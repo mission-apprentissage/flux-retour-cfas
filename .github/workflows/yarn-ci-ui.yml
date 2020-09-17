@@ -1,0 +1,19 @@
+# Worflow pour IC
+name: Yarn CI UI
+
+on: [push]
+
+jobs:
+  # Single job
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out the repository
+      - uses: actions/checkout@v2
+
+      # Install dependencies
+      - name: Run Yarn Install
+        run: |
+          cd ui
+          yarn install

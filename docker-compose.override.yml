@@ -1,0 +1,42 @@
+# Override containers for local / dev environnement
+version: "2.4"
+services:
+  reverse_proxy:
+    volumes:
+      - flux_retour_cfas_nginx_data:/data
+
+  ui:
+    command: yarn start
+    mem_limit: 1g
+    stdin_open: true
+    volumes:
+      - ./ui:/app #Allows source folders to be watched
+
+  server:
+    command: ["yarn", "debug"]
+    ports:
+      - "127.0.0.1:9229:9229" # Allows remote debugging
+    volumes:
+      - ./server/src:/app/src # Allows source folders to be watched
+      - ./server/config:/app/config
+      - flux_retour_cfas_server_data:/data
+    environment:
+      - FLUX_RETOUR_CFAS_ENV=local
+      - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
+
+  mongodb:
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - flux_retour_cfas_mongodb_data:/data
+
+volumes:
+  flux_retour_cfas_mongodb_data:
+    driver: local
+    name: flux_retour_cfas_mongodb_data
+  flux_retour_cfas_nginx_data:
+    driver: local
+    name: flux_retour_cfas_nginx_data
+  flux_retour_cfas_server_data:
+    driver: local
+    name: flux_retour_cfas_server_data

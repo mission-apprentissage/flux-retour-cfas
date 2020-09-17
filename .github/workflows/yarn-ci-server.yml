@@ -1,0 +1,37 @@
+# Worflow pour IC
+name: Yarn CI Server
+
+on: [push]
+
+jobs:
+  # Single job
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out the repository
+      - uses: actions/checkout@v2
+
+      # Install dependencies
+      - name: Run Yarn Install
+        run: |
+          cd server
+          yarn install
+
+      # Lint
+      - name: Run Lint
+        run: |
+          cd server
+          yarn lint
+
+      # Start dockers containers
+      - name: Start Docker
+        run: |
+          cd server
+          yarn docker:start
+
+      # Run mocha tests
+      - name: Run Tests
+        run: |
+          cd server
+          yarn test

@@ -1,0 +1,53 @@
+version: "2.4"
+services:
+  reverse_proxy:
+    image: flux_retour_cfas_reverse_proxy
+    container_name: flux_retour_cfas_reverse_proxy
+    build:
+      context: reverse_proxy
+    mem_limit: 256m
+    restart: unless-stopped
+    ports:
+      - 80:80
+    networks:
+      - flux_retour_cfas_network
+    depends_on:
+      - server
+      - ui
+
+  ui:
+    image: flux_retour_cfas_ui
+    container_name: flux_retour_cfas_ui
+    build:
+      context: ui
+    mem_limit: 256m
+    networks:
+      - flux_retour_cfas_network
+    depends_on:
+      - server
+
+  server:
+    image: flux_retour_cfas_server
+    container_name: flux_retour_cfas_server
+    build:
+      context: server
+    mem_limit: 1g
+    restart: unless-stopped
+    networks:
+      - flux_retour_cfas_network
+    depends_on:
+      - mongodb
+    environment:
+      - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
+
+  mongodb:
+    image: mongo:4.2.6-bionic
+    container_name: flux_retour_cfas_mongodb
+    mem_limit: 1g
+    restart: unless-stopped
+    networks:
+      - flux_retour_cfas_network
+
+networks:
+  flux_retour_cfas_network:
+    name: flux_retour_cfas_network

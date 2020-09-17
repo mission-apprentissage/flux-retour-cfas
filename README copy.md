@@ -1,6 +1,6 @@
 ![](https://avatars1.githubusercontent.com/u/63645182?s=200&v=4)
 
-# Flux Retour CFAS
+# Template Apprentissage
 
 ## Pré-requis
 
@@ -10,19 +10,26 @@
 
 ## Présentation
 
-Ce repository contient l'application des flux retours des cfas.
+Ce template permets de créer la structure d'une application exemple selon 4 modèles différents :
+
+- `express` pour un modèle d'application de type API Node Express
+- `express-mongo` pour un modèle d'application de type API Node Express avec une base de données MongoDb
+- `express-mongo-ui` pour un modèle d'application de type API Node Express avec une base de données MongoDb et une UI en React
+- `express-mongo-ui-elastic` pour un modèle d'application de type API Node Express avec une base de données MongoDb et une UI en React et un moteur de recherche ElasticSearch attaché
+
+Chacun de ces modèles est accessible via une branche dédiée du répository.
 
 ## Infrastructure & Déploiement
 
-Ce projet fonctionne de manière autonome en local avec des conteneurs docker.
+Ce template fonctionne de manière autonome en local avec des conteneurs docker.
 
-Pour déployer et faire fonctionner l'application sur un server dédié dans Azure il faut récupérer le contenu du répository flux-retour-cfas-infra pour le modèle choisi.
+Pour déployer et faire fonctionner l'application sur un server dédié dans Azure il faut récupérer le contenu du répository template-apprentissage-infra pour le modèle choisi.
 
-Le répository flux-retour-cfas-infra est lui, privé car il est utilisé pour contenir l'ensemble des données sensibles (Clés SSH, mots de passes ...) nécessaires à la mise en place de l' application, merci de suivre sa documentation dédiée pour déployer l'application.
+Le répository template-apprentissage-infra est lui, privé car il est utilisé pour contenir l'ensemble des données sensibles (Clés SSH, mots de passes ...) nécessaires à la mise en place de votre application, merci de suivre sa documentation dédiée pour déployer votre application.
 
 ## Organisation des dossiers
 
-Ce repository est organisé de la manière suivante :
+Ce template est organisé de la manière suivante :
 
 ```
     |-- .github
@@ -76,15 +83,70 @@ La configuration est définie dans le dossier `/server/config` et on y trouve :
 
 Ensuite dans la définition des conteneurs Docker ces variables d'environnements seront écrasées au besoin.
 
+## Personnalisation du template
+
+### Nom de l'application
+
+Avant de démarrer il convient de modifier le nom de l'application souhaitée dans l'ensemble des fichiers concernés.
+
+Il vous faudra donc remplacer le nom **`template-app`** par le nom de votre application dans les fichiers de configuration suivants :
+
+### Noms des conteneurs Docker
+
+Il vous faudra remplacer les noms des conteneurs Docker et des volumes (ou network) `template_app_<conteneur>` ou `template_app_<volume>` par `<nom_application>_<conteneur>` ou `<nom_application>_<volume>` dans les 2 fichiers de configuration Docker-compose :
+
+- `/docker-compose.yml`
+- `/docker-compose.override.yml`
+
+### Paramètres d'environnement
+
+Il vous faudra ensuite remplacer les noms de variables d'env `TEMPLATE_APP_<parametre>` par `<nom_application>_<parametre>` dans la définition de la configuration dans :
+
+- `/server/config/custom-environment-variables.json`
+- `/server/config/default.json`
+
+Il faudra ensuite mettre à jour dans la configuration Docker-compose ces variables dans :
+
+- `/docker-compose.yml`
+- `/docker-compose.override.yml`
+
+Il faudra ensuite mettre à jour dans la configuration (`/server/config/default.json`) et dans le Docker-compose le nom de la base de données mongo en remplaçant :
+
+```
+TEMPLATE_APP_MONGODB_URI=mongodb://mongodb:27017/template-app?retryWrites=true&w=majority
+```
+
+par
+
+```
+<nom_application>_MONGODB_URI=mongodb://mongodb:27017/<nom-application>?retryWrites=true&w=majority
+```
+
+### Package.json
+
+Il faudra aussi modifier dans le fichier `/server/package.json` les valeurs :
+
+- name : `mna-<nom_app>`
+- description : `[MNA] <Nom Application>`
+- repository : `https://github.com/mission-apprentissage/<nom_repository>.git`
+
+### Tests unitaires
+
+Dans la partie tests unitaires de l'application il est aussi nécessaire de modifier le nom de la base de données de tests, dans `/server/tests/utils/testUtils.js` :
+
+```javascript
+const uri = config.mongodb.uri.split("template-app").join("template-app_test");
+```
+
 ## Conteneurs Docker
 
 ### Présentation de la configuration Docker
 
-Pour fonctionner ce projet a besoin des éléments dockérisés suivants :
+Pour fonctionner ce template a besoin des éléments dockérisés suivants :
 
 - Un serveur Web Nginx jouant le role de reverse proxy, _défini dans le service `reverse_proxy` du docker-compose_.
 - Un serveur Node Express, _défini dans le service `server` du docker-compose_.
-- Un réseau _défini dans `flux_retour_cfas_network` du docker-compose_.
+- Un réseau _défini dans `template_app_network` du docker-compose_.
 
 ### Serveur Nodes & Nginx - Reverse Proxy
 
@@ -123,13 +185,13 @@ yarn docker:clean
 Aprés avoir créé la stack pour vérifier que les conteneurs sont bien présents vous pouvez lancer la commande suivante depuis le répertoire `/server` :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server /bin/bash
+docker exec -t -i template_app_server /bin/bash
 ```
 
 De même pour consulter la liste des fichiers dans le docker :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c 'ls'
+docker exec template_app_server bash -c 'ls'
 ```
 
 ## Linter

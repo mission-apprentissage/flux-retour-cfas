@@ -1,0 +1,27 @@
+{
+  "appName": "FLUX_RETOUR_CFAS_NAME",
+  "env": "FLUX_RETOUR_CFAS_ENV",
+  "publicUrl": "FLUX_RETOUR_CFAS_PUBLIC_URL",
+  "mongodb": {
+    "uri": "FLUX_RETOUR_CFAS_MONGODB_URI"
+  },
+  "apiKey": "FLUX_RETOUR_CFAS_API_KEY",
+  "auth": {
+    "passwordHashRounds": "FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS",
+    "user": {
+      "jwtSecret": "FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET"
+    },
+    "activation": {
+      "jwtSecret": "FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET"
+    },
+    "password": {
+      "jwtSecret": "FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET"
+    }
+  },
+  "log": {
+    "type": "FLUX_RETOUR_CFAS_LOG_TYPE",
+    "level": "FLUX_RETOUR_CFAS_LOG_LEVEL"
+  },
+  "slackWebhookUrl": "FLUX_RETOUR_CFAS_SLACK_WEBHOOK_URL",
+  "outputDir": "FLUX_RETOUR_CFAS_OUTPUT_DIR"
+}
