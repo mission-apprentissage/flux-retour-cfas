@@ -3,7 +3,7 @@ const { User } = require("../../common/model/index");
 
 module.exports = (permissions = {}) => {
   return async (req, res, next) => {
-    const apiKeyRequest = req.get("API-Key");
+    const apiKeyRequest = req.get("x-api-key");
 
     if (!apiKeyRequest) {
       return res.status(401).send("No API Key Found");
