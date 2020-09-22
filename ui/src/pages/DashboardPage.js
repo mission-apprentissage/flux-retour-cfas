@@ -6,7 +6,6 @@ import "./DashboardPage.css";
 
 export default () => {
   const [data, loading] = useFetch("api/stats");
-  console.log(data);
 
   return (
     <Page>

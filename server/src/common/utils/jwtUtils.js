@@ -1,4 +1,3 @@
-const pick = require("lodash").pick;
 const jwt = require("jsonwebtoken");
 const config = require("config");
 
@@ -19,8 +18,7 @@ module.exports = {
   createActivationToken: (subject, options = {}) => createToken("activation", subject, options),
   createPasswordToken: (subject, options = {}) => createToken("password", subject, options),
   createUserToken: (user, options = {}) => {
-    const payload = { permissions: pick(user, ["isAdmin"]) };
-
+    const payload = { permissions: user.permissions };
     return createToken("user", user.username, { payload, ...options });
   },
 };

@@ -23,9 +23,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(omit(decoded, ["iat", "exp"]), {
       sub: "user",
       iss: config.appName,
-      permissions: {
-        isAdmin: false,
-      },
+      permissions: [],
     });
   });
 

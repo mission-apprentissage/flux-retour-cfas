@@ -6,10 +6,10 @@ export default function useAuth() {
 
   let setAuthFromToken = (token) => {
     if (!token) {
-      sessionStorage.removeItem("template_app:token");
+      sessionStorage.removeItem("flux-retour-cfas:token");
       setAuth(anonymous);
     } else {
-      sessionStorage.setItem("template_app:token", token);
+      sessionStorage.setItem("flux-retour-cfas:token", token);
       setAuth(decodeJWT(token));
     }
   };

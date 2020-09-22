@@ -8,7 +8,7 @@ module.exports = () => {
     "/",
     tryCatch(async (req, res) => {
       return res.json({
-        message: "Secured route",
+        message: "API Secured route",
       });
     })
   );

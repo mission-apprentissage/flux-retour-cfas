@@ -12,9 +12,9 @@ module.exports = new Schema({
     default: null,
     description: "Le mot de passe hashé",
   },
-  isAdmin: {
-    type: Boolean,
-    default: false,
-    description: "true si l'utilisateur est administrateur",
+  permissions: {
+    type: [String],
+    default: [],
+    description: "Roles de l'utilisateur",
   },
 });

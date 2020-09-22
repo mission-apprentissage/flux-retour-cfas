@@ -1,6 +1,7 @@
 const express = require("express");
 const config = require("config");
 const logger = require("../common/logger");
+const { role1, role2, administrator } = require("../common/roles");
 const bodyParser = require("body-parser");
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
@@ -12,7 +13,9 @@ const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 const packageJson = require("../../package.json");
 const hello = require("./routes/hello");
 const entity = require("./routes/entity");
-const secured = require("./routes/secured");
+const apiSecured = require("./routes/api-secured");
+const role1Secured = require("./routes/role1-secured");
+const role2Secured = require("./routes/role2-secured");
 const login = require("./routes/login");
 const authentified = require("./routes/authentified");
 const admin = require("./routes/admin");
@@ -23,7 +26,10 @@ module.exports = async (components) => {
   const { db } = components;
   const app = express();
   const checkJwtToken = authMiddleware(components);
-  const adminOnly = permissionsMiddleware({ isAdmin: true });
+
+  const adminOnly = permissionsMiddleware([administrator]);
+  const role1Only = permissionsMiddleware([role1]);
+  const role1role2Only = permissionsMiddleware([role2]);
 
   app.use(bodyParser.json());
   app.use(corsMiddleware());
@@ -31,7 +37,11 @@ module.exports = async (components) => {
 
   app.use("/api/helloRoute", hello());
   app.use("/api/entity", entity());
-  app.use("/api/secured", apiKeyAuthMiddleware, secured());
+
+  app.use("/api/api-secured", apiKeyAuthMiddleware, apiSecured());
+  app.use("/api/role1-secured", checkJwtToken, role1Only, role1Secured());
+  app.use("/api/role2-secured", checkJwtToken, role1role2Only, role2Secured());
+
   app.use("/api/login", login(components));
   app.use("/api/authentified", checkJwtToken, authentified());
   app.use("/api/admin", checkJwtToken, adminOnly, admin());
