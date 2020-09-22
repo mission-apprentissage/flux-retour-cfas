@@ -5,7 +5,9 @@
   "mongodb": {
     "uri": "FLUX_RETOUR_CFAS_MONGODB_URI"
   },
-  "apiKey": "FLUX_RETOUR_CFAS_API_KEY",
+  "apiKeys": {
+    "ymag": "FLUX_RETOUR_CFAS_API_KEY_YMAG"
+  },
   "auth": {
     "passwordHashRounds": "FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS",
     "user": {

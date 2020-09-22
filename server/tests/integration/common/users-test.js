@@ -29,6 +29,16 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.permissions.includes(administrator), true);
   });
 
+  it("Permet de créer un utilisateur avec une clé d'API", async () => {
+    const { createUser } = await users();
+
+    const user = await createUser("userAdmin", "password", { permissions: [administrator], apiKey: "12345" });
+    const found = await User.findOne({ username: "userAdmin" });
+
+    assert.strictEqual(user.apiKey, "12345");
+    assert.strictEqual(found.apiKey, "12345");
+  });
+
   it("Permet de supprimer un utilisateur", async () => {
     const { createUser, removeUser } = await users();
 

@@ -27,10 +27,12 @@ module.exports = async () => {
     createUser: async (username, password, options = {}) => {
       const hash = options.hash || sha512Utils.hash(password);
       const permissions = options.permissions || [];
+      const apiKey = options.apiKey || null;
 
       const user = new User({
         username,
         password: hash,
+        apiKey,
         permissions: permissions,
       });
 

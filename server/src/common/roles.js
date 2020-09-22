@@ -1,5 +1,5 @@
 module.exports = {
-  role1: "role1",
-  role2: "role2",
+  apiStatutsSeeder: "apiStatutsSeeder",
+  apiStatutsConsumer: "apiStatutsConsumer",
   administrator: "administrator",
 };

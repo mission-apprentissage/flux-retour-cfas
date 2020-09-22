@@ -1,14 +1,18 @@
 const logger = require("../../common/logger");
-const { role1, role2, administrator } = require("../../common/roles");
+const { apiStatutsSeeder, administrator } = require("../../common/roles");
+const config = require("config");
 
 module.exports = async (users) => {
   await users.createUser("testUser", "password");
-  await users.createUser("testRole1", "password", { permissions: [role1] });
-  await users.createUser("testRole1And2", "password", { permissions: [role1, role2] });
-  await users.createUser("testAdmin", "password", { permissions: [administrator] });
+  await createYmag(users);
+  await createDefaultAdmin(users);
+  logger.info(`All users are successfully created `);
+};
 
-  logger.info(`User 'testUser' with password 'password' is successfully created `);
-  logger.info(`User 'testRole1' with password 'password' and role1 is successfully created `);
-  logger.info(`User 'testRole1And2' with password 'password' and role1 & role2 is successfully created `);
-  logger.info(`User 'testAdmin' with password 'password' and admin is successfully created `);
+const createYmag = async (users) => {
+  await users.createUser("ymag", config.apiKeys.ymag, { permissions: [apiStatutsSeeder], apiKey: config.apiKeys.ymag });
+};
+
+const createDefaultAdmin = async (users) => {
+  await users.createUser("testAdmin", "mna-password", { permissions: [administrator] });
 };

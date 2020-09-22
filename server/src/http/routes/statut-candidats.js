@@ -4,11 +4,11 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 module.exports = () => {
   const router = express.Router();
 
-  router.get(
+  router.post(
     "/",
     tryCatch(async (req, res) => {
       return res.json({
-        message: "Authentified route",
+        message: "Statut Candidats Secured route for user : " + req.user.username,
       });
     })
   );
