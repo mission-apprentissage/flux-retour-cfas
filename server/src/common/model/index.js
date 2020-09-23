@@ -9,5 +9,6 @@ const getModel = (modelName, callback = () => ({})) => {
 module.exports = {
   StatutCandidat: getModel("statutsCandidats"),
   User: getModel("users"),
+  UserEvent: getModel("userEvents"),
   Log: getModel("logs"),
 };
