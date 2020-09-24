@@ -29,7 +29,7 @@ module.exports = () => {
         id_formation_souhait: Joi.string().required(),
         libelle_court_formation_souhait: Joi.string(),
         libelle_long_formation_souhait: Joi.string(),
-        uai_etablissement_origine: Joi.string(),
+        uai_etablissement_origine: Joi.string().required(),
         nom_etablissement_origine: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
       })
