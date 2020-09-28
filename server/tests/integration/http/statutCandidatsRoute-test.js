@@ -59,11 +59,11 @@ httpTests(__filename, ({ startServer }) => {
     );
 
     assert.strictEqual(response.status, 200);
-    assert.ok(response.data);
+    assert.ok(response.data.status === "OK");
     const foundStatut = await StatutCandidat.findOne({ ine_apprenant: `${statutsTest[0].ine_apprenant}` });
 
     assert.strictEqual(response.status, 200);
-    assert.ok(response.data);
+    assert.ok(response.data.status === "OK");
 
     assert.strictEqual(foundStatut.nom_apprenant, statutsTest[0].nom_apprenant);
     assert.strictEqual(foundStatut.prenom_apprenant, statutsTest[0].prenom_apprenant);
@@ -86,15 +86,16 @@ httpTests(__filename, ({ startServer }) => {
     const { httpClient } = await startServer();
     const { createUser } = await users();
 
+    const goodApiKey = "12345";
     const badApiKey = "BADAPIKEY";
 
     const created = await createUser("userApi", "password", {
       permissions: [apiStatutsSeeder],
-      apiKey: badApiKey,
+      apiKey: goodApiKey,
     });
     assert.strictEqual(created.username, "userApi");
     assert.strictEqual(created.permissions.length > 0, true);
-    assert.strictEqual(created.apiKey, badApiKey);
+    assert.strictEqual(created.apiKey, goodApiKey);
 
     const response = await httpClient.post("/api/statut-candidats", statutsTest, {
       headers: {
@@ -102,7 +103,6 @@ httpTests(__filename, ({ startServer }) => {
       },
     });
 
-    assert.strictEqual(response.status, 200);
-    assert.ok(response.data);
+    assert.strictEqual(response.status, 401);
   });
 });
