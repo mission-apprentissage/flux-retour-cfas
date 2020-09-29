@@ -59,11 +59,10 @@ httpTests(__filename, ({ startServer }) => {
     );
 
     assert.strictEqual(response.status, 200);
-    assert.ok(response.data.status === "OK");
+    assert.ok(response.data.status);
+    assert.ok(response.data.message);
+    assert.strictEqual(response.data.status, "OK");
     const foundStatut = await StatutCandidat.findOne({ ine_apprenant: `${statutsTest[0].ine_apprenant}` });
-
-    assert.strictEqual(response.status, 200);
-    assert.ok(response.data.status === "OK");
 
     assert.strictEqual(foundStatut.nom_apprenant, statutsTest[0].nom_apprenant);
     assert.strictEqual(foundStatut.prenom_apprenant, statutsTest[0].prenom_apprenant);

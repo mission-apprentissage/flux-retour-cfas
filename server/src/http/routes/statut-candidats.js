@@ -19,16 +19,16 @@ module.exports = () => {
         ine_apprenant: Joi.string().required(),
         nom_apprenant: Joi.string().required(),
         prenom_apprenant: Joi.string().required(),
-        prenom2_apprenant: Joi.string(),
-        prenom3_apprenant: Joi.string(),
+        prenom2_apprenant: Joi.string().allow(null, ""),
+        prenom3_apprenant: Joi.string().allow(null, ""),
         ne_pas_solliciter: Joi.boolean().required(),
         email_contact: Joi.string().required(),
-        nom_representant_legal: Joi.string(),
-        tel_representant_legal: Joi.string(),
-        tel2_representant_legal: Joi.string(),
+        nom_representant_legal: Joi.string().allow(null, ""),
+        tel_representant_legal: Joi.string().allow(null, ""),
+        tel2_representant_legal: Joi.string().allow(null, ""),
         id_formation_souhait: Joi.string().required(),
-        libelle_court_formation_souhait: Joi.string(),
-        libelle_long_formation_souhait: Joi.string(),
+        libelle_court_formation_souhait: Joi.string().allow(null, ""),
+        libelle_long_formation_souhait: Joi.string().allow(null, ""),
         uai_etablissement_origine: Joi.string().required(),
         nom_etablissement_origine: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
@@ -38,7 +38,7 @@ module.exports = () => {
   router.post(
     "/",
     tryCatch(async (req, res) => {
-      var retourStatus = null;
+      var retourStatus = {};
 
       try {
         // Validate schema
@@ -84,15 +84,19 @@ module.exports = () => {
         });
         await StatutCandidat.insertMany(toAdd);
 
-        retourStatus = "OK";
+        retourStatus = {
+          status: "OK",
+          message: "Success",
+        };
       } catch (err) {
         logger.error("POST StatutCandidat error : " + err);
-        retourStatus = "ERROR";
+        retourStatus = {
+          status: "ERROR",
+          message: err.message,
+        };
       }
 
-      return res.json({
-        status: retourStatus,
-      });
+      return res.json(retourStatus);
     })
   );
 
