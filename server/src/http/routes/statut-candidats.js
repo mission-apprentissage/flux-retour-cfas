@@ -16,7 +16,7 @@ module.exports = () => {
     .max(config.postStatutsCandidatsMaxLength)
     .items(
       Joi.object({
-        ine_apprenant: Joi.string().required(),
+        ine_apprenant: Joi.string().allow(null, ""),
         nom_apprenant: Joi.string().required(),
         prenom_apprenant: Joi.string().required(),
         prenom2_apprenant: Joi.string().allow(null, ""),

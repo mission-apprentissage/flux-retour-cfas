@@ -9,13 +9,11 @@ const { apiStatutsSeeder, administrator } = require("../common/roles");
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 const tryCatch = require("./middlewares/tryCatchMiddleware");
-const apiKeySimpleAuthMiddleware = require("./middlewares/apiKeySimpleAuthMiddleware");
 const apiKeyPermissionsAuthMiddleware = require("./middlewares/apiKeyPermissionsAuthMiddleware");
 const corsMiddleware = require("./middlewares/corsMiddleware");
 const authMiddleware = require("./middlewares/authMiddleware");
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 
-const apiSecuredRoute = require("./routes/api-secured");
 const statutCandidatsRoute = require("./routes/statut-candidats");
 const loginRoute = require("./routes/login");
 const adminRoute = require("./routes/admin");
@@ -35,7 +33,6 @@ module.exports = async (components) => {
   app.use(corsMiddleware());
   app.use(logMiddleware());
 
-  app.use("/api/api-secured", apiKeySimpleAuthMiddleware, apiSecuredRoute());
   app.use("/api/statut-candidats", apiStatutSeedersOnly, statutCandidatsRoute());
   app.use("/api/login", loginRoute(components));
   app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
