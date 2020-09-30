@@ -22,7 +22,7 @@ module.exports = () => {
         prenom2_apprenant: Joi.string().allow(null, ""),
         prenom3_apprenant: Joi.string().allow(null, ""),
         ne_pas_solliciter: Joi.boolean().required(),
-        email_contact: Joi.string().required(),
+        email_contact: Joi.string().allow(null, ""),
         nom_representant_legal: Joi.string().allow(null, ""),
         tel_representant_legal: Joi.string().allow(null, ""),
         tel2_representant_legal: Joi.string().allow(null, ""),
