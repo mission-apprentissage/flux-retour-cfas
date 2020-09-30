@@ -8,6 +8,8 @@ import useAuth from "./common/hooks/useAuth";
 import HomePage from "./pages/HomePage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
 import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
+import { administrator } from "./common/utils/roles";
+import { some } from "lodash";
 
 function PrivateRoute({ children, ...rest }) {
   let [auth] = useAuth();
@@ -24,13 +26,18 @@ function PrivateRoute({ children, ...rest }) {
 
 export default () => {
   let [auth] = useAuth();
-
   return (
     <div className="App">
       <Router>
         <Switch>
           <PrivateRoute exact path="/">
-            <Layout>{auth && auth.permissions.isAdmin ? <DashboardPage /> : <HomePage />}</Layout>
+            <Layout>
+              {auth && auth.permissions && some(auth.permissions, (item) => administrator.includes(item)) ? (
+                <DashboardPage />
+              ) : (
+                <HomePage />
+              )}
+            </Layout>
           </PrivateRoute>
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/reset-password" component={ResetPasswordPage} />

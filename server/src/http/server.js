@@ -1,49 +1,51 @@
 const express = require("express");
 const config = require("config");
-const logger = require("../common/logger");
 const bodyParser = require("body-parser");
+const packageJson = require("../../package.json");
+const logger = require("../common/logger");
+
+const { apiStatutsSeeder, administrator } = require("../common/roles");
+
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 const tryCatch = require("./middlewares/tryCatchMiddleware");
-const apiKeyAuthMiddleware = require("./middlewares/apiKeyAuthMiddleware");
+const apiKeyPermissionsAuthMiddleware = require("./middlewares/apiKeyPermissionsAuthMiddleware");
 const corsMiddleware = require("./middlewares/corsMiddleware");
 const authMiddleware = require("./middlewares/authMiddleware");
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
-const packageJson = require("../../package.json");
-const hello = require("./routes/hello");
-const entity = require("./routes/entity");
-const secured = require("./routes/secured");
-const login = require("./routes/login");
-const authentified = require("./routes/authentified");
-const admin = require("./routes/admin");
-const password = require("./routes/password");
-const stats = require("./routes/stats");
+
+const statutCandidatsRoute = require("./routes/statut-candidats");
+const loginRoute = require("./routes/login");
+const adminRoute = require("./routes/admin");
+const passwordRoute = require("./routes/password");
+const statsRoute = require("./routes/stats");
+const configRoute = require("./routes/config");
 
 module.exports = async (components) => {
   const { db } = components;
   const app = express();
+
   const checkJwtToken = authMiddleware(components);
-  const adminOnly = permissionsMiddleware({ isAdmin: true });
+  const adminOnly = permissionsMiddleware([administrator]);
+  const apiStatutSeedersOnly = apiKeyPermissionsAuthMiddleware([apiStatutsSeeder]);
 
   app.use(bodyParser.json());
   app.use(corsMiddleware());
   app.use(logMiddleware());
 
-  app.use("/api/helloRoute", hello());
-  app.use("/api/entity", entity());
-  app.use("/api/secured", apiKeyAuthMiddleware, secured());
-  app.use("/api/login", login(components));
-  app.use("/api/authentified", checkJwtToken, authentified());
-  app.use("/api/admin", checkJwtToken, adminOnly, admin());
-  app.use("/api/password", password(components));
-  app.use("/api/stats", checkJwtToken, adminOnly, stats(components));
+  app.use("/api/statut-candidats", apiStatutSeedersOnly, statutCandidatsRoute());
+  app.use("/api/login", loginRoute(components));
+  app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
+  app.use("/api/password", passwordRoute(components));
+  app.use("/api/stats", checkJwtToken, adminOnly, statsRoute(components));
+  app.use("/api/config", checkJwtToken, adminOnly, configRoute());
 
   app.get(
     "/api",
     tryCatch(async (req, res) => {
       let mongodbStatus;
       await db
-        .collection("sampleEntity")
+        .collection("statutsCandidats")
         .stats()
         .then(() => {
           mongodbStatus = true;
@@ -60,15 +62,6 @@ module.exports = async (components) => {
         healthcheck: {
           mongodb: mongodbStatus,
         },
-      });
-    })
-  );
-
-  app.get(
-    "/api/config",
-    tryCatch(async (req, res) => {
-      return res.json({
-        config: config,
       });
     })
   );

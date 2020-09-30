@@ -4,11 +4,12 @@ const omit = require("lodash").omit;
 const jwt = require("jsonwebtoken");
 const httpTests = require("../../utils/httpTests");
 const { createPasswordToken } = require("../../../src/common/utils/jwtUtils");
+const { administrator } = require("../../../src/common/roles");
 
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie qu'un utilisateur peut faire une demande de réinitialisation de mot de passe", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    await createAndLogUser("user", "password", { permissions: { isAdmin: true } });
+    await createAndLogUser("user", "password", { permissions: [administrator] });
 
     const response = await httpClient.post("/api/password/forgotten-password", {
       username: "user",
@@ -20,7 +21,7 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie qu'on ne peut pas demander la réinitialisation du mot de passe pour un utilisateur inconnu", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    await createAndLogUser("admin", "password", { permissions: { isAdmin: true } });
+    await createAndLogUser("admin", "password", { permissions: [administrator] });
 
     const response = await httpClient.post("/api/password/forgotten-password", {
       username: "inconnu",
@@ -43,7 +44,7 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie qu'un utilisateur peut changer son mot de passe", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    await createAndLogUser("admin", "password", { permissions: { isAdmin: true } });
+    await createAndLogUser("admin", "password", { permissions: [administrator] });
 
     const response = await httpClient.post("/api/password/reset-password", {
       passwordToken: createPasswordToken("admin"),
@@ -57,15 +58,13 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(omit(decoded, ["iat", "exp"]), {
       sub: "admin",
       iss: config.appName,
-      permissions: {
-        isAdmin: true,
-      },
+      permissions: [administrator],
     });
   });
 
   it("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    await createAndLogUser("admin", "password", { permissions: { isAdmin: true } });
+    await createAndLogUser("admin", "password", { permissions: [administrator] });
 
     const response = await httpClient.post("/api/password/reset-password", {
       passwordToken: createPasswordToken("admin"),

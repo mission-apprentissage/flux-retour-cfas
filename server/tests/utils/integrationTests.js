@@ -1,4 +1,5 @@
 const { connectToMongoForTests, cleanAll } = require("./testUtils.js");
+const createComponents = require("../../src/common/components/components");
 
 module.exports = (desc, cb) => {
   describe(desc, function () {
@@ -6,7 +7,8 @@ module.exports = (desc, cb) => {
 
     beforeEach(async () => {
       const { db } = await connectToMongoForTests();
-      context = { db };
+      const components = await createComponents({ db });
+      context = { db, components };
     });
 
     cb({ getContext: () => context });

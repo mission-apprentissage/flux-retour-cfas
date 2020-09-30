@@ -1,5 +1,5 @@
 # Worflow pour IC
-name: Yarn CI UI
+name: Yarn Install UI
 
 on: [push]
 

@@ -5,7 +5,10 @@
   "mongodb": {
     "uri": "FLUX_RETOUR_CFAS_MONGODB_URI"
   },
-  "apiKey": "FLUX_RETOUR_CFAS_API_KEY",
+  "apiKeys": {
+    "ymag": "FLUX_RETOUR_CFAS_API_KEY_YMAG"
+  },
+  "postStatutsCandidatsMaxLength": "FLUX_RETOUR_CFAS_POST_STATUT_MAX_LENGTH",
   "auth": {
     "passwordHashRounds": "FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS",
     "user": {

@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "0.0.1",
+  "version": "0.9.3",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -16,6 +16,7 @@
     "docker:stop": "docker-compose down",
     "docker:clean": "docker-compose kill && docker system prune --force --volumes",
     "seed": "node src/jobs/seed/index.js",
+    "clear": "node src/jobs/clear/index.js",
     "stats": "node src/jobs/stats/index.js"
   },
   "dependencies": {

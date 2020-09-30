@@ -1,5 +1,5 @@
 # Worflow pour IC
-name: Yarn CI Server
+name: Yarn Lint & Tests
 
 on: [push]
 
