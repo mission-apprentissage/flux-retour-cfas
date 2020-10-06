@@ -32,11 +32,11 @@ httpTests(__filename, ({ startServer }) => {
           nom_representant_legal: "testnom_representant_legal",
           tel_representant_legal: "testtel_representant_legal",
           tel2_representant_legal: "testtel2_representant_legal",
-          id_formation_souhait: "testid_formation_souhait",
-          libelle_court_formation_souhait: "testlibelle_court_formation_souhait",
-          libelle_long_formation_souhait: "testlibelle_long_formation_souhait",
-          uai_etablissement_origine: "testuai_etablissement_origine",
-          nom_etablissement_origine: "testnom_etablissement_origine",
+          id_formation: "testid_formation",
+          libelle_court_formation: "testlibelle_court_formation",
+          libelle_long_formation: "testlibelle_long_formation",
+          uai_etablissement: "testuai_etablissement",
+          nom_etablissement: "testnom_etablissement",
           statut_apprenant: 2,
         },
         {
@@ -45,9 +45,9 @@ httpTests(__filename, ({ startServer }) => {
           prenom_apprenant: "test2Prenom",
           ne_pas_solliciter: true,
           email_contact: "test2Email_contact",
-          id_formation_souhait: "test2id_formation_souhait",
-          uai_etablissement_origine: "testuai_etablissement_origine",
-          nom_etablissement_origine: "testnom_etablissement_origine",
+          id_formation: "test2id_formation",
+          uai_etablissement: "testuai_etablissement",
+          nom_etablissement: "testnom_etablissement",
           statut_apprenant: 4,
         },
       ],
@@ -73,11 +73,11 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(foundStatut.nom_representant_legal, statutsTest[0].nom_representant_legal);
     assert.strictEqual(foundStatut.tel_representant_legal, statutsTest[0].tel_representant_legal);
     assert.strictEqual(foundStatut.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(foundStatut.id_formation_souhait, statutsTest[0].id_formation_souhait);
-    assert.strictEqual(foundStatut.libelle_court_formation_souhait, statutsTest[0].libelle_court_formation_souhait);
-    assert.strictEqual(foundStatut.libelle_long_formation_souhait, statutsTest[0].libelle_long_formation_souhait);
-    assert.strictEqual(foundStatut.uai_etablissement_origine, statutsTest[0].uai_etablissement_origine);
-    assert.strictEqual(foundStatut.nom_etablissement_origine, statutsTest[0].nom_etablissement_origine);
+    assert.strictEqual(foundStatut.id_formation, statutsTest[0].id_formation);
+    assert.strictEqual(foundStatut.libelle_court_formation, statutsTest[0].libelle_court_formation);
+    assert.strictEqual(foundStatut.libelle_long_formation, statutsTest[0].libelle_long_formation);
+    assert.strictEqual(foundStatut.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(foundStatut.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(foundStatut.statut_apprenant, statutsTest[0].statut_apprenant);
   });
 
