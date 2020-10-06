@@ -51,27 +51,27 @@ module.exports = new Schema({
     default: null,
     description: "Numéro de tel du représentant légal du jeune",
   },
-  id_formation_souhait: {
+  id_formation: {
     type: String,
     default: null,
     description: "Identifiant de la formation visée",
   },
-  libelle_court_formation_souhait: {
+  libelle_court_formation: {
     type: String,
     default: null,
     description: "Libellé court de la formation visée",
   },
-  libelle_long_formation_souhait: {
+  libelle_long_formation: {
     type: String,
     default: null,
     description: "Libellé court de la formation visée",
   },
-  uai_etablissement_origine: {
+  uai_etablissement: {
     type: String,
     default: null,
     description: "Code uai de l'établissement d'origine",
   },
-  nom_etablissement_origine: {
+  nom_etablissement: {
     type: String,
     default: null,
     description: "Nom de l'établissement d'origine",
@@ -95,6 +95,11 @@ module.exports = new Schema({
     type: Date,
     default: Date.now,
     description: "Date de mise à jour du statut",
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now,
+    description: "Date d'ajout en base de données",
   },
   created_at: {
     type: Date,
