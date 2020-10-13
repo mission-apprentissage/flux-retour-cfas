@@ -96,6 +96,16 @@ module.exports = new Schema({
     default: Date.now,
     description: "Date de mise à jour du statut",
   },
+  statut_mise_a_jour_statut: {
+    type: Number,
+    default: 0,
+    description: "Statut de mise à jour du statut candidat 0 = OK / 1 = KO",
+  },
+  erreur_mise_a_jour_statut: {
+    type: Object,
+    default: null,
+    description: "Erreur de mise à jour de statuts",
+  },
   updated_at: {
     type: Date,
     default: null,

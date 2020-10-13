@@ -1,4 +1,5 @@
 const { StatutCandidat } = require("../model");
+const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("../model/constants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 
 module.exports = async () => {
@@ -134,11 +135,25 @@ const getStatut = async ({
 };
 
 const updateStatut = async (existingItemId, toUpdate) => {
-  // Todo coherence verif
-  if (existingItemId) {
-    toUpdate.updated_at = Date.now();
-    return await StatutCandidat.findByIdAndUpdate({ _id: existingItemId }, toUpdate);
+  if (!existingItemId) return null;
+
+  toUpdate.updated_at = Date.now();
+
+  // Check if maj statut is valid
+  const existingItem = await StatutCandidat.findById(existingItemId);
+  if (isMajStatutInvalid(existingItem.statut_apprenant, toUpdate.statut_apprenant)) {
+    toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ko;
+    toUpdate.erreur_mise_a_jour_statut = {
+      date_mise_a_jour_statut: Date.now(),
+      ancien_statut: existingItem.statut_apprenant,
+      nouveau_statut_souhaite: toUpdate.statut_apprenant,
+    };
+  } else {
+    toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ok;
   }
+
+  // Update & return
+  return await StatutCandidat.findByIdAndUpdate(existingItemId, toUpdate);
 };
 
 const getFindStatutWithValueQuery = (
@@ -195,3 +210,7 @@ const getFindStatutQuery = (
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
       };
+
+const isMajStatutInvalid = (statutSource, statutDest) => {
+  return codesMajStatutsInterdits.some((x) => x.source === statutSource && x.destination === statutDest);
+};

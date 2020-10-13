@@ -37,7 +37,7 @@ httpTests(__filename, ({ startServer }) => {
           libelle_long_formation: "testlibelle_long_formation",
           uai_etablissement: "testuai_etablissement",
           nom_etablissement: "testnom_etablissement",
-          statut_apprenant: 2,
+          statut_apprenant: 1,
         },
         {
           ine_apprenant: "6789",

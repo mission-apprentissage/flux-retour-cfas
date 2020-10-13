@@ -2,10 +2,9 @@ const assert = require("assert");
 const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
 const { StatutCandidat } = require("../../../src/common/model");
-const { statutsTest, statutsTestUpdate } = require("../../utils/fixtures");
+const { codesStatutsMajStatutCandidats } = require("../../../src/common/model/constants");
+const { statutsTest, statutsTestUpdate, simpleStatut, simpleStatutBadUpdate } = require("../../utils/fixtures");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
-const { add } = require("../../../src/common/model/schema/statutsCandidats");
-const { cpuUsage } = require("process");
 
 integrationTests(__filename, () => {
   it("Permet de vérifier l'existence d'un statut de candidat avec INE", async () => {
@@ -607,5 +606,31 @@ integrationTests(__filename, () => {
     assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
     assert.strictEqual(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
     assert.notDeepStrictEqual(thirdUpdated.updated_at, null);
+  });
+
+  it("Permet de vérifier l'ajout ou la mise à jour d'un statut avec erreur de cohérence sur le statut", async () => {
+    const { addOrUpdateStatuts } = await statutsCandidats();
+
+    // Add statut test
+    const toAdd = new StatutCandidat(simpleStatut);
+    await toAdd.save();
+
+    // Checks addOrUpdateStatuts method
+    const { updated } = await addOrUpdateStatuts([simpleStatutBadUpdate]);
+
+    // Check added
+    assert.strictEqual(updated.length, 1);
+    const found = await StatutCandidat.findById(updated[0]._id);
+    assert.strictEqual(found.ine_apprenant, simpleStatutBadUpdate.ine_apprenant);
+    assert.strictEqual(found.nom_apprenant, simpleStatutBadUpdate.nom_apprenant);
+    assert.strictEqual(found.prenom_apprenant, simpleStatutBadUpdate.prenom_apprenant);
+    assert.strictEqual(found.ne_pas_solliciter, simpleStatutBadUpdate.ne_pas_solliciter);
+    assert.strictEqual(found.email_contact, simpleStatutBadUpdate.email_contact);
+    assert.strictEqual(found.id_formation, simpleStatutBadUpdate.id_formation);
+    assert.strictEqual(found.uai_etablissement, simpleStatutBadUpdate.uai_etablissement);
+    assert.strictEqual(found.statut_apprenant, simpleStatutBadUpdate.statut_apprenant);
+    assert.strictEqual(found.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ko);
+    assert.notDeepStrictEqual(found.erreur_mise_a_jour_statut, null);
+    assert.notDeepStrictEqual(found.updated_at, null);
   });
 });
