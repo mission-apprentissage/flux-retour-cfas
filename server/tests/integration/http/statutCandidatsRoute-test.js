@@ -28,7 +28,7 @@ httpTests(__filename, ({ startServer }) => {
           nom_apprenant: "testNom",
           prenom_apprenant: "testPrenom",
           ne_pas_solliciter: false,
-          email_contact: "testemail_contact",
+          email_contact: "testemail_contact@test.fr",
           nom_representant_legal: "testnom_representant_legal",
           tel_representant_legal: "testtel_representant_legal",
           tel2_representant_legal: "testtel2_representant_legal",
