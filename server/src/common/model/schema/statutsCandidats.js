@@ -106,6 +106,11 @@ module.exports = new Schema({
     default: null,
     description: "Date d'ajout en base de données",
   },
+  updated_at: {
+    type: Date,
+    default: Date.now,
+    description: "Date d'ajout en base de données",
+  },
   created_at: {
     type: Date,
     default: Date.now,
