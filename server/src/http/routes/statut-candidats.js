@@ -32,6 +32,7 @@ module.exports = () => {
         uai_etablissement: Joi.string().required(),
         nom_etablissement: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
+        date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
       })
     );
 
@@ -76,9 +77,7 @@ module.exports = () => {
               uai_etablissement: item.uai_etablissement,
               nom_etablissement: item.nom_etablissement,
               statut_apprenant: item.statut_apprenant,
-              date_entree_statut: item.date_entree_statut,
-              date_saisie_statut: item.date_saisie_statut,
-              date_mise_a_jour_statut: item.date_mise_a_jour_statut,
+              date_metier_mise_a_jour_statut: item.date_metier_mise_a_jour_statut,
             })
           );
         });

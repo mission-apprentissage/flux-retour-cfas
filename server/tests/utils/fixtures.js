@@ -14,6 +14,7 @@ const statutsTest = [
     uai_etablissement: "testuai_etablissement",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
+    date_metier_mise_a_jour_statut: Date.now(),
   },
   {
     ine_apprenant: "6789",
@@ -54,6 +55,7 @@ const statutsTestUpdate = [
     uai_etablissement: "testuai_etablissement",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 2,
+    date_metier_mise_a_jour_statut: Date.now(),
   },
   {
     ine_apprenant: "6789",
@@ -104,6 +106,7 @@ const simpleStatut = {
   uai_etablissement: "testuai_etablissement",
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: 3,
+  date_metier_mise_a_jour_statut: Date.now(),
 };
 
 const simpleStatutBadUpdate = {

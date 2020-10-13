@@ -137,10 +137,14 @@ const getStatut = async ({
 const updateStatut = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
-  toUpdate.updated_at = Date.now();
+  const existingItem = await StatutCandidat.findById(existingItemId);
+
+  // Calcul date update
+  if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
+    toUpdate.date_mise_a_jour_statut = Date.now();
+  }
 
   // Check if maj statut is valid
-  const existingItem = await StatutCandidat.findById(existingItemId);
   if (isMajStatutInvalid(existingItem.statut_apprenant, toUpdate.statut_apprenant)) {
     toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ko;
     toUpdate.erreur_mise_a_jour_statut = {
@@ -153,6 +157,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
   }
 
   // Update & return
+  toUpdate.updated_at = Date.now();
   return await StatutCandidat.findByIdAndUpdate(existingItemId, toUpdate);
 };
 

@@ -582,6 +582,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(firstUpdated.uai_etablissement, statutsTestUpdate[0].uai_etablissement);
     assert.strictEqual(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
     assert.strictEqual(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
+    assert.ok(firstUpdated.date_mise_a_jour_statut);
     assert.notDeepStrictEqual(firstUpdated.updated_at, null);
 
     const secondUpdated = await StatutCandidat.findById(updated[1]._id);
@@ -594,6 +595,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(secondUpdated.uai_etablissement, statutsTestUpdate[1].uai_etablissement);
     assert.strictEqual(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
     assert.strictEqual(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
+    assert.ok(secondUpdated.date_mise_a_jour_statut);
     assert.notDeepStrictEqual(secondUpdated.updated_at, null);
 
     const thirdUpdated = await StatutCandidat.findById(updated[2]._id);
@@ -605,6 +607,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(thirdUpdated.uai_etablissement, statutsTestUpdate[2].uai_etablissement);
     assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
     assert.strictEqual(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
+    assert.ok(thirdUpdated.date_mise_a_jour_statut);
     assert.notDeepStrictEqual(thirdUpdated.updated_at, null);
   });
 
