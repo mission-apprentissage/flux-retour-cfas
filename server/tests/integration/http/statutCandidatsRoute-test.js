@@ -28,7 +28,7 @@ httpTests(__filename, ({ startServer }) => {
           nom_apprenant: "testNom",
           prenom_apprenant: "testPrenom",
           ne_pas_solliciter: false,
-          email_contact: "testemail_contact",
+          email_contact: "testemail_contact@test.fr",
           nom_representant_legal: "testnom_representant_legal",
           tel_representant_legal: "testtel_representant_legal",
           tel2_representant_legal: "testtel2_representant_legal",
@@ -37,7 +37,8 @@ httpTests(__filename, ({ startServer }) => {
           libelle_long_formation: "testlibelle_long_formation",
           uai_etablissement: "testuai_etablissement",
           nom_etablissement: "testnom_etablissement",
-          statut_apprenant: 2,
+          statut_apprenant: 1,
+          date_metier_mise_a_jour_statut: Date.now(),
         },
         {
           ine_apprenant: "6789",
@@ -79,6 +80,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(foundStatut.uai_etablissement, statutsTest[0].uai_etablissement);
     assert.strictEqual(foundStatut.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(foundStatut.statut_apprenant, statutsTest[0].statut_apprenant);
+    assert.ok(foundStatut.date_metier_mise_a_jour_statut);
   });
 
   it("Vérifie que la route statut-candidats ne fonctionne pas avec une mauvaise clé d'API", async () => {
