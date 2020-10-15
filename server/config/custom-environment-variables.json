@@ -26,5 +26,13 @@
     "level": "FLUX_RETOUR_CFAS_LOG_LEVEL"
   },
   "slackWebhookUrl": "FLUX_RETOUR_CFAS_SLACK_WEBHOOK_URL",
-  "outputDir": "FLUX_RETOUR_CFAS_OUTPUT_DIR"
+  "outputDir": "FLUX_RETOUR_CFAS_OUTPUT_DIR",
+  "demarchesSimplifiees": {
+    "apiToken": "FLUX_RETOUR_CFAS_DS_TOKEN",
+    "procedureCfas2020Id": "FLUX_RETOUR_CFAS_DS_PROCEDURE_CFAS_ID"
+  },
+  "sendinblue": {
+    "apiKey": "FLUX_RETOUR_CFAS_SENDINBLUE_API_KEY",
+    "idListCfas": "FLUX_RETOUR_CFAS_SENDINBLUE_IDLIST_CFAS"
+  }
 }
