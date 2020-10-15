@@ -1,41 +1,55 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { statutsTest } = require("../../../tests/utils/fixtures");
-const { StatutCandidat } = require("../../common/model");
-// const { codesStatutsCandidats } = require("../../common/model/constants");
 
-runScript(async ({ stats, statutsCandidats }) => {
-  logger.info("Running stats...");
+runScript(async ({ stats }) => {
+  logger.info("-- Flux Retour Stats --");
 
-  // Test add
-  await addSimpleStatut(statutsCandidats);
+  // Calcul stats
+  const allStats = await stats.getAllStats();
 
-  // Load stats
-  const statsNbStatutCandidat = await stats.getNbStatutCandidatsTotal();
-  // const nbStatutProspect = await stats.getNbStatutCandidats(codesStatutsCandidats.prospect);
-  // const nbStatutInscrit = await stats.getNbStatutCandidats(codesStatutsCandidats.inscrit);
-  // const nbStatutApprenti = await stats.getNbStatutCandidats(codesStatutsCandidats.apprenti);
-  // const nbStatutAbandon = await stats.getNbStatutCandidats(codesStatutsCandidats.abandon);
-  // const nbUaiStatutProspect = await stats.getNbStatutCandidats(codesStatutsCandidats.prospect);
-  // const nbUaiStatutInscrit = await stats.getNbStatutCandidats(codesStatutsCandidats.inscrit);
-  // const nbUaiStatutApprenti = await stats.getNbStatutCandidats(codesStatutsCandidats.apprenti);
-  // const nbUaiStatutAbandon = await stats.getNbStatutsCandidatsNbUais(codesStatutsCandidats.abandon);
+  logger.info(`Nb de Statuts Candidats total : ${allStats.nbStatutsCandidats}`);
+  logger.info(`Nb de Statuts Candidats Prospects total : ${allStats.nbStatutsProspect}`);
+  logger.info(`Nb de Statuts Candidats Inscrits total : ${allStats.nbStatutsInscrits}`);
+  logger.info(`Nb de Statuts Candidats Apprentis total : ${allStats.nbStatutsApprentis}`);
+  logger.info(`Nb de Statuts Candidats Abandon total : ${allStats.nbStatutsAbandon}`);
+  logger.info(`Nb de Statuts Candidats sans INE : ${allStats.nbStatutsSansIne}`);
 
-  logger.info(statsNbStatutCandidat);
+  logger.info(" ");
+  logger.info(`Nb de Candidats distinct sans INE: ${allStats.nbDistinctCandidatsWithoutIne}`);
+  logger.info(`Nb de Candidats distinct avec INE: ${allStats.nbDistinctCandidatsWithIne}`);
+  logger.info(
+    `Nb de Candidats total : ${allStats.nbDistinctCandidatsWithIne + allStats.nbDistinctCandidatsWithoutIne}`
+  );
+
+  logger.info(" ");
+  logger.info(`-> Nb de Statuts Candidats par UAIs ...`);
+  await displayInLoggerNbStatutsCandidats(allStats.nbStatutsCandidatsParUais);
+
+  logger.info(" ");
+  logger.info(`-> Nb de Statuts Candidats Prospects par UAIs ...`);
+  await displayInLoggerNbStatutsCandidats(allStats.nbStatutsCandidatsProspectsParUais, "prospects");
+
+  logger.info(" ");
+  logger.info(`-> Nb de Statuts Candidats Inscrits par UAIs ...`);
+  await displayInLoggerNbStatutsCandidats(allStats.nbStatutsCandidatsInscritsParUais, "inscrits");
+
+  logger.info(" ");
+  logger.info(`-> Nb de Statuts Candidats Apprentis par UAIs ...`);
+  await displayInLoggerNbStatutsCandidats(allStats.nbStatutsCandidatsApprentisParUais, "apprentis");
+
+  logger.info(" ");
+  logger.info(`-> Nb de Statuts Candidats Abandon par UAIs ...`);
+  await displayInLoggerNbStatutsCandidats(allStats.nbStatutsCandidatsAbandonParUais, "abandon");
+
+  logger.info(" ");
+  logger.info(`Nb de Candidats sur plusieurs UAIs: ${allStats.nbCandidatsMultiUais}`);
 });
 
-const addSimpleStatut = async (statutsCandidats) => {
-  // Add statuts test
-  await asyncForEach(statutsTest, async (statutTest) => {
-    const toAdd = new StatutCandidat(statutTest);
-    const exist = await statutsCandidats.existsStatut({
-      ine_apprenant: toAdd.ine_apprenant,
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
-    });
-    if (!exist) {
-      await toAdd.save();
-    }
+const displayInLoggerNbStatutsCandidats = async (nbStatutsList, statut = "") => {
+  await asyncForEach(nbStatutsList, async (currentItem) => {
+    logger.info(
+      `Pour l'UAI ${currentItem.uai_etablissement} on retrouve ${currentItem.nbStatutsCandidats} statuts candidats ${statut}`
+    );
   });
 };

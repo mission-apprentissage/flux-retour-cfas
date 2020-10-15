@@ -3,7 +3,7 @@ const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
 const { apiStatutsSeeder } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
-const { statutsTest } = require("../../utils/fixtures");
+const { statutsTest } = require("../../data/sample");
 
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie que la route statut-candidats fonctionne avec une bonne clé d'API", async () => {

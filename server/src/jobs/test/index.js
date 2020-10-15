@@ -4,11 +4,21 @@ const { runScript } = require("../scriptWrapper");
 //const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../tests/utils/fixtures");
 //const { promisify } = require("util");
 const logger = require("../../common/logger");
+const users = require("../../../src/common/components/users");
+const { User } = require("../../../src/common/model");
 
 //const sleep = promisify(setTimeout);
 
 runScript(async () => {
   logger.info("Run Tests");
+
+  const { createUser } = await users();
+
+  const created = await createUser("user", "password");
+  logger.info(created);
+
+  const found = await User.findOne({ username: "user" });
+  logger.info(found);
 
   // await testAdd(statutsCandidats);
 

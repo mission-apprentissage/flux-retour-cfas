@@ -3,7 +3,7 @@ const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
 const { StatutCandidat } = require("../../../src/common/model");
 const { codesStatutsMajStatutCandidats } = require("../../../src/common/model/constants");
-const { statutsTest, statutsTestUpdate, simpleStatut, simpleStatutBadUpdate } = require("../../utils/fixtures");
+const { statutsTest, statutsTestUpdate, simpleStatut, simpleStatutBadUpdate } = require("../../data/sample");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 
 integrationTests(__filename, () => {

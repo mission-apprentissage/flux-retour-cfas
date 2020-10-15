@@ -15,8 +15,10 @@
     "docker:start": "docker-compose up -d --build --force-recreate",
     "docker:stop": "docker-compose down",
     "docker:clean": "docker-compose kill && docker system prune --force --volumes",
-    "seed": "node src/jobs/seed/index.js",
-    "clear": "node src/jobs/clear/index.js",
+    "seed:users": "node src/jobs/seed/seedUsers.js",
+    "seed:sample": "node src/jobs/seed/seedSample.js",
+    "clear:all": "node src/jobs/clear/clearAll.js",
+    "clear:statutsCandidats": "node src/jobs/clear/clearStatutsCandidats.js",
     "stats": "node src/jobs/stats/index.js"
   },
   "dependencies": {
@@ -45,6 +47,7 @@
     "passport-local": "1.0.0",
     "requestretry": "4.1.1",
     "sha512crypt-node": "0.1.0",
+    "stdio": "2.1.1",
     "xlsx": "0.16.1"
   },
   "engines": {
