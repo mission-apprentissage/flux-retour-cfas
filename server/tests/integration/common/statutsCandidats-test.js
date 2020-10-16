@@ -3,10 +3,50 @@ const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
 const { StatutCandidat } = require("../../../src/common/model");
 const { codesStatutsMajStatutCandidats } = require("../../../src/common/model/constants");
-const { statutsTest, statutsTestUpdate, simpleStatut, simpleStatutBadUpdate } = require("../../utils/fixtures");
+const { statutsTest, statutsTestUpdate, simpleStatut, simpleStatutBadUpdate } = require("../../data/sample");
+const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 
 integrationTests(__filename, () => {
+  it("Permet de vérifier l'existence d'un statut de candidat randomisé", async () => {
+    const { existsStatut } = await statutsCandidats();
+
+    const randomStatut = createRandomStatutCandidat();
+    const toAdd = new StatutCandidat(randomStatut);
+    await toAdd.save();
+
+    // Checks creation
+    assert.strictEqual(toAdd.ine_apprenant, randomStatut.ine_apprenant);
+    assert.strictEqual(toAdd.nom_apprenant, randomStatut.nom_apprenant);
+    assert.strictEqual(toAdd.prenom_apprenant, randomStatut.prenom_apprenant);
+    assert.strictEqual(toAdd.prenom2_apprenant, randomStatut.prenom2_apprenant);
+    assert.strictEqual(toAdd.prenom3_apprenant, randomStatut.prenom3_apprenant);
+    assert.strictEqual(toAdd.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
+    assert.strictEqual(toAdd.email_contact, randomStatut.email_contact);
+    assert.strictEqual(toAdd.nom_representant_legal, randomStatut.nom_representant_legal);
+    assert.strictEqual(toAdd.tel_representant_legal, randomStatut.tel_representant_legal);
+    assert.strictEqual(toAdd.tel2_representant_legal, randomStatut.tel2_representant_legal);
+    assert.strictEqual(toAdd.id_formation, randomStatut.id_formation);
+    assert.strictEqual(toAdd.libelle_court_formation, randomStatut.libelle_court_formation);
+    assert.strictEqual(toAdd.libelle_long_formation, randomStatut.libelle_long_formation);
+    assert.strictEqual(toAdd.uai_etablissement, randomStatut.uai_etablissement);
+    assert.strictEqual(toAdd.nom_etablissement, randomStatut.nom_etablissement);
+    assert.strictEqual(toAdd.statut_apprenant, randomStatut.statut_apprenant);
+
+    // Checks exists method
+    const found = await existsStatut({
+      ine_apprenant: toAdd.ine_apprenant,
+      nom_apprenant: toAdd.nom_apprenant,
+      prenom_apprenant: toAdd.prenom_apprenant,
+      prenom2_apprenant: toAdd.prenom2_apprenant,
+      prenom3_apprenant: toAdd.prenom3_apprenant,
+      email_contact: toAdd.email_contact,
+      id_formation: toAdd.id_formation,
+      uai_etablissement: toAdd.uai_etablissement,
+    });
+    assert.strictEqual(found, true);
+  });
+
   it("Permet de vérifier l'existence d'un statut de candidat avec INE", async () => {
     const { existsStatut } = await statutsCandidats();
 
@@ -543,11 +583,11 @@ integrationTests(__filename, () => {
 
     // Add statuts test
     await asyncForEach(statutsTest, async (statutTest) => {
-      const toAdd = new StatutCandidat(statutTest);
-      await toAdd.save();
+      await addOrUpdateStatuts([statutTest]);
     });
 
     // Checks addOrUpdateStatuts method
+    assert.strictEqual(await StatutCandidat.countDocuments({}), statutsTest.length);
     const { added, updated } = await addOrUpdateStatuts(statutsTestUpdate);
 
     // Check added
@@ -583,7 +623,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
     assert.strictEqual(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
     assert.ok(firstUpdated.date_mise_a_jour_statut);
-    assert.notDeepStrictEqual(firstUpdated.updated_at, null);
+    assert.ok(firstUpdated.updated_at);
 
     const secondUpdated = await StatutCandidat.findById(updated[1]._id);
     assert.strictEqual(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
@@ -596,7 +636,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
     assert.strictEqual(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
     assert.ok(secondUpdated.date_mise_a_jour_statut);
-    assert.notDeepStrictEqual(secondUpdated.updated_at, null);
+    assert.ok(secondUpdated.updated_at);
 
     const thirdUpdated = await StatutCandidat.findById(updated[2]._id);
     assert.strictEqual(thirdUpdated.nom_apprenant, statutsTestUpdate[2].nom_apprenant);
@@ -608,15 +648,14 @@ integrationTests(__filename, () => {
     assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
     assert.strictEqual(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
     assert.ok(thirdUpdated.date_mise_a_jour_statut);
-    assert.notDeepStrictEqual(thirdUpdated.updated_at, null);
+    assert.ok(thirdUpdated.updated_at);
   });
 
   it("Permet de vérifier l'ajout ou la mise à jour d'un statut avec erreur de cohérence sur le statut", async () => {
     const { addOrUpdateStatuts } = await statutsCandidats();
 
     // Add statut test
-    const toAdd = new StatutCandidat(simpleStatut);
-    await toAdd.save();
+    await addOrUpdateStatuts([simpleStatut]);
 
     // Checks addOrUpdateStatuts method
     const { updated } = await addOrUpdateStatuts([simpleStatutBadUpdate]);

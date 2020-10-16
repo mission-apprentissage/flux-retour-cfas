@@ -1,6 +1,6 @@
 const assert = require("assert");
-const httpTests = require("../../utils/httpTests");
 const config = require("config");
+const httpTests = require("../../utils/httpTests");
 
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie que le server fonctionne", async () => {

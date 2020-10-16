@@ -33,7 +33,7 @@ module.exports = async (components) => {
   app.use(corsMiddleware());
   app.use(logMiddleware());
 
-  app.use("/api/statut-candidats", apiStatutSeedersOnly, statutCandidatsRoute());
+  app.use("/api/statut-candidats", apiStatutSeedersOnly, statutCandidatsRoute(components));
   app.use("/api/login", loginRoute(components));
   app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
   app.use("/api/password", passwordRoute(components));
