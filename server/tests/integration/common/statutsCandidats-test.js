@@ -583,11 +583,11 @@ integrationTests(__filename, () => {
 
     // Add statuts test
     await asyncForEach(statutsTest, async (statutTest) => {
-      const toAdd = new StatutCandidat(statutTest);
-      await toAdd.save();
+      await addOrUpdateStatuts([statutTest]);
     });
 
     // Checks addOrUpdateStatuts method
+    assert.strictEqual(await StatutCandidat.countDocuments({}), statutsTest.length);
     const { added, updated } = await addOrUpdateStatuts(statutsTestUpdate);
 
     // Check added
@@ -623,7 +623,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
     assert.strictEqual(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
     assert.ok(firstUpdated.date_mise_a_jour_statut);
-    assert.notDeepStrictEqual(firstUpdated.updated_at, null);
+    assert.ok(firstUpdated.updated_at);
 
     const secondUpdated = await StatutCandidat.findById(updated[1]._id);
     assert.strictEqual(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
@@ -636,7 +636,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
     assert.strictEqual(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
     assert.ok(secondUpdated.date_mise_a_jour_statut);
-    assert.notDeepStrictEqual(secondUpdated.updated_at, null);
+    assert.ok(secondUpdated.updated_at);
 
     const thirdUpdated = await StatutCandidat.findById(updated[2]._id);
     assert.strictEqual(thirdUpdated.nom_apprenant, statutsTestUpdate[2].nom_apprenant);
@@ -648,15 +648,14 @@ integrationTests(__filename, () => {
     assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
     assert.strictEqual(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
     assert.ok(thirdUpdated.date_mise_a_jour_statut);
-    assert.notDeepStrictEqual(thirdUpdated.updated_at, null);
+    assert.ok(thirdUpdated.updated_at);
   });
 
   it("Permet de vérifier l'ajout ou la mise à jour d'un statut avec erreur de cohérence sur le statut", async () => {
     const { addOrUpdateStatuts } = await statutsCandidats();
 
     // Add statut test
-    const toAdd = new StatutCandidat(simpleStatut);
-    await toAdd.save();
+    await addOrUpdateStatuts([simpleStatut]);
 
     // Checks addOrUpdateStatuts method
     const { updated } = await addOrUpdateStatuts([simpleStatutBadUpdate]);

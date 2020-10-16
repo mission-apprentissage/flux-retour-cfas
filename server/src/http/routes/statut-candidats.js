@@ -2,11 +2,10 @@ const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const config = require("config");
-const { StatutCandidat, UserEvent } = require("../../common/model/index");
+const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
 
-module.exports = () => {
+module.exports = ({ statutsCandidats }) => {
   const router = express.Router();
 
   /**
@@ -36,6 +35,9 @@ module.exports = () => {
       })
     );
 
+  /**
+   * Route post for Statuts Candidats
+   */
   router.post(
     "/",
     tryCatch(async (req, res) => {
@@ -56,32 +58,8 @@ module.exports = () => {
         });
         await event.save();
 
-        // Add statutsCandidats
-        const toAdd = [];
-        await asyncForEach(req.body, async (item) => {
-          toAdd.push(
-            new StatutCandidat({
-              ine_apprenant: item.ine_apprenant,
-              nom_apprenant: item.nom_apprenant,
-              prenom_apprenant: item.prenom_apprenant,
-              prenom2_apprenant: item.prenom2_apprenant,
-              prenom3_apprenant: item.prenom3_apprenant,
-              ne_pas_solliciter: item.ne_pas_solliciter,
-              email_contact: item.email_contact,
-              nom_representant_legal: item.nom_representant_legal,
-              tel_representant_legal: item.tel_representant_legal,
-              tel2_representant_legal: item.tel2_representant_legal,
-              id_formation: item.id_formation,
-              libelle_court_formation: item.libelle_court_formation,
-              libelle_long_formation: item.libelle_long_formation,
-              uai_etablissement: item.uai_etablissement,
-              nom_etablissement: item.nom_etablissement,
-              statut_apprenant: item.statut_apprenant,
-              date_metier_mise_a_jour_statut: item.date_metier_mise_a_jour_statut,
-            })
-          );
-        });
-        await StatutCandidat.insertMany(toAdd);
+        // Add StatutsCandidats
+        await statutsCandidats.addOrUpdateStatuts(req.body);
 
         retourStatus = {
           status: "OK",

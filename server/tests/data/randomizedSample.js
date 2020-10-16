@@ -3,7 +3,7 @@ const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
 const sampleSize = require("lodash").sampleSize;
 
-const isInePresent = () => Math.random > 0.65;
+const isInePresent = () => Math.random() < 0.65;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
 const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
 const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();

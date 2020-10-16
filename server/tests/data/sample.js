@@ -1,3 +1,21 @@
+const simpleStatut = {
+  ine_apprenant: "12345",
+  nom_apprenant: "testNom",
+  prenom_apprenant: "testPrenom",
+  ne_pas_solliciter: false,
+  email_contact: "testemail_contact@test.fr",
+  nom_representant_legal: "testnom_representant_legal",
+  tel_representant_legal: "testtel_representant_legal",
+  tel2_representant_legal: "testtel2_representant_legal",
+  id_formation: "testid_formation",
+  libelle_court_formation: "testlibelle_court_formation",
+  libelle_long_formation: "testlibelle_long_formation",
+  uai_etablissement: "testuai_etablissement",
+  nom_etablissement: "testnom_etablissement",
+  statut_apprenant: 3,
+  date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+};
+
 const statutsTest = [
   {
     ine_apprenant: "12345",
@@ -14,7 +32,7 @@ const statutsTest = [
     uai_etablissement: "testuai_etablissement",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
-    date_metier_mise_a_jour_statut: Date.now(),
+    date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
   },
   {
     ine_apprenant: "6789",
@@ -55,7 +73,7 @@ const statutsTestUpdate = [
     uai_etablissement: "testuai_etablissement",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 2,
-    date_metier_mise_a_jour_statut: Date.now(),
+    date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
   },
   {
     ine_apprenant: "6789",
@@ -90,24 +108,6 @@ const statutsTestUpdate = [
     statut_apprenant: 1,
   },
 ];
-
-const simpleStatut = {
-  ine_apprenant: "12345",
-  nom_apprenant: "testNom",
-  prenom_apprenant: "testPrenom",
-  ne_pas_solliciter: false,
-  email_contact: "testemail_contact@test.fr",
-  nom_representant_legal: "testnom_representant_legal",
-  tel_representant_legal: "testtel_representant_legal",
-  tel2_representant_legal: "testtel2_representant_legal",
-  id_formation: "testid_formation",
-  libelle_court_formation: "testlibelle_court_formation",
-  libelle_long_formation: "testlibelle_long_formation",
-  uai_etablissement: "testuai_etablissement",
-  nom_etablissement: "testnom_etablissement",
-  statut_apprenant: 3,
-  date_metier_mise_a_jour_statut: Date.now(),
-};
 
 const simpleStatutBadUpdate = {
   ine_apprenant: "12345",

@@ -68,9 +68,15 @@ module.exports = async () => {
             uai_etablissement: item.uai_etablissement,
             nom_etablissement: item.nom_etablissement,
             statut_apprenant: item.statut_apprenant,
+            historique_statut_apprenant: {
+              valeur_statut: item.statut_apprenant,
+              position_statut: 1,
+              date_statut: new Date(Date.now()),
+            },
             date_entree_statut: item.date_entree_statut,
             date_saisie_statut: item.date_saisie_statut,
             date_mise_a_jour_statut: item.date_mise_a_jour_statut,
+            date_metier_mise_a_jour_statut: item.date_metier_mise_a_jour_statut,
           });
           const addedItem = await toAdd.save();
           added.push(addedItem);
@@ -83,6 +89,7 @@ module.exports = async () => {
       };
     },
     updateStatut,
+    getStatutHistory,
   };
 };
 
@@ -134,6 +141,30 @@ const getStatut = async ({
   return found;
 };
 
+const getStatutHistory = async ({
+  ine_apprenant = null,
+  nom_apprenant = null,
+  prenom_apprenant = null,
+  prenom2_apprenant = null,
+  prenom3_apprenant = null,
+  email_contact = null,
+  id_formation,
+  uai_etablissement,
+}) => {
+  const query = getFindStatutQuery(
+    ine_apprenant,
+    nom_apprenant,
+    prenom_apprenant,
+    prenom2_apprenant,
+    prenom3_apprenant,
+    email_contact,
+    id_formation,
+    uai_etablissement
+  );
+  const found = await StatutCandidat.findOne(query);
+  return found ? found.historique_statut_apprenant : null;
+};
+
 const updateStatut = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
@@ -141,14 +172,14 @@ const updateStatut = async (existingItemId, toUpdate) => {
 
   // Calcul date update
   if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
-    toUpdate.date_mise_a_jour_statut = Date.now();
+    toUpdate.date_mise_a_jour_statut = new Date(Date.now());
   }
 
   // Check if maj statut is valid
   if (isMajStatutInvalid(existingItem.statut_apprenant, toUpdate.statut_apprenant)) {
     toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ko;
     toUpdate.erreur_mise_a_jour_statut = {
-      date_mise_a_jour_statut: Date.now(),
+      date_mise_a_jour_statut: new Date(Date.now()),
       ancien_statut: existingItem.statut_apprenant,
       nouveau_statut_souhaite: toUpdate.statut_apprenant,
     };
@@ -157,8 +188,21 @@ const updateStatut = async (existingItemId, toUpdate) => {
   }
 
   // Update & return
-  toUpdate.updated_at = Date.now();
-  return await StatutCandidat.findByIdAndUpdate(existingItemId, toUpdate);
+  const updateQuery = {
+    ...toUpdate,
+    ...{
+      updated_at: new Date(Date.now()),
+      $addToSet: {
+        historique_statut_apprenant: {
+          valeur_statut: toUpdate.statut_apprenant,
+          position_statut: existingItem.historique_statut_apprenant.length + 1,
+          date_statut: new Date(Date.now()),
+        },
+      },
+    },
+  };
+  const updated = await StatutCandidat.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
+  return updated;
 };
 
 const getFindStatutWithValueQuery = (
