@@ -4,9 +4,49 @@ const statutsCandidats = require("../../../src/common/components/statutsCandidat
 const { StatutCandidat } = require("../../../src/common/model");
 const { codesStatutsMajStatutCandidats } = require("../../../src/common/model/constants");
 const { statutsTest, statutsTestUpdate, simpleStatut, simpleStatutBadUpdate } = require("../../data/sample");
+const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 
 integrationTests(__filename, () => {
+  it("Permet de vérifier l'existence d'un statut de candidat randomisé", async () => {
+    const { existsStatut } = await statutsCandidats();
+
+    const randomStatut = createRandomStatutCandidat();
+    const toAdd = new StatutCandidat(randomStatut);
+    await toAdd.save();
+
+    // Checks creation
+    assert.strictEqual(toAdd.ine_apprenant, randomStatut.ine_apprenant);
+    assert.strictEqual(toAdd.nom_apprenant, randomStatut.nom_apprenant);
+    assert.strictEqual(toAdd.prenom_apprenant, randomStatut.prenom_apprenant);
+    assert.strictEqual(toAdd.prenom2_apprenant, randomStatut.prenom2_apprenant);
+    assert.strictEqual(toAdd.prenom3_apprenant, randomStatut.prenom3_apprenant);
+    assert.strictEqual(toAdd.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
+    assert.strictEqual(toAdd.email_contact, randomStatut.email_contact);
+    assert.strictEqual(toAdd.nom_representant_legal, randomStatut.nom_representant_legal);
+    assert.strictEqual(toAdd.tel_representant_legal, randomStatut.tel_representant_legal);
+    assert.strictEqual(toAdd.tel2_representant_legal, randomStatut.tel2_representant_legal);
+    assert.strictEqual(toAdd.id_formation, randomStatut.id_formation);
+    assert.strictEqual(toAdd.libelle_court_formation, randomStatut.libelle_court_formation);
+    assert.strictEqual(toAdd.libelle_long_formation, randomStatut.libelle_long_formation);
+    assert.strictEqual(toAdd.uai_etablissement, randomStatut.uai_etablissement);
+    assert.strictEqual(toAdd.nom_etablissement, randomStatut.nom_etablissement);
+    assert.strictEqual(toAdd.statut_apprenant, randomStatut.statut_apprenant);
+
+    // Checks exists method
+    const found = await existsStatut({
+      ine_apprenant: toAdd.ine_apprenant,
+      nom_apprenant: toAdd.nom_apprenant,
+      prenom_apprenant: toAdd.prenom_apprenant,
+      prenom2_apprenant: toAdd.prenom2_apprenant,
+      prenom3_apprenant: toAdd.prenom3_apprenant,
+      email_contact: toAdd.email_contact,
+      id_formation: toAdd.id_formation,
+      uai_etablissement: toAdd.uai_etablissement,
+    });
+    assert.strictEqual(found, true);
+  });
+
   it("Permet de vérifier l'existence d'un statut de candidat avec INE", async () => {
     const { existsStatut } = await statutsCandidats();
 

@@ -3,66 +3,48 @@ const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
 const { apiStatutsSeeder } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
-const { statutsTest } = require("../../data/sample");
+const { statutsTest, fullSample } = require("../../data/sample");
+const { createRandomStatutsCandidatsList } = require("../../data/randomizedSample");
+
+const goodApiKey = "12345";
+const badApiKey = "BADAPIKEY";
+
+const createApiUser = async () => {
+  const { createUser } = await users();
+
+  return await createUser("userApi", "password", {
+    permissions: [apiStatutsSeeder],
+    apiKey: goodApiKey,
+  });
+};
 
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie que la route statut-candidats fonctionne avec une bonne clé d'API", async () => {
     const { httpClient } = await startServer();
-    const { createUser } = await users();
 
-    const goodApiKey = "12345";
+    // Clear statuts in DB
+    await StatutCandidat.deleteMany({});
 
-    const created = await createUser("userApi", "password", {
-      permissions: [apiStatutsSeeder],
-      apiKey: goodApiKey,
+    // Create & check api user
+    const userApiCreated = await createApiUser();
+    assert.strictEqual(userApiCreated.username, "userApi");
+    assert.strictEqual(userApiCreated.permissions.length > 0, true);
+    assert.strictEqual(userApiCreated.apiKey, goodApiKey);
+
+    // Call Api Route
+    const response = await httpClient.post("/api/statut-candidats", statutsTest, {
+      headers: {
+        "x-api-key": goodApiKey,
+      },
     });
-    assert.strictEqual(created.username, "userApi");
-    assert.strictEqual(created.permissions.length > 0, true);
-    assert.strictEqual(created.apiKey, goodApiKey);
 
-    const response = await httpClient.post(
-      "/api/statut-candidats",
-      [
-        {
-          ine_apprenant: "12345",
-          nom_apprenant: "testNom",
-          prenom_apprenant: "testPrenom",
-          ne_pas_solliciter: false,
-          email_contact: "testemail_contact@test.fr",
-          nom_representant_legal: "testnom_representant_legal",
-          tel_representant_legal: "testtel_representant_legal",
-          tel2_representant_legal: "testtel2_representant_legal",
-          id_formation: "testid_formation",
-          libelle_court_formation: "testlibelle_court_formation",
-          libelle_long_formation: "testlibelle_long_formation",
-          uai_etablissement: "testuai_etablissement",
-          nom_etablissement: "testnom_etablissement",
-          statut_apprenant: 1,
-          date_metier_mise_a_jour_statut: Date.now(),
-        },
-        {
-          ine_apprenant: "6789",
-          nom_apprenant: "test2Nom",
-          prenom_apprenant: "test2Prenom",
-          ne_pas_solliciter: true,
-          email_contact: "test2Email_contact",
-          id_formation: "test2id_formation",
-          uai_etablissement: "testuai_etablissement",
-          nom_etablissement: "testnom_etablissement",
-          statut_apprenant: 4,
-        },
-      ],
-      {
-        headers: {
-          "x-api-key": goodApiKey,
-        },
-      }
-    );
-
+    // Check Api Route data
     assert.strictEqual(response.status, 200);
     assert.ok(response.data.status);
     assert.ok(response.data.message);
     assert.strictEqual(response.data.status, "OK");
+
+    // Check in DB & Check data
     const foundStatut = await StatutCandidat.findOne({ ine_apprenant: `${statutsTest[0].ine_apprenant}` });
 
     assert.strictEqual(foundStatut.nom_apprenant, statutsTest[0].nom_apprenant);
@@ -85,19 +67,14 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie que la route statut-candidats ne fonctionne pas avec une mauvaise clé d'API", async () => {
     const { httpClient } = await startServer();
-    const { createUser } = await users();
 
-    const goodApiKey = "12345";
-    const badApiKey = "BADAPIKEY";
+    // Create & check api user
+    const userApiCreated = await createApiUser();
+    assert.strictEqual(userApiCreated.username, "userApi");
+    assert.strictEqual(userApiCreated.permissions.length > 0, true);
+    assert.strictEqual(userApiCreated.apiKey, goodApiKey);
 
-    const created = await createUser("userApi", "password", {
-      permissions: [apiStatutsSeeder],
-      apiKey: goodApiKey,
-    });
-    assert.strictEqual(created.username, "userApi");
-    assert.strictEqual(created.permissions.length > 0, true);
-    assert.strictEqual(created.apiKey, goodApiKey);
-
+    // Call Api Route with bad API Key
     const response = await httpClient.post("/api/statut-candidats", statutsTest, {
       headers: {
         "x-api-key": badApiKey,
@@ -105,5 +82,94 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     assert.strictEqual(response.status, 401);
+  });
+
+  it("Vérifie l'ajout via route statut-candidats de données complètes", async () => {
+    const { httpClient } = await startServer();
+
+    // Clear statuts in DB
+    await StatutCandidat.deleteMany({});
+
+    // Create & check api user
+    const userApiCreated = await createApiUser();
+    assert.strictEqual(userApiCreated.username, "userApi");
+    assert.strictEqual(userApiCreated.permissions.length > 0, true);
+    assert.strictEqual(userApiCreated.apiKey, goodApiKey);
+
+    // Call Api Route with full sample
+    const response = await httpClient.post("/api/statut-candidats", fullSample, {
+      headers: {
+        "x-api-key": goodApiKey,
+      },
+    });
+
+    // Check Api Route data
+    assert.strictEqual(response.status, 200);
+    assert.ok(response.data.status);
+    assert.ok(response.data.message);
+    assert.strictEqual(response.data.status, "OK");
+  });
+
+  it("Vérifie l'ajout via route statut-candidats de 100 données randomisées", async () => {
+    const { httpClient } = await startServer();
+
+    const nbItemsToTest = 100;
+
+    // Clear statuts in DB
+    await StatutCandidat.deleteMany({});
+
+    // Create & check api user
+    const userApiCreated = await createApiUser();
+    assert.strictEqual(userApiCreated.username, "userApi");
+    assert.strictEqual(userApiCreated.permissions.length > 0, true);
+    assert.strictEqual(userApiCreated.apiKey, goodApiKey);
+
+    // Generate random data
+    const randomDataList = createRandomStatutsCandidatsList(nbItemsToTest);
+
+    // Call Api Route with full sample
+    const response = await httpClient.post("/api/statut-candidats", randomDataList, {
+      headers: {
+        "x-api-key": goodApiKey,
+      },
+    });
+
+    // Check Api Route data
+    assert.strictEqual(response.status, 200);
+    assert.ok(response.data.status);
+    assert.ok(response.data.message);
+    assert.strictEqual(response.data.status, "OK");
+
+    // Check Nb Items added
+    assert.strictEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
+  });
+
+  it("Vérifie l'erreur d'ajout via route statut-candidats pour un trop grande nb de données randomisées (>100)", async () => {
+    const { httpClient } = await startServer();
+
+    const nbItemsToTest = 200;
+
+    // Clear statuts in DB
+    await StatutCandidat.deleteMany({});
+
+    // Create & check api user
+    const userApiCreated = await createApiUser();
+    assert.strictEqual(userApiCreated.username, "userApi");
+    assert.strictEqual(userApiCreated.permissions.length > 0, true);
+    assert.strictEqual(userApiCreated.apiKey, goodApiKey);
+
+    // Generate random data
+    const randomDataList = createRandomStatutsCandidatsList(nbItemsToTest);
+
+    // Call Api Route with full sample
+    const response = await httpClient.post("/api/statut-candidats", randomDataList, {
+      headers: {
+        "x-api-key": goodApiKey,
+      },
+    });
+
+    // Check Api Route data & Data not added
+    assert.strictEqual(response.status, 413);
+    assert.notDeepStrictEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
   });
 });

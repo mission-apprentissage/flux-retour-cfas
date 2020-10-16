@@ -4,6 +4,7 @@ const { StatutCandidat } = require("../../../common/model");
 const { apiStatutsSeeder, administrator } = require("../../../common/roles");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { fullSample } = require("../../../../tests/data/sample");
+const { createRandomStatutsCandidatsList } = require("../../../../tests/data/randomizedSample");
 
 const seedUsers = async (users) => {
   logger.info(`Creating user ${config.users.defaultAdmin.name}`);
@@ -37,7 +38,27 @@ const seedSample = async (statutsCandidats) => {
   });
 };
 
+const seedRandomizedSample = async (statutsCandidats) => {
+  await asyncForEach(createRandomStatutsCandidatsList(), async (statut) => {
+    const toAdd = new StatutCandidat(statut);
+    const exist = await statutsCandidats.existsStatut({
+      ine_apprenant: toAdd.ine_apprenant,
+      nom_apprenant: toAdd.nom_apprenant,
+      prenom_apprenant: toAdd.prenom_apprenant,
+      prenom2_apprenant: toAdd.prenom2_apprenant,
+      prenom3_apprenant: toAdd.prenom3_apprenant,
+      email_contact: toAdd.email_contact,
+      id_formation: toAdd.id_formation,
+      uai_etablissement: toAdd.uai_etablissement,
+    });
+    if (!exist) {
+      await toAdd.save();
+    }
+  });
+};
+
 module.exports = {
   seedUsers,
   seedSample,
+  seedRandomizedSample,
 };

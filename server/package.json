@@ -17,6 +17,7 @@
     "docker:clean": "docker-compose kill && docker system prune --force --volumes",
     "seed:users": "node src/jobs/seed/seedUsers.js",
     "seed:sample": "node src/jobs/seed/seedSample.js",
+    "seed:randomizedSample": "node src/jobs/seed/seedRandomizedSample.js",
     "clear:all": "node src/jobs/clear/clearAll.js",
     "clear:statutsCandidats": "node src/jobs/clear/clearStatutsCandidats.js",
     "stats": "node src/jobs/stats/index.js"
@@ -34,6 +35,7 @@
     "convert-csv-to-json": "0.0.15",
     "env-var": "6.1.1",
     "express": "4.17.1",
+    "faker": "5.1.0",
     "fs-extra": "9.0.0",
     "joi": "17.2.1",
     "json2csv": "5.0.1",
@@ -45,6 +47,7 @@
     "passport-http": "0.3.0",
     "passport-jwt": "4.0.0",
     "passport-local": "1.0.0",
+    "randexp": "0.5.3",
     "requestretry": "4.1.1",
     "sha512crypt-node": "0.1.0",
     "stdio": "2.1.1",
