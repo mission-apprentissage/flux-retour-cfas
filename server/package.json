@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "0.9.6",
+  "version": "0.9.6.2",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -52,7 +52,6 @@
     "randexp": "0.5.3",
     "requestretry": "4.1.1",
     "sha512crypt-node": "0.1.0",
-    "stdio": "2.1.1",
     "xlsx": "0.16.1"
   },
   "engines": {
