@@ -49,7 +49,7 @@ const exit = async (rawError) => {
         error = closeError;
         console.log(error);
       });
-  }, 250);
+  }, 500);
 
   process.exitCode = error ? 1 : 0;
 };
