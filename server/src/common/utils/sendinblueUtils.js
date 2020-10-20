@@ -1,6 +1,22 @@
 const request = require("requestretry");
 const config = require("config");
 
+async function getEmailCampaign(campaignId) {
+  const options = {
+    method: "GET",
+    url: `https://api.sendinblue.com/v3/emailCampaigns/${campaignId}`,
+    headers: {
+      accept: "application/json",
+      "api-key": config.sendinblue.apiKey,
+    },
+  };
+  try {
+    const res = await request(options);
+    return JSON.parse(res.body);
+  } catch (error) {
+    throw new Error(error);
+  }
+}
 async function getUser(email) {
   const options = {
     method: "GET",
@@ -89,4 +105,4 @@ async function updateContactAttributes(email, body, displayLog = false) {
   }
 }
 
-module.exports = { getAllUsers, getUser, updateContactAttributes, getContactsFromList };
+module.exports = { getAllUsers, getUser, updateContactAttributes, getContactsFromList, getEmailCampaign };

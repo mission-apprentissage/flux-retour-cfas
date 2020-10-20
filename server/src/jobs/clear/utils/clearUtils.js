@@ -1,5 +1,5 @@
 const logger = require("../../../common/logger");
-const { User, StatutCandidat } = require("../../../common/model");
+const { User, StatutCandidat, Log, UserEvent } = require("../../../common/model");
 
 const clearAll = async () => {
   logger.info("Suppression en cours");
@@ -17,7 +17,17 @@ const clearStatutsCandidats = async () => {
   logger.info(`StatutsCandidats supprimés`);
 };
 
+const clearLogsAndEvents = async () => {
+  logger.info("Suppression en cours");
+
+  await Log.deleteMany({});
+  logger.info(`Logs supprimés`);
+
+  await UserEvent.deleteMany({});
+  logger.info(`UserEvents supprimés`);
+};
 module.exports = {
   clearAll,
   clearStatutsCandidats,
+  clearLogsAndEvents,
 };
