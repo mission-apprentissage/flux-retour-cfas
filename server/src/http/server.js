@@ -19,6 +19,7 @@ const loginRoute = require("./routes/login");
 const adminRoute = require("./routes/admin");
 const passwordRoute = require("./routes/password");
 const statsRoute = require("./routes/stats");
+const statsEnqueteDs2020Route = require("./routes/statsEnqueteDs2020");
 const configRoute = require("./routes/config");
 
 module.exports = async (components) => {
@@ -38,6 +39,7 @@ module.exports = async (components) => {
   app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
   app.use("/api/password", passwordRoute(components));
   app.use("/api/stats", checkJwtToken, adminOnly, statsRoute(components));
+  app.use("/api/statsDs", checkJwtToken, adminOnly, statsEnqueteDs2020Route());
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());
 
   app.get(
