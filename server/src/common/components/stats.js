@@ -21,6 +21,7 @@ module.exports = async () => {
 const getAllStats = async () => {
   return {
     nbStatutsCandidats: await getNbStatutsCandidatsTotal(),
+    nbStatutsCandidatsMisAJour: await getNbStatutsCandidatsUpdatedTotal(),
     nbStatutsProspect: await getNbStatutsCandidats(codesStatutsCandidats.prospect),
     nbStatutsInscrits: await getNbStatutsCandidats(codesStatutsCandidats.inscrit),
     nbStatutsApprentis: await getNbStatutsCandidats(codesStatutsCandidats.apprenti),
@@ -47,6 +48,9 @@ const getAllStats = async () => {
 };
 
 const getNbStatutsCandidatsTotal = async () => await StatutCandidat.countDocuments({});
+
+const getNbStatutsCandidatsUpdatedTotal = async () =>
+  await StatutCandidat.countDocuments({ updated_at: { $ne: null } });
 
 const getNbStatutsCandidats = async (statutCandidat) =>
   await StatutCandidat.countDocuments({

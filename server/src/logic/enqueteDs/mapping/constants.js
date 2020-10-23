@@ -21,6 +21,44 @@ const formFieldToDsId = {
   coordonnesRespTechMultiSites: 1411602,
 };
 
+const erps = [
+  {
+    name: "Aucun",
+    value: "Aucun ou Autre système de gestion",
+  },
+  {
+    name: "Ymag",
+    value: "Ymag - Yparéo",
+  },
+  {
+    name: "AurigaAurion",
+    value: "Auriga - Aurion",
+  },
+  {
+    name: "Gesti",
+    value: "Gestibase - IGesti et IMFR",
+  },
+  {
+    name: "HyperPlanning",
+    value: "HyperPlanning - Index Education",
+  },
+  {
+    name: "Unit4",
+    value: "Unit4 - Unit4 Student Management",
+  },
+  {
+    name: "ValSoftware",
+    value: "Val Software - Ammon",
+  },
+];
+
+const dsStates = {
+  recue: "received",
+  initiee: "initiated",
+};
+
 module.exports = {
   formFieldToDsId,
+  erps,
+  dsStates,
 };

@@ -9,6 +9,7 @@ runScript(async ({ stats }) => {
   const allStats = await stats.getAllStats();
 
   logger.info(`Nb de Statuts Candidats total : ${allStats.nbStatutsCandidats}`);
+  logger.info(`Nb de Statuts Candidats mis à jour : ${allStats.nbStatutsCandidatsMisAJour}`);
   logger.info(`Nb de Statuts Candidats Prospects total : ${allStats.nbStatutsProspect}`);
   logger.info(`Nb de Statuts Candidats Inscrits total : ${allStats.nbStatutsInscrits}`);
   logger.info(`Nb de Statuts Candidats Apprentis total : ${allStats.nbStatutsApprentis}`);
