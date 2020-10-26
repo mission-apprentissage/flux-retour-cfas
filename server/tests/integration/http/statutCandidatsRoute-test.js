@@ -111,6 +111,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.ok(response.data.status);
     assert.ok(response.data.message);
     assert.deepStrictEqual(response.data.status, "OK");
+    assert.deepStrictEqual(response.data.message, "Success");
   });
 
   it("Vérifie l'ajout via route statut-candidats de 100 données randomisées", async () => {

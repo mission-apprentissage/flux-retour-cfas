@@ -1,9 +1,7 @@
 const logger = require("../../../common/logger");
 const config = require("config");
-const { StatutCandidat } = require("../../../common/model");
 const { apiStatutsSeeder, administrator } = require("../../../common/roles");
-const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { fullSample } = require("../../../../tests/data/sample");
+const { fullSampleWithUpdates } = require("../../../../tests/data/sample");
 const { createRandomStatutsCandidatsList } = require("../../../../tests/data/randomizedSample");
 
 const seedUsers = async (users) => {
@@ -20,41 +18,11 @@ const seedUsers = async (users) => {
 };
 
 const seedSample = async (statutsCandidats) => {
-  await asyncForEach(fullSample, async (statut) => {
-    const toAdd = new StatutCandidat(statut);
-    const exist = await statutsCandidats.existsStatut({
-      ine_apprenant: toAdd.ine_apprenant,
-      nom_apprenant: toAdd.nom_apprenant,
-      prenom_apprenant: toAdd.prenom_apprenant,
-      prenom2_apprenant: toAdd.prenom2_apprenant,
-      prenom3_apprenant: toAdd.prenom3_apprenant,
-      email_contact: toAdd.email_contact,
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
-    });
-    if (!exist) {
-      await toAdd.save();
-    }
-  });
+  await statutsCandidats.addOrUpdateStatuts(fullSampleWithUpdates);
 };
 
 const seedRandomizedSample = async (statutsCandidats) => {
-  await asyncForEach(createRandomStatutsCandidatsList(), async (statut) => {
-    const toAdd = new StatutCandidat(statut);
-    const exist = await statutsCandidats.existsStatut({
-      ine_apprenant: toAdd.ine_apprenant,
-      nom_apprenant: toAdd.nom_apprenant,
-      prenom_apprenant: toAdd.prenom_apprenant,
-      prenom2_apprenant: toAdd.prenom2_apprenant,
-      prenom3_apprenant: toAdd.prenom3_apprenant,
-      email_contact: toAdd.email_contact,
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
-    });
-    if (!exist) {
-      await toAdd.save();
-    }
-  });
+  await statutsCandidats.addOrUpdateStatuts(createRandomStatutsCandidatsList());
 };
 
 module.exports = {
