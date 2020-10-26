@@ -45,6 +45,24 @@ runScript(async ({ stats }) => {
 
   logger.info(" ");
   logger.info(`Nb de Candidats sur plusieurs UAIs: ${allStats.nbCandidatsMultiUais}`);
+  logger.info(`Nb de Candidats sur plusieurs CFS: ${allStats.nbCandidatsMultiCfds}`);
+
+  logger.info(" ");
+  logger.info(`Nb de Statuts sans historique : ${allStats.nbStatutsWithoutHistory}`);
+  logger.info(`Nb de Candidats sans changement de statut: ${allStats.nbDistinctCandidatsWithoutStatutHistory}`);
+  logger.info(`Nb de Candidats avec 1 changement statut : ${allStats.nbDistinctCandidatsWithStatutHistory1}`);
+  logger.info(`Nb de Candidats avec 2 changements statut : ${allStats.nbDistinctCandidatsWithStatutHistory2}`);
+  logger.info(`Nb de Candidats avec 3 changements statut : ${allStats.nbDistinctCandidatsWithStatutHistory3}`);
+
+  logger.info(
+    `Nb de Candidats avec changements statut Prospect / Inscrit : ${allStats.nbDistinctCandidatsWithChangingStatutProspectInscrit}`
+  );
+  logger.info(
+    `Nb de Candidats avec changements statut Prospect / Apprenti : ${allStats.nbDistinctCandidatsWithChangingStatutProspectApprenti}`
+  );
+  logger.info(
+    `Nb de Candidats avec changements statut Prospect / Abandon : ${allStats.nbDistinctCandidatsWithChangingStatutProspectAbandon}`
+  );
 });
 
 const displayInLoggerNbStatutsCandidats = async (nbStatutsList, statut = "") => {

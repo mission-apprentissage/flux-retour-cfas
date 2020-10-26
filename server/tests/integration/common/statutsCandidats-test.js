@@ -2,8 +2,14 @@ const assert = require("assert");
 const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
 const { StatutCandidat } = require("../../../src/common/model");
-const { codesStatutsMajStatutCandidats } = require("../../../src/common/model/constants");
-const { statutsTest, statutsTestUpdate, simpleStatut, simpleStatutBadUpdate } = require("../../data/sample");
+const { codesStatutsMajStatutCandidats, codesStatutsCandidats } = require("../../../src/common/model/constants");
+const {
+  statutsTest,
+  statutsTestUpdate,
+  simpleStatut,
+  simpleStatutBadUpdate,
+  simpleProspectStatut,
+} = require("../../data/sample");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 
@@ -674,5 +680,39 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ko);
     assert.notDeepStrictEqual(found.erreur_mise_a_jour_statut, null);
     assert.notDeepStrictEqual(found.updated_at, null);
+  });
+
+  it("Permet de vérifier la récupération de l'historique simple d'un statut", async () => {
+    const { addOrUpdateStatuts, getStatutHistory } = await statutsCandidats();
+
+    // Add statut test
+    const { added } = await addOrUpdateStatuts([simpleProspectStatut]);
+
+    // Mise à jour du statut
+    const simpleStatutChangedInsc = { ...simpleProspectStatut, ...{ statut_apprenant: codesStatutsCandidats.inscrit } };
+    await addOrUpdateStatuts([simpleStatutChangedInsc]);
+
+    // Check value in db
+    const found = await StatutCandidat.findById(added[0]._id);
+    assert.strictEqual(found.ine_apprenant, simpleProspectStatut.ine_apprenant);
+    assert.strictEqual(found.nom_apprenant, simpleProspectStatut.nom_apprenant);
+    assert.strictEqual(found.prenom_apprenant, simpleProspectStatut.prenom_apprenant);
+    assert.strictEqual(found.ne_pas_solliciter, simpleProspectStatut.ne_pas_solliciter);
+    assert.strictEqual(found.email_contact, simpleProspectStatut.email_contact);
+    assert.strictEqual(found.id_formation, simpleProspectStatut.id_formation);
+    assert.strictEqual(found.uai_etablissement, simpleProspectStatut.uai_etablissement);
+    // Check updated value
+    assert.strictEqual(found.statut_apprenant, codesStatutsCandidats.inscrit);
+    assert.strictEqual(found.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ok);
+    assert.strictEqual(found.erreur_mise_a_jour_statut, null);
+    assert.notDeepStrictEqual(found.updated_at, null);
+
+    // Check history
+    const history = await getStatutHistory(simpleProspectStatut);
+    assert.strictEqual(history.length, 2);
+    assert.strictEqual(history[0].position_statut, 1);
+    assert.strictEqual(history[0].valeur_statut, simpleProspectStatut.statut_apprenant);
+    assert.strictEqual(history[1].position_statut, 2);
+    assert.strictEqual(history[1].valeur_statut, simpleStatutChangedInsc.statut_apprenant);
   });
 });
