@@ -19,9 +19,7 @@ runScript(async ({ stats }) => {
   logger.info(" ");
   logger.info(`Nb de Candidats distinct sans INE: ${allStats.nbDistinctCandidatsWithoutIne}`);
   logger.info(`Nb de Candidats distinct avec INE: ${allStats.nbDistinctCandidatsWithIne}`);
-  logger.info(
-    `Nb de Candidats total : ${allStats.nbDistinctCandidatsWithIne + allStats.nbDistinctCandidatsWithoutIne}`
-  );
+  logger.info(`Nb de Candidats total : ${allStats.nbDistinctCandidatsTotal}`);
 
   logger.info(" ");
   logger.info(`-> Nb de Statuts Candidats par UAIs ...`);
