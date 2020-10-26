@@ -15,6 +15,12 @@ module.exports = async () => {
     getDistinctCandidatsWithIneWithMultiUais,
     getDistinctCandidatsWithoutIneMultiCfds,
     getDistinctCandidatsWithIneWithMultiCfds,
+    getNbStatutsCandidatsWithoutHistory,
+    getNbDistinctCandidatsWithoutHistory,
+    getNbDistinctCandidatsWithHistoryNbItems,
+    getNbDistinctCandidatsWithChangingStatutProspectInscrit,
+    getNbDistinctCandidatsWithChangingStatutProspectApprenti,
+    getNbDistinctCandidatsWithChangingStatutProspectAbandon,
   };
 };
 
@@ -36,14 +42,28 @@ const getAllStats = async () => {
     nbStatutsCandidatsAbandonParUais: await getNbStatutsCandidatsParUais(codesStatutsCandidats.abandon),
     candidatsMultiUaisWithoutIne: await getDistinctCandidatsWithoutIneMultiUais(),
     candidatsMultiUaisWithIne: await getDistinctCandidatsWithIneWithMultiUais(),
+
     nbCandidatsMultiUais:
       (await getDistinctCandidatsWithoutIneMultiUais()).length +
       (await getDistinctCandidatsWithIneWithMultiUais()).length,
+
     candidatsMultiCfdsWithoutIne: await getDistinctCandidatsWithoutIneMultiCfds(),
     candidatsMultiCfdsWithIne: await getDistinctCandidatsWithIneWithMultiCfds(),
+
     nbCandidatsMultiCfds:
       (await getDistinctCandidatsWithoutIneMultiCfds()).length +
       (await getDistinctCandidatsWithIneWithMultiCfds()).length,
+
+    nbStatutsWithoutHistory: await getNbStatutsCandidatsWithoutHistory(),
+    nbDistinctCandidatsWithoutStatutHistory: await getNbDistinctCandidatsWithoutHistory(),
+
+    nbDistinctCandidatsWithStatutHistory1: await getNbDistinctCandidatsWithHistoryNbItems(2),
+    nbDistinctCandidatsWithStatutHistory2: await getNbDistinctCandidatsWithHistoryNbItems(3),
+    nbDistinctCandidatsWithStatutHistory3: await getNbDistinctCandidatsWithHistoryNbItems(4),
+
+    nbDistinctCandidatsWithChangingStatutProspectInscrit: await getNbDistinctCandidatsWithChangingStatutProspectInscrit(),
+    nbDistinctCandidatsWithChangingStatutProspectApprenti: await getNbDistinctCandidatsWithChangingStatutProspectApprenti(),
+    nbDistinctCandidatsWithChangingStatutProspectAbandon: await getNbDistinctCandidatsWithChangingStatutProspectAbandon(),
   };
 };
 
@@ -163,3 +183,84 @@ const getDistinctCandidatsWithIneWithMultiCfds = async () =>
     },
     { $match: { "idsFormations.1": { $exists: true } } },
   ]);
+
+const getNbStatutsCandidatsWithoutHistory = async () =>
+  await StatutCandidat.countDocuments({ historique_statut_apprenant: { $size: 1 } });
+
+const getNbDistinctCandidatsWithoutHistory = async () =>
+  (
+    await StatutCandidat.aggregate([
+      { $match: { historique_statut_apprenant: { $size: 1 } } },
+      {
+        $group: {
+          _id: {
+            nom: "$nom_apprenant",
+            prenom: "$prenom_apprenant",
+            prenom2: "$prenom2_apprenant",
+            prenom3: "$prenom3_apprenant",
+            email: "$email_contact",
+          },
+        },
+      },
+    ])
+  ).length;
+
+const getNbDistinctCandidatsWithHistoryNbItems = async (nbChangements) =>
+  (
+    await StatutCandidat.aggregate([
+      { $match: { historique_statut_apprenant: { $size: nbChangements } } },
+      {
+        $group: {
+          _id: {
+            nom: "$nom_apprenant",
+            prenom: "$prenom_apprenant",
+            prenom2: "$prenom2_apprenant",
+            prenom3: "$prenom3_apprenant",
+            email: "$email_contact",
+          },
+        },
+      },
+    ])
+  ).length;
+
+const getNbDistinctCandidatsWithChangingStatutProspectInscrit = async () =>
+  (
+    await StatutCandidat.find({
+      $where: function () {
+        return [1, 2].every((val) =>
+          this.historique_statut_apprenant
+            .sort((a, b) => a.position_statut > b.position_statut)
+            .map((item) => item.valeur_statut)
+            .includes(val)
+        );
+      },
+    })
+  ).length;
+
+const getNbDistinctCandidatsWithChangingStatutProspectApprenti = async () =>
+  (
+    await StatutCandidat.find({
+      $where: function () {
+        return [1, 3].every((val) =>
+          this.historique_statut_apprenant
+            .sort((a, b) => a.position_statut > b.position_statut)
+            .map((item) => item.valeur_statut)
+            .includes(val)
+        );
+      },
+    })
+  ).length;
+
+const getNbDistinctCandidatsWithChangingStatutProspectAbandon = async () =>
+  (
+    await StatutCandidat.find({
+      $where: function () {
+        return [1, 0].every((val) =>
+          this.historique_statut_apprenant
+            .sort((a, b) => a.position_statut > b.position_statut)
+            .map((item) => item.valeur_statut)
+            .includes(val)
+        );
+      },
+    })
+  ).length;
