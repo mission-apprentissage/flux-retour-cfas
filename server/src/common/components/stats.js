@@ -32,6 +32,7 @@ const getAllStats = async () => {
     nbStatutsInscrits: await getNbStatutsCandidats(codesStatutsCandidats.inscrit),
     nbStatutsApprentis: await getNbStatutsCandidats(codesStatutsCandidats.apprenti),
     nbStatutsAbandon: await getNbStatutsCandidats(codesStatutsCandidats.abandon),
+    nbDistinctCandidatsTotal: (await getNbDistinctCandidatsWithIne()) + (await getNbDistinctCandidatsWithoutIne()),
     nbDistinctCandidatsWithIne: await getNbDistinctCandidatsWithIne(),
     nbDistinctCandidatsWithoutIne: await getNbDistinctCandidatsWithoutIne(),
     nbStatutsSansIne: await getNbStatutsCandidatsSansIne(),
