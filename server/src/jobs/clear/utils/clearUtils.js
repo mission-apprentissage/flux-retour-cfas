@@ -17,6 +17,16 @@ const clearStatutsCandidats = async () => {
   logger.info(`StatutsCandidats supprimés`);
 };
 
+const clearUsers = async () => {
+  logger.info("Suppression en cours");
+
+  await User.deleteMany({});
+  logger.info(`Users supprimés`);
+
+  await UserEvent.deleteMany({});
+  logger.info(`UserEvents supprimés`);
+};
+
 const clearLogsAndEvents = async () => {
   logger.info("Suppression en cours");
 
@@ -30,4 +40,5 @@ module.exports = {
   clearAll,
   clearStatutsCandidats,
   clearLogsAndEvents,
+  clearUsers,
 };
