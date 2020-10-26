@@ -16,7 +16,7 @@ Ce repository contient l'application des flux retours des cfas.
 
 Ce projet fonctionne de manière autonome en local avec des conteneurs docker.
 
-Pour déployer et faire fonctionner l'application sur un server dédié dans Azure il faut récupérer le contenu du répository flux-retour-cfas-infra pour le modèle choisi.
+Pour déployer et faire fonctionner l'application sur un server dédié dans Azure il faut récupérer le contenu du répository flux-retour-cfas-infra.
 
 Le répository flux-retour-cfas-infra est lui, privé car il est utilisé pour contenir l'ensemble des données sensibles (Clés SSH, mots de passes ...) nécessaires à la mise en place de l' application, merci de suivre sa documentation dédiée pour déployer l'application.
 
@@ -228,15 +228,85 @@ Le workflow principal est définie dans `/.github/workflows/yarn-ci.yml` et se c
 - Lancer le linter
 - Exécuter les tests unitaires.
 
-## Seed / Procédure
+## Jobs & Procédure de déploiement de l'application
 
-Yarn clear:all
-Yarn seed:users
+### Jobs de suppression des données
 
-Yarn seed:sample vs randomizedSample
-Yarn clear:statutsCandidats
-Yarn clear:logs
+Il est possible de supprimer les données en base de plusieurs manières :
 
-Yarn stats
+- Pour supprimer toutes les données en base :
 
-Yarn ds
+```bash
+yarn clear:all
+```
+
+- Pour supprimer uniquement les statuts des candidats en base :
+
+```bash
+yarn clear:statutsCandidats
+```
+
+- Pour supprimer uniquement les logs (+usersEvents) en base :
+
+```bash
+yarn clear:logs
+```
+
+- Pour supprimer uniquement les users (+ usersEvents) en base :
+
+```bash
+yarn clear:users
+```
+
+### Jobs d'alimentation des données
+
+Il est possible d'alimenter la base de donneés avec des données de réferences / test :
+
+- Pour ajouter les users par défaut en base :
+
+```bash
+yarn seed:users
+```
+
+- Pour ajouter des statuts candidats de test en base :
+
+```bash
+yarn seed:sample
+```
+
+- Pour ajouter des statuts candidats randomisés en base :
+
+```bash
+yarn seed:randomizedSample
+```
+
+### Jobs d'affichage des statistiques
+
+Il est possible d'afficher en console les statistiques des données du flux retour :
+
+```bash
+yarn stats
+```
+
+### Jobs pour l'enquete Démarches Simplifiées
+
+Pour l'enquete Démarches Simplifiés :
+
+- Il est possible de mettre à jour dans Sendinblue les contacts :
+
+```bash
+yarn ds2020:updateSib
+```
+
+- Il est possible d'exporter les stats sous format csv
+
+```bash
+yarn ds2020:statsCsv
+```
+
+### Procédure à suivre au premier déploiement
+
+Dès le premier déploiement de l'application est recommandé de suivre la procédure suivante :
+
+1. Affichage des stats pour vérifier que la base de données est vide.
+2. Seed des users défaut
