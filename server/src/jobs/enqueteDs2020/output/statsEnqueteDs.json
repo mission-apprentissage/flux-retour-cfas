@@ -1,0 +1,41 @@
+{
+  "globalStats": {
+    "tauxRepondantsOk": {
+      "tauxRepondantsOkSurMailsEnvoyes": 14.8,
+      "tauxRepondantsOkSurNbEtablissementsCatalogue": 46.73,
+      "tauxRepondantsOkDemarcheRecueSurNbEtablissementsCatalogue": 0,
+      "tauxRepondantsOkDemarcheInitieeSurNbEtablissementsCatalogue": 0.05
+    },
+    "tauxRepondantsKo": {
+      "tauxNonRepondantsSurMailsEnvoyes": 85.2,
+      "tauxNonRepondantsSurNbEtablissementsCatalogue": 269.06,
+      "tauxNonRepondantsDemarcheNiRecueNiInitieeSurNbEtablissementsCatalogue": 0
+    }
+  },
+  "sendinblueStats": [
+    {
+      "campagne_id": 115,
+      "campagne_nom": "Courrier - Demande de données aux CFA_DS",
+      "nbMailsEnvoyes": 6562,
+      "nbMailsOuverts": 1921,
+      "nbMailsCliquesVersDs": 1018,
+      "nbAdressesErronnees": 582
+    },
+    {
+      "campagne_id": 117,
+      "campagne_nom": "Courrier - Relance de la demande de données aux CFA_DS",
+      "nbMailsEnvoyes": 5965,
+      "nbMailsOuverts": 1547,
+      "nbMailsCliquesVersDs": 716,
+      "nbAdressesErronnees": 166
+    },
+    {
+      "campagne_id": 123,
+      "campagne_nom": "Courrier - 2e relance de la demande de données aux CFA_DS",
+      "nbMailsEnvoyes": 5608,
+      "nbMailsOuverts": 1166,
+      "nbMailsCliquesVersDs": 427,
+      "nbAdressesErronnees": 456
+    }
+  ]
+}
