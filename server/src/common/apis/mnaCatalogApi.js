@@ -39,6 +39,18 @@ class MnaCatalogApi {
     return response.data;
   }
 
+  async getEtablissementBySiret(siret) {
+    const query = `{"siret":${siret}}`;
+    const response = await this.axios.get(`${this.endpoint}/etablissements?query=${encodeURIComponent(query)}`);
+    return response.data;
+  }
+
+  async getEtablissementBySiren(siren) {
+    const query = `{"siren":${siren}}`;
+    const response = await this.axios.get(`${this.endpoint}/etablissements?query=${encodeURIComponent(query)}`);
+    return response.data;
+  }
+
   async getEtablissementsCount() {
     const response = await this.axios.get(`${this.endpoint}/etablissements/count`);
     return response.data.count;
@@ -62,6 +74,11 @@ class MnaCatalogApi {
       logger.error(`MnaCatalogApi Error : ${error}`);
       return [];
     }
+  }
+
+  async getFormationsCount() {
+    const response = await this.axios.get(`${this.endpoint}/formations/count`);
+    return response.data.count;
   }
 
   async addEtablissement(data) {

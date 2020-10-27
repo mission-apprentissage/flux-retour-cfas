@@ -39,6 +39,6 @@ const clearLogsAndEvents = async () => {
 module.exports = {
   clearAll,
   clearStatutsCandidats,
-  clearLogsAndEvents,
   clearUsers,
+  clearLogsAndEvents,
 };
