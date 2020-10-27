@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -21,9 +21,10 @@
     "clear:all": "node src/jobs/clear/clearAll.js",
     "clear:statutsCandidats": "node src/jobs/clear/clearStatutsCandidats.js",
     "clear:logs": "node src/jobs/clear/clearLogs.js",
+    "clear:users": "node src/jobs/clear/clearUsers.js",
     "stats": "node src/jobs/stats/index.js",
     "ds2020:updateSib": "node src/jobs/enqueteDs2020/updateSib.js",
-    "ds2020:stats": "node src/jobs/enqueteDs2020/stats.js",
+    "ds2020:statsCsv": "node src/jobs/enqueteDs2020/buildStats.js",
     "run:tests": "node src/jobs/test/index.js"
   },
   "dependencies": {
