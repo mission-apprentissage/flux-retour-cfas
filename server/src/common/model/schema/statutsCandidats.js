@@ -51,27 +51,27 @@ module.exports = new Schema({
     default: null,
     description: "Numéro de tel du représentant légal du jeune",
   },
-  id_formation_souhait: {
+  id_formation: {
     type: String,
     default: null,
     description: "Identifiant de la formation visée",
   },
-  libelle_court_formation_souhait: {
+  libelle_court_formation: {
     type: String,
     default: null,
     description: "Libellé court de la formation visée",
   },
-  libelle_long_formation_souhait: {
+  libelle_long_formation: {
     type: String,
     default: null,
     description: "Libellé court de la formation visée",
   },
-  uai_etablissement_origine: {
+  uai_etablissement: {
     type: String,
     default: null,
     description: "Code uai de l'établissement d'origine",
   },
-  nom_etablissement_origine: {
+  nom_etablissement: {
     type: String,
     default: null,
     description: "Nom de l'établissement d'origine",
@@ -81,20 +81,35 @@ module.exports = new Schema({
     default: null,
     description: "Statut de l'apprenant",
   },
-  date_entree_statut: {
-    type: Date,
-    default: Date.now,
-    description: "Date d'entrée dans le statut",
-  },
-  date_saisie_statut: {
-    type: Date,
-    default: Date.now,
-    description: "Date de saisie dans le statut",
+  historique_statut_apprenant: {
+    type: [Object],
+    default: [],
+    description: "Historique du statut de l'apprenant",
   },
   date_mise_a_jour_statut: {
     type: Date,
     default: Date.now,
     description: "Date de mise à jour du statut",
+  },
+  date_metier_mise_a_jour_statut: {
+    type: Date,
+    default: null,
+    description: "Date métier de mise à jour du statut",
+  },
+  statut_mise_a_jour_statut: {
+    type: Number,
+    default: 0,
+    description: "Statut de mise à jour du statut candidat 0 = OK / 1 = KO",
+  },
+  erreur_mise_a_jour_statut: {
+    type: Object,
+    default: null,
+    description: "Erreur de mise à jour de statuts",
+  },
+  updated_at: {
+    type: Date,
+    default: null,
+    description: "Date d'ajout en base de données",
   },
   created_at: {
     type: Date,

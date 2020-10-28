@@ -2,11 +2,10 @@ const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const config = require("config");
-const { StatutCandidat, UserEvent } = require("../../common/model/index");
+const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
 
-module.exports = () => {
+module.exports = ({ statutsCandidats }) => {
   const router = express.Router();
 
   /**
@@ -26,15 +25,19 @@ module.exports = () => {
         nom_representant_legal: Joi.string().allow(null, ""),
         tel_representant_legal: Joi.string().allow(null, ""),
         tel2_representant_legal: Joi.string().allow(null, ""),
-        id_formation_souhait: Joi.string().required(),
-        libelle_court_formation_souhait: Joi.string().allow(null, ""),
-        libelle_long_formation_souhait: Joi.string().allow(null, ""),
-        uai_etablissement_origine: Joi.string().required(),
-        nom_etablissement_origine: Joi.string().required(),
+        id_formation: Joi.string().required(),
+        libelle_court_formation: Joi.string().allow(null, ""),
+        libelle_long_formation: Joi.string().allow(null, ""),
+        uai_etablissement: Joi.string().required(),
+        nom_etablissement: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
+        date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
       })
     );
 
+  /**
+   * Route post for Statuts Candidats
+   */
   router.post(
     "/",
     tryCatch(async (req, res) => {
@@ -55,34 +58,8 @@ module.exports = () => {
         });
         await event.save();
 
-        // Add statutsCandidats
-        const toAdd = [];
-        await asyncForEach(req.body, async (item) => {
-          toAdd.push(
-            new StatutCandidat({
-              ine_apprenant: item.ine_apprenant,
-              nom_apprenant: item.nom_apprenant,
-              prenom_apprenant: item.prenom_apprenant,
-              prenom2_apprenant: item.prenom2_apprenant,
-              prenom3_apprenant: item.prenom3_apprenant,
-              ne_pas_solliciter: item.ne_pas_solliciter,
-              email_contact: item.email_contact,
-              nom_representant_legal: item.nom_representant_legal,
-              tel_representant_legal: item.tel_representant_legal,
-              tel2_representant_legal: item.tel2_representant_legal,
-              id_formation_souhait: item.id_formation_souhait,
-              libelle_court_formation_souhait: item.libelle_court_formation_souhait,
-              libelle_long_formation_souhait: item.libelle_long_formation_souhait,
-              uai_etablissement_origine: item.uai_etablissement_origine,
-              nom_etablissement_origine: item.nom_etablissement_origine,
-              statut_apprenant: item.statut_apprenant,
-              date_entree_statut: item.date_entree_statut,
-              date_saisie_statut: item.date_saisie_statut,
-              date_mise_a_jour_statut: item.date_mise_a_jour_statut,
-            })
-          );
-        });
-        await StatutCandidat.insertMany(toAdd);
+        // Add StatutsCandidats
+        await statutsCandidats.addOrUpdateStatuts(req.body);
 
         retourStatus = {
           status: "OK",
