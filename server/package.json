@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "0.9.9",
+  "version": "0.9.9.1",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -23,8 +23,8 @@
     "clear:logs": "node src/jobs/clear/clearLogs.js",
     "clear:users": "node src/jobs/clear/clearUsers.js",
     "stats": "node src/jobs/stats/index.js",
-    "ds2020:updateSib": "node src/jobs/enqueteDs2020/updateSib.js",
-    "ds2020:statsCsv": "node src/jobs/enqueteDs2020/buildStats.js",
+    "ds:updateSib": "node src/jobs/enqueteDs/updateSib.js",
+    "ds:buildStats": "node src/jobs/enqueteDs/buildStats.js",
     "run:tests": "node src/jobs/test/index.js"
   },
   "dependencies": {
@@ -36,6 +36,7 @@
     "bunyan-mongodb-stream": "0.0.3",
     "bunyan-prettystream": "0.1.3",
     "bunyan-slack": "0.0.10",
+    "cli-progress": "3.8.2",
     "compose-middleware": "5.0.1",
     "config": "3.3.1",
     "convert-csv-to-json": "0.0.15",
