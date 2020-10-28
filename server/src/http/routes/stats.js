@@ -1,15 +1,14 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
-module.exports = () => {
+module.exports = ({ stats }) => {
   const router = express.Router();
 
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      return res.json({
-        message: "Stats route",
-      });
+      const allStats = await stats.getAllStats();
+      return res.json({ stats: allStats });
     })
   );
 
