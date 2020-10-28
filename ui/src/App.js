@@ -4,6 +4,9 @@ import LoginPage from "./pages/LoginPage";
 import Layout from "./pages/Layout";
 import "tabler-react/dist/Tabler.css";
 import DashboardPage from "./pages/DashboardPage";
+import DashboardDsPage from "./pages/DashboardDsPage";
+import DashboardTablerPage from "./pages/DashboardTablerPage";
+import SamplePage from "./pages/SamplePage";
 import useAuth from "./common/hooks/useAuth";
 import HomePage from "./pages/HomePage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
@@ -40,6 +43,9 @@ export default () => {
             </Layout>
           </PrivateRoute>
           <Route exact path="/login" component={LoginPage} />
+          <Route exact path="/sample" component={SamplePage} />
+          <Route exact path="/dashboard-ds" component={DashboardDsPage} />
+          <Route exact path="/dashboard-tabler" component={DashboardTablerPage} />
           <Route exact path="/reset-password" component={ResetPasswordPage} />
           <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
         </Switch>

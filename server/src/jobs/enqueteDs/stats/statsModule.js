@@ -1,24 +1,34 @@
 const config = require("config");
-const dsFetcher = require("../../../common/dsFetcher");
-const { getRateResponseDsForNotInDemarcheStatuses, getPercentageFromTotal } = require("./calculUtils");
-const createMnaCatalogApi = require("../../../common/apis/mnaCatalogApi");
-const { getEmailCampaign } = require("../../../common/utils/sendinblueUtils");
-const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { mapDsChamps } = require("./dsMapper");
-const { erps, dsStates } = require("./constants");
 const fs = require("fs-extra");
 const path = require("path");
 const { uniqBy, uniqWith } = require("lodash");
+const cliProgress = require("cli-progress");
+
+const logger = require("../../../common/logger");
+const dsFetcher = require("../../../common/dsFetcher");
+const createMnaCatalogApi = require("../../../common/apis/mnaCatalogApi");
+const { getEmailCampaign } = require("../../../common/utils/sendinblueUtils");
+const { asyncForEach } = require("../../../common/utils/asyncUtils");
+
+const { mapDsChamps } = require("./utils/dsMapper");
+const { erps, dsStates } = require("./utils/constants");
+const { getRateResponseDsForNotInDemarcheStatuses, getPercentageFromTotal } = require("./utils/calculUtils");
 
 // Data path for local mode
-const localDossierDataFile = path.join(__dirname, "./../output/dossiersData.json");
-const localMissingSiretFile = path.join(__dirname, "./../output/missingSiretInCatalog.json");
-const localMissingSirenFile = path.join(__dirname, "./../output/missingSirenInCatalog.json");
+const localDossierDataFile = path.join(__dirname, "./data/dossiersData.json");
+const localMissingSiretFile = path.join(__dirname, "./data/missingSiretInCatalog.json");
+const localMissingSirenFile = path.join(__dirname, "./data/missingSirenInCatalog.json");
 
 let mnaApi = null;
+const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
-module.exports = async (localMode) => {
+/**
+ * Module de construction des stats DS2020
+ * @param {*} localMode
+ */
+module.exports = async () => {
   // Init DS Config
+  logger.info("Init Ds Config ...");
   dsFetcher.config({
     id: config.demarchesSimplifiees.procedureCfas2020Id,
     token: config.demarchesSimplifiees.apiToken,
@@ -28,9 +38,11 @@ module.exports = async (localMode) => {
   mnaApi = await createMnaCatalogApi();
 
   // Recuperation des données de reference
-  const referenceData = await loadReferenceDataFromApis(localMode);
+  logger.info("Loading reference data ...");
+  const referenceData = await loadReferenceData();
 
   // Construction d'un objet de stats
+  logger.info("Building stats...");
   return {
     globalStats: buildGlobalStats(referenceData),
     sendinblueStats: await buildSendinblueStats(),
@@ -346,8 +358,15 @@ const getAllDossiersData = async (sample = null) => {
 
   const totalNbFormationsInCatalog = await mnaApi.getFormationsCount();
 
+  let nbDossierTraites = 0;
+  loadingBar.start(allDossiers.length, 0);
+
   await asyncForEach(allDossiers, async ({ id }) => {
     const currentDossier = await dsFetcher.getDossier(id);
+
+    nbDossierTraites++;
+    loadingBar.update(nbDossierTraites);
+
     if (currentDossier) {
       if (currentDossier.dossier) {
         // Add questions mapped
@@ -397,44 +416,52 @@ const getAllDossiersData = async (sample = null) => {
     }
   });
 
+  loadingBar.stop();
   return { dossiersData, siretNotfoundInCatalog, sirenNotfoundInCatalog };
+};
+
+/**
+ * Sauvegarde des données de référence dans un fichier local
+ * @param {*} sample
+ */
+const buildReferenceDataFiles = async (sample = null) => {
+  logger.info("Loading reference data from DS & Mna Catalog Apis ...");
+  let { dossiersData, siretNotfoundInCatalog, sirenNotfoundInCatalog } = await getAllDossiersData(sample);
+
+  logger.info("Writing reference data to json files ...");
+  fs.writeFile(localDossierDataFile, JSON.stringify(dossiersData), (err) => {
+    if (err) logger.error(err);
+  });
+  fs.writeFile(localMissingSiretFile, JSON.stringify(siretNotfoundInCatalog), (err) => {
+    if (err) logger.error(err);
+  });
+  fs.writeFile(localMissingSirenFile, JSON.stringify(sirenNotfoundInCatalog), (err) => {
+    if (err) logger.error(err);
+  });
 };
 
 /**
  * Load reference data from Apis DS & Mna Catalog
  */
-const loadReferenceDataFromApis = async (localMode, sample = null) => {
-  let dossiersData = [];
-  let siretNotfoundInCatalog = [];
-  let sirenNotfoundInCatalog = [];
+const loadReferenceData = async () => {
+  const nbTotalDossiersDs = (await dsFetcher.getProcedure()).procedure.total_dossier;
+  const nbEtablissementsDansCatalogue = await mnaApi.getEtablissementsCount();
+  const nbFormationsDansCatalogue = await mnaApi.getFormationsCount();
 
-  // Si local mode on cherche / ecrit les données dans un fichier json local
-  if (localMode && fs.existsSync(localDossierDataFile)) {
-    dossiersData = await fs.readJSON(localDossierDataFile);
-    siretNotfoundInCatalog = await fs.readJSON(localMissingSiretFile);
-    sirenNotfoundInCatalog = await fs.readJSON(localMissingSirenFile);
-  } else {
-    let { dossiersData, siretNotfoundInCatalog, sirenNotfoundInCatalog } = await getAllDossiersData(sample);
+  // Si local json pas présent on récupère les données depuis API + sauvegarde local
+  !fs.existsSync(localDossierDataFile) && (await buildReferenceDataFiles());
 
-    fs.writeFile(localDossierDataFile, JSON.stringify(dossiersData), (err) => {
-      if (err) console.error(err);
-    });
-
-    fs.writeFile(localMissingSiretFile, JSON.stringify(siretNotfoundInCatalog), (err) => {
-      if (err) console.error(err);
-    });
-
-    fs.writeFile(localMissingSirenFile, JSON.stringify(sirenNotfoundInCatalog), (err) => {
-      if (err) console.error(err);
-    });
-  }
+  logger.info("Loading reference data from local files...");
+  const dossiersData = await fs.readJSON(localDossierDataFile);
+  const siretNotfoundInCatalog = await fs.readJSON(localMissingSiretFile);
+  const sirenNotfoundInCatalog = await fs.readJSON(localMissingSirenFile);
 
   return {
     dossiersData,
     siretNotfoundInCatalog,
     sirenNotfoundInCatalog,
-    nbTotalDossiersDs: (await dsFetcher.getProcedure()).procedure.total_dossier,
-    nbEtablissementsDansCatalogue: await mnaApi.getEtablissementsCount(),
-    nbFormationsDansCatalogue: await mnaApi.getFormationsCount(),
+    nbTotalDossiersDs,
+    nbEtablissementsDansCatalogue,
+    nbFormationsDansCatalogue,
   };
 };
