@@ -62,6 +62,7 @@ Ce repository est organisé de la manière suivante :
 - Le dossier `/.github` va contenir l'ensemble des Github Actions.
 - Le dossier `/reverse_proxy` va contenir le serveur Nginx et sa configuration en tant que reverse_proxy.
 - Le dossier `/server` va contenir l'ensemble de l'application coté serveur, à savoir l'API Node Express.
+- Le dossier `/ui` va contenir l'ensemble de l'application coté front, à savoir une application React basé sur Tabler (https://github.com/tabler/tabler-react).
 - Le fichier `/docker-compose.yml` va définir la configuration des conteneurs de l'application, _pour plus d'informations sur Docker cf: https://docs.docker.com/_
 - Le fichier `/docker-compose.override.yml` va définir la configuration Docker spécifique à l'environnement local de développement.
 
