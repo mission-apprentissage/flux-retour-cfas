@@ -1,3 +1,4 @@
+const path = require("path");
 const logger = require("../../../common/logger");
 const { toCsv } = require("../../../common/utils/exporterUtils");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
@@ -50,7 +51,8 @@ const validateUais = async () => {
     });
   });
 
-  await toCsv(validated, __dirname + "/data", `result_uai_${Date.now()}.csv`, { quote: "", delimiter: ";" });
+  const resultFilePath = path.join(__dirname, `/data/result_uai_${Date.now()}.csv`);
+  await toCsv(validated, resultFilePath, { quote: "", delimiter: ";" });
   logger.info("End validation for UAI");
 };
 

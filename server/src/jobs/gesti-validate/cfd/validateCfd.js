@@ -1,3 +1,4 @@
+const path = require("path");
 const axios = require("axios");
 const logger = require("../../../common/logger");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
@@ -78,7 +79,8 @@ const validateCfds = async () => {
     await sleep();
   });
 
-  await toCsv(validated, __dirname + "/data", `result_cfd_${Date.now()}.csv`, { quote: "", delimiter: ";" });
+  const resultFilePath = path.join(__dirname, `/data/result_cfd_${Date.now()}.csv`);
+  await toCsv(validated, resultFilePath, { quote: "", delimiter: ";" });
 
   logger.info("End validation for CFD");
 };
