@@ -176,4 +176,25 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(response.status, 413);
     assert.notDeepStrictEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
   });
+
+  it("Vérifie que la route statut-candidats/test fonctionne avec une bonne clé d'API", async () => {
+    const { httpClient } = await startServer();
+
+    await createApiUser();
+
+    // Call Api Route
+    const response = await httpClient.post(
+      "/api/statut-candidats/test",
+      {},
+      {
+        headers: {
+          "x-api-key": goodApiKey,
+        },
+      }
+    );
+
+    // Check Api Route data
+    assert.deepStrictEqual(response.status, 200);
+    assert.deepStrictEqual(response.data.msg, "ok");
+  });
 });
