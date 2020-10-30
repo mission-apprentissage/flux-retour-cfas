@@ -296,13 +296,19 @@ Pour l'enquete Démarches Simplifiés :
 - Il est possible de mettre à jour dans Sendinblue les contacts :
 
 ```bash
-yarn ds2020:updateSib
+yarn ds:updateSib
 ```
 
 - Il est possible d'exporter les stats sous format csv
 
 ```bash
-yarn ds2020:statsCsv
+yarn ds:buildStats
+```
+
+- Il est possible d'exporter les clients d'Ymag sous format csv
+
+```bash
+yarn ds:buldYmagClients
 ```
 
 ### Procédure à suivre au premier déploiement
