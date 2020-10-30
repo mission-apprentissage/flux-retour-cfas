@@ -1,3 +1,4 @@
+const path = require("path");
 const axios = require("axios");
 const logger = require("../../../common/logger");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
@@ -98,7 +99,8 @@ const valideMefs = async () => {
   logger.warn(`[MEF] Erreurs lors de la vérification dans base MNA: ${mnaApiErrorCounter}`);
 
   // create csv file with results
-  await toCsv(validated, __dirname + "/data", `result_mef_${Date.now()}.csv`, { quote: "", delimiter: ";" });
+  const resultFilePath = path.join(__dirname, `/data/result_mef_${Date.now()}.csv`);
+  await toCsv(validated, resultFilePath, { quote: "", delimiter: ";" });
 
   logger.info("End validation for MEF");
 };
