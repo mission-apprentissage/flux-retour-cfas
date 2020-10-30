@@ -28,17 +28,13 @@ const toXlsx = async (data, outputDirectory, fileName, workbookName, options) =>
 };
 module.exports.toXlsx = toXlsx;
 
-const toCsv = async (data, outputDirectory, fileName, options = {}) => {
-  const file = `${outputDirectory}/${fileName}`;
-  const csvData = parse(data, {
-    delimiter: options.delimiter || ",",
-    quote: options.quote === undefined ? '"' : options.quote,
-  });
+const toCsv = async (data, outputDirectoryFileName, options = {}) => {
+  const csvData = parse(data, { delimiter: options.delimiter || "," });
 
-  await writeFile(file, options.utf8Bom === true ? "\ufeff" + csvData : csvData, "utf8");
+  await writeFile(outputDirectoryFileName, options.utf8Bom === true ? "\ufeff" + csvData : csvData, "utf8");
 
   if (options.owner) {
-    await chown(file, options.owner.uid, options.owner.gid);
+    await chown(outputDirectoryFileName, options.owner.uid, options.owner.gid);
   }
 };
 module.exports.toCsv = toCsv;
