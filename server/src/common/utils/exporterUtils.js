@@ -30,7 +30,10 @@ module.exports.toXlsx = toXlsx;
 
 const toCsv = async (data, outputDirectory, fileName, options = {}) => {
   const file = `${outputDirectory}/${fileName}`;
-  const csvData = parse(data, { delimiter: options.delimiter || "," });
+  const csvData = parse(data, {
+    delimiter: options.delimiter || ",",
+    quote: options.quote === undefined ? '"' : options.quote,
+  });
 
   await writeFile(file, options.utf8Bom === true ? "\ufeff" + csvData : csvData, "utf8");
 
