@@ -27,6 +27,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * @param {*} localMode
  */
 module.exports = async (sample) => {
+
   // Init DS Config
   logger.info("Init Ds Config ...");
   dsFetcher.config({
@@ -445,12 +446,15 @@ const buildReferenceDataFiles = async (sample = null) => {
  */
 
 const loadReferenceData = async (sample) => {
+
   const nbTotalDossiersDs = (await dsFetcher.getProcedure()).procedure.total_dossier;
   const nbEtablissementsDansCatalogue = await mnaApi.getEtablissementsCount();
   const nbFormationsDansCatalogue = await mnaApi.getFormationsCount();
 
   // Si local json pas présent on récupère les données depuis API + sauvegarde local
+
   !fs.existsSync(localDossierDataFile) && (await buildReferenceDataFiles(sample));
+
   logger.info("Loading reference data from local files...");
   const dossiersData = await fs.readJSON(localDossierDataFile);
   const siretNotfoundInCatalog = await fs.readJSON(localMissingSiretFile);
