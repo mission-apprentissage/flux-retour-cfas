@@ -27,7 +27,6 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * @param {*} localMode
  */
 module.exports = async (sample) => {
-
   // Init DS Config
   logger.info("Init Ds Config ...");
   dsFetcher.config({
