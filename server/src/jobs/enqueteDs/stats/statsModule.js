@@ -27,7 +27,6 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * @param {*} localMode
  */
 module.exports = async (sample) => {
-
   // Init DS Config
   logger.info("Init Ds Config ...");
   dsFetcher.config({
@@ -446,7 +445,6 @@ const buildReferenceDataFiles = async (sample = null) => {
  */
 
 const loadReferenceData = async (sample) => {
-
   const nbTotalDossiersDs = (await dsFetcher.getProcedure()).procedure.total_dossier;
   const nbEtablissementsDansCatalogue = await mnaApi.getEtablissementsCount();
   const nbFormationsDansCatalogue = await mnaApi.getFormationsCount();
