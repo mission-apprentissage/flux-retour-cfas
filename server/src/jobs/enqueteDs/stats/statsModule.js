@@ -26,7 +26,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * Module de construction des stats DS2020
  * @param {*} localMode
  */
-module.exports = async () => {
+module.exports = async (sample) => {
   // Init DS Config
   logger.info("Init Ds Config ...");
   dsFetcher.config({
@@ -39,7 +39,7 @@ module.exports = async () => {
 
   // Recuperation des données de reference
   logger.info("Loading reference data ...");
-  const referenceData = await loadReferenceData();
+  const referenceData = await loadReferenceData(sample);
 
   // Construction d'un objet de stats
   logger.info("Building stats...");
@@ -443,13 +443,13 @@ const buildReferenceDataFiles = async (sample = null) => {
 /**
  * Load reference data from Apis DS & Mna Catalog
  */
-const loadReferenceData = async () => {
+const loadReferenceData = async (sample) => {
   const nbTotalDossiersDs = (await dsFetcher.getProcedure()).procedure.total_dossier;
   const nbEtablissementsDansCatalogue = await mnaApi.getEtablissementsCount();
   const nbFormationsDansCatalogue = await mnaApi.getFormationsCount();
 
   // Si local json pas présent on récupère les données depuis API + sauvegarde local
-  !fs.existsSync(localDossierDataFile) && (await buildReferenceDataFiles());
+  !fs.existsSync(localDossierDataFile) && (await buildReferenceDataFiles(sample));
 
   logger.info("Loading reference data from local files...");
   const dossiersData = await fs.readJSON(localDossierDataFile);
