@@ -77,5 +77,15 @@ module.exports = ({ statutsCandidats }) => {
     })
   );
 
+  /**
+   * Test route for Statuts Candidats
+   */
+  router.post(
+    "/test",
+    tryCatch(async (_req, res) => {
+      return res.json({ msg: "ok" });
+    })
+  );
+
   return router;
 };
