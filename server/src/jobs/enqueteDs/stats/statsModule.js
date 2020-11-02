@@ -450,7 +450,9 @@ const loadReferenceData = async (sample) => {
   const nbFormationsDansCatalogue = await mnaApi.getFormationsCount();
 
   // Si local json pas présent on récupère les données depuis API + sauvegarde local
+
   !fs.existsSync(localDossierDataFile) && (await buildReferenceDataFiles(sample));
+
   logger.info("Loading reference data from local files...");
   const dossiersData = await fs.readJSON(localDossierDataFile);
   const siretNotfoundInCatalog = await fs.readJSON(localMissingSiretFile);
