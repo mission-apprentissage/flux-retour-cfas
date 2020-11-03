@@ -3,10 +3,10 @@ import * as Yup from "yup";
 import { Form as TablerForm, Card, Page, Alert, Header, Button, Grid } from "tabler-react";
 import { Formik, Field, Form } from "formik";
 import { NavLink, useHistory } from "react-router-dom";
-import useAuth from "../common/hooks/useAuth";
-import { _post } from "../common/httpClient";
-import CenteredCol from "../common/components/CenteredCol";
-import FormError from "../common/components/FormError";
+import useAuth from "../../common/hooks/useAuth";
+import { _post } from "../../common/httpClient";
+import CenteredCol from "../../common/components/CenteredCol";
+import FormError from "../../common/components/FormError";
 
 export default () => {
   let [, setAuth] = useAuth();
