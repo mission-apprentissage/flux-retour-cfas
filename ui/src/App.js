@@ -15,6 +15,27 @@ import HomePage from "./pages/HomePage";
 import useAuth from "./common/hooks/useAuth";
 import { roles, isUserInRole } from "./common/utils/rolesUtils";
 
+export default () => {
+  let [auth] = useAuth();
+  return (
+    <div className="App">
+      <Router>
+        <Switch>
+          {getPrivateRouteForRole("/", <DashboardPage />, roles.administrator, auth)}
+          {getPrivateRouteForRole("/enquete-ds", <DashboardDsPage />, roles.administrator, auth)}
+          {getPrivateRouteForRole("/ds-siret-sirens-manquants", <MissingSirensSiretsPage />, roles.administrator, auth)}
+
+          <Route exact path="/login" component={LoginPage} />
+          <Route exact path="/sample" component={SamplePage} />
+          <Route exact path="/dashboard-tabler" component={DashboardTablerPage} />
+          <Route exact path="/reset-password" component={ResetPasswordPage} />
+          <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
+        </Switch>
+      </Router>
+    </div>
+  );
+};
+
 function PrivateRoute({ children, ...rest }) {
   let [auth] = useAuth();
 
@@ -28,24 +49,8 @@ function PrivateRoute({ children, ...rest }) {
   );
 }
 
-export default () => {
-  let [auth] = useAuth();
-  return (
-    <div className="App">
-      <Router>
-        <Switch>
-          <PrivateRoute exact path="/">
-            {isUserInRole(auth, roles.administrator) ? <DashboardPage /> : <HomePage />}
-          </PrivateRoute>
-          <Route exact path="/login" component={LoginPage} />
-          <Route exact path="/sample" component={SamplePage} />
-          <Route exact path="/enquete-ds/" component={DashboardDsPage} />
-          <Route exact path="/enquete-ds/siret-siren-manquants" component={MissingSirensSiretsPage} />
-          <Route exact path="/dashboard-tabler" component={DashboardTablerPage} />
-          <Route exact path="/reset-password" component={ResetPasswordPage} />
-          <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
-        </Switch>
-      </Router>
-    </div>
-  );
-};
+const getPrivateRouteForRole = (route, page, currentRole, auth) => (
+  <PrivateRoute exact path={route}>
+    {isUserInRole(auth, currentRole) ? page : <HomePage />}
+  </PrivateRoute>
+);

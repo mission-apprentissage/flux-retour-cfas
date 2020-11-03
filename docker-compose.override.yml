@@ -30,6 +30,10 @@ services:
     volumes:
       - flux_retour_cfas_mongodb_data:/data
 
+  ftp:
+    volumes:
+      - flux_retour_cfas_ftp_data:/data
+
 volumes:
   flux_retour_cfas_mongodb_data:
     driver: local
@@ -40,3 +44,6 @@ volumes:
   flux_retour_cfas_server_data:
     driver: local
     name: flux_retour_cfas_server_data
+  flux_retour_cfas_ftp_data:
+    driver: local
+    name: flux_retour_cfas_ftp_data
