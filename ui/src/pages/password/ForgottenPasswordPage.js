@@ -40,6 +40,9 @@ export default () => {
         <Page.Content>
           <Grid.Row>
             <CenteredCol>
+              <div class="text-center mb-6">
+                <img src="/brand/flux-cfas.png" class="h-6" alt="" />
+              </div>
               <Card>
                 <Card.Header>
                   <Card.Title>Mot de passe oublié</Card.Title>

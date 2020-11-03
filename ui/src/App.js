@@ -18,21 +18,19 @@ import { roles, isUserInRole } from "./common/utils/rolesUtils";
 export default () => {
   let [auth] = useAuth();
   return (
-    <div className="App">
-      <Router>
-        <Switch>
-          {getPrivateRouteForRole("/", <DashboardPage />, roles.administrator, auth)}
-          {getPrivateRouteForRole("/enquete-ds", <DashboardDsPage />, roles.administrator, auth)}
-          {getPrivateRouteForRole("/ds-siret-sirens-manquants", <MissingSirensSiretsPage />, roles.administrator, auth)}
+    <Router>
+      <Switch>
+        {getPrivateRouteForRole("/", <DashboardPage />, roles.administrator, auth)}
+        {getPrivateRouteForRole("/enquete-ds", <DashboardDsPage />, roles.administrator, auth)}
+        {getPrivateRouteForRole("/ds-siret-sirens-manquants", <MissingSirensSiretsPage />, roles.administrator, auth)}
 
-          <Route exact path="/login" component={LoginPage} />
-          <Route exact path="/sample" component={SamplePage} />
-          <Route exact path="/dashboard-tabler" component={DashboardTablerPage} />
-          <Route exact path="/reset-password" component={ResetPasswordPage} />
-          <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
-        </Switch>
-      </Router>
-    </div>
+        <Route exact path="/login" component={LoginPage} />
+        <Route exact path="/sample" component={SamplePage} />
+        <Route exact path="/dashboard-tabler" component={DashboardTablerPage} />
+        <Route exact path="/reset-password" component={ResetPasswordPage} />
+        <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
+      </Switch>
+    </Router>
   );
 };
 
