@@ -52,9 +52,12 @@ export default () => {
         <Page.Content>
           <Grid.Row>
             <CenteredCol>
+              <div class="text-center mb-6">
+                <img src="/brand/flux-cfas.png" class="h-6" alt="" />
+              </div>
               <Card>
                 <Card.Header>
-                  <Card.Title>Changement du mot de passe pour le CFA {uai}</Card.Title>
+                  <Card.Title>Changement du mot de passe</Card.Title>
                 </Card.Header>
                 <Card.Body>
                   <Formik
