@@ -33,54 +33,78 @@ export default () => {
   };
 
   return (
-    <div className="page-single">
-      <div className="container">
-        <div className="row">
-          <div className="col col-login mx-auto">
-            <div className="text-center mb-6">
-              <img src="/brand/flux-cfas.png" className="h-6" alt="" />
-            </div>
-            <form className="card" action="" method="post">
-              <div className="card-body p-6">
-                <div className="card-title">Login to your account</div>
-                <div className="form-group">
-                  <label className="form-label">Email address</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="exampleInputEmail1"
-                    aria-describedby="emailHelp"
-                    placeholder="Enter email"
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">
-                    Password
-                    <a href="./forgot-password.html" className="float-right small">
-                      I forgot password
-                    </a>
-                  </label>
-                  <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password" />
-                </div>
-                <div className="form-group">
-                  <label className="custom-control custom-checkbox">
-                    <input type="checkbox" className="custom-control-input" />
-                    <span className="custom-control-label">Remember me</span>
-                  </label>
-                </div>
-                <div className="form-footer">
-                  <button type="submit" className="btn btn-primary btn-block">
-                    Sign in
-                  </button>
-                </div>
+    <Page>
+      <Page.Main>
+        <Page.Content>
+          <Grid.Row>
+            <CenteredCol>
+              <div class="text-center mb-6">
+                <img src="/brand/flux-cfas.png" class="h-6" alt="" />
               </div>
-            </form>
-            <div className="text-center text-muted">
-              Don't have account yet? <a href="./register.html">Sign up</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+              <Card>
+                <Card.Header>
+                  <Card.Title>Connexion</Card.Title>
+                </Card.Header>
+                <Card.Body>
+                  <Formik
+                    initialValues={{
+                      username: "",
+                      password: "",
+                    }}
+                    validationSchema={Yup.object().shape({
+                      username: Yup.string().required("Requis"),
+                      password: Yup.string().required("Requis"),
+                    })}
+                    onSubmit={login}
+                  >
+                    {({ status = {} }) => {
+                      return (
+                        <Form>
+                          <TablerForm.Group label="Identifiant">
+                            <Field name="username">
+                              {({ field, meta }) => {
+                                return (
+                                  <TablerForm.Input
+                                    placeholder="Votre identifiant..."
+                                    {...field}
+                                    {...feedback(meta, "Identifiant invalide")}
+                                  />
+                                );
+                              }}
+                            </Field>
+                          </TablerForm.Group>
+                          <TablerForm.Group label="Mot de passe">
+                            <Field name="password">
+                              {({ field, meta }) => {
+                                return (
+                                  <TablerForm.Input
+                                    type={"password"}
+                                    placeholder="Votre mot de passe..."
+                                    {...field}
+                                    {...feedback(meta, "Mot de passe invalide")}
+                                  />
+                                );
+                              }}
+                            </Field>
+                          </TablerForm.Group>
+                          <div className={"d-flex justify-content-between align-items-center"}>
+                            <Button color="primary" className="text-left" type={"submit"}>
+                              Connexion
+                            </Button>
+                            <NavLink to="/forgotten-password">Mot de passe oublié</NavLink>
+                          </div>
+
+                          {status.error && <FormError>{status.error}</FormError>}
+                        </Form>
+                      );
+                    }}
+                  </Formik>
+                </Card.Body>
+              </Card>
+            </CenteredCol>
+          </Grid.Row>
+        </Page.Content>
+      </Page.Main>
+    </Page>
   );
 };
