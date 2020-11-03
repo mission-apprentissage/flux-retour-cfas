@@ -48,6 +48,18 @@ services:
     networks:
       - flux_retour_cfas_network
 
+  ftp:
+    image: flux_retour_cfas_ftp
+    container_name: flux_retour_cfas_ftp
+    build:
+      context: ftp
+    restart: unless-stopped
+    ports:
+      - "21:21"
+      - "21100-21110:21100-21110"
+    networks:
+      - flux_retour_cfas_network
+
 networks:
   flux_retour_cfas_network:
     name: flux_retour_cfas_network

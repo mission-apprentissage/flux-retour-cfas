@@ -146,9 +146,9 @@ export default () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {sortBy(data.statsDs.reponses_par_regions_academies, "tauxReponseTotalCatalogue")
-                                  .reverse()
-                                  .map((item) => getAcademieTableRow(item))}
+                                {sortBy(data.statsDs.reponses_par_regions_academies, "region").map((item) =>
+                                  getAcademieTableRow(item)
+                                )}
                               </tbody>
                             </table>
                           </div>
