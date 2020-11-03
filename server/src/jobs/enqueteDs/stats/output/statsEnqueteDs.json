@@ -1,0 +1,931 @@
+{
+  "globalStats": {
+    "nbEtablissementsDansCatalogue": 2078,
+    "nbReponsesDs": 1006,
+    "nbReponsesSiretUniquesInDs": 957,
+    "nbDossiersAvecFichierAttache": 21,
+    "tauxDossiersAvecFichierAttache": 2.09,
+    "nbSiretDsNotInCatalogue": 306,
+    "nbSirenDsNotInCatalogue": 220,
+    "RepondantsOk": {
+      "tauxReponseSiretUniquesTotalCatalogue": 46.05,
+      "RepondantsOkDemarcheRecue": {
+        "nbStatutDemarcheRecue": 1006,
+        "tauxReponseDemarcheRecueTotalCatalogue": 48.41,
+        "nbStatutSiretUniquesDemarcheRecue": 957,
+        "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 46.05
+      },
+      "RepondantsOkDemarcheInitiee": {
+        "nbStatutDemarcheInitiee": 0,
+        "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+        "nbStatutSiretUniquesDemarcheInitiee": 0,
+        "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+      }
+    },
+    "RepondantsKo": {
+      "nbNonRépondants": 1121,
+      "tauxNonRepondantsTotalCatalogue": 53.95,
+      "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0
+    }
+  },
+  "sendinblueStats": [
+    {
+      "campagne_id": 115,
+      "campagne_nom": "Courrier - Demande de données aux CFA_DS",
+      "nbMailsEnvoyes": 6562,
+      "nbMailsOuverts": 1928,
+      "nbMailsCliquesVersDs": 1023,
+      "nbAdressesErronnees": 582
+    },
+    {
+      "campagne_id": 117,
+      "campagne_nom": "Courrier - Relance de la demande de données aux CFA_DS",
+      "nbMailsEnvoyes": 5965,
+      "nbMailsOuverts": 1559,
+      "nbMailsCliquesVersDs": 728,
+      "nbAdressesErronnees": 166
+    },
+    {
+      "campagne_id": 123,
+      "campagne_nom": "Courrier - 2e relance de la demande de données aux CFA_DS",
+      "nbMailsEnvoyes": 5608,
+      "nbMailsOuverts": 1307,
+      "nbMailsCliquesVersDs": 504,
+      "nbAdressesErronnees": 456
+    }
+  ],
+  "reponses_par_erp": [
+    {
+      "erp": "Aucun",
+      "nbStatuts": 348,
+      "tauxReponseTotalCatalogue": 16.75,
+      "tauxReponseTotalDossiersDs": 34.59,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 14.309999999999985,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 332,
+        "tauxReponseSiretUniquesTotalCatalogue": 15.98,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 348,
+          "tauxReponseDemarcheRecueTotalCatalogue": 16.75,
+          "nbStatutSiretUniquesDemarcheRecue": 332,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 15.98
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "erp": "Ymag",
+      "nbStatuts": 434,
+      "tauxReponseTotalCatalogue": 20.89,
+      "tauxReponseTotalDossiersDs": 43.14,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 34.020000000000024,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 410,
+        "tauxReponseSiretUniquesTotalCatalogue": 19.73,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 434,
+          "tauxReponseDemarcheRecueTotalCatalogue": 20.89,
+          "nbStatutSiretUniquesDemarcheRecue": 410,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 19.73
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 },
+      "tauxNbDossiersDsTotalCfasConnusErp": 89.52
+    },
+    {
+      "erp": "AurigaAurion",
+      "nbStatuts": 6,
+      "tauxReponseTotalCatalogue": 0.29,
+      "tauxReponseTotalDossiersDs": 0.6,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.8400000000000001,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 6,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.29,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 6,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.29,
+          "nbStatutSiretUniquesDemarcheRecue": 6,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.29
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "erp": "Gesti",
+      "nbStatuts": 197,
+      "tauxReponseTotalCatalogue": 9.48,
+      "tauxReponseTotalDossiersDs": 19.58,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 3.2499999999999964,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 192,
+        "tauxReponseSiretUniquesTotalCatalogue": 9.24,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 197,
+          "tauxReponseDemarcheRecueTotalCatalogue": 9.48,
+          "nbStatutSiretUniquesDemarcheRecue": 192,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 9.24
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 },
+      "tauxNbDossiersDsTotalCfasConnusErp": 39.92
+    },
+    {
+      "erp": "HyperPlanning",
+      "nbStatuts": 13,
+      "tauxReponseTotalCatalogue": 0.63,
+      "tauxReponseTotalDossiersDs": 1.29,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.53,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 12,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.58,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 13,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.63,
+          "nbStatutSiretUniquesDemarcheRecue": 12,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.58
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "erp": "Unit4",
+      "nbStatuts": 0,
+      "tauxReponseTotalCatalogue": 0,
+      "tauxReponseTotalDossiersDs": 0,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 0,
+        "tauxReponseSiretUniquesTotalCatalogue": 0,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 0,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheRecue": 0,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "erp": "ValSoftware",
+      "nbStatuts": 8,
+      "tauxReponseTotalCatalogue": 0.38,
+      "tauxReponseTotalDossiersDs": 0.8,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.31000000000000005,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 8,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.38,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 8,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.38,
+          "nbStatutSiretUniquesDemarcheRecue": 8,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.38
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    }
+  ],
+  "reponses_par_regions_academies": [
+    {
+      "region": "Occitanie",
+      "academie": "Toulouse",
+      "nbStatuts": 39,
+      "tauxReponseTotalCatalogue": 1.88,
+      "tauxReponseTotalDossiersDs": 3.88,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 3.4299999999999993,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 38,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.83,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 39,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.88,
+          "nbStatutSiretUniquesDemarcheRecue": 38,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.83
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Bretagne",
+      "academie": "Rennes",
+      "nbStatuts": 45,
+      "tauxReponseTotalCatalogue": 2.17,
+      "tauxReponseTotalDossiersDs": 4.47,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 3.9300000000000006,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 43,
+        "tauxReponseSiretUniquesTotalCatalogue": 2.07,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 45,
+          "tauxReponseDemarcheRecueTotalCatalogue": 2.17,
+          "nbStatutSiretUniquesDemarcheRecue": 43,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 2.07
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Île-de-France",
+      "academie": "Versailles",
+      "nbStatuts": 41,
+      "tauxReponseTotalCatalogue": 1.97,
+      "tauxReponseTotalDossiersDs": 4.08,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 3.519999999999999,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 40,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.92,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 41,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.97,
+          "nbStatutSiretUniquesDemarcheRecue": 40,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.92
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Auvergne-Rhône-Alpes",
+      "academie": "Clermont-Ferrand",
+      "nbStatuts": 18,
+      "tauxReponseTotalCatalogue": 0.87,
+      "tauxReponseTotalDossiersDs": 1.79,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.9000000000000001,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 17,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.82,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 18,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.87,
+          "nbStatutSiretUniquesDemarcheRecue": 17,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.82
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Normandie",
+      "academie": "Normandie",
+      "nbStatuts": 34,
+      "tauxReponseTotalCatalogue": 1.64,
+      "tauxReponseTotalDossiersDs": 3.38,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.5000000000000004,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 32,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.54,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 34,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.64,
+          "nbStatutSiretUniquesDemarcheRecue": 32,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.54
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Grand Est",
+      "academie": "Reims",
+      "nbStatuts": 18,
+      "tauxReponseTotalCatalogue": 0.87,
+      "tauxReponseTotalDossiersDs": 1.79,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.76,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 16,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.77,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 18,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.87,
+          "nbStatutSiretUniquesDemarcheRecue": 16,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.77
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Occitanie",
+      "academie": "Montpellier",
+      "nbStatuts": 29,
+      "tauxReponseTotalCatalogue": 1.4,
+      "tauxReponseTotalDossiersDs": 2.88,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.9900000000000001,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 28,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.35,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 29,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.4,
+          "nbStatutSiretUniquesDemarcheRecue": 28,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.35
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Bourgogne-Franche-Comté",
+      "academie": "Dijon",
+      "nbStatuts": 18,
+      "tauxReponseTotalCatalogue": 0.87,
+      "tauxReponseTotalDossiersDs": 1.79,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.3400000000000003,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 17,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.82,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 18,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.87,
+          "nbStatutSiretUniquesDemarcheRecue": 17,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.82
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Centre-Val de Loire",
+      "academie": "Orléans-Tours",
+      "nbStatuts": 33,
+      "tauxReponseTotalCatalogue": 1.59,
+      "tauxReponseTotalDossiersDs": 3.28,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 3.4699999999999998,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 32,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.54,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 33,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.59,
+          "nbStatutSiretUniquesDemarcheRecue": 32,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.54
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Nouvelle-Aquitaine",
+      "academie": "Limoges",
+      "nbStatuts": 13,
+      "tauxReponseTotalCatalogue": 0.63,
+      "tauxReponseTotalDossiersDs": 1.29,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.6,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 12,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.58,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 13,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.63,
+          "nbStatutSiretUniquesDemarcheRecue": 12,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.58
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Nouvelle-Aquitaine",
+      "academie": "Poitiers",
+      "nbStatuts": 36,
+      "tauxReponseTotalCatalogue": 1.73,
+      "tauxReponseTotalDossiersDs": 3.58,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 2.67,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 32,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.54,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 36,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.73,
+          "nbStatutSiretUniquesDemarcheRecue": 32,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.54
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Auvergne-Rhône-Alpes",
+      "academie": "Lyon",
+      "nbStatuts": 26,
+      "tauxReponseTotalCatalogue": 1.25,
+      "tauxReponseTotalDossiersDs": 2.58,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 2.32,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 25,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.2,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 26,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.25,
+          "nbStatutSiretUniquesDemarcheRecue": 25,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.2
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Grand Est",
+      "academie": "Nancy-Metz",
+      "nbStatuts": 24,
+      "tauxReponseTotalCatalogue": 1.15,
+      "tauxReponseTotalDossiersDs": 2.39,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.1100000000000003,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 24,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.15,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 24,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.15,
+          "nbStatutSiretUniquesDemarcheRecue": 24,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.15
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Nouvelle-Aquitaine",
+      "academie": "Bordeaux",
+      "nbStatuts": 64,
+      "tauxReponseTotalCatalogue": 3.08,
+      "tauxReponseTotalDossiersDs": 6.36,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 3.229999999999999,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 59,
+        "tauxReponseSiretUniquesTotalCatalogue": 2.84,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 64,
+          "tauxReponseDemarcheRecueTotalCatalogue": 3.08,
+          "nbStatutSiretUniquesDemarcheRecue": 59,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 2.84
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Île-de-France",
+      "academie": "Paris",
+      "nbStatuts": 41,
+      "tauxReponseTotalCatalogue": 1.97,
+      "tauxReponseTotalDossiersDs": 4.08,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.9600000000000006,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 39,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.88,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 41,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.97,
+          "nbStatutSiretUniquesDemarcheRecue": 39,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.88
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Provence-Alpes-Côte d'Azur",
+      "academie": "Aix-Marseille",
+      "nbStatuts": 27,
+      "tauxReponseTotalCatalogue": 1.3,
+      "tauxReponseTotalDossiersDs": 2.68,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.7800000000000002,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 27,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.3,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 27,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.3,
+          "nbStatutSiretUniquesDemarcheRecue": 27,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.3
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Grand Est",
+      "academie": "Strasbourg",
+      "nbStatuts": 14,
+      "tauxReponseTotalCatalogue": 0.67,
+      "tauxReponseTotalDossiersDs": 1.39,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.05,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 14,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.67,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 14,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.67,
+          "nbStatutSiretUniquesDemarcheRecue": 14,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.67
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Provence-Alpes-Côte d'Azur",
+      "academie": "Nice",
+      "nbStatuts": 12,
+      "tauxReponseTotalCatalogue": 0.58,
+      "tauxReponseTotalDossiersDs": 1.19,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.6300000000000003,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 10,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.48,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 12,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.58,
+          "nbStatutSiretUniquesDemarcheRecue": 10,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.48
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Auvergne-Rhône-Alpes",
+      "academie": "Grenoble",
+      "nbStatuts": 21,
+      "tauxReponseTotalCatalogue": 1.01,
+      "tauxReponseTotalDossiersDs": 2.09,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.6100000000000005,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 19,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.91,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 21,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.01,
+          "nbStatutSiretUniquesDemarcheRecue": 19,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.91
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Hauts-de-France",
+      "academie": "Lille",
+      "nbStatuts": 27,
+      "tauxReponseTotalCatalogue": 1.3,
+      "tauxReponseTotalDossiersDs": 2.68,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 4.55,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 26,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.25,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 27,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.3,
+          "nbStatutSiretUniquesDemarcheRecue": 26,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.25
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Bourgogne-Franche-Comté",
+      "academie": "Besançon",
+      "nbStatuts": 23,
+      "tauxReponseTotalCatalogue": 1.11,
+      "tauxReponseTotalDossiersDs": 2.29,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 2.329999999999999,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 22,
+        "tauxReponseSiretUniquesTotalCatalogue": 1.06,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 23,
+          "tauxReponseDemarcheRecueTotalCatalogue": 1.11,
+          "nbStatutSiretUniquesDemarcheRecue": 22,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 1.06
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Guadeloupe",
+      "academie": "Guadeloupe",
+      "nbStatuts": 3,
+      "tauxReponseTotalCatalogue": 0.14,
+      "tauxReponseTotalDossiersDs": 0.3,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.07,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 3,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.14,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 3,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.14,
+          "nbStatutSiretUniquesDemarcheRecue": 3,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.14
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "La Réunion",
+      "academie": "La Réunion",
+      "nbStatuts": 7,
+      "tauxReponseTotalCatalogue": 0.34,
+      "tauxReponseTotalDossiersDs": 0.7,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.35,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 6,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.29,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 7,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.34,
+          "nbStatutSiretUniquesDemarcheRecue": 6,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.29
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Hauts-de-France",
+      "academie": "Amiens",
+      "nbStatuts": 11,
+      "tauxReponseTotalCatalogue": 0.53,
+      "tauxReponseTotalDossiersDs": 1.09,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.8300000000000001,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 11,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.53,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 11,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.53,
+          "nbStatutSiretUniquesDemarcheRecue": 11,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.53
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Pays de la Loire",
+      "academie": "Nantes",
+      "nbStatuts": 48,
+      "tauxReponseTotalCatalogue": 2.31,
+      "tauxReponseTotalDossiersDs": 4.77,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 2.8299999999999996,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 45,
+        "tauxReponseSiretUniquesTotalCatalogue": 2.17,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 48,
+          "tauxReponseDemarcheRecueTotalCatalogue": 2.31,
+          "nbStatutSiretUniquesDemarcheRecue": 45,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 2.17
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Île-de-France",
+      "academie": "Créteil",
+      "nbStatuts": 18,
+      "tauxReponseTotalCatalogue": 0.87,
+      "tauxReponseTotalDossiersDs": 1.79,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.9200000000000002,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 16,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.77,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 18,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.87,
+          "nbStatutSiretUniquesDemarcheRecue": 16,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.77
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Corse",
+      "academie": "Corse",
+      "nbStatuts": 5,
+      "tauxReponseTotalCatalogue": 0.24,
+      "tauxReponseTotalDossiersDs": 0.5,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 1.1,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 4,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.19,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 5,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.24,
+          "nbStatutSiretUniquesDemarcheRecue": 4,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.19
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    },
+    {
+      "region": "Martinique",
+      "academie": "Martinique",
+      "nbStatuts": 1,
+      "tauxReponseTotalCatalogue": 0.05,
+      "tauxReponseTotalDossiersDs": 0.1,
+      "sommeVolumetrieEstimeeReponsesFormationsCatalogue": 0.02,
+      "RepondantsOk": {
+        "nbReponsesDsSiretUnique": 1,
+        "tauxReponseSiretUniquesTotalCatalogue": 0.05,
+        "RepondantsOkDemarcheRecue": {
+          "nbStatutDemarcheRecue": 1,
+          "tauxReponseDemarcheRecueTotalCatalogue": 0.05,
+          "nbStatutSiretUniquesDemarcheRecue": 1,
+          "tauxReponseSiretUniquesDemarcheRecueTotalCatalogue": 0.05
+        },
+        "RepondantsOkDemarcheInitiee": {
+          "nbStatutDemarcheInitiee": 0,
+          "tauxReponseDemarcheInitieeTotalCatalogue": 0,
+          "nbStatutSiretUniquesDemarcheInitiee": 0,
+          "tauxReponseSiretUniquesDemarcheInitieeTotalCatalogue": 0
+        }
+      },
+      "RepondantsKo": { "tauxRepondantsDemarcheNiRecueNiInitieeTotalCatalogue": 0 }
+    }
+  ]
+}
