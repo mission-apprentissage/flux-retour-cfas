@@ -62,6 +62,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(foundStatut.uai_etablissement, statutsTest[0].uai_etablissement);
     assert.deepStrictEqual(foundStatut.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.deepStrictEqual(foundStatut.statut_apprenant, statutsTest[0].statut_apprenant);
+    assert.deepStrictEqual(foundStatut.source, userApiCreated.username);
     assert.deepStrictEqual(
       foundStatut.date_metier_mise_a_jour_statut,
       new Date(Date.parse(statutsTest[0].date_metier_mise_a_jour_statut))

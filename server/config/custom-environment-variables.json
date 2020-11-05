@@ -5,11 +5,13 @@
   "mongodb": {
     "uri": "FLUX_RETOUR_CFAS_MONGODB_URI"
   },
-  "apiKeys": {
-    "ymag": "FLUX_RETOUR_CFAS_API_KEY_YMAG"
-  },
   "users": {
-    "ymag": "FLUX_RETOUR_CFAS_USERS_YMAG",
+    "ymag": {
+      "apiKey": "FLUX_RETOUR_CFAS_USERS_YMAG_API_KEY"
+    },
+    "gesti": {
+      "apiKey": "FLUX_RETOUR_CFAS_USERS_GESTI_API_KEY"
+    },
     "defaultAdmin": {
       "name": "FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME",
       "password": "FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD"
