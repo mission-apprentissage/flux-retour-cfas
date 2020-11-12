@@ -86,6 +86,9 @@ Pour fonctionner ce projet a besoin des éléments dockérisés suivants :
 - Un serveur Web Nginx jouant le role de reverse proxy, _défini dans le service `reverse_proxy` du docker-compose_.
 - Un serveur Node Express, _défini dans le service `server` du docker-compose_.
 - Un réseau _défini dans `flux_retour_cfas_network` du docker-compose_.
+- Une base de donnée mongoDb _défini dans le service `mongodb` du docker-compose_.
+- Une interface Web en React, _définie dans le service `ui` du docker-compose_.
+- Un serveur FTP (VSFTPD) , _défini dans le service `ftp` du docker-compose_.
 
 ### Serveur Nodes & Nginx - Reverse Proxy
 
@@ -94,6 +97,19 @@ Le serveur nginx joue le role de reverse proxy sur le port 80.
 Le serveur Web Node Express utilise le port 5000.
 
 Dans la configuration de nginx, on fait référence au fichier `/reverse_proxy/app/nginx/conf.d/locations/api.inc` qui définir la gestion de l'API Node Express.
+
+### Base de données MongoDb
+
+Le base de données est une MongoDb et utilise le port par défaut 27017.
+
+### Ui - React
+
+L'interface web est une application React crée à partir du cli `create-react-app` (cf: https://create-react-app.dev/)
+La partie template est basée sur le template open-source `Tabler` (cf: https://tabler.io/ et http://tabler-react.com/)
+
+### Server FTP
+
+Le serveur FTP est monté via une image de VSFTPD (cf https://wiki.debian.org/fr/vsftpd)
 
 ### Démarrage de la stack
 
@@ -231,6 +247,10 @@ Le workflow principal est définie dans `/.github/workflows/yarn-ci.yml` et se c
 
 ## Jobs & Procédure de déploiement de l'application
 
+Pour executer un job, que ce soit en local ou sur un des environnement (production / recette) il est recommandé d'executer les commandes **dans le conteneur docker `flux_retour_cfas_server`.**
+
+**Attention, pour la création des users ayant un accès ftp il est nécéssaire de créer les users depuis le conteneur docker `flux_retour_cfas_server`, car il est nécessaire à VSFTPD d'écrire dans le fichier de configuration vsftp_pam pour la création des utilisateurs.**
+
 ### Jobs de suppression des données
 
 Il est possible de supprimer les données en base de plusieurs manières :
@@ -238,47 +258,47 @@ Il est possible de supprimer les données en base de plusieurs manières :
 - Pour supprimer toutes les données en base :
 
 ```bash
-yarn clear:all
+docker exec flux_retour_cfas_server bash -c "yarn clear:all"
 ```
 
 - Pour supprimer uniquement les statuts des candidats en base :
 
 ```bash
-yarn clear:statutsCandidats
+docker exec flux_retour_cfas_server bash -c "yarn clear:statutsCandidats"
 ```
 
 - Pour supprimer uniquement les logs (+usersEvents) en base :
 
 ```bash
-yarn clear:logs
+docker exec flux_retour_cfas_server bash -c "yarn clear:logs"
 ```
 
 - Pour supprimer uniquement les users (+ usersEvents) en base :
 
 ```bash
-yarn clear:users
+docker exec flux_retour_cfas_server bash -c "yarn clear:users"
 ```
 
 ### Jobs d'alimentation des données
 
 Il est possible d'alimenter la base de donneés avec des données de réferences / test :
 
-- Pour ajouter les users par défaut en base :
+- Pour ajouter les users par défaut :
 
 ```bash
-yarn seed:users
+docker exec flux_retour_cfas_server bash -c "yarn seed:users"
 ```
 
 - Pour ajouter des statuts candidats de test en base :
 
 ```bash
-yarn seed:sample
+docker exec flux_retour_cfas_server bash -c "yarn seed:sample"
 ```
 
 - Pour ajouter des statuts candidats randomisés en base :
 
 ```bash
-yarn seed:randomizedSample
+docker exec flux_retour_cfas_server bash -c "yarn seed:randomizedSample"
 ```
 
 ### Jobs d'affichage des statistiques
@@ -286,7 +306,7 @@ yarn seed:randomizedSample
 Il est possible d'afficher en console les statistiques des données du flux retour :
 
 ```bash
-yarn stats
+docker exec flux_retour_cfas_server bash -c "yarn stats"
 ```
 
 ### Jobs pour l'enquete Démarches Simplifiées
@@ -296,19 +316,20 @@ Pour l'enquete Démarches Simplifiés :
 - Il est possible de mettre à jour dans Sendinblue les contacts :
 
 ```bash
-yarn ds:updateSib
+docker exec flux_retour_cfas_server bash -c "yarn ds:updateSib"
 ```
 
 - Il est possible d'exporter les stats sous format csv
 
 ```bash
-yarn ds:buildStats
+docker exec flux_retour_cfas_server bash -c "yarn ds:buildStats"
 ```
 
-- Il est possible d'exporter les clients d'Ymag sous format csv
+- Il est possible d'exporter les clients d'Ymag/Gesti sous format csv
 
 ```bash
-yarn ds:buldYmagClients
+docker exec flux_retour_cfas_server bash -c "yarn ds:buildYmagClients"
+docker exec flux_retour_cfas_server bash -c "yarn ds:buildGestiClients"
 ```
 
 ### Procédure à suivre au premier déploiement

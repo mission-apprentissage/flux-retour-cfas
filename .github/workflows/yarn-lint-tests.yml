@@ -34,4 +34,4 @@ jobs:
       - name: Run Tests
         run: |
           cd server
-          yarn test
+          docker exec flux_retour_cfas_server bash -c "yarn test"

@@ -1,5 +1,7 @@
 const { User } = require("../model");
 const sha512Utils = require("../utils/sha512Utils");
+const { ftpAccess } = require("../roles");
+const createFtp = require("../ftp");
 
 const rehashPassword = (user, password) => {
   user.password = sha512Utils.hash(password);
@@ -7,6 +9,9 @@ const rehashPassword = (user, password) => {
 };
 
 module.exports = async () => {
+  const ftp = createFtp();
+  await ftp.ensureReady();
+
   return {
     authenticate: async (username, password) => {
       const user = await User.findOne({ username });
@@ -37,6 +42,12 @@ module.exports = async () => {
       });
 
       await user.save();
+
+      // would be better to emit a "USER_CREATED" event and do this in another module so the users component is not coupled with ftp
+      if (permissions.includes(ftpAccess)) {
+        await ftp.addUser(user);
+      }
+
       return user.toObject();
     },
     removeUser: async (username) => {

@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 
-const getModel = (modelName, callback = () => ({})) => {
+const getModel = (modelName) => {
   const Schema = require(`./schema/${modelName}`);
-  callback(Schema);
   return mongoose.model(modelName, Schema, modelName);
 };
 

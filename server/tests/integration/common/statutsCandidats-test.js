@@ -38,6 +38,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.uai_etablissement, randomStatut.uai_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, randomStatut.nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, randomStatut.statut_apprenant);
+    assert.strictEqual(toAdd.source, randomStatut.source);
 
     // Checks exists method
     const found = await existsStatut({
@@ -76,6 +77,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
+    assert.strictEqual(toAdd.source, statutsTest[0].source);
 
     // Checks exists method
     const found = await existsStatut({
@@ -109,6 +111,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
+    assert.strictEqual(toAdd.source, statutsTest[0].source);
 
     // Checks exists method
     const found = await existsStatut({
@@ -142,6 +145,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
+    assert.strictEqual(toAdd.source, statutsTest[0].source);
 
     // Checks exists method
     const found = await existsStatut({
@@ -180,6 +184,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
+    assert.strictEqual(toAdd.source, statutsTest[0].source);
 
     // Checks exists method
     const found = await existsStatut({
@@ -218,192 +223,13 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
+    assert.strictEqual(toAdd.source, statutsTest[0].source);
 
     // Checks exists method with bad id formation
     const found = await existsStatut({
       ine_apprenant: toAdd.ine_apprenant,
       id_formation: "BAD_ID_FORMATION",
       uai_etablissement: toAdd.uai_etablissement,
-    });
-    assert.strictEqual(found, false);
-  });
-
-  it("Permet de vérifier l'existence avec vérification de valeur d'un statut de candidat avec INE", async () => {
-    const { existsWithStatutValue } = await statutsCandidats();
-
-    const toAdd = new StatutCandidat(statutsTest[0]);
-    await toAdd.save();
-
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-
-    // Checks exists method
-    const found = await existsWithStatutValue({
-      ine_apprenant: toAdd.ine_apprenant,
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
-      statut_apprenant: toAdd.statut_apprenant,
-    });
-    assert.strictEqual(found, true);
-  });
-
-  it("Permet de vérifier l'existence avec vérification de valeur d'un statut de candidat avec mauvais INE", async () => {
-    const { existsWithStatutValue } = await statutsCandidats();
-
-    const toAdd = new StatutCandidat(statutsTest[0]);
-    await toAdd.save();
-
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-
-    // Checks exists method
-    const found = await existsWithStatutValue({
-      ine_apprenant: "BAD_INE",
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
-      statut_apprenant: toAdd.statut_apprenant,
-    });
-    assert.strictEqual(found, false);
-  });
-
-  it("Permet de vérifier l'existence avec vérification de valeur d'un statut de candidat avec les Nom, Prénoms & Email", async () => {
-    const { existsWithStatutValue } = await statutsCandidats();
-
-    const toAdd = new StatutCandidat(statutsTest[0]);
-    await toAdd.save();
-
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-
-    // Checks exists method
-    const found = await existsWithStatutValue({
-      nom_apprenant: toAdd.nom_apprenant,
-      prenom_apprenant: toAdd.prenom_apprenant,
-      prenom2_apprenant: toAdd.prenom2_apprenant,
-      prenom3_apprenant: toAdd.prenom3_apprenant,
-      email_contact: toAdd.email_contact,
-
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
-      statut_apprenant: toAdd.statut_apprenant,
-    });
-    assert.strictEqual(found, true);
-  });
-
-  it("Permet de vérifier l'existence avec vérification de valeur d'un statut de candidat avec les mauvais Nom, Prénoms & Email", async () => {
-    const { existsWithStatutValue } = await statutsCandidats();
-
-    const toAdd = new StatutCandidat(statutsTest[0]);
-    await toAdd.save();
-
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-
-    // Checks exists method
-    const found = await existsWithStatutValue({
-      nom_apprenant: "BAD_NAME",
-      prenom_apprenant: toAdd.prenom_apprenant,
-      prenom2_apprenant: toAdd.prenom2_apprenant,
-      prenom3_apprenant: toAdd.prenom3_apprenant,
-      email_contact: toAdd.email_contact,
-
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
-      statut_apprenant: toAdd.statut_apprenant,
-    });
-    assert.strictEqual(found, false);
-  });
-
-  it("Permet de vérifier l'existence avec vérification de valeur d'un mauvais statut de candidat", async () => {
-    const { existsWithStatutValue } = await statutsCandidats();
-
-    const toAdd = new StatutCandidat(statutsTest[0]);
-    await toAdd.save();
-
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-
-    // Checks exists method
-    const found = await existsWithStatutValue({
-      ine_apprenant: toAdd.ine_apprenant,
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
-      statut_apprenant: "8",
     });
     assert.strictEqual(found, false);
   });

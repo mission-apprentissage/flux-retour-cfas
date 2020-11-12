@@ -41,8 +41,6 @@ module.exports = ({ statutsCandidats }) => {
   router.post(
     "/",
     tryCatch(async (req, res) => {
-      var retourStatus = {};
-
       try {
         // Validate schema
         await statutCandidatSchema.validateAsync(req.body, { abortEarly: false });
@@ -59,21 +57,23 @@ module.exports = ({ statutsCandidats }) => {
         await event.save();
 
         // Add StatutsCandidats
-        await statutsCandidats.addOrUpdateStatuts(req.body);
+        const toAddOrUpdate = req.body.map((statutCandidat) => ({
+          ...statutCandidat,
+          source: req.user.username,
+        }));
+        await statutsCandidats.addOrUpdateStatuts(toAddOrUpdate);
 
-        retourStatus = {
+        res.json({
           status: "OK",
           message: "Success",
-        };
+        });
       } catch (err) {
         logger.error("POST StatutCandidat error : " + err);
-        retourStatus = {
+        res.status(400).json({
           status: "ERROR",
           message: err.message,
-        };
+        });
       }
-
-      return res.json(retourStatus);
     })
   );
 

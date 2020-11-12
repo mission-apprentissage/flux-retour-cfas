@@ -116,4 +116,8 @@ module.exports = new Schema({
     default: Date.now,
     description: "Date d'ajout en base de données",
   },
+  source: {
+    type: String,
+    description: "Source du statut candidat (Ymag, Gesti...)",
+  },
 });
