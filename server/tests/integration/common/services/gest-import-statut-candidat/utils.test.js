@@ -1,6 +1,9 @@
 const assert = require("assert");
 const config = require("config");
-const { adaptGestiStatutCandidat, validateInput } = require("../../../../src/jobs/gesti-import-statut-candidat/utils");
+const {
+  adaptGestiStatutCandidat,
+  validateInput,
+} = require("../../../../../src/common/services/gesti-import-statuts-candidats/utils.js");
 
 describe("gesti-import-statut-candidat utils", () => {
   describe("adaptGestiStatutCandidat", () => {

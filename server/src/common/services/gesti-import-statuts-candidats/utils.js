@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const config = require("config");
 
-const logger = require("../../common/logger");
+const logger = require("../../logger");
 
 // parse date as DD/MM/YYYY
 const parseGestiDate = (gestiDate) => {
@@ -21,6 +21,7 @@ const adaptGestiStatutCandidat = (gestiStatutCandidat) => {
   };
 };
 
+/* this schema should be located in a StatutCandidat entity validator */
 const tempSchema = Joi.object({
   ine_apprenant: Joi.string().allow(null, ""),
   nom_apprenant: Joi.string().required(),
