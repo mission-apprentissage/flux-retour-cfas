@@ -10,13 +10,15 @@
       "apiKey": "FLUX_RETOUR_CFAS_USERS_YMAG_API_KEY"
     },
     "gesti": {
-      "apiKey": "FLUX_RETOUR_CFAS_USERS_GESTI_API_KEY"
+      "apiKey": "FLUX_RETOUR_CFAS_USERS_GESTI_API_KEY",
+      "password": "FLUX_RETOUR_CFAS_USERS_GESTI_PASSWORD"
     },
     "defaultAdmin": {
       "name": "FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME",
       "password": "FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD"
     }
   },
+  "ftpDir": "FLUX_RETOUR_CFAS_FTP_DIR",
   "mnaCatalog": {
     "endpoint": "FLUX_RETOUR_CFAS_MNA_CATALOG_ENDPOINT",
     "apiToken": "FLUX_RETOUR_CFAS_MNA_API_TOKEN"
