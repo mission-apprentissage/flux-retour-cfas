@@ -1,1 +1,0 @@
-Contient les données des stats
