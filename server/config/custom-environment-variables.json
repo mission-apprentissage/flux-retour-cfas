@@ -7,7 +7,8 @@
   },
   "users": {
     "ymag": {
-      "apiKey": "FLUX_RETOUR_CFAS_USERS_YMAG_API_KEY"
+      "apiKey": "FLUX_RETOUR_CFAS_USERS_YMAG_API_KEY",
+      "password": "FLUX_RETOUR_CFAS_USERS_YMAG_PASSWORD"
     },
     "gesti": {
       "apiKey": "FLUX_RETOUR_CFAS_USERS_GESTI_API_KEY",
