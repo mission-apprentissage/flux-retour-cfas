@@ -10,4 +10,6 @@ module.exports = {
   User: getModel("users"),
   UserEvent: getModel("userEvents"),
   Log: getModel("logs"),
+  DsDossier: getModel("dsDossiers"),
+  DsStats: getModel("dsStats"),
 };

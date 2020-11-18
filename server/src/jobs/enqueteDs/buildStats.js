@@ -1,21 +1,17 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const createStatsEnqueteDs = require("./stats/statsModule");
-const fs = require("fs");
-const path = require("path");
-
-const statsFileName = "statsEnqueteDs.json";
-const localStatsFilePath = path.join(__dirname, `./stats/output/${statsFileName}`);
+const buildStats = require("./import/buildStats");
+const { DsStats } = require("../../common/model");
 
 runScript(async () => {
-  logger.info("Building stats from DS 2020");
-  const statsDs = await createStatsEnqueteDs();
+  logger.info("Génération des stats des données DS");
 
-  // Export to Json local file
-  logger.info(`Saving stats to Json File ${statsFileName}...`);
-  fs.writeFile(localStatsFilePath, JSON.stringify(statsDs), (err) => {
-    if (err) logger.info(err);
-  });
+  const statsInDb = await DsStats.countDocuments({});
+  if (statsInDb !== 0) {
+    logger.info(`-> ${statsInDb} stats déja en base - clean de la bdd ...`);
+    await DsStats.deleteMany({});
+  }
 
-  logger.info("End building stats from DS 2020");
+  await buildStats();
+  logger.info("Fin de la génération des stats des données DS");
 });

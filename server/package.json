@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -23,8 +23,9 @@
     "clear:logs": "node src/jobs/clear/clearLogs.js",
     "clear:users": "node src/jobs/clear/clearUsers.js",
     "stats": "node src/jobs/stats/index.js",
+    "ds:import": "node src/jobs/enqueteDs/import.js",
+    "ds:stats": "node src/jobs/enqueteDs/buildStats.js",
     "ds:updateSib": "node src/jobs/enqueteDs/updateSib.js",
-    "ds:buildStats": "node src/jobs/enqueteDs/buildStats.js",
     "ds:buildYmagClients": "node src/jobs/enqueteDs/buildYmagClientList.js",
     "ds:buildGestiClients": "node src/jobs/enqueteDs/buildGestiClientList.js",
     "run:tests": "node src/jobs/test/index.js"
@@ -84,7 +85,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "./scripts/preventDataFilesCommit.sh && lint-staged"
     }
   },
   "lint-staged": {

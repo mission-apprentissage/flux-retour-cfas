@@ -258,25 +258,25 @@ Il est possible de supprimer les données en base de plusieurs manières :
 - Pour supprimer toutes les données en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn clear:all"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn clear:all"
 ```
 
 - Pour supprimer uniquement les statuts des candidats en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn clear:statutsCandidats"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn clear:statutsCandidats"
 ```
 
 - Pour supprimer uniquement les logs (+usersEvents) en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn clear:logs"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn clear:logs"
 ```
 
 - Pour supprimer uniquement les users (+ usersEvents) en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn clear:users"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn clear:users"
 ```
 
 ### Jobs d'alimentation des données
@@ -286,19 +286,19 @@ Il est possible d'alimenter la base de donneés avec des données de réferences
 - Pour ajouter les users par défaut :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn seed:users"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:users"
 ```
 
 - Pour ajouter des statuts candidats de test en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn seed:sample"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:sample"
 ```
 
 - Pour ajouter des statuts candidats randomisés en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn seed:randomizedSample"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:randomizedSample"
 ```
 
 ### Jobs d'affichage des statistiques
@@ -306,30 +306,36 @@ docker exec flux_retour_cfas_server bash -c "yarn seed:randomizedSample"
 Il est possible d'afficher en console les statistiques des données du flux retour :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn stats"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn stats"
 ```
 
 ### Jobs pour l'enquete Démarches Simplifiées
 
 Pour l'enquete Démarches Simplifiés :
 
-- Il est possible de mettre à jour dans Sendinblue les contacts :
+- Il est possible d'importer l'ensemble des donneés (et de calculer des stats) de l'enquete DS :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn ds:updateSib"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:import"
 ```
 
-- Il est possible d'exporter les stats sous format csv
+- Il est possible de calculer les uniquement stats de l'enquete DS (nécessite un import préalable):
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn ds:buildStats"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:stats"
+```
+
+- Il est possible de mettre à jour dans Sendinblue les contacts ayant répondu à l'enquete :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:updateSib"
 ```
 
 - Il est possible d'exporter les clients d'Ymag/Gesti sous format csv
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn ds:buildYmagClients"
-docker exec flux_retour_cfas_server bash -c "yarn ds:buildGestiClients"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:buildYmagClients"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:buildGestiClients"
 ```
 
 ### Procédure à suivre au premier déploiement
