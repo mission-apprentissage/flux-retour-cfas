@@ -4,7 +4,7 @@ import { useFetch } from "../../common/hooks/useFetch";
 import Layout from "../layout/Layout";
 
 export default () => {
-  const [data, loading] = useFetch("api/statsDs");
+  const [data, loading] = useFetch("api/ds/stats");
 
   return (
     <Layout>
