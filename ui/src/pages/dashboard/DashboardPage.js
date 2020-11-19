@@ -24,6 +24,16 @@ export default () => {
                     <StampCard
                       color="blue"
                       icon="users"
+                      header={`${data.stats.nbCfas} CFAs au total`}
+                      footer={"Nb total de CFAs"}
+                    />
+                  </Grid.Col>
+                </Grid.Row>
+                <Grid.Row cards={true}>
+                  <Grid.Col sm={6} lg={3}>
+                    <StampCard
+                      color="blue"
+                      icon="users"
                       header={`${data.stats.nbDistinctCandidatsTotal} candidats au total`}
                       footer={"Nb total de candidats"}
                     />

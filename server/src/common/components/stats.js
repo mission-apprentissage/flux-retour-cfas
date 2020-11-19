@@ -65,6 +65,8 @@ const getAllStats = async () => {
     nbDistinctCandidatsWithChangingStatutProspectInscrit: await getNbDistinctCandidatsWithChangingStatutProspectInscrit(),
     nbDistinctCandidatsWithChangingStatutProspectApprenti: await getNbDistinctCandidatsWithChangingStatutProspectApprenti(),
     nbDistinctCandidatsWithChangingStatutProspectAbandon: await getNbDistinctCandidatsWithChangingStatutProspectAbandon(),
+
+    nbCfas: await getNbDistinctCfas(),
   };
 };
 
@@ -265,3 +267,8 @@ const getNbDistinctCandidatsWithChangingStatutProspectAbandon = async () =>
       },
     })
   ).length;
+
+const getNbDistinctCfas = async () => {
+  const distinctUais = await StatutCandidat.distinct("uai_etablissement");
+  return distinctUais.length;
+};
