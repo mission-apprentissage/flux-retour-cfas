@@ -4,7 +4,7 @@
 
 ## Pré-requis
 
-- NodeJs 12.11
+- NodeJs 14
 - Yarn
 - Docker & Docker-compose
 
