@@ -8,6 +8,7 @@ module.exports = ({ stats }) => {
     "/",
     tryCatch(async (req, res) => {
       const allStats = await stats.getAllStats();
+
       return res.json({ stats: allStats });
     })
   );
