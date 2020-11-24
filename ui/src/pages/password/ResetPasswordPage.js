@@ -10,7 +10,7 @@ import decodeJWT from "../../common/utils/decodeJWT";
 import FormError from "../../common/components/FormError";
 import CenteredCol from "../../common/components/CenteredCol";
 
-export default () => {
+const ResetPasswordPage = () => {
   let [, setAuth] = useAuth();
   let history = useHistory();
   let location = useLocation();
@@ -52,8 +52,8 @@ export default () => {
         <Page.Content>
           <Grid.Row>
             <CenteredCol>
-              <div class="text-center mb-6">
-                <img src="/brand/flux-cfas.png" class="h-6" alt="" />
+              <div className="text-center mb-6">
+                <img src="/brand/flux-cfas.png" className="h-6" alt="" />
               </div>
               <Card>
                 <Card.Header>
@@ -108,3 +108,5 @@ export default () => {
     </Page>
   );
 };
+
+export default ResetPasswordPage;

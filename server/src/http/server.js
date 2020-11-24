@@ -38,8 +38,8 @@ module.exports = async (components) => {
   app.use("/api/login", loginRoute(components));
   app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
   app.use("/api/password", passwordRoute(components));
-  app.use("/api/stats", checkJwtToken, adminOnly, statsRoute(components));
   app.use("/api/ds", checkJwtToken, adminOnly, dsRoute(components));
+  app.use("/api/stats", checkJwtToken, statsRoute(components));
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());
 
   app.get(

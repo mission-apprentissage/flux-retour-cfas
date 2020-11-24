@@ -4,7 +4,7 @@ import useAuth from "../../../common/hooks/useAuth";
 import { NavLink } from "react-router-dom";
 import { roles, isUserInRole } from "../../../common/utils/rolesUtils";
 
-export default () => {
+const NavigationMenu = () => {
   let [auth] = useAuth();
 
   return (
@@ -51,3 +51,5 @@ export default () => {
     </Site.Nav>
   );
 };
+
+export default NavigationMenu;

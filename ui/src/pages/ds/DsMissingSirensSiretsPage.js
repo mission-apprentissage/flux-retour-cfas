@@ -3,7 +3,7 @@ import { Page, Site, Nav, Grid, Header, Alert, StampCard } from "tabler-react";
 import { useFetch } from "../../common/hooks/useFetch";
 import Layout from "../layout/Layout";
 
-export default () => {
+const MissingSirensSiretsPage = () => {
   const [data, loading] = useFetch("api/ds/stats");
 
   return (
@@ -34,11 +34,11 @@ export default () => {
 };
 
 const getDataTable = (title, data) => (
-  <div class="card">
-    <div class="card-header">
-      <h2 class="card-title">{title}</h2>
+  <div className="card">
+    <div className="card-header">
+      <h2 className="card-title">{title}</h2>
     </div>
-    <table class="table card-table">
+    <table className="table card-table">
       <tbody>
         {data.map((item) => (
           <tr key={item}>
@@ -49,3 +49,5 @@ const getDataTable = (title, data) => (
     </table>
   </div>
 );
+
+export default MissingSirensSiretsPage;

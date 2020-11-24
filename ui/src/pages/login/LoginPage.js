@@ -8,7 +8,7 @@ import { _post } from "../../common/httpClient";
 import CenteredCol from "../../common/components/CenteredCol";
 import FormError from "../../common/components/FormError";
 
-export default () => {
+const LoginPage = () => {
   let [, setAuth] = useAuth();
   let history = useHistory();
 
@@ -38,8 +38,8 @@ export default () => {
         <Page.Content>
           <Grid.Row>
             <CenteredCol>
-              <div class="text-center mb-6">
-                <img src="/brand/flux-cfas.png" class="h-6" alt="" />
+              <div className="text-center mb-6">
+                <img src="/brand/flux-cfas.png" className="h-6" alt="" />
               </div>
               <Card>
                 <Card.Header>
@@ -108,3 +108,5 @@ export default () => {
     </Page>
   );
 };
+
+export default LoginPage;

@@ -5,7 +5,7 @@ import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
 import Footer from "./components/Footer";
 
-export default (props) => {
+const Layout = (props) => {
   return (
     <Site className="flex-fill">
       <Header />
@@ -15,3 +15,5 @@ export default (props) => {
     </Site>
   );
 };
+
+export default Layout;

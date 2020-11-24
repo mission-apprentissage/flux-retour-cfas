@@ -2,7 +2,7 @@ import React from "react";
 import { Page, Grid, Alert, Header } from "tabler-react";
 import LayoutUser from "./layout/LayoutUser";
 
-export default () => {
+const HomePage = () => {
   return (
     <LayoutUser>
       <Page>
@@ -22,3 +22,5 @@ export default () => {
     </LayoutUser>
   );
 };
+
+export default HomePage;
