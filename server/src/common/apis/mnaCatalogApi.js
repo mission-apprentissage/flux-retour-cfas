@@ -1,6 +1,6 @@
-const logger = require("../logger");
-const config = require("config");
 const axios = require("axios");
+const logger = require("../logger");
+const config = require("../../../config");
 
 class MnaCatalogApi {
   constructor(options) {

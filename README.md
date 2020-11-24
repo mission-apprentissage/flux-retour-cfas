@@ -41,8 +41,7 @@ Ce repository est organisé de la manière suivante :
     |-- server
         |-- assets
         |-- config
-          |-- custom-environment-variables.json
-          |-- default.json
+          |-- index.js
         |-- data
         |-- src
         |-- tests
@@ -65,17 +64,17 @@ Ce repository est organisé de la manière suivante :
 - Le dossier `/ui` va contenir l'ensemble de l'application coté front, à savoir une application React basé sur Tabler (https://github.com/tabler/tabler-react).
 - Le fichier `/docker-compose.yml` va définir la configuration des conteneurs de l'application, _pour plus d'informations sur Docker cf: https://docs.docker.com/_
 - Le fichier `/docker-compose.override.yml` va définir la configuration Docker spécifique à l'environnement local de développement.
+  :warning: ce fichier est ignoré lors des commits (cf .gitignore) afin d'éviter la divulgation de secrets/tokens
 
 ## Gestion de la configuration
 
-La gestion de configuration et de variables d'environnement est mise en place avec la librairie node-config : https://www.npmjs.com/package/config
+La gestion de la configuration se fait via bibliothèque [env-var](https://www.npmjs.com/package/env-var) et le fichier `docker-compose.override.yml`
 
-La configuration est définie dans le dossier `/server/config` et on y trouve :
+La configuration est gérée exclusivement via variables d'environnement pour des raisons de sécurité et de cohérence entre environnements.
 
-- Un fichier `/server/config/custom-environment-variables.json` qui va définir la liste des variables d'environnements pour l'application
-- Un fichier `/server/config/default.json` qui va définir la valeur par défaut de ces variables d'environnement.
+Le module `/server/config/index.js` expose un objet mappant les variables d'environnements nécessaires au fonctionnement de l'application. Il se charge également de parser les variables grâce à env-var afin de les rendre exploitable en javascript (la valeur "true" est convertie en boolean, 1234 en number etc...).
 
-Ensuite dans la définition des conteneurs Docker ces variables d'environnements seront écrasées au besoin.
+Chaque environnement possède son propre fichier d'override afin d'isoler les différentes configurations.
 
 ## Conteneurs Docker
 

@@ -1,9 +1,9 @@
-const config = require("config");
 const { uniqBy, uniqWith } = require("lodash");
 const logger = require("../../../common/logger");
 const dsFetcher = require("../../../common/dsFetcher");
 const createMnaCatalogApi = require("../../../common/apis/mnaCatalogApi");
 const { getEmailCampaign } = require("../../../common/utils/sendinblueUtils");
+const config = require("../../../../config");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { erps, dsStates } = require("../utils/constants");
 const { getRateResponseDsForNotInDemarcheStatuses, getPercentageFromTotal } = require("../utils/calculUtils");

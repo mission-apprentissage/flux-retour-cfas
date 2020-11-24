@@ -1,7 +1,7 @@
 const logger = require("../../common/logger");
 const { toDateFromUnixTimestamp } = require("../../common/utils/miscUtils");
+const config = require("../../../config");
 const axios = require("axios");
-const config = require("config");
 
 // Cf Documentation : https://doc.entreprise.api.gouv.fr/#param-tres-obligatoires
 const apiEndpoint = "https://entreprise.api.gouv.fr/v2";

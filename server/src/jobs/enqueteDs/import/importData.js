@@ -1,5 +1,5 @@
-const config = require("config");
 const cliProgress = require("cli-progress");
+const config = require("../../../../config");
 const logger = require("../../../common/logger");
 const dsFetcher = require("../../../common/dsFetcher");
 const createMnaCatalogApi = require("../../../common/apis/mnaCatalogApi");

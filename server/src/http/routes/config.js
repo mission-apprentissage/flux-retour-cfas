@@ -1,6 +1,6 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const config = require("config");
+const config = require("../../../config");
 
 module.exports = () => {
   const router = express.Router();

@@ -1,5 +1,4 @@
 const express = require("express");
-const config = require("config");
 const bodyParser = require("body-parser");
 const packageJson = require("../../package.json");
 const logger = require("../common/logger");
@@ -21,6 +20,7 @@ const passwordRoute = require("./routes/password");
 const statsRoute = require("./routes/stats");
 const dsRoute = require("./routes/ds");
 const configRoute = require("./routes/config");
+const config = require("../../config");
 
 module.exports = async (components) => {
   const { db } = components;

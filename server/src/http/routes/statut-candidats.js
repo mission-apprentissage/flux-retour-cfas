@@ -1,9 +1,10 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const config = require("config");
 const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
+
+const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
 module.exports = ({ statutsCandidats }) => {
   const router = express.Router();
@@ -12,7 +13,7 @@ module.exports = ({ statutsCandidats }) => {
    * Schema for validation
    */
   const statutCandidatSchema = Joi.array()
-    .max(config.postStatutsCandidatsMaxLength)
+    .max(POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH)
     .items(
       Joi.object({
         ine_apprenant: Joi.string().allow(null, ""),

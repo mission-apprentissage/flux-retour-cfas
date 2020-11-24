@@ -1,5 +1,5 @@
 const logger = require("../../../common/logger");
-const config = require("config");
+const config = require("../../../../config");
 const { fullSampleWithUpdates } = require("../../../../tests/data/sample");
 const { createRandomStatutsCandidatsList } = require("../../../../tests/data/randomizedSample");
 const { User } = require("../../../common/model/index");

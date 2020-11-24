@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# A hook script to verify that we don't commit files that could contain sensible data or credentials like json, csv, xls(x) or .env
+# A hook script to verify that we don't commit files that could contain sensible data or credentials like json, yml, csv, xls(x) or .env
 
-sensible_files_pattern="\.(csv|xls|xls(x?)|json|env)$"
+sensible_files_pattern="\.(csv|xls|xls(x?)|json|env|yml)$"
 exception="package.json$"
 
 files=$(git diff --cached --name-only | grep -v -E "$exception" | grep -E "$sensible_files_pattern")

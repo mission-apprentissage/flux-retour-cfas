@@ -1,5 +1,5 @@
 const assert = require("assert");
-const config = require("config");
+const config = require("../../../config");
 const jwt = require("jsonwebtoken");
 const omit = require("lodash").omit;
 const httpTests = require("../../utils/httpTests");
@@ -61,7 +61,7 @@ httpTests(__filename, ({ startServer }) => {
 
     assert.strictEqual(response.status, 200);
     const found = await User.findOne({ username: "user" });
-    assert.strictEqual(found.password.startsWith("$6$rounds=1001"), true);
+    assert.strictEqual(found.password.startsWith("$6$rounds=1000"), true);
 
     response = await httpClient.post("/api/login", {
       username: "user",
@@ -87,7 +87,7 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie que le mot de passe n'est pas rehashé si invalide", async () => {
     const { httpClient, components } = await startServer();
-    await components.users.createUser("user", "password", { hash: hash("password", 1001) });
+    await components.users.createUser("user", "password", { hash: hash("password", 1000) });
     const previous = await User.findOne({ username: "user" });
 
     const response = await httpClient.post("/api/login", {

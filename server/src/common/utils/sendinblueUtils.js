@@ -1,5 +1,5 @@
 const request = require("requestretry");
-const config = require("config");
+const config = require("../../../config");
 
 async function getEmailCampaign(campaignId) {
   const options = {

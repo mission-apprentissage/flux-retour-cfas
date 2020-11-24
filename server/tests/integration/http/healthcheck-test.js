@@ -1,5 +1,5 @@
 const assert = require("assert");
-const config = require("config");
+const config = require("../../../config");
 const httpTests = require("../../utils/httpTests");
 
 httpTests(__filename, ({ startServer }) => {

@@ -2,7 +2,7 @@ const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { getUser, updateContactAttributes } = require("../../common/utils/sendinblueUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const config = require("config");
+const config = require("../../../config");
 const { DsDossier } = require("../../common/model");
 
 runScript(async () => {

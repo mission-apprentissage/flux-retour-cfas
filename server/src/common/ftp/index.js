@@ -1,7 +1,7 @@
-const config = require("config");
 const path = require("path");
 const { appendFile, writeFile, readFile, chown } = require("fs").promises;
 const { remove: removeFile, ensureFile, ensureDir } = require("fs-extra");
+const config = require("../../../config");
 const { removeLine } = require("../utils/fileUtils");
 const ftpWatcher = require("./ftpWatcher");
 

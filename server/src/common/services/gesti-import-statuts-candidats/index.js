@@ -1,6 +1,6 @@
-const config = require("config");
 const path = require("path");
 const { move, writeFile } = require("fs-extra");
+const config = require("../../../../config");
 
 const logger = require("../../logger");
 const { readJsonFromCsvFile } = require("../../utils/fileUtils");
