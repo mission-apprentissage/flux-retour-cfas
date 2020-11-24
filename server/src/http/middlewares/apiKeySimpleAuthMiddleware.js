@@ -1,4 +1,4 @@
-const config = require("config");
+const config = require("../../../config");
 
 module.exports = (req, res, next) => {
   const apiKey = req.get("x-api-key");

@@ -24,6 +24,7 @@ const mapDsChamps = async (dossier) => {
         prestaTechTel1: getValueFromChamp(dossier, formFieldToDsId.prestaTechTel1),
         prestaTechTel2: getValueFromChamp(dossier, formFieldToDsId.prestaTechTel2),
         coordonnesRespTechMultiSites: getValueFromChamp(dossier, formFieldToDsId.coordonnesRespTechMultiSites),
+        commentairesMerci: getValueFromChamp(dossier, formFieldToDsId.commentairesMerci),
       },
     };
   }

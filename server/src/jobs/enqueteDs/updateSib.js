@@ -1,19 +1,18 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const dsFetcher = require("../../common/dsFetcher");
 const { getUser, updateContactAttributes } = require("../../common/utils/sendinblueUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const config = require("config");
+const config = require("../../../config");
+const { DsDossier } = require("../../common/model");
 
 runScript(async () => {
-  logger.info("Updating Sendinblue Contacts from DS 2020");
+  logger.info("MAJ des contacts Sendinblue depuis DS");
+  await updateSibAttributesForDsErps();
+  logger.info("Fin de la MAJ des contacts Sendinblue depuis DS");
+});
 
-  dsFetcher.config({
-    id: config.demarchesSimplifiees.procedureCfas2020Id,
-    token: config.demarchesSimplifiees.apiToken,
-  });
-
-  const emailsDossiersDs = await getDossiersEmails();
+const updateSibAttributesForDsErps = async () => {
+  const emailsDossiersDs = (await DsDossier.find({}).select("dossier")).map((item) => item._doc.dossier.email);
   const uniqueEmailsDossiersDs = [...new Set(emailsDossiersDs)];
   logger.info(`DS ${uniqueEmailsDossiersDs.length} emails uniques trouvés`);
 
@@ -22,36 +21,35 @@ runScript(async () => {
   // Parse SB List contact
   await asyncForEach(uniqueEmailsDossiersDs, async (emailInDs) => {
     const contactFromSib = await getUser(emailInDs);
+
     if (contactFromSib) {
+      const erpsForEmail = (await DsDossier.find({ "dossier.email": `${emailInDs}` })).map(
+        (item) => item._doc.dossier.questions.erpNom
+      );
+      const uniqueErpsNames = erpsForEmail.length > 0 ? [...new Set(erpsForEmail)] : [];
+
       await updateContactAttributes(emailInDs, {
         listIds: [config.sendinblue.idListCfas],
-        attributes: {
-          DS_PROCEDURE_CFAS_2020_INITIATED: true,
-        },
+        attributes: getSibUpdateAttributes(uniqueErpsNames),
       });
       nbUpdated++;
-      logger.info(`Contact ${emailInDs} updated in Sendinblue`);
-    }
-  });
 
-  logger.info(`Successfully updated ${nbUpdated} contacts from DS 2020 to Sendinblue !`);
-});
-
-const getDossiersEmails = async () => {
-  const dossierEmails = [];
-
-  // Get dossiers from DsFetcher Api
-  var dossiers = await dsFetcher.getDossiers();
-  await asyncForEach(dossiers, async (currentDossier) => {
-    const detailDossier = await dsFetcher.getDossier(currentDossier.id);
-    if (detailDossier) {
-      if (detailDossier.dossier) {
-        if (detailDossier.dossier.email) {
-          dossierEmails.push(detailDossier.dossier.email);
-        }
+      if (uniqueErpsNames.length > 0) {
+        logger.info(`Contact ${emailInDs} mis à jour dans Sendinblue avec ERPs : ${uniqueErpsNames[0]}`);
+      } else {
+        logger.info(`Contact ${emailInDs} mis à jour dans Sendinblue sans ERPs`);
       }
     }
   });
 
-  return dossierEmails;
+  logger.info(`${nbUpdated} Contacts mis à jour dans Sendinblue !`);
+};
+
+const getSibUpdateAttributes = (uniqueErpsNames) => {
+  const attributes = {
+    DS_PROCEDURE_CFAS_2020_INITIATED: true,
+    DS_PROCEDURE_CFAS_2020_ERP_NAME: `${uniqueErpsNames.length > 0 ? uniqueErpsNames[0] : "-"}`,
+  };
+
+  return attributes;
 };

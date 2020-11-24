@@ -1,5 +1,4 @@
 const express = require("express");
-const config = require("config");
 const bodyParser = require("body-parser");
 const packageJson = require("../../package.json");
 const logger = require("../common/logger");
@@ -19,8 +18,9 @@ const loginRoute = require("./routes/login");
 const adminRoute = require("./routes/admin");
 const passwordRoute = require("./routes/password");
 const statsRoute = require("./routes/stats");
-const statsDsRoute = require("./routes/statsDs");
+const dsRoute = require("./routes/ds");
 const configRoute = require("./routes/config");
+const config = require("../../config");
 
 module.exports = async (components) => {
   const { db } = components;
@@ -39,7 +39,7 @@ module.exports = async (components) => {
   app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
   app.use("/api/password", passwordRoute(components));
   app.use("/api/stats", checkJwtToken, adminOnly, statsRoute(components));
-  app.use("/api/statsDs", checkJwtToken, adminOnly, statsDsRoute(components));
+  app.use("/api/ds", checkJwtToken, adminOnly, dsRoute(components));
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());
 
   app.get(

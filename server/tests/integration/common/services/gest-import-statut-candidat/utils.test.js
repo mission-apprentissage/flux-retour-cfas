@@ -1,5 +1,5 @@
 const assert = require("assert");
-const config = require("config");
+const config = require("../../../../../config");
 const {
   adaptGestiStatutCandidat,
   validateInput,
@@ -142,7 +142,7 @@ describe("gesti-import-statut-candidat utils", () => {
       ];
       const expectedOutput = {
         valid: input,
-        errors: 0,
+        errors: [],
       };
       assert.deepStrictEqual(validateInput(input), expectedOutput);
     });
@@ -190,11 +190,9 @@ describe("gesti-import-statut-candidat utils", () => {
         },
         {},
       ];
-      const expectedOutput = {
-        valid: [input[0]],
-        errors: 2,
-      };
-      assert.deepStrictEqual(validateInput(input), expectedOutput);
+      const output = validateInput(input);
+      assert.deepStrictEqual(output.valid, [input[0]]);
+      assert.deepStrictEqual(output.errors.length, 2);
     });
   });
 });

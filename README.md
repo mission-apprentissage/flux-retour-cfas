@@ -4,7 +4,7 @@
 
 ## Pré-requis
 
-- NodeJs 12.11
+- NodeJs 14
 - Yarn
 - Docker & Docker-compose
 
@@ -41,8 +41,7 @@ Ce repository est organisé de la manière suivante :
     |-- server
         |-- assets
         |-- config
-          |-- custom-environment-variables.json
-          |-- default.json
+          |-- index.js
         |-- data
         |-- src
         |-- tests
@@ -65,17 +64,17 @@ Ce repository est organisé de la manière suivante :
 - Le dossier `/ui` va contenir l'ensemble de l'application coté front, à savoir une application React basé sur Tabler (https://github.com/tabler/tabler-react).
 - Le fichier `/docker-compose.yml` va définir la configuration des conteneurs de l'application, _pour plus d'informations sur Docker cf: https://docs.docker.com/_
 - Le fichier `/docker-compose.override.yml` va définir la configuration Docker spécifique à l'environnement local de développement.
+  :warning: ce fichier est ignoré lors des commits (cf .gitignore) afin d'éviter la divulgation de secrets/tokens
 
 ## Gestion de la configuration
 
-La gestion de configuration et de variables d'environnement est mise en place avec la librairie node-config : https://www.npmjs.com/package/config
+La gestion de la configuration se fait via bibliothèque [env-var](https://www.npmjs.com/package/env-var) et le fichier `docker-compose.override.yml`
 
-La configuration est définie dans le dossier `/server/config` et on y trouve :
+La configuration est gérée exclusivement via variables d'environnement pour des raisons de sécurité et de cohérence entre environnements.
 
-- Un fichier `/server/config/custom-environment-variables.json` qui va définir la liste des variables d'environnements pour l'application
-- Un fichier `/server/config/default.json` qui va définir la valeur par défaut de ces variables d'environnement.
+Le module `/server/config/index.js` expose un objet mappant les variables d'environnements nécessaires au fonctionnement de l'application. Il se charge également de parser les variables grâce à env-var afin de les rendre exploitable en javascript (la valeur "true" est convertie en boolean, 1234 en number etc...).
 
-Ensuite dans la définition des conteneurs Docker ces variables d'environnements seront écrasées au besoin.
+Chaque environnement possède son propre fichier d'override afin d'isoler les différentes configurations.
 
 ## Conteneurs Docker
 
@@ -258,25 +257,25 @@ Il est possible de supprimer les données en base de plusieurs manières :
 - Pour supprimer toutes les données en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn clear:all"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn clear:all"
 ```
 
 - Pour supprimer uniquement les statuts des candidats en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn clear:statutsCandidats"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn clear:statutsCandidats"
 ```
 
 - Pour supprimer uniquement les logs (+usersEvents) en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn clear:logs"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn clear:logs"
 ```
 
 - Pour supprimer uniquement les users (+ usersEvents) en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn clear:users"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn clear:users"
 ```
 
 ### Jobs d'alimentation des données
@@ -286,19 +285,19 @@ Il est possible d'alimenter la base de donneés avec des données de réferences
 - Pour ajouter les users par défaut :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn seed:users"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:users"
 ```
 
 - Pour ajouter des statuts candidats de test en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn seed:sample"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:sample"
 ```
 
 - Pour ajouter des statuts candidats randomisés en base :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn seed:randomizedSample"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:randomizedSample"
 ```
 
 ### Jobs d'affichage des statistiques
@@ -306,30 +305,36 @@ docker exec flux_retour_cfas_server bash -c "yarn seed:randomizedSample"
 Il est possible d'afficher en console les statistiques des données du flux retour :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn stats"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn stats"
 ```
 
 ### Jobs pour l'enquete Démarches Simplifiées
 
 Pour l'enquete Démarches Simplifiés :
 
-- Il est possible de mettre à jour dans Sendinblue les contacts :
+- Il est possible d'importer l'ensemble des donneés (et de calculer des stats) de l'enquete DS :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn ds:updateSib"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:import"
 ```
 
-- Il est possible d'exporter les stats sous format csv
+- Il est possible de calculer les uniquement stats de l'enquete DS (nécessite un import préalable):
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn ds:buildStats"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:stats"
+```
+
+- Il est possible de mettre à jour dans Sendinblue les contacts ayant répondu à l'enquete :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:updateSib"
 ```
 
 - Il est possible d'exporter les clients d'Ymag/Gesti sous format csv
 
 ```bash
-docker exec flux_retour_cfas_server bash -c "yarn ds:buildYmagClients"
-docker exec flux_retour_cfas_server bash -c "yarn ds:buildGestiClients"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:buildYmagClients"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:buildGestiClients"
 ```
 
 ### Procédure à suivre au premier déploiement

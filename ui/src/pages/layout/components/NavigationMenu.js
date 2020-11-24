@@ -23,8 +23,8 @@ export default () => {
 
                 {isUserInRole(auth, roles.administrator) && (
                   <li className="nav-item">
-                    <NavLink className="nav-link" to="/enquete-ds" activeClassName="active">
-                      <i className="fe fe-box"></i> Enquête DS
+                    <NavLink className="nav-link" to="/ds-dashboard" activeClassName="active">
+                      <i className="fe fe-box"></i> Dashboard DS
                     </NavLink>
                   </li>
                 )}
@@ -32,7 +32,14 @@ export default () => {
                 {isUserInRole(auth, roles.administrator) && (
                   <li className="nav-item">
                     <NavLink className="nav-link" to="/ds-siret-sirens-manquants" activeClassName="active">
-                      <i className="fe fe-box"></i> Enquête DS - Siret & Sirens manquants
+                      <i className="fe fe-bar-chart"></i>DS - Siret & Sirens manquants
+                    </NavLink>
+                  </li>
+                )}
+                {isUserInRole(auth, roles.administrator) && (
+                  <li className="nav-item">
+                    <NavLink className="nav-link" to="/ds-commentaires" activeClassName="active">
+                      <i className="fe fe-bar-chart-2"></i>DS - Commentaires
                     </NavLink>
                   </li>
                 )}

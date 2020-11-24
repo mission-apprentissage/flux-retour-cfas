@@ -1,5 +1,5 @@
 const assert = require("assert");
-const config = require("config");
+const config = require("../../../config");
 const omit = require("lodash").omit;
 const jwt = require("jsonwebtoken");
 const httpTests = require("../../utils/httpTests");

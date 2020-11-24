@@ -1,5 +1,5 @@
 const path = require("path");
-const config = require("config");
+const config = require("../../config");
 const { ensureDir, ensureFile, emptyDir } = require("fs-extra");
 const { connectToMongo } = require("../../src/common/mongodb");
 

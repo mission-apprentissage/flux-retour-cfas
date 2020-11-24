@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const config = require("config");
+const config = require("../../../../config");
 
 const logger = require("../../logger");
 
@@ -45,15 +45,17 @@ const tempSchema = Joi.object({
 
 const validateInput = (input) => {
   let validStatutsCandidats = [];
-  let inputValidationErrors = 0;
+  let inputValidationErrors = [];
 
   input.forEach((statutCandidat, index) => {
     const { error } = tempSchema.validate(statutCandidat, { abortEarly: false });
 
     if (error) {
-      inputValidationErrors++;
-      logger.error("Validation error for input line number", index + 2);
+      // first line is the columns titles
+      const csvLineNumber = index + 2;
+      logger.error("Validation error for input line number", csvLineNumber);
       logger.error(error);
+      inputValidationErrors.push({ line: csvLineNumber, error });
       return;
     }
 

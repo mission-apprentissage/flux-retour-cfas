@@ -15,3 +15,7 @@ const getDuplicates = (arr) => {
   return store;
 };
 module.exports.getDuplicates = getDuplicates;
+
+const toDateFromUnixTimestamp = (unixTimestamp) =>
+  unixTimestamp ? new Date(unixTimestamp * 1000).toLocaleDateString("fr-FR") : null;
+module.exports.toDateFromUnixTimestamp = toDateFromUnixTimestamp;

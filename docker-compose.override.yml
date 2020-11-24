@@ -23,7 +23,33 @@ services:
       - flux_retour_cfas_server_data:/data
     environment:
       - FLUX_RETOUR_CFAS_ENV=local
+      - FLUX_RETOUR_CFAS_APP_NAME=Flux Retour Cfas
+      # logs
       - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
+      - FLUX_RETOUR_CFAS_OUTPUT_DIR=.local/output
+      - FLUX_RETOUR_CFAS_PUBLIC_URL=htt://localhost
+      # auth
+      - FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET=1234
+      - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=456
+      - FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET=789
+      # MNA Catalogue
+      - FLUX_RETOUR_CFAS_MNA_CATALOG_ENDPOINT=https://r7mayzn08d.execute-api.eu-west-3.amazonaws.com/dev
+      - FLUX_RETOUR_CFAS_MNA_API_TOKEN=1234
+      # users
+        ## ymag
+      - FLUX_RETOUR_CFAS_USERS_YMAG_NAME=ymag
+      - FLUX_RETOUR_CFAS_USERS_YMAG_PASSWORD=mdpYmag
+      - FLUX_RETOUR_CFAS_USERS_YMAG_API_KEY=01234
+      - FLUX_RETOUR_CFAS_USERS_YMAG_PERMISSIONS=apiStatutsSeeder
+        ## gesti
+      - FLUX_RETOUR_CFAS_USERS_GESTI_NAME=gesti
+      - FLUX_RETOUR_CFAS_USERS_GESTI_PASSWORD=mdpGesti
+      - FLUX_RETOUR_CFAS_USERS_GESTI_API_KEY=01234
+      - FLUX_RETOUR_CFAS_USERS_GESTI_PERMISSIONS=apiStatutsSeeder,ftpAccess
+        ## admin
+      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME=mna-admin
+      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD=password
+      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS=administrator,ftpAccess
 
   mongodb:
     ports:

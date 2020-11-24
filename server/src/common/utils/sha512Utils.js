@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const config = require("config");
+const config = require("../../../config");
 const { sha512crypt } = require("sha512crypt-node");
 
 module.exports = {

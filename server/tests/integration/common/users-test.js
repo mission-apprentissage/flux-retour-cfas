@@ -11,12 +11,12 @@ integrationTests(__filename, () => {
     const created = await createUser("user", "password");
     assert.strictEqual(created.username, "user");
     assert.strictEqual(created.permissions.length, 0);
-    assert.strictEqual(created.password.startsWith("$6$rounds=1001"), true);
+    assert.strictEqual(created.password.startsWith("$6$rounds="), true);
 
     const found = await User.findOne({ username: "user" });
     assert.strictEqual(found.username, "user");
     assert.strictEqual(found.permissions.length, 0);
-    assert.strictEqual(found.password.startsWith("$6$rounds=1001"), true);
+    assert.strictEqual(found.password.startsWith("$6$rounds="), true);
   });
 
   it("Permet de créer un utilisateur avec les droits d'admin", async () => {

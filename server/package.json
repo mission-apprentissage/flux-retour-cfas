@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -23,8 +23,9 @@
     "clear:logs": "node src/jobs/clear/clearLogs.js",
     "clear:users": "node src/jobs/clear/clearUsers.js",
     "stats": "node src/jobs/stats/index.js",
+    "ds:import": "node src/jobs/enqueteDs/import.js",
+    "ds:stats": "node src/jobs/enqueteDs/buildStats.js",
     "ds:updateSib": "node src/jobs/enqueteDs/updateSib.js",
-    "ds:buildStats": "node src/jobs/enqueteDs/buildStats.js",
     "ds:buildYmagClients": "node src/jobs/enqueteDs/buildYmagClientList.js",
     "ds:buildGestiClients": "node src/jobs/enqueteDs/buildGestiClientList.js",
     "run:tests": "node src/jobs/test/index.js"
@@ -40,12 +41,12 @@
     "bunyan-slack": "0.0.10",
     "cli-progress": "3.8.2",
     "compose-middleware": "5.0.1",
-    "config": "3.3.1",
-    "convert-csv-to-json": "0.0.15",
-    "env-var": "6.1.1",
+    "csv-parse": "4.14.1",
+    "env-var": "7.0.0",
     "express": "4.17.1",
     "faker": "5.1.0",
     "fs-extra": "9.0.0",
+    "iconv-lite": "0.6.2",
     "joi": "17.2.1",
     "json2csv": "5.0.1",
     "jsonwebtoken": "8.5.1",
@@ -63,7 +64,7 @@
     "xlsx": "0.16.1"
   },
   "engines": {
-    "node": ">=12.11.0"
+    "node": ">=14.15.0"
   },
   "prettier": {
     "printWidth": 120,
@@ -84,7 +85,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "./scripts/preventSensibleFilesCommit.sh && lint-staged"
     }
   },
   "lint-staged": {
