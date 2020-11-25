@@ -18,6 +18,6 @@ echo
 echo "Either reset those files, add them to .gitignore or remove them."
 echo
 echo "If you know what you are doing, please double-check that you are not commiting"
-echo "any credentials, password or sensible data and run git commit again with --no-verify."
+echo "any credentials, password or sensible data and run git commit again with -m `Commit message` --no-verify."
 echo
 exit 1
