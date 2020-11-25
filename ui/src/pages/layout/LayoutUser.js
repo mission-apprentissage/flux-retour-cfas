@@ -38,11 +38,6 @@ const LayoutUser = (props) => {
                   <i className="fe fe-home"></i> Accueil
                 </NavLink>
               </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/enquete-ds" activeClassName="active">
-                  <i className="fe fe-box"></i> Enquête DS
-                </NavLink>
-              </li>
             </ul>
           </div>
         </div>

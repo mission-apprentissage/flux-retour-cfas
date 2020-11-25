@@ -308,35 +308,6 @@ Il est possible d'afficher en console les statistiques des données du flux reto
 docker exec -t -i flux_retour_cfas_server bash -c "yarn stats"
 ```
 
-### Jobs pour l'enquete Démarches Simplifiées
-
-Pour l'enquete Démarches Simplifiés :
-
-- Il est possible d'importer l'ensemble des donneés (et de calculer des stats) de l'enquete DS :
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:import"
-```
-
-- Il est possible de calculer les uniquement stats de l'enquete DS (nécessite un import préalable):
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:stats"
-```
-
-- Il est possible de mettre à jour dans Sendinblue les contacts ayant répondu à l'enquete :
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:updateSib"
-```
-
-- Il est possible d'exporter les clients d'Ymag/Gesti sous format csv
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:buildYmagClients"
-docker exec -t -i flux_retour_cfas_server bash -c "yarn ds:buildGestiClients"
-```
-
 ### Procédure à suivre au premier déploiement
 
 Dès le premier déploiement de l'application est recommandé de suivre la procédure suivante :

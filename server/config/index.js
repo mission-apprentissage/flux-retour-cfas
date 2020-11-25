@@ -32,19 +32,7 @@ module.exports = {
     level: env.get("FLUX_RETOUR_CFAS_LOG_LEVEL").default("info").asString(),
   },
   slackWebhookUrl: env.get("FLUX_RETOUR_CFAS_SLACK_WEBHOOK_URL").asString(),
-  demarchesSimplifiees: {
-    apiToken: env.get("FLUX_RETOUR_CFAS_DS_TOKEN").asString(),
-    procedureCfas2020Id: env.get("FLUX_RETOUR_CFAS_DS_PROCEDURE_CFAS_ID").asString(),
-  },
   outputDir: env.get("FLUX_RETOUR_CFAS_OUTPUT_DIR").required().asString(),
-  sendinblue: {
-    apiKey: env.get("FLUX_RETOUR_CFAS_SENDINBLUE_API_KEY").asString(),
-    idListCfas: env.get("FLUX_RETOUR_CFAS_SENDINBLUE_IDLIST_CFAS").asString(),
-    idsCampaignDs2020: env.get("FLUX_RETOUR_CFAS_SENDINBLUE_IDS_CAMPAIGN_DS2020").asString(),
-  },
-  apiEntreprise: {
-    apiKey: env.get("FLUX_RETOUR_CFAS_API_ENTREPRISE_API_KEY").asString(),
-  },
   users: {
     ymag: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_YMAG_NAME").asString(),

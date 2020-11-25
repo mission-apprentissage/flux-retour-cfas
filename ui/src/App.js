@@ -6,9 +6,6 @@ import LoginPage from "./pages/login/LoginPage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
 import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
-import DsDashboardPage from "./pages/ds/DsDashboardPage";
-import DsMissingSirensSiretsPage from "./pages/ds/DsMissingSirensSiretsPage";
-import DsCommentairesPage from "./pages/ds/DsCommentairesPage";
 import HomePage from "./pages/HomePage";
 
 import useAuth from "./common/hooks/useAuth";
@@ -23,15 +20,6 @@ const App = () => {
         <Route exact path="/login" component={LoginPage} />
         <AdminRoute path="/" exact>
           <DashboardPage />
-        </AdminRoute>
-        <AdminRoute path="/ds-dashboard" exact>
-          <DsDashboardPage />
-        </AdminRoute>
-        <AdminRoute path="/ds-siret-sirens-manquants" exact>
-          <DsMissingSirensSiretsPage />
-        </AdminRoute>
-        <AdminRoute path="/ds-commentaires" exact>
-          <DsCommentairesPage />
         </AdminRoute>
 
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
