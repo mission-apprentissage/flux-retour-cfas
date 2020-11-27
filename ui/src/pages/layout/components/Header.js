@@ -3,7 +3,7 @@ import { Site, Dropdown } from "tabler-react";
 import useAuth from "../../../common/hooks/useAuth";
 import { useHistory } from "react-router-dom";
 
-export default () => {
+const Header = () => {
   let [auth, setAuth] = useAuth();
   let history = useHistory();
   let logout = () => {
@@ -53,3 +53,5 @@ export default () => {
     </Site.Header>
   );
 };
+
+export default Header;

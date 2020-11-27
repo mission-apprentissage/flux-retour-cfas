@@ -1,11 +1,11 @@
 import React from "react";
-import { Page, Site, Nav, AccountDropdown } from "tabler-react";
+import { Site, Nav } from "tabler-react";
 import useAuth from "../../common/hooks/useAuth";
 import { useHistory } from "react-router-dom";
 import packageJson from "../../../package.json";
 import { NavLink } from "react-router-dom";
 
-export default (props) => {
+const LayoutUser = (props) => {
   let [auth, setAuth] = useAuth();
   let history = useHistory();
   let logout = () => {
@@ -17,7 +17,7 @@ export default (props) => {
     <Site className="flex-fill">
       <Site.Header>
         <a className="header-brand" href="./index.html">
-          <img src="/brand/flux-cfas.png" class="header-brand-img" alt="tabler logo" />
+          <img src="/brand/flux-cfas.png" className="header-brand-img" alt="tabler logo" />
         </a>
         <div className="d-flex order-lg-2 ml-auto">
           <Nav.Item hasSubNav value={auth.sub}>
@@ -37,16 +37,6 @@ export default (props) => {
                 <NavLink className="nav-link" to="/" activeClassName="active">
                   <i className="fe fe-home"></i> Accueil
                 </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/enquete-ds" activeClassName="active">
-                  <i className="fe fe-box"></i> Enquête DS
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="/sample">
-                  <i className="fe fe-check"></i> Page Exemple
-                </a>
               </li>
             </ul>
           </div>
@@ -93,3 +83,5 @@ export default (props) => {
     </Site>
   );
 };
+
+export default LayoutUser;

@@ -1,7 +1,7 @@
 import React from "react";
 import packageJson from "../../../../package.json";
 
-export default () => {
+const Footer = () => {
   return (
     <footer className="footer">
       <div className="container">
@@ -39,3 +39,5 @@ export default () => {
     </footer>
   );
 };
+
+export default Footer;

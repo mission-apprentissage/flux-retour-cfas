@@ -1,11 +1,12 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Page } from "tabler-react";
-import CandidatsStats from "../../common/components/CandidatsStats";
 import { useFetch } from "../../common/hooks/useFetch";
 import Layout from "../layout/Layout";
+import CandidatsStats from "../../common/components/CandidatsStats";
 
-const DashboardPage = () => {
-  const [data, loading, error] = useFetch("/api/stats");
+const UserStatsPage = ({ match }) => {
+  const [data, loading, error] = useFetch(`/api/stats/${match.params.dataSource}`);
 
   return (
     <Layout>
@@ -22,4 +23,13 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+UserStatsPage.propTypes = {
+  // from react-router's Route component
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      dataSource: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+};
+
+export default UserStatsPage;

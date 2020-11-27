@@ -6,55 +6,44 @@ import LoginPage from "./pages/login/LoginPage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
 import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
-import DsDashboardPage from "./pages/ds/DsDashboardPage";
-import DsMissingSirensSiretsPage from "./pages/ds/DsMissingSirensSiretsPage";
-import DsCommentairesPage from "./pages/ds/DsCommentairesPage";
-import DashboardTablerPage from "./pages/sample/DashboardTablerPage";
-import SamplePage from "./pages/sample/SamplePage";
-import BasicTablePage from "./pages/sample/BasicTablePage";
-import BasicBootstrapPage from "./pages/sample/BasicBootstrapPage";
 import HomePage from "./pages/HomePage";
 
 import useAuth from "./common/hooks/useAuth";
 import { roles, isUserInRole } from "./common/utils/rolesUtils";
+import { anonymous } from "./common/auth";
+import UserStatsPage from "./pages/user-stats";
 
-export default () => {
-  let [auth] = useAuth();
+const App = () => {
   return (
     <Router>
       <Switch>
-        {getPrivateRouteForRole("/", <DashboardPage />, roles.administrator, auth)}
-        {getPrivateRouteForRole("/ds-dashboard", <DsDashboardPage />, roles.administrator, auth)}
-        {getPrivateRouteForRole("/ds-siret-sirens-manquants", <DsMissingSirensSiretsPage />, roles.administrator, auth)}
-        {getPrivateRouteForRole("/ds-commentaires", <DsCommentairesPage />, roles.administrator, auth)}
+        <Route exact path="/login" component={LoginPage} />
+        <AdminRoute path="/" exact>
+          <DashboardPage />
+        </AdminRoute>
+
+        <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
 
         <Route exact path="/login" component={LoginPage} />
-        <Route exact path="/sample" component={SamplePage} />
-        <Route exact path="/basic-table" component={BasicTablePage} />
-        <Route exact path="/basic-bootstrap-table" component={BasicBootstrapPage} />
-        <Route exact path="/dashboard-tabler" component={DashboardTablerPage} />
         <Route exact path="/reset-password" component={ResetPasswordPage} />
         <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
+
+        <Route exact path="/statuts-candidats/stats" />
       </Switch>
     </Router>
   );
 };
 
-function PrivateRoute({ children, ...rest }) {
-  let [auth] = useAuth();
+export default App;
 
-  return (
-    <Route
-      {...rest}
-      render={() => {
-        return auth.sub !== "anonymous" ? children : <Redirect to="/login" />;
-      }}
-    />
-  );
-}
+const PrivateRoute = ({ children, ...rest }) => {
+  const [auth] = useAuth();
 
-const getPrivateRouteForRole = (route, page, currentRole, auth) => (
-  <PrivateRoute exact path={route}>
-    {isUserInRole(auth, currentRole) ? page : <HomePage />}
-  </PrivateRoute>
-);
+  return <Route {...rest}>{auth.sub === anonymous.sub ? <Redirect to="/login" /> : children}</Route>;
+};
+
+const AdminRoute = ({ children, ...rest }) => {
+  const [auth] = useAuth();
+
+  return <PrivateRoute {...rest}>{isUserInRole(auth, roles.administrator) ? children : <HomePage />}</PrivateRoute>;
+};

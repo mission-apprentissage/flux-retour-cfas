@@ -27,7 +27,7 @@ services:
       # logs
       - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
       - FLUX_RETOUR_CFAS_OUTPUT_DIR=.local/output
-      - FLUX_RETOUR_CFAS_PUBLIC_URL=htt://localhost
+      - FLUX_RETOUR_CFAS_PUBLIC_URL=http://localhost
       # auth
       - FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET=1234
       - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=456
