@@ -76,6 +76,10 @@ Le module `/server/config/index.js` expose un objet mappant les variables d'envi
 
 Chaque environnement possède son propre fichier d'override afin d'isoler les différentes configurations.
 
+Pour la gestion et l'execution locale de l'application nous utilisons la bibliothèque [dotenv](https://github.com/motdotla/dotenv) et en local un fichier `.env` à placer dans le dossier `/server`.
+
+**Ce fichier est privé et n'est pas disponible dans le repository.**
+
 ## Conteneurs Docker
 
 ### Présentation de la configuration Docker
