@@ -7,9 +7,6 @@
   "author": "MNA",
   "license": "MIT",
   "dependencies": {
-    "@testing-library/jest-dom": "4.2.4",
-    "@testing-library/react": "9.3.2",
-    "@testing-library/user-event": "7.1.2",
     "formik": "2.1.4",
     "jsonwebtoken": "8.5.1",
     "moment": "2.27.0",
