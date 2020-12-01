@@ -2,14 +2,12 @@ const fs = require("fs");
 const Tail = require("tail").Tail;
 const logger = require("../logger");
 
-const getUserFromLog = (data) => {
-  let array = data.split(" ");
-  return array[7].replace(/["[\],]/g, "");
+const getUserFromLog = (logString) => {
+  return logString.split("[")[2].split("]")[0];
 };
 
-const getFileNameFromLog = (data) => {
-  let array = data.split(" ");
-  return array[12].replace(/["[\],]/g, "");
+const getFileNameFromLog = (logString) => {
+  return logString.split(",")[1].trim().replace(/"/g, "");
 };
 
 const getLogWatcher = async (logFile) => {
