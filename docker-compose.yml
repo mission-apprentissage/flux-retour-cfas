@@ -37,14 +37,29 @@ services:
       - flux_retour_cfas_network
     depends_on:
       - mongodb
+      - ftp
     environment:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
+      - FLUX_RETOUR_CFAS_FTP_DIR=/ftp
+      - FLUX_RETOUR_CFAS_OUTPUT_DIR=/data
 
   mongodb:
     image: mongo:4.2.6-bionic
     container_name: flux_retour_cfas_mongodb
     mem_limit: 1g
     restart: unless-stopped
+    networks:
+      - flux_retour_cfas_network
+
+  ftp:
+    image: flux_retour_cfas_ftp
+    container_name: flux_retour_cfas_ftp
+    build:
+      context: ftp
+    restart: unless-stopped
+    ports:
+      - "21:21"
+      - "21100-21110:21100-21110"
     networks:
       - flux_retour_cfas_network
 

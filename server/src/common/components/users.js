@@ -1,5 +1,9 @@
-const { User } = require("../model");
+const { User, UserEvent } = require("../model");
 const sha512Utils = require("../utils/sha512Utils");
+const { ftpAccess } = require("../roles");
+const createFtp = require("../ftp");
+const logger = require("../../common/logger");
+const { readdir } = require("fs-extra");
 
 const rehashPassword = (user, password) => {
   user.password = sha512Utils.hash(password);
@@ -7,6 +11,9 @@ const rehashPassword = (user, password) => {
 };
 
 module.exports = async () => {
+  const ftp = createFtp();
+  await ftp.ensureReady();
+
   return {
     authenticate: async (username, password) => {
       const user = await User.findOne({ username });
@@ -37,6 +44,12 @@ module.exports = async () => {
       });
 
       await user.save();
+
+      // would be better to emit a "USER_CREATED" event and do this in another module so the users component is not coupled with ftp
+      if (permissions.includes(ftpAccess)) {
+        await ftp.addUser(user);
+      }
+
       return user.toObject();
     },
     removeUser: async (username) => {
@@ -57,6 +70,30 @@ module.exports = async () => {
       await user.save();
 
       return user.toObject();
+    },
+    getFtpFiles: async (username) => readdir(ftp.getHome(username)),
+    recordFtpActivity: async () => {
+      let watcher = await ftp.createFtpWatcher();
+
+      watcher.onLogin((username) => {
+        const event = new UserEvent({ type: "ftp", action: "login", username });
+        event.save();
+        logger.info(`${username} logged into FTP`);
+      });
+
+      watcher.onFileUploaded((username, fileName) => {
+        const event = new UserEvent({ type: "ftp", action: "upload", username, data: fileName });
+        event.save();
+        logger.info(`${fileName} has been uploaded`);
+      });
+
+      watcher.onFileDownloaded((username, fileName) => {
+        const event = new UserEvent({ type: "ftp", action: "download", username, data: fileName });
+        event.save();
+        logger.info(`File ${fileName} has been downloaded by ${username}`);
+      });
+
+      return watcher.stop;
     },
   };
 };

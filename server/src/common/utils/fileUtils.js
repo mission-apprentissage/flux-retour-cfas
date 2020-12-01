@@ -1,10 +1,17 @@
 const XLSX = require("xlsx");
-const csvToJson = require("convert-csv-to-json");
 const path = require("path");
+const parse = require("csv-parse/lib/sync");
+const fs = require("fs");
+const iconvlite = require("iconv-lite");
 
-const readJsonFromCsvFile = (localPath) => {
-  return csvToJson.getJsonFromCsv(localPath);
+const readFile = (fileInputName) => {
+  const content = fs.readFileSync(fileInputName);
+  return iconvlite.decode(content, "latin1").toString();
 };
+const readJsonFromCsvFile = (fileInputName) => {
+  return parse(readFile(fileInputName), { columns: true, delimiter: ";", relax: true });
+};
+
 module.exports.readJsonFromCsvFile = readJsonFromCsvFile;
 
 const readXLSXFile = (localPath) => {

@@ -1,6 +1,7 @@
 const { Schema } = require("mongoose");
+const { validateUai } = require("../../domain/uai");
 
-module.exports = new Schema({
+const statutsCandidatsSchema = new Schema({
   ine_apprenant: {
     type: String,
     default: null,
@@ -116,4 +117,14 @@ module.exports = new Schema({
     default: Date.now,
     description: "Date d'ajout en base de données",
   },
+  source: {
+    type: String,
+    description: "Source du statut candidat (Ymag, Gesti...)",
+  },
 });
+
+statutsCandidatsSchema.virtual("uai_etablissement_valid").get(function () {
+  return validateUai(this.uai_etablissement);
+});
+
+module.exports = statutsCandidatsSchema;

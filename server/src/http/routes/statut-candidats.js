@@ -1,9 +1,10 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const config = require("config");
 const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
+
+const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
 module.exports = ({ statutsCandidats }) => {
   const router = express.Router();
@@ -12,7 +13,7 @@ module.exports = ({ statutsCandidats }) => {
    * Schema for validation
    */
   const statutCandidatSchema = Joi.array()
-    .max(config.postStatutsCandidatsMaxLength)
+    .max(POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH)
     .items(
       Joi.object({
         ine_apprenant: Joi.string().allow(null, ""),
@@ -41,8 +42,6 @@ module.exports = ({ statutsCandidats }) => {
   router.post(
     "/",
     tryCatch(async (req, res) => {
-      var retourStatus = {};
-
       try {
         // Validate schema
         await statutCandidatSchema.validateAsync(req.body, { abortEarly: false });
@@ -59,21 +58,23 @@ module.exports = ({ statutsCandidats }) => {
         await event.save();
 
         // Add StatutsCandidats
-        await statutsCandidats.addOrUpdateStatuts(req.body);
+        const toAddOrUpdate = req.body.map((statutCandidat) => ({
+          ...statutCandidat,
+          source: req.user.username,
+        }));
+        await statutsCandidats.addOrUpdateStatuts(toAddOrUpdate);
 
-        retourStatus = {
+        res.json({
           status: "OK",
           message: "Success",
-        };
+        });
       } catch (err) {
         logger.error("POST StatutCandidat error : " + err);
-        retourStatus = {
+        res.status(400).json({
           status: "ERROR",
           message: err.message,
-        };
+        });
       }
-
-      return res.json(retourStatus);
     })
   );
 

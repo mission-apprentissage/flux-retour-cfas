@@ -2,7 +2,7 @@ const moment = require("moment");
 const { closeMongoConnection } = require("../common/mongodb");
 const createComponents = require("../common/components/components");
 const logger = require("../common/logger");
-const config = require("config");
+const config = require("../../config");
 const { access, mkdir } = require("fs").promises;
 
 process.on("unhandledRejection", (e) => console.log(e));

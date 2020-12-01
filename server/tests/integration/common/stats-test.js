@@ -24,12 +24,17 @@ integrationTests(__filename, () => {
     assert.strictEqual(allStats.nbDistinctCandidatsWithoutIne > 0, true);
     assert.strictEqual(allStats.nbDistinctCandidatsWithIne > 0, true);
 
-    assert.strictEqual(allStats.nbStatutsCandidatsParUais.length > 0, true);
-    assert.strictEqual(allStats.nbStatutsCandidatsInscritsParUais.length > 0, true);
-    assert.strictEqual(allStats.nbStatutsCandidatsApprentisParUais.length > 0, true);
-    assert.strictEqual(allStats.nbStatutsCandidatsAbandonParUais.length > 0, true);
-
     assert.strictEqual(allStats.nbCandidatsMultiUais > 0, true);
     assert.strictEqual(allStats.nbCandidatsMultiCfds > 0, true);
+
+    assert.strictEqual(allStats.nbDistinctCandidatsTotal > 0, true);
+    assert.strictEqual(allStats.nbDistinctCandidatsWithIne > 0, true);
+    assert.strictEqual(allStats.nbDistinctCandidatsWithoutIne > 0, true);
+    assert.strictEqual(allStats.nbStatutsSansIne > 0, true);
+    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectInscrit > 0, true);
+    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectApprenti > 0, true);
+    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectAbandon === 0, true);
+
+    assert.strictEqual(allStats.nbCfas > 0, true);
   });
 });

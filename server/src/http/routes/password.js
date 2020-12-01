@@ -1,7 +1,7 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("joi");
-const config = require("config");
+const config = require("../../../config");
 const passport = require("passport");
 const { Strategy, ExtractJwt } = require("passport-jwt");
 const tryCatch = require("../middlewares/tryCatchMiddleware");

@@ -13,9 +13,10 @@ export function useFetch(url, initialState = null) {
     try {
       const response = await _get(url);
       setResponse(response);
-      setLoading(false);
     } catch (error) {
       setError(error);
+    } finally {
+      setLoading(false);
     }
   }, [url]);
 

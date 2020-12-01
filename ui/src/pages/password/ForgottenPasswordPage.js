@@ -9,7 +9,7 @@ import FormError from "../../common/components/FormError";
 import CenteredCol from "../../common/components/CenteredCol";
 import FormMessage from "../../common/components/FormMessage";
 
-export default () => {
+const ForgottenPasswordPage = () => {
   let [, setAuth] = useAuth();
   let history = useHistory();
 
@@ -40,6 +40,9 @@ export default () => {
         <Page.Content>
           <Grid.Row>
             <CenteredCol>
+              <div className="text-center mb-6">
+                <img src="/brand/flux-cfas.png" className="h-6" alt="" />
+              </div>
               <Card>
                 <Card.Header>
                   <Card.Title>Mot de passe oublié</Card.Title>
@@ -89,3 +92,5 @@ export default () => {
     </Page>
   );
 };
+
+export default ForgottenPasswordPage;
