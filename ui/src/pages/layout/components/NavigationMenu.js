@@ -1,8 +1,9 @@
 import React from "react";
-import { Site } from "tabler-react";
-import useAuth from "../../../common/hooks/useAuth";
 import { NavLink } from "react-router-dom";
-import { roles, isUserInRole } from "../../../common/utils/rolesUtils";
+import { Site } from "tabler-react";
+
+import useAuth from "../../../common/hooks/useAuth";
+import { isUserInRole, roles } from "../../../common/utils/rolesUtils";
 
 const NavigationMenu = () => {
   let [auth] = useAuth();

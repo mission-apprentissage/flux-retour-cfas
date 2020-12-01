@@ -1,13 +1,14 @@
+import { Field, Form, Formik } from "formik";
 import React from "react";
-import * as Yup from "yup";
-import { Form as TablerForm, Card, Page, Button, Grid } from "tabler-react";
-import { Formik, Field, Form } from "formik";
 import { useHistory } from "react-router-dom";
+import { Button, Card, Form as TablerForm, Grid, Page } from "tabler-react";
+import * as Yup from "yup";
+
+import CenteredCol from "../../common/components/CenteredCol";
+import FormError from "../../common/components/FormError";
+import FormMessage from "../../common/components/FormMessage";
 import useAuth from "../../common/hooks/useAuth";
 import { _post } from "../../common/httpClient";
-import FormError from "../../common/components/FormError";
-import CenteredCol from "../../common/components/CenteredCol";
-import FormMessage from "../../common/components/FormMessage";
 
 const ForgottenPasswordPage = () => {
   let [, setAuth] = useAuth();
