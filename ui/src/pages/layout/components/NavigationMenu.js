@@ -22,26 +22,18 @@ const NavigationMenu = () => {
                 </li>
 
                 {isUserInRole(auth, roles.administrator) && (
-                  <li className="nav-item">
-                    <NavLink className="nav-link" to="/ds-dashboard" activeClassName="active">
-                      <i className="fe fe-box"></i> Dashboard DS
-                    </NavLink>
-                  </li>
-                )}
-
-                {isUserInRole(auth, roles.administrator) && (
-                  <li className="nav-item">
-                    <NavLink className="nav-link" to="/ds-siret-sirens-manquants" activeClassName="active">
-                      <i className="fe fe-bar-chart"></i>DS - Siret & Sirens manquants
-                    </NavLink>
-                  </li>
-                )}
-                {isUserInRole(auth, roles.administrator) && (
-                  <li className="nav-item">
-                    <NavLink className="nav-link" to="/ds-commentaires" activeClassName="active">
-                      <i className="fe fe-bar-chart-2"></i>DS - Commentaires
-                    </NavLink>
-                  </li>
+                  <>
+                    <li className="nav-item">
+                      <NavLink className="nav-link" to="/stats/gesti" activeClassName="active">
+                        <i className="fe fe-box"></i> Stats Gesti
+                      </NavLink>
+                    </li>
+                    <li className="nav-item">
+                      <NavLink className="nav-link" to="/stats/ymag" activeClassName="active">
+                        <i className="fe fe-box"></i> Stats Ymag
+                      </NavLink>
+                    </li>
+                  </>
                 )}
               </ul>
             </div>
