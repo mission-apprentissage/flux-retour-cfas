@@ -152,6 +152,24 @@ De même pour consulter la liste des fichiers dans le docker :
 docker exec flux_retour_cfas_server bash -c 'ls'
 ```
 
+## Migrations
+
+Le projet utilise [migrate-mongo](https://github.com/seppevs/migrate-mongo#readme). Les migrations se trouvent dans le répertoire `/server/src/migrations`
+
+Pour créer une migration :
+```sh
+yarn migration:create ma-nouvelle-migration
+```
+
+Pour jouer les migrations :
+```sh
+yarn migration:up
+```
+
+Après chaque migration réussie [migrate-mongo](https://github.com/seppevs/migrate-mongo#readme) stocke dans la collection Mongo `changelog` une référence permettant de versionner le processus et ne pas rejouer à chaque fois toutes les migrations.
+
+Les nouvelles migrations sont exécutées automatiquement à chaque déploiement.
+
 ## Linter
 
 Un linter (via ESLint) est mis en place dans le projet, pour le lancer :

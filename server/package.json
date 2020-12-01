@@ -23,7 +23,10 @@
     "clear:logs": "node -r dotenv/config src/jobs/clear/clearLogs.js",
     "clear:users": "node -r dotenv/config src/jobs/clear/clearUsers.js",
     "stats": "node -r dotenv/config src/jobs/stats/index.js",
-    "run:tests": "node -r dotenv/config src/jobs/test/index.js"
+    "run:tests": "node -r dotenv/config src/jobs/test/index.js",
+    "migration:create": "migrate-mongo create -f src/migrations/migrate-mongo-config.js",
+    "migration:up": "migrate-mongo up -f src/migrations/migrate-mongo-config.js",
+    "migration:down": "migrate-mongo down -f src/migrations/migrate-mongo-config.js"
   },
   "dependencies": {
     "async": "3.2.0",
@@ -46,6 +49,7 @@
     "json2csv": "5.0.5",
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.20",
+    "migrate-mongo": "8.1.4",
     "moment": "2.29.1",
     "mongoose": "5.10.18",
     "passport": "0.4.1",
