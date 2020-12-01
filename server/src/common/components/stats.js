@@ -16,6 +16,7 @@ const getAllStats = async (filters = {}) => {
   const nbDistinctCandidatsWithIne = await getNbDistinctCandidatsWithIne(filters);
   const nbDistinctCandidatsWithoutIne = await getNbDistinctCandidatsWithoutIne(filters);
   const nbStatutsSansIne = allStatutCandidats.filter((statut) => !statut.ine_apprenant).length;
+  const nbInvalidUais = allStatutCandidats.filter((statut) => !statut.uai_etablissement_valid).length;
 
   const nbDistinctCandidatsWithChangingStatutProspectInscrit = allStatutCandidats.filter((statut) => {
     const sortedStatutsValuesHistory = statut.historique_statut_apprenant
@@ -68,6 +69,7 @@ const getAllStats = async (filters = {}) => {
     nbDistinctCandidatsWithChangingStatutProspectApprenti,
     nbDistinctCandidatsWithChangingStatutProspectAbandon,
     nbCfas: await getNbDistinctCfas(filters),
+    nbInvalidUais,
   };
 };
 
@@ -142,7 +144,7 @@ const getNbDistinctCandidatsWithHistoryNbItems = async (nbChangements, filters) 
     ])
   ).length;
 
-const getNbDistinctCfas = async () => {
-  const distinctUais = await StatutCandidat.distinct("uai_etablissement");
+const getNbDistinctCfas = async (filters) => {
+  const distinctUais = await StatutCandidat.distinct("uai_etablissement", filters);
   return distinctUais.length;
 };

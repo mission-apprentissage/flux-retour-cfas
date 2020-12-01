@@ -19,6 +19,14 @@ const CandidatsStats = ({ stats }) => {
           <StampCard
             color="blue"
             icon="users"
+            header={`${stats.nbInvalidUais} UAIs invalides au total`}
+            footer={"Nb total de UAIs invalides"}
+          />
+        </Grid.Col>
+        <Grid.Col sm={6} lg={3}>
+          <StampCard
+            color="blue"
+            icon="users"
             header={`${stats.nbDistinctCandidatsTotal} candidats au total`}
             footer={"Nb total de candidats"}
           />

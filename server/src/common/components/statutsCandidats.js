@@ -1,12 +1,13 @@
 const { StatutCandidat } = require("../model");
+const logger = require("../logger");
 const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("../model/constants");
+const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 
 module.exports = () => ({
   existsStatut,
   getStatut,
   addOrUpdateStatuts,
-  updateStatut,
   getStatutHistory,
 });
 
@@ -74,6 +75,10 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
       id_formation: item.id_formation,
       uai_etablissement: item.uai_etablissement,
     });
+
+    // log when uai is not valid
+    const isUaiValid = validateUai(item.uai_etablissement);
+    !isUaiValid && logger.warn(`Invalid UAI "${item.uai_etablissement}" detected. Will add or update anyway.`);
 
     if (foundItem) {
       const updatedItem = await updateStatut(foundItem._id, item);
