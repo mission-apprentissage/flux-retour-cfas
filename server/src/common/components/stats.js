@@ -1,5 +1,6 @@
 const { StatutCandidat } = require("../../common/model");
 const { codesStatutsCandidats } = require("../../common/model/constants");
+const { validateUai } = require("../../common/domain/uai");
 
 module.exports = async () => {
   return {
@@ -12,11 +13,11 @@ const filterByStatutApprenant = (statutApprenantFilter) => (statutCandidat) => {
 };
 
 const getAllStats = async (filters = {}) => {
-  const allStatutCandidats = await StatutCandidat.find().lean();
+  const allStatutCandidats = await StatutCandidat.find(filters).lean();
   const nbDistinctCandidatsWithIne = await getNbDistinctCandidatsWithIne(filters);
   const nbDistinctCandidatsWithoutIne = await getNbDistinctCandidatsWithoutIne(filters);
   const nbStatutsSansIne = allStatutCandidats.filter((statut) => !statut.ine_apprenant).length;
-  const nbInvalidUais = allStatutCandidats.filter((statut) => !statut.uai_etablissement_valid).length;
+  const nbInvalidUais = allStatutCandidats.filter((statut) => !validateUai(statut.uai_etablissement)).length;
 
   const nbDistinctCandidatsWithChangingStatutProspectInscrit = allStatutCandidats.filter((statut) => {
     const sortedStatutsValuesHistory = statut.historique_statut_apprenant
@@ -61,9 +62,9 @@ const getAllStats = async (filters = {}) => {
 
     nbStatutsWithoutHistory: await getNbStatutsCandidatsWithoutHistory(filters),
 
-    nbDistinctCandidatsWithStatutHistory1: await getNbDistinctCandidatsWithHistoryNbItems(2),
-    nbDistinctCandidatsWithStatutHistory2: await getNbDistinctCandidatsWithHistoryNbItems(3),
-    nbDistinctCandidatsWithStatutHistory3: await getNbDistinctCandidatsWithHistoryNbItems(4),
+    nbDistinctCandidatsWithStatutHistory1: await getNbDistinctCandidatsWithHistoryNbItems(2, filters),
+    nbDistinctCandidatsWithStatutHistory2: await getNbDistinctCandidatsWithHistoryNbItems(3, filters),
+    nbDistinctCandidatsWithStatutHistory3: await getNbDistinctCandidatsWithHistoryNbItems(4, filters),
 
     nbDistinctCandidatsWithChangingStatutProspectInscrit,
     nbDistinctCandidatsWithChangingStatutProspectApprenti,
