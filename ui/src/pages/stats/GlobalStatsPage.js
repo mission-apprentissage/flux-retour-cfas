@@ -14,9 +14,6 @@ const GlobalStatsPage = () => {
   return (
     data && (
       <Box>
-        <Heading fontFamily="Marianne" fontSize="delta" color="grey.800" as="h2">
-          Dashboard de l&apos;apprentissage
-        </Heading>
         <Heading fontSize="alpha" fontWeight="400" as="h1" mb="1v" mt="9w">
           Statistiques globales
         </Heading>

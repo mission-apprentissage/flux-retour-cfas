@@ -20,7 +20,7 @@ const StatCard = ({ label, stat, background = "bluefrance", color = "white", ind
 
 StatCard.propTypes = {
   label: PropTypes.string.isRequired,
-  stat: PropTypes.string.isRequired,
+  stat: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   background: PropTypes.string,
   color: PropTypes.string,
   indicatorColor: PropTypes.string,

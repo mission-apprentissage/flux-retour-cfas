@@ -1,5 +1,4 @@
 import { Box, Center, Heading, HStack, Text } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
 import PageSectionTitle from "../../common/components/PageSectionTitle";
@@ -10,9 +9,6 @@ const CfaViewPage = () => {
   return (
     <>
       <Box>
-        <Heading fontFamily="Marianne" fontSize="delta" color="grey.800" as="h2">
-          Dashboard de l&apos;apprentissage
-        </Heading>
         <Heading fontSize="alpha" fontWeight="400" as="h1" mb="1v" mt="9w">
           Institut de la vigne et du vin
         </Heading>
@@ -70,10 +66,6 @@ const CfaViewPage = () => {
       </Box>
     </>
   );
-};
-
-CfaViewPage.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export default CfaViewPage;

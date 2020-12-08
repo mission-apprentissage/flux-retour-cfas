@@ -1,20 +1,24 @@
 import { Box, Heading, Link, VStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useRouteMatch } from "react-router-dom";
 
 import { useAuthState } from "../../auth";
 import { isUserAdmin } from "../../utils/rolesUtils";
 
-const NavLink = ({ isActive = false, to, children }) => {
+const NavLink = ({ to, children }) => {
+  const match = useRouteMatch({
+    path: to,
+    exact: true,
+  });
   return (
     <Box
       as="li"
       px="2w"
       py="1w"
       borderRadius="4.8rem"
-      background={isActive ? "white" : "initial"}
-      boxShadow={isActive ? "0 0 1rem rgba(0, 0, 0, 0.08)" : ""}
+      background={match ? "white" : "initial"}
+      boxShadow={match ? "0 0 1rem rgba(0, 0, 0, 0.08)" : ""}
     >
       <Link to={to} as={RouterLink} color="bluefrance" fontSize="epsilon">
         {children}
@@ -24,7 +28,6 @@ const NavLink = ({ isActive = false, to, children }) => {
 };
 
 NavLink.propTypes = {
-  isActive: PropTypes.bool,
   to: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
 };
@@ -59,8 +62,8 @@ const LeftSideNavigation = ({ width }) => {
         TERRITOIRE
       </Heading>
       <VStack as="ul" listStyleType="none" spacing="1w" align="left" mt="2w">
-        <NavLink>Établissements</NavLink>
-        <NavLink isActive>Départements</NavLink>
+        <NavLink to="/etablissements">Établissements</NavLink>
+        <NavLink>Départements</NavLink>
         <NavLink>Académies</NavLink>
         <NavLink>Régions académiques</NavLink>
       </VStack>

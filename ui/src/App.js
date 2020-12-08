@@ -19,6 +19,10 @@ const App = () => {
   return (
     <Router>
       <Switch>
+        <Route exact path="/login" component={LoginPage} />
+        <Route exact path="/reset-password" component={ResetPasswordPage} />
+        <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
+
         <AppLayout>
           <PrivateRoute exact path="/">
             <Redirect to={isAdmin ? "/stats" : "/stats/gesti"} />
@@ -28,10 +32,6 @@ const App = () => {
           <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
           <Route exact path="/etablissements" component={CfaViewPage} />
         </AppLayout>
-
-        <Route exact path="/login" component={LoginPage} />
-        <Route exact path="/reset-password" component={ResetPasswordPage} />
-        <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
 
         <Route component={() => <div>404</div>} />
       </Switch>

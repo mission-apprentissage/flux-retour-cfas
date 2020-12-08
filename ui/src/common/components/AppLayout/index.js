@@ -1,16 +1,36 @@
-import { Box, Flex } from "@chakra-ui/react";
+import { Box, Flex, Heading, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
+import { useHistory } from "react-router-dom";
 
+import useAuth from "../../hooks/useAuth";
 import LeftSideNavigation from "../LeftSideNavigation";
 
 const LEFT_SIDE_NAV_WIDTH = "18.25rem";
 
 const AppLayout = ({ children }) => {
+  const [auth, setAuth] = useAuth();
+  const history = useHistory();
+  const logout = () => {
+    setAuth(null);
+    history.push("/login");
+  };
+
   return (
     <Flex>
       <LeftSideNavigation width={LEFT_SIDE_NAV_WIDTH} />
-      <Box marginLeft={LEFT_SIDE_NAV_WIDTH} padding="3rem">
+      <Box marginLeft={LEFT_SIDE_NAV_WIDTH} width="100%" padding="3rem">
+        <Flex justifyContent="space-between">
+          <Heading fontFamily="Marianne" fontSize="delta" color="grey.800" as="h2">
+            Dashboard de l&apos;apprentissage
+          </Heading>
+          <Menu>
+            <MenuButton fontSize="zeta">{auth.sub}</MenuButton>
+            <MenuList>
+              <MenuItem onClick={logout}>Déconnexion</MenuItem>
+            </MenuList>
+          </Menu>
+        </Flex>
         {children}
       </Box>
     </Flex>
