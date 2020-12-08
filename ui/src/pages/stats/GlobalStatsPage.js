@@ -5,12 +5,11 @@ import React from "react";
 import GlobalStats from "../../common/components/GlobalStats";
 import { useFetch } from "../../common/hooks/useFetch";
 
-const UserStatsPage = ({ match }) => {
-  const userName = match.params.dataSource;
-  const [data, loading, error] = useFetch(`/api/stats/${userName}`);
+const GlobalStatsPage = () => {
+  const [data, loading, error] = useFetch(`/api/stats`);
 
   if (loading) return <p>Chargement des données...</p>;
-  if (error) return <p>Erreur lors du chargement des statistiques {userName}</p>;
+  if (error) return <p>Erreur lors du chargement des statistiques</p>;
 
   return (
     data && (
@@ -19,7 +18,7 @@ const UserStatsPage = ({ match }) => {
           Dashboard de l&apos;apprentissage
         </Heading>
         <Heading fontSize="alpha" fontWeight="400" as="h1" mb="1v" mt="9w">
-          Statistiques {userName}
+          Statistiques globales
         </Heading>
         <GlobalStats stats={data.stats} />
       </Box>
@@ -27,13 +26,8 @@ const UserStatsPage = ({ match }) => {
   );
 };
 
-UserStatsPage.propTypes = {
-  // from react-router's Route component
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      dataSource: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
+GlobalStatsPage.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
-export default UserStatsPage;
+export default GlobalStatsPage;
