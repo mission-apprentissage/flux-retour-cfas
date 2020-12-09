@@ -59,6 +59,7 @@ const LeftSideNavigation = ({ width }) => {
         )}
       </VStack>
       <Heading as="h2" textStyle="h2" fontSize="zeta" fontWeight="400" mt="6w">
+        <Box as="i" className="ri-map-pin-fill" marginRight="3v" />
         TERRITOIRE
       </Heading>
       <VStack as="ul" listStyleType="none" spacing="1w" align="left" mt="2w">

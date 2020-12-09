@@ -25,7 +25,13 @@ const AppLayout = ({ children }) => {
             Dashboard de l&apos;apprentissage
           </Heading>
           <Menu>
-            <MenuButton fontSize="zeta">{auth.sub}</MenuButton>
+            <MenuButton>
+              <Flex alignItems="center">
+                <Box fontSize="beta" as="i" className="ri-account-circle-fill" marginRight="1w" />
+                <span>{auth.sub}</span>
+                <Box fontSize="beta" as="i" className="ri-arrow-down-s-line" marginLeft="1w" />
+              </Flex>
+            </MenuButton>
             <MenuList>
               <MenuItem onClick={logout}>Déconnexion</MenuItem>
             </MenuList>
