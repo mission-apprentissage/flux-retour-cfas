@@ -1,11 +1,20 @@
 @font-face {
   font-family: "Marianne";
-  src: local("Marianne"), url(./fonts/Marianne-Regular.woff2) format("woff");
+  src: local("Marianne"), url(./fonts/Marianne-Regular.woff2) format("woff2"),
+    url(./fonts/Marianne-Regular.woff) format("woff");
   font-weight: 400;
 }
 
 @font-face {
   font-family: "Marianne";
-  src: local("Marianne"), url(./fonts/Marianne-Bold.woff2) format("woff");
+  src: local("Marianne"), url(./fonts/Marianne-Bold.woff2) format("woff2"),
+    url(./fonts/Marianne-Bold.woff) format("woff");
   font-weight: 700;
+}
+
+@font-face {
+  font-family: "Marianne";
+  src: local("Marianne"), url(./fonts/Marianne-ExtraBold.woff2) format("woff2"),
+    url(./fonts/Marianne-ExtraBold.woff) format("woff");
+  font-weight: 800;
 }

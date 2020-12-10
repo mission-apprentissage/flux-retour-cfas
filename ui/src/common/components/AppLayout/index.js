@@ -21,7 +21,7 @@ const AppLayout = ({ children }) => {
       <LeftSideNavigation width={LEFT_SIDE_NAV_WIDTH} />
       <Box marginLeft={LEFT_SIDE_NAV_WIDTH} width="100%" padding="3rem">
         <Flex justifyContent="space-between">
-          <Heading fontFamily="Marianne" fontSize="delta" color="grey.800" as="h2">
+          <Heading fontFamily="Marianne" fontSize="delta" fontWeight="800" color="grey.800" as="h2">
             Dashboard de l&apos;apprentissage
           </Heading>
           <Menu>
