@@ -46,8 +46,6 @@ module.exports = ({ statutsCandidats }) => {
         // Validate schema
         await statutCandidatSchema.validateAsync(req.body, { abortEarly: false });
 
-        logger.info("Posting new statut candidats : ", req.body);
-
         // Add user event
         const event = new UserEvent({
           username: req.user.username,
