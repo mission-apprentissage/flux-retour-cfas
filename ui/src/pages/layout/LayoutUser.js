@@ -1,9 +1,9 @@
 import React from "react";
-import { Site, Nav } from "tabler-react";
-import useAuth from "../../common/hooks/useAuth";
-import { useHistory } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
+import { Nav, Site } from "tabler-react";
+
 import packageJson from "../../../package.json";
-import { NavLink } from "react-router-dom";
+import useAuth from "../../common/hooks/useAuth";
 
 const LayoutUser = (props) => {
   let [auth, setAuth] = useAuth();
@@ -54,7 +54,7 @@ const LayoutUser = (props) => {
                 <div className="col-auto">
                   <ul className="list-inline list-inline-dots mb-0">
                     <li className="list-inline-item">
-                      <a href="https://mission-apprentissage.gitbook.io/" target="_blank">
+                      <a href="https://mission-apprentissage.gitbook.io/" target="_blank" rel="noopener noreferrer">
                         Documentation
                       </a>
                     </li>
@@ -64,6 +64,7 @@ const LayoutUser = (props) => {
                   <a
                     href="https://github.com/mission-apprentissage/flux-retour-cfas"
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="btn btn-outline-primary btn-sm"
                   >
                     Code source
@@ -72,8 +73,8 @@ const LayoutUser = (props) => {
               </div>
             </div>
             <div className="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
-              <a href="https://beta.gouv.fr/startups/apprentissage.html" target="_blank">
-                Mission Nationale pour l'apprentissage
+              <a href="https://beta.gouv.fr/startups/apprentissage.html" target="_blank" rel="noopener noreferrer">
+                Mission Nationale pour l&apos;apprentissage
               </a>{" "}
               - © {`${new Date().getFullYear()}`} - Version {packageJson.version}
             </div>

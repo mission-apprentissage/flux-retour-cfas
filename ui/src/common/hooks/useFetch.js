@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import { _get } from "../httpClient";
 
 export function useFetch(url, initialState = null) {

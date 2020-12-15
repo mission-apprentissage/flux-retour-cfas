@@ -1,6 +1,6 @@
-import React from "react";
 import PropTypes from "prop-types";
-import { Header, Alert, Grid, StampCard } from "tabler-react";
+import React from "react";
+import { Alert, Grid, Header, StampCard } from "tabler-react";
 
 const CandidatsStats = ({ stats }) => {
   return (

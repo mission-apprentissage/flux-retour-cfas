@@ -1,7 +1,35 @@
 {
   "root": true,
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
   "extends": [
-    "react-app",
-    "plugin:prettier/recommended"
-  ]
+    "eslint:recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended" // Make sure this is always the last element in the array.
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "warn",
+    "import/order": "off",
+    "simple-import-sort/imports": "error"
+  },
+  "plugins": ["simple-import-sort", "import", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 2018, 
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+      }
+    }
 }
