@@ -1,6 +1,6 @@
 const { StatutCandidat } = require("../../common/model");
 const { codesStatutsCandidats } = require("../../common/model/constants");
-const { validateUai } = require("../../common/domain/uai");
+const { validateUai } = require("../domain/uai");
 
 module.exports = async () => {
   return {
