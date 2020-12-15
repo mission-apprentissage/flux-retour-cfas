@@ -1,9 +1,10 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 import { Page } from "tabler-react";
+
+import CandidatsStats from "../../common/components/CandidatsStats";
 import { useFetch } from "../../common/hooks/useFetch";
 import Layout from "../layout/Layout";
-import CandidatsStats from "../../common/components/CandidatsStats";
 
 const UserStatsPage = ({ match }) => {
   const [data, loading, error] = useFetch(`/api/stats/${match.params.dataSource}`);

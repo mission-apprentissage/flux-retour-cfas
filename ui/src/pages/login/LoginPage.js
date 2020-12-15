@@ -1,12 +1,13 @@
+import { Field, Form, Formik } from "formik";
 import React from "react";
-import * as Yup from "yup";
-import { Form as TablerForm, Card, Page, Alert, Header, Button, Grid } from "tabler-react";
-import { Formik, Field, Form } from "formik";
 import { NavLink, useHistory } from "react-router-dom";
-import useAuth from "../../common/hooks/useAuth";
-import { _post } from "../../common/httpClient";
+import { Button, Card, Form as TablerForm, Grid, Page } from "tabler-react";
+import * as Yup from "yup";
+
 import CenteredCol from "../../common/components/CenteredCol";
 import FormError from "../../common/components/FormError";
+import useAuth from "../../common/hooks/useAuth";
+import { _post } from "../../common/httpClient";
 
 const LoginPage = () => {
   let [, setAuth] = useAuth();

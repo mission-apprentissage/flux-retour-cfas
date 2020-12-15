@@ -1,4 +1,4 @@
-import { useAuthState, anonymous } from "../auth";
+import { anonymous, useAuthState } from "../auth";
 import decodeJWT from "../utils/decodeJWT";
 
 export default function useAuth() {
