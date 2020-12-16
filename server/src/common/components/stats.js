@@ -12,7 +12,7 @@ const getAllStats = async (filters = {}) => {
   const nbAllStatutCandidats = await StatutCandidat.countDocuments(filters);
   const nbStatutsCandidatsMisAJour = await StatutCandidat.countDocuments({
     ...filters,
-    updatedAt: { $ne: null },
+    updated_at: { $ne: null },
   });
   const nbStatutsProspect = await StatutCandidat.countDocuments({
     statut_apprenant: codesStatutsCandidats.prospect,
