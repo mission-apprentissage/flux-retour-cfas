@@ -1,7 +1,8 @@
 import React from "react";
-import { Site, Dropdown } from "tabler-react";
-import useAuth from "../../../common/hooks/useAuth";
 import { useHistory } from "react-router-dom";
+import { Dropdown, Site } from "tabler-react";
+
+import useAuth from "../../../common/hooks/useAuth";
 
 const Header = () => {
   let [auth, setAuth] = useAuth();
@@ -42,7 +43,7 @@ const Header = () => {
               </Dropdown.Item>
               <Dropdown.ItemDivider />
               <Dropdown.Item icon="log-out" to="#" onClick={logout}>
-                <span href="#" onClick={logout}>
+                <span href="#" onClick={logout} role="button">
                   Déconnexion
                 </span>
               </Dropdown.Item>

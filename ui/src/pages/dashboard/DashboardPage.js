@@ -1,5 +1,6 @@
 import React from "react";
 import { Page } from "tabler-react";
+
 import CandidatsStats from "../../common/components/CandidatsStats";
 import { useFetch } from "../../common/hooks/useFetch";
 import Layout from "../layout/Layout";

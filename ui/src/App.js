@@ -1,16 +1,16 @@
-import React from "react";
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 import "tabler-react/dist/Tabler.css";
 
-import LoginPage from "./pages/login/LoginPage";
-import ResetPasswordPage from "./pages/password/ResetPasswordPage";
-import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
+import React from "react";
+import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
+
+import { anonymous } from "./common/auth";
+import useAuth from "./common/hooks/useAuth";
+import { isUserInRole, roles } from "./common/utils/rolesUtils";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import HomePage from "./pages/HomePage";
-
-import useAuth from "./common/hooks/useAuth";
-import { roles, isUserInRole } from "./common/utils/rolesUtils";
-import { anonymous } from "./common/auth";
+import LoginPage from "./pages/login/LoginPage";
+import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
+import ResetPasswordPage from "./pages/password/ResetPasswordPage";
 import UserStatsPage from "./pages/user-stats";
 
 const App = () => {

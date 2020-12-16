@@ -52,4 +52,12 @@ module.exports = {
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS").default([]).asArray(),
     },
   },
+  ovhStorage: {
+    username: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_USERNAME").required().asString(),
+    password: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_PASSWORD").required().asString(),
+    authURL: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_AUTH_URL").required().asString(),
+    tenantId: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_TENANT_ID").required().asString(),
+    region: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_REGION").required().asString(),
+    containerName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").required().asString(),
+  },
 };

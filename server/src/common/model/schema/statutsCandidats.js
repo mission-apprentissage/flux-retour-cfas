@@ -1,5 +1,4 @@
 const { Schema } = require("mongoose");
-const { validateUai } = require("../../domain/uai");
 
 const statutsCandidatsSchema = new Schema({
   ine_apprenant: {
@@ -121,10 +120,6 @@ const statutsCandidatsSchema = new Schema({
     type: String,
     description: "Source du statut candidat (Ymag, Gesti...)",
   },
-});
-
-statutsCandidatsSchema.virtual("uai_etablissement_valid").get(function () {
-  return validateUai(this.uai_etablissement);
 });
 
 module.exports = statutsCandidatsSchema;

@@ -1,4 +1,5 @@
 import { createGlobalState } from "react-hooks-global-state";
+
 import { subscribeToHttpEvent } from "./httpClient";
 import decodeJWT from "./utils/decodeJWT";
 

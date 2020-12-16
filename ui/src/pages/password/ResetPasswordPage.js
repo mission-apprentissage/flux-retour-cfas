@@ -1,21 +1,20 @@
-import React from "react";
+import { Field, Form, Formik } from "formik";
 import queryString from "query-string";
-import * as Yup from "yup";
-import { Form as TablerForm, Card, Page, Button, Grid } from "tabler-react";
-import { Formik, Field, Form } from "formik";
+import React from "react";
 import { useHistory, useLocation } from "react-router-dom";
+import { Button, Card, Form as TablerForm, Grid, Page } from "tabler-react";
+import * as Yup from "yup";
+
+import CenteredCol from "../../common/components/CenteredCol";
+import FormError from "../../common/components/FormError";
 import useAuth from "../../common/hooks/useAuth";
 import { _post } from "../../common/httpClient";
-import decodeJWT from "../../common/utils/decodeJWT";
-import FormError from "../../common/components/FormError";
-import CenteredCol from "../../common/components/CenteredCol";
 
 const ResetPasswordPage = () => {
   let [, setAuth] = useAuth();
   let history = useHistory();
   let location = useLocation();
   let { passwordToken } = queryString.parse(location.search);
-  let uai = decodeJWT(passwordToken).sub;
 
   let showError = (meta) => {
     return meta.touched && meta.error
