@@ -6,7 +6,7 @@ httpTests(__filename, ({ startServer }) => {
   it("Vérifie que le server fonctionne", async () => {
     const { httpClient } = await startServer();
 
-    const response = await httpClient.get("/api");
+    const response = await httpClient.get("/api/healthcheck");
 
     assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.name, `Serveur MNA - ${config.appName}`);
