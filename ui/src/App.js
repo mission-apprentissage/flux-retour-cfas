@@ -1,34 +1,39 @@
-import "tabler-react/dist/Tabler.css";
-
-import React from "react";
+import * as React from "react";
 import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 
 import { anonymous } from "./common/auth";
+import AppLayout from "./common/components/AppLayout";
 import useAuth from "./common/hooks/useAuth";
-import { isUserInRole, roles } from "./common/utils/rolesUtils";
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import HomePage from "./pages/HomePage";
+import { isUserAdmin } from "./common/utils/rolesUtils";
+import CfaViewPage from "./pages/cfa/CfaViewPage";
 import LoginPage from "./pages/login/LoginPage";
 import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
+import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import UserStatsPage from "./pages/user-stats";
 
 const App = () => {
+  const [auth] = useAuth();
+  const isAdmin = isUserAdmin(auth);
+
   return (
     <Router>
       <Switch>
         <Route exact path="/login" component={LoginPage} />
-        <AdminRoute path="/" exact>
-          <DashboardPage />
-        </AdminRoute>
-
-        <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
-
-        <Route exact path="/login" component={LoginPage} />
         <Route exact path="/reset-password" component={ResetPasswordPage} />
         <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
 
-        <Route exact path="/statuts-candidats/stats" />
+        <AppLayout>
+          <PrivateRoute exact path="/">
+            <Redirect to={isAdmin ? "/stats" : "/stats/gesti"} />
+          </PrivateRoute>
+
+          <AdminRoute path="/stats" exact component={GlobalStatsPage} />
+          <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
+          <Route exact path="/etablissements" component={CfaViewPage} />
+        </AppLayout>
+
+        <Route component={() => <div>404</div>} />
       </Switch>
     </Router>
   );
@@ -36,14 +41,16 @@ const App = () => {
 
 export default App;
 
-const PrivateRoute = ({ children, ...rest }) => {
+const PrivateRoute = (routeProps) => {
   const [auth] = useAuth();
+  const notLoggedIn = auth.sub === anonymous.sub;
 
-  return <Route {...rest}>{auth.sub === anonymous.sub ? <Redirect to="/login" /> : children}</Route>;
+  return notLoggedIn ? <Redirect to="/login" /> : <Route {...routeProps} />;
 };
 
-const AdminRoute = ({ children, ...rest }) => {
+const AdminRoute = (routeProps) => {
   const [auth] = useAuth();
+  const isAdmin = isUserAdmin(auth);
 
-  return <PrivateRoute {...rest}>{isUserInRole(auth, roles.administrator) ? children : <HomePage />}</PrivateRoute>;
+  return <PrivateRoute {...routeProps}>{isAdmin ? null : <Redirect to="/" />}</PrivateRoute>;
 };
