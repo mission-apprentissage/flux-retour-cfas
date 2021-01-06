@@ -76,6 +76,15 @@ const getAllStats = async (filters = {}) => {
     );
   }).length;
 
+  const nbCandidatsMultiUais = await getNbDistinctCandidatsWithMultiUais(filters);
+  const nbCandidatsMultiCfds = await getDistinctCandidatsWithMultiCfds(filters);
+
+  const nbDistinctCandidatsWithStatutHistory1 = await getNbDistinctCandidatsWithHistoryNbItems(2, filters);
+  const nbDistinctCandidatsWithStatutHistory2 = await getNbDistinctCandidatsWithHistoryNbItems(3, filters);
+  const nbDistinctCandidatsWithStatutHistory3 = await getNbDistinctCandidatsWithHistoryNbItems(4, filters);
+
+  const nbCfas = await getNbDistinctCfas(filters);
+
   return {
     nbStatutsCandidats: nbAllStatutCandidats,
     nbStatutsCandidatsMisAJour,
@@ -88,20 +97,20 @@ const getAllStats = async (filters = {}) => {
     nbDistinctCandidatsTotal: nbDistinctCandidatsWithIne + nbDistinctCandidatsWithoutIne,
     nbStatutsSansIne,
 
-    nbCandidatsMultiUais: await getNbDistinctCandidatsWithMultiUais(filters),
+    nbCandidatsMultiUais,
 
-    nbCandidatsMultiCfds: await getDistinctCandidatsWithMultiCfds(filters),
+    nbCandidatsMultiCfds,
 
     nbStatutsWithoutHistory,
 
-    nbDistinctCandidatsWithStatutHistory1: await getNbDistinctCandidatsWithHistoryNbItems(2, filters),
-    nbDistinctCandidatsWithStatutHistory2: await getNbDistinctCandidatsWithHistoryNbItems(3, filters),
-    nbDistinctCandidatsWithStatutHistory3: await getNbDistinctCandidatsWithHistoryNbItems(4, filters),
+    nbDistinctCandidatsWithStatutHistory1,
+    nbDistinctCandidatsWithStatutHistory2,
+    nbDistinctCandidatsWithStatutHistory3,
 
     nbDistinctCandidatsWithChangingStatutProspectInscrit,
     nbDistinctCandidatsWithChangingStatutProspectApprenti,
     nbDistinctCandidatsWithChangingStatutProspectAbandon,
-    nbCfas: await getNbDistinctCfas(filters),
+    nbCfas,
     nbInvalidUais,
   };
 };
@@ -179,7 +188,7 @@ const getNbDistinctCandidatsWithHistoryNbItems = async (nbChangements, filters) 
     { $count: "count" },
   ]);
 
-  return result[0]?.count;
+  return result[0]?.count || 0;
 };
 
 const getNbDistinctCfas = async (filters) => {

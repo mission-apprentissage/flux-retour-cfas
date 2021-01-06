@@ -23,7 +23,7 @@
     "clear:statutsCandidats": "node -r dotenv/config src/jobs/clear/clearStatutsCandidats.js",
     "clear:logs": "node -r dotenv/config src/jobs/clear/clearLogs.js",
     "clear:users": "node -r dotenv/config src/jobs/clear/clearUsers.js",
-    "stats": "node -r dotenv/config src/jobs/stats/index.js",
+    "stats": "node -r dotenv/config src/jobs/compute-stats-statuts-candidats/index.js",
     "run:tests": "node -r dotenv/config src/jobs/test/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
