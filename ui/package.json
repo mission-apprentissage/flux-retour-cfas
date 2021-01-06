@@ -1,13 +1,17 @@
 {
   "name": "mna-flux-retour-cfas-ui",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
   "author": "MNA",
   "license": "MIT",
   "dependencies": {
+    "@chakra-ui/react": "1.0.1",
+    "@emotion/react": "11.1.1",
+    "@emotion/styled": "11.0.0",
     "formik": "2.1.4",
+    "framer-motion": "2.9.5",
     "jsonwebtoken": "8.5.1",
     "query-string": "6.13.1",
     "react": "16.13.1",
@@ -15,8 +19,7 @@
     "react-hooks-global-state": "1.0.0",
     "react-router-dom": "5.2.0",
     "react-scripts": "4.0.1",
-    "styled-components": "5.2.1",
-    "tabler-react": "1.30.1",
+    "remixicon": "2.5.0",
     "yup": "0.29.1"
   },
   "scripts": {

@@ -61,7 +61,7 @@ Ce repository est organisé de la manière suivante :
 - Le dossier `/.github` va contenir l'ensemble des Github Actions.
 - Le dossier `/reverse_proxy` va contenir le serveur Nginx et sa configuration en tant que reverse_proxy.
 - Le dossier `/server` va contenir l'ensemble de l'application coté serveur, à savoir l'API Node Express.
-- Le dossier `/ui` va contenir l'ensemble de l'application coté front, à savoir une application React basé sur Tabler (https://github.com/tabler/tabler-react).
+- Le dossier `/ui` va contenir l'ensemble de l'application coté front, à savoir une application React implémentant le design system de l'État (https://www.gouvernement.fr/charte/charte-graphique-les-fondamentaux/introduction) grâce à [ChakraUI](https://chakra-ui.com/).
 - Le fichier `/docker-compose.yml` va définir la configuration des conteneurs de l'application, _pour plus d'informations sur Docker cf: https://docs.docker.com/_
 - Le fichier `/docker-compose.override.yml` va définir la configuration Docker spécifique à l'environnement local de développement.
   :warning: ce fichier est ignoré lors des commits (cf .gitignore) afin d'éviter la divulgation de secrets/tokens
@@ -108,7 +108,8 @@ Le base de données est une MongoDb et utilise le port par défaut 27017.
 ### Ui - React
 
 L'interface web est une application React crée à partir du cli `create-react-app` (cf: https://create-react-app.dev/)
-La partie template est basée sur le template open-source `Tabler` (cf: https://tabler.io/ et http://tabler-react.com/)
+
+L'application implémente le design system de l'État Français https://gouvfr.atlassian.net/wiki/spaces/DB/overview?homepageId=145359476 grâce à un theme propagé par ChakraUI (https://chakra-ui.com/docs/theming/customize-theme).
 
 ### Server FTP
 

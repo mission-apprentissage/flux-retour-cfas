@@ -1,13 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const packageJson = require("../../package.json");
-const logger = require("../common/logger");
 
 const { apiStatutsSeeder, administrator } = require("../common/roles");
 
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
-const tryCatch = require("./middlewares/tryCatchMiddleware");
 const apiKeyPermissionsAuthMiddleware = require("./middlewares/apiKeyPermissionsAuthMiddleware");
 const corsMiddleware = require("./middlewares/corsMiddleware");
 const authMiddleware = require("./middlewares/authMiddleware");
@@ -19,10 +16,9 @@ const adminRoute = require("./routes/admin");
 const passwordRoute = require("./routes/password");
 const statsRoute = require("./routes/stats");
 const configRoute = require("./routes/config");
-const config = require("../../config");
+const healthcheckRoute = require("./routes/healthcheck");
 
 module.exports = async (components) => {
-  const { db } = components;
   const app = express();
 
   const checkJwtToken = authMiddleware(components);
@@ -39,32 +35,7 @@ module.exports = async (components) => {
   app.use("/api/password", passwordRoute(components));
   app.use("/api/stats", checkJwtToken, statsRoute(components));
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());
-
-  app.get(
-    "/api",
-    tryCatch(async (req, res) => {
-      let mongodbStatus;
-      await db
-        .collection("statutsCandidats")
-        .stats()
-        .then(() => {
-          mongodbStatus = true;
-        })
-        .catch((e) => {
-          mongodbStatus = false;
-          logger.error("Healthcheck failed", e);
-        });
-
-      return res.json({
-        name: `Serveur MNA - ${config.appName}`,
-        version: packageJson.version,
-        env: config.env,
-        healthcheck: {
-          mongodb: mongodbStatus,
-        },
-      });
-    })
-  );
+  app.use("/api/healthcheck", healthcheckRoute(components));
 
   app.use(errorMiddleware());
 

@@ -23,7 +23,7 @@
     "clear:statutsCandidats": "node -r dotenv/config src/jobs/clear/clearStatutsCandidats.js",
     "clear:logs": "node -r dotenv/config src/jobs/clear/clearLogs.js",
     "clear:users": "node -r dotenv/config src/jobs/clear/clearUsers.js",
-    "stats": "node -r dotenv/config src/jobs/stats/index.js",
+    "stats": "node -r dotenv/config src/jobs/compute-stats-statuts-candidats/index.js",
     "run:tests": "node -r dotenv/config src/jobs/test/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "async": "3.2.0",
-    "axios": "0.21.0",
+    "axios": "0.21.1",
     "body-parser": "1.19.0",
     "boom": "7.3.0",
     "bunyan": "1.8.14",
