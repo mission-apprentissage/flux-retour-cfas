@@ -31,7 +31,6 @@ services:
     container_name: flux_retour_cfas_server
     build:
       context: server
-    mem_limit: 1g
     restart: unless-stopped
     networks:
       - flux_retour_cfas_network
@@ -54,6 +53,7 @@ services:
   ftp:
     image: flux_retour_cfas_ftp
     container_name: flux_retour_cfas_ftp
+    mem_limit: 256m
     build:
       context: ftp
     restart: unless-stopped
