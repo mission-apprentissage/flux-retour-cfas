@@ -101,11 +101,13 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
         uai_etablissement: item.uai_etablissement,
         nom_etablissement: item.nom_etablissement,
         statut_apprenant: item.statut_apprenant,
-        historique_statut_apprenant: {
-          valeur_statut: item.statut_apprenant,
-          position_statut: 1,
-          date_statut: new Date(),
-        },
+        historique_statut_apprenant: [
+          {
+            valeur_statut: item.statut_apprenant,
+            position_statut: 1,
+            date_statut: new Date(),
+          },
+        ],
         date_entree_statut: item.date_entree_statut,
         date_saisie_statut: item.date_saisie_statut,
         date_mise_a_jour_statut: item.date_mise_a_jour_statut,
@@ -152,16 +154,11 @@ const updateStatut = async (existingItemId, toUpdate) => {
 
   const existingItem = await StatutCandidat.findById(existingItemId);
 
-  // Calcul date update
-  if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
-    toUpdate.date_mise_a_jour_statut = new Date(Date.now());
-  }
-
   // Check if maj statut is valid
   if (isMajStatutInvalid(existingItem.statut_apprenant, toUpdate.statut_apprenant)) {
     toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ko;
     toUpdate.erreur_mise_a_jour_statut = {
-      date_mise_a_jour_statut: new Date(Date.now()),
+      date_mise_a_jour_statut: new Date(),
       ancien_statut: existingItem.statut_apprenant,
       nouveau_statut_souhaite: toUpdate.statut_apprenant,
     };
@@ -169,19 +166,24 @@ const updateStatut = async (existingItemId, toUpdate) => {
     toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ok;
   }
 
+  // statut_apprenant has changed?
+  if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
+    toUpdate.date_mise_a_jour_statut = new Date();
+
+    toUpdate.historique_statut_apprenant = [
+      ...existingItem.historique_statut_apprenant,
+      {
+        valeur_statut: toUpdate.statut_apprenant,
+        position_statut: existingItem.historique_statut_apprenant.length + 1,
+        date_statut: new Date(),
+      },
+    ];
+  }
+
   // Update & return
   const updateQuery = {
     ...toUpdate,
-    ...{
-      updated_at: new Date(Date.now()),
-      $addToSet: {
-        historique_statut_apprenant: {
-          valeur_statut: toUpdate.statut_apprenant,
-          position_statut: existingItem.historique_statut_apprenant.length + 1,
-          date_statut: new Date(Date.now()),
-        },
-      },
-    },
+    updated_at: new Date(),
   };
   const updated = await StatutCandidat.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
   return updated;
