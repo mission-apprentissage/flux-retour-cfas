@@ -20,6 +20,7 @@ const existsStatut = async ({
   email_contact = null,
   id_formation,
   uai_etablissement,
+  siret_etablissement,
 }) => {
   const query = getFindStatutQuery(
     ine_apprenant,
@@ -29,7 +30,8 @@ const existsStatut = async ({
     prenom3_apprenant,
     email_contact,
     id_formation,
-    uai_etablissement
+    uai_etablissement,
+    siret_etablissement
   );
   const count = await StatutCandidat.countDocuments(query);
   return count !== 0;
@@ -44,6 +46,7 @@ const getStatut = async ({
   email_contact = null,
   id_formation,
   uai_etablissement,
+  siret_etablissement,
 }) => {
   const query = getFindStatutQuery(
     ine_apprenant,
@@ -53,7 +56,8 @@ const getStatut = async ({
     prenom3_apprenant,
     email_contact,
     id_formation,
-    uai_etablissement
+    uai_etablissement,
+    siret_etablissement
   );
   const found = await StatutCandidat.findOne(query);
   return found;
@@ -74,6 +78,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
       email_contact: item.email_contact,
       id_formation: item.id_formation,
       uai_etablissement: item.uai_etablissement,
+      siret_etablissement: item.siret_etablissement,
     });
 
     // log when uai is not valid
@@ -99,6 +104,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
         libelle_court_formation: item.libelle_court_formation,
         libelle_long_formation: item.libelle_long_formation,
         uai_etablissement: item.uai_etablissement,
+        siret_etablissement: item.siret_etablissement,
         nom_etablissement: item.nom_etablissement,
         statut_apprenant: item.statut_apprenant,
         historique_statut_apprenant: [
@@ -134,6 +140,7 @@ const getStatutHistory = async ({
   email_contact = null,
   id_formation,
   uai_etablissement,
+  siret_etablissement,
 }) => {
   const query = getFindStatutQuery(
     ine_apprenant,
@@ -143,7 +150,8 @@ const getStatutHistory = async ({
     prenom3_apprenant,
     email_contact,
     id_formation,
-    uai_etablissement
+    uai_etablissement,
+    siret_etablissement
   );
   const found = await StatutCandidat.findOne(query);
   return found ? found.historique_statut_apprenant : null;
@@ -197,13 +205,15 @@ const getFindStatutQuery = (
   prenom3_apprenant = null,
   email_contact = null,
   id_formation,
-  uai_etablissement
+  uai_etablissement,
+  siret_etablissement
 ) =>
   ine_apprenant
     ? {
         ine_apprenant: ine_apprenant,
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
+        siret_etablissement: siret_etablissement,
       }
     : {
         nom_apprenant: nom_apprenant,
@@ -213,6 +223,7 @@ const getFindStatutQuery = (
         email_contact: email_contact,
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
+        siret_etablissement: siret_etablissement,
       };
 
 const isMajStatutInvalid = (statutSource, statutDest) => {

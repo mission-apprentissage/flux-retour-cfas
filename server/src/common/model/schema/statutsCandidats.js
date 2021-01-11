@@ -75,6 +75,11 @@ const statutsCandidatsSchema = new Schema({
     index: true,
     sparse: true,
   },
+  siret_etablissement: {
+    type: String,
+    default: null,
+    description: "Siret de l'établissement d'origine",
+  },
   nom_etablissement: {
     type: String,
     default: null,

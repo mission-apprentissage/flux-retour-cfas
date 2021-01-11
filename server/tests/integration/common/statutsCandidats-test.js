@@ -36,6 +36,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, randomStatut.libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, randomStatut.libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, randomStatut.uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, randomStatut.siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, randomStatut.nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, randomStatut.statut_apprenant);
     assert.strictEqual(toAdd.source, randomStatut.source);
@@ -50,6 +51,7 @@ integrationTests(__filename, () => {
       email_contact: toAdd.email_contact,
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, true);
   });
@@ -75,6 +77,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
     assert.strictEqual(toAdd.source, statutsTest[0].source);
@@ -84,6 +87,7 @@ integrationTests(__filename, () => {
       ine_apprenant: toAdd.ine_apprenant,
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, true);
   });
@@ -109,6 +113,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
     assert.strictEqual(toAdd.source, statutsTest[0].source);
@@ -118,6 +123,7 @@ integrationTests(__filename, () => {
       ine_apprenant: "BAD_INE",
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, false);
   });
@@ -143,6 +149,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
     assert.strictEqual(toAdd.source, statutsTest[0].source);
@@ -157,6 +164,7 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, true);
   });
@@ -182,6 +190,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
     assert.strictEqual(toAdd.source, statutsTest[0].source);
@@ -196,6 +205,7 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, false);
   });
@@ -221,6 +231,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
     assert.strictEqual(toAdd.source, statutsTest[0].source);
@@ -230,6 +241,7 @@ integrationTests(__filename, () => {
       ine_apprenant: toAdd.ine_apprenant,
       id_formation: "BAD_ID_FORMATION",
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, false);
   });
@@ -255,6 +267,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
 
@@ -263,6 +276,7 @@ integrationTests(__filename, () => {
       ine_apprenant: toAdd.ine_apprenant,
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
 
     assert.notDeepStrictEqual(found, null);
@@ -280,6 +294,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(found.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(found.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(found.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(found.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(found.statut_apprenant, statutsTest[0].statut_apprenant);
   });
@@ -305,6 +320,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
 
@@ -318,6 +334,7 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
 
     assert.notDeepStrictEqual(found, null);
@@ -335,6 +352,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(found.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(found.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(found.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(found.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(found.statut_apprenant, statutsTest[0].statut_apprenant);
   });
@@ -360,6 +378,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
 
@@ -368,6 +387,7 @@ integrationTests(__filename, () => {
       ine_apprenant: "BAD_INE",
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, null);
   });
@@ -393,6 +413,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(toAdd.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
 
@@ -406,6 +427,7 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, null);
   });
@@ -432,6 +454,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(foundAdded.email_contact, statutsTestUpdate[3].email_contact);
     assert.strictEqual(foundAdded.id_formation, statutsTestUpdate[3].id_formation);
     assert.strictEqual(foundAdded.uai_etablissement, statutsTestUpdate[3].uai_etablissement);
+    assert.strictEqual(foundAdded.siret_etablissement, statutsTestUpdate[3].siret_etablissement);
     assert.strictEqual(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
     assert.strictEqual(foundAdded.updated_at, null);
 
@@ -452,6 +475,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(firstUpdated.libelle_court_formation, statutsTestUpdate[0].libelle_court_formation);
     assert.strictEqual(firstUpdated.libelle_long_formation, statutsTestUpdate[0].libelle_long_formation);
     assert.strictEqual(firstUpdated.uai_etablissement, statutsTestUpdate[0].uai_etablissement);
+    assert.strictEqual(firstUpdated.siret_etablissement, statutsTestUpdate[0].siret_etablissement);
     assert.strictEqual(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
     assert.strictEqual(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
     assert.ok(firstUpdated.date_mise_a_jour_statut);
@@ -465,6 +489,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(secondUpdated.email_contact, statutsTestUpdate[1].email_contact);
     assert.strictEqual(secondUpdated.id_formation, statutsTestUpdate[1].id_formation);
     assert.strictEqual(secondUpdated.uai_etablissement, statutsTestUpdate[1].uai_etablissement);
+    assert.strictEqual(secondUpdated.siret_etablissement, statutsTestUpdate[1].siret_etablissement);
     assert.strictEqual(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
     assert.strictEqual(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
     assert.ok(secondUpdated.date_mise_a_jour_statut);
@@ -477,6 +502,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(thirdUpdated.email_contact, statutsTestUpdate[2].email_contact);
     assert.strictEqual(thirdUpdated.id_formation, statutsTestUpdate[2].id_formation);
     assert.strictEqual(thirdUpdated.uai_etablissement, statutsTestUpdate[2].uai_etablissement);
+    assert.strictEqual(thirdUpdated.siret_etablissement, statutsTestUpdate[2].siret_etablissement);
     assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
     assert.strictEqual(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
     assert.ok(thirdUpdated.date_mise_a_jour_statut);
@@ -502,6 +528,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.email_contact, simpleStatutBadUpdate.email_contact);
     assert.strictEqual(found.id_formation, simpleStatutBadUpdate.id_formation);
     assert.strictEqual(found.uai_etablissement, simpleStatutBadUpdate.uai_etablissement);
+    assert.strictEqual(found.siret_etablissement, simpleStatutBadUpdate.siret_etablissement);
     assert.strictEqual(found.statut_apprenant, simpleStatutBadUpdate.statut_apprenant);
     assert.strictEqual(found.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ko);
     assert.notDeepStrictEqual(found.erreur_mise_a_jour_statut, null);
@@ -527,6 +554,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.email_contact, simpleProspectStatut.email_contact);
     assert.strictEqual(found.id_formation, simpleProspectStatut.id_formation);
     assert.strictEqual(found.uai_etablissement, simpleProspectStatut.uai_etablissement);
+    assert.strictEqual(found.siret_etablissement, simpleProspectStatut.siret_etablissement);
     // Check updated value
     assert.strictEqual(found.statut_apprenant, codesStatutsCandidats.inscrit);
     assert.strictEqual(found.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ok);
