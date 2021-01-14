@@ -1,7 +1,6 @@
 const assert = require("assert");
 const config = require("../../../config");
 const jwt = require("jsonwebtoken");
-const omit = require("lodash").omit;
 const httpTests = require("../../utils/httpTests");
 const { User } = require("../../../src/common/model");
 const { hash } = require("../../../src/common/utils/sha512Utils");
@@ -20,11 +19,9 @@ httpTests(__filename, ({ startServer }) => {
     const decoded = jwt.verify(response.data.token, config.auth.user.jwtSecret);
     assert.ok(decoded.iat);
     assert.ok(decoded.exp);
-    assert.deepStrictEqual(omit(decoded, ["iat", "exp"]), {
-      sub: "user",
-      iss: config.appName,
-      permissions: [],
-    });
+    assert.strictEqual(decoded.sub, "user");
+    assert.strictEqual(decoded.iss, config.appName);
+    assert.deepStrictEqual(decoded.permissions, []);
   });
 
   it("Vérifie qu'un mot de passe invalide est rejeté", async () => {

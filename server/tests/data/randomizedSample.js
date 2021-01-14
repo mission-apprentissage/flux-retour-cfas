@@ -1,7 +1,6 @@
 const faker = require("faker/locale/fr");
 const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
-const sampleSize = require("lodash").sampleSize;
 
 const isInePresent = () => Math.random() < 0.65;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -25,8 +24,8 @@ const createRandomStatutCandidat = () => {
     tel2_representant_legal: faker.random.boolean() ? faker.phone.phoneNumberFormat().trim().toUpperCase() : null,
 
     id_formation: getRandomIdFormation(),
-    libelle_court_formation: faker.random.boolean() ? sampleSize(sampleLibelles, 1)[0].intitule_court : null,
-    libelle_long_formation: faker.random.boolean() ? sampleSize(sampleLibelles, 1)[0].intitule_long : null,
+    libelle_court_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
+    libelle_long_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: getRandomSiretEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),

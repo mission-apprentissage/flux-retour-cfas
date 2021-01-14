@@ -1,4 +1,4 @@
-const omitBy = require("lodash").omitBy;
+const omitBy = require("lodash.omitby");
 const logger = require("../../common/logger");
 
 module.exports = () => {
