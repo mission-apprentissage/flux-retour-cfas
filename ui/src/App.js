@@ -2,10 +2,8 @@ import * as React from "react";
 import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 
 import { anonymous } from "./common/auth";
-import AppLayout from "./common/components/AppLayout";
 import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
-import CfaViewPage from "./pages/cfa/CfaViewPage";
 import LoginPage from "./pages/login/LoginPage";
 import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
@@ -23,15 +21,12 @@ const App = () => {
         <Route exact path="/reset-password" component={ResetPasswordPage} />
         <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
 
-        <AppLayout>
-          <PrivateRoute exact path="/">
-            <Redirect to={isAdmin ? "/stats" : "/stats/gesti"} />
-          </PrivateRoute>
+        <PrivateRoute exact path="/">
+          <Redirect to={isAdmin ? "/stats" : "/stats/gesti"} />
+        </PrivateRoute>
 
-          <AdminRoute path="/stats" exact component={GlobalStatsPage} />
-          <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
-          <Route exact path="/etablissements" component={CfaViewPage} />
-        </AppLayout>
+        <AdminRoute path="/stats" exact component={GlobalStatsPage} />
+        <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
 
         <Route component={() => <div>404</div>} />
       </Switch>

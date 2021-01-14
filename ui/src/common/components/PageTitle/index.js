@@ -2,16 +2,16 @@ import { Heading } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-const PageSectionTitle = ({ children }) => {
+const PageTitle = ({ children }) => {
   return (
-    <Heading fontFamily="Marianne" fontWeight="700" fontSize="gamma">
+    <Heading fontFamily="Marianne" fontSize="alpha" fontWeight="700" color="grey.800" as="h1" textAlign="center">
       {children}
     </Heading>
   );
 };
 
-PageSectionTitle.propTypes = {
+PageTitle.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export default PageSectionTitle;
+export default PageTitle;
