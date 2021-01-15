@@ -13,8 +13,8 @@ const ForgottenPasswordPage = () => {
 
   const resetPassword = async (values, { setStatus }) => {
     try {
-      const { token } = await _post("/api/password/forgotten-password", { ...values });
-      setAuth(token);
+      const { access_token } = await _post("/api/password/forgotten-password", { ...values });
+      setAuth(access_token);
       setStatus({ message: "Un email vous a été envoyé." });
       setTimeout(() => history.push("/"), 1500);
     } catch (e) {

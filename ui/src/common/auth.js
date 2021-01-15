@@ -4,16 +4,16 @@ import { subscribeToHttpEvent } from "./httpClient";
 import decodeJWT from "./utils/decodeJWT";
 
 const anonymous = { sub: "anonymous", permissions: {} };
-let token = sessionStorage.getItem("flux-retour-cfas:token");
+let access_token = sessionStorage.getItem("flux-retour-cfas:access_token");
 
 const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
-  auth: token ? decodeJWT(token) : anonymous,
+  auth: access_token ? decodeJWT(access_token) : anonymous,
 });
 
 subscribeToHttpEvent("http:error", (response) => {
   if (response.status === 401) {
     //Auto logout user when token is invalid
-    sessionStorage.removeItem("flux-retour-cfas:token");
+    sessionStorage.removeItem("flux-retour-cfas:access_token");
     setGlobalState("auth", anonymous);
   }
 });

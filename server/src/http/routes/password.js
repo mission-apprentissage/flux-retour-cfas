@@ -64,7 +64,7 @@ module.exports = ({ users }) => {
       }).validateAsync(req.body, { abortEarly: false });
 
       await users.changePassword(user.username, newPassword);
-      return res.json({ token: createUserToken(user) });
+      return res.json({ access_token: createUserToken(user) });
     })
   );
 

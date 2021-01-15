@@ -25,8 +25,8 @@ const LoginPage = () => {
 
   const login = async (values, { setStatus }) => {
     try {
-      const { token } = await _post("/api/login", values);
-      setAuth(token);
+      const { access_token } = await _post("/api/login", values);
+      setAuth(access_token);
       history.push("/");
     } catch (e) {
       console.error(e);

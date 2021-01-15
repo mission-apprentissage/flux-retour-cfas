@@ -22,7 +22,7 @@ const startServer = async () => {
       });
 
       return {
-        Authorization: "Bearer " + response.data.token,
+        Authorization: "Bearer " + response.data.access_token,
       };
     },
   };

@@ -16,8 +16,8 @@ const ResetPasswordPage = () => {
 
   const changePassword = async (values, { setStatus }) => {
     try {
-      const { token } = await _post("/api/password/reset-password", { ...values, passwordToken });
-      setAuth(token);
+      const { access_token } = await _post("/api/password/reset-password", { ...values, passwordToken });
+      setAuth(access_token);
       history.push("/");
     } catch (e) {
       console.error(e);

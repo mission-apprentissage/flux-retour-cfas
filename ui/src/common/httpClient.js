@@ -44,7 +44,7 @@ const getHeaders = () => {
 
   return {
     Accept: "application/json",
-    ...(auth.sub !== "anonymous" ? { Authorization: `Bearer ${auth.token}` } : {}),
+    ...(auth.sub !== "anonymous" ? { Authorization: `Bearer ${auth.access_token}` } : {}),
     "Content-Type": "application/json",
   };
 };
@@ -83,7 +83,7 @@ export const buildLink = (path) => {
   let auth = getAuth();
   if (auth.sub !== "anonymous") {
     //TODO better handle params
-    return `${path}?token=${auth.token}`;
+    return `${path}?access_token=${auth.access_token}`;
   }
   return path;
 };

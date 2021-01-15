@@ -52,7 +52,7 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     assert.strictEqual(response.status, 200);
-    const decoded = jwt.verify(response.data.token, config.auth.user.jwtSecret);
+    const decoded = jwt.verify(response.data.access_token, config.auth.user.jwtSecret);
     assert.ok(decoded.iat);
     assert.ok(decoded.exp);
     assert.deepStrictEqual(omit(decoded, ["iat", "exp"]), {
