@@ -1,4 +1,3 @@
-const { some } = require("lodash");
 const { User } = require("../../common/model/index");
 
 module.exports = (permissions = {}) => {
@@ -10,7 +9,7 @@ module.exports = (permissions = {}) => {
     }
 
     const userForApiKey = await User.findOne({ apiKey: `${apiKeyRequest}` });
-    if (userForApiKey && some(userForApiKey.permissions, (item) => permissions.includes(item))) {
+    if (userForApiKey && userForApiKey.permissions.some((item) => permissions.includes(item))) {
       req.user = userForApiKey;
       next();
     } else {
