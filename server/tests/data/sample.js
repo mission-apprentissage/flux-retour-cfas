@@ -17,6 +17,8 @@ const simpleStatut = {
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: 3,
   date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+  periode_formation: [2020, 2021],
+  annee_formation: 2020,
 };
 
 const simpleProspectStatut = {
@@ -36,6 +38,8 @@ const simpleProspectStatut = {
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: codesStatutsCandidats.prospect,
   date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+  periode_formation: [2020, 2021],
+  annee_formation: 2020,
 };
 
 const statutsTest = [
@@ -56,6 +60,8 @@ const statutsTest = [
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
     date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     ine_apprenant: "6789",
@@ -68,6 +74,7 @@ const statutsTest = [
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
+    annee_formation: 0,
   },
   {
     nom_apprenant: "test3Nom",
@@ -78,7 +85,8 @@ const statutsTest = [
     uai_etablissement: "testuai_etablissement",
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
-    statut_apprenant: 2,
+    statut_apprenant: 1,
+    annee_formation: 2019,
   },
 ];
 
@@ -100,6 +108,8 @@ const statutsTestUpdate = [
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 2,
     date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     ine_apprenant: "6789",
@@ -112,6 +122,7 @@ const statutsTestUpdate = [
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 2,
+    annee_formation: 0,
   },
   {
     nom_apprenant: "test3Nom",
@@ -123,6 +134,7 @@ const statutsTestUpdate = [
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
+    annee_formation: 2019,
   },
   {
     ine_apprenant: "99999",
@@ -135,6 +147,7 @@ const statutsTestUpdate = [
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
 ];
 
@@ -154,6 +167,8 @@ const simpleStatutBadUpdate = {
   siret_etablissement: "11111111111111",
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: 1,
+  periode_formation: [2020, 2021],
+  annee_formation: 2020,
 };
 
 const fullSampleWithUpdates = [
@@ -173,6 +188,8 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 1,
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     ine_apprenant: "111111111AB",
@@ -190,6 +207,8 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 1,
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     nom_apprenant: "RONALDO",
@@ -217,6 +236,8 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 3,
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     nom_apprenant: "GIROUD",
@@ -233,6 +254,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000008",
     nom_etablissement: "Etablissement 3",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111BB",
@@ -250,6 +272,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 3,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111XX",
@@ -267,6 +290,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111112PP",
@@ -284,6 +308,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111XX",
@@ -301,6 +326,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111XX",
@@ -318,6 +344,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111MM",
@@ -335,6 +362,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111MM",
@@ -352,6 +380,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 2,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111QQ",
@@ -369,6 +398,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111QQ",
@@ -386,6 +416,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 2,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "991111111CC",
@@ -403,6 +434,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "991111111CC",
@@ -420,6 +452,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 2,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "991111111CC",
@@ -437,6 +470,7 @@ const fullSampleWithUpdates = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 3,
+    annee_formation: 2021,
   },
 ];
 
@@ -457,6 +491,7 @@ const fullSample = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111AB",
@@ -474,6 +509,7 @@ const fullSample = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     nom_apprenant: "RONALDO",
@@ -485,6 +521,7 @@ const fullSample = [
     siret_etablissement: "00000000000002",
     nom_etablissement: "Autre Etablissement",
     statut_apprenant: 2,
+    annee_formation: 2021,
   },
   {
     nom_apprenant: "GIROUD",
@@ -501,6 +538,7 @@ const fullSample = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 3,
+    annee_formation: 2021,
   },
   {
     nom_apprenant: "GIROUD",
@@ -517,6 +555,7 @@ const fullSample = [
     siret_etablissement: "00000000000008",
     nom_etablissement: "Etablissement 3",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111BB",
@@ -534,6 +573,7 @@ const fullSample = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 3,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111XX",
@@ -551,6 +591,7 @@ const fullSample = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111112PP",
@@ -568,6 +609,7 @@ const fullSample = [
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111XX",
@@ -585,6 +627,7 @@ const fullSample = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111XX",
@@ -602,6 +645,7 @@ const fullSample = [
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
 ];
 

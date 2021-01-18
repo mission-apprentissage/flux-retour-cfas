@@ -116,6 +116,16 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Erreur de mise à jour de statuts",
   },
+  periode_formation: {
+    type: [Number],
+    default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
+    description: "Date debut & date de fin de la formation",
+  },
+  annee_formation: {
+    type: Number,
+    default: null,
+    description: "Numéro de l'année dans la formation (promo)",
+  },
   updated_at: {
     type: Date,
     default: null,

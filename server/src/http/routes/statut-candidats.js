@@ -34,6 +34,8 @@ module.exports = ({ statutsCandidats }) => {
         nom_etablissement: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
         date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
+        periode_formation: Joi.array().items(Joi.number()).allow(null),
+        annee_formation: Joi.number().allow(null),
       })
     );
 
