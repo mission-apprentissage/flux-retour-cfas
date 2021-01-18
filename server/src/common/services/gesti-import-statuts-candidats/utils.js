@@ -18,6 +18,9 @@ const adaptGestiStatutCandidat = (gestiStatutCandidat) => {
       ? parseGestiDate(gestiStatutCandidat.date_metier_mise_a_jour_statut)
       : "",
     source: config.users.gesti.name,
+    periode_formation: gestiStatutCandidat.periode_formation
+      ? gestiStatutCandidat.periode_formation.split("-").map(Number)
+      : undefined,
   };
 };
 
@@ -42,6 +45,8 @@ const tempSchema = Joi.object({
   statut_apprenant: Joi.number().required(),
   date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
   source: Joi.string().allow(null, ""),
+  periode_formation: Joi.string().allow(null),
+  annee_formation: Joi.number().allow(null),
 });
 
 const validateInput = (input) => {
