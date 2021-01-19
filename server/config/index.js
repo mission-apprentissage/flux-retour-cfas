@@ -46,6 +46,12 @@ module.exports = {
       password: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_PERMISSIONS").default([]).asArray(),
     },
+    scform: {
+      name: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_NAME").asString(),
+      apiKey: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_API_KEY").required().asString(),
+      password: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_PASSWORD").required().asString(),
+      permissions: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_PERMISSIONS").default([]).asArray(),
+    },
     defaultAdmin: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),
