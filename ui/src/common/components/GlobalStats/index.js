@@ -1,4 +1,4 @@
-import { Box, HStack } from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, HStack, Stack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -6,10 +6,18 @@ import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../constants/statutsColo
 import PageSectionTitle from "../PageSectionTitle";
 import StatCard from "../StatCard";
 
-const GlobalStats = ({ stats }) => {
+const GlobalStats = ({ stats, lastImportDates }) => {
   return (
     <>
       <Box>
+        <Stack spacing="2w" mt="3w" mb="3w">
+          {lastImportDates.map((item) => (
+            <Alert key={item} status="info">
+              <AlertIcon />
+              Dernier import de données de {item.source} réalisé le {item.date}
+            </Alert>
+          ))}
+        </Stack>
         <PageSectionTitle>Candidats</PageSectionTitle>
         <HStack spacing="2w" mt="3w">
           <StatCard label="Total candidats" stat={stats.nbDistinctCandidatsTotal} background="info" />
@@ -115,6 +123,12 @@ GlobalStats.propTypes = {
     nbDistinctCandidatsWithStatutHistory2: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory3: PropTypes.number,
   }).isRequired,
+  lastImportDates: PropTypes.arrayOf(
+    PropTypes.shape({
+      source: PropTypes.string,
+      date: PropTypes.string,
+    }).isRequired
+  ),
 };
 
 export default GlobalStats;

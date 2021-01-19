@@ -15,6 +15,7 @@ const loginRoute = require("./routes/login");
 const adminRoute = require("./routes/admin");
 const passwordRoute = require("./routes/password");
 const statsRoute = require("./routes/stats");
+const userEventsRoute = require("./routes/userEvents");
 const configRoute = require("./routes/config");
 const healthcheckRoute = require("./routes/healthcheck");
 
@@ -34,6 +35,7 @@ module.exports = async (components) => {
   app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
   app.use("/api/password", passwordRoute(components));
   app.use("/api/stats", checkJwtToken, statsRoute(components));
+  app.use("/api/userEvents", checkJwtToken, userEventsRoute(components));
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());
   app.use("/api/healthcheck", healthcheckRoute(components));
 

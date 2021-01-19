@@ -14,7 +14,7 @@ const GlobalStatsPage = () => {
   let content;
   if (loading) content = <PageSkeleton />;
   if (error) content = <p>Erreur lors du chargement des statistiques</p>;
-  if (data) content = <GlobalStats stats={data.stats} />;
+  if (data) content = <GlobalStats stats={data.stats} lastImportDates={data.lastImportDates} />;
 
   return (
     <Box width="100%">

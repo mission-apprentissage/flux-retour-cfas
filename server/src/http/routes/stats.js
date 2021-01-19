@@ -4,7 +4,7 @@ const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
 const { apiStatutsSeeder, administrator } = require("../../common/roles");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
-module.exports = ({ stats }) => {
+module.exports = ({ stats, userEvents }) => {
   const router = express.Router();
 
   router.get(
@@ -12,8 +12,8 @@ module.exports = ({ stats }) => {
     permissionsMiddleware([administrator]),
     tryCatch(async (req, res) => {
       const allStats = await stats.getAllStats();
-
-      return res.json({ stats: allStats });
+      const lastImportDates = await userEvents.getLastImportDatesForSources();
+      return res.json({ stats: allStats, lastImportDates });
     })
   );
 
