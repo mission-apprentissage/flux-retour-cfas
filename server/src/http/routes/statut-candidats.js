@@ -34,7 +34,7 @@ module.exports = ({ statutsCandidats }) => {
         nom_etablissement: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
         date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
-        periode_formation: Joi.array().items(Joi.number()).allow(null),
+        periode_formation: Joi.string().allow(null),
         annee_formation: Joi.number().allow(null),
       })
     );
@@ -61,6 +61,10 @@ module.exports = ({ statutsCandidats }) => {
         // Add StatutsCandidats
         const toAddOrUpdate = req.body.map((statutCandidat) => ({
           ...statutCandidat,
+          // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
+          periode_formation: statutCandidat.periode_formation
+            ? statutCandidat.periode_formation.split("-").map(Number)
+            : null,
           source: req.user.username,
         }));
         await statutsCandidats.addOrUpdateStatuts(toAddOrUpdate);
