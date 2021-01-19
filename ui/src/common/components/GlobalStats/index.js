@@ -9,7 +9,7 @@ import StatCard from "../StatCard";
 const GlobalStats = ({ stats }) => {
   return (
     <>
-      <Box mt="9w">
+      <Box>
         <PageSectionTitle>Candidats</PageSectionTitle>
         <HStack spacing="2w" mt="3w">
           <StatCard label="Total candidats" stat={stats.nbDistinctCandidatsTotal} background="info" />

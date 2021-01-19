@@ -5,6 +5,7 @@ const statutsCandidatsSchema = new Schema({
     type: String,
     default: null,
     description: "N° INE du jeune",
+    index: true,
   },
   nom_apprenant: {
     type: String,
@@ -55,6 +56,7 @@ const statutsCandidatsSchema = new Schema({
     type: String,
     default: null,
     description: "Identifiant de la formation visée",
+    index: true,
   },
   libelle_court_formation: {
     type: String,
@@ -70,6 +72,13 @@ const statutsCandidatsSchema = new Schema({
     type: String,
     default: null,
     description: "Code uai de l'établissement d'origine",
+    index: true,
+    sparse: true,
+  },
+  siret_etablissement: {
+    type: String,
+    default: null,
+    description: "Siret de l'établissement d'origine",
   },
   nom_etablissement: {
     type: String,
@@ -80,6 +89,7 @@ const statutsCandidatsSchema = new Schema({
     type: Number,
     default: null,
     description: "Statut de l'apprenant",
+    index: true,
   },
   historique_statut_apprenant: {
     type: [Object],
@@ -106,6 +116,16 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Erreur de mise à jour de statuts",
   },
+  periode_formation: {
+    type: [Number],
+    default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
+    description: "Date debut & date de fin de la formation",
+  },
+  annee_formation: {
+    type: Number,
+    default: null,
+    description: "Numéro de l'année dans la formation (promo)",
+  },
   updated_at: {
     type: Date,
     default: null,
@@ -119,6 +139,7 @@ const statutsCandidatsSchema = new Schema({
   source: {
     type: String,
     description: "Source du statut candidat (Ymag, Gesti...)",
+    index: true,
   },
 });
 

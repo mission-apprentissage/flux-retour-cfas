@@ -8,7 +8,7 @@ module.exports = ({ users }) => {
     new Strategy(
       {
         jwtFromRequest: ExtractJwt.fromExtractors([
-          ExtractJwt.fromUrlQueryParameter("token"),
+          ExtractJwt.fromUrlQueryParameter("access_token"),
           ExtractJwt.fromAuthHeaderAsBearerToken(),
         ]),
         secretOrKey: config.auth.user.jwtSecret,

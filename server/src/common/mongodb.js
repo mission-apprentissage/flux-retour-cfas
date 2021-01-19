@@ -11,6 +11,8 @@ module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
+      useCreateIndex: true,
+      autoIndex: false, // otherwise Mongoose will build indexes everytime the application starts up
     });
 
     // Get Mongoose to use the global promise library

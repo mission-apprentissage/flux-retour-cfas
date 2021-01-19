@@ -13,9 +13,12 @@ const simpleStatut = {
   libelle_court_formation: "testlibelle_court_formation",
   libelle_long_formation: "testlibelle_long_formation",
   uai_etablissement: "testuai_etablissement",
+  siret_etablissement: "11111111111111",
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: 3,
   date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+  periode_formation: [2020, 2021],
+  annee_formation: 2020,
 };
 
 const simpleProspectStatut = {
@@ -31,9 +34,12 @@ const simpleProspectStatut = {
   libelle_court_formation: "testlibelle_court_formation",
   libelle_long_formation: "testlibelle_long_formation",
   uai_etablissement: "testuai_etablissement",
+  siret_etablissement: "11111111111111",
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: codesStatutsCandidats.prospect,
   date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+  periode_formation: [2020, 2021],
+  annee_formation: 2020,
 };
 
 const statutsTest = [
@@ -50,9 +56,12 @@ const statutsTest = [
     libelle_court_formation: "testlibelle_court_formation",
     libelle_long_formation: "testlibelle_long_formation",
     uai_etablissement: "testuai_etablissement",
+    siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
     date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     ine_apprenant: "6789",
@@ -62,8 +71,10 @@ const statutsTest = [
     email_contact: "test2email_contact@test.fr",
     id_formation: "test2id_formation",
     uai_etablissement: "testuai_etablissement",
+    siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
+    annee_formation: 0,
   },
   {
     nom_apprenant: "test3Nom",
@@ -72,8 +83,10 @@ const statutsTest = [
     email_contact: "test3email_contact@test.fr",
     id_formation: "test3id_formation",
     uai_etablissement: "testuai_etablissement",
+    siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
-    statut_apprenant: 2,
+    statut_apprenant: 1,
+    annee_formation: 2019,
   },
 ];
 
@@ -91,9 +104,12 @@ const statutsTestUpdate = [
     libelle_court_formation: "testlibelle_court_formation",
     libelle_long_formation: "testlibelle_long_formation",
     uai_etablissement: "testuai_etablissement",
+    siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 2,
     date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     ine_apprenant: "6789",
@@ -103,8 +119,10 @@ const statutsTestUpdate = [
     email_contact: "test2email_contact@test.fr",
     id_formation: "test2id_formation",
     uai_etablissement: "testuai_etablissement",
+    siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 2,
+    annee_formation: 0,
   },
   {
     nom_apprenant: "test3Nom",
@@ -113,8 +131,10 @@ const statutsTestUpdate = [
     email_contact: "test3email_contact@test.fr",
     id_formation: "test3id_formation",
     uai_etablissement: "testuai_etablissement",
+    siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
+    annee_formation: 2019,
   },
   {
     ine_apprenant: "99999",
@@ -124,8 +144,10 @@ const statutsTestUpdate = [
     email_contact: "nouvelEmail@email.fr",
     id_formation: "nouvelleFormation",
     uai_etablissement: "testuai_etablissement",
+    siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
 ];
 
@@ -142,8 +164,11 @@ const simpleStatutBadUpdate = {
   libelle_court_formation: "testlibelle_court_formation",
   libelle_long_formation: "testlibelle_long_formation",
   uai_etablissement: "testuai_etablissement",
+  siret_etablissement: "11111111111111",
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: 1,
+  periode_formation: [2020, 2021],
+  annee_formation: 2020,
 };
 
 const fullSampleWithUpdates = [
@@ -160,8 +185,11 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation test",
     libelle_long_formation: "Ceci est la formation de test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 1,
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     ine_apprenant: "111111111AB",
@@ -176,8 +204,11 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation test",
     libelle_long_formation: "Ceci est la formation de test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 1,
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     nom_apprenant: "RONALDO",
@@ -186,6 +217,7 @@ const fullSampleWithUpdates = [
     email_contact: "cr7@test.fr",
     id_formation: "11111112",
     uai_etablissement: "0000001X",
+    siret_etablissement: "00000000000002",
     nom_etablissement: "Autre Etablissement",
     statut_apprenant: 2,
   },
@@ -201,8 +233,11 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation autre test",
     libelle_long_formation: "Ceci est la formation d'un autre test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 3,
+    periode_formation: [2020, 2021],
+    annee_formation: 2020,
   },
   {
     nom_apprenant: "GIROUD",
@@ -216,8 +251,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation autre test",
     libelle_long_formation: "Ceci est la formation d'un autre test",
     uai_etablissement: "0000008S",
+    siret_etablissement: "00000000000008",
     nom_etablissement: "Etablissement 3",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111BB",
@@ -232,8 +269,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation autre test",
     libelle_long_formation: "Ceci est la formation d'un autre test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 3,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111XX",
@@ -248,8 +287,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation test",
     libelle_long_formation: "Ceci est la formation de test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111112PP",
@@ -264,8 +305,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation test",
     libelle_long_formation: "Ceci est la formation de test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111XX",
@@ -280,8 +323,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Sport",
     libelle_long_formation: "Ceci est la formation de sport",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111XX",
@@ -296,8 +341,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111MM",
@@ -312,8 +359,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111MM",
@@ -328,8 +377,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 2,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111QQ",
@@ -344,8 +395,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111QQ",
@@ -360,8 +413,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 2,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "991111111CC",
@@ -376,8 +431,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "991111111CC",
@@ -392,8 +449,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 2,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "991111111CC",
@@ -408,8 +467,10 @@ const fullSampleWithUpdates = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 3,
+    annee_formation: 2021,
   },
 ];
 
@@ -427,8 +488,10 @@ const fullSample = [
     libelle_court_formation: "Formation test",
     libelle_long_formation: "Ceci est la formation de test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111AB",
@@ -443,8 +506,10 @@ const fullSample = [
     libelle_court_formation: "Formation test",
     libelle_long_formation: "Ceci est la formation de test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     nom_apprenant: "RONALDO",
@@ -453,8 +518,10 @@ const fullSample = [
     email_contact: "cr7@test.fr",
     id_formation: "11111112",
     uai_etablissement: "0000001X",
+    siret_etablissement: "00000000000002",
     nom_etablissement: "Autre Etablissement",
     statut_apprenant: 2,
+    annee_formation: 2021,
   },
   {
     nom_apprenant: "GIROUD",
@@ -468,8 +535,10 @@ const fullSample = [
     libelle_court_formation: "Formation autre test",
     libelle_long_formation: "Ceci est la formation d'un autre test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 3,
+    annee_formation: 2021,
   },
   {
     nom_apprenant: "GIROUD",
@@ -483,8 +552,10 @@ const fullSample = [
     libelle_court_formation: "Formation autre test",
     libelle_long_formation: "Ceci est la formation d'un autre test",
     uai_etablissement: "0000008S",
+    siret_etablissement: "00000000000008",
     nom_etablissement: "Etablissement 3",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111BB",
@@ -499,8 +570,10 @@ const fullSample = [
     libelle_court_formation: "Formation autre test",
     libelle_long_formation: "Ceci est la formation d'un autre test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 3,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111XX",
@@ -515,8 +588,10 @@ const fullSample = [
     libelle_court_formation: "Formation test",
     libelle_long_formation: "Ceci est la formation de test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111112PP",
@@ -531,8 +606,10 @@ const fullSample = [
     libelle_court_formation: "Formation test",
     libelle_long_formation: "Ceci est la formation de test",
     uai_etablissement: "0000001S",
+    siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "111111111XX",
@@ -547,8 +624,10 @@ const fullSample = [
     libelle_court_formation: "Formation Sport",
     libelle_long_formation: "Ceci est la formation de sport",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 1,
+    annee_formation: 2021,
   },
   {
     ine_apprenant: "001111111XX",
@@ -563,8 +642,10 @@ const fullSample = [
     libelle_court_formation: "Formation Developpement",
     libelle_long_formation: "Ceci est la formation de Developpement",
     uai_etablissement: "0000002D",
+    siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
     statut_apprenant: 0,
+    annee_formation: 2021,
   },
 ];
 

@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 
-export default (token) => {
+export default (access_token) => {
   return {
-    token,
-    ...jwt.decode(token),
+    access_token,
+    ...jwt.decode(access_token),
   };
 };

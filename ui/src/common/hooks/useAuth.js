@@ -4,13 +4,13 @@ import decodeJWT from "../utils/decodeJWT";
 export default function useAuth() {
   let [auth, setAuth] = useAuthState();
 
-  let setAuthFromToken = (token) => {
-    if (!token) {
-      sessionStorage.removeItem("flux-retour-cfas:token");
+  let setAuthFromToken = (access_token) => {
+    if (!access_token) {
+      sessionStorage.removeItem("flux-retour-cfas:access_token");
       setAuth(anonymous);
     } else {
-      sessionStorage.setItem("flux-retour-cfas:token", token);
-      setAuth(decodeJWT(token));
+      sessionStorage.setItem("flux-retour-cfas:access_token", access_token);
+      setAuth(decodeJWT(access_token));
     }
   };
 

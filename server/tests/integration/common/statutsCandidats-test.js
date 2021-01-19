@@ -18,38 +18,46 @@ integrationTests(__filename, () => {
     const { existsStatut } = await statutsCandidats();
 
     const randomStatut = createRandomStatutCandidat();
+
     const toAdd = new StatutCandidat(randomStatut);
     await toAdd.save();
+    const result = toAdd.toJSON();
 
     // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, randomStatut.ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, randomStatut.nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, randomStatut.prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, randomStatut.prenom2_apprenant);
-    assert.strictEqual(toAdd.prenom3_apprenant, randomStatut.prenom3_apprenant);
-    assert.strictEqual(toAdd.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, randomStatut.email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, randomStatut.nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, randomStatut.tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, randomStatut.tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, randomStatut.id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, randomStatut.libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, randomStatut.libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, randomStatut.uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, randomStatut.nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, randomStatut.statut_apprenant);
-    assert.strictEqual(toAdd.source, randomStatut.source);
+    assert.strictEqual(result.ine_apprenant, randomStatut.ine_apprenant);
+    assert.strictEqual(result.nom_apprenant, randomStatut.nom_apprenant);
+    assert.strictEqual(result.prenom_apprenant, randomStatut.prenom_apprenant);
+    assert.strictEqual(result.prenom2_apprenant, randomStatut.prenom2_apprenant);
+    assert.strictEqual(result.prenom3_apprenant, randomStatut.prenom3_apprenant);
+    assert.strictEqual(result.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
+    assert.strictEqual(result.email_contact, randomStatut.email_contact);
+    assert.strictEqual(result.nom_representant_legal, randomStatut.nom_representant_legal);
+    assert.strictEqual(result.tel_representant_legal, randomStatut.tel_representant_legal);
+    assert.strictEqual(result.tel2_representant_legal, randomStatut.tel2_representant_legal);
+    assert.strictEqual(result.id_formation, randomStatut.id_formation);
+    assert.strictEqual(result.libelle_court_formation, randomStatut.libelle_court_formation);
+    assert.strictEqual(result.libelle_long_formation, randomStatut.libelle_long_formation);
+    assert.strictEqual(result.uai_etablissement, randomStatut.uai_etablissement);
+    assert.strictEqual(result.siret_etablissement, randomStatut.siret_etablissement);
+    assert.strictEqual(result.nom_etablissement, randomStatut.nom_etablissement);
+    assert.strictEqual(result.statut_apprenant, randomStatut.statut_apprenant);
+    assert.strictEqual(result.source, randomStatut.source);
+    assert.strictEqual(result.annee_formation, randomStatut.annee_formation);
+    assert.deepStrictEqual(result.periode_formation, randomStatut.periode_formation);
 
     // Checks exists method
     const found = await existsStatut({
-      ine_apprenant: toAdd.ine_apprenant,
-      nom_apprenant: toAdd.nom_apprenant,
-      prenom_apprenant: toAdd.prenom_apprenant,
-      prenom2_apprenant: toAdd.prenom2_apprenant,
-      prenom3_apprenant: toAdd.prenom3_apprenant,
-      email_contact: toAdd.email_contact,
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
+      ine_apprenant: result.ine_apprenant,
+      nom_apprenant: result.nom_apprenant,
+      prenom_apprenant: result.prenom_apprenant,
+      prenom2_apprenant: result.prenom2_apprenant,
+      prenom3_apprenant: result.prenom3_apprenant,
+      email_contact: result.email_contact,
+      id_formation: result.id_formation,
+      uai_etablissement: result.uai_etablissement,
+      siret_etablissement: result.siret_etablissement,
+      annee_formation: result.annee_formation,
+      periode_formation: result.periode_formation,
     });
     assert.strictEqual(found, true);
   });
@@ -59,31 +67,38 @@ integrationTests(__filename, () => {
 
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
+    const result = toAdd.toJSON();
 
     // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-    assert.strictEqual(toAdd.source, statutsTest[0].source);
+    assert.strictEqual(result.ine_apprenant, statutsTest[0].ine_apprenant);
+    assert.strictEqual(result.nom_apprenant, statutsTest[0].nom_apprenant);
+    assert.strictEqual(result.prenom_apprenant, statutsTest[0].prenom_apprenant);
+    assert.strictEqual(result.prenom2_apprenant, null);
+    assert.strictEqual(result.prenom3_apprenant, null);
+    assert.strictEqual(result.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
+    assert.strictEqual(result.email_contact, statutsTest[0].email_contact);
+    assert.strictEqual(result.nom_representant_legal, statutsTest[0].nom_representant_legal);
+    assert.strictEqual(result.tel_representant_legal, statutsTest[0].tel_representant_legal);
+    assert.strictEqual(result.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
+    assert.strictEqual(result.id_formation, statutsTest[0].id_formation);
+    assert.strictEqual(result.libelle_court_formation, statutsTest[0].libelle_court_formation);
+    assert.strictEqual(result.libelle_long_formation, statutsTest[0].libelle_long_formation);
+    assert.strictEqual(result.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(result.siret_etablissement, statutsTest[0].siret_etablissement);
+    assert.strictEqual(result.nom_etablissement, statutsTest[0].nom_etablissement);
+    assert.strictEqual(result.statut_apprenant, statutsTest[0].statut_apprenant);
+    assert.strictEqual(result.source, statutsTest[0].source);
+    assert.strictEqual(result.annee_formation, statutsTest[0].annee_formation);
+    assert.deepStrictEqual(result.periode_formation, statutsTest[0].periode_formation);
 
     // Checks exists method
     const found = await existsStatut({
-      ine_apprenant: toAdd.ine_apprenant,
-      id_formation: toAdd.id_formation,
-      uai_etablissement: toAdd.uai_etablissement,
+      ine_apprenant: result.ine_apprenant,
+      id_formation: result.id_formation,
+      uai_etablissement: result.uai_etablissement,
+      siret_etablissement: result.siret_etablissement,
+      periode_formation: result.periode_formation,
+      annee_formation: result.annee_formation,
     });
     assert.strictEqual(found, true);
   });
@@ -94,30 +109,12 @@ integrationTests(__filename, () => {
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
 
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-    assert.strictEqual(toAdd.source, statutsTest[0].source);
-
     // Checks exists method
     const found = await existsStatut({
       ine_apprenant: "BAD_INE",
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, false);
   });
@@ -128,25 +125,6 @@ integrationTests(__filename, () => {
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
 
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-    assert.strictEqual(toAdd.source, statutsTest[0].source);
-
     // Checks exists method
     const found = await existsStatut({
       nom_apprenant: toAdd.nom_apprenant,
@@ -157,6 +135,9 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
+      periode_formation: toAdd.periode_formation,
+      annee_formation: toAdd.annee_formation,
     });
     assert.strictEqual(found, true);
   });
@@ -167,25 +148,6 @@ integrationTests(__filename, () => {
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
 
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-    assert.strictEqual(toAdd.source, statutsTest[0].source);
-
     // Checks exists method
     const found = await existsStatut({
       nom_apprenant: "BAD_NAME",
@@ -196,6 +158,9 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
+      periode_formation: toAdd.periode_formation,
+      annee_formation: toAdd.annee_formation,
     });
     assert.strictEqual(found, false);
   });
@@ -206,30 +171,14 @@ integrationTests(__filename, () => {
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
 
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-    assert.strictEqual(toAdd.source, statutsTest[0].source);
-
     // Checks exists method with bad id formation
     const found = await existsStatut({
       ine_apprenant: toAdd.ine_apprenant,
       id_formation: "BAD_ID_FORMATION",
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
+      periode_formation: toAdd.periode_formation,
+      annee_formation: toAdd.annee_formation,
     });
     assert.strictEqual(found, false);
   });
@@ -240,32 +189,17 @@ integrationTests(__filename, () => {
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
 
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-
     // Checks exists method
     const found = await getStatut({
       ine_apprenant: toAdd.ine_apprenant,
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
+      periode_formation: toAdd.periode_formation,
+      annee_formation: toAdd.annee_formation,
     });
 
-    assert.notDeepStrictEqual(found, null);
+    assert.notStrictEqual(found, null);
     assert.strictEqual(found.ine_apprenant, statutsTest[0].ine_apprenant);
     assert.strictEqual(found.nom_apprenant, statutsTest[0].nom_apprenant);
     assert.strictEqual(found.prenom_apprenant, statutsTest[0].prenom_apprenant);
@@ -280,6 +214,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(found.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(found.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(found.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(found.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(found.statut_apprenant, statutsTest[0].statut_apprenant);
   });
@@ -289,24 +224,6 @@ integrationTests(__filename, () => {
 
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
-
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
 
     // Checks exists method
     const found = await getStatut({
@@ -318,6 +235,9 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
+      periode_formation: toAdd.periode_formation,
+      annee_formation: toAdd.annee_formation,
     });
 
     assert.notDeepStrictEqual(found, null);
@@ -335,6 +255,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.libelle_court_formation, statutsTest[0].libelle_court_formation);
     assert.strictEqual(found.libelle_long_formation, statutsTest[0].libelle_long_formation);
     assert.strictEqual(found.uai_etablissement, statutsTest[0].uai_etablissement);
+    assert.strictEqual(found.siret_etablissement, statutsTest[0].siret_etablissement);
     assert.strictEqual(found.nom_etablissement, statutsTest[0].nom_etablissement);
     assert.strictEqual(found.statut_apprenant, statutsTest[0].statut_apprenant);
   });
@@ -345,29 +266,12 @@ integrationTests(__filename, () => {
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
 
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
-
     // Checks exists method
     const found = await getStatut({
       ine_apprenant: "BAD_INE",
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, null);
   });
@@ -377,24 +281,6 @@ integrationTests(__filename, () => {
 
     const toAdd = new StatutCandidat(statutsTest[0]);
     await toAdd.save();
-
-    // Checks creation
-    assert.strictEqual(toAdd.ine_apprenant, statutsTest[0].ine_apprenant);
-    assert.strictEqual(toAdd.nom_apprenant, statutsTest[0].nom_apprenant);
-    assert.strictEqual(toAdd.prenom_apprenant, statutsTest[0].prenom_apprenant);
-    assert.strictEqual(toAdd.prenom2_apprenant, null);
-    assert.strictEqual(toAdd.prenom3_apprenant, null);
-    assert.strictEqual(toAdd.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-    assert.strictEqual(toAdd.email_contact, statutsTest[0].email_contact);
-    assert.strictEqual(toAdd.nom_representant_legal, statutsTest[0].nom_representant_legal);
-    assert.strictEqual(toAdd.tel_representant_legal, statutsTest[0].tel_representant_legal);
-    assert.strictEqual(toAdd.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-    assert.strictEqual(toAdd.id_formation, statutsTest[0].id_formation);
-    assert.strictEqual(toAdd.libelle_court_formation, statutsTest[0].libelle_court_formation);
-    assert.strictEqual(toAdd.libelle_long_formation, statutsTest[0].libelle_long_formation);
-    assert.strictEqual(toAdd.uai_etablissement, statutsTest[0].uai_etablissement);
-    assert.strictEqual(toAdd.nom_etablissement, statutsTest[0].nom_etablissement);
-    assert.strictEqual(toAdd.statut_apprenant, statutsTest[0].statut_apprenant);
 
     // Checks exists method
     const found = await getStatut({
@@ -406,6 +292,7 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
+      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, null);
   });
@@ -432,8 +319,11 @@ integrationTests(__filename, () => {
     assert.strictEqual(foundAdded.email_contact, statutsTestUpdate[3].email_contact);
     assert.strictEqual(foundAdded.id_formation, statutsTestUpdate[3].id_formation);
     assert.strictEqual(foundAdded.uai_etablissement, statutsTestUpdate[3].uai_etablissement);
+    assert.strictEqual(foundAdded.siret_etablissement, statutsTestUpdate[3].siret_etablissement);
     assert.strictEqual(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
     assert.strictEqual(foundAdded.updated_at, null);
+    assert.strictEqual(foundAdded.annee_formation, statutsTestUpdate[3].annee_formation);
+    assert.deepStrictEqual(foundAdded.periode_formation, statutsTestUpdate[3].periode_formation);
 
     // Check updated
     assert.strictEqual(updated.length, 3);
@@ -452,6 +342,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(firstUpdated.libelle_court_formation, statutsTestUpdate[0].libelle_court_formation);
     assert.strictEqual(firstUpdated.libelle_long_formation, statutsTestUpdate[0].libelle_long_formation);
     assert.strictEqual(firstUpdated.uai_etablissement, statutsTestUpdate[0].uai_etablissement);
+    assert.strictEqual(firstUpdated.siret_etablissement, statutsTestUpdate[0].siret_etablissement);
     assert.strictEqual(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
     assert.strictEqual(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
     assert.ok(firstUpdated.date_mise_a_jour_statut);
@@ -465,6 +356,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(secondUpdated.email_contact, statutsTestUpdate[1].email_contact);
     assert.strictEqual(secondUpdated.id_formation, statutsTestUpdate[1].id_formation);
     assert.strictEqual(secondUpdated.uai_etablissement, statutsTestUpdate[1].uai_etablissement);
+    assert.strictEqual(secondUpdated.siret_etablissement, statutsTestUpdate[1].siret_etablissement);
     assert.strictEqual(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
     assert.strictEqual(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
     assert.ok(secondUpdated.date_mise_a_jour_statut);
@@ -477,6 +369,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(thirdUpdated.email_contact, statutsTestUpdate[2].email_contact);
     assert.strictEqual(thirdUpdated.id_formation, statutsTestUpdate[2].id_formation);
     assert.strictEqual(thirdUpdated.uai_etablissement, statutsTestUpdate[2].uai_etablissement);
+    assert.strictEqual(thirdUpdated.siret_etablissement, statutsTestUpdate[2].siret_etablissement);
     assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
     assert.strictEqual(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
     assert.ok(thirdUpdated.date_mise_a_jour_statut);
@@ -502,6 +395,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.email_contact, simpleStatutBadUpdate.email_contact);
     assert.strictEqual(found.id_formation, simpleStatutBadUpdate.id_formation);
     assert.strictEqual(found.uai_etablissement, simpleStatutBadUpdate.uai_etablissement);
+    assert.strictEqual(found.siret_etablissement, simpleStatutBadUpdate.siret_etablissement);
     assert.strictEqual(found.statut_apprenant, simpleStatutBadUpdate.statut_apprenant);
     assert.strictEqual(found.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ko);
     assert.notDeepStrictEqual(found.erreur_mise_a_jour_statut, null);
@@ -527,6 +421,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.email_contact, simpleProspectStatut.email_contact);
     assert.strictEqual(found.id_formation, simpleProspectStatut.id_formation);
     assert.strictEqual(found.uai_etablissement, simpleProspectStatut.uai_etablissement);
+    assert.strictEqual(found.siret_etablissement, simpleProspectStatut.siret_etablissement);
     // Check updated value
     assert.strictEqual(found.statut_apprenant, codesStatutsCandidats.inscrit);
     assert.strictEqual(found.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ok);
