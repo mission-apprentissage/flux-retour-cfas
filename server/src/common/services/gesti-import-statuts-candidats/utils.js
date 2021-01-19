@@ -20,7 +20,7 @@ const adaptGestiStatutCandidat = (gestiStatutCandidat) => {
     source: config.users.gesti.name,
     periode_formation: gestiStatutCandidat.periode_formation
       ? gestiStatutCandidat.periode_formation.split("-").map(Number)
-      : undefined,
+      : null,
   };
 };
 
@@ -45,7 +45,7 @@ const tempSchema = Joi.object({
   statut_apprenant: Joi.number().required(),
   date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
   source: Joi.string().allow(null, ""),
-  periode_formation: Joi.string().allow(null),
+  periode_formation: Joi.string(),
   annee_formation: Joi.number().allow(null),
 });
 
@@ -57,11 +57,11 @@ const validateInput = (input) => {
     const { error } = tempSchema.validate(statutCandidat, { abortEarly: false });
 
     if (error) {
-      // first line is the columns titles
-      const csvLineNumber = index + 2;
-      logger.error("Validation error for input line number", csvLineNumber);
-      logger.error(error);
-      inputValidationErrors.push({ line: csvLineNumber, error });
+      logger.error("Validation error for input element number", index + 1);
+      inputValidationErrors.push({
+        index: index,
+        details: error.details.map(({ message, path }) => ({ message, path })),
+      });
       return;
     }
 

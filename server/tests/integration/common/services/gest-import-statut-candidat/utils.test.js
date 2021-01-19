@@ -27,6 +27,8 @@ describe("gesti-import-statut-candidat utils", () => {
         nom_etablissement: "MFR DE BAGE LE CHATEL - 01380 BAGE LE CHATEL",
         statut_apprenant: "3",
         date_metier_mise_a_jour_statut: "07/09/2020",
+        periode_formation: "2020-2021",
+        annee_formation: 1,
       };
 
       const expectedOutput = {
@@ -49,6 +51,8 @@ describe("gesti-import-statut-candidat utils", () => {
         statut_apprenant: 3,
         date_metier_mise_a_jour_statut: new Date(2020, 9, 7),
         source: config.users.gesti.name,
+        periode_formation: [2020, 2021],
+        annee_formation: 1,
       };
       assert.deepStrictEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
     });
@@ -95,6 +99,7 @@ describe("gesti-import-statut-candidat utils", () => {
         statut_apprenant: 3,
         date_metier_mise_a_jour_statut: "",
         source: config.users.gesti.name,
+        periode_formation: null,
       };
       assert.deepStrictEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
     });
@@ -200,7 +205,34 @@ describe("gesti-import-statut-candidat utils", () => {
       ];
       const output = validateInput(input);
       assert.deepStrictEqual(output.valid, [input[0]]);
-      assert.deepStrictEqual(output.errors.length, 2);
+      assert.strictEqual(output.errors.length, 2);
+
+      // statutCandidat at index 1 has 5 missing fields: nom_apprenant, prenom_apprenant, id_formation, uai_etablissement, siret_etablissement
+      const firstElementErrors = output.errors[0];
+      assert.strictEqual(firstElementErrors.index, 1);
+      assert.strictEqual(firstElementErrors.details.length, 5);
+      assert.deepStrictEqual(
+        firstElementErrors.details.map((detail) => detail.path[0]),
+        ["nom_apprenant", "prenom_apprenant", "id_formation", "uai_etablissement", "siret_etablissement"]
+      );
+
+      // statutCandidat at index 2 is empty
+      const secondElementErrors = output.errors[1];
+      assert.strictEqual(secondElementErrors.index, 2);
+      assert.strictEqual(secondElementErrors.details.length, 8);
+      assert.deepStrictEqual(
+        secondElementErrors.details.map((detail) => detail.path[0]),
+        [
+          "nom_apprenant",
+          "prenom_apprenant",
+          "ne_pas_solliciter",
+          "id_formation",
+          "uai_etablissement",
+          "siret_etablissement",
+          "nom_etablissement",
+          "statut_apprenant",
+        ]
+      );
     });
   });
 });
