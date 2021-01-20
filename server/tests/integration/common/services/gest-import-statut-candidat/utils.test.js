@@ -28,7 +28,7 @@ describe("gesti-import-statut-candidat utils", () => {
         statut_apprenant: "3",
         date_metier_mise_a_jour_statut: "07/09/2020",
         periode_formation: "2020-2021",
-        annee_formation: 1,
+        annee_formation: "1",
       };
 
       const expectedOutput = {
@@ -100,6 +100,7 @@ describe("gesti-import-statut-candidat utils", () => {
         date_metier_mise_a_jour_statut: "",
         source: config.users.gesti.name,
         periode_formation: null,
+        annee_formation: null,
       };
       assert.deepStrictEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
     });
