@@ -30,7 +30,7 @@ const retrieveSiret = async () => {
     $and: [{ siret_etablissement: null }, { uai_etablissement: { $ne: null } }],
   });
 
-  await asyncForEach(statutsWithoutSiretsWithUais.slice(0, 20), async (currentStatutWithoutSiret) => {
+  await asyncForEach(statutsWithoutSiretsWithUais, async (currentStatutWithoutSiret) => {
     // Search a matching siret for uai
     const siretFound = findSiretForUai(currentStatutWithoutSiret.uai_etablissement);
 
