@@ -30,7 +30,7 @@ module.exports = ({ statutsCandidats }) => {
         libelle_court_formation: Joi.string().allow(null, ""),
         libelle_long_formation: Joi.string().allow(null, ""),
         uai_etablissement: Joi.string().required(),
-        siret_etablissement: Joi.string().required(),
+        siret_etablissement: Joi.string().allow(null, ""),
         nom_etablissement: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
         date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
