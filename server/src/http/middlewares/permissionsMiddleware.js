@@ -4,7 +4,7 @@ module.exports = (permissions = {}) => {
     if (user && user.permissions.some((item) => permissions.includes(item))) {
       next();
     } else {
-      return res.status(401).send("Not authorized");
+      return res.status(403).send("Not authorized");
     }
   };
 };

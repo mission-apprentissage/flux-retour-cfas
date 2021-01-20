@@ -4,6 +4,7 @@ const users = require("../../../src/common/components/users");
 const { apiStatutsSeeder } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
 const { createRandomStatutsCandidatsApiInputList } = require("../../data/randomizedSample");
+const { fullSample } = require("../../data/sample");
 
 const goodApiKey = "12345";
 const badApiKey = "BADAPIKEY";
@@ -69,6 +70,27 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(foundStatut.source, userApiCreated.username);
   });
 
+  it("Vérifie que la route statut-candidats fonctionne avec un jwt", async () => {
+    const { httpClient } = await startServer();
+    const userApiCreated = await createApiUser();
+
+    const { data } = await httpClient.post("/api/login", {
+      username: userApiCreated.username,
+      password: "password",
+    });
+
+    // Call Api Route
+    const response = await httpClient.post("/api/statut-candidats", [], {
+      headers: {
+        Authorization: `Bearer ${data.access_token}`,
+      },
+    });
+
+    // Check Api Route data
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(response.data.status, "OK");
+  });
+
   it("Vérifie que la route statut-candidats ne fonctionne pas avec une mauvaise clé d'API", async () => {
     const { httpClient } = await startServer();
 
@@ -86,6 +108,55 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     assert.deepStrictEqual(response.status, 401);
+  });
+
+  it("Vérifie que la route statut-candidats renvoie une 403 pour un user n'ayant pas la permission", async () => {
+    const { httpClient } = await startServer();
+
+    // Create a normal user
+    const { createUser } = await users();
+
+    const userWithoutPermission = await createUser("normal-user", "passpass", {
+      permissions: [],
+      apiKey: goodApiKey,
+    });
+    assert.deepStrictEqual(userWithoutPermission.permissions.length, 0);
+    assert.deepStrictEqual(userWithoutPermission.apiKey, goodApiKey);
+
+    const response = await httpClient.post("/api/statut-candidats", [], {
+      headers: {
+        "x-api-key": goodApiKey,
+      },
+    });
+
+    assert.deepStrictEqual(response.status, 403);
+  });
+
+  it("Vérifie l'ajout via route statut-candidats de données complètes", async () => {
+    const { httpClient } = await startServer();
+
+    // Clear statuts in DB
+    await StatutCandidat.deleteMany({});
+
+    // Create & check api user
+    const userApiCreated = await createApiUser();
+    assert.deepStrictEqual(userApiCreated.username, "userApi");
+    assert.deepStrictEqual(userApiCreated.permissions.length > 0, true);
+    assert.deepStrictEqual(userApiCreated.apiKey, goodApiKey);
+
+    // Call Api Route with full sample
+    const response = await httpClient.post("/api/statut-candidats", fullSample, {
+      headers: {
+        "x-api-key": goodApiKey,
+      },
+    });
+
+    // Check Api Route data
+    assert.deepStrictEqual(response.status, 200);
+    assert.ok(response.data.status);
+    assert.ok(response.data.message);
+    assert.deepStrictEqual(response.data.status, "OK");
+    assert.deepStrictEqual(response.data.message, "Success");
   });
 
   it("Vérifie l'ajout via route statut-candidats de 100 données randomisées", async () => {

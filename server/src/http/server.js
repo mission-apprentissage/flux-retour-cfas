@@ -5,10 +5,10 @@ const { apiStatutsSeeder, administrator } = require("../common/roles");
 
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
-const apiKeyPermissionsAuthMiddleware = require("./middlewares/apiKeyPermissionsAuthMiddleware");
 const corsMiddleware = require("./middlewares/corsMiddleware");
-const authMiddleware = require("./middlewares/authMiddleware");
+const jwtAuthMiddleware = require("./middlewares/jwtAuthMiddleware");
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
+const apiKeyOrJwtAuthMiddleware = require("./middlewares/apiKeyOrJwtAuthMiddleware");
 
 const statutCandidatsRoute = require("./routes/statut-candidats");
 const loginRoute = require("./routes/login");
@@ -22,15 +22,20 @@ const healthcheckRoute = require("./routes/healthcheck");
 module.exports = async (components) => {
   const app = express();
 
-  const checkJwtToken = authMiddleware(components);
+  const checkJwtToken = jwtAuthMiddleware(components);
   const adminOnly = permissionsMiddleware([administrator]);
-  const apiStatutSeedersOnly = apiKeyPermissionsAuthMiddleware([apiStatutsSeeder]);
 
   app.use(bodyParser.json());
   app.use(corsMiddleware());
   app.use(logMiddleware());
 
-  app.use("/api/statut-candidats", apiStatutSeedersOnly, statutCandidatsRoute(components));
+  // temporarily support auth with jwt or apiKey while Ymag clients upgrade their strategy
+  app.use(
+    "/api/statut-candidats",
+    apiKeyOrJwtAuthMiddleware(components),
+    permissionsMiddleware([apiStatutsSeeder]),
+    statutCandidatsRoute(components)
+  );
   app.use("/api/login", loginRoute(components));
   app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
   app.use("/api/password", passwordRoute(components));
