@@ -31,9 +31,18 @@ const retrieveSiret = async () => {
   });
 
   await asyncForEach(statutsWithoutSiretsWithUais, async (currentStatutWithoutSiret) => {
-    const siretFound = findSiretForUai(currentStatutWithoutSiret.uai_etablissement);
+    const statutWithoutSiret = await StatutCandidat.findById(currentStatutWithoutSiret._id);
+    // Search a matching siret for uai
+    const siretFound = findSiretForUai(statutWithoutSiret.uai_etablissement);
+
+    // Update siret in db
     if (siretFound) {
-      logger.info(`Update statutCandidat with siret : ${siretFound}`);
+      await StatutCandidat.findByIdAndUpdate(
+        statutWithoutSiret._id,
+        { siret_etablissement: siretFound },
+        { new: true }
+      );
+      logger.info(`StatutCandidat updated with siret : ${siretFound}`);
     }
   });
 };
@@ -43,6 +52,7 @@ const findSiretForUai = (uai) => {
   const jsonData = readJsonFromCsvFile(siretGestiReferenceFilePath);
   if (!jsonData) return null;
 
+  // Looking for uai in JSON Data from file
   const referenceDataForUai = jsonData.find((x) => x.uai === uai);
   if (referenceDataForUai) {
     logger.info(`Siret for uai ${uai} found : ${referenceDataForUai.siret}`);
