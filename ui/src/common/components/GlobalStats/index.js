@@ -29,23 +29,16 @@ const GlobalStats = ({ stats, lastImportDates }) => {
         </HStack>
         <HStack spacing="2w" mt="3w">
           <StatCard background="warning" label="CFAs au total" stat={stats.nbCfas} />
-          <StatCard
-            background="warning"
-            label="Statuts candidats avec UAI absent ou invalide"
-            stat={stats.nbInvalidUais}
-          />
-          <StatCard
-            background="warning"
-            label="Statuts candidats avec CFD absent ou invalide"
-            stat={stats.nbInvalidCfds}
-          />
         </HStack>
       </Box>
       <Box mt="9w">
         <PageSectionTitle>Statuts Candidats</PageSectionTitle>
         <HStack spacing="2w" mt="3w">
           <StatCard background="info" label="Total Statuts" stat={stats.nbStatutsCandidats} />
-          <StatCard background="info" label="Statuts sans INE" stat={stats.nbStatutsSansIne} />
+          <StatCard background="warning" label="Statuts sans INE" stat={stats.nbStatutsSansIne} />
+          <StatCard background="warning" label="Statuts avec UAI absent ou invalide" stat={stats.nbInvalidUais} />
+          <StatCard background="warning" label="Statuts avec SIRET absent ou invalide" stat={stats.nbInvalidSirets} />
+          <StatCard background="warning" label="Statuts avec CFD absent ou invalide" stat={stats.nbInvalidCfds} />
         </HStack>
         <HStack spacing="2w" mt="3w">
           <StatCard
@@ -116,6 +109,7 @@ GlobalStats.propTypes = {
     nbCfas: PropTypes.number,
     nbInvalidUais: PropTypes.number,
     nbInvalidCfds: PropTypes.number,
+    nbInvalidSirets: PropTypes.number,
     nbDistinctCandidatsTotal: PropTypes.number,
     nbDistinctCandidatsWithIne: PropTypes.number,
     nbCandidatsMultiUais: PropTypes.number,

@@ -4,12 +4,14 @@ const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("..
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
+const { validateSiret } = require("../domain/siret");
 
 module.exports = () => ({
   existsStatut,
   getStatut,
   addOrUpdateStatuts,
   getStatutHistory,
+  updateStatut,
 });
 
 const existsStatut = async ({
@@ -117,6 +119,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
         uai_etablissement: item.uai_etablissement,
         uai_etablissement_valid: validateUai(item.uai_etablissement),
         siret_etablissement: item.siret_etablissement,
+        siret_etablissement_valid: validateSiret(item.siret_etablissement),
         nom_etablissement: item.nom_etablissement,
         statut_apprenant: item.statut_apprenant,
         historique_statut_apprenant: [
@@ -209,6 +212,11 @@ const updateStatut = async (existingItemId, toUpdate) => {
   // if uai has changed, validate it
   if (existingItem.uai_etablissement !== toUpdate.uai_etablissement) {
     toUpdate.uai_etablissement_valid = validateUai(toUpdate.uai_etablissement);
+  }
+
+  // if siret has changed, validate it
+  if (existingItem.siret_etablissement !== toUpdate.siret_etablissement) {
+    toUpdate.siret_etablissement_valid = validateSiret(toUpdate.siret_etablissement);
   }
 
   // Update & return

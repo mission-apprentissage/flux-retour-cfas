@@ -14,7 +14,7 @@ const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 
 integrationTests(__filename, () => {
-  it("Permet de vérifier l'existence d'un statut de candidat randomisé", async () => {
+  it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
     const { existsStatut } = await statutsCandidats();
 
     const randomStatut = createRandomStatutCandidat();
@@ -62,7 +62,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found, true);
   });
 
-  it("Permet de vérifier l'existence d'un statut de candidat avec INE", async () => {
+  it("Vérifie l'existence d'un statut de candidat avec INE", async () => {
     const { existsStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -103,7 +103,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found, true);
   });
 
-  it("Permet de vérifier l'existence d'un statut de candidat avec un mauvais INE", async () => {
+  it("Vérifie l'existence d'un statut de candidat avec un mauvais INE", async () => {
     const { existsStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -119,7 +119,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found, false);
   });
 
-  it("Permet de vérifier l'existence d'un statut de candidat avec les Nom, Prénoms & Email", async () => {
+  it("Vérifie l'existence d'un statut de candidat avec les Nom, Prénoms & Email", async () => {
     const { existsStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -142,7 +142,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found, true);
   });
 
-  it("Permet de vérifier l'existence d'un statut de candidat avec mauvais Nom, Prénoms & Email", async () => {
+  it("Vérifie l'existence d'un statut de candidat avec mauvais Nom, Prénoms & Email", async () => {
     const { existsStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -165,7 +165,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found, false);
   });
 
-  it("Permet de vérifier l'existence d'un mauvais statut de candidat sur la formation", async () => {
+  it("Vérifie l'existence d'un mauvais statut de candidat sur la formation", async () => {
     const { existsStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -183,7 +183,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found, false);
   });
 
-  it("Permet de vérifier la récupération d'un statut sur l'INE", async () => {
+  it("Vérifie la récupération d'un statut sur l'INE", async () => {
     const { getStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -219,7 +219,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.statut_apprenant, statutsTest[0].statut_apprenant);
   });
 
-  it("Permet de vérifier la récupération d'un statut sur les Nom, Prénoms & Email", async () => {
+  it("Vérifie la récupération d'un statut sur les Nom, Prénoms & Email", async () => {
     const { getStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -260,7 +260,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.statut_apprenant, statutsTest[0].statut_apprenant);
   });
 
-  it("Permet de vérifier la mauvaise récupération d'un statut sur un mauvais INE", async () => {
+  it("Vérifie la mauvaise récupération d'un statut sur un mauvais INE", async () => {
     const { getStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -276,7 +276,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found, null);
   });
 
-  it("Permet de vérifier la mauvaise récupération d'un statut sur mauvais Nom, Prénoms & Email", async () => {
+  it("Vérifie la mauvaise récupération d'un statut sur mauvais Nom, Prénoms & Email", async () => {
     const { getStatut } = await statutsCandidats();
 
     const toAdd = new StatutCandidat(statutsTest[0]);
@@ -297,7 +297,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found, null);
   });
 
-  it("Permet de vérifier l'ajout ou la mise à jour d'un statut'", async () => {
+  it("Vérifie l'ajout ou la mise à jour d'un statut'", async () => {
     const { addOrUpdateStatuts } = await statutsCandidats();
 
     // Add statuts test
@@ -376,7 +376,7 @@ integrationTests(__filename, () => {
     assert.ok(thirdUpdated.updated_at);
   });
 
-  it("Permet de vérifier l'ajout ou la mise à jour d'un statut avec erreur de cohérence sur le statut", async () => {
+  it("Vérifie l'ajout ou la mise à jour d'un statut avec erreur de cohérence sur le statut", async () => {
     const { addOrUpdateStatuts } = await statutsCandidats();
 
     // Add statut test
@@ -402,14 +402,14 @@ integrationTests(__filename, () => {
     assert.notDeepStrictEqual(found.updated_at, null);
   });
 
-  it("Permet de vérifier la récupération de l'historique simple d'un statut", async () => {
+  it("Vérifie la récupération de l'historique simple d'un statut", async () => {
     const { addOrUpdateStatuts, getStatutHistory } = await statutsCandidats();
 
     // Add statut test
     const { added } = await addOrUpdateStatuts([simpleProspectStatut]);
 
     // Mise à jour du statut
-    const simpleStatutChangedInsc = { ...simpleProspectStatut, ...{ statut_apprenant: codesStatutsCandidats.inscrit } };
+    const simpleStatutChangedInsc = { ...simpleProspectStatut, statut_apprenant: codesStatutsCandidats.inscrit };
     await addOrUpdateStatuts([simpleStatutChangedInsc]);
 
     // Check value in db
@@ -435,5 +435,104 @@ integrationTests(__filename, () => {
     assert.strictEqual(history[0].valeur_statut, simpleProspectStatut.statut_apprenant);
     assert.strictEqual(history[1].position_statut, 2);
     assert.strictEqual(history[1].valeur_statut, simpleStatutChangedInsc.statut_apprenant);
+  });
+
+  it("Vérifie qu'on met à jour updated_at après un update", async () => {
+    const { updateStatut, addOrUpdateStatuts, getStatut } = await statutsCandidats();
+
+    const randomStatut = createRandomStatutCandidat();
+    await addOrUpdateStatuts([randomStatut]);
+    const createdStatut = await getStatut(randomStatut);
+
+    // First update
+    await updateStatut(createdStatut._id, { prenom_apprenant: "André-Pierre" });
+    // Check value in db
+    const foundAfterFirstUpdate = await StatutCandidat.findById(createdStatut._id);
+    assert.notStrictEqual(foundAfterFirstUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
+    assert.notStrictEqual(foundAfterFirstUpdate.updated_at, createdStatut.updated_at);
+
+    // Second update
+    await updateStatut(createdStatut._id, { nom_apprenant: "Gignac" });
+    const foundAfterSecondUpdate = await StatutCandidat.findById(createdStatut._id);
+    assert.notStrictEqual(foundAfterSecondUpdate.nom_apprenant, createdStatut.nom_apprenant);
+    assert.notStrictEqual(foundAfterSecondUpdate.updated_at, foundAfterFirstUpdate.updated_at);
+  });
+
+  it("Vérifie qu'on update historique_statut_apprenant quand un nouveau statut_apprenant est envoyé", async () => {
+    const { updateStatut, addOrUpdateStatuts, getStatut } = await statutsCandidats();
+
+    // Add statut with invalid uai
+    await addOrUpdateStatuts([simpleProspectStatut]);
+    const createdStatut = await getStatut(simpleProspectStatut);
+
+    assert.strictEqual(createdStatut.historique_statut_apprenant.length, 1);
+    assert.strictEqual(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+    assert.strictEqual(createdStatut.historique_statut_apprenant[0].position_statut, 1);
+
+    // Mise à jour du statut avec nouveau statut_apprenant
+    await updateStatut(createdStatut._id, { statut_apprenant: codesStatutsCandidats.abandon });
+
+    // Check value in db
+    const found = await StatutCandidat.findById(createdStatut._id);
+    assert.strictEqual(found.historique_statut_apprenant.length, 2);
+    assert.strictEqual(found.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+    assert.strictEqual(found.historique_statut_apprenant[0].position_statut, 1);
+    assert.strictEqual(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
+    assert.strictEqual(found.historique_statut_apprenant[1].position_statut, 2);
+  });
+
+  it("Vérifie qu'on update PAS historique_statut_apprenant quand un statut_apprenant identique à l'actuel est envoyé", async () => {
+    const { updateStatut, addOrUpdateStatuts, getStatut } = await statutsCandidats();
+
+    // Add statut with invalid uai
+    await addOrUpdateStatuts([simpleProspectStatut]);
+    const createdStatut = await getStatut(simpleProspectStatut);
+
+    assert.deepStrictEqual(createdStatut.historique_statut_apprenant.length, 1);
+    assert.deepStrictEqual(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+    assert.deepStrictEqual(createdStatut.historique_statut_apprenant[0].position_statut, 1);
+
+    // Mise à jour du statut avec le même statut_apprenant
+    await updateStatut(createdStatut._id, { statut_apprenant: codesStatutsCandidats.prospect });
+
+    // Check value in db
+    const found = await StatutCandidat.findById(createdStatut._id);
+    assert.strictEqual(found.historique_statut_apprenant.length, 1);
+  });
+
+  it("Vérifie l'update d'un uai invalide vers valide pour un statut", async () => {
+    const { updateStatut, addOrUpdateStatuts, getStatut } = await statutsCandidats();
+
+    // Add statut with invalid uai
+    const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: "invalid-uai" };
+    await addOrUpdateStatuts([statutWithInvalidUai]);
+    const createdStatut = await getStatut(statutWithInvalidUai);
+
+    assert.strictEqual(createdStatut.uai_etablissement_valid, false);
+
+    // Mise à jour du statut avec uai valide
+    await updateStatut(createdStatut._id, { uai_etablissement: "0000009S" });
+
+    // Check value in db
+    const found = await StatutCandidat.findById(createdStatut._id);
+    assert.strictEqual(found.uai_etablissement_valid, true);
+  });
+
+  it("Vérifie l'update d'un siret invalide vers valide pour un statut", async () => {
+    const { updateStatut, addOrUpdateStatuts, getStatut } = await statutsCandidats();
+
+    // Add statut with invalid siret
+    const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: "invalid-siret" };
+    await addOrUpdateStatuts([statutWithInvalidSiret]);
+    const createdStatut = await getStatut(statutWithInvalidSiret);
+
+    assert.strictEqual(createdStatut.siret_etablissement_valid, false);
+
+    // Mise à jour du statut avec siret valide
+    await updateStatut(createdStatut._id, { siret_etablissement: "80490173800023" });
+
+    // Check value in db
+    const found = await StatutCandidat.findById(createdStatut._id);
+    assert.strictEqual(found.siret_etablissement_valid, true);
   });
 });
