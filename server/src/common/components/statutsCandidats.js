@@ -113,6 +113,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
         libelle_court_formation: item.libelle_court_formation,
         libelle_long_formation: item.libelle_long_formation,
         uai_etablissement: item.uai_etablissement,
+        uai_etablissement_valid: validateUai(item.uai_etablissement),
         siret_etablissement: item.siret_etablissement,
         nom_etablissement: item.nom_etablissement,
         statut_apprenant: item.statut_apprenant,
@@ -201,6 +202,11 @@ const updateStatut = async (existingItemId, toUpdate) => {
         date_statut: new Date(),
       },
     ];
+  }
+
+  // if uai has changed, validate it
+  if (existingItem.uai_etablissement !== toUpdate.uai_etablissement) {
+    toUpdate.uai_etablissement_valid = validateUai(toUpdate.uai_etablissement);
   }
 
   // Update & return
