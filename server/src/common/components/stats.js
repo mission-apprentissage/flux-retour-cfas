@@ -1,6 +1,5 @@
 const { StatutCandidat } = require("../../common/model");
 const { codesStatutsCandidats } = require("../../common/model/constants");
-const { validateUai } = require("../domain/uai");
 
 module.exports = async () => {
   return {
@@ -197,7 +196,5 @@ const getNbDistinctCfas = async (filters) => {
 };
 
 const getNbInvalidUais = async (filters = {}) => {
-  const uais = await StatutCandidat.aggregate([{ $match: filters }, { $project: { uai_etablissement: 1 } }]);
-  const invalidUais = uais.filter(({ uai_etablissement }) => !validateUai(uai_etablissement));
-  return invalidUais.length;
+  return StatutCandidat.count({ ...filters, uai_etablissement_valid: false });
 };

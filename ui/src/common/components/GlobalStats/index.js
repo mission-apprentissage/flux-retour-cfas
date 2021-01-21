@@ -10,14 +10,16 @@ const GlobalStats = ({ stats, lastImportDates }) => {
   return (
     <>
       <Box>
-        <Stack spacing="2w" mt="3w" mb="3w">
-          {lastImportDates.map((item) => (
-            <Alert key={item} status="info">
-              <AlertIcon />
-              Dernier import de données de {item.source} réalisé le {item.date}
-            </Alert>
-          ))}
-        </Stack>
+        {lastImportDates && (
+          <Stack spacing="2w" mt="3w" mb="3w">
+            {lastImportDates.map((item) => (
+              <Alert key={item} status="info">
+                <AlertIcon />
+                Dernier import de données de {item.source} réalisé le {item.date}
+              </Alert>
+            ))}
+          </Stack>
+        )}
         <PageSectionTitle>Candidats</PageSectionTitle>
         <HStack spacing="2w" mt="3w">
           <StatCard label="Total candidats" stat={stats.nbDistinctCandidatsTotal} background="info" />
@@ -27,7 +29,11 @@ const GlobalStats = ({ stats, lastImportDates }) => {
         </HStack>
         <HStack spacing="2w" mt="3w">
           <StatCard background="warning" label="CFAs au total" stat={stats.nbCfas} />
-          <StatCard background="warning" label="UAIs invalides" stat={stats.nbInvalidUais} />
+          <StatCard
+            background="warning"
+            label="Statuts candidats avec UAI absent ou invalide"
+            stat={stats.nbInvalidUais}
+          />
         </HStack>
       </Box>
       <Box mt="9w">
