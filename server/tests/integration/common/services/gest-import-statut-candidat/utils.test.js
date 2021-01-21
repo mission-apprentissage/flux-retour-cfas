@@ -73,7 +73,7 @@ describe("gesti-import-statut-candidat utils", () => {
         libelle_court_formation: "",
         libelle_long_formation: "",
         uai_etablissement: "0011074M",
-        siret_etablissement: "11111222223333",
+        siret_etablissement: "",
         nom_etablissement: "MFR DE BAGE LE CHATEL - 01380 BAGE LE CHATEL",
         statut_apprenant: "3",
         date_metier_mise_a_jour_statut: "",
@@ -94,7 +94,7 @@ describe("gesti-import-statut-candidat utils", () => {
         libelle_court_formation: "",
         libelle_long_formation: "",
         uai_etablissement: "0011074M",
-        siret_etablissement: "11111222223333",
+        siret_etablissement: "",
         nom_etablissement: "MFR DE BAGE LE CHATEL - 01380 BAGE LE CHATEL",
         statut_apprenant: 3,
         date_metier_mise_a_jour_statut: "",
@@ -208,19 +208,19 @@ describe("gesti-import-statut-candidat utils", () => {
       assert.deepStrictEqual(output.valid, [input[0]]);
       assert.strictEqual(output.errors.length, 2);
 
-      // statutCandidat at index 1 has 5 missing fields: nom_apprenant, prenom_apprenant, id_formation, uai_etablissement, siret_etablissement
+      // statutCandidat at index 1 has 5 missing fields: nom_apprenant, prenom_apprenant, id_formation, uai_etablissement
       const firstElementErrors = output.errors[0];
       assert.strictEqual(firstElementErrors.index, 1);
-      assert.strictEqual(firstElementErrors.details.length, 5);
+      assert.strictEqual(firstElementErrors.details.length, 4);
       assert.deepStrictEqual(
         firstElementErrors.details.map((detail) => detail.path[0]),
-        ["nom_apprenant", "prenom_apprenant", "id_formation", "uai_etablissement", "siret_etablissement"]
+        ["nom_apprenant", "prenom_apprenant", "id_formation", "uai_etablissement"]
       );
 
       // statutCandidat at index 2 is empty
       const secondElementErrors = output.errors[1];
       assert.strictEqual(secondElementErrors.index, 2);
-      assert.strictEqual(secondElementErrors.details.length, 8);
+      assert.strictEqual(secondElementErrors.details.length, 7);
       assert.deepStrictEqual(
         secondElementErrors.details.map((detail) => detail.path[0]),
         [
@@ -229,7 +229,6 @@ describe("gesti-import-statut-candidat utils", () => {
           "ne_pas_solliciter",
           "id_formation",
           "uai_etablissement",
-          "siret_etablissement",
           "nom_etablissement",
           "statut_apprenant",
         ]

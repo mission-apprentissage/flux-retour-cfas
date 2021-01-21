@@ -40,7 +40,7 @@ const createRandomStatutCandidat = () => {
     libelle_court_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
     libelle_long_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
-    siret_etablissement: getRandomSiretEtablissement(),
+    siret_etablissement: isPresent() ? getRandomSiretEtablissement() : null,
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
@@ -69,7 +69,7 @@ const createRandomStatutCandidatApiInput = () => {
     libelle_court_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
     libelle_long_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
-    siret_etablissement: getRandomSiretEtablissement(),
+    siret_etablissement: isPresent() ? getRandomSiretEtablissement() : "",
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
