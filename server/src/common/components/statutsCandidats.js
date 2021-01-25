@@ -3,6 +3,7 @@ const logger = require("../logger");
 const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
+const { validateCfd } = require("../domain/cfd");
 
 module.exports = () => ({
   existsStatut,
@@ -110,6 +111,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
         tel_representant_legal: item.tel_representant_legal,
         tel2_representant_legal: item.tel2_representant_legal,
         id_formation: item.id_formation,
+        id_formation_valid: validateCfd(item.id_formation),
         libelle_court_formation: item.libelle_court_formation,
         libelle_long_formation: item.libelle_long_formation,
         uai_etablissement: item.uai_etablissement,

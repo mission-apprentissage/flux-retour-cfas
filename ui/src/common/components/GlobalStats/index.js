@@ -34,6 +34,11 @@ const GlobalStats = ({ stats, lastImportDates }) => {
             label="Statuts candidats avec UAI absent ou invalide"
             stat={stats.nbInvalidUais}
           />
+          <StatCard
+            background="warning"
+            label="Statuts candidats avec CFD absent ou invalide"
+            stat={stats.nbInvalidCfds}
+          />
         </HStack>
       </Box>
       <Box mt="9w">
@@ -110,6 +115,7 @@ GlobalStats.propTypes = {
   stats: PropTypes.shape({
     nbCfas: PropTypes.number,
     nbInvalidUais: PropTypes.number,
+    nbInvalidCfds: PropTypes.number,
     nbDistinctCandidatsTotal: PropTypes.number,
     nbDistinctCandidatsWithIne: PropTypes.number,
     nbCandidatsMultiUais: PropTypes.number,
