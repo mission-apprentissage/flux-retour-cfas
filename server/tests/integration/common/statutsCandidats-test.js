@@ -500,8 +500,8 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.historique_statut_apprenant.length, 1);
   });
 
-  it("Vérifie l'update d'un uai invalide vers valide pour un statut", async () => {
-    const { updateStatut, addOrUpdateStatuts, getStatut } = await statutsCandidats();
+  it("Vérifie la création d'un statut avec un uai invalide", async () => {
+    const { addOrUpdateStatuts, getStatut } = await statutsCandidats();
 
     // Add statut with invalid uai
     const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: "invalid-uai" };
@@ -509,17 +509,10 @@ integrationTests(__filename, () => {
     const createdStatut = await getStatut(statutWithInvalidUai);
 
     assert.strictEqual(createdStatut.uai_etablissement_valid, false);
-
-    // Mise à jour du statut avec uai valide
-    await updateStatut(createdStatut._id, { uai_etablissement: "0000009S" });
-
-    // Check value in db
-    const found = await StatutCandidat.findById(createdStatut._id);
-    assert.strictEqual(found.uai_etablissement_valid, true);
   });
 
-  it("Vérifie l'update d'un siret invalide vers valide pour un statut", async () => {
-    const { updateStatut, addOrUpdateStatuts, getStatut } = await statutsCandidats();
+  it("Vérifie la création d'un statut avec un siret invalide", async () => {
+    const { addOrUpdateStatuts, getStatut } = await statutsCandidats();
 
     // Add statut with invalid siret
     const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: "invalid-siret" };
@@ -527,12 +520,5 @@ integrationTests(__filename, () => {
     const createdStatut = await getStatut(statutWithInvalidSiret);
 
     assert.strictEqual(createdStatut.siret_etablissement_valid, false);
-
-    // Mise à jour du statut avec siret valide
-    await updateStatut(createdStatut._id, { siret_etablissement: "80490173800023" });
-
-    // Check value in db
-    const found = await StatutCandidat.findById(createdStatut._id);
-    assert.strictEqual(found.siret_etablissement_valid, true);
   });
 });

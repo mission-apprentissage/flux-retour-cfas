@@ -209,16 +209,6 @@ const updateStatut = async (existingItemId, toUpdate) => {
     ];
   }
 
-  // if uai has changed, validate it
-  if (existingItem.uai_etablissement !== toUpdate.uai_etablissement) {
-    toUpdate.uai_etablissement_valid = validateUai(toUpdate.uai_etablissement);
-  }
-
-  // if siret has changed, validate it
-  if (existingItem.siret_etablissement !== toUpdate.siret_etablissement) {
-    toUpdate.siret_etablissement_valid = validateSiret(toUpdate.siret_etablissement);
-  }
-
   // Update & return
   const updateQuery = {
     ...toUpdate,
