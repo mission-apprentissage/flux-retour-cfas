@@ -22,7 +22,7 @@ const App = () => {
         <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
 
         <PrivateRoute exact path="/">
-          <Redirect to={isAdmin ? "/stats" : "/stats/gesti"} />
+          <Redirect to={isAdmin ? "/stats" : `/stats/${auth.sub}`} />
         </PrivateRoute>
 
         <AdminRoute path="/stats" exact component={GlobalStatsPage} />
