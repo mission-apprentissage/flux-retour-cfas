@@ -36,6 +36,11 @@ const GlobalStats = ({ stats, lastImportDates }) => {
         <HStack spacing="2w" mt="3w">
           <StatCard background="info" label="Total Statuts" stat={stats.nbStatutsCandidats} />
           <StatCard background="warning" label="Statuts sans INE" stat={stats.nbStatutsSansIne} />
+          <StatCard
+            background="warning"
+            label="Statuts avec SIRET et UAI absent ou invalide"
+            stat={stats.nbInvalidSiretsAndUais}
+          />
           <StatCard background="warning" label="Statuts avec UAI absent ou invalide" stat={stats.nbInvalidUais} />
           <StatCard background="warning" label="Statuts avec SIRET absent ou invalide" stat={stats.nbInvalidSirets} />
           <StatCard background="warning" label="Statuts avec CFD absent ou invalide" stat={stats.nbInvalidCfds} />
@@ -110,6 +115,7 @@ GlobalStats.propTypes = {
     nbInvalidUais: PropTypes.number,
     nbInvalidCfds: PropTypes.number,
     nbInvalidSirets: PropTypes.number,
+    nbInvalidSiretsAndUais: PropTypes.number,
     nbDistinctCandidatsTotal: PropTypes.number,
     nbDistinctCandidatsWithIne: PropTypes.number,
     nbCandidatsMultiUais: PropTypes.number,
