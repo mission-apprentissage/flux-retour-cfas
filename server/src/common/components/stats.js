@@ -42,6 +42,8 @@ const getAllStats = async (filters = {}) => {
 
   const nbInvalidUais = await getNbInvalidUais(filters);
   const nbInvalidCfds = await getNbInvalidCfds(filters);
+  const nbInvalidSirets = await getNbInvalidSirets(filters);
+  const nbInvalidSiretsAndUais = await getNbInvalidSiretsAndUais(filters);
 
   const candidatsWithHistory = await StatutCandidat.aggregate([
     { $match: filters },
@@ -113,6 +115,8 @@ const getAllStats = async (filters = {}) => {
     nbDistinctCandidatsWithChangingStatutProspectAbandon,
     nbCfas,
     nbInvalidUais,
+    nbInvalidSirets,
+    nbInvalidSiretsAndUais,
   };
 };
 
@@ -203,4 +207,12 @@ const getNbInvalidUais = async (filters = {}) => {
 
 const getNbInvalidCfds = async (filters = {}) => {
   return StatutCandidat.count({ ...filters, id_formation_valid: false });
+};
+
+const getNbInvalidSirets = async (filters = {}) => {
+  return StatutCandidat.count({ ...filters, siret_etablissement_valid: false });
+};
+
+const getNbInvalidSiretsAndUais = async (filters = {}) => {
+  return StatutCandidat.count({ ...filters, siret_etablissement_valid: false, uai_etablissement_valid: false });
 };

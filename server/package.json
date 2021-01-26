@@ -21,6 +21,7 @@
     "seed:randomizedSample": "node -r dotenv/config src/jobs/seed/seedRandomizedSample.js",
     "clear:all": "node -r dotenv/config src/jobs/clear/clearAll.js",
     "clear:statutsCandidats": "node -r dotenv/config src/jobs/clear/clearStatutsCandidats.js",
+    "checkSiretUaiValid": "node -r dotenv/config src/jobs/check-siret-and-uai-validity-statuts-candidats/index.js",
     "clear:logs": "node -r dotenv/config src/jobs/clear/clearLogs.js",
     "clear:users": "node -r dotenv/config src/jobs/clear/clearUsers.js",
     "stats": "node -r dotenv/config src/jobs/compute-stats-statuts-candidats/index.js",
