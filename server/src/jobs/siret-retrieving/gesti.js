@@ -12,22 +12,22 @@ const siretGestiReferenceFilePath = path.join(__dirname, `./assets/sirets-gesti.
  * Ce script permet de récupérer les SIRETs Gesti pour les statuts n'ayant aucun siret présent
  * Utilise un fichier référentiel sirets-gesti contenant les couples SIRET-UAIs de Gesti
  */
-runScript(async () => {
+runScript(async ({ statutsCandidats }) => {
   logger.info("Run Siret Retrieving Job for Gesti");
-  await retrieveSiret();
+  await retrieveSiret(statutsCandidats);
   logger.info("End Siret Retrieving Job");
 });
 
-const retrieveSiret = async () => {
+const retrieveSiret = async (statutsCandidats) => {
   logger.info("Retrieving sirets for Gesti");
 
   // Gets the referentiel file
   await downloadIfNeeded(`siret-erps/sirets-gesti.csv`, siretGestiReferenceFilePath);
 
-  // Parse all data for gesti with siret_etablissement null & uai not null
+  // Parse all data for gesti with siret_etablissement invalid & uai valid
   const statutsWithoutSiretsWithUais = await StatutCandidat.find({
     source: "gesti",
-    $and: [{ siret_etablissement: null }, { uai_etablissement: { $ne: null } }],
+    $and: [{ siret_etablissement_valid: false }, { uai_etablissement_valid: true }],
   });
 
   await asyncForEach(statutsWithoutSiretsWithUais, async (currentStatutWithoutSiret) => {
@@ -36,11 +36,8 @@ const retrieveSiret = async () => {
 
     // Update siret in db
     if (siretFound) {
-      await StatutCandidat.findByIdAndUpdate(
-        currentStatutWithoutSiret._id,
-        { siret_etablissement: siretFound },
-        { new: true }
-      );
+      const toUpdate = { ...currentStatutWithoutSiret, siret_etablissement: siretFound };
+      await statutsCandidats.updateStatut(currentStatutWithoutSiret._id, toUpdate);
       logger.info(`StatutCandidat updated with siret : ${siretFound}`);
     }
   });

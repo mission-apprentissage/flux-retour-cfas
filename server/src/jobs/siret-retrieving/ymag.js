@@ -7,19 +7,19 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
  * Ce script permet de récupérer les SIRETs Ymag pour les statuts n'ayant aucun siret présent
  * Utilise les données de la collection StatutCandidats existantes
  */
-runScript(async () => {
+runScript(async ({ statutsCandidats }) => {
   logger.info("Run Siret Retrieving Job for Ymag");
-  await retrieveSiret();
+  await retrieveSiret(statutsCandidats);
   logger.info("End Siret Retrieving Job");
 });
 
-const retrieveSiret = async () => {
+const retrieveSiret = async (statutsCandidats) => {
   logger.info("Retrieving sirets for YMag");
 
-  // Parse all data for ymag with siret_etablissement null & uai not null
+  // Parse all data for ymag with siret_etablissement invalid & uai valid
   const statutsWithoutSiretsWithUais = await StatutCandidat.find({
     source: "ymag",
-    $and: [{ siret_etablissement: null }, { uai_etablissement: { $ne: null } }],
+    $and: [{ siret_etablissement_valid: false }, { uai_etablissement_valid: true }],
   });
 
   await asyncForEach(statutsWithoutSiretsWithUais, async (currentStatutWithoutSiret) => {
@@ -28,11 +28,8 @@ const retrieveSiret = async () => {
 
     // Update siret in db
     if (siretFound) {
-      await StatutCandidat.findByIdAndUpdate(
-        currentStatutWithoutSiret._id,
-        { siret_etablissement: siretFound },
-        { new: true }
-      );
+      const toUpdate = { ...currentStatutWithoutSiret, siret_etablissement: siretFound };
+      await statutsCandidats.updateStatut(currentStatutWithoutSiret._id, toUpdate);
       logger.info(`StatutCandidat updated with siret : ${siretFound}`);
     }
   });
@@ -41,10 +38,10 @@ const retrieveSiret = async () => {
 const findSiretForUai = async (uai) => {
   logger.info(`-- Searching Siret for uai ${uai}`);
 
-  // Search siret in existing StatutCandidats
+  // Search siret in existing StatutCandidats with siret valid & uai valid
   const referenceDataForUai = await StatutCandidat.findOne({
     source: "ymag",
-    $and: [{ siret_etablissement: { $ne: null } }, { uai_etablissement: { $ne: null } }],
+    $and: [{ siret_etablissement_valid: true }, { uai_etablissement_valid: true }],
   });
 
   if (referenceDataForUai) {
