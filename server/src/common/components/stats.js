@@ -41,6 +41,7 @@ const getAllStats = async (filters = {}) => {
   });
 
   const nbInvalidUais = await getNbInvalidUais(filters);
+  const nbInvalidCfds = await getNbInvalidCfds(filters);
 
   const candidatsWithHistory = await StatutCandidat.aggregate([
     { $match: filters },
@@ -97,6 +98,7 @@ const getAllStats = async (filters = {}) => {
     nbStatutsSansIne,
 
     nbCandidatsMultiUais,
+    nbInvalidCfds,
 
     nbCandidatsMultiCfds,
 
@@ -197,4 +199,8 @@ const getNbDistinctCfas = async (filters) => {
 
 const getNbInvalidUais = async (filters = {}) => {
   return StatutCandidat.count({ ...filters, uai_etablissement_valid: false });
+};
+
+const getNbInvalidCfds = async (filters = {}) => {
+  return StatutCandidat.count({ ...filters, id_formation_valid: false });
 };
