@@ -12,7 +12,6 @@ const apiKeyOrJwtAuthMiddleware = require("./middlewares/apiKeyOrJwtAuthMiddlewa
 
 const statutCandidatsRoute = require("./routes/statut-candidats");
 const loginRoute = require("./routes/login");
-const adminRoute = require("./routes/admin");
 const passwordRoute = require("./routes/password");
 const statsRoute = require("./routes/stats");
 const userEventsRoute = require("./routes/userEvents");
@@ -37,7 +36,6 @@ module.exports = async (components) => {
     statutCandidatsRoute(components)
   );
   app.use("/api/login", loginRoute(components));
-  app.use("/api/admin", checkJwtToken, adminOnly, adminRoute());
   app.use("/api/password", passwordRoute(components));
   app.use("/api/stats", checkJwtToken, statsRoute(components));
   app.use("/api/userEvents", checkJwtToken, userEventsRoute(components));
