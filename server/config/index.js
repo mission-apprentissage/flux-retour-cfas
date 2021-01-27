@@ -10,7 +10,6 @@ module.exports = {
   ftpDir: env.get("FLUX_RETOUR_CFAS_FTP_DIR").required().asString(),
   mnaCatalog: {
     endpoint: env.get("FLUX_RETOUR_CFAS_MNA_CATALOG_ENDPOINT").required().asString(),
-    apiToken: env.get("FLUX_RETOUR_CFAS_MNA_API_TOKEN").required().asString(),
   },
   auth: {
     passwordHashRounds: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS").asInt(),
