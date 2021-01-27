@@ -4,7 +4,7 @@ import React from "react";
 
 const PageSectionTitle = ({ children }) => {
   return (
-    <Heading fontFamily="Marianne" fontWeight="700" fontSize="gamma">
+    <Heading fontWeight="400" fontSize="beta">
       {children}
     </Heading>
   );
