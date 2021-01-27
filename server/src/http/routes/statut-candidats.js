@@ -54,7 +54,7 @@ module.exports = ({ statutsCandidats }) => {
           username: req.user.username,
           type: "POST",
           action: "statut-candidats",
-          data: JSON.stringify(req.body),
+          data: req.body,
         });
         await event.save();
 
