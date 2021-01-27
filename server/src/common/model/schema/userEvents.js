@@ -22,7 +22,7 @@ module.exports = new Schema({
     description: "L'action ayant eu lieu",
   },
   data: {
-    type: String,
+    type: Object,
     default: null,
     description: "La donnée liéé à l'action",
   },

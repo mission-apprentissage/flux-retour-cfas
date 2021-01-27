@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "1.1.6",
+  "version": "1.1.8",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -21,6 +21,7 @@
     "seed:randomizedSample": "node -r dotenv/config src/jobs/seed/seedRandomizedSample.js",
     "clear:all": "node -r dotenv/config src/jobs/clear/clearAll.js",
     "clear:statutsCandidats": "node -r dotenv/config src/jobs/clear/clearStatutsCandidats.js",
+    "checkSiretUaiValid": "node -r dotenv/config src/jobs/check-siret-and-uai-validity-statuts-candidats/index.js",
     "clear:logs": "node -r dotenv/config src/jobs/clear/clearLogs.js",
     "clear:users": "node -r dotenv/config src/jobs/clear/clearUsers.js",
     "stats": "node -r dotenv/config src/jobs/compute-stats-statuts-candidats/index.js",

@@ -40,7 +40,11 @@ const getAllStats = async (filters = {}) => {
     historique_statut_apprenant: { $size: 1 },
   });
 
+  const nbStatutsValid = await getNbStatutsValid(filters);
   const nbInvalidUais = await getNbInvalidUais(filters);
+  const nbInvalidCfds = await getNbInvalidCfds(filters);
+  const nbInvalidSirets = await getNbInvalidSirets(filters);
+  const nbInvalidSiretsAndUais = await getNbInvalidSiretsAndUais(filters);
 
   const candidatsWithHistory = await StatutCandidat.aggregate([
     { $match: filters },
@@ -97,6 +101,7 @@ const getAllStats = async (filters = {}) => {
     nbStatutsSansIne,
 
     nbCandidatsMultiUais,
+    nbInvalidCfds,
 
     nbCandidatsMultiCfds,
 
@@ -111,6 +116,9 @@ const getAllStats = async (filters = {}) => {
     nbDistinctCandidatsWithChangingStatutProspectAbandon,
     nbCfas,
     nbInvalidUais,
+    nbInvalidSirets,
+    nbInvalidSiretsAndUais,
+    nbStatutsValid,
   };
 };
 
@@ -195,6 +203,27 @@ const getNbDistinctCfas = async (filters) => {
   return distinctUais.length;
 };
 
+const getNbStatutsValid = async (filters = {}) => {
+  return StatutCandidat.count({
+    ...filters,
+    siret_etablissement_valid: true,
+    uai_etablissement_valid: true,
+    id_formation_valid: true,
+  });
+};
+
 const getNbInvalidUais = async (filters = {}) => {
   return StatutCandidat.count({ ...filters, uai_etablissement_valid: false });
+};
+
+const getNbInvalidCfds = async (filters = {}) => {
+  return StatutCandidat.count({ ...filters, id_formation_valid: false });
+};
+
+const getNbInvalidSirets = async (filters = {}) => {
+  return StatutCandidat.count({ ...filters, siret_etablissement_valid: false });
+};
+
+const getNbInvalidSiretsAndUais = async (filters = {}) => {
+  return StatutCandidat.count({ ...filters, siret_etablissement_valid: false, uai_etablissement_valid: false });
 };

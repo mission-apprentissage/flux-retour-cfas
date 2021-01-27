@@ -3,12 +3,15 @@ const logger = require("../logger");
 const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
+const { validateCfd } = require("../domain/cfd");
+const { validateSiret } = require("../domain/siret");
 
 module.exports = () => ({
   existsStatut,
   getStatut,
   addOrUpdateStatuts,
   getStatutHistory,
+  updateStatut,
 });
 
 const existsStatut = async ({
@@ -110,11 +113,13 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
         tel_representant_legal: item.tel_representant_legal,
         tel2_representant_legal: item.tel2_representant_legal,
         id_formation: item.id_formation,
+        id_formation_valid: validateCfd(item.id_formation),
         libelle_court_formation: item.libelle_court_formation,
         libelle_long_formation: item.libelle_long_formation,
         uai_etablissement: item.uai_etablissement,
         uai_etablissement_valid: validateUai(item.uai_etablissement),
         siret_etablissement: item.siret_etablissement,
+        siret_etablissement_valid: validateSiret(item.siret_etablissement),
         nom_etablissement: item.nom_etablissement,
         statut_apprenant: item.statut_apprenant,
         historique_statut_apprenant: [
@@ -202,11 +207,6 @@ const updateStatut = async (existingItemId, toUpdate) => {
         date_statut: new Date(),
       },
     ];
-  }
-
-  // if uai has changed, validate it
-  if (existingItem.uai_etablissement !== toUpdate.uai_etablissement) {
-    toUpdate.uai_etablissement_valid = validateUai(toUpdate.uai_etablissement);
   }
 
   // Update & return

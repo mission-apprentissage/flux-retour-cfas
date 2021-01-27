@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../constants/statutsColors";
+import { getItemsRate } from "../../utils/calculUtils";
+import DoubleStatCard from "../DoubleStatCard";
 import PageSectionTitle from "../PageSectionTitle";
 import StatCard from "../StatCard";
 
@@ -12,8 +14,8 @@ const GlobalStats = ({ stats, lastImportDates }) => {
       <Box>
         {lastImportDates && (
           <Stack spacing="2w" mt="3w" mb="3w">
-            {lastImportDates.map((item) => (
-              <Alert key={item} status="info">
+            {lastImportDates.map((item, index) => (
+              <Alert key={index} status="info">
                 <AlertIcon />
                 Dernier import de données de {item.source} réalisé le {item.date}
               </Alert>
@@ -29,18 +31,12 @@ const GlobalStats = ({ stats, lastImportDates }) => {
         </HStack>
         <HStack spacing="2w" mt="3w">
           <StatCard background="warning" label="CFAs au total" stat={stats.nbCfas} />
-          <StatCard
-            background="warning"
-            label="Statuts candidats avec UAI absent ou invalide"
-            stat={stats.nbInvalidUais}
-          />
         </HStack>
       </Box>
       <Box mt="9w">
         <PageSectionTitle>Statuts Candidats</PageSectionTitle>
         <HStack spacing="2w" mt="3w">
           <StatCard background="info" label="Total Statuts" stat={stats.nbStatutsCandidats} />
-          <StatCard background="info" label="Statuts sans INE" stat={stats.nbStatutsSansIne} />
         </HStack>
         <HStack spacing="2w" mt="3w">
           <StatCard
@@ -70,6 +66,46 @@ const GlobalStats = ({ stats, lastImportDates }) => {
             background="orangesoft.200"
             color="grey.800"
             indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
+          />
+        </HStack>
+      </Box>
+      <Box mt="9w">
+        <PageSectionTitle>Données invalides</PageSectionTitle>
+        <HStack spacing="2w" mt="3w">
+          <DoubleStatCard
+            background="warning"
+            label="Statuts valides"
+            stat={stats.nbStatutsValid}
+            stat2={`${getItemsRate(stats.nbStatutsValid, stats.nbStatutsCandidats)} %`}
+            stat2Label="du total des statuts"
+          />
+          <DoubleStatCard
+            background="warning"
+            label="Statuts avec UAI absent ou invalide"
+            stat={stats.nbInvalidUais}
+            stat2={`${getItemsRate(stats.nbInvalidUais, stats.nbStatutsCandidats)} %`}
+            stat2Label="du total des statuts"
+          />
+          <DoubleStatCard
+            background="warning"
+            label="Statuts avec SIRET absent ou invalide"
+            stat={stats.nbInvalidSirets}
+            stat2={`${getItemsRate(stats.nbInvalidSirets, stats.nbStatutsCandidats)} %`}
+            stat2Label="du total des statuts"
+          />
+          <DoubleStatCard
+            background="warning"
+            label="Statuts avec SIRET et UAI absent ou invalide"
+            stat={stats.nbInvalidSiretsAndUais}
+            stat2={`${getItemsRate(stats.nbInvalidSiretsAndUais, stats.nbStatutsCandidats)} %`}
+            stat2Label="du total des statuts"
+          />
+          <DoubleStatCard
+            background="warning"
+            label="Statuts avec CFD absent ou invalide"
+            stat={stats.nbInvalidCfds}
+            stat2={`${getItemsRate(stats.nbInvalidCfds, stats.nbStatutsCandidats)} %`}
+            stat2Label="du total des statuts"
           />
         </HStack>
       </Box>
@@ -109,7 +145,11 @@ const GlobalStats = ({ stats, lastImportDates }) => {
 GlobalStats.propTypes = {
   stats: PropTypes.shape({
     nbCfas: PropTypes.number,
+    nbStatutsValid: PropTypes.number,
     nbInvalidUais: PropTypes.number,
+    nbInvalidCfds: PropTypes.number,
+    nbInvalidSirets: PropTypes.number,
+    nbInvalidSiretsAndUais: PropTypes.number,
     nbDistinctCandidatsTotal: PropTypes.number,
     nbDistinctCandidatsWithIne: PropTypes.number,
     nbCandidatsMultiUais: PropTypes.number,

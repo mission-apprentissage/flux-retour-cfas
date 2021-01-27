@@ -34,7 +34,6 @@ services:
       - FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET=789
       # MNA Catalogue
       - FLUX_RETOUR_CFAS_MNA_CATALOG_ENDPOINT=https://r7mayzn08d.execute-api.eu-west-3.amazonaws.com/dev
-      - FLUX_RETOUR_CFAS_MNA_API_TOKEN=1234
       # users
         ## ymag
       - FLUX_RETOUR_CFAS_USERS_YMAG_NAME=ymag
@@ -51,6 +50,11 @@ services:
       - FLUX_RETOUR_CFAS_USERS_SCFORM_PASSWORD=mdpScform
       - FLUX_RETOUR_CFAS_USERS_SCFORM_API_KEY=01234
       - FLUX_RETOUR_CFAS_USERS_SCFORM_PERMISSIONS=apiStatutsSeeder
+        ## fca manager
+      - FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_NAME=fcamanager
+      - FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_PASSWORD=mdpFcaManager
+      - FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_API_KEY=01234
+      - FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_PERMISSIONS=apiStatutsSeeder
         ## admin
       - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME=mna-admin
       - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD=password

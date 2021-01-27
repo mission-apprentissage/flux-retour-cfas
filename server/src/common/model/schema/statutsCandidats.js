@@ -58,6 +58,10 @@ const statutsCandidatsSchema = new Schema({
     description: "Identifiant de la formation visée",
     index: true,
   },
+  id_formation_valid: {
+    type: Boolean,
+    description: "Le champ id_formation est-il un cfd valide ?",
+  },
   libelle_court_formation: {
     type: String,
     default: null,
@@ -83,6 +87,10 @@ const statutsCandidatsSchema = new Schema({
     type: String,
     default: null,
     description: "Siret de l'établissement d'origine",
+  },
+  siret_etablissement_valid: {
+    type: Boolean,
+    description: "Le champ siret_etablissement est-il valide ?",
   },
   nom_etablissement: {
     type: String,

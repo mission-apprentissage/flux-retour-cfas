@@ -1,7 +1,7 @@
 const express = require("express");
 const roles = require("../../common/roles");
 const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
-const { apiStatutsSeeder, administrator } = require("../../common/roles");
+const { administrator } = require("../../common/roles");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
 module.exports = ({ stats, userEvents }) => {
@@ -19,7 +19,6 @@ module.exports = ({ stats, userEvents }) => {
 
   router.get(
     "/:dataSource",
-    permissionsMiddleware([administrator, apiStatutsSeeder]),
     tryCatch(async (req, res) => {
       const { dataSource } = req.params;
       const isUserAdmin = req.user.permissions.indexOf(roles.administrator) > -1;
