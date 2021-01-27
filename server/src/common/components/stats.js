@@ -40,6 +40,7 @@ const getAllStats = async (filters = {}) => {
     historique_statut_apprenant: { $size: 1 },
   });
 
+  const nbStatutsValid = await getNbStatutsValid(filters);
   const nbInvalidUais = await getNbInvalidUais(filters);
   const nbInvalidCfds = await getNbInvalidCfds(filters);
   const nbInvalidSirets = await getNbInvalidSirets(filters);
@@ -117,6 +118,7 @@ const getAllStats = async (filters = {}) => {
     nbInvalidUais,
     nbInvalidSirets,
     nbInvalidSiretsAndUais,
+    nbStatutsValid,
   };
 };
 
@@ -199,6 +201,15 @@ const getNbDistinctCandidatsWithHistoryNbItems = async (nbChangements, filters) 
 const getNbDistinctCfas = async (filters) => {
   const distinctUais = await StatutCandidat.distinct("uai_etablissement", filters);
   return distinctUais.length;
+};
+
+const getNbStatutsValid = async (filters = {}) => {
+  return StatutCandidat.count({
+    ...filters,
+    siret_etablissement_valid: true,
+    uai_etablissement_valid: true,
+    id_formation_valid: true,
+  });
 };
 
 const getNbInvalidUais = async (filters = {}) => {

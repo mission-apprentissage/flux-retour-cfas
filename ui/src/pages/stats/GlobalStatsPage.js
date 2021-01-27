@@ -1,5 +1,4 @@
 import { Box, Flex } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
 import GlobalStats from "../../common/components/GlobalStats";
@@ -29,10 +28,6 @@ const GlobalStatsPage = () => {
       </Box>
     </Box>
   );
-};
-
-GlobalStatsPage.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export default GlobalStatsPage;
