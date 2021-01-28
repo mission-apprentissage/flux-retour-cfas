@@ -23,7 +23,6 @@ const existsStatut = async ({
   email_contact = null,
   id_formation,
   uai_etablissement,
-  siret_etablissement,
   periode_formation,
   annee_formation,
 }) => {
@@ -36,7 +35,6 @@ const existsStatut = async ({
     email_contact,
     id_formation,
     uai_etablissement,
-    siret_etablissement,
     periode_formation,
     annee_formation
   );
@@ -53,7 +51,6 @@ const getStatut = ({
   email_contact = null,
   id_formation,
   uai_etablissement,
-  siret_etablissement,
   periode_formation,
   annee_formation,
 }) => {
@@ -66,7 +63,6 @@ const getStatut = ({
     email_contact,
     id_formation,
     uai_etablissement,
-    siret_etablissement,
     periode_formation,
     annee_formation
   );
@@ -78,7 +74,6 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // If status found update it
     const foundItem = await getStatut({
       ine_apprenant: item.ine_apprenant,
       nom_apprenant: item.nom_apprenant,
@@ -88,7 +83,6 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
       email_contact: item.email_contact,
       id_formation: item.id_formation,
       uai_etablissement: item.uai_etablissement,
-      siret_etablissement: item.siret_etablissement,
       periode_formation: item.periode_formation,
       annee_formation: item.annee_formation,
     });
@@ -97,48 +91,16 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
     const isUaiValid = validateUai(item.uai_etablissement);
     !isUaiValid && logger.warn(`Invalid UAI "${item.uai_etablissement}" detected. Will add or update anyway.`);
 
-    if (foundItem) {
-      const updatedItem = await updateStatut(foundItem._id, item);
-      await updated.push(updatedItem);
-    } else {
-      const toAdd = new StatutCandidat({
-        ine_apprenant: item.ine_apprenant,
-        nom_apprenant: item.nom_apprenant,
-        prenom_apprenant: item.prenom_apprenant,
-        prenom2_apprenant: item.prenom2_apprenant,
-        prenom3_apprenant: item.prenom3_apprenant,
-        ne_pas_solliciter: item.ne_pas_solliciter,
-        email_contact: item.email_contact,
-        nom_representant_legal: item.nom_representant_legal,
-        tel_representant_legal: item.tel_representant_legal,
-        tel2_representant_legal: item.tel2_representant_legal,
-        id_formation: item.id_formation,
-        id_formation_valid: validateCfd(item.id_formation),
-        libelle_court_formation: item.libelle_court_formation,
-        libelle_long_formation: item.libelle_long_formation,
-        uai_etablissement: item.uai_etablissement,
-        uai_etablissement_valid: validateUai(item.uai_etablissement),
-        siret_etablissement: item.siret_etablissement,
-        siret_etablissement_valid: validateSiret(item.siret_etablissement),
-        nom_etablissement: item.nom_etablissement,
-        statut_apprenant: item.statut_apprenant,
-        historique_statut_apprenant: [
-          {
-            valeur_statut: item.statut_apprenant,
-            position_statut: 1,
-            date_statut: new Date(),
-          },
-        ],
-        date_entree_statut: item.date_entree_statut,
-        date_saisie_statut: item.date_saisie_statut,
-        date_mise_a_jour_statut: item.date_mise_a_jour_statut,
-        date_metier_mise_a_jour_statut: item.date_metier_mise_a_jour_statut,
-        periode_formation: item.periode_formation,
-        annee_formation: item.annee_formation,
-        source: item.source,
-      });
-      const addedItem = await toAdd.save();
+    // create a new statutCandidat if no found statut or if found statut has an existing SIRET but different than item to add/update
+    const shouldCreateStatutCandidat =
+      !foundItem || (foundItem.siret_etablissement && item.siret_etablissement !== foundItem.siret_etablissement);
+
+    if (shouldCreateStatutCandidat) {
+      const addedItem = await createStatutCandidat(item);
       added.push(addedItem);
+    } else {
+      const updatedItem = await updateStatut(foundItem._id, item);
+      updated.push(updatedItem);
     }
   });
 
@@ -157,7 +119,6 @@ const getStatutHistory = async ({
   email_contact = null,
   id_formation,
   uai_etablissement,
-  siret_etablissement,
   periode_formation,
   annee_formation,
 }) => {
@@ -170,7 +131,6 @@ const getStatutHistory = async ({
     email_contact,
     id_formation,
     uai_etablissement,
-    siret_etablissement,
     periode_formation,
     annee_formation
   );
@@ -218,6 +178,46 @@ const updateStatut = async (existingItemId, toUpdate) => {
   return updated;
 };
 
+const createStatutCandidat = (itemToCreate) => {
+  const toAdd = new StatutCandidat({
+    ine_apprenant: itemToCreate.ine_apprenant,
+    nom_apprenant: itemToCreate.nom_apprenant,
+    prenom_apprenant: itemToCreate.prenom_apprenant,
+    prenom2_apprenant: itemToCreate.prenom2_apprenant,
+    prenom3_apprenant: itemToCreate.prenom3_apprenant,
+    ne_pas_solliciter: itemToCreate.ne_pas_solliciter,
+    email_contact: itemToCreate.email_contact,
+    nom_representant_legal: itemToCreate.nom_representant_legal,
+    tel_representant_legal: itemToCreate.tel_representant_legal,
+    tel2_representant_legal: itemToCreate.tel2_representant_legal,
+    id_formation: itemToCreate.id_formation,
+    id_formation_valid: validateCfd(itemToCreate.id_formation),
+    libelle_court_formation: itemToCreate.libelle_court_formation,
+    libelle_long_formation: itemToCreate.libelle_long_formation,
+    uai_etablissement: itemToCreate.uai_etablissement,
+    uai_etablissement_valid: validateUai(itemToCreate.uai_etablissement),
+    siret_etablissement: itemToCreate.siret_etablissement,
+    siret_etablissement_valid: validateSiret(itemToCreate.siret_etablissement),
+    nom_etablissement: itemToCreate.nom_etablissement,
+    statut_apprenant: itemToCreate.statut_apprenant,
+    historique_statut_apprenant: [
+      {
+        valeur_statut: itemToCreate.statut_apprenant,
+        position_statut: 1,
+        date_statut: new Date(),
+      },
+    ],
+    date_entree_statut: itemToCreate.date_entree_statut,
+    date_saisie_statut: itemToCreate.date_saisie_statut,
+    date_mise_a_jour_statut: itemToCreate.date_mise_a_jour_statut,
+    date_metier_mise_a_jour_statut: itemToCreate.date_metier_mise_a_jour_statut,
+    periode_formation: itemToCreate.periode_formation,
+    annee_formation: itemToCreate.annee_formation,
+    source: itemToCreate.source,
+  });
+  return toAdd.save();
+};
+
 const getFindStatutQuery = (
   ine_apprenant = null,
   nom_apprenant = null,
@@ -227,7 +227,6 @@ const getFindStatutQuery = (
   email_contact = null,
   id_formation,
   uai_etablissement,
-  siret_etablissement,
   periode_formation,
   annee_formation
 ) =>
@@ -236,7 +235,6 @@ const getFindStatutQuery = (
         ine_apprenant: ine_apprenant,
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
-        siret_etablissement: siret_etablissement,
         periode_formation: periode_formation,
         annee_formation: annee_formation,
       }
@@ -248,7 +246,6 @@ const getFindStatutQuery = (
         email_contact: email_contact,
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
-        siret_etablissement: siret_etablissement,
         periode_formation: periode_formation,
         annee_formation: annee_formation,
       };

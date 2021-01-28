@@ -402,6 +402,52 @@ integrationTests(__filename, () => {
     assert.notDeepStrictEqual(found.updated_at, null);
   });
 
+  it("Vérifie qu'on trouve un statut sans SIRET et qu'il est updaté avec SIRET", async () => {
+    const { addOrUpdateStatuts } = await statutsCandidats();
+
+    const statutWithoutSiret = { ...createRandomStatutCandidat(), siret_etablissement: null };
+    const result = await addOrUpdateStatuts([statutWithoutSiret]);
+    assert.strictEqual(result.added.length, 1);
+    assert.strictEqual(result.updated.length, 0);
+
+    // send the same statut but with a siret
+    const sameStatutWithSiret = { ...statutWithoutSiret, siret_etablissement: "12312312300099" };
+    const { added, updated } = await addOrUpdateStatuts([sameStatutWithSiret]);
+
+    // statut should have been updated
+    assert.strictEqual(added.length, 0);
+    assert.strictEqual(updated.length, 1);
+    const count = await StatutCandidat.countDocuments();
+    assert.strictEqual(count, 1);
+
+    // check in db
+    const found = await StatutCandidat.findById(result.added[0]._id);
+    assert.deepStrictEqual(found.siret_etablissement, "12312312300099");
+  });
+
+  it("Vérifie qu'on trouve un statut avec uniquement SIRET différent, qu'il n'est pas updaté et qu'on crée un nouveau statut", async () => {
+    const { addOrUpdateStatuts } = await statutsCandidats();
+
+    const statutWithSiret = { ...createRandomStatutCandidat(), siret_etablissement: "12312312300099" };
+    const firstCallResult = await addOrUpdateStatuts([statutWithSiret]);
+    assert.strictEqual(firstCallResult.added.length, 1);
+    assert.strictEqual(firstCallResult.updated.length, 0);
+
+    // send the same statut but with a different siret
+    const sameStatutWithDifferentSiret = { ...statutWithSiret, siret_etablissement: "45645645600099" };
+    const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentSiret]);
+
+    // a new statut should have been created
+    assert.strictEqual(secondCallResult.added.length, 1);
+    assert.strictEqual(secondCallResult.updated.length, 0);
+    const count = await StatutCandidat.countDocuments();
+    assert.strictEqual(count, 2);
+
+    // check in db that first statut has not been updated
+    const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+    assert.deepStrictEqual(found.updated_at, null);
+  });
+
   it("Vérifie la récupération de l'historique simple d'un statut", async () => {
     const { addOrUpdateStatuts, getStatutHistory } = await statutsCandidats();
 
