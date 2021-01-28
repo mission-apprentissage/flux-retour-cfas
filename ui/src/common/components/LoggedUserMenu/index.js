@@ -53,6 +53,9 @@ const LoggedUserMenu = () => {
             <MenuItem>
               <NavLink to="/stats/ymag">Statistiques Ymag</NavLink>
             </MenuItem>
+            <MenuItem>
+              <NavLink to="/analytics">Analytics</NavLink>
+            </MenuItem>
           </>
         )}
         <MenuItem onClick={logout}>Déconnexion</MenuItem>
