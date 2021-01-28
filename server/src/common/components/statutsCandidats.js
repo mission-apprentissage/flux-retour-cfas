@@ -1,5 +1,4 @@
 const { StatutCandidat } = require("../model");
-const logger = require("../logger");
 const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
@@ -86,10 +85,6 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
       periode_formation: item.periode_formation,
       annee_formation: item.annee_formation,
     });
-
-    // log when uai is not valid
-    const isUaiValid = validateUai(item.uai_etablissement);
-    !isUaiValid && logger.warn(`Invalid UAI "${item.uai_etablissement}" detected. Will add or update anyway.`);
 
     // create a new statutCandidat if no found statut or if found statut has an existing SIRET but different than item to add/update
     const shouldCreateStatutCandidat =
