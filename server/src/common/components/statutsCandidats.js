@@ -22,7 +22,6 @@ const existsStatut = async ({
   email_contact = null,
   id_formation,
   uai_etablissement,
-  annee_formation,
 }) => {
   const query = getFindStatutQuery(
     ine_apprenant,
@@ -32,8 +31,7 @@ const existsStatut = async ({
     prenom3_apprenant,
     email_contact,
     id_formation,
-    uai_etablissement,
-    annee_formation
+    uai_etablissement
   );
   const count = await StatutCandidat.countDocuments(query);
   return count !== 0;
@@ -48,7 +46,6 @@ const getStatut = ({
   email_contact = null,
   id_formation,
   uai_etablissement,
-  annee_formation,
 }) => {
   const query = getFindStatutQuery(
     ine_apprenant,
@@ -58,8 +55,7 @@ const getStatut = ({
     prenom3_apprenant,
     email_contact,
     id_formation,
-    uai_etablissement,
-    annee_formation
+    uai_etablissement
   );
   return StatutCandidat.findOne(query);
 };
@@ -78,7 +74,6 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
       email_contact: item.email_contact,
       id_formation: item.id_formation,
       uai_etablissement: item.uai_etablissement,
-      annee_formation: item.annee_formation,
     });
 
     /*
@@ -88,11 +83,14 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
         - found statut has an existing SIRET but different than item to add/update
         or
         - found statut has an existing periode_formation but different than item to add/update
+        or
+        - found statut has an existing annee_formation but different than item to add/update
     */
     const shouldCreateStatutCandidat =
       !foundItem ||
       (foundItem.siret_etablissement && foundItem.siret_etablissement !== item.siret_etablissement) ||
-      (foundItem.periode_formation && foundItem.periode_formation.join() !== item.periode_formation.join());
+      (foundItem.periode_formation && foundItem.periode_formation.join() !== item.periode_formation.join()) ||
+      (foundItem.annee_formation && foundItem.annee_formation !== item.annee_formation);
 
     if (shouldCreateStatutCandidat) {
       const addedItem = await createStatutCandidat(item);
@@ -197,15 +195,13 @@ const getFindStatutQuery = (
   prenom3_apprenant = null,
   email_contact = null,
   id_formation,
-  uai_etablissement,
-  annee_formation
+  uai_etablissement
 ) =>
   ine_apprenant
     ? {
         ine_apprenant: ine_apprenant,
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
-        annee_formation: annee_formation,
       }
     : {
         nom_apprenant: nom_apprenant,
@@ -215,7 +211,6 @@ const getFindStatutQuery = (
         email_contact: email_contact,
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
-        annee_formation: annee_formation,
       };
 
 const isMajStatutInvalid = (statutSource, statutDest) => {

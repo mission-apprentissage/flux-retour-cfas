@@ -455,8 +455,11 @@ integrationTests(__filename, () => {
       assert.strictEqual(firstCallResult.updated.length, 0);
 
       // send the same statut but with a different periode_formation
-      const sameStatutWithPeriodeFormation = { ...statutWithPeriodeFormation, periode_formation: [2021, 2022] };
-      const secondCallResult = await addOrUpdateStatuts([sameStatutWithPeriodeFormation]);
+      const sameStatutWithDifferentPeriodeFormation = {
+        ...statutWithPeriodeFormation,
+        periode_formation: [2021, 2022],
+      };
+      const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentPeriodeFormation]);
 
       // a new statut should have been created
       assert.strictEqual(secondCallResult.added.length, 1);
@@ -467,6 +470,54 @@ integrationTests(__filename, () => {
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
       assert.deepStrictEqual(found.toJSON().periode_formation, [2020, 2021]);
+      assert.strictEqual(found.updated_at, null);
+    });
+
+    it("Vérifie qu'on update la annee_formation d'un statut existant qui n'en a pas avec la annee_formation de l'élément passé si le reste des infos est identique", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+
+      const statutWithoutAnneeFormation = { ...createRandomStatutCandidat(), annee_formation: null };
+      const result = await addOrUpdateStatuts([statutWithoutAnneeFormation]);
+      assert.strictEqual(result.added.length, 1);
+      assert.strictEqual(result.updated.length, 0);
+
+      // send the same statut but with a annee_formation
+      const sameStatutWithAnneeFormation = { ...statutWithoutAnneeFormation, annee_formation: 2020 };
+      const { added, updated } = await addOrUpdateStatuts([sameStatutWithAnneeFormation]);
+
+      // statut should have been updated
+      assert.strictEqual(added.length, 0);
+      assert.strictEqual(updated.length, 1);
+      const count = await StatutCandidat.countDocuments();
+      assert.strictEqual(count, 1);
+
+      // check in db
+      const found = await StatutCandidat.findById(result.added[0]._id);
+      assert.strictEqual(found.annee_formation, 2020);
+      assert.notStrictEqual(found.updated_at, null);
+    });
+
+    it("Vérifie qu'on crée un nouveau statut candidat quand un statut correspondant à l'élément passé est trouvé mais qu'ils n'ont pas la même annee_formation", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+
+      const statutWithPeriodeFormation = { ...createRandomStatutCandidat(), annee_formation: 2020 };
+      const firstCallResult = await addOrUpdateStatuts([statutWithPeriodeFormation]);
+      assert.strictEqual(firstCallResult.added.length, 1);
+      assert.strictEqual(firstCallResult.updated.length, 0);
+
+      // send the same statut but with a different annee_formation
+      const sameStatutWithDifferentAnneeFormation = { ...statutWithPeriodeFormation, annee_formation: 2021 };
+      const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentAnneeFormation]);
+
+      // a new statut should have been created
+      assert.strictEqual(secondCallResult.added.length, 1);
+      assert.strictEqual(secondCallResult.updated.length, 0);
+      const count = await StatutCandidat.countDocuments();
+      assert.strictEqual(count, 2);
+
+      // check in db
+      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      assert.deepStrictEqual(found.annee_formation, 2020);
       assert.strictEqual(found.updated_at, null);
     });
   });
