@@ -9,7 +9,7 @@ module.exports = () => ({
   existsStatut,
   getStatut,
   addOrUpdateStatuts,
-  getStatutHistory,
+  createStatutCandidat,
   updateStatut,
 });
 
@@ -22,7 +22,6 @@ const existsStatut = async ({
   email_contact = null,
   id_formation,
   uai_etablissement,
-  periode_formation,
   annee_formation,
 }) => {
   const query = getFindStatutQuery(
@@ -34,7 +33,6 @@ const existsStatut = async ({
     email_contact,
     id_formation,
     uai_etablissement,
-    periode_formation,
     annee_formation
   );
   const count = await StatutCandidat.countDocuments(query);
@@ -50,7 +48,6 @@ const getStatut = ({
   email_contact = null,
   id_formation,
   uai_etablissement,
-  periode_formation,
   annee_formation,
 }) => {
   const query = getFindStatutQuery(
@@ -62,7 +59,6 @@ const getStatut = ({
     email_contact,
     id_formation,
     uai_etablissement,
-    periode_formation,
     annee_formation
   );
   return StatutCandidat.findOne(query);
@@ -82,13 +78,21 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
       email_contact: item.email_contact,
       id_formation: item.id_formation,
       uai_etablissement: item.uai_etablissement,
-      periode_formation: item.periode_formation,
       annee_formation: item.annee_formation,
     });
 
-    // create a new statutCandidat if no found statut or if found statut has an existing SIRET but different than item to add/update
+    /*
+      create a new statutCandidat if :
+        - no found statut
+        or
+        - found statut has an existing SIRET but different than item to add/update
+        or
+        - found statut has an existing periode_formation but different than item to add/update
+    */
     const shouldCreateStatutCandidat =
-      !foundItem || (foundItem.siret_etablissement && item.siret_etablissement !== foundItem.siret_etablissement);
+      !foundItem ||
+      (foundItem.siret_etablissement && foundItem.siret_etablissement !== item.siret_etablissement) ||
+      (foundItem.periode_formation && foundItem.periode_formation.join() !== item.periode_formation.join());
 
     if (shouldCreateStatutCandidat) {
       const addedItem = await createStatutCandidat(item);
@@ -103,34 +107,6 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
     added,
     updated,
   };
-};
-
-const getStatutHistory = async ({
-  ine_apprenant = null,
-  nom_apprenant = null,
-  prenom_apprenant = null,
-  prenom2_apprenant = null,
-  prenom3_apprenant = null,
-  email_contact = null,
-  id_formation,
-  uai_etablissement,
-  periode_formation,
-  annee_formation,
-}) => {
-  const query = getFindStatutQuery(
-    ine_apprenant,
-    nom_apprenant,
-    prenom_apprenant,
-    prenom2_apprenant,
-    prenom3_apprenant,
-    email_contact,
-    id_formation,
-    uai_etablissement,
-    periode_formation,
-    annee_formation
-  );
-  const found = await StatutCandidat.findOne(query);
-  return found ? found.historique_statut_apprenant : null;
 };
 
 const updateStatut = async (existingItemId, toUpdate) => {
@@ -222,7 +198,6 @@ const getFindStatutQuery = (
   email_contact = null,
   id_formation,
   uai_etablissement,
-  periode_formation,
   annee_formation
 ) =>
   ine_apprenant
@@ -230,7 +205,6 @@ const getFindStatutQuery = (
         ine_apprenant: ine_apprenant,
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
-        periode_formation: periode_formation,
         annee_formation: annee_formation,
       }
     : {
@@ -241,7 +215,6 @@ const getFindStatutQuery = (
         email_contact: email_contact,
         id_formation: id_formation,
         uai_etablissement: uai_etablissement,
-        periode_formation: periode_formation,
         annee_formation: annee_formation,
       };
 
