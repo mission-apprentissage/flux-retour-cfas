@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-d
 import { anonymous } from "./common/auth";
 import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
+import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import LoginPage from "./pages/login/LoginPage";
 import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
@@ -27,6 +28,7 @@ const App = () => {
 
         <AdminRoute path="/stats" exact component={GlobalStatsPage} />
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
+        <PrivateRoute path="/analytics/" component={AnalyticsPage} />
 
         <Route component={() => <div>404</div>} />
       </Switch>

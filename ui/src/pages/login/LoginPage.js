@@ -37,10 +37,12 @@ const LoginPage = () => {
   return (
     <Center height="100vh" verticalAlign="center">
       <Box width="28rem">
-        <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          Connexion
-        </Heading>
-        <Box>
+        <Center>
+          <Heading mt={4} fontFamily="Marianne" fontWeight="700" marginBottom="2w">
+            Connexion
+          </Heading>
+        </Center>
+        <Box p={8} maxWidth="500px" borderWidth={1} borderRadius={8} boxShadow="lg">
           <Formik
             initialValues={{ username: "", password: "" }}
             validationSchema={Yup.object().shape({
