@@ -24,37 +24,35 @@ const retrieveSiret = async (statutsCandidats) => {
   // Gets the referentiel file
   await downloadIfNeeded(`siret-erps/sirets-gesti.csv`, siretGestiReferenceFilePath);
 
-  // Parse all data for gesti with siret_etablissement invalid & uai valid
+  const uaiSiretGestiReference = readJsonFromCsvFile(siretGestiReferenceFilePath);
+  if (!uaiSiretGestiReference) {
+    logger.error("Error while reading Gesti reference file");
+    return;
+  }
+
+  // retrieve statuts provided by ymag with a valid UAI but missing SIRET
   const statutsWithoutSiretsWithUais = await StatutCandidat.find({
-    source: "gesti",
-    $and: [{ siret_etablissement_valid: false }, { uai_etablissement_valid: true }],
+    source: "ymag",
+    siret_etablissement_valid: false,
+    uai_etablissement_valid: true,
   });
 
-  await asyncForEach(statutsWithoutSiretsWithUais, async (currentStatutWithoutSiret) => {
+  await asyncForEach(statutsWithoutSiretsWithUais, async (_statut) => {
     // Search a matching siret for uai
-    const siretFound = findSiretForUai(currentStatutWithoutSiret.uai_etablissement);
+    const statutWithoutSiret = _statut.toJSON();
+    const matchFoundInReference = uaiSiretGestiReference.find((x) => x.uai === statutWithoutSiret.uai_etablissement);
 
     // Update siret in db
-    if (siretFound) {
-      const toUpdate = { ...currentStatutWithoutSiret, siret_etablissement: siretFound };
-      await statutsCandidats.updateStatut(currentStatutWithoutSiret._id, toUpdate);
-      logger.info(`StatutCandidat updated with siret : ${siretFound}`);
+    if (matchFoundInReference) {
+      const toUpdate = {
+        ...statutWithoutSiret,
+        siret_etablissement: matchFoundInReference.siret,
+        siret_etablissement_valid: true,
+      };
+      const updated = await statutsCandidats.updateStatut(statutWithoutSiret._id, toUpdate);
+      logger.info(`StatutCandidat with _id ${updated._id} updated with siret : ${updated.siret_etablissement}`);
+    } else {
+      logger.info(`No SIRET found matching UAI ${statutWithoutSiret.uai_etablissement}`);
     }
   });
-};
-
-const findSiretForUai = (uai) => {
-  logger.info(`-- Searching Siret for uai ${uai}`);
-  const jsonData = readJsonFromCsvFile(siretGestiReferenceFilePath);
-  if (!jsonData) return null;
-
-  // Looking for uai in JSON Data from file
-  const referenceDataForUai = jsonData.find((x) => x.uai === uai);
-  if (referenceDataForUai) {
-    logger.info(`Siret for uai ${uai} found : ${referenceDataForUai.siret}`);
-    return referenceDataForUai.siret;
-  } else {
-    logger.info(`Siret not found for uai ${uai}`);
-    return null;
-  }
 };

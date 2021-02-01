@@ -16,39 +16,45 @@ runScript(async ({ statutsCandidats }) => {
 const retrieveSiret = async (statutsCandidats) => {
   logger.info("Retrieving sirets for YMag");
 
-  // Parse all data for ymag with siret_etablissement invalid & uai valid
+  // retrieve statuts provided by ymag with a valid UAI but missing SIRET
   const statutsWithoutSiretsWithUais = await StatutCandidat.find({
     source: "ymag",
-    $and: [{ siret_etablissement_valid: false }, { uai_etablissement_valid: true }],
+    siret_etablissement_valid: false,
+    uai_etablissement_valid: true,
   });
 
-  await asyncForEach(statutsWithoutSiretsWithUais, async (currentStatutWithoutSiret) => {
+  logger.info(`Found ${statutsWithoutSiretsWithUais?.length || 0} statuts with valid UAI but missing SIRET`);
+
+  await asyncForEach(statutsWithoutSiretsWithUais, async (_statut) => {
     // Search a matching siret for uai
-    const siretFound = await findSiretForUai(currentStatutWithoutSiret.uai_etablissement);
+    const statutWithoutSiret = _statut.toJSON();
+    const siretFound = await findSiretForUai(statutWithoutSiret.uai_etablissement);
 
     // Update siret in db
     if (siretFound) {
-      const toUpdate = { ...currentStatutWithoutSiret, siret_etablissement: siretFound };
-      await statutsCandidats.updateStatut(currentStatutWithoutSiret._id, toUpdate);
-      logger.info(`StatutCandidat updated with siret : ${siretFound}`);
+      const toUpdate = {
+        ...statutWithoutSiret,
+        siret_etablissement: siretFound,
+        siret_etablissement_valid: true,
+      };
+      const updated = await statutsCandidats.updateStatut(statutWithoutSiret._id, toUpdate);
+      logger.info(`StatutCandidat with _id ${updated._id} updated with siret : ${updated.siret_etablissement}`);
+    } else {
+      logger.info(`No SIRET found matching UAI ${statutWithoutSiret.uai_etablissement}`);
     }
   });
 };
-
 const findSiretForUai = async (uai) => {
-  logger.info(`-- Searching Siret for uai ${uai}`);
-
-  // Search siret in existing StatutCandidats with siret valid & uai valid
+  // Search siret in existing StatutCandidats with same uai but siret valid
   const referenceDataForUai = await StatutCandidat.findOne({
     source: "ymag",
-    $and: [{ siret_etablissement_valid: true }, { uai_etablissement_valid: true }],
+    siret_etablissement_valid: true,
+    uai_etablissement: uai,
   });
 
   if (referenceDataForUai) {
     logger.info(`Siret for uai ${uai} found : ${referenceDataForUai.siret_etablissement}`);
     return referenceDataForUai.siret_etablissement;
-  } else {
-    logger.info(`Siret not found for uai ${uai}`);
-    return null;
   }
+  return null;
 };
