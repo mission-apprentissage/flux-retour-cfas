@@ -57,11 +57,12 @@ const colors = {
     200: "#e5f7f4",
   },
   bluesoft: {
-    600: "#5266a1",
-    500: "#5770be",
-    400: "#abb8de",
-    300: "#d5dbef",
-    200: "#eef1f8",
+    500: "#5266a1",
+    400: "#5770be",
+    300: "#abb8de",
+    200: "#d5dbef",
+    100: "#eef1f8",
+    50: "#f9fafc",
   },
   bluedark: {
     600: "#444871",
@@ -147,17 +148,17 @@ const colors = {
 };
 
 const fontSizes = {
-  giga: "4.75rem",
-  mega: "3.375rem",
-  alpha: "2.25rem",
-  beta: "1.75rem",
-  gamma: "1.25rem",
-  delta: "1.125rem",
-  epsilon: "1rem",
-  zeta: "0.875rem",
-  omega: "0.75rem",
-  caption: "0.6875rem",
-  legal: "0.625rem",
+  giga: `${76 / rootFontSizePx}rem`,
+  mega: `${54 / rootFontSizePx}rem`,
+  alpha: `${36 / rootFontSizePx}rem`,
+  beta: `${28 / rootFontSizePx}rem`,
+  gamma: `${20 / rootFontSizePx}rem`,
+  delta: `${18 / rootFontSizePx}rem`,
+  epsilon: `${16 / rootFontSizePx}rem`,
+  zeta: `${14 / rootFontSizePx}rem`,
+  omega: `${12 / rootFontSizePx}rem`,
+  caption: `${11 / rootFontSizePx}rem`,
+  legal: `${10 / rootFontSizePx}rem`,
 };
 
 const textStyles = {
