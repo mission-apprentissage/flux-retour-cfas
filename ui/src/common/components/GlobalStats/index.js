@@ -5,7 +5,7 @@ import React from "react";
 import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../constants/statutsColors";
 import { getItemsRate } from "../../utils/calculUtils";
 import DoubleStatCard from "../DoubleStatCard";
-import PageSectionTitle from "../PageSectionTitle";
+import PageSectionTitle from "../Page/PageSectionTitle";
 import StatCard from "../StatCard";
 
 const GlobalStats = ({ stats, lastImportDates }) => {
