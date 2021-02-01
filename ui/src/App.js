@@ -9,6 +9,7 @@ import LoginPage from "./pages/login/LoginPage";
 import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
+import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import UserStatsPage from "./pages/user-stats";
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
         </PrivateRoute>
 
         <AdminRoute path="/stats" exact component={GlobalStatsPage} />
+        <AdminRoute path="/tableau-de-bord" exact component={TableauDeBordPage} />
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
         <PrivateRoute path="/analytics/" component={AnalyticsPage} />
 
