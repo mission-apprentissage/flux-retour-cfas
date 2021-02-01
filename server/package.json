@@ -26,7 +26,8 @@
     "clear:users": "node -r dotenv/config src/jobs/clear/clearUsers.js",
     "stats": "node -r dotenv/config src/jobs/compute-stats-statuts-candidats/index.js",
     "run:tests": "node -r dotenv/config src/jobs/test/index.js",
-    "siret:retrieving": "node -r dotenv/config src/jobs/siret-retrieving/index.js",
+    "siret:retrieve-gesti": "node -r dotenv/config src/jobs/siret-retrieving/gesti.js",
+    "siret:retrieve-ymag": "node -r dotenv/config src/jobs/siret-retrieving/ymag.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down"
