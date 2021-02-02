@@ -1,0 +1,66 @@
+import { Input, InputGroup, InputLeftElement, List } from "@chakra-ui/react";
+import PropTypes from "prop-types";
+import React, { useState } from "react";
+
+import { ALL_FRANCE_OPTION } from "./TerritoireFilter";
+import TerritoireOption from "./TerritoireOption";
+
+const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
+  const [regionSearchTerm, setRegionSearchTerm] = useState("");
+
+  const filteredRegions = regionSearchTerm
+    ? regions.filter((region) => {
+        return region.nom.toLowerCase().indexOf(regionSearchTerm.toLowerCase()) > -1;
+      })
+    : regions;
+
+  return (
+    <>
+      <InputGroup>
+        <InputLeftElement pointerEvents="none" className="ri-search-line" as="i" paddingBottom="1w" />
+        <Input
+          placeholder="Saisissez une région"
+          value={regionSearchTerm}
+          onChange={(event) => setRegionSearchTerm(event.target.value)}
+          size="sm"
+          marginBottom="2w"
+          autoFocus
+        />
+      </InputGroup>
+      <List spacing="1w" textAlign="left">
+        <TerritoireOption
+          onClick={() => {
+            onRegionClick(ALL_FRANCE_OPTION);
+          }}
+          isSelected={currentFilter?.nom === ALL_FRANCE_OPTION.nom}
+        >
+          {ALL_FRANCE_OPTION.nom}
+        </TerritoireOption>
+        {filteredRegions.map((region) => (
+          <TerritoireOption
+            key={region.code}
+            onClick={() => onRegionClick(region)}
+            isSelected={currentFilter?.nom === region.nom}
+          >
+            {region.nom}
+          </TerritoireOption>
+        ))}
+      </List>
+    </>
+  );
+};
+
+RegionOptions.propTypes = {
+  regions: PropTypes.arrayOf(
+    PropTypes.shape({
+      nom: PropTypes.string.isRequired,
+      code: PropTypes.string.isRequired,
+    }).isRequired
+  ),
+  onRegionClick: PropTypes.func.isRequired,
+  currentFilter: PropTypes.shape({
+    nom: PropTypes.string.isRequired,
+  }),
+};
+
+export default RegionOptions;
