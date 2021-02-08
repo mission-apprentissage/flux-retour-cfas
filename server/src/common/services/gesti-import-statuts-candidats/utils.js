@@ -22,6 +22,7 @@ const adaptGestiStatutCandidat = (gestiStatutCandidat) => {
       ? gestiStatutCandidat.periode_formation.split("-").map(Number)
       : null,
     annee_formation: gestiStatutCandidat.annee_formation ? Number(gestiStatutCandidat.annee_formation) : null,
+    siret_etablissement: gestiStatutCandidat.siret_etablissement.split(" ").join(""),
   };
 };
 
