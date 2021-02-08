@@ -28,6 +28,7 @@
     "run:tests": "node -r dotenv/config src/jobs/test/index.js",
     "siret:retrieve-gesti": "node -r dotenv/config src/jobs/siret-retrieving/gesti.js",
     "siret:retrieve-ymag": "node -r dotenv/config src/jobs/siret-retrieving/ymag.js",
+    "identifyNetwork:cma": "node -r dotenv/config src/jobs/identify-cfas-network/identify-cma.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down"

@@ -14,16 +14,15 @@ const toWorksheet = (collection = null, name) => {
 };
 module.exports.toWorksheet = toWorksheet;
 
-const toXlsx = async (data, outputDirectory, fileName, workbookName, options) => {
+const toXlsx = async (data, outputDirectoryFileName, workbookName = "", options = {}) => {
   const workbook = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(data);
-  const file = `${outputDirectory}/${fileName}`;
 
   XLSX.utils.book_append_sheet(workbook, ws, workbookName);
-  await XLSX.writeFile(workbook, file, { type: "file" });
+  await XLSX.writeFile(workbook, outputDirectoryFileName, { type: "file" });
 
   if (options.owner) {
-    await chown(file, options.owner.uid, options.owner.gid);
+    await chown(outputDirectoryFileName, options.owner.uid, options.owner.gid);
   }
 };
 module.exports.toXlsx = toXlsx;
