@@ -23,7 +23,7 @@ describe("gesti-import-statut-candidat utils", () => {
         libelle_court_formation: "CAPA JARDINIER PAYSAGISTE",
         libelle_long_formation: "JARDINIER PAYSAGISTE (CAPA)",
         uai_etablissement: "0011074M",
-        siret_etablissement: "11111222223333",
+        siret_etablissement: "111 112 222 23333",
         nom_etablissement: "MFR DE BAGE LE CHATEL - 01380 BAGE LE CHATEL",
         statut_apprenant: "3",
         date_metier_mise_a_jour_statut: "07/09/2020",
