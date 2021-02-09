@@ -4,6 +4,7 @@ const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
+const { getSiretInfo } = require("../../common/apis/apiTablesCorrespondances");
 
 module.exports = () => ({
   existsStatut,
@@ -147,7 +148,11 @@ const updateStatut = async (existingItemId, toUpdate) => {
   return updated;
 };
 
-const createStatutCandidat = (itemToCreate) => {
+const createStatutCandidat = async (itemToCreate) => {
+  // if statut candidat établissement has a VALID siret, try to retrieve location information in Tables Correspondances API
+  const etablissementDataFromSiret =
+    validateSiret(itemToCreate.siret_etablissement) && (await getSiretInfo(itemToCreate.siret_etablissement));
+
   const toAdd = new StatutCandidat({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant,
@@ -183,6 +188,22 @@ const createStatutCandidat = (itemToCreate) => {
     periode_formation: itemToCreate.periode_formation,
     annee_formation: itemToCreate.annee_formation,
     source: itemToCreate.source,
+
+    // add location data of etablissement if found
+    ...(etablissementDataFromSiret
+      ? {
+          etablissement_adresse: etablissementDataFromSiret.adresse,
+          etablissement_code_postal: etablissementDataFromSiret.code_postal,
+          etablissement_localite: etablissementDataFromSiret.localite,
+          etablissement_geo_coordonnees: etablissementDataFromSiret.geo_coordonnees,
+          etablissement_num_region: etablissementDataFromSiret.region_implantation_code,
+          etablissement_nom_region: etablissementDataFromSiret.region_implantation_nom,
+          etablissement_num_departement: etablissementDataFromSiret.num_departement,
+          etablissement_nom_departement: etablissementDataFromSiret.nom_departement,
+          etablissement_num_academie: etablissementDataFromSiret.num_academie,
+          etablissement_nom_academie: etablissementDataFromSiret.nom_academie,
+        }
+      : {}),
   });
   return toAdd.save();
 };

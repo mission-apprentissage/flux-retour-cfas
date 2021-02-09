@@ -9,6 +9,7 @@ const {
   simpleStatut,
   simpleStatutBadUpdate,
   simpleProspectStatut,
+  sampleEtablissementDataFromSiret,
 } = require("../../data/sample");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 
@@ -54,9 +55,6 @@ integrationTests(__filename, () => {
       email_contact: result.email_contact,
       id_formation: result.id_formation,
       uai_etablissement: result.uai_etablissement,
-      siret_etablissement: result.siret_etablissement,
-      annee_formation: result.annee_formation,
-      periode_formation: result.periode_formation,
     });
     assert.strictEqual(found, true);
   });
@@ -95,9 +93,6 @@ integrationTests(__filename, () => {
       ine_apprenant: result.ine_apprenant,
       id_formation: result.id_formation,
       uai_etablissement: result.uai_etablissement,
-      siret_etablissement: result.siret_etablissement,
-      periode_formation: result.periode_formation,
-      annee_formation: result.annee_formation,
     });
     assert.strictEqual(found, true);
   });
@@ -113,7 +108,6 @@ integrationTests(__filename, () => {
       ine_apprenant: "BAD_INE",
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
-      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, false);
   });
@@ -134,9 +128,6 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
-      siret_etablissement: toAdd.siret_etablissement,
-      periode_formation: toAdd.periode_formation,
-      annee_formation: toAdd.annee_formation,
     });
     assert.strictEqual(found, true);
   });
@@ -157,9 +148,6 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
-      siret_etablissement: toAdd.siret_etablissement,
-      periode_formation: toAdd.periode_formation,
-      annee_formation: toAdd.annee_formation,
     });
     assert.strictEqual(found, false);
   });
@@ -175,9 +163,6 @@ integrationTests(__filename, () => {
       ine_apprenant: toAdd.ine_apprenant,
       id_formation: "BAD_ID_FORMATION",
       uai_etablissement: toAdd.uai_etablissement,
-      siret_etablissement: toAdd.siret_etablissement,
-      periode_formation: toAdd.periode_formation,
-      annee_formation: toAdd.annee_formation,
     });
     assert.strictEqual(found, false);
   });
@@ -193,9 +178,6 @@ integrationTests(__filename, () => {
       ine_apprenant: toAdd.ine_apprenant,
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
-      siret_etablissement: toAdd.siret_etablissement,
-      periode_formation: toAdd.periode_formation,
-      annee_formation: toAdd.annee_formation,
     });
 
     assert.notStrictEqual(found, null);
@@ -234,9 +216,6 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
-      siret_etablissement: toAdd.siret_etablissement,
-      periode_formation: toAdd.periode_formation,
-      annee_formation: toAdd.annee_formation,
     });
 
     assert.notDeepStrictEqual(found, null);
@@ -270,7 +249,6 @@ integrationTests(__filename, () => {
       ine_apprenant: "BAD_INE",
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
-      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, null);
   });
@@ -291,7 +269,6 @@ integrationTests(__filename, () => {
 
       id_formation: toAdd.id_formation,
       uai_etablissement: toAdd.uai_etablissement,
-      siret_etablissement: toAdd.siret_etablissement,
     });
     assert.strictEqual(found, null);
   });
@@ -638,13 +615,68 @@ integrationTests(__filename, () => {
       assert.deepStrictEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
     });
 
-    it("Vérifie la création d'un statut avec un siret invalide", async () => {
+    it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid et qu'aucune donnée de la localisation n'est fetchée ", async () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: "invalid-siret" };
       const createdStatut = await createStatutCandidat(statutWithInvalidSiret);
+      const {
+        siret_etablissement_valid,
+        etablissement_adresse,
+        etablissement_code_postal,
+        etablissement_localite,
+        etablissement_geo_coordonnees,
+        etablissement_num_region,
+        etablissement_nom_region,
+        etablissement_num_departement,
+        etablissement_nom_departement,
+        etablissement_num_academie,
+        etablissement_nom_academie,
+      } = createdStatut;
+      assert.strictEqual(siret_etablissement_valid, false);
+      assert.strictEqual(etablissement_adresse, null);
+      assert.strictEqual(etablissement_code_postal, null);
+      assert.strictEqual(etablissement_localite, null);
+      assert.strictEqual(etablissement_geo_coordonnees, null);
+      assert.strictEqual(etablissement_num_region, null);
+      assert.strictEqual(etablissement_nom_region, null);
+      assert.strictEqual(etablissement_num_departement, null);
+      assert.strictEqual(etablissement_nom_departement, null);
+      assert.strictEqual(etablissement_num_academie, null);
+      assert.strictEqual(etablissement_nom_academie, null);
+    });
 
-      assert.strictEqual(createdStatut.siret_etablissement_valid, false);
+    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid et qu'on fetch les données de localisation associées ", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+
+      const validSiret = "12312312300099";
+      const statutWithValidSiret = { ...createRandomStatutCandidat(), siret_etablissement: validSiret };
+      const createdStatut = await createStatutCandidat(statutWithValidSiret);
+
+      const {
+        siret_etablissement_valid,
+        etablissement_adresse,
+        etablissement_code_postal,
+        etablissement_localite,
+        etablissement_geo_coordonnees,
+        etablissement_num_region,
+        etablissement_nom_region,
+        etablissement_num_departement,
+        etablissement_nom_departement,
+        etablissement_num_academie,
+        etablissement_nom_academie,
+      } = createdStatut;
+      assert.strictEqual(siret_etablissement_valid, true);
+      assert.strictEqual(etablissement_adresse, sampleEtablissementDataFromSiret.adresse);
+      assert.strictEqual(etablissement_code_postal, sampleEtablissementDataFromSiret.code_postal);
+      assert.strictEqual(etablissement_localite, sampleEtablissementDataFromSiret.localite);
+      assert.strictEqual(etablissement_geo_coordonnees, sampleEtablissementDataFromSiret.geo_coordonnees);
+      assert.strictEqual(etablissement_num_region, sampleEtablissementDataFromSiret.region_implantation_code);
+      assert.strictEqual(etablissement_nom_region, sampleEtablissementDataFromSiret.region_implantation_nom);
+      assert.strictEqual(etablissement_num_departement, sampleEtablissementDataFromSiret.num_departement);
+      assert.strictEqual(etablissement_nom_departement, sampleEtablissementDataFromSiret.nom_departement);
+      assert.strictEqual(etablissement_num_academie, sampleEtablissementDataFromSiret.num_academie);
+      assert.strictEqual(etablissement_nom_academie, sampleEtablissementDataFromSiret.nom_academie);
     });
 
     it("Vérifie la création d'un statut avec un uai invalide", async () => {
@@ -654,6 +686,36 @@ integrationTests(__filename, () => {
       const createdStatut = await createStatutCandidat(statutWithInvalidUai);
 
       assert.strictEqual(createdStatut.uai_etablissement_valid, false);
+    });
+
+    it("Vérifie la création d'un statut avec un uai valide", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+
+      const validUai = "0123456Z";
+      const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: validUai };
+      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
+
+      assert.strictEqual(createdStatut.uai_etablissement_valid, true);
+    });
+
+    it("Vérifie la création d'un statut avec un cfd invalide", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+
+      const invalidCfd = "0123";
+      const statutWithInvalidUai = { ...createRandomStatutCandidat(), id_formation: invalidCfd };
+      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
+
+      assert.strictEqual(createdStatut.id_formation_valid, false);
+    });
+
+    it("Vérifie la création d'un statut avec un cfd valide", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+
+      const validCfd = "abcd1234";
+      const statutWithInvalidUai = { ...createRandomStatutCandidat(), id_formation: validCfd };
+      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
+
+      assert.strictEqual(createdStatut.id_formation_valid, true);
     });
   });
 });
