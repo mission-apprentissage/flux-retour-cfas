@@ -8,9 +8,6 @@ module.exports = {
     uri: env.get("FLUX_RETOUR_CFAS_MONGODB_URI").required().asString(),
   },
   ftpDir: env.get("FLUX_RETOUR_CFAS_FTP_DIR").required().asString(),
-  mnaCatalog: {
-    endpoint: env.get("FLUX_RETOUR_CFAS_MNA_CATALOG_ENDPOINT").required().asString(),
-  },
   auth: {
     passwordHashRounds: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS").asInt(),
     user: {
@@ -62,6 +59,12 @@ module.exports = {
       password: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS").default([]).asArray(),
     },
+  },
+  tablesCorrespondances: {
+    endpoint: env.get("FLUX_RETOUR_CFAS_TABLES_CORRESPONDANCES_ENDPOINT_URL").required().asString(),
+  },
+  mnaCatalogApi: {
+    endpoint: env.get("FLUX_RETOUR_CFAS_MNA_CATALOG_ENDPOINT_URL").required().asString(),
   },
   ovhStorage: {
     username: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_USERNAME").required().asString(),

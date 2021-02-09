@@ -97,6 +97,57 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Nom de l'établissement d'origine",
   },
+  etablissement_adresse: {
+    type: String,
+    default: null,
+    description: "Adresse complète de l'établissement",
+  },
+  etablissement_code_postal: {
+    type: String,
+    default: null,
+    description: "Code postal établissement",
+  },
+  etablissement_localite: {
+    type: String,
+    default: null,
+    description: "Localité établissement",
+  },
+  etablissement_geo_coordonnees: {
+    type: String,
+    implicit_type: "geo_point",
+    default: null,
+    description: "Latitude et longitude de l'établissement",
+  },
+  etablissement_nom_region: {
+    type: String,
+    default: null,
+    description: "Région de l'établissement",
+  },
+  etablissement_num_region: {
+    type: String,
+    default: null,
+    description: "Numéro de la région de l'établissement",
+  },
+  etablissement_num_departement: {
+    type: String,
+    default: null,
+    description: "Numéro de departement de l'établissement",
+  },
+  etablissement_nom_departement: {
+    type: String,
+    default: null,
+    description: "Nom du departement de l'établissement",
+  },
+  etablissement_nom_academie: {
+    type: String,
+    default: null,
+    description: "Nom de l'académie de l'établissement",
+  },
+  etablissement_num_academie: {
+    type: String,
+    default: null,
+    description: "Numéro de l'académie de l'établissement",
+  },
   statut_apprenant: {
     type: Number,
     default: null,
