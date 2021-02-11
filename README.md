@@ -331,6 +331,38 @@ Il est possible d'afficher en console les statistiques des données du flux reto
 docker exec -t -i flux_retour_cfas_server bash -c "yarn stats"
 ```
 
+### Jobs de vérification et clean des données
+
+- Pour valider et marquer les SIRET et UAI des statuts candidats en base :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn siret-uai:check-validity"
+```
+
+- Pour clean les SIRET invalides (comportant espaces et points) en base :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn siret:sanitize"
+```
+
+- Pour tenter de retrouver les SIRET manquants grâce à une table de correspondance UAI/SIRET fournie par Gesti en base :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn siret:retrieve-gesti"
+```
+
+- Pour tenter de retrouver les SIRET manquants sur les statuts candidats provenant de Ymag grâce aux UAI déjà présents en base :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn siret:retrieve-ymag"
+```
+
+- Pour tenter de retrouver les infos de localisation des établissements en base grâce au SIRET et à l'API Tables Correspondances :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn etablissements-location:retrieve"
+```
+
 ### Procédure à suivre au premier déploiement
 
 Dès le premier déploiement de l'application est recommandé de suivre la procédure suivante :
