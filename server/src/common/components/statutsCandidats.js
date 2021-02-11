@@ -90,7 +90,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
     const shouldCreateStatutCandidat =
       !foundItem ||
       (foundItem.siret_etablissement && foundItem.siret_etablissement !== item.siret_etablissement) ||
-      (foundItem.periode_formation && foundItem.periode_formation.join() !== item.periode_formation.join()) ||
+      (foundItem.periode_formation && foundItem.periode_formation.join() !== item.periode_formation?.join()) ||
       (foundItem.annee_formation && foundItem.annee_formation !== item.annee_formation);
 
     if (shouldCreateStatutCandidat) {
