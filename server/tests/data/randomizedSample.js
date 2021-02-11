@@ -45,7 +45,7 @@ const createRandomStatutCandidat = () => {
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-    periode_formation: getRandomPeriodeFormation(),
+    periode_formation: isPresent() ? getRandomPeriodeFormation() : null,
     annee_formation: getRandomAnneeFormation(),
   };
 };
@@ -74,7 +74,7 @@ const createRandomStatutCandidatApiInput = () => {
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-    periode_formation: getRandomPeriodeFormationFromApi(),
+    periode_formation: isPresent() ? getRandomPeriodeFormationFromApi() : "",
     annee_formation: getRandomAnneeFormation(),
   };
 };
