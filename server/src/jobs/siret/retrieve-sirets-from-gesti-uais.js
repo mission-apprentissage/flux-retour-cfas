@@ -4,7 +4,7 @@ const { runScript } = require("../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { StatutCandidat } = require("../../common/model");
-const { downloadIfNeeded } = require("./utils/");
+const { downloadIfNeeded } = require("./utils");
 
 const siretGestiReferenceFilePath = path.join(__dirname, `./assets/sirets-gesti.csv`);
 
@@ -21,7 +21,7 @@ runScript(async ({ statutsCandidats }) => {
 const retrieveSiret = async (statutsCandidats) => {
   logger.info("Retrieving sirets for Gesti");
 
-  // Gets the referentiel file
+  // Gets the reference file
   await downloadIfNeeded(`siret-erps/sirets-gesti.csv`, siretGestiReferenceFilePath);
 
   const uaiSiretGestiReference = readJsonFromCsvFile(siretGestiReferenceFilePath);
@@ -30,9 +30,9 @@ const retrieveSiret = async (statutsCandidats) => {
     return;
   }
 
-  // retrieve statuts provided by ymag with a valid UAI but missing SIRET
+  // retrieve statuts provided by gesti with a valid UAI but missing SIRET
   const statutsWithoutSiretsWithUais = await StatutCandidat.find({
-    source: "ymag",
+    source: "gesti",
     siret_etablissement_valid: false,
     uai_etablissement_valid: true,
   });
