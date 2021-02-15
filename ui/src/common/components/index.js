@@ -1,3 +1,5 @@
+export { default as FilterButton } from "./FilterButton/FilterButton";
+
 export { default as Page } from "./Page/Page";
 export { default as PageHeader } from "./Page/PageHeader";
 export { default as PageSectionTitle } from "./Page/PageSectionTitle";
