@@ -1,6 +1,5 @@
 import "react-datepicker/dist/react-datepicker.css";
 
-import { Box } from "@chakra-ui/react";
 import { format } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
@@ -14,7 +13,7 @@ const formatDate = (date) => (date ? format(date, DATE_FORMAT) : "");
 
 const PeriodeFilter = ({ date1, date2, onChange }) => {
   return (
-    <Box>
+    <div>
       <DatePicker
         selectsRange
         selected={date1}
@@ -35,7 +34,7 @@ const PeriodeFilter = ({ date1, date2, onChange }) => {
         todayButton="Aujourd'hui"
         shouldCloseOnSelect={false}
       />
-    </Box>
+    </div>
   );
 };
 
