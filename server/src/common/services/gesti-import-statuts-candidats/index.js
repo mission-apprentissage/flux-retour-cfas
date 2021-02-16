@@ -21,7 +21,7 @@ class GestiImportStatutsCandidatsService {
     // read data from csv file
     let gestiCsv;
     try {
-      gestiCsv = readJsonFromCsvFile(inputFilePath);
+      gestiCsv = readJsonFromCsvFile(inputFilePath, "latin1");
     } catch (err) {
       logger.error(`Problem while reading input file at path ${inputFilePath}`, err);
     }

@@ -97,6 +97,11 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Nom de l'établissement d'origine",
   },
+  etablissement_reseaux: {
+    type: [String],
+    default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
+    description: "Réseaux du CFA, s'ils existent",
+  },
   etablissement_adresse: {
     type: String,
     default: null,

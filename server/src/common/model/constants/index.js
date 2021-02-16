@@ -36,8 +36,39 @@ const codesMajStatutsInterdits = [
   },
 ];
 
+/**
+ * Noms des réseaux de CFAS
+ */
+const reseauxCfas = {
+  CCCA_BTP: {
+    nomReseau: "CCCA Btp",
+    nomFichier: "cfas-ccca-btp",
+  },
+  CCCI_France: {
+    nomReseau: "CCCI France",
+    nomFichier: "cfas-cci-france",
+  },
+  CMA: {
+    nomReseau: "CMA",
+    nomFichier: "cfas-cma",
+  },
+  AGRI: {
+    nomReseau: "AGRI",
+    nomFichier: "cfas-agri",
+  },
+  ANASUP: {
+    nomReseau: "ANASUP",
+    nomFichier: "cfas-anasup",
+  },
+  PROMOTRANS: {
+    nomReseau: "PROMOTRANS",
+    nomFichier: "cfas-promotrans",
+  },
+};
+
 module.exports = {
   codesStatutsCandidats,
   codesMajStatutsInterdits,
   codesStatutsMajStatutCandidats,
+  reseauxCfas,
 };

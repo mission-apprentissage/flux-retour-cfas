@@ -4,12 +4,12 @@ const parse = require("csv-parse/lib/sync");
 const fs = require("fs");
 const iconvlite = require("iconv-lite");
 
-const readFile = (fileInputName) => {
+const readFile = (fileInputName, encoding) => {
   const content = fs.readFileSync(fileInputName);
-  return iconvlite.decode(content, "latin1").toString();
+  return iconvlite.decode(content, encoding).toString();
 };
-const readJsonFromCsvFile = (fileInputName) => {
-  return parse(readFile(fileInputName), { columns: true, delimiter: ";", relax: true });
+const readJsonFromCsvFile = (fileInputName, encoding = "utf8", delimiter = ";") => {
+  return parse(readFile(fileInputName, encoding), { columns: true, delimiter, relax: true });
 };
 
 module.exports.readJsonFromCsvFile = readJsonFromCsvFile;
