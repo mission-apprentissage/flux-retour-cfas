@@ -1,12 +1,11 @@
-import { Box, Button, Divider, HStack } from "@chakra-ui/react";
+import { Box, Divider, HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import { FilterButton } from "../../../../common/components";
 import { useFetch } from "../../../../common/hooks/useFetch";
 import DepartementOptions from "./DepartementOptions";
 import RegionOptions from "./RegionOptions";
-
-export const ALL_FRANCE_OPTION = { code: "france", nom: "Toute la France" };
 
 const TERRITOIRE_TYPES = {
   region: "region",
@@ -35,9 +34,8 @@ TerritoireTypeOption.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-const TerritoireFilter = ({ onChange }) => {
+const TerritoireFilter = ({ value, onChange }) => {
   const [isFilterOptionsOpen, setIsFilterOptionsOpen] = useState(false);
-  const [chosenFilter, setChosenFilter] = useState(ALL_FRANCE_OPTION);
   const [selectedTerritoireType, setSelectedTerritoireType] = useState(TERRITOIRE_TYPES.region);
 
   const [departements] = useFetch("https://geo.api.gouv.fr/departements");
@@ -50,23 +48,30 @@ const TerritoireFilter = ({ onChange }) => {
 
   const onFilterClick = (territoireType) => (filter) => {
     // set filter and close overlay
-    setChosenFilter({ ...filter, type: territoireType });
     setIsFilterOptionsOpen(false);
-    onChange({ type: territoireType, value: filter.code });
+    const value = filter ? { type: territoireType, code: filter.code } : null;
+    onChange(value);
   };
+
+  const chosenFilter = !value
+    ? null
+    : value.type === TERRITOIRE_TYPES.region
+    ? regions.find((region) => region.code === value.code)
+    : departements.find((departement) => departement.code === value.code);
+
+  const buttonLabel = isFilterOptionsOpen
+    ? "Sélectionner un territoire"
+    : chosenFilter
+    ? chosenFilter.nom
+    : "Toute la France";
 
   return (
     <div>
-      <Button onClick={() => setIsFilterOptionsOpen(!isFilterOptionsOpen)} background="bluesoft.200">
-        {isFilterOptionsOpen || !chosenFilter ? (
-          "Sélectionner un territoire"
-        ) : (
-          <span>
-            <Box fontSize="epsilon" as="i" className="ri-map-pin-fill" marginRight="1v" />
-            {chosenFilter.nom}
-          </span>
-        )}
-      </Button>
+      <FilterButton
+        label={buttonLabel}
+        icon="ri-map-pin-fill"
+        onClick={() => setIsFilterOptionsOpen(!isFilterOptionsOpen)}
+      />
       {isFilterOptionsOpen && (
         <Box
           background="white"
@@ -78,6 +83,7 @@ const TerritoireFilter = ({ onChange }) => {
           paddingY="3w"
           boxShadow="0px 0px 16px rgba(30, 30, 30, 0.12)"
           borderRadius="0.25rem"
+          zIndex="999"
         >
           <HStack spacing="4w">
             {TERRITOIRE_TYPE_OPTIONS.map(({ value, label }) => (
@@ -119,6 +125,10 @@ const TerritoireFilter = ({ onChange }) => {
 
 TerritoireFilter.propTypes = {
   onChange: PropTypes.func.isRequired,
+  value: PropTypes.shape({
+    code: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+  }),
 };
 
 export default TerritoireFilter;
