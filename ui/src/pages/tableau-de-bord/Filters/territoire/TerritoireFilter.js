@@ -69,11 +69,7 @@ const TerritoireFilter = ({ value, onChange }) => {
 
   return (
     <div>
-      <FilterButton
-        label={buttonLabel}
-        icon="ri-map-pin-fill"
-        onClick={() => setIsFilterOptionsOpen(!isFilterOptionsOpen)}
-      />
+      <FilterButton label={buttonLabel} icon="ri-map-pin-fill" onClick={() => setIsFilterOptionsOpen(true)} />
       {isFilterOptionsOpen && (
         <Box
           background="white"
@@ -86,6 +82,7 @@ const TerritoireFilter = ({ value, onChange }) => {
           boxShadow="0px 0px 16px rgba(30, 30, 30, 0.12)"
           borderRadius="0.25rem"
           zIndex="999"
+          onBlur={() => setIsFilterOptionsOpen(false)}
         >
           <HStack spacing="4w">
             {TERRITOIRE_TYPE_OPTIONS.map(({ value, label }) => (
