@@ -7,6 +7,8 @@ import { useFetch } from "../../../../common/hooks/useFetch";
 import DepartementOptions from "./DepartementOptions";
 import RegionOptions from "./RegionOptions";
 
+const GEO_API_URL = "https://geo.api.gouv.fr";
+
 const TERRITOIRE_TYPES = {
   region: "region",
   departement: "departement",
@@ -38,8 +40,8 @@ const TerritoireFilter = ({ value, onChange }) => {
   const [isFilterOptionsOpen, setIsFilterOptionsOpen] = useState(false);
   const [selectedTerritoireType, setSelectedTerritoireType] = useState(TERRITOIRE_TYPES.region);
 
-  const [departements] = useFetch("https://geo.api.gouv.fr/departements");
-  const [regions] = useFetch("https://geo.api.gouv.fr/regions");
+  const [departements] = useFetch(`${GEO_API_URL}/departements`);
+  const [regions] = useFetch(`${GEO_API_URL}/regions`);
 
   const TERRITOIRE_TYPE_OPTIONS = [
     { value: TERRITOIRE_TYPES.region, label: `Régions (${regions?.length})` },
