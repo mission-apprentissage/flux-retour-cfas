@@ -1,15 +1,11 @@
 import "react-datepicker/dist/react-datepicker.css";
 
-import { format } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
 import DatePicker from "react-datepicker";
 
 import { FilterButton } from "../../../../common/components";
-
-const DATE_FORMAT = "dd/MM/yyyy";
-
-const formatDate = (date) => (date ? format(date, DATE_FORMAT) : "");
+import { formatDate } from "../../../../common/utils/dateUtils";
 
 const PeriodeFilter = ({ date1, date2, onChange }) => {
   return (
