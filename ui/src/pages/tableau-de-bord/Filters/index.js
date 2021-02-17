@@ -11,8 +11,8 @@ const TableauDeBordFilters = () => {
       date1: subYears(new Date(), 1),
       date2: new Date(),
     },
-    territoire: undefined,
-    formation: undefined,
+    territoire: null,
+    formation: null,
   });
 
   const handlePeriodeFilterChange = ({ date1, date2 }) => {
@@ -23,10 +23,8 @@ const TableauDeBordFilters = () => {
     setFilters({ ...filters, territoire });
   };
 
-  console.log(filters);
-
   return (
-    <HStack spacing="2w" mt="4w" justifyContent="center" center>
+    <HStack spacing="2w" mt="4w" justifyContent="center">
       <PeriodeFilter date1={filters.periode.date1} date2={filters.periode.date2} onChange={handlePeriodeFilterChange} />
       <TerritoireFilter value={filters.territoire} onChange={handleTerritoireFilterChange} />
     </HStack>
