@@ -2,7 +2,6 @@ import { Input, InputGroup, InputLeftElement, List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { ALL_FRANCE_OPTION } from "./TerritoireFilter";
 import TerritoireOption from "./TerritoireOption";
 
 const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
@@ -30,11 +29,11 @@ const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
       <List spacing="1w" textAlign="left">
         <TerritoireOption
           onClick={() => {
-            onRegionClick(ALL_FRANCE_OPTION);
+            onRegionClick(null);
           }}
-          isSelected={currentFilter?.nom === ALL_FRANCE_OPTION.nom}
+          isSelected={currentFilter === null}
         >
-          {ALL_FRANCE_OPTION.nom}
+          Toute la France
         </TerritoireOption>
         {filteredRegions.map((region) => (
           <TerritoireOption

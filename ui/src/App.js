@@ -6,8 +6,6 @@ import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import LoginPage from "./pages/login/LoginPage";
-import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
-import ResetPasswordPage from "./pages/password/ResetPasswordPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import UserStatsPage from "./pages/user-stats";
@@ -20,8 +18,6 @@ const App = () => {
     <Router>
       <Switch>
         <Route exact path="/login" component={LoginPage} />
-        <Route exact path="/reset-password" component={ResetPasswordPage} />
-        <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
 
         <PrivateRoute exact path="/">
           <Redirect to={isAdmin ? "/stats" : `/stats/${auth.sub}`} />

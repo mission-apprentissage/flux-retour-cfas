@@ -1,61 +1,34 @@
-import { HStack, Select } from "@chakra-ui/react";
+import { HStack } from "@chakra-ui/react";
+import { subYears } from "date-fns";
 import React, { useState } from "react";
 
+import PeriodeFilter from "./periode/PeriodeFilter";
 import TerritoireFilter from "./territoire/TerritoireFilter";
 
-const periodes = [
-  { value: "2020", label: "Année en cours (2020-2021)" },
-  { value: "2019", label: "2019-2020" },
-];
-
-const ObservatoireFilters = () => {
+const TableauDeBordFilters = () => {
   const [filters, setFilters] = useState({
-    periode: "2020",
-    territoire: "france",
-    formation: undefined,
+    periode: {
+      date1: subYears(new Date(), 1),
+      date2: new Date(),
+    },
+    territoire: null,
+    formation: null,
   });
 
-  const handlePeriodFilterChange = (ev) => {
-    setFilters({ ...filters, periode: ev.target.value });
+  const handlePeriodeFilterChange = ({ date1, date2 }) => {
+    setFilters({ ...filters, periode: { date1, date2 } });
   };
 
-  const handleTerritoireFilterChange = (territoireFilter) => {
-    setFilters({ ...filters, territoire: territoireFilter, formation: "" });
-  };
-
-  const handleFormationFilterChange = (ev) => {
-    setFilters({ ...filters, formation: ev.target.value });
+  const handleTerritoireFilterChange = (territoire) => {
+    setFilters({ ...filters, territoire });
   };
 
   return (
-    <>
-      <HStack spacing="2w" mt="4w" textAlign="center">
-        <Select
-          placeholder="Sélectionner une période"
-          background="white"
-          value={filters.periode}
-          onChange={handlePeriodFilterChange}
-        >
-          {periodes.map((periode) => (
-            <option key={periode.value} value={periode.value}>
-              {periode.label}
-            </option>
-          ))}
-        </Select>
-        <TerritoireFilter onChange={handleTerritoireFilterChange} />
-        <Select
-          placeholder="Sélectionner une formation"
-          background="white"
-          value={filters.formation}
-          onChange={handleFormationFilterChange}
-        >
-          <option value="all">Toutes les formations</option>
-          <option value="hello">BTSA Viticulture/Oenologie</option>
-          <option value="world">CAP Menuiserie</option>
-        </Select>
-      </HStack>
-    </>
+    <HStack spacing="2w" mt="4w" justifyContent="center">
+      <PeriodeFilter date1={filters.periode.date1} date2={filters.periode.date2} onChange={handlePeriodeFilterChange} />
+      <TerritoireFilter value={filters.territoire} onChange={handleTerritoireFilterChange} />
+    </HStack>
   );
 };
 
-export default ObservatoireFilters;
+export default TableauDeBordFilters;

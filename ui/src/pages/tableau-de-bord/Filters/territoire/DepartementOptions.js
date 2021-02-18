@@ -2,7 +2,6 @@ import { Input, InputGroup, InputLeftElement, List, ListItem } from "@chakra-ui/
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { ALL_FRANCE_OPTION } from "./TerritoireFilter";
 import TerritoireOption from "./TerritoireOption";
 
 const MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH = 9;
@@ -32,11 +31,11 @@ const DepartementOptions = ({ departements = [], onDepartementClick, currentFilt
       <List spacing="1w" textAlign="left">
         <TerritoireOption
           onClick={() => {
-            onDepartementClick(ALL_FRANCE_OPTION);
+            onDepartementClick(null);
           }}
-          isSelected={currentFilter?.nom === ALL_FRANCE_OPTION.nom}
+          isSelected={currentFilter === null}
         >
-          {ALL_FRANCE_OPTION.nom}
+          Toute la France
         </TerritoireOption>
         {filteredDepartements.slice(0, MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH).map((filter) => (
           <TerritoireOption

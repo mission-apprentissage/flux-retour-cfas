@@ -23,7 +23,7 @@ const TerritoireOption = ({ isSelected = false, onClick, children }) => {
 TerritoireOption.propTypes = {
   isSelected: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
-  children: PropTypes.number.isRequired,
+  children: PropTypes.string.isRequired,
 };
 
 export default TerritoireOption;

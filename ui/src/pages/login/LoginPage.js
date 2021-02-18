@@ -8,12 +8,11 @@ import {
   Heading,
   HStack,
   Input,
-  Link,
   Text,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import React from "react";
-import { NavLink, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import * as Yup from "yup";
 
 import useAuth from "../../common/hooks/useAuth";
@@ -80,9 +79,6 @@ const LoginPage = () => {
                     <Button color="primary" type="submit">
                       Connexion
                     </Button>
-                    <Link to="/forgotten-password" as={NavLink} color="grey.500">
-                      Mot de passe oublié
-                    </Link>
                   </HStack>
                   {status.error && <Text color="error">{status.error}</Text>}
                 </Form>

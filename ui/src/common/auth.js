@@ -4,7 +4,7 @@ import { subscribeToHttpEvent } from "./httpClient";
 import decodeJWT from "./utils/decodeJWT";
 
 const anonymous = { sub: "anonymous", permissions: {} };
-let access_token = sessionStorage.getItem("flux-retour-cfas:access_token");
+let access_token = localStorage.getItem("flux-retour-cfas:access_token");
 
 const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
   auth: access_token ? decodeJWT(access_token) : anonymous,
@@ -13,7 +13,7 @@ const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
 subscribeToHttpEvent("http:error", (response) => {
   if (response.status === 401) {
     //Auto logout user when token is invalid
-    sessionStorage.removeItem("flux-retour-cfas:access_token");
+    localStorage.removeItem("flux-retour-cfas:access_token");
     setGlobalState("auth", anonymous);
   }
 });

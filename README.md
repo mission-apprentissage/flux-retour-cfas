@@ -158,11 +158,13 @@ docker exec flux_retour_cfas_server bash -c 'ls'
 Le projet utilise [migrate-mongo](https://github.com/seppevs/migrate-mongo#readme). Les migrations se trouvent dans le répertoire `/server/src/migrations`
 
 Pour créer une migration :
+
 ```sh
 yarn migration:create ma-nouvelle-migration
 ```
 
 Pour jouer les migrations :
+
 ```sh
 yarn migration:up
 ```
@@ -323,6 +325,12 @@ docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:sample"
 docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:randomizedSample"
 ```
 
+- Pour ajouter les données de reférences des CFAs et leurs réseaux :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn seed:referentielCfas"
+```
+
 ### Jobs d'affichage des statistiques
 
 Il est possible d'afficher en console les statistiques des données du flux retour :
@@ -361,6 +369,12 @@ docker exec -t -i flux_retour_cfas_server bash -c "yarn siret:retrieve-ymag"
 
 ```bash
 docker exec -t -i flux_retour_cfas_server bash -c "yarn etablissements-location:retrieve"
+```
+
+- Pour tenter de retrouver les infos de réseau des établissements en base grâce au SIRET ou les UAI via la collection referentiel des cfas :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn etablissements-networks:retrieve"
 ```
 
 ### Procédure à suivre au premier déploiement

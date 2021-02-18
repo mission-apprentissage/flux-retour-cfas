@@ -1,4 +1,4 @@
-const { StatutCandidat } = require("../model");
+const { StatutCandidat, Cfa } = require("../model");
 const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
@@ -153,6 +153,13 @@ const createStatutCandidat = async (itemToCreate) => {
   const etablissementDataFromSiret =
     validateSiret(itemToCreate.siret_etablissement) && (await getSiretInfo(itemToCreate.siret_etablissement));
 
+  // if statut candidat établissement has a VALID siret or uai, try to retrieve information in Referentiel CFAs
+
+  const etablissementInReferentielCfaFromSiretOrUai =
+    (validateSiret(itemToCreate.siret_etablissement) &&
+      (await Cfa.findOne({ siret: itemToCreate.siret_etablissement }))) ||
+    (validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement })));
+
   const toAdd = new StatutCandidat({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant,
@@ -203,6 +210,11 @@ const createStatutCandidat = async (itemToCreate) => {
           etablissement_num_academie: etablissementDataFromSiret.num_academie,
           etablissement_nom_academie: etablissementDataFromSiret.nom_academie,
         }
+      : {}),
+
+    // add network of etablissement if found in ReferentielCfa
+    ...(etablissementInReferentielCfaFromSiretOrUai
+      ? { etablissement_reseaux: etablissementInReferentielCfaFromSiretOrUai.reseaux }
       : {}),
   });
   return toAdd.save();

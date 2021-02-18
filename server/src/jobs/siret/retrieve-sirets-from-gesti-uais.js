@@ -24,7 +24,7 @@ const retrieveSiret = async (statutsCandidats) => {
   // Gets the reference file
   await downloadIfNeeded(`siret-erps/sirets-gesti.csv`, siretGestiReferenceFilePath);
 
-  const uaiSiretGestiReference = readJsonFromCsvFile(siretGestiReferenceFilePath);
+  const uaiSiretGestiReference = readJsonFromCsvFile(siretGestiReferenceFilePath, "latin1");
   if (!uaiSiretGestiReference) {
     logger.error("Error while reading Gesti reference file");
     return;

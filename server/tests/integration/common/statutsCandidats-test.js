@@ -1,7 +1,7 @@
 const assert = require("assert");
 const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
-const { StatutCandidat } = require("../../../src/common/model");
+const { StatutCandidat, Cfa } = require("../../../src/common/model");
 const { codesStatutsMajStatutCandidats, codesStatutsCandidats } = require("../../../src/common/model/constants");
 const {
   statutsTest,
@@ -12,6 +12,7 @@ const {
   sampleEtablissementDataFromSiret,
 } = require("../../data/sample");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
+const { reseauxCfas } = require("../../../src/common/model/constants");
 
 integrationTests(__filename, () => {
   it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
@@ -716,6 +717,94 @@ integrationTests(__filename, () => {
       const createdStatut = await createStatutCandidat(statutWithInvalidUai);
 
       assert.strictEqual(createdStatut.id_formation_valid, true);
+    });
+
+    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+      const validSiret = "12312312300099";
+
+      // Create sample cfa in referentiel
+      const referenceCfa = new Cfa({
+        siret: validSiret,
+        reseaux: [reseauxCfas.AGRI.nomReseau, reseauxCfas.CCCI_France.nomReseau],
+      });
+      await referenceCfa.save();
+
+      // Create statut
+      const statutWithValidSiret = { ...createRandomStatutCandidat(), siret_etablissement: validSiret };
+      const createdStatut = await createStatutCandidat(statutWithValidSiret);
+
+      // Check siret & reseaux in created statut
+      const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
+      assert.deepStrictEqual(siret_etablissement_valid, true);
+      assert.deepStrictEqual(etablissement_reseaux.length, 2);
+      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.AGRI.nomReseau);
+      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.CCCI_France.nomReseau);
+    });
+
+    it("Vérifie qu'à la création d'un statut avec un siret invalide on ne set pas le champ etablissement_reseaux", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+      const invalidSiret = "invalid";
+
+      // Create sample cfa in referentiel
+      const referenceCfa = new Cfa({
+        siret: invalidSiret,
+        reseaux: [reseauxCfas.AGRI.nomReseau, reseauxCfas.CCCI_France.nomReseau],
+      });
+      await referenceCfa.save();
+
+      // Create statut
+      const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: invalidSiret };
+      const createdStatut = await createStatutCandidat(statutWithInvalidSiret);
+
+      // Check uai & reseaux in created statut
+      const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
+      assert.deepStrictEqual(siret_etablissement_valid, false);
+      assert.deepStrictEqual(etablissement_reseaux, undefined);
+    });
+
+    it("Vérifie qu'à la création d'un statut avec un uai valid on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+      const validUai = "0631450J";
+
+      // Create sample cfa in referentiel
+      const referenceCfa = new Cfa({
+        uai: validUai,
+        reseaux: [reseauxCfas.AGRI.nomReseau, reseauxCfas.CCCI_France.nomReseau],
+      });
+      await referenceCfa.save();
+
+      // Create statut
+      const statutWithValidUai = { ...createRandomStatutCandidat(), uai_etablissement: validUai };
+      const createdStatut = await createStatutCandidat(statutWithValidUai);
+
+      // Check uai & reseaux in created statut
+      const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
+      assert.deepStrictEqual(uai_etablissement_valid, true);
+      assert.deepStrictEqual(etablissement_reseaux.length, 2);
+      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.AGRI.nomReseau);
+      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.CCCI_France.nomReseau);
+    });
+
+    it("Vérifie qu'à la création d'un statut avec un uai invalide on ne set pas le champ etablissement_reseaux", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+      const invalidUai = "invalid";
+
+      // Create sample cfa in referentiel
+      const referenceCfa = new Cfa({
+        uai: invalidUai,
+        reseaux: [reseauxCfas.AGRI.nomReseau, reseauxCfas.CCCI_France.nomReseau],
+      });
+      await referenceCfa.save();
+
+      // Create statut
+      const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: invalidUai };
+      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
+
+      // Check uai & reseaux in created statut
+      const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
+      assert.deepStrictEqual(uai_etablissement_valid, false);
+      assert.deepStrictEqual(etablissement_reseaux, undefined);
     });
   });
 });

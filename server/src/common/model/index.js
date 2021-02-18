@@ -9,5 +9,6 @@ module.exports = {
   StatutCandidat: getModel("statutsCandidats"),
   User: getModel("users"),
   UserEvent: getModel("userEvents"),
+  Cfa: getModel("cfas"),
   Log: getModel("logs"),
 };
