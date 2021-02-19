@@ -17,8 +17,17 @@ const { dataForGetSiretInfo } = require("../../data/apiTablesDeCorrespondances")
 const { reseauxCfas } = require("../../../src/common/model/constants");
 const { dataForGetCfdInfo } = require("../../data/apiTablesDeCorrespondances");
 const config = require("../../../config");
+const { nockGetSiretInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 
 integrationTests(__filename, () => {
+  beforeEach(() => {
+    nockGetSiretInfo();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
   it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
     const { existsStatut } = await statutsCandidats();
 
