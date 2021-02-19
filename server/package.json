@@ -33,7 +33,7 @@
     "identifyNetwork:cma": "node -r dotenv/config src/jobs/identify-cfas-network/identify-cma.js",
     "etablissements-location:retrieve": "node -r dotenv/config src/jobs/etablissements-retrieve-location/index.js",
     "etablissements-networks:retrieve": "node -r dotenv/config src/jobs/etablissements-retrieve-networks/index.js",
-    "formation:retrieve-libelle": "node -r dotenv/config src/jobs/formation-retrieve-libelle/index.js",
+    "formation:retrieve-from-cfd": "node -r dotenv/config src/jobs/formation-retrieve-from-cfd/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
