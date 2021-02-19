@@ -1,6 +1,4 @@
 const assert = require("assert");
-// eslint-disable-next-line node/no-unpublished-require
-const nock = require("nock");
 const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
 const { StatutCandidat, Cfa, Formation } = require("../../../src/common/model");
@@ -15,17 +13,12 @@ const {
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 const { dataForGetSiretInfo } = require("../../data/apiTablesDeCorrespondances");
 const { reseauxCfas } = require("../../../src/common/model/constants");
-const { dataForGetCfdInfo } = require("../../data/apiTablesDeCorrespondances");
-const config = require("../../../config");
-const { nockGetSiretInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
+const { nockGetSiretInfo, nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 
 integrationTests(__filename, () => {
   beforeEach(() => {
     nockGetSiretInfo();
-  });
-
-  afterEach(() => {
-    nock.cleanAll();
+    nockGetCfdInfo();
   });
 
   it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
@@ -821,9 +814,6 @@ integrationTests(__filename, () => {
     });
 
     it("Vérifie qu'à la création d'un statut avec un CFD valide on crée la formation correspondante si elle n'existe pas", async () => {
-      nock(config.tablesCorrespondances.endpoint).post("/cfd").reply(200, {
-        result: dataForGetCfdInfo.withIntituleLong,
-      });
       const { createStatutCandidat } = await statutsCandidats();
 
       // Create statut

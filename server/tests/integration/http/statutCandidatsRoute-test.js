@@ -1,6 +1,4 @@
 const assert = require("assert");
-// eslint-disable-next-line node/no-unpublished-require
-const nock = require("nock");
 const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
 const { apiStatutsSeeder } = require("../../../src/common/roles");
@@ -25,10 +23,6 @@ httpTests(__filename, ({ startServer }) => {
   beforeEach(() => {
     nockGetSiretInfo();
     nockGetCfdInfo();
-  });
-
-  afterEach(() => {
-    nock.cleanAll();
   });
 
   it("Vérifie que la route statut-candidats fonctionne avec une bonne clé d'API", async () => {

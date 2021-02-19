@@ -1,11 +1,9 @@
 const assert = require("assert").strict;
-// eslint-disable-next-line node/no-unpublished-require
-const nock = require("nock");
 const omit = require("lodash.omit");
+const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const integrationTests = require("../../../utils/integrationTests");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
 const formationsComponent = require("../../../../src/common/components/formations");
-const config = require("../../../../config");
 const { Formation } = require("../../../../src/common/model");
 
 integrationTests(__filename, () => {
@@ -80,18 +78,15 @@ integrationTests(__filename, () => {
     });
 
     it("returns null when formation could not be found in Tables de Correspondaces", async () => {
-      nock(config.tablesCorrespondances.endpoint).post("/cfd").reply(200, {
-        result: null,
-      });
+      nockGetCfdInfo(null);
+
       const cfd = "13534005";
       const formation = await createFormation(cfd);
       assert.equal(formation, null);
     });
 
     it("returns created formation when cfd was found in Tables de Correspondaces with intitule_long", async () => {
-      nock(config.tablesCorrespondances.endpoint).post("/cfd").reply(200, {
-        result: dataForGetCfdInfo.withIntituleLong,
-      });
+      nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
 
       const cfd = "13534005";
       const created = await createFormation(cfd);
@@ -103,9 +98,7 @@ integrationTests(__filename, () => {
     });
 
     it("returns created formation when cfd was found in Tables de Correspondaces without intitule_long", async () => {
-      nock(config.tablesCorrespondances.endpoint).post("/cfd").reply(200, {
-        result: dataForGetCfdInfo.withoutIntituleLong,
-      });
+      nockGetCfdInfo(dataForGetCfdInfo.withoutIntituleLong);
 
       const cfd = "13534005";
       const created = await createFormation(cfd);
