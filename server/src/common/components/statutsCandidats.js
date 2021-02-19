@@ -5,6 +5,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { getSiretInfo } = require("../../common/apis/apiTablesCorrespondances");
+const { existsFormation, createFormation } = require("./formations")();
 
 module.exports = () => ({
   existsStatut,
@@ -154,11 +155,15 @@ const createStatutCandidat = async (itemToCreate) => {
     validateSiret(itemToCreate.siret_etablissement) && (await getSiretInfo(itemToCreate.siret_etablissement));
 
   // if statut candidat établissement has a VALID siret or uai, try to retrieve information in Referentiel CFAs
-
   const etablissementInReferentielCfaFromSiretOrUai =
     (validateSiret(itemToCreate.siret_etablissement) &&
       (await Cfa.findOne({ siret: itemToCreate.siret_etablissement }))) ||
     (validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement })));
+
+  // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
+  if (validateCfd(itemToCreate.id_formation) && !(await existsFormation(itemToCreate.id_formation))) {
+    await createFormation(itemToCreate.id_formation);
+  }
 
   const toAdd = new StatutCandidat({
     ine_apprenant: itemToCreate.ine_apprenant,

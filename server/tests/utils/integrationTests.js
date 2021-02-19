@@ -10,7 +10,7 @@ module.exports = (desc, cb) => {
       let [{ db }, ftpDir] = await Promise.all([connectToMongoForTests(), createFtpDir()]);
       const components = await createComponents({ db });
       context = { db, components, ftpDir };
-      await nockApis();
+      nockApis();
     });
 
     cb({ getContext: () => context });
@@ -19,6 +19,6 @@ module.exports = (desc, cb) => {
   });
 };
 
-const nockApis = async () => {
-  await nockTablesCo();
+const nockApis = () => {
+  nockTablesCo();
 };
