@@ -22,10 +22,9 @@ const PeriodeFilter = ({ date1, date2, onChange }) => {
         monthsShown={3}
         maxDate={new Date()}
         customInput={
-          <FilterButton
-            icon="ri-calendar-event-fill"
-            label={`Entre le ${formatDate(date1)} et le ${formatDate(date2)}`}
-          />
+          <FilterButton icon="ri-calendar-event-fill">
+            Entre le {formatDate(date1)} et le {formatDate(date2)}
+          </FilterButton>
         }
         todayButton="Aujourd'hui"
         shouldCloseOnSelect={false}
