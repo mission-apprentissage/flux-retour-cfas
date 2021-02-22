@@ -2,6 +2,7 @@ const path = require("path");
 const config = require("../../config");
 const { ensureDir, ensureFile, emptyDir } = require("fs-extra");
 const { connectToMongo } = require("../../src/common/mongodb");
+const { createIndexes } = require("../../src/common/indexes");
 
 const testDataDir = path.join(__dirname, "../../.local/test");
 let mongoHolder = null;
@@ -10,6 +11,8 @@ const connectToMongoForTests = async () => {
   if (!mongoHolder) {
     const uri = config.mongodb.uri.split("flux-retour-cfas").join("flux-retour-cfas_test");
     mongoHolder = await connectToMongo(uri);
+
+    createIndexes(mongoHolder.db);
   }
   return mongoHolder;
 };
