@@ -7,10 +7,10 @@ const createStats = require("./stats");
 
 module.exports = async (options = {}) => {
   const users = options.users || (await createUsers());
-  const userEvents = options.userEvents || (await createUserEvents());
-  const statutsCandidats = options.statutsCandidats || (await createStatutsCandidats());
-  const formations = formationsComponent();
-  const stats = options.stats || (await createStats());
+  const userEvents = options.userEvents || createUserEvents();
+  const statutsCandidats = options.statutsCandidats || createStatutsCandidats();
+  const formations = options.formations || formationsComponent();
+  const stats = options.stats || createStats();
 
   return {
     users,
