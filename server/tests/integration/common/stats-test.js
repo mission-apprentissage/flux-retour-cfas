@@ -3,8 +3,14 @@ const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
 const stats = require("../../../src/common/components/stats");
 const { seedSample } = require("../../../src/jobs/seed/utils/seedUtils");
+const { nockGetSiretInfo, nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 
 integrationTests(__filename, () => {
+  beforeEach(() => {
+    nockGetSiretInfo();
+    nockGetCfdInfo();
+  });
+
   it("Permet de récupérer les statistiques", async () => {
     // Seed with sample data
     const createStatutsCandidats = await statutsCandidats();

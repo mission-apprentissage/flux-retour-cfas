@@ -1,4 +1,6 @@
 const path = require("path");
+// eslint-disable-next-line node/no-unpublished-require
+const nock = require("nock");
 const config = require("../../config");
 const { ensureDir, ensureFile, emptyDir } = require("fs-extra");
 const { connectToMongo } = require("../../src/common/mongodb");
@@ -32,6 +34,7 @@ module.exports = {
   connectToMongoForTests: mongoHolder || connectToMongoForTests,
   createFtpDir,
   cleanAll: () => {
+    nock.cleanAll();
     const models = require("../../src/common/model");
     return Promise.all([emptyDir(testDataDir), ...Object.values(models).map((m) => m.deleteMany())]);
   },

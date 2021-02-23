@@ -649,20 +649,6 @@ const fullSample = [
   },
 ];
 
-const sampleEtablissementDataFromSiret = {
-  adresse: "ADRESSE DE TEST - TOULOUSE FRANCE",
-  code_postal: "31500",
-  code_commune_insee: "31555",
-  localite: "TOULOUSE",
-  geo_coordonnees: "40.000000,1.000000",
-  region_implantation_nom: "Occitanie",
-  region_implantation_code: "76",
-  num_departement: "31",
-  nom_departement: "Haute-Garonne",
-  nom_academie: "Toulouse",
-  num_academie: "16",
-};
-
 module.exports = {
   statutsTest,
   statutsTestUpdate,
@@ -671,5 +657,4 @@ module.exports = {
   simpleProspectStatut,
   fullSample,
   fullSampleWithUpdates,
-  sampleEtablissementDataFromSiret,
 };

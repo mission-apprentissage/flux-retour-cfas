@@ -1,7 +1,7 @@
 const { StatutCandidat } = require("../../common/model");
 const { codesStatutsCandidats } = require("../../common/model/constants");
 
-module.exports = async () => {
+module.exports = () => {
   return {
     getAllStats,
   };

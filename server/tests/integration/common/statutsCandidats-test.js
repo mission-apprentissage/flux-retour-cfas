@@ -1,7 +1,7 @@
 const assert = require("assert");
 const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
-const { StatutCandidat, Cfa } = require("../../../src/common/model");
+const { StatutCandidat, Cfa, Formation } = require("../../../src/common/model");
 const { codesStatutsMajStatutCandidats, codesStatutsCandidats } = require("../../../src/common/model/constants");
 const {
   statutsTest,
@@ -9,12 +9,18 @@ const {
   simpleStatut,
   simpleStatutBadUpdate,
   simpleProspectStatut,
-  sampleEtablissementDataFromSiret,
 } = require("../../data/sample");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
+const { dataForGetSiretInfo } = require("../../data/apiTablesDeCorrespondances");
 const { reseauxCfas } = require("../../../src/common/model/constants");
+const { nockGetSiretInfo, nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 
 integrationTests(__filename, () => {
+  beforeEach(() => {
+    nockGetSiretInfo();
+    nockGetCfdInfo();
+  });
+
   it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
     const { existsStatut } = await statutsCandidats();
 
@@ -668,16 +674,16 @@ integrationTests(__filename, () => {
         etablissement_nom_academie,
       } = createdStatut;
       assert.strictEqual(siret_etablissement_valid, true);
-      assert.strictEqual(etablissement_adresse, sampleEtablissementDataFromSiret.adresse);
-      assert.strictEqual(etablissement_code_postal, sampleEtablissementDataFromSiret.code_postal);
-      assert.strictEqual(etablissement_localite, sampleEtablissementDataFromSiret.localite);
-      assert.strictEqual(etablissement_geo_coordonnees, sampleEtablissementDataFromSiret.geo_coordonnees);
-      assert.strictEqual(etablissement_num_region, sampleEtablissementDataFromSiret.region_implantation_code);
-      assert.strictEqual(etablissement_nom_region, sampleEtablissementDataFromSiret.region_implantation_nom);
-      assert.strictEqual(etablissement_num_departement, sampleEtablissementDataFromSiret.num_departement);
-      assert.strictEqual(etablissement_nom_departement, sampleEtablissementDataFromSiret.nom_departement);
-      assert.strictEqual(etablissement_num_academie, sampleEtablissementDataFromSiret.num_academie);
-      assert.strictEqual(etablissement_nom_academie, sampleEtablissementDataFromSiret.nom_academie);
+      assert.strictEqual(etablissement_adresse, dataForGetSiretInfo.adresse);
+      assert.strictEqual(etablissement_code_postal, dataForGetSiretInfo.code_postal);
+      assert.strictEqual(etablissement_localite, dataForGetSiretInfo.localite);
+      assert.strictEqual(etablissement_geo_coordonnees, dataForGetSiretInfo.geo_coordonnees);
+      assert.strictEqual(etablissement_num_region, dataForGetSiretInfo.region_implantation_code);
+      assert.strictEqual(etablissement_nom_region, dataForGetSiretInfo.region_implantation_nom);
+      assert.strictEqual(etablissement_num_departement, dataForGetSiretInfo.num_departement);
+      assert.strictEqual(etablissement_nom_departement, dataForGetSiretInfo.nom_departement);
+      assert.strictEqual(etablissement_num_academie, dataForGetSiretInfo.num_academie);
+      assert.strictEqual(etablissement_nom_academie, dataForGetSiretInfo.nom_academie);
     });
 
     it("Vérifie la création d'un statut avec un uai invalide", async () => {
@@ -805,6 +811,39 @@ integrationTests(__filename, () => {
       const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
       assert.deepStrictEqual(uai_etablissement_valid, false);
       assert.deepStrictEqual(etablissement_reseaux, undefined);
+    });
+
+    it("Vérifie qu'à la création d'un statut avec un CFD valide on crée la formation correspondante si elle n'existe pas", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+
+      // Create statut
+      const cfd = "01022104";
+      const statutWithValidCfd = { ...createRandomStatutCandidat(), id_formation: cfd };
+      const createdStatut = await createStatutCandidat(statutWithValidCfd);
+
+      assert.ok(createdStatut);
+      // Check that formation was created
+      const foundFormations = await Formation.find();
+      assert.deepEqual(foundFormations.length, 1);
+      assert.deepEqual(foundFormations[0].cfd, cfd);
+    });
+
+    it("Vérifie qu'à la création d'un statut avec un CFD valide on ne crée pas de formation si elle existe", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+
+      const cfd = "01022104";
+      // Create formation
+      const formation = await new Formation({ cfd }).save();
+
+      // Create statut
+      const statutWithValidCfd = { ...createRandomStatutCandidat(), id_formation: cfd };
+      const createdStatut = await createStatutCandidat(statutWithValidCfd);
+
+      assert.ok(createdStatut);
+      // Check that new formation was not created
+      const foundFormations = await Formation.find();
+      assert.deepEqual(foundFormations.length, 1);
+      assert.deepEqual(foundFormations[0].created_at, formation.created_at);
     });
   });
 });
