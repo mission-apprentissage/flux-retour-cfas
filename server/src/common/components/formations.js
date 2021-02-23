@@ -24,7 +24,7 @@ const existsFormation = async (cfd) => {
  * @param {string} cfd
  * @return {Formation | null} Found formation
  */
-const getFormationWithCfd = (cfd) => Formation.findOne({ cfd }).lean();
+const getFormationWithCfd = (cfd) => FormationModel.findOne({ cfd }).lean();
 
 const buildFormationLibelle = (formationFromTCO) => {
   return formationFromTCO.intitule_long || "";
