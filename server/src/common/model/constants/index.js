@@ -64,6 +64,18 @@ const reseauxCfas = {
     nomReseau: "PROMOTRANS",
     nomFichier: "cfas-promotrans",
   },
+  COMPAGNONS_DU_DEVOIR: {
+    nomReseau: "COMPAGNONS_DU_DEVOIR",
+    nomFichier: "cfas-compagnons-du-devoir",
+  },
+  UIMM: {
+    nomReseau: "UIMM",
+    nomFichier: "cfas-uimm",
+  },
+  BTP_CFA: {
+    nomReseau: "BTP_CFA",
+    nomFichier: "cfas-btp-cfa",
+  },
 };
 
 module.exports = {
