@@ -90,7 +90,7 @@ integrationTests(__filename, () => {
 
       const cfd = "13534005";
       const created = await createFormation(cfd);
-      assert.deepEqual(omit(created, ["created_at", "_id"]), {
+      assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
         libelle: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
         updated_at: null,
@@ -102,7 +102,7 @@ integrationTests(__filename, () => {
 
       const cfd = "13534005";
       const created = await createFormation(cfd);
-      assert.deepEqual(omit(created, ["created_at", "_id"]), {
+      assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
         libelle: "",
         updated_at: null,
