@@ -23,10 +23,7 @@ const existsFormation = async (cfd) => {
  * @param {string} cfd
  * @return {Formation | null} Found formation
  */
-const getFormationWithCfd = async (cfd) => {
-  const found = await Formation.findOne({ cfd });
-  return found ? found.toJSON() : null;
-};
+const getFormationWithCfd = (cfd) => Formation.findOne({ cfd }).lean();
 
 const buildFormationLibelle = (formationFromTCO) => {
   return formationFromTCO.intitule_long || "";
@@ -57,7 +54,7 @@ const createFormation = async (cfd) => {
     });
 
     const saved = await newFormation.save();
-    return saved.toJSON();
+    return saved.toObject();
   }
   return null;
 };

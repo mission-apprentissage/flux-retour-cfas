@@ -49,7 +49,7 @@ integrationTests(__filename, () => {
       const createdFormation = await newFormation.save();
 
       const found = await getFormationWithCfd(cfd);
-      assert.deepEqual(createdFormation.toJSON(), found);
+      assert.deepEqual(createdFormation.toObject(), found);
     });
   });
 
