@@ -29,10 +29,7 @@ const getFormationWithCfd = async (cfd) => {
 };
 
 const buildFormationLibelle = (formationFromTCO) => {
-  if (formationFromTCO.intitule_long) {
-    return formationFromTCO.intitule_long;
-  }
-  return "";
+  return formationFromTCO.intitule_long || "";
 };
 
 /**
