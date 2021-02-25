@@ -2,7 +2,7 @@ import { Box, Divider, HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { FilterButton } from "../../../../common/components";
+import { FilterButton, OverlayMenu } from "../../../../common/components";
 import { useFetch } from "../../../../common/hooks/useFetch";
 import DepartementOptions from "./DepartementOptions";
 import RegionOptions from "./RegionOptions";
@@ -37,7 +37,7 @@ TerritoireTypeOption.propTypes = {
 };
 
 const TerritoireFilter = ({ value, onChange }) => {
-  const [isFilterOptionsOpen, setIsFilterOptionsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedTerritoireType, setSelectedTerritoireType] = useState(TERRITOIRE_TYPES.region);
 
   const [departements] = useFetch(`${GEO_API_URL}/departements`);
@@ -49,8 +49,6 @@ const TerritoireFilter = ({ value, onChange }) => {
   ];
 
   const onFilterClick = (territoireType) => (filter) => {
-    // set filter and close overlay
-    setIsFilterOptionsOpen(false);
     const value = filter ? { type: territoireType, code: filter.code } : null;
     onChange(value);
   };
@@ -61,29 +59,16 @@ const TerritoireFilter = ({ value, onChange }) => {
     ? regions.find((region) => region.code === value.code)
     : departements.find((departement) => departement.code === value.code);
 
-  const buttonLabel = isFilterOptionsOpen
-    ? "Sélectionner un territoire"
-    : chosenFilter
-    ? chosenFilter.nom
-    : "Toute la France";
+  const buttonLabel = isOpen ? "Sélectionner un territoire" : chosenFilter ? chosenFilter.nom : "Toute la France";
 
   return (
     <div>
-      <FilterButton label={buttonLabel} icon="ri-map-pin-fill" onClick={() => setIsFilterOptionsOpen(true)} />
-      {isFilterOptionsOpen && (
-        <Box
-          background="white"
-          position="absolute"
-          marginTop="2w"
-          left="20%"
-          right="20%"
-          paddingX="6w"
-          paddingY="3w"
-          boxShadow="0px 0px 16px rgba(30, 30, 30, 0.12)"
-          borderRadius="0.25rem"
-          zIndex="999"
-          onBlur={() => setIsFilterOptionsOpen(false)}
-        >
+      <FilterButton onClick={() => setIsOpen(!isOpen)} icon="ri-map-pin-fill">
+        {buttonLabel}
+      </FilterButton>
+
+      {isOpen && (
+        <OverlayMenu onClose={() => setIsOpen(false)}>
           <HStack spacing="4w">
             {TERRITOIRE_TYPE_OPTIONS.map(({ value, label }) => (
               <TerritoireTypeOption
@@ -116,7 +101,7 @@ const TerritoireFilter = ({ value, onChange }) => {
               )}
             </>
           )}
-        </Box>
+        </OverlayMenu>
       )}
     </div>
   );
