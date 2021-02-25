@@ -24,7 +24,7 @@ const TableauDeBordFilters = () => {
   };
 
   return (
-    <HStack spacing="2w" mt="4w" justifyContent="center">
+    <HStack spacing="2w" mt="2w" justifyContent="center">
       <PeriodeFilter date1={filters.periode.date1} date2={filters.periode.date2} onChange={handlePeriodeFilterChange} />
       <TerritoireFilter value={filters.territoire} onChange={handleTerritoireFilterChange} />
     </HStack>
