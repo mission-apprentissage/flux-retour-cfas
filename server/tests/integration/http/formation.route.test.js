@@ -1,6 +1,5 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
-const { administrator } = require("../../../src/common/roles");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 const { Formation: FormationModel } = require("../../../src/common/model");
 const { Formation } = require("../../../src/common/domain/formation");
@@ -22,30 +21,17 @@ httpTests(__filename, ({ startServer }) => {
     });
   };
 
-  let httpClient, bearerToken;
+  let httpClient;
 
   beforeEach(async () => {
-    const { httpClient: _httpClient, createAndLogUser } = await startServer();
+    const { httpClient: _httpClient } = await startServer();
     httpClient = _httpClient;
-    bearerToken = await createAndLogUser("user", "password", { permissions: [administrator] });
 
     await seedFormations();
   });
 
-  it("sends a 401 HTTP response when no authorization header passed", async () => {
-    const response = await httpClient.post("/api/formations/search");
-
-    assert.equal(response.status, 401);
-  });
-
   it("sends a 400 HTTP response when no searchTerm provided", async () => {
-    const response = await httpClient.post(
-      "/api/formations/search",
-      {},
-      {
-        headers: bearerToken,
-      }
-    );
+    const response = await httpClient.post("/api/formations/search", {});
 
     assert.equal(response.status, 400);
     assert.equal(response.data.message, "query parameter 'searchTerm' is required");
@@ -54,13 +40,7 @@ httpTests(__filename, ({ startServer }) => {
   it("sends a 400 HTTP response when searchTerm is shorter than 3 chars", async () => {
     const searchTerm = "he";
 
-    const response = await httpClient.post(
-      `/api/formations/search?searchTerm=${searchTerm}`,
-      {},
-      {
-        headers: bearerToken,
-      }
-    );
+    const response = await httpClient.post(`/api/formations/search?searchTerm=${searchTerm}`, {});
 
     assert.equal(response.status, 400);
   });
@@ -110,13 +90,7 @@ httpTests(__filename, ({ startServer }) => {
 
   validCases.forEach(({ searchTerm, caseDescription, expectedResult }) => {
     it(`sends a 200 HTTP response with results ${caseDescription}`, async () => {
-      const response = await httpClient.post(
-        `/api/formations/search?searchTerm=${encodeURIComponent(searchTerm)}`,
-        {},
-        {
-          headers: bearerToken,
-        }
-      );
+      const response = await httpClient.post(`/api/formations/search?searchTerm=${encodeURIComponent(searchTerm)}`, {});
 
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, expectedResult);
@@ -126,13 +100,7 @@ httpTests(__filename, ({ startServer }) => {
   it("sends a 200 HTTP response with results matching different cases and diacritics in libelle", async () => {
     const searchTerm = "decoratio";
 
-    const response = await httpClient.post(
-      `/api/formations/search?searchTerm=${encodeURIComponent(searchTerm)}`,
-      {},
-      {
-        headers: bearerToken,
-      }
-    );
+    const response = await httpClient.post(`/api/formations/search?searchTerm=${encodeURIComponent(searchTerm)}`, {});
 
     assert.equal(response.status, 200);
     assert.equal(response.data.length, 4);
