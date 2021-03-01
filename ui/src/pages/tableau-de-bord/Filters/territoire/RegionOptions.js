@@ -25,7 +25,7 @@ const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
           autoFocus
         />
       </InputGroup>
-      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="15rem" overflow="scroll">
+      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
         <TerritoireOption
           onClick={() => {
             onRegionClick(null);

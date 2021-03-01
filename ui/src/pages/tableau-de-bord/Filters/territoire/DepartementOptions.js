@@ -27,7 +27,7 @@ const DepartementOptions = ({ departements = [], onDepartementClick, currentFilt
           autoFocus
         />
       </InputGroup>
-      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="15rem" overflow="scroll">
+      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
         <TerritoireOption
           onClick={() => {
             onDepartementClick(null);
