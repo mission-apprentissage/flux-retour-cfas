@@ -22,11 +22,10 @@ const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
           value={regionSearchTerm}
           onChange={(event) => setRegionSearchTerm(event.target.value)}
           size="sm"
-          marginBottom="2w"
           autoFocus
         />
       </InputGroup>
-      <List spacing="1w" textAlign="left">
+      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
         <TerritoireOption
           onClick={() => {
             onRegionClick(null);
