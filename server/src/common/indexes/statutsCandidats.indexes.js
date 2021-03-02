@@ -8,6 +8,11 @@ const createStatutsCandidatsCollectionIndexes = async (db) => {
   await collection.createIndex({ uai_etablissement: 1 }, { name: "uai_etablissement" });
   await collection.createIndex({ siret_etablissement: 1 }, { name: "siret_etablissement" });
   await collection.createIndex({ id_formation: 1 }, { name: "id_formation" });
+
+  await collection.createIndex(
+    { nom_etablissement: "text", tokenized_nom_etablissement: "text" },
+    { default_language: "french" }
+  );
 };
 
 module.exports = { createStatutsCandidatsCollectionIndexes };

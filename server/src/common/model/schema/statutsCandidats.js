@@ -97,6 +97,11 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Nom de l'établissement d'origine",
   },
+  nom_etablissement_tokenized: {
+    type: String,
+    default: null,
+    description: "Nom de l'établissement d'origine tokenized pour la recherche textuelle",
+  },
   etablissement_reseaux: {
     type: [String],
     default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays

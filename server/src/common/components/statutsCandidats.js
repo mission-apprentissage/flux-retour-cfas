@@ -5,6 +5,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { getSiretInfo } = require("../../common/apis/apiTablesCorrespondances");
+const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { existsFormation, createFormation } = require("./formations")();
 
 module.exports = () => ({
@@ -185,6 +186,8 @@ const createStatutCandidat = async (itemToCreate) => {
     siret_etablissement: itemToCreate.siret_etablissement,
     siret_etablissement_valid: validateSiret(itemToCreate.siret_etablissement),
     nom_etablissement: itemToCreate.nom_etablissement,
+    nom_etablissement_tokenized:
+      itemToCreate.nom_etablissement && buildTokenizedString(itemToCreate.nom_etablissement, 3),
     statut_apprenant: itemToCreate.statut_apprenant,
     historique_statut_apprenant: [
       {
