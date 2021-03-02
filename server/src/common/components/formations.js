@@ -1,6 +1,7 @@
-const { Formation } = require("../model");
+const { Formation: FormationModel } = require("../model");
 const { validateCfd } = require("../domain/cfd");
 const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
+const { Formation } = require("../domain/formation");
 
 module.exports = () => ({
   createFormation,
@@ -14,7 +15,7 @@ module.exports = () => ({
  * @return {boolean} Does it exist
  */
 const existsFormation = async (cfd) => {
-  const count = await Formation.countDocuments({ cfd });
+  const count = await FormationModel.countDocuments({ cfd });
   return count !== 0;
 };
 
@@ -23,14 +24,14 @@ const existsFormation = async (cfd) => {
  * @param {string} cfd
  * @return {Formation | null} Found formation
  */
-const getFormationWithCfd = (cfd) => Formation.findOne({ cfd }).lean();
+const getFormationWithCfd = (cfd) => FormationModel.findOne({ cfd }).lean();
 
 const buildFormationLibelle = (formationFromTCO) => {
   return formationFromTCO.intitule_long || "";
 };
 
 /**
- * Fetches data for given CFD in Tables de Correspondances and create a new Formation in DB
+ * Fetches data for given CFD in Tables de Correspondances and creates a new Formation in DB
  * @param {string} cfd
  * @return {Formation | null} The newly created Formation or null
  */
@@ -47,13 +48,12 @@ const createFormation = async (cfd) => {
   const formationInfo = await getCfdInfo(cfd);
 
   if (formationInfo) {
-    const newFormation = new Formation({
+    const formation = Formation.create({
       cfd,
       libelle: buildFormationLibelle(formationInfo),
-      created_at: new Date(),
     });
-
-    const saved = await newFormation.save();
+    const newFormationDocument = new FormationModel(formation);
+    const saved = await newFormationDocument.save();
     return saved.toObject();
   }
   return null;
