@@ -14,26 +14,31 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_etablissement: "CFA DU ROANNAIS",
         siret_etablissement: "80420010000021",
+        siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cFa dU RO",
         siret_etablissement: "80420010000022",
+        siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cfa du roanna",
         siret_etablissement: "80420010000023",
+        siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "CFA DUROC",
         siret_etablissement: "80420010000024",
+        siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "FACULTE SCIENCES NANCY",
         siret_etablissement: "80420010000025",
+        siret_etablissement_valid: true,
       },
     ];
 

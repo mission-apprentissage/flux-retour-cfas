@@ -14,14 +14,27 @@ const searchCfasByNomEtablissement = async (nomEtablissement) => {
     throw new Error("param nomEtablissement is required");
   }
 
-  const results = await StatutCandidatModel.find({
-    $text: { $search: nomEtablissement },
-  })
-    .limit(50)
-    .lean();
+  const found = await StatutCandidatModel.aggregate([
+    {
+      $match: { $text: { $search: nomEtablissement }, siret_etablissement_valid: true },
+    },
+    {
+      $group: {
+        _id: "$siret_etablissement",
+        nom_etablissement: { $first: "$nom_etablissement" },
+      },
+    },
+    {
+      $limit: 50,
+    },
+    {
+      $project: {
+        _id: 0,
+        siret_etablissement: "$_id",
+        nom_etablissement: 1,
+      },
+    },
+  ]);
 
-  return results.map((result) => ({
-    nom_etablissement: result.nom_etablissement,
-    siret_etablissement: result.siret_etablissement,
-  }));
+  return found;
 };

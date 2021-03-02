@@ -31,6 +31,7 @@ httpTests(__filename, ({ startServer }) => {
       ...createRandomStatutCandidat(),
       nom_etablissement: "FACULTE SCIENCES NANCY",
       nom_etablissement_tokenized: buildTokenizedString("FACULTE SCIENCES NANCY", 3),
+      siret_etablissement_valid: true,
     }).save();
 
     const response = await httpClient.post(`/api/cfas/search?searchTerm=${encodeURIComponent("FACULTE")}`, {});

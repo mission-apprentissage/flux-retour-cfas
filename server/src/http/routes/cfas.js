@@ -19,6 +19,7 @@ module.exports = ({ cfas }) => {
         const foundCfa = await cfas.searchCfasByNomEtablissement(searchTerm);
         return res.json(foundCfa);
       } catch (err) {
+        console.log(err);
         return res.json(null);
       }
     })
