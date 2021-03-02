@@ -22,7 +22,7 @@ const getRandomPeriodeFormation = () => {
 };
 const getRandomAnneeFormation = () => faker.random.arrayElement([0, 1, 2, 3]);
 
-const createRandomStatutCandidat = () => {
+const createRandomStatutCandidat = (params = null) => {
   return {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
@@ -47,6 +47,7 @@ const createRandomStatutCandidat = () => {
     date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
     periode_formation: isPresent() ? getRandomPeriodeFormation() : null,
     annee_formation: getRandomAnneeFormation(),
+    ...params,
   };
 };
 
@@ -90,6 +91,39 @@ const createRandomListOf = (generateItem) => (nbItems = null) => {
   return randomList;
 };
 
+const createRandomStatutCandidatWithParams = (params) => {
+  const random = {
+    ine_apprenant: isPresent() ? getRandomIne() : null,
+    nom_apprenant: faker.name.lastName().toUpperCase(),
+    prenom_apprenant: faker.name.firstName(),
+    prenom2_apprenant: faker.random.boolean() ? faker.name.firstName().toUpperCase() : null,
+    prenom3_apprenant: faker.random.boolean() ? faker.name.firstName().toUpperCase() : null,
+    ne_pas_solliciter: faker.random.boolean(),
+    email_contact: faker.internet.email(),
+
+    nom_representant_legal: faker.random.boolean() ? faker.name.lastName().toUpperCase() : null,
+    tel_representant_legal: faker.random.boolean() ? faker.phone.phoneNumberFormat().trim().toUpperCase() : null,
+    tel2_representant_legal: faker.random.boolean() ? faker.phone.phoneNumberFormat().trim().toUpperCase() : null,
+
+    id_formation: getRandomIdFormation(),
+    libelle_court_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
+    libelle_long_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
+    uai_etablissement: getRandomUaiEtablissement(),
+    siret_etablissement: isPresent() ? getRandomSiretEtablissement() : null,
+    nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
+
+    statut_apprenant: getRandomStatutApprenant(),
+    date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
+    periode_formation: isPresent() ? getRandomPeriodeFormation() : null,
+    annee_formation: getRandomAnneeFormation(),
+  };
+
+  return {
+    ...params,
+    ...random,
+  };
+};
+
 const createRandomStatutsCandidatsApiInputList = createRandomListOf(createRandomStatutCandidatApiInput);
 
 const createRandomStatutsCandidatsList = createRandomListOf(createRandomStatutCandidat);
@@ -99,4 +133,5 @@ module.exports = {
   createRandomStatutCandidatApiInput,
   createRandomStatutsCandidatsList,
   createRandomStatutsCandidatsApiInputList,
+  createRandomStatutCandidatWithParams,
 };

@@ -4,6 +4,7 @@ const createUserEvents = require("./userEvents");
 const createStatutsCandidats = require("./statutsCandidats");
 const formationsComponent = require("./formations");
 const createStats = require("./stats");
+const createDashboard = require("./dashboard");
 
 module.exports = async (options = {}) => {
   const users = options.users || (await createUsers());
@@ -11,6 +12,7 @@ module.exports = async (options = {}) => {
   const statutsCandidats = options.statutsCandidats || createStatutsCandidats();
   const formations = options.formations || formationsComponent();
   const stats = options.stats || createStats();
+  const dashboard = options.dashboard || createDashboard();
 
   return {
     users,
@@ -19,5 +21,6 @@ module.exports = async (options = {}) => {
     statutsCandidats,
     formations,
     stats,
+    dashboard,
   };
 };

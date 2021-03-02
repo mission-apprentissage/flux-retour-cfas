@@ -1,5 +1,5 @@
 // const assert = require("assert");
-const integrationTests = require("../../utils/integrationTests");
+const integrationTests = require("../../../utils/integrationTests");
 // const users = require("../../../src/common/components/users");
 // const { User } = require("../../../src/common/model");
 // const { ftpAccess } = require("../../../src/common/roles");

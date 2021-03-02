@@ -17,6 +17,7 @@ const userEventsRoute = require("./routes/userEvents");
 const analyticsRoute = require("./routes/analytics");
 const configRoute = require("./routes/config");
 const referentielRoute = require("./routes/referentiel");
+const dashboardRoute = require("./routes/dashboard");
 const formationRoutes = require("./routes/formations");
 const healthcheckRoute = require("./routes/healthcheck");
 
@@ -44,6 +45,7 @@ module.exports = async (components) => {
   app.use("/api/analytics", checkJwtToken, analyticsRoute(components));
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());
   app.use("/api/referentiel", checkJwtToken, adminOnly, referentielRoute());
+  app.use("/api/dashboard", dashboardRoute(components));
   app.use("/api/healthcheck", healthcheckRoute(components));
 
   app.use(errorMiddleware());

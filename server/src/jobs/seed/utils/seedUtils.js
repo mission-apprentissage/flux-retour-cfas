@@ -33,8 +33,20 @@ const seedRandomizedSample = async (statutsCandidats) => {
   await statutsCandidats.addOrUpdateStatuts(createRandomStatutsCandidatsList());
 };
 
+const seedRandomizedSampleWithStatut = async (statutsCandidats, nbStatuts, statutValue) => {
+  const randomStatuts = createRandomStatutsCandidatsList(nbStatuts).map((statutCandidat) => {
+    return {
+      ...statutCandidat,
+      statut_apprenant: statutValue,
+    };
+  });
+
+  await statutsCandidats.addOrUpdateStatuts(randomStatuts);
+};
+
 module.exports = {
   seedUsers,
   seedSample,
   seedRandomizedSample,
+  seedRandomizedSampleWithStatut,
 };
