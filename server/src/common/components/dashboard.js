@@ -9,11 +9,11 @@ module.exports = () => ({
 /**
  * Récupération des données effectifs pour 2 dates et
  * passage de filtres en paramètres
- * @param {*} beginDate
+ * @param {*} startDate
  * @param {*} endDate
  * @param {*} filters
  */
-const getEffectifsData = async (beginDate, endDate, filters = {}) => {
+const getEffectifsData = async (startDate, endDate, filters = {}) => {
   const [
     nbInscritsBeginDate,
     nbApprentisBeginDate,
@@ -22,16 +22,16 @@ const getEffectifsData = async (beginDate, endDate, filters = {}) => {
     nbApprentisEndDate,
     nbAbandonsEndDate,
   ] = await Promise.all([
-    getNbStatutsInHistoryForStatutAndDate(beginDate, codesStatutsCandidats.inscrit, filters),
-    getNbStatutsInHistoryForStatutAndDate(beginDate, codesStatutsCandidats.apprenti, filters),
-    getNbStatutsInHistoryForStatutAndDate(beginDate, codesStatutsCandidats.abandon, filters),
+    getNbStatutsInHistoryForStatutAndDate(startDate, codesStatutsCandidats.inscrit, filters),
+    getNbStatutsInHistoryForStatutAndDate(startDate, codesStatutsCandidats.apprenti, filters),
+    getNbStatutsInHistoryForStatutAndDate(startDate, codesStatutsCandidats.abandon, filters),
     getNbStatutsInHistoryForStatutAndDate(endDate, codesStatutsCandidats.inscrit, filters),
     getNbStatutsInHistoryForStatutAndDate(endDate, codesStatutsCandidats.apprenti, filters),
     getNbStatutsInHistoryForStatutAndDate(endDate, codesStatutsCandidats.abandon, filters),
   ]);
 
   return {
-    beginDate: {
+    startDate: {
       nbInscrits: nbInscritsBeginDate,
       nbApprentis: nbApprentisBeginDate,
       nbAbandons: nbAbandonsBeginDate,

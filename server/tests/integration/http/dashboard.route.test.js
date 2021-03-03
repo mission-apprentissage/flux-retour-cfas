@@ -50,7 +50,7 @@ httpTests(__filename, ({ startServer }) => {
 
     // Expected results
     const expectedResults = {
-      beginDate: {
+      startDate: {
         nbInscrits: 10,
         nbApprentis: 5,
         nbAbandons: 0,
@@ -64,15 +64,15 @@ httpTests(__filename, ({ startServer }) => {
 
     // Check good api call
     const response = await httpClient.post("/api/dashboard/effectifs", {
-      beginDate: "2020-09-15T00:00:00.000Z",
+      startDate: "2020-09-15T00:00:00.000Z",
       endDate: "2020-10-10T00:00:00.000Z",
     });
 
     assert.deepStrictEqual(response.status, 200);
     assert.deepStrictEqual(response.data.length, 2);
-    assert.deepStrictEqual(response.data[0].inscrits, expectedResults.beginDate.nbInscrits);
-    assert.deepStrictEqual(response.data[0].apprentis, expectedResults.beginDate.nbApprentis);
-    assert.deepStrictEqual(response.data[0].abandons, expectedResults.beginDate.nbAbandons);
+    assert.deepStrictEqual(response.data[0].inscrits, expectedResults.startDate.nbInscrits);
+    assert.deepStrictEqual(response.data[0].apprentis, expectedResults.startDate.nbApprentis);
+    assert.deepStrictEqual(response.data[0].abandons, expectedResults.startDate.nbAbandons);
     assert.deepStrictEqual(response.data[1].inscrits, expectedResults.endDate.nbInscrits);
     assert.deepStrictEqual(response.data[1].apprentis, expectedResults.endDate.nbApprentis);
     assert.deepStrictEqual(response.data[1].abandons, expectedResults.endDate.nbAbandons);
@@ -114,7 +114,7 @@ httpTests(__filename, ({ startServer }) => {
 
     // Expected results
     const expectedResults = {
-      beginDate: {
+      startDate: {
         nbInscrits: 10,
         nbApprentis: 5,
         nbAbandons: 0,
@@ -128,25 +128,25 @@ httpTests(__filename, ({ startServer }) => {
 
     // Check good api call
     const response = await httpClient.post("/api/dashboard/effectifs", {
-      beginDate: "2020-09-15T00:00:00.000Z",
+      startDate: "2020-09-15T00:00:00.000Z",
       endDate: "2020-10-10T00:00:00.000Z",
-      filters: filterQuery,
+      ...filterQuery,
     });
 
     assert.deepStrictEqual(response.status, 200);
     assert.deepStrictEqual(response.data.length, 2);
-    assert.deepStrictEqual(response.data[0].inscrits, expectedResults.beginDate.nbInscrits);
-    assert.deepStrictEqual(response.data[0].apprentis, expectedResults.beginDate.nbApprentis);
-    assert.deepStrictEqual(response.data[0].abandons, expectedResults.beginDate.nbAbandons);
+    assert.deepStrictEqual(response.data[0].inscrits, expectedResults.startDate.nbInscrits);
+    assert.deepStrictEqual(response.data[0].apprentis, expectedResults.startDate.nbApprentis);
+    assert.deepStrictEqual(response.data[0].abandons, expectedResults.startDate.nbAbandons);
     assert.deepStrictEqual(response.data[1].inscrits, expectedResults.endDate.nbInscrits);
     assert.deepStrictEqual(response.data[1].apprentis, expectedResults.endDate.nbApprentis);
     assert.deepStrictEqual(response.data[1].abandons, expectedResults.endDate.nbAbandons);
 
     // Check bad api call
     const badResponse = await httpClient.post("/api/dashboard/effectifs", {
-      beginDate: "2020-09-15T00:00:00.000Z",
+      startDate: "2020-09-15T00:00:00.000Z",
       endDate: "2020-10-10T00:00:00.000Z",
-      filters: { etablissement_num_region: "99" },
+      etablissement_num_region: "99",
     });
 
     assert.deepStrictEqual(badResponse.status, 200);
@@ -330,7 +330,7 @@ httpTests(__filename, ({ startServer }) => {
 
     // Check bad api call
     const badResponse = await httpClient.post("/api/dashboard/cfa", {
-      beginDate: "2020-09-15T00:00:00.000Z",
+      startDate: "2020-09-15T00:00:00.000Z",
       endDate: "2020-10-10T00:00:00.000Z",
       siret: "77929544309999",
     });

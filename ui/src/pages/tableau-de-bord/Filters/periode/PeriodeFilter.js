@@ -11,24 +11,24 @@ import { formatDate } from "../../../../common/utils/dateUtils";
 
 registerLocale("fr", fr);
 
-const PeriodeFilter = ({ date1, date2, onChange }) => {
+const PeriodeFilter = ({ value, onChange }) => {
   return (
     <div>
       <DatePicker
         locale="fr"
         selectsRange
-        selected={date1}
+        selected={value.startDate}
         onChange={(dates) => {
           const [start, end] = dates;
-          onChange({ date1: start, date2: end });
+          onChange({ startDate: start, endDate: end });
         }}
-        startDate={date1}
-        endDate={date2}
+        startDate={value.startDate}
+        endDate={value.endDate}
         monthsShown={3}
         maxDate={new Date()}
         customInput={
           <FilterButton icon="ri-calendar-event-fill">
-            Entre le {formatDate(date1)} et le {formatDate(date2)}
+            Entre le {formatDate(value.startDate)} et le {formatDate(value.endDate)}
           </FilterButton>
         }
         todayButton="Aujourd'hui"
@@ -39,8 +39,10 @@ const PeriodeFilter = ({ date1, date2, onChange }) => {
 };
 
 PeriodeFilter.propTypes = {
-  date1: PropTypes.instanceOf(Date).isRequired,
-  date2: PropTypes.instanceOf(Date).isRequired,
+  value: PropTypes.shape({
+    startDate: PropTypes.instanceOf(Date).isRequired,
+    endDate: PropTypes.instanceOf(Date).isRequired,
+  }).isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
