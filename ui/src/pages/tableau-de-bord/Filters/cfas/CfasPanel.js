@@ -61,7 +61,6 @@ CfaPanel.propTypes = {
   onCfaClick: PropTypes.func.isRequired,
   value: PropTypes.shape({
     siret_etablissement: PropTypes.string.isRequired,
-    uai_etablissement: PropTypes.string.isRequired,
     nom_etablissement: PropTypes.string.isRequired,
   }),
 };
