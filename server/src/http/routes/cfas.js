@@ -15,13 +15,8 @@ module.exports = ({ cfas }) => {
         return res.status(400).json({ message: "query parameter 'searchTerm' is required" });
       }
 
-      try {
-        const foundCfa = await cfas.searchCfasByNomEtablissement(searchTerm);
-        return res.json(foundCfa);
-      } catch (err) {
-        console.log(err);
-        return res.json(null);
-      }
+      const foundCfa = await cfas.searchCfasByNomEtablissement(searchTerm);
+      return res.json(foundCfa);
     })
   );
 
