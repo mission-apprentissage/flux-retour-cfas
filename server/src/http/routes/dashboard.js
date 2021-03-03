@@ -1,19 +1,26 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-
-const { UserEvent } = require("../../common/model");
+const { UserEvent, StatutCandidat, Cfa } = require("../../common/model");
+const { validateSiret } = require("../../common/domain/siret");
 
 module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
 
   /**
-   * Schema for validation
+   * Schema for effectif validation
    */
-  const dashboardInputSchema = Joi.object({
+  const dashboardEffectifInputSchema = Joi.object({
     beginDate: Joi.date().required(),
     endDate: Joi.date().required(),
     filters: Joi.object().allow(null),
+  });
+
+  /**
+   * Schema for cfa data validation
+   */
+  const dashboardInfosCfaInputSchema = Joi.object({
+    siret: Joi.string().required(),
   });
 
   /**
@@ -48,7 +55,7 @@ module.exports = ({ stats, dashboard }) => {
     "/effectifs",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardInputSchema.validateAsync(req.body, { abortEarly: false });
+      await dashboardEffectifInputSchema.validateAsync(req.body, { abortEarly: false });
 
       // Gets & format params
       const { beginDate, endDate, filters = {} } = req.body;
@@ -85,5 +92,52 @@ module.exports = ({ stats, dashboard }) => {
       ]);
     })
   );
+
+  /**
+   * Gets the dashboard data for cfa
+   */
+  router.post(
+    "/cfa",
+    tryCatch(async (req, res) => {
+      // Validate schema
+      await dashboardInfosCfaInputSchema.validateAsync(req.body, { abortEarly: false });
+
+      // Gets & format params
+      const { siret } = req.body;
+
+      // Add user event
+      const event = new UserEvent({
+        username: "dashboard",
+        type: "GET",
+        action: `api/dashboard/cfa/${siret}`,
+        data: { siret },
+      });
+      await event.save();
+
+      // Checks if siret valid
+      if (!validateSiret(siret)) {
+        return res.status(400).json({ message: "Siret is not valid" });
+      } else {
+        // Search cfa in statuts
+        const cfaFound = await StatutCandidat.findOne({ siret_etablissement: siret }).lean();
+        if (!cfaFound) {
+          return res.status(400).json({ message: `No cfa found for siret ${siret}` });
+        } else {
+          // Search reseaux for cfa in référentiel
+          const cfaInReferentiel = await Cfa.findOne({ siret: siret }).lean();
+
+          // Build response
+          return res.json({
+            libelleLong: cfaFound.nom_etablissement,
+            reseaux: cfaInReferentiel ? cfaInReferentiel.reseaux ?? [] : [],
+            domainesMetiers: [],
+            uai: cfaFound.uai_etablissement,
+            adresse: cfaFound.etablissement_adresse,
+          });
+        }
+      }
+    })
+  );
+
   return router;
 };

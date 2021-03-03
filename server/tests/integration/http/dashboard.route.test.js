@@ -6,7 +6,7 @@ const {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
-const { StatutCandidat } = require("../../../src/common/model");
+const { StatutCandidat, Cfa } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie qu'on peut récupérer des statistiques d'établissements via API", async () => {
@@ -157,5 +157,184 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(badResponse.data[1].inscrits, 0);
     assert.deepStrictEqual(badResponse.data[1].apprentis, 0);
     assert.deepStrictEqual(badResponse.data[1].abandons, 0);
+  });
+
+  it("Vérifie qu'on peut récupérer des effectifs d'un CFA via API", async () => {
+    const { httpClient } = await startServer();
+
+    const nomTest = "TEST NOM";
+    const siretTest = "77929544300013";
+    const uaiTest = "0762232N";
+    const adresseTest = "TEST ADRESSE";
+    const reseauxTest = ["Reseau1", "Reseau2"];
+
+    const filterQuery = {
+      nom_etablissement: nomTest,
+      siret_etablissement: siretTest,
+      siret_etablissement_valid: true,
+      uai_etablissement: uaiTest,
+      etablissement_adresse: adresseTest,
+    };
+
+    // Add 10 statuts for cfa with history sequence - full
+    for (let index = 0; index < 10; index++) {
+      const randomStatut = createRandomStatutCandidat({
+        ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+        ...filterQuery,
+      });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
+    }
+
+    // Add Cfa in referentiel
+    const cfaReferenceToAdd = new Cfa({ siret: siretTest, nom: nomTest, uai: uaiTest, reseaux: reseauxTest });
+    await cfaReferenceToAdd.save();
+
+    // Check good api call
+    const response = await httpClient.post("/api/dashboard/cfa", {
+      siret: "77929544300013",
+    });
+
+    assert.deepStrictEqual(response.status, 200);
+    assert.ok(response.data.libelleLong);
+    assert.ok(response.data.reseaux);
+    assert.ok(response.data.domainesMetiers);
+    assert.ok(response.data.uai);
+    assert.ok(response.data.adresse);
+    assert.deepStrictEqual(response.data.libelleLong, nomTest);
+    assert.deepStrictEqual(response.data.uai, uaiTest);
+    assert.deepStrictEqual(response.data.adresse, adresseTest);
+    assert.deepStrictEqual(response.data.reseaux, reseauxTest);
+  });
+
+  it("Vérifie qu'on peut récupérer des effectifs d'un CFA qui n'a pas de réseaux via API", async () => {
+    const { httpClient } = await startServer();
+
+    const nomTest = "TEST NOM";
+    const siretTest = "77929544300013";
+    const uaiTest = "0762232N";
+    const adresseTest = "TEST ADRESSE";
+
+    const filterQuery = {
+      nom_etablissement: nomTest,
+      siret_etablissement: siretTest,
+      siret_etablissement_valid: true,
+      uai_etablissement: uaiTest,
+      etablissement_adresse: adresseTest,
+    };
+
+    // Add 10 statuts for cfa with history sequence - full
+    for (let index = 0; index < 10; index++) {
+      const randomStatut = createRandomStatutCandidat({
+        ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+        ...filterQuery,
+      });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
+    }
+
+    // Add Cfa in referentiel
+    const cfaReferenceToAdd = new Cfa({ siret: siretTest, nom: nomTest, uai: uaiTest });
+    await cfaReferenceToAdd.save();
+
+    // Check good api call
+    const response = await httpClient.post("/api/dashboard/cfa", {
+      siret: "77929544300013",
+    });
+
+    assert.deepStrictEqual(response.status, 200);
+    assert.ok(response.data.libelleLong);
+    // assert.ok(response.data.reseaux);
+    assert.ok(response.data.domainesMetiers);
+    assert.ok(response.data.uai);
+    assert.ok(response.data.adresse);
+    assert.deepStrictEqual(response.data.libelleLong, nomTest);
+    assert.deepStrictEqual(response.data.uai, uaiTest);
+    assert.deepStrictEqual(response.data.adresse, adresseTest);
+    assert.deepStrictEqual(response.data.reseaux, []);
+  });
+
+  it("Vérifie qu'on peut récupérer des effectifs d'un CFA qui n'est pas dans le référentiel via API", async () => {
+    const { httpClient } = await startServer();
+
+    const nomTest = "TEST NOM";
+    const siretTest = "77929544300013";
+    const uaiTest = "0762232N";
+    const adresseTest = "TEST ADRESSE";
+
+    const filterQuery = {
+      nom_etablissement: nomTest,
+      siret_etablissement: siretTest,
+      siret_etablissement_valid: true,
+      uai_etablissement: uaiTest,
+      etablissement_adresse: adresseTest,
+    };
+
+    // Add 10 statuts for cfa with history sequence - full
+    for (let index = 0; index < 10; index++) {
+      const randomStatut = createRandomStatutCandidat({
+        ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+        ...filterQuery,
+      });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
+    }
+
+    // Check good api call
+    const response = await httpClient.post("/api/dashboard/cfa", {
+      siret: "77929544300013",
+    });
+
+    assert.deepStrictEqual(response.status, 200);
+    assert.ok(response.data.libelleLong);
+    assert.ok(response.data.reseaux);
+    assert.ok(response.data.domainesMetiers);
+    assert.ok(response.data.uai);
+    assert.ok(response.data.adresse);
+    assert.deepStrictEqual(response.data.libelleLong, nomTest);
+    assert.deepStrictEqual(response.data.uai, uaiTest);
+    assert.deepStrictEqual(response.data.adresse, adresseTest);
+    assert.deepStrictEqual(response.data.reseaux, []);
+  });
+
+  it("Vérifie qu'on ne peut pas récupérer des effectifs d'un CFA via mauvais Siret via API", async () => {
+    const { httpClient } = await startServer();
+
+    const nomTest = "TEST NOM";
+    const siretTest = "77929544300013";
+    const uaiTest = "0762232N";
+    const adresseTest = "TEST ADRESSE";
+    const reseauxTest = ["Reseau1", "Reseau2"];
+
+    const filterQuery = {
+      nom_etablissement: nomTest,
+      siret_etablissement: siretTest,
+      siret_etablissement_valid: true,
+      uai_etablissement: uaiTest,
+      etablissement_adresse: adresseTest,
+    };
+
+    // Add 10 statuts for cfa with history sequence - full
+    for (let index = 0; index < 10; index++) {
+      const randomStatut = createRandomStatutCandidat({
+        ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+        ...filterQuery,
+      });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
+    }
+
+    // Add Cfa in referentiel
+    const cfaReferenceToAdd = new Cfa({ siret: siretTest, nom: nomTest, uai: uaiTest, reseaux: reseauxTest });
+    await cfaReferenceToAdd.save();
+
+    // Check bad api call
+    const badResponse = await httpClient.post("/api/dashboard/cfa", {
+      beginDate: "2020-09-15T00:00:00.000Z",
+      endDate: "2020-10-10T00:00:00.000Z",
+      siret: "77929544309999",
+    });
+
+    assert.deepStrictEqual(badResponse.status, 400);
   });
 });
