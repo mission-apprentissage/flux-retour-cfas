@@ -4,6 +4,8 @@ module.exports = () => ({
   searchCfasByNomEtablissement,
 });
 
+const SEARCH_RESULTS_LIMIT = 50;
+
 /**
  * Returns list of CFA information whose nom_etablissement matches input
  * @param {string} nomEtablissement
@@ -25,7 +27,7 @@ const searchCfasByNomEtablissement = async (nomEtablissement) => {
       },
     },
     {
-      $limit: 50,
+      $limit: SEARCH_RESULTS_LIMIT,
     },
     {
       $project: {
