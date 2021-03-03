@@ -3,10 +3,9 @@ import debounce from "debounce";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
-import { FilterButton, OverlayMenu } from "../../../../common/components";
+import { FilterButton, OverlayMenu, SearchInput } from "../../../../common/components";
 import { _post } from "../../../../common/httpClient";
 import FormationsList from "./FormationsList";
-import SearchInput from "./SearchInput";
 
 const SEARCH_TERM_MIN_LENGTH = 3;
 const SEARCH_DEBOUNCE_TIME = 300;
@@ -41,7 +40,11 @@ const FormationFilter = ({ value, onChange }) => {
       <FilterButton onClick={() => setIsOpen(!isOpen)}>{buttonLabel}</FilterButton>
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <SearchInput value={searchTerm} onChange={setSeachTerm} />
+          <SearchInput
+            value={searchTerm}
+            onChange={setSeachTerm}
+            placeholder="Saisissez un libellé de formation ou un CFD"
+          />
           {searchResults && <FormationsList formations={searchResults} onFormationClick={onFormationClick} />}
           {searchResults?.length === 0 && (
             <Text fontSize="zeta" color="gray.500">
