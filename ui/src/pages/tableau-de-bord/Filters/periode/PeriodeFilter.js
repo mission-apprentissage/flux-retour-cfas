@@ -1,16 +1,21 @@
 import "react-datepicker/dist/react-datepicker.css";
+import "./PeriodeFilter.css";
 
+import fr from "date-fns/locale/fr";
 import PropTypes from "prop-types";
 import React from "react";
-import DatePicker from "react-datepicker";
+import DatePicker, { registerLocale } from "react-datepicker";
 
 import { FilterButton } from "../../../../common/components";
 import { formatDate } from "../../../../common/utils/dateUtils";
+
+registerLocale("fr", fr);
 
 const PeriodeFilter = ({ date1, date2, onChange }) => {
   return (
     <div>
       <DatePicker
+        locale="fr"
         selectsRange
         selected={date1}
         onChange={(dates) => {
