@@ -1,8 +1,8 @@
-import { Box, Divider, HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { FilterButton, OverlayMenu } from "../../../../common/components";
+import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
 import { useFetch } from "../../../../common/hooks/useFetch";
 import DepartementOptions from "./DepartementOptions";
 import RegionOptions from "./RegionOptions";
@@ -14,32 +14,8 @@ const TERRITOIRE_TYPES = {
   departement: "departement",
 };
 
-const TerritoireTypeOption = ({ isSelected = false, onClick, children }) => {
-  return (
-    <Box
-      cursor="pointer"
-      _hover={{ borderBottom: "4px solid" }}
-      onClick={onClick}
-      color={isSelected ? "bluefrance" : "grey.600"}
-      borderBottom={isSelected ? "4px solid" : "none"}
-      paddingBottom="1w"
-      role="button"
-    >
-      {children}
-    </Box>
-  );
-};
-
-TerritoireTypeOption.propTypes = {
-  isSelected: PropTypes.bool,
-  onClick: PropTypes.func.isRequired,
-  children: PropTypes.node.isRequired,
-};
-
 const TerritoireFilter = ({ value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedTerritoireType, setSelectedTerritoireType] = useState(TERRITOIRE_TYPES.region);
-
   const [departements] = useFetch(`${GEO_API_URL}/departements`);
   const [regions] = useFetch(`${GEO_API_URL}/regions`);
 
@@ -51,6 +27,7 @@ const TerritoireFilter = ({ value, onChange }) => {
   const onFilterClick = (territoireType) => (filter) => {
     const value = filter ? { type: territoireType, code: filter.code } : null;
     onChange(value);
+    setIsOpen(false);
   };
 
   const chosenFilter = !value
@@ -69,38 +46,18 @@ const TerritoireFilter = ({ value, onChange }) => {
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <HStack spacing="4w">
-            {TERRITOIRE_TYPE_OPTIONS.map(({ value, label }) => (
-              <TerritoireTypeOption
-                key={value}
-                onClick={() => {
-                  setSelectedTerritoireType(value);
-                }}
-                isSelected={selectedTerritoireType === value}
-              >
-                {label}
-              </TerritoireTypeOption>
-            ))}
-          </HStack>
-          {selectedTerritoireType && (
-            <>
-              <Divider marginBottom="3w" />
-              {selectedTerritoireType === TERRITOIRE_TYPES.departement && (
-                <DepartementOptions
-                  departements={departements}
-                  onDepartementClick={onFilterClick(TERRITOIRE_TYPES.departement)}
-                  currentFilter={chosenFilter}
-                />
-              )}
-              {selectedTerritoireType === TERRITOIRE_TYPES.region && (
-                <RegionOptions
-                  regions={regions}
-                  onRegionClick={onFilterClick(TERRITOIRE_TYPES.region)}
-                  currentFilter={chosenFilter}
-                />
-              )}
-            </>
-          )}
+          <MenuTabs tabNames={TERRITOIRE_TYPE_OPTIONS.map(({ label }) => label)}>
+            <RegionOptions
+              regions={regions}
+              onRegionClick={onFilterClick(TERRITOIRE_TYPES.region)}
+              currentFilter={chosenFilter}
+            />
+            <DepartementOptions
+              departements={departements}
+              onDepartementClick={onFilterClick(TERRITOIRE_TYPES.departement)}
+              currentFilter={chosenFilter}
+            />
+          </MenuTabs>
         </OverlayMenu>
       )}
     </div>
