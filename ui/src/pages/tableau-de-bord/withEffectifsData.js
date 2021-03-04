@@ -2,26 +2,22 @@
 import React, { useState } from "react";
 
 import { _post } from "../../common/httpClient";
-
-const computeEvolutionPercent = (count1, count2) => {
-  if (count2 === 0) return null;
-  return ((count1 - count2) * 100) / count2;
-};
+import { getPercentageDifference } from "../../common/utils/calculUtils";
 
 const mapEffectifsData = (effectifsData) => {
   const [start, end] = effectifsData;
   return {
     apprentis: {
       count: end.apprentis,
-      evolution: computeEvolutionPercent(end.apprentis, start.apprentis),
+      evolution: getPercentageDifference(end.apprentis, start.apprentis),
     },
     inscrits: {
       count: end.inscrits,
-      evolution: computeEvolutionPercent(end.inscrits, start.inscrits),
+      evolution: getPercentageDifference(end.inscrits, start.inscrits),
     },
     abandons: {
       count: end.abandons,
-      evolution: computeEvolutionPercent(end.abandons, start.abandons),
+      evolution: getPercentageDifference(end.abandons, start.abandons),
     },
   };
 };
@@ -42,7 +38,7 @@ const buildSearchRequestBody = (filters) => {
   }, {});
 };
 
-const withEffectifsData = (Comp) => (props) => {
+const withEffectifsData = (Component) => (props) => {
   const [effectifs, setEffectifs] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -61,7 +57,7 @@ const withEffectifsData = (Comp) => (props) => {
     }
   };
 
-  return <Comp {...props} fetchEffectifs={fetchEffectifs} effectifs={effectifs} loading={loading} error={error} />;
+  return <Component {...props} fetchEffectifs={fetchEffectifs} effectifs={effectifs} loading={loading} error={error} />;
 };
 
 export default withEffectifsData;

@@ -4,7 +4,7 @@ import React from "react";
 
 const FormationsList = ({ formations, onFormationClick }) => {
   return (
-    <List spacing="2w" textAlign="left" marginTop="2w" maxHeight="20rem" overflow="scroll">
+    <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
       {formations.map((formation) => (
         <ListItem
           key={formation.cfd}
@@ -14,6 +14,7 @@ const FormationsList = ({ formations, onFormationClick }) => {
           color="grey.800"
           _hover={{ textDecoration: "underline" }}
           onClick={() => onFormationClick(formation)}
+          padding="1w"
         >
           {formation.cfd} - {formation.libelle}
         </ListItem>
