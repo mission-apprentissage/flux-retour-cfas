@@ -1,7 +1,8 @@
-import { Input, InputGroup, InputLeftElement, List, ListItem } from "@chakra-ui/react";
+import { List, ListItem } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import { SearchInput } from "../../../../common/components";
 import TerritoireOption from "./TerritoireOption";
 
 const MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH = 9;
@@ -17,18 +18,12 @@ const DepartementOptions = ({ departements = [], onDepartementClick, currentFilt
 
   return (
     <>
-      <InputGroup>
-        <InputLeftElement pointerEvents="none" className="ri-search-line" as="i" paddingBottom="1w" />
-        <Input
-          placeholder="Saisissez une région"
-          value={departementSearchTerm}
-          onChange={(event) => setDepartementSearchTerm(event.target.value)}
-          size="sm"
-          marginBottom="2w"
-          autoFocus
-        />
-      </InputGroup>
-      <List spacing="1w" textAlign="left">
+      <SearchInput
+        placeholder="Saisissez un département"
+        value={departementSearchTerm}
+        onChange={setDepartementSearchTerm}
+      />
+      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
         <TerritoireOption
           onClick={() => {
             onDepartementClick(null);

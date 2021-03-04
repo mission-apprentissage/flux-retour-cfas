@@ -1,7 +1,7 @@
 const assert = require("assert");
-const integrationTests = require("../../utils/integrationTests");
-const userEvents = require("../../../src/common/components/userEvents");
-const { UserEvent } = require("../../../src/common/model");
+const integrationTests = require("../../../utils/integrationTests");
+const userEvents = require("../../../../src/common/components/userEvents");
+const { UserEvent } = require("../../../../src/common/model");
 
 integrationTests(__filename, () => {
   it("Permet de retrouver la date du dernier userEvent", async () => {

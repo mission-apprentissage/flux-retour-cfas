@@ -17,8 +17,10 @@ const logStats = (stats = {}) => {
   logger.info(`Nb de Candidats total : ${stats.nbDistinctCandidatsTotal}`);
 
   logger.info(" ");
-  logger.info(`Nb de Candidats sur plusieurs UAIs: ${stats.nbCandidatsMultiUais}`);
-  logger.info(`Nb de Candidats sur plusieurs CFS: ${stats.nbCandidatsMultiCfds}`);
+  logger.info(`Nb de Candidats sur plusieurs UAIs avec INE: ${stats.nbCandidatsMultiUaisWithIne}`);
+  logger.info(`Nb de Candidats sur plusieurs UAIs sans INE: ${stats.nbCandidatsMultiUaisWithoutIne}`);
+  logger.info(`Nb de Candidats sur plusieurs CFS avec INE: ${stats.nbCandidatsMultiCfdsWithIne}`);
+  logger.info(`Nb de Candidats sur plusieurs CFS sans INE: ${stats.nbCandidatsMultiCfdsWithoutIne}`);
 
   logger.info(" ");
   logger.info(`Nb de Statuts sans historique : ${stats.nbStatutsWithoutHistory}`);

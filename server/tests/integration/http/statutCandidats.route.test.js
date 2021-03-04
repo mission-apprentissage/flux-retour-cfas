@@ -5,6 +5,7 @@ const { apiStatutsSeeder } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
 const { createRandomStatutsCandidatsApiInputList } = require("../../data/randomizedSample");
 const { fullSample } = require("../../data/sample");
+const { nockGetSiretInfo, nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 
 const goodApiKey = "12345";
 const badApiKey = "BADAPIKEY";
@@ -19,6 +20,11 @@ const createApiUser = async () => {
 };
 
 httpTests(__filename, ({ startServer }) => {
+  beforeEach(() => {
+    nockGetSiretInfo();
+    nockGetCfdInfo();
+  });
+
   it("Vérifie que la route statut-candidats fonctionne avec une bonne clé d'API", async () => {
     const { httpClient } = await startServer();
 
@@ -159,10 +165,10 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(response.data.message, "Success");
   });
 
-  it("Vérifie l'ajout via route statut-candidats de 100 données randomisées", async () => {
+  it("Vérifie l'ajout via route statut-candidats de 50 données randomisées", async () => {
     const { httpClient } = await startServer();
 
-    const nbItemsToTest = 100;
+    const nbItemsToTest = 50;
 
     // Clear statuts in DB
     await StatutCandidat.deleteMany({});

@@ -10,5 +10,6 @@ module.exports = {
   User: getModel("users"),
   UserEvent: getModel("userEvents"),
   Cfa: getModel("cfas"),
+  Formation: getModel("formations"),
   Log: getModel("logs"),
 };

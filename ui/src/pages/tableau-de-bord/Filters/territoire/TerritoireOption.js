@@ -10,7 +10,9 @@ const TerritoireOption = ({ isSelected = false, onClick, children }) => {
       color={isSelected ? "bluefrance" : "grey.800"}
       fontSize="zeta"
       role="button"
-      fontWeight={isSelected ? "700" : "400"}
+      fontWeight="400"
+      backgroundColor={isSelected ? "bluesoft.50" : "transparent"}
+      padding="1w"
       display="flex"
     >
       <Box _hover={{ textDecoration: "underline" }}>{children}</Box>

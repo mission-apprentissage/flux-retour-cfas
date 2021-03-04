@@ -22,7 +22,7 @@ const getRandomPeriodeFormation = () => {
 };
 const getRandomAnneeFormation = () => faker.random.arrayElement([0, 1, 2, 3]);
 
-const createRandomStatutCandidat = () => {
+const createRandomStatutCandidat = (params = null) => {
   return {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
@@ -47,6 +47,7 @@ const createRandomStatutCandidat = () => {
     date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
     periode_formation: isPresent() ? getRandomPeriodeFormation() : null,
     annee_formation: getRandomAnneeFormation(),
+    ...params,
   };
 };
 

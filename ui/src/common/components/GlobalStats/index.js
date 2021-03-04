@@ -26,11 +26,22 @@ const GlobalStats = ({ stats, lastImportDates }) => {
         <HStack spacing="2w" mt="3w">
           <StatCard label="Total candidats" stat={stats.nbDistinctCandidatsTotal} background="info" />
           <StatCard background="info" label="Numéros INE distincs" stat={stats.nbDistinctCandidatsWithIne} />
-          <StatCard background="info" label="Candidats multi-UAIs" stat={stats.nbCandidatsMultiUais} />
-          <StatCard background="info" label="Candidats multi-CFDs" stat={stats.nbCandidatsMultiCfds} />
+          <StatCard background="info" label="Candidats multi-UAIs avec INE" stat={stats.nbCandidatsMultiUaisWithIne} />
+          <StatCard
+            background="info"
+            label="Candidats multi-UAIs sans INE"
+            stat={stats.nbCandidatsMultiUaisWithoutIne}
+          />
+          <StatCard background="info" label="Candidats multi-CFDs avec INE" stat={stats.nbCandidatsMultiCfdsWithIne} />
+          <StatCard
+            background="info"
+            label="Candidats multi-CFDs sans INE"
+            stat={stats.nbCandidatsMultiCfdsWithoutIne}
+          />
         </HStack>
         <HStack spacing="2w" mt="3w">
-          <StatCard background="warning" label="CFAs au total" stat={stats.nbCfas} />
+          <StatCard background="warning" label="CFAs distinct Uai total" stat={stats.nbCfasDistinctUai} />
+          <StatCard background="warning" label="CFAs distinct Siret total" stat={stats.nbCfasDistinctSiret} />
         </HStack>
       </Box>
       <Box mt="9w">
@@ -144,7 +155,8 @@ const GlobalStats = ({ stats, lastImportDates }) => {
 
 GlobalStats.propTypes = {
   stats: PropTypes.shape({
-    nbCfas: PropTypes.number,
+    nbCfasDistinctUai: PropTypes.number,
+    nbCfasDistinctSiret: PropTypes.number,
     nbStatutsValid: PropTypes.number,
     nbInvalidUais: PropTypes.number,
     nbInvalidCfds: PropTypes.number,
@@ -152,8 +164,10 @@ GlobalStats.propTypes = {
     nbInvalidSiretsAndUais: PropTypes.number,
     nbDistinctCandidatsTotal: PropTypes.number,
     nbDistinctCandidatsWithIne: PropTypes.number,
-    nbCandidatsMultiUais: PropTypes.number,
-    nbCandidatsMultiCfds: PropTypes.number,
+    nbCandidatsMultiUaisWithIne: PropTypes.number,
+    nbCandidatsMultiUaisWithoutIne: PropTypes.number,
+    nbCandidatsMultiCfdsWithIne: PropTypes.number,
+    nbCandidatsMultiCfdsWithoutIne: PropTypes.number,
     nbStatutsCandidats: PropTypes.number,
     nbStatutsSansIne: PropTypes.number,
     nbStatutsProspect: PropTypes.number,

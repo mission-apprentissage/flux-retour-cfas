@@ -1,8 +1,8 @@
 const assert = require("assert");
-const integrationTests = require("../../utils/integrationTests");
-const users = require("../../../src/common/components/users");
-const { User } = require("../../../src/common/model");
-const { administrator } = require("../../../src/common/roles");
+const integrationTests = require("../../../utils/integrationTests");
+const users = require("../../../../src/common/components/users");
+const { User } = require("../../../../src/common/model");
+const { administrator } = require("../../../../src/common/roles");
 
 integrationTests(__filename, () => {
   it("Permet de créer un utilisateur", async () => {

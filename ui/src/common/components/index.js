@@ -1,4 +1,8 @@
 export { default as FilterButton } from "./FilterButton/FilterButton";
+export { default as SearchInput } from "./SearchInput/SearchInput";
+export { default as OverlayMenu } from "./OverlayMenu/OverlayMenu";
+
+export { default as InfoModal } from "./Modal/InfoModal";
 
 export { default as Page } from "./Page/Page";
 export { default as PageHeader } from "./Page/PageHeader";

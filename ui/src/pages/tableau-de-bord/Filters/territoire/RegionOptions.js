@@ -1,7 +1,8 @@
-import { Input, InputGroup, InputLeftElement, List } from "@chakra-ui/react";
+import { List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import { SearchInput } from "../../../../common/components";
 import TerritoireOption from "./TerritoireOption";
 
 const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
@@ -15,18 +16,8 @@ const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
 
   return (
     <>
-      <InputGroup>
-        <InputLeftElement pointerEvents="none" className="ri-search-line" as="i" paddingBottom="1w" />
-        <Input
-          placeholder="Saisissez une région"
-          value={regionSearchTerm}
-          onChange={(event) => setRegionSearchTerm(event.target.value)}
-          size="sm"
-          marginBottom="2w"
-          autoFocus
-        />
-      </InputGroup>
-      <List spacing="1w" textAlign="left">
+      <SearchInput placeholder="Saisissez une région" value={regionSearchTerm} onChange={setRegionSearchTerm} />
+      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
         <TerritoireOption
           onClick={() => {
             onRegionClick(null);
