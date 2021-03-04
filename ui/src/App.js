@@ -7,7 +7,6 @@ import { isUserAdmin } from "./common/utils/rolesUtils";
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
-import TableauDeBordDetailCfaPage from "./pages/tableau-de-bord/TableauDeBordDetailCfaPage";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import UserStatsPage from "./pages/user-stats";
 
@@ -26,7 +25,6 @@ const App = () => {
 
         <AdminRoute path="/stats" exact component={GlobalStatsPage} />
         <AdminRoute path="/tableau-de-bord" exact component={TableauDeBordPage} />
-        <AdminRoute path="/tableau-de-bord/centre-de-formation/:siret" exact component={TableauDeBordDetailCfaPage} />
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
         <PrivateRoute path="/analytics/" component={AnalyticsPage} />
 

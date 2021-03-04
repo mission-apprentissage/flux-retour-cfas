@@ -5,7 +5,7 @@ import React from "react";
 import PageSectionTitle from "../../../../common/components/Page/PageSectionTitle";
 
 const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
-  <>
+  <div>
     {/* No Data  */}
     {!infosCfa && !error && (
       <Center h="100px" p={4} background="orangesoft.200">
@@ -87,7 +87,7 @@ const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
         </Box>
       </Flex>
     )}
-  </>
+  </div>
 );
 
 InfoCfaSection.propTypes = {

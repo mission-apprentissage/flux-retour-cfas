@@ -1,5 +1,6 @@
 /* eslint-disable react/display-name */
-import React, { useState } from "react";
+import { subMonths } from "date-fns";
+import React, { useEffect, useState } from "react";
 
 import { _post } from "../../common/httpClient";
 import { getPercentageDifference } from "../../common/utils/calculUtils";
@@ -42,22 +43,50 @@ const withEffectifsData = (Component) => (props) => {
   const [effectifs, setEffectifs] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    periode: {
+      startDate: subMonths(new Date(), 1),
+      endDate: new Date(),
+    },
+    territoire: null,
+    formation: null,
+    cfa: null,
+  });
 
-  const fetchEffectifs = async (filters) => {
-    setLoading(true);
-    try {
-      const response = await _post("/api/dashboard/effectifs", buildSearchRequestBody(filters));
-      setEffectifs(mapEffectifsData(response));
-      setError(null);
-    } catch (err) {
-      setError(err);
-      setEffectifs(null);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    const fetchEffectifs = async () => {
+      setLoading(true);
+      try {
+        const response = await _post("/api/dashboard/effectifs", buildSearchRequestBody(filters));
+        setEffectifs(mapEffectifsData(response));
+        setError(null);
+      } catch (err) {
+        setError(err);
+        setEffectifs(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (
+      filters.periode.startDate &&
+      filters.periode.endDate &&
+      (filters.cfa || filters.territoire || filters.formation)
+    ) {
+      fetchEffectifs();
     }
-  };
+  }, [filters]);
 
-  return <Component {...props} fetchEffectifs={fetchEffectifs} effectifs={effectifs} loading={loading} error={error} />;
+  return (
+    <Component
+      {...props}
+      filters={filters}
+      setFilters={setFilters}
+      effectifs={effectifs}
+      loading={loading}
+      error={error}
+    />
+  );
 };
 
 export default withEffectifsData;

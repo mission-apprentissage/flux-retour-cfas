@@ -2,8 +2,8 @@ import { Box, Flex, Heading, List, ListItem, Text, useDisclosure } from "@chakra
 import PropTypes from "prop-types";
 import React from "react";
 
-import { InfoModal } from "../../../common/components";
-import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../../common/constants/statutsColors";
+import { InfoModal } from "../../../../common/components";
+import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../../../common/constants/statutsColors";
 
 const IndiceDefinition = ({ indice, color, children }) => {
   return (

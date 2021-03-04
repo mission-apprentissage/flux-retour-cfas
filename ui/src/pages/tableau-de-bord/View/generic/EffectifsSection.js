@@ -2,14 +2,14 @@ import { HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import EffectifCard from "../../../common/components/EffectifCard/EffectifCard";
-import PageSectionTitle from "../../../common/components/Page/PageSectionTitle";
-import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../../common/constants/statutsColors";
+import EffectifCard from "../../../../common/components/EffectifCard/EffectifCard";
+import PageSectionTitle from "../../../../common/components/Page/PageSectionTitle";
+import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../../../common/constants/statutsColors";
 import DefinitionIndicesModal from "./DefinitionIndicesModal";
 
 const EffectifsSection = ({ effectifs }) => {
   return (
-    <>
+    <div>
       <PageSectionTitle>Effectifs</PageSectionTitle>
       <DefinitionIndicesModal />
       <HStack marginTop="4w">
@@ -32,7 +32,7 @@ const EffectifsSection = ({ effectifs }) => {
           indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
         />
       </HStack>
-    </>
+    </div>
   );
 };
 
