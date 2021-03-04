@@ -1,30 +1,20 @@
 import { HStack } from "@chakra-ui/react";
-import { subMonths } from "date-fns";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
+import { filtersPropType } from "../propTypes";
 import CfasFilter from "./cfas/CfasFilter";
 import FormationFilter from "./formation/FormationFilter";
 import PeriodeFilter from "./periode/PeriodeFilter";
 import TerritoireFilter from "./territoire/TerritoireFilter";
 
-const TableauDeBordFilters = ({ onChange }) => {
-  const [filters, setFilters] = useState({
-    periode: {
-      startDate: subMonths(new Date(), 1),
-      endDate: new Date(),
-    },
-    territoire: null,
-    formation: null,
-    cfas: null,
-  });
-
+const TableauDeBordFilters = ({ filters, setFilters }) => {
   const handlePeriodeFilterChange = ({ startDate, endDate }) => {
     setFilters({ ...filters, periode: { startDate, endDate } });
   };
 
   const handleTerritoireFilterChange = (territoire) => {
-    setFilters({ ...filters, territoire });
+    setFilters({ ...filters, territoire, cfa: null });
   };
 
   const handleFormationFilterChange = (formation) => {
@@ -34,13 +24,6 @@ const TableauDeBordFilters = ({ onChange }) => {
   const handleCfaFilterChange = (cfa) => {
     setFilters({ ...filters, territoire: null, cfa });
   };
-
-  useEffect(() => {
-    const hasAtLeastOneFilterSelected = Boolean(filters.territoire || filters.cfas || filters.formation);
-    if (filters.periode.startDate && filters.periode.endDate && hasAtLeastOneFilterSelected) {
-      onChange(filters);
-    }
-  }, [filters]);
 
   return (
     <HStack spacing="2w" mt="2w" justifyContent="center">
@@ -53,7 +36,8 @@ const TableauDeBordFilters = ({ onChange }) => {
 };
 
 TableauDeBordFilters.propTypes = {
-  onChange: PropTypes.func.isRequired,
+  setFilters: PropTypes.func.isRequired,
+  filters: filtersPropType.isRequired,
 };
 
 export default TableauDeBordFilters;
