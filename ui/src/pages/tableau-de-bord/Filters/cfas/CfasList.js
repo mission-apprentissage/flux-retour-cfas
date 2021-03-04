@@ -4,20 +4,29 @@ import React from "react";
 
 import TerritoireOption from "../territoire/TerritoireOption";
 
-const CfasList = ({ cfas, onCfaClick, isSelected }) => {
+const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
   return (
-    <List spacing="2w" textAlign="left" marginTop="2w" maxHeight="20rem" overflow="scroll">
-      {cfas.map((cfa) => (
-        <TerritoireOption
-          key={cfa.siret_etablissement}
-          onClick={() => {
-            onCfaClick(cfa);
-          }}
-          isSelected={isSelected(cfa)}
-        >
-          {cfa.nom_etablissement}
-        </TerritoireOption>
-      ))}
+    <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
+      <TerritoireOption
+        onClick={() => {
+          onCfaClick(null);
+        }}
+        isSelected={!selectedValue}
+      >
+        Tous les centres de formation
+      </TerritoireOption>
+      {cfas &&
+        cfas.map((cfa) => (
+          <TerritoireOption
+            key={cfa.siret_etablissement}
+            onClick={() => {
+              onCfaClick(cfa);
+            }}
+            isSelected={selectedValue?.siret_etablissement === cfa.siret_etablissement}
+          >
+            {cfa.nom_etablissement}
+          </TerritoireOption>
+        ))}
     </List>
   );
 };
@@ -29,8 +38,11 @@ CfasList.propTypes = {
       siret_etablissement: PropTypes.string.isRequired,
       nom_etablissement: PropTypes.string.isRequired,
     }).isRequired
-  ).isRequired,
-  isSelected: PropTypes.func.isRequired,
+  ),
+  selectedValue: PropTypes.shape({
+    siret_etablissement: PropTypes.string.isRequired,
+    nom_etablissement: PropTypes.string.isRequired,
+  }),
 };
 
 export default CfasList;

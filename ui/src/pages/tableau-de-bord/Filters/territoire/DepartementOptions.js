@@ -23,7 +23,7 @@ const DepartementOptions = ({ departements = [], onDepartementClick, currentFilt
         value={departementSearchTerm}
         onChange={setDepartementSearchTerm}
       />
-      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
+      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
         <TerritoireOption
           onClick={() => {
             onDepartementClick(null);

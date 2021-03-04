@@ -1,12 +1,20 @@
 import { Box } from "@chakra-ui/react";
 import PropTypes from "prop-types";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const OverlayMenu = ({ onClose, children }) => {
-  const menuRef = useRef();
-  const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-  // compute max-height for menu considering viewport, current y axis position and the 16px marginTop
-  const menuHeight = menuRef?.current ? `${viewportHeight - menuRef.current.getBoundingClientRect().y - 16}px` : "100%";
+  const menuRef = useRef(null);
+  const [menuMaxHeight, setMenuMaxHeight] = useState("100%");
+
+  useEffect(() => {
+    // compute max-height for menu considering viewport, current y axis position and the 16px marginTop
+    const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    const menuHeight = menuRef?.current
+      ? `${viewportHeight - menuRef.current.getBoundingClientRect().y - 16}px`
+      : "100%";
+
+    setMenuMaxHeight(menuHeight);
+  });
 
   return (
     <div>
@@ -32,7 +40,7 @@ const OverlayMenu = ({ onClose, children }) => {
         borderRadius="0.25rem"
         zIndex="100"
         ref={menuRef}
-        maxHeight={menuHeight}
+        maxHeight={menuMaxHeight}
       >
         {children}
       </Box>

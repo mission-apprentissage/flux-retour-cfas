@@ -17,7 +17,7 @@ const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
   return (
     <>
       <SearchInput placeholder="Saisissez une région" value={regionSearchTerm} onChange={setRegionSearchTerm} />
-      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
+      <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
         <TerritoireOption
           onClick={() => {
             onRegionClick(null);
