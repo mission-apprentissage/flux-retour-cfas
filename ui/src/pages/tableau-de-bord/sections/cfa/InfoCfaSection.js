@@ -4,7 +4,7 @@ import React from "react";
 
 import PageSectionTitle from "../../../../common/components/Page/PageSectionTitle";
 
-const InfoCfaSection = ({ infosCfa = {}, loading, error }) => (
+const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
   <>
     {/* No Data  */}
     {!infosCfa && !error && (
@@ -93,13 +93,13 @@ const InfoCfaSection = ({ infosCfa = {}, loading, error }) => (
 InfoCfaSection.propTypes = {
   infosCfa: PropTypes.shape({
     libelleLong: PropTypes.string.isRequired,
-    libelleCourt: PropTypes.string.isRequired,
+    reseaux: PropTypes.arrayOf(PropTypes.string).isRequired,
     domainesMetiers: PropTypes.arrayOf(PropTypes.string).isRequired,
     uai: PropTypes.string.isRequired,
     adresse: PropTypes.string.isRequired,
-  }).isRequired,
-  loading: PropTypes.bool.isRequired,
-  error: PropTypes.bool.isRequired,
+  }),
+  loading: PropTypes.bool,
+  error: PropTypes.object,
 };
 
 export default InfoCfaSection;

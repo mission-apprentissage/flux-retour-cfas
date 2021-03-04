@@ -101,11 +101,11 @@ integrationTests(__filename, () => {
       }
 
       // Search params dates
-      const beginDate = new Date("2020-09-15T00:00:00.000+0000");
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
       const endDate = new Date("2020-10-10T00:00:00.000+0000");
 
       const expectedResults = {
-        beginDate: {
+        startDate: {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
@@ -117,11 +117,11 @@ integrationTests(__filename, () => {
         },
       };
 
-      const nbStatutsFoundInHistory = await getEffectifsData(beginDate, endDate);
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate);
 
-      assert.deepStrictEqual(nbStatutsFoundInHistory.beginDate.nbInscrits, expectedResults.beginDate.nbInscrits);
-      assert.deepStrictEqual(nbStatutsFoundInHistory.beginDate.nbApprentis, expectedResults.beginDate.nbApprentis);
-      assert.deepStrictEqual(nbStatutsFoundInHistory.beginDate.nbAbandons, expectedResults.beginDate.nbAbandons);
+      assert.deepStrictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.deepStrictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.deepStrictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, expectedResults.startDate.nbAbandons);
       assert.deepStrictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
       assert.deepStrictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.deepStrictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
@@ -165,10 +165,10 @@ integrationTests(__filename, () => {
       }
 
       // Search params & expected results
-      const beginDate = new Date("2020-09-15T00:00:00.000+0000");
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
       const endDate = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResults = {
-        beginDate: {
+        startDate: {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
@@ -181,20 +181,20 @@ integrationTests(__filename, () => {
       };
 
       // Check for good filter
-      const nbStatutsFoundInHistory = await getEffectifsData(beginDate, endDate, filterQuery);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbInscrits, expectedResults.beginDate.nbInscrits);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbApprentis, expectedResults.beginDate.nbApprentis);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbAbandons, expectedResults.beginDate.nbAbandons);
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate, filterQuery);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, expectedResults.startDate.nbAbandons);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
 
       // Check for bad filter
       const badFilterQuery = { etablissement_num_region: "99" };
-      const nbStatutsBadFilter = await getEffectifsData(beginDate, endDate, badFilterQuery);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbInscrits, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbApprentis, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbAbandons, 0);
+      const nbStatutsBadFilter = await getEffectifsData(startDate, endDate, badFilterQuery);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbInscrits, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbApprentis, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbAbandons, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbApprentis, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbAbandons, 0);
@@ -234,10 +234,10 @@ integrationTests(__filename, () => {
       }
 
       // Search params & expected results
-      const beginDate = new Date("2020-09-15T00:00:00.000+0000");
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
       const endDate = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResults = {
-        beginDate: {
+        startDate: {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
@@ -250,20 +250,20 @@ integrationTests(__filename, () => {
       };
 
       // Check for good filter
-      const nbStatutsFoundInHistory = await getEffectifsData(beginDate, endDate, filterQuery);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbInscrits, expectedResults.beginDate.nbInscrits);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbApprentis, expectedResults.beginDate.nbApprentis);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbAbandons, expectedResults.beginDate.nbAbandons);
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate, filterQuery);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, expectedResults.startDate.nbAbandons);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
 
       // Check for bad filter
       const badFilterQuery = { etablissement_num_departement: "99" };
-      const nbStatutsBadFilter = await getEffectifsData(beginDate, endDate, badFilterQuery);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbInscrits, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbApprentis, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbAbandons, 0);
+      const nbStatutsBadFilter = await getEffectifsData(startDate, endDate, badFilterQuery);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbInscrits, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbApprentis, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbAbandons, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbApprentis, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbAbandons, 0);
@@ -303,10 +303,10 @@ integrationTests(__filename, () => {
       }
 
       // Search params & expected results
-      const beginDate = new Date("2020-09-15T00:00:00.000+0000");
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
       const endDate = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResults = {
-        beginDate: {
+        startDate: {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
@@ -319,20 +319,20 @@ integrationTests(__filename, () => {
       };
 
       // Check for good filter
-      const nbStatutsFoundInHistory = await getEffectifsData(beginDate, endDate, filterQuery);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbInscrits, expectedResults.beginDate.nbInscrits);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbApprentis, expectedResults.beginDate.nbApprentis);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbAbandons, expectedResults.beginDate.nbAbandons);
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate, filterQuery);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, expectedResults.startDate.nbAbandons);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
 
       // Check for bad filter
       const badFilterQuery = { etablissement_num_academie: "99" };
-      const nbStatutsBadFilter = await getEffectifsData(beginDate, endDate, badFilterQuery);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbInscrits, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbApprentis, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbAbandons, 0);
+      const nbStatutsBadFilter = await getEffectifsData(startDate, endDate, badFilterQuery);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbInscrits, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbApprentis, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbAbandons, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbApprentis, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbAbandons, 0);
@@ -376,10 +376,10 @@ integrationTests(__filename, () => {
       }
 
       // Search params & expected results
-      const beginDate = new Date("2020-09-15T00:00:00.000+0000");
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
       const endDate = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResults = {
-        beginDate: {
+        startDate: {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
@@ -392,20 +392,20 @@ integrationTests(__filename, () => {
       };
 
       // Check for good filter
-      const nbStatutsFoundInHistory = await getEffectifsData(beginDate, endDate, filterQuery);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbInscrits, expectedResults.beginDate.nbInscrits);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbApprentis, expectedResults.beginDate.nbApprentis);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbAbandons, expectedResults.beginDate.nbAbandons);
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate, filterQuery);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, expectedResults.startDate.nbAbandons);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
 
       // Check for bad filter
       const badFilterQuery = { siret_etablissement: "99999999900999", siret_etablissement_valid: true };
-      const nbStatutsBadFilter = await getEffectifsData(beginDate, endDate, badFilterQuery);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbInscrits, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbApprentis, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbAbandons, 0);
+      const nbStatutsBadFilter = await getEffectifsData(startDate, endDate, badFilterQuery);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbInscrits, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbApprentis, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbAbandons, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbApprentis, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbAbandons, 0);
@@ -449,10 +449,10 @@ integrationTests(__filename, () => {
       }
 
       // Search params & expected results
-      const beginDate = new Date("2020-09-15T00:00:00.000+0000");
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
       const endDate = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResults = {
-        beginDate: {
+        startDate: {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
@@ -465,20 +465,20 @@ integrationTests(__filename, () => {
       };
 
       // Check for good filter
-      const nbStatutsFoundInHistory = await getEffectifsData(beginDate, endDate, filterQuery);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbInscrits, expectedResults.beginDate.nbInscrits);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbApprentis, expectedResults.beginDate.nbApprentis);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbAbandons, expectedResults.beginDate.nbAbandons);
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate, filterQuery);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, expectedResults.startDate.nbAbandons);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
 
       // Check for bad filter
       const badFilterQuery = { id_formation: "99999999999999" };
-      const nbStatutsBadFilter = await getEffectifsData(beginDate, endDate, badFilterQuery);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbInscrits, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbApprentis, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbAbandons, 0);
+      const nbStatutsBadFilter = await getEffectifsData(startDate, endDate, badFilterQuery);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbInscrits, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbApprentis, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbAbandons, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbApprentis, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbAbandons, 0);
@@ -522,10 +522,10 @@ integrationTests(__filename, () => {
       }
 
       // Search params & expected results
-      const beginDate = new Date("2020-09-15T00:00:00.000+0000");
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
       const endDate = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResults = {
-        beginDate: {
+        startDate: {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
@@ -539,20 +539,20 @@ integrationTests(__filename, () => {
 
       // Check for good filter
       const filterQuery = { etablissement_reseaux: { $in: [reseauxCfas.AGRI.nomReseau] } };
-      const nbStatutsFoundInHistory = await getEffectifsData(beginDate, endDate, filterQuery);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbInscrits, expectedResults.beginDate.nbInscrits);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbApprentis, expectedResults.beginDate.nbApprentis);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbAbandons, expectedResults.beginDate.nbAbandons);
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate, filterQuery);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, expectedResults.startDate.nbAbandons);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
 
       // Check for bad filter
       const badFilterQuery = { etablissement_reseaux: { $in: [reseauxCfas.PROMOTRANS.nomReseau] } };
-      const nbStatutsBadFilter = await getEffectifsData(beginDate, endDate, badFilterQuery);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbInscrits, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbApprentis, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbAbandons, 0);
+      const nbStatutsBadFilter = await getEffectifsData(startDate, endDate, badFilterQuery);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbInscrits, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbApprentis, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbAbandons, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbApprentis, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbAbandons, 0);
@@ -596,10 +596,10 @@ integrationTests(__filename, () => {
       }
 
       // Search params & expected results
-      const beginDate = new Date("2020-09-15T00:00:00.000+0000");
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
       const endDate = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResults = {
-        beginDate: {
+        startDate: {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
@@ -612,20 +612,20 @@ integrationTests(__filename, () => {
       };
 
       // Check for good filter
-      const nbStatutsFoundInHistory = await getEffectifsData(beginDate, endDate, filterQuery);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbInscrits, expectedResults.beginDate.nbInscrits);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbApprentis, expectedResults.beginDate.nbApprentis);
-      assert.strictEqual(nbStatutsFoundInHistory.beginDate.nbAbandons, expectedResults.beginDate.nbAbandons);
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate, filterQuery);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.strictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, expectedResults.startDate.nbAbandons);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
 
       // Check for bad filter
       const badFilterQuery = { id_formation: "99999999999999", etablissement_num_region: "99" };
-      const nbStatutsBadFilter = await getEffectifsData(beginDate, endDate, badFilterQuery);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbInscrits, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbApprentis, 0);
-      assert.strictEqual(nbStatutsBadFilter.beginDate.nbAbandons, 0);
+      const nbStatutsBadFilter = await getEffectifsData(startDate, endDate, badFilterQuery);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbInscrits, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbApprentis, 0);
+      assert.strictEqual(nbStatutsBadFilter.startDate.nbAbandons, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbApprentis, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbAbandons, 0);

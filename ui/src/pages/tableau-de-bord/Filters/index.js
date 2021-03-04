@@ -1,25 +1,26 @@
 import { HStack } from "@chakra-ui/react";
-import { subYears } from "date-fns";
-import React, { useState } from "react";
+import { subMonths } from "date-fns";
+import PropTypes from "prop-types";
+import React, { useEffect, useState } from "react";
 
 import CfasFilter from "./cfas/CfasFilter";
 import FormationFilter from "./formation/FormationFilter";
 import PeriodeFilter from "./periode/PeriodeFilter";
 import TerritoireFilter from "./territoire/TerritoireFilter";
 
-const TableauDeBordFilters = () => {
+const TableauDeBordFilters = ({ onChange }) => {
   const [filters, setFilters] = useState({
     periode: {
-      date1: subYears(new Date(), 1),
-      date2: new Date(),
+      startDate: subMonths(new Date(), 1),
+      endDate: new Date(),
     },
     territoire: null,
     formation: null,
     cfas: null,
   });
 
-  const handlePeriodeFilterChange = ({ date1, date2 }) => {
-    setFilters({ ...filters, periode: { date1, date2 } });
+  const handlePeriodeFilterChange = ({ startDate, endDate }) => {
+    setFilters({ ...filters, periode: { startDate, endDate } });
   };
 
   const handleTerritoireFilterChange = (territoire) => {
@@ -31,17 +32,28 @@ const TableauDeBordFilters = () => {
   };
 
   const handleCfaFilterChange = (cfa) => {
-    setFilters({ ...filters, cfa });
+    setFilters({ ...filters, territoire: null, cfa });
   };
+
+  useEffect(() => {
+    const hasAtLeastOneFilterSelected = Boolean(filters.territoire || filters.cfas || filters.formation);
+    if (filters.periode.startDate && filters.periode.endDate && hasAtLeastOneFilterSelected) {
+      onChange(filters);
+    }
+  }, [filters]);
 
   return (
     <HStack spacing="2w" mt="2w" justifyContent="center">
-      <PeriodeFilter date1={filters.periode.date1} date2={filters.periode.date2} onChange={handlePeriodeFilterChange} />
+      <PeriodeFilter value={filters.periode} onChange={handlePeriodeFilterChange} />
       <TerritoireFilter value={filters.territoire} onChange={handleTerritoireFilterChange} />
       <CfasFilter value={filters.cfa} onChange={handleCfaFilterChange} />
       <FormationFilter value={filters.formation} onChange={handleFormationFilterChange} />
     </HStack>
   );
+};
+
+TableauDeBordFilters.propTypes = {
+  onChange: PropTypes.func.isRequired,
 };
 
 export default TableauDeBordFilters;

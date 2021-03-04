@@ -45,7 +45,7 @@ const reseauxCfas = {
     nomFichier: "cfas-ccca-btp",
   },
   CCCI_France: {
-    nomReseau: "CCCI France",
+    nomReseau: "CCI France",
     nomFichier: "cfas-cci-france",
   },
   CMA: {

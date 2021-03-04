@@ -11,9 +11,12 @@ module.exports = ({ stats, dashboard }) => {
    * Schema for effectif validation
    */
   const dashboardEffectifInputSchema = Joi.object({
-    beginDate: Joi.date().required(),
+    startDate: Joi.date().required(),
     endDate: Joi.date().required(),
-    filters: Joi.object().allow(null),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    id_formation: Joi.string().allow(null, ""),
+    siret_etablissement: Joi.string().allow(null, ""),
   });
 
   /**
@@ -57,9 +60,9 @@ module.exports = ({ stats, dashboard }) => {
       // Validate schema
       await dashboardEffectifInputSchema.validateAsync(req.body, { abortEarly: false });
 
-      // Gets & format params
-      const { beginDate, endDate, filters = {} } = req.body;
-      const beginSearchDate = new Date(beginDate);
+      // Gets & format params:
+      const { startDate, endDate, ...filters } = req.body;
+      const beginSearchDate = new Date(startDate);
       const endSearchDate = new Date(endDate);
 
       // Add user event
@@ -67,7 +70,7 @@ module.exports = ({ stats, dashboard }) => {
         username: "dashboard",
         type: "GET",
         action: "api/dashboard/effectifs",
-        data: { beginDate, endDate, filters },
+        data: { startDate, endDate, filters },
       });
       await event.save();
 
@@ -77,10 +80,10 @@ module.exports = ({ stats, dashboard }) => {
       // Build response
       return res.json([
         {
-          date: beginDate,
-          apprentis: effectifData.beginDate.nbApprentis,
-          inscrits: effectifData.beginDate.nbInscrits,
-          abandons: effectifData.beginDate.nbAbandons,
+          date: startDate,
+          apprentis: effectifData.startDate.nbApprentis,
+          inscrits: effectifData.startDate.nbInscrits,
+          abandons: effectifData.startDate.nbAbandons,
         },
         {
           date: endDate,
