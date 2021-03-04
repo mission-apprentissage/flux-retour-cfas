@@ -42,7 +42,7 @@ const buildSearchRequestBody = (filters) => {
   }, {});
 };
 
-const withEffectifsData = (Comp) => (props) => {
+const withEffectifsData = (Component) => (props) => {
   const [effectifs, setEffectifs] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -61,7 +61,7 @@ const withEffectifsData = (Comp) => (props) => {
     }
   };
 
-  return <Comp {...props} fetchEffectifs={fetchEffectifs} effectifs={effectifs} loading={loading} error={error} />;
+  return <Component {...props} fetchEffectifs={fetchEffectifs} effectifs={effectifs} loading={loading} error={error} />;
 };
 
 export default withEffectifsData;
