@@ -16,7 +16,7 @@ const TableauDeBordFilters = ({ onChange }) => {
     },
     territoire: null,
     formation: null,
-    cfas: null,
+    cfa: null,
   });
 
   const handlePeriodeFilterChange = ({ startDate, endDate }) => {
@@ -24,7 +24,7 @@ const TableauDeBordFilters = ({ onChange }) => {
   };
 
   const handleTerritoireFilterChange = (territoire) => {
-    setFilters({ ...filters, territoire });
+    setFilters({ ...filters, territoire, cfa: null });
   };
 
   const handleFormationFilterChange = (formation) => {
@@ -36,7 +36,7 @@ const TableauDeBordFilters = ({ onChange }) => {
   };
 
   useEffect(() => {
-    const hasAtLeastOneFilterSelected = Boolean(filters.territoire || filters.cfas || filters.formation);
+    const hasAtLeastOneFilterSelected = Boolean(filters.territoire || filters.cfa || filters.formation);
     if (filters.periode.startDate && filters.periode.endDate && hasAtLeastOneFilterSelected) {
       onChange(filters);
     }
