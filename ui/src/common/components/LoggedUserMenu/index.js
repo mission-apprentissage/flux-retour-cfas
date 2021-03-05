@@ -45,6 +45,9 @@ const LoggedUserMenu = () => {
         {isAdmin && (
           <>
             <MenuItem>
+              <NavLink to="/tableau-de-bord/">Tableau de bord</NavLink>
+            </MenuItem>
+            <MenuItem>
               <NavLink to="/stats">Statistiques globales</NavLink>
             </MenuItem>
             <MenuItem>
@@ -55,9 +58,6 @@ const LoggedUserMenu = () => {
             </MenuItem>
             <MenuItem>
               <NavLink to="/analytics">Analytics</NavLink>
-            </MenuItem>
-            <MenuItem>
-              <NavLink to="/tableau-de-bord/centre-de-formation/77929544300013">Tdb Détail CFA Test</NavLink>
             </MenuItem>
           </>
         )}
