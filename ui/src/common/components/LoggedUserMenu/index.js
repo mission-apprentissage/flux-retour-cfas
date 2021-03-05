@@ -45,6 +45,9 @@ const LoggedUserMenu = () => {
         {isAdmin && (
           <>
             <MenuItem>
+              <NavLink to="/tableau-de-bord/">Tableau de bord</NavLink>
+            </MenuItem>
+            <MenuItem>
               <NavLink to="/stats">Statistiques globales</NavLink>
             </MenuItem>
             <MenuItem>
