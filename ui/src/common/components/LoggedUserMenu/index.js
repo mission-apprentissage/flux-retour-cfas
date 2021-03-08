@@ -59,6 +59,9 @@ const LoggedUserMenu = () => {
             <MenuItem>
               <NavLink to="/analytics">Analytics</NavLink>
             </MenuItem>
+            <MenuItem>
+              <NavLink to="/tableau-de-bord/centre-de-formation/77929544300013">Tdb Détail CFA Test</NavLink>
+            </MenuItem>
           </>
         )}
         <MenuItem onClick={logout}>Déconnexion</MenuItem>
