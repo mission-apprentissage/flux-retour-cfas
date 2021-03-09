@@ -1,11 +1,9 @@
-import { List, ListItem } from "@chakra-ui/react";
+import { List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { SearchInput } from "../../../../common/components";
 import TerritoireOption from "./TerritoireOption";
-
-const MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH = 9;
 
 const DepartementOptions = ({ departements = [], onDepartementClick, currentFilter }) => {
   const [departementSearchTerm, setDepartementSearchTerm] = useState("");
@@ -32,7 +30,7 @@ const DepartementOptions = ({ departements = [], onDepartementClick, currentFilt
         >
           Toute la France
         </TerritoireOption>
-        {filteredDepartements.slice(0, MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH).map((filter) => (
+        {filteredDepartements.map((filter) => (
           <TerritoireOption
             key={filter.code}
             onClick={() => onDepartementClick(filter)}
@@ -41,7 +39,6 @@ const DepartementOptions = ({ departements = [], onDepartementClick, currentFilt
             {filter.nom}
           </TerritoireOption>
         ))}
-        {filteredDepartements.length > MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH && <ListItem>...</ListItem>}
       </List>
     </>
   );
