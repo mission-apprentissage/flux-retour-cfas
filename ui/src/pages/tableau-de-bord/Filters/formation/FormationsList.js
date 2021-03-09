@@ -1,23 +1,28 @@
-import { List, ListItem } from "@chakra-ui/react";
+import { List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-const FormationsList = ({ formations, onFormationClick }) => {
+import TerritoireOption from "../territoire/TerritoireOption";
+
+const FormationsList = ({ formations = [], onFormationClick, selectedValue }) => {
   return (
     <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
+      <TerritoireOption
+        onClick={() => {
+          onFormationClick(null);
+        }}
+        isSelected={!selectedValue}
+      >
+        Tous les centres de formation
+      </TerritoireOption>
       {formations.map((formation) => (
-        <ListItem
+        <TerritoireOption
           key={formation.cfd}
-          cursor="pointer"
-          fontSize="zeta"
-          role="button"
-          color="grey.800"
-          _hover={{ textDecoration: "underline" }}
           onClick={() => onFormationClick(formation)}
-          padding="1w"
+          isSelected={formation.cfd === selectedValue?.cfd}
         >
           {formation.cfd} - {formation.libelle}
-        </ListItem>
+        </TerritoireOption>
       ))}
     </List>
   );
@@ -30,7 +35,11 @@ FormationsList.propTypes = {
       cfd: PropTypes.string.isRequired,
       libelle: PropTypes.string.isRequired,
     }).isRequired
-  ).isRequired,
+  ),
+  selectedValue: PropTypes.shape({
+    cfd: PropTypes.string.isRequired,
+    libelle: PropTypes.string.isRequired,
+  }),
 };
 
 export default FormationsList;

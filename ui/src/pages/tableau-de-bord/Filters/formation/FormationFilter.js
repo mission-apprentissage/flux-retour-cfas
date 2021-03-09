@@ -21,7 +21,7 @@ const FormationFilter = ({ value, onChange }) => {
   const [searchResults, setSearchResults] = useState();
 
   useEffect(() => {
-    setSearchResults(null);
+    setSearchResults();
     if (searchTerm.length >= SEARCH_TERM_MIN_LENGTH) {
       searchFormationByLibelle(searchTerm, (result) => {
         if (result) setSearchResults(result);
@@ -45,7 +45,7 @@ const FormationFilter = ({ value, onChange }) => {
             onChange={setSeachTerm}
             placeholder="Saisissez un libellé de formation ou un CFD"
           />
-          {searchResults && <FormationsList formations={searchResults} onFormationClick={onFormationClick} />}
+          <FormationsList formations={searchResults} onFormationClick={onFormationClick} selectedValue={value} />
           {searchResults?.length === 0 && (
             <Text fontSize="zeta" color="gray.500">
               Aucun résultat trouvé
