@@ -3,30 +3,21 @@ import React, { useState } from "react";
 
 import { FilterButton, OverlayMenu } from "../../../../common/components";
 import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
-import { useFetch } from "../../../../common/hooks/useFetch";
 import DepartementOptions from "./DepartementOptions";
+import { territoireOptionPropType } from "./propTypes";
 import RegionOptions from "./RegionOptions";
+import withTerritoiresData, { TERRITOIRE_TYPES } from "./withTerritoireData";
 
-const GEO_API_URL = "https://geo.api.gouv.fr";
-
-const TERRITOIRE_TYPES = {
-  region: "region",
-  departement: "departement",
-};
-
-const TerritoireFilter = ({ value, onChange }) => {
+const TerritoireFilter = ({ value, onChange, regions, departements }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [departements] = useFetch(`${GEO_API_URL}/departements`);
-  const [regions] = useFetch(`${GEO_API_URL}/regions`);
 
   const TERRITOIRE_TYPE_OPTIONS = [
-    { value: TERRITOIRE_TYPES.region, label: `Régions (${regions?.length})` },
-    { value: TERRITOIRE_TYPES.departement, label: `Départements (${departements?.length})` },
+    { value: TERRITOIRE_TYPES.region, label: `Régions (${regions.length})` },
+    { value: TERRITOIRE_TYPES.departement, label: `Départements (${departements.length})` },
   ];
 
-  const onFilterClick = (territoireType) => (filter) => {
-    const value = filter ? { type: territoireType, code: filter.code } : null;
-    onChange(value);
+  const onFilterClick = (filter) => {
+    onChange(filter);
     setIsOpen(false);
   };
 
@@ -52,14 +43,10 @@ const TerritoireFilter = ({ value, onChange }) => {
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <MenuTabs tabNames={TERRITOIRE_TYPE_OPTIONS.map(({ label }) => label)}>
-            <RegionOptions
-              regions={regions}
-              onRegionClick={onFilterClick(TERRITOIRE_TYPES.region)}
-              currentFilter={chosenFilter}
-            />
+            <RegionOptions regions={regions} onRegionClick={onFilterClick} currentFilter={chosenFilter} />
             <DepartementOptions
               departements={departements}
-              onDepartementClick={onFilterClick(TERRITOIRE_TYPES.departement)}
+              onDepartementClick={onFilterClick}
               currentFilter={chosenFilter}
             />
           </MenuTabs>
@@ -71,10 +58,9 @@ const TerritoireFilter = ({ value, onChange }) => {
 
 TerritoireFilter.propTypes = {
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.shape({
-    code: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
-  }),
+  value: territoireOptionPropType,
+  regions: PropTypes.arrayOf(territoireOptionPropType).isRequired,
+  departements: PropTypes.arrayOf(territoireOptionPropType).isRequired,
 };
 
-export default TerritoireFilter;
+export default withTerritoiresData(TerritoireFilter);

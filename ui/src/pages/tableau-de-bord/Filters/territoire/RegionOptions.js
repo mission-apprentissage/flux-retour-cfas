@@ -5,8 +5,9 @@ import React, { useState } from "react";
 import { SearchInput } from "../../../../common/components";
 import { stringContains } from "../../../../common/utils/stringUtils";
 import TerritoireOption from "./TerritoireOption";
+import { TERRITOIRE_TYPES } from "./withTerritoireData";
 
-const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
+const RegionOptions = ({ regions, onRegionClick, currentFilter }) => {
   const [regionSearchTerm, setRegionSearchTerm] = useState("");
 
   const filteredRegions = regionSearchTerm
@@ -44,6 +45,7 @@ RegionOptions.propTypes = {
     PropTypes.shape({
       nom: PropTypes.string.isRequired,
       code: PropTypes.string.isRequired,
+      type: PropTypes.oneOf([TERRITOIRE_TYPES.region]),
     }).isRequired
   ),
   onRegionClick: PropTypes.func.isRequired,
