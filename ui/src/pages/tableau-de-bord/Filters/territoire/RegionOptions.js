@@ -47,7 +47,7 @@ RegionOptions.propTypes = {
       code: PropTypes.string.isRequired,
       type: PropTypes.oneOf([TERRITOIRE_TYPES.region]),
     }).isRequired
-  ),
+  ).isRequired,
   onRegionClick: PropTypes.func.isRequired,
   currentFilter: PropTypes.shape({
     nom: PropTypes.string.isRequired,
