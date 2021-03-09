@@ -3,15 +3,14 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { SearchInput } from "../../../../common/components";
+import { stringContains } from "../../../../common/utils/stringUtils";
 import TerritoireOption from "./TerritoireOption";
 
 const DepartementOptions = ({ departements = [], onDepartementClick, currentFilter }) => {
   const [departementSearchTerm, setDepartementSearchTerm] = useState("");
 
   const filteredDepartements = departementSearchTerm
-    ? departements.filter((departement) => {
-        return departement.nom.toLowerCase().indexOf(departementSearchTerm.toLowerCase()) > -1;
-      })
+    ? departements.filter((departement) => stringContains(departement.nom + departement.code, departementSearchTerm))
     : departements;
 
   return (
@@ -36,7 +35,7 @@ const DepartementOptions = ({ departements = [], onDepartementClick, currentFilt
             onClick={() => onDepartementClick(filter)}
             isSelected={currentFilter?.nom === filter.nom}
           >
-            {filter.nom}
+            {filter.nom} ({filter.code})
           </TerritoireOption>
         ))}
       </List>
