@@ -40,7 +40,12 @@ const TerritoireFilter = ({ value, onChange }) => {
 
   return (
     <div>
-      <FilterButton onClick={() => setIsOpen(!isOpen)} icon="ri-map-pin-fill">
+      <FilterButton
+        onClick={() => setIsOpen(!isOpen)}
+        icon="ri-map-pin-fill"
+        displayClearIcon={!!value}
+        clearIconOnClick={() => onChange(null)}
+      >
         {buttonLabel}
       </FilterButton>
 

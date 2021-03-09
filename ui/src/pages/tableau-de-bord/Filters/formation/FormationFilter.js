@@ -37,7 +37,13 @@ const FormationFilter = ({ value, onChange }) => {
 
   return (
     <div>
-      <FilterButton onClick={() => setIsOpen(!isOpen)}>{buttonLabel}</FilterButton>
+      <FilterButton
+        onClick={() => setIsOpen(!isOpen)}
+        displayClearIcon={!!value}
+        clearIconOnClick={() => onChange(null)}
+      >
+        {buttonLabel}
+      </FilterButton>
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <SearchInput
