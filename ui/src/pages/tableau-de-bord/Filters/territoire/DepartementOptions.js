@@ -1,19 +1,16 @@
-import { List, ListItem } from "@chakra-ui/react";
+import { List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { SearchInput } from "../../../../common/components";
+import { stringContains } from "../../../../common/utils/stringUtils";
 import TerritoireOption from "./TerritoireOption";
-
-const MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH = 9;
 
 const DepartementOptions = ({ departements = [], onDepartementClick, currentFilter }) => {
   const [departementSearchTerm, setDepartementSearchTerm] = useState("");
 
   const filteredDepartements = departementSearchTerm
-    ? departements.filter((departement) => {
-        return departement.nom.toLowerCase().indexOf(departementSearchTerm.toLowerCase()) > -1;
-      })
+    ? departements.filter((departement) => stringContains(departement.nom + departement.code, departementSearchTerm))
     : departements;
 
   return (
@@ -32,16 +29,15 @@ const DepartementOptions = ({ departements = [], onDepartementClick, currentFilt
         >
           Toute la France
         </TerritoireOption>
-        {filteredDepartements.slice(0, MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH).map((filter) => (
+        {filteredDepartements.map((filter) => (
           <TerritoireOption
             key={filter.code}
             onClick={() => onDepartementClick(filter)}
             isSelected={currentFilter?.nom === filter.nom}
           >
-            {filter.nom}
+            {filter.nom} ({filter.code})
           </TerritoireOption>
         ))}
-        {filteredDepartements.length > MAX_DEPARTEMENTS_OPTIONS_DISPLAYED_LENGTH && <ListItem>...</ListItem>}
       </List>
     </>
   );

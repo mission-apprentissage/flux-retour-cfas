@@ -3,15 +3,14 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { SearchInput } from "../../../../common/components";
+import { stringContains } from "../../../../common/utils/stringUtils";
 import TerritoireOption from "./TerritoireOption";
 
 const RegionOptions = ({ regions = [], onRegionClick, currentFilter }) => {
   const [regionSearchTerm, setRegionSearchTerm] = useState("");
 
   const filteredRegions = regionSearchTerm
-    ? regions.filter((region) => {
-        return region.nom.toLowerCase().indexOf(regionSearchTerm.toLowerCase()) > -1;
-      })
+    ? regions.filter((region) => stringContains(region.nom, regionSearchTerm))
     : regions;
 
   return (
