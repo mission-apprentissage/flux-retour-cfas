@@ -18,7 +18,12 @@ const CfasFilter = ({ onChange, value }) => {
 
   return (
     <div>
-      <FilterButton onClick={() => setIsOpen(!isOpen)} icon="ri-community-fill">
+      <FilterButton
+        icon="ri-community-fill"
+        onClick={() => setIsOpen(!isOpen)}
+        displayClearIcon={!!value}
+        clearIconOnClick={() => onChange(null)}
+      >
         {buttonLabel}
       </FilterButton>
 
