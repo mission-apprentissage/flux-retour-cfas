@@ -36,7 +36,7 @@ const TerritoireFilter = ({ value, onChange }) => {
     ? regions.find((region) => region.code === value.code)
     : departements.find((departement) => departement.code === value.code);
 
-  const buttonLabel = isOpen ? "Sélectionner un territoire" : chosenFilter ? chosenFilter.nom : "Toute la France";
+  const buttonLabel = chosenFilter ? chosenFilter.nom : "Toute la France";
 
   return (
     <div>
