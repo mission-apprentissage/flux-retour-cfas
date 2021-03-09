@@ -33,7 +33,7 @@ const FormationFilter = ({ value, onChange }) => {
     onChange(formation);
     setIsOpen(false);
   };
-  const buttonLabel = isOpen ? "Sélectionner une formation" : value ? value.libelle : "Toutes les formations";
+  const buttonLabel = value ? value.libelle : "Toutes les formations";
 
   return (
     <div>
