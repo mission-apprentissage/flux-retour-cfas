@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import { _post } from "../../common/httpClient";
 import { getPercentageDifference } from "../../common/utils/calculUtils";
+import { TERRITOIRE_TYPES } from "./Filters/territoire/withTerritoireData";
 
 const mapEffectifsData = (effectifsData) => {
   const [start, end] = effectifsData;
@@ -28,8 +29,9 @@ const buildSearchRequestBody = (filters) => {
   const flattenedFilters = {
     startDate: filters.periode.startDate?.toISOString(),
     endDate: filters.periode.endDate?.toISOString(),
-    etablissement_num_region: filters.territoire?.type === "region" ? filters.territoire.code : null,
-    etablissement_num_departement: filters.territoire?.type === "departement" ? filters.territoire.code : null,
+    etablissement_num_region: filters.territoire?.type === TERRITOIRE_TYPES.region ? filters.territoire.code : null,
+    etablissement_num_departement:
+      filters.territoire?.type === TERRITOIRE_TYPES.departement ? filters.territoire.code : null,
     id_formation: filters.formation?.cfd || null,
     siret_etablissement: filters.cfa?.siret_etablissement || null,
   };
@@ -39,19 +41,23 @@ const buildSearchRequestBody = (filters) => {
   }, {});
 };
 
+const REGION_NORMANDIE_OPTION = { code: "28", type: TERRITOIRE_TYPES.region };
+
+const initialFiltersState = {
+  periode: {
+    startDate: subMonths(new Date(), 1),
+    endDate: new Date(),
+  },
+  territoire: REGION_NORMANDIE_OPTION,
+  formation: null,
+  cfa: null,
+};
+
 const withEffectifsData = (Component) => (props) => {
   const [effectifs, setEffectifs] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({
-    periode: {
-      startDate: subMonths(new Date(), 1),
-      endDate: new Date(),
-    },
-    territoire: null,
-    formation: null,
-    cfa: null,
-  });
+  const [filters, setFilters] = useState(initialFiltersState);
 
   useEffect(() => {
     const fetchEffectifs = async () => {

@@ -5,8 +5,9 @@ import React, { useState } from "react";
 import { SearchInput } from "../../../../common/components";
 import { stringContains } from "../../../../common/utils/stringUtils";
 import TerritoireOption from "./TerritoireOption";
+import { TERRITOIRE_TYPES } from "./withTerritoireData";
 
-const DepartementOptions = ({ departements = [], onDepartementClick, currentFilter }) => {
+const DepartementOptions = ({ departements, onDepartementClick, currentFilter }) => {
   const [departementSearchTerm, setDepartementSearchTerm] = useState("");
 
   const filteredDepartements = departementSearchTerm
@@ -48,8 +49,9 @@ DepartementOptions.propTypes = {
     PropTypes.shape({
       nom: PropTypes.string.isRequired,
       code: PropTypes.string.isRequired,
+      type: PropTypes.oneOf([TERRITOIRE_TYPES.departement]),
     }).isRequired
-  ),
+  ).isRequired,
   onDepartementClick: PropTypes.func.isRequired,
   currentFilter: PropTypes.shape({
     nom: PropTypes.string.isRequired,
