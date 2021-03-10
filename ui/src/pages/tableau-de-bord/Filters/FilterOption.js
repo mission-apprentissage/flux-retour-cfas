@@ -2,7 +2,7 @@ import { Box, ListItem } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-const TerritoireOption = ({ isSelected = false, onClick, children }) => {
+const FilterOption = ({ isSelected = false, onClick, children }) => {
   return (
     <ListItem
       cursor="pointer"
@@ -22,10 +22,10 @@ const TerritoireOption = ({ isSelected = false, onClick, children }) => {
   );
 };
 
-TerritoireOption.propTypes = {
+FilterOption.propTypes = {
   isSelected: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
   children: PropTypes.string.isRequired,
 };
 
-export default TerritoireOption;
+export default FilterOption;

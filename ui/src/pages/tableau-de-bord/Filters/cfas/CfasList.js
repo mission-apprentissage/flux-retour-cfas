@@ -2,22 +2,22 @@ import { List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import TerritoireOption from "../territoire/TerritoireOption";
+import FilterOption from "../FilterOption";
 
 const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
   return (
     <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-      <TerritoireOption
+      <FilterOption
         onClick={() => {
           onCfaClick(null);
         }}
         isSelected={!selectedValue}
       >
         Tous les centres de formation
-      </TerritoireOption>
+      </FilterOption>
       {cfas &&
         cfas.map((cfa) => (
-          <TerritoireOption
+          <FilterOption
             key={cfa.siret_etablissement}
             onClick={() => {
               onCfaClick(cfa);
@@ -25,7 +25,7 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
             isSelected={selectedValue?.siret_etablissement === cfa.siret_etablissement}
           >
             {cfa.nom_etablissement} ({cfa.etablissement_num_departement})
-          </TerritoireOption>
+          </FilterOption>
         ))}
     </List>
   );
