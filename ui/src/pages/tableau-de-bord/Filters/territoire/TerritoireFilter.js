@@ -33,7 +33,7 @@ const TerritoireFilter = ({ value, onChange, regions, departements }) => {
     <div>
       <FilterButton
         onClick={() => setIsOpen(!isOpen)}
-        icon="ri-map-pin-fill"
+        icon="ri-map-pin-2-fill"
         displayClearIcon={!!value}
         clearIconOnClick={() => onChange(null)}
       >
