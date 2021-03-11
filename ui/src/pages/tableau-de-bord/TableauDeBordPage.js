@@ -1,4 +1,4 @@
-import { Text } from "@chakra-ui/react";
+import { Box, Flex, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -13,9 +13,27 @@ import withEffectifsData from "./withEffectifsData";
 const TableauDeBordPage = ({ effectifs, filters, setFilters, loading, error }) => {
   const [dataStats] = useFetch("/api/dashboard/etablissements-stats/");
 
+  const pageTitle = (
+    <Flex justifyContent="center" alignItems="center">
+      <span>Tableau de bord de l&apos;apprentissage</span>
+      &nbsp;
+      <Box
+        as="legend"
+        paddingX="1w"
+        paddingY="1v"
+        fontSize="zeta"
+        backgroundColor="bluefrance"
+        color="white"
+        borderRadius="4px"
+      >
+        beta
+      </Box>
+    </Flex>
+  );
+
   return (
     <Page>
-      <PageHeader title="Tableau de bord de l'apprentissage">
+      <PageHeader title={pageTitle}>
         <Text color="grey.800" fontWeight="bold" textAlign="center" marginTop="1w">
           <span>Les indices affichés concernent {dataStats?.nbEtablissements} centres de formation</span>
           &nbsp;

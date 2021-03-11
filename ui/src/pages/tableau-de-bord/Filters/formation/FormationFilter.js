@@ -38,6 +38,7 @@ const FormationFilter = ({ value, onChange }) => {
   return (
     <div>
       <FilterButton
+        icon="ri-book-mark-fill"
         onClick={() => setIsOpen(!isOpen)}
         displayClearIcon={!!value}
         clearIconOnClick={() => onChange(null)}

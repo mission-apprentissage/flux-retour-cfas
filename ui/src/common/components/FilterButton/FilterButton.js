@@ -4,7 +4,7 @@ import React from "react";
 
 const FilterButton = ({ children, icon, onClick, displayClearIcon = false, clearIconOnClick }) => {
   return (
-    <Button background="bluesoft.100" onClick={onClick}>
+    <Button background="bluesoft.100" onClick={onClick} fontWeight="400">
       {icon && <Box fontSize="epsilon" as="i" className={icon} marginRight="1v" />}
       {children}
       {displayClearIcon && (
