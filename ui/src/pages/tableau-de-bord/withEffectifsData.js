@@ -33,7 +33,8 @@ const buildSearchRequestBody = (filters) => {
     etablissement_num_departement:
       filters.territoire?.type === TERRITOIRE_TYPES.departement ? filters.territoire.code : null,
     id_formation: filters.formation?.cfd || null,
-    siret_etablissement: filters.cfa?.siret_etablissement || null,
+    siret_etablissement: filters.cfa?.type === "cfa" ? filters.cfa?.siret_etablissement : null,
+    etablissement_reseaux: filters.cfa?.type === "reseau" ? filters.cfa.nom : null,
   };
 
   return Object.entries(flattenedFilters).reduce((acc, [key, value]) => {
