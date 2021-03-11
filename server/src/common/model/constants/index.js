@@ -78,9 +78,34 @@ const reseauxCfas = {
   },
 };
 
+/**
+ * Nom des jobs
+ */
+const jobNames = {
+  test: "test-job",
+  sanitizeSirets: "sanitize-sirets",
+  retrieveSiretsFromYmagUais: "retrieve-sirets-from-ymag-uais",
+  retrieveSiretsFromGestiUais: "retrieve-sirets-from-gesti-uais",
+  seedUsers: "seed-users",
+  seedSample: "seed-sample",
+  seedReferentielCfas: "seed-referentiel-cfas",
+  seedRandomizedSample: "seed-randomized-sample",
+  identifyNetworkCma: "identify-network-cma",
+  formationRetrieveFromCfd: "formation-retrieve-from-cfd",
+  etablissementsRetrieveLocation: "etablissements-retrieve-location",
+  etablissementsRetrieveNetworks: "etablissements-retrieve-networks",
+  createIndexes: "create-indexes",
+  clearUsers: "clear-users",
+  clearStatutsCandidats: "clear-statuts-candidats",
+  clearLogs: "clear-logs",
+  clearAll: "clear-all",
+  checkSiretAndUaiValidity: "check-siret-and-uai-validity",
+};
+
 module.exports = {
   codesStatutsCandidats,
   codesMajStatutsInterdits,
   codesStatutsMajStatutCandidats,
   reseauxCfas,
+  jobNames,
 };

@@ -2,6 +2,7 @@ const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { StatutCandidat } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
+const { jobNames } = require("../../common/model/constants");
 
 /**
  * Ce script permet de récupérer les SIRETs Ymag pour les statuts n'ayant aucun siret présent
@@ -11,7 +12,7 @@ runScript(async ({ statutsCandidats }) => {
   logger.info("Run Siret Retrieving Job for Ymag");
   await retrieveSiret(statutsCandidats);
   logger.info("End Siret Retrieving Job");
-});
+}, jobNames.retrieveSiretsFromYmagUais);
 
 const retrieveSiret = async (statutsCandidats) => {
   logger.info("Retrieving sirets for YMag");

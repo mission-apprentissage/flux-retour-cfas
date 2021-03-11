@@ -6,6 +6,7 @@ import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import LoginPage from "./pages/login/LoginPage";
+import JobEventsPage from "./pages/settings/JobEventsPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import UserStatsPage from "./pages/user-stats";
@@ -27,6 +28,7 @@ const App = () => {
         <AdminRoute path="/tableau-de-bord" exact component={TableauDeBordPage} />
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
         <PrivateRoute path="/analytics/" component={AnalyticsPage} />
+        <PrivateRoute path="/settings/jobEvents" component={JobEventsPage} />
 
         <Route component={() => <div>404</div>} />
       </Switch>

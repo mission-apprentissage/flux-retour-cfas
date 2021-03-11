@@ -382,4 +382,26 @@ docker exec -t -i flux_retour_cfas_server bash -c "yarn etablissements-networks:
 Dès le premier déploiement de l'application est recommandé de suivre la procédure suivante :
 
 1. Affichage des stats pour vérifier que la base de données est vide.
-2. Seed des users défaut
+
+2. Seed des users défaut si pas déja fait
+
+3. Run des migration `yarn migration:up` si non fait par Ansible
+
+4. Création des indexs `yarn indexes:create` si non fait par Ansible
+
+5. Lancement des jobs :
+   5.1 - Création du référentiel des cfas `yarn seed:referentielCfas`
+
+   5.2 - Récupération des sirets depuis Gesti `yarn siret:retrieve-gesti`
+
+   5.3 - Récupération des sirets depuis YMag `yarn siret:retrieve-ymag`
+
+   5.4 - Sanitize des sirets `yarn siret:sanitize`
+
+   5.5 - Vérification des validité de siret `yarn siret-uai:check-validity`
+
+   5.6 - Recherche des infos de localisation des établissements `yarn etablissements-location:retrieve`
+
+   5.7 - Recherche des infos de réseaux des établissements `yarn etablissements-networks:retrieve`
+
+   5.8 - Recherche des codes CFD des formations `yarn formation:retrieve-from-cfd`

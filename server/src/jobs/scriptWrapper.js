@@ -4,24 +4,10 @@ const createComponents = require("../common/components/components");
 const logger = require("../common/logger");
 const config = require("../../config");
 const { access, mkdir } = require("fs").promises;
+const { JobEvent } = require("../common/model");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
-
-const createTimer = () => {
-  let launchTime;
-  return {
-    start: () => {
-      launchTime = new Date().getTime();
-    },
-    stop: (results) => {
-      const duration = moment.utc(new Date().getTime() - launchTime).format("HH:mm:ss.SSS");
-      const data = results && results.toJSON ? results.toJSON() : results;
-      console.log(JSON.stringify(data || {}, null, 2));
-      console.log(`Completed in ${duration}`);
-    },
-  };
-};
 
 const ensureOutputDirExists = async () => {
   const outputDir = config.outputDir;
@@ -55,16 +41,25 @@ const exit = async (rawError) => {
 };
 
 module.exports = {
-  runScript: async (job) => {
+  runScript: async (job, jobName = null) => {
     try {
-      const timer = createTimer();
-      timer.start();
+      const launchDate = new Date();
 
       await ensureOutputDirExists();
       const components = await createComponents();
-      const results = await job(components);
+      await job(components);
 
-      timer.stop(results);
+      const jobEventStop = new JobEvent({
+        jobname: jobName,
+        action: "Run Job",
+        data: {
+          startDate: launchDate,
+          endDate: new Date(),
+          duration: moment.utc(new Date().getTime() - launchDate).format("HH:mm:ss.SSS"),
+        },
+      });
+      await jobEventStop.save();
+
       await exit();
     } catch (e) {
       await exit(e);

@@ -9,3 +9,5 @@ export { default as PageHeader } from "./Page/PageHeader";
 export { default as PageSectionTitle } from "./Page/PageSectionTitle";
 export { default as PageSkeleton } from "./Page/PageSkeleton";
 export { default as PageContent } from "./Page/PageContent";
+
+export { default as Pagination } from "./Pagination/Pagination";

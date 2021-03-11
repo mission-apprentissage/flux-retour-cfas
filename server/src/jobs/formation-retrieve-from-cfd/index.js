@@ -1,6 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
+const { jobNames } = require("../../common/model/constants");
 
 /*
     Ce script récupère tous les CFDs valides présents dans la collection StatutsCandidats et crée une formation en base pour chacun si elle n'existe pas
@@ -37,4 +38,4 @@ runScript(async ({ db, formations }) => {
   logger.warn(`${formationsNotFoundInTablesCorrespondances} formations not found in Tables de Correspondances API`);
   logger.warn(`${formationsError} CFD with error while fetching Tables de Correspondances API`);
   logger.info("End Retrieve Formations from CFD");
-});
+}, jobNames.formationRetrieveFromCfd);

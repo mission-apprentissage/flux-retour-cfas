@@ -6,7 +6,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { StatutCandidat } = require("../../common/model");
 const { downloadIfNeeded } = require("./utils/");
 const { toXlsx } = require("../../common/utils/exporterUtils");
-const { codesStatutsCandidats } = require("../../common/model/constants/index");
+const { codesStatutsCandidats, jobNames } = require("../../common/model/constants/index");
 
 const cmaReferenceFilePath = path.join(__dirname, `./assets/cfas-cma.csv`);
 
@@ -17,7 +17,7 @@ runScript(async () => {
   logger.info("Exporting Cfas identified for CMA Network");
   await identifyCfas();
   logger.info("End exporting Cfas identified for CMA Network");
-});
+}, jobNames.identifyNetworkCma);
 
 const identifyCfas = async () => {
   const statutsForCma = [];

@@ -7,7 +7,7 @@ const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { Cfa } = require("../../common/model");
-const { reseauxCfas } = require("../../common/model/constants/");
+const { reseauxCfas, jobNames } = require("../../common/model/constants/");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -22,7 +22,7 @@ runScript(async () => {
   await seedCfasNetworkFromCsv(reseauxCfas.PROMOTRANS);
 
   logger.info("End seeding référentiel CFAs !");
-});
+}, jobNames.seedReferentielCfas);
 
 /**
  * Seeding Reference CFAs for Network

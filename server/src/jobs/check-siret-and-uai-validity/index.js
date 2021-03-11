@@ -2,6 +2,7 @@ const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { validateUai } = require("../../common/domain/uai");
 const { validateSiret } = require("../../common/domain/siret");
+const { jobNames } = require("../../common/model/constants");
 
 /*
     Ce script permet d'identifier les statuts candidats ayant un UAI ou un SIRET invalide ou absent
@@ -40,4 +41,4 @@ runScript(async ({ db }) => {
 
   logger.info(`${nbDocumentsUpdated} statutsCandidats updated / ${documentsCount} total`);
   logger.info("End Check SIRET and UAI validity in StatutsCandidats");
-});
+}, jobNames.checkSiretAndUaiValidity);

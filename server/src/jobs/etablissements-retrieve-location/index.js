@@ -3,6 +3,7 @@ const logger = require("../../common/logger");
 const { StatutCandidat } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { getSiretInfo } = require("../../common/apis/apiTablesCorrespondances");
+const { jobNames } = require("../../common/model/constants");
 
 // Map containing etablissementsData - for limiting API Calls
 const etablissementsInfosCache = new Map();
@@ -48,7 +49,7 @@ runScript(async () => {
   });
 
   logger.info("End Location Retrieving Job");
-});
+}, jobNames.etablissementsRetrieveLocation);
 
 /**
  * Search etablissement data from Siret

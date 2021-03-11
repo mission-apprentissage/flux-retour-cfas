@@ -1,6 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { validateSiret } = require("../../common/domain/siret");
+const { jobNames } = require("../../common/model/constants");
 
 /*
     Ce script permet de nettoyer certains SIRET contenant des espaces ou des points
@@ -36,4 +37,4 @@ runScript(async ({ db }) => {
 
   logger.info(`${nbDocumentsUpdated} statutsCandidats updated with valid SIRET`);
   logger.info("Ending Sanitize SIRET");
-});
+}, jobNames.sanitizeSirets);

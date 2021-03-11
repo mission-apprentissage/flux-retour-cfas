@@ -64,6 +64,7 @@
     "migrate-mongo": "8.1.4",
     "moment": "2.29.1",
     "mongoose": "5.10.18",
+    "mongoose-paginate": "5.0.3",
     "node-ovh-objectstorage": "2.0.1",
     "passport": "0.4.1",
     "passport-http": "0.3.0",

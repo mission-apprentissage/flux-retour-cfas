@@ -1,6 +1,4 @@
 const express = require("express");
-const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
-const { administrator } = require("../../common/roles");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
 module.exports = ({ userEvents }) => {
@@ -8,7 +6,6 @@ module.exports = ({ userEvents }) => {
 
   router.post(
     "/last-date",
-    permissionsMiddleware([administrator]),
     tryCatch(async (req, res) => {
       const lastDate = await userEvents.getLastUserEventDate({
         username: req.body.username,

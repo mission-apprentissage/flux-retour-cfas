@@ -3,6 +3,7 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { StatutCandidat, Cfa } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
+const { jobNames } = require("../../common/model/constants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -15,7 +16,7 @@ runScript(async () => {
   await retrieveNetworksForSiretValid();
   await retrieveNetworksForUaiValid();
   logger.info("End Cfas Network Retrieving Job");
-});
+}, jobNames.etablissementsRetrieveNetworks);
 
 /**
  * Parse tous les statuts ayant un siret valid et pas de réseaux de cfas

@@ -59,6 +59,9 @@ const LoggedUserMenu = () => {
             <MenuItem>
               <NavLink to="/analytics">Analytics</NavLink>
             </MenuItem>
+            <MenuItem>
+              <NavLink to="/settings/jobEvents">Paramètres - Jobs</NavLink>
+            </MenuItem>
           </>
         )}
         <MenuItem onClick={logout}>Déconnexion</MenuItem>

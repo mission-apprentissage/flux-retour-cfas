@@ -5,6 +5,7 @@ const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { StatutCandidat } = require("../../common/model");
 const { downloadIfNeeded } = require("./utils");
+const { jobNames } = require("../../common/model/constants");
 
 const siretGestiReferenceFilePath = path.join(__dirname, `./assets/sirets-gesti.csv`);
 
@@ -16,7 +17,7 @@ runScript(async ({ statutsCandidats }) => {
   logger.info("Run Siret Retrieving Job for Gesti");
   await retrieveSiret(statutsCandidats);
   logger.info("End Siret Retrieving Job");
-});
+}, jobNames.retrieveSiretsFromGestiUais);
 
 const retrieveSiret = async (statutsCandidats) => {
   logger.info("Retrieving sirets for Gesti");
