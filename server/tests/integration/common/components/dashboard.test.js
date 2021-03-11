@@ -23,6 +23,7 @@ integrationTests(__filename, () => {
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -41,6 +42,7 @@ integrationTests(__filename, () => {
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -59,6 +61,7 @@ integrationTests(__filename, () => {
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -77,6 +80,7 @@ integrationTests(__filename, () => {
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -86,6 +90,7 @@ integrationTests(__filename, () => {
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceApprenti,
+          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -95,6 +100,7 @@ integrationTests(__filename, () => {
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceInscritToApprenti,
+          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -126,6 +132,64 @@ integrationTests(__filename, () => {
       assert.deepStrictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
       assert.deepStrictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
     });
+
+    it("Permet de ne pas récupérer les données d'effectifs pour une période donnée si un siret est invalide", async () => {
+      // Add 10 statuts with history sequence - full
+      for (let index = 0; index < 10; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          siret_etablissement_valid: false,
+        });
+        const toAdd = new StatutCandidat(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 5 statuts with history sequence - simple apprenti
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          historique_statut_apprenant: historySequenceApprenti,
+          siret_etablissement_valid: false,
+        });
+        const toAdd = new StatutCandidat(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 15 statuts with history sequence - inscritToApprenti
+      for (let index = 0; index < 15; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          historique_statut_apprenant: historySequenceInscritToApprenti,
+          siret_etablissement_valid: false,
+        });
+        const toAdd = new StatutCandidat(randomStatut);
+        await toAdd.save();
+      }
+
+      // Search params dates
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
+      const endDate = new Date("2020-10-10T00:00:00.000+0000");
+
+      const expectedResults = {
+        startDate: {
+          nbInscrits: 10,
+          nbApprentis: 5,
+          nbAbandons: 0,
+        },
+        endDate: {
+          nbInscrits: 15,
+          nbApprentis: 5,
+          nbAbandons: 10,
+        },
+      };
+
+      const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate);
+
+      assert.notDeepStrictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
+      assert.notDeepStrictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
+      assert.deepStrictEqual(nbStatutsFoundInHistory.startDate.nbAbandons, 0);
+      assert.notDeepStrictEqual(nbStatutsFoundInHistory.endDate.nbInscrits, expectedResults.endDate.nbInscrits);
+      assert.notDeepStrictEqual(nbStatutsFoundInHistory.endDate.nbApprentis, expectedResults.endDate.nbApprentis);
+      assert.notDeepStrictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
+    });
   });
 
   describe("getEffectifsData pour une période et une localisation", () => {
@@ -137,7 +201,10 @@ integrationTests(__filename, () => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          ...{
+            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+            siret_etablissement_valid: true,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -147,7 +214,7 @@ integrationTests(__filename, () => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceApprenti },
+          ...{ historique_statut_apprenant: historySequenceApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -157,7 +224,7 @@ integrationTests(__filename, () => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceInscritToApprenti },
+          ...{ historique_statut_apprenant: historySequenceInscritToApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -206,7 +273,10 @@ integrationTests(__filename, () => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          ...{
+            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+            siret_etablissement_valid: true,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -216,7 +286,7 @@ integrationTests(__filename, () => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceApprenti },
+          ...{ historique_statut_apprenant: historySequenceApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -226,7 +296,7 @@ integrationTests(__filename, () => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceInscritToApprenti },
+          ...{ historique_statut_apprenant: historySequenceInscritToApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -275,7 +345,10 @@ integrationTests(__filename, () => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          ...{
+            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+            siret_etablissement_valid: true,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -285,7 +358,7 @@ integrationTests(__filename, () => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceApprenti },
+          ...{ historique_statut_apprenant: historySequenceApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -295,7 +368,7 @@ integrationTests(__filename, () => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceInscritToApprenti },
+          ...{ historique_statut_apprenant: historySequenceInscritToApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -348,7 +421,10 @@ integrationTests(__filename, () => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          ...{
+            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+            siret_etablissement_valid: true,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -358,7 +434,7 @@ integrationTests(__filename, () => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceApprenti },
+          ...{ historique_statut_apprenant: historySequenceApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -368,7 +444,7 @@ integrationTests(__filename, () => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceInscritToApprenti },
+          ...{ historique_statut_apprenant: historySequenceInscritToApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -421,7 +497,10 @@ integrationTests(__filename, () => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          ...{
+            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+            siret_etablissement_valid: true,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -431,7 +510,7 @@ integrationTests(__filename, () => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceApprenti },
+          ...{ historique_statut_apprenant: historySequenceApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -441,7 +520,7 @@ integrationTests(__filename, () => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceInscritToApprenti },
+          ...{ historique_statut_apprenant: historySequenceInscritToApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -494,7 +573,10 @@ integrationTests(__filename, () => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          ...{
+            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+            siret_etablissement_valid: true,
+          },
           ...createQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -504,7 +586,7 @@ integrationTests(__filename, () => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceApprenti },
+          ...{ historique_statut_apprenant: historySequenceApprenti, siret_etablissement_valid: true },
           ...createQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -514,7 +596,7 @@ integrationTests(__filename, () => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceInscritToApprenti },
+          ...{ historique_statut_apprenant: historySequenceInscritToApprenti, siret_etablissement_valid: true },
           ...createQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -568,7 +650,10 @@ integrationTests(__filename, () => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          ...{
+            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+            siret_etablissement_valid: true,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -578,7 +663,7 @@ integrationTests(__filename, () => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceApprenti },
+          ...{ historique_statut_apprenant: historySequenceApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -588,7 +673,7 @@ integrationTests(__filename, () => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceInscritToApprenti },
+          ...{ historique_statut_apprenant: historySequenceInscritToApprenti, siret_etablissement_valid: true },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);

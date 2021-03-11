@@ -65,7 +65,7 @@ const getNbStatutsInHistoryForStatutAndDate = async (searchDate, searchStatut, f
     // Filtrage sur les filtres passées en paramètres
     // et des éléments d'historiques antérieurs à la date de recherche
     {
-      $match: filters,
+      $match: { ...filters, siret_etablissement_valid: true },
     },
     // Filtrage sur les élements avec date <= searchDate
     {
