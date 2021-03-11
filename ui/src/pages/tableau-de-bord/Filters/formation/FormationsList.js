@@ -13,7 +13,7 @@ const FormationsList = ({ formations = [], onFormationClick, selectedValue }) =>
         }}
         isSelected={!selectedValue}
       >
-        Tous les centres de formation
+        Toutes les formations
       </FilterOption>
       {formations.map((formation) => (
         <FilterOption
