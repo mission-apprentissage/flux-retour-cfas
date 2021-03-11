@@ -118,6 +118,13 @@ const GlobalStats = ({ stats, lastImportDates }) => {
             stat2={`${getItemsRate(stats.nbInvalidCfds, stats.nbStatutsCandidats)} %`}
             stat2Label="du total des statuts"
           />
+          <DoubleStatCard
+            background="warning"
+            label="Statuts avec annee_formation manquante"
+            stat={stats.nbStatutsAnneeFormationMissing}
+            stat2={`${getItemsRate(stats.nbStatutsAnneeFormationMissing, stats.nbStatutsCandidats)} %`}
+            stat2Label="du total des statuts"
+          />
         </HStack>
       </Box>
       <Box mt="9w">
@@ -182,6 +189,7 @@ GlobalStats.propTypes = {
     nbDistinctCandidatsWithStatutHistory1: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory2: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory3: PropTypes.number,
+    nbStatutsAnneeFormationMissing: PropTypes.number,
   }).isRequired,
   lastImportDates: PropTypes.arrayOf(
     PropTypes.shape({

@@ -87,6 +87,7 @@ const getAllStats = async (filters = {}) => {
 
   const nbCfasDistinctUai = await getNbDistinctCfasByUai(filters);
   const nbCfasDistinctSiret = await getNbDistinctCfasBySiret(filters);
+  const nbStatutsAnneeFormationMissing = await getNbAnneeFormationMissing(filters);
 
   return {
     nbStatutsCandidats: nbAllStatutCandidats,
@@ -122,6 +123,7 @@ const getAllStats = async (filters = {}) => {
     nbInvalidSirets,
     nbInvalidSiretsAndUais,
     nbStatutsValid,
+    nbStatutsAnneeFormationMissing,
   };
 };
 
@@ -306,4 +308,8 @@ const getNbInvalidSirets = async (filters = {}) => {
 
 const getNbInvalidSiretsAndUais = async (filters = {}) => {
   return StatutCandidat.count({ ...filters, siret_etablissement_valid: false, uai_etablissement_valid: false });
+};
+
+const getNbAnneeFormationMissing = async (filters = {}) => {
+  return StatutCandidat.count({ ...filters, annee_formation: null });
 };

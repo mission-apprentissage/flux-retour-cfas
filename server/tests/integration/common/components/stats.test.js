@@ -47,6 +47,7 @@ integrationTests(__filename, () => {
 
     assert.strictEqual(allStats.nbCfasDistinctUai > 0, true);
     assert.strictEqual(allStats.nbCfasDistinctSiret > 0, true);
+    assert.strictEqual(allStats.nbStatutsAnneeFormationMissing > 0, true);
   });
 
   it("Permet de récupérer le nb de statuts prospect", async () => {
