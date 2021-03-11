@@ -24,7 +24,7 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
             }}
             isSelected={selectedValue?.siret_etablissement === cfa.siret_etablissement}
           >
-            {cfa.nom_etablissement}
+            {cfa.nom_etablissement} ({cfa.etablissement_num_departement})
           </TerritoireOption>
         ))}
     </List>

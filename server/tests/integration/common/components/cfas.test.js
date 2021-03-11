@@ -13,30 +13,35 @@ integrationTests(__filename, () => {
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "CFA DU ROANNAIS",
+        etablissement_num_departement: "15",
         siret_etablissement: "80420010000021",
         siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cFa dU RO",
+        etablissement_num_departement: "15",
         siret_etablissement: "80420010000022",
         siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cfa du roanna",
+        etablissement_num_departement: "15",
         siret_etablissement: "80420010000023",
         siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "CFA DUROC",
+        etablissement_num_departement: "15",
         siret_etablissement: "80420010000024",
         siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "FACULTE SCIENCES NANCY",
+        etablissement_num_departement: "15",
         siret_etablissement: "80420010000025",
         siret_etablissement_valid: true,
       },
@@ -111,9 +116,10 @@ integrationTests(__filename, () => {
         const sortBySiret = (a, b) => Number(a.siret_etablissement) - Number(b.siret_etablissement);
         const actual = searchResults.sort(sortBySiret);
         const expected = expectedResult
-          .map(({ nom_etablissement, siret_etablissement }) => ({
+          .map(({ nom_etablissement, siret_etablissement, etablissement_num_departement }) => ({
             nom_etablissement,
             siret_etablissement,
+            etablissement_num_departement,
           }))
           .sort(sortBySiret);
 

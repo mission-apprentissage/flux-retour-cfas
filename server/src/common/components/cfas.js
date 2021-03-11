@@ -24,6 +24,7 @@ const searchCfasByNomEtablissement = async (nomEtablissement) => {
       $group: {
         _id: "$siret_etablissement",
         nom_etablissement: { $first: "$nom_etablissement" },
+        etablissement_num_departement: { $first: "$etablissement_num_departement" },
       },
     },
     {
@@ -34,6 +35,7 @@ const searchCfasByNomEtablissement = async (nomEtablissement) => {
         _id: 0,
         siret_etablissement: "$_id",
         nom_etablissement: 1,
+        etablissement_num_departement: 1,
       },
     },
   ]);
