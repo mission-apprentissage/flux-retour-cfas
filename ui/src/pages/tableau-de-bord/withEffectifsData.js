@@ -1,9 +1,10 @@
 /* eslint-disable react/display-name */
-import { subMonths } from "date-fns";
+import { subYears } from "date-fns";
 import React, { useEffect, useState } from "react";
 
 import { _post } from "../../common/httpClient";
 import { getPercentageDifference } from "../../common/utils/calculUtils";
+import { omitNullishValues } from "../../common/utils/omitNullishValues";
 import { TERRITOIRE_TYPES } from "./Filters/territoire/withTerritoireData";
 
 const mapEffectifsData = (effectifsData) => {
@@ -27,8 +28,8 @@ const mapEffectifsData = (effectifsData) => {
 // map filters to the expected body shape in our API and filter out null values
 const buildSearchRequestBody = (filters) => {
   const flattenedFilters = {
-    startDate: filters.periode.startDate?.toISOString(),
-    endDate: filters.periode.endDate?.toISOString(),
+    startDate: filters.date.toISOString(),
+    endDate: subYears(filters.date, 1).toISOString(),
     etablissement_num_region: filters.territoire?.type === TERRITOIRE_TYPES.region ? filters.territoire.code : null,
     etablissement_num_departement:
       filters.territoire?.type === TERRITOIRE_TYPES.departement ? filters.territoire.code : null,
@@ -36,18 +37,13 @@ const buildSearchRequestBody = (filters) => {
     siret_etablissement: filters.cfa?.siret_etablissement || null,
   };
 
-  return Object.entries(flattenedFilters).reduce((acc, [key, value]) => {
-    return value ? { ...acc, [key]: value } : acc;
-  }, {});
+  return omitNullishValues(flattenedFilters);
 };
 
 const REGION_NORMANDIE_OPTION = { code: "28", type: TERRITOIRE_TYPES.region };
 
 const initialFiltersState = {
-  periode: {
-    startDate: subMonths(new Date(), 1),
-    endDate: new Date(),
-  },
+  date: new Date(),
   territoire: REGION_NORMANDIE_OPTION,
   formation: null,
   cfa: null,
@@ -59,11 +55,12 @@ const withEffectifsData = (Component) => (props) => {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState(initialFiltersState);
 
+  const searchRequestBody = buildSearchRequestBody(filters);
   useEffect(() => {
     const fetchEffectifs = async () => {
       setLoading(true);
       try {
-        const response = await _post("/api/dashboard/effectifs", buildSearchRequestBody(filters));
+        const response = await _post("/api/dashboard/effectifs", searchRequestBody);
         setEffectifs(mapEffectifsData(response));
         setError(null);
       } catch (err) {
@@ -74,14 +71,10 @@ const withEffectifsData = (Component) => (props) => {
       }
     };
 
-    if (
-      filters.periode.startDate &&
-      filters.periode.endDate &&
-      (filters.cfa || filters.territoire || filters.formation)
-    ) {
+    if (filters.cfa || filters.territoire || filters.formation) {
       fetchEffectifs();
     }
-  }, [filters]);
+  }, [JSON.stringify(searchRequestBody)]);
 
   return (
     <Component
