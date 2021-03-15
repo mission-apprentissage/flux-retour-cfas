@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 import { SearchInput } from "../../../../common/components";
 import { stringContains } from "../../../../common/utils/stringUtils";
-import TerritoireOption from "./TerritoireOption";
+import FilterOption from "../FilterOption";
 import { TERRITOIRE_TYPES } from "./withTerritoireData";
 
 const DepartementOptions = ({ departements, onDepartementClick, currentFilter }) => {
@@ -22,22 +22,22 @@ const DepartementOptions = ({ departements, onDepartementClick, currentFilter })
         onChange={setDepartementSearchTerm}
       />
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-        <TerritoireOption
+        <FilterOption
           onClick={() => {
             onDepartementClick(null);
           }}
           isSelected={currentFilter === null}
         >
           Toute la France
-        </TerritoireOption>
+        </FilterOption>
         {filteredDepartements.map((filter) => (
-          <TerritoireOption
+          <FilterOption
             key={filter.code}
             onClick={() => onDepartementClick(filter)}
             isSelected={currentFilter?.nom === filter.nom}
           >
             {filter.nom} ({filter.code})
-          </TerritoireOption>
+          </FilterOption>
         ))}
       </List>
     </>

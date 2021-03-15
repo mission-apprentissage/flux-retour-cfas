@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 import { SearchInput } from "../../../../common/components";
 import { stringContains } from "../../../../common/utils/stringUtils";
-import TerritoireOption from "./TerritoireOption";
+import FilterOption from "../FilterOption";
 import { TERRITOIRE_TYPES } from "./withTerritoireData";
 
 const RegionOptions = ({ regions, onRegionClick, currentFilter }) => {
@@ -18,22 +18,22 @@ const RegionOptions = ({ regions, onRegionClick, currentFilter }) => {
     <>
       <SearchInput placeholder="Saisissez une région" value={regionSearchTerm} onChange={setRegionSearchTerm} />
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-        <TerritoireOption
+        <FilterOption
           onClick={() => {
             onRegionClick(null);
           }}
           isSelected={currentFilter === null}
         >
           Toute la France
-        </TerritoireOption>
+        </FilterOption>
         {filteredRegions.map((region) => (
-          <TerritoireOption
+          <FilterOption
             key={region.code}
             onClick={() => onRegionClick(region)}
             isSelected={currentFilter?.nom === region.nom}
           >
             {region.nom}
-          </TerritoireOption>
+          </FilterOption>
         ))}
       </List>
     </>

@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const { reseauxCfas, jobNames } = require("../../../src/common/model/constants");
 const { administrator } = require("../../../src/common/roles");
@@ -12,9 +12,9 @@ httpTests(__filename, ({ startServer }) => {
       headers: bearerToken,
     });
 
-    assert.deepStrictEqual(response.status, 200);
-    assert.ok(response.data.networks);
-    assert.deepStrictEqual(response.data.networks, reseauxCfas);
+    assert.deepEqual(response.status, 200);
+    assert.deepEqual(response.data.length, Object.values(reseauxCfas).length);
+    assert.deepEqual(response.data[0].nom, reseauxCfas.CCCA_BTP.nomReseau);
   });
 
   it("Vérifie qu'on peut récupérer les noms des jobs via API", async () => {

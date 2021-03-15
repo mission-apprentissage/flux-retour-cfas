@@ -1,17 +1,17 @@
 const express = require("express");
-const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
-const { administrator } = require("../../common/roles");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { reseauxCfas, jobNames } = require("../../common/model/constants");
+const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
+const { administrator } = require("../../common/roles");
 
 module.exports = () => {
   const router = express.Router();
 
   router.get(
     "/networks",
-    permissionsMiddleware([administrator]),
     tryCatch(async (req, res) => {
-      return res.json({ networks: reseauxCfas });
+      const networks = Object.keys(reseauxCfas).map((id) => ({ id, nom: reseauxCfas[id].nomReseau }));
+      return res.json(networks);
     })
   );
 

@@ -14,7 +14,12 @@ const CfasFilter = ({ onChange, value }) => {
     setIsOpen(false);
   };
 
-  const buttonLabel = value ? value.nom_etablissement : "Tous les CFAs";
+  const onReseauClick = (reseau) => {
+    onChange(reseau ? { ...reseau, type: "reseau" } : null);
+    setIsOpen(false);
+  };
+
+  const buttonLabel = !value ? "Tous les CFAs" : value.type === "cfa" ? value.nom_etablissement : value.nom;
 
   return (
     <div>
@@ -31,7 +36,7 @@ const CfasFilter = ({ onChange, value }) => {
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <MenuTabs tabNames={["Centres de formation", "Réseaux"]}>
             <CfaPanel onCfaClick={onCfaClick} value={value} />
-            <ReseauxPanel />
+            <ReseauxPanel onReseauClick={onReseauClick} value={value} />
           </MenuTabs>
         </OverlayMenu>
       )}
@@ -41,11 +46,18 @@ const CfasFilter = ({ onChange, value }) => {
 
 CfasFilter.propTypes = {
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.shape({
-    siret_etablissement: PropTypes.string.isRequired,
-    nom_etablissement: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
-  }),
+  value: PropTypes.oneOfType([
+    PropTypes.shape({
+      siret_etablissement: PropTypes.string.isRequired,
+      nom_etablissement: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+    }),
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      nom: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+    }),
+  ]),
 };
 
 export default CfasFilter;

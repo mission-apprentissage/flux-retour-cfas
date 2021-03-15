@@ -6,7 +6,7 @@ import CfaView from "./cfa/CfaView";
 import GenericView from "./generic/GenericView";
 
 const TableauDeBordViewSwitch = ({ filters, effectifs, loading, error }) => {
-  if (filters.cfa) {
+  if (filters.cfa?.type === "cfa") {
     return <CfaView filters={filters} effectifs={effectifs} loading={loading} error={error} />;
   }
   return <GenericView effectifs={effectifs} loading={loading} error={error} />;

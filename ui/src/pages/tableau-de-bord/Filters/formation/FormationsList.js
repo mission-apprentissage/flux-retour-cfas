@@ -2,27 +2,27 @@ import { List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import TerritoireOption from "../territoire/TerritoireOption";
+import FilterOption from "../FilterOption";
 
 const FormationsList = ({ formations = [], onFormationClick, selectedValue }) => {
   return (
     <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
-      <TerritoireOption
+      <FilterOption
         onClick={() => {
           onFormationClick(null);
         }}
         isSelected={!selectedValue}
       >
-        Tous les centres de formation
-      </TerritoireOption>
+        Toutes les formations
+      </FilterOption>
       {formations.map((formation) => (
-        <TerritoireOption
+        <FilterOption
           key={formation.cfd}
           onClick={() => onFormationClick(formation)}
           isSelected={formation.cfd === selectedValue?.cfd}
         >
           {formation.cfd} - {formation.libelle}
-        </TerritoireOption>
+        </FilterOption>
       ))}
     </List>
   );
