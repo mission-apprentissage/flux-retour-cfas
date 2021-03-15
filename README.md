@@ -341,10 +341,16 @@ docker exec -t -i flux_retour_cfas_server bash -c "yarn stats"
 
 ### Jobs de vérification et clean des données
 
-- Pour valider et marquer les SIRET et UAI des statuts candidats en base :
+- Pour valider et marquer les SIRET des statuts candidats en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c "yarn siret-uai:check-validity"
+docker exec -t -i flux_retour_cfas_server bash -c "yarn siret:check-validity"
+```
+
+- Pour valider et marquer les UAI des statuts candidats en base :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn uai:check-validity"
 ```
 
 - Pour clean les SIRET invalides (comportant espaces et points) en base :
