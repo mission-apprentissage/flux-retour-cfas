@@ -1,6 +1,8 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { reseauxCfas, jobNames } = require("../../common/model/constants");
+const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
+const { administrator } = require("../../common/roles");
 
 module.exports = () => {
   const router = express.Router();
