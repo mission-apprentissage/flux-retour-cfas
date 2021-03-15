@@ -39,10 +39,10 @@ const LoginPage = () => {
     <Center background="bluefrance" height="100vh" verticalAlign="center">
       <Stack align="center">
         <Flex align="center" mb="5">
-          <Text fontSize="beta" fontWeight="bold" color="white" mr="5">
+          <Text fontSize="beta" fontWeight="700" color="white" mr="5">
             <i className="ri-shield-star-fill"></i>
           </Text>
-          <Text fontSize="beta" fontWeight="bold" color="white">
+          <Text fontSize="beta" fontWeight="700" color="white">
             Tableau de bord - Flux Cfas
           </Text>
         </Flex>

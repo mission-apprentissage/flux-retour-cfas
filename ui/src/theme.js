@@ -179,7 +179,6 @@ const fonts = {
 const styles = {
   global: {
     "html, body": {
-      fontSize: `${rootFontSizePx}px`,
       fontFamily: "Inter",
       background: "white",
       color: "bluefrance",
@@ -189,19 +188,19 @@ const styles = {
 
 const space = {
   0: "0",
-  "1v": `${4 / rootFontSizePx}rem`,
-  "1w": `${8 / rootFontSizePx}rem`,
-  "3v": `${12 / rootFontSizePx}rem`,
-  "2w": `${16 / rootFontSizePx}rem`,
-  "3w": `${24 / rootFontSizePx}rem`,
-  "4w": `${32 / rootFontSizePx}rem`,
-  "5w": `${40 / rootFontSizePx}rem`,
-  "6w": `${48 / rootFontSizePx}rem`,
-  "7w": `${56 / rootFontSizePx}rem`,
-  "8w": `${64 / rootFontSizePx}rem`,
-  "9w": `${72 / rootFontSizePx}rem`,
-  "12w": `${96 / rootFontSizePx}rem`,
-  "15w": `${120 / rootFontSizePx}rem`,
+  "1v": "4px",
+  "1w": "8px",
+  "3v": "12px",
+  "2w": "16px",
+  "3w": "24px",
+  "4w": "32px",
+  "5w": "40px",
+  "6w": "48px",
+  "7w": "56px",
+  "8w": "64px",
+  "9w": "72px",
+  "12w": "96px",
+  "15w": "120px",
 };
 
 const theme = extendTheme({ fonts, colors, styles, fontSizes, textStyles, space });

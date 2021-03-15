@@ -34,7 +34,7 @@ const TableauDeBordPage = ({ effectifs, filters, setFilters, loading, error }) =
   return (
     <Page>
       <PageHeader title={pageTitle}>
-        <Text color="grey.800" fontWeight="bold" textAlign="center" marginTop="1w">
+        <Text color="grey.800" fontWeight="700" textAlign="center" marginTop="1w">
           <span>Les indices affichés concernent {dataStats?.nbEtablissements} centres de formation</span>
           &nbsp;
           <EnSavoirPlusModal />
