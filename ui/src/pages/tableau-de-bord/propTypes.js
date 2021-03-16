@@ -16,10 +16,7 @@ export const effectifsPropType = PropTypes.shape({
 });
 
 export const filtersPropType = PropTypes.shape({
-  periode: {
-    startDate: PropTypes.instanceOf(Date),
-    endDate: PropTypes.instanceOf(Date),
-  },
+  date: PropTypes.instanceOf(Date),
   cfa: PropTypes.shape({
     siret_etablissement: PropTypes.string.isRequired,
     nom_etablissement: PropTypes.string.isRequired,

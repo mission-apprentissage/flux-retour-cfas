@@ -1,8 +1,9 @@
 import { Center, Divider, HStack, Skeleton, Stack, Text } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
 import { _post } from "../../../../common/httpClient";
-import { effectifsPropType, filtersPropType } from "../../propTypes";
+import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "../generic/EffectifsSection";
 import InfoCfaSection from "./InfoCfaSection";
 import RepartionCfaNiveauAnneesSection from "./RepartionCfaNiveauAnneesSection";
@@ -16,7 +17,7 @@ const CfaViewError = () => (
   </Center>
 );
 
-const CfaView = ({ effectifs, filters }) => {
+const CfaView = ({ effectifs, cfaSiret }) => {
   const [dataCfa, setDataCfa] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,7 +26,7 @@ const CfaView = ({ effectifs, filters }) => {
     const fetchInfosCfa = async () => {
       setLoading(true);
       try {
-        const response = await _post("/api/dashboard/cfa/", { siret: filters.cfa.siret_etablissement });
+        const response = await _post("/api/dashboard/cfa/", { siret: cfaSiret });
         setDataCfa(response);
         setError(null);
       } catch (err) {
@@ -36,14 +37,8 @@ const CfaView = ({ effectifs, filters }) => {
       }
     };
 
-    if (
-      filters.periode.startDate &&
-      filters.periode.endDate &&
-      (filters.cfa || filters.territoire || filters.formation)
-    ) {
-      fetchInfosCfa();
-    }
-  }, [filters]);
+    fetchInfosCfa();
+  }, [cfaSiret]);
 
   return (
     <Stack spacing="4w">
@@ -59,7 +54,7 @@ const CfaView = ({ effectifs, filters }) => {
 
 CfaView.propTypes = {
   effectifs: effectifsPropType,
-  filters: filtersPropType.isRequired,
+  cfaSiret: PropTypes.string.isRequired,
 };
 
 export default CfaView;

@@ -9,8 +9,8 @@ import PeriodeFilter from "./periode/PeriodeFilter";
 import TerritoireFilter from "./territoire/TerritoireFilter";
 
 const TableauDeBordFilters = ({ filters, setFilters }) => {
-  const handlePeriodeFilterChange = ({ startDate, endDate }) => {
-    setFilters({ ...filters, periode: { startDate, endDate } });
+  const handlePeriodeFilterChange = (date) => {
+    setFilters({ ...filters, date });
   };
 
   const handleTerritoireFilterChange = (territoire) => {
@@ -27,7 +27,7 @@ const TableauDeBordFilters = ({ filters, setFilters }) => {
 
   return (
     <HStack spacing="2w" mt="2w" justifyContent="center">
-      <PeriodeFilter value={filters.periode} onChange={handlePeriodeFilterChange} />
+      <PeriodeFilter value={filters.date} onChange={handlePeriodeFilterChange} />
       <TerritoireFilter value={filters.territoire} onChange={handleTerritoireFilterChange} />
       <CfasFilter value={filters.cfa} onChange={handleCfaFilterChange} />
       <FormationFilter value={filters.formation} onChange={handleFormationFilterChange} />
