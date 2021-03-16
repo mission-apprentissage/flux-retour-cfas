@@ -28,8 +28,8 @@ const mapEffectifsData = (effectifsData) => {
 // map filters to the expected body shape in our API and filter out null values
 const buildSearchRequestBody = (filters) => {
   const flattenedFilters = {
-    startDate: filters.date.toISOString(),
-    endDate: subYears(filters.date, 1).toISOString(),
+    startDate: subYears(filters.date, 1).toISOString(),
+    endDate: filters.date.toISOString(),
     etablissement_num_region: filters.territoire?.type === TERRITOIRE_TYPES.region ? filters.territoire.code : null,
     etablissement_num_departement:
       filters.territoire?.type === TERRITOIRE_TYPES.departement ? filters.territoire.code : null,
