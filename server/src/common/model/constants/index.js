@@ -99,7 +99,8 @@ const jobNames = {
   clearStatutsCandidats: "clear-statuts-candidats",
   clearLogs: "clear-logs",
   clearAll: "clear-all",
-  checkSiretAndUaiValidity: "check-siret-and-uai-validity",
+  checkSiretValidity: "check-siret-validity",
+  checkUaiValidity: "check-uai-validity",
 };
 
 module.exports = {
