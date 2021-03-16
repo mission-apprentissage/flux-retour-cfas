@@ -4,7 +4,6 @@ const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
-const { getSiretInfo } = require("../../common/apis/apiTablesCorrespondances");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { existsFormation, createFormation } = require("./formations")();
 
@@ -151,10 +150,6 @@ const updateStatut = async (existingItemId, toUpdate) => {
 };
 
 const createStatutCandidat = async (itemToCreate) => {
-  // if statut candidat établissement has a VALID siret, try to retrieve location information in Tables Correspondances API
-  const etablissementDataFromSiret =
-    validateSiret(itemToCreate.siret_etablissement) && (await getSiretInfo(itemToCreate.siret_etablissement));
-
   // if statut candidat établissement has a VALID siret or uai, try to retrieve information in Referentiel CFAs
   const etablissementInReferentielCfaFromSiretOrUai =
     (validateSiret(itemToCreate.siret_etablissement) &&
@@ -201,22 +196,6 @@ const createStatutCandidat = async (itemToCreate) => {
     periode_formation: itemToCreate.periode_formation,
     annee_formation: itemToCreate.annee_formation,
     source: itemToCreate.source,
-
-    // add location data of etablissement if found
-    ...(etablissementDataFromSiret
-      ? {
-          etablissement_adresse: etablissementDataFromSiret.adresse,
-          etablissement_code_postal: etablissementDataFromSiret.code_postal,
-          etablissement_localite: etablissementDataFromSiret.localite,
-          etablissement_geo_coordonnees: etablissementDataFromSiret.geo_coordonnees,
-          etablissement_num_region: etablissementDataFromSiret.region_implantation_code,
-          etablissement_nom_region: etablissementDataFromSiret.region_implantation_nom,
-          etablissement_num_departement: etablissementDataFromSiret.num_departement,
-          etablissement_nom_departement: etablissementDataFromSiret.nom_departement,
-          etablissement_num_academie: etablissementDataFromSiret.num_academie,
-          etablissement_nom_academie: etablissementDataFromSiret.nom_academie,
-        }
-      : {}),
 
     // add network of etablissement if found in ReferentielCfa
     ...(etablissementInReferentielCfaFromSiretOrUai

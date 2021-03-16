@@ -11,13 +11,11 @@ const {
   simpleProspectStatut,
 } = require("../../../data/sample");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
-const { dataForGetSiretInfo } = require("../../../data/apiTablesDeCorrespondances");
 const { reseauxCfas } = require("../../../../src/common/model/constants");
-const { nockGetSiretInfo, nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
+const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 
 integrationTests(__filename, () => {
   beforeEach(() => {
-    nockGetSiretInfo();
     nockGetCfdInfo();
   });
 
@@ -582,30 +580,8 @@ integrationTests(__filename, () => {
 
       const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: "invalid-siret" };
       const createdStatut = await createStatutCandidat(statutWithInvalidSiret);
-      const {
-        siret_etablissement_valid,
-        etablissement_adresse,
-        etablissement_code_postal,
-        etablissement_localite,
-        etablissement_geo_coordonnees,
-        etablissement_num_region,
-        etablissement_nom_region,
-        etablissement_num_departement,
-        etablissement_nom_departement,
-        etablissement_num_academie,
-        etablissement_nom_academie,
-      } = createdStatut;
-      assert.strictEqual(siret_etablissement_valid, false);
-      assert.strictEqual(etablissement_adresse, null);
-      assert.strictEqual(etablissement_code_postal, null);
-      assert.strictEqual(etablissement_localite, null);
-      assert.strictEqual(etablissement_geo_coordonnees, null);
-      assert.strictEqual(etablissement_num_region, null);
-      assert.strictEqual(etablissement_nom_region, null);
-      assert.strictEqual(etablissement_num_departement, null);
-      assert.strictEqual(etablissement_nom_departement, null);
-      assert.strictEqual(etablissement_num_academie, null);
-      assert.strictEqual(etablissement_nom_academie, null);
+
+      assert.strictEqual(createdStatut.siret_etablissement_valid, false);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid et qu'on fetch les données de localisation associées ", async () => {
@@ -615,30 +591,7 @@ integrationTests(__filename, () => {
       const statutWithValidSiret = { ...createRandomStatutCandidat(), siret_etablissement: validSiret };
       const createdStatut = await createStatutCandidat(statutWithValidSiret);
 
-      const {
-        siret_etablissement_valid,
-        etablissement_adresse,
-        etablissement_code_postal,
-        etablissement_localite,
-        etablissement_geo_coordonnees,
-        etablissement_num_region,
-        etablissement_nom_region,
-        etablissement_num_departement,
-        etablissement_nom_departement,
-        etablissement_num_academie,
-        etablissement_nom_academie,
-      } = createdStatut;
-      assert.strictEqual(siret_etablissement_valid, true);
-      assert.strictEqual(etablissement_adresse, dataForGetSiretInfo.adresse);
-      assert.strictEqual(etablissement_code_postal, dataForGetSiretInfo.code_postal);
-      assert.strictEqual(etablissement_localite, dataForGetSiretInfo.localite);
-      assert.strictEqual(etablissement_geo_coordonnees, dataForGetSiretInfo.geo_coordonnees);
-      assert.strictEqual(etablissement_num_region, dataForGetSiretInfo.region_implantation_code);
-      assert.strictEqual(etablissement_nom_region, dataForGetSiretInfo.region_implantation_nom);
-      assert.strictEqual(etablissement_num_departement, dataForGetSiretInfo.num_departement);
-      assert.strictEqual(etablissement_nom_departement, dataForGetSiretInfo.nom_departement);
-      assert.strictEqual(etablissement_num_academie, dataForGetSiretInfo.num_academie);
-      assert.strictEqual(etablissement_nom_academie, dataForGetSiretInfo.nom_academie);
+      assert.strictEqual(createdStatut.siret_etablissement_valid, true);
     });
 
     it("Vérifie la création d'un statut avec un uai invalide", async () => {

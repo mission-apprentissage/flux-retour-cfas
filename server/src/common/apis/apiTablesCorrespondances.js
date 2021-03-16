@@ -23,6 +23,10 @@ const getSiretInfo = async (siret) => {
     const { data } = await axios.post(`${API_ENDPOINT}/siret`, {
       siret,
     });
+
+    if (!data.result.siret) {
+      return null;
+    }
     return data.result;
   } catch (error) {
     logger.error(`getSiretInfo: something went wrong`);
