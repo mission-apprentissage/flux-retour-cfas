@@ -1,5 +1,6 @@
 const { StatutCandidat } = require("../../common/model");
-const { codesStatutsCandidats } = require("../../common/model/constants");
+const { codesStatutsCandidats, reseauxCfas } = require("../../common/model/constants");
+const { asyncForEach } = require("../utils/asyncUtils");
 
 module.exports = () => {
   return {
@@ -10,6 +11,7 @@ module.exports = () => {
     getNbStatutsAbandon,
     getNbDistinctCfasByUai,
     getNbDistinctCfasBySiret,
+    getNetworkStats,
   };
 };
 
@@ -125,6 +127,23 @@ const getAllStats = async (filters = {}) => {
     nbStatutsValid,
     nbStatutsAnneeFormationMissing,
   };
+};
+
+const getNetworkStats = async () => {
+  const networksNames = Object.keys(reseauxCfas).map((r) => reseauxCfas[r].nomReseau);
+  const networksStatutsCandidatsCount = [];
+
+  await asyncForEach(networksNames, async (currentNetworkName) => {
+    const nbStatutsForNetwork = await StatutCandidat.countDocuments({
+      etablissement_reseaux: { $in: [currentNetworkName] },
+    });
+    networksStatutsCandidatsCount.push({
+      nomReseau: currentNetworkName,
+      nbStatutsCandidats: nbStatutsForNetwork,
+    });
+  });
+
+  return networksStatutsCandidatsCount;
 };
 
 const getNbStatutsProspect = async (filters = {}) =>

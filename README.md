@@ -406,8 +406,8 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
 
    5.5 - Vérification des validité de siret `yarn siret-uai:check-validity`
 
-   5.6 - Recherche des infos de localisation des établissements `yarn etablissements-location:retrieve`
+   5.6 - Recherche des infos de localisation des établissements `yarn statutsCandidats:retrieve-location`
 
-   5.7 - Recherche des infos de réseaux des établissements `yarn etablissements-networks:retrieve`
+   5.7 - Recherche des infos de réseaux des établissements `yarn statutsCandidats:retrieve-networks`
 
    5.8 - Recherche des codes CFD des formations `yarn formation:retrieve-from-cfd`

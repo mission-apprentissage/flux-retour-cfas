@@ -8,7 +8,7 @@ import DoubleStatCard from "../DoubleStatCard";
 import PageSectionTitle from "../Page/PageSectionTitle";
 import StatCard from "../StatCard";
 
-const GlobalStats = ({ stats, lastImportDates }) => {
+const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
   return (
     <>
       <Box>
@@ -156,6 +156,16 @@ const GlobalStats = ({ stats, lastImportDates }) => {
           <StatCard label="3 mises à jour" stat={stats.nbDistinctCandidatsWithStatutHistory3} background="info" />
         </HStack>
       </Box>
+      {networksStats && (
+        <Box mt="9w">
+          <PageSectionTitle>Stats Statuts Réseaux</PageSectionTitle>
+          <HStack spacing="2w" mt="3w">
+            {networksStats.map((item, index) => (
+              <StatCard key={index} label={item.nomReseau} stat={item.nbStatutsCandidats} background="bluedark.600" />
+            ))}
+          </HStack>
+        </Box>
+      )}
     </>
   );
 };
@@ -195,6 +205,12 @@ GlobalStats.propTypes = {
     PropTypes.shape({
       source: PropTypes.string,
       date: PropTypes.string,
+    }).isRequired
+  ),
+  networksStats: PropTypes.arrayOf(
+    PropTypes.shape({
+      nomReseau: PropTypes.string,
+      nbStatutsCandidats: PropTypes.number,
     }).isRequired
   ),
 };

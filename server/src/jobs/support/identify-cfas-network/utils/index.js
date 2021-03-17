@@ -1,6 +1,6 @@
 const fs = require("fs-extra");
-const ovhStorageManager = require("../../../common/utils/ovhStorageManager");
-const logger = require("../../../common/logger");
+const ovhStorageManager = require("../../../../common/utils/ovhStorageManager");
+const logger = require("../../../../common/logger");
 
 /**
  * Télécharge le fichier depuis OvhStorage si non présent

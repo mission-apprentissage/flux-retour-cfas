@@ -65,7 +65,7 @@ const reseauxCfas = {
     nomFichier: "cfas-promotrans",
   },
   COMPAGNONS_DU_DEVOIR: {
-    nomReseau: "COMPAGNONS_DU_DEVOIR",
+    nomReseau: "COMPAGNONS DU DEVOIR",
     nomFichier: "cfas-compagnons-du-devoir",
   },
   UIMM: {
@@ -73,8 +73,30 @@ const reseauxCfas = {
     nomFichier: "cfas-uimm",
   },
   BTP_CFA: {
-    nomReseau: "BTP_CFA",
+    nomReseau: "BTP CFA",
     nomFichier: "cfas-btp-cfa",
+  },
+  MFR: {
+    nomReseau: "MFR",
+    nomFichier: "cfas-mfr",
+  },
+};
+
+/**
+ * Noms des ERPs
+ */
+const erps = {
+  YMAG: {
+    nomErp: "Ymag",
+    nomFichier: "referentielCfas_ymag",
+  },
+  GESTI: {
+    nomErp: "Gesti",
+    nomFichier: "referentielCfas_gesti",
+  },
+  SCFORM: {
+    nomErp: "SCForm",
+    nomFichier: "referentielCfas_scform",
   },
 };
 
@@ -91,12 +113,15 @@ const jobNames = {
   seedReferentielCfas: "seed-referentiel-cfas",
   seedRandomizedSample: "seed-randomized-sample",
   identifyNetworkCma: "identify-network-cma",
+  identifyNetworkDuplicates: "identify-network-duplicates",
   formationRetrieveFromCfd: "formation-retrieve-from-cfd",
-  etablissementsRetrieveLocation: "etablissements-retrieve-location",
-  etablissementsRetrieveNetworks: "etablissements-retrieve-networks",
+  statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
+  statutsCandidatsRetrieveNetworks: "statutsCandidats-retrieve-networks",
   createIndexes: "create-indexes",
   clearUsers: "clear-users",
+  clearCfas: "clear-cfas",
   clearStatutsCandidats: "clear-statuts-candidats",
+  clearStatutsCandidatsNetworks: "clear-statuts-candidats-networks",
   clearLogs: "clear-logs",
   clearAll: "clear-all",
   checkSiretValidity: "check-siret-validity",
@@ -109,4 +134,5 @@ module.exports = {
   codesStatutsMajStatutCandidats,
   reseauxCfas,
   jobNames,
+  erps,
 };

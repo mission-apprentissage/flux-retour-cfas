@@ -10,7 +10,10 @@ const GlobalStatsPage = () => {
   let content;
   if (loading) content = <PageSkeleton />;
   if (error) content = <p>Erreur lors du chargement des statistiques</p>;
-  if (data) content = <GlobalStats stats={data.stats} lastImportDates={data.lastImportDates} />;
+  if (data)
+    content = (
+      <GlobalStats stats={data.stats} lastImportDates={data.lastImportDates} networksStats={data.networksStats} />
+    );
 
   return (
     <Page>

@@ -13,7 +13,8 @@ module.exports = ({ stats, userEvents }) => {
     tryCatch(async (req, res) => {
       const allStats = await stats.getAllStats();
       const lastImportDates = await userEvents.getLastImportDatesForSources();
-      return res.json({ stats: allStats, lastImportDates });
+      const networksStats = await stats.getNetworkStats();
+      return res.json({ stats: allStats, lastImportDates, networksStats });
     })
   );
 
