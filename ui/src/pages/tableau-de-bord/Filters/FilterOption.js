@@ -25,7 +25,7 @@ const FilterOption = ({ isSelected = false, onClick, children }) => {
 FilterOption.propTypes = {
   isSelected: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
-  children: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default FilterOption;
