@@ -16,11 +16,11 @@ httpTests(__filename, ({ startServer }) => {
     const response = await httpClient.post("/api/cfas/search", {});
 
     assert.equal(response.status, 400);
-    assert.equal(response.data.message, "query parameter 'searchTerm' is required");
+    assert.equal(response.data.message, '"searchTerm" is required');
   });
 
   it("sends a 200 HTTP empty response when no match", async () => {
-    const response = await httpClient.post(`/api/cfas/search?searchTerm=blabla`, {});
+    const response = await httpClient.post("/api/cfas/search", { searchTerm: "blabla" });
 
     assert.equal(response.status, 200);
     assert.deepEqual(response.data, []);
@@ -34,7 +34,7 @@ httpTests(__filename, ({ startServer }) => {
       siret_etablissement_valid: true,
     }).save();
 
-    const response = await httpClient.post(`/api/cfas/search?searchTerm=${encodeURIComponent("FACULTE")}`, {});
+    const response = await httpClient.post("/api/cfas/search", { searchTerm: "FACULTE" });
 
     assert.equal(response.status, 200);
     assert.equal(response.data.length, 1);

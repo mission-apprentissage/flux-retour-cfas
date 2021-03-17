@@ -5,17 +5,26 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 module.exports = ({ cfas }) => {
   const router = express.Router();
 
+  const searchBodyValidationSchema = Joi.object({
+    searchTerm: Joi.string().min(3).required(),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+  });
+
   router.post(
     "/search",
     tryCatch(async (req, res) => {
-      const { searchTerm } = req.query;
+      const { error } = searchBodyValidationSchema.validate(req.body);
+      const { searchTerm, ...otherFilters } = req.body;
 
-      const { error } = Joi.string().min(3).required().validate(searchTerm);
       if (error) {
-        return res.status(400).json({ message: "query parameter 'searchTerm' is required" });
+        return res.status(400).json({
+          status: "INPUT_VALIDATION_ERROR",
+          message: error.message,
+        });
       }
 
-      const foundCfa = await cfas.searchCfasByNomEtablissement(searchTerm);
+      const foundCfa = await cfas.searchCfasByNomEtablissement(searchTerm, otherFilters);
       return res.json(foundCfa);
     })
   );

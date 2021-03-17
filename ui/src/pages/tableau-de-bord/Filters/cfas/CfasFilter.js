@@ -3,10 +3,11 @@ import React, { useState } from "react";
 
 import { FilterButton, OverlayMenu } from "../../../../common/components";
 import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
+import { filtersPropType } from "../../propTypes";
 import CfaPanel from "./CfasPanel";
 import ReseauxPanel from "./ReseauxPanel";
 
-const CfasFilter = ({ onChange, value }) => {
+const CfasFilter = ({ onChange, value, filters }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onCfaClick = (cfa) => {
@@ -35,7 +36,7 @@ const CfasFilter = ({ onChange, value }) => {
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <MenuTabs tabNames={["Centres de formation", "Réseaux"]}>
-            <CfaPanel onCfaClick={onCfaClick} value={value} />
+            <CfaPanel onCfaClick={onCfaClick} value={value} filters={filters} />
             <ReseauxPanel onReseauClick={onReseauClick} value={value} />
           </MenuTabs>
         </OverlayMenu>
@@ -58,6 +59,7 @@ CfasFilter.propTypes = {
       type: PropTypes.string.isRequired,
     }),
   ]),
+  filters: filtersPropType,
 };
 
 export default CfasFilter;

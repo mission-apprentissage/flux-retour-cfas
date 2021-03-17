@@ -31,7 +31,7 @@ const TableauDeBordFilters = ({ filters, setFilters }) => {
       <HStack spacing="1w">
         <span>Filtrer&nbsp;:</span>
         <PeriodeFilter value={filters.date} onChange={handlePeriodeFilterChange} />
-        <CfasFilter value={filters.cfa} onChange={handleCfaFilterChange} />
+        <CfasFilter value={filters.cfa} onChange={handleCfaFilterChange} filters={filters} />
         <FormationFilter value={filters.formation} onChange={handleFormationFilterChange} />
       </HStack>
     </HStack>

@@ -11,14 +11,18 @@ const SEARCH_RESULTS_LIMIT = 50;
  * @param {string} nomEtablissement
  * @return {[{siret_etablissement: string, nom_etablissement: string}]} Array of CFA information
  */
-const searchCfasByNomEtablissement = async (nomEtablissement) => {
+const searchCfasByNomEtablissement = async (nomEtablissement, otherFilters) => {
   if (!nomEtablissement) {
     throw new Error("param nomEtablissement is required");
   }
 
   const found = await StatutCandidatModel.aggregate([
     {
-      $match: { $text: { $search: nomEtablissement }, siret_etablissement_valid: true },
+      $match: {
+        $text: { $search: nomEtablissement },
+        siret_etablissement_valid: true,
+        ...otherFilters,
+      },
     },
     {
       $group: {
