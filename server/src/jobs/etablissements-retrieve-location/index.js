@@ -5,29 +5,31 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { getSiretInfo } = require("../../common/apis/apiTablesCorrespondances");
 const { jobNames } = require("../../common/model/constants");
 
-// Map containing etablissementsData - for limiting API Calls
-const etablissementsInfosCache = new Map();
-
 /**
  * Ce script permet de récupérer les données de localisation d'établissements
- * pour chaque statutCandidat ayant un SIRET
+ * pour chaque statutCandidat ayant un SIRET valide
  */
 runScript(async () => {
   logger.info("Run Location Retrieving Job");
 
-  // Parse all statutsCandidat with siret_etablissement
-  const statutsWithSiret = await StatutCandidat.find({ siret_etablissement_valid: true });
+  // Find all valid SIRETs in db
+  const allValidSirets = await StatutCandidat.distinct("siret_etablissement", { siret_etablissement_valid: true });
+  logger.info(`${allValidSirets.length} valid SIRET found in DB`);
 
-  await asyncForEach(statutsWithSiret, async (statutCandidat) => {
-    logger.info(`Searching location data for SIRET ${statutCandidat.siret_etablissement}`);
+  let updatedStatutsCandidatsCount = 0;
 
-    // Get etablissementData from API Tables de correspondance or from cache if already fetched
-    const etablissementDataFromSiret = await findEtablissementData(statutCandidat.siret_etablissement);
+  await asyncForEach(allValidSirets, async (validSiret) => {
+    // Get etablissementData from API Tables de correspondance
+    const etablissementDataFromSiret = await getSiretInfo(validSiret);
 
-    if (etablissementDataFromSiret) {
-      // Update in db
-      await StatutCandidat.findByIdAndUpdate(
-        statutCandidat._id,
+    if (!etablissementDataFromSiret) {
+      logger.warn(`No data found in Tables de Co for SIRET ${validSiret}`);
+      return;
+    }
+
+    try {
+      const updateResult = await StatutCandidat.updateMany(
+        { siret_etablissement: validSiret },
         {
           etablissement_adresse: etablissementDataFromSiret.adresse,
           etablissement_code_postal: etablissementDataFromSiret.code_postal,
@@ -39,30 +41,16 @@ runScript(async () => {
           etablissement_nom_departement: etablissementDataFromSiret.nom_departement,
           etablissement_num_academie: etablissementDataFromSiret.num_academie,
           etablissement_nom_academie: etablissementDataFromSiret.nom_academie,
-        },
-        { new: true }
+        }
       );
-      logger.info(`Location data updated in db for siret ${statutCandidat.siret_etablissement}`);
-    } else {
-      logger.info(`No data found in Tables de Co for siret ${statutCandidat.siret_etablissement}`);
+      updatedStatutsCandidatsCount += updateResult.nModified;
+      logger.info(`Location data updated in db for SIRET ${validSiret}`);
+    } catch (err) {
+      logger.error(`Error while updating etablissement information with SIRET ${validSiret}`);
+      logger.error(err);
     }
   });
 
+  logger.info(`${updatedStatutsCandidatsCount} statuts candidats updated with etablissement location information`);
   logger.info("End Location Retrieving Job");
 }, jobNames.etablissementsRetrieveLocation);
-
-/**
- * Search etablissement data from Siret
- * Use a local Map
- * @param {*} siret
- */
-const findEtablissementData = async (siret) => {
-  // Add to Map from API Tables de co if not present
-  if (!etablissementsInfosCache.get(siret)) {
-    const etablissementDataFromSiret = await getSiretInfo(siret);
-    if (!etablissementDataFromSiret) return null;
-    etablissementsInfosCache.set(siret, etablissementDataFromSiret);
-  }
-
-  return etablissementsInfosCache.get(siret);
-};
