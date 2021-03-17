@@ -41,7 +41,7 @@ const exit = async (rawError) => {
 };
 
 module.exports = {
-  runScript: async (job, jobName = null) => {
+  runScript: async (job, jobName) => {
     try {
       const launchDate = new Date();
 

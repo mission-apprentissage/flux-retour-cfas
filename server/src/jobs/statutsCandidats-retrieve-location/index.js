@@ -53,4 +53,4 @@ runScript(async () => {
 
   logger.info(`${updatedStatutsCandidatsCount} statuts candidats updated with etablissement location information`);
   logger.info("End Location Retrieving Job");
-}, jobNames.etablissementsRetrieveLocation);
+}, jobNames.statutsCandidatsRetrieveLocation);
