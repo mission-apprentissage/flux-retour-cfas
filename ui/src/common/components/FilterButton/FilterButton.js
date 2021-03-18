@@ -2,7 +2,9 @@ import { Box, Button } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-const FilterButton = ({ children, icon, onClick, displayClearIcon = false, clearIconOnClick }) => {
+const noop = () => {};
+
+const FilterButton = ({ children, icon, onClick, displayClearIcon = false, clearIconOnClick = noop }) => {
   return (
     <Button background="bluesoft.100" onClick={onClick} fontWeight="400">
       {icon && <Box fontSize="epsilon" as="i" className={icon} marginRight="1v" />}
@@ -30,7 +32,7 @@ FilterButton.propTypes = {
   displayClearIcon: PropTypes.bool,
   icon: PropTypes.string,
   onClick: PropTypes.func.isRequired,
-  clearIconOnClick: PropTypes.func.isRequired,
+  clearIconOnClick: PropTypes.func,
 };
 
 export default FilterButton;

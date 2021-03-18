@@ -19,7 +19,7 @@ const PageHeader = ({ title, children }) => {
 };
 
 PageHeader.propTypes = {
-  title: PropTypes.string.isRequired,
+  title: PropTypes.node.isRequired,
   children: PropTypes.node,
 };
 
