@@ -28,6 +28,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cfa du roanna",
         etablissement_num_departement: "15",
+        etablissement_num_region: "123",
         siret_etablissement: "80420010000023",
         siret_etablissement_valid: true,
       },
@@ -130,6 +131,14 @@ integrationTests(__filename, () => {
     it(`returns list of CFA matching searchTerm AND additional filter (etablissement_num_departement)`, async () => {
       const actual = await searchCfasByNomEtablissement("CFA", { etablissement_num_departement: "75" });
       const expected = [statutsSeed[3]];
+
+      assert.equal(actual.length, 1);
+      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
+    });
+
+    it(`returns list of CFA matching searchTerm AND additional filter (etablissement_num_region)`, async () => {
+      const actual = await searchCfasByNomEtablissement("CFA", { etablissement_num_region: "123" });
+      const expected = [statutsSeed[2]];
 
       assert.equal(actual.length, 1);
       assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
