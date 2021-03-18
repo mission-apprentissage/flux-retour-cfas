@@ -18,14 +18,6 @@ const RegionOptions = ({ regions, onRegionClick, currentFilter }) => {
     <>
       <SearchInput placeholder="Saisissez une région" value={regionSearchTerm} onChange={setRegionSearchTerm} />
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-        <FilterOption
-          onClick={() => {
-            onRegionClick(null);
-          }}
-          isSelected={currentFilter === null}
-        >
-          Toute la France
-        </FilterOption>
         {filteredRegions.map((region) => (
           <FilterOption
             key={region.code}
