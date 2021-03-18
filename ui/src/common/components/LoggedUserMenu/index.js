@@ -30,6 +30,11 @@ const LoggedUserMenu = () => {
     setAuth(null);
     history.push("/login");
   };
+
+  if (!auth) {
+    return null;
+  }
+
   const isAdmin = isUserAdmin(auth);
 
   return (
