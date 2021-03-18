@@ -26,11 +26,14 @@ const TableauDeBordFilters = ({ filters, setFilters }) => {
   };
 
   return (
-    <HStack spacing="2w" mt="2w" justifyContent="center">
-      <PeriodeFilter value={filters.date} onChange={handlePeriodeFilterChange} />
+    <HStack spacing="4w" mt="2w" justifyContent="center">
       <TerritoireFilter value={filters.territoire} onChange={handleTerritoireFilterChange} />
-      <CfasFilter value={filters.cfa} onChange={handleCfaFilterChange} />
-      <FormationFilter value={filters.formation} onChange={handleFormationFilterChange} />
+      <HStack spacing="1w">
+        <span>Filtrer&nbsp;:</span>
+        <PeriodeFilter value={filters.date} onChange={handlePeriodeFilterChange} />
+        <CfasFilter value={filters.cfa} onChange={handleCfaFilterChange} />
+        <FormationFilter value={filters.formation} onChange={handleFormationFilterChange} />
+      </HStack>
     </HStack>
   );
 };
