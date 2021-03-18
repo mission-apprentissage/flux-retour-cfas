@@ -22,14 +22,6 @@ const DepartementOptions = ({ departements, onDepartementClick, currentFilter })
         onChange={setDepartementSearchTerm}
       />
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-        <FilterOption
-          onClick={() => {
-            onDepartementClick(null);
-          }}
-          isSelected={currentFilter === null}
-        >
-          Toute la France
-        </FilterOption>
         {filteredDepartements.map((filter) => (
           <FilterOption
             key={filter.code}
