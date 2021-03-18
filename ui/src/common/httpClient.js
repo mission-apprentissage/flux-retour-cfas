@@ -44,7 +44,7 @@ const getHeaders = () => {
 
   return {
     Accept: "application/json",
-    ...(auth.sub !== "anonymous" ? { Authorization: `Bearer ${auth.access_token}` } : {}),
+    ...(auth ? { Authorization: `Bearer ${auth.access_token}` } : {}),
     "Content-Type": "application/json",
   };
 };
@@ -77,15 +77,6 @@ export const _delete = (path) => {
     method: "DELETE",
     headers: getHeaders(),
   }).then((res) => handleResponse(path, res));
-};
-
-export const buildLink = (path) => {
-  let auth = getAuth();
-  if (auth.sub !== "anonymous") {
-    //TODO better handle params
-    return `${path}?access_token=${auth.access_token}`;
-  }
-  return path;
 };
 
 export const subscribeToHttpEvent = (eventName, callback) => emitter.on(eventName, callback);

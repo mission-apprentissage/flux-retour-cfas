@@ -1,7 +1,6 @@
 import * as React from "react";
 import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 
-import { anonymous } from "./common/auth";
 import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
@@ -21,7 +20,7 @@ const App = () => {
         <Route exact path="/login" component={LoginPage} />
 
         <PrivateRoute exact path="/">
-          <Redirect to={isAdmin ? "/stats" : `/stats/${auth.sub}`} />
+          <Redirect to={isAdmin ? "/stats" : `/stats/${auth?.sub}`} />
         </PrivateRoute>
 
         <AdminRoute path="/stats" exact component={GlobalStatsPage} />
@@ -40,9 +39,9 @@ export default App;
 
 const PrivateRoute = (routeProps) => {
   const [auth] = useAuth();
-  const notLoggedIn = auth.sub === anonymous.sub;
+  const isLoggedIn = Boolean(auth?.sub);
 
-  return notLoggedIn ? <Redirect to="/login" /> : <Route {...routeProps} />;
+  return isLoggedIn ? <Route {...routeProps} /> : <Redirect to="/login" />;
 };
 
 const AdminRoute = (routeProps) => {
