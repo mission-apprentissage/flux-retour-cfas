@@ -11,20 +11,17 @@ import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import UserStatsPage from "./pages/user-stats";
 
 const App = () => {
-  const [auth] = useAuth();
-  const isAdmin = isUserAdmin(auth);
-
   return (
     <Router>
       <Switch>
         <Route exact path="/login" component={LoginPage} />
+        <Route path="/tableau-de-bord" exact component={TableauDeBordPage} />
 
-        <PrivateRoute exact path="/">
-          <Redirect to={isAdmin ? "/stats" : `/stats/${auth?.sub}`} />
-        </PrivateRoute>
+        <Route exact path="/">
+          <Redirect to="/tableau-de-bord" />
+        </Route>
 
         <AdminRoute path="/stats" exact component={GlobalStatsPage} />
-        <AdminRoute path="/tableau-de-bord" exact component={TableauDeBordPage} />
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
         <PrivateRoute path="/analytics/" component={AnalyticsPage} />
         <PrivateRoute path="/settings/jobEvents" component={JobEventsPage} />
