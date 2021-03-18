@@ -1,3 +1,4 @@
+import { Box } from "@chakra-ui/layout";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
@@ -31,13 +32,9 @@ const TerritoireFilter = ({ value, onChange, regions, departements }) => {
 
   return (
     <div>
-      <FilterButton
-        onClick={() => setIsOpen(!isOpen)}
-        icon="ri-map-pin-2-fill"
-        displayClearIcon={!!value}
-        clearIconOnClick={() => onChange(null)}
-      >
+      <FilterButton onClick={() => setIsOpen(!isOpen)} icon="ri-map-pin-2-fill">
         {buttonLabel}
+        <Box fontSize="delta" as="i" className="ri-arrow-down-s-line" marginLeft="1v" />
       </FilterButton>
 
       {isOpen && (
