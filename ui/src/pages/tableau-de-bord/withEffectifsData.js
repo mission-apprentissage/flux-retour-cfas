@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import { subYears } from "date-fns";
 import React, { useEffect, useState } from "react";
 
@@ -50,43 +49,46 @@ const initialFiltersState = {
   cfa: null,
 };
 
-const withEffectifsData = (Component) => (props) => {
-  const [effectifs, setEffectifs] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [filters, setFilters] = useState(initialFiltersState);
+const withEffectifsData = (Component) => {
+  const WithEffectifsData = (props) => {
+    const [effectifs, setEffectifs] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [filters, setFilters] = useState(initialFiltersState);
 
-  const searchRequestBody = buildSearchRequestBody(filters);
-  useEffect(() => {
-    const fetchEffectifs = async () => {
-      setLoading(true);
-      try {
-        const response = await _post("/api/dashboard/effectifs", searchRequestBody);
-        setEffectifs(mapEffectifsData(response));
-        setError(null);
-      } catch (err) {
-        setError(err);
-        setEffectifs(null);
-      } finally {
-        setLoading(false);
+    const searchRequestBody = buildSearchRequestBody(filters);
+    useEffect(() => {
+      const fetchEffectifs = async () => {
+        setLoading(true);
+        try {
+          const response = await _post("/api/dashboard/effectifs", searchRequestBody);
+          setEffectifs(mapEffectifsData(response));
+          setError(null);
+        } catch (err) {
+          setError(err);
+          setEffectifs(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      if (filters.cfa || filters.territoire || filters.formation) {
+        fetchEffectifs();
       }
-    };
+    }, [JSON.stringify(searchRequestBody)]);
 
-    if (filters.cfa || filters.territoire || filters.formation) {
-      fetchEffectifs();
-    }
-  }, [JSON.stringify(searchRequestBody)]);
-
-  return (
-    <Component
-      {...props}
-      filters={filters}
-      setFilters={setFilters}
-      effectifs={effectifs}
-      loading={loading}
-      error={error}
-    />
-  );
+    return (
+      <Component
+        {...props}
+        filters={filters}
+        setFilters={setFilters}
+        effectifs={effectifs}
+        loading={loading}
+        error={error}
+      />
+    );
+  };
+  return WithEffectifsData;
 };
 
 export default withEffectifsData;
