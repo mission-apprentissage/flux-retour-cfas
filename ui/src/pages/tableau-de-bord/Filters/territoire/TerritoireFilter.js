@@ -22,18 +22,15 @@ const TerritoireFilter = ({ value, onChange, regions, departements }) => {
     setIsOpen(false);
   };
 
-  const chosenFilter = !value
-    ? null
-    : value.type === TERRITOIRE_TYPES.region
-    ? regions.find((region) => region.code === value.code)
-    : departements.find((departement) => departement.code === value.code);
-
-  const buttonLabel = chosenFilter ? chosenFilter.nom : "Toute la France";
+  const chosenFilter =
+    value.type === TERRITOIRE_TYPES.region
+      ? regions.find((region) => region.code === value.code)
+      : departements.find((departement) => departement.code === value.code);
 
   return (
     <div>
       <FilterButton onClick={() => setIsOpen(!isOpen)} icon="ri-map-pin-2-fill">
-        {buttonLabel}
+        {chosenFilter?.nom}
         <Box fontSize="delta" as="i" className="ri-arrow-down-s-line" marginLeft="1v" />
       </FilterButton>
 
