@@ -50,7 +50,7 @@ const getHeaders = () => {
 };
 
 export const _get = (path) => {
-  return fetch(`${path}`, {
+  return fetch(path, {
     method: "GET",
     headers: getHeaders(),
   }).then((res) => handleResponse(path, res));

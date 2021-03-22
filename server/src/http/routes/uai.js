@@ -1,20 +1,18 @@
 const express = require("express");
-const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
-const { administrator } = require("../../common/roles");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { StatutCandidat } = require("../../common/model");
 const { codesStatutsCandidats } = require("../../common/model/constants");
 
-module.exports = ({ userEvents }) => {
+module.exports = ({ userEvents, cfas }) => {
   const router = express.Router();
 
-  router.get(
-    "/statutsCandidats/uai/:uai",
-    permissionsMiddleware([administrator]),
+  router.post(
+    "/search",
     tryCatch(async (req, res) => {
-      const { uai } = req.params;
+      const { uai } = req.body;
 
       const nbUsersEventsData = await userEvents.countDataForUai(uai);
+      const cfaName = await cfas.getCfaNameByUai(uai);
       const nbProspects = await StatutCandidat.countDocuments({
         statut_apprenant: codesStatutsCandidats.prospect,
         uai_etablissement: uai,
@@ -33,6 +31,7 @@ module.exports = ({ userEvents }) => {
       });
 
       return res.json({
+        cfaName,
         nbUsersEventsData,
         nbProspects,
         nbInscrits,

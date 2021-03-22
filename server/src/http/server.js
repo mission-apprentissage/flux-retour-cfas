@@ -15,7 +15,7 @@ const loginRoute = require("./routes/login");
 const statsRoute = require("./routes/stats");
 const userEventsRoute = require("./routes/userEvents");
 const jobEventsRoute = require("./routes/jobEvents");
-const analyticsRoute = require("./routes/analytics");
+const uaiRoute = require("./routes/uai");
 const configRoute = require("./routes/config");
 const referentielRoute = require("./routes/referentiel");
 const dashboardRoute = require("./routes/dashboard");
@@ -46,7 +46,7 @@ module.exports = async (components) => {
   app.use("/api/cfas", cfasRoute(components));
   app.use("/api/userEvents", checkJwtToken, adminOnly, userEventsRoute(components));
   app.use("/api/jobEvents", checkJwtToken, adminOnly, jobEventsRoute(components));
-  app.use("/api/analytics", checkJwtToken, analyticsRoute(components));
+  app.use("/api/uai", uaiRoute(components));
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());
   app.use("/api/referentiel", checkJwtToken, adminOnly, referentielRoute());
   app.use("/api/dashboard", dashboardRoute(components));

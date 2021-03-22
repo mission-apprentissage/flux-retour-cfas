@@ -2,6 +2,7 @@ const { StatutCandidat: StatutCandidatModel } = require("../model");
 
 module.exports = () => ({
   searchCfasByNomEtablissement,
+  getCfaNameByUai,
 });
 
 const SEARCH_RESULTS_LIMIT = 50;
@@ -45,4 +46,10 @@ const searchCfasByNomEtablissement = async (nomEtablissement, otherFilters) => {
   ]);
 
   return found;
+};
+
+const getCfaNameByUai = async (uai) => {
+  const statutCandidatWithUai = await StatutCandidatModel.findOne({ uai_etablissement: uai });
+
+  return statutCandidatWithUai ? statutCandidatWithUai.nom_etablissement : null;
 };

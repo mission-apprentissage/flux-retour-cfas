@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-d
 
 import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
-import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import LoginPage from "./pages/login/LoginPage";
+import RechercheUaiPage from "./pages/recherche-uai/RechercheUaiPage";
 import JobEventsPage from "./pages/settings/JobEventsPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
@@ -23,7 +23,7 @@ const App = () => {
 
         <AdminRoute path="/stats" exact component={GlobalStatsPage} />
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
-        <PrivateRoute path="/analytics/" component={AnalyticsPage} />
+        <PrivateRoute path="/recherche-uai" component={RechercheUaiPage} />
         <PrivateRoute path="/settings/jobEvents" component={JobEventsPage} />
 
         <Route component={() => <div>404</div>} />
