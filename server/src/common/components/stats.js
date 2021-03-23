@@ -9,6 +9,7 @@ module.exports = () => {
     getNbStatutsInscrit,
     getNbStatutsApprenti,
     getNbStatutsAbandon,
+    getNbStatutsAbandonProspects,
     getNbDistinctCfasByUai,
     getNbDistinctCfasBySiret,
     getNetworkStats,
@@ -26,6 +27,7 @@ const getAllStats = async (filters = {}) => {
   const nbStatutsInscrits = await getNbStatutsInscrit(filters);
   const nbStatutsApprentis = await getNbStatutsApprenti(filters);
   const nbStatutsAbandon = await getNbStatutsAbandon(filters);
+  const nbStatutsAbandonProspects = await getNbStatutsAbandonProspects(filters);
 
   const nbDistinctCandidatsWithIne = await getNbDistinctCandidatsWithIne(filters);
   const nbDistinctCandidatsWithoutIne = await getNbDistinctCandidatsWithoutIne(filters);
@@ -98,6 +100,7 @@ const getAllStats = async (filters = {}) => {
     nbStatutsInscrits,
     nbStatutsApprentis,
     nbStatutsAbandon,
+    nbStatutsAbandonProspects,
     nbDistinctCandidatsWithIne,
     nbDistinctCandidatsWithoutIne,
     nbDistinctCandidatsTotal: nbDistinctCandidatsWithIne + nbDistinctCandidatsWithoutIne,
@@ -167,6 +170,12 @@ const getNbStatutsApprenti = async (filters = {}) =>
 const getNbStatutsAbandon = async (filters = {}) =>
   await StatutCandidat.countDocuments({
     statut_apprenant: codesStatutsCandidats.abandon,
+    ...filters,
+  });
+
+const getNbStatutsAbandonProspects = async (filters = {}) =>
+  await StatutCandidat.countDocuments({
+    statut_apprenant: codesStatutsCandidats.abandonProspects,
     ...filters,
   });
 

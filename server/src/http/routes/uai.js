@@ -29,6 +29,10 @@ module.exports = ({ userEvents, cfas }) => {
         statut_apprenant: codesStatutsCandidats.abandon,
         uai_etablissement: uai,
       });
+      const nbAbandonProspects = await StatutCandidat.countDocuments({
+        statut_apprenant: codesStatutsCandidats.abandonProspects,
+        uai_etablissement: uai,
+      });
 
       return res.json({
         cfaName,
@@ -37,6 +41,7 @@ module.exports = ({ userEvents, cfas }) => {
         nbInscrits,
         nbApprentis,
         nbAbandon,
+        nbAbandonProspects,
       });
     })
   );

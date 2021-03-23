@@ -6,6 +6,7 @@ const codesStatutsCandidats = {
   inscrit: 2,
   apprenti: 3,
   abandon: 0,
+  abandonProspects: -1,
 };
 
 /**

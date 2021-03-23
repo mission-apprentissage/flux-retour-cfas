@@ -15,6 +15,9 @@ const computeStatsForStatutsCandidats = (statutsCandidats = []) => {
     nbStatutsAbandon: statutsCandidats.filter(
       ({ statut_apprenant }) => statut_apprenant === codesStatutsCandidats.abandon
     ).length,
+    nbStatutsAbandonProspects: statutsCandidats.filter(
+      ({ statut_apprenant }) => statut_apprenant === codesStatutsCandidats.abandonProspects
+    ).length,
   };
 };
 

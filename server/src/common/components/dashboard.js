@@ -18,16 +18,20 @@ const getEffectifsData = async (startDate, endDate, filters = {}) => {
     nbInscritsBeginDate,
     nbApprentisBeginDate,
     nbAbandonsBeginDate,
+    nbAbandonsProspectsBeginDate,
     nbInscritsEndDate,
     nbApprentisEndDate,
     nbAbandonsEndDate,
+    nbAbandonsProspectsEndDate,
   ] = await Promise.all([
     getNbStatutsInHistoryForStatutAndDate(startDate, codesStatutsCandidats.inscrit, filters),
     getNbStatutsInHistoryForStatutAndDate(startDate, codesStatutsCandidats.apprenti, filters),
     getNbStatutsInHistoryForStatutAndDate(startDate, codesStatutsCandidats.abandon, filters),
+    getNbStatutsInHistoryForStatutAndDate(startDate, codesStatutsCandidats.abandonProspects, filters),
     getNbStatutsInHistoryForStatutAndDate(endDate, codesStatutsCandidats.inscrit, filters),
     getNbStatutsInHistoryForStatutAndDate(endDate, codesStatutsCandidats.apprenti, filters),
     getNbStatutsInHistoryForStatutAndDate(endDate, codesStatutsCandidats.abandon, filters),
+    getNbStatutsInHistoryForStatutAndDate(endDate, codesStatutsCandidats.abandonProspects, filters),
   ]);
 
   return {
@@ -35,11 +39,13 @@ const getEffectifsData = async (startDate, endDate, filters = {}) => {
       nbInscrits: nbInscritsBeginDate,
       nbApprentis: nbApprentisBeginDate,
       nbAbandons: nbAbandonsBeginDate,
+      nbAbandonsProspects: nbAbandonsProspectsBeginDate,
     },
     endDate: {
       nbInscrits: nbInscritsEndDate,
       nbApprentis: nbApprentisEndDate,
       nbAbandons: nbAbandonsEndDate,
+      nbAbandonsProspects: nbAbandonsProspectsEndDate,
     },
   };
 };

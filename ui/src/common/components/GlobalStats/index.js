@@ -78,6 +78,13 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
             color="grey.800"
             indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
           />
+          <StatCard
+            label="Statuts Abandon de Prospects"
+            stat={stats.nbStatutsAbandonProspects}
+            background="orangesoft.200"
+            color="grey.800"
+            indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
+          />
         </HStack>
       </Box>
       <Box mt="9w">
@@ -191,6 +198,7 @@ GlobalStats.propTypes = {
     nbStatutsInscrits: PropTypes.number,
     nbStatutsApprentis: PropTypes.number,
     nbStatutsAbandon: PropTypes.number,
+    nbStatutsAbandonProspects: PropTypes.number,
     nbStatutsCandidatsMisAJour: PropTypes.number,
     nbStatutsWithoutHistory: PropTypes.number,
     nbDistinctCandidatsWithChangingStatutProspectInscrit: PropTypes.number,

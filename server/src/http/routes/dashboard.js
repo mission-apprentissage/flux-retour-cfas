@@ -85,12 +85,14 @@ module.exports = ({ stats, dashboard }) => {
           apprentis: effectifData.startDate.nbApprentis,
           inscrits: effectifData.startDate.nbInscrits,
           abandons: effectifData.startDate.nbAbandons,
+          abandonsProspects: effectifData.startDate.nbAbandonsProspects,
         },
         {
           date: endDate,
           apprentis: effectifData.endDate.nbApprentis,
           inscrits: effectifData.endDate.nbInscrits,
           abandons: effectifData.endDate.nbAbandons,
+          abandonsProspects: effectifData.endDate.nbAbandonsProspects,
           dataConsistency: null,
         },
       ]);

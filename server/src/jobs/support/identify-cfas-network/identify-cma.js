@@ -61,6 +61,11 @@ const identifyCfas = async () => {
             uai_etablissement: _uai,
           });
 
+          const nbStatutsAbandonProspects = await StatutCandidat.countDocuments({
+            statut_apprenant: codesStatutsCandidats.abandonProspects,
+            uai_etablissement: _uai,
+          });
+
           statutsForCma.push({
             uai: uaiFoundInStatuts.uai_etablissement,
             siret: uaiFoundInStatuts.siret_etablissement,
@@ -69,6 +74,7 @@ const identifyCfas = async () => {
             nb_statuts_inscrits: nbStatutsInscrits,
             nb_statuts_apprentis: nbStatutsApprentis,
             nb_statuts_abandon: nbStatutsAbandon,
+            nb_statuts_abandon_prospects: nbStatutsAbandonProspects,
           });
         }
       }

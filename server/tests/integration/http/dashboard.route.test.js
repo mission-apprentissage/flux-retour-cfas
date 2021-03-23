@@ -60,11 +60,13 @@ httpTests(__filename, ({ startServer }) => {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
+          nbAbandonsProspects: 0,
         },
         endDate: {
           nbInscrits: 15,
           nbApprentis: 5,
           nbAbandons: 10,
+          nbAbandonsProspects: 0,
         },
       };
 
@@ -79,9 +81,12 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepStrictEqual(response.data[0].inscrits, expectedResults.startDate.nbInscrits);
       assert.deepStrictEqual(response.data[0].apprentis, expectedResults.startDate.nbApprentis);
       assert.deepStrictEqual(response.data[0].abandons, expectedResults.startDate.nbAbandons);
+      assert.deepStrictEqual(response.data[0].abandons, expectedResults.startDate.nbAbandons);
+      assert.deepStrictEqual(response.data[0].abandonsProspects, expectedResults.startDate.nbAbandonsProspects);
       assert.deepStrictEqual(response.data[1].inscrits, expectedResults.endDate.nbInscrits);
       assert.deepStrictEqual(response.data[1].apprentis, expectedResults.endDate.nbApprentis);
       assert.deepStrictEqual(response.data[1].abandons, expectedResults.endDate.nbAbandons);
+      assert.deepStrictEqual(response.data[1].abandonsProspects, expectedResults.endDate.nbAbandonsProspects);
     });
 
     it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts avec filtres", async () => {
@@ -127,11 +132,13 @@ httpTests(__filename, ({ startServer }) => {
           nbInscrits: 10,
           nbApprentis: 5,
           nbAbandons: 0,
+          nbAbandonsProspects: 0,
         },
         endDate: {
           nbInscrits: 15,
           nbApprentis: 5,
           nbAbandons: 10,
+          nbAbandonsProspects: 0,
         },
       };
 
@@ -147,9 +154,11 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepStrictEqual(response.data[0].inscrits, expectedResults.startDate.nbInscrits);
       assert.deepStrictEqual(response.data[0].apprentis, expectedResults.startDate.nbApprentis);
       assert.deepStrictEqual(response.data[0].abandons, expectedResults.startDate.nbAbandons);
+      assert.deepStrictEqual(response.data[0].abandonsProspects, expectedResults.startDate.nbAbandonsProspects);
       assert.deepStrictEqual(response.data[1].inscrits, expectedResults.endDate.nbInscrits);
       assert.deepStrictEqual(response.data[1].apprentis, expectedResults.endDate.nbApprentis);
       assert.deepStrictEqual(response.data[1].abandons, expectedResults.endDate.nbAbandons);
+      assert.deepStrictEqual(response.data[1].abandonsProspects, expectedResults.endDate.nbAbandonsProspects);
 
       // Check bad api call
       const badResponse = await httpClient.post("/api/dashboard/effectifs", {
@@ -163,9 +172,11 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepStrictEqual(badResponse.data[0].inscrits, 0);
       assert.deepStrictEqual(badResponse.data[0].apprentis, 0);
       assert.deepStrictEqual(badResponse.data[0].abandons, 0);
+      assert.deepStrictEqual(badResponse.data[0].abandonsProspects, 0);
       assert.deepStrictEqual(badResponse.data[1].inscrits, 0);
       assert.deepStrictEqual(badResponse.data[1].apprentis, 0);
       assert.deepStrictEqual(badResponse.data[1].abandons, 0);
+      assert.deepStrictEqual(badResponse.data[1].abandonsProspects, 0);
     });
   });
 

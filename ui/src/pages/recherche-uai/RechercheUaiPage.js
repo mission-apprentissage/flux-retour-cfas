@@ -121,6 +121,12 @@ const RechercheUaiPage = ({ searchUaiInformation, loading, error, uaiInformation
                   background="greenmedium.300"
                   color="grey.800"
                 />
+                <StatCard
+                  label="Statuts abandons de prospects"
+                  stat={uaiInformation.nbAbandonProspects}
+                  background="greenmedium.300"
+                  color="grey.800"
+                />
               </HStack>
             </Box>
           )}
@@ -141,6 +147,7 @@ RechercheUaiPage.propTypes = {
     nbInscrits: PropTypes.number.isRequired,
     nbApprentis: PropTypes.number.isRequired,
     nbAbandon: PropTypes.number.isRequired,
+    nbAbandonProspects: PropTypes.number.isRequired,
   }),
 };
 

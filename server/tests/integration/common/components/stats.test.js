@@ -106,6 +106,24 @@ integrationTests(__filename, () => {
     assert.strictEqual(nbStatuts, nbStatutsForTest);
   });
 
+  it("Permet de récupérer le nb de statuts abandon prospects", async () => {
+    // Seed with sample data for value abandonProspects
+    const nbStatutsForTest = 10;
+    const createStatutsCandidats = await statutsCandidats();
+    await seedRandomizedSampleWithStatut(
+      createStatutsCandidats,
+      nbStatutsForTest,
+      codesStatutsCandidats.abandonProspects
+    );
+
+    // Calcul stats
+    const statsModule = await stats();
+    const nbStatuts = await statsModule.getNbStatutsAbandonProspects();
+
+    // Check stats value
+    assert.strictEqual(nbStatuts, nbStatutsForTest);
+  });
+
   it("Permet de récupérer le nb d'etablissements distincts par uai", async () => {
     // Seed with sample data
     const { addOrUpdateStatuts } = await statutsCandidats();
