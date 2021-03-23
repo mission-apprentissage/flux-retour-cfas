@@ -1,6 +1,7 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { JobEvent } = require("../../common/model");
+const { jobNames } = require("../../common/model/constants");
 
 module.exports = () => {
   const router = express.Router();
@@ -24,6 +25,13 @@ module.exports = () => {
           total: allData.total,
         },
       });
+    })
+  );
+
+  router.get(
+    "/jobNames",
+    tryCatch(async (req, res) => {
+      return res.json({ jobNames: jobNames });
     })
   );
 

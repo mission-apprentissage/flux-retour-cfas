@@ -48,7 +48,7 @@ module.exports = async (components) => {
   app.use("/api/jobEvents", checkJwtToken, adminOnly, jobEventsRoute(components));
   app.use("/api/uai", uaiRoute(components));
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());
-  app.use("/api/referentiel", checkJwtToken, adminOnly, referentielRoute());
+  app.use("/api/referentiel", referentielRoute());
   app.use("/api/dashboard", dashboardRoute(components));
   app.use("/api/healthcheck", healthcheckRoute(components));
 
