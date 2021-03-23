@@ -22,7 +22,7 @@ const TableauDeBordFilters = ({ filters, setFilters }) => {
   };
 
   const handleCfaFilterChange = (cfa) => {
-    setFilters({ ...filters, territoire: null, cfa });
+    setFilters({ ...filters, cfa });
   };
 
   return (
