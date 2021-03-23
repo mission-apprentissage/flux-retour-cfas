@@ -13,7 +13,8 @@ services:
     volumes:
       - ./ui:/app #Allows source folders to be watched
       - '/app/node_modules'
-
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 
   server:
     command: ["yarn", "debug"]
