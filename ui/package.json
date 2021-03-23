@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas-ui",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
