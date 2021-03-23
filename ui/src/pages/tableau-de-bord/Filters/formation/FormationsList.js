@@ -4,7 +4,7 @@ import React from "react";
 
 import FilterOption from "../FilterOption";
 
-const FormationsList = ({ formations = [], onFormationClick, selectedValue }) => {
+const FormationsList = ({ formations, onFormationClick, selectedValue }) => {
   return (
     <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
       <FilterOption
@@ -15,7 +15,7 @@ const FormationsList = ({ formations = [], onFormationClick, selectedValue }) =>
       >
         Toutes les formations
       </FilterOption>
-      {formations.map((formation) => (
+      {formations?.map((formation) => (
         <FilterOption
           key={formation.cfd}
           onClick={() => onFormationClick(formation)}

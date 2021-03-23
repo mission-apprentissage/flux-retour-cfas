@@ -1,33 +1,13 @@
 import { Text } from "@chakra-ui/react";
-import debounce from "debounce";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { FilterButton, OverlayMenu, SearchInput } from "../../../../common/components";
-import { _post } from "../../../../common/httpClient";
 import FormationsList from "./FormationsList";
+import withFormationSearch from "./withFormationSearch";
 
-const SEARCH_TERM_MIN_LENGTH = 3;
-const SEARCH_DEBOUNCE_TIME = 300;
-
-const searchFormationByLibelle = debounce(async (searchTerm, callback) => {
-  const result = await _post(`/api/formations/search?searchTerm=${searchTerm}`);
-  callback(result);
-}, SEARCH_DEBOUNCE_TIME);
-
-const FormationFilter = ({ value, onChange }) => {
+const FormationFilter = ({ value, onChange, searchTerm, searchResults, onSearchTermChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSeachTerm] = useState("");
-  const [searchResults, setSearchResults] = useState();
-
-  useEffect(() => {
-    setSearchResults();
-    if (searchTerm.length >= SEARCH_TERM_MIN_LENGTH) {
-      searchFormationByLibelle(searchTerm, (result) => {
-        if (result) setSearchResults(result);
-      });
-    }
-  }, [searchTerm]);
 
   const onFormationClick = (formation) => {
     onChange(formation);
@@ -49,7 +29,7 @@ const FormationFilter = ({ value, onChange }) => {
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <SearchInput
             value={searchTerm}
-            onChange={setSeachTerm}
+            onChange={onSearchTermChange}
             placeholder="Saisissez un libellé de formation ou un CFD"
           />
           <FormationsList formations={searchResults} onFormationClick={onFormationClick} selectedValue={value} />
@@ -70,6 +50,14 @@ FormationFilter.propTypes = {
     cfd: PropTypes.string.isRequired,
     libelle: PropTypes.string.isRequired,
   }),
+  searchResults: PropTypes.arrayOf(
+    PropTypes.shape({
+      cfd: PropTypes.string.isRequired,
+      libelle: PropTypes.string.isRequired,
+    })
+  ),
+  onSearchTermChange: PropTypes.func.isRequired,
+  searchTerm: PropTypes.string,
 };
 
-export default FormationFilter;
+export default withFormationSearch(FormationFilter);

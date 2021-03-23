@@ -7,6 +7,7 @@ module.exports = () => ({
   createFormation,
   existsFormation,
   getFormationWithCfd,
+  searchFormationByIntituleOrCfd,
 });
 
 /**
@@ -57,4 +58,17 @@ const createFormation = async (cfd) => {
     return saved.toObject();
   }
   return null;
+};
+
+/**
+ * Returns list of CFA information whose nom_etablissement matches input
+ * @param {string} intitule
+ * @return {[Formation]} Array of CFA information
+ */
+const searchFormationByIntituleOrCfd = async (intituleOrCfd) => {
+  const found = await FormationModel.find({
+    $or: [{ $text: { $search: intituleOrCfd } }, { cfd: new RegExp(intituleOrCfd, "g") }],
+  }).lean();
+
+  return found;
 };
