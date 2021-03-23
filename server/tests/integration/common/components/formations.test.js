@@ -6,7 +6,9 @@ const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
 const formationsComponent = require("../../../../src/common/components/formations");
 const { Formation: FormationModel } = require("../../../../src/common/model");
+const { StatutCandidat: StatutCandidatModel } = require("../../../../src/common/model");
 const { Formation } = require("../../../../src/common/domain/formation");
+const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 
 integrationTests(__filename, () => {
   describe("existsFormation", () => {
@@ -193,6 +195,57 @@ integrationTests(__filename, () => {
       assert.ok(results.find((formation) => formation.cfd === formationsSeed[3].cfd));
       assert.ok(results.find((formation) => formation.cfd === formationsSeed[4].cfd));
       assert.ok(results.find((formation) => formation.cfd === formationsSeed[5].cfd));
+    });
+
+    it("returns results matching libelle and etablissement_num_region", async () => {
+      const searchTerm = "decoration";
+      const etablissement_num_region = "28";
+
+      await new StatutCandidatModel({
+        ...createRandomStatutCandidat(),
+        etablissement_num_region,
+        id_formation: formationsSeed[2].cfd,
+        id_formation_valid: true,
+      }).save();
+
+      const results = await searchFormationByIntituleOrCfd(searchTerm, { etablissement_num_region });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].cfd, formationsSeed[2].cfd);
+    });
+
+    it("returns results matching libelle and etablissement_num_departement", async () => {
+      const searchTerm = "decoration";
+      const etablissement_num_departement = "77";
+
+      await new StatutCandidatModel({
+        ...createRandomStatutCandidat(),
+        etablissement_num_departement,
+        id_formation: formationsSeed[2].cfd,
+        id_formation_valid: true,
+      }).save();
+
+      const results = await searchFormationByIntituleOrCfd(searchTerm, { etablissement_num_departement });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].cfd, formationsSeed[2].cfd);
+    });
+
+    it("returns results matching libelle and siret_etablissement", async () => {
+      const searchTerm = "decoration";
+      const siret_etablissement = "80480480400022";
+
+      await new StatutCandidatModel({
+        ...createRandomStatutCandidat(),
+        siret_etablissement,
+        id_formation: formationsSeed[2].cfd,
+        id_formation_valid: true,
+      }).save();
+
+      const results = await searchFormationByIntituleOrCfd(searchTerm, { siret_etablissement });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].cfd, formationsSeed[2].cfd);
     });
   });
 });

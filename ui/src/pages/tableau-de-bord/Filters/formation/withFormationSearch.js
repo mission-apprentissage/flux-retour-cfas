@@ -2,12 +2,23 @@ import { debounce } from "debounce";
 import React, { useEffect, useState } from "react";
 
 import { _post } from "../../../../common/httpClient";
+import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
 import { filtersPropType } from "../../propTypes";
+import { TERRITOIRE_TYPES } from "../territoire/withTerritoireData";
 
 const SEARCH_DEBOUNCE_TIME = 300;
 
-const searchFormationByIntituleOrCfd = debounce(async ({ searchTerm }, callback) => {
-  const result = await _post("/api/formations/search", { searchTerm });
+const searchFormationByIntituleOrCfd = debounce(async (searchParams, callback) => {
+  const searchRequestBody = omitNullishValues({
+    searchTerm: searchParams.searchTerm,
+    etablissement_num_region:
+      searchParams.territoire?.type === TERRITOIRE_TYPES.region ? searchParams.territoire.code : null,
+    etablissement_num_departement:
+      searchParams.territoire?.type === TERRITOIRE_TYPES.departement ? searchParams.territoire.code : null,
+    siret_etablissement: searchParams.cfa?.siret_etablissement,
+  });
+
+  const result = await _post("/api/formations/search", searchRequestBody);
   callback(result);
 }, SEARCH_DEBOUNCE_TIME);
 

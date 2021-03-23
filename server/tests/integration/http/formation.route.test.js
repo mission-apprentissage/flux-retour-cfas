@@ -27,7 +27,7 @@ httpTests(__filename, ({ startServer }) => {
     const response = await httpClient.post("/api/formations/search", {});
 
     assert.equal(response.status, 400);
-    assert.equal(response.data.message, "'searchTerm' is required");
+    assert.equal(response.data.message, '"searchTerm" is required');
   });
 
   it("sends a 400 HTTP response when searchTerm is shorter than 3 chars", async () => {

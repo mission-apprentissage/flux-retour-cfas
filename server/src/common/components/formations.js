@@ -1,4 +1,4 @@
-const { Formation: FormationModel } = require("../model");
+const { Formation: FormationModel, StatutCandidat: StatutCandidatModel } = require("../model");
 const { validateCfd } = require("../domain/cfd");
 const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
 const { Formation } = require("../domain/formation");
@@ -65,10 +65,24 @@ const createFormation = async (cfd) => {
  * @param {string} intitule
  * @return {[Formation]} Array of CFA information
  */
-const searchFormationByIntituleOrCfd = async (intituleOrCfd) => {
-  const found = await FormationModel.find({
+const searchFormationByIntituleOrCfd = async (intituleOrCfd, otherFilters) => {
+  const searchTermFilterQuery = {
     $or: [{ $text: { $search: intituleOrCfd } }, { cfd: new RegExp(intituleOrCfd, "g") }],
-  }).lean();
+  };
 
-  return found;
+  if (otherFilters && Object.keys(otherFilters).length > 0) {
+    const filters = {
+      id_formation_valid: true,
+      ...otherFilters,
+    };
+
+    const eligibleCfds = await StatutCandidatModel.distinct("id_formation", filters);
+
+    return FormationModel.find({
+      ...searchTermFilterQuery,
+      cfd: { $in: eligibleCfds },
+    }).lean();
+  }
+
+  return FormationModel.find(searchTermFilterQuery).lean();
 };
