@@ -15,19 +15,16 @@ const EffectifsSection = ({ effectifs }) => {
       <HStack marginTop="4w">
         <EffectifCard
           count={effectifs.apprentis.count}
-          evolution={effectifs.apprentis.evolution}
           label="apprentis"
           indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.apprentis}
         />
         <EffectifCard
           count={effectifs.inscrits.count}
-          evolution={effectifs.inscrits.evolution}
           label="inscrits"
           indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.inscrits}
         />
         <EffectifCard
           count={effectifs.abandons.count}
-          evolution={effectifs.abandons.evolution}
           label="abandons"
           indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
         />

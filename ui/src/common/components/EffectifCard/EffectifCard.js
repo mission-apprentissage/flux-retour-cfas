@@ -2,12 +2,7 @@ import { Box, Flex, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { roundToOne } from "../../../common/utils/calculUtils";
-
-const EffectifCard = ({ label, evolution, count, indicatorColor }) => {
-  const roundedEvolution = evolution !== null ? roundToOne(evolution) : null;
-  const evolutionText = evolution === null ? "N/A" : evolution >= 0 ? `+${roundedEvolution}` : roundedEvolution;
-
+const EffectifCard = ({ label, count, indicatorColor }) => {
   return (
     <Flex background="bluesoft.50" padding="3w" minWidth="16rem" justifyContent="space-between">
       <div>
@@ -21,9 +16,6 @@ const EffectifCard = ({ label, evolution, count, indicatorColor }) => {
           {label}
         </Text>
       </div>
-      <Box as="legend" fontWeight="700">
-        {evolutionText}%
-      </Box>
     </Flex>
   );
 };
@@ -31,7 +23,6 @@ const EffectifCard = ({ label, evolution, count, indicatorColor }) => {
 EffectifCard.propTypes = {
   label: PropTypes.string.isRequired,
   count: PropTypes.number.isRequired,
-  evolution: PropTypes.number,
   indicatorColor: PropTypes.string,
 };
 
