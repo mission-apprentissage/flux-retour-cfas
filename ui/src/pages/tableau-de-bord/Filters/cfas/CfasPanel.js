@@ -10,12 +10,12 @@ const CfaPanel = ({ value, onCfaClick, searchTerm, onSearchTermChange, searchRes
   return (
     <div>
       <SearchInput value={searchTerm} onChange={onSearchTermChange} placeholder="Saisissez le nom d'un établissment" />
-      <CfasList cfas={searchResults} onCfaClick={onCfaClick} selectedValue={value} />
       {searchResults?.length === 0 && (
-        <Text fontSize="zeta" color="gray.500 ">
+        <Text fontSize="zeta" color="grey.500" paddingTop="1w" paddingLeft="1w">
           Aucun résultat trouvé
         </Text>
       )}
+      <CfasList cfas={searchResults} onCfaClick={onCfaClick} selectedValue={value} />
     </div>
   );
 };
