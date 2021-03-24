@@ -24,7 +24,7 @@ module.exports = ({ cfas }) => {
         });
       }
 
-      const foundCfa = await cfas.searchCfasByNomEtablissement(searchTerm, otherFilters);
+      const foundCfa = await cfas.searchCfasByNomEtablissementOrUai(searchTerm, otherFilters);
       return res.json(foundCfa);
     })
   );

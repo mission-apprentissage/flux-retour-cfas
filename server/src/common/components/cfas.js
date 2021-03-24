@@ -1,7 +1,7 @@
 const { StatutCandidat: StatutCandidatModel } = require("../model");
 
 module.exports = () => ({
-  searchCfasByNomEtablissement,
+  searchCfasByNomEtablissementOrUai,
   getCfaNameByUai,
 });
 
@@ -9,18 +9,18 @@ const SEARCH_RESULTS_LIMIT = 50;
 
 /**
  * Returns list of CFA information whose nom_etablissement matches input
- * @param {string} nomEtablissement
+ * @param {string} nomEtablissementOrUai
  * @return {[{siret_etablissement: string, nom_etablissement: string}]} Array of CFA information
  */
-const searchCfasByNomEtablissement = async (nomEtablissement, otherFilters) => {
-  if (!nomEtablissement) {
-    throw new Error("param nomEtablissement is required");
+const searchCfasByNomEtablissementOrUai = async (nomEtablissementOrUai, otherFilters) => {
+  if (!nomEtablissementOrUai) {
+    throw new Error("param nomEtablissementOrUai is required");
   }
 
   const found = await StatutCandidatModel.aggregate([
     {
       $match: {
-        $text: { $search: nomEtablissement },
+        $or: [{ $text: { $search: nomEtablissementOrUai } }, { uai_etablissement: nomEtablissementOrUai }],
         siret_etablissement_valid: true,
         ...otherFilters,
       },
