@@ -38,6 +38,7 @@
     "statutsCandidats:retrieve-networks": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-networks/index.js",
     "formation:retrieve-from-cfd": "node -r dotenv/config src/jobs/formation-retrieve-from-cfd/index.js",
     "support:identify-network-duplicates": "node -r dotenv/config src/jobs/support/identify-network-duplicates/index.js",
+    "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",

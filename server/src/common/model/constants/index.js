@@ -127,6 +127,7 @@ const jobNames = {
   clearAll: "clear-all",
   checkSiretValidity: "check-siret-validity",
   checkUaiValidity: "check-uai-validity",
+  fixHistoriqueStatutApprenant: "fix-historique-statut-apprenant-date-statut",
 };
 
 module.exports = {
