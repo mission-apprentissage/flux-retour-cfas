@@ -9,7 +9,11 @@ import withCfaSearch from "./withCfaSearch";
 const CfaPanel = ({ value, onCfaClick, searchTerm, onSearchTermChange, searchResults }) => {
   return (
     <div>
-      <SearchInput value={searchTerm} onChange={onSearchTermChange} placeholder="Saisissez le nom d'un établissment ou un UAI" />
+      <SearchInput
+        value={searchTerm}
+        onChange={onSearchTermChange}
+        placeholder="Saisissez le nom d'un établissment ou un UAI"
+      />
       {searchResults?.length === 0 && (
         <Text fontSize="zeta" color="grey.500" paddingTop="1w" paddingLeft="1w">
           Aucun résultat trouvé
