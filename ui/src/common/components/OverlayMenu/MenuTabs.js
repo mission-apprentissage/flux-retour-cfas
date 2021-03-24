@@ -35,7 +35,7 @@ const MenuTabs = ({ children, tabNames }) => {
         spacing="4w"
         marginBottom="2w"
         borderBottom="1px solid"
-        borderBottomColor="gray.300"
+        borderBottomColor="grey.300"
         role="tablist"
         as="ul"
       >

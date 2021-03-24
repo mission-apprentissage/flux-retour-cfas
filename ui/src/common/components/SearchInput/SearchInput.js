@@ -12,6 +12,7 @@ const SearchInput = ({ value = "", placeholder = "", onChange }) => {
         onChange={(event) => onChange(event.target.value)}
         size="sm"
         autoFocus
+        color="grey.800"
       />
     </InputGroup>
   );

@@ -52,12 +52,12 @@ const FormationFilter = ({ value, onChange }) => {
             onChange={setSeachTerm}
             placeholder="Saisissez un libellé de formation ou un CFD"
           />
-          <FormationsList formations={searchResults} onFormationClick={onFormationClick} selectedValue={value} />
           {searchResults?.length === 0 && (
-            <Text fontSize="zeta" color="gray.500">
+            <Text fontSize="zeta" color="grey.500" paddingTop="1w" paddingLeft="1w">
               Aucun résultat trouvé
             </Text>
           )}
+          <FormationsList formations={searchResults} onFormationClick={onFormationClick} selectedValue={value} />
         </OverlayMenu>
       )}
     </div>
