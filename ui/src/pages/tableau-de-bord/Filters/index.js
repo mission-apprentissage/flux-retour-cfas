@@ -32,7 +32,7 @@ const TableauDeBordFilters = ({ filters, setFilters }) => {
         <span>Filtrer&nbsp;:</span>
         <PeriodeFilter value={filters.date} onChange={handlePeriodeFilterChange} />
         <CfasFilter value={filters.cfa} onChange={handleCfaFilterChange} filters={filters} />
-        <FormationFilter value={filters.formation} onChange={handleFormationFilterChange} />
+        <FormationFilter value={filters.formation} onChange={handleFormationFilterChange} filters={filters} />
       </HStack>
     </HStack>
   );

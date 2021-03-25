@@ -1,28 +1,30 @@
 const express = require("express");
 const Joi = require("joi");
-const { Formation: FormationModel } = require("../../common/model");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
-module.exports = () => {
+module.exports = ({ formations }) => {
   const router = express.Router();
 
-  const MAX_NUMBER_OF_SEARCH_RESULTS = 50;
+  const searchBodyValidationSchema = Joi.object({
+    searchTerm: Joi.string().min(3).required(),
+    siret_etablissement: Joi.string().allow(null, ""),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+  });
 
   router.post(
     "/search",
     tryCatch(async (req, res) => {
-      const searchTerm = req.query.searchTerm;
+      const { error } = searchBodyValidationSchema.validate(req.body);
+      const { searchTerm, ...otherFilters } = req.body;
 
-      const { error } = Joi.string().min(3).required().validate(searchTerm);
       if (error) {
-        return res.status(400).json({ message: "query parameter 'searchTerm' is required" });
+        return res.status(400).json({ status: "INPUT_VALIDATION_ERROR", message: error.message });
       }
 
-      const results = await FormationModel.find({
-        $or: [{ $text: { $search: searchTerm } }, { cfd: new RegExp(searchTerm, "g") }],
-      }).limit(MAX_NUMBER_OF_SEARCH_RESULTS);
+      const foundFormations = await formations.searchFormationByIntituleOrCfd(searchTerm, otherFilters);
 
-      return res.json(results.map(({ cfd, libelle }) => ({ cfd, libelle })));
+      return res.json(foundFormations.map(({ cfd, libelle }) => ({ cfd, libelle })));
     })
   );
 

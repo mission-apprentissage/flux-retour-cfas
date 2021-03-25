@@ -42,7 +42,7 @@ module.exports = async (components) => {
   );
   app.use("/api/login", loginRoute(components));
   app.use("/api/stats", checkJwtToken, statsRoute(components));
-  app.use("/api/formations", formationRoutes());
+  app.use("/api/formations", formationRoutes(components));
   app.use("/api/cfas", cfasRoute(components));
   app.use("/api/userEvents", checkJwtToken, adminOnly, userEventsRoute(components));
   app.use("/api/jobEvents", checkJwtToken, adminOnly, jobEventsRoute(components));
