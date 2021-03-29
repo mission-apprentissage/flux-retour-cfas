@@ -128,6 +128,7 @@ const jobNames = {
   checkSiretValidity: "check-siret-validity",
   checkUaiValidity: "check-uai-validity",
   fixHistoriqueStatutApprenant: "fix-historique-statut-apprenant-date-statut",
+  cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
 };
 
 module.exports = {

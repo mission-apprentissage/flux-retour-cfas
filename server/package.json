@@ -36,6 +36,7 @@
     "identifyNetwork:cma": "node -r dotenv/config src/jobs/identify-cfas-network/identify-cma.js",
     "statutsCandidats:retrieve-location": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-location/index.js",
     "statutsCandidats:retrieve-networks": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-networks/index.js",
+    "cfas:retrieve-data-connection": "node -r dotenv/config src/jobs/cfas-retrieve-data-connection/index.js",
     "formation:retrieve-from-cfd": "node -r dotenv/config src/jobs/formation-retrieve-from-cfd/index.js",
     "support:identify-network-duplicates": "node -r dotenv/config src/jobs/support/identify-network-duplicates/index.js",
     "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
