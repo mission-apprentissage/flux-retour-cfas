@@ -1,66 +1,92 @@
-import { Box, Divider, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Divider, Flex, Text, useDisclosure } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { formatDate } from "../../../../../common/utils/dateUtils";
 import DataFeedbackModal from "./DataFeedbackModal";
+import ValidationStateBadge from "./ValidationStateBadge";
 import withDataFeedback from "./withDataFeedback";
 
-const DataFeedbackInfo = ({ dataFeedback }) => {
-  const icon = dataFeedback.donnee_est_valide ? "ri-checkbox-circle-fill" : "ri-error-warning-fill";
-  const text = dataFeedback.donnee_est_valide
-    ? `Les données affichées pour ce CFA ont été validées le ${formatDate(new Date(dataFeedback.created_at))}.`
-    : `Les données affichées pour ce CFA ont été signalées comme incorrectes le ${formatDate(
-        new Date(dataFeedback.created_at)
-      )}.`;
-
+const DataValidated = ({ date }) => {
   return (
-    <Text color="grey.800">
-      <Box as="i" className={icon} marginRight="1w" fontSize="gamma" verticalAlign="middle" />
-      <Box as="span" verticalAlign="middle">
-        {text}
-      </Box>
-    </Text>
+    <Flex justifyContent="space-between">
+      <Text color="grey.800">
+        <Box as="i" className="ri-checkbox-circle-fill" marginRight="1w" fontSize="gamma" verticalAlign="middle" />
+        <Box as="span" verticalAlign="middle">
+          Les données affichées pour ce CFA ont été validées le {formatDate(new Date(date))}.
+        </Box>
+      </Text>
+      <span>
+        <ValidationStateBadge>Données validées</ValidationStateBadge>
+      </span>
+    </Flex>
   );
 };
 
-DataFeedbackInfo.propTypes = {
-  dataFeedback: PropTypes.shape({
-    donnee_est_valide: PropTypes.bool.isRequired,
-    created_at: PropTypes.string.isRequired,
-  }).isRequired,
+DataValidated.propTypes = {
+  date: PropTypes.string.isRequired,
 };
 
-const DataFeedbackModalInvitation = ({ siret, refetchDataFeedback }) => {
+const DataInvalidated = ({ date }) => {
+  return (
+    <Flex justifyContent="space-between">
+      <Text color="grey.800">
+        <Box as="i" className="ri-error-warning-fill" marginRight="1w" fontSize="gamma" verticalAlign="middle" />
+        <Box as="span" verticalAlign="middle">
+          Les données affichées pour ce CFA ont été signalées comme incorrectes le {formatDate(new Date(date))}.
+        </Box>
+      </Text>
+      <span>
+        <ValidationStateBadge>Données invalidées</ValidationStateBadge>
+      </span>
+    </Flex>
+  );
+};
+
+DataInvalidated.propTypes = {
+  date: PropTypes.string.isRequired,
+};
+
+const AwaitingDataFeedback = ({ siret, refetchDataFeedback }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <>
-      <Text color="grey.800">
-        <strong>Votre centre de formation transmet ses données au tableau de bord.</strong>
-        <br />
-        Pour nous aider à construire un outil de qualité, vous pouvez&nbsp;
-        <Box as="span" role="button" onClick={onOpen} textDecoration="underline" color="bluefrance" cursor="pointer">
-          valider les données affichées ou signaler une anomalie
-        </Box>
-        .
-      </Text>
+      <Flex justifyContent="space-between">
+        <Text color="grey.800" fontSize="zeta">
+          <strong>Votre centre de formation transmet ses données au tableau de bord.</strong>
+          <br />
+          Pour nous aider à construire un outil de qualité, vous pouvez&nbsp;
+          <Box as="span" role="button" onClick={onOpen} textDecoration="underline" color="bluefrance" cursor="pointer">
+            valider les données affichées ou signaler une anomalie
+          </Box>
+          .
+        </Text>
+        <span>
+          <ValidationStateBadge fullOpacity={false}>Données en attente de validation</ValidationStateBadge>
+        </span>
+      </Flex>
       <DataFeedbackModal isOpen={isOpen} onClose={onClose} siret={siret} refetchDataFeedback={refetchDataFeedback} />
     </>
   );
 };
 
-DataFeedbackModalInvitation.propTypes = {
+AwaitingDataFeedback.propTypes = {
   siret: PropTypes.string.isRequired,
   refetchDataFeedback: PropTypes.func.isRequired,
 };
 
 const DataFeedbackSection = ({ dataFeedback, siret, refetchDataFeedback }) => {
-  const content = dataFeedback ? (
-    <DataFeedbackInfo dataFeedback={dataFeedback} />
-  ) : (
-    <DataFeedbackModalInvitation siret={siret} refetchDataFeedback={refetchDataFeedback} />
-  );
+  let content;
+
+  if (!dataFeedback) content = <AwaitingDataFeedback siret={siret} refetchDataFeedback={refetchDataFeedback} />;
+  else {
+    content = dataFeedback.donnee_est_valide ? (
+      <DataValidated date={dataFeedback.created_at} />
+    ) : (
+      <DataInvalidated date={dataFeedback.created_at} />
+    );
+  }
 
   return (
     <Box as="section">
