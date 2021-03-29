@@ -78,6 +78,14 @@ const getAllStats = async (filters = {}) => {
       sortedStatutsValuesHistory.includes(val)
     );
   }).length;
+  const nbDistinctCandidatsWithChangingStatutProspectAbandonProspect = candidatsWithHistory.filter((statut) => {
+    const sortedStatutsValuesHistory = statut.historique_statut_apprenant
+      .sort((a, b) => a.position_statut > b.position_statut)
+      .map((item) => item.valeur_statut);
+    return [codesStatutsCandidats.prospect, codesStatutsCandidats.abandonProspects].every((val) =>
+      sortedStatutsValuesHistory.includes(val)
+    );
+  }).length;
 
   const nbCandidatsMultiUaisWithIne = await getNbDistinctCandidatsWithMultiUaisWithIne(filters);
   const nbCandidatsMultiUaisWithoutIne = await getNbDistinctCandidatsWithMultiUaisWithoutIne(filters);
@@ -122,6 +130,7 @@ const getAllStats = async (filters = {}) => {
     nbDistinctCandidatsWithChangingStatutProspectInscrit,
     nbDistinctCandidatsWithChangingStatutProspectApprenti,
     nbDistinctCandidatsWithChangingStatutProspectAbandon,
+    nbDistinctCandidatsWithChangingStatutProspectAbandonProspect,
     nbCfasDistinctUai,
     nbCfasDistinctSiret,
     nbInvalidUais,

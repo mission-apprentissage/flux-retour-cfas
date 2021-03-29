@@ -156,6 +156,11 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
             stat={stats.nbDistinctCandidatsWithChangingStatutProspectAbandon}
             background="warning"
           />
+          <StatCard
+            label="Prospect vers Abandon Prospect"
+            stat={stats.nbDistinctCandidatsWithChangingStatutProspectAbandonProspect}
+            background="warning"
+          />
         </HStack>
         <HStack spacing="2w" mt="3w">
           <StatCard label="1 mise à jour" stat={stats.nbDistinctCandidatsWithStatutHistory1} background="info" />
@@ -204,6 +209,7 @@ GlobalStats.propTypes = {
     nbDistinctCandidatsWithChangingStatutProspectInscrit: PropTypes.number,
     nbDistinctCandidatsWithChangingStatutProspectApprenti: PropTypes.number,
     nbDistinctCandidatsWithChangingStatutProspectAbandon: PropTypes.number,
+    nbDistinctCandidatsWithChangingStatutProspectAbandonProspect: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory1: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory2: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory3: PropTypes.number,
