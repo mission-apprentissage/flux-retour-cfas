@@ -19,7 +19,7 @@ const cfaDataFeedback = new Schema({
   donnee_est_valide: {
     type: Boolean,
     required: true,
-    description: "Les données présentées sur le taleau de bord par ce CFA est-elle valide",
+    description: "Les données présentées sur le tableau de bord par ce CFA est-elle valide",
   },
   created_at: {
     type: Date,
