@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { _post } from "../../../../common/httpClient";
 import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "../generic/EffectifsSection";
+import DataFeedbackSection from "./data-feedback/DataFeedbackSection";
 import InfoCfaSection from "./InfoCfaSection";
 import RepartionCfaNiveauAnneesSection from "./RepartionCfaNiveauAnneesSection";
 
@@ -42,6 +43,7 @@ const CfaView = ({ effectifs, cfaSiret }) => {
 
   return (
     <Stack spacing="4w">
+      <DataFeedbackSection siret={cfaSiret} />
       <InfoCfaSection infosCfa={dataCfa} loading={loading} error={error} />
       <Divider orientation="horizontal" />
       {effectifs && <EffectifsSection effectifs={effectifs} />}

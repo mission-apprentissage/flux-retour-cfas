@@ -6,8 +6,9 @@ export function useFetch(url, initialState = null) {
   const [response, setResponse] = useState(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-  const _fetch = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -22,13 +23,12 @@ export function useFetch(url, initialState = null) {
   }, [url]);
 
   useEffect(() => {
-    async function fetchData() {
-      return _fetch();
-    }
     fetchData();
-  }, [url, _fetch]);
+  }, [url, refetchTrigger]);
 
-  return [response, loading, error];
+  const refetch = () => setRefetchTrigger(refetchTrigger + 1);
+
+  return [response, loading, error, refetch];
 }
 
 export function usePostFetch(url, body, initialState = null) {
