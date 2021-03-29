@@ -203,6 +203,40 @@ const space = {
   "15w": "120px",
 };
 
-const theme = extendTheme({ fonts, colors, styles, fontSizes, textStyles, space });
+const components = {
+  Button: {
+    baseStyle: {
+      fontWeight: "400",
+      fontFamily: "Inter",
+    },
+    variants: {
+      primary: {
+        background: "bluefrance",
+        color: "white",
+        _hover: {
+          background: "bluedark.600",
+        },
+      },
+      light: {
+        background: "bluesoft.100",
+        _hover: {
+          background: "bluesoft.200",
+        },
+      },
+      outline: {
+        color: "bluefrance",
+        borderColor: "bluefrance",
+        _hover: {
+          background: "bluesoft.200",
+        },
+      },
+    },
+    defaultProps: {
+      variant: "primary",
+    },
+  },
+};
+
+const theme = extendTheme({ fonts, colors, styles, fontSizes, textStyles, space, components });
 
 export default theme;
