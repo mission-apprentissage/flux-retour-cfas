@@ -17,9 +17,7 @@ const getCfaDataFeedbackBySiret = (siret) => CfaDataFeedbackModel.findOne({ sire
  * Creates a new CfaDataFeedback in DB
  * @return {CfaDataFeedback | null} The newly created CfaDataFeedback or null
  */
-const createCfaDataFeedback = async (props) => {
-  const { siret, email, dataIsValid, details } = props;
-
+const createCfaDataFeedback = async ({ siret, email, dataIsValid, details }) => {
   if (!validateSiret(siret)) {
     throw Error("Invalid SIRET");
   }
