@@ -6,7 +6,7 @@ const noop = () => {};
 
 const FilterButton = ({ children, icon, onClick, displayClearIcon = false, clearIconOnClick = noop }) => {
   return (
-    <Button background="bluesoft.100" onClick={onClick} fontWeight="400">
+    <Button variant="light" onClick={onClick}>
       {icon && <Box fontSize="epsilon" as="i" className={icon} marginRight="1v" />}
       {children}
       {displayClearIcon && (
