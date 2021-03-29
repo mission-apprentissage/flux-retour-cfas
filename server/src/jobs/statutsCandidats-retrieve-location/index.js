@@ -17,13 +17,15 @@ runScript(async () => {
   logger.info(`${allValidSirets.length} valid SIRET found in DB`);
 
   let updatedStatutsCandidatsCount = 0;
+  let foundLocationCount = 0;
+  const unknownSiretInTco = [];
 
   await asyncForEach(allValidSirets, async (validSiret) => {
     // Get etablissementData from API Tables de correspondance
     const etablissementDataFromSiret = await getSiretInfo(validSiret);
 
     if (!etablissementDataFromSiret) {
-      logger.warn(`No data found in Tables de Co for SIRET ${validSiret}`);
+      unknownSiretInTco.push(validSiret);
       return;
     }
 
@@ -44,13 +46,15 @@ runScript(async () => {
         }
       );
       updatedStatutsCandidatsCount += updateResult.nModified;
-      logger.info(`Location data updated in db for SIRET ${validSiret}`);
+      foundLocationCount++;
     } catch (err) {
       logger.error(`Error while updating etablissement information with SIRET ${validSiret}`);
       logger.error(err);
     }
   });
 
+  logger.info(`Etablissement location information found for ${foundLocationCount} SIRET`);
   logger.info(`${updatedStatutsCandidatsCount} statuts candidats updated with etablissement location information`);
+  logger.warn(`No data found in Tables de Co for ${unknownSiretInTco.length} SIRET ${unknownSiretInTco}`);
   logger.info("End Location Retrieving Job");
 }, jobNames.statutsCandidatsRetrieveLocation);
