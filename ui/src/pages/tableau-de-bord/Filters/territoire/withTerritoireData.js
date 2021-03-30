@@ -11,7 +11,8 @@ export const TERRITOIRE_TYPES = {
 
 const withTerritoiresData = (Component) => {
   const WithTerritoiresData = (props) => {
-    const [departements, departementsLoading] = useFetch(`${GEO_API_URL}/departements`);
+    // limit to region Normandie for now
+    const [departements, departementsLoading] = useFetch(`${GEO_API_URL}/regions/28/departements`);
     const [regions, regionsLoading] = useFetch(`${GEO_API_URL}/regions`);
 
     const departementsOptions =
@@ -19,7 +20,10 @@ const withTerritoiresData = (Component) => {
         ...departement,
         type: TERRITOIRE_TYPES.departement,
       })) || [];
-    const regionsOptions = regions?.map((region) => ({ ...region, type: TERRITOIRE_TYPES.region })) || [];
+    // limit to region Normandie for now
+    const regionsOptions =
+      regions?.filter(({ code }) => code === "28").map((region) => ({ ...region, type: TERRITOIRE_TYPES.region })) ||
+      [];
     const isLoading = departementsLoading || regionsLoading;
 
     return <Component {...props} departements={departementsOptions} regions={regionsOptions} loading={isLoading} />;
