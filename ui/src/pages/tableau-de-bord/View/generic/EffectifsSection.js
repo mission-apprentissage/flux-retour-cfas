@@ -27,6 +27,7 @@ const EffectifsSection = ({ effectifs }) => {
           count={effectifs.abandons.count}
           label="abandons"
           indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
+          tooltipLabel="Le chiffre affiché inclus les abandons de prospects. Un correctif est en cours."
         />
       </HStack>
     </div>
