@@ -8,6 +8,22 @@ const historySequenceApprenti = [
   },
 ];
 
+const historySequenceInscrit = [
+  {
+    valeur_statut: codesStatutsCandidats.inscrit,
+    position_statut: 1,
+    date_statut: new Date("2020-09-20T00:00:00.000+0000"),
+  },
+];
+
+const historySequenceAbandon = [
+  {
+    valeur_statut: codesStatutsCandidats.abandon,
+    position_statut: 1,
+    date_statut: new Date("2020-09-20T00:00:00.000+0000"),
+  },
+];
+
 const historySequenceApprentiToAbandon = [
   {
     valeur_statut: codesStatutsCandidats.apprenti,
@@ -75,10 +91,26 @@ const historySequenceProspectToInscritToApprentiToAbandon = [
   },
 ];
 
+const historySequenceProspectToInscrit = [
+  {
+    valeur_statut: codesStatutsCandidats.prospect,
+    position_statut: 1,
+    date_statut: new Date("2020-08-15T00:00:00.000+0000"),
+  },
+  {
+    valeur_statut: codesStatutsCandidats.inscrit,
+    position_statut: 2,
+    date_statut: new Date("2020-09-12T00:00:00.000+0000"),
+  },
+];
+
 module.exports = {
   historySequenceApprenti,
   historySequenceApprentiToAbandon,
   historySequenceApprentiToAbandonProspect,
+  historySequenceInscrit,
   historySequenceInscritToApprenti,
+  historySequenceProspectToInscrit,
   historySequenceProspectToInscritToApprentiToAbandon,
+  historySequenceAbandon,
 };

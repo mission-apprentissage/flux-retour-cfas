@@ -12,6 +12,10 @@ const formationSchema = new Schema(
       type: String,
       description: "Libellé normalisé depuis Tables de Correspondances",
     },
+    niveau: {
+      type: String,
+      description: "Niveau récupéré depuis Tables de Correspondances",
+    },
     tokenized_libelle: {
       type: String,
       description: "Libellé tokenizé pour la recherche",

@@ -383,6 +383,12 @@ docker exec -t -i flux_retour_cfas_server bash -c "yarn etablissements-location:
 docker exec -t -i flux_retour_cfas_server bash -c "yarn etablissements-networks:retrieve"
 ```
 
+- Pour tenter de retrouver niveau des formations grâce au CFA via la collection referentiel des Formations :
+
+```bash
+docker exec -t -i flux_retour_cfas_server bash -c "yarn statutsCandidats:update-niveaux"
+```
+
 ### Procédure à suivre au premier déploiement
 
 Dès le premier déploiement de l'application est recommandé de suivre la procédure suivante :
@@ -411,3 +417,5 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
    5.7 - Recherche des infos de réseaux des établissements `yarn statutsCandidats:retrieve-networks`
 
    5.8 - Recherche des codes CFD des formations `yarn formation:retrieve-from-cfd`
+
+   5.9 - Mise à jour des niveau des statutsCandidats - dépend des codes CFD des formations (5.8) `yarn statutsCandidats:retrieve-niveaux`

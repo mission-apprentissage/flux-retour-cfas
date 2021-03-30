@@ -9,6 +9,13 @@ const {
 const { StatutCandidat } = require("../../../../src/common/model");
 const { codesStatutsCandidats, reseauxCfas } = require("../../../../src/common/model/constants");
 const dashboardComponent = require("../../../../src/common/components/dashboard");
+const {
+  getStatutsSamplesInscrits,
+  getStatutsSamplesApprentis,
+  getStatutsSamplesAbandons,
+  expectedDetailResultList,
+} = require("../../../data/effectifDetailSamples");
+const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 
 integrationTests(__filename, () => {
   describe("getNbStatutsInHistoryForStatutAndDate", () => {
@@ -714,6 +721,46 @@ integrationTests(__filename, () => {
       assert.strictEqual(nbStatutsBadFilter.endDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbApprentis, 0);
       assert.strictEqual(nbStatutsBadFilter.endDate.nbAbandons, 0);
+    });
+  });
+
+  describe("getEffectifsDetailDataForSiret pour une période et un centre de formation", () => {
+    const { getEffectifsDetailDataForSiret } = dashboardComponent();
+
+    it("Permet de récupérer les données détaillées d'effectifs pour une période et un cfa via son siret", async () => {
+      const siretToTest = "77929544300013";
+
+      // Build sample statuts
+      const statutsSamplesInscrits = await getStatutsSamplesInscrits(siretToTest);
+      const statutsSamplesApprentis = await getStatutsSamplesApprentis(siretToTest);
+      const statutsSamplesAbandons = await getStatutsSamplesAbandons(siretToTest);
+
+      // Save all statuts to database
+      const sampleStatutsListToSave = [
+        ...statutsSamplesInscrits,
+        ...statutsSamplesApprentis,
+        ...statutsSamplesAbandons,
+      ];
+      await asyncForEach(sampleStatutsListToSave, async (currentStatut) => {
+        await currentStatut.save();
+      });
+
+      // Search params & expected results
+      const startDate = new Date("2020-09-15T00:00:00.000+0000");
+      const endDate = new Date("2020-10-10T00:00:00.000+0000");
+
+      // Gets effectif data detail
+      const statutsFound = await getEffectifsDetailDataForSiret(startDate, endDate, siretToTest);
+
+      // Check for siret
+      assert.deepStrictEqual(statutsFound.length, 2);
+      assert.deepStrictEqual(statutsFound, expectedDetailResultList);
+
+      // Check for bad siret
+      const badSiret = "99999999900999";
+      const statutsBadSiret = await getEffectifsDetailDataForSiret(startDate, endDate, badSiret);
+      assert.notDeepStrictEqual(statutsBadSiret.length, 2);
+      assert.notDeepStrictEqual(statutsBadSiret, expectedDetailResultList);
     });
   });
 });

@@ -28,6 +28,15 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
+   * Schema for effectif cfa detail input validation
+   */
+  const dashboardEffectifCfaDetailInputSchema = Joi.object({
+    startDate: Joi.date().required(),
+    endDate: Joi.date().required(),
+    siret: Joi.string().allow(null, ""),
+  });
+
+  /**
    * Gets the general stats for the dashboard
    */
   router.get(
@@ -140,6 +149,52 @@ module.exports = ({ stats, dashboard }) => {
             uai: cfaFound.uai_etablissement,
             adresse: cfaFound.etablissement_adresse,
           });
+        }
+      }
+    })
+  );
+
+  /**
+   * Gets the dashboard cfa effectif detail
+   */
+  router.post(
+    "/cfa-effectifs-detail",
+    tryCatch(async (req, res) => {
+      // Validate schema
+      await dashboardEffectifCfaDetailInputSchema.validateAsync(req.body, { abortEarly: false });
+
+      // Gets & format params:
+      const { startDate, endDate, siret } = req.body;
+      const beginSearchDate = new Date(startDate);
+      const endSearchDate = new Date(endDate);
+
+      // Add user event
+      const event = new UserEvent({
+        username: "dashboard",
+        type: "GET",
+        action: "api/dashboard/cfa-effectifs-detail",
+        data: { startDate, endDate, siret },
+      });
+      await event.save();
+
+      // Checks if siret valid
+      if (!validateSiret(siret)) {
+        return res.status(400).json({ message: "Siret is not valid" });
+      } else {
+        // Search cfa in statuts
+        const cfaFound = await StatutCandidat.findOne({ siret_etablissement: siret }).lean();
+        if (!cfaFound) {
+          return res.status(400).json({ message: `No cfa found for siret ${siret}` });
+        } else {
+          // Gets effectif data for params
+          const effectifDetailCfaData = await dashboard.getEffectifsDetailDataForSiret(
+            beginSearchDate,
+            endSearchDate,
+            siret
+          );
+
+          // Build response
+          return res.json(effectifDetailCfaData);
         }
       }
     })

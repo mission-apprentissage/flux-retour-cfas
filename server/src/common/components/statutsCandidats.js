@@ -5,7 +5,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
-const { existsFormation, createFormation } = require("./formations")();
+const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
   existsStatut,
@@ -176,6 +176,7 @@ const createStatutCandidat = async (itemToCreate) => {
     id_formation_valid: validateCfd(itemToCreate.id_formation),
     libelle_court_formation: itemToCreate.libelle_court_formation,
     libelle_long_formation: itemToCreate.libelle_long_formation,
+    niveau_formation: (await getFormationWithCfd(itemToCreate.id_formation))?.niveau,
     uai_etablissement: itemToCreate.uai_etablissement,
     uai_etablissement_valid: validateUai(itemToCreate.uai_etablissement),
     siret_etablissement: itemToCreate.siret_etablissement,

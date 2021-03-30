@@ -15,6 +15,7 @@ class Formation {
         })
         .required(),
       libelle: Joi.string().allow(""),
+      niveau: Joi.string().allow(""),
     });
 
     const { error } = schema.validate(props);

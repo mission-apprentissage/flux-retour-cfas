@@ -7,6 +7,13 @@ const {
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
 const { StatutCandidat, Cfa } = require("../../../src/common/model");
+const {
+  getStatutsSamplesInscrits,
+  getStatutsSamplesApprentis,
+  getStatutsSamplesAbandons,
+  expectedDetailResultList,
+} = require("../../data/effectifDetailSamples");
+const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 
 httpTests(__filename, ({ startServer }) => {
   describe("/api/dashboard/etablissements-stats route", () => {
@@ -358,6 +365,49 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       assert.deepStrictEqual(badResponse.status, 400);
+    });
+  });
+
+  describe("/api/dashboard/cfa-effectifs-detail route", () => {
+    it("Vérifie qu'on peut récupérer le détail des effectifs d'un CFA via API", async () => {
+      const { httpClient } = await startServer();
+      const siretToTest = "77929544300013";
+
+      // Build sample statuts
+      const statutsSamplesInscrits = await getStatutsSamplesInscrits(siretToTest);
+      const statutsSamplesApprentis = await getStatutsSamplesApprentis(siretToTest);
+      const statutsSamplesAbandons = await getStatutsSamplesAbandons(siretToTest);
+
+      // Save all statuts to database
+      const sampleStatutsListToSave = [
+        ...statutsSamplesInscrits,
+        ...statutsSamplesApprentis,
+        ...statutsSamplesAbandons,
+      ];
+      await asyncForEach(sampleStatutsListToSave, async (currentStatut) => {
+        await currentStatut.save();
+      });
+
+      // Check good api call
+      const response = await httpClient.post("/api/dashboard/cfa-effectifs-detail", {
+        startDate: "2020-09-15T00:00:00.000Z",
+        endDate: "2020-10-10T00:00:00.000Z",
+        siret: siretToTest,
+      });
+
+      assert.deepStrictEqual(response.status, 200);
+      assert.deepStrictEqual(response.data.length, 2);
+      assert.deepStrictEqual(response.data, expectedDetailResultList);
+
+      // Check bad siret
+      const badSiret = "99999999900999";
+      const badResponse = await httpClient.post("/api/dashboard/cfa-effectifs-detail", {
+        startDate: "2020-09-15T00:00:00.000Z",
+        endDate: "2020-10-10T00:00:00.000Z",
+        siret: badSiret,
+      });
+      assert.deepStrictEqual(badResponse.status, 400);
+      assert.deepStrictEqual(badResponse.data.message, `No cfa found for siret ${badSiret}`);
     });
   });
 });

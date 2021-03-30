@@ -97,6 +97,7 @@ integrationTests(__filename, () => {
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
         libelle: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
+        niveau: "7 (Master, titre ingénieur...)",
         updated_at: null,
       });
     });
@@ -109,6 +110,7 @@ integrationTests(__filename, () => {
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
         libelle: "",
+        niveau: "7 (Master, titre ingénieur...)",
         updated_at: null,
       });
     });

@@ -2,12 +2,13 @@ import { Box, Center, Divider, Flex, HStack, Skeleton, Stack, Tag, Text } from "
 import PropTypes from "prop-types";
 import React from "react";
 
-import PageSectionTitle from "../../../../common/components/Page/PageSectionTitle";
+import PageSectionTitle from "../../../../../common/components/Page/PageSectionTitle";
+import withInfoCfaData from "./withInfoCfaData";
 
 const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
   <div>
     {/* No Data  */}
-    {!infosCfa && !error && (
+    {!infosCfa && !error && !loading && (
       <Center h="100px" p={4} background="orangesoft.200">
         <HStack fontSize="gamma">
           <i className="ri-error-warning-fill"></i>
@@ -17,7 +18,7 @@ const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
     )}
 
     {/* Error  */}
-    {error && (
+    {error && !loading && (
       <Center h="100px" p={4} background="orangesoft.200">
         <HStack fontSize="gamma">
           <i className="ri-error-warning-fill"></i>
@@ -27,7 +28,7 @@ const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
     )}
 
     {/* Loading  */}
-    {loading && (
+    {loading && !error && (
       <Flex>
         <Skeleton flex="2" h="100px" p={4} />
         <Box>
@@ -102,4 +103,4 @@ InfoCfaSection.propTypes = {
   error: PropTypes.object,
 };
 
-export default InfoCfaSection;
+export default withInfoCfaData(InfoCfaSection);

@@ -52,6 +52,7 @@ const createFormation = async (cfd) => {
     const formation = Formation.create({
       cfd,
       libelle: buildFormationLibelle(formationInfo),
+      niveau: formationInfo.niveau,
     });
     const newFormationDocument = new FormationModel(formation);
     const saved = await newFormationDocument.save();

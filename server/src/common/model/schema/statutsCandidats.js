@@ -72,6 +72,11 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Libellé court de la formation visée",
   },
+  niveau_formation: {
+    type: String,
+    default: null,
+    description: "Le niveau de la formation",
+  },
   uai_etablissement: {
     type: String,
     default: null,
