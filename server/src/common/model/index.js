@@ -12,6 +12,7 @@ module.exports = {
   UserEvent: getModel("userEvents"),
   JobEvent: getModel("jobEvents", true),
   Cfa: getModel("cfas"),
+  CfaDataFeedback: getModel("cfaDataFeedback"),
   Formation: getModel("formations"),
   Log: getModel("logs"),
 };

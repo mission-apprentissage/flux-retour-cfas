@@ -6,6 +6,7 @@ const cfasComponent = require("./cfas");
 const formationsComponent = require("./formations");
 const createStats = require("./stats");
 const createDashboard = require("./dashboard");
+const cfaDataFeedbackComponent = require("./cfaDataFeedback");
 
 module.exports = async (options = {}) => {
   const users = options.users || (await createUsers());
@@ -13,6 +14,7 @@ module.exports = async (options = {}) => {
   const statutsCandidats = options.statutsCandidats || createStatutsCandidats();
   const formations = options.formations || formationsComponent();
   const cfas = options.cfas || cfasComponent();
+  const cfaDataFeedback = options.cfas || cfaDataFeedbackComponent();
   const stats = options.stats || createStats();
   const dashboard = options.dashboard || createDashboard();
 
@@ -21,6 +23,7 @@ module.exports = async (options = {}) => {
     userEvents,
     db: options.db || (await connectToMongo()).db,
     statutsCandidats,
+    cfaDataFeedback,
     formations,
     cfas,
     stats,

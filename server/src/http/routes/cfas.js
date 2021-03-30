@@ -2,7 +2,7 @@ const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
-module.exports = ({ cfas }) => {
+module.exports = ({ cfas, cfaDataFeedback }) => {
   const router = express.Router();
 
   const searchBodyValidationSchema = Joi.object({
@@ -26,6 +26,42 @@ module.exports = ({ cfas }) => {
 
       const foundCfa = await cfas.searchCfasByNomEtablissementOrUai(searchTerm, otherFilters);
       return res.json(foundCfa);
+    })
+  );
+
+  const dataFeedbackBodyValidationSchema = Joi.object({
+    siret: Joi.string().required(),
+    email: Joi.string().required(),
+    details: Joi.string().required(),
+    dataIsValid: Joi.boolean().required(),
+  });
+
+  router.post(
+    "/data-feedback",
+    tryCatch(async (req, res) => {
+      const { error } = dataFeedbackBodyValidationSchema.validate(req.body);
+
+      if (error) {
+        return res.status(400).json({
+          status: "INPUT_VALIDATION_ERROR",
+          message: error.message,
+        });
+      }
+
+      const created = await cfaDataFeedback.createCfaDataFeedback(req.body);
+
+      return res.json(created);
+    })
+  );
+
+  router.get(
+    "/data-feedback",
+    tryCatch(async (req, res) => {
+      const { siret } = req.query;
+
+      const foundDataFeedback = await cfaDataFeedback.getCfaDataFeedbackBySiret(siret);
+      console.log(foundDataFeedback);
+      return res.json(foundDataFeedback);
     })
   );
 
