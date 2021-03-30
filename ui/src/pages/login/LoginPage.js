@@ -87,7 +87,7 @@ const LoginPage = () => {
                       </Field>
                     </Box>
                     <HStack spacing="4w">
-                      <Button color="primary" type="submit">
+                      <Button color="white" type="submit">
                         Connexion
                       </Button>
                     </HStack>

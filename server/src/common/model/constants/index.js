@@ -53,22 +53,22 @@ const reseauxCfas = {
     nomReseau: "CMA",
     nomFichier: "cfas-cma",
   },
-  AGRI: {
-    nomReseau: "AGRI",
-    nomFichier: "cfas-agri",
-  },
+  // AGRI: {
+  //   nomReseau: "AGRI",
+  //   nomFichier: "cfas-agri",
+  // },
   ANASUP: {
     nomReseau: "ANASUP",
     nomFichier: "cfas-anasup",
   },
-  PROMOTRANS: {
-    nomReseau: "PROMOTRANS",
-    nomFichier: "cfas-promotrans",
-  },
-  COMPAGNONS_DU_DEVOIR: {
-    nomReseau: "COMPAGNONS DU DEVOIR",
-    nomFichier: "cfas-compagnons-du-devoir",
-  },
+  // PROMOTRANS: {
+  //   nomReseau: "PROMOTRANS",
+  //   nomFichier: "cfas-promotrans",
+  // },
+  // COMPAGNONS_DU_DEVOIR: {
+  //   nomReseau: "COMPAGNONS DU DEVOIR",
+  //   nomFichier: "cfas-compagnons-du-devoir",
+  // },
   UIMM: {
     nomReseau: "UIMM",
     nomFichier: "cfas-uimm",

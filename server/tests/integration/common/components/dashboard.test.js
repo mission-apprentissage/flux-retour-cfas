@@ -568,7 +568,7 @@ integrationTests(__filename, () => {
     const { getEffectifsData } = dashboardComponent();
 
     it("Permet de récupérer les données d'effectifs pour une période et un réseau", async () => {
-      const createQuery = { etablissement_reseaux: [reseauxCfas.AGRI.nomReseau] };
+      const createQuery = { etablissement_reseaux: [reseauxCfas.BTP_CFA.nomReseau] };
 
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
@@ -620,7 +620,7 @@ integrationTests(__filename, () => {
       };
 
       // Check for good filter
-      const filterQuery = { etablissement_reseaux: { $in: [reseauxCfas.AGRI.nomReseau] } };
+      const filterQuery = { etablissement_reseaux: { $in: [reseauxCfas.BTP_CFA.nomReseau] } };
       const nbStatutsFoundInHistory = await getEffectifsData(startDate, endDate, filterQuery);
       assert.strictEqual(nbStatutsFoundInHistory.startDate.nbInscrits, expectedResults.startDate.nbInscrits);
       assert.strictEqual(nbStatutsFoundInHistory.startDate.nbApprentis, expectedResults.startDate.nbApprentis);
@@ -630,7 +630,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(nbStatutsFoundInHistory.endDate.nbAbandons, expectedResults.endDate.nbAbandons);
 
       // Check for bad filter
-      const badFilterQuery = { etablissement_reseaux: { $in: [reseauxCfas.PROMOTRANS.nomReseau] } };
+      const badFilterQuery = { etablissement_reseaux: { $in: [reseauxCfas.ANASUP.nomReseau] } };
       const nbStatutsBadFilter = await getEffectifsData(startDate, endDate, badFilterQuery);
       assert.strictEqual(nbStatutsBadFilter.startDate.nbInscrits, 0);
       assert.strictEqual(nbStatutsBadFilter.startDate.nbApprentis, 0);
