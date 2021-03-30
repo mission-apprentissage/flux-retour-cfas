@@ -21,6 +21,11 @@ const cfasSchema = new Schema({
     default: null,
     description: "Nom de l'établissement",
   },
+  noms_cfa: {
+    type: [String],
+    default: null,
+    description: "Liste des noms de l'établissement identifiés",
+  },
   emails_contact: {
     type: [String],
     default: null,

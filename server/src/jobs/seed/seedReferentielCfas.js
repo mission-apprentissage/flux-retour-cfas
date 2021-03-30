@@ -19,15 +19,15 @@ runScript(async () => {
   logger.info("Seeding referentiel CFAs");
 
   // Seed Networks
-  await seedCfasNetworkFromCsv(reseauxCfas.CCCA_BTP);
+  await seedCfasNetworkFromCsv(reseauxCfas.CCCA_BTP, "latin1");
   await seedCfasNetworkFromCsv(reseauxCfas.CCCI_France);
-  await seedCfasNetworkFromCsv(reseauxCfas.CMA);
+  await seedCfasNetworkFromCsv(reseauxCfas.CMA, "latin1");
   // await seedCfasNetworkFromCsv(reseauxCfas.AGRI); // En attente violaine
-  await seedCfasNetworkFromCsv(reseauxCfas.ANASUP);
+  await seedCfasNetworkFromCsv(reseauxCfas.ANASUP, "latin1");
   // await seedCfasNetworkFromCsv(reseauxCfas.PROMOTRANS); // En attente violaine
-  await seedCfasNetworkFromCsv(reseauxCfas.COMPAGNONS_DU_DEVOIR);
+  await seedCfasNetworkFromCsv(reseauxCfas.COMPAGNONS_DU_DEVOIR, "latin1");
   await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
-  await seedCfasNetworkFromCsv(reseauxCfas.BTP_CFA);
+  await seedCfasNetworkFromCsv(reseauxCfas.BTP_CFA, "latin1");
   await seedCfasNetworkFromCsv(reseauxCfas.MFR);
 
   // Seed Erps
@@ -44,7 +44,7 @@ runScript(async () => {
  * 2.a - If cfa in data has siret - check if update or creation needed
  * 2.b - If cfa in data has uai - check if update or creation needed
  */
-const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier }) => {
+const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier }, encoding = "utf8") => {
   logger.info(`Seeding CFAs for network ${nomReseau}`);
   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 
@@ -56,7 +56,7 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier }) => {
     logger.info(`File ${cfasReferenceFilePath} already in data folder.`);
   }
 
-  const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath, "latin1");
+  const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
   loadingBar.start(allCfasForNetwork.length, 0);
   let nbCfasHandled = 0;
 
@@ -69,7 +69,7 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier }) => {
       const cfaForSiret = await Cfa.findOne({ siret: `${currentCfa.siret}` });
       if (cfaForSiret) {
         // Update if needed
-        await updateCfaIfNeeded(cfaForSiret, nomReseau, nomFichier);
+        await updateCfaIfNeeded(cfaForSiret, currentCfa, nomReseau, nomFichier);
       } else {
         await addCfaToReferentiel(currentCfa, nomReseau, nomFichier);
       }
@@ -78,7 +78,7 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier }) => {
       const cfaForUai = await Cfa.findOne({ uai: `${currentCfa.uai}` });
       if (cfaForUai) {
         // Update if needed
-        await updateCfaIfNeeded(cfaForUai, nomReseau, nomFichier);
+        await updateCfaIfNeeded(cfaForUai, currentCfa, nomReseau, nomFichier);
       } else {
         await addCfaToReferentiel(currentCfa, nomReseau, nomFichier);
       }
@@ -95,7 +95,7 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier }) => {
  * @param {*} nomReseau
  * @param {*} nomFichier
  */
-const updateCfaIfNeeded = async (cfaInReferentiel, nomReseau, nomFichier) => {
+const updateCfaIfNeeded = async (cfaInReferentiel, cfaInFile, nomReseau, nomFichier) => {
   const cfaExistantWithoutCurrentNetwork =
     !cfaInReferentiel.reseaux ||
     (!cfaInReferentiel.reseaux.some((item) => item === nomReseau) &&
@@ -106,7 +106,7 @@ const updateCfaIfNeeded = async (cfaInReferentiel, nomReseau, nomFichier) => {
     await Cfa.findByIdAndUpdate(
       cfaInReferentiel._id,
       {
-        $addToSet: { reseaux: nomReseau, fichiers_reference: `${nomFichier}.csv` },
+        $addToSet: { noms_cfa: cfaInFile.nom.trim(), reseaux: nomReseau, fichiers_reference: `${nomFichier}.csv` },
       },
       { new: true }
     );
@@ -122,7 +122,8 @@ const updateCfaIfNeeded = async (cfaInReferentiel, nomReseau, nomFichier) => {
 const addCfaToReferentiel = async (currentCfa, nomReseau, nomFichier) => {
   // Add cfa in référentiel
   const cfaToAdd = new Cfa({
-    nom: currentCfa.nom ?? null,
+    nom: currentCfa.nom.trim() ?? null,
+    noms_cfa: [currentCfa.nom.trim()],
     siret: currentCfa.siret ? currentCfa.siret?.replace(/(\s|\.)/g, "") : null, //if siret exists and escaping spaces and dots makes it valid
     siren: currentCfa.siren ? currentCfa.siren?.replace(/(\s|\.)/g, "") : null, //if siren exists and escaping spaces and dots makes it valid
     uai: currentCfa.uai ?? null,
@@ -173,13 +174,14 @@ const seedCfasErpsFromCsv = async ({ nomErp, nomFichier }) => {
         ) {
           await Cfa.findOneAndUpdate(
             { uai: `${currentCfa.uai}` },
-            { $addToSet: { erps: nomErp, fichiers_reference: `${nomFichier}.csv` } },
+            { $addToSet: { noms_cfa: currentCfa.nom.trim(), erps: nomErp, fichiers_reference: `${nomFichier}.csv` } },
             { new: true }
           );
         }
       } else {
         const cfaToAdd = new Cfa({
-          nom: currentCfa.nom ?? null,
+          nom: currentCfa.nom.trim() ?? null,
+          noms_cfa: [currentCfa.nom] ?? null,
           siret: currentCfa.siret ? currentCfa.siret?.replace(/(\s|\.)/g, "") : null, //if siret exists and escaping spaces and dots makes it valid
           siren: currentCfa.siren ? currentCfa.siren?.replace(/(\s|\.)/g, "") : null, //if siren exists and escaping spaces and dots makes it valid
           uai: currentCfa.uai ?? null,
