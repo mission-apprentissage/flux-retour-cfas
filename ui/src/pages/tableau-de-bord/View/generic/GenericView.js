@@ -2,11 +2,8 @@ import { HStack, Skeleton } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import EffectifCard from "../../../../common/components/EffectifCard/EffectifCard";
-import PageSectionTitle from "../../../../common/components/Page/PageSectionTitle";
-import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../../../common/constants/statutsColors";
 import { effectifsPropType } from "../../propTypes";
-import DefinitionIndicesModal from "./DefinitionIndicesModal";
+import EffectifsSection from "./EffectifsSection";
 
 const GenericViewLoading = () => {
   return (
@@ -27,29 +24,7 @@ const GenericView = ({ effectifs, loading }) => {
     return null;
   }
 
-  return (
-    <>
-      <PageSectionTitle>Effectifs</PageSectionTitle>
-      <DefinitionIndicesModal />
-      <HStack marginTop="4w">
-        <EffectifCard
-          count={effectifs.apprentis.count}
-          label="apprentis"
-          indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.apprentis}
-        />
-        <EffectifCard
-          count={effectifs.inscrits.count}
-          label="inscrits"
-          indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.inscrits}
-        />
-        <EffectifCard
-          count={effectifs.abandons.count}
-          label="abandons"
-          indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
-        />
-      </HStack>
-    </>
-  );
+  return <EffectifsSection effectifs={effectifs} />;
 };
 
 GenericView.propTypes = {
