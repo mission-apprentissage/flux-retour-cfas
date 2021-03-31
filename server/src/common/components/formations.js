@@ -47,14 +47,14 @@ const createFormation = async (cfd) => {
   }
 
   const formationInfo = await getCfdInfo(cfd);
+  const formationEntity = Formation.create({
+    cfd,
+    libelle: buildFormationLibelle(formationInfo),
+    niveau: formationInfo.niveau,
+  });
 
-  if (formationInfo) {
-    const formation = Formation.create({
-      cfd,
-      libelle: buildFormationLibelle(formationInfo),
-      niveau: formationInfo.niveau,
-    });
-    const newFormationDocument = new FormationModel(formation);
+  if (formationEntity) {
+    const newFormationDocument = new FormationModel(formationEntity);
     const saved = await newFormationDocument.save();
     return saved.toObject();
   }

@@ -81,14 +81,6 @@ integrationTests(__filename, () => {
       }
     });
 
-    it("returns null when formation could not be found in Tables de Correspondaces", async () => {
-      nockGetCfdInfo(null);
-
-      const cfd = "13534005";
-      const formation = await createFormation(cfd);
-      assert.equal(formation, null);
-    });
-
     it("returns created formation when cfd was found in Tables de Correspondaces with intitule_long", async () => {
       nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
 
