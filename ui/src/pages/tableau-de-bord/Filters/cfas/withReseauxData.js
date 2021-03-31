@@ -6,7 +6,15 @@ const withReseauxData = (Component) => {
   const WithReseauxData = (props) => {
     const [reseaux] = useFetch("/api/referentiel/networks");
 
-    return <Component {...props} reseaux={reseaux || []} />;
+    const sortedReseaux = reseaux
+      ? reseaux.slice().sort((a, b) => {
+          if (a.nom < b.nom) return -1;
+          if (a.nom > b.nom) return 1;
+          return 0;
+        })
+      : [];
+
+    return <Component {...props} reseaux={sortedReseaux} />;
   };
 
   return WithReseauxData;
