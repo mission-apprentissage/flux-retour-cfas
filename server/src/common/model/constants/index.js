@@ -118,22 +118,6 @@ const erps = {
 };
 
 /**
- * Noms des régions de CFAS
- */
-const regionsCfas = {
-  NORMANDIE: {
-    nomRegion: "Normandie",
-    numRegion: "28",
-    nomFichier: "cfas-normandie",
-  },
-  CENTRE_VAL_DE_LOIRE: {
-    nomRegion: "Centre-Val de loire",
-    numRegion: "24",
-    nomFichier: "cfas-centre-val-de-loire",
-  },
-};
-
-/**
  * Nom des jobs
  */
 const jobNames = {
@@ -174,5 +158,4 @@ module.exports = {
   regionsCfas,
   jobNames,
   erps,
-  regionsCfas,
 };
