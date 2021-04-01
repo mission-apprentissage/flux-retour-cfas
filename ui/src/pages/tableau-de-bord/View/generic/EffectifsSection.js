@@ -20,7 +20,7 @@ const EffectifsSection = ({ effectifs }) => {
         />
         <EffectifCard
           count={effectifs.inscrits.count}
-          label="inscrits"
+          label="apprenants sans contrat"
           indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.inscrits}
         />
         <EffectifCard
