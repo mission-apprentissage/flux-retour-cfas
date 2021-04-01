@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 const DEFAULT_SELECTED_REGION = { nom: "Normandie", code: "28" };
-import { _get, _post } from "../../../common/httpClient";
+import { _get } from "../../../common/httpClient";
 
 const withCfasReferentielData = (Component) => {
   const WithCfasReferentielData = (props) => {
@@ -34,12 +34,10 @@ const withCfasReferentielData = (Component) => {
           filterQuery = { ...filterQuery, ...{ feedback_donnee_valide: withValidation == 2 ? null : withValidation } };
         }
 
+        const searchParams = `query=${JSON.stringify(filterQuery)}&page=${pageNumber}&limit=${10}`;
+
         try {
-          const response = await _post("/api/cfas", {
-            query: filterQuery,
-            page: pageNumber,
-            limit: 10,
-          });
+          const response = await _get(`/api/cfas?${searchParams}`);
           setData(response);
         } catch (error) {
           setError(error);

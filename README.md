@@ -419,3 +419,5 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
    5.8 - Recherche des codes CFD des formations `yarn formation:retrieve-from-cfd`
 
    5.9 - Mise à jour des niveau des statutsCandidats - dépend des codes CFD des formations (5.8) `yarn statutsCandidats:retrieve-niveaux`
+
+   5.10 - Mise à jour des branchements des données des CFAs `yarn cfas:retrieve-data-connection`
