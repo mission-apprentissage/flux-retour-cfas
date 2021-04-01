@@ -2,10 +2,12 @@ const { StatutCandidat, Cfa } = require("../model");
 const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
+const { paginate } = require("../utils/miscUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
+const groupBy = require("lodash.groupby");
 
 module.exports = () => ({
   existsStatut,
@@ -13,6 +15,7 @@ module.exports = () => ({
   addOrUpdateStatuts,
   createStatutCandidat,
   updateStatut,
+  getDuplicatesList,
 });
 
 const existsStatut = async ({
@@ -236,4 +239,81 @@ const getFindStatutQuery = (
 
 const isMajStatutInvalid = (statutSource, statutDest) => {
   return codesMajStatutsInterdits.some((x) => x.source === statutSource && x.destination === statutDest);
+};
+
+/**
+ * Récupération de la liste des statuts en doublons pour les filtres passés en paramètres
+ * @param {*} filters
+ * @returns
+ */
+const findStatutsDuplicates = async (filters = {}) => {
+  const statutsFound = await StatutCandidat.aggregate([
+    // Filtrage sur les filtres passées en paramètres
+    {
+      $match: filters,
+    },
+    // Regroupement sur les critères d'unicité
+    {
+      $group: {
+        _id: {
+          ine_apprenant: "$ine_apprenant",
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          prenom2_apprenant: "$prenom2_apprenant",
+          prenom3_apprenant: "$prenom3_apprenant",
+          email_contact: "$email_contact",
+          id_formation: "$id_formation",
+          uai_etablissement: "$uai_etablissement",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des différentes periodes en doublon potentiel
+        periodes: { $addToSet: "$periode_formation" },
+        // Ajout des différents sirets en doublon potentiel
+        sirets: { $addToSet: "$siret_etablissement" },
+        count: { $sum: 1 },
+        uai_etablissement: { $first: "$uai_etablissement" }, // Pour regroupement par uai
+      },
+    },
+    // Récupération des statuts en doublons = regroupement count > 1
+    {
+      $match: {
+        count: { $gt: 1 },
+      },
+    },
+    { $sort: { _id: -1 } },
+  ]);
+
+  return statutsFound;
+};
+
+/**
+ * Construction d'une liste de doublons de statutsCandidats
+ * regroupés par UAI pour les filtres passés en paramètres
+ * @param {*} filters
+ * @returns
+ */
+const getDuplicatesList = async (filters = {}, page = 1, limit = 1000) => {
+  // Pagination des statuts trouvés
+  const paginatedStatuts = paginate(await findStatutsDuplicates(filters), page, limit);
+
+  // Regroupement par uai_etablissement
+  const groupedDuplicates = groupBy(paginatedStatuts.data, "uai_etablissement");
+
+  // Construction d'un tableau avec uai, doublons et nb de doublons
+  const groupedData = Object.keys(groupedDuplicates).map((item) => ({
+    uai: item,
+    duplicates: groupedDuplicates[item],
+    nbDuplicates: groupedDuplicates[item].length,
+  }));
+
+  return {
+    data: groupedData,
+    page: paginatedStatuts.page,
+    per_page: paginatedStatuts.per_page,
+    pre_page: paginatedStatuts.pre_page,
+    next_page: paginatedStatuts.next_page,
+    total: paginatedStatuts.total,
+    total_pages: paginatedStatuts.total_pages,
+  };
 };

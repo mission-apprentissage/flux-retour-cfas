@@ -1,4 +1,5 @@
 const assert = require("assert");
+const faker = require("faker/locale/fr");
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidat, Cfa, Formation } = require("../../../../src/common/model");
@@ -10,7 +11,7 @@ const {
   simpleStatutBadUpdate,
   simpleProspectStatut,
 } = require("../../../data/sample");
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { createRandomStatutCandidat, getRandomPeriodeFormation } = require("../../../data/randomizedSample");
 const { reseauxCfas } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 
@@ -752,6 +753,116 @@ integrationTests(__filename, () => {
       const foundFormations = await Formation.find();
       assert.deepEqual(foundFormations.length, 1);
       assert.deepEqual(foundFormations[0].created_at, formation.created_at);
+    });
+  });
+
+  describe("getDuplicatesList", () => {
+    it("Vérifie la récupération des doublons de statuts candidats", async () => {
+      const { addOrUpdateStatuts, getDuplicatesList } = await statutsCandidats();
+
+      const uaiToTest = "0762518Z";
+      const idFormationToTest = "01022103";
+
+      const duplicates = [];
+
+      // Create 10 random duplicates for uai & idFormation
+      const firstRandomStatut = await createRandomStatutCandidat();
+      for (let index = 0; index < 10; index++) {
+        duplicates.push({
+          ...firstRandomStatut,
+          ...{
+            id_formation: idFormationToTest,
+            uai_etablissement: uaiToTest,
+            periode_formation: getRandomPeriodeFormation(),
+            date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
+          },
+        });
+      }
+
+      // Create 10 others random duplicates for uai & idFormation
+      const secondRandomStatut = await createRandomStatutCandidat();
+      for (let index = 0; index < 10; index++) {
+        duplicates.push({
+          ...secondRandomStatut,
+          ...{
+            id_formation: idFormationToTest,
+            uai_etablissement: uaiToTest,
+            periode_formation: getRandomPeriodeFormation(),
+            date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
+          },
+        });
+      }
+
+      await addOrUpdateStatuts(duplicates);
+
+      const duplicatesListFound = await getDuplicatesList({ uai_etablissement: uaiToTest });
+
+      assert.ok(duplicatesListFound);
+      assert.ok(duplicatesListFound.data);
+      assert.deepStrictEqual(duplicatesListFound.data.length, 1);
+      assert.ok(duplicatesListFound.data[0]);
+      assert.deepStrictEqual(duplicatesListFound.data[0].uai, uaiToTest);
+      assert.deepStrictEqual(duplicatesListFound.data[0].nbDuplicates, 2);
+    });
+
+    it("Vérifie la récupération en détail des doublons de statuts candidats", async () => {
+      const { addOrUpdateStatuts, getDuplicatesList } = await statutsCandidats();
+
+      const uaiToTest = "0762518Z";
+      const idFormationToTest = "01022103";
+      const firstPeriodeToTest = [2020, 2021];
+      const secondPeriodeToTest = [2021, 2022];
+
+      // Create duplicates for uai & idFormation
+      const randomDuplicate = await createRandomStatutCandidat();
+      const duplicatesForPeriode = [];
+
+      // Add random duplicate with periode [2020, 2021] && random date_metier_mise_a_jour_statut
+      duplicatesForPeriode.push({
+        ...randomDuplicate,
+        ...{
+          id_formation: idFormationToTest,
+          uai_etablissement: uaiToTest,
+          periode_formation: firstPeriodeToTest,
+          date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
+        },
+      });
+
+      // Add random duplicate with periode [2021, 2022] && random date_metier_mise_a_jour_statut
+      duplicatesForPeriode.push({
+        ...randomDuplicate,
+        ...{
+          id_formation: idFormationToTest,
+          uai_etablissement: uaiToTest,
+          periode_formation: secondPeriodeToTest,
+          date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
+        },
+      });
+
+      await addOrUpdateStatuts(duplicatesForPeriode);
+
+      const duplicatesListFound = await getDuplicatesList({ uai_etablissement: uaiToTest });
+
+      // Check duplicates list
+      assert.ok(duplicatesListFound);
+      assert.ok(duplicatesListFound.data);
+      assert.deepStrictEqual(duplicatesListFound.data.length, 1);
+      assert.ok(duplicatesListFound.data[0]);
+      assert.deepStrictEqual(duplicatesListFound.data[0].uai, uaiToTest);
+      assert.deepStrictEqual(duplicatesListFound.data[0].nbDuplicates, 1);
+      assert.ok(duplicatesListFound.data[0].duplicates);
+
+      // Check duplicates periodes
+      assert.ok(duplicatesListFound.data[0].duplicates[0].periodes);
+      assert.deepStrictEqual(duplicatesListFound.data[0].duplicates[0].periodes.length, 2);
+      assert.deepStrictEqual(
+        duplicatesListFound.data[0].duplicates[0].periodes.some((item) => item.join() === firstPeriodeToTest.join()),
+        true
+      );
+      assert.deepStrictEqual(
+        duplicatesListFound.data[0].duplicates[0].periodes.some((item) => item.join() === secondPeriodeToTest.join()),
+        true
+      );
     });
   });
 });

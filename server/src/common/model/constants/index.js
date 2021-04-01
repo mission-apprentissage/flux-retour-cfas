@@ -118,6 +118,22 @@ const erps = {
 };
 
 /**
+ * Noms des régions de CFAS
+ */
+const regionsCfas = {
+  NORMANDIE: {
+    nomRegion: "Normandie",
+    numRegion: "28",
+    nomFichier: "cfas-normandie",
+  },
+  CENTRE_VAL_DE_LOIRE: {
+    nomRegion: "Centre-Val de loire",
+    numRegion: "24",
+    nomFichier: "cfas-centre-val-de-loire",
+  },
+};
+
+/**
  * Nom des jobs
  */
 const jobNames = {
@@ -131,6 +147,7 @@ const jobNames = {
   seedRandomizedSample: "seed-randomized-sample",
   identifyNetworkCma: "identify-network-cma",
   identifyNetworkDuplicates: "identify-network-duplicates",
+  identifyStatutsCandidatsDuplicates: "identify-statutsCandidats-duplicates",
   formationRetrieveFromCfd: "formation-retrieve-from-cfd",
   formationRetrieveNiveaux: "formation-retrieve-niveaux",
   statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
@@ -157,4 +174,5 @@ module.exports = {
   regionsCfas,
   jobNames,
   erps,
+  regionsCfas,
 };

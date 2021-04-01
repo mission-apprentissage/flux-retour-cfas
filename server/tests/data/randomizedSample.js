@@ -96,6 +96,7 @@ const createRandomStatutsCandidatsApiInputList = createRandomListOf(createRandom
 const createRandomStatutsCandidatsList = createRandomListOf(createRandomStatutCandidat);
 
 module.exports = {
+  getRandomPeriodeFormation,
   createRandomStatutCandidat,
   createRandomStatutCandidatApiInput,
   createRandomStatutsCandidatsList,
