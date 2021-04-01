@@ -41,18 +41,18 @@ const codesMajStatutsInterdits = [
  * Noms des réseaux de CFAS
  */
 const reseauxCfas = {
-  CCCA_BTP: {
-    nomReseau: "CCCA Btp",
-    nomFichier: "cfas-ccca-btp",
-  },
-  CCCI_France: {
-    nomReseau: "CCI France",
-    nomFichier: "cfas-cci-france",
-  },
-  CMA: {
-    nomReseau: "CMA",
-    nomFichier: "cfas-cma",
-  },
+  // CCCA_BTP: {
+  //   nomReseau: "CCCA Btp",
+  //   nomFichier: "cfas-ccca-btp",
+  // },
+  // CCCI_France: {
+  //   nomReseau: "CCI France",
+  //   nomFichier: "cfas-cci-france",
+  // },
+  // CMA: {
+  //   nomReseau: "CMA",
+  //   nomFichier: "cfas-cma",
+  // },
   // AGRI: {
   //   nomReseau: "AGRI",
   //   nomFichier: "cfas-agri",
@@ -80,6 +80,22 @@ const reseauxCfas = {
   MFR: {
     nomReseau: "MFR",
     nomFichier: "cfas-mfr",
+  },
+};
+
+/**
+ * Noms des régions de CFAS
+ */
+const regionsCfas = {
+  NORMANDIE: {
+    nomRegion: "Normandie",
+    numRegion: "28",
+    nomFichier: "cfas-normandie",
+  },
+  CENTRE_VAL_DE_LOIRE: {
+    nomRegion: "Centre-Val de loire",
+    numRegion: "24",
+    nomFichier: "cfas-centre-val-de-loire",
   },
 };
 
@@ -138,6 +154,7 @@ module.exports = {
   codesMajStatutsInterdits,
   codesStatutsMajStatutCandidats,
   reseauxCfas,
+  regionsCfas,
   jobNames,
   erps,
 };

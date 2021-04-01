@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const httpTests = require("../../utils/httpTests");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
-const { StatutCandidat: StatutCandidatModel } = require("../../../src/common/model");
+const { StatutCandidat: StatutCandidatModel, Cfa } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
 httpTests(__filename, ({ startServer }) => {
@@ -93,5 +93,28 @@ httpTests(__filename, ({ startServer }) => {
         donnee_est_valide: validBody.dataIsValid,
       });
     });
+  });
+
+  it("Vérifie qu'on peut récupérer une liste paginée de cfas pour une région en query", async () => {
+    const regionToTest = {
+      code: "24",
+      nom: "Centre-Val de loire",
+    };
+
+    await new Cfa({
+      uai: "0451582A",
+      siret: "31521327200067",
+      nom: "TEST CFA",
+      region_nom: regionToTest.nom,
+      region_num: regionToTest.code,
+    }).save();
+
+    const response = await httpClient.get(`/api/cfas?query={"region_num":${regionToTest.code}}`);
+
+    assert.equal(response.status, 200);
+    assert.equal(response.data.cfas.length, 1);
+    assert.deepEqual(response.data.cfas[0].nom, "TEST CFA");
+    assert.deepEqual(response.data.cfas[0].region_nom, regionToTest.nom);
+    assert.deepEqual(response.data.cfas[0].region_num, regionToTest.code);
   });
 });

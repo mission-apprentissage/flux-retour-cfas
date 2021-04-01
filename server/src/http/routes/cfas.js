@@ -1,6 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
+const { Cfa } = require("../../common/model");
 
 module.exports = ({ cfas, cfaDataFeedback }) => {
   const router = express.Router();
@@ -9,6 +10,13 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     searchTerm: Joi.string().min(3).required(),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
+  });
+
+  const dataFeedbackBodyValidationSchema = Joi.object({
+    siret: Joi.string().required(),
+    email: Joi.string().required(),
+    details: Joi.string().required(),
+    dataIsValid: Joi.boolean().required(),
   });
 
   router.post(
@@ -29,12 +37,29 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     })
   );
 
-  const dataFeedbackBodyValidationSchema = Joi.object({
-    siret: Joi.string().required(),
-    email: Joi.string().required(),
-    details: Joi.string().required(),
-    dataIsValid: Joi.boolean().required(),
-  });
+  router.get(
+    "/",
+    tryCatch(async (req, res) => {
+      const { query, page, limit } = await Joi.object({
+        query: Joi.string().default("{}"),
+        page: Joi.number().default(1),
+        limit: Joi.number().default(50),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const jsonQuery = JSON.parse(query);
+      const allData = await Cfa.paginate(jsonQuery, { page, limit });
+
+      return res.json({
+        cfas: allData.docs,
+        pagination: {
+          page: allData.page,
+          resultats_par_page: limit,
+          nombre_de_page: allData.pages,
+          total: allData.total,
+        },
+      });
+    })
+  );
 
   router.post(
     "/data-feedback",

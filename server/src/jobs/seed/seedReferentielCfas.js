@@ -7,7 +7,7 @@ const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { Cfa } = require("../../common/model");
-const { reseauxCfas, erps, jobNames } = require("../../common/model/constants/");
+const { reseauxCfas, jobNames, regionsCfas } = require("../../common/model/constants/");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -19,20 +19,24 @@ runScript(async () => {
   logger.info("Seeding referentiel CFAs");
 
   // Seed Networks
-  await seedCfasNetworkFromCsv(reseauxCfas.CCCA_BTP, "latin1");
-  await seedCfasNetworkFromCsv(reseauxCfas.CCCI_France);
-  await seedCfasNetworkFromCsv(reseauxCfas.CMA, "latin1");
+  // await seedCfasNetworkFromCsv(reseauxCfas.CCCA_BTP); // En attente violaine - SIRETS manquants
+  // await seedCfasNetworkFromCsv(reseauxCfas.CCCI_France); // En attente violaine - SIRETS manquants
+  // await seedCfasNetworkFromCsv(reseauxCfas.CMA); // En attente violaine - SIRETS manquants
   // await seedCfasNetworkFromCsv(reseauxCfas.AGRI); // En attente violaine
   await seedCfasNetworkFromCsv(reseauxCfas.ANASUP, "latin1");
   // await seedCfasNetworkFromCsv(reseauxCfas.PROMOTRANS); // En attente violaine
-  await seedCfasNetworkFromCsv(reseauxCfas.COMPAGNONS_DU_DEVOIR, "latin1");
+  // await seedCfasNetworkFromCsv(reseauxCfas.COMPAGNONS_DU_DEVOIR); // En attente violaine
   await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
   await seedCfasNetworkFromCsv(reseauxCfas.BTP_CFA, "latin1");
   await seedCfasNetworkFromCsv(reseauxCfas.MFR);
 
   // Seed Erps
-  await seedCfasErpsFromCsv(erps.GESTI);
-  await seedCfasErpsFromCsv(erps.YMAG);
+  // await seedCfasErpsFromCsv(erps.GESTI); // Certains sirets sont manquants
+  // await seedCfasErpsFromCsv(erps.YMAG); // Certains sirets sont manquants
+
+  // Seed Regions
+  await seedCfasRegionsFromCsv(regionsCfas.NORMANDIE, "latin1");
+  await seedCfasRegionsFromCsv(regionsCfas.CENTRE_VAL_DE_LOIRE, "latin1");
 
   logger.info("End seeding référentiel CFAs !");
 }, jobNames.seedReferentielCfas);
@@ -139,55 +143,121 @@ const addCfaToReferentiel = async (currentCfa, nomReseau, nomFichier) => {
 /**
  * Seeding Reference CFAs for Erps
  */
-const seedCfasErpsFromCsv = async ({ nomErp, nomFichier }) => {
-  logger.info(`Seeding CFAs for erp ${nomErp}`);
+// const seedCfasErpsFromCsv = async ({ nomErp, nomFichier }) => {
+//   logger.info(`Seeding CFAs for erp ${nomErp}`);
+//   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
+
+//   // Get Reference CSV File if needed
+//   if (!fs.existsSync(cfasReferenceFilePath)) {
+//     const storageMgr = await ovhStorageManager();
+//     await storageMgr.downloadFileTo(`cfas-clients-erps/${nomFichier}.csv`, cfasReferenceFilePath);
+//   } else {
+//     logger.info(`File ${cfasReferenceFilePath} already in data folder.`);
+//   }
+
+//   const allCfasForErp = readJsonFromCsvFile(cfasReferenceFilePath);
+//   loadingBar.start(allCfasForErp.length, 0);
+//   let nbCfasHandled = 0;
+
+//   // Parse all cfas in file
+//   await asyncForEach(allCfasForErp, async (currentCfa) => {
+//     nbCfasHandled++;
+//     loadingBar.update(nbCfasHandled);
+
+//     if (currentCfa.uai) {
+//       // Gets cfa for this uai without this ERP
+//       const cfasForUai = await Cfa.findOne({ uai: `${currentCfa.uai}` });
+
+//       // Update cfa if needed, create it if not existant
+//       if (cfasForUai) {
+//         // Update only if cfa in referentiel has not erp
+//         if (
+//           !cfasForUai.erps ||
+//           (!cfasForUai.erps.some((item) => item === nomErp) &&
+//             !cfasForUai.fichiers_reference.some((item) => item === `${nomFichier}.csv`))
+//         ) {
+//           await Cfa.findOneAndUpdate(
+//             { uai: `${currentCfa.uai}` },
+//             { $addToSet: { erps: nomErp, fichiers_reference: `${nomFichier}.csv` } },
+//             { new: true }
+//           );
+//         }
+//       } else {
+//         const cfaToAdd = new Cfa({
+//           nom: currentCfa.nom ?? null,
+//           siret: currentCfa.siret ? currentCfa.siret?.replace(/(\s|\.)/g, "") : null, //if siret exists and escaping spaces and dots makes it valid
+//           siren: currentCfa.siren ? currentCfa.siren?.replace(/(\s|\.)/g, "") : null, //if siren exists and escaping spaces and dots makes it valid
+//           uai: currentCfa.uai ?? null,
+//           emails_contact: [currentCfa.email_contact] ?? null,
+//           telephone: currentCfa.telephone ?? null,
+//           erps: [nomErp],
+//           fichiers_reference: [`${nomFichier}.csv`],
+//         });
+
+//         await cfaToAdd.save();
+//       }
+//     }
+//   });
+
+//   loadingBar.stop();
+//   logger.info(`All cfas from ${nomFichier}.csv file imported !`);
+// };
+
+/**
+ * Seeding Reference CFAs for Regions
+ */
+const seedCfasRegionsFromCsv = async ({ nomRegion, numRegion, nomFichier }, encoding) => {
+  logger.info(`Seeding CFAs for regions ${nomRegion}`);
   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
   if (!fs.existsSync(cfasReferenceFilePath)) {
     const storageMgr = await ovhStorageManager();
-    await storageMgr.downloadFileTo(`cfas-clients-erps/${nomFichier}.csv`, cfasReferenceFilePath);
+    await storageMgr.downloadFileTo(`cfas-regions/${nomFichier}.csv`, cfasReferenceFilePath);
   } else {
     logger.info(`File ${cfasReferenceFilePath} already in data folder.`);
   }
 
-  const allCfasForErp = readJsonFromCsvFile(cfasReferenceFilePath);
-  loadingBar.start(allCfasForErp.length, 0);
+  const allCfasForRegion = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
+  loadingBar.start(allCfasForRegion.length, 0);
   let nbCfasHandled = 0;
 
   // Parse all cfas in file
-  await asyncForEach(allCfasForErp, async (currentCfa) => {
+  await asyncForEach(allCfasForRegion, async (currentCfa) => {
     nbCfasHandled++;
     loadingBar.update(nbCfasHandled);
 
-    if (currentCfa.uai) {
-      // Gets cfa for this uai without this ERP
-      const cfasForUai = await Cfa.findOne({ uai: `${currentCfa.uai}` });
+    if (currentCfa.siret) {
+      // Gets cfa for this siret without this region
+      const cfaForSiret = await Cfa.findOne({ siret: `${currentCfa.siret}` });
 
       // Update cfa if needed, create it if not existant
-      if (cfasForUai) {
-        // Update only if cfa in referentiel has not erp
+      if (cfaForSiret) {
+        // Update only if cfa in referentiel has no region
         if (
-          !cfasForUai.erps ||
-          (!cfasForUai.erps.some((item) => item === nomErp) &&
-            !cfasForUai.fichiers_reference.some((item) => item === `${nomFichier}.csv`))
+          !cfaForSiret.numRegion ||
+          (!cfaForSiret.numRegion === numRegion &&
+            !cfaForSiret.fichiers_reference.some((item) => item === `${nomFichier}.csv`))
         ) {
-          await Cfa.findOneAndUpdate(
-            { uai: `${currentCfa.uai}` },
-            { $addToSet: { noms_cfa: currentCfa.nom.trim(), erps: nomErp, fichiers_reference: `${nomFichier}.csv` } },
+          await Cfa.findByIdAndUpdate(
+            cfaForSiret._id,
+            {
+              $set: { region_num: numRegion, region_nom: nomRegion },
+              $addToSet: { fichiers_reference: `${nomFichier}.csv` },
+            },
             { new: true }
           );
         }
       } else {
         const cfaToAdd = new Cfa({
-          nom: currentCfa.nom.trim() ?? null,
-          noms_cfa: [currentCfa.nom] ?? null,
+          nom: currentCfa.nom?.trim() ?? null,
           siret: currentCfa.siret ? currentCfa.siret?.replace(/(\s|\.)/g, "") : null, //if siret exists and escaping spaces and dots makes it valid
           siren: currentCfa.siren ? currentCfa.siren?.replace(/(\s|\.)/g, "") : null, //if siren exists and escaping spaces and dots makes it valid
           uai: currentCfa.uai ?? null,
           emails_contact: [currentCfa.email_contact] ?? null,
-          telephone: currentCfa.telephone ?? null,
-          erps: [nomErp],
+          telephone: currentCfa.telephone?.trim() ?? null,
+          region_num: numRegion ?? null,
+          region_nom: nomRegion ?? null,
           fichiers_reference: [`${nomFichier}.csv`],
         });
 

@@ -1,41 +1,11 @@
 import { Skeleton, Table, TableCaption, Tag, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
-import React, { useCallback, useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { Page, PageContent, PageHeader, Pagination } from "../../common/components";
-import { _post } from "../../common/httpClient";
+import { Page, PageContent, PageHeader, Pagination } from "../../../common/components";
+import withJobEventsData from "./withJobEventsData";
 
-const JobEventsPage = () => {
-  let [data, setData] = useState(null);
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState(null);
-
-  const _fetch = useCallback(
-    async (pageNumber = 1) => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await _post("/api/jobEvents/", {
-          page: pageNumber,
-          limit: 10,
-        });
-        setData(response);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    ["/api/jobEvents/"]
-  );
-
-  useEffect(() => {
-    async function fetchData() {
-      return _fetch();
-    }
-    fetchData();
-  }, ["/api/jobEvents/", _fetch]);
-
+const JobEventsPage = ({ data, error, loading, _fetch }) => {
   return (
     <Page>
       <PageHeader title="Paramètres - Jobs" />
@@ -116,4 +86,11 @@ const JobEventsPage = () => {
   );
 };
 
-export default JobEventsPage;
+JobEventsPage.propTypes = {
+  data: PropTypes.object.isRequired,
+  loading: PropTypes.bool.isRequired,
+  error: PropTypes.object,
+  _fetch: PropTypes.func.isRequired,
+};
+
+export default withJobEventsData(JobEventsPage);

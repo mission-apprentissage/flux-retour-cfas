@@ -640,7 +640,7 @@ integrationTests(__filename, () => {
       // Create sample cfa in referentiel
       const referenceCfa = new Cfa({
         siret: validSiret,
-        reseaux: [reseauxCfas.BTP_CFA.nomReseau, reseauxCfas.CCCI_France.nomReseau],
+        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
 
@@ -652,8 +652,8 @@ integrationTests(__filename, () => {
       const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
       assert.deepStrictEqual(siret_etablissement_valid, true);
       assert.deepStrictEqual(etablissement_reseaux.length, 2);
-      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.BTP_CFA.nomReseau);
-      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.CCCI_France.nomReseau);
+      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.ANASUP.nomReseau);
+      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.BTP_CFA.nomReseau);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret invalide on ne set pas le champ etablissement_reseaux", async () => {
@@ -663,7 +663,7 @@ integrationTests(__filename, () => {
       // Create sample cfa in referentiel
       const referenceCfa = new Cfa({
         siret: invalidSiret,
-        reseaux: [reseauxCfas.BTP_CFA.nomReseau, reseauxCfas.CCCI_France.nomReseau],
+        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
 
@@ -684,7 +684,7 @@ integrationTests(__filename, () => {
       // Create sample cfa in referentiel
       const referenceCfa = new Cfa({
         uai: validUai,
-        reseaux: [reseauxCfas.BTP_CFA.nomReseau, reseauxCfas.CCCI_France.nomReseau],
+        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
 
@@ -696,8 +696,8 @@ integrationTests(__filename, () => {
       const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
       assert.deepStrictEqual(uai_etablissement_valid, true);
       assert.deepStrictEqual(etablissement_reseaux.length, 2);
-      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.BTP_CFA.nomReseau);
-      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.CCCI_France.nomReseau);
+      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.ANASUP.nomReseau);
+      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.BTP_CFA.nomReseau);
     });
 
     it("Vérifie qu'à la création d'un statut avec un uai invalide on ne set pas le champ etablissement_reseaux", async () => {
@@ -707,7 +707,7 @@ integrationTests(__filename, () => {
       // Create sample cfa in referentiel
       const referenceCfa = new Cfa({
         uai: invalidUai,
-        reseaux: [reseauxCfas.BTP_CFA.nomReseau, reseauxCfas.CCCI_France.nomReseau],
+        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
 

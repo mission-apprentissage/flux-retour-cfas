@@ -5,7 +5,8 @@ import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
 import LoginPage from "./pages/login/LoginPage";
 import RechercheUaiPage from "./pages/recherche-uai/RechercheUaiPage";
-import JobEventsPage from "./pages/settings/JobEventsPage";
+import CfasReferentielPage from "./pages/settings/cfasReferentiel/CfasReferentielPage";
+import JobEventsPage from "./pages/settings/jobEvents/JobEventsPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import UserStatsPage from "./pages/user-stats";
@@ -25,6 +26,7 @@ const App = () => {
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
         <PrivateRoute path="/recherche-uai" component={RechercheUaiPage} />
         <PrivateRoute path="/settings/jobEvents" component={JobEventsPage} />
+        <Route path="/referentiel-cfas" component={CfasReferentielPage} />
 
         <Route component={() => <div>404</div>} />
       </Switch>

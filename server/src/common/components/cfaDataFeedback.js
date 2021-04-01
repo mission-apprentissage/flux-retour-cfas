@@ -1,4 +1,4 @@
-const { CfaDataFeedback: CfaDataFeedbackModel } = require("../model");
+const { CfaDataFeedback: CfaDataFeedbackModel, Cfa } = require("../model");
 const { validateSiret } = require("../domain/siret");
 
 module.exports = () => ({
@@ -21,6 +21,9 @@ const createCfaDataFeedback = async ({ siret, email, dataIsValid, details }) => 
   if (!validateSiret(siret)) {
     throw Error("Invalid SIRET");
   }
+
+  // Add validation to CFA Referentiel
+  await Cfa.findOneAndUpdate({ siret: siret }, { $set: { feedback_donnee_valide: dataIsValid } });
 
   const newCfaDataFeedbackDocument = new CfaDataFeedbackModel({
     siret,

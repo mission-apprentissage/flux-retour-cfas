@@ -51,6 +51,16 @@ const cfasSchema = new Schema({
     default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
     description: "Réseaux du CFA, s'ils existent",
   },
+  region_nom: {
+    type: String,
+    default: null,
+    description: "Région du CFA",
+  },
+  region_num: {
+    type: String,
+    default: null,
+    description: "Numéro de la région du CFA",
+  },
   reponse_enquete_ds: {
     type: Boolean,
     default: false,
@@ -65,6 +75,11 @@ const cfasSchema = new Schema({
     type: [String],
     default: [],
     description: "Fichiers dans lesquels le cfa est identifié",
+  },
+  feedback_donnee_valide: {
+    type: Boolean,
+    default: null,
+    description: "Les données présentées sur le tableau de bord par ce CFA est-elle valide",
   },
 });
 
