@@ -8,7 +8,9 @@ const FilterButton = ({ children, icon, onClick, displayClearIcon = false, clear
   return (
     <Button variant="light" onClick={onClick}>
       {icon && <Box fontSize="epsilon" as="i" className={icon} marginRight="1v" />}
-      {children}
+      <Box as="span" textOverflow="ellipsis" maxWidth="320px" overflow="hidden">
+        {children}
+      </Box>
       {displayClearIcon && (
         <Box
           fontSize="epsilon"
