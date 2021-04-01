@@ -91,7 +91,7 @@ const RepartionCfaNiveauAnneesSection = ({ repartitionEffectifs, loading, error 
                   fontWeight="400"
                   letterSpacing="0px"
                 >
-                  Inscrits
+                  Apprenants sans contrat
                 </Th>
                 <Th
                   textTransform="initial"
@@ -201,7 +201,7 @@ const RepartionCfaNiveauAnneesSection = ({ repartitionEffectifs, loading, error 
                   fontWeight="400"
                   letterSpacing="0px"
                 >
-                  Inscrits
+                  Apprenants sans contrat
                 </Th>
                 <Th
                   textTransform="initial"

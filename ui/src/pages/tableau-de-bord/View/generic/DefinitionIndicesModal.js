@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, List, ListItem, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Heading, List, ListItem, Text, useDisclosure } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -8,10 +8,10 @@ import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../../../common/constant
 const IndiceDefinition = ({ indice, color, children }) => {
   return (
     <ListItem display="flex" alignItems="flex-start">
-      <Flex alignItems="center">
-        <Box borderRadius="50%" background={color} height="1rem" width="1rem" mr="1w" />
+      <Box whiteSpace="nowrap">
+        <Box display="inline-flex" borderRadius="50%" background={color} height="1rem" width="1rem" mr="1w" />
         <strong>{indice}&nbsp;:&nbsp;</strong>
-      </Flex>
+      </Box>
       <Text>{children}</Text>
     </ListItem>
   );
@@ -41,7 +41,7 @@ const DefinitionIndicesModal = () => {
           <IndiceDefinition indice="Apprenti" color={STATUTS_APPRENANTS_INDICATOR_COLORS.apprentis}>
             a signé un contrat d&apos;apprentissage
           </IndiceDefinition>
-          <IndiceDefinition indice="Inscrit" color={STATUTS_APPRENANTS_INDICATOR_COLORS.inscrits}>
+          <IndiceDefinition indice="Apprenant sans contrat" color={STATUTS_APPRENANTS_INDICATOR_COLORS.inscrits}>
             est affecté à un groupe classe et/ou a démarré sa formation mais n&apos;a pas encore signé de contrat
             (stagiaires dela formation professionelle compris)
           </IndiceDefinition>
