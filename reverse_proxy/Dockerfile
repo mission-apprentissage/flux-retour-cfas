@@ -1,7 +1,7 @@
 FROM nginx:latest
 
 RUN apt-get update \
-    && apt-get install -y logrotate
+    && apt-get install -y logrotate nginx-extras
 
 #Logrotate
 COPY app/logrotate.d/logrotate.conf /etc/logrotate.conf
