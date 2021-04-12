@@ -1,4 +1,4 @@
-import { Box, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Link, Text, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 
 import { InfoModal } from "../../common/components";
@@ -27,6 +27,16 @@ const EnSavoirPlusModal = () => {
             Ce tableau n&apos;a pas de valeur statistique mais sert à donner des indices à tous les acteurs pour piloter
             les formations à différents niveaux de granularité.
           </strong>
+        </Text>
+        <Text marginTop="2w">
+          <Link
+            href="https://mission-apprentissage.gitbook.io/general/de-nouveaux-outils-pour-lecosysteme/tableau-de-bord-comprendre-les-donnees"
+            rel="noopener noreferrer"
+            target="_blank"
+            color="bluefrance"
+          >
+            Consultez la FAQ
+          </Link>
         </Text>
       </InfoModal>
     </>
