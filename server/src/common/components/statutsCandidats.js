@@ -35,19 +35,12 @@ const getStatut = ({ nom_apprenant, prenom_apprenant, id_formation, uai_etabliss
   - no found statut
   or
   - found statut has an existing SIRET but different than item to add/update
-  or
-  - found statut has an existing periode_formation but different than item to add/update
-  or
-  - found statut has an existing annee_formation but different than item to add/update
  * @param {*} item 
  * @param {*} foundItem 
  * @returns 
  */
 const shouldCreateNewStatutCandidat = (item, foundItem) =>
-  !foundItem ||
-  (foundItem.siret_etablissement && foundItem.siret_etablissement !== item.siret_etablissement) ||
-  (foundItem.periode_formation && foundItem.periode_formation.join() !== item.periode_formation?.join()) ||
-  (foundItem.annee_formation && foundItem.annee_formation !== item.annee_formation);
+  !foundItem || (foundItem.siret_etablissement !== null && foundItem.siret_etablissement !== item.siret_etablissement);
 
 /**
  * Add or update a list of statuts

@@ -366,8 +366,9 @@ integrationTests(__filename, () => {
       const validUai = "0123456Z";
 
       // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
       const uniqueStatutToCreate = {
-        ...createRandomStatutCandidat(),
+        ...randomStatut,
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
         id_formation: validCfd,
@@ -376,7 +377,7 @@ integrationTests(__filename, () => {
       await createStatutCandidat(uniqueStatutToCreate);
 
       const secondUniqueStatutToCreate = {
-        ...createRandomStatutCandidat(),
+        ...randomStatut,
         nom_apprenant: sampleNom2,
         prenom_apprenant: samplePrenom,
         id_formation: validCfd,
@@ -404,8 +405,9 @@ integrationTests(__filename, () => {
       const validUai = "0123456Z";
 
       // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
       const uniqueStatutToCreate = {
-        ...createRandomStatutCandidat(),
+        ...randomStatut,
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
         id_formation: validCfd,
@@ -414,11 +416,8 @@ integrationTests(__filename, () => {
       await createStatutCandidat(uniqueStatutToCreate);
 
       const secondUniqueStatutToCreate = {
-        ...createRandomStatutCandidat(),
-        nom_apprenant: sampleNom,
+        ...uniqueStatutToCreate,
         prenom_apprenant: samplePrenom2,
-        id_formation: validCfd,
-        uai_etablissement: validUai,
       };
 
       // Check duplicate
@@ -442,8 +441,9 @@ integrationTests(__filename, () => {
       const validUai = "0123456Z";
 
       // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
       const uniqueStatutToCreate = {
-        ...createRandomStatutCandidat(),
+        ...randomStatut,
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
         id_formation: validCfd,
@@ -452,11 +452,8 @@ integrationTests(__filename, () => {
       await createStatutCandidat(uniqueStatutToCreate);
 
       const secondUniqueStatutToCreate = {
-        ...createRandomStatutCandidat(),
-        nom_apprenant: sampleNom,
-        prenom_apprenant: samplePrenom,
+        ...uniqueStatutToCreate,
         id_formation: validCfd2,
-        uai_etablissement: validUai,
       };
 
       // Check duplicate
@@ -480,8 +477,9 @@ integrationTests(__filename, () => {
       const validUai2 = "1111111Z";
 
       // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
       const uniqueStatutToCreate = {
-        ...createRandomStatutCandidat(),
+        ...randomStatut,
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
         id_formation: validCfd,
@@ -490,10 +488,7 @@ integrationTests(__filename, () => {
       await createStatutCandidat(uniqueStatutToCreate);
 
       const secondUniqueStatutToCreate = {
-        ...createRandomStatutCandidat(),
-        nom_apprenant: sampleNom,
-        prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        ...uniqueStatutToCreate,
         uai_etablissement: validUai2,
       };
 
@@ -506,6 +501,82 @@ integrationTests(__filename, () => {
       });
       const shouldCreateNewStatut = await shouldCreateNewStatutCandidat(secondUniqueStatutToCreate, foundItem);
       assert.deepStrictEqual(shouldCreateNewStatut, true);
+    });
+
+    it("Vérifie la non création de nouveau statut si ajout avec une periode_formation différente", async () => {
+      const { getStatut, createStatutCandidat, shouldCreateNewStatutCandidat } = await statutsCandidats();
+
+      const sampleNom = "SMITH";
+      const samplePrenom = "John";
+      const validCfd = "abcd1234";
+      const validUai = "0123456Z";
+      const samplePeriode = [2019, 2020];
+      const samplePeriode2 = [2021, 2022];
+
+      // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
+      const uniqueStatutToCreate = {
+        ...randomStatut,
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+        periode_formation: samplePeriode,
+      };
+      await createStatutCandidat(uniqueStatutToCreate);
+
+      const secondUniqueStatutToCreate = {
+        ...uniqueStatutToCreate,
+        periode_formation: samplePeriode2,
+      };
+
+      // Check duplicate
+      const foundItem = await getStatut({
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+      });
+      const shouldCreateNewStatut = await shouldCreateNewStatutCandidat(secondUniqueStatutToCreate, foundItem);
+      assert.deepStrictEqual(shouldCreateNewStatut, false);
+    });
+
+    it("Vérifie la non création de nouveau statut si ajout avec une annee_formation différente", async () => {
+      const { getStatut, createStatutCandidat, shouldCreateNewStatutCandidat } = await statutsCandidats();
+
+      const sampleNom = "SMITH";
+      const samplePrenom = "John";
+      const validCfd = "abcd1234";
+      const validUai = "0123456Z";
+      const sampleAnnee = 2020;
+      const sampleAnnee2 = 2021;
+
+      // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
+      const uniqueStatutToCreate = {
+        ...randomStatut,
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+        annee_formation: sampleAnnee,
+      };
+      await createStatutCandidat(uniqueStatutToCreate);
+
+      const secondUniqueStatutToCreate = {
+        ...uniqueStatutToCreate,
+        annee_formation: sampleAnnee2,
+      };
+
+      // Check duplicate
+      const foundItem = await getStatut({
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+      });
+      const shouldCreateNewStatut = await shouldCreateNewStatutCandidat(secondUniqueStatutToCreate, foundItem);
+      assert.deepStrictEqual(shouldCreateNewStatut, false);
     });
   });
 
@@ -659,33 +730,6 @@ integrationTests(__filename, () => {
       assert.notStrictEqual(found.updated_at, null);
     });
 
-    it("Vérifie qu'on crée un nouveau statut candidat quand un statut correspondant à l'élément passé est trouvé mais qu'ils n'ont pas la même periode_formation", async () => {
-      const { addOrUpdateStatuts } = await statutsCandidats();
-
-      const statutWithPeriodeFormation = { ...createRandomStatutCandidat(), periode_formation: [2020, 2021] };
-      const firstCallResult = await addOrUpdateStatuts([statutWithPeriodeFormation]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
-
-      // send the same statut but with a different periode_formation
-      const sameStatutWithDifferentPeriodeFormation = {
-        ...statutWithPeriodeFormation,
-        periode_formation: [2021, 2022],
-      };
-      const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentPeriodeFormation]);
-
-      // a new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 1);
-      assert.strictEqual(secondCallResult.updated.length, 0);
-      const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 2);
-
-      // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.toJSON().periode_formation, [2020, 2021]);
-      assert.strictEqual(found.updated_at, null);
-    });
-
     it("Vérifie qu'on update la annee_formation d'un statut existant qui n'en a pas avec la annee_formation de l'élément passé si le reste des infos est identique", async () => {
       const { addOrUpdateStatuts } = await statutsCandidats();
 
@@ -708,30 +752,6 @@ integrationTests(__filename, () => {
       const found = await StatutCandidat.findById(result.added[0]._id);
       assert.strictEqual(found.annee_formation, 2020);
       assert.notStrictEqual(found.updated_at, null);
-    });
-
-    it("Vérifie qu'on crée un nouveau statut candidat quand un statut correspondant à l'élément passé est trouvé mais qu'ils n'ont pas la même annee_formation", async () => {
-      const { addOrUpdateStatuts } = await statutsCandidats();
-
-      const statutWithPeriodeFormation = { ...createRandomStatutCandidat(), annee_formation: 2020 };
-      const firstCallResult = await addOrUpdateStatuts([statutWithPeriodeFormation]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
-
-      // send the same statut but with a different annee_formation
-      const sameStatutWithDifferentAnneeFormation = { ...statutWithPeriodeFormation, annee_formation: 2021 };
-      const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentAnneeFormation]);
-
-      // a new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 1);
-      assert.strictEqual(secondCallResult.updated.length, 0);
-      const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 2);
-
-      // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.annee_formation, 2020);
-      assert.strictEqual(found.updated_at, null);
     });
 
     it("Vérifie qu'on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un nom différent", async () => {
@@ -880,6 +900,133 @@ integrationTests(__filename, () => {
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
       assert.deepStrictEqual(found.uai_etablissement, validUai);
       assert.strictEqual(found.updated_at, null);
+    });
+
+    it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une période différente", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+
+      const sampleNom = "SMITH";
+      const samplePrenom = "John";
+      const validCfd = "abcd1234";
+      const validUai = "0123456Z";
+      const samplePeriode = [2019, 2020];
+      const samplePeriode2 = [2021, 2022];
+
+      // Create 2 distinct items
+      const uniqueStatutToCreate = {
+        ...createRandomStatutCandidat(),
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+        periode_formation: samplePeriode,
+      };
+      const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
+      assert.strictEqual(firstCallResult.added.length, 1);
+      assert.strictEqual(firstCallResult.updated.length, 0);
+
+      // send the same statut but with a different periode_formation
+      const sameStatutWithDifferentPeriode = { ...uniqueStatutToCreate, periode_formation: samplePeriode2 };
+      const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentPeriode]);
+
+      // no new statut should have been created
+      assert.strictEqual(secondCallResult.added.length, 0);
+      assert.strictEqual(secondCallResult.updated.length, 1);
+      const count = await StatutCandidat.countDocuments();
+      assert.strictEqual(count, 1);
+
+      // check in db
+      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      assert.deepStrictEqual(found.periode_formation.join(), samplePeriode2.join());
+      assert.notDeepStrictEqual(found.updated_at, null);
+    });
+
+    it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une année différente", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+
+      const sampleNom = "SMITH";
+      const samplePrenom = "John";
+      const validCfd = "abcd1234";
+      const validUai = "0123456Z";
+      const sampleAnnee = 2019;
+      const sampleAnnee2 = 2021;
+
+      // Create 2 distinct items
+      const uniqueStatutToCreate = {
+        ...createRandomStatutCandidat(),
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+        annee_formation: sampleAnnee,
+      };
+      const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
+      assert.strictEqual(firstCallResult.added.length, 1);
+      assert.strictEqual(firstCallResult.updated.length, 0);
+
+      // send the same statut but with a different annee_formation
+      const sameStatutWithDifferentAnnee = { ...uniqueStatutToCreate, annee_formation: sampleAnnee2 };
+      const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentAnnee]);
+
+      // no new statut should have been created
+      assert.strictEqual(secondCallResult.added.length, 0);
+      assert.strictEqual(secondCallResult.updated.length, 1);
+      const count = await StatutCandidat.countDocuments();
+      assert.strictEqual(count, 1);
+
+      // check in db
+      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      assert.deepStrictEqual(found.annee_formation, sampleAnnee2);
+      assert.notDeepStrictEqual(found.updated_at, null);
+    });
+
+    it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une différence sur les prénoms 2-3 / email", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+
+      const sampleNom = "SMITH";
+      const samplePrenom = "John";
+      const sampleEmail = "john@email.fr";
+      const validCfd = "abcd1234";
+      const validUai = "0123456Z";
+
+      const updatedPrenom2 = "Sam";
+      const updatedPrenom3 = "Billy";
+      const updatedEmail = "other@email.fr";
+
+      // Create 2 distinct items
+      const uniqueStatutToCreate = {
+        ...createRandomStatutCandidat(),
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+        email_contact: sampleEmail,
+      };
+      const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
+      assert.strictEqual(firstCallResult.added.length, 1);
+      assert.strictEqual(firstCallResult.updated.length, 0);
+
+      // send the same statut but with updates on prenom2-3 & email
+      const sameStatutWithUpdatesPrenomEmail = {
+        ...uniqueStatutToCreate,
+        prenom2_apprenant: updatedPrenom2,
+        prenom3_apprenant: updatedPrenom3,
+        email_contact: updatedEmail,
+      };
+      const secondCallResult = await addOrUpdateStatuts([sameStatutWithUpdatesPrenomEmail]);
+
+      // no new statut should have been created but update only
+      assert.strictEqual(secondCallResult.added.length, 0);
+      assert.strictEqual(secondCallResult.updated.length, 1);
+      const count = await StatutCandidat.countDocuments();
+      assert.strictEqual(count, 1);
+
+      // check in db
+      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      assert.deepStrictEqual(found.prenom2_apprenant, updatedPrenom2);
+      assert.deepStrictEqual(found.prenom3_apprenant, updatedPrenom3);
+      assert.deepStrictEqual(found.email_contact, updatedEmail);
+      assert.notDeepStrictEqual(found.updated_at, null);
     });
   });
 
@@ -1181,7 +1328,7 @@ integrationTests(__filename, () => {
 
   describe("getDuplicatesList", () => {
     it("Vérifie la récupération des doublons de statuts candidats", async () => {
-      const { addOrUpdateStatuts, getDuplicatesList } = await statutsCandidats();
+      const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
 
       const uaiToTest = "0762518Z";
       const idFormationToTest = "01022103";
@@ -1216,7 +1363,11 @@ integrationTests(__filename, () => {
         });
       }
 
-      await addOrUpdateStatuts(duplicates);
+      // Add each duplicates to db
+      for (const key in duplicates) {
+        const toAdd = duplicates[key];
+        await createStatutCandidat(toAdd);
+      }
 
       const duplicatesListFound = await getDuplicatesList({ uai_etablissement: uaiToTest });
 
@@ -1229,7 +1380,7 @@ integrationTests(__filename, () => {
     });
 
     it("Vérifie la récupération en détail des doublons de statuts candidats", async () => {
-      const { addOrUpdateStatuts, getDuplicatesList } = await statutsCandidats();
+      const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
 
       const uaiToTest = "0762518Z";
       const idFormationToTest = "01022103";
@@ -1262,7 +1413,11 @@ integrationTests(__filename, () => {
         },
       });
 
-      await addOrUpdateStatuts(duplicatesForPeriode);
+      // Add each duplicates to db
+      for (const key in duplicatesForPeriode) {
+        const toAdd = duplicatesForPeriode[key];
+        await createStatutCandidat(toAdd);
+      }
 
       const duplicatesListFound = await getDuplicatesList({ uai_etablissement: uaiToTest });
 
