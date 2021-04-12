@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Divider, Flex, Link, Text, useDisclosure } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -66,6 +66,15 @@ const AwaitingDataFeedback = ({ siret, refetchDataFeedback }) => {
           <ValidationStateBadge fullOpacity={false}>Données en attente de validation</ValidationStateBadge>
         </span>
       </Flex>
+      <Link
+        href="https://mission-apprentissage.gitbook.io/general/de-nouveaux-outils-pour-lecosysteme/tableau-de-bord-comprendre-les-donnees"
+        rel="noopener noreferrer"
+        target="_blank"
+        color="bluefrance"
+        fontSize="zeta"
+      >
+        Consultez la FAQ
+      </Link>
       <DataFeedbackModal isOpen={isOpen} onClose={onClose} siret={siret} refetchDataFeedback={refetchDataFeedback} />
     </>
   );
