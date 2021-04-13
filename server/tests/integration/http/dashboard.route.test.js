@@ -1,6 +1,7 @@
 const assert = require("assert");
 const httpTests = require("../../utils/httpTests");
-const { createRandomStatutCandidat } = require("../../data/randomizedSample");
+const faker = require("faker/locale/fr");
+const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const {
   historySequenceProspectToInscritToApprentiToAbandon,
   historySequenceApprenti,
@@ -116,7 +117,10 @@ httpTests(__filename, ({ startServer }) => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceApprenti, siret_etablissement_valid: true },
+          ...{
+            historique_statut_apprenant: historySequenceApprenti,
+            siret_etablissement_valid: true,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -126,7 +130,10 @@ httpTests(__filename, ({ startServer }) => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceInscritToApprenti, siret_etablissement_valid: true },
+          ...{
+            historique_statut_apprenant: historySequenceInscritToApprenti,
+            siret_etablissement_valid: true,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -208,7 +215,9 @@ httpTests(__filename, ({ startServer }) => {
       // Add 10 statuts for cfa with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          ...{
+            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          },
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -216,7 +225,12 @@ httpTests(__filename, ({ startServer }) => {
       }
 
       // Add Cfa in referentiel
-      const cfaReferenceToAdd = new Cfa({ siret: siretTest, nom: nomTest, uai: uaiTest, reseaux: reseauxTest });
+      const cfaReferenceToAdd = new Cfa({
+        siret: siretTest,
+        nom: nomTest,
+        uai: uaiTest,
+        reseaux: reseauxTest,
+      });
       await cfaReferenceToAdd.save();
 
       // Check good api call
@@ -255,7 +269,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 10 statuts for cfa with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -263,7 +277,11 @@ httpTests(__filename, ({ startServer }) => {
       }
 
       // Add Cfa in referentiel
-      const cfaReferenceToAdd = new Cfa({ siret: siretTest, nom: nomTest, uai: uaiTest });
+      const cfaReferenceToAdd = new Cfa({
+        siret: siretTest,
+        nom: nomTest,
+        uai: uaiTest,
+      });
       await cfaReferenceToAdd.save();
 
       // Check good api call
@@ -302,7 +320,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 10 statuts for cfa with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -346,7 +364,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 10 statuts for cfa with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{ historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon },
+          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -354,7 +372,12 @@ httpTests(__filename, ({ startServer }) => {
       }
 
       // Add Cfa in referentiel
-      const cfaReferenceToAdd = new Cfa({ siret: siretTest, nom: nomTest, uai: uaiTest, reseaux: reseauxTest });
+      const cfaReferenceToAdd = new Cfa({
+        siret: siretTest,
+        nom: nomTest,
+        uai: uaiTest,
+        reseaux: reseauxTest,
+      });
       await cfaReferenceToAdd.save();
 
       // Check bad api call
@@ -408,6 +431,67 @@ httpTests(__filename, ({ startServer }) => {
       });
       assert.deepStrictEqual(badResponse.status, 400);
       assert.deepStrictEqual(badResponse.data.message, `No cfa found for siret ${badSiret}`);
+    });
+  });
+
+  describe("/api/dashboard/region-conversion route", () => {
+    it("Vérifie qu'on peut récupérer les informations de conversion d'une région via API", async () => {
+      const { httpClient } = await startServer();
+
+      const regionNumTest = "28";
+
+      // Add 1 statut for region
+      await new StatutCandidat(
+        createRandomStatutCandidat({
+          nom_etablissement: "TEST CFA",
+          siret_etablissement: "77929544300013",
+          siret_etablissement_valid: true,
+          uai_etablissement: "0762232N",
+          etablissement_num_region: regionNumTest,
+        })
+      ).save();
+
+      // Add 5 cfa in referentiel region without validation
+      for (let index = 0; index < 5; index++) {
+        await new Cfa({
+          nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
+          region_num: regionNumTest,
+          siret: getRandomSiretEtablissement(),
+        }).save();
+      }
+
+      // Add 3 cfa with validation true in referentiel region
+      for (let index = 0; index < 3; index++) {
+        await new Cfa({
+          nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
+          region_num: regionNumTest,
+          siret: getRandomSiretEtablissement(),
+          feedback_donnee_valide: true,
+        }).save();
+      }
+
+      // Check good api call
+      const response = await httpClient.post("/api/dashboard/region-conversion", {
+        num_region: regionNumTest,
+      });
+
+      assert.deepStrictEqual(response.status, 200);
+      assert.ok(response.data.nbCfaIdentified);
+      assert.ok(response.data.nbCfaConnected);
+      assert.ok(response.data.nbCfaDataValidated);
+      assert.deepStrictEqual(response.data.nbCfaIdentified, 8);
+      assert.deepStrictEqual(response.data.nbCfaConnected, 1);
+      assert.deepStrictEqual(response.data.nbCfaDataValidated, 3);
+
+      // Check bad api call
+      const badRegionResponse = await httpClient.post("/api/dashboard/region-conversion", {
+        num_region: "999",
+      });
+
+      assert.deepStrictEqual(badRegionResponse.status, 200);
+      assert.deepStrictEqual(badRegionResponse.data.nbCfaIdentified, 0);
+      assert.deepStrictEqual(badRegionResponse.data.nbCfaConnected, 0);
+      assert.deepStrictEqual(badRegionResponse.data.nbCfaDataValidated, 0);
     });
   });
 });

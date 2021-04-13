@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../constants/statutsColors";
-import { getItemsRate } from "../../utils/calculUtils";
+import { getRoundedPercentage } from "../../utils/calculUtils";
 import DoubleStatCard from "../DoubleStatCard";
 import PageSectionTitle from "../Page/PageSectionTitle";
 import StatCard from "../StatCard";
@@ -94,42 +94,42 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
             background="warning"
             label="Statuts valides"
             stat={stats.nbStatutsValid}
-            stat2={`${getItemsRate(stats.nbStatutsValid, stats.nbStatutsCandidats)} %`}
+            stat2={`${getRoundedPercentage(stats.nbStatutsValid, stats.nbStatutsCandidats)} %`}
             stat2Label="du total des statuts"
           />
           <DoubleStatCard
             background="warning"
             label="Statuts avec UAI absent ou invalide"
             stat={stats.nbInvalidUais}
-            stat2={`${getItemsRate(stats.nbInvalidUais, stats.nbStatutsCandidats)} %`}
+            stat2={`${getRoundedPercentage(stats.nbInvalidUais, stats.nbStatutsCandidats)} %`}
             stat2Label="du total des statuts"
           />
           <DoubleStatCard
             background="warning"
             label="Statuts avec SIRET absent ou invalide"
             stat={stats.nbInvalidSirets}
-            stat2={`${getItemsRate(stats.nbInvalidSirets, stats.nbStatutsCandidats)} %`}
+            stat2={`${getRoundedPercentage(stats.nbInvalidSirets, stats.nbStatutsCandidats)} %`}
             stat2Label="du total des statuts"
           />
           <DoubleStatCard
             background="warning"
             label="Statuts avec SIRET et UAI absent ou invalide"
             stat={stats.nbInvalidSiretsAndUais}
-            stat2={`${getItemsRate(stats.nbInvalidSiretsAndUais, stats.nbStatutsCandidats)} %`}
+            stat2={`${getRoundedPercentage(stats.nbInvalidSiretsAndUais, stats.nbStatutsCandidats)} %`}
             stat2Label="du total des statuts"
           />
           <DoubleStatCard
             background="warning"
             label="Statuts avec CFD absent ou invalide"
             stat={stats.nbInvalidCfds}
-            stat2={`${getItemsRate(stats.nbInvalidCfds, stats.nbStatutsCandidats)} %`}
+            stat2={`${getRoundedPercentage(stats.nbInvalidCfds, stats.nbStatutsCandidats)} %`}
             stat2Label="du total des statuts"
           />
           <DoubleStatCard
             background="warning"
             label="Statuts avec annee_formation manquante"
             stat={stats.nbStatutsAnneeFormationMissing}
-            stat2={`${getItemsRate(stats.nbStatutsAnneeFormationMissing, stats.nbStatutsCandidats)} %`}
+            stat2={`${getRoundedPercentage(stats.nbStatutsAnneeFormationMissing, stats.nbStatutsCandidats)} %`}
             stat2Label="du total des statuts"
           />
         </HStack>

@@ -17,7 +17,7 @@ const TableauDeBordViewSwitch = ({ filters, effectifs, loading, error }) => {
       />
     );
   }
-  return <GenericView effectifs={effectifs} loading={loading} error={error} />;
+  return <GenericView filters={filters} effectifs={effectifs} loading={loading} error={error} />;
 };
 
 TableauDeBordViewSwitch.propTypes = {
