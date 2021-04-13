@@ -132,6 +132,7 @@ const jobNames = {
   identifyNetworkCma: "identify-network-cma",
   identifyNetworkDuplicates: "identify-network-duplicates",
   identifyStatutsCandidatsDuplicates: "identify-statutsCandidats-duplicates",
+  identifyCfasWithInvalidSiret: "identify-cfas-with-invalid-siret",
   formationRetrieveFromCfd: "formation-retrieve-from-cfd",
   formationRetrieveNiveaux: "formation-retrieve-niveaux",
   statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
