@@ -37,6 +37,13 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
+   * Schema for region conversion validation
+   */
+  const dashboardConversionRegionInputSchema = Joi.object({
+    num_region: Joi.string().required(),
+  });
+
+  /**
    * Gets the general stats for the dashboard
    */
   router.get(
@@ -62,13 +69,63 @@ module.exports = ({ stats, dashboard }) => {
   );
 
   /**
+   * Gets region conversion stats
+   */
+  router.post(
+    "/region-conversion",
+    tryCatch(async (req, res) => {
+      // Validate schema
+      await dashboardConversionRegionInputSchema.validateAsync(req.body, {
+        abortEarly: false,
+      });
+
+      // Gets num region param
+      const { num_region } = req.body;
+
+      // Add user event
+      const event = new UserEvent({
+        username: "dashboard",
+        type: "GET",
+        action: `api/dashboard/region-conversion`,
+        data: { num_region },
+      });
+      await event.save();
+
+      // Gets cfas identified for num_region
+      const nbCfaIdentified = await Cfa.countDocuments({
+        region_num: num_region,
+      });
+
+      // Gets distincts cfa sirets for num_region
+      const nbCfaConnected = await stats.getNbDistinctCfasBySiret({
+        etablissement_num_region: num_region,
+      });
+
+      // Gets cfas validate for num_region
+      const nbCfaDataValidated = await Cfa.countDocuments({
+        region_num: num_region,
+        feedback_donnee_valide: true,
+      });
+
+      // Build response
+      return res.json({
+        nbCfaIdentified,
+        nbCfaConnected,
+        nbCfaDataValidated,
+      });
+    })
+  );
+
+  /**
    * Gets the effectifs data for input period & query
    */
   router.post(
     "/effectifs",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardEffectifInputSchema.validateAsync(req.body, { abortEarly: false });
+      await dashboardEffectifInputSchema.validateAsync(req.body, {
+        abortEarly: false,
+      });
 
       // Gets & format params:
       const { startDate, endDate, ...filters } = req.body;
@@ -115,7 +172,9 @@ module.exports = ({ stats, dashboard }) => {
     "/cfa",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardInfosCfaInputSchema.validateAsync(req.body, { abortEarly: false });
+      await dashboardInfosCfaInputSchema.validateAsync(req.body, {
+        abortEarly: false,
+      });
 
       // Gets & format params
       const { siret } = req.body;
@@ -134,7 +193,9 @@ module.exports = ({ stats, dashboard }) => {
         return res.status(400).json({ message: "Siret is not valid" });
       } else {
         // Search cfa in statuts
-        const cfaFound = await StatutCandidat.findOne({ siret_etablissement: siret }).lean();
+        const cfaFound = await StatutCandidat.findOne({
+          siret_etablissement: siret,
+        }).lean();
         if (!cfaFound) {
           return res.status(400).json({ message: `No cfa found for siret ${siret}` });
         } else {
@@ -161,7 +222,9 @@ module.exports = ({ stats, dashboard }) => {
     "/cfa-effectifs-detail",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardEffectifCfaDetailInputSchema.validateAsync(req.body, { abortEarly: false });
+      await dashboardEffectifCfaDetailInputSchema.validateAsync(req.body, {
+        abortEarly: false,
+      });
 
       // Gets & format params:
       const { startDate, endDate, siret } = req.body;
@@ -182,7 +245,9 @@ module.exports = ({ stats, dashboard }) => {
         return res.status(400).json({ message: "Siret is not valid" });
       } else {
         // Search cfa in statuts
-        const cfaFound = await StatutCandidat.findOne({ siret_etablissement: siret }).lean();
+        const cfaFound = await StatutCandidat.findOne({
+          siret_etablissement: siret,
+        }).lean();
         if (!cfaFound) {
           return res.status(400).json({ message: `No cfa found for siret ${siret}` });
         } else {

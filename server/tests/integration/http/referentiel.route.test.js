@@ -23,4 +23,15 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepEqual(response.data[0].num, regionsCfas.NORMANDIE.numRegion);
     assert.deepEqual(response.data[0].nom, regionsCfas.NORMANDIE.nomRegion);
   });
+
+  it("Vérifie qu'on peut récupérer les numéro de régions des CFA référentiels via API", async () => {
+    const { httpClient } = await startServer();
+
+    const response = await httpClient.get("/api/referentiel/regions-cfas");
+
+    assert.deepStrictEqual(response.status, 200);
+    assert.deepEqual(response.data.length, Object.values(regionsCfas).length);
+    assert.deepEqual(response.data[0].num, regionsCfas.NORMANDIE.numRegion);
+    assert.deepEqual(response.data[0].nom, regionsCfas.NORMANDIE.nomRegion);
+  });
 });
