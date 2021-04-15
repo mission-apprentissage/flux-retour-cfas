@@ -6,14 +6,15 @@ const { createRandomStatutCandidat } = require("../../../data/randomizedSample")
 const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
 
 integrationTests(__filename, () => {
-  describe("searchCfasByNomEtablissementOrUai", () => {
-    const { searchCfasByNomEtablissementOrUai } = cfasComponent();
+  describe("searchCfas", () => {
+    const { searchCfas } = cfasComponent();
 
     const statutsSeed = [
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "CFA DU ROANNAIS",
         etablissement_num_departement: "15",
+        etablissement_num_region: "01",
         siret_etablissement: "80420010000021",
         siret_etablissement_valid: true,
         uai_etablissement: "0762290X",
@@ -22,13 +23,14 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cFa dU RO",
         etablissement_num_departement: "15",
+        etablissement_num_region: "01",
         siret_etablissement: "80420010000022",
         siret_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cfa du roanna",
-        etablissement_num_departement: "15",
+        etablissement_num_departement: "39",
         etablissement_num_region: "123",
         siret_etablissement: "80420010000023",
         siret_etablissement_valid: true,
@@ -37,6 +39,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_etablissement: "CFA DUROC",
         etablissement_num_departement: "75",
+        etablissement_num_region: "02",
         siret_etablissement: "80420010000024",
         siret_etablissement_valid: true,
       },
@@ -44,6 +47,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_etablissement: "FACULTE SCIENCES NANCY",
         etablissement_num_departement: "15",
+        etablissement_num_region: "039",
         siret_etablissement: "80420010000025",
         siret_etablissement_valid: true,
       },
@@ -61,18 +65,18 @@ integrationTests(__filename, () => {
 
     it("throws error when no parameter passed", async () => {
       try {
-        await searchCfasByNomEtablissementOrUai();
+        await searchCfas();
       } catch (err) {
         assert.ok(err);
       }
     });
 
     it("returns [] when no CFA found", async () => {
-      const cfa = await searchCfasByNomEtablissementOrUai("blabla");
+      const cfa = await searchCfas({ searchTerm: "blabla" });
       assert.deepEqual(cfa, []);
     });
 
-    const validCases = [
+    const validsearchTermCases = [
       {
         caseDescription: "when searchTerm matches nom_etablissement perfectly",
         searchTerm: statutsSeed[4].nom_etablissement,
@@ -110,9 +114,9 @@ integrationTests(__filename, () => {
       },
     ];
 
-    validCases.forEach(({ searchTerm, caseDescription, expectedResult }) => {
+    validsearchTermCases.forEach(({ searchTerm, caseDescription, expectedResult }) => {
       it(`returns list of CFA matching ${caseDescription}`, async () => {
-        const searchResults = await searchCfasByNomEtablissementOrUai(searchTerm);
+        const searchResults = await searchCfas({ searchTerm });
 
         // we will sort results because we don't care of the order in the test
         const sortBySiret = (a, b) => Number(a.siret_etablissement) - Number(b.siret_etablissement);
@@ -130,7 +134,7 @@ integrationTests(__filename, () => {
     });
 
     it("returns list of CFA matching passed UAI", async () => {
-      const actual = await searchCfasByNomEtablissementOrUai(statutsSeed[0].uai_etablissement);
+      const actual = await searchCfas({ searchTerm: statutsSeed[0].uai_etablissement });
       const expected = [statutsSeed[0]];
 
       assert.equal(actual.length, 1);
@@ -138,7 +142,7 @@ integrationTests(__filename, () => {
     });
 
     it("returns list of CFA matching searchTerm AND additional filter (etablissement_num_departement)", async () => {
-      const actual = await searchCfasByNomEtablissementOrUai("CFA", { etablissement_num_departement: "75" });
+      const actual = await searchCfas({ searchTerm: "CFA", etablissement_num_departement: "75" });
       const expected = [statutsSeed[3]];
 
       assert.equal(actual.length, 1);
@@ -146,8 +150,16 @@ integrationTests(__filename, () => {
     });
 
     it("returns list of CFA matching searchTerm AND additional filter (etablissement_num_region)", async () => {
-      const actual = await searchCfasByNomEtablissementOrUai("CFA", { etablissement_num_region: "123" });
+      const actual = await searchCfas({ searchTerm: "CFA", etablissement_num_region: "123" });
       const expected = [statutsSeed[2]];
+
+      assert.equal(actual.length, 1);
+      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
+    });
+
+    it("returns list of CFA matching a given search criteria (no searchTerm)", async () => {
+      const actual = await searchCfas({ etablissement_num_region: "02" });
+      const expected = [statutsSeed[3]];
 
       assert.equal(actual.length, 1);
       assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);

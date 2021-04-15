@@ -1,29 +1,28 @@
 const { StatutCandidat: StatutCandidatModel } = require("../model");
 
 module.exports = () => ({
-  searchCfasByNomEtablissementOrUai,
+  searchCfas,
   getCfaNameByUai,
 });
 
-const SEARCH_RESULTS_LIMIT = 50;
+const SEARCH_RESULTS_LIMIT = 100;
 
 /**
- * Returns list of CFA information whose nom_etablissement matches input
- * @param {string} nomEtablissementOrUai
- * @return {[{siret_etablissement: string, nom_etablissement: string}]} Array of CFA information
+ * Returns list of CFA information matching passed criteria
+ * @param {{}} searchCriteria
+ * @return {[{siret_etablissement: string, nom_etablissement: string, etablissement_num_departement: string}]} Array of CFA information
  */
-const searchCfasByNomEtablissementOrUai = async (nomEtablissementOrUai, otherFilters) => {
-  if (!nomEtablissementOrUai) {
-    throw new Error("param nomEtablissementOrUai is required");
-  }
+const searchCfas = async (searchCriteria) => {
+  const { searchTerm, ...otherCriteria } = searchCriteria;
+  const matchQuery = {
+    ...otherCriteria,
+    ...(searchTerm ? { $or: [{ $text: { $search: searchTerm } }, { uai_etablissement: searchTerm }] } : {}),
+    siret_etablissement_valid: true,
+  };
 
   const found = await StatutCandidatModel.aggregate([
     {
-      $match: {
-        $or: [{ $text: { $search: nomEtablissementOrUai } }, { uai_etablissement: nomEtablissementOrUai }],
-        siret_etablissement_valid: true,
-        ...otherFilters,
-      },
+      $match: matchQuery,
     },
     {
       $group: {
