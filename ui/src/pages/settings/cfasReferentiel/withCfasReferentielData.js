@@ -45,7 +45,7 @@ const withCfasReferentielData = (Component) => {
           setLoading(false);
         }
       },
-      ["/api/cfas"]
+      []
     );
 
     /** UseEffect hook for cfas api call */
@@ -54,7 +54,7 @@ const withCfasReferentielData = (Component) => {
         return _fetch();
       }
       fetchData();
-    }, ["/api/cfas", _fetch]);
+    }, [_fetch]);
 
     /** UseEffect hook for region cfas api call */
     useEffect(() => {
@@ -71,7 +71,7 @@ const withCfasReferentielData = (Component) => {
         }
       };
       fetchRegionsCfas();
-    }, ["/api/referentiel/regions-cfas", _fetch]);
+    }, [_fetch]);
 
     /** Update region filter */
     const onRegionChange = async (region) => {
