@@ -1,4 +1,4 @@
-import { Box, Link, Text, useDisclosure } from "@chakra-ui/react";
+import { Button, Link, Text, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 
 import { InfoModal } from "../../common/components";
@@ -7,9 +7,9 @@ const EnSavoirPlusModal = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
-      <Box as="span" onClick={onOpen} textDecoration="underline" cursor="pointer" color="bluefrance">
-        en savoir plus
-      </Box>
+      <Button margin="auto" fontWeight="700" variant="link" onClick={onOpen}>
+        En savoir plus sur les données collectées et les indices affichés
+      </Button>
 
       <InfoModal title="En savoir plus" onClose={onClose} isOpen={isOpen}>
         <Text color="grey.800">

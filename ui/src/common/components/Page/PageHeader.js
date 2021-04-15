@@ -7,7 +7,7 @@ import PageTitle from "./PageTitle";
 
 const PageHeader = ({ title, children }) => {
   return (
-    <Box background="bluegrey.100" padding="4w" width="100%">
+    <Box background="bluegrey.100" padding="4w" width="100%" textAlign="center">
       <Flex justifyContent="space-between" alignItems="start">
         <img src="/brand/Bloc-marque.svg" alt="Bloc marque gouvernement" />
         <LoggedUserMenu />
