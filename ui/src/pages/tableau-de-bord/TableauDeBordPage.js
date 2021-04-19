@@ -1,9 +1,8 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { Page, PageContent, PageHeader } from "../../common/components";
-import { useFetch } from "../../common/hooks/useFetch";
 import EnSavoirPlusModal from "./EnSavoirPlusModal";
 import Filters from "./Filters";
 import { effectifsPropType, filtersPropType } from "./propTypes";
@@ -11,8 +10,6 @@ import View from "./View";
 import withEffectifsData from "./withEffectifsData";
 
 const TableauDeBordPage = ({ effectifs, filters, setFilters, loading, error }) => {
-  const [dataStats] = useFetch("/api/dashboard/etablissements-stats/");
-
   const pageTitle = (
     <Flex justifyContent="center" alignItems="center">
       <span>Tableau de bord de l&apos;apprentissage</span>
@@ -34,11 +31,7 @@ const TableauDeBordPage = ({ effectifs, filters, setFilters, loading, error }) =
   return (
     <Page>
       <PageHeader title={pageTitle}>
-        <Text color="grey.800" fontWeight="700" textAlign="center" marginTop="1w">
-          <span>Les indices affichés concernent {dataStats?.nbEtablissements} centres de formation</span>
-          &nbsp;
-          <EnSavoirPlusModal />
-        </Text>
+        <EnSavoirPlusModal />
         <Filters setFilters={setFilters} filters={filters} />
       </PageHeader>
       <PageContent>

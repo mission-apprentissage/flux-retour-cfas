@@ -230,6 +230,11 @@ const components = {
           background: "bluesoft.200",
         },
       },
+      link: {
+        color: "bluefrance",
+        border: "none",
+        textDecoration: "underline",
+      },
     },
     defaultProps: {
       variant: "primary",
