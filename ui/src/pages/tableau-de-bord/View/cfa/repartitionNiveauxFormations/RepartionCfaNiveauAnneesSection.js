@@ -4,7 +4,7 @@ import React from "react";
 
 import PageSectionTitle from "../../../../../common/components/Page/PageSectionTitle";
 import { getPercentage } from "../../../../../common/utils/calculUtils";
-import { displayYearLabelized } from "../../../../../common/utils/stringUtils";
+import { toPrettyYearLabel } from "../../../../../common/utils/stringUtils";
 import withRepartitionNiveauFormationInCfa from "./withRepartitionNiveauFormationInCfa";
 
 const RepartionCfaNiveauAnneesSection = ({ repartitionEffectifs, loading, error }) => {
@@ -270,7 +270,7 @@ const displayNiveauDataForStatut = (statutData, colorScheme) => (
 const buildFormationDetailRow = (formationData, index, niveauData) => (
   <Tr key={"detailRow_" + index} textAlign="left">
     <Td textColor="black">{formationData.libelle}</Td>
-    <Td textColor="black">{displayYearLabelized(formationData.annee)}</Td>
+    <Td textColor="black">{toPrettyYearLabel(formationData.annee)}</Td>
 
     {/* Apprentis détail */}
     {displayFormationDataForStatut(formationData.apprentis, niveauData.apprentis.nbTotal, "orangesoft")}
