@@ -40,7 +40,8 @@
     "statutsCandidats:retrieve-niveaux": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-niveaux/index.js",
     "support:identify-cma": "node -r dotenv/config src/jobs/identify-cfas-network/identify-cma.js",
     "support:identify-network-duplicates": "node -r dotenv/config src/jobs/support/identify-network-duplicates/index.js",
-    "support:identify-statutsCandidats-duplicates": "node -r dotenv/config src/jobs/support/identify-statutsCandidats-duplicates/index.js",
+    "support:identify-statutsCandidats-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates/identify-duplicates.js",
+    "support:remove-statutsCandidats-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates/remove-duplicates.js",
     "support:identify-cfas-with-invalid-siret": "node -r dotenv/config src/jobs/support/identify-cfas-with-invalid-siret/index.js",
     "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
@@ -49,6 +50,7 @@
     "migration:down": "migrate-mongo down"
   },
   "dependencies": {
+    "arg": "5.0.0",
     "async": "3.2.0",
     "axios": "0.21.1",
     "body-parser": "1.19.0",

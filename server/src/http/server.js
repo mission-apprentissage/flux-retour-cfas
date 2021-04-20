@@ -14,7 +14,6 @@ const statutCandidatsRoute = require("./routes/statut-candidats");
 const loginRoute = require("./routes/login");
 const statsRoute = require("./routes/stats");
 const userEventsRoute = require("./routes/userEvents");
-const supportRoute = require("./routes/support");
 const jobEventsRoute = require("./routes/jobEvents");
 const uaiRoute = require("./routes/uai");
 const configRoute = require("./routes/config");
@@ -46,7 +45,6 @@ module.exports = async (components) => {
   app.use("/api/formations", formationRoutes(components));
   app.use("/api/cfas", cfasRoute(components));
   app.use("/api/userEvents", checkJwtToken, adminOnly, userEventsRoute(components));
-  app.use("/api/support", checkJwtToken, adminOnly, supportRoute(components));
   app.use("/api/jobEvents", checkJwtToken, adminOnly, jobEventsRoute(components));
   app.use("/api/uai", uaiRoute(components));
   app.use("/api/config", checkJwtToken, adminOnly, configRoute());

@@ -133,6 +133,7 @@ const jobNames = {
   identifyNetworkDuplicates: "identify-network-duplicates",
   identifyStatutsCandidatsDuplicates: "identify-statutsCandidats-duplicates",
   identifyCfasWithInvalidSiret: "identify-cfas-with-invalid-siret",
+  removeStatutsCandidatsDuplicates: "remove-statutsCandidats-duplicates",
   formationRetrieveFromCfd: "formation-retrieve-from-cfd",
   formationRetrieveNiveaux: "formation-retrieve-niveaux",
   statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
@@ -151,6 +152,36 @@ const jobNames = {
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
 };
 
+/**
+ * Code pour les types de doublons identifiables
+ */
+const duplicatesTypesCodes = {
+  all: {
+    name: "Tous",
+    code: 0,
+  },
+  periode_formation: {
+    name: "Periodes",
+    code: 1,
+  },
+  id_formation: {
+    name: "CFDs",
+    code: 2,
+  },
+  ine: {
+    name: "INEs",
+    code: 3,
+  },
+  email_contact: {
+    name: "Emails",
+    code: 4,
+  },
+  prenoms: {
+    name: "Prenoms",
+    code: 5,
+  },
+};
+
 module.exports = {
   codesStatutsCandidats,
   codesMajStatutsInterdits,
@@ -159,4 +190,5 @@ module.exports = {
   regionsCfas,
   jobNames,
   erps,
+  duplicatesTypesCodes,
 };
