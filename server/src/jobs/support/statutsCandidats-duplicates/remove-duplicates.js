@@ -1,0 +1,251 @@
+const logger = require("../../../common/logger");
+const { runScript } = require("../../scriptWrapper");
+const path = require("path");
+const { jobNames, duplicatesTypesCodes } = require("../../../common/model/constants/index");
+const arg = require("arg");
+const fs = require("fs-extra");
+const { StatutCandidat, JobEvent } = require("../../../common/model");
+const { asyncForEach } = require("../../../common/utils/asyncUtils");
+const { toXlsx, toCsv } = require("../../../common/utils/exporterUtils");
+const sortBy = require("lodash.sortby");
+
+/**
+ * Ce script permet de nettoyer les doublons des statuts identifiés
+ * Ce script prends plusieurs paramètres en argument :
+ * --duplicatesTypeCode : types de doublons à supprimer : 0/1/2/3/4/5 cf duplicatesTypesCodes
+ * --mode : forAll / forRegion / forUai
+ *   permets de nettoyer les doublons dans toute la BDD / pour une région / pour un UAI
+ * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
+ * --uai : si mode forUai actif, permet de préciser l'uai souhaité
+ */
+runScript(async ({ statutsCandidats }) => {
+  const args = arg(
+    { "--duplicatesTypeCode": Number, "--mode": String, "--regionCode": String, "--uai": String },
+    { argv: process.argv.slice(2) }
+  );
+
+  if (!args["--duplicatesTypeCode"])
+    throw new Error("missing required argument: --duplicatesTypeCode  (should be in [0/1/2/3/4/5])");
+
+  if (!args["--mode"])
+    throw new Error("missing required argument: --mode  (should be in [forAll / forRegion / forUai])");
+
+  switch (args["--mode"]) {
+    case "forAll":
+      await removeAll(statutsCandidats, args["--duplicatesTypeCode"]);
+      break;
+
+    case "forRegion":
+      if (!args["--regionCode"]) throw new Error("missing required argument: --regionCode");
+      await removeAllDuplicatesForRegion(statutsCandidats, args["--regionCode"], args["--duplicatesTypeCode"]);
+      break;
+
+    case "forUai":
+      if (!args["--uai"]) throw new Error("missing required argument: --uai");
+      await removeAllDuplicatesForUai(statutsCandidats, args["--uai"], args["--duplicatesTypeCode"]);
+      break;
+
+    default:
+      throw new Error("bad argument: --mode (should be in [forAll / forRegion / forUai])");
+  }
+
+  logger.info("Job Ended !");
+}, jobNames.removeStatutsCandidatsDuplicates);
+
+/**
+ * Supprime les doublons de type duplicatesTypesCode pour toute la bdd
+ * @param {*} statutsCandidats
+ * @param {*} duplicatesTypesCode
+ */
+const removeAll = async (statutsCandidats, duplicatesTypesCode) => {
+  const allRegionsInStatutsCandidats = await StatutCandidat.distinct("etablissement_num_region");
+  await asyncForEach(allRegionsInStatutsCandidats, async (currentCodeRegion) => {
+    await removeAllDuplicatesForRegion(statutsCandidats, duplicatesTypesCode, currentCodeRegion);
+  });
+};
+
+/**
+ * Supprime les doublons de type duplicatesTypesCode pour une région
+ * @param {*} statutsCandidats
+ * @param {*} codeRegion
+ * @param {*} duplicatesTypesCode
+ */
+const removeAllDuplicatesForRegion = async (statutsCandidats, codeRegion, duplicatesTypesCode) => {
+  logger.info(`Removing all statuts duplicates for codeRegion : ${codeRegion}`);
+  const duplicatesRemovedForRegion = await removeStatutsCandidatsDuplicatesForFilters(
+    statutsCandidats,
+    duplicatesTypesCode,
+    {
+      etablissement_num_region: codeRegion,
+    }
+  );
+
+  // Export list
+  await asyncForEach(duplicatesRemovedForRegion, async (currentUaiList) => {
+    const exportFolderPath = `/output/region_${codeRegion}/uai_${currentUaiList.uai}`;
+    const removedFileName = getDuplicateRemovedFileName(currentUaiList.duplicatesRemoved.length, duplicatesTypesCode);
+    await fs.ensureDir(path.join(__dirname, exportFolderPath));
+
+    await toXlsx(currentUaiList.duplicatesRemoved, path.join(__dirname, `${exportFolderPath}/${removedFileName}.xlsx`));
+    await toCsv(currentUaiList.duplicatesRemoved, path.join(__dirname, `${exportFolderPath}/${removedFileName}.csv`));
+    logger.info(`Output file created : ${exportFolderPath}/${removedFileName}.csv`);
+  });
+};
+
+/**
+ * Supprime les doublons de type duplicatesTypesCode pour un uai
+ * @param {*} statutsCandidats
+ * @param {*} uai
+ * @param {*} duplicatesTypesCode
+ */
+const removeAllDuplicatesForUai = async (statutsCandidats, uai, duplicatesTypesCode) => {
+  logger.info(`Removing all statuts duplicates for uai : ${uai}`);
+  const removedDuplicatesForUai = await removeStatutsCandidatsDuplicatesForFilters(
+    statutsCandidats,
+    duplicatesTypesCode,
+    {
+      uai_etablissement: uai,
+    }
+  );
+
+  // Export list
+  await asyncForEach(removedDuplicatesForUai, async (currentUaiList) => {
+    const exportFolderPath = `/output/uai_${currentUaiList.uai}`;
+    const removedName = getDuplicateRemovedFileName(currentUaiList.duplicatesRemoved.length, duplicatesTypesCode);
+    await fs.ensureDir(path.join(__dirname, exportFolderPath));
+
+    await toXlsx(currentUaiList.duplicatesRemoved, path.join(__dirname, `${exportFolderPath}/${removedName}.xlsx`));
+    await toCsv(currentUaiList.duplicatesRemoved, path.join(__dirname, `${exportFolderPath}/${removedName}.csv`));
+    logger.info(`Output file created : ${exportFolderPath}/${removedName}.csv`);
+  });
+};
+
+/**
+ * Fonction de suppression de tous les doublons de type duplicatesTypesCode pour les filtres fournis en entrée
+ * Retourne une liste regoupée par UAIs
+ * @param {*} statutsCandidats
+ * @param {*} duplicatesTypesCode
+ * @param {*} filters
+ * @returns
+ */
+const removeStatutsCandidatsDuplicatesForFilters = async (statutsCandidats, duplicatesTypesCode, filters = {}) => {
+  const duplicatesForType = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filters);
+  const duplicatesRemoved = [];
+
+  if (duplicatesForType.data) {
+    await asyncForEach(duplicatesForType.data, async (currentUaiData) => {
+      logger.info(`Removing duplicates for UAI : ${currentUaiData.uai}`);
+      duplicatesRemoved.push(await removeDuplicates(currentUaiData.duplicates, statutsCandidats));
+    });
+  }
+  return duplicatesRemoved.flat();
+};
+
+/**
+ * Supprime les mauvais doublons pour la liste des doublons d'uai
+ * @param {*} duplicatesToRemove
+ * @param {*} statutsCandidats
+ */
+const removeDuplicates = async (duplicatesToRemove, statutsCandidats) => {
+  const removedList = [];
+
+  await asyncForEach(duplicatesToRemove, async (currentDuplicate) => {
+    // Build duplicates detail items from _id
+    const duplicatesItems = [];
+    await asyncForEach(currentDuplicate.duplicatesIds, async (currentDuplicateItem) => {
+      duplicatesItems.push(await StatutCandidat.findById(currentDuplicateItem._id));
+    });
+
+    // Gets statuts toKeep & toRemove - find max date
+    const maxDate = Math.max(...duplicatesItems.map((s) => new Date(s.created_at)));
+    // Gets statuts mostRecentStatut & toRemove - keep last created & remove before
+    const mostRecentStatut = duplicatesItems.find((statut) => new Date(statut.created_at) >= maxDate);
+    const statutsToRemove = duplicatesItems.filter((statut) => new Date(statut.created_at) < maxDate);
+
+    // Save Duplicates detail to userEvents
+    await new JobEvent({
+      jobname: "remove-statutsCandidats-duplicates",
+      action: `removeDuplicatesWithPeriodesForUaiDuplicates-${JSON.stringify(currentDuplicate._id)}-${
+        currentDuplicate.uai_etablissement
+      }`,
+      data: { ...currentDuplicate, ...{ duplicatesItems, mostRecentStatut, statutsToRemove } },
+    }).save();
+
+    // Remove duplicates
+    await asyncForEach(statutsToRemove, async (toRemove) => {
+      await StatutCandidat.findByIdAndDelete(toRemove);
+    });
+
+    // Rewrite history for statut to keep
+    const flattenedHistory = await getFlattenedHistoryFromDuplicates(duplicatesItems, statutsCandidats);
+    const statutToKeep = { ...mostRecentStatut, historique_statut_apprenant: flattenedHistory };
+
+    removedList.push({
+      duplicatesRemoved: statutsToRemove.map((item) => item._doc),
+      uai: currentDuplicate.uai_etablissement,
+      statutKeeped: JSON.stringify(statutToKeep._doc),
+    });
+  });
+
+  return removedList;
+};
+
+/**
+ * Fonction de réécriture de l'historique à partir des statuts en doublons
+ * @param {*} duplicatesItems
+ * @param {*} statutsCandidats
+ * @returns
+ */
+const getFlattenedHistoryFromDuplicates = async (duplicatesItems, statutsCandidats) => {
+  const history = [];
+  let currentStatut = null;
+  let duplicatesIndex = 0;
+
+  // Parcours de la liste des doublons ordonné par date de création
+  await asyncForEach(sortBy(duplicatesItems, "created_at"), async (currentDuplicateItem) => {
+    duplicatesIndex++;
+
+    const shouldCreateStatutCandidat = await statutsCandidats.shouldCreateNewStatutCandidat(
+      currentDuplicateItem,
+      currentStatut
+    );
+    if (shouldCreateStatutCandidat) {
+      history.push({
+        valeur_statut: currentDuplicateItem.statut_apprenant,
+        position_statut: duplicatesIndex,
+        date_statut: currentDuplicateItem.date_metier_mise_a_jour_statut
+          ? new Date(currentDuplicateItem.date_metier_mise_a_jour_statut)
+          : new Date(),
+      });
+      currentStatut = { ...currentDuplicateItem._doc };
+    } else {
+      // statut_apprenant has changed?
+      if (currentStatut.statut_apprenant !== currentDuplicateItem.statut_apprenant) {
+        history.push({
+          valeur_statut: currentDuplicateItem.statut_apprenant,
+          position_statut: currentStatut.historique_statut_apprenant.length + 1,
+          date_statut: currentDuplicateItem.created_at,
+        });
+        currentStatut = { ...currentDuplicateItem._doc, statut_apprenant: currentDuplicateItem.statut_apprenant };
+      }
+    }
+  });
+
+  return history;
+};
+
+/**
+ * Construction du nom de fichier des doublons supprimés
+ * @param {*} nbDuplicates
+ * @param {*} duplicatesTypesCode
+ * @returns
+ */
+const getDuplicateRemovedFileName = (nbDuplicates, duplicatesTypesCode) => {
+  const duplicatesTypesArray = Object.keys(duplicatesTypesCodes).map((id) => ({
+    id,
+    name: duplicatesTypesCodes[id].name,
+    code: duplicatesTypesCodes[id].code,
+  }));
+  const duplicateTypeName = duplicatesTypesArray.find((item) => item.code === duplicatesTypesCode)?.name;
+  return `${nbDuplicates}doublonsSupprimes_type${duplicateTypeName}__${Date.now()}`;
+};

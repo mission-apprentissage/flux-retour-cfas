@@ -12,7 +12,7 @@ const {
   simpleProspectStatut,
 } = require("../../../data/sample");
 const { createRandomStatutCandidat, getRandomPeriodeFormation } = require("../../../data/randomizedSample");
-const { reseauxCfas } = require("../../../../src/common/model/constants");
+const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 
 integrationTests(__filename, () => {
@@ -1369,7 +1369,9 @@ integrationTests(__filename, () => {
         await createStatutCandidat(toAdd);
       }
 
-      const duplicatesListFound = await getDuplicatesList({ uai_etablissement: uaiToTest });
+      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.periode_formation.code, {
+        uai_etablissement: uaiToTest,
+      });
 
       assert.ok(duplicatesListFound);
       assert.ok(duplicatesListFound.data);
@@ -1419,7 +1421,9 @@ integrationTests(__filename, () => {
         await createStatutCandidat(toAdd);
       }
 
-      const duplicatesListFound = await getDuplicatesList({ uai_etablissement: uaiToTest });
+      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.periode_formation.code, {
+        uai_etablissement: uaiToTest,
+      });
 
       // Check duplicates list
       assert.ok(duplicatesListFound);

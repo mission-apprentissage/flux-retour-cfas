@@ -1,5 +1,9 @@
 const { StatutCandidat, Cfa } = require("../model");
-const { codesMajStatutsInterdits, codesStatutsMajStatutCandidats } = require("../model/constants");
+const {
+  codesMajStatutsInterdits,
+  codesStatutsMajStatutCandidats,
+  duplicatesTypesCodes,
+} = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { paginate } = require("../utils/miscUtils");
@@ -187,19 +191,37 @@ const isMajStatutInvalid = (statutSource, statutDest) => {
 };
 
 /**
- * Récupération de la liste des statuts en doublons pour les filtres passés en paramètres
+ * Récupération de la liste des statuts en doublons stricts pour les filtres passés en paramètres
+ * @param {*} duplicatesTypesCode
  * @param {*} filters
  * @returns
  */
-const findStatutsDuplicates = async (filters = {}) => {
-  const statutsFound = await StatutCandidat.aggregate([
-    // Filtrage sur les filtres passées en paramètres
-    {
-      $match: filters,
-    },
-    // Regroupement sur les critères d'unicité
-    {
-      $group: {
+const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}) => {
+  let unicityQueryGroup = {};
+
+  switch (duplicatesTypesCode) {
+    case duplicatesTypesCodes.all.code:
+      unicityQueryGroup = {
+        _id: {
+          ine_apprenant: "$ine_apprenant",
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          prenom2_apprenant: "$prenom2_apprenant",
+          prenom3_apprenant: "$prenom3_apprenant",
+          email_contact: "$email_contact",
+          id_formation: "$id_formation",
+          uai_etablissement: "$uai_etablissement",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        count: { $sum: 1 },
+        // Pour regroupement par uai
+        uai_etablissement: { $first: "$uai_etablissement" },
+      };
+      break;
+
+    case duplicatesTypesCodes.periode_formation.code:
+      unicityQueryGroup = {
         _id: {
           ine_apprenant: "$ine_apprenant",
           nom_apprenant: "$nom_apprenant",
@@ -214,11 +236,108 @@ const findStatutsDuplicates = async (filters = {}) => {
         duplicatesIds: { $addToSet: "$_id" },
         // Ajout des différentes periodes en doublon potentiel
         periodes: { $addToSet: "$periode_formation" },
-        // Ajout des différents sirets en doublon potentiel
-        sirets: { $addToSet: "$siret_etablissement" },
         count: { $sum: 1 },
-        uai_etablissement: { $first: "$uai_etablissement" }, // Pour regroupement par uai
-      },
+        // Pour regroupement par uai
+        uai_etablissement: { $first: "$uai_etablissement" },
+      };
+      break;
+
+    case duplicatesTypesCodes.id_formation.code:
+      unicityQueryGroup = {
+        _id: {
+          ine_apprenant: "$ine_apprenant",
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          prenom2_apprenant: "$prenom2_apprenant",
+          prenom3_apprenant: "$prenom3_apprenant",
+          email_contact: "$email_contact",
+          uai_etablissement: "$uai_etablissement",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des différents id_formation en doublon potentiel
+        ids_formations: { $addToSet: "$id_formation" },
+        count: { $sum: 1 },
+        // Pour regroupement par uai
+        uai_etablissement: { $first: "$uai_etablissement" },
+      };
+      break;
+
+    case duplicatesTypesCodes.email_contact.code:
+      unicityQueryGroup = {
+        _id: {
+          ine_apprenant: "$ine_apprenant",
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          prenom2_apprenant: "$prenom2_apprenant",
+          prenom3_apprenant: "$prenom3_apprenant",
+          id_formation: "$id_formation",
+          uai_etablissement: "$uai_etablissement",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des différents email_contact en doublon potentiel
+        emails_contact: { $addToSet: "$email_contact" },
+        count: { $sum: 1 },
+        // Pour regroupement par uai
+        uai_etablissement: { $first: "$uai_etablissement" },
+      };
+      break;
+
+    case duplicatesTypesCodes.ine.code:
+      unicityQueryGroup = {
+        _id: {
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          prenom2_apprenant: "$prenom2_apprenant",
+          prenom3_apprenant: "$prenom3_apprenant",
+          email_contact: "$email_contact",
+          id_formation: "$id_formation",
+          uai_etablissement: "$uai_etablissement",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des différente INE en doublon potentiel
+        ines: { $addToSet: "$ine_apprenant" },
+        count: { $sum: 1 },
+        // Pour regroupement par uai
+        uai_etablissement: { $first: "$uai_etablissement" },
+      };
+      break;
+
+    case duplicatesTypesCodes.prenoms.code:
+      unicityQueryGroup = {
+        _id: {
+          ine_apprenant: "$ine_apprenant",
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          email_contact: "$email_contact",
+          id_formation: "$id_formation",
+          uai_etablissement: "$uai_etablissement",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des différentes prenom2-3_apprenant en doublon potentiel
+        prenoms2_apprenants: { $addToSet: "$prenom2_apprenant" },
+        prenoms3_apprenants: { $addToSet: "$prenom3_apprenant" },
+        count: { $sum: 1 },
+        // Pour regroupement par uai
+        uai_etablissement: { $first: "$uai_etablissement" },
+      };
+      break;
+
+    default:
+      throw new Error("findStatutsDuplicates Error :  duplicatesTypesCode not matching any code");
+  }
+
+  const statutsFound = await StatutCandidat.aggregate([
+    // Filtrage sur les filtres passées en paramètres
+    {
+      $match: filters,
+    },
+    // Regroupement sur les critères d'unicité
+    {
+      $group: unicityQueryGroup,
     },
     // Récupération des statuts en doublons = regroupement count > 1
     {
@@ -233,14 +352,20 @@ const findStatutsDuplicates = async (filters = {}) => {
 };
 
 /**
- * Construction d'une liste de doublons de statutsCandidats
+ * Construction d'une liste de doublons de type duplicatesTypeCode de statutsCandidats
  * regroupés par UAI pour les filtres passés en paramètres
+ * @param {*} duplicatesTypeCode
  * @param {*} filters
+ * @param {*} page
+ * @param {*} limit
  * @returns
  */
-const getDuplicatesList = async (filters = {}, page = 1, limit = 1000) => {
+const getDuplicatesList = async (duplicatesTypeCode, filters = {}, page = 1, limit = 1000) => {
+  // Récupération des doublons pour le type souhaité
+  const duplicates = await findDuplicatesForDuplicateType(duplicatesTypeCode, filters);
+
   // Pagination des statuts trouvés
-  const paginatedStatuts = paginate(await findStatutsDuplicates(filters), page, limit);
+  const paginatedStatuts = paginate(duplicates, page, limit);
 
   // Regroupement par uai_etablissement
   const groupedDuplicates = groupBy(paginatedStatuts.data, "uai_etablissement");
@@ -261,4 +386,41 @@ const getDuplicatesList = async (filters = {}, page = 1, limit = 1000) => {
     total: paginatedStatuts.total,
     total_pages: paginatedStatuts.total_pages,
   };
+};
+
+/**
+ * Fonction de récupération des doublons en fonction d'un type de doublon souhaité
+ * @param {*} duplicatesTypesCode
+ * @param {*} filters
+ * @returns
+ */
+const findDuplicatesForDuplicateType = async (duplicatesTypesCode, filters) => {
+  const duplicates = await findStatutsDuplicates(duplicatesTypesCode, filters);
+
+  if (duplicates) {
+    switch (duplicatesTypesCode) {
+      case duplicatesTypesCodes.all.code:
+        return duplicates;
+
+      case duplicatesTypesCodes.periode_formation.code:
+        return duplicates.filter((item) => item.periodes.length > 1);
+
+      case duplicatesTypesCodes.id_formation.code:
+        return duplicates.filter((item) => item.ids_formations.length > 1);
+
+      case duplicatesTypesCodes.email_contact.code:
+        return duplicates.filter((item) => item.emails_contact.length > 1);
+
+      case duplicatesTypesCodes.ine.code:
+        return duplicates.filter((item) => item.ines.length > 1);
+
+      case duplicatesTypesCodes.prenoms.code:
+        return duplicates.filter((item) => item.prenoms2_apprenants.length > 1 || item.prenoms3_apprenants.length > 1);
+
+      default:
+        return [];
+    }
+  }
+
+  return [];
 };

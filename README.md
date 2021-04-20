@@ -421,3 +421,31 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
    5.9 - Mise à jour des niveau des statutsCandidats - dépend des codes CFD des formations (5.8) `yarn statutsCandidats:retrieve-niveaux`
 
    5.10 - Mise à jour des branchements des données des CFAs `yarn cfas:retrieve-data-connection`
+
+### Script d'identification des doublons
+
+Il est possible de lancer un script d'identification de différents types de doublons.
+
+Ce script prend en arguments :
+
+- duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5
+- mode : forAll / forRegion / forUai le script va se lancer pour toute la base, pour une région ou un uai
+- regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
+- uai : si mode forUai actif, permet de préciser l'uai souhaité
+
+Exemple, identifier les doublons de type 1 (periode_formation) sur la région normandie (code 28) :
+`yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28`
+
+### Script de suppression des doublons
+
+Il est possible de lancer un script de suppression de différents types de doublons.
+
+Ce script prend les mêmes arguments que le script d'identification :
+
+- duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5
+- mode : forAll / forRegion / forUai le script va se lancer pour toute la base, pour une région ou un uai
+- regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
+- uai : si mode forUai actif, permet de préciser l'uai souhaité
+
+Exemple, supprimer les doublons de type 1 (periode_formation) sur la région normandie (code 28) :
+`yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28`
