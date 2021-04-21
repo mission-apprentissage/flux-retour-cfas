@@ -60,7 +60,7 @@ runScript(async ({ statutsCandidats }) => {
 const removeAll = async (statutsCandidats, duplicatesTypesCode) => {
   const allRegionsInStatutsCandidats = await StatutCandidat.distinct("etablissement_num_region");
   await asyncForEach(allRegionsInStatutsCandidats, async (currentCodeRegion) => {
-    await removeAllDuplicatesForRegion(statutsCandidats, duplicatesTypesCode, currentCodeRegion);
+    await removeAllDuplicatesForRegion(statutsCandidats, currentCodeRegion, duplicatesTypesCode);
   });
 };
 
