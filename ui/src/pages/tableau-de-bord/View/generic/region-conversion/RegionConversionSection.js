@@ -42,7 +42,7 @@ const RegionConversionSection = ({ regionConversionData, error, loading }) => {
                 <Text as="b" mr={2}>
                   {getRoundedPercentage(regionConversionData.nbCfaConnected, regionConversionData.nbCfaIdentified)}%
                 </Text>
-                <Text textColor="grey.600">{regionConversionData.nbCfaIdentified} CFAs en France</Text>
+                <Text textColor="grey.600">{regionConversionData.nbCfaIdentified} CFAs</Text>
                 <Text mb={-1} textColor="grey.600" as="b">
                   <i className="ri-arrow-right-s-line"></i>
                 </Text>
