@@ -8,13 +8,13 @@ import { TERRITOIRE_TYPES } from "../territoire/withTerritoireData";
 
 const SEARCH_DEBOUNCE_TIME = 300;
 
-const searchCfaBySiretOrUai = debounce(async (searchParams, callback) => {
+const searchCfas = debounce(async (searchCriteria, callback) => {
   const searchRequestBody = omitNullishValues({
-    searchTerm: searchParams.searchTerm,
+    searchTerm: searchCriteria.searchTerm,
     etablissement_num_region:
-      searchParams.territoire?.type === TERRITOIRE_TYPES.region ? searchParams.territoire.code : null,
+      searchCriteria.territoire?.type === TERRITOIRE_TYPES.region ? searchCriteria.territoire.code : null,
     etablissement_num_departement:
-      searchParams.territoire?.type === TERRITOIRE_TYPES.departement ? searchParams.territoire.code : null,
+      searchCriteria.territoire?.type === TERRITOIRE_TYPES.departement ? searchCriteria.territoire.code : null,
   });
   const result = await _post("/api/cfas/search", searchRequestBody);
   callback(result);
@@ -26,13 +26,17 @@ const withCfaSearch = (Component) => {
     const [searchResults, setSearchResults] = useState();
 
     useEffect(() => {
-      setSearchResults(null);
-      if (searchTerm.length > 3) {
-        searchCfaBySiretOrUai({ searchTerm, ...filters }, (result) => {
+      // perform search with searchTerm only if longer than 3 characters
+      const searchCriteria = searchTerm.length > 3 ? { searchTerm, ...filters } : filters;
+
+      // perform search if there is at least one search criterion
+      if (Object.keys(searchCriteria).length !== 0) {
+        setSearchResults(null);
+        searchCfas(searchCriteria, (result) => {
           setSearchResults(result);
         });
       }
-    }, [searchTerm]);
+    }, [searchTerm, filters]);
 
     return (
       <Component {...props} searchTerm={searchTerm} searchResults={searchResults} onSearchTermChange={setSearchTerm} />

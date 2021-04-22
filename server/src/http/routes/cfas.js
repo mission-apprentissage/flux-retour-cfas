@@ -7,10 +7,10 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
   const router = express.Router();
 
   const searchBodyValidationSchema = Joi.object({
-    searchTerm: Joi.string().min(3).required(),
+    searchTerm: Joi.string().min(3),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
-  });
+  }).min(1);
 
   const dataFeedbackBodyValidationSchema = Joi.object({
     siret: Joi.string().required(),
@@ -23,7 +23,6 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     "/search",
     tryCatch(async (req, res) => {
       const { error } = searchBodyValidationSchema.validate(req.body);
-      const { searchTerm, ...otherFilters } = req.body;
 
       if (error) {
         return res.status(400).json({
@@ -32,8 +31,8 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
         });
       }
 
-      const foundCfa = await cfas.searchCfasByNomEtablissementOrUai(searchTerm, otherFilters);
-      return res.json(foundCfa);
+      const foundCfas = await cfas.searchCfas(req.body);
+      return res.json(foundCfas);
     })
   );
 

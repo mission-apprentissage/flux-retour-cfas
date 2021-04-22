@@ -14,11 +14,10 @@ httpTests(__filename, ({ startServer }) => {
   });
 
   describe("POST /cfas/search", () => {
-    it("sends a 400 HTTP response when no searchTerm provided", async () => {
+    it("sends a 400 HTTP response when no body provided", async () => {
       const response = await httpClient.post("/api/cfas/search", {});
 
       assert.equal(response.status, 400);
-      assert.equal(response.data.message, '"searchTerm" is required');
     });
 
     it("sends a 200 HTTP empty response when no match", async () => {

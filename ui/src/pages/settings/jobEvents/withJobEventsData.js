@@ -8,32 +8,29 @@ const withJobEventsData = (Component) => {
     let [loading, setLoading] = useState(false);
     let [error, setError] = useState(null);
 
-    const _fetch = useCallback(
-      async (pageNumber = 1) => {
-        setLoading(true);
-        setError(null);
+    const _fetch = useCallback(async (pageNumber = 1) => {
+      setLoading(true);
+      setError(null);
 
-        try {
-          const response = await _post("/api/jobEvents/", {
-            page: pageNumber,
-            limit: 10,
-          });
-          setData(response);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      },
-      ["/api/jobEvents/"]
-    );
+      try {
+        const response = await _post("/api/jobEvents/", {
+          page: pageNumber,
+          limit: 10,
+        });
+        setData(response);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
 
     useEffect(() => {
       async function fetchData() {
         return _fetch();
       }
       fetchData();
-    }, ["/api/jobEvents/", _fetch]);
+    }, [_fetch]);
 
     return <Component {...props} data={data} loading={loading} error={error} _fetch={_fetch} />;
   };
