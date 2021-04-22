@@ -22,7 +22,7 @@
     "react-dom": "17.0.1",
     "react-hooks-global-state": "1.0.1",
     "react-router-dom": "5.2.0",
-    "react-scripts": "4.0.1",
+    "react-scripts": "4.0.3",
     "remixicon": "2.5.0",
     "yup": "0.32.8"
   },

@@ -6,11 +6,15 @@ services:
       - flux_retour_cfas_nginx_data:/data
 
   ui:
-    command: yarn start
-    mem_limit: 1g
     stdin_open: true
+    build:
+      context: ui
+      dockerfile: Dockerfile.dev
     volumes:
       - ./ui:/app #Allows source folders to be watched
+      - '/app/node_modules'
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 
   server:
     command: ["yarn", "debug"]

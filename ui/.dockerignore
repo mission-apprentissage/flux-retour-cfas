@@ -1,3 +1,7 @@
-node_modules/
-build/
+node_modules
+build
 Dockerfile
+Dockerfile.dev
+.dockerignore
+.eslintcache
+.eslintrc
