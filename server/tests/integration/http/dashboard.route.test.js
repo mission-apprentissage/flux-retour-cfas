@@ -243,9 +243,11 @@ httpTests(__filename, ({ startServer }) => {
       assert.ok(response.data.reseaux);
       assert.ok(response.data.domainesMetiers);
       assert.ok(response.data.uai);
+      assert.ok(response.data.siret);
       assert.ok(response.data.adresse);
       assert.deepStrictEqual(response.data.libelleLong, nomTest);
       assert.deepStrictEqual(response.data.uai, uaiTest);
+      assert.deepStrictEqual(response.data.siret, siretTest);
       assert.deepStrictEqual(response.data.adresse, adresseTest);
       assert.deepStrictEqual(response.data.reseaux, reseauxTest);
     });
@@ -294,9 +296,11 @@ httpTests(__filename, ({ startServer }) => {
       // assert.ok(response.data.reseaux);
       assert.ok(response.data.domainesMetiers);
       assert.ok(response.data.uai);
+      assert.ok(response.data.siret);
       assert.ok(response.data.adresse);
       assert.deepStrictEqual(response.data.libelleLong, nomTest);
       assert.deepStrictEqual(response.data.uai, uaiTest);
+      assert.deepStrictEqual(response.data.siret, siretTest);
       assert.deepStrictEqual(response.data.adresse, adresseTest);
       assert.deepStrictEqual(response.data.reseaux, []);
     });
@@ -337,9 +341,11 @@ httpTests(__filename, ({ startServer }) => {
       assert.ok(response.data.reseaux);
       assert.ok(response.data.domainesMetiers);
       assert.ok(response.data.uai);
+      assert.ok(response.data.siret);
       assert.ok(response.data.adresse);
       assert.deepStrictEqual(response.data.libelleLong, nomTest);
       assert.deepStrictEqual(response.data.uai, uaiTest);
+      assert.deepStrictEqual(response.data.siret, siretTest);
       assert.deepStrictEqual(response.data.adresse, adresseTest);
       assert.deepStrictEqual(response.data.reseaux, []);
     });

@@ -208,6 +208,7 @@ module.exports = ({ stats, dashboard }) => {
             reseaux: cfaInReferentiel ? cfaInReferentiel.reseaux ?? [] : [],
             domainesMetiers: [],
             uai: cfaFound.uai_etablissement,
+            siret: cfaFound.siret_etablissement,
             adresse: cfaFound.etablissement_adresse,
           });
         }

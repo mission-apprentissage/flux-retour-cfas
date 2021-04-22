@@ -81,6 +81,9 @@ const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
             <Text fontSize="epsilon" color="grey.600">
               UAI : {infosCfa.uai}
             </Text>
+            <Text fontSize="epsilon" color="grey.600">
+              SIRET : {infosCfa.siret}
+            </Text>
             <Text fontSize="epsilon" color="grey.800">
               {infosCfa.adresse}
             </Text>
