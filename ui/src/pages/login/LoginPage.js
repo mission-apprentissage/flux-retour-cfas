@@ -13,22 +13,23 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
+import PropTypes from "prop-types";
+import queryString from "query-string";
 import React from "react";
-import { useHistory } from "react-router-dom";
 import * as Yup from "yup";
 
 import useAuth from "../../common/hooks/useAuth";
 import { _post } from "../../common/httpClient";
 
-const LoginPage = () => {
+const LoginPage = ({ history }) => {
   const [, setAuth] = useAuth();
-  const history = useHistory();
+  const pathToRedirectTo = queryString.parse(history.location.search)?.redirect || "/";
 
   const login = async (values, { setStatus }) => {
     try {
       const { access_token } = await _post("/api/login", values);
       setAuth(access_token);
-      history.push("/");
+      history.push(pathToRedirectTo);
     } catch (e) {
       console.error(e);
       setStatus({ error: e.prettyMessage });
@@ -101,6 +102,15 @@ const LoginPage = () => {
       </Stack>
     </Center>
   );
+};
+
+LoginPage.propTypes = {
+  history: PropTypes.shape({
+    location: PropTypes.shape({
+      search: PropTypes.string,
+    }).isRequired,
+    push: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 export default LoginPage;

@@ -35,8 +35,9 @@ export default App;
 const PrivateRoute = (routeProps) => {
   const [auth] = useAuth();
   const isLoggedIn = Boolean(auth?.sub);
+  const loginPath = `/login?redirect=${encodeURIComponent(routeProps.location.pathname)}`;
 
-  return isLoggedIn ? <Route {...routeProps} /> : <Redirect to="/login" />;
+  return isLoggedIn ? <Route {...routeProps} /> : <Redirect to={loginPath} />;
 };
 
 const AdminRoute = (routeProps) => {
