@@ -1,45 +1,33 @@
-import { Box, Center, Divider, Flex, HStack, Skeleton, Stack, Tag, Text } from "@chakra-ui/react";
+import { Box, Divider, Flex, HStack, Skeleton, Stack, Tag, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import PageSectionTitle from "../../../../../common/components/Page/PageSectionTitle";
+import { PageSectionTitle } from "../../../../../common/components";
 import withInfoCfaData from "./withInfoCfaData";
 
-const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
-  <div>
-    {/* No Data  */}
-    {!infosCfa && !error && !loading && (
-      <Center h="100px" p={4} background="orangesoft.200">
-        <HStack fontSize="gamma">
-          <i className="ri-error-warning-fill"></i>
-          <Text>Aucune information disponible</Text>
-        </HStack>
-      </Center>
-    )}
+const InfoCfaSection = ({ infosCfa, loading, error }) => {
+  if (loading) {
+    return (
+      <HStack spacing="4w">
+        <Skeleton height="2rem" startColor="bluesoft.300" endColor="bluesoft.100" flex="2" />
+        <Skeleton height="2rem" startColor="bluesoft.300" endColor="bluesoft.100" flex="1" />
+      </HStack>
+    );
+  }
 
-    {/* Error  */}
-    {error && !loading && (
-      <Center h="100px" p={4} background="orangesoft.200">
-        <HStack fontSize="gamma">
-          <i className="ri-error-warning-fill"></i>
-          <Text>Erreur - merci de contacter un administrateur</Text>
-        </HStack>
-      </Center>
-    )}
-
-    {/* Loading  */}
-    {loading && !error && (
-      <Flex>
-        <Skeleton flex="2" h="100px" p={4} />
-        <Box>
-          <Divider orientation="vertical" />
+  if (error) {
+    return (
+      <Text fontSize="epsilon" color="grey.800">
+        <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
+        <Box as="span" verticalAlign="middle">
+          Erreur lors de la récupération des informations du CFA
         </Box>
-        <Skeleton flex="1" ml="5" />
-      </Flex>
-    )}
+      </Text>
+    );
+  }
 
-    {/* Data  */}
-    {infosCfa && !loading && !error && (
+  if (infosCfa) {
+    return (
       <Flex>
         <Box flex="2">
           <Stack spacing="8px">
@@ -90,12 +78,15 @@ const InfoCfaSection = ({ infosCfa = null, loading, error }) => (
           </Stack>
         </Box>
       </Flex>
-    )}
-  </div>
-);
+    );
+  }
+
+  return null;
+};
 
 InfoCfaSection.propTypes = {
   infosCfa: PropTypes.shape({
+    siret: PropTypes.string.isRequired,
     libelleLong: PropTypes.string.isRequired,
     reseaux: PropTypes.arrayOf(PropTypes.string).isRequired,
     domainesMetiers: PropTypes.arrayOf(PropTypes.string).isRequired,
