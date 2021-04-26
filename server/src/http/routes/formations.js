@@ -28,5 +28,16 @@ module.exports = ({ formations }) => {
     })
   );
 
+  router.get(
+    "/:cfd",
+    tryCatch(async (req, res) => {
+      const { cfd } = req.params;
+
+      const foundFormation = await formations.getFormationWithCfd(cfd);
+
+      return res.json(foundFormation);
+    })
+  );
+
   return router;
 };
