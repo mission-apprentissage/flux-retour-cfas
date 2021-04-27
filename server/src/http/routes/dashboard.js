@@ -3,6 +3,7 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { UserEvent, StatutCandidat, Cfa } = require("../../common/model");
 const { validateSiret } = require("../../common/domain/siret");
+const { codesStatutsCandidats } = require("../../common/model/constants");
 
 module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
@@ -121,9 +122,9 @@ module.exports = ({ stats, dashboard }) => {
       });
 
       // Gets & format params:
-      const { startDate, endDate, ...filters } = req.body;
-      const beginSearchDate = new Date(startDate);
-      const endSearchDate = new Date(endDate);
+      const { startDate: startDateFromBody, endDate: endDateFromBody, ...filters } = req.body;
+      const startDate = new Date(startDateFromBody);
+      const endDate = new Date(endDateFromBody);
 
       // Add user event
       const event = new UserEvent({
@@ -135,23 +136,24 @@ module.exports = ({ stats, dashboard }) => {
       await event.save();
 
       // Gets effectif data for params
-      const effectifData = await dashboard.getEffectifsData(beginSearchDate, endSearchDate, filters);
+      const effectifsAtStartDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(startDate, filters);
+      const effectifsAtEndDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(endDate, filters);
 
       // Build response
       return res.json([
         {
           date: startDate,
-          apprentis: effectifData.startDate.nbApprentis,
-          inscrits: effectifData.startDate.nbInscrits,
-          abandons: effectifData.startDate.nbAbandons,
-          abandonsProspects: effectifData.startDate.nbAbandonsProspects,
+          apprentis: effectifsAtStartDate[codesStatutsCandidats.apprenti].count,
+          inscrits: effectifsAtStartDate[codesStatutsCandidats.inscrit].count,
+          abandons: effectifsAtStartDate[codesStatutsCandidats.abandon].count,
+          abandonsProspects: effectifsAtStartDate[codesStatutsCandidats.abandonProspects].count,
         },
         {
           date: endDate,
-          apprentis: effectifData.endDate.nbApprentis,
-          inscrits: effectifData.endDate.nbInscrits,
-          abandons: effectifData.endDate.nbAbandons,
-          abandonsProspects: effectifData.endDate.nbAbandonsProspects,
+          apprentis: effectifsAtEndDate[codesStatutsCandidats.apprenti].count,
+          inscrits: effectifsAtEndDate[codesStatutsCandidats.inscrit].count,
+          abandons: effectifsAtEndDate[codesStatutsCandidats.abandon].count,
+          abandonsProspects: effectifsAtEndDate[codesStatutsCandidats.abandonProspects].count,
           dataConsistency: null,
         },
       ]);
