@@ -130,6 +130,7 @@ const jobNames = {
   seedReferentielCfas: "seed-referentiel-cfas",
   seedRandomizedSample: "seed-randomized-sample",
   identifyNetworkCma: "identify-network-cma",
+  identifyUaisSiretsDuplicates: "identify-uais-sirets-duplicates",
   identifyNetworkDuplicates: "identify-network-duplicates",
   identifyStatutsCandidatsDuplicates: "identify-statutsCandidats-duplicates",
   identifyCfasWithInvalidSiret: "identify-cfas-with-invalid-siret",
