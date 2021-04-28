@@ -15,4 +15,5 @@ module.exports = {
   CfaDataFeedback: getModel("cfaDataFeedback"),
   Formation: getModel("formations"),
   Log: getModel("logs"),
+  Stats: getModel("stats"),
 };
