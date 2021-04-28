@@ -8,8 +8,8 @@ const PageSkeleton = () => {
       <Skeleton height="1rem" startColor="grey.600" endColor="grey.200" />
       <Skeleton height="1rem" startColor="grey.600" endColor="grey.200" />
       <Skeleton height="5rem" startColor="grey.600" endColor="grey.200" />
-      <Skeleton height="1rem" startColor="grey.600" endColor="grey.200" />;
-      <Skeleton height="1rem" startColor="grey.600" endColor="grey.200" />;
+      <Skeleton height="1rem" startColor="grey.600" endColor="grey.200" />
+      <Skeleton height="1rem" startColor="grey.600" endColor="grey.200" />
     </Stack>
   );
 };

@@ -3,6 +3,7 @@ import React from "react";
 
 import { effectifsPropType, filtersPropType } from "../propTypes";
 import CfaView from "./cfa/CfaView";
+import FormationView from "./formation/FormationView";
 import GenericView from "./generic/GenericView";
 
 const TableauDeBordViewSwitch = ({ filters, effectifs, loading, error }) => {
@@ -17,6 +18,11 @@ const TableauDeBordViewSwitch = ({ filters, effectifs, loading, error }) => {
       />
     );
   }
+
+  if (filters.formation?.cfd) {
+    return <FormationView formationCfd={filters.formation.cfd} effectifs={effectifs} />;
+  }
+
   return <GenericView filters={filters} effectifs={effectifs} loading={loading} error={error} />;
 };
 
