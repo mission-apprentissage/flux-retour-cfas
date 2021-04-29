@@ -7,7 +7,6 @@ module.exports = ({ formations }) => {
 
   const searchBodyValidationSchema = Joi.object({
     searchTerm: Joi.string().min(3).required(),
-    siret_etablissement: Joi.string().allow(null, ""),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
   });

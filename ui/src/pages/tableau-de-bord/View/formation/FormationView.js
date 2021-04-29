@@ -5,14 +5,16 @@ import React from "react";
 import { effectifsPropType, filtersPropType } from "../../propTypes";
 import EffectifsSection from "../generic/EffectifsSection";
 import InfosFormationSection from "./infos-formation/InfosFormationSection";
+import RepartitionFormationParCfa from "./repartition-cfas/RepartitionFormationParCfa";
 
-const FormationView = ({ formationCfd, effectifs }) => {
+const FormationView = ({ formationCfd, filters, effectifs }) => {
   return (
     <Stack spacing="4w">
       <InfosFormationSection formationCfd={formationCfd} />
       <Divider orientation="horizontal" />
-
       {effectifs && <EffectifsSection effectifs={effectifs} />}
+      <Divider orientation="horizontal" />
+      <RepartitionFormationParCfa formationCfd={formationCfd} filters={filters} />
     </Stack>
   );
 };
