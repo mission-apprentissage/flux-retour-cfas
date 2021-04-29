@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "2.14.0",
+  "version": "2.15.0",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -43,6 +43,8 @@
     "support:identify-statutsCandidats-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates/identify-duplicates.js",
     "support:remove-statutsCandidats-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates/remove-duplicates.js",
     "support:identify-cfas-with-invalid-siret": "node -r dotenv/config src/jobs/support/identify-cfas-with-invalid-siret/index.js",
+    "support:identify-uais-sirets-duplicates": "node -r dotenv/config src/jobs/support/identify-uais-sirets-duplicates/index.js",
+    "support:identify-uais-catalog": "node -r dotenv/config src/jobs/support/identify-uais-catalog/index.js",
     "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
     "migration:create": "migrate-mongo create",

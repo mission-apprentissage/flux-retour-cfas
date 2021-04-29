@@ -18,8 +18,9 @@ const getFormations2021Count = async () => {
 
 const getFormations2021 = async (options) => {
   try {
-    let { page, allFormations, limit, query } = { page: 1, allFormations: [], limit: 1050, ...options };
-    let params = { page, limit, query };
+    let { page, allFormations, limit, query, select } = { page: 1, allFormations: [], limit: 1050, ...options };
+
+    let params = { page, limit, query, select };
     logger.debug(`Requesting ${API_ENDPOINT}/formations2021 with parameters`, params);
     const response = await axios.get(`${API_ENDPOINT}/entity/formations2021`, { params });
 
@@ -27,7 +28,7 @@ const getFormations2021 = async (options) => {
     allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
 
     if (page < pagination.nombre_de_page) {
-      return this.getFormations2021({ page: page + 1, allFormations, limit });
+      return getFormations2021({ page: page + 1, allFormations, limit });
     } else {
       return allFormations;
     }

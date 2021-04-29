@@ -129,7 +129,9 @@ const jobNames = {
   seedSample: "seed-sample",
   seedReferentielCfas: "seed-referentiel-cfas",
   seedRandomizedSample: "seed-randomized-sample",
+  identifyUaisInCatalog: "identify-uais-types-catalog",
   identifyNetworkCma: "identify-network-cma",
+  identifyUaisSiretsDuplicates: "identify-uais-sirets-duplicates",
   identifyNetworkDuplicates: "identify-network-duplicates",
   identifyStatutsCandidatsDuplicates: "identify-statutsCandidats-duplicates",
   identifyCfasWithInvalidSiret: "identify-cfas-with-invalid-siret",
@@ -182,6 +184,10 @@ const duplicatesTypesCodes = {
   },
 };
 
+const statsTypes = {
+  uaiStats: "UaiStats",
+};
+
 module.exports = {
   codesStatutsCandidats,
   codesMajStatutsInterdits,
@@ -191,4 +197,5 @@ module.exports = {
   jobNames,
   erps,
   duplicatesTypesCodes,
+  statsTypes,
 };

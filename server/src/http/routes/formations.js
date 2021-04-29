@@ -12,6 +12,10 @@ module.exports = ({ formations }) => {
     etablissement_num_departement: Joi.string().allow(null, ""),
   });
 
+  const getFormationParamsSchema = Joi.object({
+    cfd: Joi.string().required(),
+  });
+
   router.post(
     "/search",
     tryCatch(async (req, res) => {
@@ -25,6 +29,21 @@ module.exports = ({ formations }) => {
       const foundFormations = await formations.searchFormationByIntituleOrCfd(searchTerm, otherFilters);
 
       return res.json(foundFormations.map(({ cfd, libelle }) => ({ cfd, libelle })));
+    })
+  );
+
+  router.get(
+    "/:cfd",
+    tryCatch(async (req, res) => {
+      const { error } = getFormationParamsSchema.validate(req.params);
+
+      if (error) {
+        return res.status(400).json({ status: "INPUT_VALIDATION_ERROR", message: error.message });
+      }
+
+      const foundFormation = await formations.getFormationWithCfd(req.params.cfd);
+
+      return res.json(foundFormation);
     })
   );
 

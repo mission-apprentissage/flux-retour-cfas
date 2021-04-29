@@ -14,11 +14,10 @@ httpTests(__filename, ({ startServer }) => {
   });
 
   describe("POST /cfas/search", () => {
-    it("sends a 400 HTTP response when no searchTerm provided", async () => {
+    it("sends a 400 HTTP response when no body provided", async () => {
       const response = await httpClient.post("/api/cfas/search", {});
 
       assert.equal(response.status, 400);
-      assert.equal(response.data.message, '"searchTerm" is required');
     });
 
     it("sends a 200 HTTP empty response when no match", async () => {
@@ -92,6 +91,96 @@ httpTests(__filename, ({ startServer }) => {
         email: validBody.email,
         donnee_est_valide: validBody.dataIsValid,
       });
+    });
+  });
+
+  describe("GET /cfas/:siret", () => {
+    it("Vérifie qu'on peut récupérer les informations d'un CFA via son SIRET", async () => {
+      const { httpClient } = await startServer();
+
+      const nomTest = "TEST NOM";
+      const siretTest = "77929544300013";
+      const uaiTest = "0762232N";
+      const adresseTest = "TEST ADRESSE";
+      const reseauxTest = ["Reseau1", "Reseau2"];
+
+      const cfaInfos = {
+        nom_etablissement: nomTest,
+        siret_etablissement: siretTest,
+        siret_etablissement_valid: true,
+        uai_etablissement: uaiTest,
+        etablissement_adresse: adresseTest,
+      };
+
+      const randomStatut = createRandomStatutCandidat({
+        ...cfaInfos,
+      });
+      const toAdd = new StatutCandidatModel(randomStatut);
+      await toAdd.save();
+
+      // Add Cfa in referentiel
+      const cfaReferenceToAdd = new Cfa({
+        siret: siretTest,
+        nom: nomTest,
+        uai: uaiTest,
+        reseaux: reseauxTest,
+      });
+      await cfaReferenceToAdd.save();
+
+      const response = await httpClient.get(`/api/cfas/${siretTest}`);
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, {
+        libelleLong: nomTest,
+        uai: uaiTest,
+        siret: siretTest,
+        adresse: adresseTest,
+        reseaux: reseauxTest,
+        domainesMetiers: [],
+      });
+    });
+
+    it("Vérifie qu'on peut récupérer les informations d'un CFA qui n'est pas dans le référentiel via API", async () => {
+      const { httpClient } = await startServer();
+
+      const nomTest = "TEST NOM";
+      const siretTest = "77929544300013";
+      const uaiTest = "0762232N";
+      const adresseTest = "TEST ADRESSE";
+      const reseauxTest = [];
+
+      const cfaInfos = {
+        nom_etablissement: nomTest,
+        siret_etablissement: siretTest,
+        siret_etablissement_valid: true,
+        uai_etablissement: uaiTest,
+        etablissement_adresse: adresseTest,
+      };
+
+      const randomStatut = createRandomStatutCandidat({
+        ...cfaInfos,
+      });
+      const toAdd = new StatutCandidatModel(randomStatut);
+      await toAdd.save();
+
+      const response = await httpClient.get(`/api/cfas/${siretTest}`);
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, {
+        libelleLong: nomTest,
+        uai: uaiTest,
+        siret: siretTest,
+        adresse: adresseTest,
+        reseaux: reseauxTest,
+        domainesMetiers: [],
+      });
+    });
+
+    it("Vérifie qu'on reçoit une réponse 404 lorsqu'aucun CFA n'est trouvé pour le SIRET demandé", async () => {
+      const { httpClient } = await startServer();
+
+      const response = await httpClient.get(`/api/cfas/unknown`);
+      assert.equal(response.status, 404);
     });
   });
 

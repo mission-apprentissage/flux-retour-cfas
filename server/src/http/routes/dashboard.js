@@ -21,13 +21,6 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
-   * Schema for cfa data validation
-   */
-  const dashboardInfosCfaInputSchema = Joi.object({
-    siret: Joi.string().required(),
-  });
-
-  /**
    * Schema for effectif cfa detail input validation
    */
   const dashboardEffectifCfaDetailInputSchema = Joi.object({
@@ -162,56 +155,6 @@ module.exports = ({ stats, dashboard }) => {
           dataConsistency: null,
         },
       ]);
-    })
-  );
-
-  /**
-   * Gets the dashboard data for cfa
-   */
-  router.post(
-    "/cfa",
-    tryCatch(async (req, res) => {
-      // Validate schema
-      await dashboardInfosCfaInputSchema.validateAsync(req.body, {
-        abortEarly: false,
-      });
-
-      // Gets & format params
-      const { siret } = req.body;
-
-      // Add user event
-      const event = new UserEvent({
-        username: "dashboard",
-        type: "GET",
-        action: `api/dashboard/cfa/${siret}`,
-        data: { siret },
-      });
-      await event.save();
-
-      // Checks if siret valid
-      if (!validateSiret(siret)) {
-        return res.status(400).json({ message: "Siret is not valid" });
-      } else {
-        // Search cfa in statuts
-        const cfaFound = await StatutCandidat.findOne({
-          siret_etablissement: siret,
-        }).lean();
-        if (!cfaFound) {
-          return res.status(400).json({ message: `No cfa found for siret ${siret}` });
-        } else {
-          // Search reseaux for cfa in référentiel
-          const cfaInReferentiel = await Cfa.findOne({ siret: siret }).lean();
-
-          // Build response
-          return res.json({
-            libelleLong: cfaFound.nom_etablissement,
-            reseaux: cfaInReferentiel ? cfaInReferentiel.reseaux ?? [] : [],
-            domainesMetiers: [],
-            uai: cfaFound.uai_etablissement,
-            adresse: cfaFound.etablissement_adresse,
-          });
-        }
-      }
     })
   );
 

@@ -62,12 +62,6 @@ const LoggedUserMenu = () => {
               <NavLink to="/stats/ymag">Statistiques Ymag</NavLink>
             </MenuItem>
             <MenuItem>
-              <NavLink to="/recherche-uai">Recherche UAI</NavLink>
-            </MenuItem>
-            <MenuItem>
-              <NavLink to="/settings/jobEvents">Paramètres - Jobs</NavLink>
-            </MenuItem>
-            <MenuItem>
               <NavLink to="/referentiel-cfas">CFAs par Régions</NavLink>
             </MenuItem>
           </>
