@@ -11,32 +11,12 @@ const cfasSchema = new Schema({
     default: null,
     description: "Siret de l'établissement",
   },
-  siren: {
-    type: String,
-    default: null,
-    description: "N° de Siren",
-  },
   nom: {
     type: String,
     default: null,
     description: "Nom de l'établissement",
   },
-  noms_cfa: {
-    type: [String],
-    default: null,
-    description: "Liste des noms de l'établissement identifiés",
-  },
-  emails_contact: {
-    type: [String],
-    default: null,
-    description: "Emails de contact cfa",
-  },
-  telephone: {
-    type: String,
-    default: null,
-    description: "Téléphone du cfa",
-  },
-  branchement_flux_cfa_erp: {
+  branchement_tdb: {
     type: Boolean,
     default: false,
     description: "Indique si le flux vers ce CFA a été mis en place et les données récupérées depuis son ERP",
@@ -61,20 +41,10 @@ const cfasSchema = new Schema({
     default: null,
     description: "Numéro de la région du CFA",
   },
-  reponse_enquete_ds: {
-    type: Boolean,
-    default: false,
-    description: "Indique si ce CFA a répondu à l'enquête Démarches Simplifiées",
-  },
-  consentement_cfa_erp: {
-    type: Boolean,
+  source_seed_cfa: {
+    type: String,
     default: null,
-    description: "Indique si ce CFA ne souhaite pas le branchement depuis son ERP",
-  },
-  fichiers_reference: {
-    type: [String],
-    default: [],
-    description: "Fichiers dans lesquels le cfa est identifié",
+    description: "Source du seed du cfa dans la collection (StatutsCandidats ou fichier d'origine)",
   },
   feedback_donnee_valide: {
     type: Boolean,
