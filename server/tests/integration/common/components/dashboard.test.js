@@ -403,7 +403,9 @@ integrationTests(__filename, () => {
       ];
 
       const effectifsByCfa = await getEffectifsCountByCfaAtDate(date, filterQuery);
-      assert.deepEqual(effectifsByCfa, expectedResult);
+      // we will sort results because we don't care of the order in the test
+      const sortBySiret = (a, b) => Number(a.siret_etablissement) - Number(b.siret_etablissement);
+      assert.deepEqual(effectifsByCfa.sort(sortBySiret), expectedResult);
     });
   });
 });

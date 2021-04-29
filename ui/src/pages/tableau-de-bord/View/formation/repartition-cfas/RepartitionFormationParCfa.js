@@ -11,7 +11,7 @@ const TABLE_HEADERS = ["UAI", "SIRET", "Nom de l'organisme", "Apprentis", "Appre
 const RepartitionFormationParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
 
-  if (!loading) {
+  if (loading) {
     content = <TableSkeleton headers={TABLE_HEADERS} />;
   }
 
