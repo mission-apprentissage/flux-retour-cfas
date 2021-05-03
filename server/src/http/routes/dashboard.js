@@ -45,6 +45,7 @@ module.exports = ({ stats, dashboard }) => {
     id_formation: Joi.string().allow(null, ""),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
   });
 
   /**
