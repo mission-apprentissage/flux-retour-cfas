@@ -133,8 +133,16 @@ integrationTests(__filename, () => {
       });
     });
 
-    it("returns list of CFA matching passed UAI", async () => {
-      const actual = await searchCfas({ searchTerm: statutsSeed[0].uai_etablissement });
+    it("returns list of CFA whose UAI matches searchTerm", async () => {
+      const actual = await searchCfas({ searchTerm: statutsSeed[1].uai_etablissement });
+      const expected = [statutsSeed[1]];
+
+      assert.equal(actual.length, 1);
+      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
+    });
+
+    it("returns list of CFA whose SIRET matches searchTerm", async () => {
+      const actual = await searchCfas({ searchTerm: statutsSeed[0].siret_etablissement });
       const expected = [statutsSeed[0]];
 
       assert.equal(actual.length, 1);
