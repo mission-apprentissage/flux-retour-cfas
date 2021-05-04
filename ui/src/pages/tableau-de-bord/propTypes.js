@@ -18,8 +18,8 @@ export const effectifsPropType = PropTypes.shape({
 export const filtersPropType = PropTypes.shape({
   date: PropTypes.instanceOf(Date),
   cfa: PropTypes.shape({
-    siret_etablissement: PropTypes.string.isRequired,
-    nom_etablissement: PropTypes.string.isRequired,
+    siret_etablissement: PropTypes.string,
+    nom_etablissement: PropTypes.string,
   }),
   territoire: PropTypes.shape({
     type: PropTypes.string.isRequired,
