@@ -1,45 +1,59 @@
 import { subYears } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
-import { _post } from "../../../../../common/httpClient";
+import { _get } from "../../../../../common/httpClient";
 import { filtersPropType } from "../../../propTypes";
 
-const buildSearchRequestBody = (filters) => {
-  const flattenedFilters = {
-    startDate: subYears(filters.date, 1).toISOString(),
-    endDate: filters.date.toISOString(),
-    siret: filters.cfa?.type === "cfa" ? filters.cfa?.siret_etablissement : null,
-  };
-  return flattenedFilters;
+const DEFAULT_PAGE_SIZE = 10;
+
+const buildSearchParams = (filters, pageNumber, limit) => {
+  const startDate = subYears(filters.date, 1).toISOString();
+  const endDate = filters.date.toISOString();
+  const siret = filters.cfa?.type === "cfa" ? filters.cfa?.siret_etablissement : null;
+  return `startDate=${startDate}&endDate=${endDate}&siret=${siret}&page=${pageNumber}&limit=${limit}`;
 };
 
 const withRepartitionNiveauFormationInCfa = (Component) => {
   const WithRepartitionNiveauFormationInCfa = ({ filters, ...props }) => {
     const [repartitionEffectifs, setRepartitionEffectifs] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
     const [error, setError] = useState(null);
 
-    const searchRequestBody = buildSearchRequestBody(filters);
+    const _setPage = useCallback(async (pageNumber) => {
+      console.log(pageNumber);
+      setPage(pageNumber);
+    });
 
     useEffect(() => {
-      const fetchRepartitionEffectifCfa = async () => {
+      const fetchData = async () => {
         setLoading(true);
+        setError(null);
+
         try {
-          const response = await _post("/api/dashboard/cfa-effectifs-detail/", searchRequestBody);
+          const response = await _get(
+            `/api/dashboard/cfa-effectifs-detail?${buildSearchParams(filters, page, DEFAULT_PAGE_SIZE)}`
+          );
           setRepartitionEffectifs(response);
-          setError(null);
-        } catch (err) {
-          setError(err);
-          setRepartitionEffectifs(null);
+        } catch (error) {
+          setError(error);
         } finally {
           setLoading(false);
         }
       };
 
-      fetchRepartitionEffectifCfa();
-    }, [JSON.stringify(searchRequestBody)]);
+      fetchData();
+    }, [buildSearchParams(filters, page, 10)]);
 
-    return <Component {...props} repartitionEffectifs={repartitionEffectifs} loading={loading} error={error} />;
+    return (
+      <Component
+        {...props}
+        repartitionEffectifs={repartitionEffectifs}
+        loading={loading}
+        error={error}
+        _setPage={_setPage}
+      />
+    );
   };
 
   WithRepartitionNiveauFormationInCfa.propTypes = {

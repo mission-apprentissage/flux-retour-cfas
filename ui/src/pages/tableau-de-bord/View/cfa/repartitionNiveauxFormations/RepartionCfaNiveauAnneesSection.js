@@ -1,13 +1,13 @@
-import { Center, HStack, Progress, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import { Center, HStack, Progress, Table, TableCaption, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { PageSectionTitle, TableSkeleton } from "../../../../../common/components";
+import { PageSectionTitle, Pagination, TableSkeleton } from "../../../../../common/components";
 import { getPercentage } from "../../../../../common/utils/calculUtils";
 import { toPrettyYearLabel } from "../../../../../common/utils/stringUtils";
 import withRepartitionNiveauFormationInCfa from "./withRepartitionNiveauFormationInCfa";
 
-const RepartionCfaNiveauAnneesSection = ({ repartitionEffectifs, loading, error }) => {
+const RepartionCfaNiveauAnneesSection = ({ repartitionEffectifs, loading, error, _setPage }) => {
   return (
     <>
       <PageSectionTitle>Répartition par niveaux et années de formation</PageSectionTitle>
@@ -54,7 +54,7 @@ const RepartionCfaNiveauAnneesSection = ({ repartitionEffectifs, loading, error 
       {/* Loading  */}
       {loading && <TableSkeleton headers={["Intitulé", "Année", "Apprentis", "Apprenants sans contrat", "Abandons"]} />}
 
-      {/* Data */}
+      {/* Data Paginated */}
       {repartitionEffectifs && !error && !loading && (
         <>
           <Table mt="5">
@@ -107,7 +107,14 @@ const RepartionCfaNiveauAnneesSection = ({ repartitionEffectifs, loading, error 
                 </Th>
               </Tr>
             </Thead>
-            {repartitionEffectifs.map((item, index) => buildNiveauRows(item, index))}
+            {repartitionEffectifs.data.map((item, index) => buildNiveauRows(item, index))}
+            <TableCaption>
+              <Pagination
+                pagesQuantity={repartitionEffectifs.total_pages}
+                currentPage={repartitionEffectifs.page}
+                changePageHandler={(data) => _setPage(data)}
+              />
+            </TableCaption>
           </Table>
         </>
       )}
@@ -191,41 +198,50 @@ const displayFormationDataForStatut = (statutData, nbStatutsTotal, colorScheme) 
 );
 
 RepartionCfaNiveauAnneesSection.propTypes = {
-  repartitionEffectifs: PropTypes.arrayOf(
-    PropTypes.shape({
-      niveau: PropTypes.shape({
-        libelle: PropTypes.string,
-        apprentis: PropTypes.shape({
-          nbTotal: PropTypes.number,
-          nbTotalForNiveau: PropTypes.number,
-        }).isRequired,
-        inscrits: PropTypes.shape({
-          nbTotal: PropTypes.number,
-          nbTotalForNiveau: PropTypes.number,
-        }).isRequired,
-        abandons: PropTypes.shape({
-          nbTotal: PropTypes.number,
-          nbTotalForNiveau: PropTypes.number,
-        }).isRequired,
-      }).isRequired,
-      formations: PropTypes.arrayOf(
-        PropTypes.shape({
+  repartitionEffectifs: PropTypes.shape({
+    page: PropTypes.number.isRequired,
+    per_page: PropTypes.number.isRequired,
+    pre_page: PropTypes.number,
+    next_page: PropTypes.number,
+    total: PropTypes.number.isRequired,
+    total_pages: PropTypes.number.isRequired,
+    data: PropTypes.arrayOf(
+      PropTypes.shape({
+        niveau: PropTypes.shape({
           libelle: PropTypes.string,
-          annee: PropTypes.number,
           apprentis: PropTypes.shape({
+            nbTotal: PropTypes.number,
             nbTotalForNiveau: PropTypes.number,
           }).isRequired,
           inscrits: PropTypes.shape({
+            nbTotal: PropTypes.number,
             nbTotalForNiveau: PropTypes.number,
           }).isRequired,
           abandons: PropTypes.shape({
+            nbTotal: PropTypes.number,
             nbTotalForNiveau: PropTypes.number,
           }).isRequired,
-        })
-      ).isRequired,
-    })
-  ),
+        }).isRequired,
+        formations: PropTypes.arrayOf(
+          PropTypes.shape({
+            libelle: PropTypes.string,
+            annee: PropTypes.number,
+            apprentis: PropTypes.shape({
+              nbTotalForNiveau: PropTypes.number,
+            }).isRequired,
+            inscrits: PropTypes.shape({
+              nbTotalForNiveau: PropTypes.number,
+            }).isRequired,
+            abandons: PropTypes.shape({
+              nbTotalForNiveau: PropTypes.number,
+            }).isRequired,
+          })
+        ).isRequired,
+      })
+    ),
+  }),
   loading: PropTypes.bool,
   error: PropTypes.object,
+  _setPage: PropTypes.func.isRequired,
 };
 export default withRepartitionNiveauFormationInCfa(RepartionCfaNiveauAnneesSection);

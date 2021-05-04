@@ -22,15 +22,6 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
-   * Schema for effectif cfa detail input validation
-   */
-  const dashboardEffectifCfaDetailInputSchema = Joi.object({
-    startDate: Joi.date().required(),
-    endDate: Joi.date().required(),
-    siret: Joi.string().allow(null, ""),
-  });
-
-  /**
    * Schema for region conversion validation
    */
   const dashboardConversionRegionInputSchema = Joi.object({
@@ -174,16 +165,17 @@ module.exports = ({ stats, dashboard }) => {
   /**
    * Gets the dashboard cfa effectif detail
    */
-  router.post(
+  router.get(
     "/cfa-effectifs-detail",
     tryCatch(async (req, res) => {
-      // Validate schema
-      await dashboardEffectifCfaDetailInputSchema.validateAsync(req.body, {
-        abortEarly: false,
-      });
+      const { page, limit, startDate, endDate, siret } = await Joi.object({
+        page: Joi.number().default(1),
+        limit: Joi.number().default(10),
+        startDate: Joi.date().required(),
+        endDate: Joi.date().required(),
+        siret: Joi.string().allow(null, ""),
+      }).validateAsync(req.query, { abortEarly: false });
 
-      // Gets & format params:
-      const { startDate, endDate, siret } = req.body;
       const beginSearchDate = new Date(startDate);
       const endSearchDate = new Date(endDate);
 
@@ -208,10 +200,12 @@ module.exports = ({ stats, dashboard }) => {
           return res.status(400).json({ message: `No cfa found for siret ${siret}` });
         } else {
           // Gets effectif data for params
-          const effectifDetailCfaData = await dashboard.getEffectifsDetailDataForSiret(
+          const effectifDetailCfaData = await dashboard.getPaginatedEffectifsDetailDataForSiret(
             beginSearchDate,
             endSearchDate,
-            siret
+            siret,
+            page,
+            limit
           );
 
           // Build response

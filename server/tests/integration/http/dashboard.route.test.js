@@ -215,23 +215,17 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       // Check good api call
-      const response = await httpClient.post("/api/dashboard/cfa-effectifs-detail", {
-        startDate: "2020-09-15T00:00:00.000Z",
-        endDate: "2020-10-10T00:00:00.000Z",
-        siret: siretToTest,
-      });
+      const searchParams = `startDate=2020-09-15T00:00:00.000Z&endDate=2020-10-10T00:00:00.000Z&siret=${siretToTest}&page=1&limit=100`;
+      const response = await httpClient.get(`/api/dashboard/cfa-effectifs-detail?${searchParams}`);
 
       assert.deepStrictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data.length, 2);
-      assert.deepStrictEqual(response.data, expectedDetailResultList);
+      assert.deepStrictEqual(response.data.data.length, 2);
+      assert.deepStrictEqual(response.data.data, expectedDetailResultList);
 
       // Check bad siret
       const badSiret = "99999999900999";
-      const badResponse = await httpClient.post("/api/dashboard/cfa-effectifs-detail", {
-        startDate: "2020-09-15T00:00:00.000Z",
-        endDate: "2020-10-10T00:00:00.000Z",
-        siret: badSiret,
-      });
+      const badSearchParams = `startDate=2020-09-15T00:00:00.000Z&endDate=2020-10-10T00:00:00.000Z&siret=${badSiret}&page=1&limit=100`;
+      const badResponse = await httpClient.get(`/api/dashboard/cfa-effectifs-detail?${badSearchParams}`);
       assert.deepStrictEqual(badResponse.status, 400);
       assert.deepStrictEqual(badResponse.data.message, `No cfa found for siret ${badSiret}`);
     });

@@ -1,13 +1,16 @@
 const { codesStatutsCandidats } = require("../model/constants");
 const { StatutCandidat } = require("../model");
 const groupBy = require("lodash.groupby");
+const { asyncForEach } = require("../utils/asyncUtils");
 const { getPercentageDifference } = require("../utils/calculUtils");
-const { uniqueValues } = require("../utils/miscUtils");
+const { uniqueValues, paginate } = require("../utils/miscUtils");
 const sortBy = require("lodash.sortby");
+const omit = require("lodash.omit");
 
 module.exports = () => ({
   getEffectifsCountByStatutApprenantAtDate,
   getEffectifsDetailDataForSiret,
+  getPaginatedEffectifsDetailDataForSiret,
   getEffectifsCountByCfaAtDate,
 });
 
@@ -150,6 +153,34 @@ const getEffectifsDetailDataForSiret = async (startDate, endDate, siret) => {
 };
 
 /**
+ * Récupération des données paginées des effectifs avec niveaux / annee pour 2 dates et un siret donné
+ * @param {*} startDate
+ * @param {*} endDate
+ * @param {*} siret_etablissement
+ */
+const getPaginatedEffectifsDetailDataForSiret = async (startDate, endDate, siret, page = 1, limit = 1000) => {
+  const listData = await getEffectifsDetailDataForSiret(startDate, endDate, siret);
+  const flattenedData = await flattenEffectifDetails(listData);
+  const paginatedData = paginate(flattenedData, page, limit);
+  const regroupedData = regroupEffectifDetails(paginatedData.data, (item) => [
+    item.niveau.libelle,
+    item.niveau.apprentis,
+    item.niveau.inscrits,
+    item.niveau.abandons,
+  ]);
+
+  return {
+    page: paginatedData.page,
+    per_page: paginatedData.per_page,
+    pre_page: paginatedData.pre_page,
+    next_page: paginatedData.next_page,
+    total: paginatedData.total,
+    total_pages: paginatedData.total_pages,
+    data: regroupedData,
+  };
+};
+
+/**
  * Récupération des détail des effectifs avec niveaux / annee des formations
  * pour le statut (searchStatut) et la date souhaitée (searchDate) et un siret.
  *
@@ -232,7 +263,7 @@ const buildEffectifByNiveauxList = ({ startDate, endDate }) => {
   const effectifByNiveauxList = [];
 
   // Récup les niveaux présents dans les données
-  const uniquesNiveaux = getUniquesNiveauxFrom(startDate, endDate);
+  const uniquesNiveaux = getUniquesNiveauxFrom(startDate, endDate).sort();
 
   // Pour chaque niveau on construit un objet contenant les infos de niveaux + les formations rattachées
   uniquesNiveaux.forEach((currentNiveau) => {
@@ -386,6 +417,40 @@ const getUniquesFormationsParAnneesForNiveau = (endDateData, currentNiveau) =>
     ),
     ["libelle", "annee"]
   );
+
+const regroupEffectifDetails = (array, f) => {
+  var groups = {};
+  var niveaux = new Map();
+
+  array.forEach(function (o) {
+    var group = JSON.stringify(f(o));
+    groups[group] = groups[group] || [];
+    groups[group].push(omit(o, "niveau"));
+  });
+
+  array.forEach(function (o) {
+    var group = JSON.stringify(f(o));
+    niveaux.set(group, o.niveau);
+  });
+
+  return Object.keys(groups).map(function (group) {
+    return { niveau: niveaux.get(group), formations: groups[group] };
+  });
+};
+
+const flattenEffectifDetails = async (data) => {
+  const resultList = [];
+
+  await asyncForEach(data, async (currentDetail) => {
+    const formationUpgrade = currentDetail.formations.map((item) => ({
+      ...item,
+      ...{ niveau: currentDetail.niveau },
+    }));
+    resultList.push(formationUpgrade);
+  });
+
+  return resultList.flat();
+};
 
 /**
  * Récupération du nombre de statuts apprenants par cfa à une date donnée
