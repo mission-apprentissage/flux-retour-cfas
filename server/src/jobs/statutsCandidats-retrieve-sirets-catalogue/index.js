@@ -26,7 +26,7 @@ runScript(async () => {
       },
       {
         $group: {
-          _id: { uai: "$uai_etablissement", cfd: "$id_formation" },
+          _id: { uai: "$uai_etablissement", cfd: "$formation_cfd" },
         },
       },
     ])
@@ -57,7 +57,7 @@ runScript(async () => {
       // Récupère tous les statuts ayant ce couple UAI & CFD et un siret invalide
       const statutsForUaiCfdCouple = await StatutCandidat.find({
         uai_etablissement: currentUaiCfd.uai,
-        id_formation: currentUaiCfd.cfd,
+        formation_cfd: currentUaiCfd.cfd,
         siret_etablissement_valid: false,
       });
 

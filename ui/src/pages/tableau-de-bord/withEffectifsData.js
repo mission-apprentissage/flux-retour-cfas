@@ -33,7 +33,7 @@ const buildSearchRequestBody = (filters) => {
     etablissement_num_region: filters.territoire?.type === TERRITOIRE_TYPES.region ? filters.territoire.code : null,
     etablissement_num_departement:
       filters.territoire?.type === TERRITOIRE_TYPES.departement ? filters.territoire.code : null,
-    id_formation: filters.formation?.cfd || null,
+    formation_cfd: filters.formation?.cfd || null,
     siret_etablissement: filters.cfa?.type === "cfa" ? filters.cfa?.siret_etablissement : null,
     etablissement_reseaux: filters.cfa?.type === "reseau" ? filters.cfa.nom : null,
   };

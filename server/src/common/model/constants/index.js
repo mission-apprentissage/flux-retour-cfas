@@ -173,7 +173,7 @@ const duplicatesTypesCodes = {
     name: "Periodes",
     code: 1,
   },
-  id_formation: {
+  formation_cfd: {
     name: "CFDs",
     code: 2,
   },

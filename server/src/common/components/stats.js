@@ -261,7 +261,7 @@ const getDistinctCandidatsWithMultiCfdsWithIne = async (filters = {}) => {
         _id: {
           ine: "$ine_apprenant",
         },
-        idsFormations: { $addToSet: "$id_formation" },
+        idsFormations: { $addToSet: "$formation_cfd" },
       },
     },
     { $match: { "idsFormations.1": { $exists: true } } },
@@ -282,7 +282,7 @@ const getDistinctCandidatsWithMultiCfdsWithoutIne = async (filters = {}) => {
           prenom3: "$prenom3_apprenant",
           email: "$email_contact",
         },
-        idsFormations: { $addToSet: "$id_formation" },
+        idsFormations: { $addToSet: "$formation_cfd" },
       },
     },
     { $match: { "idsFormations.1": { $exists: true } } },
@@ -332,7 +332,7 @@ const getNbStatutsValid = async (filters = {}) => {
     ...filters,
     siret_etablissement_valid: true,
     uai_etablissement_valid: true,
-    id_formation_valid: true,
+    formation_cfd_valid: true,
   });
 };
 
@@ -341,7 +341,7 @@ const getNbInvalidUais = async (filters = {}) => {
 };
 
 const getNbInvalidCfds = async (filters = {}) => {
-  return StatutCandidat.countDocuments({ ...filters, id_formation_valid: false });
+  return StatutCandidat.countDocuments({ ...filters, formation_cfd_valid: false });
 };
 
 const getNbInvalidSirets = async (filters = {}) => {
