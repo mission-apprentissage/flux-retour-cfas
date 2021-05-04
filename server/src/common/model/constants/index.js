@@ -141,6 +141,7 @@ const jobNames = {
   statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
   statutsCandidatsRetrieveNetworks: "statutsCandidats-retrieve-networks",
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
+  statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
   createIndexes: "create-indexes",
   clearUsers: "clear-users",
   clearCfas: "clear-cfas",

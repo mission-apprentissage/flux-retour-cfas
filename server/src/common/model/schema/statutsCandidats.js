@@ -163,6 +163,16 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Numéro de l'académie de l'établissement",
   },
+  etablissement_gestionnaire_siret: {
+    type: String,
+    default: null,
+    description: "Siret de l'établissement gestionnaire - depuis le catalogue",
+  },
+  etablissement_formateur_siret: {
+    type: String,
+    default: null,
+    description: "Siret de l'établissement formateur - depuis le catalogue",
+  },
   statut_apprenant: {
     type: Number,
     default: null,
