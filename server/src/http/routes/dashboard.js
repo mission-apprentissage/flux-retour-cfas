@@ -38,6 +38,16 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
+   * Schema for effetctifs by CFA body
+   */
+  const dashboardEffectifsByCfaBodySchema = Joi.object({
+    date: Joi.date().required(),
+    id_formation: Joi.string().allow(null, ""),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+  });
+
+  /**
    * Gets the general stats for the dashboard
    */
   router.get(
@@ -207,6 +217,23 @@ module.exports = ({ stats, dashboard }) => {
           return res.json(effectifDetailCfaData);
         }
       }
+    })
+  );
+
+  router.post(
+    "/effectifs-par-cfa",
+    tryCatch(async (req, res) => {
+      // Validate schema
+      await dashboardEffectifsByCfaBodySchema.validateAsync(req.body, {
+        abortEarly: false,
+      });
+
+      const { date: dateFromBody, ...filters } = req.body;
+      const date = new Date(dateFromBody);
+
+      const effectifsByCfaAtDate = await dashboard.getEffectifsCountByCfaAtDate(date, filters);
+
+      return res.json(effectifsByCfaAtDate);
     })
   );
 

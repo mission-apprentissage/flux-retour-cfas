@@ -17,12 +17,14 @@ const TableauDeBordFilters = ({ filters, setFilters }) => {
     setFilters({ ...filters, territoire, cfa: null });
   };
 
+  // reset cfa filter when user chooses to filter display effectifs for a formation
   const handleFormationFilterChange = (formation) => {
-    setFilters({ ...filters, formation });
+    setFilters({ ...filters, formation, cfa: null });
   };
 
+  // reset formation filter when user chooses to filter display effectifs for a CFA
   const handleCfaFilterChange = (cfa) => {
-    setFilters({ ...filters, cfa });
+    setFilters({ ...filters, cfa, formation: null });
   };
 
   return (

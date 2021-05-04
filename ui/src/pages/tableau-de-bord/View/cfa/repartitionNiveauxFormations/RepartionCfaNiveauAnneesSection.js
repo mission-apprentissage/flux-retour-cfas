@@ -1,8 +1,8 @@
-import { Center, HStack, Progress, Skeleton, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import { Center, HStack, Progress, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import PageSectionTitle from "../../../../../common/components/Page/PageSectionTitle";
+import { PageSectionTitle, TableSkeleton } from "../../../../../common/components";
 import { getPercentage } from "../../../../../common/utils/calculUtils";
 import { toPrettyYearLabel } from "../../../../../common/utils/stringUtils";
 import withRepartitionNiveauFormationInCfa from "./withRepartitionNiveauFormationInCfa";
@@ -52,114 +52,7 @@ const RepartionCfaNiveauAnneesSection = ({ repartitionEffectifs, loading, error 
       )}
 
       {/* Loading  */}
-      {loading && (
-        <>
-          <Table mt="5">
-            <Thead>
-              <Tr background="bluesoft.100">
-                <Th
-                  textTransform="initial"
-                  textColor="grey.600"
-                  fontSize="epsilon"
-                  fontWeight="400"
-                  letterSpacing="0px"
-                >
-                  Intitulé
-                </Th>
-                <Th
-                  textTransform="initial"
-                  textColor="grey.600"
-                  fontSize="epsilon"
-                  fontWeight="400"
-                  letterSpacing="0px"
-                >
-                  Année
-                </Th>
-                <Th
-                  textTransform="initial"
-                  textColor="grey.600"
-                  fontSize="epsilon"
-                  fontWeight="400"
-                  letterSpacing="0px"
-                >
-                  Apprentis
-                </Th>
-                <Th
-                  textTransform="initial"
-                  textColor="grey.600"
-                  fontSize="epsilon"
-                  fontWeight="400"
-                  letterSpacing="0px"
-                >
-                  Apprenants sans contrat
-                </Th>
-                <Th
-                  textTransform="initial"
-                  textColor="grey.600"
-                  fontSize="epsilon"
-                  fontWeight="400"
-                  letterSpacing="0px"
-                >
-                  Abandons
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr textAlign="left">
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-              </Tr>
-              <Tr textAlign="left">
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-              </Tr>
-              <Tr textAlign="left">
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-                <Td>
-                  <Skeleton width="100%" p={5} />
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </>
-      )}
+      {loading && <TableSkeleton headers={["Intitulé", "Année", "Apprentis", "Apprenants sans contrat", "Abandons"]} />}
 
       {/* Data */}
       {repartitionEffectifs && !error && !loading && (

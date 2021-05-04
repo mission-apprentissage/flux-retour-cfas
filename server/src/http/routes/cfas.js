@@ -84,7 +84,6 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
       const { siret } = req.query;
 
       const foundDataFeedback = await cfaDataFeedback.getCfaDataFeedbackBySiret(siret);
-      console.log(foundDataFeedback);
       return res.json(foundDataFeedback);
     })
   );

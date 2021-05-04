@@ -8,37 +8,22 @@ const sortBy = require("lodash.sortby");
 module.exports = () => ({
   getEffectifsCountByStatutApprenantAtDate,
   getEffectifsDetailDataForSiret,
+  getEffectifsCountByCfaAtDate,
 });
 
-/**
- * Récupération des effectifs par statut_apprenant à une date donnée
- *
- * Principe :
- * 1. On filtre sur les params en entrée
- * 2. On filtre dans l'historique sur les élements ayant une date <= date recherchée
- * 3. On construit dans l'historique des statuts un champ diff_date_search = différence entre la date du statut de l'historique et la date recherchée
- * 4. On crée un champ statut_apprenant_at_date = statut dans l'historique avec le plus petit diff_date_search
- * 5. On compte les effectifs résultant par statut_apprenant
- */
-const getEffectifsCountByStatutApprenantAtDate = async (searchDate, filters = {}) => {
-  const aggregationPipeline = [
-    // Filtrage sur les filtres passées en paramètres
-    {
-      $match: {
-        ...filters,
-        siret_etablissement_valid: true,
-      },
-    },
+const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) => {
+  return [
     // Filtrage sur les élements avec date antérieure à la date recherchée
     {
       $project: {
+        ...projection,
         historique_statut_apprenant: {
           $filter: {
             input: "$historique_statut_apprenant",
             as: "result",
             // Filtre dans l'historique sur les valeurs ayant une date antérieure à la date de recherche
             cond: {
-              $lte: ["$$result.date_statut", searchDate],
+              $lte: ["$$result.date_statut", date],
             },
           },
         },
@@ -57,8 +42,8 @@ const getEffectifsCountByStatutApprenantAtDate = async (searchDate, filters = {}
             in: {
               date_statut: "$$item.date_statut",
               valeur_statut: "$$item.valeur_statut",
-              // Calcul de la différence entre item.date_statut & searchDate
-              diff_date_search: { $abs: [{ $subtract: ["$$item.date_statut", searchDate] }] },
+              // Calcul de la différence entre item.date_statut & date
+              diff_date_search: { $abs: [{ $subtract: ["$$item.date_statut", date] }] },
             },
           },
         },
@@ -80,6 +65,29 @@ const getEffectifsCountByStatutApprenantAtDate = async (searchDate, filters = {}
         },
       },
     },
+  ];
+};
+
+/**
+ * Récupération des effectifs par statut_apprenant à une date donnée
+ *
+ * Principe :
+ * 1. On filtre sur les params en entrée
+ * 2. On filtre dans l'historique sur les élements ayant une date <= date recherchée
+ * 3. On construit dans l'historique des statuts un champ diff_date_search = différence entre la date du statut de l'historique et la date recherchée
+ * 4. On crée un champ statut_apprenant_at_date = statut dans l'historique avec le plus petit diff_date_search
+ * 5. On compte les effectifs résultant par statut_apprenant
+ */
+const getEffectifsCountByStatutApprenantAtDate = async (searchDate, filters = {}) => {
+  const aggregationPipeline = [
+    // Filtrage sur les filtres passées en paramètres
+    {
+      $match: {
+        ...filters,
+        siret_etablissement_valid: true,
+      },
+    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate),
     {
       $group: {
         _id: "$statut_apprenant_at_date.valeur_statut",
@@ -188,6 +196,11 @@ const getEffectifsDetailWithNiveauxForStatutAndDate = async (searchDate, searchS
  * 5. On garde uniquement les statuts correspondants à celui demandé
  */
 const getEffectifsWithStatutApprenantAtDate = async (searchDate, statutApprenant, filters = {}) => {
+  const projection = {
+    niveau_formation: 1,
+    annee_formation: 1,
+    libelle_court_formation: 1,
+  };
   const aggregationPipeline = [
     // Filtrage sur les filtres passées en paramètres
     {
@@ -196,60 +209,7 @@ const getEffectifsWithStatutApprenantAtDate = async (searchDate, statutApprenant
         siret_etablissement_valid: true,
       },
     },
-    // Filtrage sur les élements avec date antérieure à la date recherchée
-    {
-      $project: {
-        niveau_formation: 1,
-        annee_formation: 1,
-        libelle_court_formation: 1,
-        historique_statut_apprenant: {
-          $filter: {
-            input: "$historique_statut_apprenant",
-            as: "result",
-            // Filtre dans l'historique sur les valeurs ayant une date antérieure à la date de recherche
-            cond: {
-              $lte: ["$$result.date_statut", searchDate],
-            },
-          },
-        },
-      },
-    },
-    {
-      $match: { historique_statut_apprenant: { $not: { $size: 0 } } },
-    },
-    // Ajout d'un champ diff_date_search : écart entre la date de l'historique et la date recherchée
-    {
-      $addFields: {
-        historique_statut_apprenant: {
-          $map: {
-            input: "$historique_statut_apprenant",
-            as: "item",
-            in: {
-              date_statut: "$$item.date_statut",
-              valeur_statut: "$$item.valeur_statut",
-              // Calcul de la différence entre item.date_statut & searchDate
-              diff_date_search: { $abs: [{ $subtract: ["$$item.date_statut", searchDate] }] },
-            },
-          },
-        },
-      },
-    },
-    // Ajout d'un champ statut_apprenant_at_date correspondant à l'élément de l'historique ayant le plus petit écart avec la date recherchée
-    {
-      $addFields: {
-        statut_apprenant_at_date: {
-          $first: {
-            $filter: {
-              input: "$historique_statut_apprenant",
-              as: "result",
-              cond: {
-                $eq: ["$$result.diff_date_search", { $min: "$historique_statut_apprenant.diff_date_search" }],
-              },
-            },
-          },
-        },
-      },
-    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate, projection),
     {
       $match: {
         "statut_apprenant_at_date.valeur_statut": statutApprenant,
@@ -426,3 +386,70 @@ const getUniquesFormationsParAnneesForNiveau = (endDateData, currentNiveau) =>
     ),
     ["libelle", "annee"]
   );
+
+/**
+ * Récupération du nombre de statuts apprenants par cfa à une date donnée
+ * @param {Date} searchDate
+ * @param {*} filters
+ * @returns [{
+ *  siret_etablissement: string
+ *  uai_etablissement: string
+ *  nom_etablissement: string
+ *  effectifs: {
+ *    total: number
+ *    apprentis: number
+ *    inscrits: number
+ *    abandons: number
+ *  }
+ * }]
+ */
+const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
+  const projection = {
+    siret_etablissement: 1,
+    uai_etablissement: 1,
+    nom_etablissement: 1,
+  };
+  const aggregationPipeline = [
+    // Filtrage sur les filtres passées en paramètres
+    {
+      $match: {
+        ...filters,
+        siret_etablissement_valid: true,
+      },
+    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate, projection),
+    {
+      $group: {
+        _id: "$siret_etablissement",
+        uai_etablissement: { $first: "$uai_etablissement" },
+        nom_etablissement: { $first: "$nom_etablissement" },
+        apprentis: {
+          $sum: {
+            $cond: [{ $eq: ["$statut_apprenant_at_date.valeur_statut", codesStatutsCandidats.apprenti] }, 1, 0],
+          },
+        },
+        inscrits: {
+          $sum: {
+            $cond: [{ $eq: ["$statut_apprenant_at_date.valeur_statut", codesStatutsCandidats.inscrit] }, 1, 0],
+          },
+        },
+        abandons: {
+          $sum: {
+            $cond: [{ $eq: ["$statut_apprenant_at_date.valeur_statut", codesStatutsCandidats.abandon] }, 1, 0],
+          },
+        },
+      },
+    },
+  ];
+
+  const effectifsByCfa = await StatutCandidat.aggregate(aggregationPipeline);
+
+  return effectifsByCfa.map(({ _id, uai_etablissement, nom_etablissement, ...counts }) => {
+    return {
+      siret_etablissement: _id,
+      uai_etablissement,
+      nom_etablissement,
+      effectifs: counts,
+    };
+  });
+};

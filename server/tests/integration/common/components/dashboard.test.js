@@ -18,43 +18,43 @@ const {
 const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 
 integrationTests(__filename, () => {
+  const seedStatutsCandidats = async (statutsProps) => {
+    // Add 10 statuts with history sequence - full
+    for (let index = 0; index < 10; index++) {
+      const randomStatut = createRandomStatutCandidat({
+        historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+        siret_etablissement_valid: true,
+        ...statutsProps,
+      });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
+    }
+
+    // Add 5 statuts with history sequence - simple apprenti
+    for (let index = 0; index < 5; index++) {
+      const randomStatut = createRandomStatutCandidat({
+        historique_statut_apprenant: historySequenceApprenti,
+        siret_etablissement_valid: true,
+        ...statutsProps,
+      });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
+    }
+
+    // Add 15 statuts with history sequence - inscritToApprenti
+    for (let index = 0; index < 15; index++) {
+      const randomStatut = createRandomStatutCandidat({
+        historique_statut_apprenant: historySequenceInscritToApprenti,
+        siret_etablissement_valid: true,
+        ...statutsProps,
+      });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
+    }
+  };
+
   describe("getEffectifsCountByStatutApprenantAtDate", () => {
     const { getEffectifsCountByStatutApprenantAtDate } = dashboardComponent();
-
-    const seedStatutsCandidats = async (statutsProps) => {
-      // Add 10 statuts with history sequence - full
-      for (let index = 0; index < 10; index++) {
-        const randomStatut = createRandomStatutCandidat({
-          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
-          siret_etablissement_valid: true,
-          ...statutsProps,
-        });
-        const toAdd = new StatutCandidat(randomStatut);
-        await toAdd.save();
-      }
-
-      // Add 5 statuts with history sequence - simple apprenti
-      for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomStatutCandidat({
-          historique_statut_apprenant: historySequenceApprenti,
-          siret_etablissement_valid: true,
-          ...statutsProps,
-        });
-        const toAdd = new StatutCandidat(randomStatut);
-        await toAdd.save();
-      }
-
-      // Add 15 statuts with history sequence - inscritToApprenti
-      for (let index = 0; index < 15; index++) {
-        const randomStatut = createRandomStatutCandidat({
-          historique_statut_apprenant: historySequenceInscritToApprenti,
-          siret_etablissement_valid: true,
-          ...statutsProps,
-        });
-        const toAdd = new StatutCandidat(randomStatut);
-        await toAdd.save();
-      }
-    };
 
     it("Permet de récupérer les données d'effectifs par statut pour à date donnée", async () => {
       await seedStatutsCandidats();
@@ -68,21 +68,21 @@ integrationTests(__filename, () => {
       const effectifsAtDate2 = await getEffectifsCountByStatutApprenantAtDate(date2);
       const effectifsAtDate3 = await getEffectifsCountByStatutApprenantAtDate(date3);
 
-      assert.deepStrictEqual(effectifsAtDate1, {
+      assert.deepEqual(effectifsAtDate1, {
         [codesStatutsCandidats.inscrit]: { count: 10 },
         [codesStatutsCandidats.apprenti]: { count: 5 },
         [codesStatutsCandidats.abandon]: { count: 0 },
         [codesStatutsCandidats.abandonProspects]: { count: 0 },
         [codesStatutsCandidats.prospect]: { count: 0 },
       });
-      assert.deepStrictEqual(effectifsAtDate2, {
+      assert.deepEqual(effectifsAtDate2, {
         [codesStatutsCandidats.inscrit]: { count: 15 },
         [codesStatutsCandidats.apprenti]: { count: 15 },
         [codesStatutsCandidats.abandon]: { count: 0 },
         [codesStatutsCandidats.abandonProspects]: { count: 0 },
         [codesStatutsCandidats.prospect]: { count: 0 },
       });
-      assert.deepStrictEqual(effectifsAtDate3, {
+      assert.deepEqual(effectifsAtDate3, {
         [codesStatutsCandidats.inscrit]: { count: 15 },
         [codesStatutsCandidats.apprenti]: { count: 5 },
         [codesStatutsCandidats.abandon]: { count: 10 },
@@ -98,7 +98,7 @@ integrationTests(__filename, () => {
       const date = new Date("2018-09-15T00:00:00.000+0000");
       const effectifsInPast = await getEffectifsCountByStatutApprenantAtDate(date);
 
-      assert.deepStrictEqual(effectifsInPast, {
+      assert.deepEqual(effectifsInPast, {
         [codesStatutsCandidats.inscrit]: { count: 0 },
         [codesStatutsCandidats.apprenti]: { count: 0 },
         [codesStatutsCandidats.abandon]: { count: 0 },
@@ -351,14 +351,61 @@ integrationTests(__filename, () => {
       const statutsFound = await getEffectifsDetailDataForSiret(startDate, endDate, siretToTest);
 
       // Check for siret
-      assert.deepStrictEqual(statutsFound.length, 2);
-      assert.deepStrictEqual(statutsFound, expectedDetailResultList);
+      assert.deepEqual(statutsFound.length, 2);
+      assert.deepEqual(statutsFound, expectedDetailResultList);
 
       // Check for bad siret
       const badSiret = "99999999900999";
       const statutsBadSiret = await getEffectifsDetailDataForSiret(startDate, endDate, badSiret);
-      assert.notDeepStrictEqual(statutsBadSiret.length, 2);
-      assert.notDeepStrictEqual(statutsBadSiret, expectedDetailResultList);
+      assert.notDeepEqual(statutsBadSiret.length, 2);
+      assert.notDeepEqual(statutsBadSiret, expectedDetailResultList);
+    });
+  });
+
+  describe("getEffectifsCountByCfaAtDate", () => {
+    const { getEffectifsCountByCfaAtDate } = dashboardComponent();
+
+    it("Permet de récupérer les effectifs par CFA à une date donnée pour une formation", async () => {
+      const filterQuery = { id_formation: "77929544300013" };
+      const cfa1 = {
+        siret_etablissement: "00690630980544",
+        uai_etablissement: "0123456Z",
+        nom_etablissement: "CFA 1",
+      };
+      const cfa2 = {
+        siret_etablissement: "00690630980588",
+        uai_etablissement: "0123456T",
+        nom_etablissement: "CFA 2",
+      };
+      await seedStatutsCandidats({ ...filterQuery, ...cfa1 });
+      await seedStatutsCandidats({ id_formation: "12345", ...cfa1 });
+      await seedStatutsCandidats({ ...filterQuery, ...cfa2 });
+      await seedStatutsCandidats({ ...filterQuery, ...cfa2 });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          ...cfa1,
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+        {
+          ...cfa2,
+          effectifs: {
+            apprentis: 10,
+            inscrits: 30,
+            abandons: 20,
+          },
+        },
+      ];
+
+      const effectifsByCfa = await getEffectifsCountByCfaAtDate(date, filterQuery);
+      // we will sort results because we don't care of the order in the test
+      const sortBySiret = (a, b) => Number(a.siret_etablissement) - Number(b.siret_etablissement);
+      assert.deepEqual(effectifsByCfa.sort(sortBySiret), expectedResult);
     });
   });
 });

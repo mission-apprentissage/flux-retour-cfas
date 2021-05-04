@@ -1,4 +1,4 @@
-import { Box, Heading, List, ListItem, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Heading, List, ListItem, Text, useDisclosure } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -27,11 +27,13 @@ const DefinitionIndicesModal = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
-      <Box as="legend" onClick={onOpen} fontSize="zeta" cursor="pointer">
-        <span>définition des indices</span>
+      <Button variant="link" onClick={onOpen} fontSize="zeta" textDecoration="none" _hover={{ textDecoration: "none" }}>
+        <Box as="span" verticalAlign="bottom" _hover={{ textDecoration: "underline" }}>
+          définition des indices
+        </Box>
         &nbsp;
-        <Box as="i" className="ri-information-fill" />
-      </Box>
+        <Box as="i" className="ri-information-fill" verticalAlign="bottom" />
+      </Button>
 
       <InfoModal title="Définition des indices" onClose={onClose} isOpen={isOpen}>
         <Heading fontWeight="400" fontSize="gamma">

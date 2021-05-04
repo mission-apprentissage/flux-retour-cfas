@@ -15,7 +15,6 @@ const searchFormationByIntituleOrCfd = debounce(async (searchParams, callback) =
       searchParams.territoire?.type === TERRITOIRE_TYPES.region ? searchParams.territoire.code : null,
     etablissement_num_departement:
       searchParams.territoire?.type === TERRITOIRE_TYPES.departement ? searchParams.territoire.code : null,
-    siret_etablissement: searchParams.cfa?.siret_etablissement,
   });
 
   const result = await _post("/api/formations/search", searchRequestBody);

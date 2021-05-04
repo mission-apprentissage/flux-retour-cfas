@@ -48,14 +48,14 @@ export function usePostFetch(url, body, initialState = null) {
     } finally {
       setLoading(false);
     }
-  }, [url]);
+  }, [url, JSON.stringify(body)]);
 
   useEffect(() => {
     async function fetchData() {
       return _fetch();
     }
     fetchData();
-  }, [url, _fetch]);
+  }, [_fetch]);
 
   return [response, loading, error];
 }
