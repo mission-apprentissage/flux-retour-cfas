@@ -16,7 +16,15 @@ const searchCfas = async (searchCriteria) => {
   const { searchTerm, ...otherCriteria } = searchCriteria;
   const matchQuery = {
     ...otherCriteria,
-    ...(searchTerm ? { $or: [{ $text: { $search: searchTerm } }, { uai_etablissement: searchTerm }] } : {}),
+    ...(searchTerm
+      ? {
+          $or: [
+            { $text: { $search: searchTerm } },
+            { uai_etablissement: searchTerm.toUpperCase() },
+            { siret_etablissement: searchTerm },
+          ],
+        }
+      : {}),
     siret_etablissement_valid: true,
   };
 

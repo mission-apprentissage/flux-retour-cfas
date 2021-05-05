@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const httpTests = require("../../utils/httpTests");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
-const { StatutCandidat: StatutCandidatModel, Cfa } = require("../../../src/common/model");
+const { StatutCandidat: StatutCandidatModel, Cfa, CfaDataFeedback } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
 httpTests(__filename, ({ startServer }) => {
@@ -90,6 +90,39 @@ httpTests(__filename, ({ startServer }) => {
         details: validBody.details,
         email: validBody.email,
         donnee_est_valide: validBody.dataIsValid,
+      });
+    });
+  });
+
+  describe("GET /cfas/data-feedback", () => {
+    const cfaDataFeedbackSeed = {
+      created_at: new Date(),
+      siret: "80320291800022",
+      details: "blabla",
+      email: "mail@example.com",
+      donnee_est_valide: true,
+    };
+
+    beforeEach(async () => {
+      await new CfaDataFeedback(cfaDataFeedbackSeed).save();
+    });
+
+    it("sends null HTTP response when no cfaDataFeedback for given siret", async () => {
+      const response = await httpClient.get("/api/cfas/data-feedback?siret=123456");
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, null);
+    });
+
+    it("sends a 200 HTTP response", async () => {
+      const response = await httpClient.get(`/api/cfas/data-feedback?siret=${cfaDataFeedbackSeed.siret}`);
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(omit(response.data, "_id", "__v", "created_at"), {
+        siret: cfaDataFeedbackSeed.siret,
+        details: cfaDataFeedbackSeed.details,
+        email: cfaDataFeedbackSeed.email,
+        donnee_est_valide: cfaDataFeedbackSeed.donnee_est_valide,
       });
     });
   });

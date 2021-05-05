@@ -323,7 +323,7 @@ const getNbDistinctCfasBySiret = async (filters = {}) => {
 };
 
 const getNbStatutsValid = async (filters = {}) => {
-  return StatutCandidat.count({
+  return StatutCandidat.countDocuments({
     ...filters,
     siret_etablissement_valid: true,
     uai_etablissement_valid: true,
@@ -332,21 +332,25 @@ const getNbStatutsValid = async (filters = {}) => {
 };
 
 const getNbInvalidUais = async (filters = {}) => {
-  return StatutCandidat.count({ ...filters, uai_etablissement_valid: false });
+  return StatutCandidat.countDocuments({ ...filters, uai_etablissement_valid: false });
 };
 
 const getNbInvalidCfds = async (filters = {}) => {
-  return StatutCandidat.count({ ...filters, id_formation_valid: false });
+  return StatutCandidat.countDocuments({ ...filters, id_formation_valid: false });
 };
 
 const getNbInvalidSirets = async (filters = {}) => {
-  return StatutCandidat.count({ ...filters, siret_etablissement_valid: false });
+  return StatutCandidat.countDocuments({ ...filters, siret_etablissement_valid: false });
 };
 
 const getNbInvalidSiretsAndUais = async (filters = {}) => {
-  return StatutCandidat.count({ ...filters, siret_etablissement_valid: false, uai_etablissement_valid: false });
+  return StatutCandidat.countDocuments({
+    ...filters,
+    siret_etablissement_valid: false,
+    uai_etablissement_valid: false,
+  });
 };
 
 const getNbAnneeFormationMissing = async (filters = {}) => {
-  return StatutCandidat.count({ ...filters, annee_formation: null });
+  return StatutCandidat.countDocuments({ ...filters, annee_formation: null });
 };

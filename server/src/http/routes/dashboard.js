@@ -3,6 +3,7 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { UserEvent, StatutCandidat, Cfa } = require("../../common/model");
 const { validateSiret } = require("../../common/domain/siret");
+const { codesStatutsCandidats } = require("../../common/model/constants");
 
 module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
@@ -21,19 +22,21 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
-   * Schema for effectif cfa detail input validation
-   */
-  const dashboardEffectifCfaDetailInputSchema = Joi.object({
-    startDate: Joi.date().required(),
-    endDate: Joi.date().required(),
-    siret: Joi.string().allow(null, ""),
-  });
-
-  /**
    * Schema for region conversion validation
    */
   const dashboardConversionRegionInputSchema = Joi.object({
     num_region: Joi.string().required(),
+  });
+
+  /**
+   * Schema for effetctifs by CFA body
+   */
+  const dashboardEffectifsByCfaBodySchema = Joi.object({
+    date: Joi.date().required(),
+    id_formation: Joi.string().allow(null, ""),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
   });
 
   /**
@@ -121,9 +124,9 @@ module.exports = ({ stats, dashboard }) => {
       });
 
       // Gets & format params:
-      const { startDate, endDate, ...filters } = req.body;
-      const beginSearchDate = new Date(startDate);
-      const endSearchDate = new Date(endDate);
+      const { startDate: startDateFromBody, endDate: endDateFromBody, ...filters } = req.body;
+      const startDate = new Date(startDateFromBody);
+      const endDate = new Date(endDateFromBody);
 
       // Add user event
       const event = new UserEvent({
@@ -135,23 +138,24 @@ module.exports = ({ stats, dashboard }) => {
       await event.save();
 
       // Gets effectif data for params
-      const effectifData = await dashboard.getEffectifsData(beginSearchDate, endSearchDate, filters);
+      const effectifsAtStartDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(startDate, filters);
+      const effectifsAtEndDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(endDate, filters);
 
       // Build response
       return res.json([
         {
           date: startDate,
-          apprentis: effectifData.startDate.nbApprentis,
-          inscrits: effectifData.startDate.nbInscrits,
-          abandons: effectifData.startDate.nbAbandons,
-          abandonsProspects: effectifData.startDate.nbAbandonsProspects,
+          apprentis: effectifsAtStartDate[codesStatutsCandidats.apprenti].count,
+          inscrits: effectifsAtStartDate[codesStatutsCandidats.inscrit].count,
+          abandons: effectifsAtStartDate[codesStatutsCandidats.abandon].count,
+          abandonsProspects: effectifsAtStartDate[codesStatutsCandidats.abandonProspects].count,
         },
         {
           date: endDate,
-          apprentis: effectifData.endDate.nbApprentis,
-          inscrits: effectifData.endDate.nbInscrits,
-          abandons: effectifData.endDate.nbAbandons,
-          abandonsProspects: effectifData.endDate.nbAbandonsProspects,
+          apprentis: effectifsAtEndDate[codesStatutsCandidats.apprenti].count,
+          inscrits: effectifsAtEndDate[codesStatutsCandidats.inscrit].count,
+          abandons: effectifsAtEndDate[codesStatutsCandidats.abandon].count,
+          abandonsProspects: effectifsAtEndDate[codesStatutsCandidats.abandonProspects].count,
           dataConsistency: null,
         },
       ]);
@@ -161,16 +165,17 @@ module.exports = ({ stats, dashboard }) => {
   /**
    * Gets the dashboard cfa effectif detail
    */
-  router.post(
+  router.get(
     "/cfa-effectifs-detail",
     tryCatch(async (req, res) => {
-      // Validate schema
-      await dashboardEffectifCfaDetailInputSchema.validateAsync(req.body, {
-        abortEarly: false,
-      });
+      const { page, limit, startDate, endDate, siret } = await Joi.object({
+        page: Joi.number().default(1),
+        limit: Joi.number().default(10),
+        startDate: Joi.date().required(),
+        endDate: Joi.date().required(),
+        siret: Joi.string().allow(null, ""),
+      }).validateAsync(req.query, { abortEarly: false });
 
-      // Gets & format params:
-      const { startDate, endDate, siret } = req.body;
       const beginSearchDate = new Date(startDate);
       const endSearchDate = new Date(endDate);
 
@@ -195,16 +200,35 @@ module.exports = ({ stats, dashboard }) => {
           return res.status(400).json({ message: `No cfa found for siret ${siret}` });
         } else {
           // Gets effectif data for params
-          const effectifDetailCfaData = await dashboard.getEffectifsDetailDataForSiret(
+          const effectifDetailCfaData = await dashboard.getPaginatedEffectifsDetailDataForSiret(
             beginSearchDate,
             endSearchDate,
-            siret
+            siret,
+            page,
+            limit
           );
 
           // Build response
           return res.json(effectifDetailCfaData);
         }
       }
+    })
+  );
+
+  router.post(
+    "/effectifs-par-cfa",
+    tryCatch(async (req, res) => {
+      // Validate schema
+      await dashboardEffectifsByCfaBodySchema.validateAsync(req.body, {
+        abortEarly: false,
+      });
+
+      const { date: dateFromBody, ...filters } = req.body;
+      const date = new Date(dateFromBody);
+
+      const effectifsByCfaAtDate = await dashboard.getEffectifsCountByCfaAtDate(date, filters);
+
+      return res.json(effectifsByCfaAtDate);
     })
   );
 

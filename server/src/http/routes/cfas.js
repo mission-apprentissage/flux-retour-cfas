@@ -60,6 +60,34 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     })
   );
 
+  router.post(
+    "/data-feedback",
+    tryCatch(async (req, res) => {
+      const { error } = dataFeedbackBodyValidationSchema.validate(req.body);
+
+      if (error) {
+        return res.status(400).json({
+          status: "INPUT_VALIDATION_ERROR",
+          message: error.message,
+        });
+      }
+
+      const created = await cfaDataFeedback.createCfaDataFeedback(req.body);
+
+      return res.json(created);
+    })
+  );
+
+  router.get(
+    "/data-feedback",
+    tryCatch(async (req, res) => {
+      const { siret } = req.query;
+
+      const foundDataFeedback = await cfaDataFeedback.getCfaDataFeedbackBySiret(siret);
+      return res.json(foundDataFeedback);
+    })
+  );
+
   /**
    * Gets the dashboard data for cfa
    */
@@ -89,35 +117,6 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
           adresse: cfaFound.etablissement_adresse,
         });
       }
-    })
-  );
-
-  router.post(
-    "/data-feedback",
-    tryCatch(async (req, res) => {
-      const { error } = dataFeedbackBodyValidationSchema.validate(req.body);
-
-      if (error) {
-        return res.status(400).json({
-          status: "INPUT_VALIDATION_ERROR",
-          message: error.message,
-        });
-      }
-
-      const created = await cfaDataFeedback.createCfaDataFeedback(req.body);
-
-      return res.json(created);
-    })
-  );
-
-  router.get(
-    "/data-feedback",
-    tryCatch(async (req, res) => {
-      const { siret } = req.query;
-
-      const foundDataFeedback = await cfaDataFeedback.getCfaDataFeedbackBySiret(siret);
-      console.log(foundDataFeedback);
-      return res.json(foundDataFeedback);
     })
   );
 

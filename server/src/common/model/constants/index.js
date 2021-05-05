@@ -141,6 +141,7 @@ const jobNames = {
   statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
   statutsCandidatsRetrieveNetworks: "statutsCandidats-retrieve-networks",
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
+  statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
   createIndexes: "create-indexes",
   clearUsers: "clear-users",
   clearCfas: "clear-cfas",
@@ -152,6 +153,7 @@ const jobNames = {
   checkUaiValidity: "check-uai-validity",
   fixHistoriqueStatutApprenant: "fix-historique-statut-apprenant-date-statut",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
+  calculateStats: "calculate-stats",
 };
 
 /**
@@ -184,8 +186,23 @@ const duplicatesTypesCodes = {
   },
 };
 
+/**
+ * Types de stats possibles
+ */
 const statsTypes = {
   uaiStats: "UaiStats",
+  tdbStats: "TdbStats",
+  networksStats: "NetworksStats",
+  importDatesStats: "ImportDatesStats",
+};
+
+/**
+ * Type de source des données
+ */
+const dataSource = {
+  all: "all",
+  ymag: "ymag",
+  gesti: "gesti",
 };
 
 module.exports = {
@@ -198,4 +215,5 @@ module.exports = {
   erps,
   duplicatesTypesCodes,
   statsTypes,
+  dataSource,
 };
