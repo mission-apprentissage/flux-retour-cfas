@@ -12,6 +12,11 @@ module.exports = new Schema({
     default: () => new Date(),
     description: "La date du calcul de stats",
   },
+  dataSource: {
+    type: String,
+    default: null,
+    description: "Le source des données de stats",
+  },
   data: {
     type: Object,
     default: null,

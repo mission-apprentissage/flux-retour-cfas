@@ -47,6 +47,7 @@
     "support:identify-uais-sirets-duplicates": "node -r dotenv/config src/jobs/support/identify-uais-sirets-duplicates/index.js",
     "support:identify-uais-catalog": "node -r dotenv/config src/jobs/support/identify-uais-catalog/index.js",
     "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
+    "calculate:stats": "node -r dotenv/config src/jobs/stats/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
