@@ -3,7 +3,6 @@ import { Skeleton } from "@chakra-ui/skeleton";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { getRoundedPercentage } from "../../../../../common/utils/calculUtils";
 import withRegionConversionData from "./withRegionConversionData";
 
 const RegionConversionSection = ({ regionConversionData, error, loading }) => {
@@ -38,22 +37,17 @@ const RegionConversionSection = ({ regionConversionData, error, loading }) => {
           <Text color="grey.800">
             <Box as="span" verticalAlign="middle">
               <HStack>
-                <Text>Couverture des indices :</Text>
-                <Text as="b" mr={2}>
-                  {getRoundedPercentage(regionConversionData.nbCfaConnected, regionConversionData.nbCfaIdentified)}%
-                </Text>
-                <Text textColor="grey.600">{regionConversionData.nbCfaIdentified} CFAs</Text>
-                <Text mb={-1} textColor="grey.600" as="b">
-                  <i className="ri-arrow-right-s-line"></i>
-                </Text>
+                <Text>Couverture des indices sur le territoire sélectionné :</Text>
                 <Text textColor="grey.600">
-                  {regionConversionData.nbCfaConnected} CFAs sont connectés au tableau de bord
+                  {regionConversionData.nbCfaConnected} CFAs transmettent leurs données au tableau de bord
                 </Text>
                 <Text mb={-1} textColor="grey.600" as="b">
                   {" "}
                   <i className="ri-arrow-right-s-line"></i>
                 </Text>
-                <Text textColor="grey.600">{regionConversionData.nbCfaDataValidated} CFAs ont validé les indices</Text>
+                <Text textColor="grey.600">
+                  {regionConversionData.nbCfaDataValidated} CFAs ont validé leurs données
+                </Text>
               </HStack>
             </Box>
           </Text>

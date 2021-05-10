@@ -87,11 +87,6 @@ module.exports = ({ stats, dashboard }) => {
       });
       await event.save();
 
-      // Gets cfas identified for num_region
-      const nbCfaIdentified = await Cfa.countDocuments({
-        region_num: num_region,
-      });
-
       // Gets distincts cfa sirets for num_region
       const nbCfaConnected = await stats.getNbDistinctCfasBySiret({
         etablissement_num_region: num_region,
@@ -105,7 +100,6 @@ module.exports = ({ stats, dashboard }) => {
 
       // Build response
       return res.json({
-        nbCfaIdentified,
         nbCfaConnected,
         nbCfaDataValidated,
       });

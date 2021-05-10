@@ -273,10 +273,8 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       assert.deepStrictEqual(response.status, 200);
-      assert.ok(response.data.nbCfaIdentified);
       assert.ok(response.data.nbCfaConnected);
       assert.ok(response.data.nbCfaDataValidated);
-      assert.deepStrictEqual(response.data.nbCfaIdentified, 8);
       assert.deepStrictEqual(response.data.nbCfaConnected, 1);
       assert.deepStrictEqual(response.data.nbCfaDataValidated, 3);
 
@@ -286,7 +284,6 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       assert.deepStrictEqual(badRegionResponse.status, 200);
-      assert.deepStrictEqual(badRegionResponse.data.nbCfaIdentified, 0);
       assert.deepStrictEqual(badRegionResponse.data.nbCfaConnected, 0);
       assert.deepStrictEqual(badRegionResponse.data.nbCfaDataValidated, 0);
     });
