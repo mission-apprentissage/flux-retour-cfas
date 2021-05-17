@@ -16,12 +16,10 @@ module.exports = () => {
   router.get(
     "/regions",
     tryCatch(async (req, res) => {
-      const networks = Object.keys(REGIONS_OUVERTES).map((id) => ({
-        id,
-        nom: REGIONS_OUVERTES[id].nomRegion,
-        code: REGIONS_OUVERTES[id].codeRegion,
-      }));
-      return res.json(networks);
+      const regions = Object.values(REGIONS_OUVERTES).map((region) => {
+        return { code: region.codeRegion, nom: region.nomRegion };
+      });
+      return res.json(regions);
     })
   );
 

@@ -90,12 +90,10 @@ const REGIONS_OUVERTES = {
   NORMANDIE: {
     nomRegion: "Normandie",
     codeRegion: "28",
-    nomFichier: "cfas-normandie",
   },
   CENTRE_VAL_DE_LOIRE: {
     nomRegion: "Centre-Val de loire",
     codeRegion: "24",
-    nomFichier: "cfas-centre-val-de-loire",
   },
   AUVERGNE_RHONE_ALPES: {
     nomRegion: "Auvergne-Rhône-Alpes",
