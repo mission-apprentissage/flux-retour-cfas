@@ -1,6 +1,7 @@
 import { subYears } from "date-fns";
 import React, { useEffect, useState } from "react";
 
+import { DEFAULT_REGION } from "../../common/constants/defaultRegion";
 import { _post } from "../../common/httpClient";
 import { getPercentageDifference } from "../../common/utils/calculUtils";
 import { omitNullishValues } from "../../common/utils/omitNullishValues";
@@ -40,11 +41,11 @@ const buildSearchRequestBody = (filters) => {
   return omitNullishValues(flattenedFilters);
 };
 
-const REGION_NORMANDIE_OPTION = { code: "28", type: TERRITOIRE_TYPES.region };
+const DEFAULT_OPTION = { code: DEFAULT_REGION.code, type: TERRITOIRE_TYPES.region };
 
 const initialFiltersState = {
   date: new Date(),
-  territoire: REGION_NORMANDIE_OPTION,
+  territoire: DEFAULT_OPTION,
   formation: null,
   cfa: null,
 };

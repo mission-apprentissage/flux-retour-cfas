@@ -1,16 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react";
-const DEFAULT_SELECTED_REGION = { nom: "Normandie", code: "28" };
+
+import { DEFAULT_REGION } from "../../../common/constants/defaultRegion";
 import { _get } from "../../../common/httpClient";
 
 const withCfasReferentielData = (Component) => {
   const WithCfasReferentielData = (props) => {
-    let [data, setData] = useState(null);
-    let [regionsData, setRegionsData] = useState([]);
-    let [loading, setLoading] = useState(false);
-    let [error, setError] = useState(null);
-    let [regionCode, setRegionCode] = useState(DEFAULT_SELECTED_REGION.code);
-    let [withDataConnection, setWithDataConnection] = useState(-1);
-    let [withValidationTdb, setWithValidationTdb] = useState(-1);
+    const [data, setData] = useState(null);
+    const [regionsData, setRegionsData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [regionCode, setRegionCode] = useState(DEFAULT_REGION.code);
+    const [withDataConnection, setWithDataConnection] = useState(-1);
+    const [withValidationTdb, setWithValidationTdb] = useState(-1);
 
     /** Callback for get paginated filtered cfas list */
     const _fetch = useCallback(
@@ -27,11 +28,11 @@ const withCfasReferentielData = (Component) => {
         let filterQuery = { region_num: codeRegion };
 
         if (withConnection != -1) {
-          filterQuery = { ...filterQuery, ...{ branchement_flux_cfa_erp: withConnection } };
+          filterQuery = { ...filterQuery, branchement_flux_cfa_erp: withConnection };
         }
 
         if (withValidation != -1) {
-          filterQuery = { ...filterQuery, ...{ feedback_donnee_valide: withValidation == 2 ? null : withValidation } };
+          filterQuery = { ...filterQuery, feedback_donnee_valide: withValidation == 2 ? null : withValidation };
         }
 
         const searchParams = `query=${JSON.stringify(filterQuery)}&page=${pageNumber}&limit=${10}`;
@@ -50,19 +51,16 @@ const withCfasReferentielData = (Component) => {
 
     /** UseEffect hook for cfas api call */
     useEffect(() => {
-      async function fetchData() {
-        return _fetch();
-      }
-      fetchData();
+      _fetch();
     }, [_fetch]);
 
-    /** UseEffect hook for region cfas api call */
+    /** fetch available regions */
     useEffect(() => {
       const fetchRegionsCfas = async () => {
         setLoading(true);
         setError(null);
         try {
-          const response = await _get("/api/referentiel/regions-cfas");
+          const response = await _get("/api/referentiel/regions");
           setRegionsData(response);
         } catch (error) {
           setError(error);
@@ -71,7 +69,7 @@ const withCfasReferentielData = (Component) => {
         }
       };
       fetchRegionsCfas();
-    }, [_fetch]);
+    }, []);
 
     /** Update region filter */
     const onRegionChange = async (region) => {
@@ -102,7 +100,7 @@ const withCfasReferentielData = (Component) => {
         onConnectionChange={onConnectionChange}
         onRegionChange={onRegionChange}
         onValidationTdbChange={onValidationTdbChange}
-        defaultSelectedRegionCode={DEFAULT_SELECTED_REGION.code}
+        defaultSelectedRegionCode={DEFAULT_REGION.code}
       />
     );
   };

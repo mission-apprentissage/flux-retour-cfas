@@ -52,7 +52,7 @@ const CfasReferentielPage = ({
                     width="30%"
                   >
                     {regionsData.map((item) => (
-                      <option key={item.id} value={item.num}>
+                      <option key={item.code} value={item.code}>
                         {item.nom}
                       </option>
                     ))}
@@ -201,7 +201,12 @@ const CfasReferentielPage = ({
 
 CfasReferentielPage.propTypes = {
   data: PropTypes.object,
-  regionsData: PropTypes.arrayOf(PropTypes.object).isRequired,
+  regionsData: PropTypes.arrayOf(
+    PropTypes.shape({
+      code: PropTypes.string.isRequired,
+      nom: PropTypes.string.isRequired,
+    })
+  ),
   loading: PropTypes.bool.isRequired,
   error: PropTypes.object,
   _fetch: PropTypes.func.isRequired,

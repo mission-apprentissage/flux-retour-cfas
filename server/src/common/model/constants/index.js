@@ -84,18 +84,20 @@ const reseauxCfas = {
 };
 
 /**
- * Noms des régions de CFAS
+ * Liste des régions pour lesquelles on ouvre le produit
  */
-const regionsCfas = {
+const REGIONS_OUVERTES = {
   NORMANDIE: {
     nomRegion: "Normandie",
-    numRegion: "28",
-    nomFichier: "cfas-normandie",
+    codeRegion: "28",
   },
   CENTRE_VAL_DE_LOIRE: {
     nomRegion: "Centre-Val de loire",
-    numRegion: "24",
-    nomFichier: "cfas-centre-val-de-loire",
+    codeRegion: "24",
+  },
+  AUVERGNE_RHONE_ALPES: {
+    nomRegion: "Auvergne-Rhône-Alpes",
+    codeRegion: "84",
   },
 };
 
@@ -210,7 +212,7 @@ module.exports = {
   codesMajStatutsInterdits,
   codesStatutsMajStatutCandidats,
   reseauxCfas,
-  regionsCfas,
+  REGIONS_OUVERTES,
   jobNames,
   erps,
   duplicatesTypesCodes,
