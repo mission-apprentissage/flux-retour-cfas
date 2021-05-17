@@ -201,7 +201,13 @@ const CfasReferentielPage = ({
 
 CfasReferentielPage.propTypes = {
   data: PropTypes.object,
-  regionsData: PropTypes.arrayOf(PropTypes.object).isRequired,
+  regionsData: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      num: PropTypes.string.isRequired,
+      nom: PropTypes.string.isRequired,
+    })
+  ),
   loading: PropTypes.bool.isRequired,
   error: PropTypes.object,
   _fetch: PropTypes.func.isRequired,
