@@ -220,7 +220,7 @@ httpTests(__filename, ({ startServer }) => {
   it("Vérifie qu'on peut récupérer une liste paginée de cfas pour une région en query", async () => {
     const regionToTest = {
       code: "24",
-      nom: "Centre-Val de loire",
+      nom: "Centre-Val de Loire",
     };
 
     await new Cfa({

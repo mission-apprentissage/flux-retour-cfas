@@ -92,7 +92,7 @@ const REGIONS_OUVERTES = {
     codeRegion: "28",
   },
   CENTRE_VAL_DE_LOIRE: {
-    nomRegion: "Centre-Val de loire",
+    nomRegion: "Centre-Val de Loire",
     codeRegion: "24",
   },
   AUVERGNE_RHONE_ALPES: {
