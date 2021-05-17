@@ -52,7 +52,7 @@ const CfasReferentielPage = ({
                     width="30%"
                   >
                     {regionsData.map((item) => (
-                      <option key={item.id} value={item.num}>
+                      <option key={item.id} value={item.code}>
                         {item.nom}
                       </option>
                     ))}
@@ -204,7 +204,7 @@ CfasReferentielPage.propTypes = {
   regionsData: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      num: PropTypes.string.isRequired,
+      code: PropTypes.string.isRequired,
       nom: PropTypes.string.isRequired,
     })
   ),

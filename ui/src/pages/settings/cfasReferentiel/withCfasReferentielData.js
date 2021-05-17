@@ -54,13 +54,13 @@ const withCfasReferentielData = (Component) => {
       _fetch();
     }, [_fetch]);
 
-    /** fetch for available regions */
+    /** fetch available regions */
     useEffect(() => {
       const fetchRegionsCfas = async () => {
         setLoading(true);
         setError(null);
         try {
-          const response = await _get("/api/referentiel/regions-cfas");
+          const response = await _get("/api/referentiel/regions");
           setRegionsData(response);
         } catch (error) {
           setError(error);
