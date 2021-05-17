@@ -45,7 +45,7 @@ const DefinitionIndicesModal = () => {
           </IndiceDefinition>
           <IndiceDefinition indice="Apprenant sans contrat" color={STATUTS_APPRENANTS_INDICATOR_COLORS.inscrits}>
             est affecté à un groupe classe et/ou a démarré sa formation mais n&apos;a pas encore signé de contrat
-            (stagiaires dela formation professionelle compris)
+            (stagiaires de la formation professionelle compris)
           </IndiceDefinition>
           <IndiceDefinition indice="Abandon" color={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}>
             apprenti ou inscrit qui a quitté le centre de formation
