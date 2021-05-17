@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-const DEFAULT_SELECTED_REGION = { nom: "Normandie", code: "28" };
+
+import { DEFAULT_REGION } from "../../../common/constants/defaultRegion";
 import { _get } from "../../../common/httpClient";
 
 const withCfasReferentielData = (Component) => {
@@ -8,7 +9,7 @@ const withCfasReferentielData = (Component) => {
     let [regionsData, setRegionsData] = useState([]);
     let [loading, setLoading] = useState(false);
     let [error, setError] = useState(null);
-    let [regionCode, setRegionCode] = useState(DEFAULT_SELECTED_REGION.code);
+    let [regionCode, setRegionCode] = useState(DEFAULT_REGION.code);
     let [withDataConnection, setWithDataConnection] = useState(-1);
     let [withValidationTdb, setWithValidationTdb] = useState(-1);
 
@@ -27,11 +28,11 @@ const withCfasReferentielData = (Component) => {
         let filterQuery = { region_num: codeRegion };
 
         if (withConnection != -1) {
-          filterQuery = { ...filterQuery, ...{ branchement_flux_cfa_erp: withConnection } };
+          filterQuery = { ...filterQuery, branchement_flux_cfa_erp: withConnection };
         }
 
         if (withValidation != -1) {
-          filterQuery = { ...filterQuery, ...{ feedback_donnee_valide: withValidation == 2 ? null : withValidation } };
+          filterQuery = { ...filterQuery, feedback_donnee_valide: withValidation == 2 ? null : withValidation };
         }
 
         const searchParams = `query=${JSON.stringify(filterQuery)}&page=${pageNumber}&limit=${10}`;
@@ -102,7 +103,7 @@ const withCfasReferentielData = (Component) => {
         onConnectionChange={onConnectionChange}
         onRegionChange={onRegionChange}
         onValidationTdbChange={onValidationTdbChange}
-        defaultSelectedRegionCode={DEFAULT_SELECTED_REGION.code}
+        defaultSelectedRegionCode={DEFAULT_REGION.code}
       />
     );
   };
