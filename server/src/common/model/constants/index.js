@@ -144,6 +144,7 @@ const jobNames = {
   statutsCandidatsRetrieveNetworks: "statutsCandidats-retrieve-networks",
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
   statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
+  statutsCandidatsSanitizeEmptyStrings: "statutsCandidats-sanitize-empty-strings",
   createIndexes: "create-indexes",
   clearUsers: "clear-users",
   clearCfas: "clear-cfas",
@@ -207,6 +208,21 @@ const dataSource = {
   gesti: "gesti",
 };
 
+const statutsCandidatsStringFields = [
+  "ine_apprenant",
+  "prenom2_apprenant",
+  "prenom3_apprenant",
+  "email_contact",
+  "nom_representant_legal",
+  "tel_representant_legal",
+  "tel2_representant_legal",
+  "libelle_court_formation",
+  "libelle_long_formation",
+  "siret_etablissement",
+  "date_metier_mise_a_jour_statut",
+  "periode_formation",
+];
+
 module.exports = {
   codesStatutsCandidats,
   codesMajStatutsInterdits,
@@ -218,4 +234,5 @@ module.exports = {
   duplicatesTypesCodes,
   statsTypes,
   dataSource,
+  statutsCandidatsStringFields,
 };
