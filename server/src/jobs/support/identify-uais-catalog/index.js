@@ -37,24 +37,43 @@ runScript(async () => {
           { etablissement_gestionnaire_uai: currentUai },
         ],
       },
-      select: { uai_formation: 1, etablissement_formateur_uai: 1, etablissement_gestionnaire_uai: 1 },
+      select: {
+        uai_formation: 1,
+        etablissement_formateur_uai: 1,
+        etablissement_gestionnaire_uai: 1,
+        etablissement_gestionnaire_siret: 1,
+        etablissement_formateur_siret: 1,
+        lieu_formation_siret: 1,
+      },
     });
 
     // Build lists depending results
     if (formationsForUai.length === 0) {
-      uaisNotFoundCatalog.push(currentUai);
+      uaisNotFoundCatalog.push({ uai: currentUai });
     }
 
     if (formationsForUai.some((item) => item.uai_formation === currentUai)) {
-      uaisAsFormation.push(currentUai);
+      uaisAsFormation.push({
+        uai: currentUai,
+        etablissement_gestionnaire_siret: formationsForUai[0].etablissement_gestionnaire_siret,
+        etablissement_formateur_siret: formationsForUai[0].etablissement_formateur_siret,
+      });
     }
 
     if (formationsForUai.some((item) => item.etablissement_formateur_uai === currentUai)) {
-      uaisAsFormateur.push(currentUai);
+      uaisAsFormateur.push({
+        uai: currentUai,
+        etablissement_gestionnaire_siret: formationsForUai[0].etablissement_gestionnaire_siret,
+        etablissement_formateur_siret: formationsForUai[0].etablissement_formateur_siret,
+      });
     }
 
     if (formationsForUai.some((item) => item.etablissement_gestionnaire_uai === currentUai)) {
-      uaisAsGestionnaire.push(currentUai);
+      uaisAsGestionnaire.push({
+        uai: currentUai,
+        etablissement_gestionnaire_siret: formationsForUai[0].etablissement_gestionnaire_siret,
+        etablissement_formateur_siret: formationsForUai[0].etablissement_formateur_siret,
+      });
     }
   });
 
