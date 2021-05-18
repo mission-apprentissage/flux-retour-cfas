@@ -16,10 +16,17 @@ const { StatutCandidat } = require("../../../common/model");
  *   permets d'identifier les doublons dans toute la BDD / pour une région / pour un UAI
  * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
  * --uai : si mode forUai actif, permet de préciser l'uai souhaité
+ * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
  */
 runScript(async ({ statutsCandidats }) => {
   const args = arg(
-    { "--duplicatesTypeCode": Number, "--mode": String, "--regionCode": String, "--uai": String },
+    {
+      "--duplicatesTypeCode": Number,
+      "--mode": String,
+      "--regionCode": String,
+      "--uai": String,
+      "--allowDiskUse": Boolean,
+    },
     { argv: process.argv.slice(2) }
   );
 
@@ -29,19 +36,22 @@ runScript(async ({ statutsCandidats }) => {
   if (!args["--mode"])
     throw new Error("missing required argument: --mode  (should be in [forAll / forRegion / forUai])");
 
+  // Handle allowDiskUseMode param
+  const allowDiskUseMode = args["--allowDiskUse"] ? true : false;
+
   switch (args["--mode"]) {
     case "forAll":
-      await identifyAll(statutsCandidats, args["--duplicatesTypeCode"]);
+      await identifyAll(statutsCandidats, args["--duplicatesTypeCode"], allowDiskUseMode);
       break;
 
     case "forRegion":
       if (!args["--regionCode"]) throw new Error("missing required argument: --regionCode");
-      await identifyForRegion(statutsCandidats, args["--duplicatesTypeCode"], args["--regionCode"]);
+      await identifyForRegion(statutsCandidats, args["--duplicatesTypeCode"], args["--regionCode"], allowDiskUseMode);
       break;
 
     case "forUai":
       if (!args["--uai"]) throw new Error("missing required argument: --uai");
-      await identifyForUai(statutsCandidats, args["--duplicatesTypeCode"], args["--uai"]);
+      await identifyForUai(statutsCandidats, args["--duplicatesTypeCode"], args["--uai"], allowDiskUseMode);
       break;
 
     default:
@@ -57,10 +67,10 @@ runScript(async ({ statutsCandidats }) => {
  * @param {*} statutsCandidats
  * @param {*} duplicatesTypesCode
  */
-const identifyAll = async (statutsCandidats, duplicatesTypesCode) => {
+const identifyAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMode) => {
   const allRegionsInStatutsCandidats = await StatutCandidat.distinct("etablissement_num_region");
   await asyncForEach(allRegionsInStatutsCandidats, async (currentCodeRegion) => {
-    await identifyForRegion(statutsCandidats, duplicatesTypesCode, currentCodeRegion);
+    await identifyForRegion(statutsCandidats, duplicatesTypesCode, currentCodeRegion, allowDiskUseMode);
   });
 };
 
@@ -71,11 +81,16 @@ const identifyAll = async (statutsCandidats, duplicatesTypesCode) => {
  * @param {*} codeRegion
  * @returns
  */
-const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegion) => {
+const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegion, allowDiskUseMode) => {
   logger.info(`Identifying all statuts duplicates for codeRegion : ${codeRegion}`);
-  const duplicatesForRegion = await identifyDuplicatesForFiltersGroupedByUai(statutsCandidats, duplicatesTypesCode, {
-    etablissement_num_region: codeRegion,
-  });
+  const duplicatesForRegion = await identifyDuplicatesForFiltersGroupedByUai(
+    statutsCandidats,
+    duplicatesTypesCode,
+    {
+      etablissement_num_region: codeRegion,
+    },
+    allowDiskUseMode
+  );
 
   // Export list
   await asyncForEach(duplicatesForRegion, async (currentUaiList) => {
@@ -95,11 +110,16 @@ const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegi
  * @param {*} duplicatesTypesCode
  * @param {*} uai
  */
-const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai) => {
+const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai, allowDiskUseMode) => {
   logger.info(`Identifying all statuts duplicates for uai : ${uai}`);
-  const duplicatesForUai = await identifyDuplicatesForFiltersGroupedByUai(statutsCandidats, duplicatesTypesCode, {
-    uai_etablissement: uai,
-  });
+  const duplicatesForUai = await identifyDuplicatesForFiltersGroupedByUai(
+    statutsCandidats,
+    duplicatesTypesCode,
+    {
+      uai_etablissement: uai,
+    },
+    allowDiskUseMode
+  );
 
   // Export list
   await asyncForEach(duplicatesForUai, async (currentUaiList) => {
@@ -121,8 +141,13 @@ const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai) => {
  * @param {*} filters
  * @returns
  */
-const identifyDuplicatesForFiltersGroupedByUai = async (statutsCandidats, duplicatesTypesCode, filters = {}) => {
-  const duplicatesForType = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filters);
+const identifyDuplicatesForFiltersGroupedByUai = async (
+  statutsCandidats,
+  duplicatesTypesCode,
+  filters = {},
+  allowDiskUseMode
+) => {
+  const duplicatesForType = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filters, allowDiskUseMode);
   const duplicatesUaiGroup = [];
 
   if (duplicatesForType.data) {

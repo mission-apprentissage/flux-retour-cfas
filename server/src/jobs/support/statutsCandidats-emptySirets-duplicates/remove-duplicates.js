@@ -1,144 +1,65 @@
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
-const path = require("path");
 const { jobNames, duplicatesTypesCodes } = require("../../../common/model/constants/index");
-const arg = require("arg");
-const fs = require("fs-extra");
 const { StatutCandidat, JobEvent } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { toXlsx, toCsv } = require("../../../common/utils/exporterUtils");
 const sortBy = require("lodash.sortby");
+const groupBy = require("lodash.groupby");
+const arg = require("arg");
+const fs = require("fs-extra");
+const path = require("path");
+const { toXlsx, toCsv } = require("../../../common/utils/exporterUtils");
 
 /**
- * Ce script permet de nettoyer les doublons des statuts identifiés
- * Ce script prends plusieurs paramètres en argument :
- * --duplicatesTypeCode : types de doublons à supprimer : 0/1/2/3/4/5 cf duplicatesTypesCodes
- * --mode : forAll / forRegion / forUai
- *   permets de nettoyer les doublons dans toute la BDD / pour une région / pour un UAI
- * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
- * --uai : si mode forUai actif, permet de préciser l'uai souhaité
- * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
+ * Ce script permet de supprimer les doublons de sirets vides
  */
 runScript(async ({ statutsCandidats }) => {
-  const args = arg(
-    {
-      "--duplicatesTypeCode": Number,
-      "--mode": String,
-      "--regionCode": String,
-      "--uai": String,
-      "--allowDiskUse": Boolean,
-    },
-    { argv: process.argv.slice(2) }
-  );
-
-  if (!args["--duplicatesTypeCode"])
-    throw new Error("missing required argument: --duplicatesTypeCode  (should be in [0/1/2/3/4/5])");
-
-  if (!args["--mode"])
-    throw new Error("missing required argument: --mode  (should be in [forAll / forRegion / forUai])");
+  logger.info("Removing empty sirets duplicates...");
 
   // Handle allowDiskUseMode param
+  const args = arg({ "--allowDiskUse": Boolean }, { argv: process.argv.slice(2) });
   const allowDiskUseMode = args["--allowDiskUse"] ? true : false;
 
-  switch (args["--mode"]) {
-    case "forAll":
-      await removeAll(statutsCandidats, args["--duplicatesTypeCode"], allowDiskUseMode);
-      break;
+  await removeAllDuplicates(statutsCandidats, duplicatesTypesCodes.sirets_empty.code, allowDiskUseMode);
 
-    case "forRegion":
-      if (!args["--regionCode"]) throw new Error("missing required argument: --regionCode");
-      await removeAllDuplicatesForRegion(
-        statutsCandidats,
-        args["--regionCode"],
-        args["--duplicatesTypeCode"],
-        allowDiskUseMode
-      );
-      break;
-
-    case "forUai":
-      if (!args["--uai"]) throw new Error("missing required argument: --uai");
-      await removeAllDuplicatesForUai(statutsCandidats, args["--uai"], args["--duplicatesTypeCode"], allowDiskUseMode);
-      break;
-
-    default:
-      throw new Error("bad argument: --mode (should be in [forAll / forRegion / forUai])");
-  }
-
-  logger.info("Job Ended !");
-}, jobNames.removeStatutsCandidatsDuplicates);
+  logger.info("End removing empty sirets duplicates...");
+}, jobNames.removeEmptySiretsCandidatsDuplicates);
 
 /**
- * Supprime les doublons de type duplicatesTypesCode pour toute la bdd
- * @param {*} statutsCandidats
- * @param {*} duplicatesTypesCode
- */
-const removeAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMode) => {
-  const allRegionsInStatutsCandidats = await StatutCandidat.distinct("etablissement_num_region");
-  await asyncForEach(allRegionsInStatutsCandidats, async (currentCodeRegion) => {
-    await removeAllDuplicatesForRegion(statutsCandidats, currentCodeRegion, duplicatesTypesCode, allowDiskUseMode);
-  });
-};
-
-/**
- * Supprime les doublons de type duplicatesTypesCode pour une région
- * @param {*} statutsCandidats
- * @param {*} codeRegion
- * @param {*} duplicatesTypesCode
- */
-const removeAllDuplicatesForRegion = async (statutsCandidats, codeRegion, duplicatesTypesCode, allowDiskUseMode) => {
-  logger.info(`Removing all statuts duplicates for codeRegion : ${codeRegion}`);
-  const duplicatesRemovedForRegion = await removeStatutsCandidatsDuplicatesForFilters(
-    statutsCandidats,
-    duplicatesTypesCode,
-    {
-      etablissement_num_region: codeRegion,
-    },
-    allowDiskUseMode
-  );
-
-  // Export list
-  await asyncForEach(duplicatesRemovedForRegion, async (currentUaiList) => {
-    const exportFolderPath = `/output/region_${codeRegion}/uai_${currentUaiList.uai}`;
-    const removedFileName = getDuplicateRemovedFileName(currentUaiList.duplicatesRemoved.length, duplicatesTypesCode);
-    await fs.ensureDir(path.join(__dirname, exportFolderPath));
-
-    await toXlsx(currentUaiList.duplicatesRemoved, path.join(__dirname, `${exportFolderPath}/${removedFileName}.xlsx`));
-    await toCsv(currentUaiList.duplicatesRemoved, path.join(__dirname, `${exportFolderPath}/${removedFileName}.csv`));
-    logger.info(`Output file created : ${exportFolderPath}/${removedFileName}.csv`);
-  });
-};
-
-/**
- * Supprime les doublons de type duplicatesTypesCode pour un uai
+ * Supprime tous les doublons
  * @param {*} statutsCandidats
  * @param {*} uai
  * @param {*} duplicatesTypesCode
  */
-const removeAllDuplicatesForUai = async (statutsCandidats, uai, duplicatesTypesCode, allowDiskUseMode) => {
-  logger.info(`Removing all statuts duplicates for uai : ${uai}`);
-  const removedDuplicatesForUai = await removeStatutsCandidatsDuplicatesForFilters(
+const removeAllDuplicates = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMode = false) => {
+  logger.info(`Removing all statuts duplicates`);
+  const removedDuplicates = await removeStatutsCandidatsDuplicatesForFilters(
     statutsCandidats,
     duplicatesTypesCode,
-    {
-      uai_etablissement: uai,
-    },
     allowDiskUseMode
   );
 
+  // Create uai grouped data
+  const groupedByUai = groupBy(removedDuplicates, "uai");
+  const removedDuplicatesGroupedByUai = Object.keys(groupedByUai).map((item) => ({
+    uai: item,
+    duplicates: groupedByUai[item],
+  }));
+
   // Export list
-  await asyncForEach(removedDuplicatesForUai, async (currentUaiList) => {
-    const exportFolderPath = `/output/uai_${currentUaiList.uai}`;
-    const removedName = getDuplicateRemovedFileName(currentUaiList.duplicatesRemoved.length, duplicatesTypesCode);
+  await asyncForEach(removedDuplicatesGroupedByUai, async (currentDuplicatesForUai) => {
+    const exportFolderPath = `/output/uai_${currentDuplicatesForUai.uai}`;
+    const removedName = getDuplicateRemovedFileName(currentDuplicatesForUai.duplicates.length, duplicatesTypesCode);
     await fs.ensureDir(path.join(__dirname, exportFolderPath));
 
-    await toXlsx(currentUaiList.duplicatesRemoved, path.join(__dirname, `${exportFolderPath}/${removedName}.xlsx`));
-    await toCsv(currentUaiList.duplicatesRemoved, path.join(__dirname, `${exportFolderPath}/${removedName}.csv`));
+    await toXlsx(currentDuplicatesForUai.duplicates, path.join(__dirname, `${exportFolderPath}/${removedName}.xlsx`));
+    await toCsv(currentDuplicatesForUai.duplicates, path.join(__dirname, `${exportFolderPath}/${removedName}.csv`));
     logger.info(`Output file created : ${exportFolderPath}/${removedName}.csv`);
   });
 };
 
 /**
- * Fonction de suppression de tous les doublons de type duplicatesTypesCode pour les filtres fournis en entrée
+ * Fonction de suppression de tous les doublons pour les filtres fournis en entrée
  * Retourne une liste regoupée par UAIs
  * @param {*} statutsCandidats
  * @param {*} duplicatesTypesCode
@@ -148,8 +69,8 @@ const removeAllDuplicatesForUai = async (statutsCandidats, uai, duplicatesTypesC
 const removeStatutsCandidatsDuplicatesForFilters = async (
   statutsCandidats,
   duplicatesTypesCode,
-  filters = {},
-  allowDiskUseMode
+  allowDiskUseMode = false,
+  filters = {}
 ) => {
   const duplicatesForType = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filters, allowDiskUseMode);
   const duplicatesRemoved = [];
@@ -186,10 +107,8 @@ const removeDuplicates = async (duplicatesToRemove, statutsCandidats) => {
 
     // Save Duplicates detail to userEvents
     await new JobEvent({
-      jobname: "remove-statutsCandidats-duplicates",
-      action: `removeDuplicatesWithPeriodesForUaiDuplicates-${JSON.stringify(currentDuplicate._id)}-${
-        currentDuplicate.uai_etablissement
-      }`,
+      jobname: "remove-emptySirets-statutsCandidats-duplicates",
+      action: `removeDuplicates-${JSON.stringify(currentDuplicate._id)}-${currentDuplicate.uai_etablissement}`,
       data: { ...currentDuplicate, ...{ duplicatesItems, mostRecentStatut, statutsToRemove } },
     }).save();
 
@@ -201,6 +120,15 @@ const removeDuplicates = async (duplicatesToRemove, statutsCandidats) => {
     // Rewrite history for statut to keep
     const flattenedHistory = await getFlattenedHistoryFromDuplicates(duplicatesItems, statutsCandidats);
     const statutToKeep = { ...mostRecentStatut, historique_statut_apprenant: flattenedHistory };
+
+    // Update siret_catalogue & siret as empty
+    await StatutCandidat.findByIdAndUpdate(
+      statutToKeep._id,
+      {
+        $set: { siret_catalogue: statutToKeep.siret_etablissement, siret_etablissement: "" },
+      },
+      { new: true }
+    );
 
     removedList.push({
       duplicatesRemoved: statutsToRemove.map((item) => item._doc),

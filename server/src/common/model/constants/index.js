@@ -137,7 +137,9 @@ const jobNames = {
   identifyNetworkDuplicates: "identify-network-duplicates",
   identifyStatutsCandidatsDuplicates: "identify-statutsCandidats-duplicates",
   identifyCfasWithInvalidSiret: "identify-cfas-with-invalid-siret",
+  identifyEmptySiretsDuplicates: "identify-empty-sirets-duplicates",
   removeStatutsCandidatsDuplicates: "remove-statutsCandidats-duplicates",
+  removeEmptySiretsCandidatsDuplicates: "remove-emptySirets-duplicates",
   formationRetrieveFromCfd: "formation-retrieve-from-cfd",
   formationRetrieveNiveaux: "formation-retrieve-niveaux",
   statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
@@ -186,6 +188,10 @@ const duplicatesTypesCodes = {
   prenoms: {
     name: "Prenoms",
     code: 5,
+  },
+  sirets_empty: {
+    name: "SiretsVides",
+    code: 6,
   },
 };
 

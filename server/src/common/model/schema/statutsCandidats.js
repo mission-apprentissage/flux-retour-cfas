@@ -97,6 +97,11 @@ const statutsCandidatsSchema = new Schema({
     type: Boolean,
     description: "Le champ siret_etablissement est-il valide ?",
   },
+  siret_catalogue: {
+    type: String,
+    default: null,
+    description: "Siret de l'établissement retrouvé depuis le catalogue",
+  },
   nom_etablissement: {
     type: String,
     default: null,

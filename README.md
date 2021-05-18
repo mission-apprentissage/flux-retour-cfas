@@ -432,9 +432,13 @@ Ce script prend en arguments :
 - mode : forAll / forRegion / forUai le script va se lancer pour toute la base, pour une région ou un uai
 - regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
 - uai : si mode forUai actif, permet de préciser l'uai souhaité
+- allowDiskUseMode : si mode allowDiskUseMode actif, permet d'utiliser l'option d'aggregation MongoDb allowDiskUse https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
 Exemple, identifier les doublons de type 1 (periode_formation) sur la région normandie (code 28) :
-`yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28`
+docker exec -ti flux_retour_cfas_server bash -c `yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28`
+
+Exemple, identifier les doublons de type 2 sur la région normandie (code 28) avec l'utilisation d'allowDiskUse :
+docker exec -ti flux_retour_cfas_server bash -c `yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 2 --mode forRegion --regionCode 28 --allowDiskUse`
 
 ### Script de suppression des doublons
 
@@ -446,6 +450,24 @@ Ce script prend les mêmes arguments que le script d'identification :
 - mode : forAll / forRegion / forUai le script va se lancer pour toute la base, pour une région ou un uai
 - regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
 - uai : si mode forUai actif, permet de préciser l'uai souhaité
+- allowDiskUseMode : si mode allowDiskUseMode actif, permet d'utiliser l'option d'aggregation MongoDb allowDiskUse https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
 Exemple, supprimer les doublons de type 1 (periode_formation) sur la région normandie (code 28) :
-`yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28`
+docker exec -ti flux_retour_cfas_server bash -c `yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28`
+
+Exemple, supprimer les doublons de type 2 sur la région normandie (code 28) avec l'utilisation d'allowDiskUse :
+docker exec -ti flux_retour_cfas_server bash -c `yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28 --allowDiskUse`
+
+### Scripts d'identification & suppression des doublons de sirets vides
+
+Il est possible de lancer un script d'identification & suppression des doublons de sirets vides.
+
+Ces scripts prennent en argument :
+
+- allowDiskUseMode : si mode allowDiskUseMode actif, permet d'utiliser l'option d'aggregation MongoDb allowDiskUse https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
+
+Exemple, identifier les doublons de sirets vides :
+docker exec -ti flux_retour_cfas_server bash -c `yarn support:identify-empty-sirets-duplicates --allowDiskUse`
+
+Exemple, supprimer les doublons de sirets vides :
+docker exec -ti flux_retour_cfas_server bash -c `yarn support:remove-empty-sirets-duplicates --allowDiskUse`

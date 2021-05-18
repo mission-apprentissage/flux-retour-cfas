@@ -196,7 +196,7 @@ const isMajStatutInvalid = (statutSource, statutDest) => {
  * @param {*} filters
  * @returns
  */
-const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}) => {
+const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDiskUse = false) => {
   let unicityQueryGroup = {};
 
   switch (duplicatesTypesCode) {
@@ -326,11 +326,33 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}) => {
       };
       break;
 
+    case duplicatesTypesCodes.sirets_empty.code:
+      unicityQueryGroup = {
+        _id: {
+          ine_apprenant: "$ine_apprenant",
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          prenom2_apprenant: "$prenom2_apprenant",
+          prenom3_apprenant: "$prenom3_apprenant",
+          email_contact: "$email_contact",
+          id_formation: "$id_formation",
+          uai_etablissement: "$uai_etablissement",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des sirets en doublon potentiel
+        sirets: { $addToSet: "$siret_etablissement" },
+        count: { $sum: 1 },
+        // Pour regroupement par uai
+        uai_etablissement: { $first: "$uai_etablissement" },
+      };
+      break;
+
     default:
       throw new Error("findStatutsDuplicates Error :  duplicatesTypesCode not matching any code");
   }
 
-  const statutsFound = await StatutCandidat.aggregate([
+  const aggregateQuery = [
     // Filtrage sur les filtres passées en paramètres
     {
       $match: filters,
@@ -346,7 +368,11 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}) => {
       },
     },
     { $sort: { _id: -1 } },
-  ]);
+  ];
+
+  const statutsFound = allowDiskUse
+    ? await StatutCandidat.aggregate(aggregateQuery).allowDiskUse(true).exec()
+    : await StatutCandidat.aggregate(aggregateQuery);
 
   return statutsFound;
 };
@@ -360,9 +386,9 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}) => {
  * @param {*} limit
  * @returns
  */
-const getDuplicatesList = async (duplicatesTypeCode, filters = {}, page = 1, limit = 1000) => {
+const getDuplicatesList = async (duplicatesTypeCode, filters = {}, allowDiskUse = false, page = 1, limit = 10000) => {
   // Récupération des doublons pour le type souhaité
-  const duplicates = await findDuplicatesForDuplicateType(duplicatesTypeCode, filters);
+  const duplicates = await findDuplicatesForDuplicateType(duplicatesTypeCode, filters, allowDiskUse);
 
   // Pagination des statuts trouvés
   const paginatedStatuts = paginate(duplicates, page, limit);
@@ -394,8 +420,8 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, page = 1, lim
  * @param {*} filters
  * @returns
  */
-const findDuplicatesForDuplicateType = async (duplicatesTypesCode, filters) => {
-  const duplicates = await findStatutsDuplicates(duplicatesTypesCode, filters);
+const findDuplicatesForDuplicateType = async (duplicatesTypesCode, filters, allowDiskUse = false) => {
+  const duplicates = await findStatutsDuplicates(duplicatesTypesCode, filters, allowDiskUse);
 
   if (duplicates) {
     switch (duplicatesTypesCode) {
@@ -416,6 +442,11 @@ const findDuplicatesForDuplicateType = async (duplicatesTypesCode, filters) => {
 
       case duplicatesTypesCodes.prenoms.code:
         return duplicates.filter((item) => item.prenoms2_apprenants.length > 1 || item.prenoms3_apprenants.length > 1);
+
+      case duplicatesTypesCodes.sirets_empty.code:
+        return duplicates.filter(
+          (item) => item.sirets.length > 1 && (item.sirets.includes("") || item.sirets.includes(" "))
+        );
 
       default:
         return [];
