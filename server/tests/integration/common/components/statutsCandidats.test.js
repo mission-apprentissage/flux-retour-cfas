@@ -327,13 +327,14 @@ integrationTests(__filename, () => {
   });
 
   describe("shouldCreateNewStatutCandidat", () => {
-    it("Vérifie l'identification d'un doublon sur un vrai doublon", async () => {
+    it("Vérifie l'identification d'un doublon sur un vrai doublon avec siret", async () => {
       const { getStatut, createStatutCandidat, shouldCreateNewStatutCandidat } = await statutsCandidats();
 
       const sampleNom = "SMITH";
       const samplePrenom = "John";
       const validCfd = "abcd1234";
       const validUai = "0123456Z";
+      const validSiret = "12312312300099";
 
       // Create statut
       const uniqueStatutToCreate = {
@@ -342,6 +343,7 @@ integrationTests(__filename, () => {
         prenom_apprenant: samplePrenom,
         id_formation: validCfd,
         uai_etablissement: validUai,
+        siret_etablissement: validSiret,
       };
       await createStatutCandidat(uniqueStatutToCreate);
 
@@ -567,6 +569,123 @@ integrationTests(__filename, () => {
         ...uniqueStatutToCreate,
         annee_formation: sampleAnnee2,
       };
+
+      // Check duplicate
+      const foundItem = await getStatut({
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+      });
+      const shouldCreateNewStatut = await shouldCreateNewStatutCandidat(secondUniqueStatutToCreate, foundItem);
+      assert.deepStrictEqual(shouldCreateNewStatut, false);
+    });
+
+    it("Vérifie la création d'un nouveau statut si ajout d'un statut avec siret différent", async () => {
+      const { getStatut, createStatutCandidat, shouldCreateNewStatutCandidat } = await statutsCandidats();
+
+      const sampleNom = "SMITH";
+      const samplePrenom = "John";
+      const validCfd = "abcd1234";
+      const validSiret = "12312312300099";
+      const validSiret2 = "12312312311111";
+
+      // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
+      const uniqueStatutToCreate = {
+        ...randomStatut,
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        siret_etablissement: validSiret,
+      };
+      await createStatutCandidat(uniqueStatutToCreate);
+
+      const secondUniqueStatutToCreate = {
+        ...uniqueStatutToCreate,
+        siret_etablissement: validSiret2,
+      };
+
+      // Check duplicate
+      const foundItem = await getStatut({
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        siret_etablissement: validSiret2,
+      });
+      const shouldCreateNewStatut = await shouldCreateNewStatutCandidat(secondUniqueStatutToCreate, foundItem);
+      assert.deepStrictEqual(shouldCreateNewStatut, true);
+    });
+
+    it("Vérifie la non création d'un nouveau statut si ajout d'un statut avec siret identiques", async () => {
+      const { getStatut, createStatutCandidat, shouldCreateNewStatutCandidat } = await statutsCandidats();
+
+      const sampleNom = "SMITH";
+      const samplePrenom = "John";
+      const validCfd = "abcd1234";
+      const validUai = "0123456Z";
+      const validSiret = "12312312300099";
+
+      // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
+      const uniqueStatutToCreate = {
+        ...randomStatut,
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+        siret_etablissement: validSiret,
+      };
+      await createStatutCandidat(uniqueStatutToCreate);
+
+      const secondUniqueStatutToCreate = { ...uniqueStatutToCreate };
+
+      // Check duplicate
+      const foundItem = await getStatut({
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+      });
+      const shouldCreateNewStatut = await shouldCreateNewStatutCandidat(secondUniqueStatutToCreate, foundItem);
+      assert.deepStrictEqual(shouldCreateNewStatut, false);
+    });
+
+    it("Vérifie la non création d'un nouveau statut si ajout site siret vide puis MAJ siret puis ajout d'un même statut avec siret vide", async () => {
+      const { getStatut, createStatutCandidat, shouldCreateNewStatutCandidat } = await statutsCandidats();
+
+      const sampleNom = "SMITH";
+      const samplePrenom = "John";
+      const validUai = "0123456Z";
+      const validCfd = "abcd1234";
+      const emptySiret = "";
+      const validSiret = "12312312311111";
+
+      // Create 2 distinct items
+      const randomStatut = createRandomStatutCandidat();
+      const uniqueStatutToCreate = {
+        ...randomStatut,
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        id_formation: validCfd,
+        uai_etablissement: validUai,
+        siret_etablissement: emptySiret,
+      };
+      await createStatutCandidat(uniqueStatutToCreate);
+
+      // Update siret
+      await StatutCandidat.updateOne(
+        {
+          nom_apprenant: sampleNom,
+          prenom_apprenant: samplePrenom,
+          id_formation: validCfd,
+          uai_etablissement: validUai,
+        },
+        { siret_etablissement: validSiret }
+      );
+
+      // Add second statut
+      const secondUniqueStatutToCreate = { ...uniqueStatutToCreate };
 
       // Check duplicate
       const foundItem = await getStatut({
