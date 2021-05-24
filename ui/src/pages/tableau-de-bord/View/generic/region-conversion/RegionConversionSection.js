@@ -10,7 +10,7 @@ const RegionConversionSection = ({ regionConversionData, error, loading }) => {
     <>
       {/* Error */}
       {error && !loading && (
-        <Center mb={12} height="40px" background="orangesoft.200">
+        <Center mb="6w" height="40px" background="orangesoft.200">
           <HStack fontSize="epsilon">
             <i className="ri-error-warning-fill"></i>
             <Text>Erreur - Impossible de charger la conversion de cette région</Text>
@@ -20,7 +20,7 @@ const RegionConversionSection = ({ regionConversionData, error, loading }) => {
 
       {/* No Data */}
       {!regionConversionData && !error && !loading && (
-        <Center mb={12} height="40px" background="orangesoft.200">
+        <Center mb="6w" height="40px" background="orangesoft.200">
           <HStack fontSize="epsilon">
             <i className="ri-error-warning-fill"></i>
             <Text>Aucune information disponible</Text>
@@ -29,28 +29,17 @@ const RegionConversionSection = ({ regionConversionData, error, loading }) => {
       )}
 
       {/* Loading */}
-      {loading && !error && <Skeleton mb={12} height="40px" />}
+      {loading && !error && <Skeleton mb="6w" height="40px" />}
 
       {/* Data */}
       {regionConversionData && !error && !loading && (
-        <Flex mb={12} justifyContent="space-between">
-          <Text color="grey.800">
-            <Box as="span" verticalAlign="middle">
-              <HStack>
-                <Text>Couverture des indices sur le territoire sélectionné :</Text>
-                <Text textColor="grey.600">
-                  {regionConversionData.nbCfaConnected} CFAs transmettent leurs données au tableau de bord
-                </Text>
-                <Text mb={-1} textColor="grey.600" as="b">
-                  {" "}
-                  <i className="ri-arrow-right-s-line"></i>
-                </Text>
-                <Text textColor="grey.600">
-                  {regionConversionData.nbCfaDataValidated} CFAs ont validé leurs données
-                </Text>
-              </HStack>
-            </Box>
+        <Flex mb="6w" justifyContent="space-between" alignItems="flex-start" as="section">
+          <Text color="grey.800">Couverture des indices sur le territoire sélectionné :</Text>
+          <Text color="grey.600">
+            {regionConversionData.nbCfaConnected} organismes de transmettent leurs données au tableau de bord
           </Text>
+          <Box color="grey.600" fontWeight="bold" as="i" className="ri-arrow-right-s-line" marginX="1w" />
+          <Text color="grey.600">{regionConversionData.nbCfaDataValidated} organismes de ont validé leurs données</Text>
         </Flex>
       )}
     </>
