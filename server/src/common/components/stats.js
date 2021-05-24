@@ -1,6 +1,7 @@
 const { StatutCandidat } = require("../../common/model");
 const { codesStatutsCandidats, reseauxCfas } = require("../../common/model/constants");
 const { asyncForEach } = require("../utils/asyncUtils");
+const { containsSubArray } = require("../utils/containsSubArray");
 
 module.exports = () => {
   return {
@@ -46,45 +47,49 @@ const getAllStats = async (filters = {}) => {
   const nbInvalidSirets = await getNbInvalidSirets(filters);
   const nbInvalidSiretsAndUais = await getNbInvalidSiretsAndUais(filters);
 
-  const candidatsWithHistory = await StatutCandidat.aggregate([
-    { $match: filters },
+  const candidatsWithHistory = await StatutCandidat.find(
     {
-      $project: { historique_statut_apprenant: 1, hasHistory: { $gt: [{ $size: "$historique_statut_apprenant" }, 1] } },
+      ...filters,
+      "historique_statut_apprenant.1": { $exists: true },
     },
-    { $match: { hasHistory: true } },
-  ]);
+    { historique_statut_apprenant: 1 }
+  ).lean();
 
   const nbDistinctCandidatsWithChangingStatutProspectInscrit = candidatsWithHistory.filter((statut) => {
     const sortedStatutsValuesHistory = statut.historique_statut_apprenant
       .sort((a, b) => a.position_statut > b.position_statut)
       .map((item) => item.valeur_statut);
-    return [codesStatutsCandidats.prospect, codesStatutsCandidats.inscrit].every((val) =>
-      sortedStatutsValuesHistory.includes(val)
-    );
+    return containsSubArray(sortedStatutsValuesHistory, [
+      codesStatutsCandidats.prospect,
+      codesStatutsCandidats.inscrit,
+    ]);
   }).length;
   const nbDistinctCandidatsWithChangingStatutProspectApprenti = candidatsWithHistory.filter((statut) => {
     const sortedStatutsValuesHistory = statut.historique_statut_apprenant
       .sort((a, b) => a.position_statut > b.position_statut)
       .map((item) => item.valeur_statut);
-    return [codesStatutsCandidats.prospect, codesStatutsCandidats.apprenti].every((val) =>
-      sortedStatutsValuesHistory.includes(val)
-    );
+    return containsSubArray(sortedStatutsValuesHistory, [
+      codesStatutsCandidats.prospect,
+      codesStatutsCandidats.apprenti,
+    ]);
   }).length;
   const nbDistinctCandidatsWithChangingStatutProspectAbandon = candidatsWithHistory.filter((statut) => {
     const sortedStatutsValuesHistory = statut.historique_statut_apprenant
       .sort((a, b) => a.position_statut > b.position_statut)
       .map((item) => item.valeur_statut);
-    return [codesStatutsCandidats.prospect, codesStatutsCandidats.abandon].every((val) =>
-      sortedStatutsValuesHistory.includes(val)
-    );
+    return containsSubArray(sortedStatutsValuesHistory, [
+      codesStatutsCandidats.prospect,
+      codesStatutsCandidats.abandon,
+    ]);
   }).length;
   const nbDistinctCandidatsWithChangingStatutProspectAbandonProspect = candidatsWithHistory.filter((statut) => {
     const sortedStatutsValuesHistory = statut.historique_statut_apprenant
       .sort((a, b) => a.position_statut > b.position_statut)
       .map((item) => item.valeur_statut);
-    return [codesStatutsCandidats.prospect, codesStatutsCandidats.abandonProspects].every((val) =>
-      sortedStatutsValuesHistory.includes(val)
-    );
+    return containsSubArray(sortedStatutsValuesHistory, [
+      codesStatutsCandidats.prospect,
+      codesStatutsCandidats.abandonProspects,
+    ]);
   }).length;
 
   const nbCandidatsMultiUaisWithIne = await getNbDistinctCandidatsWithMultiUaisWithIne(filters);
