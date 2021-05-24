@@ -20,7 +20,11 @@ const CfasFilter = ({ onChange, value, filters }) => {
     setIsOpen(false);
   };
 
-  const buttonLabel = !value ? "Tous les CFAs" : value.type === "cfa" ? value.nom_etablissement : value.nom;
+  const buttonLabel = !value
+    ? "Tous les organismes de formation"
+    : value.type === "cfa"
+    ? value.nom_etablissement
+    : value.nom;
 
   return (
     <div>

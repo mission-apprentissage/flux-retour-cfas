@@ -36,10 +36,12 @@ const RegionConversionSection = ({ regionConversionData, error, loading }) => {
         <Flex mb="6w" justifyContent="space-between" alignItems="flex-start" as="section">
           <Text color="grey.800">Couverture des indices sur le territoire sélectionné :</Text>
           <Text color="grey.600">
-            {regionConversionData.nbCfaConnected} organismes de transmettent leurs données au tableau de bord
+            {regionConversionData.nbCfaConnected} organismes de formation transmettent leurs données au tableau de bord
           </Text>
           <Box color="grey.600" fontWeight="bold" as="i" className="ri-arrow-right-s-line" marginX="1w" />
-          <Text color="grey.600">{regionConversionData.nbCfaDataValidated} organismes de ont validé leurs données</Text>
+          <Text color="grey.600">
+            {regionConversionData.nbCfaDataValidated} organismes de formation ont validé leurs données
+          </Text>
         </Flex>
       )}
     </>

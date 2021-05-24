@@ -13,7 +13,7 @@ const DataValidated = ({ date }) => {
       <Text color="grey.800">
         <Box as="i" className="ri-checkbox-circle-fill" marginRight="1w" fontSize="gamma" verticalAlign="middle" />
         <Box as="span" verticalAlign="middle">
-          Les données affichées pour ce CFA ont été validées le {formatDate(new Date(date))}.
+          Les données affichées pour cet organisme de formation ont été validées le {formatDate(new Date(date))}.
         </Box>
       </Text>
       <span>
@@ -33,7 +33,8 @@ const DataInvalidated = ({ date }) => {
       <Text color="grey.800">
         <Box as="i" className="ri-error-warning-fill" marginRight="1w" fontSize="gamma" verticalAlign="middle" />
         <Box as="span" verticalAlign="middle">
-          Les données affichées pour ce CFA ont été signalées comme incorrectes le {formatDate(new Date(date))}.
+          Les données affichées pour cet organisme de formation ont été signalées comme incorrectes le{" "}
+          {formatDate(new Date(date))}.
         </Box>
       </Text>
       <span>
@@ -54,7 +55,7 @@ const AwaitingDataFeedback = ({ siret, refetchDataFeedback }) => {
     <>
       <Flex justifyContent="space-between">
         <Text color="grey.800" fontSize="zeta">
-          <strong>Votre centre de formation transmet ses données au tableau de bord.</strong>
+          <strong>Votre organisme de formation transmet ses données au tableau de bord.</strong>
           <br />
           Pour nous aider à construire un outil de qualité, vous pouvez&nbsp;
           <Box as="span" role="button" onClick={onOpen} textDecoration="underline" color="bluefrance" cursor="pointer">

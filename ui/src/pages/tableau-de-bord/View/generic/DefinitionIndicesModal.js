@@ -48,7 +48,7 @@ const DefinitionIndicesModal = () => {
             (stagiaires de la formation professionelle compris)
           </IndiceDefinition>
           <IndiceDefinition indice="Abandon" color={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}>
-            apprenti ou inscrit qui a quitté le centre de formation
+            apprenti ou inscrit qui a quitté l&apos;organisme de formation
           </IndiceDefinition>
         </List>
       </InfoModal>

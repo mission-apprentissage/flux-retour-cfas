@@ -50,8 +50,16 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
             />
           </HStack>
           <HStack spacing="2w" mt="3w">
-            <StatCard background="warning" label="CFAs distinct Uai total" stat={stats.nbCfasDistinctUai} />
-            <StatCard background="warning" label="CFAs distinct Siret total" stat={stats.nbCfasDistinctSiret} />
+            <StatCard
+              background="warning"
+              label="Organismes de formation distinct Uai total"
+              stat={stats.nbCfasDistinctUai}
+            />
+            <StatCard
+              background="warning"
+              label="Organismes de formation distinct Siret total"
+              stat={stats.nbCfasDistinctSiret}
+            />
           </HStack>
         </Box>
         <Box mt="9w">
@@ -198,7 +206,7 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
       <Text fontSize="epsilon" color="grey.800">
         <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
         <Box as="span" verticalAlign="middle">
-          Erreur lors de la récupération des informations du CFA
+          Erreur lors de la récupération des informations de l&apos;organisme de formation
         </Box>
       </Text>
     );

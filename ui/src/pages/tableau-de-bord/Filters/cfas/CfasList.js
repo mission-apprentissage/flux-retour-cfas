@@ -13,7 +13,7 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
         }}
         isSelected={!selectedValue}
       >
-        Tous les centres de formation
+        Tous les organismes de formation
       </FilterOption>
       {cfas &&
         cfas.map((cfa) => (

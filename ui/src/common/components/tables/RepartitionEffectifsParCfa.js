@@ -17,7 +17,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
       <Text fontSize="epsilon" color="grey.800">
         <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
         <Box as="span" verticalAlign="middle">
-          Erreur lors de la récupération de la répartition par CFA
+          Erreur lors de la récupération de la répartition par organismes de formation
         </Box>
       </Text>
     );

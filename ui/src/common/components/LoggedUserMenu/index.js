@@ -62,7 +62,7 @@ const LoggedUserMenu = () => {
               <NavLink to="/stats/ymag">Statistiques Ymag</NavLink>
             </MenuItem>
             <MenuItem>
-              <NavLink to="/referentiel-cfas">CFAs par Régions</NavLink>
+              <NavLink to="/referentiel-cfas">Organismes de formation par région</NavLink>
             </MenuItem>
           </>
         )}

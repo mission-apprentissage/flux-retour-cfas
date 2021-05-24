@@ -21,7 +21,7 @@ const EnSavoirPlusModal = () => {
           </strong>
         </Text>
         <Text color="grey.800" marginTop="2w">
-          Il est élaboré à partir des données transmises par les centres de formation via leur éditeur de logiciel ou
+          Il est élaboré à partir des données transmises par les organismes de formation via leur éditeur de logiciel ou
           une API.{" "}
           <strong>
             Ce tableau n&apos;a pas de valeur statistique mais sert à donner des indices à tous les acteurs pour piloter

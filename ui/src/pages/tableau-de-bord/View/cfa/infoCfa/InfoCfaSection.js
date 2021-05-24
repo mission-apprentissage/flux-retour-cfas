@@ -20,7 +20,7 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
       <Text fontSize="epsilon" color="grey.800">
         <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
         <Box as="span" verticalAlign="middle">
-          Erreur lors de la récupération des informations du CFA
+          Erreur lors de la récupération des informations de l&apos;organisme de formation
         </Box>
       </Text>
     );

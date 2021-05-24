@@ -33,7 +33,7 @@ const CfasReferentielPage = ({
 }) => {
   return (
     <Page>
-      <PageHeader title="Référentiel des CFAs" />
+      <PageHeader title="Référentiel des organismes de formation" />
 
       <PageContent>
         <Stack spacing="4w">
@@ -45,7 +45,7 @@ const CfasReferentielPage = ({
                   <Text>
                     <i className="ri-map-pin-2-fill"></i>
                   </Text>
-                  <Text>Région des CFAs : </Text>
+                  <Text>Région :</Text>
                   <Select
                     defaultValue={defaultSelectedRegionCode}
                     onChange={(e) => onRegionChange(e.target.value)}
@@ -92,7 +92,7 @@ const CfasReferentielPage = ({
           {/* Error */}
           {error && (
             <Text>
-              <p>Erreur lors du chargement des CFAs Référentiels</p>
+              <p>Erreur lors du chargement des organismes de formation Référentiels</p>
             </Text>
           )}
 
@@ -101,7 +101,7 @@ const CfasReferentielPage = ({
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th>Nom du CFA</Th>
+                  <Th>Nom de l&apos;organisme de formation</Th>
                   <Th>SIRET</Th>
                   <Th>UAI</Th>
                   <Th>Region</Th>
@@ -140,7 +140,7 @@ const CfasReferentielPage = ({
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th>Nom du CFA</Th>
+                  <Th>Nom de l&apos;organisme de formation</Th>
                   <Th>SIRET</Th>
                   <Th>UAI</Th>
                   <Th>Region</Th>

@@ -11,7 +11,7 @@ const RepartitionEffectifsFormationParCfa = withRepartitionFormationParCfa(Repar
 const RepartitionFormationParCfa = ({ formationCfd, filters }) => {
   return (
     <>
-      <PageSectionTitle>Répartition des effectifs par centres de formation</PageSectionTitle>
+      <PageSectionTitle>Répartition des effectifs par organismes de formation</PageSectionTitle>
       <RepartitionEffectifsFormationParCfa formationCfd={formationCfd} filters={filters} />
     </>
   );
