@@ -2,15 +2,14 @@ const { codesStatutsCandidats } = require("../model/constants");
 const { StatutCandidat } = require("../model");
 const groupBy = require("lodash.groupby");
 const { asyncForEach } = require("../utils/asyncUtils");
-const { getPercentageDifference } = require("../utils/calculUtils");
 const { uniqueValues, paginate } = require("../utils/miscUtils");
 const sortBy = require("lodash.sortby");
 const omit = require("lodash.omit");
 
 module.exports = () => ({
   getEffectifsCountByStatutApprenantAtDate,
-  getEffectifsDetailDataForSiret,
-  getPaginatedEffectifsDetailDataForSiret,
+  getEffectifsParNiveauEtAnneeFormation,
+  getPaginatedEffectifsParNiveauEtAnneeFormation,
   getEffectifsCountByCfaAtDate,
 });
 
@@ -118,48 +117,30 @@ const getEffectifsCountByStatutApprenantAtDate = async (searchDate, filters = {}
  * @param {*} endDate
  * @param {*} siret_etablissement
  */
-const getEffectifsDetailDataForSiret = async (startDate, endDate, siret) => {
-  const [
-    inscritsBeginDate,
-    apprentisBeginDate,
-    abandonsBeginDate,
-    inscritsEndDate,
-    apprentisEndDate,
-    abandonsEndDate,
-  ] = await Promise.all([
-    getEffectifsDetailWithNiveauxForStatutAndDate(startDate, codesStatutsCandidats.inscrit, siret),
-    getEffectifsDetailWithNiveauxForStatutAndDate(startDate, codesStatutsCandidats.apprenti, siret),
-    getEffectifsDetailWithNiveauxForStatutAndDate(startDate, codesStatutsCandidats.abandon, siret),
-    getEffectifsDetailWithNiveauxForStatutAndDate(endDate, codesStatutsCandidats.inscrit, siret),
-    getEffectifsDetailWithNiveauxForStatutAndDate(endDate, codesStatutsCandidats.apprenti, siret),
-    getEffectifsDetailWithNiveauxForStatutAndDate(endDate, codesStatutsCandidats.abandon, siret),
+const getEffectifsParNiveauEtAnneeFormation = async (date, filters) => {
+  const [inscritsBeginDate, apprentisBeginDate, abandonsBeginDate] = await Promise.all([
+    getEffectifsDetailWithNiveauxForStatutAndDate(date, codesStatutsCandidats.inscrit, filters),
+    getEffectifsDetailWithNiveauxForStatutAndDate(date, codesStatutsCandidats.apprenti, filters),
+    getEffectifsDetailWithNiveauxForStatutAndDate(date, codesStatutsCandidats.abandon, filters),
   ]);
 
-  const dateData = {
-    startDate: {
-      inscrits: inscritsBeginDate,
-      apprentis: apprentisBeginDate,
-      abandons: abandonsBeginDate,
-    },
-    endDate: {
-      inscrits: inscritsEndDate,
-      apprentis: apprentisEndDate,
-      abandons: abandonsEndDate,
-    },
+  const effectifs = {
+    inscrits: inscritsBeginDate,
+    apprentis: apprentisBeginDate,
+    abandons: abandonsBeginDate,
   };
 
-  const listData = await buildEffectifByNiveauxList(dateData);
+  const listData = await buildEffectifByNiveauxList(effectifs);
   return listData;
 };
 
 /**
  * Récupération des données paginées des effectifs avec niveaux / annee pour 2 dates et un siret donné
- * @param {*} startDate
- * @param {*} endDate
- * @param {*} siret_etablissement
+ * @param {*} date
+ * @param {*} filters
  */
-const getPaginatedEffectifsDetailDataForSiret = async (startDate, endDate, siret, page = 1, limit = 1000) => {
-  const listData = await getEffectifsDetailDataForSiret(startDate, endDate, siret);
+const getPaginatedEffectifsParNiveauEtAnneeFormation = async (date, filters, page = 1, limit = 1000) => {
+  const listData = await getEffectifsParNiveauEtAnneeFormation(date, filters);
   const flattenedData = await flattenEffectifDetails(listData);
   const paginatedData = paginate(flattenedData, page, limit);
   const regroupedData = regroupEffectifDetails(paginatedData.data, (item) => [
@@ -182,19 +163,17 @@ const getPaginatedEffectifsDetailDataForSiret = async (startDate, endDate, siret
 
 /**
  * Récupération des détail des effectifs avec niveaux / annee des formations
- * pour le statut (searchStatut) et la date souhaitée (searchDate) et un siret.
+ * pour le statut (searchStatut) et la date souhaitée (searchDate)
  *
  * Même fonctionnement que getNbStatutsInHistoryForStatutAndDate mais on récupère tout l'objet pour détail
  * @param {*} searchDate
  * @param {*} searchStatut
- * @param {*} searchSiret
+ * @param {*} filters
  * @returns
  */
-const getEffectifsDetailWithNiveauxForStatutAndDate = async (searchDate, searchStatut, searchSiret) => {
+const getEffectifsDetailWithNiveauxForStatutAndDate = async (searchDate, searchStatut, filters) => {
   // Récupération des effectifs depuis paramètres
-  const statutsFound = await getEffectifsWithStatutApprenantAtDate(searchDate, searchStatut, {
-    siret_etablissement: searchSiret,
-  });
+  const statutsFound = await getEffectifsWithStatutApprenantAtDate(searchDate, searchStatut, filters);
 
   // Récupération total des effectifs
   const nbTotalStatuts = statutsFound.length;
@@ -256,25 +235,25 @@ const getEffectifsWithStatutApprenantAtDate = async (searchDate, statutApprenant
  * Principe :
  * On récupère la liste des niveaux uniques et des formations uniques dans la liste
  * Pour chaque niveau, chaque formation / année on construit la liste
- * @param {*} param
+ * @param {*} effectifs
  * @returns
  */
-const buildEffectifByNiveauxList = ({ startDate, endDate }) => {
+const buildEffectifByNiveauxList = (effectifs) => {
   const effectifByNiveauxList = [];
 
   // Récup les niveaux présents dans les données
-  const uniquesNiveaux = getUniquesNiveauxFrom(startDate, endDate).sort();
+  const uniquesNiveaux = getUniquesNiveauxFrom(effectifs).sort();
 
   // Pour chaque niveau on construit un objet contenant les infos de niveaux + les formations rattachées
   uniquesNiveaux.forEach((currentNiveau) => {
     effectifByNiveauxList.push({
       niveau: {
         libelle: currentNiveau,
-        apprentis: buildStatutDataForNiveau(endDate.apprentis, startDate.apprentis, currentNiveau),
-        inscrits: buildStatutDataForNiveau(endDate.inscrits, startDate.inscrits, currentNiveau),
-        abandons: buildStatutDataForNiveau(endDate.abandons, startDate.abandons, currentNiveau),
+        apprentis: buildStatutDataForNiveau(effectifs.apprentis, currentNiveau),
+        inscrits: buildStatutDataForNiveau(effectifs.inscrits, currentNiveau),
+        abandons: buildStatutDataForNiveau(effectifs.abandons, currentNiveau),
       },
-      formations: buildFormationsDataForNiveau(endDate, startDate, currentNiveau),
+      formations: buildFormationsDataForNiveau(effectifs, currentNiveau),
     });
   });
 
@@ -282,19 +261,15 @@ const buildEffectifByNiveauxList = ({ startDate, endDate }) => {
 };
 
 /**
- * Construction d'un objet contenant les nbTotaux / evolution pour un statut et un niveau
+ * Construction d'un objet contenant les nbTotaux pour un statut et un niveau
  * @param {*} statutDataEndDate
  * @param {*} statutDataStartDate
  * @param {*} currentNiveau
  * @returns
  */
-const buildStatutDataForNiveau = (statutDataEndDate, statutDataStartDate, currentNiveau) => ({
-  nbTotal: statutDataEndDate.nbTotalStatuts,
-  nbTotalForNiveau: statutDataEndDate.dataDetail?.find((item) => item.niveau === currentNiveau)?.nbStatuts,
-  evolution: getPercentageDifference(
-    statutDataEndDate.dataDetail.find((item) => item.niveau === currentNiveau)?.nbStatuts,
-    statutDataStartDate.dataDetail.find((item) => item.niveau === currentNiveau)?.nbStatuts
-  ),
+const buildStatutDataForNiveau = (statutEffectifs, currentNiveau) => ({
+  nbTotal: statutEffectifs.nbTotalStatuts,
+  nbTotalForNiveau: statutEffectifs.dataDetail?.find((item) => item.niveau === currentNiveau)?.nbStatuts,
 });
 
 /**
@@ -304,11 +279,11 @@ const buildStatutDataForNiveau = (statutDataEndDate, statutDataStartDate, curren
  * @param {*} currentNiveau
  * @returns
  */
-const buildFormationsDataForNiveau = (endDateData, startDateData, currentNiveau) => {
+const buildFormationsDataForNiveau = (effectifsParStatut, currentNiveau) => {
   const allFormationsForNiveau = [];
 
   // Récupération des couples année - libellé uniques dans les données effectifs
-  const uniquesFormationsParAnneesForNiveau = getUniquesFormationsParAnneesForNiveau(endDateData, currentNiveau);
+  const uniquesFormationsParAnneesForNiveau = getUniquesFormationsParAnneesForNiveau(effectifsParStatut, currentNiveau);
 
   // Pour chaque couple année - libéllé on construit un objet avec les nb de statuts (apprentis / inscrits / abandons)
   uniquesFormationsParAnneesForNiveau.forEach((currentFormationParAnnee) => {
@@ -316,20 +291,17 @@ const buildFormationsDataForNiveau = (endDateData, startDateData, currentNiveau)
       libelle: currentFormationParAnnee.libelle,
       annee: currentFormationParAnnee.annee,
       apprentis: buildFormationsDataForStatut(
-        endDateData.apprentis.dataDetail,
-        startDateData.apprentis.dataDetail,
+        effectifsParStatut.apprentis.dataDetail,
         currentFormationParAnnee,
         currentNiveau
       ),
       inscrits: buildFormationsDataForStatut(
-        endDateData.inscrits.dataDetail,
-        startDateData.inscrits.dataDetail,
+        effectifsParStatut.inscrits.dataDetail,
         currentFormationParAnnee,
         currentNiveau
       ),
       abandons: buildFormationsDataForStatut(
-        endDateData.abandons.dataDetail,
-        startDateData.abandons.dataDetail,
+        effectifsParStatut.abandons.dataDetail,
         currentFormationParAnnee,
         currentNiveau
       ),
@@ -340,21 +312,14 @@ const buildFormationsDataForNiveau = (endDateData, startDateData, currentNiveau)
 };
 
 /**
- * Construction d'un objet contenant le nbTotal / evolution pour un couple formation - année et un niveau
+ * Construction d'un objet contenant le nbTotal pour un couple formation - année et un niveau
  * @param {*} dataDetail
- * @param {*} startDateDataDetail
  * @param {*} currentFormationParAnnee
  * @param {*} currentNiveau
  * @returns
  */
-const buildFormationsDataForStatut = (dataDetail, startDateDataDetail, currentFormationParAnnee, currentNiveau) => {
+const buildFormationsDataForStatut = (dataDetail, currentFormationParAnnee, currentNiveau) => {
   const matchingFormations = dataDetail
-    ?.find((x) => x.niveau === currentNiveau)
-    ?.formations.filter(
-      (x) => x.libelle === currentFormationParAnnee.libelle && x.annee === currentFormationParAnnee.annee
-    );
-
-  const matchingFormationsEndDate = startDateDataDetail
     ?.find((x) => x.niveau === currentNiveau)
     ?.formations.filter(
       (x) => x.libelle === currentFormationParAnnee.libelle && x.annee === currentFormationParAnnee.annee
@@ -362,35 +327,24 @@ const buildFormationsDataForStatut = (dataDetail, startDateDataDetail, currentFo
 
   return {
     nbTotalForNiveau: matchingFormations ? matchingFormations.length : 0,
-    evolution: getPercentageDifference(matchingFormations?.length, matchingFormationsEndDate?.length),
   };
 };
 
 /**
  * Récupération des niveaux des formations uniques dans les effectifs
- * @param {*} startDate
- * @param {*} endDate
+ * @param {*} effectifs
  * @returns
  */
-const getUniquesNiveauxFrom = (startDate, endDate) => {
+const getUniquesNiveauxFrom = (effectifs) => {
   return [
     ...new Set(
-      Object.keys(startDate)
+      Object.keys(effectifs)
         .map((item) => ({
           statut: item,
-          detail: startDate[item].dataDetail,
-          nbTotal: startDate[item].nbTotalStatuts,
+          detail: effectifs[item].dataDetail,
+          nbTotal: effectifs[item].nbTotalStatuts,
         }))
         .flat()
-        .concat(
-          Object.keys(endDate)
-            .map((item) => ({
-              statut: item,
-              detail: endDate[item].dataDetail,
-              nbTotal: endDate[item].nbTotalStatuts,
-            }))
-            .flat()
-        )
         .map((item) => item.detail)
         .flat()
         .map((item) => item.niveau)

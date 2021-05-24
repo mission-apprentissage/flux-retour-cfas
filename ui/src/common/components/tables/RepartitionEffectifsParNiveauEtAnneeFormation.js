@@ -26,7 +26,7 @@ const RepartitionEffectifsParNiveauEtAnneeFormation = ({ repartitionEffectifs, l
 
   if (repartitionEffectifs) {
     return (
-      <Table mt="5">
+      <Table mt="2w">
         <Thead>
           <Tr background="bluesoft.100">
             {TABLE_HEADERS.map((header) => {
@@ -49,8 +49,8 @@ const RepartitionEffectifsParNiveauEtAnneeFormation = ({ repartitionEffectifs, l
         <TableCaption>
           <Pagination
             pagesQuantity={repartitionEffectifs.total_pages}
-            currentPage={repartitionEffectifs.page}
-            changePageHandler={(data) => _setPage(data)}
+            currentPage={Number(repartitionEffectifs.page)}
+            changePageHandler={_setPage}
           />
         </TableCaption>
       </Table>

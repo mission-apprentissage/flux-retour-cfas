@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const faker = require("faker/locale/fr");
 const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
@@ -194,8 +194,8 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  describe("/api/dashboard/cfa-effectifs-detail route", () => {
-    it("Vérifie qu'on peut récupérer le détail des effectifs d'un CFA via API", async () => {
+  describe("/api/dashboard/effectifs-par-niveau-et-annee-formation route", () => {
+    it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux/année de formation via API", async () => {
       const { httpClient } = await startServer();
       const siretToTest = "77929544300013";
 
@@ -214,20 +214,12 @@ httpTests(__filename, ({ startServer }) => {
         await currentStatut.save();
       });
 
-      // Check good api call
-      const searchParams = `startDate=2020-09-15T00:00:00.000Z&endDate=2020-10-10T00:00:00.000Z&siret=${siretToTest}&page=1&limit=100`;
-      const response = await httpClient.get(`/api/dashboard/cfa-effectifs-detail?${searchParams}`);
+      const searchParams = `date=2020-10-10T00:00:00.000Z&siret_etablissement=${siretToTest}&page=1&limit=100`;
+      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-et-annee-formation?${searchParams}`);
 
-      assert.deepStrictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data.data.length, 2);
+      assert.equal(response.status, 200);
+      assert.equal(response.data.data.length, 2);
       assert.deepStrictEqual(response.data.data, expectedDetailResultList);
-
-      // Check bad siret
-      const badSiret = "99999999900999";
-      const badSearchParams = `startDate=2020-09-15T00:00:00.000Z&endDate=2020-10-10T00:00:00.000Z&siret=${badSiret}&page=1&limit=100`;
-      const badResponse = await httpClient.get(`/api/dashboard/cfa-effectifs-detail?${badSearchParams}`);
-      assert.deepStrictEqual(badResponse.status, 400);
-      assert.deepStrictEqual(badResponse.data.message, `No cfa found for siret ${badSiret}`);
     });
   });
 

@@ -25,7 +25,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
 
   if (repartitionEffectifsParCfa) {
     return (
-      <Table mt="5">
+      <Table mt="2w">
         <Thead>
           <Tr background="bluesoft.100">
             {TABLE_HEADERS.map((header) => {

@@ -13,7 +13,6 @@ const ReseauView = ({ reseau, filters, effectifs }) => {
       <PageSectionTitle>Réseau {reseau}</PageSectionTitle>
       <Divider orientation="horizontal" />
       {effectifs && <EffectifsSection effectifs={effectifs} />}
-      <Divider orientation="horizontal" />
       <RepartitionEffectifsReseau reseau={reseau} filters={filters} />
     </Stack>
   );
