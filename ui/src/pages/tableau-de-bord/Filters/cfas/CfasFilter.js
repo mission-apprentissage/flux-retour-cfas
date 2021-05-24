@@ -35,7 +35,7 @@ const CfasFilter = ({ onChange, value, filters }) => {
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <MenuTabs tabNames={["Centres de formation", "Réseaux"]}>
+          <MenuTabs tabNames={["Organismes de formation", "Réseaux"]}>
             <CfaPanel onCfaClick={onCfaClick} value={value} filters={filters} />
             <ReseauxPanel onReseauClick={onReseauClick} value={value} />
           </MenuTabs>
