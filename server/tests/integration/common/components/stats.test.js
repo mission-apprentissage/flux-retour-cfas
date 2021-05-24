@@ -41,9 +41,9 @@ integrationTests(__filename, () => {
     assert.strictEqual(allStats.nbDistinctCandidatsWithIne > 0, true);
     assert.strictEqual(allStats.nbDistinctCandidatsWithoutIne > 0, true);
     assert.strictEqual(allStats.nbStatutsSansIne > 0, true);
-    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectInscrit > 0, true);
-    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectApprenti > 0, true);
-    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectAbandon === 0, true);
+    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectInscrit, 3);
+    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectApprenti, 0);
+    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectAbandon, 0);
 
     assert.strictEqual(allStats.nbCfasDistinctUai > 0, true);
     assert.strictEqual(allStats.nbCfasDistinctSiret > 0, true);
