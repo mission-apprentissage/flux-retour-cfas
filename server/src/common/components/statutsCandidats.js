@@ -351,6 +351,28 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
       };
       break;
 
+    case duplicatesTypesCodes.sirets.code:
+      unicityQueryGroup = {
+        _id: {
+          ine_apprenant: "$ine_apprenant",
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          prenom2_apprenant: "$prenom2_apprenant",
+          prenom3_apprenant: "$prenom3_apprenant",
+          email_contact: "$email_contact",
+          id_formation: "$id_formation",
+          uai_etablissement: "$uai_etablissement",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des sirets en doublon potentiel
+        sirets: { $addToSet: "$siret_etablissement" },
+        count: { $sum: 1 },
+        // Pour regroupement par uai
+        uai_etablissement: { $first: "$uai_etablissement" },
+      };
+      break;
+
     default:
       throw new Error("findStatutsDuplicates Error :  duplicatesTypesCode not matching any code");
   }
@@ -450,6 +472,9 @@ const findDuplicatesForDuplicateType = async (duplicatesTypesCode, filters, allo
         return duplicates.filter(
           (item) => item.sirets.length > 1 && (item.sirets.includes("") || item.sirets.includes(" "))
         );
+
+      case duplicatesTypesCodes.sirets.code:
+        return duplicates.filter((item) => item.sirets.length > 1);
 
       default:
         return [];

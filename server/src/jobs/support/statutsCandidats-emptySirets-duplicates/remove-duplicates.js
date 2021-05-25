@@ -1,14 +1,13 @@
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
 const { jobNames, duplicatesTypesCodes } = require("../../../common/model/constants/index");
-const { StatutCandidat, JobEvent } = require("../../../common/model");
+const { StatutCandidat, DuplicateEvent } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const sortBy = require("lodash.sortby");
 const groupBy = require("lodash.groupby");
 const arg = require("arg");
-const fs = require("fs-extra");
-const path = require("path");
-const { toXlsx, toCsv } = require("../../../common/utils/exporterUtils");
+
+let args = [];
 
 /**
  * Ce script permet de supprimer les doublons de sirets vides
@@ -17,7 +16,7 @@ runScript(async ({ statutsCandidats }) => {
   logger.info("Removing empty sirets duplicates...");
 
   // Handle allowDiskUseMode param
-  const args = arg({ "--allowDiskUse": Boolean }, { argv: process.argv.slice(2) });
+  args = arg({ "--allowDiskUse": Boolean }, { argv: process.argv.slice(2) });
   const allowDiskUseMode = args["--allowDiskUse"] ? true : false;
 
   await removeAllDuplicates(statutsCandidats, duplicatesTypesCodes.sirets_empty.code, allowDiskUseMode);
@@ -48,13 +47,15 @@ const removeAllDuplicates = async (statutsCandidats, duplicatesTypesCode, allowD
 
   // Export list
   await asyncForEach(removedDuplicatesGroupedByUai, async (currentDuplicatesForUai) => {
-    const exportFolderPath = `/output/uai_${currentDuplicatesForUai.uai}`;
-    const removedName = getDuplicateRemovedFileName(currentDuplicatesForUai.duplicates.length, duplicatesTypesCode);
-    await fs.ensureDir(path.join(__dirname, exportFolderPath));
-
-    await toXlsx(currentDuplicatesForUai.duplicates, path.join(__dirname, `${exportFolderPath}/${removedName}.xlsx`));
-    await toCsv(currentDuplicatesForUai.duplicates, path.join(__dirname, `${exportFolderPath}/${removedName}.csv`));
-    logger.info(`Output file created : ${exportFolderPath}/${removedName}.csv`);
+    await new DuplicateEvent({
+      jobType: "remove-duplicates-emptySirets",
+      duplicatesInfo: {
+        uai: currentDuplicatesForUai.uai,
+        nbDuplicates: currentDuplicatesForUai.duplicates.length,
+      },
+      args: args,
+      data: currentDuplicatesForUai.duplicates,
+    }).save();
   });
 };
 
@@ -105,10 +106,13 @@ const removeDuplicates = async (duplicatesToRemove, statutsCandidats) => {
     const mostRecentStatut = duplicatesItems.find((statut) => new Date(statut.created_at) >= maxDate);
     const statutsToRemove = duplicatesItems.filter((statut) => new Date(statut.created_at) < maxDate);
 
-    // Save Duplicates detail to userEvents
-    await new JobEvent({
-      jobname: "remove-emptySirets-statutsCandidats-duplicates",
-      action: `removeDuplicates-${JSON.stringify(currentDuplicate._id)}-${currentDuplicate.uai_etablissement}`,
+    // Save Duplicates detail to DuplicateEvents
+    await new DuplicateEvent({
+      jobType: "remove-emptySirets-statutsCandidats-duplicates",
+      duplicatesInfo: {
+        currentDuplicate: currentDuplicate._id,
+        uai: currentDuplicate.uai_etablissement,
+      },
       data: { ...currentDuplicate, ...{ duplicatesItems, mostRecentStatut, statutsToRemove } },
     }).save();
 
@@ -182,20 +186,4 @@ const getFlattenedHistoryFromDuplicates = async (duplicatesItems, statutsCandida
   });
 
   return history;
-};
-
-/**
- * Construction du nom de fichier des doublons supprimés
- * @param {*} nbDuplicates
- * @param {*} duplicatesTypesCode
- * @returns
- */
-const getDuplicateRemovedFileName = (nbDuplicates, duplicatesTypesCode) => {
-  const duplicatesTypesArray = Object.keys(duplicatesTypesCodes).map((id) => ({
-    id,
-    name: duplicatesTypesCodes[id].name,
-    code: duplicatesTypesCodes[id].code,
-  }));
-  const duplicateTypeName = duplicatesTypesArray.find((item) => item.code === duplicatesTypesCode)?.name;
-  return `${nbDuplicates}doublonsSupprimes_type${duplicateTypeName}__${Date.now()}`;
 };

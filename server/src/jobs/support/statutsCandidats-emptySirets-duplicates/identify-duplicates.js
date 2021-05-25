@@ -3,9 +3,9 @@ const { runScript } = require("../../scriptWrapper");
 const { jobNames, duplicatesTypesCodes } = require("../../../common/model/constants/index");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const arg = require("arg");
-const fs = require("fs-extra");
-const path = require("path");
-const { toXlsx, toCsv } = require("../../../common/utils/exporterUtils");
+const { DuplicateEvent } = require("../../../common/model");
+
+let args = [];
 
 /**
  * Ce script permet d'identifier les doublons de sirets (sirets vides)
@@ -14,7 +14,7 @@ runScript(async ({ statutsCandidats }) => {
   logger.info("Identifying empty sirets duplicates...");
 
   // Handle allowDiskUseMode param
-  const args = arg({ "--allowDiskUse": Boolean }, { argv: process.argv.slice(2) });
+  args = arg({ "--allowDiskUse": Boolean }, { argv: process.argv.slice(2) });
   const allowDiskUseMode = args["--allowDiskUse"] ? true : false;
 
   await identifyAll(statutsCandidats, duplicatesTypesCodes.sirets_empty.code, allowDiskUseMode);
@@ -35,15 +35,17 @@ const identifyAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMo
     allowDiskUseMode
   );
 
-  // Export list
+  // Log duplicates list
   await asyncForEach(duplicates, async (currentUaiList) => {
-    const exportFolderPath = `/output/uai_${currentUaiList.uai}`;
-    const exportName = getDuplicateExportFileName(currentUaiList.duplicates.length, duplicatesTypesCode);
-    await fs.ensureDir(path.join(__dirname, exportFolderPath));
-
-    await toXlsx(currentUaiList.duplicates, path.join(__dirname, `${exportFolderPath}/${exportName}.xlsx`));
-    await toCsv(currentUaiList.duplicates, path.join(__dirname, `${exportFolderPath}/${exportName}.csv`));
-    logger.info(`Output file created : ${exportFolderPath}/${exportName}.csv`);
+    await new DuplicateEvent({
+      jobType: "identify-duplicates-emptySirets",
+      duplicatesInfo: {
+        uai: currentUaiList.uai,
+        nbDuplicates: currentUaiList.duplicates.length,
+      },
+      args: args,
+      data: currentUaiList.duplicates,
+    }).save();
   });
 };
 
@@ -90,20 +92,4 @@ const identifyDuplicatesForFiltersGroupedByUai = async (
   }
 
   return duplicatesUaiGroup;
-};
-
-/**
- * Construction du nom de fichier des doublons pour un type donné
- * @param {*} nbDuplicates
- * @param {*} duplicatesTypesCode
- * @returns
- */
-const getDuplicateExportFileName = (nbDuplicates, duplicatesTypesCode) => {
-  const duplicatesTypesArray = Object.keys(duplicatesTypesCodes).map((id) => ({
-    id,
-    name: duplicatesTypesCodes[id].name,
-    code: duplicatesTypesCodes[id].code,
-  }));
-  const duplicateTypeName = duplicatesTypesArray.find((item) => item.code === duplicatesTypesCode)?.name;
-  return `${nbDuplicates}doublonsIdentifies_type${duplicateTypeName}__${Date.now()}`;
 };

@@ -167,7 +167,7 @@ const jobNames = {
 const duplicatesTypesCodes = {
   all: {
     name: "Tous",
-    code: 0,
+    code: -1,
   },
   periode_formation: {
     name: "Periodes",
@@ -192,6 +192,10 @@ const duplicatesTypesCodes = {
   sirets_empty: {
     name: "SiretsVides",
     code: 6,
+  },
+  sirets: {
+    name: "Sirets",
+    code: 7,
   },
 };
 

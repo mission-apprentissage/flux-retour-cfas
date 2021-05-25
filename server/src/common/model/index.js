@@ -11,6 +11,7 @@ module.exports = {
   User: getModel("users"),
   UserEvent: getModel("userEvents"),
   JobEvent: getModel("jobEvents", true),
+  DuplicateEvent: getModel("duplicatesEvents"),
   Cfa: getModel("cfas", true),
   CfaDataFeedback: getModel("cfaDataFeedback"),
   Formation: getModel("formations"),

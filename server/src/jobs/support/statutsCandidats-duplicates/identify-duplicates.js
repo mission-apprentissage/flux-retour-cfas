@@ -1,12 +1,11 @@
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
-const path = require("path");
 const arg = require("arg");
-const fs = require("fs-extra");
-const { toXlsx, toCsv } = require("../../../common/utils/exporterUtils");
-const { jobNames, duplicatesTypesCodes } = require("../../../common/model/constants/index");
+const { jobNames } = require("../../../common/model/constants/index");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { StatutCandidat } = require("../../../common/model");
+const { StatutCandidat, DuplicateEvent } = require("../../../common/model");
+
+let args = [];
 
 /**
  * Ce script permet de créer un export contenant tous les doublons des statuts identifiés
@@ -19,12 +18,13 @@ const { StatutCandidat } = require("../../../common/model");
  * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
  */
 runScript(async ({ statutsCandidats }) => {
-  const args = arg(
+  args = arg(
     {
       "--duplicatesTypeCode": Number,
       "--mode": String,
       "--regionCode": String,
       "--uai": String,
+      "--emailContact": String,
       "--allowDiskUse": Boolean,
     },
     { argv: process.argv.slice(2) }
@@ -41,17 +41,29 @@ runScript(async ({ statutsCandidats }) => {
 
   switch (args["--mode"]) {
     case "forAll":
-      await identifyAll(statutsCandidats, args["--duplicatesTypeCode"], allowDiskUseMode);
+      await identifyAll(statutsCandidats, args["--duplicatesTypeCode"], args["--emailContact"], allowDiskUseMode);
       break;
 
     case "forRegion":
       if (!args["--regionCode"]) throw new Error("missing required argument: --regionCode");
-      await identifyForRegion(statutsCandidats, args["--duplicatesTypeCode"], args["--regionCode"], allowDiskUseMode);
+      await identifyForRegion(
+        statutsCandidats,
+        args["--duplicatesTypeCode"],
+        args["--regionCode"],
+        args["--emailContact"],
+        allowDiskUseMode
+      );
       break;
 
     case "forUai":
       if (!args["--uai"]) throw new Error("missing required argument: --uai");
-      await identifyForUai(statutsCandidats, args["--duplicatesTypeCode"], args["--uai"], allowDiskUseMode);
+      await identifyForUai(
+        statutsCandidats,
+        args["--duplicatesTypeCode"],
+        args["--uai"],
+        args["--emailContact"],
+        allowDiskUseMode
+      );
       break;
 
     default:
@@ -67,10 +79,10 @@ runScript(async ({ statutsCandidats }) => {
  * @param {*} statutsCandidats
  * @param {*} duplicatesTypesCode
  */
-const identifyAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMode) => {
+const identifyAll = async (statutsCandidats, duplicatesTypesCode, emailContact, allowDiskUseMode) => {
   const allRegionsInStatutsCandidats = await StatutCandidat.distinct("etablissement_num_region");
   await asyncForEach(allRegionsInStatutsCandidats, async (currentCodeRegion) => {
-    await identifyForRegion(statutsCandidats, duplicatesTypesCode, currentCodeRegion, allowDiskUseMode);
+    await identifyForRegion(statutsCandidats, duplicatesTypesCode, currentCodeRegion, emailContact, allowDiskUseMode);
   });
 };
 
@@ -81,26 +93,35 @@ const identifyAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMo
  * @param {*} codeRegion
  * @returns
  */
-const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegion, allowDiskUseMode) => {
+const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegion, emailContact, allowDiskUseMode) => {
   logger.info(`Identifying all statuts duplicates for codeRegion : ${codeRegion}`);
+
+  const filterQuery = emailContact
+    ? { etablissement_num_region: codeRegion, email_contact: emailContact }
+    : {
+        etablissement_num_region: codeRegion,
+      };
+
   const duplicatesForRegion = await identifyDuplicatesForFiltersGroupedByUai(
     statutsCandidats,
     duplicatesTypesCode,
-    {
-      etablissement_num_region: codeRegion,
-    },
+    filterQuery,
+    emailContact,
     allowDiskUseMode
   );
 
-  // Export list
+  // Log duplicates list
   await asyncForEach(duplicatesForRegion, async (currentUaiList) => {
-    const exportFolderPath = `/output/region_${codeRegion}/uai_${currentUaiList.uai}`;
-    const exportName = getDuplicateExportFileName(currentUaiList.duplicates.length, duplicatesTypesCode);
-    await fs.ensureDir(path.join(__dirname, exportFolderPath));
-
-    await toXlsx(currentUaiList.duplicates, path.join(__dirname, `${exportFolderPath}/${exportName}.xlsx`));
-    await toCsv(currentUaiList.duplicates, path.join(__dirname, `${exportFolderPath}/${exportName}.csv`));
-    logger.info(`Output file created : ${exportFolderPath}/${exportName}.csv`);
+    await new DuplicateEvent({
+      jobType: "identify-duplicates",
+      duplicatesInfo: {
+        region: codeRegion,
+        uai: currentUaiList.uai,
+        nbDuplicates: currentUaiList.duplicates.length,
+      },
+      args: args,
+      data: currentUaiList.duplicates,
+    }).save();
   });
 };
 
@@ -110,26 +131,34 @@ const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegi
  * @param {*} duplicatesTypesCode
  * @param {*} uai
  */
-const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai, allowDiskUseMode) => {
+const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai, emailContact, allowDiskUseMode) => {
   logger.info(`Identifying all statuts duplicates for uai : ${uai}`);
+
+  const filterQuery = emailContact
+    ? { uai_etablissement: uai, email_contact: emailContact }
+    : {
+        uai_etablissement: uai,
+      };
+
   const duplicatesForUai = await identifyDuplicatesForFiltersGroupedByUai(
     statutsCandidats,
     duplicatesTypesCode,
-    {
-      uai_etablissement: uai,
-    },
+    filterQuery,
+    emailContact,
     allowDiskUseMode
   );
 
-  // Export list
+  // Log duplicates list
   await asyncForEach(duplicatesForUai, async (currentUaiList) => {
-    const exportFolderPath = `/output/uai_${currentUaiList.uai}`;
-    const exportName = getDuplicateExportFileName(currentUaiList.duplicates.length, duplicatesTypesCode);
-    await fs.ensureDir(path.join(__dirname, exportFolderPath));
-
-    await toXlsx(currentUaiList.duplicates, path.join(__dirname, `${exportFolderPath}/${exportName}.xlsx`));
-    await toCsv(currentUaiList.duplicates, path.join(__dirname, `${exportFolderPath}/${exportName}.csv`));
-    logger.info(`Output file created : ${exportFolderPath}/${exportName}.csv`);
+    await new DuplicateEvent({
+      jobType: "identify-duplicates",
+      duplicatesInfo: {
+        uai: currentUaiList.uai,
+        nbDuplicates: currentUaiList.duplicates.length,
+      },
+      args: args,
+      data: currentUaiList.duplicates,
+    }).save();
   });
 };
 
@@ -170,6 +199,7 @@ const identifyDuplicatesForFiltersGroupedByUai = async (
           __INEs: JSON.stringify(currentDuplicate.ines),
           __prenoms2: JSON.stringify(currentDuplicate.prenoms2_apprenants),
           __prenoms3: JSON.stringify(currentDuplicate.prenoms3_apprenants),
+          __sirets: JSON.stringify(currentDuplicate.sirets),
         });
       });
 
@@ -182,20 +212,4 @@ const identifyDuplicatesForFiltersGroupedByUai = async (
   }
 
   return duplicatesUaiGroup;
-};
-
-/**
- * Construction du nom de fichier des doublons pour un type donné
- * @param {*} nbDuplicates
- * @param {*} duplicatesTypesCode
- * @returns
- */
-const getDuplicateExportFileName = (nbDuplicates, duplicatesTypesCode) => {
-  const duplicatesTypesArray = Object.keys(duplicatesTypesCodes).map((id) => ({
-    id,
-    name: duplicatesTypesCodes[id].name,
-    code: duplicatesTypesCodes[id].code,
-  }));
-  const duplicateTypeName = duplicatesTypesArray.find((item) => item.code === duplicatesTypesCode)?.name;
-  return `${nbDuplicates}doublonsIdentifies_type${duplicateTypeName}__${Date.now()}`;
 };

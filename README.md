@@ -428,7 +428,7 @@ Il est possible de lancer un script d'identification de différents types de dou
 
 Ce script prend en arguments :
 
-- duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5
+- duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5/7
 - mode : forAll / forRegion / forUai le script va se lancer pour toute la base, pour une région ou un uai
 - regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
 - uai : si mode forUai actif, permet de préciser l'uai souhaité
@@ -446,7 +446,7 @@ Il est possible de lancer un script de suppression de différents types de doubl
 
 Ce script prend les mêmes arguments que le script d'identification :
 
-- duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5
+- duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5/7
 - mode : forAll / forRegion / forUai le script va se lancer pour toute la base, pour une région ou un uai
 - regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
 - uai : si mode forUai actif, permet de préciser l'uai souhaité
