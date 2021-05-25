@@ -407,4 +407,72 @@ integrationTests(__filename, () => {
       assert.deepEqual(effectifsByCfa.sort(sortBySiret), expectedResult);
     });
   });
+
+  describe("computeNouveauxContratsApprentissageForDateRange", () => {
+    const { computeNouveauxContratsApprentissageForDateRange } = dashboardComponent();
+
+    beforeEach(async () => {
+      const statuts = [
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 2, date_statut: new Date("2021-02-01T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2021-06-13T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2021-09-13T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2021-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 1, date_statut: new Date("2021-03-22T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2021-03-29T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 1, date_statut: new Date("2021-04-21T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2021-04-24T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2021-04-30T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 2, date_statut: new Date("2020-12-20T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-12-29T00:00:00") },
+            { valeur_statut: 0, date_statut: new Date("2021-01-07T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 2, date_statut: new Date("2020-02-01T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-06-13T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [{ valeur_statut: 3, date_statut: new Date("2021-05-15T00:00:00") }],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [{ valeur_statut: 2, date_statut: new Date("2020-05-15T00:00:00") }],
+        }),
+      ];
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+    });
+
+    [
+      { dateRange: [new Date("2021-01-01T00:00:00"), new Date("2021-12-31T00:00:00")], expectedCount: 4 },
+      { dateRange: [new Date("2020-01-01T00:00:00"), new Date("2020-12-31T00:00:00")], expectedCount: 3 },
+      { dateRange: [new Date("2020-07-01T00:00:00"), new Date("2021-06-30T00:00:00")], expectedCount: 5 },
+      { dateRange: [new Date("2019-07-01T00:00:00"), new Date("2020-06-30T00:00:00")], expectedCount: 1 },
+      { dateRange: [new Date("2019-07-01T00:00:00"), new Date("2019-12-31T00:00:00")], expectedCount: 0 },
+    ].forEach(({ dateRange, expectedCount }) => {
+      it(`computes number of new contracts for date range ${dateRange[0].toLocaleDateString()} - ${dateRange[1].toLocaleDateString()}`, async () => {
+        const count = await computeNouveauxContratsApprentissageForDateRange(dateRange);
+        assert.equal(count, expectedCount);
+      });
+    });
+  });
 });
