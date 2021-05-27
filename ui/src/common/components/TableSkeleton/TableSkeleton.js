@@ -4,7 +4,7 @@ import React from "react";
 
 const TableSkeleton = ({ headers, numberOfLines = 5 }) => {
   return (
-    <Table>
+    <Table mt="2w">
       <Thead>
         <Tr background="bluesoft.100">
           {headers.map((header) => {

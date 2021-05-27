@@ -322,8 +322,8 @@ integrationTests(__filename, () => {
     });
   });
 
-  describe("getEffectifsDetailDataForSiret pour une date et un centre de formation", () => {
-    const { getEffectifsDetailDataForSiret } = dashboardComponent();
+  describe("getEffectifsParNiveauEtAnneeFormation pour une date et un centre de formation", () => {
+    const { getEffectifsParNiveauEtAnneeFormation } = dashboardComponent();
 
     it("Permet de récupérer les données détaillées d'effectifs pour une date et un cfa via son siret", async () => {
       const siretToTest = "77929544300013";
@@ -344,11 +344,10 @@ integrationTests(__filename, () => {
       });
 
       // Search params & expected results
-      const startDate = new Date("2020-09-15T00:00:00.000+0000");
-      const endDate = new Date("2020-10-10T00:00:00.000+0000");
+      const date = new Date("2020-10-10T00:00:00.000+0000");
 
       // Gets effectif data detail
-      const statutsFound = await getEffectifsDetailDataForSiret(startDate, endDate, siretToTest);
+      const statutsFound = await getEffectifsParNiveauEtAnneeFormation(date, { siret_etablissement: siretToTest });
 
       // Check for siret
       assert.deepEqual(statutsFound.length, 2);
@@ -356,7 +355,7 @@ integrationTests(__filename, () => {
 
       // Check for bad siret
       const badSiret = "99999999900999";
-      const statutsBadSiret = await getEffectifsDetailDataForSiret(startDate, endDate, badSiret);
+      const statutsBadSiret = await getEffectifsParNiveauEtAnneeFormation(date, { siret_etablissement: badSiret });
       assert.notDeepEqual(statutsBadSiret.length, 2);
       assert.notDeepEqual(statutsBadSiret, expectedDetailResultList);
     });

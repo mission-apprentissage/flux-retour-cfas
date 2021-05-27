@@ -1,8 +1,7 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { UserEvent, StatutCandidat, Cfa } = require("../../common/model");
-const { validateSiret } = require("../../common/domain/siret");
+const { UserEvent, Cfa } = require("../../common/model");
 const { codesStatutsCandidats } = require("../../common/model/constants");
 
 module.exports = ({ stats, dashboard }) => {
@@ -160,52 +159,31 @@ module.exports = ({ stats, dashboard }) => {
    * Gets the dashboard cfa effectif detail
    */
   router.get(
-    "/cfa-effectifs-detail",
+    "/effectifs-par-niveau-et-annee-formation",
     tryCatch(async (req, res) => {
-      const { page, limit, startDate, endDate, siret } = await Joi.object({
+      await Joi.object({
         page: Joi.number().default(1),
         limit: Joi.number().default(10),
-        startDate: Joi.date().required(),
-        endDate: Joi.date().required(),
-        siret: Joi.string().allow(null, ""),
+        date: Joi.date().required(),
+        siret_etablissement: Joi.string().allow(null, ""),
+        etablissement_reseaux: Joi.string().allow(null, ""),
+        etablissement_num_region: Joi.string().allow(null, ""),
+        etablissement_num_departement: Joi.string().allow(null, ""),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const beginSearchDate = new Date(startDate);
-      const endSearchDate = new Date(endDate);
-
-      // Add user event
-      const event = new UserEvent({
-        username: "dashboard",
-        type: "GET",
-        action: "api/dashboard/cfa-effectifs-detail",
-        data: { startDate, endDate, siret },
-      });
-      await event.save();
+      const { date: dateFromBody, page, limit, ...filters } = req.query;
+      const date = new Date(dateFromBody);
 
       // Checks if siret valid
-      if (!validateSiret(siret)) {
-        return res.status(400).json({ message: "Siret is not valid" });
-      } else {
-        // Search cfa in statuts
-        const cfaFound = await StatutCandidat.findOne({
-          siret_etablissement: siret,
-        }).lean();
-        if (!cfaFound) {
-          return res.status(400).json({ message: `No cfa found for siret ${siret}` });
-        } else {
-          // Gets effectif data for params
-          const effectifDetailCfaData = await dashboard.getPaginatedEffectifsDetailDataForSiret(
-            beginSearchDate,
-            endSearchDate,
-            siret,
-            page,
-            limit
-          );
+      const effectifDetailCfaData = await dashboard.getPaginatedEffectifsParNiveauEtAnneeFormation(
+        date,
+        filters,
+        page,
+        limit
+      );
 
-          // Build response
-          return res.json(effectifDetailCfaData);
-        }
-      }
+      // Build response
+      return res.json(effectifDetailCfaData);
     })
   );
 

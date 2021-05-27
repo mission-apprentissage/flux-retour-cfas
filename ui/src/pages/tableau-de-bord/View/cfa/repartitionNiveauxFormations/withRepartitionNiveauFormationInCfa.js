@@ -1,16 +1,14 @@
-import { subYears } from "date-fns";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { _get } from "../../../../../common/httpClient";
 import { filtersPropType } from "../../../propTypes";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-const buildSearchParams = (filters, pageNumber, limit) => {
-  const startDate = subYears(filters.date, 1).toISOString();
-  const endDate = filters.date.toISOString();
+const buildSearchParams = (filters, pageNumber) => {
+  const date = filters.date.toISOString();
   const siret = filters.cfa?.type === "cfa" ? filters.cfa?.siret_etablissement : null;
-  return `startDate=${startDate}&endDate=${endDate}&siret=${siret}&page=${pageNumber}&limit=${limit}`;
+  return `date=${date}&siret_etablissement=${siret}&page=${pageNumber}&limit=${DEFAULT_PAGE_SIZE}`;
 };
 
 const withRepartitionNiveauFormationInCfa = (Component) => {
@@ -20,11 +18,6 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
     const [page, setPage] = useState(1);
     const [error, setError] = useState(null);
 
-    const _setPage = useCallback(async (pageNumber) => {
-      console.log(pageNumber);
-      setPage(pageNumber);
-    });
-
     useEffect(() => {
       const fetchData = async () => {
         setLoading(true);
@@ -32,7 +25,7 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
 
         try {
           const response = await _get(
-            `/api/dashboard/cfa-effectifs-detail?${buildSearchParams(filters, page, DEFAULT_PAGE_SIZE)}`
+            `/api/dashboard/effectifs-par-niveau-et-annee-formation?${buildSearchParams(filters, page)}`
           );
           setRepartitionEffectifs(response);
         } catch (error) {
@@ -43,7 +36,7 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
       };
 
       fetchData();
-    }, [buildSearchParams(filters, page, 10)]);
+    }, [buildSearchParams(filters, page)]);
 
     return (
       <Component
@@ -51,7 +44,7 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
         repartitionEffectifs={repartitionEffectifs}
         loading={loading}
         error={error}
-        _setPage={_setPage}
+        _setPage={setPage}
       />
     );
   };

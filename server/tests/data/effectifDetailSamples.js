@@ -249,17 +249,14 @@ const expectedDetailResultList = [
       apprentis: {
         nbTotal: 13,
         nbTotalForNiveau: 5,
-        evolution: 0,
       },
       inscrits: {
         nbTotal: 14,
         nbTotalForNiveau: 8,
-        evolution: null,
       },
       abandons: {
         nbTotal: 15,
         nbTotalForNiveau: 10,
-        evolution: null,
       },
     },
     formations: [
@@ -268,15 +265,12 @@ const expectedDetailResultList = [
         annee: 1,
         apprentis: {
           nbTotalForNiveau: 2,
-          evolution: 0,
         },
         inscrits: {
           nbTotalForNiveau: 2,
-          evolution: null,
         },
         abandons: {
           nbTotalForNiveau: 2,
-          evolution: null,
         },
       },
       {
@@ -284,15 +278,12 @@ const expectedDetailResultList = [
         annee: 2,
         apprentis: {
           nbTotalForNiveau: 1,
-          evolution: 0,
         },
         inscrits: {
           nbTotalForNiveau: 2,
-          evolution: null,
         },
         abandons: {
           nbTotalForNiveau: 2,
-          evolution: null,
         },
       },
       {
@@ -300,15 +291,12 @@ const expectedDetailResultList = [
         annee: 1,
         apprentis: {
           nbTotalForNiveau: 1,
-          evolution: 0,
         },
         inscrits: {
           nbTotalForNiveau: 3,
-          evolution: null,
         },
         abandons: {
           nbTotalForNiveau: 3,
-          evolution: null,
         },
       },
       {
@@ -316,15 +304,12 @@ const expectedDetailResultList = [
         annee: 2,
         apprentis: {
           nbTotalForNiveau: 1,
-          evolution: 0,
         },
         inscrits: {
           nbTotalForNiveau: 1,
-          evolution: null,
         },
         abandons: {
           nbTotalForNiveau: 3,
-          evolution: null,
         },
       },
     ],
@@ -335,17 +320,14 @@ const expectedDetailResultList = [
       apprentis: {
         nbTotal: 13,
         nbTotalForNiveau: 8,
-        evolution: 0,
       },
       inscrits: {
         nbTotal: 14,
         nbTotalForNiveau: 6,
-        evolution: null,
       },
       abandons: {
         nbTotal: 15,
         nbTotalForNiveau: 5,
-        evolution: null,
       },
     },
     formations: [
@@ -354,15 +336,12 @@ const expectedDetailResultList = [
         annee: 1,
         apprentis: {
           nbTotalForNiveau: 2,
-          evolution: 0,
         },
         inscrits: {
           nbTotalForNiveau: 2,
-          evolution: null,
         },
         abandons: {
           nbTotalForNiveau: 2,
-          evolution: null,
         },
       },
       {
@@ -370,15 +349,12 @@ const expectedDetailResultList = [
         annee: 2,
         apprentis: {
           nbTotalForNiveau: 3,
-          evolution: 0,
         },
         inscrits: {
           nbTotalForNiveau: 2,
-          evolution: null,
         },
         abandons: {
           nbTotalForNiveau: 1,
-          evolution: null,
         },
       },
       {
@@ -386,15 +362,12 @@ const expectedDetailResultList = [
         annee: 1,
         apprentis: {
           nbTotalForNiveau: 1,
-          evolution: 0,
         },
         inscrits: {
           nbTotalForNiveau: 1,
-          evolution: null,
         },
         abandons: {
           nbTotalForNiveau: 1,
-          evolution: null,
         },
       },
       {
@@ -402,15 +375,12 @@ const expectedDetailResultList = [
         annee: 2,
         apprentis: {
           nbTotalForNiveau: 2,
-          evolution: 0,
         },
         inscrits: {
           nbTotalForNiveau: 1,
-          evolution: null,
         },
         abandons: {
           nbTotalForNiveau: 1,
-          evolution: null,
         },
       },
     ],
