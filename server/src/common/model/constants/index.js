@@ -49,10 +49,10 @@ const reseauxCfas = {
   //   nomReseau: "CCI France",
   //   nomFichier: "cfas-cci-france",
   // },
-  // CMA: {
-  //   nomReseau: "CMA",
-  //   nomFichier: "cfas-cma",
-  // },
+  CMA: {
+    nomReseau: "CMA",
+    nomFichier: "cfas-cma",
+  },
   // AGRI: {
   //   nomReseau: "AGRI",
   //   nomFichier: "cfas-agri",

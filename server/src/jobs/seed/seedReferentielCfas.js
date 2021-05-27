@@ -1,9 +1,13 @@
 const cliProgress = require("cli-progress");
+const fs = require("fs-extra");
+const path = require("path");
 const logger = require("../../common/logger");
+const ovhStorageManager = require("../../common/utils/ovhStorageManager");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { Cfa, StatutCandidat } = require("../../common/model");
-const { jobNames } = require("../../common/model/constants/");
+const { jobNames, reseauxCfas } = require("../../common/model/constants/");
+const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -12,14 +16,16 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  */
 runScript(async () => {
   logger.info("Seeding referentiel CFAs");
-  await seedUaisValid();
+  await seedCfasFromStatutsCandidatsUaisValid();
+  await seedCfasNetworkFromCsv(reseauxCfas.CMA);
+  await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
   logger.info("End seeding référentiel CFAs !");
 }, jobNames.seedReferentielCfas);
 
 /**
- * Seed des cfas avec UAIs valid
+ * Seed des cfas depuis statuts candidats avec UAIs valid
  */
-const seedUaisValid = async () => {
+const seedCfasFromStatutsCandidatsUaisValid = async () => {
   // All distinct valid uais
   const allUais = await StatutCandidat.distinct("uai_etablissement", { uai_etablissement_valid: true });
 
@@ -84,4 +90,104 @@ const updateCfaFromStatutCandidat = async (idCfa, statutForCfa) => {
       },
     }
   );
+};
+
+/**
+ * Seeding Reference CFAs for Network
+ * 1. Gets csv file reference from OVH Storage
+ * 2. Parse data from csv
+ * 2.a - If cfa in data has siret - check if update or creation needed
+ * 2.b - If cfa in data has uai - check if update or creation needed
+ */
+const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier }, encoding = "utf8") => {
+  logger.info(`Seeding CFAs for network ${nomReseau}`);
+  const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
+
+  // Get Reference CSV File if needed
+  if (!fs.existsSync(cfasReferenceFilePath)) {
+    const storageMgr = await ovhStorageManager();
+    await storageMgr.downloadFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
+  } else {
+    logger.info(`File ${cfasReferenceFilePath} already in data folder.`);
+  }
+
+  const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
+  loadingBar.start(allCfasForNetwork.length, 0);
+  let nbCfasHandled = 0;
+
+  // Parse all cfas in file
+  await asyncForEach(allCfasForNetwork, async (currentCfa) => {
+    nbCfasHandled++;
+    loadingBar.update(nbCfasHandled);
+
+    if (currentCfa.siret) {
+      const cfaForSiret = await Cfa.findOne({ siret: `${currentCfa.siret}` });
+      if (cfaForSiret) {
+        // Update if needed
+        await updateCfaFromNetwork(cfaForSiret, currentCfa, nomReseau, nomFichier);
+      } else {
+        await addCfaFromNetwork(currentCfa, nomReseau, nomFichier);
+      }
+    } else if (currentCfa.uai) {
+      // Gets cfas for UAI in referentiel
+      const cfaForUai = await Cfa.findOne({ uai: `${currentCfa.uai}` });
+      if (cfaForUai) {
+        // Update if needed
+        await updateCfaFromNetwork(cfaForUai, currentCfa, nomReseau, nomFichier);
+      } else {
+        await addCfaFromNetwork(currentCfa, nomReseau, nomFichier);
+      }
+    }
+  });
+
+  loadingBar.stop();
+  logger.info(`All cfas from ${nomFichier}.csv file imported !`);
+};
+
+/**
+ * Update cfa in referentiel if it has not this network existant
+ * @param {*} cfaInReferentiel
+ * @param {*} nomReseau
+ * @param {*} nomFichier
+ */
+const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau, nomFichier) => {
+  const cfaExistantWithoutCurrentNetwork =
+    !cfaInReferentiel.reseaux ||
+    (!cfaInReferentiel.reseaux.some((item) => item === nomReseau) &&
+      !cfaInReferentiel.fichiers_reference.some((item) => item === `${nomFichier}.csv`));
+
+  // Update only if cfa in referentiel has not network or current network not included
+  if (cfaExistantWithoutCurrentNetwork) {
+    await Cfa.findByIdAndUpdate(
+      cfaInReferentiel._id,
+      {
+        $addToSet: { noms_cfa: cfaInFile.nom.trim(), reseaux: nomReseau, fichiers_reference: `${nomFichier}.csv` },
+      },
+      { new: true }
+    );
+  }
+};
+
+/**
+ * Add cfa to referentiel collection from network
+ * @param {*} currentCfa
+ * @param {*} nomReseau
+ * @param {*} nomFichier
+ */
+const addCfaFromNetwork = async (currentCfa, nomReseau, nomFichier) => {
+  // Add cfa in référentiel
+  const cfaToAdd = new Cfa({
+    nom: currentCfa.nom?.trim(),
+    noms_cfa: [currentCfa.nom?.trim()],
+    siret: currentCfa.siret ? currentCfa.siret?.replace(/(\s|\.)/g, "") : null, //if siret exists and escaping spaces and dots makes it valid
+    siren: currentCfa.siren ? currentCfa.siren?.replace(/(\s|\.)/g, "") : null, //if siren exists and escaping spaces and dots makes it valid
+    uai: currentCfa.uai ?? null,
+    emails_contact: [currentCfa.email_contact] ?? null,
+    telephone: currentCfa.telephone ?? null,
+    reseaux: [nomReseau],
+    fichiers_reference: [`${nomFichier}.csv`],
+    source_seed_cfa: "NetworkFile",
+  });
+
+  await cfaToAdd.save();
 };

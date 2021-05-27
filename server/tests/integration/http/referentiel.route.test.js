@@ -10,7 +10,7 @@ httpTests(__filename, ({ startServer }) => {
 
     assert.deepStrictEqual(response.status, 200);
     assert.deepEqual(response.data.length, Object.values(reseauxCfas).length);
-    assert.deepEqual(response.data[0].nom, reseauxCfas.ANASUP.nomReseau);
+    assert.deepEqual(response.data[0].nom, reseauxCfas.CMA.nomReseau);
   });
 
   it("Vérifie qu'on peut récupérer les numéro des régions ouvertes via API", async () => {
