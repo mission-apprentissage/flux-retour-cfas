@@ -11,7 +11,7 @@ let args = [];
 /**
  * Ce script permet de nettoyer les doublons des statuts identifiés
  * Ce script prends plusieurs paramètres en argument :
- * --duplicatesTypeCode : types de doublons à supprimer : 0/1/2/3/4/5 cf duplicatesTypesCodes
+ * --duplicatesTypeCode : types de doublons à supprimer : -1/1/2/3/4/5 cf duplicatesTypesCodes
  * --mode : forAll / forRegion / forUai
  *   permets de nettoyer les doublons dans toute la BDD / pour une région / pour un UAI
  * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
