@@ -77,7 +77,7 @@ const identifyDuplicatesForFiltersGroupedByUai = async (
           prenom2_apprenant: currentDuplicate._id.prenom2_apprenant,
           prenom3_apprenant: currentDuplicate._id.prenom3_apprenant,
           email_contact: currentDuplicate._id.email_contact,
-          id_formation: currentDuplicate._id.id_formation,
+          formation_cfd: currentDuplicate._id.formation_cfd,
           uai_etablissement: currentDuplicate._id.uai_etablissement,
           __sirets: JSON.stringify(currentDuplicate.sirets),
         });

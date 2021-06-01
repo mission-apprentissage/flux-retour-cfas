@@ -25,7 +25,7 @@ runScript(async () => {
     nbHandled++;
 
     // get all statutsCandidats for this cfd
-    const statutsForFormation = await StatutCandidat.find({ id_formation: currentFormation.cfd });
+    const statutsForFormation = await StatutCandidat.find({ formation_cfd: currentFormation.cfd });
 
     // Update niveau for all statutsCandidats
     await asyncForEach(statutsForFormation, async (currentStatutToUpdate) => {

@@ -9,7 +9,7 @@ import { filtersPropType } from "../../../propTypes";
 const withRepartitionFormationParCfa = (Component) => {
   const WithRepartitionFormationParCfa = ({ formationCfd, filters, ...props }) => {
     const requestBody = omitNullishValues({
-      id_formation: formationCfd,
+      formation_cfd: formationCfd,
       date: filters.date,
       etablissement_num_region: filters.territoire?.type === TERRITOIRE_TYPES.region ? filters.territoire.code : null,
       etablissement_num_departement:

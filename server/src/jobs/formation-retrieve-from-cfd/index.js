@@ -15,7 +15,7 @@ runScript(async ({ db, formations }) => {
   const collection = db.collection("statutsCandidats");
 
   // get all valid CFDs
-  const allCfds = await collection.distinct("id_formation", { id_formation_valid: true });
+  const allCfds = await collection.distinct("formation_cfd", { formation_cfd_valid: true });
   logger.info(`${allCfds.length} distinct CFDs found in collection StatutsCandidats`);
 
   // for each CFD, if no formation exists in DB, create and store it

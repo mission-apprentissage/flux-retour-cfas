@@ -11,12 +11,25 @@ const parseGestiDate = (gestiDate) => {
 
 const adaptGestiStatutCandidat = (gestiStatutCandidat) => {
   return {
-    ...gestiStatutCandidat,
+    ine_apprenant: gestiStatutCandidat.ine_apprenant,
+    nom_apprenant: gestiStatutCandidat.nom_apprenant,
+    prenom_apprenant: gestiStatutCandidat.prenom_apprenant,
+    prenom2_apprenant: gestiStatutCandidat.prenom2_apprenant,
+    prenom3_apprenant: gestiStatutCandidat.prenom3_apprenant,
+    email_contact: gestiStatutCandidat.email_contact,
+    nom_representant_legal: gestiStatutCandidat.nom_representant_legal,
+    tel_representant_legal: gestiStatutCandidat.tel_representant_legal,
+    tel2_representant_legal: gestiStatutCandidat.tel2_representant_legal,
+    libelle_court_formation: gestiStatutCandidat.libelle_court_formation,
+    libelle_long_formation: gestiStatutCandidat.libelle_long_formation,
+    uai_etablissement: gestiStatutCandidat.uai_etablissement,
+    nom_etablissement: gestiStatutCandidat.nom_etablissement,
     ne_pas_solliciter: gestiStatutCandidat.ne_pas_solliciter === "true",
     statut_apprenant: gestiStatutCandidat.statut_apprenant && Number(gestiStatutCandidat.statut_apprenant),
     date_metier_mise_a_jour_statut: gestiStatutCandidat.date_metier_mise_a_jour_statut
       ? parseGestiDate(gestiStatutCandidat.date_metier_mise_a_jour_statut)
       : "",
+    formation_cfd: gestiStatutCandidat.id_formation,
     source: config.users.gesti.name,
     periode_formation: gestiStatutCandidat.periode_formation
       ? gestiStatutCandidat.periode_formation.split("-").map(Number)
@@ -38,7 +51,7 @@ const tempSchema = Joi.object({
   nom_representant_legal: Joi.string().allow(null, ""),
   tel_representant_legal: Joi.string().allow(null, ""),
   tel2_representant_legal: Joi.string().allow(null, ""),
-  id_formation: Joi.string().required(),
+  formation_cfd: Joi.string().required(),
   libelle_court_formation: Joi.string().allow(null, ""),
   libelle_long_formation: Joi.string().allow(null, ""),
   uai_etablissement: Joi.string().required(),

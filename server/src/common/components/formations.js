@@ -73,11 +73,11 @@ const searchFormationByIntituleOrCfd = async (intituleOrCfd, otherFilters) => {
 
   if (otherFilters && Object.keys(otherFilters).length > 0) {
     const filters = {
-      id_formation_valid: true,
+      formation_cfd_valid: true,
       ...otherFilters,
     };
 
-    const eligibleCfds = await StatutCandidatModel.distinct("id_formation", filters);
+    const eligibleCfds = await StatutCandidatModel.distinct("formation_cfd", filters);
 
     return FormationModel.find({
       ...searchTermFilterQuery,

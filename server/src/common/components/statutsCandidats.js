@@ -22,14 +22,14 @@ module.exports = () => ({
   getDuplicatesList,
 });
 
-const existsStatut = async ({ nom_apprenant, prenom_apprenant, id_formation, uai_etablissement }) => {
-  const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, id_formation, uai_etablissement);
+const existsStatut = async ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement }) => {
+  const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement);
   const count = await StatutCandidat.countDocuments(query);
   return count !== 0;
 };
 
-const getStatut = ({ nom_apprenant, prenom_apprenant, id_formation, uai_etablissement }) => {
-  const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, id_formation, uai_etablissement);
+const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement }) => {
+  const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement);
   return StatutCandidat.findOne(query);
 };
 
@@ -46,7 +46,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
     const foundItem = await getStatut({
       nom_apprenant: item.nom_apprenant,
       prenom_apprenant: item.prenom_apprenant,
-      id_formation: item.id_formation,
+      formation_cfd: item.formation_cfd,
       uai_etablissement: item.uai_etablissement,
     });
 
@@ -113,8 +113,8 @@ const createStatutCandidat = async (itemToCreate) => {
     (validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement })));
 
   // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
-  if (validateCfd(itemToCreate.id_formation) && !(await existsFormation(itemToCreate.id_formation))) {
-    await createFormation(itemToCreate.id_formation);
+  if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {
+    await createFormation(itemToCreate.formation_cfd);
   }
 
   const toAdd = new StatutCandidat({
@@ -128,11 +128,11 @@ const createStatutCandidat = async (itemToCreate) => {
     nom_representant_legal: itemToCreate.nom_representant_legal,
     tel_representant_legal: itemToCreate.tel_representant_legal,
     tel2_representant_legal: itemToCreate.tel2_representant_legal,
-    id_formation: itemToCreate.id_formation,
-    id_formation_valid: validateCfd(itemToCreate.id_formation),
+    formation_cfd: itemToCreate.formation_cfd,
+    formation_cfd_valid: validateCfd(itemToCreate.formation_cfd),
     libelle_court_formation: itemToCreate.libelle_court_formation,
     libelle_long_formation: itemToCreate.libelle_long_formation,
-    niveau_formation: (await getFormationWithCfd(itemToCreate.id_formation))?.niveau,
+    niveau_formation: (await getFormationWithCfd(itemToCreate.formation_cfd))?.niveau,
     uai_etablissement: itemToCreate.uai_etablissement,
     uai_etablissement_valid: validateUai(itemToCreate.uai_etablissement),
     siret_etablissement: itemToCreate.siret_etablissement,
@@ -164,11 +164,11 @@ const createStatutCandidat = async (itemToCreate) => {
   return toAdd.save();
 };
 
-const getFindStatutQuery = (nom_apprenant = null, prenom_apprenant = null, id_formation, uai_etablissement) => ({
-  nom_apprenant: nom_apprenant,
-  prenom_apprenant: prenom_apprenant,
-  id_formation: id_formation,
-  uai_etablissement: uai_etablissement,
+const getFindStatutQuery = (nom_apprenant = null, prenom_apprenant = null, formation_cfd, uai_etablissement) => ({
+  nom_apprenant,
+  prenom_apprenant,
+  formation_cfd,
+  uai_etablissement,
 });
 
 const isMajStatutInvalid = (statutSource, statutDest) => {
@@ -194,7 +194,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
           prenom2_apprenant: "$prenom2_apprenant",
           prenom3_apprenant: "$prenom3_apprenant",
           email_contact: "$email_contact",
-          id_formation: "$id_formation",
+          formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
@@ -214,7 +214,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
           prenom2_apprenant: "$prenom2_apprenant",
           prenom3_apprenant: "$prenom3_apprenant",
           email_contact: "$email_contact",
-          id_formation: "$id_formation",
+          formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
@@ -227,7 +227,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
       };
       break;
 
-    case duplicatesTypesCodes.id_formation.code:
+    case duplicatesTypesCodes.formation_cfd.code:
       unicityQueryGroup = {
         _id: {
           ine_apprenant: "$ine_apprenant",
@@ -240,8 +240,8 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
-        // Ajout des différents id_formation en doublon potentiel
-        ids_formations: { $addToSet: "$id_formation" },
+        // Ajout des différents formation_cfd en doublon potentiel
+        ids_formations: { $addToSet: "$formation_cfd" },
         count: { $sum: 1 },
         // Pour regroupement par uai
         uai_etablissement: { $first: "$uai_etablissement" },
@@ -256,7 +256,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
           prenom_apprenant: "$prenom_apprenant",
           prenom2_apprenant: "$prenom2_apprenant",
           prenom3_apprenant: "$prenom3_apprenant",
-          id_formation: "$id_formation",
+          formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
@@ -277,7 +277,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
           prenom2_apprenant: "$prenom2_apprenant",
           prenom3_apprenant: "$prenom3_apprenant",
           email_contact: "$email_contact",
-          id_formation: "$id_formation",
+          formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
@@ -297,7 +297,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
           nom_apprenant: "$nom_apprenant",
           prenom_apprenant: "$prenom_apprenant",
           email_contact: "$email_contact",
-          id_formation: "$id_formation",
+          formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
@@ -320,7 +320,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
           prenom2_apprenant: "$prenom2_apprenant",
           prenom3_apprenant: "$prenom3_apprenant",
           email_contact: "$email_contact",
-          id_formation: "$id_formation",
+          formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
@@ -342,7 +342,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
           prenom2_apprenant: "$prenom2_apprenant",
           prenom3_apprenant: "$prenom3_apprenant",
           email_contact: "$email_contact",
-          id_formation: "$id_formation",
+          formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
@@ -438,7 +438,7 @@ const findDuplicatesForDuplicateType = async (duplicatesTypesCode, filters, allo
       case duplicatesTypesCodes.periode_formation.code:
         return duplicates.filter((item) => item.periodes.length > 1);
 
-      case duplicatesTypesCodes.id_formation.code:
+      case duplicatesTypesCodes.formation_cfd.code:
         return duplicates.filter((item) => item.ids_formations.length > 1);
 
       case duplicatesTypesCodes.email_contact.code:

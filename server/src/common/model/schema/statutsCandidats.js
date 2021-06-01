@@ -52,15 +52,15 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Numéro de tel du représentant légal du jeune",
   },
-  id_formation: {
+  formation_cfd: {
     type: String,
     default: null,
-    description: "Identifiant de la formation visée",
+    description: "CFD de la formation du candidat",
     index: true,
   },
-  id_formation_valid: {
+  formation_cfd_valid: {
     type: Boolean,
-    description: "Le champ id_formation est-il un cfd valide ?",
+    description: "Le champ formation_cfd est-il un cfd valide ?",
   },
   libelle_court_formation: {
     type: String,

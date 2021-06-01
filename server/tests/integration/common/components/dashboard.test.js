@@ -220,7 +220,7 @@ integrationTests(__filename, () => {
     });
 
     it("Permet de récupérer les données d'effectifs pour une période et une formation via son cfd", async () => {
-      const filterQuery = { id_formation: "77929544300013" };
+      const filterQuery = { formation_cfd: "77929544300013" };
       await seedStatutsCandidats(filterQuery);
 
       // Search params & expected results
@@ -238,7 +238,7 @@ integrationTests(__filename, () => {
       assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
 
       // Check for another cfd filter
-      const badFilterQuery = { id_formation: "99" };
+      const badFilterQuery = { formation_cfd: "99" };
       const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
       assert.deepEqual(nbStatutsBadFilter, {
         [codesStatutsCandidats.apprenti]: { count: 0 },
@@ -281,7 +281,7 @@ integrationTests(__filename, () => {
     });
 
     it("Permet de récupérer les données d'effectifs pour une date, pour une formation et une région", async () => {
-      const filterQuery = { id_formation: "77929544300013", etablissement_num_region: "84" };
+      const filterQuery = { formation_cfd: "77929544300013", etablissement_num_region: "84" };
       await seedStatutsCandidats(filterQuery);
 
       // Search params & expected results
@@ -310,7 +310,7 @@ integrationTests(__filename, () => {
       });
 
       // Check for another filter
-      const badFilterQuery2 = { ...filterQuery, id_formation: "123445" };
+      const badFilterQuery2 = { ...filterQuery, formation_cfd: "123445" };
       const nbStatutsBadFilter2 = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery2);
       assert.deepEqual(nbStatutsBadFilter2, {
         [codesStatutsCandidats.apprenti]: { count: 0 },
@@ -365,7 +365,7 @@ integrationTests(__filename, () => {
     const { getEffectifsCountByCfaAtDate } = dashboardComponent();
 
     it("Permet de récupérer les effectifs par CFA à une date donnée pour une formation", async () => {
-      const filterQuery = { id_formation: "77929544300013" };
+      const filterQuery = { formation_cfd: "77929544300013" };
       const cfa1 = {
         siret_etablissement: "00690630980544",
         uai_etablissement: "0123456Z",
@@ -377,7 +377,7 @@ integrationTests(__filename, () => {
         nom_etablissement: "CFA 2",
       };
       await seedStatutsCandidats({ ...filterQuery, ...cfa1 });
-      await seedStatutsCandidats({ id_formation: "12345", ...cfa1 });
+      await seedStatutsCandidats({ formation_cfd: "12345", ...cfa1 });
       await seedStatutsCandidats({ ...filterQuery, ...cfa2 });
       await seedStatutsCandidats({ ...filterQuery, ...cfa2 });
 

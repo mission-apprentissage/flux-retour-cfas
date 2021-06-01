@@ -61,6 +61,7 @@ module.exports = ({ statutsCandidats }) => {
         // Add StatutsCandidats
         const toAddOrUpdate = req.body.map((statutCandidat) => ({
           ...statutCandidat,
+          formation_cfd: statutCandidat.id_formation,
           // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
           periode_formation: statutCandidat.periode_formation
             ? statutCandidat.periode_formation.split("-").map(Number)
