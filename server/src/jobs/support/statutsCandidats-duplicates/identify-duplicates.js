@@ -10,7 +10,7 @@ let args = [];
 /**
  * Ce script permet de créer un export contenant tous les doublons des statuts identifiés
  * Ce script prends plusieurs paramètres en argument :
- * --duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5 cf duplicatesTypesCodes
+ * --duplicatesTypeCode : types de doublons à identifier : -1/1/2/3/4/5 cf duplicatesTypesCodes
  * --mode : forAll / forRegion / forUai
  *   permets d'identifier les doublons dans toute la BDD / pour une région / pour un UAI
  * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
