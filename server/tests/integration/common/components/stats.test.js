@@ -4,8 +4,9 @@ const statutsCandidats = require("../../../../src/common/components/statutsCandi
 const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
 const stats = require("../../../../src/common/components/stats");
 const { seedSample, seedRandomizedSampleWithStatut } = require("../../../../src/jobs/seed/utils/seedUtils");
-const { simpleStatutsWith3DifferentUais, simpleStatutsWith3DifferentSirets } = require("../../../data/sample");
+const { simpleStatutsWith3DifferentUais } = require("../../../data/sample");
 const { nockGetSiretInfo, nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
+const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 
 integrationTests(__filename, () => {
   beforeEach(() => {
@@ -140,13 +141,21 @@ integrationTests(__filename, () => {
   it("Permet de récupérer le nb d'etablissements distincts par siret", async () => {
     // Seed with sample data
     const { addOrUpdateStatuts } = await statutsCandidats();
-    await addOrUpdateStatuts(simpleStatutsWith3DifferentSirets);
+    await addOrUpdateStatuts([
+      createRandomStatutCandidat({ siret_etablissement: "80070060000010" }),
+      createRandomStatutCandidat({ siret_etablissement: "80070060000011" }),
+      createRandomStatutCandidat({ siret_etablissement: "80070060000011" }),
+      createRandomStatutCandidat({ siret_etablissement: "80070060000012" }),
+      createRandomStatutCandidat({ siret_etablissement: "80070060000012" }),
+      createRandomStatutCandidat({ siret_etablissement: "80070060000012" }),
+      createRandomStatutCandidat({ siret_etablissement: "80070060000012" }),
+    ]);
 
     // Calcul stats
     const statsModule = await stats();
-    const nbStatuts = await statsModule.getNbDistinctCfasBySiret();
+    const nbCfas = await statsModule.getNbDistinctCfasBySiret();
 
     // Check stats value
-    assert.strictEqual(nbStatuts, 3);
+    assert.strictEqual(nbCfas, 3);
   });
 });

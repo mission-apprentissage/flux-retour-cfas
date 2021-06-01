@@ -20,7 +20,6 @@ module.exports = () => ({
   createStatutCandidat,
   updateStatut,
   getDuplicatesList,
-  shouldCreateNewStatutCandidat,
 });
 
 const existsStatut = async ({ nom_apprenant, prenom_apprenant, id_formation, uai_etablissement }) => {
@@ -33,21 +32,6 @@ const getStatut = ({ nom_apprenant, prenom_apprenant, id_formation, uai_etabliss
   const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, id_formation, uai_etablissement);
   return StatutCandidat.findOne(query);
 };
-
-/**
- * Checks if we should create a new statutCandidat if :
-  - no found statut
-  or
-  - foundItem SIRET is different from newStatut SIRET AND foundItem SIRET not null AND newItem SIRET not empty
- * @param {*} newItem 
- * @param {*} foundItem 
- * @returns 
- */
-const shouldCreateNewStatutCandidat = (newItem, foundItem) =>
-  !foundItem ||
-  (foundItem.siret_etablissement !== newItem.siret_etablissement &&
-    foundItem.siret_etablissement &&
-    newItem.siret_etablissement !== "");
 
 /**
  * Add or update a list of statuts
@@ -66,9 +50,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
       uai_etablissement: item.uai_etablissement,
     });
 
-    const shouldCreateStatutCandidat = shouldCreateNewStatutCandidat(item, foundItem);
-
-    if (shouldCreateStatutCandidat) {
+    if (!foundItem) {
       const addedItem = await createStatutCandidat(item);
       added.push(addedItem);
     } else {
