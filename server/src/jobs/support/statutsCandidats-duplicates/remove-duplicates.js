@@ -11,7 +11,7 @@ let args = [];
 /**
  * Ce script permet de nettoyer les doublons des statuts identifiés
  * Ce script prends plusieurs paramètres en argument :
- * --duplicatesTypeCode : types de doublons à supprimer : -1/1/2/3/4/5 cf duplicatesTypesCodes
+ * --duplicatesTypeCode : types de doublons à supprimer : 1/2/3/4 cf duplicatesTypesCodes
  * --mode : forAll / forRegion / forUai
  *   permets de nettoyer les doublons dans toute la BDD / pour une région / pour un UAI
  * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
@@ -25,14 +25,13 @@ runScript(async ({ statutsCandidats }) => {
       "--mode": String,
       "--regionCode": String,
       "--uai": String,
-      "--emailContact": String,
       "--allowDiskUse": Boolean,
     },
     { argv: process.argv.slice(2) }
   );
 
   if (!args["--duplicatesTypeCode"])
-    throw new Error("missing required argument: --duplicatesTypeCode  (should be in [0/1/2/3/4/5])");
+    throw new Error("missing required argument: --duplicatesTypeCode  (should be in [1/2/3/4])");
 
   if (!args["--mode"])
     throw new Error("missing required argument: --mode  (should be in [forAll / forRegion / forUai])");
@@ -42,7 +41,7 @@ runScript(async ({ statutsCandidats }) => {
 
   switch (args["--mode"]) {
     case "forAll":
-      await removeAll(statutsCandidats, args["--duplicatesTypeCode"], args["--emailContact"], allowDiskUseMode);
+      await removeAll(statutsCandidats, args["--duplicatesTypeCode"], allowDiskUseMode);
       break;
 
     case "forRegion":
@@ -51,20 +50,13 @@ runScript(async ({ statutsCandidats }) => {
         statutsCandidats,
         args["--regionCode"],
         args["--duplicatesTypeCode"],
-        args["--emailContact"],
         allowDiskUseMode
       );
       break;
 
     case "forUai":
       if (!args["--uai"]) throw new Error("missing required argument: --uai");
-      await removeAllDuplicatesForUai(
-        statutsCandidats,
-        args["--uai"],
-        args["--duplicatesTypeCode"],
-        args["--emailContact"],
-        allowDiskUseMode
-      );
+      await removeAllDuplicatesForUai(statutsCandidats, args["--uai"], args["--duplicatesTypeCode"], allowDiskUseMode);
       break;
 
     default:
@@ -79,16 +71,10 @@ runScript(async ({ statutsCandidats }) => {
  * @param {*} statutsCandidats
  * @param {*} duplicatesTypesCode
  */
-const removeAll = async (statutsCandidats, duplicatesTypesCode, emailContact, allowDiskUseMode) => {
+const removeAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMode) => {
   const allRegionsInStatutsCandidats = await StatutCandidat.distinct("etablissement_num_region");
   await asyncForEach(allRegionsInStatutsCandidats, async (currentCodeRegion) => {
-    await removeAllDuplicatesForRegion(
-      statutsCandidats,
-      currentCodeRegion,
-      duplicatesTypesCode,
-      emailContact,
-      allowDiskUseMode
-    );
+    await removeAllDuplicatesForRegion(statutsCandidats, currentCodeRegion, duplicatesTypesCode, allowDiskUseMode);
   });
 };
 
@@ -98,20 +84,10 @@ const removeAll = async (statutsCandidats, duplicatesTypesCode, emailContact, al
  * @param {*} codeRegion
  * @param {*} duplicatesTypesCode
  */
-const removeAllDuplicatesForRegion = async (
-  statutsCandidats,
-  codeRegion,
-  duplicatesTypesCode,
-  emailContact,
-  allowDiskUseMode
-) => {
+const removeAllDuplicatesForRegion = async (statutsCandidats, codeRegion, duplicatesTypesCode, allowDiskUseMode) => {
   logger.info(`Removing all statuts duplicates for codeRegion : ${codeRegion}`);
 
-  const filterQuery = emailContact
-    ? { etablissement_num_region: codeRegion, email_contact: emailContact }
-    : {
-        etablissement_num_region: codeRegion,
-      };
+  const filterQuery = { etablissement_num_region: codeRegion };
 
   const duplicatesRemovedForRegion = await removeStatutsCandidatsDuplicatesForFilters(
     statutsCandidats,
@@ -141,20 +117,10 @@ const removeAllDuplicatesForRegion = async (
  * @param {*} uai
  * @param {*} duplicatesTypesCode
  */
-const removeAllDuplicatesForUai = async (
-  statutsCandidats,
-  uai,
-  duplicatesTypesCode,
-  emailContact,
-  allowDiskUseMode
-) => {
+const removeAllDuplicatesForUai = async (statutsCandidats, uai, duplicatesTypesCode, allowDiskUseMode) => {
   logger.info(`Removing all statuts duplicates for uai : ${uai}`);
 
-  const filterQuery = emailContact
-    ? { uai_etablissement: uai, email_contact: emailContact }
-    : {
-        uai_etablissement: uai,
-      };
+  const filterQuery = { uai_etablissement: uai };
 
   const removedDuplicatesForUai = await removeStatutsCandidatsDuplicatesForFilters(
     statutsCandidats,
