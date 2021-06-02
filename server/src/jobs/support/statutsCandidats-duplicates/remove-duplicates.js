@@ -197,7 +197,7 @@ const removeStatutsCandidatsDuplicatesForFilters = async (
   if (duplicatesForType.data) {
     await asyncForEach(duplicatesForType.data, async (currentUaiData) => {
       logger.info(`Removing duplicates for UAI : ${currentUaiData.uai}`);
-      duplicatesRemoved.push(await removeDuplicates(currentUaiData.duplicates, statutsCandidats));
+      duplicatesRemoved.push(await removeDuplicates(currentUaiData.duplicates));
     });
   }
   return duplicatesRemoved.flat();
@@ -206,9 +206,8 @@ const removeStatutsCandidatsDuplicatesForFilters = async (
 /**
  * Supprime les mauvais doublons pour la liste des doublons d'uai
  * @param {*} duplicatesToRemove
- * @param {*} statutsCandidats
  */
-const removeDuplicates = async (duplicatesToRemove, statutsCandidats) => {
+const removeDuplicates = async (duplicatesToRemove) => {
   const removedList = [];
 
   await asyncForEach(duplicatesToRemove, async (currentDuplicate) => {
@@ -240,7 +239,7 @@ const removeDuplicates = async (duplicatesToRemove, statutsCandidats) => {
     });
 
     // Rewrite history for statut to keep
-    const flattenedHistory = await getFlattenedHistoryFromDuplicates(duplicatesItems, statutsCandidats);
+    const flattenedHistory = await getFlattenedHistoryFromDuplicates(duplicatesItems);
     const statutToKeep = { ...mostRecentStatut, historique_statut_apprenant: flattenedHistory };
 
     removedList.push({
@@ -256,10 +255,9 @@ const removeDuplicates = async (duplicatesToRemove, statutsCandidats) => {
 /**
  * Fonction de réécriture de l'historique à partir des statuts en doublons
  * @param {*} duplicatesItems
- * @param {*} statutsCandidats
  * @returns
  */
-const getFlattenedHistoryFromDuplicates = async (duplicatesItems, statutsCandidats) => {
+const getFlattenedHistoryFromDuplicates = async (duplicatesItems) => {
   const history = [];
   let currentStatut = null;
   let duplicatesIndex = 0;
@@ -268,11 +266,7 @@ const getFlattenedHistoryFromDuplicates = async (duplicatesItems, statutsCandida
   await asyncForEach(sortBy(duplicatesItems, "created_at"), async (currentDuplicateItem) => {
     duplicatesIndex++;
 
-    const shouldCreateStatutCandidat = await statutsCandidats.shouldCreateNewStatutCandidat(
-      currentDuplicateItem,
-      currentStatut
-    );
-    if (shouldCreateStatutCandidat) {
+    if (!currentStatut) {
       history.push({
         valeur_statut: currentDuplicateItem.statut_apprenant,
         position_statut: duplicatesIndex,

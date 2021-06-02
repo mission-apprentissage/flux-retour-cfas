@@ -185,42 +185,16 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
   let unicityQueryGroup = {};
 
   switch (duplicatesTypesCode) {
-    case duplicatesTypesCodes.all.code:
+    case duplicatesTypesCodes.unique.code:
       unicityQueryGroup = {
         _id: {
-          ine_apprenant: "$ine_apprenant",
           nom_apprenant: "$nom_apprenant",
           prenom_apprenant: "$prenom_apprenant",
-          prenom2_apprenant: "$prenom2_apprenant",
-          prenom3_apprenant: "$prenom3_apprenant",
-          email_contact: "$email_contact",
           formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
-        count: { $sum: 1 },
-        // Pour regroupement par uai
-        uai_etablissement: { $first: "$uai_etablissement" },
-      };
-      break;
-
-    case duplicatesTypesCodes.periode_formation.code:
-      unicityQueryGroup = {
-        _id: {
-          ine_apprenant: "$ine_apprenant",
-          nom_apprenant: "$nom_apprenant",
-          prenom_apprenant: "$prenom_apprenant",
-          prenom2_apprenant: "$prenom2_apprenant",
-          prenom3_apprenant: "$prenom3_apprenant",
-          email_contact: "$email_contact",
-          formation_cfd: "$formation_cfd",
-          uai_etablissement: "$uai_etablissement",
-        },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
-        // Ajout des différentes periodes en doublon potentiel
-        periodes: { $addToSet: "$periode_formation" },
         count: { $sum: 1 },
         // Pour regroupement par uai
         uai_etablissement: { $first: "$uai_etablissement" },
@@ -230,125 +204,48 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
     case duplicatesTypesCodes.formation_cfd.code:
       unicityQueryGroup = {
         _id: {
-          ine_apprenant: "$ine_apprenant",
           nom_apprenant: "$nom_apprenant",
           prenom_apprenant: "$prenom_apprenant",
-          prenom2_apprenant: "$prenom2_apprenant",
-          prenom3_apprenant: "$prenom3_apprenant",
-          email_contact: "$email_contact",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
         // Ajout des différents formation_cfd en doublon potentiel
-        ids_formations: { $addToSet: "$formation_cfd" },
+        formation_cfds: { $addToSet: "$formation_cfd" },
         count: { $sum: 1 },
         // Pour regroupement par uai
         uai_etablissement: { $first: "$uai_etablissement" },
       };
       break;
 
-    case duplicatesTypesCodes.email_contact.code:
+    case duplicatesTypesCodes.prenom_apprenant.code:
       unicityQueryGroup = {
         _id: {
-          ine_apprenant: "$ine_apprenant",
           nom_apprenant: "$nom_apprenant",
-          prenom_apprenant: "$prenom_apprenant",
-          prenom2_apprenant: "$prenom2_apprenant",
-          prenom3_apprenant: "$prenom3_apprenant",
           formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
-        // Ajout des différents email_contact en doublon potentiel
-        emails_contact: { $addToSet: "$email_contact" },
+        // Ajout des différentes prenom_apprenant en doublon potentiel
+        prenom_apprenants: { $addToSet: "$prenom_apprenant" },
         count: { $sum: 1 },
         // Pour regroupement par uai
         uai_etablissement: { $first: "$uai_etablissement" },
       };
       break;
 
-    case duplicatesTypesCodes.ine.code:
+    case duplicatesTypesCodes.nom_apprenant.code:
       unicityQueryGroup = {
         _id: {
-          nom_apprenant: "$nom_apprenant",
           prenom_apprenant: "$prenom_apprenant",
-          prenom2_apprenant: "$prenom2_apprenant",
-          prenom3_apprenant: "$prenom3_apprenant",
-          email_contact: "$email_contact",
           formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
-        // Ajout des différente INE en doublon potentiel
-        ines: { $addToSet: "$ine_apprenant" },
-        count: { $sum: 1 },
-        // Pour regroupement par uai
-        uai_etablissement: { $first: "$uai_etablissement" },
-      };
-      break;
-
-    case duplicatesTypesCodes.prenoms.code:
-      unicityQueryGroup = {
-        _id: {
-          ine_apprenant: "$ine_apprenant",
-          nom_apprenant: "$nom_apprenant",
-          prenom_apprenant: "$prenom_apprenant",
-          email_contact: "$email_contact",
-          formation_cfd: "$formation_cfd",
-          uai_etablissement: "$uai_etablissement",
-        },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
-        // Ajout des différentes prenom2-3_apprenant en doublon potentiel
-        prenoms2_apprenants: { $addToSet: "$prenom2_apprenant" },
-        prenoms3_apprenants: { $addToSet: "$prenom3_apprenant" },
-        count: { $sum: 1 },
-        // Pour regroupement par uai
-        uai_etablissement: { $first: "$uai_etablissement" },
-      };
-      break;
-
-    case duplicatesTypesCodes.sirets_empty.code:
-      unicityQueryGroup = {
-        _id: {
-          ine_apprenant: "$ine_apprenant",
-          nom_apprenant: "$nom_apprenant",
-          prenom_apprenant: "$prenom_apprenant",
-          prenom2_apprenant: "$prenom2_apprenant",
-          prenom3_apprenant: "$prenom3_apprenant",
-          email_contact: "$email_contact",
-          formation_cfd: "$formation_cfd",
-          uai_etablissement: "$uai_etablissement",
-        },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
-        // Ajout des sirets en doublon potentiel
-        sirets: { $addToSet: "$siret_etablissement" },
-        count: { $sum: 1 },
-        // Pour regroupement par uai
-        uai_etablissement: { $first: "$uai_etablissement" },
-      };
-      break;
-
-    case duplicatesTypesCodes.sirets.code:
-      unicityQueryGroup = {
-        _id: {
-          ine_apprenant: "$ine_apprenant",
-          nom_apprenant: "$nom_apprenant",
-          prenom_apprenant: "$prenom_apprenant",
-          prenom2_apprenant: "$prenom2_apprenant",
-          prenom3_apprenant: "$prenom3_apprenant",
-          email_contact: "$email_contact",
-          formation_cfd: "$formation_cfd",
-          uai_etablissement: "$uai_etablissement",
-        },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
-        // Ajout des sirets en doublon potentiel
-        sirets: { $addToSet: "$siret_etablissement" },
+        // Ajout des différents nom_apprenant en doublon potentiel
+        nom_apprenants: { $addToSet: "$nom_apprenant" },
         count: { $sum: 1 },
         // Pour regroupement par uai
         uai_etablissement: { $first: "$uai_etablissement" },
@@ -374,7 +271,6 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         count: { $gt: 1 },
       },
     },
-    { $sort: { _id: -1 } },
   ];
 
   const statutsFound = allowDiskUse
@@ -395,7 +291,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
  */
 const getDuplicatesList = async (duplicatesTypeCode, filters = {}, allowDiskUse = false, page = 1, limit = 10000) => {
   // Récupération des doublons pour le type souhaité
-  const duplicates = await findDuplicatesForDuplicateType(duplicatesTypeCode, filters, allowDiskUse);
+  const duplicates = await findStatutsDuplicates(duplicatesTypeCode, filters, allowDiskUse);
 
   // Pagination des statuts trouvés
   const paginatedStatuts = paginate(duplicates, page, limit);
@@ -419,49 +315,4 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, allowDiskUse 
     total: paginatedStatuts.total,
     total_pages: paginatedStatuts.total_pages,
   };
-};
-
-/**
- * Fonction de récupération des doublons en fonction d'un type de doublon souhaité
- * @param {*} duplicatesTypesCode
- * @param {*} filters
- * @returns
- */
-const findDuplicatesForDuplicateType = async (duplicatesTypesCode, filters, allowDiskUse = false) => {
-  const duplicates = await findStatutsDuplicates(duplicatesTypesCode, filters, allowDiskUse);
-
-  if (duplicates) {
-    switch (duplicatesTypesCode) {
-      case duplicatesTypesCodes.all.code:
-        return duplicates;
-
-      case duplicatesTypesCodes.periode_formation.code:
-        return duplicates.filter((item) => item.periodes.length > 1);
-
-      case duplicatesTypesCodes.formation_cfd.code:
-        return duplicates.filter((item) => item.ids_formations.length > 1);
-
-      case duplicatesTypesCodes.email_contact.code:
-        return duplicates.filter((item) => item.emails_contact.length > 1);
-
-      case duplicatesTypesCodes.ine.code:
-        return duplicates.filter((item) => item.ines.length > 1);
-
-      case duplicatesTypesCodes.prenoms.code:
-        return duplicates.filter((item) => item.prenoms2_apprenants.length > 1 || item.prenoms3_apprenants.length > 1);
-
-      case duplicatesTypesCodes.sirets_empty.code:
-        return duplicates.filter(
-          (item) => item.sirets.length > 1 && (item.sirets.includes("") || item.sirets.includes(" "))
-        );
-
-      case duplicatesTypesCodes.sirets.code:
-        return duplicates.filter((item) => item.sirets.length > 1);
-
-      default:
-        return [];
-    }
-  }
-
-  return [];
 };

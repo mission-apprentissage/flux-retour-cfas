@@ -47,8 +47,6 @@
     "support:identify-cfas-with-invalid-siret": "node -r dotenv/config src/jobs/support/identify-cfas-with-invalid-siret/index.js",
     "support:identify-uais-sirets-duplicates": "node -r dotenv/config src/jobs/support/identify-uais-sirets-duplicates/index.js",
     "support:identify-uais-catalog": "node -r dotenv/config src/jobs/support/identify-uais-catalog/index.js",
-    "support:identify-empty-sirets-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-emptySirets-duplicates/identify-duplicates.js",
-    "support:remove-empty-sirets-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-emptySirets-duplicates/remove-duplicates.js",
     "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
     "calculate:stats": "node -r dotenv/config src/jobs/stats/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
