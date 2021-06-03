@@ -1,10 +1,9 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
 const { apiStatutsSeeder } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
 const { createRandomStatutsCandidatsApiInputList } = require("../../data/randomizedSample");
-const { fullSample } = require("../../data/sample");
 const { nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 
 const goodApiKey = "12345";
@@ -32,9 +31,9 @@ httpTests(__filename, ({ startServer }) => {
 
     // Create & check api user
     const userApiCreated = await createApiUser();
-    assert.deepStrictEqual(userApiCreated.username, "userApi");
-    assert.deepStrictEqual(userApiCreated.permissions.length > 0, true);
-    assert.deepStrictEqual(userApiCreated.apiKey, goodApiKey);
+    assert.equal(userApiCreated.username, "userApi");
+    assert.equal(userApiCreated.permissions.length > 0, true);
+    assert.equal(userApiCreated.apiKey, goodApiKey);
 
     // Call Api Route
     const input = createRandomStatutsCandidatsApiInputList(1);
@@ -45,10 +44,9 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     // Check Api Route data
-    assert.deepStrictEqual(response.status, 200);
-    assert.ok(response.data.status);
+    assert.equal(response.status, 200);
     assert.ok(response.data.message);
-    assert.deepStrictEqual(response.data.status, "OK");
+    assert.equal(response.data.status, "OK");
 
     // Check in DB & Check data
     const foundStatut = await StatutCandidat.findOne({
@@ -56,23 +54,23 @@ httpTests(__filename, ({ startServer }) => {
       nom_apprenant: input[0].nom_apprenant,
     });
 
-    assert.deepStrictEqual(foundStatut.nom_apprenant, input[0].nom_apprenant);
-    assert.deepStrictEqual(foundStatut.prenom_apprenant, input[0].prenom_apprenant);
-    assert.deepStrictEqual(foundStatut.prenom2_apprenant, input[0].prenom2_apprenant);
-    assert.deepStrictEqual(foundStatut.prenom3_apprenant, input[0].prenom3_apprenant);
-    assert.deepStrictEqual(foundStatut.ne_pas_solliciter, input[0].ne_pas_solliciter);
-    assert.deepStrictEqual(foundStatut.email_contact, input[0].email_contact);
-    assert.deepStrictEqual(foundStatut.nom_representant_legal, input[0].nom_representant_legal);
-    assert.deepStrictEqual(foundStatut.tel_representant_legal, input[0].tel_representant_legal);
-    assert.deepStrictEqual(foundStatut.tel2_representant_legal, input[0].tel2_representant_legal);
-    assert.deepStrictEqual(foundStatut.id_formation, input[0].id_formation);
-    assert.deepStrictEqual(foundStatut.libelle_court_formation, input[0].libelle_court_formation);
-    assert.deepStrictEqual(foundStatut.libelle_long_formation, input[0].libelle_long_formation);
-    assert.deepStrictEqual(foundStatut.uai_etablissement, input[0].uai_etablissement);
-    assert.deepStrictEqual(foundStatut.siret_etablissement, input[0].siret_etablissement);
-    assert.deepStrictEqual(foundStatut.nom_etablissement, input[0].nom_etablissement);
-    assert.deepStrictEqual(foundStatut.statut_apprenant, input[0].statut_apprenant);
-    assert.deepStrictEqual(foundStatut.source, userApiCreated.username);
+    assert.deepEqual(foundStatut.nom_apprenant, input[0].nom_apprenant);
+    assert.deepEqual(foundStatut.prenom_apprenant, input[0].prenom_apprenant);
+    assert.deepEqual(foundStatut.prenom2_apprenant, input[0].prenom2_apprenant);
+    assert.deepEqual(foundStatut.prenom3_apprenant, input[0].prenom3_apprenant);
+    assert.deepEqual(foundStatut.ne_pas_solliciter, input[0].ne_pas_solliciter);
+    assert.deepEqual(foundStatut.email_contact, input[0].email_contact);
+    assert.deepEqual(foundStatut.nom_representant_legal, input[0].nom_representant_legal);
+    assert.deepEqual(foundStatut.tel_representant_legal, input[0].tel_representant_legal);
+    assert.deepEqual(foundStatut.tel2_representant_legal, input[0].tel2_representant_legal);
+    assert.deepEqual(foundStatut.formation_cfd, input[0].id_formation);
+    assert.deepEqual(foundStatut.libelle_court_formation, input[0].libelle_court_formation);
+    assert.deepEqual(foundStatut.libelle_long_formation, input[0].libelle_long_formation);
+    assert.deepEqual(foundStatut.uai_etablissement, input[0].uai_etablissement);
+    assert.deepEqual(foundStatut.siret_etablissement, input[0].siret_etablissement);
+    assert.deepEqual(foundStatut.nom_etablissement, input[0].nom_etablissement);
+    assert.deepEqual(foundStatut.statut_apprenant, input[0].statut_apprenant);
+    assert.deepEqual(foundStatut.source, userApiCreated.username);
   });
 
   it("Vérifie que la route statut-candidats fonctionne avec un jwt", async () => {
@@ -101,9 +99,9 @@ httpTests(__filename, ({ startServer }) => {
 
     // Create & check api user
     const userApiCreated = await createApiUser();
-    assert.deepStrictEqual(userApiCreated.username, "userApi");
-    assert.deepStrictEqual(userApiCreated.permissions.length > 0, true);
-    assert.deepStrictEqual(userApiCreated.apiKey, goodApiKey);
+    assert.deepEqual(userApiCreated.username, "userApi");
+    assert.deepEqual(userApiCreated.permissions.length > 0, true);
+    assert.deepEqual(userApiCreated.apiKey, goodApiKey);
 
     // Call Api Route with bad API Key
     const response = await httpClient.post("/api/statut-candidats", createRandomStatutsCandidatsApiInputList(1), {
@@ -112,7 +110,7 @@ httpTests(__filename, ({ startServer }) => {
       },
     });
 
-    assert.deepStrictEqual(response.status, 401);
+    assert.deepEqual(response.status, 401);
   });
 
   it("Vérifie que la route statut-candidats renvoie une 403 pour un user n'ayant pas la permission", async () => {
@@ -125,8 +123,8 @@ httpTests(__filename, ({ startServer }) => {
       permissions: [],
       apiKey: goodApiKey,
     });
-    assert.deepStrictEqual(userWithoutPermission.permissions.length, 0);
-    assert.deepStrictEqual(userWithoutPermission.apiKey, goodApiKey);
+    assert.deepEqual(userWithoutPermission.permissions.length, 0);
+    assert.deepEqual(userWithoutPermission.apiKey, goodApiKey);
 
     const response = await httpClient.post("/api/statut-candidats", [], {
       headers: {
@@ -134,7 +132,7 @@ httpTests(__filename, ({ startServer }) => {
       },
     });
 
-    assert.deepStrictEqual(response.status, 403);
+    assert.deepEqual(response.status, 403);
   });
 
   it("Vérifie l'ajout via route statut-candidats de données complètes", async () => {
@@ -145,23 +143,21 @@ httpTests(__filename, ({ startServer }) => {
 
     // Create & check api user
     const userApiCreated = await createApiUser();
-    assert.deepStrictEqual(userApiCreated.username, "userApi");
-    assert.deepStrictEqual(userApiCreated.permissions.length > 0, true);
-    assert.deepStrictEqual(userApiCreated.apiKey, goodApiKey);
+    assert.deepEqual(userApiCreated.username, "userApi");
+    assert.deepEqual(userApiCreated.permissions.length > 0, true);
+    assert.deepEqual(userApiCreated.apiKey, goodApiKey);
 
-    // Call Api Route with full sample
-    const response = await httpClient.post("/api/statut-candidats", fullSample, {
+    const input = createRandomStatutsCandidatsApiInputList(20);
+    const response = await httpClient.post("/api/statut-candidats", input, {
       headers: {
         "x-api-key": goodApiKey,
       },
     });
 
     // Check Api Route data
-    assert.deepStrictEqual(response.status, 200);
-    assert.ok(response.data.status);
-    assert.ok(response.data.message);
-    assert.deepStrictEqual(response.data.status, "OK");
-    assert.deepStrictEqual(response.data.message, "Success");
+    assert.equal(response.status, 200);
+    assert.equal(response.data.status, "OK");
+    assert.equal(response.data.message, "Success");
   });
 
   it("Vérifie l'ajout via route statut-candidats de 50 données randomisées", async () => {
@@ -174,9 +170,9 @@ httpTests(__filename, ({ startServer }) => {
 
     // Create & check api user
     const userApiCreated = await createApiUser();
-    assert.deepStrictEqual(userApiCreated.username, "userApi");
-    assert.deepStrictEqual(userApiCreated.permissions.length > 0, true);
-    assert.deepStrictEqual(userApiCreated.apiKey, goodApiKey);
+    assert.deepEqual(userApiCreated.username, "userApi");
+    assert.deepEqual(userApiCreated.permissions.length > 0, true);
+    assert.deepEqual(userApiCreated.apiKey, goodApiKey);
 
     // Generate random data
     const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
@@ -189,13 +185,13 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     // Check Api Route data
-    assert.deepStrictEqual(response.status, 200);
+    assert.deepEqual(response.status, 200);
     assert.ok(response.data.status);
     assert.ok(response.data.message);
-    assert.deepStrictEqual(response.data.status, "OK");
+    assert.deepEqual(response.data.status, "OK");
 
     // Check Nb Items added
-    assert.deepStrictEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
+    assert.deepEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
   });
 
   it("Vérifie l'erreur d'ajout via route statut-candidats pour un trop grande nb de données randomisées (>100)", async () => {
@@ -208,9 +204,9 @@ httpTests(__filename, ({ startServer }) => {
 
     // Create & check api user
     const userApiCreated = await createApiUser();
-    assert.deepStrictEqual(userApiCreated.username, "userApi");
-    assert.deepStrictEqual(userApiCreated.permissions.length > 0, true);
-    assert.deepStrictEqual(userApiCreated.apiKey, goodApiKey);
+    assert.deepEqual(userApiCreated.username, "userApi");
+    assert.deepEqual(userApiCreated.permissions.length > 0, true);
+    assert.deepEqual(userApiCreated.apiKey, goodApiKey);
 
     // Generate random data
     const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
@@ -223,8 +219,8 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     // Check Api Route data & Data not added
-    assert.deepStrictEqual(response.status, 413);
-    assert.notDeepStrictEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
+    assert.deepEqual(response.status, 413);
+    assert.notDeepEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
   });
 
   it("Vérifie que la route statut-candidats/test fonctionne avec une bonne clé d'API", async () => {
@@ -244,7 +240,7 @@ httpTests(__filename, ({ startServer }) => {
     );
 
     // Check Api Route data
-    assert.deepStrictEqual(response.status, 200);
-    assert.deepStrictEqual(response.data.msg, "ok");
+    assert.deepEqual(response.status, 200);
+    assert.deepEqual(response.data.msg, "ok");
   });
 });

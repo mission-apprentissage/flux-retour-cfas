@@ -198,8 +198,8 @@ integrationTests(__filename, () => {
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
         etablissement_num_region,
-        id_formation: formationsSeed[2].cfd,
-        id_formation_valid: true,
+        formation_cfd: formationsSeed[2].cfd,
+        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormationByIntituleOrCfd(searchTerm, { etablissement_num_region });
@@ -215,8 +215,8 @@ integrationTests(__filename, () => {
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
         etablissement_num_departement,
-        id_formation: formationsSeed[2].cfd,
-        id_formation_valid: true,
+        formation_cfd: formationsSeed[2].cfd,
+        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormationByIntituleOrCfd(searchTerm, { etablissement_num_departement });
@@ -232,8 +232,8 @@ integrationTests(__filename, () => {
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
         siret_etablissement,
-        id_formation: formationsSeed[2].cfd,
-        id_formation_valid: true,
+        formation_cfd: formationsSeed[2].cfd,
+        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormationByIntituleOrCfd(searchTerm, { siret_etablissement });

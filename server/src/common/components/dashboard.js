@@ -5,12 +5,14 @@ const { asyncForEach } = require("../utils/asyncUtils");
 const { uniqueValues, paginate } = require("../utils/miscUtils");
 const sortBy = require("lodash.sortby");
 const omit = require("lodash.omit");
+const { isWithinInterval } = require("date-fns");
 
 module.exports = () => ({
   getEffectifsCountByStatutApprenantAtDate,
   getEffectifsParNiveauEtAnneeFormation,
   getPaginatedEffectifsParNiveauEtAnneeFormation,
   getEffectifsCountByCfaAtDate,
+  computeNouveauxContratsApprentissageForDateRange,
 });
 
 const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) => {
@@ -471,4 +473,23 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
       effectifs: counts,
     };
   });
+};
+
+const computeNouveauxContratsApprentissageForDateRange = async (dateRange, filters = {}) => {
+  const statutsWithStatutApprenant3InHistorique = await StatutCandidat.aggregate([
+    { $match: { ...filters, "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.apprenti } },
+  ]);
+
+  let count = 0;
+  statutsWithStatutApprenant3InHistorique.forEach((statut) => {
+    statut.historique_statut_apprenant.forEach((historiqueEl) => {
+      if (
+        historiqueEl.valeur_statut === codesStatutsCandidats.apprenti &&
+        isWithinInterval(historiqueEl.date_statut, { start: dateRange[0], end: dateRange[1] })
+      ) {
+        count++;
+      }
+    });
+  });
+  return count;
 };

@@ -1,5 +1,4 @@
-const assert = require("assert");
-const faker = require("faker/locale/fr");
+const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidat, Cfa, Formation } = require("../../../../src/common/model");
@@ -11,7 +10,7 @@ const {
   simpleStatutBadUpdate,
   simpleProspectStatut,
 } = require("../../../data/sample");
-const { createRandomStatutCandidat, getRandomPeriodeFormation } = require("../../../data/randomizedSample");
+const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 
@@ -33,7 +32,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
 
@@ -42,14 +41,14 @@ integrationTests(__filename, () => {
       // Checks creation
       assert.deepStrictEqual(createdStatut.nom_apprenant, sampleNom);
       assert.deepStrictEqual(createdStatut.prenom_apprenant, samplePrenom);
-      assert.deepStrictEqual(createdStatut.id_formation, validCfd);
+      assert.deepStrictEqual(createdStatut.formation_cfd, validCfd);
       assert.deepStrictEqual(createdStatut.uai_etablissement, validUai);
 
       // Checks exists method
       const found = await existsStatut({
         nom_apprenant: createdStatut.nom_apprenant,
         prenom_apprenant: createdStatut.prenom_apprenant,
-        id_formation: createdStatut.id_formation,
+        formation_cfd: createdStatut.formation_cfd,
         uai_etablissement: createdStatut.uai_etablissement,
       });
       assert.deepStrictEqual(found, true);
@@ -67,7 +66,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
 
@@ -76,14 +75,14 @@ integrationTests(__filename, () => {
       // Checks creation
       assert.deepStrictEqual(createdStatut.nom_apprenant, sampleNom);
       assert.deepStrictEqual(createdStatut.prenom_apprenant, samplePrenom);
-      assert.deepStrictEqual(createdStatut.id_formation, validCfd);
+      assert.deepStrictEqual(createdStatut.formation_cfd, validCfd);
       assert.deepStrictEqual(createdStatut.uai_etablissement, validUai);
 
       // Checks exists method
       const found = await existsStatut({
         nom_apprenant: "BAD_NOM",
         prenom_apprenant: "BAD_PRENOM",
-        id_formation: "BAD_ID_FORMATION",
+        formation_cfd: "BAD_ID_FORMATION",
         uai_etablissement: "BAD_UAI",
       });
       assert.deepStrictEqual(found, false);
@@ -101,7 +100,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
 
@@ -110,14 +109,14 @@ integrationTests(__filename, () => {
       // Checks creation
       assert.deepStrictEqual(createdStatut.nom_apprenant, sampleNom);
       assert.deepStrictEqual(createdStatut.prenom_apprenant, samplePrenom);
-      assert.deepStrictEqual(createdStatut.id_formation, validCfd);
+      assert.deepStrictEqual(createdStatut.formation_cfd, validCfd);
       assert.deepStrictEqual(createdStatut.uai_etablissement, validUai);
 
       // Checks exists method
       const found = await existsStatut({
         nom_apprenant: "BAD_NOM",
         prenom_apprenant: createdStatut.prenom_apprenant,
-        id_formation: createdStatut.id_formation,
+        formation_cfd: createdStatut.formation_cfd,
         uai_etablissement: createdStatut.uai_etablissement,
       });
       assert.deepStrictEqual(found, false);
@@ -135,7 +134,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
 
@@ -144,20 +143,20 @@ integrationTests(__filename, () => {
       // Checks creation
       assert.deepStrictEqual(createdStatut.nom_apprenant, sampleNom);
       assert.deepStrictEqual(createdStatut.prenom_apprenant, samplePrenom);
-      assert.deepStrictEqual(createdStatut.id_formation, validCfd);
+      assert.deepStrictEqual(createdStatut.formation_cfd, validCfd);
       assert.deepStrictEqual(createdStatut.uai_etablissement, validUai);
 
       // Checks exists method
       const found = await existsStatut({
         nom_apprenant: createRandomStatutCandidat.nom_apprenant,
         prenom_apprenant: "BAD_PRENOM",
-        id_formation: createdStatut.id_formation,
+        formation_cfd: createdStatut.formation_cfd,
         uai_etablissement: createdStatut.uai_etablissement,
       });
       assert.deepStrictEqual(found, false);
     });
 
-    it("Vérifie l'existence d'un statut de candidat à partir d'un mauvais id_formation", async () => {
+    it("Vérifie l'existence d'un statut de candidat à partir d'un mauvais formation_cfd", async () => {
       const { existsStatut, createStatutCandidat } = await statutsCandidats();
 
       const sampleNom = "SMITH";
@@ -169,7 +168,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
 
@@ -178,14 +177,14 @@ integrationTests(__filename, () => {
       // Checks creation
       assert.deepStrictEqual(createdStatut.nom_apprenant, sampleNom);
       assert.deepStrictEqual(createdStatut.prenom_apprenant, samplePrenom);
-      assert.deepStrictEqual(createdStatut.id_formation, validCfd);
+      assert.deepStrictEqual(createdStatut.formation_cfd, validCfd);
       assert.deepStrictEqual(createdStatut.uai_etablissement, validUai);
 
       // Checks exists method
       const found = await existsStatut({
         nom_apprenant: createRandomStatutCandidat.nom_apprenant,
         prenom_apprenant: createRandomStatutCandidat.prenom_apprenant,
-        id_formation: "BAD_ID_FORMATION",
+        formation_cfd: "BAD_ID_FORMATION",
         uai_etablissement: createdStatut.uai_etablissement,
       });
       assert.deepStrictEqual(found, false);
@@ -203,7 +202,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
 
@@ -212,14 +211,14 @@ integrationTests(__filename, () => {
       // Checks creation
       assert.deepStrictEqual(createdStatut.nom_apprenant, sampleNom);
       assert.deepStrictEqual(createdStatut.prenom_apprenant, samplePrenom);
-      assert.deepStrictEqual(createdStatut.id_formation, validCfd);
+      assert.deepStrictEqual(createdStatut.formation_cfd, validCfd);
       assert.deepStrictEqual(createdStatut.uai_etablissement, validUai);
 
       // Checks exists method
       const found = await existsStatut({
         nom_apprenant: createRandomStatutCandidat.nom_apprenant,
         prenom_apprenant: createRandomStatutCandidat.prenom_apprenant,
-        id_formation: createRandomStatutCandidat.id_formation,
+        formation_cfd: createRandomStatutCandidat.formation_cfd,
         uai_etablissement: "BAD_UAI",
       });
       assert.deepStrictEqual(found, false);
@@ -227,51 +226,52 @@ integrationTests(__filename, () => {
   });
 
   describe("getStatut", () => {
-    it("Vérifie la récupération d'un statut sur nom, prenom, id_formation & uai_etablissement", async () => {
+    it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd & uai_etablissement", async () => {
       const { getStatut } = await statutsCandidats();
 
-      const toAdd = new StatutCandidat(statutsTest[0]);
+      const randomStatut = createRandomStatutCandidat();
+      const toAdd = new StatutCandidat(randomStatut);
       await toAdd.save();
 
       // Checks exists method
       const found = await getStatut({
-        nom_apprenant: toAdd.nom_apprenant,
-        prenom_apprenant: toAdd.prenom_apprenant,
-        id_formation: toAdd.id_formation,
-        uai_etablissement: toAdd.uai_etablissement,
+        nom_apprenant: randomStatut.nom_apprenant,
+        prenom_apprenant: randomStatut.prenom_apprenant,
+        formation_cfd: randomStatut.formation_cfd,
+        uai_etablissement: randomStatut.uai_etablissement,
       });
 
       assert.notDeepStrictEqual(found, null);
-      assert.strictEqual(found.ine_apprenant, statutsTest[0].ine_apprenant);
-      assert.strictEqual(found.nom_apprenant, statutsTest[0].nom_apprenant);
-      assert.strictEqual(found.prenom_apprenant, statutsTest[0].prenom_apprenant);
-      assert.strictEqual(found.prenom2_apprenant, null);
-      assert.strictEqual(found.prenom3_apprenant, null);
-      assert.strictEqual(found.ne_pas_solliciter, statutsTest[0].ne_pas_solliciter);
-      assert.strictEqual(found.email_contact, statutsTest[0].email_contact);
-      assert.strictEqual(found.nom_representant_legal, statutsTest[0].nom_representant_legal);
-      assert.strictEqual(found.tel_representant_legal, statutsTest[0].tel_representant_legal);
-      assert.strictEqual(found.tel2_representant_legal, statutsTest[0].tel2_representant_legal);
-      assert.strictEqual(found.id_formation, statutsTest[0].id_formation);
-      assert.strictEqual(found.libelle_court_formation, statutsTest[0].libelle_court_formation);
-      assert.strictEqual(found.libelle_long_formation, statutsTest[0].libelle_long_formation);
-      assert.strictEqual(found.uai_etablissement, statutsTest[0].uai_etablissement);
-      assert.strictEqual(found.siret_etablissement, statutsTest[0].siret_etablissement);
-      assert.strictEqual(found.nom_etablissement, statutsTest[0].nom_etablissement);
-      assert.strictEqual(found.statut_apprenant, statutsTest[0].statut_apprenant);
+      assert.strictEqual(found.ine_apprenant, randomStatut.ine_apprenant);
+      assert.strictEqual(found.nom_apprenant, randomStatut.nom_apprenant);
+      assert.strictEqual(found.prenom_apprenant, randomStatut.prenom_apprenant);
+      assert.strictEqual(found.prenom2_apprenant, randomStatut.prenom2_apprenant);
+      assert.strictEqual(found.prenom3_apprenant, randomStatut.prenom3_apprenant);
+      assert.strictEqual(found.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
+      assert.strictEqual(found.email_contact, randomStatut.email_contact);
+      assert.strictEqual(found.nom_representant_legal, randomStatut.nom_representant_legal);
+      assert.strictEqual(found.tel_representant_legal, randomStatut.tel_representant_legal);
+      assert.strictEqual(found.tel2_representant_legal, randomStatut.tel2_representant_legal);
+      assert.strictEqual(found.formation_cfd, randomStatut.formation_cfd);
+      assert.strictEqual(found.libelle_court_formation, randomStatut.libelle_court_formation);
+      assert.strictEqual(found.libelle_long_formation, randomStatut.libelle_long_formation);
+      assert.strictEqual(found.uai_etablissement, randomStatut.uai_etablissement);
+      assert.strictEqual(found.siret_etablissement, randomStatut.siret_etablissement);
+      assert.strictEqual(found.nom_etablissement, randomStatut.nom_etablissement);
+      assert.strictEqual(found.statut_apprenant, randomStatut.statut_apprenant);
     });
 
     it("Vérifie la mauvaise récupération d'un statut sur mauvais nom", async () => {
       const { getStatut } = await statutsCandidats();
 
-      const toAdd = new StatutCandidat(statutsTest[0]);
+      const toAdd = new StatutCandidat(createRandomStatutCandidat());
       await toAdd.save();
 
       // Checks exists method
       const found = await getStatut({
         nom_apprenant: "BAD_NOM",
         prenom_apprenant: toAdd.prenom_apprenant,
-        id_formation: toAdd.id_formation,
+        formation_cfd: toAdd.formation_cfd,
         uai_etablissement: toAdd.uai_etablissement,
       });
       assert.strictEqual(found, null);
@@ -280,20 +280,20 @@ integrationTests(__filename, () => {
     it("Vérifie la mauvaise récupération d'un statut sur mauvais prenom", async () => {
       const { getStatut } = await statutsCandidats();
 
-      const toAdd = new StatutCandidat(statutsTest[0]);
+      const toAdd = new StatutCandidat(createRandomStatutCandidat());
       await toAdd.save();
 
       // Checks exists method
       const found = await getStatut({
         nom_apprenant: toAdd.nom_apprenant,
         prenom_apprenant: "BAD_PRENOM",
-        id_formation: toAdd.id_formation,
+        formation_cfd: toAdd.formation_cfd,
         uai_etablissement: toAdd.uai_etablissement,
       });
       assert.strictEqual(found, null);
     });
 
-    it("Vérifie la mauvaise récupération d'un statut sur un mauvais id_formation", async () => {
+    it("Vérifie la mauvaise récupération d'un statut sur un mauvais formation_cfd", async () => {
       const { getStatut } = await statutsCandidats();
 
       const toAdd = new StatutCandidat(statutsTest[0]);
@@ -303,7 +303,7 @@ integrationTests(__filename, () => {
       const found = await getStatut({
         nom_apprenant: toAdd.nom_apprenant,
         prenom_apprenant: toAdd.prenom_apprenant,
-        id_formation: "BAD_ID_FORMATION",
+        formation_cfd: "BAD_ID_FORMATION",
         uai_etablissement: toAdd.uai_etablissement,
       });
       assert.deepStrictEqual(found, null);
@@ -319,7 +319,7 @@ integrationTests(__filename, () => {
       const found = await getStatut({
         nom_apprenant: toAdd.nom_apprenant,
         prenom_apprenant: toAdd.prenom_apprenant,
-        id_formation: toAdd.id_formation,
+        formation_cfd: toAdd.formation_cfd,
         uai_etablissement: "BAD_UAI",
       });
       assert.strictEqual(found, null);
@@ -345,7 +345,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(foundAdded.prenom_apprenant, statutsTestUpdate[3].prenom_apprenant);
       assert.strictEqual(foundAdded.ne_pas_solliciter, statutsTestUpdate[3].ne_pas_solliciter);
       assert.strictEqual(foundAdded.email_contact, statutsTestUpdate[3].email_contact);
-      assert.strictEqual(foundAdded.id_formation, statutsTestUpdate[3].id_formation);
+      assert.strictEqual(foundAdded.formation_cfd, statutsTestUpdate[3].formation_cfd);
       assert.strictEqual(foundAdded.uai_etablissement, statutsTestUpdate[3].uai_etablissement);
       assert.strictEqual(foundAdded.siret_etablissement, statutsTestUpdate[3].siret_etablissement);
       assert.strictEqual(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
@@ -366,7 +366,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(firstUpdated.tel_representant_legal, statutsTestUpdate[0].tel_representant_legal);
       assert.strictEqual(firstUpdated.tel2_representant_legal, statutsTestUpdate[0].tel2_representant_legal);
       assert.strictEqual(firstUpdated.nom_representant_legal, statutsTestUpdate[0].nom_representant_legal);
-      assert.strictEqual(firstUpdated.id_formation, statutsTestUpdate[0].id_formation);
+      assert.strictEqual(firstUpdated.formation_cfd, statutsTestUpdate[0].formation_cfd);
       assert.strictEqual(firstUpdated.libelle_court_formation, statutsTestUpdate[0].libelle_court_formation);
       assert.strictEqual(firstUpdated.libelle_long_formation, statutsTestUpdate[0].libelle_long_formation);
       assert.strictEqual(firstUpdated.uai_etablissement, statutsTestUpdate[0].uai_etablissement);
@@ -382,7 +382,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(secondUpdated.prenom_apprenant, statutsTestUpdate[1].prenom_apprenant);
       assert.strictEqual(secondUpdated.ne_pas_solliciter, statutsTestUpdate[1].ne_pas_solliciter);
       assert.strictEqual(secondUpdated.email_contact, statutsTestUpdate[1].email_contact);
-      assert.strictEqual(secondUpdated.id_formation, statutsTestUpdate[1].id_formation);
+      assert.strictEqual(secondUpdated.formation_cfd, statutsTestUpdate[1].formation_cfd);
       assert.strictEqual(secondUpdated.uai_etablissement, statutsTestUpdate[1].uai_etablissement);
       assert.strictEqual(secondUpdated.siret_etablissement, statutsTestUpdate[1].siret_etablissement);
       assert.strictEqual(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
@@ -395,7 +395,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(thirdUpdated.prenom_apprenant, statutsTestUpdate[2].prenom_apprenant);
       assert.strictEqual(thirdUpdated.ne_pas_solliciter, statutsTestUpdate[2].ne_pas_solliciter);
       assert.strictEqual(thirdUpdated.email_contact, statutsTestUpdate[2].email_contact);
-      assert.strictEqual(thirdUpdated.id_formation, statutsTestUpdate[2].id_formation);
+      assert.strictEqual(thirdUpdated.formation_cfd, statutsTestUpdate[2].formation_cfd);
       assert.strictEqual(thirdUpdated.uai_etablissement, statutsTestUpdate[2].uai_etablissement);
       assert.strictEqual(thirdUpdated.siret_etablissement, statutsTestUpdate[2].siret_etablissement);
       assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
@@ -490,7 +490,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
@@ -527,7 +527,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
@@ -550,7 +550,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(found.updated_at, null);
     });
 
-    it("Vérifie qu'on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un id_formation différent", async () => {
+    it("Vérifie qu'on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un formation_cfd différent", async () => {
       const { addOrUpdateStatuts } = await statutsCandidats();
 
       const sampleNom = "SMITH";
@@ -564,7 +564,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
@@ -572,7 +572,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(firstCallResult.updated.length, 0);
 
       // send the same statut but with a different cfd
-      const sameStatutWithDifferentCfd = { ...uniqueStatutToCreate, id_formation: validCfd2 };
+      const sameStatutWithDifferentCfd = { ...uniqueStatutToCreate, formation_cfd: validCfd2 };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentCfd]);
 
       // a new statut should have been created
@@ -583,7 +583,7 @@ integrationTests(__filename, () => {
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.id_formation, validCfd);
+      assert.deepStrictEqual(found.formation_cfd, validCfd);
       assert.strictEqual(found.updated_at, null);
     });
 
@@ -601,7 +601,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
@@ -639,7 +639,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
         periode_formation: samplePeriode,
       };
@@ -678,7 +678,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
         annee_formation: sampleAnnee,
       };
@@ -717,7 +717,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
         siret_etablissement,
       };
@@ -757,7 +757,7 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         nom_apprenant: sampleNom,
         prenom_apprenant: samplePrenom,
-        id_formation: validCfd,
+        formation_cfd: validCfd,
         uai_etablissement: validUai,
         email_contact: sampleEmail,
       };
@@ -803,7 +803,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(updatedStatut.prenom_apprenant, simpleStatutBadUpdate.prenom_apprenant);
       assert.strictEqual(updatedStatut.ne_pas_solliciter, simpleStatutBadUpdate.ne_pas_solliciter);
       assert.strictEqual(updatedStatut.email_contact, simpleStatutBadUpdate.email_contact);
-      assert.strictEqual(updatedStatut.id_formation, simpleStatutBadUpdate.id_formation);
+      assert.strictEqual(updatedStatut.formation_cfd, simpleStatutBadUpdate.formation_cfd);
       assert.strictEqual(updatedStatut.uai_etablissement, simpleStatutBadUpdate.uai_etablissement);
       assert.strictEqual(updatedStatut.siret_etablissement, simpleStatutBadUpdate.siret_etablissement);
       assert.strictEqual(updatedStatut.statut_apprenant, simpleStatutBadUpdate.statut_apprenant);
@@ -893,7 +893,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatutJson.nom_representant_legal, randomStatut.nom_representant_legal);
       assert.strictEqual(createdStatutJson.tel_representant_legal, randomStatut.tel_representant_legal);
       assert.strictEqual(createdStatutJson.tel2_representant_legal, randomStatut.tel2_representant_legal);
-      assert.strictEqual(createdStatutJson.id_formation, randomStatut.id_formation);
+      assert.strictEqual(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
       assert.strictEqual(createdStatutJson.libelle_court_formation, randomStatut.libelle_court_formation);
       assert.strictEqual(createdStatutJson.libelle_long_formation, randomStatut.libelle_long_formation);
       assert.strictEqual(createdStatutJson.uai_etablissement, randomStatut.uai_etablissement);
@@ -947,20 +947,20 @@ integrationTests(__filename, () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const invalidCfd = "0123";
-      const statutWithInvalidUai = { ...createRandomStatutCandidat(), id_formation: invalidCfd };
+      const statutWithInvalidUai = { ...createRandomStatutCandidat(), formation_cfd: invalidCfd };
       const createdStatut = await createStatutCandidat(statutWithInvalidUai);
 
-      assert.strictEqual(createdStatut.id_formation_valid, false);
+      assert.strictEqual(createdStatut.formation_cfd_valid, false);
     });
 
     it("Vérifie la création d'un statut avec un cfd valide", async () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const validCfd = "abcd1234";
-      const statutWithInvalidUai = { ...createRandomStatutCandidat(), id_formation: validCfd };
+      const statutWithInvalidUai = { ...createRandomStatutCandidat(), formation_cfd: validCfd };
       const createdStatut = await createStatutCandidat(statutWithInvalidUai);
 
-      assert.strictEqual(createdStatut.id_formation_valid, true);
+      assert.strictEqual(createdStatut.formation_cfd_valid, true);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
@@ -1056,7 +1056,7 @@ integrationTests(__filename, () => {
 
       // Create statut
       const cfd = "01022104";
-      const statutWithValidCfd = { ...createRandomStatutCandidat(), id_formation: cfd };
+      const statutWithValidCfd = { ...createRandomStatutCandidat(), formation_cfd: cfd };
       const createdStatut = await createStatutCandidat(statutWithValidCfd);
 
       assert.ok(createdStatut);
@@ -1074,7 +1074,7 @@ integrationTests(__filename, () => {
       const formation = await new Formation({ cfd }).save();
 
       // Create statut
-      const statutWithValidCfd = { ...createRandomStatutCandidat(), id_formation: cfd };
+      const statutWithValidCfd = { ...createRandomStatutCandidat(), formation_cfd: cfd };
       const createdStatut = await createStatutCandidat(statutWithValidCfd);
 
       assert.ok(createdStatut);
@@ -1089,121 +1089,59 @@ integrationTests(__filename, () => {
     it("Vérifie la récupération des doublons de statuts candidats", async () => {
       const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
 
-      const uaiToTest = "0762518Z";
-      const idFormationToTest = "01022103";
-
-      const duplicates = [];
-
-      // Create 10 random duplicates for uai & idFormation
-      const firstRandomStatut = await createRandomStatutCandidat();
+      // Create 10 random statuts
       for (let index = 0; index < 10; index++) {
-        duplicates.push({
-          ...firstRandomStatut,
-          ...{
-            id_formation: idFormationToTest,
-            uai_etablissement: uaiToTest,
-            periode_formation: getRandomPeriodeFormation(),
-            date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-          },
-        });
+        await createStatutCandidat(createRandomStatutCandidat());
       }
 
-      // Create 10 others random duplicates for uai & idFormation
-      const secondRandomStatut = await createRandomStatutCandidat();
-      for (let index = 0; index < 10; index++) {
-        duplicates.push({
-          ...secondRandomStatut,
-          ...{
-            id_formation: idFormationToTest,
-            uai_etablissement: uaiToTest,
-            periode_formation: getRandomPeriodeFormation(),
-            date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-          },
-        });
+      // Create 3 duplicates
+      const commonData = {
+        formation_cfd: "01022103",
+        uai_etablissement: "0762518Z",
+        prenom_apprenant: "Jean",
+        nom_apprenant: "Dupont",
+      };
+      for (let index = 0; index < 3; index++) {
+        const toAdd = new StatutCandidat(createRandomStatutCandidat(commonData));
+        await toAdd.save();
       }
 
-      // Add each duplicates to db
-      for (const key in duplicates) {
-        const toAdd = duplicates[key];
-        await createStatutCandidat(toAdd);
-      }
+      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.unique.code);
 
-      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.periode_formation.code, {
-        uai_etablissement: uaiToTest,
-      });
-
-      assert.ok(duplicatesListFound);
-      assert.ok(duplicatesListFound.data);
-      assert.deepStrictEqual(duplicatesListFound.data.length, 1);
-      assert.ok(duplicatesListFound.data[0]);
-      assert.deepStrictEqual(duplicatesListFound.data[0].uai, uaiToTest);
-      assert.deepStrictEqual(duplicatesListFound.data[0].nbDuplicates, 2);
+      // 1 cas de doublons trouvé
+      assert.equal(duplicatesListFound.length, 1);
+      assert.equal(duplicatesListFound[0].duplicatesCount, 3);
+      assert.equal(duplicatesListFound[0].duplicatesIds.length, 3);
+      assert.deepEqual(duplicatesListFound[0].commonData, commonData);
     });
 
-    it("Vérifie la récupération en détail des doublons de statuts candidats", async () => {
+    it("Vérifie la récupération de statuts candidats ayant le même nom_apprenant, uai_etablissement, formation_cfd", async () => {
       const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
 
-      const uaiToTest = "0762518Z";
-      const idFormationToTest = "01022103";
-      const firstPeriodeToTest = [2020, 2021];
-      const secondPeriodeToTest = [2021, 2022];
-
-      // Create duplicates for uai & idFormation
-      const randomDuplicate = await createRandomStatutCandidat();
-      const duplicatesForPeriode = [];
-
-      // Add random duplicate with periode [2020, 2021] && random date_metier_mise_a_jour_statut
-      duplicatesForPeriode.push({
-        ...randomDuplicate,
-        ...{
-          id_formation: idFormationToTest,
-          uai_etablissement: uaiToTest,
-          periode_formation: firstPeriodeToTest,
-          date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-        },
-      });
-
-      // Add random duplicate with periode [2021, 2022] && random date_metier_mise_a_jour_statut
-      duplicatesForPeriode.push({
-        ...randomDuplicate,
-        ...{
-          id_formation: idFormationToTest,
-          uai_etablissement: uaiToTest,
-          periode_formation: secondPeriodeToTest,
-          date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-        },
-      });
-
-      // Add each duplicates to db
-      for (const key in duplicatesForPeriode) {
-        const toAdd = duplicatesForPeriode[key];
-        await createStatutCandidat(toAdd);
+      // Create 10 random statuts
+      for (let index = 0; index < 10; index++) {
+        await createStatutCandidat(createRandomStatutCandidat());
       }
 
-      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.periode_formation.code, {
-        uai_etablissement: uaiToTest,
-      });
+      // Create 4 statuts with same nom_apprenant, uai_etablissement, formation_cfd
+      const commonData = {
+        formation_cfd: "01022103",
+        uai_etablissement: "0762518Z",
+        nom_apprenant: "Wachosky",
+      };
+      for (let index = 0; index < 4; index++) {
+        const toAdd = new StatutCandidat(createRandomStatutCandidat(commonData));
+        await toAdd.save();
+      }
 
-      // Check duplicates list
-      assert.ok(duplicatesListFound);
-      assert.ok(duplicatesListFound.data);
-      assert.deepStrictEqual(duplicatesListFound.data.length, 1);
-      assert.ok(duplicatesListFound.data[0]);
-      assert.deepStrictEqual(duplicatesListFound.data[0].uai, uaiToTest);
-      assert.deepStrictEqual(duplicatesListFound.data[0].nbDuplicates, 1);
-      assert.ok(duplicatesListFound.data[0].duplicates);
+      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.prenom_apprenant.code);
 
-      // Check duplicates periodes
-      assert.ok(duplicatesListFound.data[0].duplicates[0].periodes);
-      assert.deepStrictEqual(duplicatesListFound.data[0].duplicates[0].periodes.length, 2);
-      assert.deepStrictEqual(
-        duplicatesListFound.data[0].duplicates[0].periodes.some((item) => item.join() === firstPeriodeToTest.join()),
-        true
-      );
-      assert.deepStrictEqual(
-        duplicatesListFound.data[0].duplicates[0].periodes.some((item) => item.join() === secondPeriodeToTest.join()),
-        true
-      );
+      // 1 cas de doublons trouvé
+      assert.equal(duplicatesListFound.length, 1);
+      assert.equal(duplicatesListFound[0].duplicatesCount, 4);
+      assert.equal(duplicatesListFound[0].duplicatesIds.length, 4);
+      assert.deepEqual(duplicatesListFound[0].commonData, commonData);
+      assert.deepEqual(duplicatesListFound[0].discriminants.prenom_apprenants.length, 4);
     });
   });
 });

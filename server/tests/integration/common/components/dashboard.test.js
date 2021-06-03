@@ -220,7 +220,7 @@ integrationTests(__filename, () => {
     });
 
     it("Permet de récupérer les données d'effectifs pour une période et une formation via son cfd", async () => {
-      const filterQuery = { id_formation: "77929544300013" };
+      const filterQuery = { formation_cfd: "77929544300013" };
       await seedStatutsCandidats(filterQuery);
 
       // Search params & expected results
@@ -238,7 +238,7 @@ integrationTests(__filename, () => {
       assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
 
       // Check for another cfd filter
-      const badFilterQuery = { id_formation: "99" };
+      const badFilterQuery = { formation_cfd: "99" };
       const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
       assert.deepEqual(nbStatutsBadFilter, {
         [codesStatutsCandidats.apprenti]: { count: 0 },
@@ -281,7 +281,7 @@ integrationTests(__filename, () => {
     });
 
     it("Permet de récupérer les données d'effectifs pour une date, pour une formation et une région", async () => {
-      const filterQuery = { id_formation: "77929544300013", etablissement_num_region: "84" };
+      const filterQuery = { formation_cfd: "77929544300013", etablissement_num_region: "84" };
       await seedStatutsCandidats(filterQuery);
 
       // Search params & expected results
@@ -310,7 +310,7 @@ integrationTests(__filename, () => {
       });
 
       // Check for another filter
-      const badFilterQuery2 = { ...filterQuery, id_formation: "123445" };
+      const badFilterQuery2 = { ...filterQuery, formation_cfd: "123445" };
       const nbStatutsBadFilter2 = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery2);
       assert.deepEqual(nbStatutsBadFilter2, {
         [codesStatutsCandidats.apprenti]: { count: 0 },
@@ -365,7 +365,7 @@ integrationTests(__filename, () => {
     const { getEffectifsCountByCfaAtDate } = dashboardComponent();
 
     it("Permet de récupérer les effectifs par CFA à une date donnée pour une formation", async () => {
-      const filterQuery = { id_formation: "77929544300013" };
+      const filterQuery = { formation_cfd: "77929544300013" };
       const cfa1 = {
         siret_etablissement: "00690630980544",
         uai_etablissement: "0123456Z",
@@ -377,7 +377,7 @@ integrationTests(__filename, () => {
         nom_etablissement: "CFA 2",
       };
       await seedStatutsCandidats({ ...filterQuery, ...cfa1 });
-      await seedStatutsCandidats({ id_formation: "12345", ...cfa1 });
+      await seedStatutsCandidats({ formation_cfd: "12345", ...cfa1 });
       await seedStatutsCandidats({ ...filterQuery, ...cfa2 });
       await seedStatutsCandidats({ ...filterQuery, ...cfa2 });
 
@@ -405,6 +405,74 @@ integrationTests(__filename, () => {
       // we will sort results because we don't care of the order in the test
       const sortBySiret = (a, b) => Number(a.siret_etablissement) - Number(b.siret_etablissement);
       assert.deepEqual(effectifsByCfa.sort(sortBySiret), expectedResult);
+    });
+  });
+
+  describe("computeNouveauxContratsApprentissageForDateRange", () => {
+    const { computeNouveauxContratsApprentissageForDateRange } = dashboardComponent();
+
+    beforeEach(async () => {
+      const statuts = [
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 2, date_statut: new Date("2021-02-01T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2021-06-13T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2021-09-13T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2021-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 1, date_statut: new Date("2021-03-22T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2021-03-29T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 1, date_statut: new Date("2021-04-21T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2021-04-24T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2021-04-30T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 2, date_statut: new Date("2020-12-20T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-12-29T00:00:00") },
+            { valeur_statut: 0, date_statut: new Date("2021-01-07T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: 2, date_statut: new Date("2020-02-01T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-06-13T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [{ valeur_statut: 3, date_statut: new Date("2021-05-15T00:00:00") }],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [{ valeur_statut: 2, date_statut: new Date("2020-05-15T00:00:00") }],
+        }),
+      ];
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+    });
+
+    [
+      { dateRange: [new Date("2021-01-01T00:00:00"), new Date("2021-12-31T00:00:00")], expectedCount: 4 },
+      { dateRange: [new Date("2020-01-01T00:00:00"), new Date("2020-12-31T00:00:00")], expectedCount: 3 },
+      { dateRange: [new Date("2020-07-01T00:00:00"), new Date("2021-06-30T00:00:00")], expectedCount: 5 },
+      { dateRange: [new Date("2019-07-01T00:00:00"), new Date("2020-06-30T00:00:00")], expectedCount: 1 },
+      { dateRange: [new Date("2019-07-01T00:00:00"), new Date("2019-12-31T00:00:00")], expectedCount: 0 },
+    ].forEach(({ dateRange, expectedCount }) => {
+      it(`computes number of new contracts for date range ${dateRange[0].toLocaleDateString()} - ${dateRange[1].toLocaleDateString()}`, async () => {
+        const count = await computeNouveauxContratsApprentissageForDateRange(dateRange);
+        assert.equal(count, expectedCount);
+      });
     });
   });
 });

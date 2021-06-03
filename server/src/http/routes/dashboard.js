@@ -15,7 +15,7 @@ module.exports = ({ stats, dashboard }) => {
     endDate: Joi.date().required(),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
-    id_formation: Joi.string().allow(null, ""),
+    formation_cfd: Joi.string().allow(null, ""),
     siret_etablissement: Joi.string().allow(null, ""),
     etablissement_reseaux: Joi.string().allow(null, ""),
   });
@@ -32,7 +32,7 @@ module.exports = ({ stats, dashboard }) => {
    */
   const dashboardEffectifsByCfaBodySchema = Joi.object({
     date: Joi.date().required(),
-    id_formation: Joi.string().allow(null, ""),
+    formation_cfd: Joi.string().allow(null, ""),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
     etablissement_reseaux: Joi.string().allow(null, ""),
