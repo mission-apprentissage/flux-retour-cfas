@@ -10,7 +10,7 @@ let args = [];
 /**
  * Ce script permet de créer un export contenant tous les doublons des statuts identifiés
  * Ce script prends plusieurs paramètres en argument :
- * --duplicatesTypeCode : types de doublons à identifier : -1/1/2/3/4/5 cf duplicatesTypesCodes
+ * --duplicatesTypeCode : types de doublons à identifier : 1/2/3/4 cf duplicatesTypesCodes
  * --mode : forAll / forRegion / forUai
  *   permets d'identifier les doublons dans toute la BDD / pour une région / pour un UAI
  * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
@@ -24,14 +24,13 @@ runScript(async ({ statutsCandidats }) => {
       "--mode": String,
       "--regionCode": String,
       "--uai": String,
-      "--emailContact": String,
       "--allowDiskUse": Boolean,
     },
     { argv: process.argv.slice(2) }
   );
 
   if (!args["--duplicatesTypeCode"])
-    throw new Error("missing required argument: --duplicatesTypeCode  (should be in [0/1/2/3/4/5])");
+    throw new Error("missing required argument: --duplicatesTypeCode  (should be in [1/2/3/4])");
 
   if (!args["--mode"])
     throw new Error("missing required argument: --mode  (should be in [forAll / forRegion / forUai])");
@@ -41,29 +40,17 @@ runScript(async ({ statutsCandidats }) => {
 
   switch (args["--mode"]) {
     case "forAll":
-      await identifyAll(statutsCandidats, args["--duplicatesTypeCode"], args["--emailContact"], allowDiskUseMode);
+      await identifyAll(statutsCandidats, args["--duplicatesTypeCode"], allowDiskUseMode);
       break;
 
     case "forRegion":
       if (!args["--regionCode"]) throw new Error("missing required argument: --regionCode");
-      await identifyForRegion(
-        statutsCandidats,
-        args["--duplicatesTypeCode"],
-        args["--regionCode"],
-        args["--emailContact"],
-        allowDiskUseMode
-      );
+      await identifyForRegion(statutsCandidats, args["--duplicatesTypeCode"], args["--regionCode"], allowDiskUseMode);
       break;
 
     case "forUai":
       if (!args["--uai"]) throw new Error("missing required argument: --uai");
-      await identifyForUai(
-        statutsCandidats,
-        args["--duplicatesTypeCode"],
-        args["--uai"],
-        args["--emailContact"],
-        allowDiskUseMode
-      );
+      await identifyForUai(statutsCandidats, args["--duplicatesTypeCode"], args["--uai"], allowDiskUseMode);
       break;
 
     default:
@@ -79,10 +66,10 @@ runScript(async ({ statutsCandidats }) => {
  * @param {*} statutsCandidats
  * @param {*} duplicatesTypesCode
  */
-const identifyAll = async (statutsCandidats, duplicatesTypesCode, emailContact, allowDiskUseMode) => {
+const identifyAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMode) => {
   const allRegionsInStatutsCandidats = await StatutCandidat.distinct("etablissement_num_region");
   await asyncForEach(allRegionsInStatutsCandidats, async (currentCodeRegion) => {
-    await identifyForRegion(statutsCandidats, duplicatesTypesCode, currentCodeRegion, emailContact, allowDiskUseMode);
+    await identifyForRegion(statutsCandidats, duplicatesTypesCode, currentCodeRegion, allowDiskUseMode);
   });
 };
 
@@ -93,34 +80,25 @@ const identifyAll = async (statutsCandidats, duplicatesTypesCode, emailContact, 
  * @param {*} codeRegion
  * @returns
  */
-const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegion, emailContact, allowDiskUseMode) => {
+const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegion, allowDiskUseMode) => {
   logger.info(`Identifying all statuts duplicates for codeRegion : ${codeRegion}`);
 
-  const filterQuery = emailContact
-    ? { etablissement_num_region: codeRegion, email_contact: emailContact }
-    : {
-        etablissement_num_region: codeRegion,
-      };
+  const filterQuery = { etablissement_num_region: codeRegion };
 
-  const duplicatesForRegion = await identifyDuplicatesForFiltersGroupedByUai(
-    statutsCandidats,
+  const duplicatesForRegion = await statutsCandidats.getDuplicatesList(
     duplicatesTypesCode,
     filterQuery,
-    emailContact,
     allowDiskUseMode
   );
+  const timestamp = Date.now();
 
   // Log duplicates list
-  await asyncForEach(duplicatesForRegion, async (currentUaiList) => {
+  await asyncForEach(duplicatesForRegion, async (duplicate) => {
     await new DuplicateEvent({
       jobType: "identify-duplicates",
-      duplicatesInfo: {
-        region: codeRegion,
-        uai: currentUaiList.uai,
-        nbDuplicates: currentUaiList.duplicates.length,
-      },
-      args: args,
-      data: currentUaiList.duplicates,
+      args,
+      jobTimestamp: timestamp,
+      ...duplicate,
     }).save();
   });
 };
@@ -131,85 +109,21 @@ const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegi
  * @param {*} duplicatesTypesCode
  * @param {*} uai
  */
-const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai, emailContact, allowDiskUseMode) => {
+const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai, allowDiskUseMode) => {
   logger.info(`Identifying all statuts duplicates for uai : ${uai}`);
 
-  const filterQuery = emailContact
-    ? { uai_etablissement: uai, email_contact: emailContact }
-    : {
-        uai_etablissement: uai,
-      };
+  const filterQuery = { uai_etablissement: uai };
 
-  const duplicatesForUai = await identifyDuplicatesForFiltersGroupedByUai(
-    statutsCandidats,
-    duplicatesTypesCode,
-    filterQuery,
-    emailContact,
-    allowDiskUseMode
-  );
+  const duplicatesForUai = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filterQuery, allowDiskUseMode);
+  const timestamp = Date.now();
 
   // Log duplicates list
-  await asyncForEach(duplicatesForUai, async (currentUaiList) => {
+  await asyncForEach(duplicatesForUai, async (duplicate) => {
     await new DuplicateEvent({
       jobType: "identify-duplicates",
-      duplicatesInfo: {
-        uai: currentUaiList.uai,
-        nbDuplicates: currentUaiList.duplicates.length,
-      },
       args: args,
-      data: currentUaiList.duplicates,
+      jobTimestamp: timestamp,
+      ...duplicate,
     }).save();
   });
-};
-
-/**
- * Fonction d'identification de tous les doublons de type duplicatesTypesCode pour les filtres fournis en entrée
- * Retourne une liste regoupée par UAIs
- * @param {*} statutsCandidats
- * @param {*} duplicatesTypesCode
- * @param {*} filters
- * @returns
- */
-const identifyDuplicatesForFiltersGroupedByUai = async (
-  statutsCandidats,
-  duplicatesTypesCode,
-  filters = {},
-  allowDiskUseMode
-) => {
-  const duplicatesForType = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filters, allowDiskUseMode);
-  const duplicatesUaiGroup = [];
-
-  if (duplicatesForType.data) {
-    await asyncForEach(duplicatesForType.data, async (currentUaiData) => {
-      // Build current uai list
-      const duplicatesForUai = [];
-      currentUaiData.duplicates.forEach((currentDuplicate) => {
-        duplicatesForUai.push({
-          ine_apprenant: currentDuplicate._id.ine_apprenant,
-          nom_apprenant: currentDuplicate._id.nom_apprenant,
-          prenom_apprenant: currentDuplicate._id.prenom_apprenant,
-          prenom2_apprenant: currentDuplicate._id.prenom2_apprenant,
-          prenom3_apprenant: currentDuplicate._id.prenom3_apprenant,
-          email_contact: currentDuplicate._id.email_contact,
-          formation_cfd: currentDuplicate._id.formation_cfd,
-          uai_etablissement: currentDuplicate._id.uai_etablissement,
-          __periodes: JSON.stringify(currentDuplicate.periodes),
-          __ids_formations: JSON.stringify(currentDuplicate.ids_formations),
-          __emails_contact: JSON.stringify(currentDuplicate.emails_contact),
-          __INEs: JSON.stringify(currentDuplicate.ines),
-          __prenoms2: JSON.stringify(currentDuplicate.prenoms2_apprenants),
-          __prenoms3: JSON.stringify(currentDuplicate.prenoms3_apprenants),
-          __sirets: JSON.stringify(currentDuplicate.sirets),
-        });
-      });
-
-      // Add to uai group
-      duplicatesUaiGroup.push({
-        uai: currentUaiData.uai,
-        duplicates: duplicatesForUai,
-      });
-    });
-  }
-
-  return duplicatesUaiGroup;
 };

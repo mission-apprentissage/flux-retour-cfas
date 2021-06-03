@@ -1,29 +1,34 @@
 const { Schema } = require("mongoose");
 
-module.exports = new Schema({
-  date: {
-    type: Date,
-    default: () => new Date(),
-    description: "La date de l'evenement",
+module.exports = new Schema(
+  {
+    created_at: {
+      type: Date,
+      default: () => new Date(),
+    },
+    jobType: {
+      type: String,
+      default: null,
+      description: "Le type de job",
+    },
+    args: {
+      type: Object,
+      default: null,
+      description: "L'action ayant eu lieu",
+    },
+    commonData: {
+      type: Object,
+      required: true,
+      description: "Les données communes aux doublons",
+    },
+    duplicatesCount: {
+      type: Number,
+      required: true,
+    },
+    duplicatesIds: {
+      type: [String],
+      required: true,
+    },
   },
-  jobType: {
-    type: String,
-    default: null,
-    description: "Le type de job",
-  },
-  args: {
-    type: Object,
-    default: null,
-    description: "L'action ayant eu lieu",
-  },
-  duplicatesInfo: {
-    type: Object,
-    default: null,
-    description: "Les données des doublons",
-  },
-  data: {
-    type: Object,
-    default: null,
-    description: "Contenu des doublons",
-  },
-});
+  { strict: false }
+);

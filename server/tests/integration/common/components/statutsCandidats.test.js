@@ -1,5 +1,4 @@
-const assert = require("assert");
-const faker = require("faker/locale/fr");
+const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidat, Cfa, Formation } = require("../../../../src/common/model");
@@ -11,7 +10,7 @@ const {
   simpleStatutBadUpdate,
   simpleProspectStatut,
 } = require("../../../data/sample");
-const { createRandomStatutCandidat, getRandomPeriodeFormation } = require("../../../data/randomizedSample");
+const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 
@@ -1090,121 +1089,59 @@ integrationTests(__filename, () => {
     it("Vérifie la récupération des doublons de statuts candidats", async () => {
       const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
 
-      const uaiToTest = "0762518Z";
-      const idFormationToTest = "01022103";
-
-      const duplicates = [];
-
-      // Create 10 random duplicates for uai & idFormation
-      const firstRandomStatut = await createRandomStatutCandidat();
+      // Create 10 random statuts
       for (let index = 0; index < 10; index++) {
-        duplicates.push({
-          ...firstRandomStatut,
-          ...{
-            formation_cfd: idFormationToTest,
-            uai_etablissement: uaiToTest,
-            periode_formation: getRandomPeriodeFormation(),
-            date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-          },
-        });
+        await createStatutCandidat(createRandomStatutCandidat());
       }
 
-      // Create 10 others random duplicates for uai & idFormation
-      const secondRandomStatut = await createRandomStatutCandidat();
-      for (let index = 0; index < 10; index++) {
-        duplicates.push({
-          ...secondRandomStatut,
-          ...{
-            formation_cfd: idFormationToTest,
-            uai_etablissement: uaiToTest,
-            periode_formation: getRandomPeriodeFormation(),
-            date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-          },
-        });
+      // Create 3 duplicates
+      const commonData = {
+        formation_cfd: "01022103",
+        uai_etablissement: "0762518Z",
+        prenom_apprenant: "Jean",
+        nom_apprenant: "Dupont",
+      };
+      for (let index = 0; index < 3; index++) {
+        const toAdd = new StatutCandidat(createRandomStatutCandidat(commonData));
+        await toAdd.save();
       }
 
-      // Add each duplicates to db
-      for (const key in duplicates) {
-        const toAdd = duplicates[key];
-        await createStatutCandidat(toAdd);
-      }
+      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.unique.code);
 
-      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.periode_formation.code, {
-        uai_etablissement: uaiToTest,
-      });
-
-      assert.ok(duplicatesListFound);
-      assert.ok(duplicatesListFound.data);
-      assert.deepStrictEqual(duplicatesListFound.data.length, 1);
-      assert.ok(duplicatesListFound.data[0]);
-      assert.deepStrictEqual(duplicatesListFound.data[0].uai, uaiToTest);
-      assert.deepStrictEqual(duplicatesListFound.data[0].nbDuplicates, 2);
+      // 1 cas de doublons trouvé
+      assert.equal(duplicatesListFound.length, 1);
+      assert.equal(duplicatesListFound[0].duplicatesCount, 3);
+      assert.equal(duplicatesListFound[0].duplicatesIds.length, 3);
+      assert.deepEqual(duplicatesListFound[0].commonData, commonData);
     });
 
-    it("Vérifie la récupération en détail des doublons de statuts candidats", async () => {
+    it("Vérifie la récupération de statuts candidats ayant le même nom_apprenant, uai_etablissement, formation_cfd", async () => {
       const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
 
-      const uaiToTest = "0762518Z";
-      const idFormationToTest = "01022103";
-      const firstPeriodeToTest = [2020, 2021];
-      const secondPeriodeToTest = [2021, 2022];
-
-      // Create duplicates for uai & idFormation
-      const randomDuplicate = await createRandomStatutCandidat();
-      const duplicatesForPeriode = [];
-
-      // Add random duplicate with periode [2020, 2021] && random date_metier_mise_a_jour_statut
-      duplicatesForPeriode.push({
-        ...randomDuplicate,
-        ...{
-          formation_cfd: idFormationToTest,
-          uai_etablissement: uaiToTest,
-          periode_formation: firstPeriodeToTest,
-          date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-        },
-      });
-
-      // Add random duplicate with periode [2021, 2022] && random date_metier_mise_a_jour_statut
-      duplicatesForPeriode.push({
-        ...randomDuplicate,
-        ...{
-          formation_cfd: idFormationToTest,
-          uai_etablissement: uaiToTest,
-          periode_formation: secondPeriodeToTest,
-          date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-        },
-      });
-
-      // Add each duplicates to db
-      for (const key in duplicatesForPeriode) {
-        const toAdd = duplicatesForPeriode[key];
-        await createStatutCandidat(toAdd);
+      // Create 10 random statuts
+      for (let index = 0; index < 10; index++) {
+        await createStatutCandidat(createRandomStatutCandidat());
       }
 
-      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.periode_formation.code, {
-        uai_etablissement: uaiToTest,
-      });
+      // Create 4 statuts with same nom_apprenant, uai_etablissement, formation_cfd
+      const commonData = {
+        formation_cfd: "01022103",
+        uai_etablissement: "0762518Z",
+        nom_apprenant: "Wachosky",
+      };
+      for (let index = 0; index < 4; index++) {
+        const toAdd = new StatutCandidat(createRandomStatutCandidat(commonData));
+        await toAdd.save();
+      }
 
-      // Check duplicates list
-      assert.ok(duplicatesListFound);
-      assert.ok(duplicatesListFound.data);
-      assert.deepStrictEqual(duplicatesListFound.data.length, 1);
-      assert.ok(duplicatesListFound.data[0]);
-      assert.deepStrictEqual(duplicatesListFound.data[0].uai, uaiToTest);
-      assert.deepStrictEqual(duplicatesListFound.data[0].nbDuplicates, 1);
-      assert.ok(duplicatesListFound.data[0].duplicates);
+      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.prenom_apprenant.code);
 
-      // Check duplicates periodes
-      assert.ok(duplicatesListFound.data[0].duplicates[0].periodes);
-      assert.deepStrictEqual(duplicatesListFound.data[0].duplicates[0].periodes.length, 2);
-      assert.deepStrictEqual(
-        duplicatesListFound.data[0].duplicates[0].periodes.some((item) => item.join() === firstPeriodeToTest.join()),
-        true
-      );
-      assert.deepStrictEqual(
-        duplicatesListFound.data[0].duplicates[0].periodes.some((item) => item.join() === secondPeriodeToTest.join()),
-        true
-      );
+      // 1 cas de doublons trouvé
+      assert.equal(duplicatesListFound.length, 1);
+      assert.equal(duplicatesListFound[0].duplicatesCount, 4);
+      assert.equal(duplicatesListFound[0].duplicatesIds.length, 4);
+      assert.deepEqual(duplicatesListFound[0].commonData, commonData);
+      assert.deepEqual(duplicatesListFound[0].discriminants.prenom_apprenants.length, 4);
     });
   });
 });

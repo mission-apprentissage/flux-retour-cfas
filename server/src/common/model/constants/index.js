@@ -165,37 +165,21 @@ const jobNames = {
  * Code pour les types de doublons identifiables
  */
 const duplicatesTypesCodes = {
-  all: {
-    name: "Tous",
-    code: -1,
-  },
-  periode_formation: {
-    name: "Periodes",
+  unique: {
+    name: "Uniques (clé d'unicité identique)",
     code: 1,
   },
   formation_cfd: {
     name: "CFDs",
     code: 2,
   },
-  ine: {
-    name: "INEs",
+  prenom_apprenant: {
+    name: "Prenom",
     code: 3,
   },
-  email_contact: {
-    name: "Emails",
+  nom_apprenant: {
+    name: "Nom",
     code: 4,
-  },
-  prenoms: {
-    name: "Prenoms",
-    code: 5,
-  },
-  sirets_empty: {
-    name: "SiretsVides",
-    code: 6,
-  },
-  sirets: {
-    name: "Sirets",
-    code: 7,
   },
 };
 
