@@ -85,24 +85,20 @@ const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegi
 
   const filterQuery = { etablissement_num_region: codeRegion };
 
-  const duplicatesForRegion = await identifyDuplicatesForFiltersGroupedByUai(
-    statutsCandidats,
+  const duplicatesForRegion = await statutsCandidats.getDuplicatesList(
     duplicatesTypesCode,
     filterQuery,
     allowDiskUseMode
   );
+  const timestamp = Date.now();
 
   // Log duplicates list
-  await asyncForEach(duplicatesForRegion, async (currentUaiList) => {
+  await asyncForEach(duplicatesForRegion, async (duplicate) => {
     await new DuplicateEvent({
       jobType: "identify-duplicates",
-      duplicatesInfo: {
-        region: codeRegion,
-        uai: currentUaiList.uai,
-        nbDuplicates: currentUaiList.duplicates.length,
-      },
-      args: args,
-      data: currentUaiList.duplicates,
+      args,
+      jobTimestamp: timestamp,
+      ...duplicate,
     }).save();
   });
 };
@@ -118,75 +114,16 @@ const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai, allowD
 
   const filterQuery = { uai_etablissement: uai };
 
-  const duplicatesForUai = await identifyDuplicatesForFiltersGroupedByUai(
-    statutsCandidats,
-    duplicatesTypesCode,
-    filterQuery,
-    allowDiskUseMode
-  );
+  const duplicatesForUai = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filterQuery, allowDiskUseMode);
+  const timestamp = Date.now();
 
   // Log duplicates list
-  await asyncForEach(duplicatesForUai, async (currentUaiList) => {
+  await asyncForEach(duplicatesForUai, async (duplicate) => {
     await new DuplicateEvent({
       jobType: "identify-duplicates",
-      duplicatesInfo: {
-        uai: currentUaiList.uai,
-        nbDuplicates: currentUaiList.duplicates.length,
-      },
       args: args,
-      data: currentUaiList.duplicates,
+      jobTimestamp: timestamp,
+      ...duplicate,
     }).save();
   });
-};
-
-/**
- * Fonction d'identification de tous les doublons de type duplicatesTypesCode pour les filtres fournis en entrée
- * Retourne une liste regoupée par UAIs
- * @param {*} statutsCandidats
- * @param {*} duplicatesTypesCode
- * @param {*} filters
- * @returns
- */
-const identifyDuplicatesForFiltersGroupedByUai = async (
-  statutsCandidats,
-  duplicatesTypesCode,
-  filters = {},
-  allowDiskUseMode
-) => {
-  const duplicatesForType = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filters, allowDiskUseMode);
-  const duplicatesUaiGroup = [];
-
-  if (duplicatesForType.data) {
-    await asyncForEach(duplicatesForType.data, async (currentUaiData) => {
-      // Build current uai list
-      const duplicatesForUai = [];
-      currentUaiData.duplicates.forEach((currentDuplicate) => {
-        duplicatesForUai.push({
-          ine_apprenant: currentDuplicate._id.ine_apprenant,
-          nom_apprenant: currentDuplicate._id.nom_apprenant,
-          prenom_apprenant: currentDuplicate._id.prenom_apprenant,
-          prenom2_apprenant: currentDuplicate._id.prenom2_apprenant,
-          prenom3_apprenant: currentDuplicate._id.prenom3_apprenant,
-          email_contact: currentDuplicate._id.email_contact,
-          formation_cfd: currentDuplicate._id.formation_cfd,
-          uai_etablissement: currentDuplicate._id.uai_etablissement,
-          __periodes: JSON.stringify(currentDuplicate.periodes),
-          __ids_formations: JSON.stringify(currentDuplicate.ids_formations),
-          __emails_contact: JSON.stringify(currentDuplicate.emails_contact),
-          __INEs: JSON.stringify(currentDuplicate.ines),
-          __prenoms2: JSON.stringify(currentDuplicate.prenoms2_apprenants),
-          __prenoms3: JSON.stringify(currentDuplicate.prenoms3_apprenants),
-          __sirets: JSON.stringify(currentDuplicate.sirets),
-        });
-      });
-
-      // Add to uai group
-      duplicatesUaiGroup.push({
-        uai: currentUaiData.uai,
-        duplicates: duplicatesForUai,
-      });
-    });
-  }
-
-  return duplicatesUaiGroup;
 };

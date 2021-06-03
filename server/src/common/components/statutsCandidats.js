@@ -6,12 +6,10 @@ const {
 } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { paginate } = require("../utils/miscUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
-const groupBy = require("lodash.groupby");
 
 module.exports = () => ({
   existsStatut,
@@ -196,8 +194,6 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
         count: { $sum: 1 },
-        // Pour regroupement par uai
-        uai_etablissement: { $first: "$uai_etablissement" },
       };
       break;
 
@@ -213,8 +209,6 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         // Ajout des différents formation_cfd en doublon potentiel
         formation_cfds: { $addToSet: "$formation_cfd" },
         count: { $sum: 1 },
-        // Pour regroupement par uai
-        uai_etablissement: { $first: "$uai_etablissement" },
       };
       break;
 
@@ -230,8 +224,6 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         // Ajout des différentes prenom_apprenant en doublon potentiel
         prenom_apprenants: { $addToSet: "$prenom_apprenant" },
         count: { $sum: 1 },
-        // Pour regroupement par uai
-        uai_etablissement: { $first: "$uai_etablissement" },
       };
       break;
 
@@ -247,8 +239,6 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         // Ajout des différents nom_apprenant en doublon potentiel
         nom_apprenants: { $addToSet: "$nom_apprenant" },
         count: { $sum: 1 },
-        // Pour regroupement par uai
-        uai_etablissement: { $first: "$uai_etablissement" },
       };
       break;
 
@@ -285,34 +275,20 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
  * regroupés par UAI pour les filtres passés en paramètres
  * @param {*} duplicatesTypeCode
  * @param {*} filters
- * @param {*} page
- * @param {*} limit
+ * @param {*} allowDiskUse
  * @returns
  */
-const getDuplicatesList = async (duplicatesTypeCode, filters = {}, allowDiskUse = false, page = 1, limit = 10000) => {
+const getDuplicatesList = async (duplicatesTypeCode, filters = {}, allowDiskUse = false) => {
   // Récupération des doublons pour le type souhaité
   const duplicates = await findStatutsDuplicates(duplicatesTypeCode, filters, allowDiskUse);
 
-  // Pagination des statuts trouvés
-  const paginatedStatuts = paginate(duplicates, page, limit);
-
-  // Regroupement par uai_etablissement
-  const groupedDuplicates = groupBy(paginatedStatuts.data, "uai_etablissement");
-
-  // Construction d'un tableau avec uai, doublons et nb de doublons
-  const groupedData = Object.keys(groupedDuplicates).map((item) => ({
-    uai: item,
-    duplicates: groupedDuplicates[item],
-    nbDuplicates: groupedDuplicates[item].length,
-  }));
-
-  return {
-    data: groupedData,
-    page: paginatedStatuts.page,
-    per_page: paginatedStatuts.per_page,
-    pre_page: paginatedStatuts.pre_page,
-    next_page: paginatedStatuts.next_page,
-    total: paginatedStatuts.total,
-    total_pages: paginatedStatuts.total_pages,
-  };
+  return duplicates.map((duplicateItem) => {
+    const { _id, count, duplicatesIds, ...discriminants } = duplicateItem;
+    return {
+      commonData: _id,
+      duplicatesCount: count,
+      duplicatesIds: duplicatesIds,
+      discriminants,
+    };
+  });
 };
