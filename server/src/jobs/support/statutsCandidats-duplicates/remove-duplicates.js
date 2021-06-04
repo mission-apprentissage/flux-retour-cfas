@@ -104,6 +104,7 @@ const removeAllDuplicatesForRegion = async (statutsCandidats, codeRegion, duplic
     await new DuplicateEvent({
       jobType: "remove-duplicates",
       args,
+      filters: filterQuery,
       jobTimestamp,
       ...duplicate,
     }).save();
@@ -133,6 +134,7 @@ const removeAllDuplicatesForUai = async (statutsCandidats, uai, duplicatesTypesC
     await new DuplicateEvent({
       jobType: "remove-duplicates",
       args,
+      filters: filterQuery,
       jobTimestamp,
       ...duplicate,
     }).save();

@@ -96,6 +96,7 @@ const identifyForRegion = async (statutsCandidats, duplicatesTypesCode, codeRegi
   await asyncForEach(duplicatesForRegion, async (duplicate) => {
     await new DuplicateEvent({
       jobType: "identify-duplicates",
+      filters: filterQuery,
       args,
       jobTimestamp: timestamp,
       ...duplicate,
@@ -121,6 +122,7 @@ const identifyForUai = async (statutsCandidats, duplicatesTypesCode, uai, allowD
   await asyncForEach(duplicatesForUai, async (duplicate) => {
     await new DuplicateEvent({
       jobType: "identify-duplicates",
+      filters: filterQuery,
       args: args,
       jobTimestamp: timestamp,
       ...duplicate,
