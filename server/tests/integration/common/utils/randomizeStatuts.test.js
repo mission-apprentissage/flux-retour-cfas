@@ -24,9 +24,6 @@ integrationTests(__filename, () => {
       assert.equal(result.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.equal(result.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.equal(result.email_contact, randomStatut.email_contact);
-      assert.equal(result.nom_representant_legal, randomStatut.nom_representant_legal);
-      assert.equal(result.tel_representant_legal, randomStatut.tel_representant_legal);
-      assert.equal(result.tel2_representant_legal, randomStatut.tel2_representant_legal);
       assert.equal(result.formation_cfd, randomStatut.formation_cfd);
       assert.equal(result.libelle_court_formation, randomStatut.libelle_court_formation);
       assert.equal(result.libelle_long_formation, randomStatut.libelle_long_formation);
@@ -69,9 +66,6 @@ integrationTests(__filename, () => {
       assert.deepEqual(result.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.deepEqual(result.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.deepEqual(result.email_contact, randomStatut.email_contact);
-      assert.deepEqual(result.nom_representant_legal, randomStatut.nom_representant_legal);
-      assert.deepEqual(result.tel_representant_legal, randomStatut.tel_representant_legal);
-      assert.deepEqual(result.tel2_representant_legal, randomStatut.tel2_representant_legal);
       assert.deepEqual(result.formation_cfd, randomStatut.formation_cfd);
       assert.deepEqual(result.libelle_court_formation, randomStatut.libelle_court_formation);
       assert.deepEqual(result.libelle_long_formation, randomStatut.libelle_long_formation);

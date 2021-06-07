@@ -60,9 +60,6 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepEqual(foundStatut.prenom3_apprenant, input[0].prenom3_apprenant);
     assert.deepEqual(foundStatut.ne_pas_solliciter, input[0].ne_pas_solliciter);
     assert.deepEqual(foundStatut.email_contact, input[0].email_contact);
-    assert.deepEqual(foundStatut.nom_representant_legal, input[0].nom_representant_legal);
-    assert.deepEqual(foundStatut.tel_representant_legal, input[0].tel_representant_legal);
-    assert.deepEqual(foundStatut.tel2_representant_legal, input[0].tel2_representant_legal);
     assert.deepEqual(foundStatut.formation_cfd, input[0].id_formation);
     assert.deepEqual(foundStatut.libelle_court_formation, input[0].libelle_court_formation);
     assert.deepEqual(foundStatut.libelle_long_formation, input[0].libelle_long_formation);

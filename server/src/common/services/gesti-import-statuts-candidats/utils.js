@@ -17,9 +17,6 @@ const adaptGestiStatutCandidat = (gestiStatutCandidat) => {
     prenom2_apprenant: gestiStatutCandidat.prenom2_apprenant,
     prenom3_apprenant: gestiStatutCandidat.prenom3_apprenant,
     email_contact: gestiStatutCandidat.email_contact,
-    nom_representant_legal: gestiStatutCandidat.nom_representant_legal,
-    tel_representant_legal: gestiStatutCandidat.tel_representant_legal,
-    tel2_representant_legal: gestiStatutCandidat.tel2_representant_legal,
     libelle_court_formation: gestiStatutCandidat.libelle_court_formation,
     libelle_long_formation: gestiStatutCandidat.libelle_long_formation,
     uai_etablissement: gestiStatutCandidat.uai_etablissement,
@@ -48,9 +45,6 @@ const tempSchema = Joi.object({
   prenom3_apprenant: Joi.string().allow(null, ""),
   ne_pas_solliciter: Joi.boolean().required(),
   email_contact: Joi.string().allow(null, ""),
-  nom_representant_legal: Joi.string().allow(null, ""),
-  tel_representant_legal: Joi.string().allow(null, ""),
-  tel2_representant_legal: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().required(),
   libelle_court_formation: Joi.string().allow(null, ""),
   libelle_long_formation: Joi.string().allow(null, ""),
@@ -62,6 +56,11 @@ const tempSchema = Joi.object({
   source: Joi.string().allow(null, ""),
   periode_formation: Joi.array().items(Joi.number()).allow(null),
   annee_formation: Joi.number().allow(null),
+
+  // TODO remove when ERPs stop sending us this information
+  nom_representant_legal: Joi.string().allow(null, ""),
+  tel_representant_legal: Joi.string().allow(null, ""),
+  tel2_representant_legal: Joi.string().allow(null, ""),
 });
 
 const validateInput = (input) => {

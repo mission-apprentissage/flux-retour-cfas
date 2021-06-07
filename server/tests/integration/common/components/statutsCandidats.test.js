@@ -249,9 +249,6 @@ integrationTests(__filename, () => {
       assert.strictEqual(found.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.strictEqual(found.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.strictEqual(found.email_contact, randomStatut.email_contact);
-      assert.strictEqual(found.nom_representant_legal, randomStatut.nom_representant_legal);
-      assert.strictEqual(found.tel_representant_legal, randomStatut.tel_representant_legal);
-      assert.strictEqual(found.tel2_representant_legal, randomStatut.tel2_representant_legal);
       assert.strictEqual(found.formation_cfd, randomStatut.formation_cfd);
       assert.strictEqual(found.libelle_court_formation, randomStatut.libelle_court_formation);
       assert.strictEqual(found.libelle_long_formation, randomStatut.libelle_long_formation);
@@ -362,10 +359,6 @@ integrationTests(__filename, () => {
       assert.strictEqual(firstUpdated.prenom_apprenant, statutsTestUpdate[0].prenom_apprenant);
       assert.strictEqual(firstUpdated.ne_pas_solliciter, statutsTestUpdate[0].ne_pas_solliciter);
       assert.strictEqual(firstUpdated.email_contact, statutsTestUpdate[0].email_contact);
-      assert.strictEqual(firstUpdated.nom_representant_legal, statutsTestUpdate[0].nom_representant_legal);
-      assert.strictEqual(firstUpdated.tel_representant_legal, statutsTestUpdate[0].tel_representant_legal);
-      assert.strictEqual(firstUpdated.tel2_representant_legal, statutsTestUpdate[0].tel2_representant_legal);
-      assert.strictEqual(firstUpdated.nom_representant_legal, statutsTestUpdate[0].nom_representant_legal);
       assert.strictEqual(firstUpdated.formation_cfd, statutsTestUpdate[0].formation_cfd);
       assert.strictEqual(firstUpdated.libelle_court_formation, statutsTestUpdate[0].libelle_court_formation);
       assert.strictEqual(firstUpdated.libelle_long_formation, statutsTestUpdate[0].libelle_long_formation);
@@ -890,9 +883,6 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatutJson.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.strictEqual(createdStatutJson.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.strictEqual(createdStatutJson.email_contact, randomStatut.email_contact);
-      assert.strictEqual(createdStatutJson.nom_representant_legal, randomStatut.nom_representant_legal);
-      assert.strictEqual(createdStatutJson.tel_representant_legal, randomStatut.tel_representant_legal);
-      assert.strictEqual(createdStatutJson.tel2_representant_legal, randomStatut.tel2_representant_legal);
       assert.strictEqual(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
       assert.strictEqual(createdStatutJson.libelle_court_formation, randomStatut.libelle_court_formation);
       assert.strictEqual(createdStatutJson.libelle_long_formation, randomStatut.libelle_long_formation);
