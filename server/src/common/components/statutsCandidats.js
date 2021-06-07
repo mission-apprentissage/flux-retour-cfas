@@ -193,6 +193,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
+        etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         count: { $sum: 1 },
       };
       break;
@@ -206,6 +207,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
+        etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // Ajout des différents formation_cfd en doublon potentiel
         formation_cfds: { $addToSet: "$formation_cfd" },
         count: { $sum: 1 },
@@ -221,6 +223,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
+        etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // Ajout des différentes prenom_apprenant en doublon potentiel
         prenom_apprenants: { $addToSet: "$prenom_apprenant" },
         count: { $sum: 1 },
@@ -236,6 +239,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         },
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
+        etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // Ajout des différents nom_apprenant en doublon potentiel
         nom_apprenants: { $addToSet: "$nom_apprenant" },
         count: { $sum: 1 },

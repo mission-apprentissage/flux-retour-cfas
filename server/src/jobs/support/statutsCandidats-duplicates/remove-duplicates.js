@@ -14,7 +14,7 @@ let mongo;
  * Ce script permet de nettoyer les doublons des statuts identifiés
  * Ce script prends plusieurs paramètres en argument :
  * --duplicatesTypeCode : types de doublons à supprimer : 1/2/3/4 cf duplicatesTypesCodes
- * --mode : forAll / forRegion / forUai
+ * --mode : forAll / forUai
  *   permets de nettoyer les doublons dans toute la BDD / pour une région / pour un UAI
  * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
  * --uai : si mode forUai actif, permet de préciser l'uai souhaité
@@ -26,7 +26,6 @@ runScript(async ({ statutsCandidats, db }) => {
     {
       "--duplicatesTypeCode": Number,
       "--mode": String,
-      "--regionCode": String,
       "--uai": String,
       "--allowDiskUse": Boolean,
     },
@@ -47,16 +46,6 @@ runScript(async ({ statutsCandidats, db }) => {
       await removeAll(statutsCandidats, args["--duplicatesTypeCode"], allowDiskUseMode);
       break;
 
-    case "forRegion":
-      if (!args["--regionCode"]) throw new Error("missing required argument: --regionCode");
-      await removeAllDuplicatesForRegion(
-        statutsCandidats,
-        args["--regionCode"],
-        args["--duplicatesTypeCode"],
-        allowDiskUseMode
-      );
-      break;
-
     case "forUai":
       if (!args["--uai"]) throw new Error("missing required argument: --uai");
       await removeAllDuplicatesForUai(statutsCandidats, args["--uai"], args["--duplicatesTypeCode"], allowDiskUseMode);
@@ -75,22 +64,9 @@ runScript(async ({ statutsCandidats, db }) => {
  * @param {*} duplicatesTypesCode
  */
 const removeAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMode) => {
-  const allRegionsInStatutsCandidats = await StatutCandidat.distinct("etablissement_num_region");
-  await asyncForEach(allRegionsInStatutsCandidats, async (currentCodeRegion) => {
-    await removeAllDuplicatesForRegion(statutsCandidats, currentCodeRegion, duplicatesTypesCode, allowDiskUseMode);
-  });
-};
+  logger.info(`Removing all statuts duplicates`);
 
-/**
- * Supprime les doublons de type duplicatesTypesCode pour une région
- * @param {*} statutsCandidats
- * @param {*} codeRegion
- * @param {*} duplicatesTypesCode
- */
-const removeAllDuplicatesForRegion = async (statutsCandidats, codeRegion, duplicatesTypesCode, allowDiskUseMode) => {
-  logger.info(`Removing all statuts duplicates for codeRegion : ${codeRegion}`);
-
-  const filterQuery = { etablissement_num_region: codeRegion };
+  const filterQuery = {};
   const jobTimestamp = Date.now();
 
   const duplicatesRemoved = await removeStatutsCandidatsDuplicatesForFilters(
