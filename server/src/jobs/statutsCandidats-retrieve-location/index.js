@@ -22,9 +22,7 @@ runScript(async () => {
 
   await asyncForEach(allValidSirets, async (validSiret) => {
     // Get etablissementData from API Tables de correspondance
-    console.log("will call");
     const etablissementDataFromSiret = await getSiretInfo(validSiret);
-    console.log("siret", validSiret, etablissementDataFromSiret);
 
     if (!etablissementDataFromSiret) {
       unknownSiretInTco.push(validSiret);
