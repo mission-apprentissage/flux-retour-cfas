@@ -33,6 +33,11 @@ const withRepartitionEffectifsReseauParNiveauEtAnneeFormation = (Component) => {
 
     const searchParamsString = buildSearchParams(filters, page);
 
+    // if filters change, set page to 1
+    useEffect(() => {
+      setPage(1);
+    }, [JSON.stringify(filters)]);
+
     useEffect(() => {
       const fetchData = async () => {
         setLoading(true);
