@@ -13,7 +13,6 @@ let args = [];
  * --duplicatesTypeCode : types de doublons à identifier : 1/2/3/4 cf duplicatesTypesCodes
  * --mode : forAll / forUai
  *   permets d'identifier les doublons dans toute la BDD / pour une région / pour un UAI
- * --regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
  * --uai : si mode forUai actif, permet de préciser l'uai souhaité
  * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
  */
