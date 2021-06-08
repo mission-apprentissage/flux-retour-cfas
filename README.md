@@ -428,46 +428,36 @@ Il est possible de lancer un script d'identification de différents types de dou
 
 Ce script prend en arguments :
 
-- duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5/7
-- mode : forAll / forRegion / forUai le script va se lancer pour toute la base, pour une région ou un uai
-- regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
+- duplicatesTypeCode : types de doublons à identifier : 1/2/3/4
+- mode : forAll / forUai le script va se lancer pour toute la base ou un uai
 - uai : si mode forUai actif, permet de préciser l'uai souhaité
 - allowDiskUseMode : si mode allowDiskUseMode actif, permet d'utiliser l'option d'aggregation MongoDb allowDiskUse https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
-Exemple, identifier les doublons de type 1 (periode_formation) sur la région normandie (code 28) :
-docker exec -ti flux_retour_cfas_server bash -c `yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28`
+Exemple, identifier les doublons de type 1 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement/formation_cfd) sur toute la base :
 
-Exemple, identifier les doublons de type 2 sur la région normandie (code 28) avec l'utilisation d'allowDiskUse :
-docker exec -ti flux_retour_cfas_server bash -c `yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 2 --mode forRegion --regionCode 28 --allowDiskUse`
+```bash
+docker exec -ti flux_retour_cfas_server bash -c "yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forAll"
+```
+ 
+Exemple, identifier les doublons de type 2 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement mais formation_cfd différent) sur l'UAI 1234X avec l'utilisation d'allowDiskUse :
+
+```bash
+docker exec -ti flux_retour_cfas_server bash -c "yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 2 --mode forUai --uai 1234X --allowDiskUse"
+```
 
 ### Script de suppression des doublons
 
-Il est possible de lancer un script de suppression de différents types de doublons.
+Il est possible de lancer un script de suppression de différents types de doublons. Les statuts en doublons les moins récents seront supprimés et archivés dans la collection `statutsCandidatsDuplicatesRemoved`
 
 Ce script prend les mêmes arguments que le script d'identification :
 
-- duplicatesTypeCode : types de doublons à identifier : 0/1/2/3/4/5/7
-- mode : forAll / forRegion / forUai le script va se lancer pour toute la base, pour une région ou un uai
-- regionCode : si mode forRegion actif, permet de préciser le codeRegion souhaité
+- duplicatesTypeCode : types de doublons à identifier : 1/2/3/4
+- mode : forAll / forUai le script va se lancer pour toute la base ou un uai
 - uai : si mode forUai actif, permet de préciser l'uai souhaité
 - allowDiskUseMode : si mode allowDiskUseMode actif, permet d'utiliser l'option d'aggregation MongoDb allowDiskUse https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
-Exemple, supprimer les doublons de type 1 (periode_formation) sur la région normandie (code 28) :
-docker exec -ti flux_retour_cfas_server bash -c `yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28`
+Exemple, supprimer les doublons de type 1 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement/formation_cfd) sur toute la base :
 
-Exemple, supprimer les doublons de type 2 sur la région normandie (code 28) avec l'utilisation d'allowDiskUse :
-docker exec -ti flux_retour_cfas_server bash -c `yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forRegion --regionCode 28 --allowDiskUse`
-
-### Scripts d'identification & suppression des doublons de sirets vides
-
-Il est possible de lancer un script d'identification & suppression des doublons de sirets vides.
-
-Ces scripts prennent en argument :
-
-- allowDiskUseMode : si mode allowDiskUseMode actif, permet d'utiliser l'option d'aggregation MongoDb allowDiskUse https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
-
-Exemple, identifier les doublons de sirets vides :
-docker exec -ti flux_retour_cfas_server bash -c `yarn support:identify-empty-sirets-duplicates --allowDiskUse`
-
-Exemple, supprimer les doublons de sirets vides :
-docker exec -ti flux_retour_cfas_server bash -c `yarn support:remove-empty-sirets-duplicates --allowDiskUse`
+```bash
+docker exec -ti flux_retour_cfas_server bash -c "yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forAll"
+```
