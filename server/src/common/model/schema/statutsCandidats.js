@@ -37,21 +37,6 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Adresse mail de contact du jeune",
   },
-  nom_representant_legal: {
-    type: String,
-    default: null,
-    description: "Nom du représentant légal",
-  },
-  tel_representant_legal: {
-    type: String,
-    default: null,
-    description: "Numéro de tel du représentant légal du jeune",
-  },
-  tel2_representant_legal: {
-    type: String,
-    default: null,
-    description: "Numéro de tel du représentant légal du jeune",
-  },
   formation_cfd: {
     type: String,
     default: null,

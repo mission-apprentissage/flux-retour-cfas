@@ -32,10 +32,6 @@ const createRandomStatutCandidat = (params = null) => {
     ne_pas_solliciter: faker.random.boolean(),
     email_contact: faker.internet.email(),
 
-    nom_representant_legal: faker.random.boolean() ? faker.name.lastName().toUpperCase() : null,
-    tel_representant_legal: faker.random.boolean() ? faker.phone.phoneNumberFormat().trim().toUpperCase() : null,
-    tel2_representant_legal: faker.random.boolean() ? faker.phone.phoneNumberFormat().trim().toUpperCase() : null,
-
     formation_cfd: getRandomIdFormation(),
     libelle_court_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
     libelle_long_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
@@ -61,10 +57,6 @@ const createRandomStatutCandidatApiInput = () => {
     prenom3_apprenant: faker.random.boolean() ? faker.name.firstName().toUpperCase() : null,
     ne_pas_solliciter: faker.random.boolean(),
     email_contact: faker.internet.email(),
-
-    nom_representant_legal: faker.random.boolean() ? faker.name.lastName().toUpperCase() : null,
-    tel_representant_legal: faker.random.boolean() ? faker.phone.phoneNumberFormat().trim().toUpperCase() : null,
-    tel2_representant_legal: faker.random.boolean() ? faker.phone.phoneNumberFormat().trim().toUpperCase() : null,
 
     id_formation: getRandomIdFormation(),
     libelle_court_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,

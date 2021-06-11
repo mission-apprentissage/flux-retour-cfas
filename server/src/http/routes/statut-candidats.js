@@ -23,9 +23,6 @@ module.exports = ({ statutsCandidats }) => {
         prenom3_apprenant: Joi.string().allow(null, ""),
         ne_pas_solliciter: Joi.boolean().required(),
         email_contact: Joi.string().allow(null, ""),
-        nom_representant_legal: Joi.string().allow(null, ""),
-        tel_representant_legal: Joi.string().allow(null, ""),
-        tel2_representant_legal: Joi.string().allow(null, ""),
         id_formation: Joi.string().required(),
         libelle_court_formation: Joi.string().allow(null, ""),
         libelle_long_formation: Joi.string().allow(null, ""),
@@ -36,6 +33,11 @@ module.exports = ({ statutsCandidats }) => {
         date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
         periode_formation: Joi.string().allow(null, ""),
         annee_formation: Joi.number().allow(null),
+
+        // TODO remove when ERPs stop sending us this information
+        nom_representant_legal: Joi.string().allow(null, ""),
+        tel_representant_legal: Joi.string().allow(null, ""),
+        tel2_representant_legal: Joi.string().allow(null, ""),
       })
     );
 
