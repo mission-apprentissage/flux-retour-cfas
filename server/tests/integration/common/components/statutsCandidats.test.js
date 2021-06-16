@@ -897,7 +897,7 @@ integrationTests(__filename, () => {
       assert.deepStrictEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid et qu'aucune donnée de la localisation n'est fetchée ", async () => {
+    it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid", async () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: "invalid-siret" };
@@ -906,7 +906,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatut.siret_etablissement_valid, false);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid et qu'on fetch les données de localisation associées ", async () => {
+    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid", async () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const validSiret = "12312312300099";

@@ -2,7 +2,6 @@ const { StatutCandidat: StatutCandidatModel } = require("../model");
 
 module.exports = () => ({
   searchCfas,
-  getCfaNameByUai,
   getCfaFirstTransmissionDateFromUai,
   getCfaFirstTransmissionDateFromSiret,
 });
@@ -12,7 +11,7 @@ const SEARCH_RESULTS_LIMIT = 100;
 /**
  * Returns list of CFA information matching passed criteria
  * @param {{}} searchCriteria
- * @return {[{siret_etablissement: string, nom_etablissement: string, etablissement_num_departement: string}]} Array of CFA information
+ * @return {[{uai_etablissement: string, nom_etablissement: string, etablissement_num_departement: string}]} Array of CFA information
  */
 const searchCfas = async (searchCriteria) => {
   const { searchTerm, ...otherCriteria } = searchCriteria;
@@ -20,14 +19,9 @@ const searchCfas = async (searchCriteria) => {
     ...otherCriteria,
     ...(searchTerm
       ? {
-          $or: [
-            { $text: { $search: searchTerm } },
-            { uai_etablissement: searchTerm.toUpperCase() },
-            { siret_etablissement: searchTerm },
-          ],
+          $or: [{ $text: { $search: searchTerm } }, { uai_etablissement: searchTerm.toUpperCase() }],
         }
       : {}),
-    siret_etablissement_valid: true,
   };
 
   const found = await StatutCandidatModel.aggregate([
@@ -36,7 +30,7 @@ const searchCfas = async (searchCriteria) => {
     },
     {
       $group: {
-        _id: "$siret_etablissement",
+        _id: "$uai_etablissement",
         nom_etablissement: { $first: "$nom_etablissement" },
         etablissement_num_departement: { $first: "$etablissement_num_departement" },
       },
@@ -47,7 +41,7 @@ const searchCfas = async (searchCriteria) => {
     {
       $project: {
         _id: 0,
-        siret_etablissement: "$_id",
+        uai_etablissement: "$_id",
         nom_etablissement: 1,
         etablissement_num_departement: 1,
       },
@@ -55,12 +49,6 @@ const searchCfas = async (searchCriteria) => {
   ]);
 
   return found;
-};
-
-const getCfaNameByUai = async (uai) => {
-  const statutCandidatWithUai = await StatutCandidatModel.findOne({ uai_etablissement: uai });
-
-  return statutCandidatWithUai ? statutCandidatWithUai.nom_etablissement : null;
 };
 
 /**

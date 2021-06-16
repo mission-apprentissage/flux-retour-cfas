@@ -14,7 +14,7 @@ const TableauDeBordViewSwitch = ({ effectifs, loading, error }) => {
   if (filters.cfa) {
     return (
       <CfaView
-        cfaSiret={filters.cfa.siret_etablissement}
+        cfaUai={filters.cfa.uai_etablissement}
         filters={filters}
         effectifs={effectifs}
         loading={loading}

@@ -23,7 +23,6 @@ integrationTests(__filename, () => {
     for (let index = 0; index < 10; index++) {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
-        siret_etablissement_valid: true,
         ...statutsProps,
       });
       const toAdd = new StatutCandidat(randomStatut);
@@ -34,7 +33,6 @@ integrationTests(__filename, () => {
     for (let index = 0; index < 5; index++) {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: historySequenceApprenti,
-        siret_etablissement_valid: true,
         ...statutsProps,
       });
       const toAdd = new StatutCandidat(randomStatut);
@@ -45,7 +43,6 @@ integrationTests(__filename, () => {
     for (let index = 0; index < 15; index++) {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: historySequenceInscritToApprenti,
-        siret_etablissement_valid: true,
         ...statutsProps,
       });
       const toAdd = new StatutCandidat(randomStatut);
@@ -209,13 +206,13 @@ integrationTests(__filename, () => {
   describe("getEffectifsParNiveauEtAnneeFormation pour une date et un centre de formation", () => {
     const { getEffectifsParNiveauEtAnneeFormation } = dashboardComponent();
 
-    it("Permet de récupérer les données détaillées d'effectifs pour une date et un cfa via son siret", async () => {
-      const siretToTest = "77929544300013";
+    it("Permet de récupérer les données détaillées d'effectifs pour une date et un cfa via son uai", async () => {
+      const uaiToTest = "0123456Z";
 
       // Build sample statuts
-      const statutsSamplesInscrits = await getStatutsSamplesInscrits(siretToTest);
-      const statutsSamplesApprentis = await getStatutsSamplesApprentis(siretToTest);
-      const statutsSamplesAbandons = await getStatutsSamplesAbandons(siretToTest);
+      const statutsSamplesInscrits = await getStatutsSamplesInscrits(uaiToTest);
+      const statutsSamplesApprentis = await getStatutsSamplesApprentis(uaiToTest);
+      const statutsSamplesAbandons = await getStatutsSamplesAbandons(uaiToTest);
 
       // Save all statuts to database
       const sampleStatutsListToSave = [
@@ -231,17 +228,16 @@ integrationTests(__filename, () => {
       const date = new Date("2020-10-10T00:00:00.000+0000");
 
       // Gets effectif data detail
-      const statutsFound = await getEffectifsParNiveauEtAnneeFormation(date, { siret_etablissement: siretToTest });
+      const statutsFound = await getEffectifsParNiveauEtAnneeFormation(date, { uai_etablissement: uaiToTest });
 
-      // Check for siret
       assert.deepEqual(statutsFound.length, 2);
       assert.deepEqual(statutsFound, expectedDetailResultList);
 
-      // Check for bad siret
-      const badSiret = "99999999900999";
-      const statutsBadSiret = await getEffectifsParNiveauEtAnneeFormation(date, { siret_etablissement: badSiret });
-      assert.notDeepEqual(statutsBadSiret.length, 2);
-      assert.notDeepEqual(statutsBadSiret, expectedDetailResultList);
+      // Check for bad uai
+      const badUai = "99999999900999";
+      const statutsBadUai = await getEffectifsParNiveauEtAnneeFormation(date, { uai_etablissement: badUai });
+      assert.notDeepEqual(statutsBadUai.length, 2);
+      assert.notDeepEqual(statutsBadUai, expectedDetailResultList);
     });
   });
 

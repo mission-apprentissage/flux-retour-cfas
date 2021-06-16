@@ -104,11 +104,11 @@ const updateStatut = async (existingItemId, toUpdate) => {
 };
 
 const createStatutCandidat = async (itemToCreate) => {
-  // if statut candidat établissement has a VALID siret or uai, try to retrieve information in Referentiel CFAs
+  // if statut candidat établissement has a VALID uai or siret, try to retrieve information in Referentiel CFAs
   const etablissementInReferentielCfaFromSiretOrUai =
+    (validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement }))) ||
     (validateSiret(itemToCreate.siret_etablissement) &&
-      (await Cfa.findOne({ siret: itemToCreate.siret_etablissement }))) ||
-    (validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement })));
+      (await Cfa.findOne({ siret: itemToCreate.siret_etablissement })));
 
   // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
   if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {

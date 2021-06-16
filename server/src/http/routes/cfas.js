@@ -91,20 +91,20 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
    * Gets the dashboard data for cfa
    */
   router.get(
-    "/:siret",
+    "/:uai",
     tryCatch(async (req, res) => {
-      const { siret } = req.params;
+      const { uai } = req.params;
 
       // Search cfa in statuts
       const cfaFound = await StatutCandidat.findOne({
-        siret_etablissement: siret,
+        uai_etablissement: uai,
       }).lean();
 
       if (!cfaFound) {
-        return res.status(404).json({ message: `No cfa found for siret ${siret}` });
+        return res.status(404).json({ message: `No cfa found for uai ${uai}` });
       } else {
         // Search reseaux for cfa in référentiel
-        const cfaInReferentiel = await Cfa.findOne({ siret }).lean();
+        const cfaInReferentiel = await Cfa.findOne({ uai }).lean();
 
         // Build response
         return res.json({

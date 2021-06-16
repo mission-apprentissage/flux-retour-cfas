@@ -32,7 +32,6 @@ httpTests(__filename, ({ startServer }) => {
         ...createRandomStatutCandidat(),
         nom_etablissement: "FACULTE SCIENCES NANCY",
         nom_etablissement_tokenized: buildTokenizedString("FACULTE SCIENCES NANCY", 3),
-        siret_etablissement_valid: true,
       }).save();
 
       const response = await httpClient.post("/api/cfas/search", { searchTerm: "FACULTE" });
@@ -117,7 +116,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  describe("GET /cfas/:siret", () => {
+  describe("GET /cfas/:uai", () => {
     it("Vérifie qu'on peut récupérer les informations d'un CFA via son SIRET", async () => {
       const { httpClient } = await startServer();
 
@@ -130,14 +129,12 @@ httpTests(__filename, ({ startServer }) => {
       const cfaInfos = {
         nom_etablissement: nomTest,
         siret_etablissement: siretTest,
-        siret_etablissement_valid: true,
         uai_etablissement: uaiTest,
+        uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat({
-        ...cfaInfos,
-      });
+      const randomStatut = createRandomStatutCandidat(cfaInfos);
       const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
 
@@ -150,7 +147,7 @@ httpTests(__filename, ({ startServer }) => {
       });
       await cfaReferenceToAdd.save();
 
-      const response = await httpClient.get(`/api/cfas/${siretTest}`);
+      const response = await httpClient.get(`/api/cfas/${uaiTest}`);
 
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, {
@@ -175,8 +172,8 @@ httpTests(__filename, ({ startServer }) => {
       const cfaInfos = {
         nom_etablissement: nomTest,
         siret_etablissement: siretTest,
-        siret_etablissement_valid: true,
         uai_etablissement: uaiTest,
+        uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
       };
 
@@ -186,7 +183,7 @@ httpTests(__filename, ({ startServer }) => {
       const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
 
-      const response = await httpClient.get(`/api/cfas/${siretTest}`);
+      const response = await httpClient.get(`/api/cfas/${uaiTest}`);
 
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, {

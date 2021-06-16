@@ -233,18 +233,18 @@ integrationTests(__filename, () => {
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
     });
 
-    it("returns results matching libelle and siret_etablissement", async () => {
+    it("returns results matching libelle and uai_etablissement", async () => {
       const searchTerm = "decoration";
-      const siret_etablissement = "80480480400022";
+      const uai_etablissement = "0762232N";
 
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
-        siret_etablissement,
+        uai_etablissement,
         formation_cfd: formationsSeed[2].cfd,
         formation_cfd_valid: true,
       }).save();
 
-      const results = await searchFormationByIntituleOrCfd(searchTerm, { siret_etablissement });
+      const results = await searchFormationByIntituleOrCfd(searchTerm, { uai_etablissement });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);

@@ -9,7 +9,7 @@ const buildSearchRequestBody = (params) => {
     etablissement_num_region: params.region?.code ?? null,
     etablissement_num_departement: params.departement?.code ?? null,
     formation_cfd: params.formation?.cfd ?? null,
-    siret_etablissement: params.cfa?.siret_etablissement ?? null,
+    uai_etablissement: params.cfa?.uai_etablissement ?? null,
     etablissement_reseaux: params.reseau?.nom ?? null,
   };
 
