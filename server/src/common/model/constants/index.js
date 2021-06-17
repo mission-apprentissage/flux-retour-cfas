@@ -52,14 +52,17 @@ const reseauxCfas = {
   CMA: {
     nomReseau: "CMA",
     nomFichier: "cfas-cma",
+    encoding: "latin1",
   },
-  // AGRI: {
-  //   nomReseau: "AGRI",
-  //   nomFichier: "cfas-agri",
-  // },
+  AGRI: {
+    nomReseau: "AGRI",
+    nomFichier: "cfas-agri",
+    encoding: "utf8",
+  },
   ANASUP: {
     nomReseau: "ANASUP",
     nomFichier: "cfas-anasup",
+    encoding: "utf8",
   },
   // PROMOTRANS: {
   //   nomReseau: "PROMOTRANS",
@@ -72,14 +75,17 @@ const reseauxCfas = {
   UIMM: {
     nomReseau: "UIMM",
     nomFichier: "cfas-uimm",
+    encoding: "utf8",
   },
   BTP_CFA: {
     nomReseau: "BTP CFA",
     nomFichier: "cfas-btp-cfa",
+    encoding: "utf8",
   },
   MFR: {
     nomReseau: "MFR",
     nomFichier: "cfas-mfr",
+    encoding: "utf8",
   },
 };
 
