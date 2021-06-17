@@ -32,8 +32,8 @@ const detectLocationDifferences = async ({ db }) => {
 
     await db.collection("statutsCandidats").findOneAndUpdate(
       { _id: document._id },
-      { $set: { etablissement_num_departement: departementFromUai, etablissement_num_region: regionFromUai } },
       {
+        $set: { etablissement_num_departement: departementFromUai, etablissement_num_region: regionFromUai },
         $unset: {
           etablissement_adresse: "",
           etablissement_code_postal: "",
