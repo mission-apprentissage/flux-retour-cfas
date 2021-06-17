@@ -99,6 +99,14 @@ const REGIONS_OUVERTES = {
     nomRegion: "Auvergne-Rhône-Alpes",
     codeRegion: "84",
   },
+  BRETAGNE: {
+    nomRegion: "Bretagne",
+    codeRegion: "53",
+  },
+  PAYS_DE_LA_LOIRE: {
+    nomRegion: "Pays de la Loire",
+    codeRegion: "52",
+  },
 };
 
 /**
