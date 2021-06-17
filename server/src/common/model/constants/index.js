@@ -144,6 +144,7 @@ const jobNames = {
   formationRetrieveNiveaux: "formation-retrieve-niveaux",
   statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
   statutsCandidatsRetrieveNetworks: "statutsCandidats-retrieve-networks",
+  statutsCandidatsRetrieveCfdHistory: "statutsCandidats-retrieve-cfd-history",
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
   statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
   statutsCandidatsSanitizeEmptyStrings: "statutsCandidats-sanitize-empty-strings",

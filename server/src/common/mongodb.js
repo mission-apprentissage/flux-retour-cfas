@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const config = require("../../config");
 const logger = require("./logger");
 
+const mongooseInstance = mongoose;
+
 module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
   return new Promise((resolve, reject) => {
     logger.info(`MongoDB: Connection to ${mongoUri}`);
@@ -33,3 +35,5 @@ module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
 };
 
 module.exports.closeMongoConnection = (mongooseInst = mongoose) => mongooseInst.disconnect();
+
+module.exports.mongooseInstance = mongooseInstance;

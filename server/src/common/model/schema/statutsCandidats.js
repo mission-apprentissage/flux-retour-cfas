@@ -43,6 +43,16 @@ const statutsCandidatsSchema = new Schema({
     description: "CFD de la formation du candidat",
     index: true,
   },
+  formation_cfd_is_outdated: {
+    type: Boolean,
+    default: false,
+    description: "Indique si le CFD de la formation est outdated",
+  },
+  formation_cfd_new: {
+    type: String,
+    default: null,
+    description: "Nouveau CFD de la formation du candidat si cfd d'origine outdated",
+  },
   formation_cfd_valid: {
     type: Boolean,
     description: "Le champ formation_cfd est-il un cfd valide ?",

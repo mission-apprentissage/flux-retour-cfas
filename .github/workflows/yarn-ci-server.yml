@@ -1,5 +1,5 @@
-# Worflow pour IC
-name: Yarn Lint & Tests
+# Worflow pour CI sur le server
+name: Yarn CI Server & Lint / Tests
 
 on: [push]
 
@@ -11,6 +11,11 @@ jobs:
     steps:
       # Checks-out the repository
       - uses: actions/checkout@v2
+
+      # setup npmrc
+      - run: echo -e "//npm.pkg.github.com/:_authToken=$NPM_TOKEN\n@mission-apprentissage:registry=https://npm.pkg.github.com" > server/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Install dependencies
       - name: Run Yarn Install
