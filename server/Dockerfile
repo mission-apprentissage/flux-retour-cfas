@@ -2,7 +2,7 @@ FROM node:14.16.1-stretch
 
 # handle .npmrc : copy local one for dev, create one using NPM_TOKEN arg for production & recette
 ARG NPM_TOKEN
-COPY .npmrc* /tmp/
+COPY .npmrc /tmp/
 RUN if [ "$NPM_TOKEN" != "local" ] ; then \
     echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN\n@mission-apprentissage:registry=https://npm.pkg.github.com" > /tmp/.npmrc ; \
     fi
