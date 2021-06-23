@@ -12,7 +12,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./ui:/app #Allows source folders to be watched
-      - '/app/node_modules'
+      - "/app/node_modules"
     environment:
       - CHOKIDAR_USEPOLLING=true
 
@@ -25,6 +25,9 @@ services:
       - ./server/config:/app/config
       - flux_retour_cfas_ftp_data:/ftp
       - flux_retour_cfas_server_data:/data
+    build:
+      args:
+        - NPM_TOKEN=local
     environment:
       - FLUX_RETOUR_CFAS_ENV=local
       - FLUX_RETOUR_CFAS_APP_NAME=Flux Retour Cfas
@@ -37,7 +40,7 @@ services:
       - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=456
       - FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET=789
       # users
-        ## ymag
+      ## ymag
       - FLUX_RETOUR_CFAS_USERS_YMAG_NAME=ymag
       - FLUX_RETOUR_CFAS_USERS_YMAG_PASSWORD=mdpYmag
       - FLUX_RETOUR_CFAS_USERS_YMAG_API_KEY=01234

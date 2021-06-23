@@ -18,6 +18,11 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
     const [page, setPage] = useState(1);
     const [error, setError] = useState(null);
 
+    // if filters change, set page to 1
+    useEffect(() => {
+      setPage(1);
+    }, [JSON.stringify(filters)]);
+
     useEffect(() => {
       const fetchData = async () => {
         setLoading(true);

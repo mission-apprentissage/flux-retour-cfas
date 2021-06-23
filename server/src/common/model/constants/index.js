@@ -52,14 +52,17 @@ const reseauxCfas = {
   CMA: {
     nomReseau: "CMA",
     nomFichier: "cfas-cma",
+    encoding: "latin1",
   },
-  // AGRI: {
-  //   nomReseau: "AGRI",
-  //   nomFichier: "cfas-agri",
-  // },
+  AGRI: {
+    nomReseau: "AGRI",
+    nomFichier: "cfas-agri",
+    encoding: "utf8",
+  },
   ANASUP: {
     nomReseau: "ANASUP",
     nomFichier: "cfas-anasup",
+    encoding: "utf8",
   },
   // PROMOTRANS: {
   //   nomReseau: "PROMOTRANS",
@@ -72,14 +75,17 @@ const reseauxCfas = {
   UIMM: {
     nomReseau: "UIMM",
     nomFichier: "cfas-uimm",
+    encoding: "utf8",
   },
   BTP_CFA: {
     nomReseau: "BTP CFA",
     nomFichier: "cfas-btp-cfa",
+    encoding: "utf8",
   },
   MFR: {
     nomReseau: "MFR",
     nomFichier: "cfas-mfr",
+    encoding: "utf8",
   },
 };
 
@@ -98,6 +104,14 @@ const REGIONS_OUVERTES = {
   AUVERGNE_RHONE_ALPES: {
     nomRegion: "Auvergne-Rhône-Alpes",
     codeRegion: "84",
+  },
+  BRETAGNE: {
+    nomRegion: "Bretagne",
+    codeRegion: "53",
+  },
+  PAYS_DE_LA_LOIRE: {
+    nomRegion: "Pays de la Loire",
+    codeRegion: "52",
   },
 };
 
@@ -144,6 +158,7 @@ const jobNames = {
   formationRetrieveNiveaux: "formation-retrieve-niveaux",
   statutsCandidatsRetrieveLocation: "statutsCandidats-retrieve-location",
   statutsCandidatsRetrieveNetworks: "statutsCandidats-retrieve-networks",
+  statutsCandidatsRetrieveCfdHistory: "statutsCandidats-retrieve-cfd-history",
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
   statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
   statutsCandidatsSanitizeEmptyStrings: "statutsCandidats-sanitize-empty-strings",
@@ -207,9 +222,6 @@ const statutsCandidatsStringFields = [
   "prenom2_apprenant",
   "prenom3_apprenant",
   "email_contact",
-  "nom_representant_legal",
-  "tel_representant_legal",
-  "tel2_representant_legal",
   "libelle_court_formation",
   "libelle_long_formation",
   "siret_etablissement",

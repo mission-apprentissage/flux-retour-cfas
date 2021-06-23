@@ -12,6 +12,7 @@ module.exports = () => ({
   getEffectifsParNiveauEtAnneeFormation,
   getPaginatedEffectifsParNiveauEtAnneeFormation,
   getEffectifsCountByCfaAtDate,
+  getRupturantsCountAtDate,
   computeNouveauxContratsApprentissageForDateRange,
 });
 
@@ -492,4 +493,39 @@ const computeNouveauxContratsApprentissageForDateRange = async (dateRange, filte
     });
   });
   return count;
+};
+
+/**
+ * Récupération des rupturants à une date donnée
+ *
+ */
+const getRupturantsCountAtDate = async (searchDate, filters = {}) => {
+  const aggregationPipeline = [
+    // Filtrage sur les filtres passées en paramètres
+    {
+      $match: {
+        ...filters,
+        "historique_statut_apprenant.1": { $exists: true },
+      },
+    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate),
+    {
+      $match: {
+        "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.inscrit,
+      },
+    },
+  ];
+
+  const inscrits = await StatutCandidat.aggregate(aggregationPipeline);
+
+  const rupturants = inscrits.filter((inscrit) => {
+    const previousStatutIndexInHistorique =
+      inscrit.historique_statut_apprenant.findIndex((historiqueElem) => {
+        return historiqueElem.date_statut.getTime() === inscrit.statut_apprenant_at_date.date_statut.getTime();
+      }) - 1;
+    const previousStatutApprenant = inscrit.historique_statut_apprenant[previousStatutIndexInHistorique]?.valeur_statut;
+    return previousStatutApprenant === codesStatutsCandidats.apprenti;
+  });
+
+  return rupturants.length;
 };

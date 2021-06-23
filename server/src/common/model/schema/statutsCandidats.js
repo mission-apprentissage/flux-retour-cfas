@@ -37,26 +37,21 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Adresse mail de contact du jeune",
   },
-  nom_representant_legal: {
-    type: String,
-    default: null,
-    description: "Nom du représentant légal",
-  },
-  tel_representant_legal: {
-    type: String,
-    default: null,
-    description: "Numéro de tel du représentant légal du jeune",
-  },
-  tel2_representant_legal: {
-    type: String,
-    default: null,
-    description: "Numéro de tel du représentant légal du jeune",
-  },
   formation_cfd: {
     type: String,
     default: null,
     description: "CFD de la formation du candidat",
     index: true,
+  },
+  formation_cfd_is_outdated: {
+    type: Boolean,
+    default: false,
+    description: "Indique si le CFD de la formation est outdated",
+  },
+  formation_cfd_new: {
+    type: String,
+    default: null,
+    description: "Nouveau CFD de la formation du candidat si cfd d'origine outdated",
   },
   formation_cfd_valid: {
     type: Boolean,

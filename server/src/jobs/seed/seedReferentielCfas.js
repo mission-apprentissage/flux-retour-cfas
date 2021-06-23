@@ -19,6 +19,7 @@ runScript(async () => {
   await seedCfasFromStatutsCandidatsUaisValid();
   await seedCfasNetworkFromCsv(reseauxCfas.CMA);
   await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
+  await seedCfasNetworkFromCsv(reseauxCfas.AGRI);
   logger.info("End seeding référentiel CFAs !");
 }, jobNames.seedReferentielCfas);
 
@@ -99,7 +100,7 @@ const updateCfaFromStatutCandidat = async (idCfa, statutForCfa) => {
  * 2.a - If cfa in data has siret - check if update or creation needed
  * 2.b - If cfa in data has uai - check if update or creation needed
  */
-const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier }, encoding = "utf8") => {
+const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier, encoding }) => {
   logger.info(`Seeding CFAs for network ${nomReseau}`);
   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 

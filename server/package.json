@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "2.22.1",
+  "version": "2.25.1",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -38,6 +38,7 @@
     "statutsCandidats:retrieve-networks": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-networks/index.js",
     "statutsCandidats:retrieve-niveaux": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-niveaux/index.js",
     "statutsCandidats:retrieve-sirets-catalogue": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-sirets-catalogue/index.js",
+    "statutsCandidats:retrieve-cfd-history": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-cfd-history/index.js",
     "statutsCandidats:sanitize-empty-strings": "node -r dotenv/config src/jobs/statutsCandidats-sanitize-empty-strings/index.js",
     "cfas:retrieve-data-connection": "node -r dotenv/config src/jobs/cfas-retrieve-data-connection/index.js",
     "support:identify-cma": "node -r dotenv/config src/jobs/identify-cfas-network/identify-cma.js",
@@ -55,6 +56,7 @@
     "migration:down": "migrate-mongo down"
   },
   "dependencies": {
+    "@mission-apprentissage/tco-service-node": "2.18.1",
     "arg": "5.0.0",
     "async": "3.2.0",
     "axios": "0.21.1",
