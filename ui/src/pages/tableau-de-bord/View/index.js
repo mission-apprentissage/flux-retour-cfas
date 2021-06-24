@@ -1,14 +1,17 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { effectifsPropType, filtersPropType } from "../propTypes";
+import { useFiltersContext } from "../FiltersContext";
+import { effectifsPropType } from "../propTypes";
 import CfaView from "./cfa/CfaView";
 import FormationView from "./formation/FormationView";
 import GenericView from "./generic/GenericView";
 import ReseauView from "./reseau/ReseauView";
 
-const TableauDeBordViewSwitch = ({ filters, effectifs, loading, error }) => {
-  if (filters.cfa?.type === "cfa") {
+const TableauDeBordViewSwitch = ({ effectifs, loading, error }) => {
+  const { state: filters } = useFiltersContext();
+
+  if (filters.cfa) {
     return (
       <CfaView
         cfaSiret={filters.cfa.siret_etablissement}
@@ -20,11 +23,11 @@ const TableauDeBordViewSwitch = ({ filters, effectifs, loading, error }) => {
     );
   }
 
-  if (filters.cfa?.type === "reseau") {
-    return <ReseauView effectifs={effectifs} reseau={filters.cfa.nom} filters={filters} />;
+  if (filters.reseau) {
+    return <ReseauView effectifs={effectifs} filters={filters} reseau={filters.reseau.nom} />;
   }
 
-  if (filters.formation?.cfd) {
+  if (filters.formation) {
     return <FormationView formationCfd={filters.formation.cfd} filters={filters} effectifs={effectifs} />;
   }
 
@@ -33,7 +36,6 @@ const TableauDeBordViewSwitch = ({ filters, effectifs, loading, error }) => {
 
 TableauDeBordViewSwitch.propTypes = {
   effectifs: effectifsPropType,
-  filters: filtersPropType.isRequired,
   loading: PropTypes.bool.isRequired,
   error: PropTypes.object,
 };

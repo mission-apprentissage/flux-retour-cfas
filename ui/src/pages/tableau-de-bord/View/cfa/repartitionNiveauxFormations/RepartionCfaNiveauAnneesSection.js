@@ -2,7 +2,7 @@ import React from "react";
 
 import { PageSectionSubtitle } from "../../../../../common/components";
 import RepartitionEffectifsParNiveauEtAnneeFormation from "../../../../../common/components/tables/RepartitionEffectifsParNiveauEtAnneeFormation";
-import { filtersPropType } from "../../../propTypes";
+import { filtersPropTypes } from "../../../FiltersContext";
 import withRepartitionNiveauFormationInCfa from "./withRepartitionNiveauFormationInCfa";
 
 const RepartitionEffectifsCfaParNiveauEtAnneeFormation = withRepartitionNiveauFormationInCfa(
@@ -19,6 +19,7 @@ const RepartionCfaNiveauAnneesSection = ({ filters }) => {
 };
 
 RepartionCfaNiveauAnneesSection.propTypes = {
-  filters: filtersPropType.isRequired,
+  filters: filtersPropTypes.state,
 };
+
 export default RepartionCfaNiveauAnneesSection;

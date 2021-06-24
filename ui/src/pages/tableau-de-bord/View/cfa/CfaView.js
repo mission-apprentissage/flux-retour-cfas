@@ -2,7 +2,8 @@ import { Divider, Stack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { effectifsPropType, filtersPropType } from "../../propTypes";
+import { filtersPropTypes } from "../../FiltersContext";
+import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "../generic/EffectifsSection";
 import DataFeedbackSection from "./data-feedback/DataFeedbackSection";
 import InfoCfaSection from "./infoCfa/InfoCfaSection";
@@ -30,7 +31,7 @@ const CfaView = ({ cfaSiret, effectifs, filters }) => {
 CfaView.propTypes = {
   effectifs: effectifsPropType,
   cfaSiret: PropTypes.string.isRequired,
-  filters: filtersPropType.isRequired,
+  filters: filtersPropTypes.state,
 };
 
 export default CfaView;

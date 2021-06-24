@@ -2,7 +2,8 @@ import { HStack, Skeleton } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { effectifsPropType, filtersPropType } from "../../propTypes";
+import { filtersPropTypes } from "../../FiltersContext";
+import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "./EffectifsSection";
 import RegionConversionSection from "./region-conversion/RegionConversionSection";
 
@@ -27,7 +28,7 @@ const GenericView = ({ filters, effectifs, loading }) => {
 
   return (
     <>
-      <RegionConversionSection filters={filters} />
+      {filters.region && <RegionConversionSection filters={filters} />}
       <EffectifsSection effectifs={effectifs} />
     </>
   );
@@ -35,7 +36,7 @@ const GenericView = ({ filters, effectifs, loading }) => {
 
 GenericView.propTypes = {
   effectifs: effectifsPropType,
-  filters: filtersPropType,
+  filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
   error: PropTypes.object,
 };

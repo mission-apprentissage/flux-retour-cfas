@@ -50,7 +50,6 @@ const RegionConversionSection = ({ regionConversionData, error, loading }) => {
 
 RegionConversionSection.propTypes = {
   regionConversionData: PropTypes.shape({
-    nbCfaIdentified: PropTypes.number.isRequired,
     nbCfaConnected: PropTypes.number.isRequired,
     nbCfaDataValidated: PropTypes.number.isRequired,
   }),

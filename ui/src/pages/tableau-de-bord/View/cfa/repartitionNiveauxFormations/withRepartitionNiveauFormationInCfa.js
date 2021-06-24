@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 
 import { _get } from "../../../../../common/httpClient";
-import { filtersPropType } from "../../../propTypes";
+import { filtersPropTypes } from "../../../FiltersContext";
 
 const DEFAULT_PAGE_SIZE = 10;
 
 const buildSearchParams = (filters, pageNumber) => {
   const date = filters.date.toISOString();
-  const siret = filters.cfa?.type === "cfa" ? filters.cfa?.siret_etablissement : null;
+  const siret = filters.cfa.siret_etablissement;
   return `date=${date}&siret_etablissement=${siret}&page=${pageNumber}&limit=${DEFAULT_PAGE_SIZE}`;
 };
 
@@ -23,15 +23,14 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
       setPage(1);
     }, [JSON.stringify(filters)]);
 
+    const searchParams = buildSearchParams(filters, page);
     useEffect(() => {
       const fetchData = async () => {
         setLoading(true);
         setError(null);
 
         try {
-          const response = await _get(
-            `/api/dashboard/effectifs-par-niveau-et-annee-formation?${buildSearchParams(filters, page)}`
-          );
+          const response = await _get(`/api/dashboard/effectifs-par-niveau-et-annee-formation?${searchParams}`);
           setRepartitionEffectifs(response);
         } catch (error) {
           setError(error);
@@ -41,7 +40,7 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
       };
 
       fetchData();
-    }, [buildSearchParams(filters, page)]);
+    }, [searchParams]);
 
     return (
       <Component
@@ -55,7 +54,7 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
   };
 
   WithRepartitionNiveauFormationInCfa.propTypes = {
-    filters: filtersPropType,
+    filters: filtersPropTypes.state,
   };
 
   return WithRepartitionNiveauFormationInCfa;

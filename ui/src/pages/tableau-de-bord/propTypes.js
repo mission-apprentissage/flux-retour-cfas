@@ -14,19 +14,3 @@ export const effectifsPropType = PropTypes.shape({
     evolution: PropTypes.number,
   }).isRequired,
 });
-
-export const filtersPropType = PropTypes.shape({
-  date: PropTypes.instanceOf(Date),
-  cfa: PropTypes.shape({
-    siret_etablissement: PropTypes.string,
-    nom_etablissement: PropTypes.string,
-  }),
-  territoire: PropTypes.shape({
-    type: PropTypes.string.isRequired,
-    code: PropTypes.string.isRequired,
-  }),
-  formation: PropTypes.shape({
-    cfd: PropTypes.string.isRequired,
-    libelle: PropTypes.string.isRequired,
-  }),
-});
