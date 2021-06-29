@@ -156,9 +156,9 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier, encoding }) => {
  */
 const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau, nomFichier) => {
   const cfaExistantWithoutCurrentNetwork =
-    !cfaInReferentiel.reseaux ||
-    (!cfaInReferentiel.reseaux.some((item) => item === nomReseau) &&
-      !cfaInReferentiel.fichiers_reference.some((item) => item === `${nomFichier}.csv`));
+    !cfaInReferentiel?.reseaux ||
+    (!cfaInReferentiel?.reseaux?.some((item) => item === nomReseau) &&
+      !cfaInReferentiel?.fichiers_reference?.some((item) => item === `${nomFichier}.csv`));
 
   // Update only if cfa in referentiel has not network or current network not included
   if (cfaExistantWithoutCurrentNetwork) {

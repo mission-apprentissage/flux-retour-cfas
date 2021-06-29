@@ -53,7 +53,7 @@ runScript(async () => {
       select: { etablissement_gestionnaire_siret: 1, etablissement_formateur_siret: 1 },
     });
 
-    if (infoCatalog.length > 0) {
+    if (infoCatalog?.length > 0) {
       // Récupère tous les statuts ayant ce couple UAI & CFD et un siret invalide
       const statutsForUaiCfdCouple = await StatutCandidat.find({
         uai_etablissement: currentUaiCfd.uai,
