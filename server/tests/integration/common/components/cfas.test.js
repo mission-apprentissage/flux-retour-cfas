@@ -4,6 +4,7 @@ const cfasComponent = require("../../../../src/common/components/cfas");
 const { StatutCandidat: StatutCandidatModel } = require("../../../../src/common/model");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
+const { addDays } = require("date-fns");
 
 integrationTests(__filename, () => {
   describe("searchCfas", () => {
@@ -171,6 +172,107 @@ integrationTests(__filename, () => {
 
       assert.equal(actual.length, 1);
       assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
+    });
+  });
+
+  describe("getCfaFirstTransmissionDateFromUai", () => {
+    const { getCfaFirstTransmissionDateFromUai } = cfasComponent();
+    const uaiToSearch = "0762290X";
+    const firstDate = new Date("2020-08-30T00:00:00.000+0000");
+    const statutsSeed = [
+      {
+        ...createRandomStatutCandidat(),
+        uai_etablissement: uaiToSearch,
+        created_at: addDays(firstDate, 2),
+      },
+      {
+        ...createRandomStatutCandidat(),
+        uai_etablissement: uaiToSearch,
+        created_at: firstDate,
+      },
+      {
+        ...createRandomStatutCandidat(),
+        uai_etablissement: uaiToSearch,
+        created_at: addDays(firstDate, 3),
+      },
+      {
+        ...createRandomStatutCandidat(),
+        uai_etablissement: uaiToSearch,
+        created_at: addDays(firstDate, 4),
+      },
+    ];
+
+    beforeEach(async () => {
+      for (let i = 0; i < statutsSeed.length; i++) {
+        const statut = statutsSeed[i];
+        await new StatutCandidatModel(statut).save();
+      }
+    });
+
+    it("returns null when no parameter passed", async () => {
+      const firstTransmissionDateFromNoUaiParameter = await getCfaFirstTransmissionDateFromUai();
+      assert.deepEqual(firstTransmissionDateFromNoUaiParameter, null);
+    });
+
+    it("returns null when bad uai is passed", async () => {
+      const firstTransmissionDateFromBadUai = await getCfaFirstTransmissionDateFromUai("00000000");
+      assert.deepEqual(firstTransmissionDateFromBadUai, null);
+    });
+
+    it("returns first date when good uai is passed", async () => {
+      const firstTransmissionDateFromGoodUai = await getCfaFirstTransmissionDateFromUai(uaiToSearch);
+      assert.deepEqual(firstTransmissionDateFromGoodUai, firstDate);
+    });
+  });
+
+  describe("getCfaFirstTransmissionDateFromSiret", () => {
+    const { getCfaFirstTransmissionDateFromSiret } = cfasComponent();
+
+    const siretToSearch = "80420010000024";
+    const firstDate = new Date("2020-06-10T00:00:00.000+0000");
+    const statutsSeed = [
+      {
+        ...createRandomStatutCandidat(),
+        siret_etablissement: siretToSearch,
+        created_at: addDays(firstDate, 2),
+      },
+      {
+        ...createRandomStatutCandidat(),
+        siret_etablissement: siretToSearch,
+        created_at: addDays(firstDate, 3),
+      },
+      {
+        ...createRandomStatutCandidat(),
+        siret_etablissement: siretToSearch,
+        created_at: firstDate,
+      },
+      {
+        ...createRandomStatutCandidat(),
+        siret_etablissement: siretToSearch,
+        created_at: addDays(firstDate, 4),
+      },
+    ];
+
+    beforeEach(async () => {
+      for (let i = 0; i < statutsSeed.length; i++) {
+        const statut = statutsSeed[i];
+        await new StatutCandidatModel(statut).save();
+      }
+    });
+
+    it("returns null when no parameter passed", async () => {
+      const firstTransmissionDateFromNoSiretParameter = await getCfaFirstTransmissionDateFromSiret();
+      assert.deepEqual(firstTransmissionDateFromNoSiretParameter, null);
+    });
+
+    it("returns null when bad siret is passed", async () => {
+      const firstTransmissionDateFromBadSiret = await getCfaFirstTransmissionDateFromSiret("00000000000000");
+      assert.deepEqual(firstTransmissionDateFromBadSiret, null);
+    });
+
+    it("returns first date when good siret is passed", async () => {
+      const getCfaFirstTransmissionDateFromGoodSiret = await getCfaFirstTransmissionDateFromSiret(siretToSearch);
+      assert.deepEqual(getCfaFirstTransmissionDateFromGoodSiret, firstDate);
     });
   });
 });

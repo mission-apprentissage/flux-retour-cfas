@@ -51,6 +51,11 @@ const cfasSchema = new Schema({
     default: null,
     description: "Les données présentées sur le tableau de bord par ce CFA est-elle valide",
   },
+  first_transmission_date: {
+    type: Date,
+    default: null,
+    description: "Date de la première transmission de données",
+  },
 });
 
 module.exports = cfasSchema;

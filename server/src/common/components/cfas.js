@@ -3,6 +3,8 @@ const { StatutCandidat: StatutCandidatModel } = require("../model");
 module.exports = () => ({
   searchCfas,
   getCfaNameByUai,
+  getCfaFirstTransmissionDateFromUai,
+  getCfaFirstTransmissionDateFromSiret,
 });
 
 const SEARCH_RESULTS_LIMIT = 100;
@@ -59,4 +61,36 @@ const getCfaNameByUai = async (uai) => {
   const statutCandidatWithUai = await StatutCandidatModel.findOne({ uai_etablissement: uai });
 
   return statutCandidatWithUai ? statutCandidatWithUai.nom_etablissement : null;
+};
+
+/**
+ * Returns the first date of statutCandidat transmission for a UAI
+ * @param {*} uai
+ * @returns
+ */
+const getCfaFirstTransmissionDateFromUai = async (uai) => {
+  const historiqueDatesStatutsCandidatsWithUai = await StatutCandidatModel.find({ uai_etablissement: uai })
+    .sort("created_at")
+    .limit(1)
+    .lean();
+
+  return historiqueDatesStatutsCandidatsWithUai.length > 0
+    ? historiqueDatesStatutsCandidatsWithUai[0].created_at
+    : null;
+};
+
+/**
+ * Returns the first date of statutCandidat transmission for a SIRET
+ * @param {*} uai
+ * @returns
+ */
+const getCfaFirstTransmissionDateFromSiret = async (siret) => {
+  const historiqueDatesStatutsCandidatsWithSiret = await StatutCandidatModel.find({ siret_etablissement: siret })
+    .sort("created_at")
+    .limit(1)
+    .lean();
+
+  return historiqueDatesStatutsCandidatsWithSiret.length > 0
+    ? historiqueDatesStatutsCandidatsWithSiret[0].created_at
+    : null;
 };

@@ -14,9 +14,9 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 /**
  * Script qui initialise la collection CFAs de référence
  */
-runScript(async () => {
+runScript(async ({ cfas }) => {
   logger.info("Seeding referentiel CFAs");
-  await seedCfasFromStatutsCandidatsUaisValid();
+  await seedCfasFromStatutsCandidatsUaisValid(cfas);
   await seedCfasNetworkFromCsv(reseauxCfas.CMA);
   await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
   await seedCfasNetworkFromCsv(reseauxCfas.AGRI);
@@ -27,7 +27,7 @@ runScript(async () => {
 /**
  * Seed des cfas depuis statuts candidats avec UAIs valid
  */
-const seedCfasFromStatutsCandidatsUaisValid = async () => {
+const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
   // All distinct valid uais
   const allUais = await StatutCandidat.distinct("uai_etablissement", { uai_etablissement_valid: true });
 
@@ -46,9 +46,9 @@ const seedCfasFromStatutsCandidatsUaisValid = async () => {
 
     // Create or update CFA
     if (cfaExistant) {
-      await updateCfaFromStatutCandidat(cfaExistant._id, statutForUai);
+      await updateCfaFromStatutCandidat(cfas, cfaExistant._id, statutForUai);
     } else {
-      await createCfaFromStatutCandidat(statutForUai);
+      await createCfaFromStatutCandidat(cfas, statutForUai);
     }
   });
 
@@ -59,7 +59,7 @@ const seedCfasFromStatutsCandidatsUaisValid = async () => {
  * Create cfa from statut
  * @param {*} statutForCfa
  */
-const createCfaFromStatutCandidat = async (statutForCfa) => {
+const createCfaFromStatutCandidat = async (cfas, statutForCfa) => {
   await new Cfa({
     uai: statutForCfa.uai_etablissement,
     siret: statutForCfa.siret_etablissement_valid ? statutForCfa.siret_etablissement : null,
@@ -69,6 +69,7 @@ const createCfaFromStatutCandidat = async (statutForCfa) => {
     erps: [statutForCfa.source],
     region_nom: statutForCfa.etablissement_nom_region,
     region_num: statutForCfa.etablissement_num_region,
+    first_transmission_date: await cfas.getCfaFirstTransmissionDateFromUai(statutForCfa.uai_etablissement),
   }).save();
 };
 
@@ -76,7 +77,7 @@ const createCfaFromStatutCandidat = async (statutForCfa) => {
  * Update cfa from statut
  * @param {*} statutForCfa
  */
-const updateCfaFromStatutCandidat = async (idCfa, statutForCfa) => {
+const updateCfaFromStatutCandidat = async (cfas, idCfa, statutForCfa) => {
   await Cfa.findOneAndUpdate(
     { _id: idCfa },
     {
@@ -89,6 +90,7 @@ const updateCfaFromStatutCandidat = async (idCfa, statutForCfa) => {
         erps: [statutForCfa.source],
         region_nom: statutForCfa.etablissement_nom_region,
         region_num: statutForCfa.etablissement_num_region,
+        first_transmission_date: await cfas.getCfaFirstTransmissionDateFromUai(statutForCfa.uai_etablissement),
       },
     }
   );
