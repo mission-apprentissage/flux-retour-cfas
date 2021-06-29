@@ -1,9 +1,9 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { StatutCandidat } = require("../../common/model");
+const { StatutCandidat, Stats } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { getSiretInfo } = require("../../common/apis/apiTablesCorrespondances");
-const { jobNames } = require("../../common/model/constants");
+const { jobNames, statsTypes } = require("../../common/model/constants");
 
 /**
  * Ce script permet de récupérer les données de localisation d'établissements
@@ -52,6 +52,13 @@ runScript(async () => {
       logger.error(err);
     }
   });
+
+  // Add sirets not found entry in stats
+  await new Stats({
+    type: statsTypes.siretsNotFoundTco,
+    date: new Date(),
+    data: unknownSiretInTco,
+  }).save();
 
   logger.info(`Etablissement location information found for ${foundLocationCount} SIRET`);
   logger.info(`${updatedStatutsCandidatsCount} statuts candidats updated with etablissement location information`);

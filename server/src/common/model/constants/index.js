@@ -206,6 +206,7 @@ const statsTypes = {
   tdbStats: "TdbStats",
   networksStats: "NetworksStats",
   importDatesStats: "ImportDatesStats",
+  siretsNotFoundTco: "SiretsNotFoundInTCO",
 };
 
 /**
