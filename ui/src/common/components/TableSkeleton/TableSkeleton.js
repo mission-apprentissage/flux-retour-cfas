@@ -6,7 +6,7 @@ const TableSkeleton = ({ headers, numberOfLines = 5 }) => {
   return (
     <Table mt="2w">
       <Thead>
-        <Tr background="gray.alt">
+        <Tr background="galt">
           {headers.map((header) => {
             return (
               <Th
