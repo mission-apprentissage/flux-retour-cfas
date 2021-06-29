@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import { _get } from "../../../../../common/httpClient";
 import { omitNullishValues } from "../../../../../common/utils/omitNullishValues";
-import { TERRITOIRE_TYPES } from "../../../Filters/territoire/withTerritoireData";
-import { filtersPropType } from "../../../propTypes";
+import { filtersPropTypes } from "../../../FiltersContext";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -14,10 +13,9 @@ const buildSearchParams = (filters, pageNumber) => {
   return queryString.stringify(
     omitNullishValues({
       date,
-      etablissement_reseaux: filters.cfa.nom,
-      etablissement_num_region: filters.territoire?.type === TERRITOIRE_TYPES.region ? filters.territoire.code : null,
-      etablissement_num_departement:
-        filters.territoire?.type === TERRITOIRE_TYPES.departement ? filters.territoire.code : null,
+      etablissement_reseaux: filters.reseau.nom,
+      etablissement_num_region: filters.region?.code ?? null,
+      etablissement_num_departement: filters.departement?.code ?? null,
       page: pageNumber,
       limit: DEFAULT_PAGE_SIZE,
     })
@@ -68,7 +66,7 @@ const withRepartitionEffectifsReseauParNiveauEtAnneeFormation = (Component) => {
   };
 
   WithRepartitionEffectifsReseauParNiveauEtAnneeFormation.propTypes = {
-    filters: filtersPropType,
+    filters: filtersPropTypes.state,
   };
 
   return WithRepartitionEffectifsReseauParNiveauEtAnneeFormation;

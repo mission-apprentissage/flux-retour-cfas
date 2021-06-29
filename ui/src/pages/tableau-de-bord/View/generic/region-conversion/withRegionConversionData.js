@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { _post } from "../../../../../common/httpClient";
-import { filtersPropType } from "../../../propTypes";
+import { filtersPropTypes } from "../../../FiltersContext";
 
 const withRegionConversionData = (Component) => {
   const WithRegionConversionData = ({ filters, ...props }) => {
@@ -9,7 +9,7 @@ const withRegionConversionData = (Component) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const regionCodeInput = filters?.territoire?.code;
+    const regionCodeInput = filters.region?.code;
 
     useEffect(() => {
       const fetchData = async () => {
@@ -41,7 +41,7 @@ const withRegionConversionData = (Component) => {
   };
 
   WithRegionConversionData.propTypes = {
-    filters: filtersPropType,
+    filters: filtersPropTypes.state,
   };
 
   return WithRegionConversionData;

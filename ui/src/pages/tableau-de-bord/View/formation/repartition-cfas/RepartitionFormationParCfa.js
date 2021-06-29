@@ -3,7 +3,7 @@ import React from "react";
 
 import { PageSectionTitle } from "../../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../../common/components/tables/RepartitionEffectifsParCfa";
-import { filtersPropType } from "../../../propTypes";
+import { filtersPropTypes } from "../../../FiltersContext";
 import withRepartitionFormationParCfa from "./withRepartitionFormationParCfaData";
 
 const RepartitionEffectifsFormationParCfa = withRepartitionFormationParCfa(RepartitionEffectifsParCfa);
@@ -19,7 +19,7 @@ const RepartitionFormationParCfa = ({ formationCfd, filters }) => {
 
 RepartitionFormationParCfa.propTypes = {
   formationCfd: PropTypes.string.isRequired,
-  filters: filtersPropType,
+  filters: filtersPropTypes.state,
 };
 
 export default RepartitionFormationParCfa;

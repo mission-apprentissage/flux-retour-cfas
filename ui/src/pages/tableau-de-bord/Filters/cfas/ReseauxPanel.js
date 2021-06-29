@@ -43,7 +43,6 @@ ReseauxPanel.propTypes = {
   value: PropTypes.shape({
     id: PropTypes.string.isRequired,
     nom: PropTypes.string.isRequired,
-    type: PropTypes.oneOf(["reseau"]).isRequired,
   }),
 };
 

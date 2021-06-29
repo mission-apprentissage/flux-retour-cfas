@@ -1,15 +1,15 @@
 import { Box, Flex } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { Page, PageContent, PageHeader } from "../../common/components";
 import EnSavoirPlusModal from "./EnSavoirPlusModal";
 import Filters from "./Filters";
-import { effectifsPropType, filtersPropType } from "./propTypes";
+import { FiltersProvider } from "./FiltersContext";
+import useEffectifs from "./useEffectifs";
 import View from "./View";
-import withEffectifsData from "./withEffectifsData";
 
-const TableauDeBordPage = ({ effectifs, filters, setFilters, loading, error }) => {
+const TableauDeBordPage = () => {
+  const [effectifs, loading, error] = useEffectifs();
   const pageTitle = (
     <Flex justifyContent="center" alignItems="center">
       <span>Tableau de bord de l&apos;apprentissage</span>
@@ -32,21 +32,21 @@ const TableauDeBordPage = ({ effectifs, filters, setFilters, loading, error }) =
     <Page>
       <PageHeader title={pageTitle}>
         <EnSavoirPlusModal />
-        <Filters setFilters={setFilters} filters={filters} />
+        <Filters />
       </PageHeader>
       <PageContent>
-        <View effectifs={effectifs} filters={filters} loading={loading} error={error} />
+        <View effectifs={effectifs} loading={loading} error={error} />
       </PageContent>
     </Page>
   );
 };
 
-TableauDeBordPage.propTypes = {
-  effectifs: effectifsPropType,
-  filters: filtersPropType.isRequired,
-  loading: PropTypes.bool.isRequired,
-  error: PropTypes.object,
-  setFilters: PropTypes.func.isRequired,
+const TableauDeBordPageContainer = () => {
+  return (
+    <FiltersProvider>
+      <TableauDeBordPage />
+    </FiltersProvider>
+  );
 };
 
-export default withEffectifsData(TableauDeBordPage);
+export default TableauDeBordPageContainer;

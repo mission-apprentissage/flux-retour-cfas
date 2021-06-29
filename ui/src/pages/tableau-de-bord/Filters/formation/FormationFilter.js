@@ -3,25 +3,26 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { FilterButton, OverlayMenu, SearchInput } from "../../../../common/components";
+import { filtersPropTypes } from "../../FiltersContext";
 import FormationsList from "./FormationsList";
 import withFormationSearch from "./withFormationSearch";
 
-const FormationFilter = ({ value, onChange, searchTerm, searchResults, onSearchTermChange }) => {
+const FormationFilter = ({ filters, searchTerm, searchResults, onSearchTermChange, onFormationChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onFormationClick = (formation) => {
-    onChange(formation);
+    onFormationChange(formation);
     setIsOpen(false);
   };
-  const buttonLabel = value ? value.libelle : "Toutes les formations";
+  const buttonLabel = filters.formation?.libelle || "Toutes les formations";
 
   return (
     <div>
       <FilterButton
         icon="ri-book-mark-fill"
         onClick={() => setIsOpen(!isOpen)}
-        displayClearIcon={!!value}
-        clearIconOnClick={() => onChange(null)}
+        displayClearIcon={!!filters.formation}
+        clearIconOnClick={() => onFormationChange(null)}
       >
         {buttonLabel}
       </FilterButton>
@@ -37,7 +38,11 @@ const FormationFilter = ({ value, onChange, searchTerm, searchResults, onSearchT
               Aucun résultat trouvé
             </Text>
           )}
-          <FormationsList formations={searchResults} onFormationClick={onFormationClick} selectedValue={value} />
+          <FormationsList
+            formations={searchResults}
+            onFormationClick={onFormationClick}
+            selectedValue={filters.formation}
+          />
         </OverlayMenu>
       )}
     </div>
@@ -45,11 +50,6 @@ const FormationFilter = ({ value, onChange, searchTerm, searchResults, onSearchT
 };
 
 FormationFilter.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.shape({
-    cfd: PropTypes.string.isRequired,
-    libelle: PropTypes.string.isRequired,
-  }),
   searchResults: PropTypes.arrayOf(
     PropTypes.shape({
       cfd: PropTypes.string.isRequired,
@@ -57,7 +57,9 @@ FormationFilter.propTypes = {
     })
   ),
   onSearchTermChange: PropTypes.func.isRequired,
+  onFormationChange: PropTypes.func.isRequired,
   searchTerm: PropTypes.string,
+  filters: filtersPropTypes.state,
 };
 
 export default withFormationSearch(FormationFilter);
