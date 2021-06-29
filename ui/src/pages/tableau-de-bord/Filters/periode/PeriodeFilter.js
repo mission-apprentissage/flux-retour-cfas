@@ -1,17 +1,17 @@
 import "react-datepicker/dist/react-datepicker.css";
 import "./PeriodeFilter.css";
 
+import { Box, Button } from "@chakra-ui/react";
 import { format, isThisMonth, lastDayOfMonth } from "date-fns";
 import fr from "date-fns/locale/fr";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
-
-import { FilterButton } from "../../../../common/components";
 
 registerLocale("fr", fr);
 
 const PeriodeFilter = ({ value, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const buttonLabel = format(value, "MMMM yyyy", { locale: fr });
 
   const onChangeCb = (selectedDate) => {
@@ -35,10 +35,21 @@ const PeriodeFilter = ({ value, onChange }) => {
         showFourColumnMonthYearPicker
         locale="fr"
         maxDate={maxDate}
+        onCalendarClose={() => setIsOpen(false)}
+        onCalendarOpen={() => setIsOpen(true)}
         customInput={
-          <FilterButton icon="ri-calendar-event-fill">
-            <span style={{ textTransform: "capitalize" }}>{buttonLabel}</span>
-          </FilterButton>
+          <Button variant="link">
+            <Box as="span" textDecoration="underline">
+              en {buttonLabel}
+            </Box>
+            <Box
+              fontSize="gamam"
+              marginLeft="1v"
+              as="i"
+              className={isOpen ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
+              textDecoration="none"
+            />
+          </Button>
         }
       />
     </div>

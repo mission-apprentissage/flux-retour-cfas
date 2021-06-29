@@ -10,6 +10,7 @@ const colors = {
   error: "#b60000",
   warning: "#fa5c00",
   info: "#3a55d1",
+  galt: "#f9f8f6",
   grey: {
     800: "#1e1e1e",
     750: "#2a2a2a",
@@ -150,8 +151,8 @@ const colors = {
 const fontSizes = {
   giga: `${76 / rootFontSizePx}rem`,
   mega: `${54 / rootFontSizePx}rem`,
-  alpha: `${36 / rootFontSizePx}rem`,
-  beta: `${28 / rootFontSizePx}rem`,
+  alpha: `${32 / rootFontSizePx}rem`,
+  beta: `${24 / rootFontSizePx}rem`,
   gamma: `${20 / rootFontSizePx}rem`,
   delta: `${18 / rootFontSizePx}rem`,
   epsilon: `${16 / rootFontSizePx}rem`,
@@ -161,28 +162,39 @@ const fontSizes = {
   legal: `${10 / rootFontSizePx}rem`,
 };
 
-const textStyles = {
-  h1: {
-    fontSize: "delta",
-    color: "brown.400",
-  },
-  h2: {
-    fontSize: "epsilon",
-    color: "purple.400",
-  },
-};
-
 const fonts = {
-  body: "Inter",
+  body: "Marianne, Arial",
+  heading: "Marianne, Arial",
 };
 
 const styles = {
   global: {
     "html, body": {
-      fontFamily: "Inter",
+      fontFamily: "Marianne, Arial",
       background: "white",
       color: "bluefrance",
     },
+  },
+};
+
+const textStyles = {
+  h1: {
+    fontSize: "alpha",
+    fontWeight: "700",
+    color: "grey.800",
+    lineHeight: "1.4",
+  },
+  h2: {
+    fontSize: "beta",
+    fontWeight: "700",
+    color: "grey.800",
+    lineHeight: "1.4",
+  },
+  h3: {
+    fontSize: "gamma",
+    fontWeight: "700",
+    color: "grey.800",
+    lineHeight: "1.4",
   },
 };
 
@@ -199,6 +211,7 @@ const space = {
   "7w": "56px",
   "8w": "64px",
   "9w": "72px",
+  "10w": "80px",
   "12w": "96px",
   "15w": "120px",
 };
@@ -207,7 +220,7 @@ const components = {
   Button: {
     baseStyle: {
       fontWeight: "400",
-      fontFamily: "Inter",
+      fontFamily: "Marianne",
     },
     variants: {
       primary: {
@@ -215,6 +228,14 @@ const components = {
         color: "white",
         _hover: {
           background: "bluedark.600",
+        },
+      },
+      secondary: {
+        borderRadius: "40px",
+        backgroundColor: "grey.300",
+        color: "grey.700",
+        _hover: {
+          background: "grey.500",
         },
       },
       light: {
@@ -233,7 +254,12 @@ const components = {
       link: {
         color: "bluefrance",
         border: "none",
-        textDecoration: "underline",
+        fontWeight: "700",
+        fontSize: "gamma",
+        paddingX: "0",
+        _hover: {
+          textDecoration: "none",
+        },
       },
     },
     defaultProps: {

@@ -1,6 +1,6 @@
 .react-datepicker {
-  font-family: "Inter", sans-serif;
-  border-color: #d5dbef;
+  font-family: "Marianne", sans-serif;
+  border-color: #e1e5f3;
 }
 
 .react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle {
@@ -27,15 +27,23 @@
 }
 
 .react-datepicker__month .react-datepicker__month--disabled {
-  color: #d5dbef;
+  color: #e7e7e7;
   border-radius: 0.3rem;
 }
 
 .react-datepicker__header {
-  color: #000091;
+  color: white;
   text-align: center;
-  background-color: #f9fafc;
+  background-color: #000091;
   padding-top: 8px;
   padding-bottom: 8px;
-  border-bottom-color: #eef1f8;
+  border-bottom-color: #e7e7e7;
+}
+
+.react-datepicker__navigation--previous {
+  border-right-color: white;
+}
+
+.react-datepicker__navigation--next {
+  border-left-color: white;
 }
