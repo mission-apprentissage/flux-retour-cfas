@@ -16,7 +16,7 @@ const DepartementOptions = ({ departements, onDepartementClick, currentFilter })
   return (
     <>
       <SearchInput
-        placeholder="Saisissez un département"
+        placeholder="Rechercher un département"
         value={departementSearchTerm}
         onChange={setDepartementSearchTerm}
       />

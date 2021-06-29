@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { FilterButton, OverlayMenu } from "../../../../common/components";
+import { OverlayMenu, SelectButton } from "../../../../common/components";
 import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
 import { filtersPropTypes } from "../../FiltersContext";
 import CfaPanel from "./CfasPanel";
@@ -20,21 +20,21 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
     setIsOpen(false);
   };
 
-  const buttonLabel = filters.cfa?.nom_etablissement || filters.reseau?.nom || "Tous les organismes de formation";
+  const buttonLabel = filters.cfa?.nom_etablissement || filters.reseau?.nom || "Sélectionner un organisme ou un réseau";
 
   return (
     <div>
-      <FilterButton
+      <SelectButton
         icon="ri-community-fill"
         onClick={() => setIsOpen(!isOpen)}
-        displayClearIcon={filters.cfa || filters.reseau}
+        isClearable={filters.cfa || filters.reseau}
         clearIconOnClick={() => {
           onReseauChange(null);
           onCfaChange(null);
         }}
       >
         {buttonLabel}
-      </FilterButton>
+      </SelectButton>
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>

@@ -1,8 +1,8 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { FilterButton, OverlayMenu } from "../../../../common/components";
+import { OverlayMenu } from "../../../../common/components";
 import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
 import { filtersPropTypes } from "../../FiltersContext";
 import DepartementOptions from "./DepartementOptions";
@@ -28,10 +28,18 @@ const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, region
 
   return (
     <div>
-      <FilterButton onClick={() => setIsOpen(!isOpen)} icon="ri-map-pin-2-fill">
-        {buttonLabel}
-        <Box fontSize="delta" as="i" className="ri-arrow-down-s-line" marginLeft="1v" />
-      </FilterButton>
+      <Button variant="link" onClick={() => setIsOpen(!isOpen)}>
+        <Box as="span" textDecoration="underline">
+          {buttonLabel}
+        </Box>
+        <Box
+          fontSize="gamam"
+          marginLeft="1v"
+          as="i"
+          className={isOpen ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
+          textDecoration="none"
+        />
+      </Button>
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
