@@ -56,7 +56,7 @@ const reseauxCfas = {
   },
   AGRI: {
     nomReseau: "AGRI",
-    nomFichier: "cfas-agri",
+    nomFichier: "cfas-agri-no-mfr",
     encoding: "utf8",
   },
   ANASUP: {

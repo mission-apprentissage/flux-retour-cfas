@@ -4,6 +4,7 @@ const { fullSampleWithUpdates } = require("../../../../tests/data/sample");
 const { createRandomStatutsCandidatsList } = require("../../../../tests/data/randomizedSample");
 const { User } = require("../../../common/model/index");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
+const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
 
 const seedUsers = async (usersModule) => {
   const users = Object.values(config.users);
@@ -44,9 +45,22 @@ const seedRandomizedSampleWithStatut = async (statutsCandidats, nbStatuts, statu
   await statutsCandidats.addOrUpdateStatuts(randomStatuts);
 };
 
+const buildCfasFromCsvAndExcludedFile = async (referenceFilePath, excludedFilePath, encoding) => {
+  const allCfasForNetwork = readJsonFromCsvFile(referenceFilePath, encoding);
+  const excludedCfas = readJsonFromCsvFile(excludedFilePath, encoding);
+
+  if (excludedCfas.length > 0 && allCfasForNetwork.length > 0) {
+    const excludedSirets = excludedCfas.filter((item) => item.siret).map((item) => item.siret);
+    return allCfasForNetwork.filter((item) => !excludedSirets.includes(item.siret));
+  }
+
+  return [];
+};
+
 module.exports = {
   seedUsers,
   seedSample,
   seedRandomizedSample,
   seedRandomizedSampleWithStatut,
+  buildCfasFromCsvAndExcludedFile,
 };

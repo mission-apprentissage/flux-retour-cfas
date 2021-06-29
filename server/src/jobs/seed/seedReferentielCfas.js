@@ -20,6 +20,7 @@ runScript(async () => {
   await seedCfasNetworkFromCsv(reseauxCfas.CMA);
   await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
   await seedCfasNetworkFromCsv(reseauxCfas.AGRI);
+  await seedCfasNetworkFromCsv(reseauxCfas.MFR);
   logger.info("End seeding référentiel CFAs !");
 }, jobNames.seedReferentielCfas);
 
