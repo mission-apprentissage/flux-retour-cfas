@@ -6,15 +6,19 @@ const TableSkeleton = ({ headers, numberOfLines = 5 }) => {
   return (
     <Table mt="2w">
       <Thead>
-        <Tr background="bluesoft.100">
+        <Tr background="gray.alt">
           {headers.map((header) => {
             return (
               <Th
                 textTransform="initial"
-                textColor="grey.600"
+                textColor="grey.800"
+                backgroundColor="galt"
                 fontSize="epsilon"
-                fontWeight="400"
+                fontWeight="700"
+                paddingY="3w"
                 letterSpacing="0px"
+                borderBottom="2px solid"
+                borderBottomColor="bluefrance"
                 key={header}
               >
                 {header}

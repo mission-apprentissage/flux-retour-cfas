@@ -1,50 +1,18 @@
-import { Box, HStack, Progress, Table, TableCaption, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import { HStack, Progress, TableCaption, Tbody, Td, Text, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { getPercentage } from "../../utils/calculUtils";
 import { toPrettyYearLabel } from "../../utils/stringUtils";
-import { Pagination, TableSkeleton } from "..";
-
-const TABLE_HEADERS = ["Intitulé", "Année", "Apprentis", "Inscrits", "Abandons"];
+import { Pagination } from "..";
+import Table from "./Table";
 
 const RepartitionEffectifsParNiveauEtAnneeFormation = ({ repartitionEffectifs, loading, error, _setPage }) => {
-  if (loading) {
-    return <TableSkeleton headers={TABLE_HEADERS} />;
-  }
-
-  if (error) {
-    return (
-      <Text fontSize="epsilon" color="grey.800">
-        <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
-        <Box as="span" verticalAlign="middle">
-          Erreur lors de la récupération de la répartition par niveaux de formation
-        </Box>
-      </Text>
-    );
-  }
+  let content = null;
 
   if (repartitionEffectifs) {
-    return (
-      <Table mt="2w">
-        <Thead>
-          <Tr background="bluesoft.100">
-            {TABLE_HEADERS.map((header) => {
-              return (
-                <Th
-                  key={header}
-                  textTransform="initial"
-                  textColor="grey.600"
-                  fontSize="epsilon"
-                  fontWeight="400"
-                  letterSpacing="0px"
-                >
-                  {header}
-                </Th>
-              );
-            })}
-          </Tr>
-        </Thead>
+    content = (
+      <>
         {repartitionEffectifs.data.map((item, index) => buildNiveauRows(item, index))}
         <TableCaption>
           <Pagination
@@ -53,20 +21,28 @@ const RepartitionEffectifsParNiveauEtAnneeFormation = ({ repartitionEffectifs, l
             changePageHandler={_setPage}
           />
         </TableCaption>
-      </Table>
+      </>
     );
   }
 
-  return null;
+  return (
+    <Table
+      headers={["Intitulé de la formation", "Année", "apprentis", "apprenants sans contrat", "abandons"]}
+      loading={loading}
+      error={error}
+    >
+      {content}
+    </Table>
+  );
 };
 
 const buildNiveauRows = (data, index) => (
   <>
     {/* Niveau Header */}
     <Tbody key={"header_" + index}>
-      <Tr key={"headerRow_" + index} background="bluesoft.50">
-        <Td fontWeight="700" textColor="black">
-          {data.niveau.libelle}
+      <Tr key={"headerRow_" + index} background="galt">
+        <Td fontWeight="700" color="bluefrance">
+          Niveau {data.niveau.libelle}
         </Td>
 
         <Td></Td>
@@ -107,8 +83,8 @@ const displayNiveauDataForStatut = (statutData, colorScheme) => (
 
 const buildFormationDetailRow = (formationData, index, niveauData) => (
   <Tr key={"detailRow_" + index} textAlign="left">
-    <Td textColor="black">{formationData.libelle}</Td>
-    <Td textColor="black">{toPrettyYearLabel(formationData.annee)}</Td>
+    <Td color="grey.800">{formationData.libelle}</Td>
+    <Td color="grey.800">{toPrettyYearLabel(formationData.annee)}</Td>
 
     {/* Apprentis détail */}
     {displayFormationDataForStatut(formationData.apprentis, niveauData.apprentis.nbTotal, "orangesoft")}
