@@ -1,4 +1,4 @@
-import { Box, ListItem } from "@chakra-ui/react";
+import { ListItem } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -9,15 +9,13 @@ const FilterOption = ({ isSelected = false, onClick, children }) => {
       onClick={onClick}
       color={isSelected ? "bluefrance" : "grey.800"}
       fontSize="zeta"
+      fontWeight={isSelected ? "700" : "400"}
       role="button"
-      fontWeight="400"
-      backgroundColor={isSelected ? "bluesoft.50" : "transparent"}
       padding="1w"
       display="flex"
+      _hover={{ color: "bluefrance", backgroundColor: "grey.100" }}
     >
-      <Box _hover={{ textDecoration: "underline" }}>{children}</Box>
-      &nbsp;
-      {isSelected && <Box fontSize="zeta" as="i" color="bluefrance" className="ri-check-line" textDecoration="none" />}
+      {children}
     </ListItem>
   );
 };

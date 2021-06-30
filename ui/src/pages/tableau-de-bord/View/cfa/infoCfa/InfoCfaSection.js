@@ -1,23 +1,25 @@
-import { Box, Divider, Flex, HStack, Skeleton, Stack, Tag, Text, Wrap, WrapItem } from "@chakra-ui/react";
+import { Box, Heading, HStack, Skeleton, Tag, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { PageSectionTitle } from "../../../../../common/components";
+import { Highlight } from "../../../../../common/components";
 import withInfoCfaData from "./withInfoCfaData";
 
 const InfoCfaSection = ({ infosCfa, loading, error }) => {
+  let content = null;
+
   if (loading) {
-    return (
-      <HStack spacing="4w">
-        <Skeleton height="2rem" startColor="bluesoft.300" endColor="bluesoft.100" flex="2" />
-        <Skeleton height="2rem" startColor="bluesoft.300" endColor="bluesoft.100" flex="1" />
-      </HStack>
+    content = (
+      <>
+        <Skeleton height="1rem" width="100px" startColor="whiteAlpha.900" endColor="whiteAlpha.100" marginBottom="1w" />
+        <Skeleton height="2rem" width="600px" startColor="whiteAlpha.900" endColor="whiteAlpha.100" />
+      </>
     );
   }
 
   if (error) {
-    return (
-      <Text fontSize="epsilon" color="grey.800">
+    content = (
+      <Text fontSize="epsilon" color="white">
         <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
         <Box as="span" verticalAlign="middle">
           Erreur lors de la récupération des informations de l&apos;organisme de formation
@@ -27,66 +29,35 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
   }
 
   if (infosCfa) {
-    return (
-      <Flex>
-        <Box flex="2">
-          <Stack spacing="8px">
-            {/* Nom cfa */}
-            <PageSectionTitle>{infosCfa.libelleLong}</PageSectionTitle>
-
-            {/* Réseaux cfa */}
-            {infosCfa.reseaux.map((item, i) => (
-              <HStack key={i}>
-                <i className="ri-community-fill"></i>
-                <span>{item}</span>
-              </HStack>
-            ))}
-
-            {/* Domaines métiers cfa */}
-            <HStack>
-              <Wrap mt="2" spacing="5px">
-                {infosCfa.domainesMetiers.map((item, i) => (
-                  <WrapItem key={i}>
-                    <Tag
-                      mb="2"
-                      key={i}
-                      background="orangesoft.200"
-                      pl="1w"
-                      pr="1w"
-                      borderRadius="7%"
-                      fontWeight="700"
-                      color="bluefrance"
-                    >
-                      {item}
-                    </Tag>
-                  </WrapItem>
-                ))}
-              </Wrap>
-            </HStack>
-          </Stack>
-        </Box>
-        <Box>
-          <Divider orientation="vertical" />
-        </Box>
-        <Box flex="1" ml="5" space>
-          {/* Uai & Adresse Cfa */}
-          <Stack spacing="24px">
-            <Text fontSize="epsilon" color="grey.600">
-              UAI : {infosCfa.uai}
-            </Text>
-            <Text fontSize="epsilon" color="grey.600">
-              SIRET : {infosCfa.siret}
-            </Text>
-            <Text fontSize="epsilon" color="grey.800">
-              {infosCfa.adresse}
-            </Text>
-          </Stack>
-        </Box>
-      </Flex>
+    content = (
+      <>
+        <Text color="white" fontSize="omega">
+          UAI&nbsp;:&nbsp;{infosCfa.uai} - SIRET&nbsp;:&nbsp;{infosCfa.siret}
+        </Text>
+        <Heading color="white" fontSize="gamma" marginTop="1w">
+          {infosCfa.libelleLong}
+        </Heading>
+        <Text color="white" marginTop="1w">
+          {infosCfa.adresse}
+        </Text>
+        {infosCfa.reseaux?.length > 0 && (
+          <Text color="white">
+            Réseau(x)&nbsp;:&nbsp;
+            {infosCfa.reseaux.join(", ")}
+          </Text>
+        )}
+        <HStack marginTop="1w">
+          {["Paysagisme, jardinage, entretien espace verts"].map((item, i) => (
+            <Tag key={i} paddingX="2w" paddingY="1w" borderRadius="20px" color="white" background="bluesoft.500">
+              {item}
+            </Tag>
+          ))}
+        </HStack>
+      </>
     );
   }
 
-  return null;
+  return <Highlight>{content}</Highlight>;
 };
 
 InfoCfaSection.propTypes = {

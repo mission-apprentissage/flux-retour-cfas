@@ -1,7 +1,8 @@
+import { Heading } from "@chakra-ui/react";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
 import React from "react";
 
-import { PageSectionSubtitle } from "../../../../../common/components";
+import { Section } from "../../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../../common/components/tables/RepartitionEffectifsParCfa";
 import RepartitionEffectifsParNiveauEtAnneeFormation from "../../../../../common/components/tables/RepartitionEffectifsParNiveauEtAnneeFormation";
 import { filtersPropTypes } from "../../../FiltersContext";
@@ -15,14 +16,15 @@ const RepartitionEffectifsReseauParNiveauEtAnneeFormation = withRepartitionEffec
 
 const RepartitionEffectifsReseau = ({ filters }) => {
   return (
-    <section>
-      <PageSectionSubtitle>Répartition des effectifs</PageSectionSubtitle>
+    <Section paddingY="4w">
+      <Heading as="h3" textStyle="h3" marginBottom="2w">
+        Répartition des effectifs
+      </Heading>
       <Tabs
         variant="unstyled"
-        marginTop="1w"
         _selected={{ borderBottom: "3px solid", borderBottomColor: "bluefrance", color: "grey.800" }}
       >
-        <TabList color="gray.600">
+        <TabList color="gray.600" marginBottom="2w">
           <Tab
             padding="0"
             paddingY="1rem"
@@ -49,12 +51,12 @@ const RepartitionEffectifsReseau = ({ filters }) => {
           </TabPanel>
         </TabPanels>
       </Tabs>
-    </section>
+    </Section>
   );
 };
 
 RepartitionEffectifsReseau.propTypes = {
-  filters: filtersPropTypes,
+  filters: filtersPropTypes.state,
 };
 
 export default RepartitionEffectifsReseau;

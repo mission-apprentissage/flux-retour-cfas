@@ -1,23 +1,25 @@
-import { Box, Divider, Flex, HStack, Skeleton, Text } from "@chakra-ui/react";
+import { Box, Heading, Skeleton, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { PageSectionTitle } from "../../../../../common/components";
+import { Highlight } from "../../../../../common/components";
 import withInfoFormationData from "./withInfoFormationData";
 
 const InfosFormationSection = ({ infosFormation, loading, error }) => {
+  let content = null;
+
   if (loading) {
-    return (
-      <HStack spacing="4w">
-        <Skeleton height="2rem" startColor="bluesoft.300" endColor="bluesoft.100" flex="2" />
-        <Skeleton height="2rem" startColor="bluesoft.300" endColor="bluesoft.100" flex="1" />
-      </HStack>
+    content = (
+      <>
+        <Skeleton height="1rem" width="100px" startColor="whiteAlpha.900" endColor="whiteAlpha.100" marginBottom="1w" />
+        <Skeleton height="2rem" width="600px" startColor="whiteAlpha.900" endColor="whiteAlpha.100" />
+      </>
     );
   }
 
   if (error) {
-    return (
-      <Text fontSize="epsilon" color="grey.800">
+    content = (
+      <Text fontSize="epsilon" color="white">
         <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
         <Box as="span" verticalAlign="middle">
           Erreur lors de la récupération des informations de la formation
@@ -27,20 +29,19 @@ const InfosFormationSection = ({ infosFormation, loading, error }) => {
   }
 
   if (infosFormation) {
-    return (
-      <Flex justifyContent="space-between">
-        <PageSectionTitle>{infosFormation.libelle}</PageSectionTitle>
-        <Flex>
-          <Divider orientation="vertical" marginRight="4w" />
-          <Text fontSize="epsilon" color="grey.600">
-            CFD : {infosFormation.cfd}
-          </Text>
-        </Flex>
-      </Flex>
+    content = (
+      <>
+        <Text color="white" fontSize="omega">
+          CFD&nbsp;:&nbsp;{infosFormation.cfd}
+        </Text>
+        <Heading color="white" fontSize="gamma" marginTop="1w">
+          {infosFormation.libelle}
+        </Heading>
+      </>
     );
   }
 
-  return null;
+  return <Highlight>{content}</Highlight>;
 };
 
 InfosFormationSection.propTypes = {

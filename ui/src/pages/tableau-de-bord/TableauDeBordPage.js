@@ -1,43 +1,35 @@
-import { Box, Flex } from "@chakra-ui/react";
+import { Flex, Link } from "@chakra-ui/react";
 import React from "react";
 
-import { Page, PageContent, PageHeader } from "../../common/components";
-import EnSavoirPlusModal from "./EnSavoirPlusModal";
-import Filters from "./Filters";
+import { Page, Section } from "../../common/components";
+import LoggedUserMenu from "../../common/components/LoggedUserMenu";
 import { FiltersProvider } from "./FiltersContext";
+import IndicesHeader from "./IndicesHeader";
 import useEffectifs from "./useEffectifs";
 import View from "./View";
 
 const TableauDeBordPage = () => {
   const [effectifs, loading, error] = useEffectifs();
-  const pageTitle = (
-    <Flex justifyContent="center" alignItems="center">
-      <span>Tableau de bord de l&apos;apprentissage</span>
-      &nbsp;
-      <Box
-        as="legend"
-        paddingX="1w"
-        paddingY="1v"
-        fontSize="zeta"
-        backgroundColor="bluefrance"
-        color="white"
-        borderRadius="4px"
-      >
-        beta
-      </Box>
-    </Flex>
-  );
 
   return (
     <Page>
-      <PageHeader title={pageTitle}>
-        <EnSavoirPlusModal />
-        <Filters />
-      </PageHeader>
-      <PageContent>
-        <View effectifs={effectifs} loading={loading} error={error} />
-      </PageContent>
+      <NavBar />
+      <IndicesHeader />
+      <View effectifs={effectifs} loading={loading} error={error} />
     </Page>
+  );
+};
+
+const NavBar = () => {
+  return (
+    <Section paddingTop="3w">
+      <Flex marginX="auto" width="100%" maxWidth="1440px" justifyContent="space-between" alignItems="center">
+        <Link fontSize="zeta" paddingBottom="3w" borderBottom="solid 2px" borderBottomColor="bluefrance">
+          Indices en temps réel
+        </Link>
+        <LoggedUserMenu />
+      </Flex>
+    </Section>
   );
 };
 

@@ -1,40 +1,51 @@
-import { HStack } from "@chakra-ui/react";
+import { Heading, HStack, Skeleton } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import EffectifCard from "../../../../common/components/EffectifCard/EffectifCard";
-import PageSectionTitle from "../../../../common/components/Page/PageSectionTitle";
-import { STATUTS_APPRENANTS_INDICATOR_COLORS } from "../../../../common/constants/statutsColors";
-import DefinitionIndicesModal from "./DefinitionIndicesModal";
+import { EffectifCard, Section } from "../../../../common/components";
+import PeriodeFilter from "../../Filters/periode/PeriodeFilter";
+import { useFiltersContext } from "../../FiltersContext";
 
-const EffectifsSection = ({ effectifs }) => {
-  return (
-    <div>
-      <PageSectionTitle>Effectifs</PageSectionTitle>
-      <DefinitionIndicesModal />
-      <HStack marginTop="4w">
-        <EffectifCard
-          count={effectifs.apprentis.count}
-          label="apprentis"
-          indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.apprentis}
-        />
-        <EffectifCard
-          count={effectifs.inscrits.count}
-          label="apprenants sans contrat"
-          indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.inscrits}
-        />
-        <EffectifCard
-          count={effectifs.abandons.count}
-          label="abandons"
-          indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
-          tooltipLabel="Le chiffre affiché inclus les abandons de prospects. Un correctif est en cours."
-        />
+const EffectifsSection = ({ effectifs, loading }) => {
+  const filtersContext = useFiltersContext();
+
+  let content = null;
+
+  if (!content) {
+    content = (
+      <HStack spacing="2w">
+        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
+        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
+        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
       </HStack>
-    </div>
+    );
+  }
+
+  if (effectifs && !loading) {
+    content = (
+      <HStack spacing="2w">
+        <EffectifCard count={effectifs.apprentis.count} label="apprentis" />
+        <EffectifCard count={effectifs.inscrits.count} label="apprentis sans contrat" />
+        <EffectifCard count={effectifs.abandons.count} label="abandons" />
+      </HStack>
+    );
+  }
+
+  return (
+    <Section paddingY="4w">
+      <HStack marginBottom="2w">
+        <Heading as="h2" textStyle="h2">
+          Effectifs
+        </Heading>
+        <PeriodeFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
+      </HStack>
+      {content}
+    </Section>
   );
 };
 
 EffectifsSection.propTypes = {
+  loading: PropTypes.bool.isRequired,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({
       count: PropTypes.number.isRequired,

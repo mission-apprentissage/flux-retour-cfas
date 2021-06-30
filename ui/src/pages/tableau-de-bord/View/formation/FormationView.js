@@ -1,4 +1,3 @@
-import { Divider, Stack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -10,13 +9,11 @@ import RepartitionFormationParCfa from "./repartition-cfas/RepartitionFormationP
 
 const FormationView = ({ formationCfd, filters, effectifs }) => {
   return (
-    <Stack spacing="4w">
+    <>
       <InfosFormationSection formationCfd={formationCfd} />
-      <Divider orientation="horizontal" />
       {effectifs && <EffectifsSection effectifs={effectifs} />}
-      <Divider orientation="horizontal" />
       <RepartitionFormationParCfa formationCfd={formationCfd} filters={filters} />
-    </Stack>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import { Box, Flex, Link, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
+import { Box, HStack, Link, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 import { Link as RouterLink, useHistory, useRouteMatch } from "react-router-dom";
@@ -12,7 +12,7 @@ const NavLink = ({ to, children }) => {
     exact: true,
   });
   return (
-    <Link to={to} as={RouterLink} color="bluefrance" fontSize="epsilon" fontWeight={match ? "700" : "400"}>
+    <Link to={to} as={RouterLink} color="grey.800" fontSize="epsilon" fontWeight={match ? "700" : "400"}>
       {children}
     </Link>
   );
@@ -40,11 +40,11 @@ const LoggedUserMenu = () => {
   return (
     <Menu>
       <MenuButton>
-        <Flex alignItems="center">
-          <Box fontSize="beta" as="i" className="ri-account-circle-fill" marginRight="1w" />
+        <HStack alignItems="center" spacing="1w">
+          <Box fontSize="beta" as="i" className="ri-account-circle-fill" />
           <span>{auth.sub}</span>
-          <Box fontSize="beta" as="i" className="ri-arrow-down-s-line" marginLeft="1w" />
-        </Flex>
+          <Box fontSize="beta" as="i" className="ri-arrow-down-s-line" />
+        </HStack>
       </MenuButton>
       <MenuList>
         {isAdmin && (

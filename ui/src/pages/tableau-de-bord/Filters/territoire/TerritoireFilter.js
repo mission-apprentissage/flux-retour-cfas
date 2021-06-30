@@ -22,7 +22,7 @@ const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, region
     setIsOpen(false);
   };
 
-  const tabLabels = [`Régions (${regions.length})`, `Départements (${departements.length})`];
+  const tabLabels = [`Région (${regions.length})`, `Département (${departements.length})`];
 
   const buttonLabel = filters.region?.nom || filters.departement?.nom;
 
