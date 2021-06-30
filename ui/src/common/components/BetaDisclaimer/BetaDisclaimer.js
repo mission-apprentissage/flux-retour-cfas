@@ -1,7 +1,9 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Box, Flex, Link, Text } from "@chakra-ui/react";
 import React from "react";
 
 import Section from "../Section/Section";
+
+const CONTACT_ADDRESS = "tableau-de-bord@apprentissage.beta.gouv.fr";
 
 const BetaDisclaimer = () => {
   return (
@@ -21,7 +23,10 @@ const BetaDisclaimer = () => {
         </Box>
         <Text color="grey.800">
           Cet outil est en construction, pour nous signaler un besoin, une donnée manquante ou une anomalie,
-          contactez-nous : tableau-de-bord@apprentissage.beta.gouv.fr
+          contactez-nous&nbsp;:&nbsp;
+          <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
+            {CONTACT_ADDRESS}
+          </Link>
         </Text>
       </Flex>
     </Section>
