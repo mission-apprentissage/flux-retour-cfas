@@ -47,8 +47,16 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
           </Text>
         )}
         <HStack marginTop="1w">
-          {["Paysagisme, jardinage, entretien espace verts"].map((item, i) => (
-            <Tag key={i} paddingX="2w" paddingY="1w" borderRadius="20px" color="white" background="bluesoft.500">
+          {infosCfa.domainesMetiers.map((item, i) => (
+            <Tag
+              key={i}
+              fontSize="omega"
+              paddingX="2w"
+              paddingY="1w"
+              borderRadius="20px"
+              color="white"
+              background="rgba(255, 255, 255, 0.24)"
+            >
               {item}
             </Tag>
           ))}
