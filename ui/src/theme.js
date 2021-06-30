@@ -11,6 +11,18 @@ const colors = {
   warning: "#fa5c00",
   info: "#3a55d1",
   galt: "#f9f8f6",
+  // hack so we can use bluefrance color in Progress component which only accepts a colorScheme prop
+  main: {
+    900: "#000091",
+    800: "#000091",
+    700: "#000091",
+    600: "#000091",
+    500: "#000091",
+    400: "#000091",
+    300: "#000091",
+    200: "#000091",
+    100: "#000091",
+  },
   grey: {
     800: "#1e1e1e",
     750: "#2a2a2a",

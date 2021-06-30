@@ -24,7 +24,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                   <Progress
                     width="3rem"
                     size="sm"
-                    colorScheme="orangesoft"
+                    colorScheme="main"
                     value={getPercentage(effectifs.apprentis, total)}
                     borderRadius="8px"
                   />{" "}
@@ -38,7 +38,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                   <Progress
                     width="3rem"
                     size="sm"
-                    colorScheme="pinklight"
+                    colorScheme="main"
                     borderRadius="8px"
                     value={getPercentage(effectifs.inscrits, total)}
                   />{" "}
@@ -52,7 +52,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                   <Progress
                     width="3rem"
                     size="sm"
-                    colorScheme="bluedark"
+                    colorScheme="main"
                     borderRadius="8px"
                     value={getPercentage(effectifs.abandons, total)}
                   />{" "}

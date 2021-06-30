@@ -48,13 +48,13 @@ const buildNiveauRows = (data, index) => (
         <Td></Td>
 
         {/* Apprentis Niveau info */}
-        {displayNiveauDataForStatut(data.niveau.apprentis, "orangesoft")}
+        {displayNiveauDataForStatut(data.niveau.apprentis)}
 
         {/* Inscrits Niveau info */}
-        {displayNiveauDataForStatut(data.niveau.inscrits, "pinklight")}
+        {displayNiveauDataForStatut(data.niveau.inscrits)}
 
         {/* Abandons Niveau info */}
-        {displayNiveauDataForStatut(data.niveau.abandons, "bluedark")}
+        {displayNiveauDataForStatut(data.niveau.abandons)}
       </Tr>
     </Tbody>
 
@@ -65,13 +65,13 @@ const buildNiveauRows = (data, index) => (
   </>
 );
 
-const displayNiveauDataForStatut = (statutData, colorScheme) => (
+const displayNiveauDataForStatut = (statutData) => (
   <Td>
     <HStack>
       <Progress
         width="50%"
         size="sm"
-        colorScheme={colorScheme}
+        colorScheme="main"
         value={getPercentage(statutData.nbTotalForNiveau, statutData.nbTotal)}
       />{" "}
       <Text color="grey.800" fontSize="gamma" fontWeight="700">
@@ -87,21 +87,21 @@ const buildFormationDetailRow = (formationData, index, niveauData) => (
     <Td color="grey.800">{toPrettyYearLabel(formationData.annee)}</Td>
 
     {/* Apprentis détail */}
-    {displayFormationDataForStatut(formationData.apprentis, niveauData.apprentis.nbTotal, "orangesoft")}
+    {displayFormationDataForStatut(formationData.apprentis, niveauData.apprentis.nbTotal)}
     {/* Inscrits détail */}
-    {displayFormationDataForStatut(formationData.inscrits, niveauData.inscrits.nbTotal, "pinklight")}
+    {displayFormationDataForStatut(formationData.inscrits, niveauData.inscrits.nbTotal)}
     {/* Abandons détail */}
-    {displayFormationDataForStatut(formationData.abandons, niveauData.abandons.nbTotal, "bluedark")}
+    {displayFormationDataForStatut(formationData.abandons, niveauData.abandons.nbTotal)}
   </Tr>
 );
 
-const displayFormationDataForStatut = (statutData, nbStatutsTotal, colorScheme) => (
+const displayFormationDataForStatut = (statutData, nbStatutsTotal) => (
   <Td>
     <HStack>
       <Progress
         width="50%"
         size="sm"
-        colorScheme={colorScheme}
+        colorScheme="main"
         value={getPercentage(statutData.nbTotalForNiveau, nbStatutsTotal)}
       />{" "}
       <Text color="grey.800" fontSize="gamma" fontWeight="700">
