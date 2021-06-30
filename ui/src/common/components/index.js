@@ -8,9 +8,7 @@ export { default as InfoModal } from "./Modal/InfoModal";
 export { default as EffectifCard } from "./EffectifCard/EffectifCard";
 
 export { default as Page } from "./Page/Page";
-export { default as PageSectionTitle } from "./Page/PageSectionTitle";
 export { default as PageSkeleton } from "./Page/PageSkeleton";
-export { default as PageContent } from "./Page/PageContent";
 export { default as Section } from "./Section/Section";
 export { default as Highlight } from "./Highlight/Highlight";
 

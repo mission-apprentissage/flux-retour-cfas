@@ -1,8 +1,9 @@
+import { Heading } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Page, PageContent, PageHeader, PageSkeleton } from "../../common/components";
-import GlobalStats from "../../common/components/GlobalStats";
+import { Page, Section } from "../../common/components";
+import GlobalStats, { StatsSkeleton } from "../../common/components/GlobalStats";
 import { useFetch } from "../../common/hooks/useFetch";
 
 const UserStatsPage = ({ match }) => {
@@ -10,14 +11,18 @@ const UserStatsPage = ({ match }) => {
   const [data, loading, error] = useFetch(`/api/stats/${userName}`);
 
   let content;
-  if (data) content = <GlobalStats stats={data.stats} />;
+  if (data && !loading) content = <GlobalStats stats={data.stats} />;
   if (error) content = <p>Erreur lors du chargement des statistiques {userName}</p>;
-  if (loading) content = <PageSkeleton />;
+  if (loading) content = <StatsSkeleton />;
 
   return (
     <Page>
-      <PageHeader title={`Statistiques ${userName}`} />
-      <PageContent>{content}</PageContent>
+      <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
+        <Heading as="h1" textStyle="h1">
+          Statistiques {userName}
+        </Heading>
+      </Section>
+      {content}
     </Page>
   );
 };

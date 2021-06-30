@@ -244,6 +244,8 @@ const components = {
       },
       secondary: {
         borderRadius: "40px",
+        paddingY: "3v",
+        lineHeight: "1.4",
         backgroundColor: "grey.300",
         color: "grey.700",
         _hover: {

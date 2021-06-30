@@ -1,5 +1,6 @@
 import {
   Box,
+  Heading,
   HStack,
   Select,
   Skeleton,
@@ -17,7 +18,7 @@ import {
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Page, PageContent, PageHeader, Pagination } from "../../../common/components";
+import { Page, Pagination, Section } from "../../../common/components";
 import withCfasReferentielData from "./withCfasReferentielData";
 
 const CfasReferentielPage = ({
@@ -33,9 +34,12 @@ const CfasReferentielPage = ({
 }) => {
   return (
     <Page>
-      <PageHeader title="Référentiel des organismes de formation" />
-
-      <PageContent>
+      <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
+        <Heading as="h1" textStyle="h1">
+          Référentiel des organismes de formation
+        </Heading>
+      </Section>
+      <Section marginTop="4w">
         <Stack spacing="4w">
           {regionsData && (
             <Box background="bluegrey.200" padding="4w" width="100%">
@@ -194,7 +198,7 @@ const CfasReferentielPage = ({
             </Table>
           )}
         </Stack>
-      </PageContent>
+      </Section>{" "}
     </Page>
   );
 };

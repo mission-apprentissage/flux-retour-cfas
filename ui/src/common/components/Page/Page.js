@@ -5,22 +5,22 @@ import React from "react";
 import BetaDisclaimer from "../BetaDisclaimer/BetaDisclaimer";
 import Logo from "../Logo/Logo";
 import Section from "../Section/Section";
+import NavBar from "./NavBar";
 
 const Page = ({ children }) => {
   return (
     <>
       <AppHeader />
+      <NavBar />
       {children}
       <BetaDisclaimer />
     </>
   );
 };
 
-const grayBorder = "#E5E5E5";
-
 const AppHeader = () => {
   return (
-    <Section as="header" borderBottom="solid 2px" borderBottomColor={grayBorder} paddingY="3w">
+    <Section as="header" borderBottom="solid 1px" borderBottomColor="grey.400" paddingY="3w">
       <Flex alignItems="center">
         <Logo />
         <Box marginLeft="5w">
