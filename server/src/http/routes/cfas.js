@@ -110,8 +110,8 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
         // Build response
         return res.json({
           libelleLong: cfaFound.nom_etablissement,
-          reseaux: cfaInReferentiel ? cfaInReferentiel.reseaux ?? [] : [],
-          domainesMetiers: [],
+          reseaux: cfaInReferentiel?.reseaux ?? [],
+          domainesMetiers: cfaInReferentiel?.metiers ?? [],
           uai: cfaFound.uai_etablissement,
           siret: cfaFound.siret_etablissement,
           adresse: cfaFound.etablissement_adresse,

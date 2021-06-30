@@ -56,6 +56,11 @@ const cfasSchema = new Schema({
     default: null,
     description: "Date de la première transmission de données",
   },
+  metiers: {
+    type: [String],
+    default: [],
+    description: "Les domaines métiers rattachés à l'établissement",
+  },
 });
 
 module.exports = cfasSchema;

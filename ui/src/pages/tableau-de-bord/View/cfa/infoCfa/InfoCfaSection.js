@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, HStack, Skeleton, Stack, Tag, Text } from "@chakra-ui/react";
+import { Box, Divider, Flex, HStack, Skeleton, Stack, Tag, Text, Wrap, WrapItem } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -43,20 +43,25 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
             ))}
 
             {/* Domaines métiers cfa */}
-            <HStack mt="2">
-              {infosCfa.domainesMetiers.map((item, i) => (
-                <Tag
-                  key={i}
-                  background="orangesoft.200"
-                  pl="1w"
-                  pr="1w"
-                  borderRadius="7%"
-                  fontWeight="700"
-                  color="bluefrance"
-                >
-                  {item}
-                </Tag>
-              ))}
+            <HStack>
+              <Wrap mt="2" spacing="5px">
+                {infosCfa.domainesMetiers.map((item, i) => (
+                  <WrapItem key={i}>
+                    <Tag
+                      mb="2"
+                      key={i}
+                      background="orangesoft.200"
+                      pl="1w"
+                      pr="1w"
+                      borderRadius="7%"
+                      fontWeight="700"
+                      color="bluefrance"
+                    >
+                      {item}
+                    </Tag>
+                  </WrapItem>
+                ))}
+              </Wrap>
             </HStack>
           </Stack>
         </Box>

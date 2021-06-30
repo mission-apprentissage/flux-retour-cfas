@@ -8,6 +8,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { Cfa, StatutCandidat } = require("../../common/model");
 const { jobNames, reseauxCfas } = require("../../common/model/constants/");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
+const { getMetiersBySiret } = require("../../common/apis/apiLba");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -17,10 +18,13 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 runScript(async ({ cfas }) => {
   logger.info("Seeding referentiel CFAs");
   await seedCfasFromStatutsCandidatsUaisValid(cfas);
+  await seedMetiersFromLbaApi();
+
   await seedCfasNetworkFromCsv(reseauxCfas.CMA);
   await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
   await seedCfasNetworkFromCsv(reseauxCfas.AGRI);
   await seedCfasNetworkFromCsv(reseauxCfas.MFR);
+
   logger.info("End seeding référentiel CFAs !");
 }, jobNames.seedReferentielCfas);
 
@@ -29,7 +33,9 @@ runScript(async ({ cfas }) => {
  */
 const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
   // All distinct valid uais
-  const allUais = await StatutCandidat.distinct("uai_etablissement", { uai_etablissement_valid: true });
+  const allUais = await StatutCandidat.distinct("uai_etablissement", {
+    uai_etablissement_valid: true,
+  });
 
   logger.info(`Seeding Referentiel CFAs from ${allUais.length} UAIs found in statutsCandidats`);
 
@@ -41,7 +47,9 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
     nbUaiHandled++;
 
     // Gets statut for UAI
-    const statutForUai = await StatutCandidat.findOne({ uai_etablissement: currentUai });
+    const statutForUai = await StatutCandidat.findOne({
+      uai_etablissement: currentUai,
+    });
     const cfaExistant = await Cfa.findOne({ uai: currentUai }).lean();
 
     // Create or update CFA
@@ -194,4 +202,33 @@ const addCfaFromNetwork = async (currentCfa, nomReseau, nomFichier) => {
   });
 
   await cfaToAdd.save();
+};
+
+/**
+ * Seed des métiers dans la collection CFAs
+ */
+const seedMetiersFromLbaApi = async () => {
+  const allCfasWithSiret = await Cfa.find({ siret: { $nin: [null, ""] } });
+
+  logger.info(`Seeding Metiers to CFAs from ${allCfasWithSiret.length} cfas found with siret`);
+
+  loadingBar.start(allCfasWithSiret.length, 0);
+  let nbHandled = 0;
+
+  await asyncForEach(allCfasWithSiret, async (currentCfaWithSiret) => {
+    loadingBar.update(nbHandled);
+    nbHandled++;
+
+    const metiersFromSiret = await getMetiersBySiret(currentCfaWithSiret.siret);
+    await Cfa.findOneAndUpdate(
+      { _id: currentCfaWithSiret._id },
+      {
+        $set: {
+          metiers: metiersFromSiret?.metiers,
+        },
+      }
+    );
+  });
+
+  loadingBar.stop();
 };

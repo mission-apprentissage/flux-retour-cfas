@@ -20,3 +20,7 @@ export const toPrettyYearLabel = (year) => {
   if (!year) return "N/A";
   return year === 1 ? `${year}ère année` : `${year}ème année`;
 };
+
+export const truncate = (string, size = 32) => {
+  return string.length > size ? string.substr(0, size - 1) + "..." : string;
+};
