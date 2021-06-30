@@ -1,7 +1,6 @@
 export { default as SearchInput } from "./SearchInput/SearchInput";
 export { default as SelectButton } from "./SelectButton/SelectButton";
 export { default as OverlayMenu } from "./OverlayMenu/OverlayMenu";
-export { default as SelectButton } from "./SelectButton/SelectButton";
 
 export { default as InfoModal } from "./Modal/InfoModal";
 
