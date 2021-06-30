@@ -5,6 +5,8 @@ import React from "react";
 import { Highlight } from "../../../../../common/components";
 import withInfoCfaData from "./withInfoCfaData";
 
+const MAX_DISPLAYED_DOMAINE_METIERS = 5;
+
 const InfoCfaSection = ({ infosCfa, loading, error }) => {
   let content = null;
 
@@ -29,6 +31,11 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
   }
 
   if (infosCfa) {
+    const domainesMetierToDisplay =
+      infosCfa.domainesMetiers.length > MAX_DISPLAYED_DOMAINE_METIERS
+        ? [...infosCfa.domainesMetiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS), "..."]
+        : infosCfa.domainesMetiers;
+
     content = (
       <>
         <Text color="white" fontSize="omega">
@@ -47,7 +54,7 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
           </Text>
         )}
         <HStack marginTop="1w">
-          {infosCfa.domainesMetiers.map((item, i) => (
+          {domainesMetierToDisplay.map((item, i) => (
             <Tag
               key={i}
               fontSize="omega"
