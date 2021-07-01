@@ -14,7 +14,6 @@ const withSubmitDataFeedback = (Component) => {
     const [submitState, setSubmitState] = useState(SUBMIT_STATE.waiting);
 
     const sendDataFeedback = async (formData) => {
-      console.log("pozjdopazjdopjazdpojazdpoj");
       const body = { ...formData, siret };
 
       try {
