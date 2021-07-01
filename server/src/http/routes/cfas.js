@@ -16,7 +16,6 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     siret: Joi.string().required(),
     email: Joi.string().required(),
     details: Joi.string().required(),
-    dataIsValid: Joi.boolean().required(),
   });
 
   router.post(

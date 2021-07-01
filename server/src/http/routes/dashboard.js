@@ -1,7 +1,7 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { UserEvent, Cfa } = require("../../common/model");
+const { UserEvent } = require("../../common/model");
 const { codesStatutsCandidats } = require("../../common/model/constants");
 
 module.exports = ({ stats, dashboard }) => {
@@ -91,16 +91,9 @@ module.exports = ({ stats, dashboard }) => {
         etablissement_num_region: num_region,
       });
 
-      // Gets cfas validate for num_region
-      const nbCfaDataValidated = await Cfa.countDocuments({
-        region_num: num_region,
-        feedback_donnee_valide: true,
-      });
-
       // Build response
       return res.json({
         nbCfaConnected,
-        nbCfaDataValidated,
       });
     })
   );

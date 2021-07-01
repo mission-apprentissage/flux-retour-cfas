@@ -255,7 +255,6 @@ httpTests(__filename, ({ startServer }) => {
           nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
           region_num: regionNumTest,
           siret: getRandomSiretEtablissement(),
-          feedback_donnee_valide: true,
         }).save();
       }
 
