@@ -8,7 +8,7 @@ import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "../generic/EffectifsSection";
 import RepartitionEffectifsReseau from "./repartition/RepartitionEffectifsReseau";
 
-const ReseauView = ({ reseau, effectifs, filters }) => {
+const ReseauView = ({ reseau, effectifs, filters, loading }) => {
   return (
     <>
       <Highlight>
@@ -16,7 +16,7 @@ const ReseauView = ({ reseau, effectifs, filters }) => {
           Réseau {reseau}
         </Heading>
       </Highlight>
-      {effectifs && <EffectifsSection effectifs={effectifs} />}
+      {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartitionEffectifsReseau filters={filters} />
     </>
   );
@@ -24,6 +24,7 @@ const ReseauView = ({ reseau, effectifs, filters }) => {
 
 ReseauView.propTypes = {
   effectifs: effectifsPropType,
+  loading: PropTypes.bool.isRequired,
   filters: filtersPropTypes.state,
   reseau: PropTypes.string.isRequired,
 };
