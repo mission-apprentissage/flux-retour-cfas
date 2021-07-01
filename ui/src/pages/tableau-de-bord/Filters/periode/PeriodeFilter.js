@@ -38,7 +38,7 @@ const PeriodeFilter = ({ value, onChange }) => {
         onCalendarClose={() => setIsOpen(false)}
         onCalendarOpen={() => setIsOpen(true)}
         customInput={
-          <Button variant="link">
+          <Button variant="select-primary">
             <Box as="span" textDecoration="underline">
               en {buttonLabel}
             </Box>

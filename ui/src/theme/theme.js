@@ -1,5 +1,7 @@
 import { extendTheme } from "@chakra-ui/react";
 
+import components from "./components";
+
 const rootFontSizePx = 16;
 
 const colors = {
@@ -226,60 +228,6 @@ const space = {
   "10w": "80px",
   "12w": "96px",
   "15w": "120px",
-};
-
-const components = {
-  Button: {
-    baseStyle: {
-      fontWeight: "400",
-      fontFamily: "Marianne",
-    },
-    variants: {
-      primary: {
-        background: "bluefrance",
-        color: "white",
-        _hover: {
-          background: "bluedark.600",
-        },
-      },
-      secondary: {
-        borderRadius: "40px",
-        paddingY: "3v",
-        lineHeight: "1.4",
-        backgroundColor: "grey.300",
-        color: "grey.700",
-        _hover: {
-          background: "grey.500",
-        },
-      },
-      light: {
-        background: "bluesoft.100",
-        _hover: {
-          background: "bluesoft.200",
-        },
-      },
-      outline: {
-        color: "bluefrance",
-        borderColor: "bluefrance",
-        _hover: {
-          background: "bluesoft.200",
-        },
-      },
-      link: {
-        color: "bluefrance",
-        border: "none",
-        fontWeight: "700",
-        fontSize: "gamma",
-        paddingX: "0",
-        _hover: {
-          textDecoration: "none",
-        },
-      },
-    },
-    defaultProps: {
-      variant: "primary",
-    },
-  },
 };
 
 const theme = extendTheme({ fonts, colors, styles, fontSizes, textStyles, space, components });

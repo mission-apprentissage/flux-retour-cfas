@@ -55,13 +55,7 @@ const NavBar = () => {
             <NavItem to="/stats/gesti">Statistiques Gesti</NavItem>
             <NavItem to="/referentiel-cfas">Organismes par région</NavItem>
             <Box paddingY="3w" paddingX="3v">
-              <Button
-                variant="unstyled"
-                color="grey.800"
-                height="100%"
-                _hover={{ textDecoration: "underline" }}
-                onClick={logout}
-              >
+              <Button variant="unstyled" height="100%" onClick={logout}>
                 Déconnexion
               </Button>
             </Box>

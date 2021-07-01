@@ -13,8 +13,10 @@ const SelectButton = ({ children, icon, onClick, isClearable = false, clearIconO
       }
     : {};
   return (
-    <Button variant="secondary" onClick={onClick} {...style}>
-      {icon && <Box fontSize="epsilon" as="i" className={icon} marginRight="1v" verticalAlign="middle" />}
+    <Button variant="select-secondary" onClick={onClick} {...style}>
+      {icon && (
+        <Box fontSize="epsilon" as="i" className={icon} marginRight="1v" paddingTop="2px" verticalAlign="middle" />
+      )}
       <Box as="span" verticalAlign="middle" textOverflow="ellipsis" maxWidth="600px" overflow="hidden">
         {children}
       </Box>

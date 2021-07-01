@@ -9,20 +9,11 @@ const SearchInput = ({ value = "", placeholder = "", onChange }) => {
       <Input
         placeholder={placeholder}
         value={value}
+        variant="search"
         onChange={(event) => onChange(event.target.value)}
         size="lg"
         autoFocus
-        color="grey.800"
-        backgroundColor="grey.200"
-        border="none"
-        borderBottom="solid 2px"
-        borderBottomColor="bluefrance"
-        borderRadius="4px 0 0 0"
         fontSize="epsilon"
-        _focus={{
-          borderColor: "bluefrance",
-          boxShadow: "none",
-        }}
         _placeholder={{ fontSize: "epsilon" }}
       />
     </InputGroup>

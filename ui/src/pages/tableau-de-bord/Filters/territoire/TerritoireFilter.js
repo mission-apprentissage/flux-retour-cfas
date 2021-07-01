@@ -28,7 +28,7 @@ const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, region
 
   return (
     <div>
-      <Button variant="link" onClick={() => setIsOpen(!isOpen)}>
+      <Button variant="select-primary" onClick={() => setIsOpen(!isOpen)}>
         <Box as="span" textDecoration="underline">
           {buttonLabel}
         </Box>
