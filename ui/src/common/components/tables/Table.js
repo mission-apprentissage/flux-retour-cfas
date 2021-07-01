@@ -50,7 +50,7 @@ const Table = ({ headers, loading, error, children }) => {
 
 Table.propTypes = {
   headers: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node,
   loading: PropTypes.bool,
   error: PropTypes.object,
 };

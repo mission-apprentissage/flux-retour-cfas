@@ -11,7 +11,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
 
   let content = null;
 
-  if (!content) {
+  if (loading) {
     content = (
       <HStack spacing="2w">
         <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
@@ -59,7 +59,7 @@ EffectifsSection.propTypes = {
       count: PropTypes.number.isRequired,
       evolution: PropTypes.number,
     }).isRequired,
-  }).isRequired,
+  }),
 };
 
 export default EffectifsSection;

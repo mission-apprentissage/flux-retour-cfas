@@ -7,11 +7,11 @@ import EffectifsSection from "../generic/EffectifsSection";
 import InfosFormationSection from "./infos-formation/InfosFormationSection";
 import RepartitionFormationParCfa from "./repartition-cfas/RepartitionFormationParCfa";
 
-const FormationView = ({ formationCfd, filters, effectifs }) => {
+const FormationView = ({ formationCfd, filters, effectifs, loading }) => {
   return (
     <>
       <InfosFormationSection formationCfd={formationCfd} />
-      {effectifs && <EffectifsSection effectifs={effectifs} />}
+      {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartitionFormationParCfa formationCfd={formationCfd} filters={filters} />
     </>
   );
@@ -19,6 +19,7 @@ const FormationView = ({ formationCfd, filters, effectifs }) => {
 
 FormationView.propTypes = {
   effectifs: effectifsPropType,
+  loading: PropTypes.bool.isRequired,
   formationCfd: PropTypes.string.isRequired,
   filters: filtersPropTypes.state,
 };

@@ -27,7 +27,7 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
       <SelectButton
         icon="ri-community-fill"
         onClick={() => setIsOpen(!isOpen)}
-        isClearable={filters.cfa || filters.reseau}
+        isClearable={Boolean(filters.cfa || filters.reseau)}
         clearIconOnClick={() => {
           onReseauChange(null);
           onCfaChange(null);
