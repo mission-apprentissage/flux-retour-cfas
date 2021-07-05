@@ -42,6 +42,19 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
+   * Schema for nouveaux contrats
+   */
+  const nouveauxContratsQueryBodySchema = Joi.object({
+    startDate: Joi.date().required(),
+    endDate: Joi.date().required(),
+    formation_cfd: Joi.string().allow(null, ""),
+    siret_etablissement: Joi.string().allow(null, ""),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
+  });
+
+  /**
    * Gets the general stats for the dashboard
    */
   router.get(
@@ -181,6 +194,25 @@ module.exports = ({ stats, dashboard }) => {
       const effectifsByCfaAtDate = await dashboard.getEffectifsCountByCfaAtDate(date, filters);
 
       return res.json(effectifsByCfaAtDate);
+    })
+  );
+
+  router.post(
+    "/nouveaux-contrats",
+    tryCatch(async (req, res) => {
+      // Validate schema
+      await nouveauxContratsQueryBodySchema.validateAsync(req.body, {
+        abortEarly: false,
+      });
+
+      const { startDate, endDate, ...filters } = req.body;
+      const dateRange = [new Date(startDate), new Date(endDate)];
+
+      console.log(dateRange);
+
+      const nouveauxContratsCountInDateRange = await dashboard.getNouveauxContratsCountInDateRange(dateRange, filters);
+
+      return res.json({ count: nouveauxContratsCountInDateRange });
     })
   );
 
