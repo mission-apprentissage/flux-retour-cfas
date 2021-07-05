@@ -2,7 +2,7 @@ import { Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { OverlayMenu, SearchInput, SelectButton } from "../../../../common/components";
+import { OverlayMenu, SearchInput, SecondarySelectButton } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
 import FormationsList from "./FormationsList";
 import withFormationSearch from "./withFormationSearch";
@@ -18,14 +18,14 @@ const FormationFilter = ({ filters, searchTerm, searchResults, onSearchTermChang
 
   return (
     <div>
-      <SelectButton
+      <SecondarySelectButton
         icon="ri-book-mark-fill"
         onClick={() => setIsOpen(!isOpen)}
         isClearable={!!filters.formation}
         clearIconOnClick={() => onFormationChange(null)}
       >
         {buttonLabel}
-      </SelectButton>
+      </SecondarySelectButton>
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <SearchInput
