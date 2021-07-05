@@ -29,7 +29,6 @@ const CfasReferentielPage = ({
   _fetch,
   onConnectionChange,
   onRegionChange,
-  onValidationTdbChange,
   defaultSelectedRegionCode,
 }) => {
   return (
@@ -75,20 +74,6 @@ const CfasReferentielPage = ({
                     <option value={0}>Sans branchement des données</option>
                   </Select>
                 </HStack>
-
-                {/* Filtre Validation */}
-                <HStack>
-                  <Text>
-                    <i className="ri-checkbox-multiple-fill"></i>
-                  </Text>
-                  <Text>Validation des données : </Text>
-                  <Select defaultValue={-1} onChange={(e) => onValidationTdbChange(e.target.value)} width="30%">
-                    <option value={-1}>-- Peu importe --</option>
-                    <option value={1}>Données validées</option>
-                    <option value={0}>Données non validées</option>
-                    <option value={2}>En attente de validation</option>
-                  </Select>
-                </HStack>
               </Stack>
             </Box>
           )}
@@ -110,16 +95,12 @@ const CfasReferentielPage = ({
                   <Th>UAI</Th>
                   <Th>Region</Th>
                   <Th>Branchement Tdb</Th>
-                  <Th>Validation Tdb</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {Array.from(Array(10), (e, i) => {
                   return (
                     <Tr key={i}>
-                      <Td>
-                        <Skeleton height="20px" />
-                      </Td>
                       <Td>
                         <Skeleton height="20px" />
                       </Td>
@@ -149,7 +130,6 @@ const CfasReferentielPage = ({
                   <Th>UAI</Th>
                   <Th>Region</Th>
                   <Th>Branchement Tdb</Th>
-                  <Th>Validation Tdb</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -161,21 +141,6 @@ const CfasReferentielPage = ({
                     <Td>{cfa.region_nom}</Td>
                     <Td>
                       {cfa.branchement_flux_cfa_erp ? (
-                        <Tag colorScheme="green">
-                          <i className="ri-thumb-up-line"></i>
-                        </Tag>
-                      ) : (
-                        <Tag colorScheme="red">
-                          <i className="ri-close-circle-line"></i>
-                        </Tag>
-                      )}
-                    </Td>
-                    <Td>
-                      {cfa.feedback_donnee_valide === null ? (
-                        <Tag>
-                          <i className="ri-question-fill"></i>
-                        </Tag>
-                      ) : cfa.feedback_donnee_valide ? (
                         <Tag colorScheme="green">
                           <i className="ri-thumb-up-line"></i>
                         </Tag>
@@ -216,7 +181,6 @@ CfasReferentielPage.propTypes = {
   _fetch: PropTypes.func.isRequired,
   onConnectionChange: PropTypes.func.isRequired,
   onRegionChange: PropTypes.func.isRequired,
-  onValidationTdbChange: PropTypes.func.isRequired,
   defaultSelectedRegionCode: PropTypes.string.isRequired,
 };
 

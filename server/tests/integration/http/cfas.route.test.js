@@ -48,7 +48,6 @@ httpTests(__filename, ({ startServer }) => {
       siret: "80320291800022",
       details: "blabla",
       email: "mail@example.com",
-      dataIsValid: true,
     };
 
     it("sends a 400 HTTP response when no data provided", async () => {
@@ -75,12 +74,6 @@ httpTests(__filename, ({ startServer }) => {
       assert.equal(response.status, 400);
     });
 
-    it("sends a 400 HTTP response when dataIsValid is missing in body", async () => {
-      const response = await httpClient.post("/api/cfas/data-feedback", omit(validBody, "dataIsValid"));
-
-      assert.equal(response.status, 400);
-    });
-
     it("sends a 200 HTTP response when feedback was created", async () => {
       const response = await httpClient.post("/api/cfas/data-feedback", validBody);
 
@@ -89,7 +82,6 @@ httpTests(__filename, ({ startServer }) => {
         siret: validBody.siret,
         details: validBody.details,
         email: validBody.email,
-        donnee_est_valide: validBody.dataIsValid,
       });
     });
   });
@@ -100,7 +92,6 @@ httpTests(__filename, ({ startServer }) => {
       siret: "80320291800022",
       details: "blabla",
       email: "mail@example.com",
-      donnee_est_valide: true,
     };
 
     beforeEach(async () => {
@@ -122,7 +113,6 @@ httpTests(__filename, ({ startServer }) => {
         siret: cfaDataFeedbackSeed.siret,
         details: cfaDataFeedbackSeed.details,
         email: cfaDataFeedbackSeed.email,
-        donnee_est_valide: cfaDataFeedbackSeed.donnee_est_valide,
       });
     });
   });

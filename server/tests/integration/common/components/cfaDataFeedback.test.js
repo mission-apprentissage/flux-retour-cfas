@@ -19,7 +19,6 @@ integrationTests(__filename, () => {
         siret,
         details: "blabla",
         email: "mail@example.com",
-        donnee_est_valide: true,
         created_at: new Date(),
       }).save();
 
@@ -44,7 +43,6 @@ integrationTests(__filename, () => {
         siret: "80320291800022",
         details: "blabla",
         email: "mail@example.com",
-        dataIsValid: true,
       };
       const created = await createCfaDataFeedback(props);
 
@@ -52,11 +50,10 @@ integrationTests(__filename, () => {
         siret: props.siret,
         details: props.details,
         email: props.email,
-        donnee_est_valide: props.dataIsValid,
       });
     });
 
-    it("update Cfa in référentiel & returns created CfaDataFeedback", async () => {
+    it("returns created CfaDataFeedback", async () => {
       const siretToCreate = "80320291800022";
 
       await new Cfa({ nom: "CFA Test", siret: siretToCreate }).save();
@@ -65,7 +62,6 @@ integrationTests(__filename, () => {
         siret: siretToCreate,
         details: "blabla",
         email: "mail@example.com",
-        dataIsValid: true,
       };
       const created = await createCfaDataFeedback(props);
 
@@ -73,14 +69,10 @@ integrationTests(__filename, () => {
         siret: props.siret,
         details: props.details,
         email: props.email,
-        donnee_est_valide: props.dataIsValid,
       });
-
-      const foundInReferentiel = await Cfa.findOne({ siret: siretToCreate }).lean();
-      assert.deepStrictEqual(foundInReferentiel.feedback_donnee_valide, true);
     });
 
-    it("doesn't update Cfa in référentiel & returns created CfaDataFeedback", async () => {
+    it("doesn't create CfaDataFeedback", async () => {
       const siretToCreate = "80320291800022";
       const badSiret = "80320291800111";
 
@@ -90,7 +82,6 @@ integrationTests(__filename, () => {
         siret: siretToCreate,
         details: "blabla",
         email: "mail@example.com",
-        dataIsValid: true,
       };
       const created = await createCfaDataFeedback(props);
 
@@ -98,14 +89,10 @@ integrationTests(__filename, () => {
         siret: props.siret,
         details: props.details,
         email: props.email,
-        donnee_est_valide: props.dataIsValid,
       });
 
       const foundInReferentiel = await Cfa.findOne({ siret: siretToCreate }).lean();
       assert.deepStrictEqual(foundInReferentiel, null);
-
-      const createdInReferentiel = await Cfa.findOne({ siret: badSiret }).lean();
-      assert.deepStrictEqual(createdInReferentiel.feedback_donnee_valide, null);
     });
   });
 });

@@ -255,7 +255,6 @@ httpTests(__filename, ({ startServer }) => {
           nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
           region_num: regionNumTest,
           siret: getRandomSiretEtablissement(),
-          feedback_donnee_valide: true,
         }).save();
       }
 
@@ -265,10 +264,7 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       assert.deepStrictEqual(response.status, 200);
-      assert.ok(response.data.nbCfaConnected);
-      assert.ok(response.data.nbCfaDataValidated);
       assert.deepStrictEqual(response.data.nbCfaConnected, 1);
-      assert.deepStrictEqual(response.data.nbCfaDataValidated, 3);
 
       // Check bad api call
       const badRegionResponse = await httpClient.post("/api/dashboard/region-conversion", {
@@ -277,7 +273,6 @@ httpTests(__filename, ({ startServer }) => {
 
       assert.deepStrictEqual(badRegionResponse.status, 200);
       assert.deepStrictEqual(badRegionResponse.data.nbCfaConnected, 0);
-      assert.deepStrictEqual(badRegionResponse.data.nbCfaDataValidated, 0);
     });
   });
 });

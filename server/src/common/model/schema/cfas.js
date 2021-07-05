@@ -46,11 +46,6 @@ const cfasSchema = new Schema({
     default: null,
     description: "Source du seed du cfa dans la collection (StatutsCandidats ou fichier d'origine)",
   },
-  feedback_donnee_valide: {
-    type: Boolean,
-    default: null,
-    description: "Les données présentées sur le tableau de bord par ce CFA est-elle valide",
-  },
   first_transmission_date: {
     type: Date,
     default: null,
