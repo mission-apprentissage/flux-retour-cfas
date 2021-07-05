@@ -9,6 +9,7 @@ const { Cfa, StatutCandidat } = require("../../common/model");
 const { jobNames, reseauxCfas } = require("../../common/model/constants/");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySiret } = require("../../common/apis/apiLba");
+const { sleep } = require("../../common/utils/miscUtils");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -220,6 +221,8 @@ const seedMetiersFromLbaApi = async () => {
     nbHandled++;
 
     const metiersFromSiret = await getMetiersBySiret(currentCfaWithSiret.siret);
+    await sleep(100); // Delay for LBA Api quota
+
     await Cfa.findOneAndUpdate(
       { _id: currentCfaWithSiret._id },
       {
