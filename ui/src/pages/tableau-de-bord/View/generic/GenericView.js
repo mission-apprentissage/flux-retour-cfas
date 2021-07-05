@@ -1,12 +1,14 @@
 import PropTypes from "prop-types";
 import React from "react";
 
+import IndicesProvenanceSection from "../../IndicesProvenanceSection";
 import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "./EffectifsSection";
 
 const GenericView = ({ effectifs, loading }) => {
   return (
     <>
+      <IndicesProvenanceSection />
       <EffectifsSection effectifs={effectifs} loading={loading} />
     </>
   );

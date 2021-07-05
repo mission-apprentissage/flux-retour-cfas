@@ -1,13 +1,12 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
-const faker = require("faker/locale/fr");
 const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const {
   historySequenceProspectToInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
-const { StatutCandidat, Cfa } = require("../../../src/common/model");
+const { StatutCandidat } = require("../../../src/common/model");
 const {
   getStatutsSamplesInscrits,
   getStatutsSamplesApprentis,
@@ -223,8 +222,8 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  describe("/api/dashboard/region-conversion route", () => {
-    it("Vérifie qu'on peut récupérer les informations de conversion d'une région via API", async () => {
+  describe("/api/dashboard/total-organismes route", () => {
+    it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une région", async () => {
       const { httpClient } = await startServer();
 
       const regionNumTest = "28";
@@ -233,46 +232,52 @@ httpTests(__filename, ({ startServer }) => {
       await new StatutCandidat(
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
-          siret_etablissement: "77929544300013",
+          siret_etablissement: getRandomSiretEtablissement(),
           siret_etablissement_valid: true,
           uai_etablissement: "0762232N",
           etablissement_num_region: regionNumTest,
         })
       ).save();
 
-      // Add 5 cfa in referentiel region without validation
-      for (let index = 0; index < 5; index++) {
-        await new Cfa({
-          nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-          region_num: regionNumTest,
-          siret: getRandomSiretEtablissement(),
-        }).save();
-      }
-
-      // Add 3 cfa with validation true in referentiel region
-      for (let index = 0; index < 3; index++) {
-        await new Cfa({
-          nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-          region_num: regionNumTest,
-          siret: getRandomSiretEtablissement(),
-        }).save();
-      }
-
       // Check good api call
-      const response = await httpClient.post("/api/dashboard/region-conversion", {
-        num_region: regionNumTest,
+      const response = await httpClient.post("/api/dashboard/total-organismes", {
+        etablissement_num_region: regionNumTest,
       });
 
-      assert.deepStrictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data.nbCfaConnected, 1);
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, { nbOrganismes: 1 });
 
-      // Check bad api call
-      const badRegionResponse = await httpClient.post("/api/dashboard/region-conversion", {
-        num_region: "999",
+      const badRegionResponse = await httpClient.post("/api/dashboard/total-organismes", {
+        etablissement_num_region: "01",
       });
 
       assert.deepStrictEqual(badRegionResponse.status, 200);
-      assert.deepStrictEqual(badRegionResponse.data.nbCfaConnected, 0);
+      assert.deepEqual(badRegionResponse.data, { nbOrganismes: 0 });
+    });
+
+    it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une formation", async () => {
+      const { httpClient } = await startServer();
+
+      const formationCfd = "abcd1234";
+
+      // Add 1 statut for region
+      await new StatutCandidat(
+        createRandomStatutCandidat({
+          nom_etablissement: "TEST CFA",
+          siret_etablissement: getRandomSiretEtablissement(),
+          siret_etablissement_valid: true,
+          uai_etablissement: "0762232N",
+          formation_cfd: formationCfd,
+        })
+      ).save();
+
+      // Check good api call
+      const response = await httpClient.post("/api/dashboard/total-organismes", {
+        formation_cfd: formationCfd,
+      });
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, { nbOrganismes: 1 });
     });
   });
 });
