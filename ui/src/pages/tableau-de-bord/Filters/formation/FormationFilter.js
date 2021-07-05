@@ -31,7 +31,7 @@ const FormationFilter = ({ filters, searchTerm, searchResults, onSearchTermChang
           <SearchInput
             value={searchTerm}
             onChange={onSearchTermChange}
-            placeholder="Saisissez un libellé de formation ou un CFD"
+            placeholder="Rechercher un libellé de formation ou un CFD"
           />
           {searchResults?.length === 0 && (
             <Text fontSize="zeta" color="grey.500" paddingTop="1w" paddingLeft="1w">
