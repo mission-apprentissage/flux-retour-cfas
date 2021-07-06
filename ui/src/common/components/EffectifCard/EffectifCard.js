@@ -12,7 +12,15 @@ const EffectifCard = ({ label, count, tooltipLabel }) => {
       aria-label={tooltipLabel}
       placement="top-end"
     >
-      <Box backgroundColor="galt" fontSize="gamma" padding="3w" color="grey.800" height="6rem" minWidth="16rem">
+      <Box
+        as="article"
+        backgroundColor="galt"
+        fontSize="gamma"
+        padding="3w"
+        color="grey.800"
+        height="6rem"
+        minWidth="16rem"
+      >
         <strong>{count}</strong>
         &nbsp;
         <span>{label}</span>
