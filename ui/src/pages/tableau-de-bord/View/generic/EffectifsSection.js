@@ -37,7 +37,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
         <EffectifCard
           count={effectifs.abandons.count}
           label="abandons"
-          tooltipLabel="Nombre de jeunes sans contrat ou d’apprentis qui sont définitivement sortis de la formation au dernier jours du mois (ou J-1 si mois en cours)"
+          tooltipLabel="Nombre de jeunes sans contrat ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours)"
         />
       </HStack>
     );
