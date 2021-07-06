@@ -21,7 +21,7 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
-   * Schema for region conversion validation
+   * Schema for organismes count validation
    */
   const organismesCountInputSchema = Joi.object({
     etablissement_num_region: Joi.string().allow(null, ""),
