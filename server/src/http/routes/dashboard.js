@@ -208,8 +208,6 @@ module.exports = ({ stats, dashboard }) => {
       const { startDate, endDate, ...filters } = req.body;
       const dateRange = [new Date(startDate), new Date(endDate)];
 
-      console.log(dateRange);
-
       const nouveauxContratsCountInDateRange = await dashboard.getNouveauxContratsCountInDateRange(dateRange, filters);
 
       return res.json({ count: nouveauxContratsCountInDateRange });
