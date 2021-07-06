@@ -24,9 +24,21 @@ const EffectifsSection = ({ effectifs, loading }) => {
   if (effectifs && !loading) {
     content = (
       <HStack spacing="2w">
-        <EffectifCard count={effectifs.apprentis.count} label="apprentis" />
-        <EffectifCard count={effectifs.inscrits.count} label="apprentis sans contrat" />
-        <EffectifCard count={effectifs.abandons.count} label="abandons" />
+        <EffectifCard
+          count={effectifs.apprentis.count}
+          label="apprentis"
+          tooltipLabel="Nombre de candidats en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours)"
+        />
+        <EffectifCard
+          count={effectifs.inscrits.count}
+          label="apprentis sans contrat"
+          tooltipLabel="Nombre de jeunes ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours)"
+        />
+        <EffectifCard
+          count={effectifs.abandons.count}
+          label="abandons"
+          tooltipLabel="Nombre de jeunes sans contrat ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours)"
+        />
       </HStack>
     );
   }
