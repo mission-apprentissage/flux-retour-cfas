@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { OverlayMenu, SelectButton } from "../../../../common/components";
+import { OverlayMenu, SecondarySelectButton } from "../../../../common/components";
 import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
 import { filtersPropTypes } from "../../FiltersContext";
 import CfaPanel from "./CfasPanel";
@@ -24,7 +24,7 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
 
   return (
     <div>
-      <SelectButton
+      <SecondarySelectButton
         icon="ri-community-fill"
         onClick={() => setIsOpen(!isOpen)}
         isClearable={Boolean(filters.cfa || filters.reseau)}
@@ -34,7 +34,7 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
         }}
       >
         {buttonLabel}
-      </SelectButton>
+      </SecondarySelectButton>
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>

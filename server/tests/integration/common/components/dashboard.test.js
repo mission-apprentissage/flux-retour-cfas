@@ -408,8 +408,8 @@ integrationTests(__filename, () => {
     });
   });
 
-  describe("computeNouveauxContratsApprentissageForDateRange", () => {
-    const { computeNouveauxContratsApprentissageForDateRange } = dashboardComponent();
+  describe("getNouveauxContratsCountInDateRange", () => {
+    const { getNouveauxContratsCountInDateRange } = dashboardComponent();
 
     beforeEach(async () => {
       const statuts = [
@@ -470,7 +470,7 @@ integrationTests(__filename, () => {
       { dateRange: [new Date("2019-07-01T00:00:00"), new Date("2019-12-31T00:00:00")], expectedCount: 0 },
     ].forEach(({ dateRange, expectedCount }) => {
       it(`computes number of new contracts for date range ${dateRange[0].toLocaleDateString()} - ${dateRange[1].toLocaleDateString()}`, async () => {
-        const count = await computeNouveauxContratsApprentissageForDateRange(dateRange);
+        const count = await getNouveauxContratsCountInDateRange(dateRange);
         assert.equal(count, expectedCount);
       });
     });

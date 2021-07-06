@@ -1,12 +1,13 @@
 import "react-datepicker/dist/react-datepicker.css";
 import "./PeriodeFilter.css";
 
-import { Box, Button } from "@chakra-ui/react";
 import { format, isThisMonth, lastDayOfMonth } from "date-fns";
 import fr from "date-fns/locale/fr";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
+
+import PrimarySelectButton from "../../../../common/components/SelectButton/PrimarySelectButton";
 
 registerLocale("fr", fr);
 
@@ -38,18 +39,9 @@ const PeriodeFilter = ({ value, onChange }) => {
         onCalendarClose={() => setIsOpen(false)}
         onCalendarOpen={() => setIsOpen(true)}
         customInput={
-          <Button variant="select-primary">
-            <Box as="span" textDecoration="underline">
-              en {buttonLabel}
-            </Box>
-            <Box
-              fontSize="gamam"
-              marginLeft="1v"
-              as="i"
-              className={isOpen ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
-              textDecoration="none"
-            />
-          </Button>
+          <PrimarySelectButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
+            en {buttonLabel}
+          </PrimarySelectButton>
         }
       />
     </div>

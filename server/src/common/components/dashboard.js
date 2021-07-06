@@ -13,7 +13,7 @@ module.exports = () => ({
   getPaginatedEffectifsParNiveauEtAnneeFormation,
   getEffectifsCountByCfaAtDate,
   getRupturantsCountAtDate,
-  computeNouveauxContratsApprentissageForDateRange,
+  getNouveauxContratsCountInDateRange,
 });
 
 const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) => {
@@ -476,7 +476,7 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
   });
 };
 
-const computeNouveauxContratsApprentissageForDateRange = async (dateRange, filters = {}) => {
+const getNouveauxContratsCountInDateRange = async (dateRange, filters = {}) => {
   const statutsWithStatutApprenant3InHistorique = await StatutCandidat.aggregate([
     { $match: { ...filters, "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.apprenti } },
   ]);

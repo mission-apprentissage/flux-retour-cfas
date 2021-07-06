@@ -4,7 +4,7 @@ import React from "react";
 
 const noop = () => {};
 
-const SelectButton = ({ children, icon, onClick, isClearable = false, clearIconOnClick = noop }) => {
+const SecondarySelectButton = ({ children, icon, onClick, isClearable = false, clearIconOnClick = noop }) => {
   const style = isClearable
     ? {
         color: "bluefrance",
@@ -39,7 +39,7 @@ const SelectButton = ({ children, icon, onClick, isClearable = false, clearIconO
   );
 };
 
-SelectButton.propTypes = {
+SecondarySelectButton.propTypes = {
   children: PropTypes.node.isRequired,
   isClearable: PropTypes.bool,
   icon: PropTypes.string,
@@ -47,4 +47,4 @@ SelectButton.propTypes = {
   clearIconOnClick: PropTypes.func,
 };
 
-export default SelectButton;
+export default SecondarySelectButton;
