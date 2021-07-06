@@ -4,6 +4,7 @@ import React from "react";
 
 import { Highlight } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
+import IndicesProvenanceSection from "../../IndicesProvenanceSection";
 import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "../generic/EffectifsSection";
 import RepartitionEffectifsReseau from "./repartition/RepartitionEffectifsReseau";
@@ -16,6 +17,7 @@ const ReseauView = ({ reseau, effectifs, filters, loading }) => {
           Réseau {reseau}
         </Heading>
       </Highlight>
+      <IndicesProvenanceSection />
       {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartitionEffectifsReseau filters={filters} />
     </>

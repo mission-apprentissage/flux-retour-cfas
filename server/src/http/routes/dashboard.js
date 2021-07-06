@@ -21,10 +21,13 @@ module.exports = ({ stats, dashboard }) => {
   });
 
   /**
-   * Schema for region conversion validation
+   * Schema for organismes count validation
    */
-  const dashboardConversionRegionInputSchema = Joi.object({
-    num_region: Joi.string().required(),
+  const organismesCountInputSchema = Joi.object({
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    formation_cfd: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
   });
 
   /**
@@ -67,33 +70,17 @@ module.exports = ({ stats, dashboard }) => {
    * Gets region conversion stats
    */
   router.post(
-    "/region-conversion",
+    "/total-organismes",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardConversionRegionInputSchema.validateAsync(req.body, {
+      await organismesCountInputSchema.validateAsync(req.body, {
         abortEarly: false,
       });
 
-      // Gets num region param
-      const { num_region } = req.body;
+      const nbOrganismes = await stats.getNbDistinctCfasBySiret(req.body);
 
-      // Add user event
-      const event = new UserEvent({
-        username: "dashboard",
-        type: "GET",
-        action: `api/dashboard/region-conversion`,
-        data: { num_region },
-      });
-      await event.save();
-
-      // Gets distincts cfa sirets for num_region
-      const nbCfaConnected = await stats.getNbDistinctCfasBySiret({
-        etablissement_num_region: num_region,
-      });
-
-      // Build response
       return res.json({
-        nbCfaConnected,
+        nbOrganismes,
       });
     })
   );

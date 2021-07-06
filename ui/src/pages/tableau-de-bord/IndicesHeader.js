@@ -11,7 +11,7 @@ const IndicesHeader = () => {
   const filtersContext = useFiltersContext();
 
   return (
-    <Section backgroundColor="galt" paddingY="4w">
+    <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
       <Heading as="h1" textStyle="h1" marginBottom="1w">
         Visualiser les indices en temps réel
       </Heading>
