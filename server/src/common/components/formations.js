@@ -1,6 +1,8 @@
 const { Formation: FormationModel, StatutCandidat: StatutCandidatModel } = require("../model");
 const { validateCfd } = require("../domain/cfd");
 const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
+const { getMetiersByCfd } = require("../apis/apiLba");
+
 const { Formation } = require("../domain/formation");
 
 module.exports = () => ({
@@ -47,10 +49,12 @@ const createFormation = async (cfd) => {
   }
 
   const formationInfo = await getCfdInfo(cfd);
+  const metiersFromCfd = await getMetiersByCfd(cfd);
   const formationEntity = Formation.create({
     cfd,
     libelle: buildFormationLibelle(formationInfo),
-    niveau: formationInfo.niveau,
+    niveau: formationInfo?.niveau,
+    metiers: metiersFromCfd?.metiers,
   });
 
   if (formationEntity) {

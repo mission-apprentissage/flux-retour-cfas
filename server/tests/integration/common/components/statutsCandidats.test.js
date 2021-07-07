@@ -13,10 +13,12 @@ const {
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
+const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 integrationTests(__filename, () => {
   beforeEach(() => {
     nockGetCfdInfo();
+    nockGetMetiersByCfd();
   });
 
   describe("existsStatut", () => {

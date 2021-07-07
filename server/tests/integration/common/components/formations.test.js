@@ -1,9 +1,11 @@
 const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
+const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 const integrationTests = require("../../../utils/integrationTests");
 const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
+const { dataForGetMetiersByCfd } = require("../../../data/apiLba");
 const formationsComponent = require("../../../../src/common/components/formations");
 const { Formation: FormationModel } = require("../../../../src/common/model");
 const { StatutCandidat: StatutCandidatModel } = require("../../../../src/common/model");
@@ -83,26 +85,32 @@ integrationTests(__filename, () => {
 
     it("returns created formation when cfd was found in Tables de Correspondaces with intitule_long", async () => {
       nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
+      nockGetMetiersByCfd(dataForGetMetiersByCfd);
 
       const cfd = "13534005";
+      await FormationModel.deleteMany({ cfd });
       const created = await createFormation(cfd);
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
         libelle: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
         niveau: "7 (Master, titre ingénieur...)",
+        metiers: dataForGetMetiersByCfd.metiers,
         updated_at: null,
       });
     });
 
     it("returns created formation when cfd was found in Tables de Correspondaces without intitule_long", async () => {
       nockGetCfdInfo(dataForGetCfdInfo.withoutIntituleLong);
+      nockGetMetiersByCfd(dataForGetMetiersByCfd);
 
       const cfd = "13534005";
+      await FormationModel.deleteMany({ cfd });
       const created = await createFormation(cfd);
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
         libelle: "",
         niveau: "7 (Master, titre ingénieur...)",
+        metiers: dataForGetMetiersByCfd.metiers,
         updated_at: null,
       });
     });

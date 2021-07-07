@@ -1,8 +1,9 @@
-import { Box, Heading, Skeleton, Text } from "@chakra-ui/react";
+import { Box, Heading, HStack, Skeleton, Tag, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { Highlight } from "../../../../../common/components";
+import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
 import withInfoFormationData from "./withInfoFormationData";
 
 const InfosFormationSection = ({ infosFormation, loading, error }) => {
@@ -29,6 +30,11 @@ const InfosFormationSection = ({ infosFormation, loading, error }) => {
   }
 
   if (infosFormation) {
+    const domainesMetierToDisplay =
+      infosFormation.metiers.length > MAX_DISPLAYED_DOMAINE_METIERS
+        ? [...infosFormation.metiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS), "..."]
+        : infosFormation.metiers;
+
     content = (
       <>
         <Text color="white" fontSize="omega">
@@ -37,6 +43,21 @@ const InfosFormationSection = ({ infosFormation, loading, error }) => {
         <Heading color="white" fontSize="gamma" marginTop="1w">
           {infosFormation.libelle}
         </Heading>
+        <HStack marginTop="1w">
+          {domainesMetierToDisplay.map((item, i) => (
+            <Tag
+              key={i}
+              fontSize="omega"
+              paddingX="2w"
+              paddingY="1w"
+              borderRadius="20px"
+              color="white"
+              background="rgba(255, 255, 255, 0.24)"
+            >
+              {item}
+            </Tag>
+          ))}
+        </HStack>
       </>
     );
   }
@@ -48,6 +69,7 @@ InfosFormationSection.propTypes = {
   infosFormation: PropTypes.shape({
     libelle: PropTypes.string.isRequired,
     cfd: PropTypes.string.isRequired,
+    metiers: PropTypes.arrayOf(PropTypes.string).isRequired,
   }),
   loading: PropTypes.bool,
   error: PropTypes.object,

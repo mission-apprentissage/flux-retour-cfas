@@ -7,11 +7,13 @@ const { seedSample, seedRandomizedSampleWithStatut } = require("../../../../src/
 const { simpleStatutsWith3DifferentUais } = require("../../../data/sample");
 const { nockGetSiretInfo, nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 integrationTests(__filename, () => {
   beforeEach(() => {
     nockGetSiretInfo();
     nockGetCfdInfo();
+    nockGetMetiersByCfd();
   });
 
   it("Permet de récupérer les statistiques", async () => {

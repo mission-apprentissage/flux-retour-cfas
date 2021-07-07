@@ -3,9 +3,8 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Highlight } from "../../../../../common/components";
+import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
 import withInfoCfaData from "./withInfoCfaData";
-
-const MAX_DISPLAYED_DOMAINE_METIERS = 5;
 
 const InfoCfaSection = ({ infosCfa, loading, error }) => {
   let content = null;

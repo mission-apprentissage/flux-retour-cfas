@@ -52,3 +52,6 @@ const paginate = (items, page = 1, per_page = 10) => {
   };
 };
 module.exports.paginate = paginate;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+module.exports.sleep = sleep;
