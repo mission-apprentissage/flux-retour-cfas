@@ -13,6 +13,7 @@ module.exports = () => ({
   getPaginatedEffectifsParNiveauEtAnneeFormation,
   getEffectifsCountByCfaAtDate,
   getRupturantsCountAtDate,
+  getJeunesSansContratCountAtDate,
   getNouveauxContratsCountInDateRange,
 });
 
@@ -501,7 +502,7 @@ const getNouveauxContratsCountInDateRange = async (dateRange, filters = {}) => {
  */
 const getRupturantsCountAtDate = async (searchDate, filters = {}) => {
   const aggregationPipeline = [
-    // Filtrage sur les filtres passées en paramètres
+    // Filtrage sur les filtres passés en paramètres
     {
       $match: {
         ...filters,
@@ -528,4 +529,35 @@ const getRupturantsCountAtDate = async (searchDate, filters = {}) => {
   });
 
   return rupturants.length;
+};
+
+// Jeunes sans contrat = Apprenants ayant démarré une formation en apprentissage
+// sans avoir signé de contrat et toujours dans cette situation à la date consultée
+// https://docs.google.com/document/d/1kxRQNm6qSlgk0FOVhkIbClB2Xq3QTDRj_fPuyfNdJHk/edit
+const getJeunesSansContratCountAtDate = async (searchDate, filters = {}) => {
+  const aggregationPipeline = [
+    // Filtrage sur les filtres passés en paramètres
+    {
+      $match: {
+        ...filters,
+        "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.inscrit,
+      },
+    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate),
+    {
+      $match: {
+        "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.inscrit,
+        "historique_statut_apprenant.valeur_statut": { $ne: codesStatutsCandidats.apprenti },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        count: { $sum: 1 },
+      },
+    },
+  ];
+
+  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  return result.length === 1 ? result[0].count : 0;
 };
