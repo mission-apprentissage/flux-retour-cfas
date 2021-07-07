@@ -5,6 +5,7 @@ import React from "react";
 import { EffectifCard, Section } from "../../../../common/components";
 import PeriodeFilter from "../../Filters/periode/PeriodeFilter";
 import { useFiltersContext } from "../../FiltersContext";
+import { effectifsPropType } from "../../propTypes";
 
 const EffectifsSection = ({ effectifs, loading }) => {
   const filtersContext = useFiltersContext();
@@ -14,6 +15,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
   if (loading) {
     content = (
       <HStack spacing="2w">
+        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
         <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
         <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
         <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
@@ -33,6 +35,11 @@ const EffectifsSection = ({ effectifs, loading }) => {
           count={effectifs.inscrits.count}
           label="apprentis sans contrat"
           tooltipLabel="Nombre de jeunes ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours)"
+        />
+        <EffectifCard
+          count={effectifs.rupturants.count}
+          label="rupturants"
+          tooltipLabel="Nombre de jeunes sans contrat après une rupture au dernier jours du mois (ou J-1 si mois en cours)"
         />
         <EffectifCard
           count={effectifs.abandons.count}
@@ -58,20 +65,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
 
 EffectifsSection.propTypes = {
   loading: PropTypes.bool.isRequired,
-  effectifs: PropTypes.shape({
-    apprentis: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-      evolution: PropTypes.number,
-    }).isRequired,
-    inscrits: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-      evolution: PropTypes.number,
-    }).isRequired,
-    abandons: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-      evolution: PropTypes.number,
-    }).isRequired,
-  }),
+  effectifs: effectifsPropType,
 };
 
 export default EffectifsSection;

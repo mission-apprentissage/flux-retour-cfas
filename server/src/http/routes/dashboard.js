@@ -124,27 +124,18 @@ module.exports = ({ stats, dashboard }) => {
       await event.save();
 
       // Gets effectif data for params
-      const effectifsAtStartDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(startDate, filters);
       const effectifsAtEndDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(endDate, filters);
+      const rupturantsAtEndDate = await dashboard.getRupturantsCountAtDate(endDate, filters);
 
       // Build response
-      return res.json([
-        {
-          date: startDate,
-          apprentis: effectifsAtStartDate[codesStatutsCandidats.apprenti].count,
-          inscrits: effectifsAtStartDate[codesStatutsCandidats.inscrit].count,
-          abandons: effectifsAtStartDate[codesStatutsCandidats.abandon].count,
-          abandonsProspects: effectifsAtStartDate[codesStatutsCandidats.abandonProspects].count,
-        },
-        {
-          date: endDate,
-          apprentis: effectifsAtEndDate[codesStatutsCandidats.apprenti].count,
-          inscrits: effectifsAtEndDate[codesStatutsCandidats.inscrit].count,
-          abandons: effectifsAtEndDate[codesStatutsCandidats.abandon].count,
-          abandonsProspects: effectifsAtEndDate[codesStatutsCandidats.abandonProspects].count,
-          dataConsistency: null,
-        },
-      ]);
+      return res.json({
+        date: endDate,
+        apprentis: effectifsAtEndDate[codesStatutsCandidats.apprenti].count,
+        inscrits: effectifsAtEndDate[codesStatutsCandidats.inscrit].count,
+        rupturants: rupturantsAtEndDate,
+        abandons: effectifsAtEndDate[codesStatutsCandidats.abandon].count,
+        abandonsProspects: effectifsAtEndDate[codesStatutsCandidats.abandonProspects].count,
+      });
     })
   );
 
