@@ -8,15 +8,22 @@ const omit = require("lodash.omit");
 const { isWithinInterval } = require("date-fns");
 
 module.exports = () => ({
-  getEffectifsCountByStatutApprenantAtDate,
   getEffectifsParNiveauEtAnneeFormation,
   getPaginatedEffectifsParNiveauEtAnneeFormation,
   getEffectifsCountByCfaAtDate,
+  getApprentisCountAtDate,
+  getAbandonsCountAtDate,
   getRupturantsCountAtDate,
   getJeunesSansContratCountAtDate,
   getNouveauxContratsCountInDateRange,
 });
 
+/*
+  Principe :
+  * 1. On filtre dans l'historique sur les élements ayant une date <= date recherchée
+  * 2. On construit dans l'historique des statuts un champ diff_date_search = différence entre la date du statut de l'historique et la date recherchée
+  * 3. On crée un champ statut_apprenant_at_date = statut dans l'historique avec le plus petit diff_date_search
+*/
 const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) => {
   return [
     // Filtrage sur les élements avec date antérieure à la date recherchée
@@ -72,47 +79,6 @@ const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) 
       },
     },
   ];
-};
-
-/**
- * Récupération des effectifs par statut_apprenant à une date donnée
- *
- * Principe :
- * 1. On filtre sur les params en entrée
- * 2. On filtre dans l'historique sur les élements ayant une date <= date recherchée
- * 3. On construit dans l'historique des statuts un champ diff_date_search = différence entre la date du statut de l'historique et la date recherchée
- * 4. On crée un champ statut_apprenant_at_date = statut dans l'historique avec le plus petit diff_date_search
- * 5. On compte les effectifs résultant par statut_apprenant
- */
-const getEffectifsCountByStatutApprenantAtDate = async (searchDate, filters = {}) => {
-  const aggregationPipeline = [
-    // Filtrage sur les filtres passées en paramètres
-    {
-      $match: {
-        ...filters,
-        siret_etablissement_valid: true,
-      },
-    },
-    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate),
-    {
-      $group: {
-        _id: "$statut_apprenant_at_date.valeur_statut",
-        count: { $sum: 1 },
-      },
-    },
-  ];
-
-  const effectifsCount = await StatutCandidat.aggregate(aggregationPipeline);
-
-  return Object.values(codesStatutsCandidats).reduce((acc, codeStatut) => {
-    const effectifsForStatut = effectifsCount.find((effectif) => effectif._id === codeStatut);
-    return {
-      ...acc,
-      [codeStatut]: {
-        count: effectifsForStatut?.count || 0,
-      },
-    };
-  }, {});
 };
 
 /**
@@ -506,6 +472,7 @@ const getRupturantsCountAtDate = async (searchDate, filters = {}) => {
     {
       $match: {
         ...filters,
+        "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.inscrit,
         "historique_statut_apprenant.1": { $exists: true },
       },
     },
@@ -548,6 +515,56 @@ const getJeunesSansContratCountAtDate = async (searchDate, filters = {}) => {
       $match: {
         "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.inscrit,
         "historique_statut_apprenant.valeur_statut": { $ne: codesStatutsCandidats.apprenti },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        count: { $sum: 1 },
+      },
+    },
+  ];
+
+  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  return result.length === 1 ? result[0].count : 0;
+};
+
+// Apprentis = Apprenants ayant le statut apprenti
+// https://docs.google.com/document/d/1kxRQNm6qSlgk0FOVhkIbClB2Xq3QTDRj_fPuyfNdJHk/edit
+const getApprentisCountAtDate = async (searchDate, filters = {}) => {
+  const aggregationPipeline = [
+    {
+      $match: { ...filters, "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.apprenti },
+    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate),
+    {
+      $match: {
+        "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.apprenti,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        count: { $sum: 1 },
+      },
+    },
+  ];
+
+  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  return result.length === 1 ? result[0].count : 0;
+};
+
+// Abandons = Apprenants ayant le statut abandon
+// https://docs.google.com/document/d/1kxRQNm6qSlgk0FOVhkIbClB2Xq3QTDRj_fPuyfNdJHk/edit
+const getAbandonsCountAtDate = async (searchDate, filters = {}) => {
+  const aggregationPipeline = [
+    {
+      $match: { ...filters, "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.abandon },
+    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate),
+    {
+      $match: {
+        "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.abandon,
       },
     },
     {

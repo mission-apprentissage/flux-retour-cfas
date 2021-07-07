@@ -53,272 +53,156 @@ integrationTests(__filename, () => {
     }
   };
 
-  describe("getEffectifsCountByStatutApprenantAtDate", () => {
-    const { getEffectifsCountByStatutApprenantAtDate } = dashboardComponent();
+  describe("getApprentisCountAtDate", () => {
+    const { getApprentisCountAtDate } = dashboardComponent();
 
-    it("Permet de récupérer les données d'effectifs par statut pour à date donnée", async () => {
+    it("gets count of apprentis at one date", async () => {
       await seedStatutsCandidats();
 
-      // Search params dates
-      const date1 = new Date("2020-09-15T00:00:00.000+0000");
-      const date2 = new Date("2020-09-30T00:00:00.000+0000");
-      const date3 = new Date("2020-10-10T00:00:00.000+0000");
+      const date = new Date("2020-09-15T00:00:00.000+0000");
+      const apprentisCount = await getApprentisCountAtDate(date);
 
-      const effectifsAtDate1 = await getEffectifsCountByStatutApprenantAtDate(date1);
-      const effectifsAtDate2 = await getEffectifsCountByStatutApprenantAtDate(date2);
-      const effectifsAtDate3 = await getEffectifsCountByStatutApprenantAtDate(date3);
-
-      assert.deepEqual(effectifsAtDate1, {
-        [codesStatutsCandidats.inscrit]: { count: 10 },
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-      assert.deepEqual(effectifsAtDate2, {
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.apprenti]: { count: 15 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-      assert.deepEqual(effectifsAtDate3, {
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.abandon]: { count: 10 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      assert.equal(apprentisCount, 5);
     });
 
-    it("Renvoie des effectifs nuls à une date dans le passé pour laquelle on n'a pas d'historique", async () => {
+    it("gets count of apprentis at another date", async () => {
       await seedStatutsCandidats();
 
-      // Search params dates
-      const date = new Date("2018-09-15T00:00:00.000+0000");
-      const effectifsInPast = await getEffectifsCountByStatutApprenantAtDate(date);
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCount = await getApprentisCountAtDate(date);
 
-      assert.deepEqual(effectifsInPast, {
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      assert.equal(apprentisCount, 15);
     });
 
-    it("Permet de ne pas récupérer les données d'effectifs pour une période donnée si un siret est invalide", async () => {
-      await seedStatutsCandidats({ siret_etablissement_valid: false });
+    it("gets count of apprentis at yet another date", async () => {
+      await seedStatutsCandidats();
 
-      // Search params dates
-      const date1 = new Date("2020-09-15T00:00:00.000+0000");
-      const date2 = new Date("2020-10-10T00:00:00.000+0000");
-
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
-
-      const result1 = await getEffectifsCountByStatutApprenantAtDate(date1);
-      const result2 = await getEffectifsCountByStatutApprenantAtDate(date2);
-
-      assert.deepEqual(result1, expectedResult);
-      assert.deepEqual(result2, expectedResult);
-    });
-
-    it("Permet de récupérer les données d'effectifs à une date et une région", async () => {
-      const filterQuery = { etablissement_num_region: "84" };
-      await seedStatutsCandidats(filterQuery);
-
-      // Search params & expected results
-      const date = new Date("2020-09-15T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 10 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
-
-      // Check for right etablissement_num_region filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another etablissement_num_region filter
-      const badFilterQuery = { etablissement_num_region: "99" };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-    });
-
-    it("Permet de récupérer les données d'effectifs à une date et un département", async () => {
-      const filterQuery = { etablissement_num_departement: "01" };
-      await seedStatutsCandidats(filterQuery);
-
-      // Search params & expected results
-      const date = new Date("2020-09-15T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 10 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
-
-      // Check for right etablissement_num_departement filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another etablissement_num_departement filter
-      const badFilterQuery = { etablissement_num_departement: "99" };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-    });
-
-    it("Permet de récupérer les données d'effectifs à une date et un cfa via son siret", async () => {
-      const filterQuery = { siret_etablissement: "77929544300013", siret_etablissement_valid: true };
-      await seedStatutsCandidats(filterQuery);
-
-      // Search params & expected results
-      const date = new Date("2020-09-15T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 10 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
-
-      // Check for right siret_etablissement filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another siret_etablissement filter
-      const badFilterQuery = { siret_etablissement: "99" };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-    });
-
-    it("Permet de récupérer les données d'effectifs pour une période et une formation via son cfd", async () => {
-      const filterQuery = { formation_cfd: "77929544300013" };
-      await seedStatutsCandidats(filterQuery);
-
-      // Search params & expected results
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.abandon]: { count: 10 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
+      const apprentisCount = await getApprentisCountAtDate(date);
 
-      // Check for right cfd filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another cfd filter
-      const badFilterQuery = { formation_cfd: "99" };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      assert.equal(apprentisCount, 5);
     });
 
-    it("Permet de récupérer les données d'effectifs pour une date et réseau", async () => {
-      const filterQuery = { etablissement_reseaux: [reseauxCfas.BTP_CFA.nomReseau] };
-      await seedStatutsCandidats(filterQuery);
+    it("gets count of apprentis at a date when there was no data", async () => {
+      await seedStatutsCandidats();
 
-      // Search params & expected results
-      const date = new Date("2020-10-10T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.abandon]: { count: 10 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
+      const date = new Date("2010-10-10T00:00:00.000+0000");
+      const apprentisCount = await getApprentisCountAtDate(date);
 
-      // Check for right reseau filter
-      const filter = { etablissement_reseaux: { $in: [reseauxCfas.BTP_CFA.nomReseau] } };
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filter);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another reseau filter
-      const badFilterQuery = { etablissement_reseaux: { $in: [reseauxCfas.ANASUP.nomReseau] } };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      assert.equal(apprentisCount, 0);
     });
 
-    it("Permet de récupérer les données d'effectifs pour une date, pour une formation et une région", async () => {
-      const filterQuery = { formation_cfd: "77929544300013", etablissement_num_region: "84" };
-      await seedStatutsCandidats(filterQuery);
+    it("gets count of apprentis at a date and for a region", async () => {
+      const filters = { etablissement_num_region: "28" };
+      await seedStatutsCandidats(filters);
 
-      // Search params & expected results
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForRegion = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForRegion, 15);
+
+      const apprentisCountForAnotherRegion = await getApprentisCountAtDate(date, { etablissement_num_region: "100" });
+      assert.equal(apprentisCountForAnotherRegion, 0);
+    });
+
+    it("gets count of apprentis at a date and for a departement", async () => {
+      const filters = { etablissement_num_departement: "75" };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForDepartement = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForDepartement, 15);
+
+      const apprentisCountForAnotherDepartement = await getApprentisCountAtDate(date, {
+        etablissement_num_departement: "100",
+      });
+      assert.equal(apprentisCountForAnotherDepartement, 0);
+    });
+
+    it("gets count of apprentis at a date and for a siret_etablissement", async () => {
+      const filters = { siret_etablissement: "77929544300013" };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForSiret = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForSiret, 15);
+
+      const apprentisCountForAnotherSiret = await getApprentisCountAtDate(date, {
+        siret_etablissement: "77929544300099",
+      });
+      assert.equal(apprentisCountForAnotherSiret, 0);
+    });
+
+    it("gets count of apprentis at a date and for a formation_cfd", async () => {
+      const filters = { formation_cfd: "2502000D" };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForCfd = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForCfd, 15);
+
+      const apprentisCountForAnotherCfd = await getApprentisCountAtDate(date, { formation_cfd: "2502000X" });
+      assert.equal(apprentisCountForAnotherCfd, 0);
+    });
+
+    it("gets count of apprentis at a date and for a reseau", async () => {
+      const filters = { etablissement_reseaux: reseauxCfas.BTP_CFA.nomReseau };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForReseau = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForReseau, 15);
+
+      const apprentisCountForAnotherReseau = await getApprentisCountAtDate(date, { etablissement_reseaux: "inconnu" });
+      assert.equal(apprentisCountForAnotherReseau, 0);
+    });
+  });
+
+  describe("getAbandonsCountAtDate", () => {
+    const { getAbandonsCountAtDate } = dashboardComponent();
+
+    it("gets count of abandons at one date", async () => {
+      await seedStatutsCandidats();
+
+      const date = new Date("2020-09-15T00:00:00.000+0000");
+      const abandonsCount = await getAbandonsCountAtDate(date);
+
+      assert.equal(abandonsCount, 0);
+    });
+
+    it("gets count of abandons at yet another date", async () => {
+      await seedStatutsCandidats();
+
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.abandon]: { count: 10 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
+      const abandonsCount = await getAbandonsCountAtDate(date);
 
-      // Check for right filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
+      assert.equal(abandonsCount, 10);
+    });
 
-      // Check for another filter
-      const badFilterQuery1 = { ...filterQuery, etablissement_num_region: "21" };
-      const nbStatutsBadFilter1 = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery1);
-      assert.deepEqual(nbStatutsBadFilter1, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+    it("gets count of abandons at a date when there was no data", async () => {
+      await seedStatutsCandidats();
 
-      // Check for another filter
-      const badFilterQuery2 = { ...filterQuery, formation_cfd: "123445" };
-      const nbStatutsBadFilter2 = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery2);
-      assert.deepEqual(nbStatutsBadFilter2, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      const date = new Date("2010-10-10T00:00:00.000+0000");
+      const abandonsCount = await getAbandonsCountAtDate(date);
+
+      assert.equal(abandonsCount, 0);
+    });
+
+    it("gets count of abandons at a date and for a region", async () => {
+      const filters = { etablissement_num_region: "28" };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const abandonsCountForRegion = await getAbandonsCountAtDate(date, filters);
+
+      assert.equal(abandonsCountForRegion, 10);
+
+      const abandonsCountForAnotherRegion = await getAbandonsCountAtDate(date, { etablissement_num_region: "100" });
+      assert.equal(abandonsCountForAnotherRegion, 0);
     });
   });
 
