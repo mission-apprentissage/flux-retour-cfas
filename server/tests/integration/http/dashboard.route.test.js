@@ -66,7 +66,6 @@ httpTests(__filename, ({ startServer }) => {
         nbInscrits: 15,
         nbApprentis: 5,
         nbAbandons: 10,
-        nbAbandonsProspects: 0,
       };
 
       // Check good api call
@@ -76,11 +75,10 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       assert.equal(response.status, 200);
-      assert.deepEqual(response.data.inscrits, expectedResults.nbInscrits);
-      assert.deepEqual(response.data.apprentis, expectedResults.nbApprentis);
-      assert.deepEqual(response.data.abandons, expectedResults.nbAbandons);
-      assert.deepEqual(response.data.abandons, expectedResults.nbAbandons);
-      assert.deepEqual(response.data.abandonsProspects, expectedResults.nbAbandonsProspects);
+      const indices = response.data;
+      assert.deepEqual(indices.jeunesSansContrat + indices.rupturants, expectedResults.nbInscrits);
+      assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
+      assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
     });
 
     it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts avec filtres", async () => {
@@ -90,10 +88,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{
-            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
-            siret_etablissement_valid: true,
-          },
+          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -103,10 +98,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{
-            historique_statut_apprenant: historySequenceApprenti,
-            siret_etablissement_valid: true,
-          },
+          historique_statut_apprenant: historySequenceApprenti,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -116,10 +108,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{
-            historique_statut_apprenant: historySequenceInscritToApprenti,
-            siret_etablissement_valid: true,
-          },
+          historique_statut_apprenant: historySequenceInscritToApprenti,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -131,7 +120,6 @@ httpTests(__filename, ({ startServer }) => {
         nbInscrits: 15,
         nbApprentis: 5,
         nbAbandons: 10,
-        nbAbandonsProspects: 0,
       };
 
       // Check good api call
@@ -141,11 +129,10 @@ httpTests(__filename, ({ startServer }) => {
         ...filterQuery,
       });
 
-      assert.deepStrictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data.inscrits, expectedResults.nbInscrits);
-      assert.deepStrictEqual(response.data.apprentis, expectedResults.nbApprentis);
-      assert.deepStrictEqual(response.data.abandons, expectedResults.nbAbandons);
-      assert.deepStrictEqual(response.data.abandonsProspects, expectedResults.nbAbandonsProspects);
+      const indices = response.data;
+      assert.deepEqual(indices.jeunesSansContrat + indices.rupturants, expectedResults.nbInscrits);
+      assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
+      assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
 
       // Check bad api call
       const badResponse = await httpClient.post("/api/dashboard/effectifs", {
@@ -155,10 +142,10 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       assert.deepStrictEqual(badResponse.status, 200);
-      assert.deepStrictEqual(badResponse.data.inscrits, 0);
+      assert.deepStrictEqual(badResponse.data.jeunesSansContrat, 0);
+      assert.deepStrictEqual(badResponse.data.rupturants, 0);
       assert.deepStrictEqual(badResponse.data.apprentis, 0);
       assert.deepStrictEqual(badResponse.data.abandons, 0);
-      assert.deepStrictEqual(badResponse.data.abandonsProspects, 0);
     });
   });
 
