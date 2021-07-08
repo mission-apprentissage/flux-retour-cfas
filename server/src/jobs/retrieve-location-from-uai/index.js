@@ -4,6 +4,8 @@ const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const logger = require("../../common/logger");
 
+const GEO_API_HOST = "https://geo.api.gouv.fr";
+
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 const normalizeCodeTerritoire = (code) => {
@@ -17,7 +19,7 @@ const normalizeCodeTerritoire = (code) => {
  * Ce script permet de créer un export contenant les CFAS sans SIRET
  */
 runScript(async ({ db }) => {
-  const { data } = await axios.get("https://geo.api.gouv.fr/departements");
+  const { data } = await axios.get(`${GEO_API_HOST}/departements`);
   const departementsRegionMap = data.reduce((acc, cur) => {
     return { ...acc, [cur.code]: cur.codeRegion };
   }, {});
