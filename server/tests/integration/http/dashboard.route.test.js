@@ -213,13 +213,14 @@ httpTests(__filename, ({ startServer }) => {
 
       const formationCfd = "abcd1234";
 
-      // Add 1 statut for region
+      // Add 1 statut for formation
       await new StatutCandidat(
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
           siret_etablissement: getRandomSiretEtablissement(),
           siret_etablissement_valid: true,
           uai_etablissement: "0762232N",
+          uai_etablissement_valid: true,
           formation_cfd: formationCfd,
         })
       ).save();
