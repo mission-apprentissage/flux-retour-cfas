@@ -3,8 +3,12 @@ const { Schema } = require("mongoose");
 const cfaDataFeedback = new Schema({
   siret: {
     type: String,
-    required: true,
     description: "Siret de l'établissement",
+  },
+  uai: {
+    type: String,
+    required: true,
+    description: "UAI de l'établissement",
   },
   email: {
     type: String,

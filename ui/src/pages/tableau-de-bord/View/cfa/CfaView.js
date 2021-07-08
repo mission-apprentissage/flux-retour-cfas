@@ -12,7 +12,7 @@ const CfaView = ({ cfaUai, filters, effectifs, loading }) => {
   return (
     <>
       <InfoCfaSection cfaUai={cfaUai} />
-      <DataFeedbackSection siret={cfaUai} />
+      <DataFeedbackSection uai={cfaUai} />
       {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartionCfaNiveauAnneesSection filters={filters} />
     </>

@@ -4,12 +4,12 @@ import React from "react";
 
 import DataFeedbackModalContent from "./DataFeedbackModalContent";
 
-const DataFeedbackModal = ({ isOpen, onClose, siret }) => {
+const DataFeedbackModal = ({ isOpen, onClose, uai }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalOverlay />
       <ModalContent borderRadius="0">
-        <DataFeedbackModalContent siret={siret} onClose={onClose} />
+        <DataFeedbackModalContent uai={uai} onClose={onClose} />
       </ModalContent>
     </Modal>
   );
@@ -18,7 +18,7 @@ const DataFeedbackModal = ({ isOpen, onClose, siret }) => {
 DataFeedbackModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  siret: PropTypes.string.isRequired,
+  uai: PropTypes.string.isRequired,
 };
 
 export default DataFeedbackModal;

@@ -13,7 +13,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
   }).min(1);
 
   const dataFeedbackBodyValidationSchema = Joi.object({
-    siret: Joi.string().required(),
+    uai: Joi.string().required(),
     email: Joi.string().required(),
     details: Joi.string().required(),
   });
@@ -74,16 +74,6 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
       const created = await cfaDataFeedback.createCfaDataFeedback(req.body);
 
       return res.json(created);
-    })
-  );
-
-  router.get(
-    "/data-feedback",
-    tryCatch(async (req, res) => {
-      const { siret } = req.query;
-
-      const foundDataFeedback = await cfaDataFeedback.getCfaDataFeedbackBySiret(siret);
-      return res.json(foundDataFeedback);
     })
   );
 

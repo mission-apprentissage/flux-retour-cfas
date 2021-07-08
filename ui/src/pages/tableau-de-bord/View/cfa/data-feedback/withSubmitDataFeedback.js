@@ -10,11 +10,11 @@ export const SUBMIT_STATE = {
 };
 
 const withSubmitDataFeedback = (Component) => {
-  const WithSubmitDataFeedback = ({ siret, ...props }) => {
+  const WithSubmitDataFeedback = ({ uai, ...props }) => {
     const [submitState, setSubmitState] = useState(SUBMIT_STATE.waiting);
 
     const sendDataFeedback = async (formData) => {
-      const body = { ...formData, siret };
+      const body = { ...formData, uai };
 
       try {
         await _post("/api/cfas/data-feedback", body);
@@ -28,7 +28,7 @@ const withSubmitDataFeedback = (Component) => {
   };
 
   WithSubmitDataFeedback.propTypes = {
-    siret: PropTypes.string.isRequired,
+    uai: PropTypes.string.isRequired,
   };
 
   return WithSubmitDataFeedback;
