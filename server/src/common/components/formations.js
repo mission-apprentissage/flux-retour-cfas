@@ -67,15 +67,18 @@ const createFormation = async (cfd) => {
 
 /**
  * Returns list of CFA information whose nom_etablissement matches input
- * @param {string} intitule
+ * @param {Object} searchCriteria
  * @return {[Formation]} Array of CFA information
  */
-const searchFormationByIntituleOrCfd = async (intituleOrCfd, otherFilters) => {
-  const searchTermFilterQuery = {
-    $or: [{ $text: { $search: intituleOrCfd } }, { cfd: new RegExp(intituleOrCfd, "g") }],
-  };
+const searchFormationByIntituleOrCfd = async (searchCriteria) => {
+  const { searchTerm, ...otherFilters } = searchCriteria;
+  const searchTermFilterQuery = searchTerm
+    ? {
+        $or: [{ $text: { $search: searchTerm } }, { cfd: new RegExp(searchTerm, "g") }],
+      }
+    : {};
 
-  if (otherFilters && Object.keys(otherFilters).length > 0) {
+  if (Object.keys(otherFilters).length > 0) {
     const filters = {
       formation_cfd_valid: true,
       ...otherFilters,
