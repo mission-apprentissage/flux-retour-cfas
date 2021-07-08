@@ -24,7 +24,7 @@ module.exports = ({ formations }) => {
         return res.status(400).json({ status: "INPUT_VALIDATION_ERROR", message: error.message });
       }
 
-      const foundFormations = await formations.searchFormationByIntituleOrCfd(req.body);
+      const foundFormations = await formations.searchFormations(req.body);
 
       return res.json(foundFormations.map(({ cfd, libelle }) => ({ cfd, libelle })));
     })

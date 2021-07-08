@@ -9,7 +9,7 @@ module.exports = () => ({
   createFormation,
   existsFormation,
   getFormationWithCfd,
-  searchFormationByIntituleOrCfd,
+  searchFormations,
 });
 
 /**
@@ -70,7 +70,7 @@ const createFormation = async (cfd) => {
  * @param {Object} searchCriteria
  * @return {[Formation]} Array of CFA information
  */
-const searchFormationByIntituleOrCfd = async (searchCriteria) => {
+const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
   const searchTermFilterQuery = searchTerm
     ? {
