@@ -4,7 +4,7 @@ export const effectifsPropType = PropTypes.shape({
   apprentis: PropTypes.shape({
     count: PropTypes.number.isRequired,
   }).isRequired,
-  inscrits: PropTypes.shape({
+  jeunesSansContrat: PropTypes.shape({
     count: PropTypes.number.isRequired,
   }).isRequired,
   abandons: PropTypes.shape({

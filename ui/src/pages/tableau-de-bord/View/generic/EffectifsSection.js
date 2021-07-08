@@ -32,8 +32,8 @@ const EffectifsSection = ({ effectifs, loading }) => {
           tooltipLabel="Nombre de candidats en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours)"
         />
         <EffectifCard
-          count={effectifs.inscrits.count}
-          label="apprentis sans contrat"
+          count={effectifs.jeunesSansContrat.count}
+          label="jeunes sans contrat"
           tooltipLabel="Nombre de jeunes ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours)"
         />
         <EffectifCard

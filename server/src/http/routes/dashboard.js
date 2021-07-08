@@ -126,6 +126,7 @@ module.exports = ({ stats, dashboard }) => {
       // Gets effectif data for params
       const effectifsAtEndDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(endDate, filters);
       const rupturantsAtEndDate = await dashboard.getRupturantsCountAtDate(endDate, filters);
+      const jeunesSansContratAtEndDate = await dashboard.getJeunesSansContratCountAtDate(endDate, filters);
 
       // Build response
       return res.json({
@@ -133,6 +134,7 @@ module.exports = ({ stats, dashboard }) => {
         apprentis: effectifsAtEndDate[codesStatutsCandidats.apprenti].count,
         inscrits: effectifsAtEndDate[codesStatutsCandidats.inscrit].count,
         rupturants: rupturantsAtEndDate,
+        jeunesSansContrat: jeunesSansContratAtEndDate,
         abandons: effectifsAtEndDate[codesStatutsCandidats.abandon].count,
         abandonsProspects: effectifsAtEndDate[codesStatutsCandidats.abandonProspects].count,
       });
