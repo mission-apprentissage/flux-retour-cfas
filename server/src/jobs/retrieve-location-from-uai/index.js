@@ -1,5 +1,10 @@
-const { runScript } = require("../scriptWrapper");
+const cliProgress = require("cli-progress");
 const axios = require("axios");
+const { runScript } = require("../scriptWrapper");
+const { asyncForEach } = require("../../common/utils/asyncUtils");
+const logger = require("../../common/logger");
+
+const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 const normalizeCodeTerritoire = (code) => {
   const n = Number(code);
@@ -12,39 +17,34 @@ const normalizeCodeTerritoire = (code) => {
  * Ce script permet de créer un export contenant les CFAS sans SIRET
  */
 runScript(async ({ db }) => {
-  await detectLocationDifferences({ db });
-}, "retrieve-location-from-uai");
-
-const detectLocationDifferences = async ({ db }) => {
   const { data } = await axios.get("https://geo.api.gouv.fr/departements");
   const departementsRegionMap = data.reduce((acc, cur) => {
     return { ...acc, [cur.code]: cur.codeRegion };
   }, {});
 
-  const cursor = db.collection("statutsCandidats").find({
+  const allValidUais = await db.collection("statutsCandidats").distinct("uai_etablissement", {
     uai_etablissement_valid: true,
   });
+  logger.info(`${allValidUais.length} valid UAI found. Will update matching statuts candidats...`);
+  loadingBar.start(allValidUais.length, 0);
 
-  while (await cursor.hasNext()) {
-    const document = await cursor.next();
-    const departementFromUai = normalizeCodeTerritoire(document.uai_etablissement.slice(0, 3));
+  let modifiedCount = 0;
+  let matchedCount = 0;
+  await asyncForEach(allValidUais, async (uaiToUpdate) => {
+    const departementFromUai = normalizeCodeTerritoire(uaiToUpdate.slice(0, 3));
     const regionFromUai = normalizeCodeTerritoire(departementsRegionMap[departementFromUai]);
 
-    await db.collection("statutsCandidats").findOneAndUpdate(
-      { _id: document._id },
+    const updateResult = await db.collection("statutsCandidats").updateMany(
+      { uai_etablissement: uaiToUpdate },
       {
         $set: { etablissement_num_departement: departementFromUai, etablissement_num_region: regionFromUai },
-        $unset: {
-          etablissement_adresse: "",
-          etablissement_code_postal: "",
-          etablissement_localite: "",
-          etablissement_geo_coordonnees: "",
-          etablissement_nom_region: "",
-          etablissement_nom_departement: "",
-          etablissement_nom_academie: "",
-          etablissement_num_academie: "",
-        },
       }
     );
-  }
-};
+    modifiedCount += updateResult.modifiedCount;
+    matchedCount += updateResult.matchedCount;
+    loadingBar.increment();
+  });
+  loadingBar.stop();
+  logger.info(`${matchedCount} statuts candidats matching valid UAIs`);
+  logger.info(`${modifiedCount} statuts candidats updated`);
+}, "retrieve-location-from-uai");
