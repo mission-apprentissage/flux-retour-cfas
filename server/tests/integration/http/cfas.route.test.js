@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const httpTests = require("../../utils/httpTests");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
-const { StatutCandidat: StatutCandidatModel, Cfa, CfaDataFeedback } = require("../../../src/common/model");
+const { StatutCandidat: StatutCandidatModel, Cfa } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
 httpTests(__filename, ({ startServer }) => {
@@ -32,7 +32,6 @@ httpTests(__filename, ({ startServer }) => {
         ...createRandomStatutCandidat(),
         nom_etablissement: "FACULTE SCIENCES NANCY",
         nom_etablissement_tokenized: buildTokenizedString("FACULTE SCIENCES NANCY", 3),
-        siret_etablissement_valid: true,
       }).save();
 
       const response = await httpClient.post("/api/cfas/search", { searchTerm: "FACULTE" });
@@ -45,7 +44,7 @@ httpTests(__filename, ({ startServer }) => {
 
   describe("POST /cfas/data-feedback", () => {
     const validBody = {
-      siret: "80320291800022",
+      uai: "0762232N",
       details: "blabla",
       email: "mail@example.com",
     };
@@ -56,8 +55,8 @@ httpTests(__filename, ({ startServer }) => {
       assert.equal(response.status, 400);
     });
 
-    it("sends a 400 HTTP response when siret is missing in body", async () => {
-      const response = await httpClient.post("/api/cfas/data-feedback", omit(validBody, "siret"));
+    it("sends a 400 HTTP response when uai is missing in body", async () => {
+      const response = await httpClient.post("/api/cfas/data-feedback", omit(validBody, "uai"));
 
       assert.equal(response.status, 400);
     });
@@ -79,45 +78,14 @@ httpTests(__filename, ({ startServer }) => {
 
       assert.equal(response.status, 200);
       assert.deepEqual(omit(response.data, "_id", "__v", "created_at"), {
-        siret: validBody.siret,
+        uai: validBody.uai,
         details: validBody.details,
         email: validBody.email,
       });
     });
   });
 
-  describe("GET /cfas/data-feedback", () => {
-    const cfaDataFeedbackSeed = {
-      created_at: new Date(),
-      siret: "80320291800022",
-      details: "blabla",
-      email: "mail@example.com",
-    };
-
-    beforeEach(async () => {
-      await new CfaDataFeedback(cfaDataFeedbackSeed).save();
-    });
-
-    it("sends null HTTP response when no cfaDataFeedback for given siret", async () => {
-      const response = await httpClient.get("/api/cfas/data-feedback?siret=123456");
-
-      assert.equal(response.status, 200);
-      assert.deepEqual(response.data, null);
-    });
-
-    it("sends a 200 HTTP response", async () => {
-      const response = await httpClient.get(`/api/cfas/data-feedback?siret=${cfaDataFeedbackSeed.siret}`);
-
-      assert.equal(response.status, 200);
-      assert.deepEqual(omit(response.data, "_id", "__v", "created_at"), {
-        siret: cfaDataFeedbackSeed.siret,
-        details: cfaDataFeedbackSeed.details,
-        email: cfaDataFeedbackSeed.email,
-      });
-    });
-  });
-
-  describe("GET /cfas/:siret", () => {
+  describe("GET /cfas/:uai", () => {
     it("Vérifie qu'on peut récupérer les informations d'un CFA via son SIRET", async () => {
       const { httpClient } = await startServer();
 
@@ -130,14 +98,12 @@ httpTests(__filename, ({ startServer }) => {
       const cfaInfos = {
         nom_etablissement: nomTest,
         siret_etablissement: siretTest,
-        siret_etablissement_valid: true,
         uai_etablissement: uaiTest,
+        uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat({
-        ...cfaInfos,
-      });
+      const randomStatut = createRandomStatutCandidat(cfaInfos);
       const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
 
@@ -150,7 +116,7 @@ httpTests(__filename, ({ startServer }) => {
       });
       await cfaReferenceToAdd.save();
 
-      const response = await httpClient.get(`/api/cfas/${siretTest}`);
+      const response = await httpClient.get(`/api/cfas/${uaiTest}`);
 
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, {
@@ -175,8 +141,8 @@ httpTests(__filename, ({ startServer }) => {
       const cfaInfos = {
         nom_etablissement: nomTest,
         siret_etablissement: siretTest,
-        siret_etablissement_valid: true,
         uai_etablissement: uaiTest,
+        uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
       };
 
@@ -186,7 +152,7 @@ httpTests(__filename, ({ startServer }) => {
       const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
 
-      const response = await httpClient.get(`/api/cfas/${siretTest}`);
+      const response = await httpClient.get(`/api/cfas/${uaiTest}`);
 
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, {

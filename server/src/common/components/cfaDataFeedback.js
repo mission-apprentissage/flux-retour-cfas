@@ -1,29 +1,21 @@
 const { CfaDataFeedback: CfaDataFeedbackModel } = require("../model");
-const { validateSiret } = require("../domain/siret");
+const { validateUai } = require("../domain/uai");
 
 module.exports = () => ({
   createCfaDataFeedback,
-  getCfaDataFeedbackBySiret,
 });
-
-/**
- * Returns formation if found with given SIRET
- * @param {string} siret
- * @return {CfaDataFeedback | null} Found CfaDataFeedback
- */
-const getCfaDataFeedbackBySiret = (siret) => CfaDataFeedbackModel.findOne({ siret }).lean();
 
 /**
  * Creates a new CfaDataFeedback in DB
  * @return {CfaDataFeedback | null} The newly created CfaDataFeedback or null
  */
-const createCfaDataFeedback = async ({ siret, email, details }) => {
-  if (!validateSiret(siret)) {
+const createCfaDataFeedback = async ({ uai, email, details }) => {
+  if (!validateUai(uai)) {
     throw Error("Invalid SIRET");
   }
 
   const newCfaDataFeedbackDocument = new CfaDataFeedbackModel({
-    siret,
+    uai,
     email,
     details,
     created_at: new Date(),

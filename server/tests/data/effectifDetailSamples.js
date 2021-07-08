@@ -83,16 +83,16 @@ const sampleDataFormationsAbandons = {
   },
 };
 
-const getStatutsSamplesInscrits = async (siretToTest) =>
-  createSamplesStatutsDetailed(siretToTest, historySequenceInscrit, sampleDataFormationsInscrits);
+const getStatutsSamplesInscrits = async (uaiToTest) =>
+  createSamplesStatutsDetailed(uaiToTest, historySequenceInscrit, sampleDataFormationsInscrits);
 
-const getStatutsSamplesApprentis = async (siretToTest) =>
-  createSamplesStatutsDetailed(siretToTest, historySequenceApprenti, sampleDataFormationsApprentis);
+const getStatutsSamplesApprentis = async (uaiToTest) =>
+  createSamplesStatutsDetailed(uaiToTest, historySequenceApprenti, sampleDataFormationsApprentis);
 
-const getStatutsSamplesAbandons = async (siretToTest) =>
-  createSamplesStatutsDetailed(siretToTest, historySequenceAbandon, sampleDataFormationsAbandons);
+const getStatutsSamplesAbandons = async (uaiToTest) =>
+  createSamplesStatutsDetailed(uaiToTest, historySequenceAbandon, sampleDataFormationsAbandons);
 
-const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiveau3, nbNiveau4 }) => {
+const createSamplesStatutsDetailed = async (uaiToTest, historyStatuts, { nbNiveau3, nbNiveau4 }) => {
   const statutsListToPush = [];
 
   // Create niveau 3 - formation 1 - year 1
@@ -102,9 +102,8 @@ const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiv
         createRandomStatutCandidat({
           ...{
             historique_statut_apprenant: historyStatuts,
-            siret_etablissement_valid: true,
             niveau_formation: "3 (CAP...)",
-            siret_etablissement: siretToTest,
+            uai_etablissement: uaiToTest,
             annee_formation: 1,
             libelle_court_formation: nbNiveau3.formation1.libelle_court,
           },
@@ -120,9 +119,8 @@ const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiv
         createRandomStatutCandidat({
           ...{
             historique_statut_apprenant: historyStatuts,
-            siret_etablissement_valid: true,
             niveau_formation: "3 (CAP...)",
-            siret_etablissement: siretToTest,
+            uai_etablissement: uaiToTest,
             annee_formation: 2,
             libelle_court_formation: nbNiveau3.formation1.libelle_court,
           },
@@ -138,9 +136,8 @@ const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiv
         createRandomStatutCandidat({
           ...{
             historique_statut_apprenant: historyStatuts,
-            siret_etablissement_valid: true,
             niveau_formation: "3 (CAP...)",
-            siret_etablissement: siretToTest,
+            uai_etablissement: uaiToTest,
             annee_formation: 1,
             libelle_court_formation: nbNiveau3.formation2.libelle_court,
           },
@@ -156,9 +153,8 @@ const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiv
         createRandomStatutCandidat({
           ...{
             historique_statut_apprenant: historyStatuts,
-            siret_etablissement_valid: true,
             niveau_formation: "3 (CAP...)",
-            siret_etablissement: siretToTest,
+            uai_etablissement: uaiToTest,
             annee_formation: 2,
             libelle_court_formation: nbNiveau3.formation2.libelle_court,
           },
@@ -174,9 +170,8 @@ const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiv
         createRandomStatutCandidat({
           ...{
             historique_statut_apprenant: historyStatuts,
-            siret_etablissement_valid: true,
             niveau_formation: "4 (Bac...)",
-            siret_etablissement: siretToTest,
+            uai_etablissement: uaiToTest,
             annee_formation: 1,
             libelle_court_formation: nbNiveau3.formation1.libelle_court,
           },
@@ -192,9 +187,8 @@ const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiv
         createRandomStatutCandidat({
           ...{
             historique_statut_apprenant: historyStatuts,
-            siret_etablissement_valid: true,
             niveau_formation: "4 (Bac...)",
-            siret_etablissement: siretToTest,
+            uai_etablissement: uaiToTest,
             annee_formation: 2,
             libelle_court_formation: nbNiveau3.formation1.libelle_court,
           },
@@ -210,9 +204,8 @@ const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiv
         createRandomStatutCandidat({
           ...{
             historique_statut_apprenant: historyStatuts,
-            siret_etablissement_valid: true,
             niveau_formation: "4 (Bac...)",
-            siret_etablissement: siretToTest,
+            uai_etablissement: uaiToTest,
             annee_formation: 1,
             libelle_court_formation: nbNiveau3.formation2.libelle_court,
           },
@@ -228,9 +221,8 @@ const createSamplesStatutsDetailed = async (siretToTest, historyStatuts, { nbNiv
         createRandomStatutCandidat({
           ...{
             historique_statut_apprenant: historyStatuts,
-            siret_etablissement_valid: true,
             niveau_formation: "4 (Bac...)",
-            siret_etablissement: siretToTest,
+            uai_etablissement: uaiToTest,
             annee_formation: 2,
             libelle_court_formation: nbNiveau3.formation2.libelle_court,
           },

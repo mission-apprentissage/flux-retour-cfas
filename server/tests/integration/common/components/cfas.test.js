@@ -16,41 +16,40 @@ integrationTests(__filename, () => {
         nom_etablissement: "CFA DU ROANNAIS",
         etablissement_num_departement: "15",
         etablissement_num_region: "01",
-        siret_etablissement: "80420010000021",
-        siret_etablissement_valid: true,
-        uai_etablissement: "0762290X",
+        uai_etablissement: "0152290X",
+        uai_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cFa dU RO",
         etablissement_num_departement: "15",
         etablissement_num_region: "01",
-        siret_etablissement: "80420010000022",
-        siret_etablissement_valid: true,
+        uai_etablissement: "0152232N",
+        uai_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "cfa du roanna",
         etablissement_num_departement: "39",
         etablissement_num_region: "123",
-        siret_etablissement: "80420010000023",
-        siret_etablissement_valid: true,
+        uai_etablissement: "0392232X",
+        uai_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "CFA DUROC",
         etablissement_num_departement: "75",
         etablissement_num_region: "02",
-        siret_etablissement: "80420010000024",
-        siret_etablissement_valid: true,
+        uai_etablissement: "0752232O",
+        uai_etablissement_valid: true,
       },
       {
         ...createRandomStatutCandidat(),
         nom_etablissement: "FACULTE SCIENCES NANCY",
         etablissement_num_departement: "15",
         etablissement_num_region: "039",
-        siret_etablissement: "80420010000025",
-        siret_etablissement_valid: true,
+        uai_etablissement: "0152232Z",
+        uai_etablissement_valid: true,
       },
     ];
 
@@ -81,70 +80,55 @@ integrationTests(__filename, () => {
       {
         caseDescription: "when searchTerm matches nom_etablissement perfectly",
         searchTerm: statutsSeed[4].nom_etablissement,
-        expectedResult: [statutsSeed[4]],
+        expectedResults: [statutsSeed[4]],
       },
       {
         caseDescription: "when searchTerm matches nom_etablissement perfectly but with different case",
         searchTerm: statutsSeed[4].nom_etablissement.toLowerCase(),
-        expectedResult: [statutsSeed[4]],
+        expectedResults: [statutsSeed[4]],
       },
       {
         caseDescription: "when searchTerm matches nom_etablissement partially",
         searchTerm: statutsSeed[4].nom_etablissement.slice(0, 6),
-        expectedResult: [statutsSeed[4]],
+        expectedResults: [statutsSeed[4]],
       },
       {
         caseDescription: "when searchTerm matches a word in nom_etablissement",
         searchTerm: "SCIENCES",
-        expectedResult: [statutsSeed[4]],
+        expectedResults: [statutsSeed[4]],
       },
       {
         caseDescription: "when searchTerm matches a word with different case in nom_etablissement",
         searchTerm: "cfa du",
-        expectedResult: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
+        expectedResults: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
       },
       {
         caseDescription: "when searchTerm matches a word with different diacritics in nom_etablissement",
         searchTerm: "CFà",
-        expectedResult: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
+        expectedResults: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
       },
       {
         caseDescription: "when searchTerm matches a word in nom_etablissement close to others",
         searchTerm: "CFA DUROC",
-        expectedResult: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
+        expectedResults: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
       },
     ];
 
-    validsearchTermCases.forEach(({ searchTerm, caseDescription, expectedResult }) => {
+    validsearchTermCases.forEach(({ searchTerm, caseDescription, expectedResults }) => {
       it(`returns list of CFA matching ${caseDescription}`, async () => {
-        const searchResults = await searchCfas({ searchTerm });
+        const actualResults = await searchCfas({ searchTerm });
 
-        // we will sort results because we don't care of the order in the test
-        const sortBySiret = (a, b) => Number(a.siret_etablissement) - Number(b.siret_etablissement);
-        const actual = searchResults.sort(sortBySiret);
-        const expected = expectedResult
-          .map(({ nom_etablissement, siret_etablissement, etablissement_num_departement }) => ({
-            nom_etablissement,
-            siret_etablissement,
-            etablissement_num_departement,
-          }))
-          .sort(sortBySiret);
-
-        assert.deepEqual(actual, expected);
+        assert.equal(actualResults.length, expectedResults.length);
+        expectedResults.forEach((result) => {
+          const foundResult = actualResults.find((cfa) => cfa.uai_etablissement === result.uai_etablissement);
+          assert.ok(foundResult);
+        });
       });
     });
 
     it("returns list of CFA whose UAI matches searchTerm", async () => {
       const actual = await searchCfas({ searchTerm: statutsSeed[1].uai_etablissement });
       const expected = [statutsSeed[1]];
-
-      assert.equal(actual.length, 1);
-      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
-    });
-
-    it("returns list of CFA whose SIRET matches searchTerm", async () => {
-      const actual = await searchCfas({ searchTerm: statutsSeed[0].siret_etablissement });
-      const expected = [statutsSeed[0]];
 
       assert.equal(actual.length, 1);
       assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);

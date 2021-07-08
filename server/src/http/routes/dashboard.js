@@ -15,7 +15,7 @@ module.exports = ({ stats, dashboard }) => {
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
     formation_cfd: Joi.string().allow(null, ""),
-    siret_etablissement: Joi.string().allow(null, ""),
+    uai_etablissement: Joi.string().allow(null, ""),
     etablissement_reseaux: Joi.string().allow(null, ""),
   });
 
@@ -47,7 +47,7 @@ module.exports = ({ stats, dashboard }) => {
     startDate: Joi.date().required(),
     endDate: Joi.date().required(),
     formation_cfd: Joi.string().allow(null, ""),
-    siret_etablissement: Joi.string().allow(null, ""),
+    uai_etablissement: Joi.string().allow(null, ""),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
     etablissement_reseaux: Joi.string().allow(null, ""),
@@ -89,7 +89,7 @@ module.exports = ({ stats, dashboard }) => {
         abortEarly: false,
       });
 
-      const nbOrganismes = await stats.getNbDistinctCfasBySiret(req.body);
+      const nbOrganismes = await stats.getNbDistinctCfasByUai(req.body);
 
       return res.json({
         nbOrganismes,
@@ -143,7 +143,7 @@ module.exports = ({ stats, dashboard }) => {
         page: Joi.number().default(1),
         limit: Joi.number().default(10),
         date: Joi.date().required(),
-        siret_etablissement: Joi.string().allow(null, ""),
+        uai_etablissement: Joi.string().allow(null, ""),
         etablissement_reseaux: Joi.string().allow(null, ""),
         etablissement_num_region: Joi.string().allow(null, ""),
         etablissement_num_departement: Joi.string().allow(null, ""),
@@ -152,7 +152,6 @@ module.exports = ({ stats, dashboard }) => {
       const { date: dateFromBody, page, limit, ...filters } = req.query;
       const date = new Date(dateFromBody);
 
-      // Checks if siret valid
       const effectifDetailCfaData = await dashboard.getPaginatedEffectifsParNiveauEtAnneeFormation(
         date,
         filters,

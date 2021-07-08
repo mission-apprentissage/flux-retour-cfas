@@ -79,7 +79,7 @@ export const filtersPropTypes = {
   state: PropTypes.shape({
     date: PropTypes.instanceOf(Date),
     cfa: PropTypes.shape({
-      siret_etablissement: PropTypes.string.isRequired,
+      uai_etablissement: PropTypes.string.isRequired,
       nom_etablissement: PropTypes.string.isRequired,
     }),
     region: PropTypes.shape({

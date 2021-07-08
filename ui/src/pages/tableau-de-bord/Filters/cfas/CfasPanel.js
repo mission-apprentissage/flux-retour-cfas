@@ -12,7 +12,7 @@ const CfaPanel = ({ value, onCfaClick, searchTerm, onSearchTermChange, searchRes
       <SearchInput
         value={searchTerm}
         onChange={onSearchTermChange}
-        placeholder="Rechercher le nom d'un organisme de formation, un UAI ou un SIRET"
+        placeholder="Rechercher le nom d'un organisme de formation ou son UAI"
       />
       {searchResults?.length === 0 && (
         <Text color="grey.800" fontWeight="700" paddingTop="2w" paddingLeft="1w">
@@ -27,14 +27,14 @@ const CfaPanel = ({ value, onCfaClick, searchTerm, onSearchTermChange, searchRes
 CfaPanel.propTypes = {
   onCfaClick: PropTypes.func.isRequired,
   value: PropTypes.shape({
-    siret_etablissement: PropTypes.string.isRequired,
+    uai_etablissement: PropTypes.string.isRequired,
     nom_etablissement: PropTypes.string.isRequired,
   }),
   onSearchTermChange: PropTypes.func.isRequired,
   searchTerm: PropTypes.string,
   searchResults: PropTypes.arrayOf(
     PropTypes.shape({
-      siret_etablissement: PropTypes.string.isRequired,
+      uai_etablissement: PropTypes.string.isRequired,
       nom_etablissement: PropTypes.string.isRequired,
     })
   ),

@@ -8,11 +8,11 @@ import DataFeedbackSection from "./data-feedback/DataFeedbackSection";
 import InfoCfaSection from "./infoCfa/InfoCfaSection";
 import RepartionCfaNiveauAnneesSection from "./repartitionNiveauxFormations/RepartionCfaNiveauAnneesSection";
 
-const CfaView = ({ cfaSiret, filters, effectifs, loading }) => {
+const CfaView = ({ cfaUai, filters, effectifs, loading }) => {
   return (
     <>
-      <InfoCfaSection cfaSiret={cfaSiret} />
-      <DataFeedbackSection siret={cfaSiret} />
+      <InfoCfaSection cfaUai={cfaUai} />
+      <DataFeedbackSection uai={cfaUai} />
       {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartionCfaNiveauAnneesSection filters={filters} />
     </>
@@ -22,7 +22,7 @@ const CfaView = ({ cfaSiret, filters, effectifs, loading }) => {
 CfaView.propTypes = {
   effectifs: effectifsPropType,
   loading: PropTypes.bool.isRequired,
-  cfaSiret: PropTypes.string.isRequired,
+  cfaUai: PropTypes.string.isRequired,
   filters: filtersPropTypes.state,
 };
 

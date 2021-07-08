@@ -83,9 +83,8 @@ const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) 
 
 /**
  * Récupération des données effectifs avec niveaux / annee pour 2 dates et un siret donné
- * @param {*} startDate
- * @param {*} endDate
- * @param {*} siret_etablissement
+ * @param {Date} date
+ * @param {*} filters
  */
 const getEffectifsParNiveauEtAnneeFormation = async (date, filters) => {
   const [inscritsBeginDate, apprentisBeginDate, abandonsBeginDate] = await Promise.all([
@@ -105,9 +104,9 @@ const getEffectifsParNiveauEtAnneeFormation = async (date, filters) => {
 };
 
 /**
- * Récupération des données paginées des effectifs avec niveaux / annee pour 2 dates et un siret donné
- * @param {*} date
- * @param {*} filters
+ * Récupération des données paginées des effectifs avec niveaux / annee pour une date et des filtres
+ * @param {Date} date
+ * @param {{}} filters
  */
 const getPaginatedEffectifsParNiveauEtAnneeFormation = async (date, filters, page = 1, limit = 1000) => {
   const listData = await getEffectifsParNiveauEtAnneeFormation(date, filters);
@@ -184,10 +183,7 @@ const getEffectifsWithStatutApprenantAtDate = async (searchDate, statutApprenant
   const aggregationPipeline = [
     // Filtrage sur les filtres passées en paramètres
     {
-      $match: {
-        ...filters,
-        siret_etablissement_valid: true,
-      },
+      $match: filters,
     },
     ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate, projection),
     {
@@ -403,14 +399,13 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
     {
       $match: {
         ...filters,
-        siret_etablissement_valid: true,
       },
     },
     ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate, projection),
     {
       $group: {
-        _id: "$siret_etablissement",
-        uai_etablissement: { $first: "$uai_etablissement" },
+        _id: "$uai_etablissement",
+        siret_etablissement: { $first: "$siret_etablissement" },
         nom_etablissement: { $first: "$nom_etablissement" },
         apprentis: {
           $sum: {
@@ -433,10 +428,10 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
 
   const effectifsByCfa = await StatutCandidat.aggregate(aggregationPipeline);
 
-  return effectifsByCfa.map(({ _id, uai_etablissement, nom_etablissement, ...counts }) => {
+  return effectifsByCfa.map(({ _id, siret_etablissement, nom_etablissement, ...counts }) => {
     return {
-      siret_etablissement: _id,
-      uai_etablissement,
+      uai_etablissement: _id,
+      siret_etablissement,
       nom_etablissement,
       effectifs: counts,
     };

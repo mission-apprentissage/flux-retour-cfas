@@ -5,7 +5,7 @@ import React from "react";
 import { Section } from "../../../../../common/components";
 import DataFeedbackModal from "./DataFeedbackModal";
 
-const DataFeedbackSection = ({ siret }) => {
+const DataFeedbackSection = ({ uai }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -16,13 +16,13 @@ const DataFeedbackSection = ({ siret }) => {
           Signaler une anomalie
         </Button>
       </Flex>
-      <DataFeedbackModal isOpen={isOpen} onClose={onClose} siret={siret} />
+      <DataFeedbackModal isOpen={isOpen} onClose={onClose} uai={uai} />
     </Section>
   );
 };
 
 DataFeedbackSection.propTypes = {
-  siret: PropTypes.string.isRequired,
+  uai: PropTypes.string.isRequired,
 };
 
 export default DataFeedbackSection;

@@ -7,8 +7,8 @@ const DEFAULT_PAGE_SIZE = 10;
 
 const buildSearchParams = (filters, pageNumber) => {
   const date = filters.date.toISOString();
-  const siret = filters.cfa.siret_etablissement;
-  return `date=${date}&siret_etablissement=${siret}&page=${pageNumber}&limit=${DEFAULT_PAGE_SIZE}`;
+  const uai = filters.cfa.uai_etablissement;
+  return `date=${date}&uai_etablissement=${uai}&page=${pageNumber}&limit=${DEFAULT_PAGE_SIZE}`;
 };
 
 const withRepartitionNiveauFormationInCfa = (Component) => {

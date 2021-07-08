@@ -35,7 +35,6 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
-          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -45,7 +44,6 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceApprenti,
-          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -55,7 +53,6 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceInscritToApprenti,
-          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -152,12 +149,12 @@ httpTests(__filename, ({ startServer }) => {
   describe("/api/dashboard/effectifs-par-niveau-et-annee-formation route", () => {
     it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux/année de formation via API", async () => {
       const { httpClient } = await startServer();
-      const siretToTest = "77929544300013";
+      const uaiTest = "0762232N";
 
       // Build sample statuts
-      const statutsSamplesInscrits = await getStatutsSamplesInscrits(siretToTest);
-      const statutsSamplesApprentis = await getStatutsSamplesApprentis(siretToTest);
-      const statutsSamplesAbandons = await getStatutsSamplesAbandons(siretToTest);
+      const statutsSamplesInscrits = await getStatutsSamplesInscrits(uaiTest);
+      const statutsSamplesApprentis = await getStatutsSamplesApprentis(uaiTest);
+      const statutsSamplesAbandons = await getStatutsSamplesAbandons(uaiTest);
 
       // Save all statuts to database
       const sampleStatutsListToSave = [
@@ -169,7 +166,7 @@ httpTests(__filename, ({ startServer }) => {
         await currentStatut.save();
       });
 
-      const searchParams = `date=2020-10-10T00:00:00.000Z&siret_etablissement=${siretToTest}&page=1&limit=100`;
+      const searchParams = `date=2020-10-10T00:00:00.000Z&uai_etablissement=${uaiTest}&page=1&limit=100`;
       const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-et-annee-formation?${searchParams}`);
 
       assert.equal(response.status, 200);
@@ -188,9 +185,9 @@ httpTests(__filename, ({ startServer }) => {
       await new StatutCandidat(
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
-          siret_etablissement: getRandomSiretEtablissement(),
-          siret_etablissement_valid: true,
+          siret_etablissement: "77929544300013",
           uai_etablissement: "0762232N",
+          uai_etablissement_valid: true,
           etablissement_num_region: regionNumTest,
         })
       ).save();
@@ -216,13 +213,14 @@ httpTests(__filename, ({ startServer }) => {
 
       const formationCfd = "abcd1234";
 
-      // Add 1 statut for region
+      // Add 1 statut for formation
       await new StatutCandidat(
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
           siret_etablissement: getRandomSiretEtablissement(),
           siret_etablissement_valid: true,
           uai_etablissement: "0762232N",
+          uai_etablissement_valid: true,
           formation_cfd: formationCfd,
         })
       ).save();
