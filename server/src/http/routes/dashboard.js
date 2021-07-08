@@ -2,7 +2,6 @@ const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { UserEvent } = require("../../common/model");
-const { codesStatutsCandidats } = require("../../common/model/constants");
 
 module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
@@ -123,20 +122,13 @@ module.exports = ({ stats, dashboard }) => {
       });
       await event.save();
 
-      // Gets effectif data for params
-      const effectifsAtEndDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(endDate, filters);
-      const rupturantsAtEndDate = await dashboard.getRupturantsCountAtDate(endDate, filters);
-      const jeunesSansContratAtEndDate = await dashboard.getJeunesSansContratCountAtDate(endDate, filters);
-
       // Build response
       return res.json({
         date: endDate,
-        apprentis: effectifsAtEndDate[codesStatutsCandidats.apprenti].count,
-        inscrits: effectifsAtEndDate[codesStatutsCandidats.inscrit].count,
-        rupturants: rupturantsAtEndDate,
-        jeunesSansContrat: jeunesSansContratAtEndDate,
-        abandons: effectifsAtEndDate[codesStatutsCandidats.abandon].count,
-        abandonsProspects: effectifsAtEndDate[codesStatutsCandidats.abandonProspects].count,
+        apprentis: await dashboard.getApprentisCountAtDate(endDate, filters),
+        rupturants: await dashboard.getRupturantsCountAtDate(endDate, filters),
+        jeunesSansContrat: await dashboard.getJeunesSansContratCountAtDate(endDate, filters),
+        abandons: await dashboard.getAbandonsCountAtDate(endDate, filters),
       });
     })
   );
