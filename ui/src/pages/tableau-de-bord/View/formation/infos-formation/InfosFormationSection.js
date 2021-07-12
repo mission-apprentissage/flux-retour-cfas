@@ -30,10 +30,11 @@ const InfosFormationSection = ({ infosFormation, loading, error }) => {
   }
 
   if (infosFormation) {
-    const domainesMetierToDisplay =
-      infosFormation.metiers.length > MAX_DISPLAYED_DOMAINE_METIERS
+    const domainesMetierToDisplay = infosFormation.metiers
+      ? infosFormation.metiers.length > MAX_DISPLAYED_DOMAINE_METIERS
         ? [...infosFormation.metiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS), "..."]
-        : infosFormation.metiers;
+        : infosFormation.metiers
+      : [];
 
     content = (
       <>
