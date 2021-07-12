@@ -18,5 +18,5 @@ const buildSearchRequestBody = (params) => {
 
 export const useFetchChiffresCles = ([startDate, endDate]) => {
   const { state: filters } = useFiltersContext();
-  return usePostFetch("/api/dashboard/nouveaux-contrats", buildSearchRequestBody({ ...filters, startDate, endDate }));
+  return usePostFetch("/api/dashboard/chiffres-cles", buildSearchRequestBody({ ...filters, startDate, endDate }));
 };

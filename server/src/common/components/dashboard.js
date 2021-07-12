@@ -6,6 +6,7 @@ const { uniqueValues, paginate } = require("../utils/miscUtils");
 const sortBy = require("lodash.sortby");
 const omit = require("lodash.omit");
 const { isWithinInterval } = require("date-fns");
+const { countSubArrayInArray } = require("../utils/subArrayUtils");
 
 module.exports = () => ({
   getEffectifsParNiveauEtAnneeFormation,
@@ -16,6 +17,7 @@ module.exports = () => ({
   getRupturantsCountAtDate,
   getJeunesSansContratCountAtDate,
   getNouveauxContratsCountInDateRange,
+  getNbRupturesContratAtDate,
 });
 
 /*
@@ -572,4 +574,50 @@ const getAbandonsCountAtDate = async (searchDate, filters = {}) => {
 
   const result = await StatutCandidat.aggregate(aggregationPipeline);
   return result.length === 1 ? result[0].count : 0;
+};
+
+/**
+ * Décompte du nombre de ruptures dans les statutsCandidats
+ * = Somme des ruptures apprenti vers abandon et apprenti vers inscrit
+ * On récupère tous les statuts en abandon / inscrit à la searchDate
+ * On filtre pour ceux ayant eu un passage d'apprenti vers abandon ou apprenti vers inscrit
+ * @param {*} searchDate
+ * @param {*} filters
+ * @returns
+ */
+const getNbRupturesContratAtDate = async (searchDate, filters = {}) => {
+  const inscritsOrAbandonsAtDate = await StatutCandidat.aggregate([
+    // Filtrage sur les filtres passées en paramètres
+    {
+      $match: {
+        ...filters,
+        "historique_statut_apprenant.1": { $exists: true },
+      },
+    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate),
+    {
+      $match: {
+        $or: [
+          { "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.inscrit },
+          { "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.abandon },
+        ],
+      },
+    },
+  ]);
+
+  return inscritsOrAbandonsAtDate
+    .map((item) => item.historique_statut_apprenant)
+    .reduce(
+      (arr, entry) =>
+        arr +
+        (countSubArrayInArray(
+          entry.map((item) => item.valeur_statut),
+          [codesStatutsCandidats.apprenti, codesStatutsCandidats.inscrit]
+        ) +
+          countSubArrayInArray(
+            entry.map((item) => item.valeur_statut),
+            [codesStatutsCandidats.apprenti, codesStatutsCandidats.abandon]
+          )),
+      0
+    );
 };

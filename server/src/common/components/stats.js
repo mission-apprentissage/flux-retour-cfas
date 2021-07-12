@@ -1,7 +1,7 @@
 const { StatutCandidat } = require("../../common/model");
 const { codesStatutsCandidats, reseauxCfas } = require("../../common/model/constants");
 const { asyncForEach } = require("../utils/asyncUtils");
-const { containsSubArray } = require("../utils/containsSubArray");
+const { containsSubArray } = require("../utils/subArrayUtils");
 
 module.exports = () => {
   return {

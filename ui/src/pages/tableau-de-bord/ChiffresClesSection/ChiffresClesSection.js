@@ -29,7 +29,12 @@ const ChiffresClesSection = () => {
   if (loading) {
     content = <Skeleton startColor="grey.800" endColor="grey.200" width="25rem" height="1rem" />;
   } else if (data) {
-    content = <strong>{data.count} nouveaux contrats d&apos;apprentissages ont été signés</strong>;
+    content = (
+      <>
+        <strong>{data.nbContrats} nouveaux contrats d&apos;apprentissages ont été signés</strong>, et{" "}
+        <strong>{data.nbRuptures} ruptures enregistrées</strong>
+      </>
+    );
   }
 
   return (

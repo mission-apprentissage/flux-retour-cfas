@@ -182,7 +182,7 @@ module.exports = ({ stats, dashboard }) => {
   );
 
   router.post(
-    "/nouveaux-contrats",
+    "/chiffres-cles",
     tryCatch(async (req, res) => {
       // Validate schema
       await nouveauxContratsQueryBodySchema.validateAsync(req.body, {
@@ -193,8 +193,9 @@ module.exports = ({ stats, dashboard }) => {
       const dateRange = [new Date(startDate), new Date(endDate)];
 
       const nouveauxContratsCountInDateRange = await dashboard.getNouveauxContratsCountInDateRange(dateRange, filters);
+      const rupturesCountInDateRange = await dashboard.getNbRupturesContratAtDate(dateRange[1], filters);
 
-      return res.json({ count: nouveauxContratsCountInDateRange });
+      return res.json({ nbContrats: nouveauxContratsCountInDateRange, nbRuptures: rupturesCountInDateRange });
     })
   );
 
