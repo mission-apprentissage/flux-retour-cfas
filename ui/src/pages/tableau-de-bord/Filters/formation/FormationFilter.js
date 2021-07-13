@@ -21,6 +21,7 @@ const FormationFilter = ({ filters, searchTerm, searchResults, onSearchTermChang
       <SecondarySelectButton
         icon="ri-book-mark-fill"
         onClick={() => setIsOpen(!isOpen)}
+        isActive={isOpen}
         isClearable={!!filters.formation}
         clearIconOnClick={() => onFormationChange(null)}
       >
