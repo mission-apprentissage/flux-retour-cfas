@@ -19,21 +19,34 @@ const searchFormationByIntituleOrCfd = debounce(async (searchParams, callback) =
 }, SEARCH_DEBOUNCE_TIME);
 
 const withFormationSearch = (Component) => {
-  const WithFormationSearch = (props) => {
+  const WithFormationSearch = ({ filters, ...props }) => {
     const [searchTerm, setSearchTerm] = useState("");
+    const [loading, setLoading] = useState(false);
     const [searchResults, setSearchResults] = useState();
 
     useEffect(() => {
-      setSearchResults(null);
-      if (searchTerm.length > 3) {
-        searchFormationByIntituleOrCfd({ searchTerm, ...props.filters }, (result) => {
+      // perform search with searchTerm only if longer than 3 characters
+      const searchCriteria = searchTerm.length > 3 ? { searchTerm, ...filters } : filters;
+      // perform search if there is at least one search criterion
+      if (Object.keys(searchCriteria).length !== 0) {
+        setSearchResults(null);
+        setLoading(true);
+        searchFormationByIntituleOrCfd(searchCriteria, (result) => {
           setSearchResults(result);
+          setLoading(false);
         });
       }
-    }, [searchTerm]);
+    }, [searchTerm, filters]);
 
     return (
-      <Component {...props} searchTerm={searchTerm} searchResults={searchResults} onSearchTermChange={setSearchTerm} />
+      <Component
+        {...props}
+        filters={filters}
+        loading={loading}
+        searchTerm={searchTerm}
+        searchResults={searchResults}
+        onSearchTermChange={setSearchTerm}
+      />
     );
   };
 

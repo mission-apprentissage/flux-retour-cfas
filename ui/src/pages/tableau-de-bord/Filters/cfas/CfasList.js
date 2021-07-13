@@ -7,14 +7,6 @@ import FilterOption from "../FilterOption";
 const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
   return (
     <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-      <FilterOption
-        onClick={() => {
-          onCfaClick(null);
-        }}
-        isSelected={!selectedValue}
-      >
-        Tous les organismes de formation
-      </FilterOption>
       {cfas &&
         cfas.map((cfa) => (
           <FilterOption

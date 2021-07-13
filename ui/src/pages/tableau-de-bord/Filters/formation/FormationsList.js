@@ -7,14 +7,6 @@ import FilterOption from "../FilterOption";
 const FormationsList = ({ formations, onFormationClick, selectedValue }) => {
   return (
     <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
-      <FilterOption
-        onClick={() => {
-          onFormationClick(null);
-        }}
-        isSelected={!selectedValue}
-      >
-        Toutes les formations
-      </FilterOption>
       {formations?.map((formation) => (
         <FilterOption
           key={formation.cfd}

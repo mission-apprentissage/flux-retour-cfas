@@ -1,4 +1,4 @@
-import { Text } from "@chakra-ui/react";
+import { Skeleton, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -6,7 +6,19 @@ import { SearchInput } from "../../../../common/components";
 import CfasList from "./CfasList";
 import withCfaSearch from "./withCfaSearch";
 
-const CfaPanel = ({ value, onCfaClick, searchTerm, onSearchTermChange, searchResults }) => {
+const Loading = () => {
+  return (
+    <Stack spacing="2w" paddingLeft="1w" marginTop="2w">
+      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
+      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
+      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
+      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
+      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
+    </Stack>
+  );
+};
+
+const CfaPanel = ({ value, loading, onCfaClick, searchTerm, onSearchTermChange, searchResults }) => {
   return (
     <div>
       <SearchInput
@@ -19,6 +31,7 @@ const CfaPanel = ({ value, onCfaClick, searchTerm, onSearchTermChange, searchRes
           Il n&apos;y a aucun résultat pour votre recherche sur le territoire sélectionné
         </Text>
       )}
+      {loading && <Loading />}
       <CfasList cfas={searchResults} onCfaClick={onCfaClick} selectedValue={value} />
     </div>
   );
@@ -32,6 +45,7 @@ CfaPanel.propTypes = {
   }),
   onSearchTermChange: PropTypes.func.isRequired,
   searchTerm: PropTypes.string,
+  loading: PropTypes.bool.isRequired,
   searchResults: PropTypes.arrayOf(
     PropTypes.shape({
       uai_etablissement: PropTypes.string.isRequired,

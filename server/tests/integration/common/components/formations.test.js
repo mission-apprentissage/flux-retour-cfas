@@ -116,8 +116,8 @@ integrationTests(__filename, () => {
     });
   });
 
-  describe("searchFormationByIntituleOrCfd", () => {
-    const { searchFormationByIntituleOrCfd } = formationsComponent();
+  describe("searchFormations", () => {
+    const { searchFormations } = formationsComponent();
 
     const formationsSeed = [
       { cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" },
@@ -180,7 +180,7 @@ integrationTests(__filename, () => {
 
     validCases.forEach(({ searchTerm, caseDescription, expectedResult }) => {
       it(`returns results ${caseDescription}`, async () => {
-        const results = await searchFormationByIntituleOrCfd(searchTerm);
+        const results = await searchFormations({ searchTerm });
 
         const mapCfd = (result) => result.cfd;
         assert.deepEqual(results.map(mapCfd), expectedResult.map(mapCfd));
@@ -190,7 +190,7 @@ integrationTests(__filename, () => {
     it("sends a 200 HTTP response with results matching different cases and diacritics in libelle", async () => {
       const searchTerm = "decoratio";
 
-      const results = await searchFormationByIntituleOrCfd(searchTerm);
+      const results = await searchFormations({ searchTerm });
 
       assert.equal(results.length, 4);
       assert.ok(results.find((formation) => formation.cfd === formationsSeed[2].cfd));
@@ -210,7 +210,7 @@ integrationTests(__filename, () => {
         formation_cfd_valid: true,
       }).save();
 
-      const results = await searchFormationByIntituleOrCfd(searchTerm, { etablissement_num_region });
+      const results = await searchFormations({ searchTerm, etablissement_num_region });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
@@ -227,7 +227,7 @@ integrationTests(__filename, () => {
         formation_cfd_valid: true,
       }).save();
 
-      const results = await searchFormationByIntituleOrCfd(searchTerm, { etablissement_num_departement });
+      const results = await searchFormations({ searchTerm, etablissement_num_departement });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
@@ -244,7 +244,7 @@ integrationTests(__filename, () => {
         formation_cfd_valid: true,
       }).save();
 
-      const results = await searchFormationByIntituleOrCfd(searchTerm, { uai_etablissement });
+      const results = await searchFormations({ searchTerm, uai_etablissement });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);

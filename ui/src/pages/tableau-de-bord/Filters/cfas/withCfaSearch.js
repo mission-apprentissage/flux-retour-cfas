@@ -21,6 +21,7 @@ const withCfaSearch = (Component) => {
   const WithCfaSearch = ({ filters, ...props }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
       // perform search with searchTerm only if longer than 3 characters
@@ -29,14 +30,22 @@ const withCfaSearch = (Component) => {
       // perform search if there is at least one search criterion
       if (Object.keys(searchCriteria).length !== 0) {
         setSearchResults(null);
+        setLoading(true);
         searchCfas(searchCriteria, (result) => {
           setSearchResults(result);
+          setLoading(false);
         });
       }
     }, [searchTerm, filters]);
 
     return (
-      <Component {...props} searchTerm={searchTerm} searchResults={searchResults} onSearchTermChange={setSearchTerm} />
+      <Component
+        {...props}
+        loading={loading}
+        searchTerm={searchTerm}
+        searchResults={searchResults}
+        onSearchTermChange={setSearchTerm}
+      />
     );
   };
 
