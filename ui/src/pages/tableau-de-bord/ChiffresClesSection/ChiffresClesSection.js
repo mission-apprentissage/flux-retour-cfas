@@ -39,7 +39,7 @@ const ChiffresClesSection = () => {
       </Heading>
       <Flex alignItems="center" marginTop="1w">
         <AnneeSelector options={ANNEE_OPTIONS} selectedAnnee={selectedAnnee} setSelectedAnnee={setSelectedAnnee} />
-        <Text color="grey.800" marginLeft="3v">
+        <Text color="grey.800" marginLeft="3v" fontSize="gamma">
           {content}
         </Text>
       </Flex>
