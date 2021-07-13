@@ -18,7 +18,12 @@ const EffectifCard = ({ label, count, tooltipLabel }) => {
       &nbsp;
       <span>{label}</span>
       {hasTooltip && (
-        <Tooltip background="white" color="grey.800" label={tooltipLabel} aria-label={tooltipLabel} placement="top-end">
+        <Tooltip
+          background="bluefrance"
+          color="white"
+          label={<Box padding="1w">{tooltipLabel}</Box>}
+          aria-label={tooltipLabel}
+        >
           <Box as="i" className="ri-information-line" fontSize="epsilon" color="grey.500" marginLeft="1v" />
         </Tooltip>
       )}
