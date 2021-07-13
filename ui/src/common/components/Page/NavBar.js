@@ -1,7 +1,7 @@
-import { Box, Button, HStack, Link } from "@chakra-ui/react";
+import { HStack, Link } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import { NavLink, useHistory, useRouteMatch } from "react-router-dom";
+import { NavLink, useRouteMatch } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
 import { isUserAdmin } from "../../utils/rolesUtils";
@@ -15,10 +15,13 @@ const NavItem = ({ to, children }) => {
 
   return (
     <Link
-      paddingY="3w"
+      height="100%"
+      display="flex"
+      alignItems="center"
       paddingX="3v"
       as={NavLink}
       to={to}
+      fontSize="zeta"
       color={isActive ? "bluefrance" : "grey.800"}
       _hover={{ textDecoration: "none", color: "grey.800", bg: "galt" }}
       borderBottom="3px solid"
@@ -35,18 +38,13 @@ NavItem.propTypes = {
 };
 
 const NavBar = () => {
-  const [auth, setAuth] = useAuth();
-  const history = useHistory();
-  const logout = () => {
-    setAuth(null);
-    history.push("/login");
-  };
+  const [auth] = useAuth();
 
   const isAdmin = isUserAdmin(auth);
 
   return (
     <Section>
-      <HStack as="nav" spacing="2w" alignItems="center">
+      <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
         <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>
         {isAdmin && (
           <>
@@ -54,11 +52,6 @@ const NavBar = () => {
             <NavItem to="/stats/ymag">Statistiques Ymag</NavItem>
             <NavItem to="/stats/gesti">Statistiques Gesti</NavItem>
             <NavItem to="/referentiel-cfas">Organismes par région</NavItem>
-            <Box paddingY="3w" paddingX="3v">
-              <Button variant="unstyled" height="100%" onClick={logout}>
-                Déconnexion
-              </Button>
-            </Box>
           </>
         )}
       </HStack>
