@@ -66,9 +66,9 @@ const createFormation = async (cfd) => {
 };
 
 /**
- * Returns list of CFA information whose nom_etablissement matches input
+ * Returns list of formations whose matching search criteria
  * @param {Object} searchCriteria
- * @return {[Formation]} Array of CFA information
+ * @return {[Formation]} Array of formations
  */
 const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
