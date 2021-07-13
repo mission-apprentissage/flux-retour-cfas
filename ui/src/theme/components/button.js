@@ -16,7 +16,12 @@ export const Button = {
       background: "bluefrance",
       color: "white",
       _hover: {
-        background: "bluedark.600",
+        background: "bluefrance_hover",
+      },
+      _disabled: {
+        background: "grey.200",
+        border: "none",
+        color: "grey.600",
       },
     },
     ["select-primary"]: {
@@ -37,7 +42,12 @@ export const Button = {
       backgroundColor: "grey.300",
       color: "grey.700",
       _hover: {
-        background: "grey.500",
+        background: "grey.200",
+      },
+      _active: {
+        background: "#f2f2f9",
+        border: "solid 1px",
+        borderColor: "bluefrance",
       },
     },
     ghost: {
@@ -48,13 +58,23 @@ export const Button = {
       _hover: {
         background: "grey.100",
       },
+      _active: {
+        background: "white",
+      },
+      _disabled: {
+        color: "grey.600",
+        borderColor: "grey.400",
+      },
     },
     link: {
       ...baseStyle,
       color: "bluefrance",
       border: "none",
+      borderRadius: "40px",
+      padding: "3v",
       _hover: {
-        textDecoration: "underline",
+        textDecoration: null,
+        background: "grey.100",
       },
     },
   },

@@ -11,8 +11,8 @@ const DataFeedbackSection = ({ uai }) => {
   return (
     <Section>
       <Flex justifyContent="flex-end">
-        <Box as="i" className="ri-arrow-right-line" marginRight="1v" paddingTop="1px" />
-        <Button variant="link" onClick={onOpen} verticalAlign="middle">
+        <Button variant="link" onClick={onOpen}>
+          <Box as="i" className="ri-arrow-right-line" marginRight="1v" paddingTop="1px" />
           Signaler une anomalie
         </Button>
       </Flex>

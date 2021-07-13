@@ -29,22 +29,22 @@ const EffectifsSection = ({ effectifs, loading }) => {
         <EffectifCard
           count={effectifs.apprentis.count}
           label="apprentis"
-          tooltipLabel="Nombre de candidats en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours)"
+          tooltipLabel="Nombre d’apprenants en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
           count={effectifs.jeunesSansContrat.count}
           label="jeunes sans contrat"
-          tooltipLabel="Nombre de jeunes ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours)"
+          tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
           count={effectifs.rupturants.count}
           label="rupturants"
-          tooltipLabel="Nombre de jeunes sans contrat après une rupture au dernier jours du mois (ou J-1 si mois en cours)"
+          tooltipLabel="Nombre d’apprenants sans contrat après une rupture au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
           count={effectifs.abandons.count}
           label="abandons"
-          tooltipLabel="Nombre de jeunes sans contrat ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours)"
+          tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
       </HStack>
     );

@@ -17,6 +17,7 @@ const Logo = () => {
     <Box p={[0, 0, 4]}>
       <Text
         display="inline-block"
+        color="grey.800"
         fontSize={fontSize}
         fontWeight="700"
         textTransform="uppercase"
