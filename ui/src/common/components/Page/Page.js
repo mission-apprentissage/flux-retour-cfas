@@ -20,7 +20,7 @@ const Page = ({ children }) => {
 
 const AppHeader = () => {
   return (
-    <Section as="header" borderBottom="solid 1px" borderBottomColor="grey.400" paddingY="3w">
+    <Section as="header" borderBottom="solid 1px" borderBottomColor="grey.400">
       <Flex alignItems="center">
         <Logo />
         <Box marginLeft="5w">
