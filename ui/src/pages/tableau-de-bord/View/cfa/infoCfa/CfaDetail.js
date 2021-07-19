@@ -5,17 +5,25 @@ import React from "react";
 import { Highlight } from "../../../../../common/components";
 import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
 import { pluralize } from "../../../../../common/utils/stringUtils";
-import withInfoCfaData from "./withInfoCfaData";
+import { filtersPropTypes } from "../../../FiltersContext";
 
-const InfoCfaSection = ({ infosCfa, loading, error }) => {
+const CfaDetail = ({ infosCfa, loading, error }) => {
   let content = null;
 
   if (loading) {
     content = (
-      <>
-        <Skeleton height="1rem" width="100px" startColor="whiteAlpha.900" endColor="whiteAlpha.100" marginBottom="1w" />
-        <Skeleton height="2rem" width="600px" startColor="whiteAlpha.900" endColor="whiteAlpha.100" />
-      </>
+      <Highlight>
+        <Skeleton height="1rem" width="250px" marginBottom="1w" />
+        <Skeleton height="2rem" width="600px" marginBottom="1w" />
+        <Skeleton height="1rem" width="800px" marginBottom="1w" />
+        <Skeleton height="1rem" width="150px" marginBottom="1w" />
+        <HStack marginTop="1w">
+          <Skeleton height="2rem" width="300px" marginBottom="1w" />
+          <Skeleton height="2rem" width="300px" marginBottom="1w" />
+          <Skeleton height="2rem" width="300px" marginBottom="1w" />
+          <Skeleton height="2rem" width="300px" marginBottom="1w" />
+        </HStack>
+      </Highlight>
     );
   }
 
@@ -36,11 +44,13 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
         ? [...infosCfa.domainesMetiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS), "..."]
         : infosCfa.domainesMetiers;
 
+    const displaySirets = (sirets) =>
+      `- ${sirets.length} ${pluralize("SIRET", sirets.length, "S")} pour cet organisme `;
+
     content = (
-      <>
+      <Highlight>
         <Text color="white" fontSize="omega">
-          UAI&nbsp;:&nbsp;{infosCfa.uai} - {infosCfa.sirets.length} {pluralize("SIRET", infosCfa.sirets.length, "S")}
-          &nbsp;pour cet organisme &nbsp;:&nbsp;
+          UAI&nbsp;:&nbsp;{infosCfa.uai} {infosCfa.sirets && displaySirets(infosCfa.sirets)}
         </Text>
         <Heading color="white" fontSize="gamma" marginTop="1w">
           {infosCfa.libelleLong}
@@ -69,14 +79,15 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
             </Tag>
           ))}
         </HStack>
-      </>
+      </Highlight>
     );
   }
 
-  return <Highlight>{content}</Highlight>;
+  return content;
 };
 
-InfoCfaSection.propTypes = {
+CfaDetail.propTypes = {
+  filters: filtersPropTypes.state,
   infosCfa: PropTypes.shape({
     sirets: PropTypes.arrayOf(PropTypes.string).isRequired,
     libelleLong: PropTypes.string.isRequired,
@@ -89,4 +100,4 @@ InfoCfaSection.propTypes = {
   error: PropTypes.object,
 };
 
-export default withInfoCfaData(InfoCfaSection);
+export default CfaDetail;

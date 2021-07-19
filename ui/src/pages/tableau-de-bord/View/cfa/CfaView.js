@@ -1,18 +1,18 @@
 import PropTypes from "prop-types";
 import React from "react";
 
+import ChiffresClesSection from "../../ChiffresClesSection/ChiffresClesSection";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "../generic/EffectifsSection";
-import DataFeedbackSection from "./data-feedback/DataFeedbackSection";
-import InfoCfaSection from "./infoCfa/InfoCfaSection";
+import CfaSection from "./infoCfa/CfaSection";
 import RepartionCfaNiveauAnneesSection from "./repartitionNiveauxFormations/RepartionCfaNiveauAnneesSection";
 
 const CfaView = ({ cfaUai, filters, effectifs, loading }) => {
   return (
     <>
-      <InfoCfaSection cfaUai={cfaUai} />
-      <DataFeedbackSection uai={cfaUai} />
+      <CfaSection filters={filters} cfaUai={cfaUai} />
+      <ChiffresClesSection />
       {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartionCfaNiveauAnneesSection filters={filters} />
     </>

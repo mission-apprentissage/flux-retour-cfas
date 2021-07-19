@@ -31,6 +31,7 @@ const buildSearchRequestBody = (filters) => {
     etablissement_num_departement: filters.departement?.code ?? null,
     formation_cfd: filters.formation?.cfd ?? null,
     uai_etablissement: filters.cfa?.uai_etablissement ?? null,
+    siret_etablissement: filters.siret ?? null,
     etablissement_reseaux: filters.reseau?.nom ?? null,
   };
 
@@ -44,6 +45,7 @@ const useEffectifs = () => {
   const filtersContext = useFiltersContext();
 
   const searchRequestBody = buildSearchRequestBody(filtersContext.state);
+
   useEffect(() => {
     const fetchEffectifs = async () => {
       setLoading(true);

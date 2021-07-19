@@ -12,6 +12,7 @@ const ACTION_TYPES = {
   SET_CFA: "SET_CFA",
   SET_RESEAU: "SET_RESEAU",
   SET_FORMATION: "SET_FORMATION",
+  SET_SIRET: "SET_SIRET",
 };
 
 const filtersReducer = (state, action) => {
@@ -20,19 +21,22 @@ const filtersReducer = (state, action) => {
       return { ...state, date: action.value };
 
     case ACTION_TYPES.SET_REGION:
-      return { ...state, cfa: null, departement: null, region: action.value };
+      return { ...state, cfa: null, departement: null, siret: null, region: action.value };
 
     case ACTION_TYPES.SET_DEPARTEMENT:
-      return { ...state, cfa: null, region: null, departement: action.value };
+      return { ...state, cfa: null, region: null, siret: null, departement: action.value };
 
     case ACTION_TYPES.SET_FORMATION:
-      return { ...state, cfa: null, reseau: null, formation: action.value };
+      return { ...state, cfa: null, reseau: null, siret: null, formation: action.value };
 
     case ACTION_TYPES.SET_CFA:
-      return { ...state, reseau: null, formation: null, cfa: action.value };
+      return { ...state, reseau: null, formation: null, siret: null, cfa: action.value };
 
     case ACTION_TYPES.SET_RESEAU:
-      return { ...state, cfa: null, formation: null, reseau: action.value };
+      return { ...state, cfa: null, formation: null, siret: null, reseau: action.value };
+
+    case ACTION_TYPES.SET_SIRET:
+      return { ...state, siret: action.value };
 
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
@@ -48,6 +52,7 @@ export const FiltersProvider = ({ children }) => {
     formation: null,
     cfa: null,
     reseau: null,
+    siret: null,
   });
 
   const setters = {
@@ -57,6 +62,7 @@ export const FiltersProvider = ({ children }) => {
     setCfa: (cfa) => dispatch({ type: ACTION_TYPES.SET_CFA, value: cfa }),
     setReseau: (reseau) => dispatch({ type: ACTION_TYPES.SET_RESEAU, value: reseau }),
     setFormation: (formation) => dispatch({ type: ACTION_TYPES.SET_FORMATION, value: formation }),
+    setSiret: (siret) => dispatch({ type: ACTION_TYPES.SET_SIRET, value: siret }),
   };
 
   const contextValue = {
@@ -97,5 +103,6 @@ export const filtersPropTypes = {
       cfd: PropTypes.string.isRequired,
       libelle: PropTypes.string.isRequired,
     }),
+    siret: PropTypes.string,
   }).isRequired,
 };
