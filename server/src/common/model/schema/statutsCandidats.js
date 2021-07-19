@@ -109,7 +109,7 @@ const statutsCandidatsSchema = new Schema({
   },
   etablissement_reseaux: {
     type: [String],
-    default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
+    default: [],
     description: "Réseaux du CFA, s'ils existent",
   },
   etablissement_adresse: {
@@ -206,7 +206,7 @@ const statutsCandidatsSchema = new Schema({
   },
   periode_formation: {
     type: [Number],
-    default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
+    default: [],
     description: "Date debut & date de fin de la formation",
   },
   annee_formation: {

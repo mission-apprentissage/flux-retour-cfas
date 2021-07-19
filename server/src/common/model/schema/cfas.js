@@ -23,7 +23,7 @@ const cfasSchema = new Schema({
   },
   erps: {
     type: [String],
-    default: null,
+    default: [],
     description: "ERPs rattachés au CFA, s'ils existent",
   },
   reseaux: {

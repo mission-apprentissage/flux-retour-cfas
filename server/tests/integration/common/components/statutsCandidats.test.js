@@ -348,7 +348,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
       assert.strictEqual(foundAdded.updated_at, null);
       assert.strictEqual(foundAdded.annee_formation, statutsTestUpdate[3].annee_formation);
-      assert.deepStrictEqual(foundAdded.periode_formation, statutsTestUpdate[3].periode_formation);
+      assert.strictEqual(foundAdded.periode_formation.length, 0);
 
       // Check updated
       assert.strictEqual(updated.length, 3);
@@ -994,7 +994,7 @@ integrationTests(__filename, () => {
       // Check uai & reseaux in created statut
       const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
       assert.deepStrictEqual(siret_etablissement_valid, false);
-      assert.deepStrictEqual(etablissement_reseaux, undefined);
+      assert.deepStrictEqual(etablissement_reseaux.length, 0);
     });
 
     it("Vérifie qu'à la création d'un statut avec un uai valid on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
@@ -1038,7 +1038,7 @@ integrationTests(__filename, () => {
       // Check uai & reseaux in created statut
       const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
       assert.deepStrictEqual(uai_etablissement_valid, false);
-      assert.deepStrictEqual(etablissement_reseaux, undefined);
+      assert.deepStrictEqual(etablissement_reseaux.length, 0);
     });
 
     it("Vérifie qu'à la création d'un statut avec un CFD valide on crée la formation correspondante si elle n'existe pas", async () => {
