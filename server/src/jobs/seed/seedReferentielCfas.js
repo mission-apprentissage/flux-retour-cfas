@@ -70,6 +70,8 @@ const createCfaFromStatutCandidat = async (cfas, statutForCfa) => {
   await new Cfa({
     uai: statutForCfa.uai_etablissement,
     siret: statutForCfa.siret_etablissement_valid ? statutForCfa.siret_etablissement : null,
+    siret_responsable: (await cfas.getSiretNatureFromAnnuaire(statutForCfa.siret_etablissement))?.responsable,
+    siret_formateur: (await cfas.getSiretNatureFromAnnuaire(statutForCfa.siret_etablissement))?.formateur,
     nom: statutForCfa.nom_etablissement.trim() ?? null,
     branchement_tdb: true,
     source_seed_cfa: "StatutsCandidats",
@@ -92,6 +94,8 @@ const updateCfaFromStatutCandidat = async (cfas, idCfa, statutForCfa) => {
         uai: statutForCfa.uai_etablissement,
         nom: statutForCfa.nom_etablissement.trim() ?? null,
         siret: statutForCfa.siret_etablissement_valid ? statutForCfa.siret_etablissement : null,
+        siret_responsable: (await cfas.getSiretNatureFromAnnuaire(statutForCfa.siret_etablissement))?.responsable,
+        siret_formateur: (await cfas.getSiretNatureFromAnnuaire(statutForCfa.siret_etablissement))?.formateur,
         branchement_tdb: true,
         source_seed_cfa: "StatutsCandidats",
         erps: [statutForCfa.source],

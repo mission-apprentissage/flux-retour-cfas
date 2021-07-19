@@ -1,10 +1,11 @@
-const { StatutCandidat: StatutCandidatModel } = require("../model");
+const { StatutCandidat: StatutCandidatModel, CfaAnnuaire } = require("../model");
 
 module.exports = () => ({
   searchCfas,
   getCfaNameByUai,
   getCfaFirstTransmissionDateFromUai,
   getCfaFirstTransmissionDateFromSiret,
+  getSiretNatureFromAnnuaire,
 });
 
 const SEARCH_RESULTS_LIMIT = 100;
@@ -93,4 +94,14 @@ const getCfaFirstTransmissionDateFromSiret = async (siret) => {
   return historiqueDatesStatutsCandidatsWithSiret.length > 0
     ? historiqueDatesStatutsCandidatsWithSiret[0].created_at
     : null;
+};
+
+/**
+ * Identify from a siret in cfasAnnuaire if cfa is responsable and / or formateur
+ * @param {*} siret
+ * @returns
+ */
+const getSiretNatureFromAnnuaire = async (siret) => {
+  const cfaInAnnuaireFromSiret = await CfaAnnuaire.findOne({ siret: siret }).lean();
+  return { responsable: cfaInAnnuaireFromSiret?.responsable, formateur: cfaInAnnuaireFromSiret?.formateur };
 };

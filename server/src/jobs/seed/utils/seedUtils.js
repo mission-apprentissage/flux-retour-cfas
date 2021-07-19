@@ -5,6 +5,8 @@ const { createRandomStatutsCandidatsList } = require("../../../../tests/data/ran
 const { User } = require("../../../common/model/index");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
+const fs = require("fs-extra");
+const ovhStorageManager = require("../../../common/utils/ovhStorageManager");
 
 const seedUsers = async (usersModule) => {
   const users = Object.values(config.users);
@@ -57,7 +59,22 @@ const buildCfasFromCsvAndExcludedFile = async (referenceFilePath, excludedFilePa
   return [];
 };
 
+/**
+ * Télécharge le fichier depuis OvhStorage si non présent
+ * @param {*} downloadDestinationFilePath
+ * @param {*} referenceFilePath
+ */
+const downloadIfNeeded = async (downloadDestinationFilePath, referenceFilePath) => {
+  if (!fs.existsSync(referenceFilePath)) {
+    const storageMgr = await ovhStorageManager();
+    await storageMgr.downloadFileTo(downloadDestinationFilePath, referenceFilePath);
+  } else {
+    logger.info(`File ${referenceFilePath} already present.`);
+  }
+};
+
 module.exports = {
+  downloadIfNeeded,
   seedUsers,
   seedSample,
   seedRandomizedSample,
