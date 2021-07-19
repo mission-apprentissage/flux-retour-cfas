@@ -102,7 +102,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
           reseaux: cfaInReferentiel?.reseaux ?? [],
           domainesMetiers: cfaInReferentiel?.metiers ?? [],
           uai: cfaFound.uai_etablissement,
-          siret: cfaFound.siret_etablissement,
+          sirets: cfaInReferentiel?.sirets,
           adresse: cfaFound.etablissement_adresse,
         });
       }

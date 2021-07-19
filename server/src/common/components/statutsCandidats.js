@@ -104,11 +104,9 @@ const updateStatut = async (existingItemId, toUpdate) => {
 };
 
 const createStatutCandidat = async (itemToCreate) => {
-  // if statut candidat établissement has a VALID uai or siret, try to retrieve information in Referentiel CFAs
-  const etablissementInReferentielCfaFromSiretOrUai =
-    (validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement }))) ||
-    (validateSiret(itemToCreate.siret_etablissement) &&
-      (await Cfa.findOne({ sirets: { $in: [itemToCreate.siret_etablissement] } })));
+  // if statut candidat établissement has a VALID uai try to retrieve information in Referentiel CFAs
+  const etablissementInReferentielCfaFromUai =
+    validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement }));
 
   // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
   if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {
@@ -152,8 +150,8 @@ const createStatutCandidat = async (itemToCreate) => {
     source: itemToCreate.source,
 
     // add network of etablissement if found in ReferentielCfa
-    ...(etablissementInReferentielCfaFromSiretOrUai
-      ? { etablissement_reseaux: etablissementInReferentielCfaFromSiretOrUai.reseaux }
+    ...(etablissementInReferentielCfaFromUai
+      ? { etablissement_reseaux: etablissementInReferentielCfaFromUai.reseaux }
       : {}),
   });
   return toAdd.save();

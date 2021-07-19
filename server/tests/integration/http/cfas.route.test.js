@@ -86,7 +86,7 @@ httpTests(__filename, ({ startServer }) => {
   });
 
   describe("GET /cfas/:uai", () => {
-    it("Vérifie qu'on peut récupérer les informations d'un CFA via son SIRET", async () => {
+    it("Vérifie qu'on peut récupérer les informations d'un CFA via son UAI", async () => {
       const { httpClient } = await startServer();
 
       const nomTest = "TEST NOM";
@@ -109,7 +109,7 @@ httpTests(__filename, ({ startServer }) => {
 
       // Add Cfa in referentiel
       const cfaReferenceToAdd = new Cfa({
-        siret: siretTest,
+        sirets: [siretTest],
         nom: nomTest,
         uai: uaiTest,
         reseaux: reseauxTest,
@@ -122,7 +122,7 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepEqual(response.data, {
         libelleLong: nomTest,
         uai: uaiTest,
-        siret: siretTest,
+        sirets: [siretTest],
         adresse: adresseTest,
         reseaux: reseauxTest,
         domainesMetiers: [],
@@ -133,14 +133,12 @@ httpTests(__filename, ({ startServer }) => {
       const { httpClient } = await startServer();
 
       const nomTest = "TEST NOM";
-      const siretTest = "77929544300013";
       const uaiTest = "0762232N";
       const adresseTest = "TEST ADRESSE";
       const reseauxTest = [];
 
       const cfaInfos = {
         nom_etablissement: nomTest,
-        siret_etablissement: siretTest,
         uai_etablissement: uaiTest,
         uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
@@ -158,7 +156,6 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepEqual(response.data, {
         libelleLong: nomTest,
         uai: uaiTest,
-        siret: siretTest,
         adresse: adresseTest,
         reseaux: reseauxTest,
         domainesMetiers: [],

@@ -4,6 +4,7 @@ import React from "react";
 
 import { Highlight } from "../../../../../common/components";
 import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
+import { pluralize } from "../../../../../common/utils/stringUtils";
 import withInfoCfaData from "./withInfoCfaData";
 
 const InfoCfaSection = ({ infosCfa, loading, error }) => {
@@ -38,7 +39,8 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
     content = (
       <>
         <Text color="white" fontSize="omega">
-          UAI&nbsp;:&nbsp;{infosCfa.uai} - SIRET&nbsp;:&nbsp;{infosCfa.siret}
+          UAI&nbsp;:&nbsp;{infosCfa.uai} - {infosCfa.sirets.length} {pluralize("SIRET", infosCfa.sirets.length, "S")}
+          &nbsp;pour cet organisme &nbsp;:&nbsp;
         </Text>
         <Heading color="white" fontSize="gamma" marginTop="1w">
           {infosCfa.libelleLong}
@@ -76,7 +78,7 @@ const InfoCfaSection = ({ infosCfa, loading, error }) => {
 
 InfoCfaSection.propTypes = {
   infosCfa: PropTypes.shape({
-    siret: PropTypes.string.isRequired,
+    sirets: PropTypes.arrayOf(PropTypes.string).isRequired,
     libelleLong: PropTypes.string.isRequired,
     reseaux: PropTypes.arrayOf(PropTypes.string).isRequired,
     domainesMetiers: PropTypes.arrayOf(PropTypes.string).isRequired,
