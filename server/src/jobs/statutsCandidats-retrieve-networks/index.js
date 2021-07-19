@@ -35,12 +35,15 @@ const retrieveNetworks = async () => {
   await asyncForEach(cfasWithReseaux, async (cfaReferentiel) => {
     nbHandled++;
 
+    // TODO
     // Si siret fourni on update les statuts pour ce siret
-    if (cfaReferentiel.siret) {
-      // Recupération des statutsCandidats pour ce siret
-      const statutsForSiret = await StatutCandidat.find({ siret_etablissement: cfaReferentiel.siret }).lean();
-      if (statutsForSiret) {
-        await updateNetworksForStatuts(statutsForSiret, cfaReferentiel);
+    if (cfaReferentiel.sirets) {
+      // Recupération des statutsCandidats pour ces sirets
+      const statutsForSirets = await StatutCandidat.find({
+        siret_etablissement: { $in: [cfaReferentiel.sirets] },
+      }).lean();
+      if (statutsForSirets) {
+        await updateNetworksForStatuts(statutsForSirets, cfaReferentiel);
       }
     } else {
       // Sinon si uai fourni on update les statuts pour cet uai

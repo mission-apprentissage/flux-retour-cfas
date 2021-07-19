@@ -8,7 +8,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { Cfa, StatutCandidat } = require("../../common/model");
 const { jobNames, reseauxCfas } = require("../../common/model/constants/");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
-const { getMetiersBySiret } = require("../../common/apis/apiLba");
+const { getMetiersBySirets } = require("../../common/apis/apiLba");
 const { sleep } = require("../../common/utils/miscUtils");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -47,17 +47,24 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
     loadingBar.update(nbUaiHandled);
     nbUaiHandled++;
 
-    // Gets statut for UAI
+    // Gets statuts & sirets for UAI
     const statutForUai = await StatutCandidat.findOne({
       uai_etablissement: currentUai,
     });
+    const allSiretsForUai = await StatutCandidat.distinct("siret_etablissement", {
+      uai_etablissement: currentUai,
+      siret_etablissement_valid: true,
+    });
+
     const cfaExistant = await Cfa.findOne({ uai: currentUai }).lean();
 
     // Create or update CFA
-    if (cfaExistant) {
-      await updateCfaFromStatutCandidat(cfas, cfaExistant._id, statutForUai);
-    } else {
-      await createCfaFromStatutCandidat(cfas, statutForUai);
+    if (statutForUai) {
+      if (cfaExistant) {
+        await updateCfaFromStatutCandidat(cfas, cfaExistant._id, statutForUai, allSiretsForUai);
+      } else {
+        await createCfaFromStatutCandidat(cfas, statutForUai, allSiretsForUai);
+      }
     }
   });
 
@@ -68,10 +75,10 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
  * Create cfa from statut
  * @param {*} statutForCfa
  */
-const createCfaFromStatutCandidat = async (cfas, statutForCfa) => {
+const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
   await new Cfa({
     uai: statutForCfa.uai_etablissement,
-    siret: statutForCfa.siret_etablissement_valid ? statutForCfa.siret_etablissement : null,
+    sirets: allSirets,
     nom: statutForCfa.nom_etablissement.trim() ?? null,
     branchement_tdb: true,
     source_seed_cfa: "StatutsCandidats",
@@ -86,14 +93,14 @@ const createCfaFromStatutCandidat = async (cfas, statutForCfa) => {
  * Update cfa from statut
  * @param {*} statutForCfa
  */
-const updateCfaFromStatutCandidat = async (cfas, idCfa, statutForCfa) => {
+const updateCfaFromStatutCandidat = async (cfas, idCfa, statutForCfa, allSirets) => {
   await Cfa.findOneAndUpdate(
     { _id: idCfa },
     {
       $set: {
         uai: statutForCfa.uai_etablissement,
         nom: statutForCfa.nom_etablissement.trim() ?? null,
-        siret: statutForCfa.siret_etablissement_valid ? statutForCfa.siret_etablissement : null,
+        sirets: allSirets,
         branchement_tdb: true,
         source_seed_cfa: "StatutsCandidats",
         erps: [statutForCfa.source],
@@ -134,7 +141,7 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier, encoding }) => {
     loadingBar.update(nbCfasHandled);
 
     if (currentCfa.siret) {
-      const cfaForSiret = await Cfa.findOne({ siret: `${currentCfa.siret}` });
+      const cfaForSiret = await Cfa.findOne({ sirets: { $in: [currentCfa.siret] } });
       if (cfaForSiret) {
         // Update if needed
         await updateCfaFromNetwork(cfaForSiret, currentCfa, nomReseau, nomFichier);
@@ -192,7 +199,7 @@ const addCfaFromNetwork = async (currentCfa, nomReseau, nomFichier) => {
   const cfaToAdd = new Cfa({
     nom: currentCfa.nom?.trim(),
     noms_cfa: [currentCfa.nom?.trim()],
-    siret: currentCfa.siret ? currentCfa.siret?.replace(/(\s|\.)/g, "") : null, //if siret exists and escaping spaces and dots makes it valid
+    sirets: currentCfa.siret ? [currentCfa.siret?.replace(/(\s|\.)/g, "")] : null, //if siret exists and escaping spaces and dots makes it valid
     siren: currentCfa.siren ? currentCfa.siren?.replace(/(\s|\.)/g, "") : null, //if siren exists and escaping spaces and dots makes it valid
     uai: currentCfa.uai ?? null,
     emails_contact: [currentCfa.email_contact] ?? null,
@@ -209,28 +216,32 @@ const addCfaFromNetwork = async (currentCfa, nomReseau, nomFichier) => {
  * Seed des métiers dans la collection CFAs
  */
 const seedMetiersFromLbaApi = async () => {
-  const allCfasWithSiret = await Cfa.find({ siret: { $nin: [null, ""] } });
+  const allCfasWithSirets = await Cfa.find({ sirets: { $nin: [null, ""] } });
 
-  logger.info(`Seeding Metiers to CFAs from ${allCfasWithSiret.length} cfas found with siret`);
+  logger.info(`Seeding Metiers to CFAs from ${allCfasWithSirets.length} cfas found with siret`);
 
-  loadingBar.start(allCfasWithSiret.length, 0);
+  loadingBar.start(allCfasWithSirets.length, 0);
   let nbHandled = 0;
 
-  await asyncForEach(allCfasWithSiret, async (currentCfaWithSiret) => {
+  await asyncForEach(allCfasWithSirets, async (currentCfaWithSiret) => {
     loadingBar.update(nbHandled);
     nbHandled++;
 
-    const metiersFromSiret = await getMetiersBySiret(currentCfaWithSiret.siret);
-    await sleep(100); // Delay for LBA Api quota
+    // Build metiers list for all sirets for currentCfa
+    if (currentCfaWithSiret.sirets.length > 0) {
+      const metiersFromSirets = await getMetiersBySirets(currentCfaWithSiret.sirets);
+      await sleep(100); // Delay for LBA Api quota
 
-    await Cfa.findOneAndUpdate(
-      { _id: currentCfaWithSiret._id },
-      {
-        $set: {
-          metiers: metiersFromSiret?.metiers,
-        },
-      }
-    );
+      // Update metiers list
+      await Cfa.findOneAndUpdate(
+        { _id: currentCfaWithSiret._id },
+        {
+          $set: {
+            metiers: metiersFromSirets?.metiers,
+          },
+        }
+      );
+    }
   });
 
   loadingBar.stop();

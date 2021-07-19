@@ -108,7 +108,7 @@ const createStatutCandidat = async (itemToCreate) => {
   const etablissementInReferentielCfaFromSiretOrUai =
     (validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement }))) ||
     (validateSiret(itemToCreate.siret_etablissement) &&
-      (await Cfa.findOne({ siret: itemToCreate.siret_etablissement })));
+      (await Cfa.findOne({ sirets: { $in: [itemToCreate.siret_etablissement] } })));
 
   // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
   if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {

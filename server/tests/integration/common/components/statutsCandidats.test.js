@@ -961,7 +961,7 @@ integrationTests(__filename, () => {
 
       // Create sample cfa in referentiel
       const referenceCfa = new Cfa({
-        siret: validSiret,
+        sirets: [validSiret],
         reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
@@ -984,7 +984,7 @@ integrationTests(__filename, () => {
 
       // Create sample cfa in referentiel
       const referenceCfa = new Cfa({
-        siret: invalidSiret,
+        sirets: [invalidSiret],
         reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();

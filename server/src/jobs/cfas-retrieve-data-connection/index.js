@@ -20,6 +20,7 @@ runScript(async () => {
 /**
  * Parse tous les CFAs et vérifie s'il existe des données dans les statuts pour ce CFA
  * Si données trouvé update le champ branchement_flux_cfa_erp
+ * Se base sur l'uai de l'établissement
  */
 const retrieveDataConnections = async () => {
   // Parse tous les CFAs du référentiel
@@ -33,11 +34,11 @@ const retrieveDataConnections = async () => {
   await asyncForEach(allCfas, async (cfaReferentiel) => {
     nbHandled++;
 
-    // Si siret fourni on cherche les statuts pour ce siret
-    if (cfaReferentiel.siret) {
-      // Vérification d'existence de statutsCandidats pour ce siret
-      const statutsForSiret = await StatutCandidat.exists({ siret_etablissement: cfaReferentiel.siret });
-      if (statutsForSiret) {
+    // Si uai fourni on update les statuts pour cet uai
+    if (cfaReferentiel.uai) {
+      // Vérification d'existence de statutsCandidats pour cet uai
+      const statutsForUai = await StatutCandidat.exists({ uai_etablissement: cfaReferentiel.uai });
+      if (statutsForUai) {
         await Cfa.findByIdAndUpdate(
           cfaReferentiel._id,
           {
@@ -45,21 +46,6 @@ const retrieveDataConnections = async () => {
           },
           { new: true }
         );
-      }
-    } else {
-      // Sinon si uai fourni on update les statuts pour cet uai
-      if (cfaReferentiel.uai) {
-        // Vérification d'existence de statutsCandidats pour cet uai
-        const statutsForUai = await StatutCandidat.exists({ uai_etablissement: cfaReferentiel.uai });
-        if (statutsForUai) {
-          await Cfa.findByIdAndUpdate(
-            cfaReferentiel._id,
-            {
-              $set: { branchement_flux_cfa_erp: true },
-            },
-            { new: true }
-          );
-        }
       }
     }
 

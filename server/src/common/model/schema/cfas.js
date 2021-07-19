@@ -6,10 +6,10 @@ const cfasSchema = new Schema({
     default: null,
     description: "Code uai de l'établissement",
   },
-  siret: {
-    type: String,
-    default: null,
-    description: "Siret de l'établissement",
+  sirets: {
+    type: [String],
+    default: [],
+    description: "Liste des sirets reliés à l'établissement",
   },
   nom: {
     type: String,
@@ -23,12 +23,12 @@ const cfasSchema = new Schema({
   },
   erps: {
     type: [String],
-    default: null,
+    default: [],
     description: "ERPs rattachés au CFA, s'ils existent",
   },
   reseaux: {
     type: [String],
-    default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
+    default: [],
     description: "Réseaux du CFA, s'ils existent",
   },
   region_nom: {
