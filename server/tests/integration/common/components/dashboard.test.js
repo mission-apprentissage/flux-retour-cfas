@@ -9,13 +9,6 @@ const {
 const { StatutCandidat } = require("../../../../src/common/model");
 const { codesStatutsCandidats, reseauxCfas } = require("../../../../src/common/model/constants");
 const dashboardComponent = require("../../../../src/common/components/dashboard");
-const {
-  getStatutsSamplesInscrits,
-  getStatutsSamplesApprentis,
-  getStatutsSamplesAbandons,
-  expectedDetailResultList,
-} = require("../../../data/effectifDetailSamples");
-const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 
 integrationTests(__filename, () => {
   const seedStatutsCandidats = async (statutsProps) => {
@@ -203,41 +196,147 @@ integrationTests(__filename, () => {
     });
   });
 
-  describe("getEffectifsParNiveauEtAnneeFormation pour une date et un centre de formation", () => {
-    const { getEffectifsParNiveauEtAnneeFormation } = dashboardComponent();
+  describe("getEffectifsCountByNiveauFormationAtDate", () => {
+    const { getEffectifsCountByNiveauFormationAtDate } = dashboardComponent();
 
-    it("Permet de récupérer les données détaillées d'effectifs pour une date et un cfa via son uai", async () => {
-      const uaiToTest = "0123456Z";
+    it("Permet de récupérer les effectifs par niveau_formation à une date donnée", async () => {
+      const filterQuery = { uai_etablissement: "0123456Z" };
 
-      // Build sample statuts
-      const statutsSamplesInscrits = await getStatutsSamplesInscrits(uaiToTest);
-      const statutsSamplesApprentis = await getStatutsSamplesApprentis(uaiToTest);
-      const statutsSamplesAbandons = await getStatutsSamplesAbandons(uaiToTest);
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "1" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "2" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "3" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: null });
+      await seedStatutsCandidats({ uai_etablissement: "0123456T", niveau_formation: "1" });
 
-      // Save all statuts to database
-      const sampleStatutsListToSave = [
-        ...statutsSamplesInscrits,
-        ...statutsSamplesApprentis,
-        ...statutsSamplesAbandons,
-      ];
-      await asyncForEach(sampleStatutsListToSave, async (currentStatut) => {
-        await currentStatut.save();
-      });
-
-      // Search params & expected results
       const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          niveau_formation: "1",
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+        {
+          niveau_formation: "2",
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+        {
+          niveau_formation: "3",
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+      ];
 
-      // Gets effectif data detail
-      const statutsFound = await getEffectifsParNiveauEtAnneeFormation(date, { uai_etablissement: uaiToTest });
+      const effectifsByNiveauFormation = await getEffectifsCountByNiveauFormationAtDate(date, filterQuery);
+      // we will sort results because we don't care of the order in the test
+      const sortByNiveauFormation = (a, b) => (Number(a.niveau_formation) > Number(b.niveau_formation) ? 1 : -1);
+      assert.deepEqual(effectifsByNiveauFormation.sort(sortByNiveauFormation), expectedResult);
+    });
+  });
 
-      assert.deepEqual(statutsFound.length, 2);
-      assert.deepEqual(statutsFound, expectedDetailResultList);
+  describe("getEffectifsCountByAnneeFormationAtDate", () => {
+    const { getEffectifsCountByAnneeFormationAtDate } = dashboardComponent();
 
-      // Check for bad uai
-      const badUai = "99999999900999";
-      const statutsBadUai = await getEffectifsParNiveauEtAnneeFormation(date, { uai_etablissement: badUai });
-      assert.notDeepEqual(statutsBadUai.length, 2);
-      assert.notDeepEqual(statutsBadUai, expectedDetailResultList);
+    it("Permet de récupérer les effectifs par annee_formation à une date donnée", async () => {
+      const filterQuery = { uai_etablissement: "0123456Z" };
+
+      await seedStatutsCandidats({ ...filterQuery, annee_formation: 1 });
+      await seedStatutsCandidats({ ...filterQuery, annee_formation: 2 });
+      await seedStatutsCandidats({ ...filterQuery, annee_formation: 3 });
+      await seedStatutsCandidats({ ...filterQuery, annee_formation: null });
+      await seedStatutsCandidats({ uai_etablissement: "0123456T", annee_formation: 1 });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          annee_formation: 1,
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+        {
+          annee_formation: 2,
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+        {
+          annee_formation: 3,
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+      ];
+
+      const effectifsByAnneeFormation = await getEffectifsCountByAnneeFormationAtDate(date, filterQuery);
+      // we will sort results because we don't care of the order in the test
+      const sortByAnneeFormation = (a, b) => (a.annee_formation > b.annee_formation ? 1 : -1);
+      assert.deepEqual(effectifsByAnneeFormation.sort(sortByAnneeFormation), expectedResult);
+    });
+  });
+
+  describe("getEffectifsCountByFormationAtDate", () => {
+    const { getEffectifsCountByFormationAtDate } = dashboardComponent();
+
+    it("Permet de récupérer les effectifs par formation_cfd à une date donnée", async () => {
+      const filterQuery = { uai_etablissement: "0123456Z" };
+
+      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "a", formation_cfd: "77929544300013" });
+      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "a", formation_cfd: "77929544300013" });
+      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "b", formation_cfd: "77929544300014" });
+      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "c", formation_cfd: "77929544300015" });
+      await seedStatutsCandidats({ uai_etablissement: "0123456T", formation_cfd: "77929544300013" });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          formation_cfd: "77929544300013",
+          intitule: "a",
+          effectifs: {
+            apprentis: 10,
+            inscrits: 30,
+            abandons: 20,
+          },
+        },
+        {
+          formation_cfd: "77929544300014",
+          intitule: "b",
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+        {
+          formation_cfd: "77929544300015",
+          intitule: "c",
+          effectifs: {
+            apprentis: 5,
+            inscrits: 15,
+            abandons: 10,
+          },
+        },
+      ];
+
+      const effectifsByFormation = await getEffectifsCountByFormationAtDate(date, filterQuery);
+      // we will sort results because we don't care of the order in the test
+      const sortByFormation = (a, b) => (a.formation_cfd > b.formation_cfd ? 1 : -1);
+      assert.deepEqual(effectifsByFormation.sort(sortByFormation), expectedResult);
     });
   });
 

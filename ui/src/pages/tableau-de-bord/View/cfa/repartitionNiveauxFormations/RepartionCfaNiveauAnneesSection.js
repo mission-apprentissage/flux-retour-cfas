@@ -2,13 +2,11 @@ import { Heading } from "@chakra-ui/react";
 import React from "react";
 
 import { Section } from "../../../../../common/components";
-import RepartitionEffectifsParNiveauEtAnneeFormation from "../../../../../common/components/tables/RepartitionEffectifsParNiveauEtAnneeFormation";
+import RepartitionEffectifsParFormation from "../../../../../common/components/tables/RepartitionEffectifsParFormation";
 import { filtersPropTypes } from "../../../FiltersContext";
 import withRepartitionNiveauFormationInCfa from "./withRepartitionNiveauFormationInCfa";
 
-const RepartitionEffectifsCfaParNiveauEtAnneeFormation = withRepartitionNiveauFormationInCfa(
-  RepartitionEffectifsParNiveauEtAnneeFormation
-);
+const RepartitionEffectifsCfaParFormation = withRepartitionNiveauFormationInCfa(RepartitionEffectifsParFormation);
 
 const RepartionCfaNiveauAnneesSection = ({ filters }) => {
   return (
@@ -16,7 +14,7 @@ const RepartionCfaNiveauAnneesSection = ({ filters }) => {
       <Heading as="h3" textStyle="h3" marginBottom="2w">
         Répartition des effectifs par formations
       </Heading>
-      <RepartitionEffectifsCfaParNiveauEtAnneeFormation filters={filters} />
+      <RepartitionEffectifsCfaParFormation filters={filters} />
     </Section>
   );
 };

@@ -7,13 +7,6 @@ const {
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
 const { StatutCandidat } = require("../../../src/common/model");
-const {
-  getStatutsSamplesInscrits,
-  getStatutsSamplesApprentis,
-  getStatutsSamplesAbandons,
-  expectedDetailResultList,
-} = require("../../data/effectifDetailSamples");
-const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 
 httpTests(__filename, ({ startServer }) => {
   describe("/api/dashboard/etablissements-stats route", () => {
@@ -146,32 +139,38 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  describe("/api/dashboard/effectifs-par-niveau-et-annee-formation route", () => {
-    it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux/année de formation via API", async () => {
+  describe("/api/dashboard/effectifs-par-niveau-formation route", () => {
+    it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux de formation via API", async () => {
       const { httpClient } = await startServer();
-      const uaiTest = "0762232N";
+      const filterQuery = { etablissement_num_region: "84" };
 
-      // Build sample statuts
-      const statutsSamplesInscrits = await getStatutsSamplesInscrits(uaiTest);
-      const statutsSamplesApprentis = await getStatutsSamplesApprentis(uaiTest);
-      const statutsSamplesAbandons = await getStatutsSamplesAbandons(uaiTest);
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          niveau_formation: "1",
+        });
+        const toAdd = new StatutCandidat(randomStatut);
+        await toAdd.save();
+      }
 
-      // Save all statuts to database
-      const sampleStatutsListToSave = [
-        ...statutsSamplesInscrits,
-        ...statutsSamplesApprentis,
-        ...statutsSamplesAbandons,
-      ];
-      await asyncForEach(sampleStatutsListToSave, async (currentStatut) => {
-        await currentStatut.save();
+      const randomStatut = createRandomStatutCandidat({
+        ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        niveau_formation: "2",
       });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
 
-      const searchParams = `date=2020-10-10T00:00:00.000Z&uai_etablissement=${uaiTest}&page=1&limit=100`;
-      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-et-annee-formation?${searchParams}`);
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-formation?${searchParams}`);
 
       assert.equal(response.status, 200);
-      assert.equal(response.data.data.length, 2);
-      assert.deepStrictEqual(response.data.data, expectedDetailResultList);
+      assert.equal(response.data.length, 2);
+      assert.deepStrictEqual(response.data, [
+        { niveau_formation: "1", effectifs: { apprentis: 5, abandons: 0, inscrits: 0 } },
+        { niveau_formation: "2", effectifs: { apprentis: 1, abandons: 0, inscrits: 0 } },
+      ]);
     });
   });
 
