@@ -41,11 +41,9 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
   logger.info(`Seeding Referentiel CFAs from ${allUais.length} UAIs found in statutsCandidats`);
 
   loadingBar.start(allUais.length, 0);
-  let nbUaiHandled = 0;
 
   await asyncForEach(allUais, async (currentUai) => {
-    loadingBar.update(nbUaiHandled);
-    nbUaiHandled++;
+    loadingBar.increment();
 
     // Gets statut for UAI
     const statutForUai = await StatutCandidat.findOne({
@@ -126,12 +124,10 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier, encoding }) => {
 
   const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
   loadingBar.start(allCfasForNetwork.length, 0);
-  let nbCfasHandled = 0;
 
   // Parse all cfas in file
   await asyncForEach(allCfasForNetwork, async (currentCfa) => {
-    nbCfasHandled++;
-    loadingBar.update(nbCfasHandled);
+    loadingBar.increment();
 
     if (currentCfa.siret) {
       const cfaForSiret = await Cfa.findOne({ siret: `${currentCfa.siret}` });
@@ -214,11 +210,9 @@ const seedMetiersFromLbaApi = async () => {
   logger.info(`Seeding Metiers to CFAs from ${allCfasWithSiret.length} cfas found with siret`);
 
   loadingBar.start(allCfasWithSiret.length, 0);
-  let nbHandled = 0;
 
   await asyncForEach(allCfasWithSiret, async (currentCfaWithSiret) => {
-    loadingBar.update(nbHandled);
-    nbHandled++;
+    loadingBar.increment();
 
     const metiersFromSiret = await getMetiersBySiret(currentCfaWithSiret.siret);
     await sleep(100); // Delay for LBA Api quota

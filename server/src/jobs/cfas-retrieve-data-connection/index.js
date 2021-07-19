@@ -28,11 +28,7 @@ const retrieveDataConnections = async () => {
   logger.info(`Searching for ${allCfas.length} CFAs in référentiel`);
   loadingBar.start(allCfas.length, 0);
 
-  let nbHandled = 0;
-
   await asyncForEach(allCfas, async (cfaReferentiel) => {
-    nbHandled++;
-
     // Si siret fourni on cherche les statuts pour ce siret
     if (cfaReferentiel.siret) {
       // Vérification d'existence de statutsCandidats pour ce siret
@@ -63,7 +59,7 @@ const retrieveDataConnections = async () => {
       }
     }
 
-    loadingBar.update(nbHandled);
+    loadingBar.increment();
   });
 
   loadingBar.stop();

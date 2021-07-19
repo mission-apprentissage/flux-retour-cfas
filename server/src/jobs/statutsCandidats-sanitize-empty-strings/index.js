@@ -33,12 +33,10 @@ const sanitizeStatutCandidatField = async (fieldName) => {
   const toSanitize = await StatutCandidat.find(findQuery).lean();
 
   loadingBar.start(toSanitize.length, 0);
-  let nbHandled = 0;
 
   // Update each document from "" to null
   await asyncForEach(toSanitize, async (currentStatutToClean) => {
-    nbHandled++;
-    loadingBar.update(nbHandled);
+    loadingBar.increment();
 
     // Update query
     const updateQuery = {};
