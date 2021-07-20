@@ -210,6 +210,7 @@ const textStyles = {
     fontWeight: "700",
     color: "grey.800",
     lineHeight: "1.4",
+    marginBottom: "3v",
   },
 };
 
