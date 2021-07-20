@@ -41,7 +41,6 @@ FormationFilter.propTypes = {
       libelle: PropTypes.string.isRequired,
     })
   ),
-  onSearchTermChange: PropTypes.func.isRequired,
   onFormationChange: PropTypes.func.isRequired,
   searchTerm: PropTypes.string,
   filters: filtersPropTypes.state,

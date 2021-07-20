@@ -24,11 +24,13 @@ const TableauDeBordViewSwitch = ({ effectifs, loading, error }) => {
   }
 
   if (filters.reseau) {
-    return <ReseauView effectifs={effectifs} filters={filters} reseau={filters.reseau.nom} />;
+    return <ReseauView effectifs={effectifs} loading={loading} filters={filters} reseau={filters.reseau.nom} />;
   }
 
   if (filters.formation) {
-    return <FormationView formationCfd={filters.formation.cfd} filters={filters} effectifs={effectifs} />;
+    return (
+      <FormationView formationCfd={filters.formation.cfd} loading={loading} filters={filters} effectifs={effectifs} />
+    );
   }
 
   return <GenericView filters={filters} effectifs={effectifs} loading={loading} error={error} />;

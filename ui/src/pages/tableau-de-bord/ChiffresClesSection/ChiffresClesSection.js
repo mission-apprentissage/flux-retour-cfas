@@ -30,10 +30,10 @@ const ChiffresClesSection = () => {
     content = <Skeleton startColor="grey.800" endColor="grey.200" width="25rem" height="1rem" />;
   } else if (data) {
     content = (
-      <>
+      <Text color="grey.800" marginLeft="3v" fontSize="gamma">
         <strong>{data.nbContrats} nouveaux contrats d&apos;apprentissages ont été signés</strong>, et{" "}
         <strong>{data.nbRuptures} ruptures enregistrées</strong>
-      </>
+      </Text>
     );
   }
 
@@ -44,9 +44,7 @@ const ChiffresClesSection = () => {
       </Heading>
       <Flex alignItems="center" marginTop="1w">
         <AnneeSelector options={ANNEE_OPTIONS} selectedAnnee={selectedAnnee} setSelectedAnnee={setSelectedAnnee} />
-        <Text color="grey.800" marginLeft="3v" fontSize="gamma">
-          {content}
-        </Text>
+        {content}
       </Flex>
     </Section>
   );
