@@ -39,7 +39,7 @@ const ChiffresClesSection = () => {
 
   return (
     <Section paddingY="2w">
-      <Heading as="h2" textStyle="h2">
+      <Heading as="h2" variant="h2">
         Chiffres clés
       </Heading>
       <Flex alignItems="center" marginTop="1w">

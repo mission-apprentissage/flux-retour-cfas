@@ -40,7 +40,7 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
           ))}
         </Stack>
       )}
-      <Heading as="h2" textStyle="h2" marginTop="4w">
+      <Heading as="h2" variant="h2" marginTop="4w">
         Candidats
       </Heading>
       <HStack spacing="2w" mt="3w">
@@ -64,7 +64,7 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
         />
       </HStack>
       <Box mt="8w">
-        <Heading as="h2" textStyle="h2">
+        <Heading as="h2" variant="h2">
           Statuts Candidats
         </Heading>
 
@@ -110,7 +110,7 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
         </HStack>
       </Box>
       <Box mt="8w">
-        <Heading as="h2" textStyle="h2">
+        <Heading as="h2" variant="h2">
           Données invalides
         </Heading>
 
@@ -160,7 +160,7 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
         </HStack>
       </Box>
       <Box mt="8w">
-        <Heading as="h2" textStyle="h2">
+        <Heading as="h2" variant="h2">
           Mises à jour statuts
         </Heading>
         <HStack spacing="2w" mt="3w">
@@ -197,7 +197,7 @@ const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
       </Box>
       {networksStats && (
         <Box mt="8w">
-          <Heading as="h2" textStyle="h2">
+          <Heading as="h2" variant="h2">
             Stats Statuts Réseaux
           </Heading>
           <HStack spacing="2w" mt="3w">

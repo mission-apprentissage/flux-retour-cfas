@@ -24,7 +24,7 @@ const AppHeader = () => {
       <Flex alignItems="center">
         <Logo />
         <Box marginLeft="5w">
-          <Heading as="h1" fontWeight="700" fontFamily="Marianne" color="grey.800" fontSize="gamma">
+          <Heading as="h1" variant="h1" fontSize="gamma">
             Données ouvertes de l&apos;apprentissage
           </Heading>
           <Text fontFamily="Marianne" color="grey.700" fontSize="zeta">
