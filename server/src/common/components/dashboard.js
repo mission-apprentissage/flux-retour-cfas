@@ -164,7 +164,11 @@ const getEffectifsCountByNiveauFormationAtDate = async (searchDate, filters = {}
  */
 const getEffectifsCountByFormationAtDate = async (searchDate, filters = {}) => {
   const projection = { formation_cfd: 1, libelle_long_formation: 1 };
-  const groupedBy = { _id: "$formation_cfd", libelle_long_formation: { $first: "$libelle_long_formation" } };
+  const groupedBy = {
+    _id: "$formation_cfd",
+    // we will send libelle_long_formation along with the grouped effectifs so we need to project it
+    libelle_long_formation: { $first: "$libelle_long_formation" },
+  };
   const effectifsByFormation = await getEffectifsCountAtDate(searchDate, filters, {
     groupedBy,
     projection,
@@ -234,6 +238,7 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
   };
   const groupedBy = {
     _id: "$uai_etablissement",
+    // we will send information about the organisme along with the grouped effectifs so we project it
     siret_etablissement: { $first: "$siret_etablissement" },
     nom_etablissement: { $first: "$nom_etablissement" },
   };
@@ -241,7 +246,7 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
     searchDate,
     {
       ...filters,
-      annee_formation: { $ne: null },
+      uai_etablissement: { $ne: null },
     },
     { groupedBy, projection }
   );
