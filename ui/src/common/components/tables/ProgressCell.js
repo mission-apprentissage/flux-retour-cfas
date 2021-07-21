@@ -15,7 +15,7 @@ const ProgressCell = ({ label, value }) => (
 );
 
 ProgressCell.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   value: PropTypes.number.isRequired,
 };
 
