@@ -1,4 +1,4 @@
-import { Heading } from "@chakra-ui/react";
+import { Box, Heading } from "@chakra-ui/react";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
 import React from "react";
 
@@ -17,37 +17,26 @@ const RepartitionEffectifsReseauParFormation = withRepartitionEffectifsReseauPar
 const RepartitionEffectifsReseau = ({ filters }) => {
   return (
     <Section paddingY="4w">
-      <Heading as="h3" textStyle="h3" marginBottom="2w">
+      <Heading as="h3" textStyle="h3">
         Répartition des effectifs
       </Heading>
-      <Tabs
-        variant="unstyled"
-        _selected={{ borderBottom: "3px solid", borderBottomColor: "bluefrance", color: "grey.800" }}
-      >
-        <TabList color="gray.600" marginBottom="2w">
-          <Tab
-            padding="0"
-            paddingY="1rem"
-            marginRight="1rem"
-            _selected={{ borderBottom: "3px solid", borderBottomColor: "bluefrance", color: "grey.800" }}
-          >
-            formations
+      <Tabs>
+        <TabList>
+          <Tab>
+            <Box as="i" className="ri-community-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
+            Organismes de formation
           </Tab>
-          <Tab
-            padding="0"
-            paddingY="1rem"
-            marginRight="1rem"
-            _selected={{ borderBottom: "3px solid", borderBottomColor: "bluefrance", color: "grey.800" }}
-          >
-            organismes de formation
+          <Tab>
+            <Box as="i" className="ri-book-mark-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
+            Formations
           </Tab>
         </TabList>
-        <TabPanels padding="0">
-          <TabPanel padding="0">
-            <RepartitionEffectifsReseauParFormation filters={filters} />
-          </TabPanel>
-          <TabPanel padding="0">
+        <TabPanels>
+          <TabPanel>
             <RepartitionEffectifsReseauParCfa filters={filters} />
+          </TabPanel>
+          <TabPanel>
+            <RepartitionEffectifsReseauParFormation filters={filters} />
           </TabPanel>
         </TabPanels>
       </Tabs>
