@@ -53,7 +53,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
   return (
     <Section paddingY="4w">
       <HStack marginBottom="2w">
-        <Heading as="h2" textStyle="h2">
+        <Heading as="h2" variant="h2">
           Effectifs
         </Heading>
         <PeriodeFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />

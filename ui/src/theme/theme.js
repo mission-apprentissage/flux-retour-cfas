@@ -192,28 +192,6 @@ const styles = {
   },
 };
 
-const textStyles = {
-  h1: {
-    fontSize: "alpha",
-    fontWeight: "700",
-    color: "grey.800",
-    lineHeight: "1.4",
-  },
-  h2: {
-    fontSize: "beta",
-    fontWeight: "700",
-    color: "grey.800",
-    lineHeight: "1.4",
-  },
-  h3: {
-    fontSize: "gamma",
-    fontWeight: "700",
-    color: "grey.800",
-    lineHeight: "1.4",
-    marginBottom: "3v",
-  },
-};
-
 const space = {
   0: "0",
   "1v": "4px",
@@ -232,6 +210,6 @@ const space = {
   "15w": "120px",
 };
 
-const theme = extendTheme({ fonts, colors, styles, fontSizes, textStyles, space, components });
+const theme = extendTheme({ fonts, colors, styles, fontSizes, space, components });
 
 export default theme;

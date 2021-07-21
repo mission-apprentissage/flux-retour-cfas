@@ -17,10 +17,10 @@ const RepartitionEffectifsTerritoireParNiveauFormation = withRepartitionEffectif
 const RepartitionEffectifsTerritoire = ({ filters }) => {
   return (
     <Section paddingY="4w">
-      <Heading as="h3" textStyle="h3">
+      <Heading as="h3" variant="h3">
         Répartition des effectifs
       </Heading>
-      <Tabs>
+      <Tabs isLazy lazyBehavior="keepMounted">
         <TabList>
           <Tab>
             <Box as="i" className="ri-community-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />

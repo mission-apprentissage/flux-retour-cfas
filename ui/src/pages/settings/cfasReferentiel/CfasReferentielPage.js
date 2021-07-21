@@ -34,7 +34,7 @@ const CfasReferentielPage = ({
   return (
     <Page>
       <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
-        <Heading as="h1" textStyle="h1">
+        <Heading as="h1" variant="h1">
           Référentiel des organismes de formation
         </Heading>
       </Section>
