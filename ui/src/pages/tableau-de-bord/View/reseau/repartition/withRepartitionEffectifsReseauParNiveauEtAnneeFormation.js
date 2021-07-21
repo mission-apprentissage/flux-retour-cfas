@@ -5,9 +5,7 @@ import { _get } from "../../../../../common/httpClient";
 import { omitNullishValues } from "../../../../../common/utils/omitNullishValues";
 import { filtersPropTypes } from "../../../FiltersContext";
 
-const DEFAULT_PAGE_SIZE = 10;
-
-const buildSearchParams = (filters, pageNumber) => {
+const buildSearchParams = (filters) => {
   const date = filters.date.toISOString();
 
   return queryString.stringify(
@@ -16,8 +14,6 @@ const buildSearchParams = (filters, pageNumber) => {
       etablissement_reseaux: filters.reseau.nom,
       etablissement_num_region: filters.region?.code ?? null,
       etablissement_num_departement: filters.departement?.code ?? null,
-      page: pageNumber,
-      limit: DEFAULT_PAGE_SIZE,
     })
   );
 };
@@ -26,15 +22,9 @@ const withRepartitionEffectifsReseauParNiveauEtAnneeFormation = (Component) => {
   const WithRepartitionEffectifsReseauParNiveauEtAnneeFormation = ({ filters, ...props }) => {
     const [repartitionEffectifs, setRepartitionEffectifs] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
     const [error, setError] = useState(null);
 
-    const searchParamsString = buildSearchParams(filters, page);
-
-    // if filters change, set page to 1
-    useEffect(() => {
-      setPage(1);
-    }, [JSON.stringify(filters)]);
+    const searchParamsString = buildSearchParams(filters);
 
     useEffect(() => {
       const fetchData = async () => {
@@ -42,7 +32,7 @@ const withRepartitionEffectifsReseauParNiveauEtAnneeFormation = (Component) => {
         setError(null);
 
         try {
-          const response = await _get(`/api/dashboard/effectifs-par-niveau-et-annee-formation?${searchParamsString}`);
+          const response = await _get(`/api/dashboard/effectifs-par-niveau-formation?${searchParamsString}`);
           setRepartitionEffectifs(response);
         } catch (error) {
           setError(error);
@@ -54,15 +44,7 @@ const withRepartitionEffectifsReseauParNiveauEtAnneeFormation = (Component) => {
       fetchData();
     }, [searchParamsString]);
 
-    return (
-      <Component
-        {...props}
-        repartitionEffectifs={repartitionEffectifs}
-        loading={loading}
-        error={error}
-        _setPage={setPage}
-      />
-    );
+    return <Component {...props} repartitionEffectifs={repartitionEffectifs} loading={loading} error={error} />;
   };
 
   WithRepartitionEffectifsReseauParNiveauEtAnneeFormation.propTypes = {

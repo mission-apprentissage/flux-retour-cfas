@@ -4,14 +4,14 @@ import React from "react";
 
 import { Section } from "../../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../../common/components/tables/RepartitionEffectifsParCfa";
-import RepartitionEffectifsParNiveauEtAnneeFormation from "../../../../../common/components/tables/RepartitionEffectifsParNiveauEtAnneeFormation";
+import RepartitionEffectifsParFormation from "../../../../../common/components/tables/RepartitionEffectifsParFormation";
 import { filtersPropTypes } from "../../../FiltersContext";
 import withRepartitionEffectifsReseauParCfa from "./withRepartitionEffectifsReseauParCfaData";
 import withRepartitionEffectifsReseauParNiveauEtAnneeFormation from "./withRepartitionEffectifsReseauParNiveauEtAnneeFormation";
 
 const RepartitionEffectifsReseauParCfa = withRepartitionEffectifsReseauParCfa(RepartitionEffectifsParCfa);
-const RepartitionEffectifsReseauParNiveauEtAnneeFormation = withRepartitionEffectifsReseauParNiveauEtAnneeFormation(
-  RepartitionEffectifsParNiveauEtAnneeFormation
+const RepartitionEffectifsReseauParFormation = withRepartitionEffectifsReseauParNiveauEtAnneeFormation(
+  RepartitionEffectifsParFormation
 );
 
 const RepartitionEffectifsReseau = ({ filters }) => {
@@ -44,7 +44,7 @@ const RepartitionEffectifsReseau = ({ filters }) => {
         </TabList>
         <TabPanels padding="0">
           <TabPanel padding="0">
-            <RepartitionEffectifsReseauParNiveauEtAnneeFormation filters={filters} />
+            <RepartitionEffectifsReseauParFormation filters={filters} />
           </TabPanel>
           <TabPanel padding="0">
             <RepartitionEffectifsReseauParCfa filters={filters} />

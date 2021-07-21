@@ -1,16 +1,9 @@
 const { codesStatutsCandidats } = require("../model/constants");
 const { StatutCandidat } = require("../model");
-const groupBy = require("lodash.groupby");
-const { asyncForEach } = require("../utils/asyncUtils");
-const { uniqueValues, paginate } = require("../utils/miscUtils");
-const sortBy = require("lodash.sortby");
-const omit = require("lodash.omit");
 const { isWithinInterval } = require("date-fns");
 const { countSubArrayInArray } = require("../utils/subArrayUtils");
 
 module.exports = () => ({
-  getEffectifsParNiveauEtAnneeFormation,
-  getPaginatedEffectifsParNiveauEtAnneeFormation,
   getEffectifsCountByCfaAtDate,
   getApprentisCountAtDate,
   getAbandonsCountAtDate,
@@ -18,6 +11,9 @@ module.exports = () => ({
   getJeunesSansContratCountAtDate,
   getNouveauxContratsCountInDateRange,
   getNbRupturesContratAtDate,
+  getEffectifsCountByNiveauFormationAtDate,
+  getEffectifsCountByFormationAtDate,
+  getEffectifsCountByAnneeFormationAtDate,
 });
 
 /*
@@ -83,332 +79,20 @@ const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) 
   ];
 };
 
-/**
- * Récupération des données effectifs avec niveaux / annee pour 2 dates et un siret donné
- * @param {Date} date
- * @param {*} filters
- */
-const getEffectifsParNiveauEtAnneeFormation = async (date, filters) => {
-  const [inscritsBeginDate, apprentisBeginDate, abandonsBeginDate] = await Promise.all([
-    getEffectifsDetailWithNiveauxForStatutAndDate(date, codesStatutsCandidats.inscrit, filters),
-    getEffectifsDetailWithNiveauxForStatutAndDate(date, codesStatutsCandidats.apprenti, filters),
-    getEffectifsDetailWithNiveauxForStatutAndDate(date, codesStatutsCandidats.abandon, filters),
-  ]);
-
-  const effectifs = {
-    inscrits: inscritsBeginDate,
-    apprentis: apprentisBeginDate,
-    abandons: abandonsBeginDate,
-  };
-
-  const listData = await buildEffectifByNiveauxList(effectifs);
-  return listData;
-};
-
-/**
- * Récupération des données paginées des effectifs avec niveaux / annee pour une date et des filtres
- * @param {Date} date
- * @param {{}} filters
- */
-const getPaginatedEffectifsParNiveauEtAnneeFormation = async (date, filters, page = 1, limit = 1000) => {
-  const listData = await getEffectifsParNiveauEtAnneeFormation(date, filters);
-  const flattenedData = await flattenEffectifDetails(listData);
-  const paginatedData = paginate(flattenedData, page, limit);
-  const regroupedData = regroupEffectifDetails(paginatedData.data, (item) => [
-    item.niveau.libelle,
-    item.niveau.apprentis,
-    item.niveau.inscrits,
-    item.niveau.abandons,
-  ]);
-
-  return {
-    page: paginatedData.page,
-    per_page: paginatedData.per_page,
-    pre_page: paginatedData.pre_page,
-    next_page: paginatedData.next_page,
-    total: paginatedData.total,
-    total_pages: paginatedData.total_pages,
-    data: regroupedData,
-  };
-};
-
-/**
- * Récupération des détail des effectifs avec niveaux / annee des formations
- * pour le statut (searchStatut) et la date souhaitée (searchDate)
- *
- * Même fonctionnement que getNbStatutsInHistoryForStatutAndDate mais on récupère tout l'objet pour détail
- * @param {*} searchDate
- * @param {*} searchStatut
- * @param {*} filters
- * @returns
- */
-const getEffectifsDetailWithNiveauxForStatutAndDate = async (searchDate, searchStatut, filters) => {
-  // Récupération des effectifs depuis paramètres
-  const statutsFound = await getEffectifsWithStatutApprenantAtDate(searchDate, searchStatut, filters);
-
-  // Récupération total des effectifs
-  const nbTotalStatuts = statutsFound.length;
-
-  // Regroupement par niveau & construction objet
-  const dataGroupedByNiveau = groupBy(statutsFound, "niveau_formation");
-  const dataDetail = Object.keys(dataGroupedByNiveau).map((niveau) => ({
-    niveau,
-    nbStatuts: dataGroupedByNiveau[niveau].length,
-    formations: dataGroupedByNiveau[niveau].map((item) => ({
-      libelle: item.libelle_court_formation,
-      annee: item.annee_formation,
-    })),
-  }));
-
-  return {
-    nbTotalStatuts,
-    dataDetail,
-  };
-};
-
-/**
- * Récupération des effectifs ayant le statut donné à la date donnée
- *
- * Principe :
- * 1. On filtre sur les params en entrée
- * 2. On filtre dans l'historique sur les élements ayant une date <= date recherchée
- * 3. On construit dans l'historique des statuts un champ diff_date_search = différence entre la date du statut de l'historique et la date recherchée
- * 4. On crée un champ statut_apprenant_at_date = statut dans l'historique avec le plus petit diff_date_search
- * 5. On garde uniquement les statuts correspondants à celui demandé
- */
-const getEffectifsWithStatutApprenantAtDate = async (searchDate, statutApprenant, filters = {}) => {
-  const projection = {
-    niveau_formation: 1,
-    annee_formation: 1,
-    libelle_court_formation: 1,
-  };
+const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, projection }) => {
   const aggregationPipeline = [
-    // Filtrage sur les filtres passées en paramètres
-    {
-      $match: filters,
-    },
+    { $match: filters },
     ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate, projection),
     {
       $match: {
-        "statut_apprenant_at_date.valeur_statut": statutApprenant,
+        "statut_apprenant_at_date.valeur_statut": {
+          $in: [codesStatutsCandidats.apprenti, codesStatutsCandidats.inscrit, codesStatutsCandidats.abandon],
+        },
       },
     },
-  ];
-
-  return StatutCandidat.aggregate(aggregationPipeline);
-};
-
-/**
- * Construction de la liste des détails des formations à partir des effectifs startDate / endDate
- * Principe :
- * On récupère la liste des niveaux uniques et des formations uniques dans la liste
- * Pour chaque niveau, chaque formation / année on construit la liste
- * @param {*} effectifs
- * @returns
- */
-const buildEffectifByNiveauxList = (effectifs) => {
-  const effectifByNiveauxList = [];
-
-  // Récup les niveaux présents dans les données
-  const uniquesNiveaux = getUniquesNiveauxFrom(effectifs).sort();
-
-  // Pour chaque niveau on construit un objet contenant les infos de niveaux + les formations rattachées
-  uniquesNiveaux.forEach((currentNiveau) => {
-    effectifByNiveauxList.push({
-      niveau: {
-        libelle: currentNiveau,
-        apprentis: buildStatutDataForNiveau(effectifs.apprentis, currentNiveau),
-        inscrits: buildStatutDataForNiveau(effectifs.inscrits, currentNiveau),
-        abandons: buildStatutDataForNiveau(effectifs.abandons, currentNiveau),
-      },
-      formations: buildFormationsDataForNiveau(effectifs, currentNiveau),
-    });
-  });
-
-  return effectifByNiveauxList;
-};
-
-/**
- * Construction d'un objet contenant les nbTotaux pour un statut et un niveau
- * @param {*} statutDataEndDate
- * @param {*} statutDataStartDate
- * @param {*} currentNiveau
- * @returns
- */
-const buildStatutDataForNiveau = (statutEffectifs, currentNiveau) => ({
-  nbTotal: statutEffectifs.nbTotalStatuts,
-  nbTotalForNiveau: statutEffectifs.dataDetail?.find((item) => item.niveau === currentNiveau)?.nbStatuts,
-});
-
-/**
- * Construction d'une liste d'objets contenant les données des formations pour un niveau
- * @param {*} endDateData
- * @param {*} startDateData
- * @param {*} currentNiveau
- * @returns
- */
-const buildFormationsDataForNiveau = (effectifsParStatut, currentNiveau) => {
-  const allFormationsForNiveau = [];
-
-  // Récupération des couples année - libellé uniques dans les données effectifs
-  const uniquesFormationsParAnneesForNiveau = getUniquesFormationsParAnneesForNiveau(effectifsParStatut, currentNiveau);
-
-  // Pour chaque couple année - libéllé on construit un objet avec les nb de statuts (apprentis / inscrits / abandons)
-  uniquesFormationsParAnneesForNiveau.forEach((currentFormationParAnnee) => {
-    allFormationsForNiveau.push({
-      libelle: currentFormationParAnnee.libelle,
-      annee: currentFormationParAnnee.annee,
-      apprentis: buildFormationsDataForStatut(
-        effectifsParStatut.apprentis.dataDetail,
-        currentFormationParAnnee,
-        currentNiveau
-      ),
-      inscrits: buildFormationsDataForStatut(
-        effectifsParStatut.inscrits.dataDetail,
-        currentFormationParAnnee,
-        currentNiveau
-      ),
-      abandons: buildFormationsDataForStatut(
-        effectifsParStatut.abandons.dataDetail,
-        currentFormationParAnnee,
-        currentNiveau
-      ),
-    });
-  });
-
-  return allFormationsForNiveau;
-};
-
-/**
- * Construction d'un objet contenant le nbTotal pour un couple formation - année et un niveau
- * @param {*} dataDetail
- * @param {*} currentFormationParAnnee
- * @param {*} currentNiveau
- * @returns
- */
-const buildFormationsDataForStatut = (dataDetail, currentFormationParAnnee, currentNiveau) => {
-  const matchingFormations = dataDetail
-    ?.find((x) => x.niveau === currentNiveau)
-    ?.formations.filter(
-      (x) => x.libelle === currentFormationParAnnee.libelle && x.annee === currentFormationParAnnee.annee
-    );
-
-  return {
-    nbTotalForNiveau: matchingFormations ? matchingFormations.length : 0,
-  };
-};
-
-/**
- * Récupération des niveaux des formations uniques dans les effectifs
- * @param {*} effectifs
- * @returns
- */
-const getUniquesNiveauxFrom = (effectifs) => {
-  return [
-    ...new Set(
-      Object.keys(effectifs)
-        .map((item) => ({
-          statut: item,
-          detail: effectifs[item].dataDetail,
-          nbTotal: effectifs[item].nbTotalStatuts,
-        }))
-        .flat()
-        .map((item) => item.detail)
-        .flat()
-        .map((item) => item.niveau)
-    ),
-  ];
-};
-
-/**
- * Récupération des couples "année-libellé" uniques parmi les données des effectifs
- * @param {*} endDateData
- * @param {*} currentNiveau
- * @returns
- */
-const getUniquesFormationsParAnneesForNiveau = (endDateData, currentNiveau) =>
-  sortBy(
-    uniqueValues(
-      endDateData.apprentis.dataDetail
-        .filter((x) => x.niveau === currentNiveau)
-        .concat(endDateData.inscrits.dataDetail.filter((x) => x.niveau === currentNiveau))
-        .concat(endDateData.abandons.dataDetail.filter((x) => x.niveau === currentNiveau))
-        .map((x) => x.formations)
-        .flat(),
-      ["annee", "libelle"]
-    ),
-    ["libelle", "annee"]
-  );
-
-const regroupEffectifDetails = (array, f) => {
-  var groups = {};
-  var niveaux = new Map();
-
-  array.forEach(function (o) {
-    var group = JSON.stringify(f(o));
-    groups[group] = groups[group] || [];
-    groups[group].push(omit(o, "niveau"));
-  });
-
-  array.forEach(function (o) {
-    var group = JSON.stringify(f(o));
-    niveaux.set(group, o.niveau);
-  });
-
-  return Object.keys(groups).map(function (group) {
-    return { niveau: niveaux.get(group), formations: groups[group] };
-  });
-};
-
-const flattenEffectifDetails = async (data) => {
-  const resultList = [];
-
-  await asyncForEach(data, async (currentDetail) => {
-    const formationUpgrade = currentDetail.formations.map((item) => ({
-      ...item,
-      ...{ niveau: currentDetail.niveau },
-    }));
-    resultList.push(formationUpgrade);
-  });
-
-  return resultList.flat();
-};
-
-/**
- * Récupération du nombre de statuts apprenants par cfa à une date donnée
- * @param {Date} searchDate
- * @param {*} filters
- * @returns [{
- *  siret_etablissement: string
- *  uai_etablissement: string
- *  nom_etablissement: string
- *  effectifs: {
- *    total: number
- *    apprentis: number
- *    inscrits: number
- *    abandons: number
- *  }
- * }]
- */
-const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
-  const projection = {
-    siret_etablissement: 1,
-    uai_etablissement: 1,
-    nom_etablissement: 1,
-  };
-  const aggregationPipeline = [
-    // Filtrage sur les filtres passées en paramètres
-    {
-      $match: {
-        ...filters,
-      },
-    },
-    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate, projection),
     {
       $group: {
-        _id: "$uai_etablissement",
-        siret_etablissement: { $first: "$siret_etablissement" },
-        nom_etablissement: { $first: "$nom_etablissement" },
+        ...groupedBy,
         apprentis: {
           $sum: {
             $cond: [{ $eq: ["$statut_apprenant_at_date.valeur_statut", codesStatutsCandidats.apprenti] }, 1, 0],
@@ -428,7 +112,144 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
     },
   ];
 
-  const effectifsByCfa = await StatutCandidat.aggregate(aggregationPipeline);
+  return StatutCandidat.aggregate(aggregationPipeline);
+};
+
+/**
+ * Récupération des effectifs par niveau de formation à une date donnée
+ * @param {Date} searchDate
+ * @param {*} filters
+ * @returns [{
+ *  niveau: string
+ *  effectifs: {
+ *    apprentis: number
+ *    inscrits: number
+ *    abandons: number
+ *  }
+ * }]
+ */
+const getEffectifsCountByNiveauFormationAtDate = async (searchDate, filters = {}) => {
+  const projection = { niveau_formation: 1 };
+  const groupedBy = { _id: "$niveau_formation" };
+  const effectifsByNiveauFormation = await getEffectifsCountAtDate(
+    searchDate,
+    {
+      ...filters,
+      niveau_formation: { $ne: null },
+    },
+    { projection, groupedBy }
+  );
+
+  return effectifsByNiveauFormation.map(({ _id, ...effectifs }) => {
+    return {
+      niveau_formation: _id,
+      effectifs,
+    };
+  });
+};
+
+/**
+ * Récupération des effectifs par formation à une date donnée
+ * @param {Date} searchDate
+ * @param {*} filters
+ * @returns [{
+ *  cfd: string
+ *  intitule: string
+ *  effectifs: {
+ *    apprentis: number
+ *    inscrits: number
+ *    abandons: number
+ *  }
+ * }]
+ */
+const getEffectifsCountByFormationAtDate = async (searchDate, filters = {}) => {
+  const projection = { formation_cfd: 1, libelle_long_formation: 1 };
+  const groupedBy = {
+    _id: "$formation_cfd",
+    // we will send libelle_long_formation along with the grouped effectifs so we need to project it
+    libelle_long_formation: { $first: "$libelle_long_formation" },
+  };
+  const effectifsByFormation = await getEffectifsCountAtDate(searchDate, filters, {
+    groupedBy,
+    projection,
+  });
+  return effectifsByFormation.map(({ _id, libelle_long_formation, ...effectifs }) => {
+    return {
+      formation_cfd: _id,
+      intitule: libelle_long_formation,
+      effectifs,
+    };
+  });
+};
+
+/**
+ * Récupération des effectifs par année de formation à une date donnée
+ * @param {Date} searchDate
+ * @param {*} filters
+ * @returns [{
+ *  annee_formation: string
+ *  effectifs: {
+ *    apprentis: number
+ *    inscrits: number
+ *    abandons: number
+ *  }
+ * }]
+ */
+const getEffectifsCountByAnneeFormationAtDate = async (searchDate, filters = {}) => {
+  const projection = { annee_formation: 1 };
+  const groupedBy = { _id: "$annee_formation" };
+  const effectifsByAnneeFormation = await getEffectifsCountAtDate(
+    searchDate,
+    {
+      ...filters,
+      annee_formation: { $ne: null },
+    },
+    { groupedBy, projection }
+  );
+
+  return effectifsByAnneeFormation.map(({ _id, ...effectifs }) => {
+    return {
+      annee_formation: _id,
+      effectifs,
+    };
+  });
+};
+
+/**
+ * Récupération du nombre de statuts apprenants par cfa à une date donnée
+ * @param {Date} searchDate
+ * @param {*} filters
+ * @returns [{
+ *  siret_etablissement: string
+ *  uai_etablissement: string
+ *  nom_etablissement: string
+ *  effectifs: {
+ *    apprentis: number
+ *    inscrits: number
+ *    abandons: number
+ *  }
+ * }]
+ */
+const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
+  const projection = {
+    siret_etablissement: 1,
+    uai_etablissement: 1,
+    nom_etablissement: 1,
+  };
+  const groupedBy = {
+    _id: "$uai_etablissement",
+    // we will send information about the organisme along with the grouped effectifs so we project it
+    siret_etablissement: { $first: "$siret_etablissement" },
+    nom_etablissement: { $first: "$nom_etablissement" },
+  };
+  const effectifsByCfa = await getEffectifsCountAtDate(
+    searchDate,
+    {
+      ...filters,
+      uai_etablissement: { $ne: null },
+    },
+    { groupedBy, projection }
+  );
 
   return effectifsByCfa.map(({ _id, siret_etablissement, nom_etablissement, ...counts }) => {
     return {
