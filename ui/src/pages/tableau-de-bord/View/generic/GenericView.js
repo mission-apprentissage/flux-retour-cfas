@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import ChiffresClesSection from "../../ChiffresClesSection/ChiffresClesSection";
 import { filtersPropTypes } from "../../FiltersContext";
 import IndicesProvenanceSection from "../../IndicesProvenanceSection";
 import { effectifsPropType } from "../../propTypes";
@@ -12,7 +11,6 @@ const GenericView = ({ effectifs, loading, filters }) => {
   return (
     <>
       <IndicesProvenanceSection />
-      <ChiffresClesSection />
       <EffectifsSection effectifs={effectifs} loading={loading} />
       <RepartitionEffectifsTerritoire filters={filters} />
     </>

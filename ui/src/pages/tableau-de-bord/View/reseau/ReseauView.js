@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Highlight } from "../../../../common/components";
-import ChiffresClesSection from "../../ChiffresClesSection/ChiffresClesSection";
 import { filtersPropTypes } from "../../FiltersContext";
 import IndicesProvenanceSection from "../../IndicesProvenanceSection";
 import { effectifsPropType } from "../../propTypes";
@@ -19,7 +18,6 @@ const ReseauView = ({ reseau, effectifs, filters, loading }) => {
         </Heading>
       </Highlight>
       <IndicesProvenanceSection />
-      <ChiffresClesSection />
       {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartitionEffectifsReseau filters={filters} />
     </>

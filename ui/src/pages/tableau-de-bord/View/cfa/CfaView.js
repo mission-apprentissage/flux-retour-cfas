@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import ChiffresClesSection from "../../ChiffresClesSection/ChiffresClesSection";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "../generic/EffectifsSection";
@@ -12,7 +11,6 @@ const CfaView = ({ cfaUai, filters, effectifs, loading }) => {
   return (
     <>
       <CfaSection filters={filters} cfaUai={cfaUai} />
-      <ChiffresClesSection />
       {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartionCfaNiveauAnneesSection filters={filters} />
     </>
