@@ -29,11 +29,7 @@ const retrieveDataConnections = async () => {
   logger.info(`Searching for ${allCfas.length} CFAs in référentiel`);
   loadingBar.start(allCfas.length, 0);
 
-  let nbHandled = 0;
-
   await asyncForEach(allCfas, async (cfaReferentiel) => {
-    nbHandled++;
-
     // Si uai fourni on update les statuts pour cet uai
     if (cfaReferentiel.uai) {
       // Vérification d'existence de statutsCandidats pour cet uai
@@ -49,7 +45,7 @@ const retrieveDataConnections = async () => {
       }
     }
 
-    loadingBar.update(nbHandled);
+    loadingBar.increment();
   });
 
   loadingBar.stop();

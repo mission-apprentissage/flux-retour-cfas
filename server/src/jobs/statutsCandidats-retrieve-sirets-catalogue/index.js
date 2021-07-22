@@ -33,11 +33,9 @@ runScript(async () => {
   ).map((item) => ({ uai: item._id.uai, cfd: item._id.cfd }));
 
   loadingBar.start(uaiCfdCouples.length, 0);
-  let nbHandled = 0;
 
   await asyncForEach(uaiCfdCouples, async (currentUaiCfd) => {
-    nbHandled++;
-    loadingBar.update(nbHandled);
+    loadingBar.increment();
 
     // Récupère les sirets depuis le catalogue à partir du CFD + UAI étant dans l'un des 3 types d'uais des formations
     const infoCatalog = await getFormations2021({

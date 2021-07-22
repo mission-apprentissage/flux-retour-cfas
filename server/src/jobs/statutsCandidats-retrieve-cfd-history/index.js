@@ -41,11 +41,8 @@ const retrieveCfdHistory = async (db) => {
 
   logger.info(`Searching for ${allCfds.length} CFD in statutsCandidats`);
   loadingBar.start(allCfds.length, 0);
-  let nbHandled = 0;
 
   await asyncForEach(allCfds, async (currentCfd) => {
-    nbHandled++;
-
     // Check cfd info from TCO lib
     const cfdInfo = await getCfdInfo(currentCfd);
 
@@ -59,7 +56,7 @@ const retrieveCfdHistory = async (db) => {
         }
       );
     }
-    loadingBar.update(nbHandled);
+    loadingBar.increment();
   });
 
   loadingBar.stop();

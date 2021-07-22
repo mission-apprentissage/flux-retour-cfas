@@ -13,6 +13,7 @@ module.exports = {
   JobEvent: getModel("jobEvents", true),
   DuplicateEvent: getModel("duplicatesEvents"),
   Cfa: getModel("cfas", true),
+  CfaAnnuaire: getModel("cfasAnnuaire"),
   CfaDataFeedback: getModel("cfaDataFeedback"),
   Formation: getModel("formations"),
   Log: getModel("logs"),
