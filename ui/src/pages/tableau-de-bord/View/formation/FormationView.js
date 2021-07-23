@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import ChiffresClesSection from "../../ChiffresClesSection/ChiffresClesSection";
 import { filtersPropTypes } from "../../FiltersContext";
 import IndicesProvenanceSection from "../../IndicesProvenanceSection";
 import { effectifsPropType } from "../../propTypes";
@@ -14,7 +13,6 @@ const FormationView = ({ formationCfd, filters, effectifs, loading }) => {
     <>
       <InfosFormationSection formationCfd={formationCfd} />
       <IndicesProvenanceSection />
-      <ChiffresClesSection />
       {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartitionFormationParCfa formationCfd={formationCfd} filters={filters} />
     </>
