@@ -167,7 +167,8 @@ httpTests(__filename, ({ startServer }) => {
 
       assert.equal(response.status, 200);
       assert.equal(response.data.length, 2);
-      assert.deepStrictEqual(response.data, [
+      const sortByNiveauFormation = (a, b) => (Number(a.niveau_formation) > Number(b.niveau_formation) ? 1 : -1);
+      assert.deepStrictEqual(response.data.sort(sortByNiveauFormation), [
         { niveau_formation: "1", effectifs: { apprentis: 5, abandons: 0, inscrits: 0 } },
         { niveau_formation: "2", effectifs: { apprentis: 1, abandons: 0, inscrits: 0 } },
       ]);
