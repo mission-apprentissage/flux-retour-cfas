@@ -2,6 +2,8 @@ import { Box, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { formatNumber } from "../../utils/stringUtils";
+
 const EffectifCard = ({ label, count, tooltipLabel }) => {
   const hasTooltip = Boolean(tooltipLabel);
   return (
@@ -14,7 +16,7 @@ const EffectifCard = ({ label, count, tooltipLabel }) => {
       height="6rem"
       minWidth="16rem"
     >
-      <strong>{count}</strong>
+      <strong>{formatNumber(count)}</strong>
       &nbsp;
       <span>{label}</span>
       {hasTooltip && (

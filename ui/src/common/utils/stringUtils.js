@@ -27,3 +27,8 @@ export const truncate = (string, size = 32) => {
 export const pluralize = (text, value, pluralCharacter = "s") => {
   return value > 1 ? `${text}${pluralCharacter}` : `${text}`;
 };
+
+export const formatNumber = (number) => {
+  if (!number) return number;
+  return Number(number).toLocaleString();
+};

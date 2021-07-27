@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Section from "../../common/components/Section/Section";
 import { _post } from "../../common/httpClient";
 import { omitNullishValues } from "../../common/utils/omitNullishValues";
+import { formatNumber } from "../../common/utils/stringUtils";
 import { useFiltersContext } from "./FiltersContext";
 
 const buildRequestBody = (filters) => {
@@ -47,7 +48,8 @@ const IndicesProvenanceSection = () => {
   if (totalOrganismes != null && !loading) {
     content = (
       <Text color="grey.600" fontWeight="400" fontSize="omega">
-        Les indices affichés sont calculés grâce aux {totalOrganismes} organismes qui ont transmis leurs données
+        Les indices affichés sont calculés grâce aux {formatNumber(totalOrganismes)} organismes qui ont transmis leurs
+        données
       </Text>
     );
   }
