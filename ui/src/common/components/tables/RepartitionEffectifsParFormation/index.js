@@ -7,7 +7,11 @@ import NiveauFormationRow from "./NiveauFormationRow";
 
 const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error }) => {
   return (
-    <Table headers={["Niveau", "apprentis", "apprenants sans contrat", "abandons"]} loading={loading} error={error}>
+    <Table
+      headers={["Niveau", "apprentis", "jeunes sans contrat", "rupturants", "abandons"]}
+      loading={loading}
+      error={error}
+    >
       <Tbody>
         {repartitionEffectifs
           ? repartitionEffectifs.map((data) => {
@@ -31,7 +35,8 @@ RepartitionEffectifsParFormation.propTypes = {
       niveauFormation: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
-        inscrits: PropTypes.number.isRequired,
+        jeunesSansContrat: PropTypes.number.isRequired,
+        rupturants: PropTypes.number.isRequired,
         abandons: PropTypes.number.isRequired,
       }).isRequired,
     }).isRequired

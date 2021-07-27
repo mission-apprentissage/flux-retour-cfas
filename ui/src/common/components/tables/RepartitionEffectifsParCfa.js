@@ -14,7 +14,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
       <Tbody>
         {repartitionEffectifsParCfa.map((item, index) => {
           const { uai_etablissement, nom_etablissement, effectifs } = item;
-          const total = effectifs.abandons + effectifs.apprentis + effectifs.inscrits;
+          const total = effectifs.abandons + effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants;
           return (
             <Tr key={"headerRow_" + index}>
               <Td color="grey.800">
@@ -22,7 +22,11 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 <Box fontSize="omega">UAI : {uai_etablissement}</Box>
               </Td>
               <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-              <ProgressCell label={effectifs.inscrits} value={getPercentage(effectifs.inscrits, total)} />
+              <ProgressCell
+                label={effectifs.jeunesSansContrat}
+                value={getPercentage(effectifs.jeunesSansContrat, total)}
+              />
+              <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
               <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
             </Tr>
           );
@@ -33,7 +37,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
 
   return (
     <Table
-      headers={["Nom de l'organisme", "apprentis", "apprenants sans contrat", "abandons"]}
+      headers={["Nom de l'organisme", "apprentis", "jeunes sans contrat", "rupturants", "abandons"]}
       loading={loading}
       error={error}
     >
@@ -49,7 +53,8 @@ RepartitionEffectifsParCfa.propTypes = {
       nom_etablissement: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
-        inscrits: PropTypes.number.isRequired,
+        jeunesSansContrat: PropTypes.number.isRequired,
+        rupturants: PropTypes.number.isRequired,
         abandons: PropTypes.number.isRequired,
       }).isRequired,
     }).isRequired
