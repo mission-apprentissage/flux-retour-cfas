@@ -67,12 +67,13 @@ const updateStatut = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
   const existingItem = await StatutCandidat.findById(existingItemId);
+  const dateMiseAJourStatut = toUpdate.date_metier_mise_a_jour_statut || new Date();
 
   // Check if maj statut is valid
   if (isMajStatutInvalid(existingItem.statut_apprenant, toUpdate.statut_apprenant)) {
     toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ko;
     toUpdate.erreur_mise_a_jour_statut = {
-      date_mise_a_jour_statut: new Date(),
+      date_mise_a_jour_statut: dateMiseAJourStatut,
       ancien_statut: existingItem.statut_apprenant,
       nouveau_statut_souhaite: toUpdate.statut_apprenant,
     };
@@ -89,7 +90,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
       {
         valeur_statut: toUpdate.statut_apprenant,
         position_statut: existingItem.historique_statut_apprenant.length + 1,
-        date_statut: new Date(),
+        date_statut: dateMiseAJourStatut,
       },
     ];
   }

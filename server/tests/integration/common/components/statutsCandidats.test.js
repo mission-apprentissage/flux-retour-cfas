@@ -803,6 +803,14 @@ integrationTests(__filename, () => {
       assert.strictEqual(updatedStatut.siret_etablissement, simpleStatutBadUpdate.siret_etablissement);
       assert.strictEqual(updatedStatut.statut_apprenant, simpleStatutBadUpdate.statut_apprenant);
       assert.strictEqual(updatedStatut.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ko);
+      assert.equal(
+        new Date(updatedStatut.date_metier_mise_a_jour_statut).getTime(),
+        new Date(simpleStatutBadUpdate.date_metier_mise_a_jour_statut).getTime()
+      );
+      assert.equal(
+        new Date(updatedStatut.erreur_mise_a_jour_statut.date_mise_a_jour_statut).getTime(),
+        new Date(simpleStatutBadUpdate.date_metier_mise_a_jour_statut).getTime()
+      );
       assert.notDeepStrictEqual(updatedStatut.erreur_mise_a_jour_statut, null);
       assert.notDeepStrictEqual(updatedStatut.updated_at, null);
     });
@@ -837,15 +845,23 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatut.historique_statut_apprenant[0].position_statut, 1);
 
       // Mise à jour du statut avec nouveau statut_apprenant
-      await updateStatut(createdStatut._id, { statut_apprenant: codesStatutsCandidats.abandon });
+      const updatePayload = {
+        statut_apprenant: codesStatutsCandidats.abandon,
+        date_metier_mise_a_jour_statut: new Date(),
+      };
+      await updateStatut(createdStatut._id, updatePayload);
 
       // Check value in db
       const found = await StatutCandidat.findById(createdStatut._id);
-      assert.strictEqual(found.historique_statut_apprenant.length, 2);
-      assert.strictEqual(found.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.strictEqual(found.historique_statut_apprenant[0].position_statut, 1);
-      assert.strictEqual(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
-      assert.strictEqual(found.historique_statut_apprenant[1].position_statut, 2);
+      assert.equal(found.historique_statut_apprenant.length, 2);
+      assert.equal(found.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(found.historique_statut_apprenant[0].position_statut, 1);
+      assert.equal(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
+      assert.equal(found.historique_statut_apprenant[1].position_statut, 2);
+      assert.equal(
+        found.historique_statut_apprenant[1].date_statut.getTime(),
+        updatePayload.date_metier_mise_a_jour_statut.getTime()
+      );
     });
 
     it("Vérifie qu'on met à jour updated_at après un update", async () => {
