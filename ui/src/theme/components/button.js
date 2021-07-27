@@ -55,6 +55,7 @@ export const Button = {
       border: "solid 1px",
       background: "transparent",
       borderColor: "bluefrance",
+      color: "bluefrance",
       _hover: {
         background: "grey.100",
       },
