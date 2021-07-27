@@ -6,7 +6,7 @@ const ovhStorageManager = require("../../common/utils/ovhStorageManager");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { Cfa, StatutCandidat } = require("../../common/model");
-const { jobNames, reseauxCfas } = require("../../common/model/constants/");
+const { jobNames, reseauxCfas, erps } = require("../../common/model/constants/");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySiret } = require("../../common/apis/apiLba");
 const { sleep } = require("../../common/utils/miscUtils");
@@ -18,6 +18,11 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  */
 runScript(async ({ cfas }) => {
   logger.info("Seeding referentiel CFAs");
+
+  // Clear all existing cfas
+  logger.info(`Clearing cfas collection...`);
+  await Cfa.deleteMany({});
+
   await seedCfasFromStatutsCandidatsUaisValid(cfas);
   await seedMetiersFromLbaApi();
 
@@ -134,8 +139,13 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier, encoding }) => {
     loadingBar.increment();
 
     if (currentCfa.siret) {
-      const cfaForSiret = await Cfa.findOne({ siret: `${currentCfa.siret}` });
+      const cfaForSiret = await Cfa.findOne({ siret: `${currentCfa.siret}` }).lean();
+
       if (cfaForSiret) {
+        // Handle AGRI - Without MFR
+        if (nomReseau === reseauxCfas.AGRI.nomReseau && cfaForSiret.erps.includes(erps.GESTI.nomErp.toLowerCase())) {
+          return;
+        }
         // Update if needed
         await updateCfaFromNetwork(cfaForSiret, currentCfa, nomReseau, nomFichier);
       } else {
@@ -143,8 +153,13 @@ const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier, encoding }) => {
       }
     } else if (currentCfa.uai) {
       // Gets cfas for UAI in referentiel
-      const cfaForUai = await Cfa.findOne({ uai: `${currentCfa.uai}` });
+      const cfaForUai = await Cfa.findOne({ uai: `${currentCfa.uai}` }).lean();
+
       if (cfaForUai) {
+        // Handle AGRI - Without MFR
+        if (nomReseau === reseauxCfas.AGRI.nomReseau && cfaForUai.erps.includes(erps.GESTI.nomErp.toLowerCase())) {
+          return;
+        }
         // Update if needed
         await updateCfaFromNetwork(cfaForUai, currentCfa, nomReseau, nomFichier);
       } else {
