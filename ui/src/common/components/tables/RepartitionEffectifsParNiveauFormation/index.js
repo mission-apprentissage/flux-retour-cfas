@@ -8,16 +8,25 @@ import Table from "../Table";
 
 const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading, error }) => {
   return (
-    <Table headers={["Niveau", "apprentis", "apprenants sans contrat", "abandons"]} loading={loading} error={error}>
+    <Table
+      headers={["Niveau", "apprentis", "jeunes sans contrat", "rupturants", "abandons"]}
+      loading={loading}
+      error={error}
+    >
       <Tbody>
         {repartitionEffectifs
           ? repartitionEffectifs.map(({ niveauFormation, effectifs }, index) => {
-              const total = effectifs.apprentis + effectifs.inscrits + effectifs.abandons;
+              const total =
+                effectifs.abandons + effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants;
               return (
                 <Tr key={niveauFormation + index}>
                   <Td color="grey.800">Niveau {niveauFormation}</Td>
                   <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-                  <ProgressCell label={effectifs.inscrits} value={getPercentage(effectifs.inscrits, total)} />
+                  <ProgressCell
+                    label={effectifs.jeunesSansContrat}
+                    value={getPercentage(effectifs.jeunesSansContrat, total)}
+                  />
+                  <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
                   <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
                 </Tr>
               );
@@ -34,7 +43,8 @@ RepartitionEffectifsParNiveauFormation.propTypes = {
       niveauFormation: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
-        inscrits: PropTypes.number.isRequired,
+        jeunesSansContrat: PropTypes.number.isRequired,
+        rupturants: PropTypes.number.isRequired,
         abandons: PropTypes.number.isRequired,
       }).isRequired,
     }).isRequired

@@ -8,7 +8,7 @@ import FormationRows from "./FormationRows";
 
 const NiveauFormationRow = ({ niveauFormation, effectifs }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const total = effectifs.apprentis + effectifs.inscrits + effectifs.abandons;
+  const total = effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
       <Tr background="galt">
@@ -19,7 +19,8 @@ const NiveauFormationRow = ({ niveauFormation, effectifs }) => {
           </Box>
         </Td>
         <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-        <ProgressCell label={effectifs.inscrits} value={getPercentage(effectifs.inscrits, total)} />
+        <ProgressCell label={effectifs.jeunesSansContrat} value={getPercentage(effectifs.jeunesSansContrat, total)} />
+        <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
         <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
       </Tr>
       {isOpen && <FormationRows niveauFormation={niveauFormation} />}
@@ -31,7 +32,8 @@ NiveauFormationRow.propTypes = {
   niveauFormation: PropTypes.string.isRequired,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
-    inscrits: PropTypes.number.isRequired,
+    rupturants: PropTypes.number.isRequired,
+    jeunesSansContrat: PropTypes.number.isRequired,
     abandons: PropTypes.number.isRequired,
   }).isRequired,
 };

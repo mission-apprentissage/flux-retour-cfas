@@ -17,7 +17,6 @@ export const displayEvolutionPercentage = (evolutionData) =>
     : `${roundToOne(evolutionData)}%`;
 
 export const toPrettyYearLabel = (year) => {
-  if (!year) return "N/A";
   return year === 1 ? `${year}ère année` : `${year}ème année`;
 };
 

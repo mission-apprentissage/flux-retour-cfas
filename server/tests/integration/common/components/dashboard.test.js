@@ -214,7 +214,8 @@ integrationTests(__filename, () => {
           niveau_formation: "1",
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -222,7 +223,8 @@ integrationTests(__filename, () => {
           niveau_formation: "2",
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -230,7 +232,8 @@ integrationTests(__filename, () => {
           niveau_formation: "3",
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -258,10 +261,20 @@ integrationTests(__filename, () => {
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResult = [
         {
+          annee_formation: null,
+          effectifs: {
+            apprentis: 5,
+            jeunesSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
           annee_formation: 1,
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -269,7 +282,8 @@ integrationTests(__filename, () => {
           annee_formation: 2,
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -277,7 +291,8 @@ integrationTests(__filename, () => {
           annee_formation: 3,
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -309,7 +324,8 @@ integrationTests(__filename, () => {
           intitule: "a",
           effectifs: {
             apprentis: 10,
-            inscrits: 30,
+            jeunesSansContrat: 30,
+            rupturants: 0,
             abandons: 20,
           },
         },
@@ -318,7 +334,8 @@ integrationTests(__filename, () => {
           intitule: "b",
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -327,7 +344,8 @@ integrationTests(__filename, () => {
           intitule: "c",
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -346,13 +364,11 @@ integrationTests(__filename, () => {
     it("Permet de récupérer les effectifs par CFA à une date donnée pour une formation", async () => {
       const filterQuery = { formation_cfd: "77929544300013" };
       const cfa1 = {
-        siret_etablissement: "00690630980544",
-        uai_etablissement: "0123456Z",
+        uai_etablissement: "0123456T",
         nom_etablissement: "CFA 1",
       };
       const cfa2 = {
-        siret_etablissement: "00690630980588",
-        uai_etablissement: "0123456T",
+        uai_etablissement: "012345Z",
         nom_etablissement: "CFA 2",
       };
       await seedStatutsCandidats({ ...filterQuery, ...cfa1 });
@@ -366,7 +382,8 @@ integrationTests(__filename, () => {
           ...cfa1,
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            jeunesSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -374,7 +391,8 @@ integrationTests(__filename, () => {
           ...cfa2,
           effectifs: {
             apprentis: 10,
-            inscrits: 30,
+            jeunesSansContrat: 30,
+            rupturants: 0,
             abandons: 20,
           },
         },
@@ -382,8 +400,8 @@ integrationTests(__filename, () => {
 
       const effectifsByCfa = await getEffectifsCountByCfaAtDate(date, filterQuery);
       // we will sort results because we don't care of the order in the test
-      const sortBySiret = (a, b) => Number(a.siret_etablissement) - Number(b.siret_etablissement);
-      assert.deepEqual(effectifsByCfa.sort(sortBySiret), expectedResult);
+      const sortByUai = (a, b) => (a.uai_etablissement > b.uai_etablissement ? 1 : -1);
+      assert.deepEqual(effectifsByCfa.sort(sortByUai), expectedResult);
     });
   });
 
@@ -464,43 +482,58 @@ integrationTests(__filename, () => {
         createRandomStatutCandidat({
           etablissement_num_region: "199",
           historique_statut_apprenant: [
-            { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
-            { valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
+            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
           ],
         }),
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
-            { valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
-            { valeur_statut: 3, date_statut: new Date("2020-11-01T00:00:00") },
+            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
+            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-11-01T00:00:00") },
           ],
-        }),
-        // not a rupturant
-        createRandomStatutCandidat({
-          historique_statut_apprenant: [{ valeur_statut: 1, date_statut: new Date("2020-03-22T00:00:00") }],
         }),
         // not a rupturant
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { valeur_statut: 1, date_statut: new Date("2020-04-21T00:00:00") },
-            { valeur_statut: 2, date_statut: new Date("2020-04-24T00:00:00") },
-            { valeur_statut: 3, date_statut: new Date("2020-04-30T00:00:00") },
+            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-03-22T00:00:00") },
+          ],
+        }),
+        // not a rupturant
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-04-21T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-04-24T00:00:00") },
+            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-04-30T00:00:00") },
           ],
         }),
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { valeur_statut: 3, date_statut: new Date("2020-07-29T00:00:00") },
-            { valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
-            { valeur_statut: 0, date_statut: new Date("2020-12-07T00:00:00") },
+            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-07-29T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
+            { position_statut: 3, valeur_statut: 0, date_statut: new Date("2020-12-07T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-07-29T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
+            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-12-07T00:00:00") },
+            { position_statut: 4, valeur_statut: 2, date_statut: new Date("2020-12-21T00:00:00") },
           ],
         }),
         // not a rupturant
         createRandomStatutCandidat({
-          historique_statut_apprenant: [{ valeur_statut: 2, date_statut: new Date("2020-02-01T00:00:00") }],
+          historique_statut_apprenant: [
+            { position_statut: 1, valeur_statut: 2, date_statut: new Date("2020-02-01T00:00:00") },
+          ],
         }),
         // not a rupturant
         createRandomStatutCandidat({
-          historique_statut_apprenant: [{ valeur_statut: 3, date_statut: new Date("2020-05-15T00:00:00") }],
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-05-15T00:00:00") },
+          ],
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
@@ -518,11 +551,11 @@ integrationTests(__filename, () => {
     it("gets count of rupturants now", async () => {
       const date = new Date();
       const count = await getRupturantsCountAtDate(date);
-      assert.equal(count, 1);
+      assert.equal(count, 2);
     });
 
     it("gets count of rupturants at date with additional filter", async () => {
-      const date = new Date("2020-10-12T00:00:00");
+      const date = new Date();
       const count = await getRupturantsCountAtDate(date, { etablissement_num_region: "199" });
       assert.equal(count, 1);
     });

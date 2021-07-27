@@ -7,14 +7,15 @@ import { toPrettyYearLabel } from "../../../utils/stringUtils";
 import ProgressCell from "../ProgressCell";
 
 const AnneeFormationRow = ({ anneeFormation, effectifs }) => {
-  const total = effectifs.apprentis + effectifs.inscrits + effectifs.abandons;
+  const total = effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <Tr>
       <Td paddingLeft="10w" color="grey.800">
-        {toPrettyYearLabel(anneeFormation)}
+        {anneeFormation ? toPrettyYearLabel(anneeFormation) : "Année non renseignée"}
       </Td>
       <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-      <ProgressCell label={effectifs.inscrits} value={getPercentage(effectifs.inscrits, total)} />
+      <ProgressCell label={effectifs.jeunesSansContrat} value={getPercentage(effectifs.jeunesSansContrat, total)} />
+      <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
       <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
     </Tr>
   );
@@ -24,7 +25,8 @@ AnneeFormationRow.propTypes = {
   anneeFormation: PropTypes.number.isRequired,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
-    inscrits: PropTypes.number.isRequired,
+    jeunesSansContrat: PropTypes.number.isRequired,
+    rupturants: PropTypes.number.isRequired,
     abandons: PropTypes.number.isRequired,
   }).isRequired,
 };
