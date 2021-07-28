@@ -23,7 +23,7 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
               fontSize="beta"
             />
             <Box verticalAlign="middle" marginLeft="1w">
-              <Box fontWeight="700">{intitule}</Box>
+              <Box>{intitule}</Box>
               <Box fontSize="omega">CFD : {formationCfd}</Box>
             </Box>
           </Flex>

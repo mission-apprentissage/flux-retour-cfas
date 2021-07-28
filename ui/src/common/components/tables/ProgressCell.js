@@ -7,9 +7,9 @@ import { formatNumber } from "../../utils/stringUtils";
 const ProgressCell = ({ label, value }) => (
   <Td>
     <HStack>
-      <Progress size="sm" width="4rem" colorScheme="main" value={value} />
+      <Progress size="sm" width="4rem" colorScheme="main" value={value} borderRadius="8px" />
       &nbsp;
-      <Text color="grey.800" fontSize="gamma" fontWeight="700">
+      <Text color="grey.800" fontSize="epsilon" fontWeight="700">
         {formatNumber(label)}
       </Text>
     </HStack>
