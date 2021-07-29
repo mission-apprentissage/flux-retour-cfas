@@ -6,6 +6,7 @@ import { effectifsPropType } from "../propTypes";
 import CfaView from "./cfa/CfaView";
 import FormationView from "./formation/FormationView";
 import GenericView from "./generic/GenericView";
+import RegionView from "./region/RegionView";
 import ReseauView from "./reseau/ReseauView";
 
 const TableauDeBordViewSwitch = ({ effectifs, loading, error }) => {
@@ -31,6 +32,10 @@ const TableauDeBordViewSwitch = ({ effectifs, loading, error }) => {
     return (
       <FormationView formationCfd={filters.formation.cfd} loading={loading} filters={filters} effectifs={effectifs} />
     );
+  }
+
+  if (filters.region) {
+    return <RegionView effectifs={effectifs} loading={loading} filters={filters} />;
   }
 
   return <GenericView filters={filters} effectifs={effectifs} loading={loading} error={error} />;

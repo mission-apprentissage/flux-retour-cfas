@@ -15,6 +15,7 @@ module.exports = () => ({
   getEffectifsCountByNiveauFormationAtDate,
   getEffectifsCountByFormationAtDate,
   getEffectifsCountByAnneeFormationAtDate,
+  getEffectifsCountByDepartementAtDate,
 });
 
 /*
@@ -259,6 +260,48 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
     return {
       uai_etablissement: _id,
       nom_etablissement,
+      effectifs: {
+        apprentis: effectifs.apprentis || 0,
+        jeunesSansContrat: effectifs.jeunesSansContrat || 0,
+        rupturants: effectifs.rupturants || 0,
+        abandons: effectifs.abandons || 0,
+      },
+    };
+  });
+};
+
+/**
+ * Récupération des effectifs par etablissement_num_departement à une date donnée
+ * @param {Date} searchDate
+ * @param {*} filters
+ * @returns [{
+ *  etablissement_num_departement: string
+ *  etablissement_nom_departement: string
+ *  effectifs: {
+ *    apprentis: number
+ *    jeunesSansContrat: number
+ *    rupturants: number
+ *    abandons: number
+ *  }
+ * }]
+ */
+const getEffectifsCountByDepartementAtDate = async (searchDate, filters = {}) => {
+  // we need to project these fields to give information about the departement
+  const projection = {
+    etablissement_nom_departement: 1,
+    etablissement_num_departement: 1,
+  };
+  const groupedBy = {
+    _id: "$etablissement_num_departement",
+    etablissement_nom_departement: { $first: "$etablissement_nom_departement" },
+  };
+  const effectifsCountByDepartement = await getEffectifsCountAtDate(searchDate, filters, { groupedBy, projection });
+
+  return effectifsCountByDepartement.map((effectifForDepartement) => {
+    const { _id, etablissement_nom_departement, ...effectifs } = effectifForDepartement;
+    return {
+      etablissement_num_departement: _id,
+      etablissement_nom_departement,
       effectifs: {
         apprentis: effectifs.apprentis || 0,
         jeunesSansContrat: effectifs.jeunesSansContrat || 0,
