@@ -12,9 +12,9 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
   const total = effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
-      <Tr>
-        <Td paddingLeft="6w" color="grey.800">
-          <Flex onClick={() => setIsOpen(!isOpen)} cursor="pointer">
+      <Tr color="grey.800" _hover={{ background: "grey.100" }} onClick={() => setIsOpen(!isOpen)} cursor="pointer">
+        <Td paddingLeft="6w">
+          <Flex>
             <Box
               as="i"
               className={isOpen ? "ri-subtract-line" : "ri-add-line"}

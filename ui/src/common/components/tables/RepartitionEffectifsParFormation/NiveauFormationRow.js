@@ -11,8 +11,8 @@ const NiveauFormationRow = ({ niveauFormation, effectifs }) => {
   const total = effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
-      <Tr background="galt">
-        <Td color="bluefrance" onClick={() => setIsOpen(!isOpen)} cursor="pointer">
+      <Tr background="galt" onClick={() => setIsOpen(!isOpen)} cursor="pointer" _hover={{ background: "galt_hover" }}>
+        <Td color="bluefrance">
           <Box as="i" className={isOpen ? "ri-subtract-line" : "ri-add-line"} verticalAlign="middle" fontSize="beta" />
           <Box as="span" fontWeight="700" verticalAlign="middle" marginLeft="1w">
             Niveau {niveauFormation}
