@@ -35,7 +35,6 @@ runScript(async ({ db }) => {
   await asyncForEach(allValidUais, async (uaiToUpdate) => {
     const departementCodeFromUai = normalizeCodeTerritoire(uaiToUpdate.slice(0, 3));
     const departement = departementsMap[departementCodeFromUai];
-    console.log({ departementCodeFromUai, departement });
 
     if (!departement) return;
 
