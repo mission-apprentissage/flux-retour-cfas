@@ -405,6 +405,51 @@ integrationTests(__filename, () => {
     });
   });
 
+  describe("getEffectifsCountByDepartementAtDate", () => {
+    const { getEffectifsCountByDepartementAtDate } = dashboardComponent();
+
+    it("Permet de récupérer les effectifs par departement à une date donnée", async () => {
+      const departement1 = {
+        etablissement_num_departement: "75",
+        etablissement_nom_departement: "Paris",
+      };
+      const departement2 = {
+        etablissement_num_departement: "77",
+        etablissement_nom_departement: "Seine-et-Marne",
+      };
+      await seedStatutsCandidats({ ...departement1 });
+      await seedStatutsCandidats({ ...departement2 });
+      await seedStatutsCandidats({ ...departement2 });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          ...departement1,
+          effectifs: {
+            apprentis: 5,
+            jeunesSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          ...departement2,
+          effectifs: {
+            apprentis: 10,
+            jeunesSansContrat: 30,
+            rupturants: 0,
+            abandons: 20,
+          },
+        },
+      ];
+
+      const effectifsByDepartement = await getEffectifsCountByDepartementAtDate(date);
+      // we will sort results because we don't care of the order in the test
+      const sortByDepartement = (a, b) => (a.etablissement_num_departement > b.etablissement_num_departement ? 1 : -1);
+      assert.deepEqual(effectifsByDepartement.sort(sortByDepartement), expectedResult);
+    });
+  });
+
   describe("getNouveauxContratsCountInDateRange", () => {
     const { getNouveauxContratsCountInDateRange } = dashboardComponent();
 

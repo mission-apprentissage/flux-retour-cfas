@@ -1,5 +1,7 @@
 const cliProgress = require("cli-progress");
 const axios = require("axios");
+const indexBy = require("lodash.indexby");
+
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const logger = require("../../common/logger");
@@ -20,9 +22,7 @@ const normalizeCodeTerritoire = (code) => {
  */
 runScript(async ({ db }) => {
   const { data } = await axios.get(`${GEO_API_HOST}/departements`);
-  const departementsRegionMap = data.reduce((acc, cur) => {
-    return { ...acc, [cur.code]: cur.codeRegion };
-  }, {});
+  const departementsMap = indexBy(data, "code");
 
   const allValidUais = await db.collection("statutsCandidats").distinct("uai_etablissement", {
     uai_etablissement_valid: true,
@@ -33,13 +33,20 @@ runScript(async ({ db }) => {
   let modifiedCount = 0;
   let matchedCount = 0;
   await asyncForEach(allValidUais, async (uaiToUpdate) => {
-    const departementFromUai = normalizeCodeTerritoire(uaiToUpdate.slice(0, 3));
-    const regionFromUai = normalizeCodeTerritoire(departementsRegionMap[departementFromUai]);
+    const departementCodeFromUai = normalizeCodeTerritoire(uaiToUpdate.slice(0, 3));
+    const departement = departementsMap[departementCodeFromUai];
+    console.log({ departementCodeFromUai, departement });
+
+    if (!departement) return;
 
     const updateResult = await db.collection("statutsCandidats").updateMany(
       { uai_etablissement: uaiToUpdate },
       {
-        $set: { etablissement_num_departement: departementFromUai, etablissement_num_region: regionFromUai },
+        $set: {
+          etablissement_num_departement: departement.code,
+          etablissement_nom_departement: departement.nom,
+          etablissement_num_region: departement.codeRegion,
+        },
       }
     );
     modifiedCount += updateResult.modifiedCount;

@@ -223,6 +223,22 @@ module.exports = ({ stats, dashboard }) => {
   );
 
   router.post(
+    "/effectifs-par-departement",
+    tryCatch(async (req, res) => {
+      await Joi.object({
+        date: Joi.date().required(),
+        etablissement_num_region: Joi.string().allow(null, ""),
+      }).validateAsync(req.body, { abortEarly: false });
+      const { date: dateFromBody, ...filters } = req.body;
+      const date = new Date(dateFromBody);
+
+      const effectifsByDepartementAtDate = await dashboard.getEffectifsCountByDepartementAtDate(date, filters);
+
+      return res.json(effectifsByDepartementAtDate);
+    })
+  );
+
+  router.post(
     "/chiffres-cles",
     tryCatch(async (req, res) => {
       // Validate schema
