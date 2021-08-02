@@ -7,6 +7,7 @@ import { filtersPropTypes } from "../../../FiltersContext";
 import DataFeedbackSection from "../data-feedback/DataFeedbackSection";
 import CfaDetail from "./CfaDetail";
 import CfaSiretsSelection from "./CfaSiretsSelection";
+import { infosCfaPropType } from "./propTypes";
 import withInfoCfaData from "./withInfoCfaData";
 
 const CfaSection = ({ infosCfa, filters, loading, error }) => {
@@ -16,7 +17,11 @@ const CfaSection = ({ infosCfa, filters, loading, error }) => {
 
       <Section>
         <Flex justifyContent="space-between">
-          <div>{infosCfa?.sirets.length > 1 && <CfaSiretsSelection filters={filters} sirets={infosCfa?.sirets} />}</div>
+          <div>
+            {infosCfa?.sousEtablissements.length > 1 && (
+              <CfaSiretsSelection filters={filters} sousEtablissements={infosCfa.sousEtablissements} />
+            )}
+          </div>
           <Box justifySelf="flex-end">
             <DataFeedbackSection uai={infosCfa?.uai} />
           </Box>
@@ -28,14 +33,7 @@ const CfaSection = ({ infosCfa, filters, loading, error }) => {
 
 CfaSection.propTypes = {
   filters: filtersPropTypes.state,
-  infosCfa: PropTypes.shape({
-    sirets: PropTypes.arrayOf(PropTypes.string).isRequired,
-    libelleLong: PropTypes.string.isRequired,
-    reseaux: PropTypes.arrayOf(PropTypes.string).isRequired,
-    domainesMetiers: PropTypes.arrayOf(PropTypes.string).isRequired,
-    uai: PropTypes.string.isRequired,
-    adresse: PropTypes.string.isRequired,
-  }),
+  infosCfa: infosCfaPropType,
   loading: PropTypes.bool,
   error: PropTypes.object,
 };

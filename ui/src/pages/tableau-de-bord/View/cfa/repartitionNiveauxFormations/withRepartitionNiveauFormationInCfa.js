@@ -1,12 +1,19 @@
+import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 
 import { _get } from "../../../../../common/httpClient";
+import { omitNullishValues } from "../../../../../common/utils/omitNullishValues";
 import { filtersPropTypes } from "../../../FiltersContext";
 
 const buildSearchParams = (filters) => {
   const date = filters.date.toISOString();
-  const uai = filters.cfa.uai_etablissement;
-  return `date=${date}&uai_etablissement=${uai}`;
+  return queryString.stringify(
+    omitNullishValues({
+      date,
+      uai_etablissement: filters.cfa.uai_etablissement,
+      siret_etablissement: filters.sousEtablissement?.siret_etablissement,
+    })
+  );
 };
 
 const withRepartitionNiveauFormationInCfa = (Component) => {

@@ -2,43 +2,51 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { OverlayMenu, SecondarySelectButton } from "../../../../common/components";
-import { filtersPropTypes } from "../../FiltersContext";
 import SiretsList from "./SiretsList";
 
-const SiretsFilter = ({ sirets, onSiretChange, filters }) => {
+const SousEtablissementFilter = ({ value, sousEtablissements, onSousEtablissementChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const onSiretClick = (reseau) => {
-    onSiretChange(reseau);
+  const onSousEtablissementClick = (sousEtablissement) => {
+    onSousEtablissementChange(sousEtablissement);
     setIsOpen(false);
   };
 
-  const buttonLabel = filters.siret ? `SIRET : ${filters.siret}` : "Tous les SIRETS";
+  const buttonLabel = value ? `${value.nom_etablissement} - SIRET : ${value.siret_etablissement}` : "Tous les SIRETS";
 
   return (
     <>
       <SecondarySelectButton
         onClick={() => setIsOpen(!isOpen)}
-        isClearable={Boolean(filters.siret)}
+        isClearable={Boolean(value)}
         clearIconOnClick={() => {
-          onSiretChange(null);
+          onSousEtablissementChange(null);
         }}
       >
         {buttonLabel}
       </SecondarySelectButton>
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <SiretsList sirets={sirets} onSiretClick={onSiretClick} value={filters.siret}></SiretsList>
+          <SiretsList
+            sousEtablissements={sousEtablissements}
+            onSousEtablissementClick={onSousEtablissementClick}
+            value={value}
+          ></SiretsList>
         </OverlayMenu>
       )}
     </>
   );
 };
 
-SiretsFilter.propTypes = {
-  sirets: PropTypes.arrayOf(PropTypes.string),
-  onSiretChange: PropTypes.func.isRequired,
-  filters: filtersPropTypes.state,
+SousEtablissementFilter.propTypes = {
+  value: PropTypes.string,
+  sousEtablissements: PropTypes.arrayOf(
+    PropTypes.shape({
+      siret_etablissement: PropTypes.string.isRequired,
+      nom_etablissement: PropTypes.string,
+    })
+  ),
+  onSousEtablissementChange: PropTypes.func.isRequired,
 };
 
-export default SiretsFilter;
+export default SousEtablissementFilter;

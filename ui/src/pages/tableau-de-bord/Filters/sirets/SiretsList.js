@@ -4,29 +4,39 @@ import React from "react";
 
 import FilterOption from "../FilterOption";
 
-const SiretsList = ({ sirets, onSiretClick, value }) => {
+const SousEtablissementsList = ({ sousEtablissements, onSousEtablissementClick, value }) => {
   return (
-    <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
-      {sirets &&
-        sirets.map((siret) => (
+    <List spacing="1v" textAlign="left" maxHeight="18rem" overflowY="scroll">
+      {sousEtablissements.map((sousEtablissement) => {
+        const { siret_etablissement, nom_etablissement } = sousEtablissement;
+        return (
           <FilterOption
-            key={siret}
+            key={siret_etablissement}
             onClick={() => {
-              onSiretClick(siret);
+              onSousEtablissementClick(sousEtablissement);
             }}
-            isSelected={value === siret}
+            isSelected={value === siret_etablissement}
           >
-            {siret}
+            SIRET : {siret_etablissement} - {nom_etablissement}
           </FilterOption>
-        ))}
+        );
+      })}
     </List>
   );
 };
 
-SiretsList.propTypes = {
-  onSiretClick: PropTypes.func.isRequired,
-  sirets: PropTypes.arrayOf(PropTypes.string).isRequired,
-  value: PropTypes.string,
+SousEtablissementsList.propTypes = {
+  onSousEtablissementClick: PropTypes.func.isRequired,
+  sousEtablissements: PropTypes.arrayOf(
+    PropTypes.shape({
+      siret_etablisement: PropTypes.string.isRequired,
+      nom_etablissement: PropTypes.string,
+    })
+  ).isRequired,
+  value: PropTypes.PropTypes.shape({
+    siret_etablisement: PropTypes.string.isRequired,
+    nom_etablissement: PropTypes.string,
+  }),
 };
 
-export default SiretsList;
+export default SousEtablissementsList;

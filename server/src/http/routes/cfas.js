@@ -95,6 +95,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
       } else {
         // Search reseaux for cfa in référentiel
         const cfaInReferentiel = await Cfa.findOne({ uai }).lean();
+        const sousEtablissements = await cfas.getSousEtablissementsForUai(uai);
 
         // Build response
         return res.json({
@@ -102,7 +103,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
           reseaux: cfaInReferentiel?.reseaux ?? [],
           domainesMetiers: cfaInReferentiel?.metiers ?? [],
           uai: cfaFound.uai_etablissement,
-          sirets: cfaInReferentiel?.sirets,
+          sousEtablissements: sousEtablissements,
           adresse: cfaFound.etablissement_adresse,
         });
       }
