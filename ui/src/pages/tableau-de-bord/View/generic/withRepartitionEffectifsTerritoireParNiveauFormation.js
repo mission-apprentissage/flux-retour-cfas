@@ -1,7 +1,7 @@
 import queryString from "query-string";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-import { _get } from "../../../../common/httpClient";
+import { useFetch } from "../../../../common/hooks/useFetch";
 import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
 import { filtersPropTypes } from "../../FiltersContext";
 
@@ -19,32 +19,12 @@ const buildSearchParams = (filters) => {
 
 const withRepartitionEffectifsTerritoireParNiveauFormation = (Component) => {
   const WithRepartitionEffectifsTerritoireParNiveauFormation = ({ filters, ...props }) => {
-    const [repartitionEffectifs, setRepartitionEffectifs] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-
     const searchParamsString = buildSearchParams(filters);
+    const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-niveau-formation?${searchParamsString}`);
 
-    useEffect(() => {
-      const fetchData = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-          const response = await _get(`/api/dashboard/effectifs-par-niveau-formation?${searchParamsString}`);
-          const data = response.map((repartition) => {
-            return { niveauFormation: repartition.niveau_formation, effectifs: repartition.effectifs };
-          });
-          setRepartitionEffectifs(data);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchData();
-    }, [searchParamsString]);
+    const repartitionEffectifs = data?.map((repartition) => {
+      return { niveauFormation: repartition.niveau_formation, effectifs: repartition.effectifs };
+    });
 
     return <Component {...props} repartitionEffectifs={repartitionEffectifs} loading={loading} error={error} />;
   };

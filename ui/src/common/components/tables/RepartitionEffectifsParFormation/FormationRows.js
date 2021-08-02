@@ -1,10 +1,10 @@
 import { Skeleton, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import queryString from "query-string";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
-import { _get } from "../../../httpClient";
+import { useFetch } from "../../../hooks/useFetch";
 import { omitNullishValues } from "../../../utils/omitNullishValues";
 import FormationRow from "./FormationRow";
 
@@ -50,22 +50,9 @@ const FormationRowsLoading = () => {
 };
 
 const FormationRows = ({ niveauFormation }) => {
-  const [data, setData] = useState();
-  const [loading, setLoading] = useState(false);
-
   const { state: filters } = useFiltersContext();
   const searchParamsString = buildSearchParams(filters, niveauFormation);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const data = await _get(`/api/dashboard/effectifs-par-formation?${searchParamsString}`);
-      setData(data);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [searchParamsString]);
+  const [data, loading] = useFetch(`/api/dashboard/effectifs-par-formation?${searchParamsString}`);
 
   if (loading) {
     return <FormationRowsLoading />;

@@ -1,7 +1,6 @@
 import { subYears } from "date-fns";
-import { useEffect, useState } from "react";
 
-import { _post } from "../../common/httpClient";
+import { usePostFetch } from "../../common/hooks/useFetch";
 import { omitNullishValues } from "../../common/utils/omitNullishValues";
 import { useFiltersContext } from "./FiltersContext";
 
@@ -39,30 +38,12 @@ const buildSearchRequestBody = (filters) => {
 };
 
 const useEffectifs = () => {
-  const [effectifs, setEffectifs] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const filtersContext = useFiltersContext();
 
   const searchRequestBody = buildSearchRequestBody(filtersContext.state);
+  const [data, loading, error] = usePostFetch("/api/dashboard/effectifs", searchRequestBody);
 
-  useEffect(() => {
-    const fetchEffectifs = async () => {
-      setLoading(true);
-      try {
-        const response = await _post("/api/dashboard/effectifs", searchRequestBody);
-        setEffectifs(mapEffectifsData(response));
-        setError(null);
-      } catch (err) {
-        setError(err);
-        setEffectifs(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEffectifs();
-  }, [JSON.stringify(searchRequestBody)]);
+  const effectifs = data && mapEffectifsData(data);
 
   return [effectifs, loading, error];
 };

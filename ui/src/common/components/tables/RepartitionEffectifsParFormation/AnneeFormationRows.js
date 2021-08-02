@@ -1,14 +1,13 @@
 import PropTypes from "prop-types";
 import queryString from "query-string";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
-import { _get } from "../../../httpClient";
+import { useFetch } from "../../../hooks/useFetch";
 import { omitNullishValues } from "../../../utils/omitNullishValues";
 import AnneeFormationRow from "./AnneeFormationRow";
 
 const AnneeFormationRows = ({ formationCfd }) => {
-  const [data, setData] = useState();
   const buildSearchParams = (filters) => {
     const date = filters.date.toISOString();
 
@@ -26,15 +25,7 @@ const AnneeFormationRows = ({ formationCfd }) => {
   };
   const { state: filters } = useFiltersContext();
   const searchParamsString = buildSearchParams(filters);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await _get(`/api/dashboard/effectifs-par-annee-formation?${searchParamsString}`);
-      setData(data);
-    };
-
-    fetchData();
-  }, [searchParamsString]);
+  const [data] = useFetch(`/api/dashboard/effectifs-par-annee-formation?${searchParamsString}`);
 
   if (!data) return null;
 

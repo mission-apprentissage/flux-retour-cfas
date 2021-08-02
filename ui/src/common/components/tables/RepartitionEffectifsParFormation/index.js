@@ -17,8 +17,8 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
           ? repartitionEffectifs.map((data) => {
               return (
                 <NiveauFormationRow
-                  key={data.niveau_formation}
-                  niveauFormation={data.niveau_formation}
+                  key={data.niveauFormation}
+                  niveauFormation={data.niveauFormation}
                   effectifs={data.effectifs}
                 />
               );

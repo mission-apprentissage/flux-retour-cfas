@@ -1,8 +1,8 @@
 import { Box, Skeleton, Text } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import Section from "../../common/components/Section/Section";
-import { _post } from "../../common/httpClient";
+import { usePostFetch } from "../../common/hooks/useFetch";
 import { omitNullishValues } from "../../common/utils/omitNullishValues";
 import { formatNumber } from "../../common/utils/stringUtils";
 import { useFiltersContext } from "./FiltersContext";
@@ -20,35 +20,16 @@ const buildRequestBody = (filters) => {
 
 const IndicesProvenanceSection = () => {
   const { state: filters } = useFiltersContext();
-  const [totalOrganismes, setTotalOrganismes] = useState();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await _post("/api/dashboard/total-organismes", buildRequestBody(filters));
-        setTotalOrganismes(response.nbOrganismes);
-        setError(null);
-      } catch (err) {
-        setError(err);
-        setTotalOrganismes(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [filters]);
+  const [data, loading, error] = usePostFetch("/api/dashboard/total-organismes", buildRequestBody(filters));
 
   let content = null;
   if (loading) {
     content = <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
   }
-  if (totalOrganismes != null && !loading) {
+  if (data?.nbOrganismes != null && !loading) {
     content = (
       <Text color="grey.600" fontWeight="400" fontSize="omega">
-        Les indices affichés sont calculés grâce aux {formatNumber(totalOrganismes)} organismes qui ont transmis leurs
+        Les indices affichés sont calculés grâce aux {formatNumber(data.nbOrganismes)} organismes qui ont transmis leurs
         données
       </Text>
     );
