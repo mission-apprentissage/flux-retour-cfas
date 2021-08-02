@@ -1,8 +1,7 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { UserEvent, Cfa } = require("../../common/model");
-const { codesStatutsCandidats } = require("../../common/model/constants");
+const { UserEvent } = require("../../common/model");
 
 module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
@@ -16,15 +15,19 @@ module.exports = ({ stats, dashboard }) => {
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
     formation_cfd: Joi.string().allow(null, ""),
+    uai_etablissement: Joi.string().allow(null, ""),
     siret_etablissement: Joi.string().allow(null, ""),
     etablissement_reseaux: Joi.string().allow(null, ""),
   });
 
   /**
-   * Schema for region conversion validation
+   * Schema for organismes count validation
    */
-  const dashboardConversionRegionInputSchema = Joi.object({
-    num_region: Joi.string().required(),
+  const organismesCountInputSchema = Joi.object({
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    formation_cfd: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
   });
 
   /**
@@ -33,6 +36,19 @@ module.exports = ({ stats, dashboard }) => {
   const dashboardEffectifsByCfaBodySchema = Joi.object({
     date: Joi.date().required(),
     formation_cfd: Joi.string().allow(null, ""),
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
+  });
+
+  /**
+   * Schema for nouveaux contrats
+   */
+  const nouveauxContratsQueryBodySchema = Joi.object({
+    startDate: Joi.date().required(),
+    endDate: Joi.date().required(),
+    formation_cfd: Joi.string().allow(null, ""),
+    uai_etablissement: Joi.string().allow(null, ""),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
     etablissement_reseaux: Joi.string().allow(null, ""),
@@ -67,40 +83,17 @@ module.exports = ({ stats, dashboard }) => {
    * Gets region conversion stats
    */
   router.post(
-    "/region-conversion",
+    "/total-organismes",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardConversionRegionInputSchema.validateAsync(req.body, {
+      await organismesCountInputSchema.validateAsync(req.body, {
         abortEarly: false,
       });
 
-      // Gets num region param
-      const { num_region } = req.body;
+      const nbOrganismes = await stats.getNbDistinctCfasByUai(req.body);
 
-      // Add user event
-      const event = new UserEvent({
-        username: "dashboard",
-        type: "GET",
-        action: `api/dashboard/region-conversion`,
-        data: { num_region },
-      });
-      await event.save();
-
-      // Gets distincts cfa sirets for num_region
-      const nbCfaConnected = await stats.getNbDistinctCfasBySiret({
-        etablissement_num_region: num_region,
-      });
-
-      // Gets cfas validate for num_region
-      const nbCfaDataValidated = await Cfa.countDocuments({
-        region_num: num_region,
-        feedback_donnee_valide: true,
-      });
-
-      // Build response
       return res.json({
-        nbCfaConnected,
-        nbCfaDataValidated,
+        nbOrganismes,
       });
     })
   );
@@ -130,60 +123,88 @@ module.exports = ({ stats, dashboard }) => {
       });
       await event.save();
 
-      // Gets effectif data for params
-      const effectifsAtStartDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(startDate, filters);
-      const effectifsAtEndDate = await dashboard.getEffectifsCountByStatutApprenantAtDate(endDate, filters);
-
       // Build response
-      return res.json([
-        {
-          date: startDate,
-          apprentis: effectifsAtStartDate[codesStatutsCandidats.apprenti].count,
-          inscrits: effectifsAtStartDate[codesStatutsCandidats.inscrit].count,
-          abandons: effectifsAtStartDate[codesStatutsCandidats.abandon].count,
-          abandonsProspects: effectifsAtStartDate[codesStatutsCandidats.abandonProspects].count,
-        },
-        {
-          date: endDate,
-          apprentis: effectifsAtEndDate[codesStatutsCandidats.apprenti].count,
-          inscrits: effectifsAtEndDate[codesStatutsCandidats.inscrit].count,
-          abandons: effectifsAtEndDate[codesStatutsCandidats.abandon].count,
-          abandonsProspects: effectifsAtEndDate[codesStatutsCandidats.abandonProspects].count,
-          dataConsistency: null,
-        },
-      ]);
+      return res.json({
+        date: endDate,
+        apprentis: await dashboard.getApprentisCountAtDate(endDate, filters),
+        rupturants: await dashboard.getRupturantsCountAtDate(endDate, filters),
+        inscritsSansContrat: await dashboard.getInscritsSansContratCountAtDate(endDate, filters),
+        abandons: await dashboard.getAbandonsCountAtDate(endDate, filters),
+      });
     })
   );
 
   /**
-   * Gets the dashboard cfa effectif detail
+   * Get effectifs details by niveau_formation
    */
   router.get(
-    "/effectifs-par-niveau-et-annee-formation",
+    "/effectifs-par-niveau-formation",
     tryCatch(async (req, res) => {
       await Joi.object({
-        page: Joi.number().default(1),
-        limit: Joi.number().default(10),
         date: Joi.date().required(),
+        uai_etablissement: Joi.string().allow(null, ""),
         siret_etablissement: Joi.string().allow(null, ""),
         etablissement_reseaux: Joi.string().allow(null, ""),
         etablissement_num_region: Joi.string().allow(null, ""),
         etablissement_num_departement: Joi.string().allow(null, ""),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const { date: dateFromBody, page, limit, ...filters } = req.query;
+      const { date: dateFromBody, ...filters } = req.query;
       const date = new Date(dateFromBody);
 
-      // Checks if siret valid
-      const effectifDetailCfaData = await dashboard.getPaginatedEffectifsParNiveauEtAnneeFormation(
-        date,
-        filters,
-        page,
-        limit
-      );
+      const effectifsParNiveauFormation = await dashboard.getEffectifsCountByNiveauFormationAtDate(date, filters);
 
-      // Build response
-      return res.json(effectifDetailCfaData);
+      return res.json(effectifsParNiveauFormation);
+    })
+  );
+
+  /**
+   * Get effectifs details by formation_cfd
+   */
+  router.get(
+    "/effectifs-par-formation",
+    tryCatch(async (req, res) => {
+      await Joi.object({
+        date: Joi.date().required(),
+        uai_etablissement: Joi.string().allow(null, ""),
+        siret_etablissement: Joi.string().allow(null, ""),
+        etablissement_reseaux: Joi.string().allow(null, ""),
+        etablissement_num_region: Joi.string().allow(null, ""),
+        etablissement_num_departement: Joi.string().allow(null, ""),
+        niveau_formation: Joi.string().allow(null, ""),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const { date: dateFromBody, ...filters } = req.query;
+      const date = new Date(dateFromBody);
+
+      const effectifsParFormation = await dashboard.getEffectifsCountByFormationAtDate(date, filters);
+
+      return res.json(effectifsParFormation);
+    })
+  );
+
+  /**
+   * Get effectifs details by annee_formation
+   */
+  router.get(
+    "/effectifs-par-annee-formation",
+    tryCatch(async (req, res) => {
+      await Joi.object({
+        date: Joi.date().required(),
+        formation_cfd: Joi.string().allow(null, ""),
+        uai_etablissement: Joi.string().allow(null, ""),
+        siret_etablissement: Joi.string().allow(null, ""),
+        etablissement_reseaux: Joi.string().allow(null, ""),
+        etablissement_num_region: Joi.string().allow(null, ""),
+        etablissement_num_departement: Joi.string().allow(null, ""),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const { date: dateFromBody, ...filters } = req.query;
+      const date = new Date(dateFromBody);
+
+      const effectifsParAnneeFormation = await dashboard.getEffectifsCountByAnneeFormationAtDate(date, filters);
+
+      return res.json(effectifsParAnneeFormation);
     })
   );
 
@@ -201,6 +222,40 @@ module.exports = ({ stats, dashboard }) => {
       const effectifsByCfaAtDate = await dashboard.getEffectifsCountByCfaAtDate(date, filters);
 
       return res.json(effectifsByCfaAtDate);
+    })
+  );
+
+  router.post(
+    "/effectifs-par-departement",
+    tryCatch(async (req, res) => {
+      await Joi.object({
+        date: Joi.date().required(),
+        etablissement_num_region: Joi.string().allow(null, ""),
+      }).validateAsync(req.body, { abortEarly: false });
+      const { date: dateFromBody, ...filters } = req.body;
+      const date = new Date(dateFromBody);
+
+      const effectifsByDepartementAtDate = await dashboard.getEffectifsCountByDepartementAtDate(date, filters);
+
+      return res.json(effectifsByDepartementAtDate);
+    })
+  );
+
+  router.post(
+    "/chiffres-cles",
+    tryCatch(async (req, res) => {
+      // Validate schema
+      await nouveauxContratsQueryBodySchema.validateAsync(req.body, {
+        abortEarly: false,
+      });
+
+      const { startDate, endDate, ...filters } = req.body;
+      const dateRange = [new Date(startDate), new Date(endDate)];
+
+      const nouveauxContratsCountInDateRange = await dashboard.getNouveauxContratsCountInDateRange(dateRange, filters);
+      const rupturesCountInDateRange = await dashboard.getNbRupturesContratAtDate(dateRange[1], filters);
+
+      return res.json({ nbContrats: nouveauxContratsCountInDateRange, nbRuptures: rupturesCountInDateRange });
     })
   );
 

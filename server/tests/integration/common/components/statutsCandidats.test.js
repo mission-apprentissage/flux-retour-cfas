@@ -13,10 +13,12 @@ const {
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
+const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 integrationTests(__filename, () => {
   beforeEach(() => {
     nockGetCfdInfo();
+    nockGetMetiersByCfd();
   });
 
   describe("existsStatut", () => {
@@ -911,7 +913,7 @@ integrationTests(__filename, () => {
       assert.deepStrictEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid et qu'aucune donnée de la localisation n'est fetchée ", async () => {
+    it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid", async () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: "invalid-siret" };
@@ -920,7 +922,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatut.siret_etablissement_valid, false);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid et qu'on fetch les données de localisation associées ", async () => {
+    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid", async () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const validSiret = "12312312300099";
@@ -969,36 +971,13 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatut.formation_cfd_valid, true);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-      const validSiret = "12312312300099";
-
-      // Create sample cfa in referentiel
-      const referenceCfa = new Cfa({
-        siret: validSiret,
-        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
-      });
-      await referenceCfa.save();
-
-      // Create statut
-      const statutWithValidSiret = { ...createRandomStatutCandidat(), siret_etablissement: validSiret };
-      const createdStatut = await createStatutCandidat(statutWithValidSiret);
-
-      // Check siret & reseaux in created statut
-      const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
-      assert.deepStrictEqual(siret_etablissement_valid, true);
-      assert.deepStrictEqual(etablissement_reseaux.length, 2);
-      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.ANASUP.nomReseau);
-      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.BTP_CFA.nomReseau);
-    });
-
     it("Vérifie qu'à la création d'un statut avec un siret invalide on ne set pas le champ etablissement_reseaux", async () => {
       const { createStatutCandidat } = await statutsCandidats();
       const invalidSiret = "invalid";
 
       // Create sample cfa in referentiel
       const referenceCfa = new Cfa({
-        siret: invalidSiret,
+        sirets: [invalidSiret],
         reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
@@ -1013,7 +992,7 @@ integrationTests(__filename, () => {
       assert.deepStrictEqual(etablissement_reseaux.length, 0);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un uai valid on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
+    it("Vérifie qu'à la création d'un statut avec un uai valide on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
       const { createStatutCandidat } = await statutsCandidats();
       const validUai = "0631450J";
 

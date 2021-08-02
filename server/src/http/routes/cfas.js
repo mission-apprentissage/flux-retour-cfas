@@ -13,10 +13,9 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
   }).min(1);
 
   const dataFeedbackBodyValidationSchema = Joi.object({
-    siret: Joi.string().required(),
+    uai: Joi.string().required(),
     email: Joi.string().required(),
     details: Joi.string().required(),
-    dataIsValid: Joi.boolean().required(),
   });
 
   router.post(
@@ -78,34 +77,25 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     })
   );
 
-  router.get(
-    "/data-feedback",
-    tryCatch(async (req, res) => {
-      const { siret } = req.query;
-
-      const foundDataFeedback = await cfaDataFeedback.getCfaDataFeedbackBySiret(siret);
-      return res.json(foundDataFeedback);
-    })
-  );
-
   /**
    * Gets the dashboard data for cfa
    */
   router.get(
-    "/:siret",
+    "/:uai",
     tryCatch(async (req, res) => {
-      const { siret } = req.params;
+      const { uai } = req.params;
 
       // Search cfa in statuts
       const cfaFound = await StatutCandidat.findOne({
-        siret_etablissement: siret,
+        uai_etablissement: uai,
       }).lean();
 
       if (!cfaFound) {
-        return res.status(404).json({ message: `No cfa found for siret ${siret}` });
+        return res.status(404).json({ message: `No cfa found for uai ${uai}` });
       } else {
         // Search reseaux for cfa in référentiel
-        const cfaInReferentiel = await Cfa.findOne({ siret }).lean();
+        const cfaInReferentiel = await Cfa.findOne({ uai }).lean();
+        const sousEtablissements = await cfas.getSousEtablissementsForUai(uai);
 
         // Build response
         return res.json({
@@ -113,7 +103,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
           reseaux: cfaInReferentiel?.reseaux ?? [],
           domainesMetiers: cfaInReferentiel?.metiers ?? [],
           uai: cfaFound.uai_etablissement,
-          siret: cfaFound.siret_etablissement,
+          sousEtablissements: sousEtablissements,
           adresse: cfaFound.etablissement_adresse,
         });
       }

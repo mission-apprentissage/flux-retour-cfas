@@ -5,6 +5,7 @@ const { apiStatutsSeeder } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
 const { createRandomStatutsCandidatsApiInputList } = require("../../data/randomizedSample");
 const { nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
+const { nockGetMetiersByCfd } = require("../../utils/nockApis/nock-Lba");
 
 const goodApiKey = "12345";
 const badApiKey = "BADAPIKEY";
@@ -21,6 +22,7 @@ const createApiUser = async () => {
 httpTests(__filename, ({ startServer }) => {
   beforeEach(() => {
     nockGetCfdInfo();
+    nockGetMetiersByCfd();
   });
 
   it("Vérifie que la route statut-candidats fonctionne avec une bonne clé d'API", async () => {

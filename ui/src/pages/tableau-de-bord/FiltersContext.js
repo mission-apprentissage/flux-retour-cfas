@@ -12,6 +12,7 @@ const ACTION_TYPES = {
   SET_CFA: "SET_CFA",
   SET_RESEAU: "SET_RESEAU",
   SET_FORMATION: "SET_FORMATION",
+  SET_SOUS_ETABLISSEMENT: "SET_SOUS_ETABLISSEMENT",
 };
 
 const filtersReducer = (state, action) => {
@@ -20,19 +21,22 @@ const filtersReducer = (state, action) => {
       return { ...state, date: action.value };
 
     case ACTION_TYPES.SET_REGION:
-      return { ...state, cfa: null, departement: null, region: action.value };
+      return { ...state, cfa: null, departement: null, sousEtablissement: null, region: action.value };
 
     case ACTION_TYPES.SET_DEPARTEMENT:
-      return { ...state, cfa: null, region: null, departement: action.value };
+      return { ...state, cfa: null, region: null, sousEtablissement: null, departement: action.value };
 
     case ACTION_TYPES.SET_FORMATION:
-      return { ...state, cfa: null, reseau: null, formation: action.value };
+      return { ...state, cfa: null, reseau: null, sousEtablissement: null, formation: action.value };
 
     case ACTION_TYPES.SET_CFA:
-      return { ...state, reseau: null, formation: null, cfa: action.value };
+      return { ...state, reseau: null, formation: null, sousEtablissement: null, cfa: action.value };
 
     case ACTION_TYPES.SET_RESEAU:
-      return { ...state, cfa: null, formation: null, reseau: action.value };
+      return { ...state, cfa: null, formation: null, sousEtablissement: null, reseau: action.value };
+
+    case ACTION_TYPES.SET_SOUS_ETABLISSEMENT:
+      return { ...state, sousEtablissement: action.value };
 
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
@@ -48,6 +52,7 @@ export const FiltersProvider = ({ children }) => {
     formation: null,
     cfa: null,
     reseau: null,
+    sousEtablissement: null,
   });
 
   const setters = {
@@ -57,6 +62,8 @@ export const FiltersProvider = ({ children }) => {
     setCfa: (cfa) => dispatch({ type: ACTION_TYPES.SET_CFA, value: cfa }),
     setReseau: (reseau) => dispatch({ type: ACTION_TYPES.SET_RESEAU, value: reseau }),
     setFormation: (formation) => dispatch({ type: ACTION_TYPES.SET_FORMATION, value: formation }),
+    setSousEtablissement: (sousEtablissement) =>
+      dispatch({ type: ACTION_TYPES.SET_SOUS_ETABLISSEMENT, value: sousEtablissement }),
   };
 
   const contextValue = {
@@ -79,7 +86,7 @@ export const filtersPropTypes = {
   state: PropTypes.shape({
     date: PropTypes.instanceOf(Date),
     cfa: PropTypes.shape({
-      siret_etablissement: PropTypes.string.isRequired,
+      uai_etablissement: PropTypes.string.isRequired,
       nom_etablissement: PropTypes.string.isRequired,
     }),
     region: PropTypes.shape({
@@ -96,6 +103,10 @@ export const filtersPropTypes = {
     formation: PropTypes.shape({
       cfd: PropTypes.string.isRequired,
       libelle: PropTypes.string.isRequired,
+    }),
+    sousEtablissement: PropTypes.shape({
+      nom_etablissement: PropTypes.string,
+      siret_etablissement: PropTypes.string.isRequired,
     }),
   }).isRequired,
 };

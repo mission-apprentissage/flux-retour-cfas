@@ -6,10 +6,10 @@ const cfasSchema = new Schema({
     default: null,
     description: "Code uai de l'établissement",
   },
-  siret: {
-    type: String,
-    default: null,
-    description: "Siret de l'établissement",
+  sirets: {
+    type: [String],
+    default: [],
+    description: "Liste des sirets reliés à l'établissement",
   },
   siret_formateur: {
     type: Boolean,
@@ -38,7 +38,7 @@ const cfasSchema = new Schema({
   },
   reseaux: {
     type: [String],
-    default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
+    default: [],
     description: "Réseaux du CFA, s'ils existent",
   },
   region_nom: {
@@ -55,11 +55,6 @@ const cfasSchema = new Schema({
     type: String,
     default: null,
     description: "Source du seed du cfa dans la collection (StatutsCandidats ou fichier d'origine)",
-  },
-  feedback_donnee_valide: {
-    type: Boolean,
-    default: null,
-    description: "Les données présentées sur le tableau de bord par ce CFA est-elle valide",
   },
   first_transmission_date: {
     type: Date,

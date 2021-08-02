@@ -2,24 +2,22 @@ import { subYears } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { _post } from "../../common/httpClient";
-import { getPercentageDifference } from "../../common/utils/calculUtils";
 import { omitNullishValues } from "../../common/utils/omitNullishValues";
 import { useFiltersContext } from "./FiltersContext";
 
 const mapEffectifsData = (effectifsData) => {
-  const [start, end] = effectifsData;
   return {
     apprentis: {
-      count: end.apprentis,
-      evolution: getPercentageDifference(end.apprentis, start.apprentis),
+      count: effectifsData.apprentis,
     },
-    inscrits: {
-      count: end.inscrits,
-      evolution: getPercentageDifference(end.inscrits, start.inscrits),
+    inscritsSansContrat: {
+      count: effectifsData.inscritsSansContrat,
+    },
+    rupturants: {
+      count: effectifsData.rupturants,
     },
     abandons: {
-      count: end.abandons,
-      evolution: getPercentageDifference(end.abandons, start.abandons),
+      count: effectifsData.abandons,
     },
   };
 };
@@ -32,7 +30,8 @@ const buildSearchRequestBody = (filters) => {
     etablissement_num_region: filters.region?.code ?? null,
     etablissement_num_departement: filters.departement?.code ?? null,
     formation_cfd: filters.formation?.cfd ?? null,
-    siret_etablissement: filters.cfa?.siret_etablissement ?? null,
+    uai_etablissement: filters.cfa?.uai_etablissement ?? null,
+    siret_etablissement: filters.sousEtablissement?.siret_etablissement ?? null,
     etablissement_reseaux: filters.reseau?.nom ?? null,
   };
 
@@ -46,6 +45,7 @@ const useEffectifs = () => {
   const filtersContext = useFiltersContext();
 
   const searchRequestBody = buildSearchRequestBody(filtersContext.state);
+
   useEffect(() => {
     const fetchEffectifs = async () => {
       setLoading(true);

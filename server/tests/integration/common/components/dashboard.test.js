@@ -9,13 +9,6 @@ const {
 const { StatutCandidat } = require("../../../../src/common/model");
 const { codesStatutsCandidats, reseauxCfas } = require("../../../../src/common/model/constants");
 const dashboardComponent = require("../../../../src/common/components/dashboard");
-const {
-  getStatutsSamplesInscrits,
-  getStatutsSamplesApprentis,
-  getStatutsSamplesAbandons,
-  expectedDetailResultList,
-} = require("../../../data/effectifDetailSamples");
-const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 
 integrationTests(__filename, () => {
   const seedStatutsCandidats = async (statutsProps) => {
@@ -23,7 +16,6 @@ integrationTests(__filename, () => {
     for (let index = 0; index < 10; index++) {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
-        siret_etablissement_valid: true,
         ...statutsProps,
       });
       const toAdd = new StatutCandidat(randomStatut);
@@ -34,7 +26,6 @@ integrationTests(__filename, () => {
     for (let index = 0; index < 5; index++) {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: historySequenceApprenti,
-        siret_etablissement_valid: true,
         ...statutsProps,
       });
       const toAdd = new StatutCandidat(randomStatut);
@@ -45,7 +36,6 @@ integrationTests(__filename, () => {
     for (let index = 0; index < 15; index++) {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: historySequenceInscritToApprenti,
-        siret_etablissement_valid: true,
         ...statutsProps,
       });
       const toAdd = new StatutCandidat(randomStatut);
@@ -53,311 +43,318 @@ integrationTests(__filename, () => {
     }
   };
 
-  describe("getEffectifsCountByStatutApprenantAtDate", () => {
-    const { getEffectifsCountByStatutApprenantAtDate } = dashboardComponent();
+  describe("getApprentisCountAtDate", () => {
+    const { getApprentisCountAtDate } = dashboardComponent();
 
-    it("Permet de récupérer les données d'effectifs par statut pour à date donnée", async () => {
+    it("gets count of apprentis at one date", async () => {
       await seedStatutsCandidats();
 
-      // Search params dates
-      const date1 = new Date("2020-09-15T00:00:00.000+0000");
-      const date2 = new Date("2020-09-30T00:00:00.000+0000");
-      const date3 = new Date("2020-10-10T00:00:00.000+0000");
+      const date = new Date("2020-09-15T00:00:00.000+0000");
+      const apprentisCount = await getApprentisCountAtDate(date);
 
-      const effectifsAtDate1 = await getEffectifsCountByStatutApprenantAtDate(date1);
-      const effectifsAtDate2 = await getEffectifsCountByStatutApprenantAtDate(date2);
-      const effectifsAtDate3 = await getEffectifsCountByStatutApprenantAtDate(date3);
-
-      assert.deepEqual(effectifsAtDate1, {
-        [codesStatutsCandidats.inscrit]: { count: 10 },
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-      assert.deepEqual(effectifsAtDate2, {
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.apprenti]: { count: 15 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-      assert.deepEqual(effectifsAtDate3, {
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.abandon]: { count: 10 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      assert.equal(apprentisCount, 5);
     });
 
-    it("Renvoie des effectifs nuls à une date dans le passé pour laquelle on n'a pas d'historique", async () => {
+    it("gets count of apprentis at another date", async () => {
       await seedStatutsCandidats();
 
-      // Search params dates
-      const date = new Date("2018-09-15T00:00:00.000+0000");
-      const effectifsInPast = await getEffectifsCountByStatutApprenantAtDate(date);
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCount = await getApprentisCountAtDate(date);
 
-      assert.deepEqual(effectifsInPast, {
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      assert.equal(apprentisCount, 15);
     });
 
-    it("Permet de ne pas récupérer les données d'effectifs pour une période donnée si un siret est invalide", async () => {
-      await seedStatutsCandidats({ siret_etablissement_valid: false });
+    it("gets count of apprentis at yet another date", async () => {
+      await seedStatutsCandidats();
 
-      // Search params dates
-      const date1 = new Date("2020-09-15T00:00:00.000+0000");
-      const date2 = new Date("2020-10-10T00:00:00.000+0000");
-
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
-
-      const result1 = await getEffectifsCountByStatutApprenantAtDate(date1);
-      const result2 = await getEffectifsCountByStatutApprenantAtDate(date2);
-
-      assert.deepEqual(result1, expectedResult);
-      assert.deepEqual(result2, expectedResult);
-    });
-
-    it("Permet de récupérer les données d'effectifs à une date et une région", async () => {
-      const filterQuery = { etablissement_num_region: "84" };
-      await seedStatutsCandidats(filterQuery);
-
-      // Search params & expected results
-      const date = new Date("2020-09-15T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 10 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
-
-      // Check for right etablissement_num_region filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another etablissement_num_region filter
-      const badFilterQuery = { etablissement_num_region: "99" };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-    });
-
-    it("Permet de récupérer les données d'effectifs à une date et un département", async () => {
-      const filterQuery = { etablissement_num_departement: "01" };
-      await seedStatutsCandidats(filterQuery);
-
-      // Search params & expected results
-      const date = new Date("2020-09-15T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 10 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
-
-      // Check for right etablissement_num_departement filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another etablissement_num_departement filter
-      const badFilterQuery = { etablissement_num_departement: "99" };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-    });
-
-    it("Permet de récupérer les données d'effectifs à une date et un cfa via son siret", async () => {
-      const filterQuery = { siret_etablissement: "77929544300013", siret_etablissement_valid: true };
-      await seedStatutsCandidats(filterQuery);
-
-      // Search params & expected results
-      const date = new Date("2020-09-15T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 10 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
-
-      // Check for right siret_etablissement filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another siret_etablissement filter
-      const badFilterQuery = { siret_etablissement: "99" };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
-    });
-
-    it("Permet de récupérer les données d'effectifs pour une période et une formation via son cfd", async () => {
-      const filterQuery = { formation_cfd: "77929544300013" };
-      await seedStatutsCandidats(filterQuery);
-
-      // Search params & expected results
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.abandon]: { count: 10 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
+      const apprentisCount = await getApprentisCountAtDate(date);
 
-      // Check for right cfd filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another cfd filter
-      const badFilterQuery = { formation_cfd: "99" };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      assert.equal(apprentisCount, 5);
     });
 
-    it("Permet de récupérer les données d'effectifs pour une date et réseau", async () => {
-      const filterQuery = { etablissement_reseaux: [reseauxCfas.BTP_CFA.nomReseau] };
-      await seedStatutsCandidats(filterQuery);
+    it("gets count of apprentis at a date when there was no data", async () => {
+      await seedStatutsCandidats();
 
-      // Search params & expected results
-      const date = new Date("2020-10-10T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.abandon]: { count: 10 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
+      const date = new Date("2010-10-10T00:00:00.000+0000");
+      const apprentisCount = await getApprentisCountAtDate(date);
 
-      // Check for right reseau filter
-      const filter = { etablissement_reseaux: { $in: [reseauxCfas.BTP_CFA.nomReseau] } };
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filter);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
-
-      // Check for another reseau filter
-      const badFilterQuery = { etablissement_reseaux: { $in: [reseauxCfas.ANASUP.nomReseau] } };
-      const nbStatutsBadFilter = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery);
-      assert.deepEqual(nbStatutsBadFilter, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      });
+      assert.equal(apprentisCount, 0);
     });
 
-    it("Permet de récupérer les données d'effectifs pour une date, pour une formation et une région", async () => {
-      const filterQuery = { formation_cfd: "77929544300013", etablissement_num_region: "84" };
-      await seedStatutsCandidats(filterQuery);
+    it("gets count of apprentis at a date and for a region", async () => {
+      const filters = { etablissement_num_region: "28" };
+      await seedStatutsCandidats(filters);
 
-      // Search params & expected results
-      const date = new Date("2020-10-10T00:00:00.000+0000");
-      const expectedResult = {
-        [codesStatutsCandidats.apprenti]: { count: 5 },
-        [codesStatutsCandidats.inscrit]: { count: 15 },
-        [codesStatutsCandidats.abandon]: { count: 10 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
-      };
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForRegion = await getApprentisCountAtDate(date, filters);
 
-      // Check for right filter
-      const nbStatutsFoundInHistory = await getEffectifsCountByStatutApprenantAtDate(date, filterQuery);
-      assert.deepEqual(nbStatutsFoundInHistory, expectedResult);
+      assert.equal(apprentisCountForRegion, 15);
 
-      // Check for another filter
-      const badFilterQuery1 = { ...filterQuery, etablissement_num_region: "21" };
-      const nbStatutsBadFilter1 = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery1);
-      assert.deepEqual(nbStatutsBadFilter1, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
+      const apprentisCountForAnotherRegion = await getApprentisCountAtDate(date, { etablissement_num_region: "100" });
+      assert.equal(apprentisCountForAnotherRegion, 0);
+    });
+
+    it("gets count of apprentis at a date and for a departement", async () => {
+      const filters = { etablissement_num_departement: "75" };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForDepartement = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForDepartement, 15);
+
+      const apprentisCountForAnotherDepartement = await getApprentisCountAtDate(date, {
+        etablissement_num_departement: "100",
       });
+      assert.equal(apprentisCountForAnotherDepartement, 0);
+    });
 
-      // Check for another filter
-      const badFilterQuery2 = { ...filterQuery, formation_cfd: "123445" };
-      const nbStatutsBadFilter2 = await getEffectifsCountByStatutApprenantAtDate(date, badFilterQuery2);
-      assert.deepEqual(nbStatutsBadFilter2, {
-        [codesStatutsCandidats.apprenti]: { count: 0 },
-        [codesStatutsCandidats.inscrit]: { count: 0 },
-        [codesStatutsCandidats.abandon]: { count: 0 },
-        [codesStatutsCandidats.abandonProspects]: { count: 0 },
-        [codesStatutsCandidats.prospect]: { count: 0 },
+    it("gets count of apprentis at a date and for a siret_etablissement", async () => {
+      const filters = { siret_etablissement: "77929544300013" };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForSiret = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForSiret, 15);
+
+      const apprentisCountForAnotherSiret = await getApprentisCountAtDate(date, {
+        siret_etablissement: "77929544300099",
       });
+      assert.equal(apprentisCountForAnotherSiret, 0);
+    });
+
+    it("gets count of apprentis at a date and for a formation_cfd", async () => {
+      const filters = { formation_cfd: "2502000D" };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForCfd = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForCfd, 15);
+
+      const apprentisCountForAnotherCfd = await getApprentisCountAtDate(date, { formation_cfd: "2502000X" });
+      assert.equal(apprentisCountForAnotherCfd, 0);
+    });
+
+    it("gets count of apprentis at a date and for a reseau", async () => {
+      const filters = { etablissement_reseaux: reseauxCfas.BTP_CFA.nomReseau };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForReseau = await getApprentisCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForReseau, 15);
+
+      const apprentisCountForAnotherReseau = await getApprentisCountAtDate(date, { etablissement_reseaux: "inconnu" });
+      assert.equal(apprentisCountForAnotherReseau, 0);
     });
   });
 
-  describe("getEffectifsParNiveauEtAnneeFormation pour une date et un centre de formation", () => {
-    const { getEffectifsParNiveauEtAnneeFormation } = dashboardComponent();
+  describe("getAbandonsCountAtDate", () => {
+    const { getAbandonsCountAtDate } = dashboardComponent();
 
-    it("Permet de récupérer les données détaillées d'effectifs pour une date et un cfa via son siret", async () => {
-      const siretToTest = "77929544300013";
+    it("gets count of abandons at one date", async () => {
+      await seedStatutsCandidats();
 
-      // Build sample statuts
-      const statutsSamplesInscrits = await getStatutsSamplesInscrits(siretToTest);
-      const statutsSamplesApprentis = await getStatutsSamplesApprentis(siretToTest);
-      const statutsSamplesAbandons = await getStatutsSamplesAbandons(siretToTest);
+      const date = new Date("2020-09-15T00:00:00.000+0000");
+      const abandonsCount = await getAbandonsCountAtDate(date);
 
-      // Save all statuts to database
-      const sampleStatutsListToSave = [
-        ...statutsSamplesInscrits,
-        ...statutsSamplesApprentis,
-        ...statutsSamplesAbandons,
-      ];
-      await asyncForEach(sampleStatutsListToSave, async (currentStatut) => {
-        await currentStatut.save();
-      });
+      assert.equal(abandonsCount, 0);
+    });
 
-      // Search params & expected results
+    it("gets count of abandons at yet another date", async () => {
+      await seedStatutsCandidats();
+
       const date = new Date("2020-10-10T00:00:00.000+0000");
+      const abandonsCount = await getAbandonsCountAtDate(date);
 
-      // Gets effectif data detail
-      const statutsFound = await getEffectifsParNiveauEtAnneeFormation(date, { siret_etablissement: siretToTest });
+      assert.equal(abandonsCount, 10);
+    });
 
-      // Check for siret
-      assert.deepEqual(statutsFound.length, 2);
-      assert.deepEqual(statutsFound, expectedDetailResultList);
+    it("gets count of abandons at a date when there was no data", async () => {
+      await seedStatutsCandidats();
 
-      // Check for bad siret
-      const badSiret = "99999999900999";
-      const statutsBadSiret = await getEffectifsParNiveauEtAnneeFormation(date, { siret_etablissement: badSiret });
-      assert.notDeepEqual(statutsBadSiret.length, 2);
-      assert.notDeepEqual(statutsBadSiret, expectedDetailResultList);
+      const date = new Date("2010-10-10T00:00:00.000+0000");
+      const abandonsCount = await getAbandonsCountAtDate(date);
+
+      assert.equal(abandonsCount, 0);
+    });
+
+    it("gets count of abandons at a date and for a region", async () => {
+      const filters = { etablissement_num_region: "28" };
+      await seedStatutsCandidats(filters);
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const abandonsCountForRegion = await getAbandonsCountAtDate(date, filters);
+
+      assert.equal(abandonsCountForRegion, 10);
+
+      const abandonsCountForAnotherRegion = await getAbandonsCountAtDate(date, { etablissement_num_region: "100" });
+      assert.equal(abandonsCountForAnotherRegion, 0);
+    });
+  });
+
+  describe("getEffectifsCountByNiveauFormationAtDate", () => {
+    const { getEffectifsCountByNiveauFormationAtDate } = dashboardComponent();
+
+    it("Permet de récupérer les effectifs par niveau_formation à une date donnée", async () => {
+      const filterQuery = { uai_etablissement: "0123456Z" };
+
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "1" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "2" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "3" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: null });
+      await seedStatutsCandidats({ uai_etablissement: "0123456T", niveau_formation: "1" });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          niveau_formation: "1",
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          niveau_formation: "2",
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          niveau_formation: "3",
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+      ];
+
+      const effectifsByNiveauFormation = await getEffectifsCountByNiveauFormationAtDate(date, filterQuery);
+      // we will sort results because we don't care of the order in the test
+      const sortByNiveauFormation = (a, b) => (Number(a.niveau_formation) > Number(b.niveau_formation) ? 1 : -1);
+      assert.deepEqual(effectifsByNiveauFormation.sort(sortByNiveauFormation), expectedResult);
+    });
+  });
+
+  describe("getEffectifsCountByAnneeFormationAtDate", () => {
+    const { getEffectifsCountByAnneeFormationAtDate } = dashboardComponent();
+
+    it("Permet de récupérer les effectifs par annee_formation à une date donnée", async () => {
+      const filterQuery = { uai_etablissement: "0123456Z" };
+
+      await seedStatutsCandidats({ ...filterQuery, annee_formation: 1 });
+      await seedStatutsCandidats({ ...filterQuery, annee_formation: 2 });
+      await seedStatutsCandidats({ ...filterQuery, annee_formation: 3 });
+      await seedStatutsCandidats({ ...filterQuery, annee_formation: null });
+      await seedStatutsCandidats({ uai_etablissement: "0123456T", annee_formation: 1 });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          annee_formation: null,
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          annee_formation: 1,
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          annee_formation: 2,
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          annee_formation: 3,
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+      ];
+
+      const effectifsByAnneeFormation = await getEffectifsCountByAnneeFormationAtDate(date, filterQuery);
+      // we will sort results because we don't care of the order in the test
+      const sortByAnneeFormation = (a, b) => (a.annee_formation > b.annee_formation ? 1 : -1);
+      assert.deepEqual(effectifsByAnneeFormation.sort(sortByAnneeFormation), expectedResult);
+    });
+  });
+
+  describe("getEffectifsCountByFormationAtDate", () => {
+    const { getEffectifsCountByFormationAtDate } = dashboardComponent();
+
+    it("Permet de récupérer les effectifs par formation_cfd à une date donnée", async () => {
+      const filterQuery = { uai_etablissement: "0123456Z" };
+
+      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "a", formation_cfd: "77929544300013" });
+      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "a", formation_cfd: "77929544300013" });
+      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "b", formation_cfd: "77929544300014" });
+      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "c", formation_cfd: "77929544300015" });
+      await seedStatutsCandidats({ uai_etablissement: "0123456T", formation_cfd: "77929544300013" });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          formation_cfd: "77929544300013",
+          intitule: "a",
+          effectifs: {
+            apprentis: 10,
+            inscritsSansContrat: 30,
+            rupturants: 0,
+            abandons: 20,
+          },
+        },
+        {
+          formation_cfd: "77929544300014",
+          intitule: "b",
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          formation_cfd: "77929544300015",
+          intitule: "c",
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+      ];
+
+      const effectifsByFormation = await getEffectifsCountByFormationAtDate(date, filterQuery);
+      // we will sort results because we don't care of the order in the test
+      const sortByFormation = (a, b) => (a.formation_cfd > b.formation_cfd ? 1 : -1);
+      assert.deepEqual(effectifsByFormation.sort(sortByFormation), expectedResult);
     });
   });
 
@@ -367,13 +364,11 @@ integrationTests(__filename, () => {
     it("Permet de récupérer les effectifs par CFA à une date donnée pour une formation", async () => {
       const filterQuery = { formation_cfd: "77929544300013" };
       const cfa1 = {
-        siret_etablissement: "00690630980544",
-        uai_etablissement: "0123456Z",
+        uai_etablissement: "0123456T",
         nom_etablissement: "CFA 1",
       };
       const cfa2 = {
-        siret_etablissement: "00690630980588",
-        uai_etablissement: "0123456T",
+        uai_etablissement: "012345Z",
         nom_etablissement: "CFA 2",
       };
       await seedStatutsCandidats({ ...filterQuery, ...cfa1 });
@@ -387,7 +382,8 @@ integrationTests(__filename, () => {
           ...cfa1,
           effectifs: {
             apprentis: 5,
-            inscrits: 15,
+            inscritsSansContrat: 15,
+            rupturants: 0,
             abandons: 10,
           },
         },
@@ -395,7 +391,8 @@ integrationTests(__filename, () => {
           ...cfa2,
           effectifs: {
             apprentis: 10,
-            inscrits: 30,
+            inscritsSansContrat: 30,
+            rupturants: 0,
             abandons: 20,
           },
         },
@@ -403,13 +400,58 @@ integrationTests(__filename, () => {
 
       const effectifsByCfa = await getEffectifsCountByCfaAtDate(date, filterQuery);
       // we will sort results because we don't care of the order in the test
-      const sortBySiret = (a, b) => Number(a.siret_etablissement) - Number(b.siret_etablissement);
-      assert.deepEqual(effectifsByCfa.sort(sortBySiret), expectedResult);
+      const sortByUai = (a, b) => (a.uai_etablissement > b.uai_etablissement ? 1 : -1);
+      assert.deepEqual(effectifsByCfa.sort(sortByUai), expectedResult);
     });
   });
 
-  describe("computeNouveauxContratsApprentissageForDateRange", () => {
-    const { computeNouveauxContratsApprentissageForDateRange } = dashboardComponent();
+  describe("getEffectifsCountByDepartementAtDate", () => {
+    const { getEffectifsCountByDepartementAtDate } = dashboardComponent();
+
+    it("Permet de récupérer les effectifs par departement à une date donnée", async () => {
+      const departement1 = {
+        etablissement_num_departement: "75",
+        etablissement_nom_departement: "Paris",
+      };
+      const departement2 = {
+        etablissement_num_departement: "77",
+        etablissement_nom_departement: "Seine-et-Marne",
+      };
+      await seedStatutsCandidats({ ...departement1 });
+      await seedStatutsCandidats({ ...departement2 });
+      await seedStatutsCandidats({ ...departement2 });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          ...departement1,
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          ...departement2,
+          effectifs: {
+            apprentis: 10,
+            inscritsSansContrat: 30,
+            rupturants: 0,
+            abandons: 20,
+          },
+        },
+      ];
+
+      const effectifsByDepartement = await getEffectifsCountByDepartementAtDate(date);
+      // we will sort results because we don't care of the order in the test
+      const sortByDepartement = (a, b) => (a.etablissement_num_departement > b.etablissement_num_departement ? 1 : -1);
+      assert.deepEqual(effectifsByDepartement.sort(sortByDepartement), expectedResult);
+    });
+  });
+
+  describe("getNouveauxContratsCountInDateRange", () => {
+    const { getNouveauxContratsCountInDateRange } = dashboardComponent();
 
     beforeEach(async () => {
       const statuts = [
@@ -470,7 +512,7 @@ integrationTests(__filename, () => {
       { dateRange: [new Date("2019-07-01T00:00:00"), new Date("2019-12-31T00:00:00")], expectedCount: 0 },
     ].forEach(({ dateRange, expectedCount }) => {
       it(`computes number of new contracts for date range ${dateRange[0].toLocaleDateString()} - ${dateRange[1].toLocaleDateString()}`, async () => {
-        const count = await computeNouveauxContratsApprentissageForDateRange(dateRange);
+        const count = await getNouveauxContratsCountInDateRange(dateRange);
         assert.equal(count, expectedCount);
       });
     });
@@ -485,43 +527,58 @@ integrationTests(__filename, () => {
         createRandomStatutCandidat({
           etablissement_num_region: "199",
           historique_statut_apprenant: [
-            { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
-            { valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
+            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
           ],
         }),
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
-            { valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
-            { valeur_statut: 3, date_statut: new Date("2020-11-01T00:00:00") },
+            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
+            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-11-01T00:00:00") },
           ],
-        }),
-        // not a rupturant
-        createRandomStatutCandidat({
-          historique_statut_apprenant: [{ valeur_statut: 1, date_statut: new Date("2020-03-22T00:00:00") }],
         }),
         // not a rupturant
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { valeur_statut: 1, date_statut: new Date("2020-04-21T00:00:00") },
-            { valeur_statut: 2, date_statut: new Date("2020-04-24T00:00:00") },
-            { valeur_statut: 3, date_statut: new Date("2020-04-30T00:00:00") },
+            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-03-22T00:00:00") },
+          ],
+        }),
+        // not a rupturant
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-04-21T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-04-24T00:00:00") },
+            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-04-30T00:00:00") },
           ],
         }),
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { valeur_statut: 3, date_statut: new Date("2020-07-29T00:00:00") },
-            { valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
-            { valeur_statut: 0, date_statut: new Date("2020-12-07T00:00:00") },
+            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-07-29T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
+            { position_statut: 3, valeur_statut: 0, date_statut: new Date("2020-12-07T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-07-29T00:00:00") },
+            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
+            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-12-07T00:00:00") },
+            { position_statut: 4, valeur_statut: 2, date_statut: new Date("2020-12-21T00:00:00") },
           ],
         }),
         // not a rupturant
         createRandomStatutCandidat({
-          historique_statut_apprenant: [{ valeur_statut: 2, date_statut: new Date("2020-02-01T00:00:00") }],
+          historique_statut_apprenant: [
+            { position_statut: 1, valeur_statut: 2, date_statut: new Date("2020-02-01T00:00:00") },
+          ],
         }),
         // not a rupturant
         createRandomStatutCandidat({
-          historique_statut_apprenant: [{ valeur_statut: 3, date_statut: new Date("2020-05-15T00:00:00") }],
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-05-15T00:00:00") },
+          ],
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
@@ -539,12 +596,397 @@ integrationTests(__filename, () => {
     it("gets count of rupturants now", async () => {
       const date = new Date();
       const count = await getRupturantsCountAtDate(date);
-      assert.equal(count, 1);
+      assert.equal(count, 2);
     });
 
     it("gets count of rupturants at date with additional filter", async () => {
-      const date = new Date("2020-10-12T00:00:00");
+      const date = new Date();
       const count = await getRupturantsCountAtDate(date, { etablissement_num_region: "199" });
+      assert.equal(count, 1);
+    });
+  });
+
+  describe("getNbRupturesContratAtDate", () => {
+    const { getNbRupturesContratAtDate } = dashboardComponent();
+
+    it("gets count of ruptures for apprentis to abandon at date", async () => {
+      const statuts = [
+        // 3 ruptures apprentis to abandon at 05-07-2021
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+
+        // 4 ruptures apprentis to abandon to apprentis to abandon at 05-07-2021
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-14T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-02T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-14T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-02T00:00:00") },
+          ],
+        }),
+      ];
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+
+      const date = new Date("2021-07-10T00:00:00");
+      const count = await getNbRupturesContratAtDate(date);
+      assert.equal(count, 7);
+    });
+
+    it("gets count of ruptures for apprentis to inscrits at date", async () => {
+      const statuts = [
+        // 4 ruptures apprentis to inscrits
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2021-05-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+
+        // 2 ruptures apprentis to inscrits to apprentis to inscrits
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-08T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-12-01T00:00:00") },
+          ],
+        }),
+      ];
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+
+      const date = new Date("2021-07-10T00:00:00");
+      const count = await getNbRupturesContratAtDate(date);
+      assert.equal(count, 6);
+    });
+
+    it("gets count of ruptures for mix apprentis to abandon & inscrits at date", async () => {
+      const statuts = [
+        // 3 ruptures apprentis to abandon at 05-07-2021
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+
+        // 4 ruptures apprentis to abandon to apprentis to abandon at 05-07-2021
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-14T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-02T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-14T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-02T00:00:00") },
+          ],
+        }),
+
+        // 4 ruptures apprentis to inscrits
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2021-05-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+
+        // 2 ruptures apprentis to inscrits to apprentis to inscrits
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-08T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-12-01T00:00:00") },
+          ],
+        }),
+      ];
+
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+
+      const date = new Date("2021-07-10T00:00:00");
+      const count = await getNbRupturesContratAtDate(date);
+      assert.equal(count, 13);
+    });
+
+    it("gets count of ruptures for mix apprentis to abandon & inscrits at date for etablissement filter", async () => {
+      const statuts = [
+        // 3 ruptures apprentis to abandon at 05-07-2021 - 1 for etablissement_num_region 199
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+
+        // 4 ruptures apprentis to abandon to apprentis to abandon at 05-07-2021 - 2 for etablissement_num_region 199
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-14T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-10-02T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-14T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-11-02T00:00:00") },
+          ],
+        }),
+
+        // 4 ruptures apprentis to inscrits - 2 for etablissement_num_region 199
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-11-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2021-05-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2021-06-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2021-07-05T00:00:00") },
+          ],
+        }),
+
+        // 2 ruptures apprentis to inscrits to apprentis to inscrits - 2 for etablissement_num_region 199
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-08T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-12-01T00:00:00") },
+          ],
+        }),
+      ];
+
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+
+      const date = new Date("2021-07-10T00:00:00");
+      const count = await getNbRupturesContratAtDate(date, { etablissement_num_region: "199" });
+      assert.equal(count, 7);
+    });
+  });
+
+  describe("getInscritsSansContratCountAtDate", () => {
+    const { getInscritsSansContratCountAtDate } = dashboardComponent();
+
+    beforeEach(async () => {
+      const statuts = [
+        // rupturant, should not be counted
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-03T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2020-03-21T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-03-22T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-03-22T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-03-25T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.prospect, date_statut: new Date("2020-04-21T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-09-24T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-30T00:00:00") },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-09-24T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-11-30T00:00:00") },
+            { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-12-30T00:00:00") },
+          ],
+        }),
+      ];
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+    });
+
+    it("gets count of inscrits sans contrat at date", async () => {
+      const date = new Date("2020-10-10T00:00:00");
+      const count = await getInscritsSansContratCountAtDate(date);
+      assert.equal(count, 5);
+    });
+
+    it("gets count of inscrits sans contrat now", async () => {
+      const date = new Date();
+      const count = await getInscritsSansContratCountAtDate(date);
+      assert.equal(count, 3);
+    });
+
+    it("gets count of rupturants now with additional filter", async () => {
+      const date = new Date();
+      const count = await getInscritsSansContratCountAtDate(date, { etablissement_num_region: "199" });
       assert.equal(count, 1);
     });
   });

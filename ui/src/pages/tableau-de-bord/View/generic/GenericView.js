@@ -1,35 +1,18 @@
-import { HStack, Skeleton } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { filtersPropTypes } from "../../FiltersContext";
+import IndicesProvenanceSection from "../../IndicesProvenanceSection";
 import { effectifsPropType } from "../../propTypes";
 import EffectifsSection from "./EffectifsSection";
-import RegionConversionSection from "./region-conversion/RegionConversionSection";
+import RepartitionEffectifsTerritoire from "./RepartitionEffectifsTerritoire";
 
-const GenericViewLoading = () => {
-  return (
-    <HStack>
-      <Skeleton height="8rem" width="16rem" startColor="bluesoft.50" endColor="bluesoft.200" />
-      <Skeleton height="8rem" width="16rem" startColor="bluesoft.50" endColor="bluesoft.200" />
-      <Skeleton height="8rem" width="16rem" startColor="bluesoft.50" endColor="bluesoft.200" />
-    </HStack>
-  );
-};
-
-const GenericView = ({ filters, effectifs, loading }) => {
-  if (loading) {
-    return <GenericViewLoading />;
-  }
-
-  if (!effectifs) {
-    return null;
-  }
-
+const GenericView = ({ effectifs, loading, filters }) => {
   return (
     <>
-      {filters.region && <RegionConversionSection filters={filters} />}
-      <EffectifsSection effectifs={effectifs} />
+      <IndicesProvenanceSection />
+      <EffectifsSection effectifs={effectifs} loading={loading} />
+      <RepartitionEffectifsTerritoire filters={filters} />
     </>
   );
 };

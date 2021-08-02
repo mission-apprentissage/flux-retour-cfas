@@ -5,11 +5,13 @@ const users = require("../../../src/common/components/users");
 const { seedUsers, seedSample } = require("../../../src/jobs/seed/utils/seedUtils");
 const { StatutCandidat, User } = require("../../../src/common/model");
 const { nockGetSiretInfo, nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
+const { nockGetMetiersByCfd } = require("../../utils/nockApis/nock-Lba");
 
 integrationTests(__filename, () => {
   beforeEach(() => {
     nockGetSiretInfo();
     nockGetCfdInfo();
+    nockGetMetiersByCfd();
   });
 
   it("Vérifie la création de données de test depuis le job", async () => {

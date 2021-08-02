@@ -17,10 +17,18 @@ export const displayEvolutionPercentage = (evolutionData) =>
     : `${roundToOne(evolutionData)}%`;
 
 export const toPrettyYearLabel = (year) => {
-  if (!year) return "N/A";
   return year === 1 ? `${year}ère année` : `${year}ème année`;
 };
 
 export const truncate = (string, size = 32) => {
   return string.length > size ? string.substr(0, size - 1) + "..." : string;
+};
+
+export const pluralize = (text, value, pluralCharacter = "s") => {
+  return value > 1 ? `${text}${pluralCharacter}` : `${text}`;
+};
+
+export const formatNumber = (number) => {
+  if (!number) return number;
+  return Number(number).toLocaleString();
 };

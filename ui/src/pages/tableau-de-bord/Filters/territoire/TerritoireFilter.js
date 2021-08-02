@@ -1,9 +1,9 @@
-import { Box } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { FilterButton, OverlayMenu } from "../../../../common/components";
+import { OverlayMenu } from "../../../../common/components";
 import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
+import PrimarySelectButton from "../../../../common/components/SelectButton/PrimarySelectButton";
 import { filtersPropTypes } from "../../FiltersContext";
 import DepartementOptions from "./DepartementOptions";
 import RegionOptions from "./RegionOptions";
@@ -22,16 +22,15 @@ const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, region
     setIsOpen(false);
   };
 
-  const tabLabels = [`Régions (${regions.length})`, `Départements (${departements.length})`];
+  const tabLabels = [`Région (${regions.length})`, `Département (${departements.length})`];
 
   const buttonLabel = filters.region?.nom || filters.departement?.nom;
 
   return (
     <div>
-      <FilterButton onClick={() => setIsOpen(!isOpen)} icon="ri-map-pin-2-fill">
+      <PrimarySelectButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
         {buttonLabel}
-        <Box fontSize="delta" as="i" className="ri-arrow-down-s-line" marginLeft="1v" />
-      </FilterButton>
+      </PrimarySelectButton>
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>

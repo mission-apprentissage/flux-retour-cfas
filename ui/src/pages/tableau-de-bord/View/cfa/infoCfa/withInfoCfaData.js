@@ -4,14 +4,13 @@ import React from "react";
 import { useFetch } from "../../../../../common/hooks/useFetch";
 
 const withInfoCfaData = (Component) => {
-  const WithInfoCfaData = ({ cfaSiret, ...props }) => {
-    const [data, loading, error] = useFetch(`/api/cfas/${cfaSiret}`);
-
+  const WithInfoCfaData = ({ cfaUai, ...props }) => {
+    const [data, loading, error] = useFetch(`/api/cfas/${cfaUai}`);
     return <Component {...props} infosCfa={data} loading={loading} error={error} />;
   };
 
   WithInfoCfaData.propTypes = {
-    cfaSiret: PropTypes.string.isRequired,
+    cfaUai: PropTypes.string.isRequired,
   };
 
   return WithInfoCfaData;

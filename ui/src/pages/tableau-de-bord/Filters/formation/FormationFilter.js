@@ -1,48 +1,33 @@
-import { Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { FilterButton, OverlayMenu, SearchInput } from "../../../../common/components";
+import { OverlayMenu, SecondarySelectButton } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
-import FormationsList from "./FormationsList";
-import withFormationSearch from "./withFormationSearch";
+import FormationFilterMenu from "./FormationFilterMenu";
 
-const FormationFilter = ({ filters, searchTerm, searchResults, onSearchTermChange, onFormationChange }) => {
+const FormationFilter = ({ filters, onFormationChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onFormationClick = (formation) => {
     onFormationChange(formation);
     setIsOpen(false);
   };
-  const buttonLabel = filters.formation?.libelle || "Toutes les formations";
+  const buttonLabel = filters.formation?.libelle || "Sélectionner une formation";
 
   return (
     <div>
-      <FilterButton
+      <SecondarySelectButton
         icon="ri-book-mark-fill"
         onClick={() => setIsOpen(!isOpen)}
-        displayClearIcon={!!filters.formation}
+        isActive={isOpen}
+        isClearable={!!filters.formation}
         clearIconOnClick={() => onFormationChange(null)}
       >
         {buttonLabel}
-      </FilterButton>
+      </SecondarySelectButton>
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <SearchInput
-            value={searchTerm}
-            onChange={onSearchTermChange}
-            placeholder="Saisissez un libellé de formation ou un CFD"
-          />
-          {searchResults?.length === 0 && (
-            <Text fontSize="zeta" color="grey.500" paddingTop="1w" paddingLeft="1w">
-              Aucun résultat trouvé
-            </Text>
-          )}
-          <FormationsList
-            formations={searchResults}
-            onFormationClick={onFormationClick}
-            selectedValue={filters.formation}
-          />
+          <FormationFilterMenu onFormationClick={onFormationClick} filters={filters} />
         </OverlayMenu>
       )}
     </div>
@@ -56,10 +41,9 @@ FormationFilter.propTypes = {
       libelle: PropTypes.string.isRequired,
     })
   ),
-  onSearchTermChange: PropTypes.func.isRequired,
   onFormationChange: PropTypes.func.isRequired,
   searchTerm: PropTypes.string,
   filters: filtersPropTypes.state,
 };
 
-export default withFormationSearch(FormationFilter);
+export default FormationFilter;

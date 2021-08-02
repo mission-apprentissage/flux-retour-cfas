@@ -4,14 +4,15 @@ import "./PeriodeFilter.css";
 import { format, isThisMonth, lastDayOfMonth } from "date-fns";
 import fr from "date-fns/locale/fr";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 
-import { FilterButton } from "../../../../common/components";
+import PrimarySelectButton from "../../../../common/components/SelectButton/PrimarySelectButton";
 
 registerLocale("fr", fr);
 
 const PeriodeFilter = ({ value, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const buttonLabel = format(value, "MMMM yyyy", { locale: fr });
 
   const onChangeCb = (selectedDate) => {
@@ -35,10 +36,12 @@ const PeriodeFilter = ({ value, onChange }) => {
         showFourColumnMonthYearPicker
         locale="fr"
         maxDate={maxDate}
+        onCalendarClose={() => setIsOpen(false)}
+        onCalendarOpen={() => setIsOpen(true)}
         customInput={
-          <FilterButton icon="ri-calendar-event-fill">
-            <span style={{ textTransform: "capitalize" }}>{buttonLabel}</span>
-          </FilterButton>
+          <PrimarySelectButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
+            en {buttonLabel}
+          </PrimarySelectButton>
         }
       />
     </div>

@@ -1,60 +1,51 @@
+import { Box, Heading } from "@chakra-ui/react";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
 import React from "react";
 
-import { PageSectionSubtitle } from "../../../../../common/components";
+import { Section } from "../../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../../common/components/tables/RepartitionEffectifsParCfa";
-import RepartitionEffectifsParNiveauEtAnneeFormation from "../../../../../common/components/tables/RepartitionEffectifsParNiveauEtAnneeFormation";
+import RepartitionEffectifsParFormation from "../../../../../common/components/tables/RepartitionEffectifsParFormation";
 import { filtersPropTypes } from "../../../FiltersContext";
 import withRepartitionEffectifsReseauParCfa from "./withRepartitionEffectifsReseauParCfaData";
 import withRepartitionEffectifsReseauParNiveauEtAnneeFormation from "./withRepartitionEffectifsReseauParNiveauEtAnneeFormation";
 
 const RepartitionEffectifsReseauParCfa = withRepartitionEffectifsReseauParCfa(RepartitionEffectifsParCfa);
-const RepartitionEffectifsReseauParNiveauEtAnneeFormation = withRepartitionEffectifsReseauParNiveauEtAnneeFormation(
-  RepartitionEffectifsParNiveauEtAnneeFormation
+const RepartitionEffectifsReseauParFormation = withRepartitionEffectifsReseauParNiveauEtAnneeFormation(
+  RepartitionEffectifsParFormation
 );
 
 const RepartitionEffectifsReseau = ({ filters }) => {
   return (
-    <section>
-      <PageSectionSubtitle>Répartition des effectifs</PageSectionSubtitle>
-      <Tabs
-        variant="unstyled"
-        marginTop="1w"
-        _selected={{ borderBottom: "3px solid", borderBottomColor: "bluefrance", color: "grey.800" }}
-      >
-        <TabList color="gray.600">
-          <Tab
-            padding="0"
-            paddingY="1rem"
-            marginRight="1rem"
-            _selected={{ borderBottom: "3px solid", borderBottomColor: "bluefrance", color: "grey.800" }}
-          >
-            formations
+    <Section paddingY="4w">
+      <Heading as="h3" variant="h3">
+        Répartition des effectifs
+      </Heading>
+      <Tabs isLazy lazyBehavior="keepMounted">
+        <TabList>
+          <Tab>
+            <Box as="i" className="ri-community-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
+            Organismes de formation
           </Tab>
-          <Tab
-            padding="0"
-            paddingY="1rem"
-            marginRight="1rem"
-            _selected={{ borderBottom: "3px solid", borderBottomColor: "bluefrance", color: "grey.800" }}
-          >
-            organismes de formation
+          <Tab>
+            <Box as="i" className="ri-book-mark-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
+            Formations
           </Tab>
         </TabList>
-        <TabPanels padding="0">
-          <TabPanel padding="0">
-            <RepartitionEffectifsReseauParNiveauEtAnneeFormation filters={filters} />
-          </TabPanel>
-          <TabPanel padding="0">
+        <TabPanels>
+          <TabPanel>
             <RepartitionEffectifsReseauParCfa filters={filters} />
+          </TabPanel>
+          <TabPanel>
+            <RepartitionEffectifsReseauParFormation filters={filters} />
           </TabPanel>
         </TabPanels>
       </Tabs>
-    </section>
+    </Section>
   );
 };
 
 RepartitionEffectifsReseau.propTypes = {
-  filters: filtersPropTypes,
+  filters: filtersPropTypes.state,
 };
 
 export default RepartitionEffectifsReseau;

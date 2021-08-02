@@ -17,6 +17,19 @@ const getMetiersBySiret = async (siret) => {
   }
 };
 
+const getMetiersBySirets = async (sirets) => {
+  try {
+    const { data } = await axios.get(
+      `${API_ENDPOINT}/metiers/metiersParEtablissement/${encodeURIComponent(sirets.join(", "))}`
+    );
+    return data;
+  } catch (error) {
+    logger.error(`getMetiersBySirets: ${sirets} - something went wrong`);
+    logger.error(error);
+    return null;
+  }
+};
+
 const getMetiersByCfd = async (cfd) => {
   try {
     const { data } = await axios.get(`${API_ENDPOINT}/metiers/metiersParFormation/${cfd}`);
@@ -29,5 +42,6 @@ const getMetiersByCfd = async (cfd) => {
 
 module.exports = {
   getMetiersBySiret,
+  getMetiersBySirets,
   getMetiersByCfd,
 };

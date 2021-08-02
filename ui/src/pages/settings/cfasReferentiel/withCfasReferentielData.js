@@ -11,43 +11,30 @@ const withCfasReferentielData = (Component) => {
     const [error, setError] = useState(null);
     const [regionCode, setRegionCode] = useState(DEFAULT_REGION.code);
     const [withDataConnection, setWithDataConnection] = useState(-1);
-    const [withValidationTdb, setWithValidationTdb] = useState(-1);
 
     /** Callback for get paginated filtered cfas list */
-    const _fetch = useCallback(
-      async (
-        pageNumber = 1,
-        codeRegion = regionCode,
-        withConnection = withDataConnection,
-        withValidation = withValidationTdb
-      ) => {
-        setLoading(true);
-        setError(null);
+    const _fetch = useCallback(async (pageNumber = 1, codeRegion = regionCode, withConnection = withDataConnection) => {
+      setLoading(true);
+      setError(null);
 
-        // Handle filters queries
-        let filterQuery = { region_num: codeRegion };
+      // Handle filters queries
+      let filterQuery = { region_num: codeRegion };
 
-        if (withConnection != -1) {
-          filterQuery = { ...filterQuery, branchement_flux_cfa_erp: withConnection };
-        }
+      if (withConnection != -1) {
+        filterQuery = { ...filterQuery, branchement_flux_cfa_erp: withConnection };
+      }
 
-        if (withValidation != -1) {
-          filterQuery = { ...filterQuery, feedback_donnee_valide: withValidation == 2 ? null : withValidation };
-        }
+      const searchParams = `query=${JSON.stringify(filterQuery)}&page=${pageNumber}&limit=${10}`;
 
-        const searchParams = `query=${JSON.stringify(filterQuery)}&page=${pageNumber}&limit=${10}`;
-
-        try {
-          const response = await _get(`/api/cfas?${searchParams}`);
-          setData(response);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      },
-      []
-    );
+      try {
+        const response = await _get(`/api/cfas?${searchParams}`);
+        setData(response);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
 
     /** UseEffect hook for cfas api call */
     useEffect(() => {
@@ -74,19 +61,13 @@ const withCfasReferentielData = (Component) => {
     /** Update region filter */
     const onRegionChange = async (region) => {
       await setRegionCode(region);
-      await _fetch(data.pagination.page, region, withDataConnection, withValidationTdb);
+      await _fetch(data.pagination.page, region, withDataConnection);
     };
 
     /** Update connection filter */
     const onConnectionChange = async (withDataConnection) => {
       await setWithDataConnection(withDataConnection);
-      await _fetch(data.pagination.page, regionCode, withDataConnection, withValidationTdb);
-    };
-
-    /** Update validation Tdb filter */
-    const onValidationTdbChange = async (withValidationTdb) => {
-      await setWithValidationTdb(withValidationTdb);
-      await _fetch(data.pagination.page, regionCode, withDataConnection, withValidationTdb);
+      await _fetch(data.pagination.page, regionCode, withDataConnection);
     };
 
     return (
@@ -99,7 +80,6 @@ const withCfasReferentielData = (Component) => {
         _fetch={_fetch}
         onConnectionChange={onConnectionChange}
         onRegionChange={onRegionChange}
-        onValidationTdbChange={onValidationTdbChange}
         defaultSelectedRegionCode={DEFAULT_REGION.code}
       />
     );

@@ -7,7 +7,7 @@ export const getPercentageDifference = (count1, count2) => {
 };
 
 export const getPercentage = (value, total) => {
-  if (total === 0) return 0;
+  if (!total || !value) return 0;
   return (value / total) * 100;
 };
 

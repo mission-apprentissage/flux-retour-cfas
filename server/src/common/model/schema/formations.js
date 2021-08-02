@@ -20,6 +20,11 @@ const formationSchema = new Schema(
       type: String,
       description: "Libellé tokenizé pour la recherche",
     },
+    metiers: {
+      type: [String],
+      default: [],
+      description: "Les domaines métiers rattachés à la formation",
+    },
     updated_at: {
       type: Date,
       default: null,

@@ -5,14 +5,16 @@ import React from "react";
 const SearchInput = ({ value = "", placeholder = "", onChange }) => {
   return (
     <InputGroup>
-      <InputLeftElement pointerEvents="none" className="ri-search-line" as="i" paddingBottom="1w" />
+      <InputLeftElement pointerEvents="none" fontSize="gamma" className="ri-search-line" as="i" marginTop="3px" />
       <Input
         placeholder={placeholder}
         value={value}
+        variant="search"
         onChange={(event) => onChange(event.target.value)}
-        size="sm"
+        size="lg"
         autoFocus
-        color="grey.800"
+        fontSize="epsilon"
+        _placeholder={{ fontSize: "epsilon" }}
       />
     </InputGroup>
   );

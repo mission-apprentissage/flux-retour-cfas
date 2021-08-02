@@ -1,5 +1,6 @@
 import {
   Box,
+  Heading,
   HStack,
   Select,
   Skeleton,
@@ -17,7 +18,7 @@ import {
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Page, PageContent, PageHeader, Pagination } from "../../../common/components";
+import { Page, Pagination, Section } from "../../../common/components";
 import withCfasReferentielData from "./withCfasReferentielData";
 
 const CfasReferentielPage = ({
@@ -28,14 +29,16 @@ const CfasReferentielPage = ({
   _fetch,
   onConnectionChange,
   onRegionChange,
-  onValidationTdbChange,
   defaultSelectedRegionCode,
 }) => {
   return (
     <Page>
-      <PageHeader title="Référentiel des organismes de formation" />
-
-      <PageContent>
+      <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
+        <Heading as="h1" variant="h1">
+          Référentiel des organismes de formation
+        </Heading>
+      </Section>
+      <Section marginTop="4w">
         <Stack spacing="4w">
           {regionsData && (
             <Box background="bluegrey.200" padding="4w" width="100%">
@@ -71,20 +74,6 @@ const CfasReferentielPage = ({
                     <option value={0}>Sans branchement des données</option>
                   </Select>
                 </HStack>
-
-                {/* Filtre Validation */}
-                <HStack>
-                  <Text>
-                    <i className="ri-checkbox-multiple-fill"></i>
-                  </Text>
-                  <Text>Validation des données : </Text>
-                  <Select defaultValue={-1} onChange={(e) => onValidationTdbChange(e.target.value)} width="30%">
-                    <option value={-1}>-- Peu importe --</option>
-                    <option value={1}>Données validées</option>
-                    <option value={0}>Données non validées</option>
-                    <option value={2}>En attente de validation</option>
-                  </Select>
-                </HStack>
               </Stack>
             </Box>
           )}
@@ -106,16 +95,12 @@ const CfasReferentielPage = ({
                   <Th>UAI</Th>
                   <Th>Region</Th>
                   <Th>Branchement Tdb</Th>
-                  <Th>Validation Tdb</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {Array.from(Array(10), (e, i) => {
                   return (
                     <Tr key={i}>
-                      <Td>
-                        <Skeleton height="20px" />
-                      </Td>
                       <Td>
                         <Skeleton height="20px" />
                       </Td>
@@ -145,7 +130,6 @@ const CfasReferentielPage = ({
                   <Th>UAI</Th>
                   <Th>Region</Th>
                   <Th>Branchement Tdb</Th>
-                  <Th>Validation Tdb</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -157,21 +141,6 @@ const CfasReferentielPage = ({
                     <Td>{cfa.region_nom}</Td>
                     <Td>
                       {cfa.branchement_flux_cfa_erp ? (
-                        <Tag colorScheme="green">
-                          <i className="ri-thumb-up-line"></i>
-                        </Tag>
-                      ) : (
-                        <Tag colorScheme="red">
-                          <i className="ri-close-circle-line"></i>
-                        </Tag>
-                      )}
-                    </Td>
-                    <Td>
-                      {cfa.feedback_donnee_valide === null ? (
-                        <Tag>
-                          <i className="ri-question-fill"></i>
-                        </Tag>
-                      ) : cfa.feedback_donnee_valide ? (
                         <Tag colorScheme="green">
                           <i className="ri-thumb-up-line"></i>
                         </Tag>
@@ -194,7 +163,7 @@ const CfasReferentielPage = ({
             </Table>
           )}
         </Stack>
-      </PageContent>
+      </Section>{" "}
     </Page>
   );
 };
@@ -212,7 +181,6 @@ CfasReferentielPage.propTypes = {
   _fetch: PropTypes.func.isRequired,
   onConnectionChange: PropTypes.func.isRequired,
   onRegionChange: PropTypes.func.isRequired,
-  onValidationTdbChange: PropTypes.func.isRequired,
   defaultSelectedRegionCode: PropTypes.string.isRequired,
 };
 
