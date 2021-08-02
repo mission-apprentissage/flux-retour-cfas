@@ -28,7 +28,7 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
 
   return (
     <Table
-      headers={["Département", "apprentis", "jeunes sans contrat", "rupturants", "abandons"]}
+      headers={["Département", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
       loading={loading}
       error={error}
     >
@@ -44,7 +44,7 @@ RepartitionEffectifsParDepartement.propTypes = {
       nom_etablissement: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
-        jeunesSansContrat: PropTypes.number.isRequired,
+        inscritsSansContrat: PropTypes.number.isRequired,
         rupturants: PropTypes.number.isRequired,
         abandons: PropTypes.number.isRequired,
       }).isRequired,

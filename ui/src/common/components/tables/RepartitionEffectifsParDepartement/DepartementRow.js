@@ -8,7 +8,7 @@ import CfasRows from "./CfasRows";
 
 const DepartementRow = ({ departementCode, departementNom, effectifs }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const total = effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants + effectifs.abandons;
+  const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
       <Tr background="galt" onClick={() => setIsOpen(!isOpen)} cursor="pointer" _hover={{ background: "galt_hover" }}>
@@ -19,7 +19,10 @@ const DepartementRow = ({ departementCode, departementNom, effectifs }) => {
           </Box>
         </Td>
         <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-        <ProgressCell label={effectifs.jeunesSansContrat} value={getPercentage(effectifs.jeunesSansContrat, total)} />
+        <ProgressCell
+          label={effectifs.inscritsSansContrat}
+          value={getPercentage(effectifs.inscritsSansContrat, total)}
+        />
         <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
         <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
       </Tr>
@@ -34,7 +37,7 @@ DepartementRow.propTypes = {
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     rupturants: PropTypes.number.isRequired,
-    jeunesSansContrat: PropTypes.number.isRequired,
+    inscritsSansContrat: PropTypes.number.isRequired,
     abandons: PropTypes.number.isRequired,
   }).isRequired,
 };

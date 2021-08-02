@@ -9,7 +9,7 @@ import Table from "../Table";
 const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading, error }) => {
   return (
     <Table
-      headers={["Niveau", "apprentis", "jeunes sans contrat", "rupturants", "abandons"]}
+      headers={["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
       loading={loading}
       error={error}
     >
@@ -17,14 +17,14 @@ const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading,
         {repartitionEffectifs
           ? repartitionEffectifs.map(({ niveauFormation, effectifs }, index) => {
               const total =
-                effectifs.abandons + effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants;
+                effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
               return (
                 <Tr key={niveauFormation + index}>
                   <Td color="grey.800">Niveau {niveauFormation}</Td>
                   <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
                   <ProgressCell
-                    label={effectifs.jeunesSansContrat}
-                    value={getPercentage(effectifs.jeunesSansContrat, total)}
+                    label={effectifs.inscritsSansContrat}
+                    value={getPercentage(effectifs.inscritsSansContrat, total)}
                   />
                   <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
                   <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
@@ -43,7 +43,7 @@ RepartitionEffectifsParNiveauFormation.propTypes = {
       niveauFormation: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
-        jeunesSansContrat: PropTypes.number.isRequired,
+        inscritsSansContrat: PropTypes.number.isRequired,
         rupturants: PropTypes.number.isRequired,
         abandons: PropTypes.number.isRequired,
       }).isRequired,

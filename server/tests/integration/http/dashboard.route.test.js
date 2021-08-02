@@ -66,7 +66,7 @@ httpTests(__filename, ({ startServer }) => {
 
       assert.equal(response.status, 200);
       const indices = response.data;
-      assert.deepEqual(indices.jeunesSansContrat + indices.rupturants, expectedResults.nbInscrits);
+      assert.deepEqual(indices.inscritsSansContrat + indices.rupturants, expectedResults.nbInscrits);
       assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
       assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
     });
@@ -120,7 +120,7 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       const indices = response.data;
-      assert.deepEqual(indices.jeunesSansContrat + indices.rupturants, expectedResults.nbInscrits);
+      assert.deepEqual(indices.inscritsSansContrat + indices.rupturants, expectedResults.nbInscrits);
       assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
       assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
 
@@ -132,7 +132,7 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       assert.deepStrictEqual(badResponse.status, 200);
-      assert.deepStrictEqual(badResponse.data.jeunesSansContrat, 0);
+      assert.deepStrictEqual(badResponse.data.inscritsSansContrat, 0);
       assert.deepStrictEqual(badResponse.data.rupturants, 0);
       assert.deepStrictEqual(badResponse.data.apprentis, 0);
       assert.deepStrictEqual(badResponse.data.abandons, 0);
@@ -169,8 +169,8 @@ httpTests(__filename, ({ startServer }) => {
       assert.equal(response.data.length, 2);
       const sortByNiveauFormation = (a, b) => (Number(a.niveau_formation) > Number(b.niveau_formation) ? 1 : -1);
       assert.deepStrictEqual(response.data.sort(sortByNiveauFormation), [
-        { niveau_formation: "1", effectifs: { apprentis: 5, abandons: 0, jeunesSansContrat: 0, rupturants: 0 } },
-        { niveau_formation: "2", effectifs: { apprentis: 1, abandons: 0, jeunesSansContrat: 0, rupturants: 0 } },
+        { niveau_formation: "1", effectifs: { apprentis: 5, abandons: 0, inscritsSansContrat: 0, rupturants: 0 } },
+        { niveau_formation: "2", effectifs: { apprentis: 1, abandons: 0, inscritsSansContrat: 0, rupturants: 0 } },
       ]);
     });
   });

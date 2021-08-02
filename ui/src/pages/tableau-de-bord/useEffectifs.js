@@ -10,8 +10,8 @@ const mapEffectifsData = (effectifsData) => {
     apprentis: {
       count: effectifsData.apprentis,
     },
-    jeunesSansContrat: {
-      count: effectifsData.jeunesSansContrat,
+    inscritsSansContrat: {
+      count: effectifsData.inscritsSansContrat,
     },
     rupturants: {
       count: effectifsData.rupturants,

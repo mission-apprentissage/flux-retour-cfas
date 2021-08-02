@@ -32,8 +32,8 @@ const EffectifsSection = ({ effectifs, loading }) => {
           tooltipLabel="Nombre d’apprenants en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
-          count={effectifs.jeunesSansContrat.count}
-          label="jeunes sans contrat"
+          count={effectifs.inscritsSansContrat.count}
+          label="inscrits sans contrat"
           tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard

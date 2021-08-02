@@ -214,7 +214,7 @@ integrationTests(__filename, () => {
           niveau_formation: "1",
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -223,7 +223,7 @@ integrationTests(__filename, () => {
           niveau_formation: "2",
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -232,7 +232,7 @@ integrationTests(__filename, () => {
           niveau_formation: "3",
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -264,7 +264,7 @@ integrationTests(__filename, () => {
           annee_formation: null,
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -273,7 +273,7 @@ integrationTests(__filename, () => {
           annee_formation: 1,
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -282,7 +282,7 @@ integrationTests(__filename, () => {
           annee_formation: 2,
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -291,7 +291,7 @@ integrationTests(__filename, () => {
           annee_formation: 3,
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -324,7 +324,7 @@ integrationTests(__filename, () => {
           intitule: "a",
           effectifs: {
             apprentis: 10,
-            jeunesSansContrat: 30,
+            inscritsSansContrat: 30,
             rupturants: 0,
             abandons: 20,
           },
@@ -334,7 +334,7 @@ integrationTests(__filename, () => {
           intitule: "b",
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -344,7 +344,7 @@ integrationTests(__filename, () => {
           intitule: "c",
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -382,7 +382,7 @@ integrationTests(__filename, () => {
           ...cfa1,
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -391,7 +391,7 @@ integrationTests(__filename, () => {
           ...cfa2,
           effectifs: {
             apprentis: 10,
-            jeunesSansContrat: 30,
+            inscritsSansContrat: 30,
             rupturants: 0,
             abandons: 20,
           },
@@ -427,7 +427,7 @@ integrationTests(__filename, () => {
           ...departement1,
           effectifs: {
             apprentis: 5,
-            jeunesSansContrat: 15,
+            inscritsSansContrat: 15,
             rupturants: 0,
             abandons: 10,
           },
@@ -436,7 +436,7 @@ integrationTests(__filename, () => {
           ...departement2,
           effectifs: {
             apprentis: 10,
-            jeunesSansContrat: 30,
+            inscritsSansContrat: 30,
             rupturants: 0,
             abandons: 20,
           },
@@ -906,8 +906,8 @@ integrationTests(__filename, () => {
     });
   });
 
-  describe("getJeunesSansContratCountAtDate", () => {
-    const { getJeunesSansContratCountAtDate } = dashboardComponent();
+  describe("getInscritsSansContratCountAtDate", () => {
+    const { getInscritsSansContratCountAtDate } = dashboardComponent();
 
     beforeEach(async () => {
       const statuts = [
@@ -972,21 +972,21 @@ integrationTests(__filename, () => {
       }
     });
 
-    it("gets count of jeunes sans contrat at date", async () => {
+    it("gets count of inscrits sans contrat at date", async () => {
       const date = new Date("2020-10-10T00:00:00");
-      const count = await getJeunesSansContratCountAtDate(date);
+      const count = await getInscritsSansContratCountAtDate(date);
       assert.equal(count, 5);
     });
 
-    it("gets count of jeunes sans contrat now", async () => {
+    it("gets count of inscrits sans contrat now", async () => {
       const date = new Date();
-      const count = await getJeunesSansContratCountAtDate(date);
+      const count = await getInscritsSansContratCountAtDate(date);
       assert.equal(count, 3);
     });
 
     it("gets count of rupturants now with additional filter", async () => {
       const date = new Date();
-      const count = await getJeunesSansContratCountAtDate(date, { etablissement_num_region: "199" });
+      const count = await getInscritsSansContratCountAtDate(date, { etablissement_num_region: "199" });
       assert.equal(count, 1);
     });
   });

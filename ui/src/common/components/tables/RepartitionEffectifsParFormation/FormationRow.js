@@ -9,7 +9,7 @@ import AnneeFormationRows from "./AnneeFormationRows";
 const FormationRow = ({ formationCfd, intitule, effectifs }) => {
   const [isOpen, setIsOpen] = useState();
 
-  const total = effectifs.apprentis + effectifs.jeunesSansContrat + effectifs.rupturants + effectifs.abandons;
+  const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
       <Tr color="grey.800" _hover={{ background: "grey.100" }} onClick={() => setIsOpen(!isOpen)} cursor="pointer">
@@ -29,7 +29,10 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
           </Flex>
         </Td>
         <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-        <ProgressCell label={effectifs.jeunesSansContrat} value={getPercentage(effectifs.jeunesSansContrat, total)} />
+        <ProgressCell
+          label={effectifs.inscritsSansContrat}
+          value={getPercentage(effectifs.inscritsSansContrat, total)}
+        />
         <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
         <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
       </Tr>
@@ -43,7 +46,7 @@ FormationRow.propTypes = {
   intitule: PropTypes.string.isRequired,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
-    jeunesSansContrat: PropTypes.number.isRequired,
+    inscritsSansContrat: PropTypes.number.isRequired,
     rupturants: PropTypes.number.isRequired,
     abandons: PropTypes.number.isRequired,
   }).isRequired,

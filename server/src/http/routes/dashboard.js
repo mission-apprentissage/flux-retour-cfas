@@ -128,7 +128,7 @@ module.exports = ({ stats, dashboard }) => {
         date: endDate,
         apprentis: await dashboard.getApprentisCountAtDate(endDate, filters),
         rupturants: await dashboard.getRupturantsCountAtDate(endDate, filters),
-        jeunesSansContrat: await dashboard.getJeunesSansContratCountAtDate(endDate, filters),
+        inscritsSansContrat: await dashboard.getInscritsSansContratCountAtDate(endDate, filters),
         abandons: await dashboard.getAbandonsCountAtDate(endDate, filters),
       });
     })

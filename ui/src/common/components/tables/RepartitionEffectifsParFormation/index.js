@@ -8,7 +8,7 @@ import NiveauFormationRow from "./NiveauFormationRow";
 const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error }) => {
   return (
     <Table
-      headers={["Niveau", "apprentis", "jeunes sans contrat", "rupturants", "abandons"]}
+      headers={["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
       loading={loading}
       error={error}
     >
@@ -35,7 +35,7 @@ RepartitionEffectifsParFormation.propTypes = {
       niveauFormation: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
-        jeunesSansContrat: PropTypes.number.isRequired,
+        inscritsSansContrat: PropTypes.number.isRequired,
         rupturants: PropTypes.number.isRequired,
         abandons: PropTypes.number.isRequired,
       }).isRequired,

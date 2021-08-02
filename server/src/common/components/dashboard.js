@@ -9,7 +9,7 @@ module.exports = () => ({
   getApprentisCountAtDate,
   getAbandonsCountAtDate,
   getRupturantsCountAtDate,
-  getJeunesSansContratCountAtDate,
+  getInscritsSansContratCountAtDate,
   getNouveauxContratsCountInDateRange,
   getNbRupturesContratAtDate,
   getEffectifsCountByNiveauFormationAtDate,
@@ -83,7 +83,7 @@ const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) 
 };
 
 const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, projection }) => {
-  // compute number of apprentis, abandons, jeunes sans contrat and rupturants
+  // compute number of apprentis, abandons, inscrits sans contrat and rupturants
   const apprentisCountByCfa = await getApprentisCountAtDate(searchDate, filters, {
     groupedBy: { ...groupedBy, apprentis: { $sum: 1 } },
     projection,
@@ -92,8 +92,8 @@ const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, pr
     groupedBy: { ...groupedBy, abandons: { $sum: 1 } },
     projection,
   });
-  const jeunesSansContratCountByCfa = await getJeunesSansContratCountAtDate(searchDate, filters, {
-    groupedBy: { ...groupedBy, jeunesSansContrat: { $sum: 1 } },
+  const inscritsSansContratCountByCfa = await getInscritsSansContratCountAtDate(searchDate, filters, {
+    groupedBy: { ...groupedBy, inscritsSansContrat: { $sum: 1 } },
     projection,
   });
   const rupturantsCountByCfa = await getRupturantsCountAtDate(searchDate, filters, {
@@ -101,9 +101,9 @@ const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, pr
     projection,
   });
 
-  // merge apprentis, abandons, jeunes sans contrat and rupturants with same _id to have them grouped
+  // merge apprentis, abandons, inscrits sans contrat and rupturants with same _id to have them grouped
   return mergeObjectsBy(
-    [...apprentisCountByCfa, ...abandonsCountByCfa, ...jeunesSansContratCountByCfa, ...rupturantsCountByCfa],
+    [...apprentisCountByCfa, ...abandonsCountByCfa, ...inscritsSansContratCountByCfa, ...rupturantsCountByCfa],
     "_id"
   );
 };
@@ -116,7 +116,7 @@ const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, pr
  *  niveau: string
  *  effectifs: {
  *    apprentis: number
- *    jeunesSansContrat: number
+ *    inscritsSansContrat: number
  *    rupturants: number
  *    abandons: number
  *  }
@@ -125,7 +125,7 @@ const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, pr
 const getEffectifsCountByNiveauFormationAtDate = async (searchDate, filters = {}) => {
   const projection = { niveau_formation: 1 };
   const groupedBy = { _id: "$niveau_formation" };
-  // compute number of apprentis, abandons, jeunes sans contrat and rupturants
+  // compute number of apprentis, abandons, inscrits sans contrat and rupturants
   const effectifsByNiveauFormation = await getEffectifsCountAtDate(
     searchDate,
     // compute effectifs with a niveau_formation
@@ -141,7 +141,7 @@ const getEffectifsCountByNiveauFormationAtDate = async (searchDate, filters = {}
       niveau_formation: _id,
       effectifs: {
         apprentis: effectifs.apprentis || 0,
-        jeunesSansContrat: effectifs.jeunesSansContrat || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
         rupturants: effectifs.rupturants || 0,
         abandons: effectifs.abandons || 0,
       },
@@ -158,7 +158,7 @@ const getEffectifsCountByNiveauFormationAtDate = async (searchDate, filters = {}
  *  intitule: string
  *  effectifs: {
  *    apprentis: number
- *    jeunesSansContrat: number
+ *    inscritsSansContrat: number
  *    rupturants: number
  *    abandons: number
  *  }
@@ -182,7 +182,7 @@ const getEffectifsCountByFormationAtDate = async (searchDate, filters = {}) => {
       intitule: libelle_long_formation,
       effectifs: {
         apprentis: effectifs.apprentis || 0,
-        jeunesSansContrat: effectifs.jeunesSansContrat || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
         rupturants: effectifs.rupturants || 0,
         abandons: effectifs.abandons || 0,
       },
@@ -198,7 +198,7 @@ const getEffectifsCountByFormationAtDate = async (searchDate, filters = {}) => {
  *  annee_formation: string
  *  effectifs: {
  *    apprentis: number
- *    jeunesSansContrat: number
+ *    inscritsSansContrat: number
  *    rupturants: number
  *    abandons: number
  *  }
@@ -214,7 +214,7 @@ const getEffectifsCountByAnneeFormationAtDate = async (searchDate, filters = {})
       annee_formation: _id,
       effectifs: {
         apprentis: effectifs.apprentis || 0,
-        jeunesSansContrat: effectifs.jeunesSansContrat || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
         rupturants: effectifs.rupturants || 0,
         abandons: effectifs.abandons || 0,
       },
@@ -231,7 +231,7 @@ const getEffectifsCountByAnneeFormationAtDate = async (searchDate, filters = {})
  *  nom_etablissement: string
  *  effectifs: {
  *    apprentis: number
- *    jeunesSansContrat: number
+ *    inscritsSansContrat: number
  *    rupturants: number
  *    abandons: number
  *  }
@@ -262,7 +262,7 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
       nom_etablissement,
       effectifs: {
         apprentis: effectifs.apprentis || 0,
-        jeunesSansContrat: effectifs.jeunesSansContrat || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
         rupturants: effectifs.rupturants || 0,
         abandons: effectifs.abandons || 0,
       },
@@ -279,7 +279,7 @@ const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
  *  etablissement_nom_departement: string
  *  effectifs: {
  *    apprentis: number
- *    jeunesSansContrat: number
+ *    inscritsSansContrat: number
  *    rupturants: number
  *    abandons: number
  *  }
@@ -304,7 +304,7 @@ const getEffectifsCountByDepartementAtDate = async (searchDate, filters = {}) =>
       etablissement_nom_departement,
       effectifs: {
         apprentis: effectifs.apprentis || 0,
-        jeunesSansContrat: effectifs.jeunesSansContrat || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
         rupturants: effectifs.rupturants || 0,
         abandons: effectifs.abandons || 0,
       },
@@ -381,10 +381,10 @@ const getRupturantsCountAtDate = async (searchDate, filters = {}, options = {}) 
   return result;
 };
 
-// Jeunes sans contrat = Apprenants ayant démarré une formation en apprentissage
+// Inscrits sans contrat = Apprenants ayant démarré une formation en apprentissage
 // sans avoir signé de contrat et toujours dans cette situation à la date consultée
 // https://docs.google.com/document/d/1kxRQNm6qSlgk0FOVhkIbClB2Xq3QTDRj_fPuyfNdJHk/edit
-const getJeunesSansContratCountAtDate = async (searchDate, filters = {}, options = {}) => {
+const getInscritsSansContratCountAtDate = async (searchDate, filters = {}, options = {}) => {
   const groupedBy = options.groupedBy ?? { _id: null, count: { $sum: 1 } };
   const aggregationPipeline = [
     // Filtrage sur les filtres passés en paramètres
