@@ -1,4 +1,4 @@
-import { Box, HStack } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -14,15 +14,13 @@ const CfaSection = ({ infosCfa, filters, loading, error }) => {
     <>
       <CfaDetail filters={filters} infosCfa={infosCfa} loading={loading} error={error}></CfaDetail>
 
-      <Section paddingX="1w" paddingY="1w">
-        <HStack>
-          <Box flex="1">
-            <CfaSiretsSelection filters={filters} sirets={infosCfa?.sirets} loading={loading} error={error} />
-          </Box>
-          <Box p flex="1">
+      <Section>
+        <Flex justifyContent="space-between">
+          <div>{infosCfa?.sirets.length > 1 && <CfaSiretsSelection filters={filters} sirets={infosCfa?.sirets} />}</div>
+          <Box justifySelf="flex-end">
             <DataFeedbackSection uai={infosCfa?.uai} />
           </Box>
-        </HStack>
+        </Flex>
       </Section>
     </>
   );
