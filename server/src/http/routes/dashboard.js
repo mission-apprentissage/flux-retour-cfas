@@ -143,6 +143,7 @@ module.exports = ({ stats, dashboard }) => {
       await Joi.object({
         date: Joi.date().required(),
         uai_etablissement: Joi.string().allow(null, ""),
+        siret_etablissement: Joi.string().allow(null, ""),
         etablissement_reseaux: Joi.string().allow(null, ""),
         etablissement_num_region: Joi.string().allow(null, ""),
         etablissement_num_departement: Joi.string().allow(null, ""),
@@ -166,6 +167,7 @@ module.exports = ({ stats, dashboard }) => {
       await Joi.object({
         date: Joi.date().required(),
         uai_etablissement: Joi.string().allow(null, ""),
+        siret_etablissement: Joi.string().allow(null, ""),
         etablissement_reseaux: Joi.string().allow(null, ""),
         etablissement_num_region: Joi.string().allow(null, ""),
         etablissement_num_departement: Joi.string().allow(null, ""),
@@ -191,6 +193,7 @@ module.exports = ({ stats, dashboard }) => {
         date: Joi.date().required(),
         formation_cfd: Joi.string().allow(null, ""),
         uai_etablissement: Joi.string().allow(null, ""),
+        siret_etablissement: Joi.string().allow(null, ""),
         etablissement_reseaux: Joi.string().allow(null, ""),
         etablissement_num_region: Joi.string().allow(null, ""),
         etablissement_num_departement: Joi.string().allow(null, ""),

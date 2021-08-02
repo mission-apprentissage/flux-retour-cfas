@@ -16,6 +16,7 @@ const buildSearchParams = (filters, niveauFormation) => {
       niveau_formation: niveauFormation,
       date,
       uai_etablissement: filters.cfa?.uai_etablissement ?? null,
+      siret_etablissement: filters.sousEtablissement?.siret_etablissement,
       etablissement_reseaux: filters.reseau?.nom ?? null,
       etablissement_num_region: filters.region?.code ?? null,
       etablissement_num_departement: filters.departement?.code ?? null,
