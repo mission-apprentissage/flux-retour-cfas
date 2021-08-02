@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { OverlayMenu, SecondarySelectButton } from "../../../../common/components";
-import SiretsList from "./SiretsList";
+import SousEtablissementList from "./SousEtablissementList";
 
 const SousEtablissementFilter = ({ value, sousEtablissements, onSousEtablissementChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,11 +27,11 @@ const SousEtablissementFilter = ({ value, sousEtablissements, onSousEtablissemen
       </SecondarySelectButton>
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <SiretsList
+          <SousEtablissementList
             sousEtablissements={sousEtablissements}
             onSousEtablissementClick={onSousEtablissementClick}
             value={value}
-          ></SiretsList>
+          ></SousEtablissementList>
         </OverlayMenu>
       )}
     </>

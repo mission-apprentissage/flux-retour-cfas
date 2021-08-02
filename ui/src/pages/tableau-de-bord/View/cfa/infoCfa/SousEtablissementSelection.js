@@ -2,10 +2,10 @@ import { Flex, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import SiretsFilter from "../../../Filters/sirets/SiretsFilter";
+import SousEtablissementFilter from "../../../Filters/sous-etablissement/SousEtablissementFilter";
 import { useFiltersContext } from "../../../FiltersContext";
 
-const CfaSiretsSelection = ({ sousEtablissements }) => {
+const SousEtablissementSelection = ({ sousEtablissements }) => {
   const filtersContext = useFiltersContext();
 
   return (
@@ -13,7 +13,7 @@ const CfaSiretsSelection = ({ sousEtablissements }) => {
       <Text color="grey.800" fontSize="delta">
         Afficher les indices pour :&nbsp;
       </Text>
-      <SiretsFilter
+      <SousEtablissementFilter
         sousEtablissements={sousEtablissements}
         value={filtersContext.state.sousEtablissement}
         onSousEtablissementChange={filtersContext.setters.setSousEtablissement}
@@ -22,7 +22,7 @@ const CfaSiretsSelection = ({ sousEtablissements }) => {
   );
 };
 
-CfaSiretsSelection.propTypes = {
+SousEtablissementSelection.propTypes = {
   sousEtablissements: PropTypes.arrayOf(
     PropTypes.shape({
       siret_etablisement: PropTypes.string.isRequired,
@@ -31,4 +31,4 @@ CfaSiretsSelection.propTypes = {
   ),
 };
 
-export default CfaSiretsSelection;
+export default SousEtablissementSelection;

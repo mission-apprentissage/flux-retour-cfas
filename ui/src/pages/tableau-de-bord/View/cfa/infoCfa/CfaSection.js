@@ -6,8 +6,8 @@ import { Section } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
 import DataFeedbackSection from "../data-feedback/DataFeedbackSection";
 import CfaDetail from "./CfaDetail";
-import CfaSiretsSelection from "./CfaSiretsSelection";
 import { infosCfaPropType } from "./propTypes";
+import SousEtablissementSelection from "./SousEtablissementSelection";
 import withInfoCfaData from "./withInfoCfaData";
 
 const CfaSection = ({ infosCfa, filters, loading, error }) => {
@@ -19,7 +19,7 @@ const CfaSection = ({ infosCfa, filters, loading, error }) => {
         <Flex justifyContent="space-between">
           <div>
             {infosCfa?.sousEtablissements.length > 1 && (
-              <CfaSiretsSelection filters={filters} sousEtablissements={infosCfa.sousEtablissements} />
+              <SousEtablissementSelection filters={filters} sousEtablissements={infosCfa.sousEtablissements} />
             )}
           </div>
           <Box justifySelf="flex-end">
