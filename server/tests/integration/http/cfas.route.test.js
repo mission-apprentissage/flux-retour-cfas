@@ -122,7 +122,9 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepEqual(response.data, {
         libelleLong: nomTest,
         uai: uaiTest,
-        sirets: [siretTest],
+        sousEtablissements: [
+          { siret_etablissement: cfaInfos.siret_etablissement, nom_etablissement: cfaInfos.nom_etablissement },
+        ],
         adresse: adresseTest,
         reseaux: reseauxTest,
         domainesMetiers: [],
@@ -141,12 +143,11 @@ httpTests(__filename, ({ startServer }) => {
         nom_etablissement: nomTest,
         uai_etablissement: uaiTest,
         uai_etablissement_valid: true,
+        siret_etablissement: "77929544300013",
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat({
-        ...cfaInfos,
-      });
+      const randomStatut = createRandomStatutCandidat(cfaInfos);
       const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
 
@@ -159,6 +160,9 @@ httpTests(__filename, ({ startServer }) => {
         adresse: adresseTest,
         reseaux: reseauxTest,
         domainesMetiers: [],
+        sousEtablissements: [
+          { siret_etablissement: cfaInfos.siret_etablissement, nom_etablissement: cfaInfos.nom_etablissement },
+        ],
       });
     });
 

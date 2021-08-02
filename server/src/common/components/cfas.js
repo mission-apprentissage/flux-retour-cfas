@@ -94,7 +94,7 @@ const getSousEtablissementsForUai = (uai) => {
   return StatutCandidatModel.aggregate([
     { $match: { uai_etablissement: uai, siret_etablissement: { $ne: null } } },
     { $group: { _id: "$siret_etablissement", nom_etablissement: { $first: "$nom_etablissement" } } },
-    { $project: { siret_etablissement: "$_id", nom_etablissement: "$nom_etablissement" } },
+    { $project: { _id: 0, siret_etablissement: "$_id", nom_etablissement: "$nom_etablissement" } },
   ]);
 };
 
