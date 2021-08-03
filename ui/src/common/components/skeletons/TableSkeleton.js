@@ -1,8 +1,10 @@
-import { Skeleton, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Table, Tbody, Th, Thead, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-const TableSkeleton = ({ headers, numberOfLines = 5 }) => {
+import RowsSkeleton from "./RowsSkeleton";
+
+const TableSkeleton = ({ headers, nbRows = 5 }) => {
   return (
     <Table mt="2w">
       <Thead>
@@ -28,19 +30,7 @@ const TableSkeleton = ({ headers, numberOfLines = 5 }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {Array.from({ length: numberOfLines }, (_, i) => i).map((i) => {
-          return (
-            <Tr textAlign="left" key={i}>
-              {headers.map((j) => {
-                return (
-                  <Td key={j}>
-                    <Skeleton width="100%" height="1.5rem" />
-                  </Td>
-                );
-              })}
-            </Tr>
-          );
-        })}
+        <RowsSkeleton nbRows={nbRows} nbColumns={headers.length} />
       </Tbody>
     </Table>
   );
@@ -48,7 +38,7 @@ const TableSkeleton = ({ headers, numberOfLines = 5 }) => {
 
 TableSkeleton.propTypes = {
   headers: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  numberOfLines: PropTypes.number,
+  nbRows: PropTypes.number,
 };
 
 export default TableSkeleton;
