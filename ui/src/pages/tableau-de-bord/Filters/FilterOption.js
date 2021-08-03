@@ -9,15 +9,15 @@ const FilterOption = ({ isSelected = false, onClick, children }) => {
       onClick={onClick}
       color={isSelected ? "bluefrance" : "grey.800"}
       fontSize="zeta"
+      fontWeight={isSelected ? "700" : "400"}
       role="button"
-      fontWeight="400"
-      backgroundColor={isSelected ? "bluesoft.50" : "transparent"}
-      padding="1w"
+      paddingY="1w"
       display="flex"
+      _hover={{ color: "bluefrance", backgroundColor: "grey.100" }}
     >
-      <Box _hover={{ textDecoration: "underline" }}>{children}</Box>
-      &nbsp;
-      {isSelected && <Box fontSize="zeta" as="i" color="bluefrance" className="ri-check-line" textDecoration="none" />}
+      <Box as="span" borderLeft={isSelected ? "solid 2px" : "none"} borderColor="bluefrance" paddingX="1w">
+        {children}
+      </Box>
     </ListItem>
   );
 };

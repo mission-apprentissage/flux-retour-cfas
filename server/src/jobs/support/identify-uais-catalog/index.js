@@ -17,15 +17,13 @@ runScript(async () => {
 
   loadingBar.start(allDistinctUais.length, 0);
 
-  let nbCfasHandled = 0;
   let uaisAsFormation = [];
   let uaisAsFormateur = [];
   let uaisAsGestionnaire = [];
   let uaisNotFoundCatalog = [];
 
   await asyncForEach(allDistinctUais, async (currentUai) => {
-    nbCfasHandled++;
-    loadingBar.update(nbCfasHandled);
+    loadingBar.increment();
 
     // Call Catalog API By - uai_formation or etablissement_gestionnaire_uai or etablissement_formateur_uai
     const formationsForUai = await getFormations2021({

@@ -13,10 +13,12 @@ const {
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
+const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 integrationTests(__filename, () => {
   beforeEach(() => {
     nockGetCfdInfo();
+    nockGetMetiersByCfd();
   });
 
   describe("existsStatut", () => {
@@ -348,7 +350,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
       assert.strictEqual(foundAdded.updated_at, null);
       assert.strictEqual(foundAdded.annee_formation, statutsTestUpdate[3].annee_formation);
-      assert.deepStrictEqual(foundAdded.periode_formation, statutsTestUpdate[3].periode_formation);
+      assert.strictEqual(foundAdded.periode_formation.length, 0);
 
       // Check updated
       assert.strictEqual(updated.length, 3);
@@ -801,6 +803,14 @@ integrationTests(__filename, () => {
       assert.strictEqual(updatedStatut.siret_etablissement, simpleStatutBadUpdate.siret_etablissement);
       assert.strictEqual(updatedStatut.statut_apprenant, simpleStatutBadUpdate.statut_apprenant);
       assert.strictEqual(updatedStatut.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ko);
+      assert.equal(
+        new Date(updatedStatut.date_metier_mise_a_jour_statut).getTime(),
+        new Date(simpleStatutBadUpdate.date_metier_mise_a_jour_statut).getTime()
+      );
+      assert.equal(
+        new Date(updatedStatut.erreur_mise_a_jour_statut.date_mise_a_jour_statut).getTime(),
+        new Date(simpleStatutBadUpdate.date_metier_mise_a_jour_statut).getTime()
+      );
       assert.notDeepStrictEqual(updatedStatut.erreur_mise_a_jour_statut, null);
       assert.notDeepStrictEqual(updatedStatut.updated_at, null);
     });
@@ -835,15 +845,23 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatut.historique_statut_apprenant[0].position_statut, 1);
 
       // Mise à jour du statut avec nouveau statut_apprenant
-      await updateStatut(createdStatut._id, { statut_apprenant: codesStatutsCandidats.abandon });
+      const updatePayload = {
+        statut_apprenant: codesStatutsCandidats.abandon,
+        date_metier_mise_a_jour_statut: new Date(),
+      };
+      await updateStatut(createdStatut._id, updatePayload);
 
       // Check value in db
       const found = await StatutCandidat.findById(createdStatut._id);
-      assert.strictEqual(found.historique_statut_apprenant.length, 2);
-      assert.strictEqual(found.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.strictEqual(found.historique_statut_apprenant[0].position_statut, 1);
-      assert.strictEqual(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
-      assert.strictEqual(found.historique_statut_apprenant[1].position_statut, 2);
+      assert.equal(found.historique_statut_apprenant.length, 2);
+      assert.equal(found.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(found.historique_statut_apprenant[0].position_statut, 1);
+      assert.equal(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
+      assert.equal(found.historique_statut_apprenant[1].position_statut, 2);
+      assert.equal(
+        found.historique_statut_apprenant[1].date_statut.getTime(),
+        updatePayload.date_metier_mise_a_jour_statut.getTime()
+      );
     });
 
     it("Vérifie qu'on met à jour updated_at après un update", async () => {
@@ -895,7 +913,7 @@ integrationTests(__filename, () => {
       assert.deepStrictEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid et qu'aucune donnée de la localisation n'est fetchée ", async () => {
+    it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid", async () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: "invalid-siret" };
@@ -904,7 +922,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatut.siret_etablissement_valid, false);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid et qu'on fetch les données de localisation associées ", async () => {
+    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid", async () => {
       const { createStatutCandidat } = await statutsCandidats();
 
       const validSiret = "12312312300099";
@@ -953,36 +971,13 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatut.formation_cfd_valid, true);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-      const validSiret = "12312312300099";
-
-      // Create sample cfa in referentiel
-      const referenceCfa = new Cfa({
-        siret: validSiret,
-        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
-      });
-      await referenceCfa.save();
-
-      // Create statut
-      const statutWithValidSiret = { ...createRandomStatutCandidat(), siret_etablissement: validSiret };
-      const createdStatut = await createStatutCandidat(statutWithValidSiret);
-
-      // Check siret & reseaux in created statut
-      const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
-      assert.deepStrictEqual(siret_etablissement_valid, true);
-      assert.deepStrictEqual(etablissement_reseaux.length, 2);
-      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.ANASUP.nomReseau);
-      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.BTP_CFA.nomReseau);
-    });
-
     it("Vérifie qu'à la création d'un statut avec un siret invalide on ne set pas le champ etablissement_reseaux", async () => {
       const { createStatutCandidat } = await statutsCandidats();
       const invalidSiret = "invalid";
 
       // Create sample cfa in referentiel
       const referenceCfa = new Cfa({
-        siret: invalidSiret,
+        sirets: [invalidSiret],
         reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
@@ -994,10 +989,10 @@ integrationTests(__filename, () => {
       // Check uai & reseaux in created statut
       const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
       assert.deepStrictEqual(siret_etablissement_valid, false);
-      assert.deepStrictEqual(etablissement_reseaux, undefined);
+      assert.deepStrictEqual(etablissement_reseaux.length, 0);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un uai valid on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
+    it("Vérifie qu'à la création d'un statut avec un uai valide on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
       const { createStatutCandidat } = await statutsCandidats();
       const validUai = "0631450J";
 
@@ -1038,7 +1033,7 @@ integrationTests(__filename, () => {
       // Check uai & reseaux in created statut
       const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
       assert.deepStrictEqual(uai_etablissement_valid, false);
-      assert.deepStrictEqual(etablissement_reseaux, undefined);
+      assert.deepStrictEqual(etablissement_reseaux.length, 0);
     });
 
     it("Vérifie qu'à la création d'un statut avec un CFD valide on crée la formation correspondante si elle n'existe pas", async () => {

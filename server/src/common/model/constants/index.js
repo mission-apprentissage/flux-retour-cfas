@@ -56,7 +56,7 @@ const reseauxCfas = {
   },
   AGRI: {
     nomReseau: "AGRI",
-    nomFichier: "cfas-agri",
+    nomFichier: "cfas-agri-no-mfr",
     encoding: "utf8",
   },
   ANASUP: {
@@ -144,6 +144,7 @@ const jobNames = {
   seedUsers: "seed-users",
   seedSample: "seed-sample",
   seedReferentielCfas: "seed-referentiel-cfas",
+  seedAnnuaireCfas: "seed-annuaire-cfas",
   seedRandomizedSample: "seed-randomized-sample",
   identifyUaisInCatalog: "identify-uais-types-catalog",
   identifyNetworkCma: "identify-network-cma",
@@ -206,6 +207,7 @@ const statsTypes = {
   tdbStats: "TdbStats",
   networksStats: "NetworksStats",
   importDatesStats: "ImportDatesStats",
+  siretsNotFoundTco: "SiretsNotFoundInTCO",
 };
 
 /**

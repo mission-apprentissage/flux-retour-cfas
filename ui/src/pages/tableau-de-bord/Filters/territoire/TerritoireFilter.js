@@ -1,47 +1,45 @@
-import { Box } from "@chakra-ui/layout";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { FilterButton, OverlayMenu } from "../../../../common/components";
+import { OverlayMenu } from "../../../../common/components";
 import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
+import PrimarySelectButton from "../../../../common/components/SelectButton/PrimarySelectButton";
+import { filtersPropTypes } from "../../FiltersContext";
 import DepartementOptions from "./DepartementOptions";
-import { territoireOptionPropType } from "./propTypes";
 import RegionOptions from "./RegionOptions";
-import withTerritoiresData, { TERRITOIRE_TYPES } from "./withTerritoireData";
+import withTerritoiresData from "./withTerritoireData";
 
-const TerritoireFilter = ({ value, onChange, regions, departements }) => {
+const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, regions, departements }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const TERRITOIRE_TYPE_OPTIONS = [
-    { value: TERRITOIRE_TYPES.region, label: `Régions (${regions.length})` },
-    { value: TERRITOIRE_TYPES.departement, label: `Départements (${departements.length})` },
-  ];
-
-  const onFilterClick = (filter) => {
-    onChange(filter);
+  const onDepartementClick = (departement) => {
+    onDepartementChange(departement);
     setIsOpen(false);
   };
 
-  const chosenFilter =
-    value.type === TERRITOIRE_TYPES.region
-      ? regions.find((region) => region.code === value.code)
-      : departements.find((departement) => departement.code === value.code);
+  const onRegionClick = (departement) => {
+    onRegionChange(departement);
+    setIsOpen(false);
+  };
+
+  const tabLabels = [`Région (${regions.length})`, `Département (${departements.length})`];
+
+  const buttonLabel = filters.region?.nom || filters.departement?.nom;
 
   return (
     <div>
-      <FilterButton onClick={() => setIsOpen(!isOpen)} icon="ri-map-pin-2-fill">
-        {chosenFilter?.nom}
-        <Box fontSize="delta" as="i" className="ri-arrow-down-s-line" marginLeft="1v" />
-      </FilterButton>
+      <PrimarySelectButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
+        {buttonLabel}
+      </PrimarySelectButton>
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <MenuTabs tabNames={TERRITOIRE_TYPE_OPTIONS.map(({ label }) => label)}>
-            <RegionOptions regions={regions} onRegionClick={onFilterClick} currentFilter={chosenFilter} />
+          <MenuTabs tabNames={tabLabels}>
+            <RegionOptions regions={regions} onRegionClick={onRegionClick} currentFilter={filters.region} />
             <DepartementOptions
               departements={departements}
-              onDepartementClick={onFilterClick}
-              currentFilter={chosenFilter}
+              onDepartementClick={onDepartementClick}
+              currentFilter={filters.departement}
             />
           </MenuTabs>
         </OverlayMenu>
@@ -51,10 +49,19 @@ const TerritoireFilter = ({ value, onChange, regions, departements }) => {
 };
 
 TerritoireFilter.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: territoireOptionPropType,
-  regions: PropTypes.arrayOf(territoireOptionPropType).isRequired,
-  departements: PropTypes.arrayOf(territoireOptionPropType).isRequired,
+  onRegionChange: PropTypes.func.isRequired,
+  onDepartementChange: PropTypes.func.isRequired,
+  filters: filtersPropTypes.state,
+  regions: PropTypes.arrayOf(
+    PropTypes.shape({
+      code: PropTypes.string.isRequired,
+    }).isRequired
+  ).isRequired,
+  departements: PropTypes.arrayOf(
+    PropTypes.shape({
+      code: PropTypes.string.isRequired,
+    }).isRequired
+  ).isRequired,
 };
 
 export default withTerritoiresData(TerritoireFilter);

@@ -1,52 +1,28 @@
-import { Box, Flex } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
-import { Page, PageContent, PageHeader } from "../../common/components";
-import EnSavoirPlusModal from "./EnSavoirPlusModal";
-import Filters from "./Filters";
-import { effectifsPropType, filtersPropType } from "./propTypes";
+import { Page } from "../../common/components";
+import { FiltersProvider } from "./FiltersContext";
+import IndicesHeader from "./IndicesHeader";
+import useEffectifs from "./useEffectifs";
 import View from "./View";
-import withEffectifsData from "./withEffectifsData";
 
-const TableauDeBordPage = ({ effectifs, filters, setFilters, loading, error }) => {
-  const pageTitle = (
-    <Flex justifyContent="center" alignItems="center">
-      <span>Tableau de bord de l&apos;apprentissage</span>
-      &nbsp;
-      <Box
-        as="legend"
-        paddingX="1w"
-        paddingY="1v"
-        fontSize="zeta"
-        backgroundColor="bluefrance"
-        color="white"
-        borderRadius="4px"
-      >
-        beta
-      </Box>
-    </Flex>
-  );
+const TableauDeBordPage = () => {
+  const [effectifs, loading, error] = useEffectifs();
 
   return (
     <Page>
-      <PageHeader title={pageTitle}>
-        <EnSavoirPlusModal />
-        <Filters setFilters={setFilters} filters={filters} />
-      </PageHeader>
-      <PageContent>
-        <View effectifs={effectifs} filters={filters} loading={loading} error={error} />
-      </PageContent>
+      <IndicesHeader />
+      <View effectifs={effectifs} loading={loading} error={error} />
     </Page>
   );
 };
 
-TableauDeBordPage.propTypes = {
-  effectifs: effectifsPropType,
-  filters: filtersPropType.isRequired,
-  loading: PropTypes.bool.isRequired,
-  error: PropTypes.object,
-  setFilters: PropTypes.func.isRequired,
+const TableauDeBordPageContainer = () => {
+  return (
+    <FiltersProvider>
+      <TableauDeBordPage />
+    </FiltersProvider>
+  );
 };
 
-export default withEffectifsData(TableauDeBordPage);
+export default TableauDeBordPageContainer;

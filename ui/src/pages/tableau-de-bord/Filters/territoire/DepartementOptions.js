@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import { SearchInput } from "../../../../common/components";
 import { stringContains } from "../../../../common/utils/stringUtils";
 import FilterOption from "../FilterOption";
-import { TERRITOIRE_TYPES } from "./withTerritoireData";
 
 const DepartementOptions = ({ departements, onDepartementClick, currentFilter }) => {
   const [departementSearchTerm, setDepartementSearchTerm] = useState("");
@@ -17,7 +16,7 @@ const DepartementOptions = ({ departements, onDepartementClick, currentFilter })
   return (
     <>
       <SearchInput
-        placeholder="Saisissez un département"
+        placeholder="Rechercher un département"
         value={departementSearchTerm}
         onChange={setDepartementSearchTerm}
       />
@@ -41,7 +40,6 @@ DepartementOptions.propTypes = {
     PropTypes.shape({
       nom: PropTypes.string.isRequired,
       code: PropTypes.string.isRequired,
-      type: PropTypes.oneOf([TERRITOIRE_TYPES.departement]),
     }).isRequired
   ).isRequired,
   onDepartementClick: PropTypes.func.isRequired,

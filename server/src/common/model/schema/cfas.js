@@ -6,10 +6,20 @@ const cfasSchema = new Schema({
     default: null,
     description: "Code uai de l'établissement",
   },
-  siret: {
-    type: String,
+  sirets: {
+    type: [String],
+    default: [],
+    description: "Liste des sirets reliés à l'établissement",
+  },
+  siret_formateur: {
+    type: Boolean,
     default: null,
-    description: "Siret de l'établissement",
+    description: "Indique si le siret de l'établissement a été identifié comme un siret formateur",
+  },
+  siret_responsable: {
+    type: Boolean,
+    default: null,
+    description: "Indique si le siret de l'établissement a été identifié comme un siret responsable",
   },
   nom: {
     type: String,
@@ -23,12 +33,12 @@ const cfasSchema = new Schema({
   },
   erps: {
     type: [String],
-    default: null,
+    default: [],
     description: "ERPs rattachés au CFA, s'ils existent",
   },
   reseaux: {
     type: [String],
-    default: undefined, // here we use undefined instead of null because mongoose would otherwise default the field to [], see https://mongoosejs.com/docs/schematypes.html#arrays
+    default: [],
     description: "Réseaux du CFA, s'ils existent",
   },
   region_nom: {
@@ -46,10 +56,15 @@ const cfasSchema = new Schema({
     default: null,
     description: "Source du seed du cfa dans la collection (StatutsCandidats ou fichier d'origine)",
   },
-  feedback_donnee_valide: {
-    type: Boolean,
+  first_transmission_date: {
+    type: Date,
     default: null,
-    description: "Les données présentées sur le tableau de bord par ce CFA est-elle valide",
+    description: "Date de la première transmission de données",
+  },
+  metiers: {
+    type: [String],
+    default: [],
+    description: "Les domaines métiers rattachés à l'établissement",
   },
 });
 

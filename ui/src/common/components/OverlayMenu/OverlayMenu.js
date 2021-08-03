@@ -34,9 +34,9 @@ const OverlayMenu = ({ onClose, children }) => {
         left="15w"
         right="15w"
         marginTop="2w"
-        paddingX="6w"
+        paddingX="8w"
         paddingY="3w"
-        boxShadow="0px 0px 16px rgba(30, 30, 30, 0.12)"
+        boxShadow="0px 0px 16px rgba(30, 30, 30, 0.16)"
         borderRadius="0.25rem"
         zIndex="100"
         ref={menuRef}

@@ -19,11 +19,8 @@ runScript(async () => {
   logger.info(`${formationsWithNiveau.length} Formations with niveau & cfd`);
 
   loadingBar.start(formationsWithNiveau.length, 0);
-  let nbHandled = 0;
 
   await asyncForEach(formationsWithNiveau, async (currentFormation) => {
-    nbHandled++;
-
     // get all statutsCandidats for this cfd
     const statutsForFormation = await StatutCandidat.find({ formation_cfd: currentFormation.cfd });
 
@@ -36,7 +33,7 @@ runScript(async () => {
       );
     });
 
-    loadingBar.update(nbHandled);
+    loadingBar.increment();
   });
 
   loadingBar.stop();

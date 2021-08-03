@@ -204,6 +204,7 @@ const simpleStatutBadUpdate = {
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: 1,
   periode_formation: [2020, 2021],
+  date_metier_mise_a_jour_statut: "2022-01-01T12:00:00.000Z",
   annee_formation: 2020,
 };
 

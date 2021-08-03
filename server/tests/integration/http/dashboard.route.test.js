@@ -1,20 +1,12 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
-const faker = require("faker/locale/fr");
 const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const {
   historySequenceProspectToInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
-const { StatutCandidat, Cfa } = require("../../../src/common/model");
-const {
-  getStatutsSamplesInscrits,
-  getStatutsSamplesApprentis,
-  getStatutsSamplesAbandons,
-  expectedDetailResultList,
-} = require("../../data/effectifDetailSamples");
-const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
+const { StatutCandidat } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
   describe("/api/dashboard/etablissements-stats route", () => {
@@ -36,7 +28,6 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
-          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -46,7 +37,6 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceApprenti,
-          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -56,7 +46,6 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceInscritToApprenti,
-          siret_etablissement_valid: true,
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -64,18 +53,9 @@ httpTests(__filename, ({ startServer }) => {
 
       // Expected results
       const expectedResults = {
-        startDate: {
-          nbInscrits: 10,
-          nbApprentis: 5,
-          nbAbandons: 0,
-          nbAbandonsProspects: 0,
-        },
-        endDate: {
-          nbInscrits: 15,
-          nbApprentis: 5,
-          nbAbandons: 10,
-          nbAbandonsProspects: 0,
-        },
+        nbInscrits: 15,
+        nbApprentis: 5,
+        nbAbandons: 10,
       };
 
       // Check good api call
@@ -84,17 +64,11 @@ httpTests(__filename, ({ startServer }) => {
         endDate: "2020-10-10T00:00:00.000Z",
       });
 
-      assert.deepStrictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data.length, 2);
-      assert.deepStrictEqual(response.data[0].inscrits, expectedResults.startDate.nbInscrits);
-      assert.deepStrictEqual(response.data[0].apprentis, expectedResults.startDate.nbApprentis);
-      assert.deepStrictEqual(response.data[0].abandons, expectedResults.startDate.nbAbandons);
-      assert.deepStrictEqual(response.data[0].abandons, expectedResults.startDate.nbAbandons);
-      assert.deepStrictEqual(response.data[0].abandonsProspects, expectedResults.startDate.nbAbandonsProspects);
-      assert.deepStrictEqual(response.data[1].inscrits, expectedResults.endDate.nbInscrits);
-      assert.deepStrictEqual(response.data[1].apprentis, expectedResults.endDate.nbApprentis);
-      assert.deepStrictEqual(response.data[1].abandons, expectedResults.endDate.nbAbandons);
-      assert.deepStrictEqual(response.data[1].abandonsProspects, expectedResults.endDate.nbAbandonsProspects);
+      assert.equal(response.status, 200);
+      const indices = response.data;
+      assert.deepEqual(indices.inscritsSansContrat + indices.rupturants, expectedResults.nbInscrits);
+      assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
+      assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
     });
 
     it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts avec filtres", async () => {
@@ -104,10 +78,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{
-            historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
-            siret_etablissement_valid: true,
-          },
+          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -117,10 +88,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{
-            historique_statut_apprenant: historySequenceApprenti,
-            siret_etablissement_valid: true,
-          },
+          historique_statut_apprenant: historySequenceApprenti,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -130,10 +98,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
-          ...{
-            historique_statut_apprenant: historySequenceInscritToApprenti,
-            siret_etablissement_valid: true,
-          },
+          historique_statut_apprenant: historySequenceInscritToApprenti,
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -142,18 +107,9 @@ httpTests(__filename, ({ startServer }) => {
 
       // Expected results
       const expectedResults = {
-        startDate: {
-          nbInscrits: 10,
-          nbApprentis: 5,
-          nbAbandons: 0,
-          nbAbandonsProspects: 0,
-        },
-        endDate: {
-          nbInscrits: 15,
-          nbApprentis: 5,
-          nbAbandons: 10,
-          nbAbandonsProspects: 0,
-        },
+        nbInscrits: 15,
+        nbApprentis: 5,
+        nbAbandons: 10,
       };
 
       // Check good api call
@@ -163,16 +119,10 @@ httpTests(__filename, ({ startServer }) => {
         ...filterQuery,
       });
 
-      assert.deepStrictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data.length, 2);
-      assert.deepStrictEqual(response.data[0].inscrits, expectedResults.startDate.nbInscrits);
-      assert.deepStrictEqual(response.data[0].apprentis, expectedResults.startDate.nbApprentis);
-      assert.deepStrictEqual(response.data[0].abandons, expectedResults.startDate.nbAbandons);
-      assert.deepStrictEqual(response.data[0].abandonsProspects, expectedResults.startDate.nbAbandonsProspects);
-      assert.deepStrictEqual(response.data[1].inscrits, expectedResults.endDate.nbInscrits);
-      assert.deepStrictEqual(response.data[1].apprentis, expectedResults.endDate.nbApprentis);
-      assert.deepStrictEqual(response.data[1].abandons, expectedResults.endDate.nbAbandons);
-      assert.deepStrictEqual(response.data[1].abandonsProspects, expectedResults.endDate.nbAbandonsProspects);
+      const indices = response.data;
+      assert.deepEqual(indices.inscritsSansContrat + indices.rupturants, expectedResults.nbInscrits);
+      assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
+      assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
 
       // Check bad api call
       const badResponse = await httpClient.post("/api/dashboard/effectifs", {
@@ -182,49 +132,51 @@ httpTests(__filename, ({ startServer }) => {
       });
 
       assert.deepStrictEqual(badResponse.status, 200);
-      assert.deepStrictEqual(badResponse.data.length, 2);
-      assert.deepStrictEqual(badResponse.data[0].inscrits, 0);
-      assert.deepStrictEqual(badResponse.data[0].apprentis, 0);
-      assert.deepStrictEqual(badResponse.data[0].abandons, 0);
-      assert.deepStrictEqual(badResponse.data[0].abandonsProspects, 0);
-      assert.deepStrictEqual(badResponse.data[1].inscrits, 0);
-      assert.deepStrictEqual(badResponse.data[1].apprentis, 0);
-      assert.deepStrictEqual(badResponse.data[1].abandons, 0);
-      assert.deepStrictEqual(badResponse.data[1].abandonsProspects, 0);
+      assert.deepStrictEqual(badResponse.data.inscritsSansContrat, 0);
+      assert.deepStrictEqual(badResponse.data.rupturants, 0);
+      assert.deepStrictEqual(badResponse.data.apprentis, 0);
+      assert.deepStrictEqual(badResponse.data.abandons, 0);
     });
   });
 
-  describe("/api/dashboard/effectifs-par-niveau-et-annee-formation route", () => {
-    it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux/année de formation via API", async () => {
+  describe("/api/dashboard/effectifs-par-niveau-formation route", () => {
+    it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux de formation via API", async () => {
       const { httpClient } = await startServer();
-      const siretToTest = "77929544300013";
+      const filterQuery = { etablissement_num_region: "84" };
 
-      // Build sample statuts
-      const statutsSamplesInscrits = await getStatutsSamplesInscrits(siretToTest);
-      const statutsSamplesApprentis = await getStatutsSamplesApprentis(siretToTest);
-      const statutsSamplesAbandons = await getStatutsSamplesAbandons(siretToTest);
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          niveau_formation: "1",
+        });
+        const toAdd = new StatutCandidat(randomStatut);
+        await toAdd.save();
+      }
 
-      // Save all statuts to database
-      const sampleStatutsListToSave = [
-        ...statutsSamplesInscrits,
-        ...statutsSamplesApprentis,
-        ...statutsSamplesAbandons,
-      ];
-      await asyncForEach(sampleStatutsListToSave, async (currentStatut) => {
-        await currentStatut.save();
+      const randomStatut = createRandomStatutCandidat({
+        ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        niveau_formation: "2",
       });
+      const toAdd = new StatutCandidat(randomStatut);
+      await toAdd.save();
 
-      const searchParams = `date=2020-10-10T00:00:00.000Z&siret_etablissement=${siretToTest}&page=1&limit=100`;
-      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-et-annee-formation?${searchParams}`);
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-formation?${searchParams}`);
 
       assert.equal(response.status, 200);
-      assert.equal(response.data.data.length, 2);
-      assert.deepStrictEqual(response.data.data, expectedDetailResultList);
+      assert.equal(response.data.length, 2);
+      const sortByNiveauFormation = (a, b) => (Number(a.niveau_formation) > Number(b.niveau_formation) ? 1 : -1);
+      assert.deepStrictEqual(response.data.sort(sortByNiveauFormation), [
+        { niveau_formation: "1", effectifs: { apprentis: 5, abandons: 0, inscritsSansContrat: 0, rupturants: 0 } },
+        { niveau_formation: "2", effectifs: { apprentis: 1, abandons: 0, inscritsSansContrat: 0, rupturants: 0 } },
+      ]);
     });
   });
 
-  describe("/api/dashboard/region-conversion route", () => {
-    it("Vérifie qu'on peut récupérer les informations de conversion d'une région via API", async () => {
+  describe("/api/dashboard/total-organismes route", () => {
+    it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une région", async () => {
       const { httpClient } = await startServer();
 
       const regionNumTest = "28";
@@ -234,50 +186,52 @@ httpTests(__filename, ({ startServer }) => {
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
           siret_etablissement: "77929544300013",
-          siret_etablissement_valid: true,
           uai_etablissement: "0762232N",
+          uai_etablissement_valid: true,
           etablissement_num_region: regionNumTest,
         })
       ).save();
 
-      // Add 5 cfa in referentiel region without validation
-      for (let index = 0; index < 5; index++) {
-        await new Cfa({
-          nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-          region_num: regionNumTest,
-          siret: getRandomSiretEtablissement(),
-        }).save();
-      }
-
-      // Add 3 cfa with validation true in referentiel region
-      for (let index = 0; index < 3; index++) {
-        await new Cfa({
-          nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-          region_num: regionNumTest,
-          siret: getRandomSiretEtablissement(),
-          feedback_donnee_valide: true,
-        }).save();
-      }
-
       // Check good api call
-      const response = await httpClient.post("/api/dashboard/region-conversion", {
-        num_region: regionNumTest,
+      const response = await httpClient.post("/api/dashboard/total-organismes", {
+        etablissement_num_region: regionNumTest,
       });
 
-      assert.deepStrictEqual(response.status, 200);
-      assert.ok(response.data.nbCfaConnected);
-      assert.ok(response.data.nbCfaDataValidated);
-      assert.deepStrictEqual(response.data.nbCfaConnected, 1);
-      assert.deepStrictEqual(response.data.nbCfaDataValidated, 3);
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, { nbOrganismes: 1 });
 
-      // Check bad api call
-      const badRegionResponse = await httpClient.post("/api/dashboard/region-conversion", {
-        num_region: "999",
+      const badRegionResponse = await httpClient.post("/api/dashboard/total-organismes", {
+        etablissement_num_region: "01",
       });
 
       assert.deepStrictEqual(badRegionResponse.status, 200);
-      assert.deepStrictEqual(badRegionResponse.data.nbCfaConnected, 0);
-      assert.deepStrictEqual(badRegionResponse.data.nbCfaDataValidated, 0);
+      assert.deepEqual(badRegionResponse.data, { nbOrganismes: 0 });
+    });
+
+    it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une formation", async () => {
+      const { httpClient } = await startServer();
+
+      const formationCfd = "abcd1234";
+
+      // Add 1 statut for formation
+      await new StatutCandidat(
+        createRandomStatutCandidat({
+          nom_etablissement: "TEST CFA",
+          siret_etablissement: getRandomSiretEtablissement(),
+          siret_etablissement_valid: true,
+          uai_etablissement: "0762232N",
+          uai_etablissement_valid: true,
+          formation_cfd: formationCfd,
+        })
+      ).save();
+
+      // Check good api call
+      const response = await httpClient.post("/api/dashboard/total-organismes", {
+        formation_cfd: formationCfd,
+      });
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, { nbOrganismes: 1 });
     });
   });
 });

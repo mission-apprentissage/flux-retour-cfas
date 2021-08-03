@@ -1,61 +1,35 @@
-import React, { useEffect, useState } from "react";
+import queryString from "query-string";
+import React from "react";
 
-import { _get } from "../../../../../common/httpClient";
-import { filtersPropType } from "../../../propTypes";
+import { useFetch } from "../../../../../common/hooks/useFetch";
+import { omitNullishValues } from "../../../../../common/utils/omitNullishValues";
+import { filtersPropTypes } from "../../../FiltersContext";
 
-const DEFAULT_PAGE_SIZE = 10;
-
-const buildSearchParams = (filters, pageNumber) => {
+const buildSearchParams = (filters) => {
   const date = filters.date.toISOString();
-  const siret = filters.cfa?.type === "cfa" ? filters.cfa?.siret_etablissement : null;
-  return `date=${date}&siret_etablissement=${siret}&page=${pageNumber}&limit=${DEFAULT_PAGE_SIZE}`;
+  return queryString.stringify(
+    omitNullishValues({
+      date,
+      uai_etablissement: filters.cfa.uai_etablissement,
+      siret_etablissement: filters.sousEtablissement?.siret_etablissement,
+    })
+  );
 };
 
 const withRepartitionNiveauFormationInCfa = (Component) => {
   const WithRepartitionNiveauFormationInCfa = ({ filters, ...props }) => {
-    const [repartitionEffectifs, setRepartitionEffectifs] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [error, setError] = useState(null);
+    const searchParams = buildSearchParams(filters);
+    const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-niveau-formation?${searchParams}`);
 
-    // if filters change, set page to 1
-    useEffect(() => {
-      setPage(1);
-    }, [JSON.stringify(filters)]);
+    const repartitionEffectifs = data?.map(({ niveau_formation, effectifs }) => {
+      return { niveauFormation: niveau_formation, effectifs };
+    });
 
-    useEffect(() => {
-      const fetchData = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-          const response = await _get(
-            `/api/dashboard/effectifs-par-niveau-et-annee-formation?${buildSearchParams(filters, page)}`
-          );
-          setRepartitionEffectifs(response);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchData();
-    }, [buildSearchParams(filters, page)]);
-
-    return (
-      <Component
-        {...props}
-        repartitionEffectifs={repartitionEffectifs}
-        loading={loading}
-        error={error}
-        _setPage={setPage}
-      />
-    );
+    return <Component {...props} repartitionEffectifs={repartitionEffectifs} loading={loading} error={error} />;
   };
 
   WithRepartitionNiveauFormationInCfa.propTypes = {
-    filters: filtersPropType,
+    filters: filtersPropTypes.state,
   };
 
   return WithRepartitionNiveauFormationInCfa;

@@ -1,74 +1,37 @@
 import queryString from "query-string";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-import { _get } from "../../../../../common/httpClient";
+import { useFetch } from "../../../../../common/hooks/useFetch";
 import { omitNullishValues } from "../../../../../common/utils/omitNullishValues";
-import { TERRITOIRE_TYPES } from "../../../Filters/territoire/withTerritoireData";
-import { filtersPropType } from "../../../propTypes";
+import { filtersPropTypes } from "../../../FiltersContext";
 
-const DEFAULT_PAGE_SIZE = 10;
-
-const buildSearchParams = (filters, pageNumber) => {
+const buildSearchParams = (filters) => {
   const date = filters.date.toISOString();
 
   return queryString.stringify(
     omitNullishValues({
       date,
-      etablissement_reseaux: filters.cfa.nom,
-      etablissement_num_region: filters.territoire?.type === TERRITOIRE_TYPES.region ? filters.territoire.code : null,
-      etablissement_num_departement:
-        filters.territoire?.type === TERRITOIRE_TYPES.departement ? filters.territoire.code : null,
-      page: pageNumber,
-      limit: DEFAULT_PAGE_SIZE,
+      etablissement_reseaux: filters.reseau.nom,
+      etablissement_num_region: filters.region?.code ?? null,
+      etablissement_num_departement: filters.departement?.code ?? null,
     })
   );
 };
 
 const withRepartitionEffectifsReseauParNiveauEtAnneeFormation = (Component) => {
   const WithRepartitionEffectifsReseauParNiveauEtAnneeFormation = ({ filters, ...props }) => {
-    const [repartitionEffectifs, setRepartitionEffectifs] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [error, setError] = useState(null);
+    const searchParamsString = buildSearchParams(filters);
+    const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-niveau-formation?${searchParamsString}`);
 
-    const searchParamsString = buildSearchParams(filters, page);
+    const repartitionEffectifs = data?.map((repartition) => {
+      return { niveauFormation: repartition.niveau_formation, effectifs: repartition.effectifs };
+    });
 
-    // if filters change, set page to 1
-    useEffect(() => {
-      setPage(1);
-    }, [JSON.stringify(filters)]);
-
-    useEffect(() => {
-      const fetchData = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-          const response = await _get(`/api/dashboard/effectifs-par-niveau-et-annee-formation?${searchParamsString}`);
-          setRepartitionEffectifs(response);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchData();
-    }, [searchParamsString]);
-
-    return (
-      <Component
-        {...props}
-        repartitionEffectifs={repartitionEffectifs}
-        loading={loading}
-        error={error}
-        _setPage={setPage}
-      />
-    );
+    return <Component {...props} repartitionEffectifs={repartitionEffectifs} loading={loading} error={error} />;
   };
 
   WithRepartitionEffectifsReseauParNiveauEtAnneeFormation.propTypes = {
-    filters: filtersPropType,
+    filters: filtersPropTypes.state,
   };
 
   return WithRepartitionEffectifsReseauParNiveauEtAnneeFormation;

@@ -94,4 +94,5 @@ module.exports = {
   createRandomStatutsCandidatsList,
   createRandomStatutsCandidatsApiInputList,
   getRandomSiretEtablissement,
+  getRandomUaiEtablissement,
 };

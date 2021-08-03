@@ -1,13 +1,15 @@
 const { Formation: FormationModel, StatutCandidat: StatutCandidatModel } = require("../model");
 const { validateCfd } = require("../domain/cfd");
 const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
+const { getMetiersByCfd } = require("../apis/apiLba");
+
 const { Formation } = require("../domain/formation");
 
 module.exports = () => ({
   createFormation,
   existsFormation,
   getFormationWithCfd,
-  searchFormationByIntituleOrCfd,
+  searchFormations,
 });
 
 /**
@@ -47,10 +49,12 @@ const createFormation = async (cfd) => {
   }
 
   const formationInfo = await getCfdInfo(cfd);
+  const metiersFromCfd = await getMetiersByCfd(cfd);
   const formationEntity = Formation.create({
     cfd,
     libelle: buildFormationLibelle(formationInfo),
-    niveau: formationInfo.niveau,
+    niveau: formationInfo?.niveau,
+    metiers: metiersFromCfd?.metiers,
   });
 
   if (formationEntity) {
@@ -62,16 +66,19 @@ const createFormation = async (cfd) => {
 };
 
 /**
- * Returns list of CFA information whose nom_etablissement matches input
- * @param {string} intitule
- * @return {[Formation]} Array of CFA information
+ * Returns list of formations whose matching search criteria
+ * @param {Object} searchCriteria
+ * @return {[Formation]} Array of formations
  */
-const searchFormationByIntituleOrCfd = async (intituleOrCfd, otherFilters) => {
-  const searchTermFilterQuery = {
-    $or: [{ $text: { $search: intituleOrCfd } }, { cfd: new RegExp(intituleOrCfd, "g") }],
-  };
+const searchFormations = async (searchCriteria) => {
+  const { searchTerm, ...otherFilters } = searchCriteria;
+  const searchTermFilterQuery = searchTerm
+    ? {
+        $or: [{ $text: { $search: searchTerm } }, { cfd: new RegExp(searchTerm, "g") }],
+      }
+    : {};
 
-  if (otherFilters && Object.keys(otherFilters).length > 0) {
+  if (Object.keys(otherFilters).length > 0) {
     const filters = {
       formation_cfd_valid: true,
       ...otherFilters,

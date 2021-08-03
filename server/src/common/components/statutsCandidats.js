@@ -67,12 +67,13 @@ const updateStatut = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
   const existingItem = await StatutCandidat.findById(existingItemId);
+  const dateMiseAJourStatut = toUpdate.date_metier_mise_a_jour_statut || new Date();
 
   // Check if maj statut is valid
   if (isMajStatutInvalid(existingItem.statut_apprenant, toUpdate.statut_apprenant)) {
     toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ko;
     toUpdate.erreur_mise_a_jour_statut = {
-      date_mise_a_jour_statut: new Date(),
+      date_mise_a_jour_statut: dateMiseAJourStatut,
       ancien_statut: existingItem.statut_apprenant,
       nouveau_statut_souhaite: toUpdate.statut_apprenant,
     };
@@ -89,7 +90,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
       {
         valeur_statut: toUpdate.statut_apprenant,
         position_statut: existingItem.historique_statut_apprenant.length + 1,
-        date_statut: new Date(),
+        date_statut: dateMiseAJourStatut,
       },
     ];
   }
@@ -104,11 +105,9 @@ const updateStatut = async (existingItemId, toUpdate) => {
 };
 
 const createStatutCandidat = async (itemToCreate) => {
-  // if statut candidat établissement has a VALID siret or uai, try to retrieve information in Referentiel CFAs
-  const etablissementInReferentielCfaFromSiretOrUai =
-    (validateSiret(itemToCreate.siret_etablissement) &&
-      (await Cfa.findOne({ siret: itemToCreate.siret_etablissement }))) ||
-    (validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement })));
+  // if statut candidat établissement has a VALID uai try to retrieve information in Referentiel CFAs
+  const etablissementInReferentielCfaFromUai =
+    validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement }));
 
   // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
   if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {
@@ -152,8 +151,8 @@ const createStatutCandidat = async (itemToCreate) => {
     source: itemToCreate.source,
 
     // add network of etablissement if found in ReferentielCfa
-    ...(etablissementInReferentielCfaFromSiretOrUai
-      ? { etablissement_reseaux: etablissementInReferentielCfaFromSiretOrUai.reseaux }
+    ...(etablissementInReferentielCfaFromUai
+      ? { etablissement_reseaux: etablissementInReferentielCfaFromUai.reseaux }
       : {}),
   });
   return toAdd.save();

@@ -29,7 +29,7 @@ const LoginPage = ({ history }) => {
         <Text>Tableau de bord - Flux Cfas</Text>
       </Flex>
       <Box background="white" borderRadius="2%" width="28rem" mt="4">
-        <Heading mt={4} fontFamily="Marianne" fontWeight="700" marginBottom="2w" textAlign="center">
+        <Heading mt={4} fontWeight="700" marginBottom="2w" textAlign="center">
           Connexion
         </Heading>
         <LoginForm onSubmit={login} />

@@ -33,11 +33,9 @@ runScript(async () => {
   ).map((item) => ({ uai: item._id.uai, cfd: item._id.cfd }));
 
   loadingBar.start(uaiCfdCouples.length, 0);
-  let nbHandled = 0;
 
   await asyncForEach(uaiCfdCouples, async (currentUaiCfd) => {
-    nbHandled++;
-    loadingBar.update(nbHandled);
+    loadingBar.increment();
 
     // Récupère les sirets depuis le catalogue à partir du CFD + UAI étant dans l'un des 3 types d'uais des formations
     const infoCatalog = await getFormations2021({
@@ -53,7 +51,7 @@ runScript(async () => {
       select: { etablissement_gestionnaire_siret: 1, etablissement_formateur_siret: 1 },
     });
 
-    if (infoCatalog.length > 0) {
+    if (infoCatalog?.length > 0) {
       // Récupère tous les statuts ayant ce couple UAI & CFD et un siret invalide
       const statutsForUaiCfdCouple = await StatutCandidat.find({
         uai_etablissement: currentUaiCfd.uai,

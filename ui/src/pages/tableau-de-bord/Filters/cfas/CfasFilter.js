@@ -1,47 +1,47 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { FilterButton, OverlayMenu } from "../../../../common/components";
+import { OverlayMenu, SecondarySelectButton } from "../../../../common/components";
 import MenuTabs from "../../../../common/components/OverlayMenu/MenuTabs";
-import { filtersPropType } from "../../propTypes";
+import { filtersPropTypes } from "../../FiltersContext";
 import CfaPanel from "./CfasPanel";
 import ReseauxPanel from "./ReseauxPanel";
 
-const CfasFilter = ({ onChange, value, filters }) => {
+const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onCfaClick = (cfa) => {
-    onChange(cfa ? { ...cfa, type: "cfa" } : null);
+    onCfaChange(cfa);
     setIsOpen(false);
   };
 
   const onReseauClick = (reseau) => {
-    onChange(reseau ? { ...reseau, type: "reseau" } : null);
+    onReseauChange(reseau);
     setIsOpen(false);
   };
 
-  const buttonLabel = !value
-    ? "Tous les organismes de formation"
-    : value.type === "cfa"
-    ? value.nom_etablissement
-    : value.nom;
+  const buttonLabel = filters.cfa?.nom_etablissement || filters.reseau?.nom || "Sélectionner un organisme ou un réseau";
 
   return (
     <div>
-      <FilterButton
+      <SecondarySelectButton
         icon="ri-community-fill"
         onClick={() => setIsOpen(!isOpen)}
-        displayClearIcon={!!value}
-        clearIconOnClick={() => onChange(null)}
+        isActive={isOpen}
+        isClearable={Boolean(filters.cfa || filters.reseau)}
+        clearIconOnClick={() => {
+          onReseauChange(null);
+          onCfaChange(null);
+        }}
       >
         {buttonLabel}
-      </FilterButton>
+      </SecondarySelectButton>
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <MenuTabs tabNames={["Organismes de formation", "Réseaux"]}>
-            <CfaPanel onCfaClick={onCfaClick} value={value} filters={filters} />
-            <ReseauxPanel onReseauClick={onReseauClick} value={value} />
+            <CfaPanel onCfaClick={onCfaClick} value={filters.cfa} filters={filters} />
+            <ReseauxPanel onReseauClick={onReseauClick} value={filters.reseau} />
           </MenuTabs>
         </OverlayMenu>
       )}
@@ -50,20 +50,9 @@ const CfasFilter = ({ onChange, value, filters }) => {
 };
 
 CfasFilter.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([
-    PropTypes.shape({
-      siret_etablissement: PropTypes.string.isRequired,
-      nom_etablissement: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-    }),
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      nom: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-    }),
-  ]),
-  filters: filtersPropType,
+  onCfaChange: PropTypes.func.isRequired,
+  onReseauChange: PropTypes.func.isRequired,
+  filters: filtersPropTypes.state,
 };
 
 export default CfasFilter;

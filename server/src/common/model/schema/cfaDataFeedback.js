@@ -3,8 +3,12 @@ const { Schema } = require("mongoose");
 const cfaDataFeedback = new Schema({
   siret: {
     type: String,
-    required: true,
     description: "Siret de l'établissement",
+  },
+  uai: {
+    type: String,
+    required: true,
+    description: "UAI de l'établissement",
   },
   email: {
     type: String,
@@ -15,11 +19,6 @@ const cfaDataFeedback = new Schema({
     type: String,
     required: true,
     description: "Détails du feedback",
-  },
-  donnee_est_valide: {
-    type: Boolean,
-    required: true,
-    description: "Les données présentées sur le tableau de bord par ce CFA est-elle valide",
   },
   created_at: {
     type: Date,

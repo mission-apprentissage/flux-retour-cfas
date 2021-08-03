@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import { SearchInput } from "../../../../common/components";
 import { stringContains } from "../../../../common/utils/stringUtils";
 import FilterOption from "../FilterOption";
-import { TERRITOIRE_TYPES } from "./withTerritoireData";
 
 const RegionOptions = ({ regions, onRegionClick, currentFilter }) => {
   const [regionSearchTerm, setRegionSearchTerm] = useState("");
@@ -16,7 +15,7 @@ const RegionOptions = ({ regions, onRegionClick, currentFilter }) => {
 
   return (
     <>
-      <SearchInput placeholder="Saisissez une région" value={regionSearchTerm} onChange={setRegionSearchTerm} />
+      <SearchInput placeholder="Rechercher une région" value={regionSearchTerm} onChange={setRegionSearchTerm} />
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
         {filteredRegions.map((region) => (
           <FilterOption
@@ -37,7 +36,6 @@ RegionOptions.propTypes = {
     PropTypes.shape({
       nom: PropTypes.string.isRequired,
       code: PropTypes.string.isRequired,
-      type: PropTypes.oneOf([TERRITOIRE_TYPES.region]),
     }).isRequired
   ).isRequired,
   onRegionClick: PropTypes.func.isRequired,
