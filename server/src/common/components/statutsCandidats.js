@@ -67,7 +67,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
   const existingItem = await StatutCandidat.findById(existingItemId);
-  const dateMiseAJourStatut = toUpdate.date_metier_mise_a_jour_statut || new Date();
+  const dateMiseAJourStatut = new Date(toUpdate.date_metier_mise_a_jour_statut) || new Date();
 
   // Check if maj statut is valid
   if (isMajStatutInvalid(existingItem.statut_apprenant, toUpdate.statut_apprenant)) {
