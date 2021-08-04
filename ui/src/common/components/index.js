@@ -12,6 +12,7 @@ export { default as Section } from "./Section/Section";
 export { default as Highlight } from "./Highlight/Highlight";
 
 export { default as Table } from "./tables/Table";
-export { default as TableSkeleton } from "./TableSkeleton/TableSkeleton";
+
+export { default as TableSkeleton } from "./skeletons/TableSkeleton";
 
 export { default as Pagination } from "./Pagination/Pagination";
