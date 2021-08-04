@@ -55,7 +55,6 @@ const getEffectifsWithStatutAtDateAggregationPipeline = (date, projection = {}) 
             in: {
               date_statut: "$$item.date_statut",
               valeur_statut: "$$item.valeur_statut",
-              position_statut: "$$item.position_statut",
               // Calcul de la différence entre item.date_statut & date
               diff_date_search: { $abs: [{ $subtract: ["$$item.date_statut", date] }] },
             },
@@ -352,13 +351,20 @@ const getRupturantsCountAtDate = async (searchDate, filters = {}, options = {}) 
         "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.inscrit,
       },
     },
+    // set previousStatutAtDate to be the element in historique_statut_apprenant juste before statut_apprenant_at_date
     {
       $addFields: {
         previousStatutAtDate: {
           $arrayElemAt: [
             "$historique_statut_apprenant",
-            // subtract 2 because index for $arrayElemAt is 0-based (first element is 0) whereas position_statut is 1-based (first element is 1)
-            { $subtract: ["$statut_apprenant_at_date.position_statut", 2] },
+            {
+              $subtract: [
+                {
+                  $indexOfArray: ["$historique_statut_apprenant.date_statut", "$statut_apprenant_at_date.date_statut"],
+                },
+                1,
+              ],
+            },
           ],
         },
       },
