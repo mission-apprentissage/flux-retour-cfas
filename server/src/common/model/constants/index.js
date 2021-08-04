@@ -31,10 +31,6 @@ const codesMajStatutsInterdits = [
     source: codesStatutsCandidats.apprenti,
     destination: codesStatutsCandidats.prospect,
   },
-  {
-    source: codesStatutsCandidats.apprenti,
-    destination: codesStatutsCandidats.inscrit,
-  },
 ];
 
 /**
