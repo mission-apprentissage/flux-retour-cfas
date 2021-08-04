@@ -1,9 +1,9 @@
 name: Deploy
 on:
   push:
-    branches: [master, recette]
+    branches: [recette]
   pull_request:
-    branches: [master, recette]
+    branches: [recette]
 
 jobs:
   deploy:
