@@ -847,7 +847,7 @@ integrationTests(__filename, () => {
       // Mise à jour du statut avec nouveau statut_apprenant
       const updatePayload = {
         statut_apprenant: codesStatutsCandidats.abandon,
-        date_metier_mise_a_jour_statut: new Date(),
+        date_metier_mise_a_jour_statut: new Date().toISOString(),
       };
       await updateStatut(createdStatut._id, updatePayload);
 
@@ -860,7 +860,7 @@ integrationTests(__filename, () => {
       assert.equal(found.historique_statut_apprenant[1].position_statut, 2);
       assert.equal(
         found.historique_statut_apprenant[1].date_statut.getTime(),
-        updatePayload.date_metier_mise_a_jour_statut.getTime()
+        new Date(updatePayload.date_metier_mise_a_jour_statut).getTime()
       );
     });
 
