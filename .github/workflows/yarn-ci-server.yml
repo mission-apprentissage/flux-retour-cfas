@@ -1,5 +1,5 @@
 # Worflow pour CI sur le server
-name: Yarn CI Server & Lint / Tests
+name: Server - Install, lint, test
 
 on: [push]
 
@@ -11,6 +11,12 @@ jobs:
     steps:
       # Checks-out the repository
       - uses: actions/checkout@v2
+
+      # define node version to use, otherwise Github Actions will use the one shipped with ubuntu-latest (https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#language-and-runtime)
+      - name: Use Node.js 16.6.0
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.6.0'
 
       # setup npmrc
       - run: echo -e "//npm.pkg.github.com/:_authToken=$NPM_TOKEN\n@mission-apprentissage:registry=https://npm.pkg.github.com" > server/.npmrc

@@ -1,4 +1,4 @@
-FROM node:14.16.1-stretch
+FROM node:16.6.0-stretch
 
 # handle .npmrc : copy local one for dev, create one using NPM_TOKEN arg for production & recette
 ARG NPM_TOKEN
