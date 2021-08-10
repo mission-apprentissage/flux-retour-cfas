@@ -16,24 +16,27 @@ module.exports = ({ statutsCandidats }) => {
     .max(POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH)
     .items(
       Joi.object({
-        ine_apprenant: Joi.string().allow(null, ""),
+        // required fields
         nom_apprenant: Joi.string().required(),
         prenom_apprenant: Joi.string().required(),
-        prenom2_apprenant: Joi.string().allow(null, ""),
-        prenom3_apprenant: Joi.string().allow(null, ""),
         ne_pas_solliciter: Joi.boolean().required(),
-        email_contact: Joi.string().allow(null, ""),
-        id_formation: Joi.string().required(),
-        libelle_court_formation: Joi.string().allow(null, ""),
-        libelle_long_formation: Joi.string().allow(null, ""),
         uai_etablissement: Joi.string().required(),
-        siret_etablissement: Joi.string().allow(null, ""),
         nom_etablissement: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
+        id_formation: Joi.string().required(),
+        annee_scolaire: Joi.string().required(),
+
+        // optional
+        ine_apprenant: Joi.string().allow(null, ""),
+        prenom2_apprenant: Joi.string().allow(null, ""),
+        prenom3_apprenant: Joi.string().allow(null, ""),
+        email_contact: Joi.string().allow(null, ""),
+        libelle_court_formation: Joi.string().allow(null, ""),
+        libelle_long_formation: Joi.string().allow(null, ""),
+        siret_etablissement: Joi.string().allow(null, ""),
         date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
         periode_formation: Joi.string().allow(null, ""),
         annee_formation: Joi.number().allow(null),
-        annee_scolaire: Joi.string().allow(null, ""),
 
         // TODO remove when ERPs stop sending us this information
         nom_representant_legal: Joi.string().allow(null, ""),

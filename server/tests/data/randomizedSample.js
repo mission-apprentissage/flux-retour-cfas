@@ -8,24 +8,28 @@ const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase()
 const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
 const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
 const getRandomStatutApprenant = () => Math.floor(Math.random() * Math.floor(4));
-const getRandomPeriodeFormation = () => {
-  const currentYear = new Date().getFullYear();
-  const startYear = faker.random.arrayElement([currentYear, currentYear - 1, currentYear - 2]);
+const getRandomPeriodeFormation = (anneeScolaire) => {
+  const yearToInclude = anneeScolaire.slice(0, 4);
+  const startYear = faker.random.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
   const endYear = startYear + faker.random.arrayElement([1, 2]);
   return [startYear, endYear];
 };
 
 const getRandomAnneeFormation = () => faker.random.arrayElement([0, 1, 2, 3]);
 
-const getRandomAnneeScolaireInRange = (range) => {
-  const [min, max] = range;
-  const anneeScolaireStart = Math.floor(Math.random() * (max - min) + min);
-  return [anneeScolaireStart, anneeScolaireStart + 1].join("-");
+const getRandomAnneeScolaire = () => {
+  const currentYear = new Date().getFullYear();
+  const anneeScolaire = faker.random.arrayElement([
+    [currentYear - 1, currentYear], // [2020, 2021]
+    [currentYear, currentYear + 1], // [2021, 2022]
+    [currentYear + 1, currentYear + 2], // [2022, 2023]
+  ]);
+  return anneeScolaire.join("-");
 };
 
 const createRandomStatutCandidat = (params = {}) => {
-  const periode_formation = getRandomPeriodeFormation();
-  const annee_scolaire = getRandomAnneeScolaireInRange(periode_formation);
+  const annee_scolaire = getRandomAnneeScolaire();
+  const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
   return {
     ine_apprenant: isPresent() ? getRandomIne() : null,
@@ -47,15 +51,15 @@ const createRandomStatutCandidat = (params = {}) => {
     date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
     periode_formation: isPresent() ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),
-    annee_scolaire: isPresent() ? annee_scolaire : null,
+    annee_scolaire,
     ...params,
   };
 };
 
 // random statutCandidat shaped along our REST API schema
 const createRandomStatutCandidatApiInput = (params = {}) => {
-  const periode_formation = getRandomPeriodeFormation();
-  const annee_scolaire = getRandomAnneeScolaireInRange(periode_formation);
+  const annee_scolaire = getRandomAnneeScolaire();
+  const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
   return {
     ine_apprenant: isPresent() ? getRandomIne() : null,
@@ -75,9 +79,9 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-    periode_formation: isPresent() ? periode_formation.join("-") : "",
-    annee_scolaire: isPresent() ? annee_scolaire : "",
     annee_formation: getRandomAnneeFormation(),
+    periode_formation: isPresent() ? periode_formation.join("-") : "",
+    annee_scolaire,
     ...params,
   };
 };

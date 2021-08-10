@@ -3,7 +3,10 @@ const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
 const { apiStatutsSeeder } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
-const { createRandomStatutsCandidatsApiInputList } = require("../../data/randomizedSample");
+const {
+  createRandomStatutsCandidatsApiInputList,
+  createRandomStatutCandidatApiInput,
+} = require("../../data/randomizedSample");
 const { nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../utils/nockApis/nock-Lba");
 
@@ -74,6 +77,36 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     assert.deepEqual(response.status, 403);
+  });
+
+  const requiredFields = [
+    "prenom_apprenant",
+    "nom_apprenant",
+    "id_formation",
+    "uai_etablissement",
+    "statut_apprenant",
+    "annee_scolaire",
+  ];
+  requiredFields.forEach((requiredField) => {
+    it(`Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
+      const { httpClient } = await startServer();
+      const userApiCreated = await createApiUser();
+
+      // set required field as undefined
+      const input = [createRandomStatutCandidatApiInput({ [requiredField]: undefined })];
+      // perform request
+      const response = await httpClient.post("/api/statut-candidats", input, {
+        headers: {
+          "x-api-key": userApiCreated.apiKey,
+        },
+      });
+      // check response
+      assert.equal(response.status, 400);
+      assert.equal(response.data.status, "ERROR");
+      assert.equal(response.data.message.includes(`${requiredField}" is required`), true);
+      // check that no data was created
+      assert.equal(await StatutCandidat.countDocuments({}), 0);
+    });
   });
 
   it("Vérifie l'ajout via route statut-candidats de données complètes", async () => {
