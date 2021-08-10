@@ -8,7 +8,6 @@ const errorMiddleware = require("./middlewares/errorMiddleware");
 const corsMiddleware = require("./middlewares/corsMiddleware");
 const jwtAuthMiddleware = require("./middlewares/jwtAuthMiddleware");
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
-const apiKeyOrJwtAuthMiddleware = require("./middlewares/apiKeyOrJwtAuthMiddleware");
 
 const statutCandidatsRoute = require("./routes/statut-candidats");
 const loginRoute = require("./routes/login");
@@ -31,10 +30,9 @@ module.exports = async (components) => {
   app.use(corsMiddleware());
   app.use(logMiddleware());
 
-  // temporarily support auth with jwt or apiKey while Ymag clients upgrade their strategy
   app.use(
     "/api/statut-candidats",
-    apiKeyOrJwtAuthMiddleware(components),
+    jwtAuthMiddleware(components),
     permissionsMiddleware([apiStatutsSeeder]),
     statutCandidatsRoute(components)
   );
