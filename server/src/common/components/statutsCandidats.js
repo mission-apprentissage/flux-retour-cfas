@@ -148,6 +148,8 @@ const createStatutCandidat = async (itemToCreate) => {
     date_metier_mise_a_jour_statut: itemToCreate.date_metier_mise_a_jour_statut,
     periode_formation: itemToCreate.periode_formation,
     annee_formation: itemToCreate.annee_formation,
+    annee_scolaire: itemToCreate.annee_scolaire,
+
     source: itemToCreate.source,
 
     // add network of etablissement if found in ReferentielCfa

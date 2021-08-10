@@ -7,12 +7,24 @@ const { createRandomStatutsCandidatsApiInputList } = require("../../data/randomi
 const { nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../utils/nockApis/nock-Lba");
 
+const user = {
+  name: "userApi",
+  password: "password",
+};
 const createApiUser = async () => {
   const { createUser } = await users();
 
-  return await createUser("userApi", "password", {
+  return await createUser(user.name, user.password, {
     permissions: [apiStatutsSeeder],
   });
+};
+
+const getJwtForUser = async (httpClient) => {
+  const { data } = await httpClient.post("/api/login", {
+    username: user.name,
+    password: user.password,
+  });
+  return data.access_token;
 };
 
 httpTests(__filename, ({ startServer }) => {
@@ -21,19 +33,15 @@ httpTests(__filename, ({ startServer }) => {
     nockGetMetiersByCfd();
   });
 
-  it("Vérifie que la route statut-candidats fonctionne avec un jwt", async () => {
+  it("Vérifie que la route statut-candidats fonctionne avec un tableau vide", async () => {
     const { httpClient } = await startServer();
-    const userApiCreated = await createApiUser();
-
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", [], {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -70,26 +78,15 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie l'ajout via route statut-candidats de données complètes", async () => {
     const { httpClient } = await startServer();
-
-    // Clear statuts in DB
-    await StatutCandidat.deleteMany({});
-
-    // Create & check api user
-    const userApiCreated = await createApiUser();
-    assert.deepEqual(userApiCreated.username, "userApi");
-    assert.deepEqual(userApiCreated.permissions.length > 0, true);
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     const input = createRandomStatutsCandidatsApiInputList(20);
-
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", input, {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -101,29 +98,17 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie l'ajout via route statut-candidats de 50 données randomisées", async () => {
     const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     const nbItemsToTest = 50;
-
-    // Clear statuts in DB
-    await StatutCandidat.deleteMany({});
-
-    // Create & check api user
-    const userApiCreated = await createApiUser();
-    assert.deepEqual(userApiCreated.username, "userApi");
-    assert.deepEqual(userApiCreated.permissions.length > 0, true);
-
     // Generate random data
     const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
-
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", randomDataList, {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -139,29 +124,17 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie l'erreur d'ajout via route statut-candidats pour un trop grande nb de données randomisées (>100)", async () => {
     const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     const nbItemsToTest = 200;
-
-    // Clear statuts in DB
-    await StatutCandidat.deleteMany({});
-
-    // Create & check api user
-    const userApiCreated = await createApiUser();
-    assert.deepEqual(userApiCreated.username, "userApi");
-    assert.deepEqual(userApiCreated.permissions.length > 0, true);
 
     // Generate random data
     const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
 
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
-
-    // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", randomDataList, {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -172,13 +145,8 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie que la route statut-candidats/test fonctionne avec un jeton JWT", async () => {
     const { httpClient } = await startServer();
-
-    const userApiCreated = await createApiUser();
-
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     // Call Api Route
     const response = await httpClient.post(
@@ -186,7 +154,7 @@ httpTests(__filename, ({ startServer }) => {
       {},
       {
         headers: {
-          Authorization: `Bearer ${data.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );

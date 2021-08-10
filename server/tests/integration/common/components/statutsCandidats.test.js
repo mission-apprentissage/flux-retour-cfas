@@ -258,6 +258,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(found.siret_etablissement, randomStatut.siret_etablissement);
       assert.strictEqual(found.nom_etablissement, randomStatut.nom_etablissement);
       assert.strictEqual(found.statut_apprenant, randomStatut.statut_apprenant);
+      assert.equal(found.annee_scolaire, randomStatut.annee_scolaire);
     });
 
     it("Vérifie la mauvaise récupération d'un statut sur mauvais nom", async () => {
@@ -338,7 +339,7 @@ integrationTests(__filename, () => {
 
       // Check added
       assert.strictEqual(added.length, 1);
-      const foundAdded = await StatutCandidat.findById(added[0]._id);
+      const foundAdded = await StatutCandidat.findById(added[0]._id).lean();
       assert.strictEqual(foundAdded.ine_apprenant, statutsTestUpdate[3].ine_apprenant);
       assert.strictEqual(foundAdded.nom_apprenant, statutsTestUpdate[3].nom_apprenant);
       assert.strictEqual(foundAdded.prenom_apprenant, statutsTestUpdate[3].prenom_apprenant);
@@ -350,12 +351,13 @@ integrationTests(__filename, () => {
       assert.strictEqual(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
       assert.strictEqual(foundAdded.updated_at, null);
       assert.strictEqual(foundAdded.annee_formation, statutsTestUpdate[3].annee_formation);
-      assert.strictEqual(foundAdded.periode_formation.length, 0);
+      assert.equal(foundAdded.annee_scolaire, statutsTestUpdate[3].annee_scolaire);
+      assert.deepEqual(foundAdded.periode_formation, statutsTestUpdate[3].periode_formation);
 
       // Check updated
       assert.strictEqual(updated.length, 3);
 
-      const firstUpdated = await StatutCandidat.findById(updated[0]._id);
+      const firstUpdated = await StatutCandidat.findById(updated[0]._id).lean();
       assert.strictEqual(firstUpdated.ine_apprenant, statutsTestUpdate[0].ine_apprenant);
       assert.strictEqual(firstUpdated.nom_apprenant, statutsTestUpdate[0].nom_apprenant);
       assert.strictEqual(firstUpdated.prenom_apprenant, statutsTestUpdate[0].prenom_apprenant);
@@ -368,10 +370,11 @@ integrationTests(__filename, () => {
       assert.strictEqual(firstUpdated.siret_etablissement, statutsTestUpdate[0].siret_etablissement);
       assert.strictEqual(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
       assert.strictEqual(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
+      assert.equal(firstUpdated.annee_scolaire, statutsTestUpdate[0].annee_scolaire);
       assert.ok(firstUpdated.date_mise_a_jour_statut);
       assert.ok(firstUpdated.updated_at);
 
-      const secondUpdated = await StatutCandidat.findById(updated[1]._id);
+      const secondUpdated = await StatutCandidat.findById(updated[1]._id).lean();
       assert.strictEqual(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
       assert.strictEqual(secondUpdated.nom_apprenant, statutsTestUpdate[1].nom_apprenant);
       assert.strictEqual(secondUpdated.prenom_apprenant, statutsTestUpdate[1].prenom_apprenant);
@@ -382,6 +385,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(secondUpdated.siret_etablissement, statutsTestUpdate[1].siret_etablissement);
       assert.strictEqual(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
       assert.strictEqual(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
+      assert.equal(secondUpdated.annee_scolaire, statutsTestUpdate[1].annee_scolaire);
       assert.ok(secondUpdated.date_mise_a_jour_statut);
       assert.ok(secondUpdated.updated_at);
 
@@ -395,6 +399,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(thirdUpdated.siret_etablissement, statutsTestUpdate[2].siret_etablissement);
       assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
       assert.strictEqual(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
+      assert.equal(thirdUpdated.annee_scolaire, statutsTestUpdate[2].annee_scolaire);
       assert.ok(thirdUpdated.date_mise_a_jour_statut);
       assert.ok(thirdUpdated.updated_at);
     });
@@ -794,12 +799,13 @@ integrationTests(__filename, () => {
       const updatedStatut = await updateStatut(createdStatut._id, simpleStatutBadUpdate);
 
       assert.strictEqual(updatedStatut.ine_apprenant, simpleStatutBadUpdate.ine_apprenant);
-      assert.strictEqual(updatedStatut.nom_apprenant, simpleStatutBadUpdate.nom_apprenant);
-      assert.strictEqual(updatedStatut.prenom_apprenant, simpleStatutBadUpdate.prenom_apprenant);
+      assert.strictEqual(updatedStatut.nom_apprenant, simpleStatut.nom_apprenant);
+      assert.strictEqual(updatedStatut.prenom_apprenant, simpleStatut.prenom_apprenant);
       assert.strictEqual(updatedStatut.ne_pas_solliciter, simpleStatutBadUpdate.ne_pas_solliciter);
       assert.strictEqual(updatedStatut.email_contact, simpleStatutBadUpdate.email_contact);
-      assert.strictEqual(updatedStatut.formation_cfd, simpleStatutBadUpdate.formation_cfd);
-      assert.strictEqual(updatedStatut.uai_etablissement, simpleStatutBadUpdate.uai_etablissement);
+      assert.strictEqual(updatedStatut.formation_cfd, simpleStatut.formation_cfd);
+      assert.strictEqual(updatedStatut.uai_etablissement, simpleStatut.uai_etablissement);
+      assert.strictEqual(updatedStatut.annee_scolaire, simpleStatut.annee_scolaire);
       assert.strictEqual(updatedStatut.siret_etablissement, simpleStatutBadUpdate.siret_etablissement);
       assert.strictEqual(updatedStatut.statut_apprenant, simpleStatutBadUpdate.statut_apprenant);
       assert.strictEqual(updatedStatut.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ko);
@@ -911,6 +917,7 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatutJson.source, randomStatut.source);
       assert.strictEqual(createdStatutJson.annee_formation, randomStatut.annee_formation);
       assert.deepStrictEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
+      assert.deepStrictEqual(createdStatutJson.annee_scolaire, randomStatut.annee_scolaire);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid", async () => {

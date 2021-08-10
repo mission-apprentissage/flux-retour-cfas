@@ -4,7 +4,6 @@ const statutsCandidats = require("../../../../src/common/components/statutsCandi
 const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
 const stats = require("../../../../src/common/components/stats");
 const { seedSample, seedRandomizedSampleWithStatut } = require("../../../../src/jobs/seed/utils/seedUtils");
-const { simpleStatutsWith3DifferentUais } = require("../../../data/sample");
 const { nockGetSiretInfo, nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
@@ -130,7 +129,11 @@ integrationTests(__filename, () => {
   it("Permet de récupérer le nb d'etablissements distincts par uai", async () => {
     // Seed with sample data
     const { addOrUpdateStatuts } = await statutsCandidats();
-    await addOrUpdateStatuts(simpleStatutsWith3DifferentUais);
+    await addOrUpdateStatuts([
+      createRandomStatutCandidat({ uai_etablissement: "0762232N" }),
+      createRandomStatutCandidat({ uai_etablissement: "0762232X" }),
+      createRandomStatutCandidat({ uai_etablissement: "0762232Z" }),
+    ]);
 
     // Calcul stats
     const statsModule = await stats();

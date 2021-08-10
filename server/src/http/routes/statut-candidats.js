@@ -33,6 +33,7 @@ module.exports = ({ statutsCandidats }) => {
         date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
         periode_formation: Joi.string().allow(null, ""),
         annee_formation: Joi.number().allow(null),
+        annee_scolaire: Joi.string().allow(null, ""),
 
         // TODO remove when ERPs stop sending us this information
         nom_representant_legal: Joi.string().allow(null, ""),
