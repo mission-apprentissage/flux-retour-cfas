@@ -9,7 +9,7 @@ const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().
 const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
 const getRandomStatutApprenant = () => Math.floor(Math.random() * Math.floor(4));
 const getRandomPeriodeFormation = (anneeScolaire) => {
-  const yearToInclude = anneeScolaire.slice(0, 4);
+  const yearToInclude = Number(anneeScolaire.slice(0, 4));
   const startYear = faker.random.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
   const endYear = startYear + faker.random.arrayElement([1, 2]);
   return [startYear, endYear];

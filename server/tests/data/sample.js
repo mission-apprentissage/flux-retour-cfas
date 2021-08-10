@@ -54,6 +54,7 @@ const statutsTest = [
     date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
     periode_formation: [2020, 2021],
     annee_formation: 2020,
+    annee_scolaire: "2020-2021",
   },
   {
     ine_apprenant: "6789",
@@ -67,6 +68,7 @@ const statutsTest = [
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
     annee_formation: 0,
+    annee_scolaire: "2020-2021",
   },
   {
     nom_apprenant: "test3Nom",
@@ -79,6 +81,7 @@ const statutsTest = [
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
     annee_formation: 2019,
+    annee_scolaire: "2020-2021",
   },
 ];
 

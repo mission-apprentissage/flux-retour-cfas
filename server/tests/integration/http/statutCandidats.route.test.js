@@ -199,7 +199,7 @@ httpTests(__filename, ({ startServer }) => {
 
     // Check Api Route data & Data not added
     assert.deepEqual(response.status, 413);
-    assert.notDeepEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
+    assert.equal(await StatutCandidat.countDocuments({}), 0);
   });
 
   it("Vérifie que la route statut-candidats/test fonctionne avec un jeton JWT", async () => {
