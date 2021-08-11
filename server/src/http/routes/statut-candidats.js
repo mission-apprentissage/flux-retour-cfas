@@ -24,7 +24,9 @@ module.exports = ({ statutsCandidats }) => {
         nom_etablissement: Joi.string().required(),
         statut_apprenant: Joi.number().required(),
         id_formation: Joi.string().required(),
-        annee_scolaire: Joi.string().required(),
+        annee_scolaire: Joi.string()
+          .regex(/^\d{4}-\d{4}$/)
+          .required(),
 
         // optional
         ine_apprenant: Joi.string().allow(null, ""),

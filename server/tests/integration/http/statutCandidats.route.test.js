@@ -109,6 +109,30 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
+  it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ annee_scolaire ne respecte pas le format", async () => {
+    const { httpClient } = await startServer();
+    const userApiCreated = await createApiUser();
+
+    // set required field as undefined
+    const input = [createRandomStatutCandidatApiInput({ annee_scolaire: "2021,2022" })];
+    // perform request
+    const response = await httpClient.post("/api/statut-candidats", input, {
+      headers: {
+        "x-api-key": userApiCreated.apiKey,
+      },
+    });
+    // check response
+    assert.equal(response.status, 400);
+    assert.equal(response.data.status, "ERROR");
+    console.log(response.data.message);
+    assert.equal(
+      response.data.message.includes('annee_scolaire" with value "2021,2022" fails to match the required pattern'),
+      true
+    );
+    // check that no data was created
+    assert.equal(await StatutCandidat.countDocuments({}), 0);
+  });
+
   it("Vérifie l'ajout via route statut-candidats de données complètes", async () => {
     const { httpClient } = await startServer();
     await createApiUser();
