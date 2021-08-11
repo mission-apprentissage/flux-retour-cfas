@@ -1,4 +1,4 @@
-import { Box, Button, FormControl, FormErrorMessage, FormLabel, HStack, Input, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Text } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import PropTypes from "prop-types";
 import React from "react";
@@ -40,11 +40,11 @@ const LoginForm = ({ onSubmit }) => {
                   }}
                 </Field>
               </Box>
-              <HStack spacing="4w">
-                <Button color="white" type="submit">
+              <Flex justifyContent="flex-end">
+                <Button variant="primary" type="submit">
                   Connexion
                 </Button>
-              </HStack>
+              </Flex>
               {status.error && <Text color="error">{status.error}</Text>}
             </Form>
           );
