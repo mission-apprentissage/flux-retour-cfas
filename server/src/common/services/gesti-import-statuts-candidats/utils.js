@@ -33,25 +33,31 @@ const adaptGestiStatutCandidat = (gestiStatutCandidat) => {
       : null,
     annee_formation: gestiStatutCandidat.annee_formation ? Number(gestiStatutCandidat.annee_formation) : null,
     siret_etablissement: gestiStatutCandidat.siret_etablissement.replace(/(\s|\.)/g, ""),
+    annee_scolaire: gestiStatutCandidat.annee_scolaire,
   };
 };
 
 /* this schema should be located in a StatutCandidat entity validator */
 const tempSchema = Joi.object({
-  ine_apprenant: Joi.string().allow(null, ""),
+  // required
   nom_apprenant: Joi.string().required(),
   prenom_apprenant: Joi.string().required(),
+  uai_etablissement: Joi.string().required(),
+  nom_etablissement: Joi.string().required(),
+  formation_cfd: Joi.string().required(),
+  statut_apprenant: Joi.number().required(),
+  ne_pas_solliciter: Joi.boolean().required(),
+  annee_scolaire: Joi.string()
+    .regex(/^\d{4}-\d{4}$/)
+    .required(),
+  // optional
+  ine_apprenant: Joi.string().allow(null, ""),
   prenom2_apprenant: Joi.string().allow(null, ""),
   prenom3_apprenant: Joi.string().allow(null, ""),
-  ne_pas_solliciter: Joi.boolean().required(),
   email_contact: Joi.string().allow(null, ""),
-  formation_cfd: Joi.string().required(),
   libelle_court_formation: Joi.string().allow(null, ""),
   libelle_long_formation: Joi.string().allow(null, ""),
-  uai_etablissement: Joi.string().required(),
   siret_etablissement: Joi.string().allow(null, ""),
-  nom_etablissement: Joi.string().required(),
-  statut_apprenant: Joi.number().required(),
   date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
   source: Joi.string().allow(null, ""),
   periode_formation: Joi.array().items(Joi.number()).allow(null),

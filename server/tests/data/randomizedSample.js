@@ -8,21 +8,29 @@ const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase()
 const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
 const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
 const getRandomStatutApprenant = () => Math.floor(Math.random() * Math.floor(4));
-const getRandomPeriodeFormationFromApi = () => {
-  const currentYear = new Date().getFullYear();
-  const startYear = faker.random.arrayElement([currentYear, currentYear - 1, currentYear - 2]);
-  const endYear = startYear + faker.random.arrayElement([1, 2]);
-  return `${startYear}-${endYear}`;
-};
-const getRandomPeriodeFormation = () => {
-  const currentYear = new Date().getFullYear();
-  const startYear = faker.random.arrayElement([currentYear, currentYear - 1, currentYear - 2]);
+const getRandomPeriodeFormation = (anneeScolaire) => {
+  const yearToInclude = Number(anneeScolaire.slice(0, 4));
+  const startYear = faker.random.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
   const endYear = startYear + faker.random.arrayElement([1, 2]);
   return [startYear, endYear];
 };
+
 const getRandomAnneeFormation = () => faker.random.arrayElement([0, 1, 2, 3]);
 
-const createRandomStatutCandidat = (params = null) => {
+const getRandomAnneeScolaire = () => {
+  const currentYear = new Date().getFullYear();
+  const anneeScolaire = faker.random.arrayElement([
+    [currentYear - 1, currentYear], // [2020, 2021]
+    [currentYear, currentYear + 1], // [2021, 2022]
+    [currentYear + 1, currentYear + 2], // [2022, 2023]
+  ]);
+  return anneeScolaire.join("-");
+};
+
+const createRandomStatutCandidat = (params = {}) => {
+  const annee_scolaire = getRandomAnneeScolaire();
+  const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+
   return {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
@@ -41,14 +49,18 @@ const createRandomStatutCandidat = (params = null) => {
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-    periode_formation: isPresent() ? getRandomPeriodeFormation() : null,
+    periode_formation: isPresent() ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),
+    annee_scolaire,
     ...params,
   };
 };
 
 // random statutCandidat shaped along our REST API schema
-const createRandomStatutCandidatApiInput = () => {
+const createRandomStatutCandidatApiInput = (params = {}) => {
+  const annee_scolaire = getRandomAnneeScolaire();
+  const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+
   return {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
@@ -67,18 +79,20 @@ const createRandomStatutCandidatApiInput = () => {
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
-    periode_formation: isPresent() ? getRandomPeriodeFormationFromApi() : "",
     annee_formation: getRandomAnneeFormation(),
+    periode_formation: isPresent() ? periode_formation.join("-") : "",
+    annee_scolaire,
+    ...params,
   };
 };
 
-const createRandomListOf = (generateItem) => (nbItems = null) => {
+const createRandomListOf = (generateItem) => (nbItems = null, params) => {
   const randomList = [];
   if (!nbItems) {
     nbItems = Math.floor(Math.random() * Math.floor(100));
   }
   for (let index = 0; index < nbItems; index++) {
-    randomList.push(generateItem());
+    randomList.push(generateItem(params));
   }
   return randomList;
 };

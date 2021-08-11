@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const config = require("../../../../../config");
 const {
   adaptGestiStatutCandidat,
@@ -26,6 +26,7 @@ describe("gesti-import-statut-candidat utils", () => {
         date_metier_mise_a_jour_statut: "07/09/2020",
         periode_formation: "2020-2021",
         annee_formation: "1",
+        annee_scolaire: "2021-2022",
       };
 
       const expectedOutput = {
@@ -47,8 +48,9 @@ describe("gesti-import-statut-candidat utils", () => {
         source: config.users.gesti.name,
         periode_formation: [2020, 2021],
         annee_formation: 1,
+        annee_scolaire: "2021-2022",
       };
-      assert.deepStrictEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
+      assert.deepEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
     });
 
     it("Vérifie qu'on convertit un statut candidat provenant de Gesti au format attendu par l'import avec le minimum d'infos", async () => {
@@ -68,6 +70,7 @@ describe("gesti-import-statut-candidat utils", () => {
         nom_etablissement: "MFR DE BAGE LE CHATEL - 01380 BAGE LE CHATEL",
         statut_apprenant: "3",
         date_metier_mise_a_jour_statut: "",
+        annee_scolaire: "2022-2023",
       };
 
       const expectedOutput = {
@@ -89,8 +92,9 @@ describe("gesti-import-statut-candidat utils", () => {
         source: config.users.gesti.name,
         periode_formation: null,
         annee_formation: null,
+        annee_scolaire: "2022-2023",
       };
-      assert.deepStrictEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
+      assert.deepEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
     });
   });
 
@@ -114,6 +118,7 @@ describe("gesti-import-statut-candidat utils", () => {
           statut_apprenant: 3,
           date_metier_mise_a_jour_statut: new Date("07/09/2020"),
           source: config.users.gesti.name,
+          annee_scolaire: "2022-2023",
         },
         {
           ine_apprenant: "",
@@ -132,13 +137,14 @@ describe("gesti-import-statut-candidat utils", () => {
           statut_apprenant: 3,
           date_metier_mise_a_jour_statut: "",
           source: config.users.gesti.name,
+          annee_scolaire: "2021-2022",
         },
       ];
       const expectedOutput = {
         valid: input,
         errors: [],
       };
-      assert.deepStrictEqual(validateInput(input), expectedOutput);
+      assert.deepEqual(validateInput(input), expectedOutput);
     });
     it("Vérifie qu'un tableau avec statuts invalides est retourné filtré et avec erreurs", async () => {
       const adaptedInput = [
@@ -159,6 +165,7 @@ describe("gesti-import-statut-candidat utils", () => {
           statut_apprenant: 3,
           date_metier_mise_a_jour_statut: new Date("07/09/2020"),
           source: config.users.gesti.name,
+          annee_scolaire: "2022-2023",
         },
         {
           ine_apprenant: "",
@@ -177,36 +184,38 @@ describe("gesti-import-statut-candidat utils", () => {
           statut_apprenant: 3,
           date_metier_mise_a_jour_statut: "",
           source: config.users.gesti.name,
+          annee_scolaire: "",
         },
         {},
       ];
       const output = validateInput(adaptedInput);
-      assert.deepStrictEqual(output.valid, [adaptedInput[0]]);
-      assert.strictEqual(output.errors.length, 2);
+      assert.deepEqual(output.valid, [adaptedInput[0]]);
+      assert.equal(output.errors.length, 2);
 
-      // statutCandidat at index 1 has 5 missing fields: nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement
+      // statutCandidat at index 1 has 5 missing fields: nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire
       const firstElementErrors = output.errors[0];
-      assert.strictEqual(firstElementErrors.index, 1);
-      assert.strictEqual(firstElementErrors.details.length, 4);
-      assert.deepStrictEqual(
+      assert.equal(firstElementErrors.index, 1);
+      assert.equal(firstElementErrors.details.length, 5);
+      assert.deepEqual(
         firstElementErrors.details.map((detail) => detail.path[0]),
-        ["nom_apprenant", "prenom_apprenant", "formation_cfd", "uai_etablissement"]
+        ["nom_apprenant", "prenom_apprenant", "uai_etablissement", "formation_cfd", "annee_scolaire"]
       );
 
       // statutCandidat at index 2 is empty
       const secondElementErrors = output.errors[1];
-      assert.strictEqual(secondElementErrors.index, 2);
-      assert.strictEqual(secondElementErrors.details.length, 7);
-      assert.deepStrictEqual(
+      assert.equal(secondElementErrors.index, 2);
+      assert.equal(secondElementErrors.details.length, 8);
+      assert.deepEqual(
         secondElementErrors.details.map((detail) => detail.path[0]),
         [
           "nom_apprenant",
           "prenom_apprenant",
-          "ne_pas_solliciter",
-          "formation_cfd",
           "uai_etablissement",
           "nom_etablissement",
+          "formation_cfd",
           "statut_apprenant",
+          "ne_pas_solliciter",
+          "annee_scolaire",
         ]
       );
     });

@@ -3,16 +3,31 @@ const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
 const { apiStatutsSeeder } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
-const { createRandomStatutsCandidatsApiInputList } = require("../../data/randomizedSample");
+const {
+  createRandomStatutsCandidatsApiInputList,
+  createRandomStatutCandidatApiInput,
+} = require("../../data/randomizedSample");
 const { nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../utils/nockApis/nock-Lba");
 
+const user = {
+  name: "userApi",
+  password: "password",
+};
 const createApiUser = async () => {
   const { createUser } = await users();
 
-  return await createUser("userApi", "password", {
+  return await createUser(user.name, user.password, {
     permissions: [apiStatutsSeeder],
   });
+};
+
+const getJwtForUser = async (httpClient) => {
+  const { data } = await httpClient.post("/api/login", {
+    username: user.name,
+    password: user.password,
+  });
+  return data.access_token;
 };
 
 httpTests(__filename, ({ startServer }) => {
@@ -21,19 +36,15 @@ httpTests(__filename, ({ startServer }) => {
     nockGetMetiersByCfd();
   });
 
-  it("Vérifie que la route statut-candidats fonctionne avec un jwt", async () => {
+  it("Vérifie que la route statut-candidats fonctionne avec un tableau vide", async () => {
     const { httpClient } = await startServer();
-    const userApiCreated = await createApiUser();
-
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", [], {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -68,28 +79,73 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepEqual(response.status, 403);
   });
 
+  const requiredFields = [
+    "prenom_apprenant",
+    "nom_apprenant",
+    "id_formation",
+    "uai_etablissement",
+    "statut_apprenant",
+    "annee_scolaire",
+  ];
+  requiredFields.forEach((requiredField) => {
+    it(`Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
+      const { httpClient } = await startServer();
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
+
+      // set required field as undefined
+      const input = [createRandomStatutCandidatApiInput({ [requiredField]: undefined })];
+      // perform request
+      const response = await httpClient.post("/api/statut-candidats", input, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      // check response
+      assert.equal(response.status, 400);
+      assert.equal(response.data.status, "ERROR");
+      assert.equal(response.data.message.includes(`${requiredField}" is required`), true);
+      // check that no data was created
+      assert.equal(await StatutCandidat.countDocuments({}), 0);
+    });
+  });
+
+  it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ annee_scolaire ne respecte pas le format", async () => {
+    const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
+
+    // set required field as undefined
+    const input = [createRandomStatutCandidatApiInput({ annee_scolaire: "2021,2022" })];
+    // perform request
+    const response = await httpClient.post("/api/statut-candidats", input, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    // check response
+    assert.equal(response.status, 400);
+    assert.equal(response.data.status, "ERROR");
+    console.log(response.data.message);
+    assert.equal(
+      response.data.message.includes('annee_scolaire" with value "2021,2022" fails to match the required pattern'),
+      true
+    );
+    // check that no data was created
+    assert.equal(await StatutCandidat.countDocuments({}), 0);
+  });
+
   it("Vérifie l'ajout via route statut-candidats de données complètes", async () => {
     const { httpClient } = await startServer();
-
-    // Clear statuts in DB
-    await StatutCandidat.deleteMany({});
-
-    // Create & check api user
-    const userApiCreated = await createApiUser();
-    assert.deepEqual(userApiCreated.username, "userApi");
-    assert.deepEqual(userApiCreated.permissions.length > 0, true);
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     const input = createRandomStatutsCandidatsApiInputList(20);
-
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", input, {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -101,29 +157,17 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie l'ajout via route statut-candidats de 50 données randomisées", async () => {
     const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     const nbItemsToTest = 50;
-
-    // Clear statuts in DB
-    await StatutCandidat.deleteMany({});
-
-    // Create & check api user
-    const userApiCreated = await createApiUser();
-    assert.deepEqual(userApiCreated.username, "userApi");
-    assert.deepEqual(userApiCreated.permissions.length > 0, true);
-
     // Generate random data
     const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
-
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", randomDataList, {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -139,46 +183,29 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie l'erreur d'ajout via route statut-candidats pour un trop grande nb de données randomisées (>100)", async () => {
     const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     const nbItemsToTest = 200;
-
-    // Clear statuts in DB
-    await StatutCandidat.deleteMany({});
-
-    // Create & check api user
-    const userApiCreated = await createApiUser();
-    assert.deepEqual(userApiCreated.username, "userApi");
-    assert.deepEqual(userApiCreated.permissions.length > 0, true);
 
     // Generate random data
     const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
 
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
-
-    // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", randomDataList, {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
     // Check Api Route data & Data not added
     assert.deepEqual(response.status, 413);
-    assert.notDeepEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
+    assert.equal(await StatutCandidat.countDocuments({}), 0);
   });
 
   it("Vérifie que la route statut-candidats/test fonctionne avec un jeton JWT", async () => {
     const { httpClient } = await startServer();
-
-    const userApiCreated = await createApiUser();
-
-    const { data } = await httpClient.post("/api/login", {
-      username: userApiCreated.username,
-      password: "password",
-    });
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     // Call Api Route
     const response = await httpClient.post(
@@ -186,7 +213,7 @@ httpTests(__filename, ({ startServer }) => {
       {},
       {
         headers: {
-          Authorization: `Bearer ${data.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
