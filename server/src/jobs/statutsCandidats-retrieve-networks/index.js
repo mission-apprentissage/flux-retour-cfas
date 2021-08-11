@@ -35,7 +35,7 @@ const retrieveNetworks = async () => {
     if (cfaReferentiel.sirets) {
       // Recupération des statutsCandidats pour ces sirets
       const statutsForSirets = await StatutCandidat.find({
-        siret_etablissement: { $in: [cfaReferentiel.sirets] },
+        siret_etablissement: { $in: cfaReferentiel.sirets },
       }).lean();
       if (statutsForSirets) {
         await updateNetworksForStatuts(statutsForSirets, cfaReferentiel);
