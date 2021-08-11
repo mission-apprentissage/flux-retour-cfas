@@ -170,6 +170,7 @@ const jobNames = {
   checkUaiValidity: "check-uai-validity",
   fixHistoriqueStatutApprenant: "fix-historique-statut-apprenant-date-statut",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
+  cfasCroisementDeca: "cfas-croisement-cfas-deca",
   calculateStats: "calculate-stats",
 };
 

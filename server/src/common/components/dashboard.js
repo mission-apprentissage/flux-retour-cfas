@@ -16,6 +16,7 @@ module.exports = () => ({
   getEffectifsCountByFormationAtDate,
   getEffectifsCountByAnneeFormationAtDate,
   getEffectifsCountByDepartementAtDate,
+  getContratsCountAtDate,
 });
 
 /*
@@ -445,6 +446,28 @@ const getApprentisCountAtDate = async (searchDate, filters = {}, options = {}) =
     return result.length === 1 ? result[0].count : 0;
   }
   return result;
+};
+
+/**
+ * Décompte des statuts apprentis à une date donnée
+ * @param {*} searchDate
+ * @param {*} filters
+ * @returns
+ */
+const getContratsCountAtDate = async (searchDate, filters = {}) => {
+  const apprentisAtDate = await StatutCandidat.aggregate([
+    {
+      $match: {
+        ...filters,
+      },
+    },
+    ...getEffectifsWithStatutAtDateAggregationPipeline(searchDate, { date_metier_mise_a_jour_statut: 1 }),
+    {
+      $match: { "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.apprenti },
+    },
+  ]);
+
+  return apprentisAtDate.length;
 };
 
 // Abandons = Apprenants ayant le statut abandon
