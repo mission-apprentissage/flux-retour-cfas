@@ -31,16 +31,13 @@ module.exports = async () => {
       return null;
     },
     getUser: (username) => User.findOne({ username }),
-    findWithApiKey: (apiKey) => User.findOne({ apiKey }),
     createUser: async (username, password, options = {}) => {
       const hash = options.hash || sha512Utils.hash(password);
       const permissions = options.permissions || [];
-      const apiKey = options.apiKey || null;
 
       const user = new User({
         username,
         password: hash,
-        apiKey,
         permissions: permissions,
       });
 
