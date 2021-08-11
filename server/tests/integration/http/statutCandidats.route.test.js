@@ -90,14 +90,15 @@ httpTests(__filename, ({ startServer }) => {
   requiredFields.forEach((requiredField) => {
     it(`Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
       const { httpClient } = await startServer();
-      const userApiCreated = await createApiUser();
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
 
       // set required field as undefined
       const input = [createRandomStatutCandidatApiInput({ [requiredField]: undefined })];
       // perform request
       const response = await httpClient.post("/api/statut-candidats", input, {
         headers: {
-          "x-api-key": userApiCreated.apiKey,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       // check response
@@ -111,14 +112,15 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ annee_scolaire ne respecte pas le format", async () => {
     const { httpClient } = await startServer();
-    const userApiCreated = await createApiUser();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
 
     // set required field as undefined
     const input = [createRandomStatutCandidatApiInput({ annee_scolaire: "2021,2022" })];
     // perform request
     const response = await httpClient.post("/api/statut-candidats", input, {
       headers: {
-        "x-api-key": userApiCreated.apiKey,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
     // check response
