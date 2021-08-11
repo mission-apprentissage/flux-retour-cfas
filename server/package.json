@@ -123,11 +123,6 @@
     "nodemon": "2.0.12",
     "prettier": "2.3.2"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "./scripts/preventSensibleFilesCommit.sh && lint-staged"
-    }
-  },
   "lint-staged": {
     "*.js": [
       "eslint --cache --fix",
