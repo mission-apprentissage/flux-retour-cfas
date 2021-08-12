@@ -264,6 +264,41 @@ integrationTests(__filename, () => {
       assert.ok(thirdUpdated.updated_at);
     });
 
+    it("Vérifie qu'on ne crée pas de données quand le statut candidat n'a pas de champ annee_scolaire", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+      const randomStatut = createRandomStatutCandidat();
+      delete randomStatut.annee_scolaire;
+
+      const result = await addOrUpdateStatuts([randomStatut]);
+      assert.equal(result.added.length, 0);
+      assert.equal(result.updated.length, 0);
+      assert.equal(await StatutCandidat.countDocuments(), 0);
+    });
+
+    it("Vérifie qu'on ne crée pas de données quand le statut candidat a un champ annee_scolaire invalide", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+      const randomStatut = createRandomStatutCandidat({ annee_scolaire: "123" });
+
+      const result = await addOrUpdateStatuts([randomStatut]);
+      assert.equal(result.added.length, 0);
+      assert.equal(result.updated.length, 0);
+      assert.equal(await StatutCandidat.countDocuments(), 0);
+    });
+
+    it("Vérifie qu'un statut avec annee_scolaire dans un batch de statuts sans annee_scolaire est quand même créé", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+      const statutWithAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: "2021-2022" });
+      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
+
+      const result = await addOrUpdateStatuts([statutWithAnneeScolaire, statutWithoutAnneeScolaire]);
+      assert.equal(result.added.length, 1);
+      const addedElement = result.added[0];
+      assert.equal(addedElement.annee_scolaire, statutWithAnneeScolaire.annee_scolaire);
+      assert.equal(addedElement.nom_apprenant, statutWithAnneeScolaire.nom_apprenant);
+      assert.equal(result.updated.length, 0);
+      assert.equal(await StatutCandidat.countDocuments(), 1);
+    });
+
     it("Vérifie qu'on update le siret_etablissement d'un statut existant qui n'en a pas avec le SIRET de l'élément passé si le reste des infos est identique", async () => {
       const { addOrUpdateStatuts } = await statutsCandidats();
 
