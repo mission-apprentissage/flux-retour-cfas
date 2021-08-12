@@ -86,16 +86,18 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
   };
 };
 
-const createRandomListOf = (generateItem) => (nbItems = null, params) => {
-  const randomList = [];
-  if (!nbItems) {
-    nbItems = Math.floor(Math.random() * Math.floor(100));
-  }
-  for (let index = 0; index < nbItems; index++) {
-    randomList.push(generateItem(params));
-  }
-  return randomList;
-};
+const createRandomListOf =
+  (generateItem) =>
+  (nbItems = null, params) => {
+    const randomList = [];
+    if (!nbItems) {
+      nbItems = Math.floor(Math.random() * Math.floor(100));
+    }
+    for (let index = 0; index < nbItems; index++) {
+      randomList.push(generateItem(params));
+    }
+    return randomList;
+  };
 
 const createRandomStatutsCandidatsApiInputList = createRandomListOf(createRandomStatutCandidatApiInput);
 
