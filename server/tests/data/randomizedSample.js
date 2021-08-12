@@ -35,20 +35,20 @@ const createRandomStatutCandidat = (params = {}) => {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
-    prenom2_apprenant: faker.random.boolean() ? faker.name.firstName().toUpperCase() : null,
-    prenom3_apprenant: faker.random.boolean() ? faker.name.firstName().toUpperCase() : null,
-    ne_pas_solliciter: faker.random.boolean(),
+    prenom2_apprenant: faker.datatype.boolean() ? faker.name.firstName().toUpperCase() : null,
+    prenom3_apprenant: faker.datatype.boolean() ? faker.name.firstName().toUpperCase() : null,
+    ne_pas_solliciter: faker.datatype.boolean(),
     email_contact: faker.internet.email(),
 
     formation_cfd: getRandomIdFormation(),
-    libelle_court_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
-    libelle_long_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
+    libelle_court_formation: faker.datatype.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
+    libelle_long_formation: faker.datatype.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : null,
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
-    date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
+    date_metier_mise_a_jour_statut: faker.datatype.boolean() ? faker.date.past() : null,
     periode_formation: isPresent() ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
@@ -65,14 +65,14 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
-    prenom2_apprenant: faker.random.boolean() ? faker.name.firstName().toUpperCase() : null,
-    prenom3_apprenant: faker.random.boolean() ? faker.name.firstName().toUpperCase() : null,
-    ne_pas_solliciter: faker.random.boolean(),
+    prenom2_apprenant: faker.datatype.boolean() ? faker.name.firstName().toUpperCase() : null,
+    prenom3_apprenant: faker.datatype.boolean() ? faker.name.firstName().toUpperCase() : null,
+    ne_pas_solliciter: faker.datatype.boolean(),
     email_contact: faker.internet.email(),
 
     id_formation: getRandomIdFormation(),
-    libelle_court_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
-    libelle_long_formation: faker.random.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
+    libelle_court_formation: faker.datatype.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
+    libelle_long_formation: faker.datatype.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : "",
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
@@ -86,16 +86,18 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
   };
 };
 
-const createRandomListOf = (generateItem) => (nbItems = null, params) => {
-  const randomList = [];
-  if (!nbItems) {
-    nbItems = Math.floor(Math.random() * Math.floor(100));
-  }
-  for (let index = 0; index < nbItems; index++) {
-    randomList.push(generateItem(params));
-  }
-  return randomList;
-};
+const createRandomListOf =
+  (generateItem) =>
+  (nbItems = null, params) => {
+    const randomList = [];
+    if (!nbItems) {
+      nbItems = Math.floor(Math.random() * Math.floor(100));
+    }
+    for (let index = 0; index < nbItems; index++) {
+      randomList.push(generateItem(params));
+    }
+    return randomList;
+  };
 
 const createRandomStatutsCandidatsApiInputList = createRandomListOf(createRandomStatutCandidatApiInput);
 

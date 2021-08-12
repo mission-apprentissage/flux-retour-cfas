@@ -1,0 +1,6 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+cd server
+bash scripts/preventSensibleFilesCommit.sh
+node_modules/.bin/./lint-staged
