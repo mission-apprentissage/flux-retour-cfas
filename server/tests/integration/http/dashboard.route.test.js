@@ -28,6 +28,7 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          annee_scolaire: "2020-2021",
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -37,6 +38,7 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
@@ -46,10 +48,19 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceInscritToApprenti,
+          annee_scolaire: "2020-2021",
         });
         const toAdd = new StatutCandidat(randomStatut);
         await toAdd.save();
       }
+
+      // this one should be ignored because of annee_scolaire
+      await new StatutCandidat(
+        createRandomStatutCandidat({
+          historique_statut_apprenant: historySequenceInscritToApprenti,
+          annee_scolaire: "2021-2022",
+        })
+      ).save();
 
       // Expected results
       const expectedResults = {
@@ -79,6 +90,7 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          annee_scolaire: "2020-2021",
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -89,6 +101,7 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -99,6 +112,7 @@ httpTests(__filename, ({ startServer }) => {
       for (let index = 0; index < 15; index++) {
         const randomStatut = createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceInscritToApprenti,
+          annee_scolaire: "2020-2021",
           ...filterQuery,
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -148,6 +162,7 @@ httpTests(__filename, ({ startServer }) => {
         const randomStatut = createRandomStatutCandidat({
           ...filterQuery,
           historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
           niveau_formation: "1",
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -157,6 +172,7 @@ httpTests(__filename, ({ startServer }) => {
       const randomStatut = createRandomStatutCandidat({
         ...filterQuery,
         historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
         niveau_formation: "2",
       });
       const toAdd = new StatutCandidat(randomStatut);
