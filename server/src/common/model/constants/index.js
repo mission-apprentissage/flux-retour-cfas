@@ -6,7 +6,6 @@ const codesStatutsCandidats = {
   inscrit: 2,
   apprenti: 3,
   abandon: 0,
-  abandonProspects: 4,
 };
 
 /**
@@ -166,6 +165,7 @@ const jobNames = {
   clearStatutsCandidatsNetworks: "clear-statuts-candidats-networks",
   clearLogs: "clear-logs",
   clearAll: "clear-all",
+  cleanStatutsCandidats: "clean-statuts-candidats",
   checkSiretValidity: "check-siret-validity",
   checkUaiValidity: "check-uai-validity",
   fixHistoriqueStatutApprenant: "fix-historique-statut-apprenant-date-statut",
