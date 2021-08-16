@@ -12,6 +12,7 @@ const createStatutsCandidatsCollectionIndexes = async (db) => {
   await collection.createIndex({ formation_cfd: 1 }, { name: "formation_cfd" });
   await collection.createIndex({ etablissement_num_region: 1 }, { name: "etablissement_num_region" });
   await collection.createIndex({ etablissement_num_departement: 1 }, { name: "etablissement_num_departement" });
+  await collection.createIndex({ annee_scolaire: 1 }, { name: "annee_scolaire" });
 
   await collection.createIndex(
     { nom_etablissement: "text", tokenized_nom_etablissement: "text" },

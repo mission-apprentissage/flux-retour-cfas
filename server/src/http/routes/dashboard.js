@@ -2,6 +2,7 @@ const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { UserEvent } = require("../../common/model");
+const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 
 module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
@@ -110,26 +111,30 @@ module.exports = ({ stats, dashboard }) => {
       });
 
       // Gets & format params:
-      const { startDate: startDateFromBody, endDate: endDateFromBody, ...filters } = req.body;
-      const startDate = new Date(startDateFromBody);
-      const endDate = new Date(endDateFromBody);
+      // eslint-disable-next-line no-unused-vars
+      const { startDate: _, endDate: endDateFromBody, ...filtersFromBody } = req.body;
+      const date = new Date(endDateFromBody);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
 
       // Add user event
       const event = new UserEvent({
         username: "dashboard",
         type: "GET",
         action: "api/dashboard/effectifs",
-        data: { startDate, endDate, filters },
+        data: { date, filters },
       });
       await event.save();
 
       // Build response
       return res.json({
-        date: endDate,
-        apprentis: await dashboard.getApprentisCountAtDate(endDate, filters),
-        rupturants: await dashboard.getRupturantsCountAtDate(endDate, filters),
-        inscritsSansContrat: await dashboard.getInscritsSansContratCountAtDate(endDate, filters),
-        abandons: await dashboard.getAbandonsCountAtDate(endDate, filters),
+        date,
+        apprentis: await dashboard.getApprentisCountAtDate(date, filters),
+        rupturants: await dashboard.getRupturantsCountAtDate(date, filters),
+        inscritsSansContrat: await dashboard.getInscritsSansContratCountAtDate(date, filters),
+        abandons: await dashboard.getAbandonsCountAtDate(date, filters),
       });
     })
   );
@@ -149,8 +154,12 @@ module.exports = ({ stats, dashboard }) => {
         etablissement_num_departement: Joi.string().allow(null, ""),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const { date: dateFromBody, ...filters } = req.query;
+      const { date: dateFromBody, ...filtersFromBody } = req.query;
       const date = new Date(dateFromBody);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
 
       const effectifsParNiveauFormation = await dashboard.getEffectifsCountByNiveauFormationAtDate(date, filters);
 
@@ -174,8 +183,12 @@ module.exports = ({ stats, dashboard }) => {
         niveau_formation: Joi.string().allow(null, ""),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const { date: dateFromBody, ...filters } = req.query;
+      const { date: dateFromBody, ...filtersFromBody } = req.query;
       const date = new Date(dateFromBody);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
 
       const effectifsParFormation = await dashboard.getEffectifsCountByFormationAtDate(date, filters);
 
@@ -199,8 +212,12 @@ module.exports = ({ stats, dashboard }) => {
         etablissement_num_departement: Joi.string().allow(null, ""),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const { date: dateFromBody, ...filters } = req.query;
+      const { date: dateFromBody, ...filtersFromBody } = req.query;
       const date = new Date(dateFromBody);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
 
       const effectifsParAnneeFormation = await dashboard.getEffectifsCountByAnneeFormationAtDate(date, filters);
 
@@ -216,8 +233,12 @@ module.exports = ({ stats, dashboard }) => {
         abortEarly: false,
       });
 
-      const { date: dateFromBody, ...filters } = req.body;
+      const { date: dateFromBody, ...filtersFromBody } = req.body;
       const date = new Date(dateFromBody);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
 
       const effectifsByCfaAtDate = await dashboard.getEffectifsCountByCfaAtDate(date, filters);
 
@@ -232,9 +253,13 @@ module.exports = ({ stats, dashboard }) => {
         date: Joi.date().required(),
         etablissement_num_region: Joi.string().allow(null, ""),
       }).validateAsync(req.body, { abortEarly: false });
-      const { date: dateFromBody, ...filters } = req.body;
-      const date = new Date(dateFromBody);
 
+      const { date: dateFromBody, ...filtersFromBody } = req.body;
+      const date = new Date(dateFromBody);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
       const effectifsByDepartementAtDate = await dashboard.getEffectifsCountByDepartementAtDate(date, filters);
 
       return res.json(effectifsByDepartementAtDate);
