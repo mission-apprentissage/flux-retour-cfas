@@ -71,8 +71,7 @@ httpTests(__filename, ({ startServer }) => {
 
       // Check good api call
       const response = await httpClient.post("/api/dashboard/effectifs", {
-        startDate: "2020-09-15T00:00:00.000Z",
-        endDate: "2020-10-10T00:00:00.000Z",
+        date: "2020-10-10T00:00:00.000Z",
       });
 
       assert.equal(response.status, 200);
@@ -128,8 +127,7 @@ httpTests(__filename, ({ startServer }) => {
 
       // Check good api call
       const response = await httpClient.post("/api/dashboard/effectifs", {
-        startDate: "2020-09-15T00:00:00.000Z",
-        endDate: "2020-10-10T00:00:00.000Z",
+        date: "2020-10-10T00:00:00.000Z",
         ...filterQuery,
       });
 
@@ -140,8 +138,7 @@ httpTests(__filename, ({ startServer }) => {
 
       // Check bad api call
       const badResponse = await httpClient.post("/api/dashboard/effectifs", {
-        startDate: "2020-09-15T00:00:00.000Z",
-        endDate: "2020-10-10T00:00:00.000Z",
+        date: "2020-10-10T00:00:00.000Z",
         etablissement_num_region: "99",
       });
 
