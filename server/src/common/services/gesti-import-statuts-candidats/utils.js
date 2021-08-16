@@ -2,6 +2,7 @@ const Joi = require("joi");
 const config = require("../../../../config");
 
 const logger = require("../../logger");
+const { schema: anneeScolaireSchema } = require("../../domain/anneeScolaire");
 
 // parse date as DD/MM/YYYY
 const parseGestiDate = (gestiDate) => {
@@ -47,9 +48,7 @@ const tempSchema = Joi.object({
   formation_cfd: Joi.string().required(),
   statut_apprenant: Joi.number().required(),
   ne_pas_solliciter: Joi.boolean().required(),
-  annee_scolaire: Joi.string()
-    .regex(/^\d{4}-\d{4}$/)
-    .required(),
+  annee_scolaire: anneeScolaireSchema,
   // optional
   ine_apprenant: Joi.string().allow(null, ""),
   prenom2_apprenant: Joi.string().allow(null, ""),
