@@ -9,6 +9,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
+const { validateAnneeScolaire } = require("../domain/anneeScolaire");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
@@ -41,6 +42,13 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
+    const anneeScolaireValidation = validateAnneeScolaire(item.annee_scolaire);
+
+    // for now we don't want to throw an error for missing annee_scolaire, we will just ignore the item
+    // TODO move it to API joi schema
+    if (anneeScolaireValidation.error) {
+      return;
+    }
     const foundItem = await getStatut({
       nom_apprenant: item.nom_apprenant,
       prenom_apprenant: item.prenom_apprenant,

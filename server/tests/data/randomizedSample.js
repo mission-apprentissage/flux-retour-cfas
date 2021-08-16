@@ -78,7 +78,7 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
-    date_metier_mise_a_jour_statut: faker.random.boolean() ? faker.date.past() : null,
+    date_metier_mise_a_jour_statut: faker.datatype.boolean() ? faker.date.past() : null,
     annee_formation: getRandomAnneeFormation(),
     periode_formation: isPresent() ? periode_formation.join("-") : "",
     annee_scolaire,
