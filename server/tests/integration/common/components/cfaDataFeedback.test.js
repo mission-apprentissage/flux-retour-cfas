@@ -2,6 +2,7 @@ const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const integrationTests = require("../../../utils/integrationTests");
 const cfaDataFeedbackComponent = require("../../../../src/common/components/cfaDataFeedback");
+const { Cfa } = require("../../../../src/common/model");
 
 integrationTests(__filename, () => {
   describe("createCfaDataFeedback", () => {
@@ -16,10 +17,23 @@ integrationTests(__filename, () => {
     });
 
     it("returns created CfaDataFeedback", async () => {
+      const sampleUai = "0451582A";
+      const sampleRegion_nom = "Normandie";
+      const sampleRegion_num = "28";
+
+      // Add Cfa with region_num / region_nom for valid UAI
+      await new Cfa({
+        uai: sampleUai,
+        region_nom: sampleRegion_nom,
+        region_num: sampleRegion_num,
+      }).save();
+
       const props = {
-        uai: "0451582A",
+        uai: sampleUai,
         details: "blabla",
         email: "mail@example.com",
+        region_nom: sampleRegion_nom,
+        region_num: sampleRegion_num,
       };
       const created = await createCfaDataFeedback(props);
 
@@ -27,6 +41,8 @@ integrationTests(__filename, () => {
         uai: props.uai,
         details: props.details,
         email: props.email,
+        region_nom: props.region_nom,
+        region_num: props.region_num,
       });
     });
   });

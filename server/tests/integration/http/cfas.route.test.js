@@ -74,6 +74,17 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     it("sends a 200 HTTP response when feedback was created", async () => {
+      const sampleRegion_nom = "Normandie";
+      const sampleRegion_num = "28";
+
+      // Add Cfa with region_num / region_nom for valid UAI
+      await new Cfa({
+        uai: validBody.uai,
+        region_nom: sampleRegion_nom,
+        region_num: sampleRegion_num,
+      }).save();
+
+      // Call API
       const response = await httpClient.post("/api/cfas/data-feedback", validBody);
 
       assert.equal(response.status, 200);
@@ -81,6 +92,8 @@ httpTests(__filename, ({ startServer }) => {
         uai: validBody.uai,
         details: validBody.details,
         email: validBody.email,
+        region_nom: sampleRegion_nom,
+        region_num: sampleRegion_num,
       });
     });
   });

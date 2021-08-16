@@ -1,4 +1,4 @@
-const { CfaDataFeedback: CfaDataFeedbackModel } = require("../model");
+const { CfaDataFeedback: CfaDataFeedbackModel, Cfa } = require("../model");
 const { validateUai } = require("../domain/uai");
 
 module.exports = () => ({
@@ -11,13 +11,17 @@ module.exports = () => ({
  */
 const createCfaDataFeedback = async ({ uai, email, details }) => {
   if (!validateUai(uai)) {
-    throw Error("Invalid SIRET");
+    throw Error("Invalid UAI");
   }
+
+  const cfaFromUai = await Cfa.findOne({ uai: uai }).lean();
 
   const newCfaDataFeedbackDocument = new CfaDataFeedbackModel({
     uai,
     email,
     details,
+    region_nom: cfaFromUai?.region_nom,
+    region_num: cfaFromUai?.region_num,
     created_at: new Date(),
   });
 
