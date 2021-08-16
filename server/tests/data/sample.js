@@ -16,58 +16,8 @@ const simpleStatut = {
   date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
   periode_formation: [2020, 2021],
   annee_formation: 2020,
+  annee_scolaire: "2020-2021",
 };
-
-const simpleStatutsWith3DifferentUais = [
-  {
-    ine_apprenant: "12345",
-    nom_apprenant: "testNom",
-    prenom_apprenant: "testPrenom",
-    ne_pas_solliciter: false,
-    email_contact: "testemail_contact@test.fr",
-    formation_cfd: "testformation_cfd",
-    libelle_court_formation: "testlibelle_court_formation",
-    libelle_long_formation: "testlibelle_long_formation",
-    uai_etablissement: "0762232N",
-    nom_etablissement: "testnom_etablissement",
-    statut_apprenant: 3,
-    date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
-    periode_formation: [2020, 2021],
-    annee_formation: 2020,
-  },
-  {
-    ine_apprenant: "12345",
-    nom_apprenant: "testNom",
-    prenom_apprenant: "testPrenom",
-    ne_pas_solliciter: false,
-    email_contact: "testemail_contact@test.fr",
-    formation_cfd: "testformation_cfd",
-    libelle_court_formation: "testlibelle_court_formation",
-    libelle_long_formation: "testlibelle_long_formation",
-    uai_etablissement: "0762232X",
-    nom_etablissement: "testnom_etablissement",
-    statut_apprenant: 3,
-    date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
-    periode_formation: [2020, 2021],
-    annee_formation: 2020,
-  },
-  {
-    ine_apprenant: "12345",
-    nom_apprenant: "testNom",
-    prenom_apprenant: "testPrenom",
-    ne_pas_solliciter: false,
-    email_contact: "testemail_contact@test.fr",
-    formation_cfd: "testformation_cfd",
-    libelle_court_formation: "testlibelle_court_formation",
-    libelle_long_formation: "testlibelle_long_formation",
-    uai_etablissement: "0762232R",
-    nom_etablissement: "testnom_etablissement",
-    statut_apprenant: 3,
-    date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
-    periode_formation: [2020, 2021],
-    annee_formation: 2020,
-  },
-];
 
 const simpleProspectStatut = {
   ine_apprenant: "12345",
@@ -104,6 +54,7 @@ const statutsTest = [
     date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
     periode_formation: [2020, 2021],
     annee_formation: 2020,
+    annee_scolaire: "2020-2021",
   },
   {
     ine_apprenant: "6789",
@@ -117,6 +68,7 @@ const statutsTest = [
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
     annee_formation: 0,
+    annee_scolaire: "2020-2021",
   },
   {
     nom_apprenant: "test3Nom",
@@ -129,6 +81,7 @@ const statutsTest = [
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
     annee_formation: 2019,
+    annee_scolaire: "2020-2021",
   },
 ];
 
@@ -148,7 +101,8 @@ const statutsTestUpdate = [
     statut_apprenant: 2,
     date_metier_mise_a_jour_statut: "1970-01-10T17:42:36.000Z",
     periode_formation: [2020, 2021],
-    annee_formation: 2020,
+    annee_formation: 1,
+    annee_scolaire: "2020-2021",
   },
   {
     ine_apprenant: "6789",
@@ -162,6 +116,7 @@ const statutsTestUpdate = [
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 2,
     annee_formation: 0,
+    annee_scolaire: "2020-2021",
   },
   {
     nom_apprenant: "test3Nom",
@@ -173,7 +128,8 @@ const statutsTestUpdate = [
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
-    annee_formation: 2019,
+    annee_formation: 2,
+    annee_scolaire: "2020-2021",
   },
   {
     ine_apprenant: "99999",
@@ -186,7 +142,9 @@ const statutsTestUpdate = [
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
     statut_apprenant: 1,
-    annee_formation: 2021,
+    periode_formation: [2019, 2021],
+    annee_formation: 2,
+    annee_scolaire: "2020-2021",
   },
 ];
 
@@ -203,14 +161,15 @@ const simpleStatutBadUpdate = {
   siret_etablissement: "11111111111111",
   nom_etablissement: "testnom_etablissement",
   statut_apprenant: 1,
-  periode_formation: [2020, 2021],
+  periode_formation: [2020, 2022],
   date_metier_mise_a_jour_statut: "2022-01-01T12:00:00.000Z",
-  annee_formation: 2020,
+  annee_formation: 1,
 };
 
 const fullSampleWithUpdates = [
   {
     ine_apprenant: "111111111AA",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "SMITH",
     prenom_apprenant: "John",
     ne_pas_solliciter: false,
@@ -227,6 +186,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "111111111AB",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "MBAPPE",
     prenom_apprenant: "Kilyan",
     ne_pas_solliciter: false,
@@ -244,6 +204,7 @@ const fullSampleWithUpdates = [
   {
     nom_apprenant: "RONALDO",
     prenom_apprenant: "Cristiano",
+    annee_scolaire: "2021-2022",
     ne_pas_solliciter: true,
     email_contact: "cr7@test.fr",
     formation_cfd: "11111112",
@@ -255,6 +216,7 @@ const fullSampleWithUpdates = [
   {
     nom_apprenant: "RONALDO",
     prenom_apprenant: "Cristiano",
+    annee_scolaire: "2021-2022",
     ne_pas_solliciter: true,
     email_contact: "cr7@test.fr",
     formation_cfd: "11111177",
@@ -266,6 +228,7 @@ const fullSampleWithUpdates = [
   {
     nom_apprenant: "GIROUD",
     prenom_apprenant: "Olivier",
+    annee_scolaire: "2021-2022",
     ne_pas_solliciter: false,
     email_contact: "ogiroud@test.fr",
     formation_cfd: "11111118",
@@ -280,6 +243,7 @@ const fullSampleWithUpdates = [
   },
   {
     nom_apprenant: "GIROUD",
+    annee_scolaire: "2021-2022",
     prenom_apprenant: "Olivier",
     ne_pas_solliciter: false,
     email_contact: "ogiroud@test.fr",
@@ -294,6 +258,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "111111111BB",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "SANTOS",
     prenom_apprenant: "Neymar",
     ne_pas_solliciter: false,
@@ -309,6 +274,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "111111111XX",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "COMAN",
     prenom_apprenant: "Kingsley",
     ne_pas_solliciter: false,
@@ -324,6 +290,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "111111112PP",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "DI MARIA",
     prenom_apprenant: "Angel",
     ne_pas_solliciter: false,
@@ -339,6 +306,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "111111111XX",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "COMAN",
     prenom_apprenant: "Kingsley",
     ne_pas_solliciter: false,
@@ -354,6 +322,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "001111111XX",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "GRIEZMANN",
     prenom_apprenant: "Antoine",
     ne_pas_solliciter: false,
@@ -369,6 +338,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "001111111MM",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "MANDANDA",
     prenom_apprenant: "Steve",
     ne_pas_solliciter: false,
@@ -384,6 +354,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "001111111MM",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "MANDANDA",
     prenom_apprenant: "Steve",
     ne_pas_solliciter: false,
@@ -399,6 +370,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "001111111QQ",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "RABIOT",
     prenom_apprenant: "Adrien",
     ne_pas_solliciter: false,
@@ -414,6 +386,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "001111111QQ",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "RABIOT",
     prenom_apprenant: "Adrien",
     ne_pas_solliciter: false,
@@ -429,6 +402,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "991111111CC",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "PAVARD",
     prenom_apprenant: "Benjamin",
     ne_pas_solliciter: false,
@@ -444,6 +418,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "991111111CC",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "PAVARD",
     prenom_apprenant: "Benjamin",
     ne_pas_solliciter: false,
@@ -459,6 +434,7 @@ const fullSampleWithUpdates = [
   },
   {
     ine_apprenant: "991111111CC",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "PAVARD",
     prenom_apprenant: "Benjamin",
     ne_pas_solliciter: false,
@@ -477,6 +453,7 @@ const fullSampleWithUpdates = [
 const fullSample = [
   {
     ine_apprenant: "111111111AA",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "SMITH",
     prenom_apprenant: "John",
     ne_pas_solliciter: false,
@@ -492,6 +469,7 @@ const fullSample = [
   },
   {
     ine_apprenant: "111111111AB",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "MBAPPE",
     prenom_apprenant: "Kilyan",
     ne_pas_solliciter: false,
@@ -547,6 +525,7 @@ const fullSample = [
   },
   {
     ine_apprenant: "111111111BB",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "SANTOS",
     prenom_apprenant: "Neymar",
     ne_pas_solliciter: false,
@@ -562,6 +541,7 @@ const fullSample = [
   },
   {
     ine_apprenant: "111111111XX",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "COMAN",
     prenom_apprenant: "Kingsley",
     ne_pas_solliciter: false,
@@ -577,6 +557,7 @@ const fullSample = [
   },
   {
     ine_apprenant: "111111112PP",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "DI MARIA",
     prenom_apprenant: "Angel",
     ne_pas_solliciter: false,
@@ -592,6 +573,7 @@ const fullSample = [
   },
   {
     ine_apprenant: "111111111XX",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "COMAN",
     prenom_apprenant: "Kingsley",
     ne_pas_solliciter: false,
@@ -607,6 +589,7 @@ const fullSample = [
   },
   {
     ine_apprenant: "001111111XX",
+    annee_scolaire: "2021-2022",
     nom_apprenant: "GRIEZMANN",
     prenom_apprenant: "Antoine",
     ne_pas_solliciter: false,
@@ -630,5 +613,4 @@ module.exports = {
   simpleProspectStatut,
   fullSample,
   fullSampleWithUpdates,
-  simpleStatutsWith3DifferentUais,
 };

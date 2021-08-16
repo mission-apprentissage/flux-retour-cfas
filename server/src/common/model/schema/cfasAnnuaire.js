@@ -1,33 +1,5 @@
 const { Schema } = require("mongoose");
 
-let adresseSchema = new Schema(
-  {
-    label: {
-      type: String,
-    },
-    code_postal: {
-      type: String,
-    },
-    code_insee: {
-      type: String,
-    },
-    region: {
-      type: new Schema(
-        {
-          code: {
-            type: String,
-          },
-          label: {
-            type: String,
-          },
-        },
-        { _id: false }
-      ),
-    },
-  },
-  { _id: false }
-);
-
 const cfasAnnuaireSchema = new Schema({
   siret: {
     type: String,
@@ -82,10 +54,30 @@ const cfasAnnuaireSchema = new Schema({
     default: [],
     description: "Relations de l'établissement",
   },
-  adresse: {
-    type: adresseSchema,
+  adresse_label: {
+    type: String,
     default: null,
-    description: "Adresse de l'établissement",
+    description: "Label de l'adresse",
+  },
+  adresse_code_postal: {
+    type: String,
+    default: null,
+    description: "Code postal de l'adresse",
+  },
+  adresse_code_insee: {
+    type: String,
+    default: null,
+    description: "Code INSEE de l'adresse",
+  },
+  adresse_region_code: {
+    type: String,
+    default: null,
+    description: "Code région de l'adresse",
+  },
+  adresse_region_nom: {
+    type: String,
+    default: null,
+    description: "Nom de la région de l'adresse",
   },
 });
 

@@ -214,6 +214,10 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Numéro de l'année dans la formation (promo)",
   },
+  annee_scolaire: {
+    type: String,
+    description: 'Année scolaire sur laquelle le statut candidat est enregistré (ex: "2020-2021")',
+  },
   updated_at: {
     type: Date,
     default: null,

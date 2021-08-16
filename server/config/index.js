@@ -32,25 +32,21 @@ module.exports = {
   users: {
     ymag: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_YMAG_NAME").asString(),
-      apiKey: env.get("FLUX_RETOUR_CFAS_USERS_YMAG_API_KEY").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_YMAG_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_YMAG_PERMISSIONS").default([]).asArray(),
     },
     gesti: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_NAME").asString(),
-      apiKey: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_API_KEY").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_PERMISSIONS").default([]).asArray(),
     },
     scform: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_NAME").asString(),
-      apiKey: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_API_KEY").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_PERMISSIONS").default([]).asArray(),
     },
     fca_manager: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_NAME").asString(),
-      apiKey: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_API_KEY").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_PERMISSIONS").default([]).asArray(),
     },

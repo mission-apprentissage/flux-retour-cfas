@@ -34,6 +34,7 @@ integrationTests(__filename, () => {
       assert.equal(result.source, randomStatut.source);
       assert.equal(result.annee_formation, randomStatut.annee_formation);
       assert.deepEqual(result.periode_formation, randomStatut.periode_formation);
+      assert.equal(result.annee_scolaire, randomStatut.annee_scolaire);
 
       // Checks exists method
       const found = await existsStatut({
@@ -45,6 +46,7 @@ integrationTests(__filename, () => {
         email_contact: result.email_contact,
         formation_cfd: result.formation_cfd,
         uai_etablissement: result.uai_etablissement,
+        annee_scolaire: result.annee_scolaire,
       });
       assert.equal(found, true);
     });

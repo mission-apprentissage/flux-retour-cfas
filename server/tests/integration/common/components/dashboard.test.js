@@ -523,62 +523,58 @@ integrationTests(__filename, () => {
 
     beforeEach(async () => {
       const statuts = [
-        // rupturant
+        // following statuts are potential rupturants (depends on date)
         createRandomStatutCandidat({
           etablissement_num_region: "199",
           historique_statut_apprenant: [
-            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
-            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
           ],
         }),
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
-            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
-            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-11-01T00:00:00") },
-          ],
-        }),
-        // not a rupturant
-        createRandomStatutCandidat({
-          historique_statut_apprenant: [
-            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-03-22T00:00:00") },
-          ],
-        }),
-        // not a rupturant
-        createRandomStatutCandidat({
-          historique_statut_apprenant: [
-            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-04-21T00:00:00") },
-            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-04-24T00:00:00") },
-            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-04-30T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2020-10-01T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-11-01T00:00:00") },
           ],
         }),
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-07-29T00:00:00") },
-            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
-            { position_statut: 3, valeur_statut: 0, date_statut: new Date("2020-12-07T00:00:00") },
+            { valeur_statut: 1, date_statut: new Date("2020-03-01T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-07-29T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
+            { valeur_statut: 0, date_statut: new Date("2020-12-07T00:00:00") },
           ],
         }),
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { position_statut: 1, valeur_statut: 1, date_statut: new Date("2020-07-29T00:00:00") },
-            { position_statut: 2, valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
-            { position_statut: 3, valeur_statut: 3, date_statut: new Date("2020-12-07T00:00:00") },
-            { position_statut: 4, valeur_statut: 2, date_statut: new Date("2020-12-21T00:00:00") },
+            { valeur_statut: 1, date_statut: new Date("2020-07-29T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2020-09-20T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-12-07T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2020-12-21T00:00:00") },
           ],
         }),
-        // not a rupturant
+        // following statuts cannot be rupturants
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [{ valeur_statut: 2, date_statut: new Date("2020-03-22T00:00:00") }],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [{ valeur_statut: 3, date_statut: new Date("2020-11-01T00:00:00") }],
+        }),
         createRandomStatutCandidat({
           historique_statut_apprenant: [
-            { position_statut: 1, valeur_statut: 2, date_statut: new Date("2020-02-01T00:00:00") },
+            { valeur_statut: 1, date_statut: new Date("2020-04-21T00:00:00") },
+            { valeur_statut: 2, date_statut: new Date("2020-04-24T00:00:00") },
+            { valeur_statut: 3, date_statut: new Date("2020-04-30T00:00:00") },
           ],
         }),
-        // not a rupturant
         createRandomStatutCandidat({
           etablissement_num_region: "199",
-          historique_statut_apprenant: [
-            { position_statut: 1, valeur_statut: 3, date_statut: new Date("2020-05-15T00:00:00") },
-          ],
+          historique_statut_apprenant: [{ valeur_statut: 2, date_statut: new Date("2020-02-01T00:00:00") }],
+        }),
+        createRandomStatutCandidat({
+          etablissement_num_region: "199",
+          historique_statut_apprenant: [{ valeur_statut: 3, date_statut: new Date("2020-05-15T00:00:00") }],
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
@@ -599,7 +595,7 @@ integrationTests(__filename, () => {
       assert.equal(count, 2);
     });
 
-    it("gets count of rupturants at date with additional filter", async () => {
+    it("gets count of rupturants now with additional filter", async () => {
       const date = new Date();
       const count = await getRupturantsCountAtDate(date, { etablissement_num_region: "199" });
       assert.equal(count, 1);
@@ -988,6 +984,206 @@ integrationTests(__filename, () => {
       const date = new Date();
       const count = await getInscritsSansContratCountAtDate(date, { etablissement_num_region: "199" });
       assert.equal(count, 1);
+    });
+  });
+
+  describe("getContratsCountAtDate", () => {
+    const { getContratsCountAtDate } = dashboardComponent();
+
+    it("gets count of contrats now", async () => {
+      const statuts = [
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.inscrit,
+              date_statut: new Date("2021-01-04T00:00:00"),
+            },
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-01-13T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.inscrit,
+              date_statut: new Date("2021-02-05T00:00:00"),
+            },
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-02-16T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-03-10T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-03-21T00:00:00"),
+            },
+          ],
+        }),
+        // Not counted : inscrit
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.inscrit,
+              date_statut: new Date("2021-03-21T00:00:00"),
+            },
+          ],
+        }),
+      ];
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+
+      const count = await getContratsCountAtDate(new Date(Date.now()), {});
+      assert.equal(count, 4);
+    });
+
+    it("gets count of contrats now with additional parameter", async () => {
+      const statuts = [
+        createRandomStatutCandidat({
+          uai_etablissement: "0123456Z",
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.inscrit,
+              date_statut: new Date("2021-01-04T00:00:00"),
+            },
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-01-13T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          uai_etablissement: "0123456Z",
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.inscrit,
+              date_statut: new Date("2021-02-05T00:00:00"),
+            },
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-02-16T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          uai_etablissement: "0123456Z",
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-03-10T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          uai_etablissement: "0123456Z",
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-03-21T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          uai_etablissement: "0123456Z",
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-05-14T00:00:00"),
+            },
+          ],
+        }),
+      ];
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+
+      const count = await getContratsCountAtDate(new Date(Date.now()), { uai_etablissement: "0123456Z" });
+      assert.equal(count, 5);
+    });
+
+    it("gets count of contrats at date", async () => {
+      const statuts = [
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.inscrit,
+              date_statut: new Date("2021-01-04T00:00:00"),
+            },
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-01-13T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.inscrit,
+              date_statut: new Date("2021-02-05T00:00:00"),
+            },
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-02-16T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-03-10T00:00:00"),
+            },
+          ],
+        }),
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.apprenti,
+              date_statut: new Date("2021-03-21T00:00:00"),
+            },
+          ],
+        }),
+        // Not counted : inscrit
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.inscrit,
+              date_statut: new Date("2021-03-21T00:00:00"),
+            },
+          ],
+        }),
+        // Not counted : abandon
+        createRandomStatutCandidat({
+          historique_statut_apprenant: [
+            {
+              valeur_statut: codesStatutsCandidats.abandon,
+              date_statut: new Date("2018-03-21T00:00:00"),
+            },
+          ],
+        }),
+      ];
+      for (let index = 0; index < statuts.length; index++) {
+        const toAdd = new StatutCandidat(statuts[index]);
+        await toAdd.save();
+      }
+
+      const count = await getContratsCountAtDate(new Date("2021-02-28T00:00:00.000Z"), {});
+      assert.equal(count, 2);
     });
   });
 });

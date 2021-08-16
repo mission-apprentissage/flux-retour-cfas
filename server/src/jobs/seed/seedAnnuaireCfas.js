@@ -48,7 +48,12 @@ const seedCfasFromAnnuaireJsonFile = async () => {
         formateur: currentCfaAnnuaire.formateur,
         statut: currentCfaAnnuaire.statut,
         relations: currentCfaAnnuaire.relations,
-        adresse: currentCfaAnnuaire.adresse,
+
+        adresse_label: currentCfaAnnuaire.adresse?.label,
+        adresse_code_postal: currentCfaAnnuaire.adresse?.code_postal,
+        adresse_code_insee: currentCfaAnnuaire.adresse?.code_insee,
+        adresse_region_code: currentCfaAnnuaire.adresse?.region.code,
+        adresse_region_nom: currentCfaAnnuaire.adresse?.region.nom,
       }).save();
     });
 

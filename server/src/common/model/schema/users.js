@@ -12,11 +12,6 @@ module.exports = new Schema({
     default: null,
     description: "Le mot de passe hashé",
   },
-  apiKey: {
-    type: String,
-    default: null,
-    description: "La clé d'API si user API",
-  },
   permissions: {
     type: [String],
     default: [],

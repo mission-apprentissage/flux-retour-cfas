@@ -20,6 +20,16 @@ const cfaDataFeedback = new Schema({
     required: true,
     description: "Détails du feedback",
   },
+  region_nom: {
+    type: String,
+    default: null,
+    description: "Région de l'établissement",
+  },
+  region_num: {
+    type: String,
+    default: null,
+    description: "Numéro de la région de l'établissement",
+  },
   created_at: {
     type: Date,
     required: true,

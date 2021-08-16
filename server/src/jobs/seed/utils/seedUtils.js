@@ -18,7 +18,6 @@ const seedUsers = async (usersModule) => {
       try {
         await usersModule.createUser(user.name, user.password, {
           permissions: user.permissions,
-          apiKey: user.apiKey,
         });
       } catch (err) {
         logger.error(err);
