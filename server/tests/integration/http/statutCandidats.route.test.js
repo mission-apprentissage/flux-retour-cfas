@@ -88,7 +88,7 @@ httpTests(__filename, ({ startServer }) => {
     // "annee_scolaire", TODO put back
   ];
   requiredFields.forEach((requiredField) => {
-    it(`Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
+    it(`Vérifie qu'on ne crée pas de donnée et renvoie une 200 + ERROR lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
@@ -102,9 +102,18 @@ httpTests(__filename, ({ startServer }) => {
         },
       });
       // check response
-      assert.equal(response.status, 400);
+      assert.equal(response.status, 200);
       assert.equal(response.data.status, "ERROR");
-      assert.equal(response.data.message.includes(`${requiredField}" is required`), true);
+      assert.equal(response.data.message.includes(`Error : 1 items not valid`), true);
+      assert.equal(response.data.ok, 0);
+      assert.equal(response.data.ko, 1);
+      assert.equal(response.data.validationErrors.length, 1);
+      assert.equal(response.data.validationErrors[0].details.length, 1);
+      assert.equal(
+        response.data.validationErrors[0].details[0].message.includes(`${requiredField}" is required`),
+        true
+      );
+
       // check that no data was created
       assert.equal(await StatutCandidat.countDocuments({}), 0);
     });
@@ -201,6 +210,41 @@ httpTests(__filename, ({ startServer }) => {
     // Check Api Route data & Data not added
     assert.deepEqual(response.status, 413);
     assert.equal(await StatutCandidat.countDocuments({}), 0);
+  });
+
+  it("Vérifie l'ajout via route statut-candidats de 10 statuts valides et 3 statuts invalides", async () => {
+    const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
+
+    // Generate random valid & invalid data
+    const nbValidItems = 10;
+    const randomValidAndInvalidData = [
+      ...createRandomStatutsCandidatsApiInputList(nbValidItems),
+      ...[
+        createRandomStatutCandidatApiInput({ prenom_apprenant: null }),
+        createRandomStatutCandidatApiInput({ date_metier_mise_a_jour_statut: true }),
+        createRandomStatutCandidatApiInput({ id_formation: 72 }),
+      ],
+    ];
+
+    // Call Api Route
+    const response = await httpClient.post("/api/statut-candidats", randomValidAndInvalidData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    // Check Api Route data
+    assert.deepEqual(response.status, 200);
+    assert.equal(response.data.status, "ERROR");
+    assert.equal(response.data.message.includes(`Error : 3 items not valid`), true);
+    assert.deepEqual(response.data.ok, 10);
+    assert.deepEqual(response.data.ko, 3);
+    assert.equal(response.data.validationErrors.length, 3);
+
+    // Check Nb Items added
+    assert.deepEqual(await StatutCandidat.countDocuments({}), nbValidItems);
   });
 
   it("Vérifie que la route statut-candidats/test fonctionne avec un jeton JWT", async () => {
