@@ -1,5 +1,3 @@
-import { subYears } from "date-fns";
-
 import { usePostFetch } from "../../common/hooks/useFetch";
 import { omitNullishValues } from "../../common/utils/omitNullishValues";
 import { useFiltersContext } from "./FiltersContext";
@@ -24,8 +22,7 @@ const mapEffectifsData = (effectifsData) => {
 // map filters to the expected body shape in our API and filter out null values
 const buildSearchRequestBody = (filters) => {
   const flattenedFilters = {
-    startDate: subYears(filters.date, 1).toISOString(),
-    endDate: filters.date.toISOString(),
+    date: filters.date.toISOString(),
     etablissement_num_region: filters.region?.code ?? null,
     etablissement_num_departement: filters.departement?.code ?? null,
     formation_cfd: filters.formation?.cfd ?? null,
