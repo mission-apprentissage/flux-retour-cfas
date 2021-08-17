@@ -166,6 +166,7 @@ const jobNames = {
   clearLogs: "clear-logs",
   clearAll: "clear-all",
   cleanStatutsCandidats: "clean-statuts-candidats",
+  cleanCfaDataFeedback: "clean-cfaDataFeedback",
   checkSiretValidity: "check-siret-validity",
   checkUaiValidity: "check-uai-validity",
   fixHistoriqueStatutApprenant: "fix-historique-statut-apprenant-date-statut",
