@@ -140,6 +140,7 @@ const jobNames = {
   seedSample: "seed-sample",
   seedReferentielCfas: "seed-referentiel-cfas",
   seedAnnuaireCfas: "seed-annuaire-cfas",
+  seedCroisementCfasAnnuaire: "seed-croisement-cfas-annuaire",
   seedRandomizedSample: "seed-randomized-sample",
   identifyUaisInCatalog: "identify-uais-types-catalog",
   identifyNetworkCma: "identify-network-cma",
