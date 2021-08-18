@@ -27,7 +27,7 @@ services:
       - flux_retour_cfas_server_data:/data
     build:
       args:
-        - NPM_TOKEN=local
+        - NPM_TOKEN=${NPM_TOKEN}
     environment:
       - FLUX_RETOUR_CFAS_ENV=local
       - FLUX_RETOUR_CFAS_APP_NAME=Flux Retour Cfas
