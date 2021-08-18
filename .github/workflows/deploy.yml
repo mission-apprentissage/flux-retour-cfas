@@ -13,13 +13,13 @@ jobs:
         uses: actions/checkout@v2
 
       - shell: bash
-        run: echo 'FLUX_RETOUR_CFAS_HEAD_REF=${{ github.head_ref }}' >> $GITHUB_ENV
+        run: echo 'TABLEAU_DE_BORD_HEAD_REF=${{ github.head_ref }}' >> $GITHUB_ENV
 
       - shell: bash
-        run: echo 'FLUX_RETOUR_CFAS_HEAD_REF=${{ github.ref }}' >> $GITHUB_ENV
+        run: echo 'TABLEAU_DE_BORD_HEAD_REF=${{ github.ref }}' >> $GITHUB_ENV
 
       - name: Check output
-        run: echo ${FLUX_RETOUR_CFAS_HEAD_REF:-${FLUX_RETOUR_CFAS_HEAD_REF##*/}}
+        run: echo ${TABLEAU_DE_BORD_HEAD_REF:-${TABLEAU_DE_BORD_HEAD_REF##*/}}
 
       - name: Request deployment recette
         uses: peter-evans/repository-dispatch@v1
