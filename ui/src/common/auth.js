@@ -3,7 +3,7 @@ import { createGlobalState } from "react-hooks-global-state";
 import { subscribeToHttpEvent } from "./httpClient";
 import decodeJWT from "./utils/decodeJWT";
 
-const access_token = localStorage.getItem("flux-retour-cfas:access_token");
+const access_token = localStorage.getItem("tableau-de-bord:access_token");
 
 const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
   auth: access_token ? decodeJWT(access_token) : null,
@@ -12,7 +12,7 @@ const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
 subscribeToHttpEvent("http:error", (response) => {
   if (response.status === 401) {
     //Auto logout user when token is invalid
-    localStorage.removeItem("flux-retour-cfas:access_token");
+    localStorage.removeItem("tableau-de-bord:access_token");
     setGlobalState("auth", null);
   }
 });

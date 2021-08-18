@@ -30,7 +30,7 @@ services:
         - NPM_TOKEN=local
     environment:
       - TABLEAU_DE_BORD_ENV=local
-      - TABLEAU_DE_BORD_APP_NAME=Flux Retour Cfas
+      - TABLEAU_DE_BORD_APP_NAME=Tableau de bord de l'apprentissage
       # logs
       - TABLEAU_DE_BORD_LOG_LEVEL=debug
       - TABLEAU_DE_BORD_OUTPUT_DIR=.local/output
