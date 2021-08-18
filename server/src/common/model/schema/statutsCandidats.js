@@ -233,6 +233,11 @@ const statutsCandidatsSchema = new Schema({
     description: "Source du statut candidat (Ymag, Gesti...)",
     index: true,
   },
+  match_formation_mnaCatalog_cfd_siret: {
+    type: Boolean,
+    default: false,
+    description: "Flag d'identification de la formation dans le Catalogue MNA sur la base du CFD + SIRET",
+  },
 });
 
 module.exports = statutsCandidatsSchema;

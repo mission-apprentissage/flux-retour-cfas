@@ -159,6 +159,7 @@ const jobNames = {
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
   statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
   statutsCandidatsSanitizeEmptyStrings: "statutsCandidats-sanitize-empty-strings",
+  statutsCandidatsRetrieveFormationsInCatalog: "statutsCandidats-retrieve-formation-in-catalog",
   createIndexes: "create-indexes",
   clearUsers: "clear-users",
   clearCfas: "clear-cfas",
