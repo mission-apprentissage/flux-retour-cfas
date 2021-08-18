@@ -11,7 +11,7 @@ let mongoHolder = null;
 
 const connectToMongoForTests = async () => {
   if (!mongoHolder) {
-    const uri = config.mongodb.uri.split("flux-retour-cfas").join("flux-retour-cfas_test");
+    const uri = config.mongodb.uri.split("tableau-de-bord").join("tableau-de-bord_test");
     mongoHolder = await connectToMongo(uri);
   }
   await createIndexes(mongoHolder.db);
