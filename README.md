@@ -1,6 +1,6 @@
 ![](https://avatars1.githubusercontent.com/u/63645182?s=200&v=4)
 
-# Flux Retour CFAS
+# Tableau de bord de l'apprentissage
 
 ## Pré-requis
 
@@ -10,7 +10,7 @@
 
 ## Présentation
 
-Ce repository contient l'application des flux retours des cfas.
+Ce repository contient l'application du Tableau de bord de l'apprentissage.
 
 ## Infrastructure & Déploiement
 
@@ -88,7 +88,7 @@ Pour fonctionner ce projet a besoin des éléments dockérisés suivants :
 
 - Un serveur Web Nginx jouant le role de reverse proxy, _défini dans le service `reverse_proxy` du docker-compose_.
 - Un serveur Node Express, _défini dans le service `server` du docker-compose_.
-- Un réseau _défini dans `flux_retour_cfas_network` du docker-compose_.
+- Un réseau _défini dans `tableau_de_bord_network` du docker-compose_.
 - Une base de donnée mongoDb _défini dans le service `mongodb` du docker-compose_.
 - Une interface Web en React, _définie dans le service `ui` du docker-compose_.
 - Un serveur FTP (VSFTPD) , _défini dans le service `ftp` du docker-compose_.
@@ -144,13 +144,13 @@ yarn docker:clean
 Aprés avoir créé la stack pour vérifier que les conteneurs sont bien présents vous pouvez lancer la commande suivante depuis le répertoire `/server` :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server /bin/bash
+docker exec -t -i tableau_de_bord_server /bin/bash
 ```
 
 De même pour consulter la liste des fichiers dans le docker :
 
 ```bash
-docker exec flux_retour_cfas_server bash -c 'ls'
+docker exec tableau_de_bord_server bash -c 'ls'
 ```
 
 ## Migrations
@@ -271,9 +271,9 @@ Le workflow principal est définie dans `/.github/workflows/yarn-ci.yml` et se c
 
 ## Jobs & Procédure de déploiement de l'application
 
-Pour executer un job, que ce soit en local ou sur un des environnement (production / recette) il est recommandé d'executer les commandes **dans le conteneur docker `flux_retour_cfas_server`.**
+Pour executer un job, que ce soit en local ou sur un des environnement (production / recette) il est recommandé d'executer les commandes **dans le conteneur docker `tableau_de_bord_server`.**
 
-**Attention, pour la création des users ayant un accès ftp il est nécéssaire de créer les users depuis le conteneur docker `flux_retour_cfas_server`, car il est nécessaire à VSFTPD d'écrire dans le fichier de configuration vsftp_pam pour la création des utilisateurs.**
+**Attention, pour la création des users ayant un accès ftp il est nécéssaire de créer les users depuis le conteneur docker `tableau_de_bord_server`, car il est nécessaire à VSFTPD d'écrire dans le fichier de configuration vsftp_pam pour la création des utilisateurs.**
 
 ### Jobs de suppression des données
 
@@ -282,25 +282,25 @@ Il est possible de supprimer les données en base de plusieurs manières :
 - Pour supprimer toutes les données en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:all'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn clear:all'
 ```
 
 - Pour supprimer uniquement les statuts des candidats en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:statutsCandidats'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn clear:statutsCandidats'
 ```
 
 - Pour supprimer uniquement les logs (+usersEvents) en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:logs'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn clear:logs'
 ```
 
 - Pour supprimer uniquement les users (+ usersEvents) en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:users'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn clear:users'
 ```
 
 ### Jobs d'alimentation des données
@@ -310,33 +310,33 @@ Il est possible d'alimenter la base de donneés avec des données de réferences
 - Pour ajouter les users par défaut :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn seed:users'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn seed:users'
 ```
 
 - Pour ajouter des statuts candidats de test en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn seed:sample'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn seed:sample'
 ```
 
 - Pour ajouter des statuts candidats randomisés en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn seed:randomizedSample'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn seed:randomizedSample'
 ```
 
 - Pour ajouter les données de reférences des CFAs et leurs réseaux :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn seed:referentielCfas'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn seed:referentielCfas'
 ```
 
 ### Jobs d'affichage des statistiques
 
-Il est possible d'afficher en console les statistiques des données du flux retour :
+Il est possible d'afficher en console les statistiques des données du tableau de bord :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn stats'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn stats'
 ```
 
 ### Jobs de vérification et clean des données
@@ -344,49 +344,49 @@ docker exec -t -i flux_retour_cfas_server bash -c 'yarn stats'
 - Pour valider et marquer les SIRET des statuts candidats en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn siret:check-validity'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn siret:check-validity'
 ```
 
 - Pour valider et marquer les UAI des statuts candidats en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn uai:check-validity'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn uai:check-validity'
 ```
 
 - Pour clean les SIRET invalides (comportant espaces et points) en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn siret:sanitize'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn siret:sanitize'
 ```
 
 - Pour tenter de retrouver les SIRET manquants grâce à une table de correspondance UAI/SIRET fournie par Gesti en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn siret:retrieve-gesti'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn siret:retrieve-gesti'
 ```
 
 - Pour tenter de retrouver les SIRET manquants sur les statuts candidats provenant de Ymag grâce aux UAI déjà présents en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn siret:retrieve-ymag'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn siret:retrieve-ymag'
 ```
 
 - Pour tenter de retrouver les infos de localisation des établissements en base grâce au SIRET et à l'API Tables Correspondances :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn etablissements-location:retrieve'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn etablissements-location:retrieve'
 ```
 
 - Pour tenter de retrouver les infos de réseau des établissements en base grâce au SIRET ou les UAI via la collection referentiel des cfas :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn etablissements-networks:retrieve'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn etablissements-networks:retrieve'
 ```
 
 - Pour tenter de retrouver niveau des formations grâce au CFA via la collection referentiel des Formations :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn statutsCandidats:update-niveaux'
+docker exec -t -i tableau_de_bord_server bash -c 'yarn statutsCandidats:update-niveaux'
 ```
 
 ### Procédure à suivre au premier déploiement
@@ -405,61 +405,61 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
    5.1 - Création du référentiel des cfas :
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn seed:referentielCfas'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn seed:referentielCfas'
    ```
 
    5.2 - Récupération des sirets depuis Gesti 'yarn siret:retrieve-gesti'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn siret:retrieve-gesti'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn siret:retrieve-gesti'
    ```
 
    5.3 - Récupération des sirets depuis YMag 'yarn siret:retrieve-ymag'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn siret:retrieve-ymag'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn siret:retrieve-ymag'
    ```
 
    5.4 - Sanitize des sirets 'yarn siret:sanitize'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn siret:sanitize'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn siret:sanitize'
    ```
 
    5.5 - Vérification des validité de siret 'yarn siret-uai:check-validity'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn siret-uai:check-validity'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn siret-uai:check-validity'
    ```
 
    5.6 - Recherche des infos de localisation des établissements 'yarn statutsCandidats:retrieve-location'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn statutsCandidats:retrieve-location'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn statutsCandidats:retrieve-location'
    ```
 
    5.7 - Recherche des infos de réseaux des établissements 'yarn statutsCandidats:retrieve-networks'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn statutsCandidats:retrieve-networks'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn statutsCandidats:retrieve-networks'
    ```
 
    5.8 - Recherche des codes CFD des formations 'yarn formation:retrieve-from-cfd'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn formation:retrieve-from-cfd'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn formation:retrieve-from-cfd'
    ```
 
    5.9 - Mise à jour des niveau des statutsCandidats - dépend des codes CFD des formations (5.8) 'yarn statutsCandidats:retrieve-niveaux'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn statutsCandidats:retrieve-niveaux'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn statutsCandidats:retrieve-niveaux'
    ```
 
    5.10 - Mise à jour des branchements des données des CFAs 'yarn cfas:retrieve-data-connection'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn cfas:retrieve-data-connection'
+   docker exec -ti tableau_de_bord_server bash -c 'yarn cfas:retrieve-data-connection'
    ```
 
 ### Script d'identification des doublons
@@ -476,13 +476,13 @@ Ce script prend en arguments :
 Exemple, identifier les doublons de type 1 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement/formation_cfd) sur toute la base :
 
 ```bash
-docker exec -ti flux_retour_cfas_server bash -c 'yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forAll'
+docker exec -ti tableau_de_bord_server bash -c 'yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forAll'
 ```
 
 Exemple, identifier les doublons de type 2 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement mais formation_cfd différent) sur l'UAI 1234X avec l'utilisation d'allowDiskUse :
 
 ```bash
-docker exec -ti flux_retour_cfas_server bash -c 'yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 2 --mode forUai --uai 1234X --allowDiskUse'
+docker exec -ti tableau_de_bord_server bash -c 'yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 2 --mode forUai --uai 1234X --allowDiskUse'
 ```
 
 ### Script de suppression des doublons
@@ -499,5 +499,5 @@ Ce script prend les mêmes arguments que le script d'identification :
 Exemple, supprimer les doublons de type 1 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement/formation_cfd) sur toute la base :
 
 ```bash
-docker exec -ti flux_retour_cfas_server bash -c 'yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forAll'
+docker exec -ti tableau_de_bord_server bash -c 'yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forAll'
 ```
