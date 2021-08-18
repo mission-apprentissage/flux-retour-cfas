@@ -6,10 +6,10 @@ export default function useAuth() {
 
   const setAuthFromToken = (access_token) => {
     if (!access_token) {
-      localStorage.removeItem("flux-retour-cfas:access_token");
+      localStorage.removeItem("tableau-de-bord:access_token");
       setAuth(null);
     } else {
-      localStorage.setItem("flux-retour-cfas:access_token", access_token);
+      localStorage.setItem("tableau-de-bord:access_token", access_token);
       setAuth(decodeJWT(access_token));
     }
   };

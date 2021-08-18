@@ -1,7 +1,7 @@
 const env = require("env-var");
 
 module.exports = {
-  appName: env.get("TABLEAU_DE_BORD_NAME").default("Flux Retour Cfas").asString(),
+  appName: env.get("TABLEAU_DE_BORD_NAME").default("Tableau de bord de l'apprentissage").asString(),
   env: env.get("TABLEAU_DE_BORD_ENV").required().asString(),
   publicUrl: env.get("TABLEAU_DE_BORD_PUBLIC_URL").required().asString(),
   mongodb: {

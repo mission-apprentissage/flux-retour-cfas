@@ -26,7 +26,7 @@ const LoginPage = ({ history }) => {
     <Center background="bluefrance" height="100vh" flexDirection="column">
       <Flex fontSize="beta" fontWeight="700" color="white">
         <Box as="i" className="ri-shield-star-fill" mr="5" />
-        <Text>Tableau de bord - Flux Cfas</Text>
+        <Text>Tableau de bord de l`apprentissage</Text>
       </Flex>
       <Box background="white" borderRadius="2%" width="28rem" mt="4">
         <Heading mt={4} fontWeight="700" marginBottom="2w" textAlign="center">

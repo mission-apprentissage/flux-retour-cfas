@@ -1,7 +1,7 @@
 {
-  "name": "mna-flux-retour-cfas",
+  "name": "mna-tableau-de-bord",
   "version": "2.30.0",
-  "description": "[MNA] Flux retour des cfas",
+  "description": "[MNA] Tableau de bord de l'apprentissage",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
   "author": "MNA",
