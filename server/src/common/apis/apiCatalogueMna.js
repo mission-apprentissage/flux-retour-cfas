@@ -7,22 +7,24 @@ const config = require("../../../config");
 const API_ENDPOINT = config.mnaCatalogApi.endpoint;
 
 const getFormations2021Count = async () => {
+  const url = `${API_ENDPOINT}/entity/formations2021/count`;
   try {
-    const { data } = await axios.get(`${API_ENDPOINT}/entity/formations2021/count`);
+    const { data } = await axios.get(url);
     return data;
-  } catch (error) {
-    logger.error(`getFormations2021Count: something went wrong`);
+  } catch (err) {
+    logger.error(`getFormations2021Count: something went wrong while requesting ${url}`, err);
     return null;
   }
 };
 
 const getFormations2021 = async (options) => {
+  const url = `${API_ENDPOINT}/entity/formations2021`;
   try {
     let { page, allFormations, limit, query, select } = { page: 1, allFormations: [], limit: 1050, ...options };
 
     let params = { page, limit, query, select };
-    logger.debug(`Requesting ${API_ENDPOINT}/formations2021 with parameters`, params);
-    const response = await axios.get(`${API_ENDPOINT}/entity/formations2021`, { params });
+    logger.debug(`Requesting ${url}`, params);
+    const response = await axios.get(url, { params });
 
     const { formations, pagination } = response.data;
     allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
@@ -33,7 +35,7 @@ const getFormations2021 = async (options) => {
       return allFormations;
     }
   } catch (err) {
-    logger.error(`getFormations2021: something went wrong`);
+    logger.error(`getFormations2021: something went wrong while requesting ${url}`, err);
     return null;
   }
 };
