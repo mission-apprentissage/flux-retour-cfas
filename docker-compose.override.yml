@@ -23,6 +23,7 @@ services:
     volumes:
       - ./server/src:/app/src # Allows source folders to be watched
       - ./server/config:/app/config
+      - ./server/.env:/app/.env
       - flux_retour_cfas_ftp_data:/ftp
       - flux_retour_cfas_server_data:/data
     build:
