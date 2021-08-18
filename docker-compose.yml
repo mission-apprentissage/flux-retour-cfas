@@ -1,8 +1,8 @@
 version: "2.4"
 services:
   reverse_proxy:
-    image: flux_retour_cfas_reverse_proxy
-    container_name: flux_retour_cfas_reverse_proxy
+    image: tableau_de_bord_reverse_proxy
+    container_name: tableau_de_bord_reverse_proxy
     build:
       context: reverse_proxy
     mem_limit: 256m
@@ -10,30 +10,30 @@ services:
     ports:
       - 80:80
     networks:
-      - flux_retour_cfas_network
+      - tableau_de_bord_network
     depends_on:
       - server
       - ui
 
   ui:
-    image: flux_retour_cfas_ui
-    container_name: flux_retour_cfas_ui
+    image: tableau_de_bord_ui
+    container_name: tableau_de_bord_ui
     build:
       context: ui
     mem_limit: 256m
     networks:
-      - flux_retour_cfas_network
+      - tableau_de_bord_network
     depends_on:
       - server
 
   server:
-    image: flux_retour_cfas_server
-    container_name: flux_retour_cfas_server
+    image: tableau_de_bord_server
+    container_name: tableau_de_bord_server
     build:
       context: server
     restart: unless-stopped
     networks:
-      - flux_retour_cfas_network
+      - tableau_de_bord_network
     depends_on:
       - mongodb
       - ftp
@@ -44,15 +44,15 @@ services:
 
   mongodb:
     image: mongo:5.0.2-focal
-    container_name: flux_retour_cfas_mongodb
+    container_name: tableau_de_bord_mongodb
     mem_limit: 1g
     restart: unless-stopped
     networks:
-      - flux_retour_cfas_network
+      - tableau_de_bord_network
 
   ftp:
-    image: flux_retour_cfas_ftp
-    container_name: flux_retour_cfas_ftp
+    image: tableau_de_bord_ftp
+    container_name: tableau_de_bord_ftp
     mem_limit: 256m
     build:
       context: ftp
@@ -61,8 +61,8 @@ services:
       - "21:21"
       - "21100-21110:21100-21110"
     networks:
-      - flux_retour_cfas_network
+      - tableau_de_bord_network
 
 networks:
-  flux_retour_cfas_network:
-    name: flux_retour_cfas_network
+  tableau_de_bord_network:
+    name: tableau_de_bord_network

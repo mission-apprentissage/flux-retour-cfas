@@ -3,7 +3,7 @@ version: "2.4"
 services:
   reverse_proxy:
     volumes:
-      - flux_retour_cfas_nginx_data:/data
+      - tableau_de_bord_nginx_data:/data
 
   ui:
     stdin_open: true
@@ -23,8 +23,8 @@ services:
     volumes:
       - ./server/src:/app/src # Allows source folders to be watched
       - ./server/config:/app/config
-      - flux_retour_cfas_ftp_data:/ftp
-      - flux_retour_cfas_server_data:/data
+      - tableau_de_bord_ftp_data:/ftp
+      - tableau_de_bord_server_data:/data
     build:
       args:
         - NPM_TOKEN=local
@@ -78,22 +78,22 @@ services:
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
-      - flux_retour_cfas_mongodb_data:/data
+      - tableau_de_bord_mongodb_data:/data
 
   ftp:
     volumes:
-      - flux_retour_cfas_ftp_data:/data
+      - tableau_de_bord_ftp_data:/data
 
 volumes:
-  flux_retour_cfas_mongodb_data:
+  tableau_de_bord_mongodb_data:
     driver: local
-    name: flux_retour_cfas_mongodb_data
-  flux_retour_cfas_nginx_data:
+    name: tableau_de_bord_mongodb_data
+  tableau_de_bord_nginx_data:
     driver: local
-    name: flux_retour_cfas_nginx_data
-  flux_retour_cfas_server_data:
+    name: tableau_de_bord_nginx_data
+  tableau_de_bord_server_data:
     driver: local
-    name: flux_retour_cfas_server_data
-  flux_retour_cfas_ftp_data:
+    name: tableau_de_bord_server_data
+  tableau_de_bord_ftp_data:
     driver: local
-    name: flux_retour_cfas_ftp_data
+    name: tableau_de_bord_ftp_data

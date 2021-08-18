@@ -45,4 +45,4 @@ jobs:
       - name: Run Tests
         run: |
           cd server
-          docker exec flux_retour_cfas_server bash -c "yarn test"
+          docker exec tableau_de_bord_server bash -c "yarn test"
