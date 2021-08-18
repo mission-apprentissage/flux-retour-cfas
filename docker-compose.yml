@@ -38,7 +38,7 @@ services:
       - mongodb
       - ftp
     environment:
-      - TABLEAU_DE_BORD_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
+      - TABLEAU_DE_BORD_MONGODB_URI=mongodb://mongodb:27017/tableau-de-bord?retryWrites=true&w=majority
       - TABLEAU_DE_BORD_FTP_DIR=/ftp
       - TABLEAU_DE_BORD_OUTPUT_DIR=/data
 
