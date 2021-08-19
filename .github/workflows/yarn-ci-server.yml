@@ -27,7 +27,7 @@ jobs:
       - name: Run Yarn Install
         run: |
           cd server
-          yarn install
+          yarn install --frozen-lockfile
 
       # Lint
       - name: Run Lint
@@ -40,6 +40,8 @@ jobs:
         run: |
           cd server
           yarn docker:start
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Run mocha tests
       - name: Run Tests

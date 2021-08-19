@@ -21,7 +21,7 @@ const RegionOptions = ({ regions, onRegionClick, currentFilter }) => {
           <FilterOption
             key={region.code}
             onClick={() => onRegionClick(region)}
-            isSelected={currentFilter?.nom === region.nom}
+            isSelected={currentFilter?.code === region.code}
           >
             {region.nom}
           </FilterOption>
@@ -41,6 +41,7 @@ RegionOptions.propTypes = {
   onRegionClick: PropTypes.func.isRequired,
   currentFilter: PropTypes.shape({
     nom: PropTypes.string.isRequired,
+    code: PropTypes.string.isRequired,
   }),
 };
 

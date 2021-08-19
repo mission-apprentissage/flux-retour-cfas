@@ -1,3 +1,4 @@
+export { default as Alert } from "./Alert/Alert";
 export { default as SearchInput } from "./SearchInput/SearchInput";
 export { default as PrimarySelectButton } from "./SelectButton/PrimarySelectButton";
 export { default as SecondarySelectButton } from "./SelectButton/SecondarySelectButton";
@@ -14,5 +15,3 @@ export { default as Highlight } from "./Highlight/Highlight";
 export { default as Table } from "./tables/Table";
 
 export { default as TableSkeleton } from "./skeletons/TableSkeleton";
-
-export { default as Pagination } from "./Pagination/Pagination";

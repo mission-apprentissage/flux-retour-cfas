@@ -14,6 +14,7 @@ module.exports = {
   DuplicateEvent: getModel("duplicatesEvents"),
   Cfa: getModel("cfas", true),
   CfaAnnuaire: getModel("cfasAnnuaire"),
+  CroisementCfasAnnuaire: getModel("croisementCfasAnnuaire"),
   CfaDataFeedback: getModel("cfaDataFeedback"),
   CroisementCfasDeca: getModel("croisementCfasDeca"),
   Formation: getModel("formations"),

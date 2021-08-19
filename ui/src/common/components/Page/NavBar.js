@@ -51,7 +51,6 @@ const NavBar = () => {
             <NavItem to="/stats">Statistiques Globales</NavItem>
             <NavItem to="/stats/ymag">Statistiques Ymag</NavItem>
             <NavItem to="/stats/gesti">Statistiques Gesti</NavItem>
-            <NavItem to="/referentiel-cfas">Organismes par région</NavItem>
           </>
         )}
       </HStack>

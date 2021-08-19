@@ -11,8 +11,7 @@ module.exports = ({ stats, dashboard }) => {
    * Schema for effectif validation
    */
   const dashboardEffectifInputSchema = Joi.object({
-    startDate: Joi.date().required(),
-    endDate: Joi.date().required(),
+    date: Joi.date().required(),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
     formation_cfd: Joi.string().allow(null, ""),
@@ -112,8 +111,8 @@ module.exports = ({ stats, dashboard }) => {
 
       // Gets & format params:
       // eslint-disable-next-line no-unused-vars
-      const { startDate: _, endDate: endDateFromBody, ...filtersFromBody } = req.body;
-      const date = new Date(endDateFromBody);
+      const { date: dateFromBody, ...filtersFromBody } = req.body;
+      const date = new Date(dateFromBody);
       const filters = {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
