@@ -1,3 +1,4 @@
+export { default as Alert } from "./Alert/Alert";
 export { default as SearchInput } from "./SearchInput/SearchInput";
 export { default as PrimarySelectButton } from "./SelectButton/PrimarySelectButton";
 export { default as SecondarySelectButton } from "./SelectButton/SecondarySelectButton";
