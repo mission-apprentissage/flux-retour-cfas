@@ -1,69 +1,103 @@
 import PropTypes from "prop-types";
-import { createContext, useContext, useReducer } from "react";
+import qs from "query-string";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 
 import { DEFAULT_REGION } from "../../common/constants/defaultRegion";
+import { omitNullishValues } from "../../common/utils/omitNullishValues";
 
 const FiltersContext = createContext();
 
-const ACTION_TYPES = {
-  SET_DATE: "SET_DATE",
-  SET_REGION: "SET_REGION",
-  SET_DEPARTEMENT: "SET_DEPARTEMENT",
-  SET_CFA: "SET_CFA",
-  SET_RESEAU: "SET_RESEAU",
-  SET_FORMATION: "SET_FORMATION",
-  SET_SOUS_ETABLISSEMENT: "SET_SOUS_ETABLISSEMENT",
+const setDate = (state, date) => {
+  return { ...state, date };
 };
 
-const filtersReducer = (state, action) => {
-  switch (action.type) {
-    case ACTION_TYPES.SET_DATE:
-      return { ...state, date: action.value };
+const setRegion = (state, region) => {
+  return { ...state, cfa: null, departement: null, sousEtablissement: null, region };
+};
 
-    case ACTION_TYPES.SET_REGION:
-      return { ...state, cfa: null, departement: null, sousEtablissement: null, region: action.value };
+const setDepartement = (state, departement) => {
+  return { ...state, cfa: null, region: null, sousEtablissement: null, departement };
+};
 
-    case ACTION_TYPES.SET_DEPARTEMENT:
-      return { ...state, cfa: null, region: null, sousEtablissement: null, departement: action.value };
+const setFormation = (state, formation) => {
+  return { ...state, cfa: null, reseau: null, sousEtablissement: null, formation };
+};
 
-    case ACTION_TYPES.SET_FORMATION:
-      return { ...state, cfa: null, reseau: null, sousEtablissement: null, formation: action.value };
+const setCfa = (state, cfa) => {
+  return { ...state, reseau: null, formation: null, sousEtablissement: null, cfa };
+};
 
-    case ACTION_TYPES.SET_CFA:
-      return { ...state, reseau: null, formation: null, sousEtablissement: null, cfa: action.value };
+const setReseau = (state, reseau) => {
+  return { ...state, cfa: null, formation: null, sousEtablissement: null, reseau };
+};
 
-    case ACTION_TYPES.SET_RESEAU:
-      return { ...state, cfa: null, formation: null, sousEtablissement: null, reseau: action.value };
+const setSousEtablissement = (state, sousEtablissement) => {
+  return { ...state, sousEtablissement };
+};
 
-    case ACTION_TYPES.SET_SOUS_ETABLISSEMENT:
-      return { ...state, sousEtablissement: action.value };
+const stateToQueryString = (state) => {
+  return qs.stringify(
+    omitNullishValues({
+      departement: state.departement ? JSON.stringify(state.departement) : null,
+      region: state.region ? JSON.stringify(state.region) : null,
+      formation: state.formation ? JSON.stringify(state.formation) : null,
+      cfa: state.cfa ? JSON.stringify(state.cfa) : null,
+      reseau: state.reseau ? JSON.stringify(state.reseau) : null,
+      sousEtablissement: state.sousEtablissement ? JSON.stringify(state.sousEtablissement) : null,
+      date: state.date?.getTime(),
+    })
+  );
+};
 
-    default: {
-      throw new Error(`Unhandled action type: ${action.type}`);
-    }
-  }
+const queryStringToState = (queryString) => {
+  const parsed = qs.parse(queryString);
+  return {
+    departement: parsed.departement ? JSON.parse(parsed.departement) : null,
+    region: parsed.region ? JSON.parse(parsed.region) : null,
+    formation: parsed.formation ? JSON.parse(parsed.formation) : null,
+    cfa: parsed.cfa ? JSON.parse(parsed.cfa) : null,
+    reseau: parsed.reseau ? JSON.parse(parsed.reseau) : null,
+    sousEtablissement: parsed.sousEtablissement ? JSON.parse(parsed.sousEtablissement) : null,
+    date: new Date(Number(parsed.date)),
+  };
+};
+
+const defaultState = {
+  date: new Date(),
+  departement: null,
+  region: DEFAULT_REGION,
+  formation: null,
+  cfa: null,
+  reseau: null,
+  sousEtablissement: null,
 };
 
 export const FiltersProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(filtersReducer, {
-    date: new Date(),
-    departement: null,
-    region: DEFAULT_REGION,
-    formation: null,
-    cfa: null,
-    reseau: null,
-    sousEtablissement: null,
-  });
+  const history = useHistory();
+  const currentQueryString = history.location.search.slice(1);
+  const [firstRender, setFirstRender] = useState(true);
+
+  const updateQueryStringWithState = (state) => {
+    const queryString = stateToQueryString(state);
+    history.push({ search: queryString });
+  };
+
+  // at first render we will set default state in query string if there is nothing in URL
+  const state = firstRender && !currentQueryString ? defaultState : queryStringToState(currentQueryString);
+  useEffect(() => {
+    if (!currentQueryString) updateQueryStringWithState(defaultState);
+    setFirstRender(false);
+  }, []);
 
   const setters = {
-    setDate: (date) => dispatch({ type: ACTION_TYPES.SET_DATE, value: date }),
-    setRegion: (region) => dispatch({ type: ACTION_TYPES.SET_REGION, value: region }),
-    setDepartement: (departement) => dispatch({ type: ACTION_TYPES.SET_DEPARTEMENT, value: departement }),
-    setCfa: (cfa) => dispatch({ type: ACTION_TYPES.SET_CFA, value: cfa }),
-    setReseau: (reseau) => dispatch({ type: ACTION_TYPES.SET_RESEAU, value: reseau }),
-    setFormation: (formation) => dispatch({ type: ACTION_TYPES.SET_FORMATION, value: formation }),
-    setSousEtablissement: (sousEtablissement) =>
-      dispatch({ type: ACTION_TYPES.SET_SOUS_ETABLISSEMENT, value: sousEtablissement }),
+    setDate: (value) => updateQueryStringWithState(setDate(state, value)),
+    setRegion: (value) => updateQueryStringWithState(setRegion(state, value)),
+    setDepartement: (value) => updateQueryStringWithState(setDepartement(state, value)),
+    setCfa: (value) => updateQueryStringWithState(setCfa(state, value)),
+    setReseau: (value) => updateQueryStringWithState(setReseau(state, value)),
+    setFormation: (value) => updateQueryStringWithState(setFormation(state, value)),
+    setSousEtablissement: (value) => updateQueryStringWithState(setSousEtablissement(state, value)),
   };
 
   const contextValue = {

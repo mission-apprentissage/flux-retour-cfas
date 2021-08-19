@@ -1,7 +1,7 @@
 import "react-datepicker/dist/react-datepicker.css";
 import "./PeriodeFilter.css";
 
-import { format, isThisMonth, lastDayOfMonth } from "date-fns";
+import { endOfMonth, format, isThisMonth } from "date-fns";
 import fr from "date-fns/locale/fr";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
@@ -17,14 +17,14 @@ const PeriodeFilter = ({ value, onChange }) => {
 
   const onChangeCb = (selectedDate) => {
     // by default, once a month is selected we use its last day
-    const lastDayOfSelectedMonth = lastDayOfMonth(selectedDate);
+    const lastDayOfSelectedMonth = endOfMonth(selectedDate);
     // if user has selected current month, we choose to use the current date instead of the last day in the month to avoid using dates in the future
     const date = isThisMonth(lastDayOfSelectedMonth) ? new Date() : lastDayOfSelectedMonth;
     onChange(date);
   };
 
   // latest month user can select is the current one. We need to pass the last day of current month to reat-datepicker to do so
-  const maxDate = lastDayOfMonth(new Date());
+  const maxDate = endOfMonth(new Date());
 
   return (
     <div>

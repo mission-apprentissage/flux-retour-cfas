@@ -23,11 +23,12 @@ services:
     volumes:
       - ./server/src:/app/src # Allows source folders to be watched
       - ./server/config:/app/config
+      - ./server/.env:/app/.env
       - tableau_de_bord_ftp_data:/ftp
       - tableau_de_bord_server_data:/data
     build:
       args:
-        - NPM_TOKEN=local
+        - NPM_TOKEN=${NPM_TOKEN}
     environment:
       - TABLEAU_DE_BORD_ENV=local
       - TABLEAU_DE_BORD_APP_NAME=Tableau de bord de l'apprentissage

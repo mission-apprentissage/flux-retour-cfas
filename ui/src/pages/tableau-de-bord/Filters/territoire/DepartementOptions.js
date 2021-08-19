@@ -25,7 +25,7 @@ const DepartementOptions = ({ departements, onDepartementClick, currentFilter })
           <FilterOption
             key={filter.code}
             onClick={() => onDepartementClick(filter)}
-            isSelected={currentFilter?.nom === filter.nom}
+            isSelected={currentFilter?.code === filter.code}
           >
             {filter.nom} ({filter.code})
           </FilterOption>
@@ -45,6 +45,7 @@ DepartementOptions.propTypes = {
   onDepartementClick: PropTypes.func.isRequired,
   currentFilter: PropTypes.shape({
     nom: PropTypes.string.isRequired,
+    code: PropTypes.string.isRequired,
   }),
 };
 

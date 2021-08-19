@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-d
 import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
 import LoginPage from "./pages/login/LoginPage";
-import CfasReferentielPage from "./pages/settings/cfasReferentiel/CfasReferentielPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import UserStatsPage from "./pages/user-stats";
@@ -22,7 +21,6 @@ const App = () => {
 
         <AdminRoute path="/stats" exact component={GlobalStatsPage} />
         <PrivateRoute path="/stats/:dataSource" component={UserStatsPage} />
-        <Route path="/referentiel-cfas" component={CfasReferentielPage} />
 
         <Route component={() => <div>404</div>} />
       </Switch>

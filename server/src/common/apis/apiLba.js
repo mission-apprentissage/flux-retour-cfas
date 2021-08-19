@@ -7,35 +7,34 @@ const config = require("../../../config");
 const API_ENDPOINT = config.lbaApi.endpoint;
 
 const getMetiersBySiret = async (siret) => {
+  const url = `${API_ENDPOINT}/metiers/metiersParEtablissement/${siret}`;
   try {
-    const { data } = await axios.get(`${API_ENDPOINT}/metiers/metiersParEtablissement/${siret}`);
+    const { data } = await axios.get(url);
     return data;
-  } catch (error) {
-    logger.error(`getMetiersBySiret: ${siret} - something went wrong`);
-    logger.error(error);
+  } catch (err) {
+    logger.error(`getMetiersBySiret: something went wrong while requesting ${url}`, err);
     return null;
   }
 };
 
 const getMetiersBySirets = async (sirets) => {
+  const url = `${API_ENDPOINT}/metiers/metiersParEtablissement/${encodeURIComponent(sirets.join(", "))}`;
   try {
-    const { data } = await axios.get(
-      `${API_ENDPOINT}/metiers/metiersParEtablissement/${encodeURIComponent(sirets.join(", "))}`
-    );
+    const { data } = await axios.get(url);
     return data;
-  } catch (error) {
-    logger.error(`getMetiersBySirets: ${sirets} - something went wrong`);
-    logger.error(error);
+  } catch (err) {
+    logger.error(`getMetiersBySirets: something went wrong while requesting ${url}`, err);
     return null;
   }
 };
 
 const getMetiersByCfd = async (cfd) => {
+  const url = `${API_ENDPOINT}/metiers/metiersParFormation/${cfd}`;
   try {
-    const { data } = await axios.get(`${API_ENDPOINT}/metiers/metiersParFormation/${cfd}`);
+    const { data } = await axios.get(url);
     return data;
-  } catch (error) {
-    logger.error(`getMetiersByCfd: ${cfd} - something went wrong`);
+  } catch (err) {
+    logger.error(`getMetiersByCfd: something went wrong while requesting ${url}`, err);
     return null;
   }
 };
