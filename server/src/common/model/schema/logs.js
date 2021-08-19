@@ -16,5 +16,6 @@ module.exports = new Schema({
   time: {
     type: Date,
     required: true,
+    expires: "7d",
   },
 });
