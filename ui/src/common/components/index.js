@@ -3,6 +3,8 @@ export { default as SearchInput } from "./SearchInput/SearchInput";
 export { default as PrimarySelectButton } from "./SelectButton/PrimarySelectButton";
 export { default as SecondarySelectButton } from "./SelectButton/SecondarySelectButton";
 export { default as OverlayMenu } from "./OverlayMenu/OverlayMenu";
+export { default as MenuTabs } from "./OverlayMenu/MenuTabs";
+export { default as FilterOption } from "./FilterOption/FilterOption";
 
 export { default as InfoModal } from "./Modal/InfoModal";
 
