@@ -1,31 +1,27 @@
 import PropTypes from "prop-types";
-import queryString from "query-string";
+import qs from "query-string";
 import React from "react";
 
 import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
 import { useFetch } from "../../../hooks/useFetch";
-import { omitNullishValues } from "../../../utils/omitNullishValues";
+import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
+import { pick } from "../../../utils/pick";
 import AnneeFormationRow from "./AnneeFormationRow";
 
 const AnneeFormationRows = ({ formationCfd }) => {
-  const buildSearchParams = (filters) => {
-    const date = filters.date.toISOString();
-
-    return queryString.stringify(
-      omitNullishValues({
-        date,
-        formation_cfd: formationCfd,
-        uai_etablissement: filters.cfa?.uai_etablissement ?? null,
-        siret_etablissement: filters.sousEtablissement?.siret_etablissement,
-        etablissement_reseaux: filters.reseau?.nom ?? null,
-        etablissement_num_region: filters.region?.code ?? null,
-        etablissement_num_departement: filters.departement?.code ?? null,
-      })
-    );
-  };
   const { state: filters } = useFiltersContext();
-  const searchParamsString = buildSearchParams(filters);
-  const [data] = useFetch(`/api/dashboard/effectifs-par-annee-formation?${searchParamsString}`);
+  const queryParams = qs.stringify({
+    formation_cfd: formationCfd,
+    ...pick(mapFiltersToApiFormat(filters), [
+      "date",
+      "uai_etablissement",
+      "siret_etablissement",
+      "etablissement_num_region",
+      "etablissement_num_departement",
+      "etablissement_reseaux",
+    ]),
+  });
+  const [data] = useFetch(`/api/dashboard/effectifs-par-annee-formation?${queryParams}`);
 
   if (!data) return null;
 

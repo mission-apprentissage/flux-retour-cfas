@@ -1,19 +1,19 @@
 import PropTypes from "prop-types";
+import qs from "query-string";
 import React from "react";
 
 import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
-import { usePostFetch } from "../../../hooks/useFetch";
-import { omitNullishValues } from "../../../utils/omitNullishValues";
+import { useFetch } from "../../../hooks/useFetch";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import CfaRow from "./CfaRow";
 
 const CfasRows = ({ departementCode }) => {
   const { state: filters } = useFiltersContext();
-  const requestBody = omitNullishValues({
+  const queryParams = qs.stringify({
     date: filters.date.toISOString(),
     etablissement_num_departement: departementCode,
   });
-  const [data, loading] = usePostFetch("/api/dashboard/effectifs-par-cfa", requestBody);
+  const [data, loading] = useFetch(`/api/dashboard/effectifs-par-cfa?${queryParams}`);
 
   if (loading) {
     return <RowsSkeleton nbRows={3} nbColumns={5} />;

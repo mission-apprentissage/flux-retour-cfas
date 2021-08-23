@@ -1,26 +1,28 @@
-import PropTypes from "prop-types";
+import qs from "query-string";
 import React from "react";
 
-import { usePostFetch } from "../../../../common/hooks/useFetch";
-import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
+import { useFetch } from "../../../../common/hooks/useFetch";
+import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { pick } from "../../../../common/utils/pick";
 import { filtersPropTypes } from "../../FiltersContext";
 
 const withRepartitionFormationParCfa = (Component) => {
-  const WithRepartitionFormationParCfa = ({ formationCfd, filters, ...props }) => {
-    const requestBody = omitNullishValues({
-      formation_cfd: formationCfd,
-      date: filters.date,
-      etablissement_num_region: filters.region?.code ?? null,
-      etablissement_num_departement: filters.departement?.code ?? null,
-    });
+  const WithRepartitionFormationParCfa = ({ filters, ...props }) => {
+    const queryParams = qs.stringify(
+      pick(mapFiltersToApiFormat(filters), [
+        "date",
+        "formation_cfd",
+        "etablissement_num_region",
+        "etablissement_num_departement",
+      ])
+    );
 
-    const [data, loading, error] = usePostFetch(`/api/dashboard/effectifs-par-cfa`, requestBody);
+    const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-cfa?${queryParams}`);
 
     return <Component {...props} repartitionEffectifsParCfa={data} loading={loading} error={error} />;
   };
 
   WithRepartitionFormationParCfa.propTypes = {
-    formationCfd: PropTypes.string.isRequired,
     filters: filtersPropTypes.state,
   };
 

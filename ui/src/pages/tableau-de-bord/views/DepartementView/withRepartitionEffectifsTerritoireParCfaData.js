@@ -1,18 +1,18 @@
+import qs from "query-string";
 import React from "react";
 
-import { usePostFetch } from "../../../../common/hooks/useFetch";
-import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
+import { useFetch } from "../../../../common/hooks/useFetch";
+import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { pick } from "../../../../common/utils/pick";
 import { filtersPropTypes } from "../../FiltersContext";
 
 const withRepartitionEffectifsTerritoireParCfa = (Component) => {
   const WithRepartitionEffectifsTerritoireParCfa = ({ filters, ...props }) => {
-    const requestBody = omitNullishValues({
-      date: filters.date,
-      etablissement_num_region: filters.region?.code ?? null,
-      etablissement_num_departement: filters.departement?.code ?? null,
-    });
+    const queryParams = qs.stringify(
+      pick(mapFiltersToApiFormat(filters), ["date", "etablissement_num_region", "etablissement_num_departement"])
+    );
 
-    const [data, loading, error] = usePostFetch(`/api/dashboard/effectifs-par-cfa`, requestBody);
+    const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-cfa?${queryParams}`);
 
     return <Component {...props} repartitionEffectifsParCfa={data} loading={loading} error={error} />;
   };

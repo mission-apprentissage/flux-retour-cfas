@@ -1,25 +1,15 @@
-import queryString from "query-string";
+import qs from "query-string";
 import React from "react";
 
 import { useFetch } from "../../../../common/hooks/useFetch";
-import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
+import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { pick } from "../../../../common/utils/pick";
 import { filtersPropTypes } from "../../FiltersContext";
-
-const buildSearchParams = (filters) => {
-  const date = filters.date.toISOString();
-
-  return queryString.stringify(
-    omitNullishValues({
-      date,
-      etablissement_num_region: filters.region.code,
-    })
-  );
-};
 
 const withRepartitionEffectifsRegionParNiveauFormation = (Component) => {
   const WithRepartitionEffectifsRegionParNiveauFormation = ({ filters, ...props }) => {
-    const searchParamsString = buildSearchParams(filters);
-    const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-niveau-formation?${searchParamsString}`);
+    const queryParams = qs.stringify(pick(mapFiltersToApiFormat(filters), ["date", "etablissement_num_region"]));
+    const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-niveau-formation?${queryParams}`);
 
     const repartitionEffectifs = data?.map((repartition) => {
       return { niveauFormation: repartition.niveau_formation, effectifs: repartition.effectifs };

@@ -101,18 +101,18 @@ module.exports = ({ stats, dashboard }) => {
   /**
    * Gets the effectifs data for input period & query
    */
-  router.post(
+  router.get(
     "/effectifs",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardEffectifInputSchema.validateAsync(req.body, {
+      await dashboardEffectifInputSchema.validateAsync(req.query, {
         abortEarly: false,
       });
 
       // Gets & format params:
       // eslint-disable-next-line no-unused-vars
-      const { date: dateFromBody, ...filtersFromBody } = req.body;
-      const date = new Date(dateFromBody);
+      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
@@ -153,8 +153,8 @@ module.exports = ({ stats, dashboard }) => {
         etablissement_num_departement: Joi.string().allow(null, ""),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const { date: dateFromBody, ...filtersFromBody } = req.query;
-      const date = new Date(dateFromBody);
+      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
@@ -182,8 +182,8 @@ module.exports = ({ stats, dashboard }) => {
         niveau_formation: Joi.string().allow(null, ""),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const { date: dateFromBody, ...filtersFromBody } = req.query;
-      const date = new Date(dateFromBody);
+      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
@@ -211,8 +211,8 @@ module.exports = ({ stats, dashboard }) => {
         etablissement_num_departement: Joi.string().allow(null, ""),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const { date: dateFromBody, ...filtersFromBody } = req.query;
-      const date = new Date(dateFromBody);
+      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
@@ -224,16 +224,16 @@ module.exports = ({ stats, dashboard }) => {
     })
   );
 
-  router.post(
+  router.get(
     "/effectifs-par-cfa",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardEffectifsByCfaBodySchema.validateAsync(req.body, {
+      await dashboardEffectifsByCfaBodySchema.validateAsync(req.query, {
         abortEarly: false,
       });
 
-      const { date: dateFromBody, ...filtersFromBody } = req.body;
-      const date = new Date(dateFromBody);
+      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
@@ -245,16 +245,16 @@ module.exports = ({ stats, dashboard }) => {
     })
   );
 
-  router.post(
+  router.get(
     "/effectifs-par-departement",
     tryCatch(async (req, res) => {
       await Joi.object({
         date: Joi.date().required(),
         etablissement_num_region: Joi.string().allow(null, ""),
-      }).validateAsync(req.body, { abortEarly: false });
+      }).validateAsync(req.query, { abortEarly: false });
 
-      const { date: dateFromBody, ...filtersFromBody } = req.body;
-      const date = new Date(dateFromBody);
+      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
@@ -265,15 +265,15 @@ module.exports = ({ stats, dashboard }) => {
     })
   );
 
-  router.post(
+  router.get(
     "/chiffres-cles",
     tryCatch(async (req, res) => {
       // Validate schema
-      await nouveauxContratsQueryBodySchema.validateAsync(req.body, {
+      await nouveauxContratsQueryBodySchema.validateAsync(req.query, {
         abortEarly: false,
       });
 
-      const { startDate, endDate, ...filters } = req.body;
+      const { startDate, endDate, ...filters } = req.query;
       const dateRange = [new Date(startDate), new Date(endDate)];
 
       const nouveauxContratsCountInDateRange = await dashboard.getNouveauxContratsCountInDateRange(dateRange, filters);
