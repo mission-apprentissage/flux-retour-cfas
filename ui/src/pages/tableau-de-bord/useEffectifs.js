@@ -1,5 +1,7 @@
-import { usePostFetch } from "../../common/hooks/useFetch";
-import { omitNullishValues } from "../../common/utils/omitNullishValues";
+import qs from "query-string";
+
+import { useFetch } from "../../common/hooks/useFetch";
+import { mapFiltersToApiFormat } from "../../common/utils/mapFiltersToApiFormat";
 import { useFiltersContext } from "./FiltersContext";
 
 const mapEffectifsData = (effectifsData) => {
@@ -19,26 +21,11 @@ const mapEffectifsData = (effectifsData) => {
   };
 };
 
-// map filters to the expected body shape in our API and filter out null values
-const buildSearchRequestBody = (filters) => {
-  const flattenedFilters = {
-    date: filters.date.toISOString(),
-    etablissement_num_region: filters.region?.code ?? null,
-    etablissement_num_departement: filters.departement?.code ?? null,
-    formation_cfd: filters.formation?.cfd ?? null,
-    uai_etablissement: filters.cfa?.uai_etablissement ?? null,
-    siret_etablissement: filters.sousEtablissement?.siret_etablissement ?? null,
-    etablissement_reseaux: filters.reseau?.nom ?? null,
-  };
-
-  return omitNullishValues(flattenedFilters);
-};
-
 const useEffectifs = () => {
   const filtersContext = useFiltersContext();
 
-  const searchRequestBody = buildSearchRequestBody(filtersContext.state);
-  const [data, loading, error] = usePostFetch("/api/dashboard/effectifs", searchRequestBody);
+  const queryParams = qs.stringify(mapFiltersToApiFormat(filtersContext.state));
+  const [data, loading, error] = useFetch(`/api/dashboard/effectifs?${queryParams}`);
 
   const effectifs = data && mapEffectifsData(data);
 

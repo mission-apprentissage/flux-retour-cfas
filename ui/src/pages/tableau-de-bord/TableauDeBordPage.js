@@ -1,27 +1,40 @@
 import React from "react";
 
-import { Alert, Page, Section } from "../../common/components";
-import { FiltersProvider } from "./FiltersContext";
-import IndicesHeader from "./IndicesHeader";
+import { FiltersProvider, useFiltersContext } from "./FiltersContext";
 import useEffectifs from "./useEffectifs";
-import View from "./View";
+import { CfaView, DepartementView, FormationView, RegionView, ReseauView } from "./views";
 
 const TableauDeBordPage = () => {
   const [effectifs, loading, error] = useEffectifs();
+  const { state: filters } = useFiltersContext();
 
-  return (
-    <Page>
-      <IndicesHeader />
-      <Section paddingY="2w">
-        <Alert>
-          La collecte des effectifs 2021-2022 est en cours ce qui peut expliquer pour certains organismes des
-          informations incomplètes. Les chiffres seront disponibles progressivement d’ici début septembre. Nous vous
-          remercions de votre compréhension.
-        </Alert>
-      </Section>
-      <View effectifs={effectifs} loading={loading} error={error} />
-    </Page>
-  );
+  if (filters.cfa) {
+    return (
+      <CfaView
+        cfaUai={filters.cfa.uai_etablissement}
+        filters={filters}
+        effectifs={effectifs}
+        loading={loading}
+        error={error}
+      />
+    );
+  }
+
+  if (filters.reseau) {
+    return <ReseauView effectifs={effectifs} loading={loading} filters={filters} reseau={filters.reseau.nom} />;
+  }
+
+  if (filters.formation) {
+    return (
+      <FormationView formationCfd={filters.formation.cfd} loading={loading} filters={filters} effectifs={effectifs} />
+    );
+  }
+
+  if (filters.region) {
+    return <RegionView effectifs={effectifs} loading={loading} filters={filters} />;
+  }
+
+  return <DepartementView filters={filters} effectifs={effectifs} loading={loading} error={error} />;
 };
 
 const TableauDeBordPageContainer = () => {
