@@ -1,22 +1,23 @@
-import { usePostFetch } from "../../../../common/hooks/useFetch";
-import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
+import qs from "query-string";
+
+import { useFetch } from "../../../../common/hooks/useFetch";
+import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { pick } from "../../../../common/utils/pick";
 import { useFiltersContext } from "../../FiltersContext";
-
-const buildSearchRequestBody = (params) => {
-  const flattenedFilters = {
-    startDate: params.startDate.toISOString(),
-    endDate: params.endDate.toISOString(),
-    etablissement_num_region: params.region?.code ?? null,
-    etablissement_num_departement: params.departement?.code ?? null,
-    formation_cfd: params.formation?.cfd ?? null,
-    uai_etablissement: params.cfa?.uai_etablissement ?? null,
-    etablissement_reseaux: params.reseau?.nom ?? null,
-  };
-
-  return omitNullishValues(flattenedFilters);
-};
 
 export const useFetchChiffresCles = ([startDate, endDate]) => {
   const { state: filters } = useFiltersContext();
-  return usePostFetch("/api/dashboard/chiffres-cles", buildSearchRequestBody({ ...filters, startDate, endDate }));
+  const queryParams = qs.stringify({
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+    ...pick(mapFiltersToApiFormat(filters), [
+      "formation_cfd",
+      "uai_etablissement",
+      "etablissement_num_region",
+      "etablissement_num_departement",
+      "etablissement_reseaux",
+    ]),
+  });
+
+  return useFetch(`/api/dashboard/chiffres-cles?${queryParams}`);
 };

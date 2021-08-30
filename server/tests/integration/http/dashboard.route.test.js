@@ -70,8 +70,8 @@ httpTests(__filename, ({ startServer }) => {
       };
 
       // Check good api call
-      const response = await httpClient.post("/api/dashboard/effectifs", {
-        date: "2020-10-10T00:00:00.000Z",
+      const response = await httpClient.get("/api/dashboard/effectifs", {
+        params: { date: "2020-10-10T00:00:00.000Z" },
       });
 
       assert.equal(response.status, 200);
@@ -126,9 +126,8 @@ httpTests(__filename, ({ startServer }) => {
       };
 
       // Check good api call
-      const response = await httpClient.post("/api/dashboard/effectifs", {
-        date: "2020-10-10T00:00:00.000Z",
-        ...filterQuery,
+      const response = await httpClient.get("/api/dashboard/effectifs", {
+        params: { date: "2020-10-10T00:00:00.000Z", ...filterQuery },
       });
 
       const indices = response.data;
@@ -137,9 +136,8 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
 
       // Check bad api call
-      const badResponse = await httpClient.post("/api/dashboard/effectifs", {
-        date: "2020-10-10T00:00:00.000Z",
-        etablissement_num_region: "99",
+      const badResponse = await httpClient.get("/api/dashboard/effectifs", {
+        params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_region: "99" },
       });
 
       assert.deepStrictEqual(badResponse.status, 200);

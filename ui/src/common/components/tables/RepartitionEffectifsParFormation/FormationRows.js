@@ -1,33 +1,28 @@
 import PropTypes from "prop-types";
-import queryString from "query-string";
+import qs from "query-string";
 import React from "react";
 
 import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
 import { useFetch } from "../../../hooks/useFetch";
-import { omitNullishValues } from "../../../utils/omitNullishValues";
+import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
+import { pick } from "../../../utils/pick";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import FormationRow from "./FormationRow";
 
-const buildSearchParams = (filters, niveauFormation) => {
-  const date = filters.date.toISOString();
-
-  return queryString.stringify(
-    omitNullishValues({
-      niveau_formation: niveauFormation,
-      date,
-      uai_etablissement: filters.cfa?.uai_etablissement ?? null,
-      siret_etablissement: filters.sousEtablissement?.siret_etablissement,
-      etablissement_reseaux: filters.reseau?.nom ?? null,
-      etablissement_num_region: filters.region?.code ?? null,
-      etablissement_num_departement: filters.departement?.code ?? null,
-    })
-  );
-};
-
 const FormationRows = ({ niveauFormation }) => {
   const { state: filters } = useFiltersContext();
-  const searchParamsString = buildSearchParams(filters, niveauFormation);
-  const [data, loading] = useFetch(`/api/dashboard/effectifs-par-formation?${searchParamsString}`);
+  const queryParams = qs.stringify({
+    niveau_formation: niveauFormation,
+    ...pick(mapFiltersToApiFormat(filters), [
+      "date",
+      "uai_etablissement",
+      "siret_etablissement",
+      "etablissement_reseaux",
+      "etablissement_num_region",
+      "etablissement_num_departement",
+    ]),
+  });
+  const [data, loading] = useFetch(`/api/dashboard/effectifs-par-formation?${queryParams}`);
 
   if (loading) {
     return <RowsSkeleton nbRows={3} nbColumns={5} />;
