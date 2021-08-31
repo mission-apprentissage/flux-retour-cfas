@@ -37,6 +37,8 @@ services:
     container_name: flux_retour_cfas_reverse_proxy
     build:
       context: reverse_proxy
+      args:
+        - KIBANA_BASIC_AUTH=${KIBANA_BASIC_AUTH}
     mem_limit: 256m
     restart: unless-stopped
     ports:
@@ -73,6 +75,7 @@ services:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
       - FLUX_RETOUR_CFAS_FTP_DIR=/ftp
       - FLUX_RETOUR_CFAS_OUTPUT_DIR=/data
+      - FLUX_RETOUR_CFAS_ELASTIC_SEARCH_URI=http://elasticsearch:9200
 
   mongodb:
     image: mongo:5.0.2-focal
