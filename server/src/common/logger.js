@@ -2,9 +2,8 @@ const util = require("util");
 const bunyan = require("bunyan");
 const PrettyStream = require("bunyan-prettystream");
 const BunyanSlack = require("bunyan-slack");
-const BunyanMongodbStream = require("bunyan-mongodb-stream");
+const BunyanElasticSearchStream = require("bunyan-elasticsearch-bulk");
 const config = require("../../config");
-const { Log } = require("./model");
 
 const createStreams = () => {
   const { type, level } = config.log;
@@ -28,11 +27,17 @@ const createStreams = () => {
     };
   };
 
-  const mongoDBStream = () => {
+  const elasticStream = () => {
     return {
-      name: "mongodb",
+      name: "elastic-search",
       level,
-      stream: BunyanMongodbStream({ model: Log }),
+      stream: BunyanElasticSearchStream({
+        // see https://github.com/Milad/bunyan-elasticsearch-bulk#parameters-specific-to-this-module
+        indexPattern: "[tdb-apprentissage-logs-]YYYY.MM.DD",
+        node: config.elasticSearch.uri,
+        limit: 10, // send logs by bulks of 10
+        interval: 3000, // send logs every 3 seconds
+      }),
     };
   };
 
@@ -65,7 +70,11 @@ const createStreams = () => {
     };
   };
 
-  const streams = [type === "console" ? consoleStream() : jsonStream(), mongoDBStream()];
+  const streams = type === "console" ? [consoleStream()] : [jsonStream()];
+
+  if (config.elasticSearch.uri) {
+    streams.push(elasticStream());
+  }
   if (config.slackWebhookUrl) {
     streams.push(slackStream());
   }

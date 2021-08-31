@@ -43,7 +43,7 @@ services:
       - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=456
       - FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET=789
       # users
-      ## ymag
+        ## ymag
       - FLUX_RETOUR_CFAS_USERS_YMAG_NAME=ymag
       - FLUX_RETOUR_CFAS_USERS_YMAG_PASSWORD=mdpYmag
       - FLUX_RETOUR_CFAS_USERS_YMAG_PERMISSIONS=apiStatutsSeeder
@@ -100,3 +100,6 @@ volumes:
   flux_retour_cfas_ftp_data:
     driver: local
     name: flux_retour_cfas_ftp_data
+  flux_retour_cfas_elastic_search_data:
+    driver: local
+    name: flux_retour_cfas_elastic_search_data
