@@ -136,7 +136,6 @@ httpTests(__filename, ({ startServer }) => {
     // check response
     assert.equal(response.status, 400);
     assert.equal(response.data.status, "ERROR");
-    console.log(response.data.message);
     assert.equal(
       response.data.message.includes('annee_scolaire" with value "2021,2022" fails to match the required pattern'),
       true

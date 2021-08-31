@@ -72,10 +72,10 @@ const createStreams = () => {
 
   const streams = type === "console" ? [consoleStream()] : [jsonStream()];
 
-  if (config.elasticSearch.uri) {
+  if (config.log.streams.includes("elastic-search") && config.elasticSearch.uri) {
     streams.push(elasticStream());
   }
-  if (config.slackWebhookUrl) {
+  if (config.log.streams.includes("slack") && config.slackWebhookUrl) {
     streams.push(slackStream());
   }
   return streams;

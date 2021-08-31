@@ -36,6 +36,7 @@ services:
       - FLUX_RETOUR_CFAS_APP_NAME=Flux Retour Cfas
       # logs
       - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
+      - FLUX_RETOUR_CFAS_LOG_STREAMS=elastic-search
       - FLUX_RETOUR_CFAS_OUTPUT_DIR=.local/output
       - FLUX_RETOUR_CFAS_PUBLIC_URL=http://localhost
       # auth
