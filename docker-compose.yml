@@ -21,6 +21,7 @@ services:
     container_name: flux_retour_cfas_kibana
     depends_on:
       - elasticsearch
+    mem_limit: 256m
     environment:
       - SERVER_BASEPATH=/kibana
       - ELASTICSEARCH_URL=http://elasticsearch:9200
@@ -54,7 +55,6 @@ services:
     container_name: flux_retour_cfas_ui
     build:
       context: ui
-    mem_limit: 256m
     networks:
       - flux_retour_cfas_network
     depends_on:
