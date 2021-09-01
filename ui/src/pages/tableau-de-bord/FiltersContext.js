@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import qs from "query-string";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 
 import { DEFAULT_REGION } from "../../common/constants/defaultRegion";
@@ -50,7 +50,7 @@ const stateToQueryString = (state) => {
   );
 };
 
-const queryStringToState = (queryString) => {
+const parseQueryString = (queryString) => {
   const parsed = qs.parse(queryString);
   return {
     departement: parsed.departement ? JSON.parse(parsed.departement) : null,
@@ -63,32 +63,38 @@ const queryStringToState = (queryString) => {
   };
 };
 
-const defaultState = {
-  date: new Date(),
-  departement: null,
-  region: DEFAULT_REGION,
-  formation: null,
-  cfa: null,
-  reseau: null,
-  sousEtablissement: null,
+const getDefaultState = () => {
+  return {
+    date: new Date(),
+    departement: null,
+    region: DEFAULT_REGION,
+    formation: null,
+    cfa: null,
+    reseau: null,
+    sousEtablissement: null,
+  };
+};
+
+const isStateValid = (state) => {
+  return Boolean(state.date?.getTime());
 };
 
 export const FiltersProvider = ({ children }) => {
   const history = useHistory();
   const currentQueryString = history.location.search.slice(1);
-  const [firstRender, setFirstRender] = useState(true);
 
   const updateQueryStringWithState = (state) => {
     const queryString = stateToQueryString(state);
     history.push({ search: queryString });
   };
 
-  // at first render we will set default state in query string if there is nothing in URL
-  const state = firstRender && !currentQueryString ? defaultState : queryStringToState(currentQueryString);
+  // make sure a valid state is always set, otherwise set it to default
+  const parsedStateFromQueryString = parseQueryString(currentQueryString);
+  const parsedStateIsValid = isStateValid(parsedStateFromQueryString);
+  const state = parsedStateIsValid ? parsedStateFromQueryString : getDefaultState();
   useEffect(() => {
-    if (!currentQueryString) updateQueryStringWithState(defaultState);
-    setFirstRender(false);
-  }, []);
+    if (!parsedStateIsValid) updateQueryStringWithState(getDefaultState());
+  }, [currentQueryString]);
 
   const setters = {
     setDate: (value) => updateQueryStringWithState(setDate(state, value)),
