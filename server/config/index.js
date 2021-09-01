@@ -7,6 +7,9 @@ module.exports = {
   mongodb: {
     uri: env.get("FLUX_RETOUR_CFAS_MONGODB_URI").required().asString(),
   },
+  elasticSearch: {
+    uri: env.get("FLUX_RETOUR_CFAS_ELASTIC_SEARCH_URI").asString(),
+  },
   ftpDir: env.get("FLUX_RETOUR_CFAS_FTP_DIR").required().asString(),
   auth: {
     passwordHashRounds: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS").asInt(),
@@ -26,6 +29,7 @@ module.exports = {
   log: {
     type: env.get("FLUX_RETOUR_CFAS_LOG_TYPE").default("console").asString(),
     level: env.get("FLUX_RETOUR_CFAS_LOG_LEVEL").default("info").asString(),
+    streams: env.get("FLUX_RETOUR_CFAS_LOG_STREAMS").default([]).asArray(),
   },
   slackWebhookUrl: env.get("FLUX_RETOUR_CFAS_SLACK_WEBHOOK_URL").asString(),
   outputDir: env.get("FLUX_RETOUR_CFAS_OUTPUT_DIR").required().asString(),
