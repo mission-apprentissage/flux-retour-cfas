@@ -52,6 +52,7 @@ const seedCroisementCfasDeca = async (dashboard) => {
         });
         await new CroisementCfasDeca({
           uai: currentDecaData.uai,
+          deca_siret: currentDecaData.siret,
           deca_nom_etablissement: currentDecaData.nom,
           tdb_nom_etablissement: cfaInTdb.nom,
           nb_contrats_deca_2021: currentDecaData.nb_contrats_2021,
@@ -60,6 +61,7 @@ const seedCroisementCfasDeca = async (dashboard) => {
       } else {
         await new CroisementCfasDeca({
           uai: currentDecaData.uai,
+          deca_siret: currentDecaData.siret,
           deca_nom_etablissement: currentDecaData.nom,
           nb_contrats_deca_2021: currentDecaData.nb_contrats_2021,
           uai_missing_in_tdb: true,
