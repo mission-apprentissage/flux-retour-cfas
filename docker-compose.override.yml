@@ -39,6 +39,8 @@ services:
       - FLUX_RETOUR_CFAS_LOG_STREAMS=elastic-search
       - FLUX_RETOUR_CFAS_OUTPUT_DIR=.local/output
       - FLUX_RETOUR_CFAS_PUBLIC_URL=http://localhost
+      # feature flags
+      - FLUX_RETOUR_CFAS_LIMIT_REGIONS_DEPLOYED=true
       # auth
       - FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET=1234
       - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=456

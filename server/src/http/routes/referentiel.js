@@ -1,6 +1,8 @@
+const axios = require("axios");
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { reseauxCfas, REGIONS_OUVERTES } = require("../../common/model/constants");
+const config = require("../../../config");
+const { reseauxCfas, REGIONS_DEPLOYEES } = require("../../common/model/constants");
 
 module.exports = () => {
   const router = express.Router();
@@ -16,9 +18,9 @@ module.exports = () => {
   router.get(
     "/regions",
     tryCatch(async (req, res) => {
-      const regions = Object.values(REGIONS_OUVERTES).map((region) => {
-        return { code: region.codeRegion, nom: region.nomRegion };
-      });
+      const { data } = await axios.get("https://geo.api.gouv.fr/regions");
+
+      const regions = config.featureFlags.limitDeployedRegions === true ? REGIONS_DEPLOYEES : data;
       return res.json(regions);
     })
   );

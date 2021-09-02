@@ -85,30 +85,30 @@ const reseauxCfas = {
 };
 
 /**
- * Liste des régions pour lesquelles on ouvre le produit
+ * Liste des régions déployées
  */
-const REGIONS_OUVERTES = {
-  NORMANDIE: {
-    nomRegion: "Normandie",
-    codeRegion: "28",
+const REGIONS_DEPLOYEES = [
+  {
+    nom: "Normandie",
+    code: "28",
   },
-  CENTRE_VAL_DE_LOIRE: {
-    nomRegion: "Centre-Val de Loire",
-    codeRegion: "24",
+  {
+    nom: "Centre-Val de Loire",
+    code: "24",
   },
-  AUVERGNE_RHONE_ALPES: {
-    nomRegion: "Auvergne-Rhône-Alpes",
-    codeRegion: "84",
+  {
+    nom: "Auvergne-Rhône-Alpes",
+    code: "84",
   },
-  BRETAGNE: {
-    nomRegion: "Bretagne",
-    codeRegion: "53",
+  {
+    nom: "Bretagne",
+    code: "53",
   },
-  PAYS_DE_LA_LOIRE: {
-    nomRegion: "Pays de la Loire",
-    codeRegion: "52",
+  {
+    nom: "Pays de la Loire",
+    code: "52",
   },
-};
+];
 
 /**
  * Noms des ERPs
@@ -236,7 +236,7 @@ module.exports = {
   codesMajStatutsInterdits,
   codesStatutsMajStatutCandidats,
   reseauxCfas,
-  REGIONS_OUVERTES,
+  REGIONS_DEPLOYEES,
   jobNames,
   erps,
   duplicatesTypesCodes,
