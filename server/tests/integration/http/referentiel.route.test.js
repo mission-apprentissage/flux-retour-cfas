@@ -1,6 +1,6 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
-const { reseauxCfas, REGIONS_OUVERTES } = require("../../../src/common/model/constants");
+const { reseauxCfas, REGIONS_DEPLOYEES } = require("../../../src/common/model/constants");
 
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie qu'on peut récupérer les réseaux référentiels via API", async () => {
@@ -19,8 +19,8 @@ httpTests(__filename, ({ startServer }) => {
     const response = await httpClient.get("/api/referentiel/regions");
 
     assert.deepStrictEqual(response.status, 200);
-    assert.deepEqual(response.data.length, Object.values(REGIONS_OUVERTES).length);
-    assert.deepEqual(response.data[0].code, REGIONS_OUVERTES.NORMANDIE.codeRegion);
-    assert.deepEqual(response.data[0].nom, REGIONS_OUVERTES.NORMANDIE.nomRegion);
+    assert.deepEqual(response.data.length, Object.values(REGIONS_DEPLOYEES).length);
+    assert.deepEqual(response.data[0].code, REGIONS_DEPLOYEES[0].code);
+    assert.deepEqual(response.data[0].nom, REGIONS_DEPLOYEES[0].nom);
   });
 });
