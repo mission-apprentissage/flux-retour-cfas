@@ -23,9 +23,6 @@ const PeriodeFilter = ({ value, onChange }) => {
     onChange(date);
   };
 
-  // latest month user can select is the current one. We need to pass the last day of current month to reat-datepicker to do so
-  const maxDate = endOfMonth(new Date());
-
   return (
     <div>
       <DatePicker
@@ -35,7 +32,6 @@ const PeriodeFilter = ({ value, onChange }) => {
         showFullMonthYearPicker
         showFourColumnMonthYearPicker
         locale="fr"
-        maxDate={maxDate}
         onCalendarClose={() => setIsOpen(false)}
         onCalendarOpen={() => setIsOpen(true)}
         customInput={
