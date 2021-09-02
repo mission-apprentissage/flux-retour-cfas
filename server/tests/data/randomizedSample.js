@@ -1,6 +1,7 @@
 const faker = require("faker/locale/fr");
 const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
+const { subYears, subMonths, addYears } = require("date-fns");
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -14,9 +15,7 @@ const getRandomPeriodeFormation = (anneeScolaire) => {
   const endYear = startYear + faker.random.arrayElement([1, 2]);
   return [startYear, endYear];
 };
-
 const getRandomAnneeFormation = () => faker.random.arrayElement([0, 1, 2, 3]);
-
 const getRandomAnneeScolaire = () => {
   const currentYear = new Date().getFullYear();
   const anneeScolaire = faker.random.arrayElement([
@@ -26,6 +25,11 @@ const getRandomAnneeScolaire = () => {
   ]);
   return anneeScolaire.join("-");
 };
+const getRandomDateDebutContrat = () => faker.date.between(subMonths(new Date(), 6), subMonths(new Date(), 1));
+const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1), addYears(new Date(), 2));
+const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
+const getRandomCoordonnates = () => `${faker.address.latitude()},${faker.address.longitude()}`;
+const getRandomDateNaissance = () => faker.date.between(subYears(new Date(), 18), subYears(new Date(), 25));
 
 const createRandomStatutCandidat = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
@@ -52,6 +56,15 @@ const createRandomStatutCandidat = (params = {}) => {
     periode_formation: isPresent() ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
+    id_erp_apprenant: faker.datatype.boolean() ? faker.datatype.uuid() : null,
+    tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
+    date_de_naissance_apprenant: faker.datatype.boolean() ? getRandomDateNaissance() : null,
+    etablissement_formateur_geo_coordonnees: faker.datatype.boolean() ? getRandomCoordonnates() : null,
+    etablissement_formateur_code_postal: faker.datatype.boolean() ? faker.address.zipCode() : null,
+    contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
+    contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
+    contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
+
     ...params,
   };
 };
@@ -82,6 +95,15 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
     annee_formation: getRandomAnneeFormation(),
     periode_formation: isPresent() ? periode_formation.join("-") : "",
     annee_scolaire,
+    id_erp_apprenant: faker.datatype.boolean() ? faker.datatype.uuid() : null,
+    tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
+    date_de_naissance_apprenant: faker.datatype.boolean() ? getRandomDateNaissance() : null,
+    etablissement_formateur_geo_coordonnees: faker.datatype.boolean() ? getRandomCoordonnates() : null,
+    etablissement_formateur_code_postal: faker.datatype.boolean() ? faker.address.zipCode() : null,
+    contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
+    contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
+    contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
+
     ...params,
   };
 };

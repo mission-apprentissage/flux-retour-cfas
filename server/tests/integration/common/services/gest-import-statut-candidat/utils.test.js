@@ -4,6 +4,7 @@ const {
   adaptGestiStatutCandidat,
   validateInput,
 } = require("../../../../../src/common/services/gesti-import-statuts-candidats/utils.js");
+const omit = require("lodash.omit");
 
 describe("gesti-import-statut-candidat utils", () => {
   describe("adaptGestiStatutCandidat", () => {
@@ -27,6 +28,14 @@ describe("gesti-import-statut-candidat utils", () => {
         periode_formation: "2020-2021",
         annee_formation: "1",
         annee_scolaire: "2021-2022",
+        id_erp_apprenant: "5465465-654654654-4654654654",
+        tel_apprenant: "0618181818",
+        date_de_naissance_apprenant: "2004-12-30",
+        etablissement_formateur_geo_coordonnees: "48.705434,6.128537",
+        etablissement_formateur_code_postal: "75015",
+        contrat_date_debut: "2020-12-30T00:00:00.000Z",
+        contrat_date_fin: "2022-12-30T00:00:00.000Z",
+        contrat_date_rupture: "2021-03-30T00:00:00.000Z",
       };
 
       const expectedOutput = {
@@ -49,6 +58,14 @@ describe("gesti-import-statut-candidat utils", () => {
         periode_formation: [2020, 2021],
         annee_formation: 1,
         annee_scolaire: "2021-2022",
+        id_erp_apprenant: "5465465-654654654-4654654654",
+        tel_apprenant: "0618181818",
+        date_de_naissance_apprenant: "2004-12-30",
+        etablissement_formateur_geo_coordonnees: "48.705434,6.128537",
+        etablissement_formateur_code_postal: "75015",
+        contrat_date_debut: "2020-12-30T00:00:00.000Z",
+        contrat_date_fin: "2022-12-30T00:00:00.000Z",
+        contrat_date_rupture: "2021-03-30T00:00:00.000Z",
       };
       assert.deepEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
     });
@@ -94,7 +111,20 @@ describe("gesti-import-statut-candidat utils", () => {
         annee_formation: null,
         annee_scolaire: "2022-2023",
       };
-      assert.deepEqual(adaptGestiStatutCandidat(gestiInput), expectedOutput);
+
+      assert.deepEqual(
+        omit(adaptGestiStatutCandidat(gestiInput), [
+          "id_erp_apprenant",
+          "tel_apprenant",
+          "date_de_naissance_apprenant",
+          "etablissement_formateur_geo_coordonnees",
+          "etablissement_formateur_code_postal",
+          "contrat_date_debut",
+          "contrat_date_fin",
+          "contrat_date_rupture",
+        ]),
+        expectedOutput
+      );
     });
   });
 

@@ -35,6 +35,14 @@ const adaptGestiStatutCandidat = (gestiStatutCandidat) => {
     annee_formation: gestiStatutCandidat.annee_formation ? Number(gestiStatutCandidat.annee_formation) : null,
     siret_etablissement: gestiStatutCandidat.siret_etablissement.replace(/(\s|\.)/g, ""),
     annee_scolaire: gestiStatutCandidat.annee_scolaire,
+    id_erp_apprenant: gestiStatutCandidat.id_erp_apprenant ?? null,
+    tel_apprenant: gestiStatutCandidat.tel_apprenant ?? null,
+    date_de_naissance_apprenant: gestiStatutCandidat.date_de_naissance_apprenant ?? null,
+    etablissement_formateur_geo_coordonnees: gestiStatutCandidat.etablissement_formateur_geo_coordonnees ?? null,
+    etablissement_formateur_code_postal: gestiStatutCandidat.etablissement_formateur_code_postal ?? null,
+    contrat_date_debut: gestiStatutCandidat.contrat_date_debut ?? null,
+    contrat_date_fin: gestiStatutCandidat.contrat_date_fin ?? null,
+    contrat_date_rupture: gestiStatutCandidat.contrat_date_rupture ?? null,
   };
 };
 
@@ -61,6 +69,14 @@ const tempSchema = Joi.object({
   source: Joi.string().allow(null, ""),
   periode_formation: Joi.array().items(Joi.number()).allow(null),
   annee_formation: Joi.number().allow(null),
+  id_erp_apprenant: Joi.string().allow(null),
+  tel_apprenant: Joi.string().allow(null),
+  date_de_naissance_apprenant: Joi.date().allow(null),
+  etablissement_formateur_geo_coordonnees: Joi.string().allow(null),
+  etablissement_formateur_code_postal: Joi.string().allow(null),
+  contrat_date_debut: Joi.date().allow(null),
+  contrat_date_fin: Joi.date().allow(null),
+  contrat_date_rupture: Joi.date().allow(null),
 
   // TODO remove when ERPs stop sending us this information
   nom_representant_legal: Joi.string().allow(null, ""),
