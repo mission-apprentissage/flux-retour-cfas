@@ -22,6 +22,19 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+
+
+  <% if (process.env.REACT_APP_FLUX_RETOUR_CFAS_ENV==='production' ) { %>
+    <!-- Plausible -->
+    <script defer data-domain="cfas.apprentissage.beta.gouv.fr/tableau-de-bord"
+      src="https://plausible.io/js/plausible.js"></script>
+
+    <!-- CRISP -->
+    <% if (process.env.REACT_APP_FLUX_RETOUR_CFAS_CRISP_WEBSITE_ID) { %>
+      <script
+        type="text/javascript">window.$crisp = []; window.CRISP_WEBSITE_ID = "49ab4e5b-e14f-4b9b-8803-63e116677ab0"; (function () { d = document; s = d.createElement("script"); s.src = "https://client.crisp.chat/l.js"; s.async = 1; d.getElementsByTagName("head")[0].appendChild(s); })();</script>
+      <% } %>
+        <% } %>
 </head>
 
 <body>

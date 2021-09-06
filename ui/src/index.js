@@ -6,14 +6,12 @@ import * as React from "react";
 import ReactDOM from "react-dom";
 
 import App from "./App";
-import Head from "./common/components/Page/Head";
 import * as serviceWorker from "./serviceWorker";
 import theme from "./theme/theme";
 
 ReactDOM.render(
   <React.StrictMode>
     <ChakraProvider theme={theme} resetCSS>
-      <Head />
       <App />
     </ChakraProvider>
   </React.StrictMode>,
