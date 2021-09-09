@@ -144,6 +144,7 @@ const jobNames = {
   seedRandomizedSample: "seed-randomized-sample",
   identifyUaisInCatalog: "identify-uais-types-catalog",
   identifyNetworkCma: "identify-network-cma",
+  identifyUaisSiretsCouples: "identify-uais-sirets-couples",
   identifyUaisSiretsDuplicates: "identify-uais-sirets-duplicates",
   identifyNetworkDuplicates: "identify-network-duplicates",
   identifyStatutsCandidatsDuplicates: "identify-statutsCandidats-duplicates",
