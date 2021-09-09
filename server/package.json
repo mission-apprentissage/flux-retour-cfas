@@ -91,6 +91,7 @@
     "lodash.indexby": "3.1.1",
     "lodash.omit": "4.5.0",
     "lodash.omitby": "4.6.0",
+    "lodash.pick": "4.4.0",
     "lodash.sortby": "4.7.0",
     "migrate-mongo": "8.2.3",
     "mongoose": "5.13.6",

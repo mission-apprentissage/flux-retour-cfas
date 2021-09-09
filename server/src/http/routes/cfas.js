@@ -2,6 +2,7 @@ const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { Cfa, StatutCandidat } = require("../../common/model");
+const pick = require("lodash.pick");
 
 module.exports = ({ cfas, cfaDataFeedback }) => {
   const router = express.Router();
@@ -46,9 +47,12 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
 
       const jsonQuery = JSON.parse(query);
       const allData = await Cfa.paginate(jsonQuery, { page, limit });
+      const omittedData = allData.docs.map((item) =>
+        pick(item._doc, ["uai", "sirets", "nom", "reseaux", "region_nom", "region_num", "metiers"])
+      );
 
       return res.json({
-        cfas: allData.docs,
+        cfas: omittedData,
         pagination: {
           page: allData.page,
           resultats_par_page: limit,
