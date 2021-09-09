@@ -9,7 +9,7 @@ const { CroisementCfasDeca, Cfa } = require("../../common/model");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-const decaFilePath = path.join(__dirname, `./assets/donnees_deca_2021.csv`);
+const decaFilePath = path.join(__dirname, `./assets/donnees_deca_2021_sommeUais.csv`);
 
 /**
  * Script qui initialise la collection CFAs de l'annuaire
@@ -29,7 +29,7 @@ const seedCroisementCfasDeca = async (dashboard) => {
   await CroisementCfasDeca.deleteMany({});
 
   // Gets the referentiel file
-  await downloadIfNeeded(`deca/donnees_deca_2021.csv`, decaFilePath);
+  await downloadIfNeeded(`deca/donnees_deca_2021_sommeUais.csv`, decaFilePath);
 
   const decaData = readJsonFromCsvFile(decaFilePath, "utf8");
   if (!decaData) {
@@ -52,8 +52,8 @@ const seedCroisementCfasDeca = async (dashboard) => {
         });
         await new CroisementCfasDeca({
           uai: currentDecaData.uai,
-          deca_siret: currentDecaData.siret,
-          deca_nom_etablissement: currentDecaData.nom,
+          deca_sirets: currentDecaData.sirets?.split(";"),
+          deca_noms_etablissement: currentDecaData.noms?.split(";"),
           tdb_nom_etablissement: cfaInTdb.nom,
           nb_contrats_deca_2021: currentDecaData.nb_contrats_2021,
           nb_contrats_tdb_2021: nbContratsForUai,
@@ -61,8 +61,8 @@ const seedCroisementCfasDeca = async (dashboard) => {
       } else {
         await new CroisementCfasDeca({
           uai: currentDecaData.uai,
-          deca_siret: currentDecaData.siret,
-          deca_nom_etablissement: currentDecaData.nom,
+          deca_sirets: currentDecaData.sirets?.split(";"),
+          deca_noms_etablissement: currentDecaData.noms?.split(";"),
           nb_contrats_deca_2021: currentDecaData.nb_contrats_2021,
           uai_missing_in_tdb: true,
         }).save();

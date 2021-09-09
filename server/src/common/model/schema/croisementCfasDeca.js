@@ -6,15 +6,15 @@ const croisementCfasDecaSchema = new Schema({
     default: null,
     description: "UAI de l'établissement",
   },
-  deca_siret: {
-    type: String,
+  deca_sirets: {
+    type: [String],
     default: null,
-    description: "Siret de l'établissement dans le fichier DECA",
+    description: "Liste des sirets de l'établissement dans le fichier DECA",
   },
-  deca_nom_etablissement: {
-    type: String,
+  deca_noms_etablissement: {
+    type: [String],
     default: null,
-    description: "Nom de l'établissement dans le fichier DECA",
+    description: "Liste des noms de l'établissement dans le fichier DECA",
   },
   tdb_nom_etablissement: {
     type: String,
