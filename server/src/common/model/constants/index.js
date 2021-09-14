@@ -108,6 +108,10 @@ const REGIONS_OUVERTES = {
     nomRegion: "Pays de la Loire",
     codeRegion: "52",
   },
+  ILE_DE_FRANCE: {
+    nomRegion: "Île-de-France",
+    codeRegion: "11",
+  },
 };
 
 /**
