@@ -108,7 +108,11 @@ const REGIONS_DEPLOYEES = [
     nom: "Pays de la Loire",
     code: "52",
   },
-];
+  ILE_DE_FRANCE: {
+    nomRegion: "Île-de-France",
+    codeRegion: "11",
+  },
+};
 
 /**
  * Noms des ERPs
