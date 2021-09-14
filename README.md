@@ -91,7 +91,6 @@ Pour fonctionner ce projet a besoin des éléments dockérisés suivants :
 - Un réseau _défini dans `flux_retour_cfas_network` du docker-compose_.
 - Une base de donnée mongoDb _défini dans le service `mongodb` du docker-compose_.
 - Une interface Web en React, _définie dans le service `ui` du docker-compose_.
-- Un serveur FTP (VSFTPD) , _défini dans le service `ftp` du docker-compose_.
 
 ### Serveur Nodes & Nginx - Reverse Proxy
 
@@ -110,10 +109,6 @@ Le base de données est une MongoDb et utilise le port par défaut 27017.
 L'interface web est une application React crée à partir du cli `create-react-app` (cf: https://create-react-app.dev/)
 
 L'application implémente le design system de l'État Français https://gouvfr.atlassian.net/wiki/spaces/DB/overview?homepageId=145359476 grâce à un theme propagé par ChakraUI (https://chakra-ui.com/docs/theming/customize-theme).
-
-### Server FTP
-
-Le serveur FTP est monté via une image de VSFTPD (cf https://wiki.debian.org/fr/vsftpd)
 
 ### Démarrage de la stack
 
@@ -272,8 +267,6 @@ Le workflow principal est définie dans `/.github/workflows/yarn-ci.yml` et se c
 ## Jobs & Procédure de déploiement de l'application
 
 Pour executer un job, que ce soit en local ou sur un des environnement (production / recette) il est recommandé d'executer les commandes **dans le conteneur docker `flux_retour_cfas_server`.**
-
-**Attention, pour la création des users ayant un accès ftp il est nécéssaire de créer les users depuis le conteneur docker `flux_retour_cfas_server`, car il est nécessaire à VSFTPD d'écrire dans le fichier de configuration vsftp_pam pour la création des utilisateurs.**
 
 ### Jobs de suppression des données
 

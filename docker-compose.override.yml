@@ -26,7 +26,6 @@ services:
       - ./server/src:/app/src # Allows source folders to be watched
       - ./server/config:/app/config
       - ./server/.env:/app/.env
-      - flux_retour_cfas_ftp_data:/ftp
       - flux_retour_cfas_server_data:/data
     build:
       args:
@@ -53,7 +52,7 @@ services:
         ## gesti
       - FLUX_RETOUR_CFAS_USERS_GESTI_NAME=gesti
       - FLUX_RETOUR_CFAS_USERS_GESTI_PASSWORD=mdpGesti
-      - FLUX_RETOUR_CFAS_USERS_GESTI_PERMISSIONS=apiStatutsSeeder,ftpAccess
+      - FLUX_RETOUR_CFAS_USERS_GESTI_PERMISSIONS=apiStatutsSeeder
         ## sc form
       - FLUX_RETOUR_CFAS_USERS_SCFORM_NAME=scform
       - FLUX_RETOUR_CFAS_USERS_SCFORM_PASSWORD=mdpScform
@@ -65,7 +64,7 @@ services:
         ## admin
       - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME=mna-admin
       - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD=password
-      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS=administrator,ftpAccess
+      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS=administrator
       # Tables Correspondance
       - FLUX_RETOUR_CFAS_TABLES_CORRESPONDANCES_ENDPOINT_URL=https://tables-correspondances.apprentissage.beta.gouv.fr/api
       # Mna Catalog
@@ -86,10 +85,6 @@ services:
     volumes:
       - flux_retour_cfas_mongodb_data:/data
 
-  ftp:
-    volumes:
-      - flux_retour_cfas_ftp_data:/data
-
 volumes:
   flux_retour_cfas_mongodb_data:
     driver: local
@@ -100,9 +95,6 @@ volumes:
   flux_retour_cfas_server_data:
     driver: local
     name: flux_retour_cfas_server_data
-  flux_retour_cfas_ftp_data:
-    driver: local
-    name: flux_retour_cfas_ftp_data
   flux_retour_cfas_elastic_search_data:
     driver: local
     name: flux_retour_cfas_elastic_search_data
