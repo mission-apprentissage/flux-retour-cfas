@@ -112,7 +112,7 @@ const REGIONS_DEPLOYEES = [
     nom: "Île-de-France",
     code: "11",
   },
-};
+];
 
 /**
  * Noms des ERPs
