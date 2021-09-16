@@ -59,12 +59,18 @@ const EffectifsSection = ({ effectifs, loading }) => {
         </Heading>
         <PeriodeFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
         <Tooltip
-          label="La sélection du mois permet d'afficher les effectifs au dernier jour du mois. Le changement de prise en compte de l'année scolaire se fait au 1er août."
-          aria-label="A tooltip"
           bg="#F9F8F6"
-          color="black"
+          label={
+            <Text>
+              La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois. <br />
+              Vous pouvez consulter les effectifs d&apos;apprentis et d&apos;inscrits dans les mois à venir.
+              <br /> A noter : l&apos;année scolaire court du 1er août au 31 juillet
+            </Text>
+          }
+          aria-label="A tooltip"
+          background="bluefrance"
+          color="white"
           p={5}
-          textAlign="center"
         >
           <Text as="span">
             <Info h="20px" w="20px" />
@@ -79,7 +85,6 @@ const EffectifsSection = ({ effectifs, loading }) => {
           remercions de votre compréhension.
         </Alert>
       </Section>
-
       {content}
     </Section>
   );
