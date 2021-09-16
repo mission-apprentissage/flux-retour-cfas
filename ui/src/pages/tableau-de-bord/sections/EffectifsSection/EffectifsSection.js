@@ -1,8 +1,9 @@
-import { Heading, HStack, Skeleton } from "@chakra-ui/react";
+import { Heading, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { Alert, EffectifCard, Section } from "../../../../common/components";
+import { Info } from "../../../../theme/components/icons";
 import { useFiltersContext } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import PeriodeFilter from "./PeriodeFilter";
@@ -57,7 +58,26 @@ const EffectifsSection = ({ effectifs, loading }) => {
           Effectifs
         </Heading>
         <PeriodeFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
+        <Tooltip
+          bg="#F9F8F6"
+          label={
+            <Text>
+              La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois. <br />
+              Vous pouvez consulter les effectifs d&apos;apprentis et d&apos;inscrits dans les mois à venir.
+              <br /> A noter : l&apos;année scolaire court du 1er août au 31 juillet
+            </Text>
+          }
+          aria-label="A tooltip"
+          background="bluefrance"
+          color="white"
+          p={5}
+        >
+          <Text as="span">
+            <Info h="20px" w="20px" />
+          </Text>
+        </Tooltip>
       </HStack>
+
       <Section paddingX="-5w" marginBottom="4w">
         <Alert>
           La collecte des effectifs 2021-2022 est en cours ce qui peut expliquer pour certains organismes des
@@ -65,7 +85,6 @@ const EffectifsSection = ({ effectifs, loading }) => {
           remercions de votre compréhension.
         </Alert>
       </Section>
-
       {content}
     </Section>
   );

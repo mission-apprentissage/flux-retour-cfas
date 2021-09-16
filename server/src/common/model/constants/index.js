@@ -85,34 +85,34 @@ const reseauxCfas = {
 };
 
 /**
- * Liste des régions pour lesquelles on ouvre le produit
+ * Liste des régions déployées
  */
-const REGIONS_OUVERTES = {
-  NORMANDIE: {
-    nomRegion: "Normandie",
-    codeRegion: "28",
+const REGIONS_DEPLOYEES = [
+  {
+    nom: "Normandie",
+    code: "28",
   },
-  CENTRE_VAL_DE_LOIRE: {
-    nomRegion: "Centre-Val de Loire",
-    codeRegion: "24",
+  {
+    nom: "Centre-Val de Loire",
+    code: "24",
   },
-  AUVERGNE_RHONE_ALPES: {
-    nomRegion: "Auvergne-Rhône-Alpes",
-    codeRegion: "84",
+  {
+    nom: "Auvergne-Rhône-Alpes",
+    code: "84",
   },
-  BRETAGNE: {
-    nomRegion: "Bretagne",
-    codeRegion: "53",
+  {
+    nom: "Bretagne",
+    code: "53",
   },
-  PAYS_DE_LA_LOIRE: {
-    nomRegion: "Pays de la Loire",
-    codeRegion: "52",
+  {
+    nom: "Pays de la Loire",
+    code: "52",
   },
-  ILE_DE_FRANCE: {
-    nomRegion: "Île-de-France",
-    codeRegion: "11",
+  {
+    nom: "Île-de-France",
+    code: "11",
   },
-};
+];
 
 /**
  * Noms des ERPs
@@ -147,7 +147,9 @@ const jobNames = {
   seedCroisementCfasAnnuaire: "seed-croisement-cfas-annuaire",
   seedRandomizedSample: "seed-randomized-sample",
   identifyUaisInCatalog: "identify-uais-types-catalog",
+  mergeDecaUaisFile: "merge-deca-uais-file",
   identifyNetworkCma: "identify-network-cma",
+  identifyUaisSiretsCouples: "identify-uais-sirets-couples",
   identifyUaisSiretsDuplicates: "identify-uais-sirets-duplicates",
   identifyNetworkDuplicates: "identify-network-duplicates",
   identifyStatutsCandidatsDuplicates: "identify-statutsCandidats-duplicates",
@@ -240,7 +242,7 @@ module.exports = {
   codesMajStatutsInterdits,
   codesStatutsMajStatutCandidats,
   reseauxCfas,
-  REGIONS_OUVERTES,
+  REGIONS_DEPLOYEES,
   jobNames,
   erps,
   duplicatesTypesCodes,

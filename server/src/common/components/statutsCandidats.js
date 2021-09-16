@@ -158,6 +158,14 @@ const createStatutCandidat = async (itemToCreate) => {
     periode_formation: itemToCreate.periode_formation,
     annee_formation: itemToCreate.annee_formation,
     annee_scolaire: itemToCreate.annee_scolaire,
+    id_erp_apprenant: itemToCreate.id_erp_apprenant,
+    tel_apprenant: itemToCreate.tel_apprenant,
+    date_de_naissance_apprenant: itemToCreate.date_de_naissance_apprenant,
+    etablissement_formateur_geo_coordonnees: itemToCreate.etablissement_formateur_geo_coordonnees,
+    etablissement_formateur_code_postal: itemToCreate.etablissement_formateur_code_postal,
+    contrat_date_debut: itemToCreate.contrat_date_debut,
+    contrat_date_fin: itemToCreate.contrat_date_fin,
+    contrat_date_rupture: itemToCreate.contrat_date_rupture,
 
     source: itemToCreate.source,
 

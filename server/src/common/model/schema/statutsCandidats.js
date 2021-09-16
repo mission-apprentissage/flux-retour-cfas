@@ -238,6 +238,47 @@ const statutsCandidatsSchema = new Schema({
     default: false,
     description: "Flag d'identification de la formation dans le Catalogue MNA sur la base du CFD + SIRET",
   },
+  id_erp_apprenant: {
+    type: String,
+    default: null,
+    description: "Identifiant du jeune dans l'erp",
+  },
+  tel_apprenant: {
+    type: String,
+    default: null,
+    description: "Numéro de téléphone du jeune",
+  },
+  date_de_naissance_apprenant: {
+    type: Date,
+    default: null,
+    description: "Date de naissance du jeune",
+  },
+  etablissement_formateur_geo_coordonnees: {
+    type: String,
+    implicit_type: "geo_point",
+    default: null,
+    description: "Latitude et longitude de l'établissement formateur",
+  },
+  etablissement_formateur_code_postal: {
+    type: String,
+    default: null,
+    description: "Code postal de l'établissement formateur",
+  },
+  contrat_date_debut: {
+    type: Date,
+    default: null,
+    description: "Date de début du contrat",
+  },
+  contrat_date_fin: {
+    type: Date,
+    default: null,
+    description: "Date de fin du contrat",
+  },
+  contrat_date_rupture: {
+    type: Date,
+    default: null,
+    description: "Date de rupture du contrat",
+  },
 });
 
 module.exports = statutsCandidatsSchema;

@@ -26,7 +26,6 @@ services:
       - ./server/src:/app/src # Allows source folders to be watched
       - ./server/config:/app/config
       - ./server/.env:/app/.env
-      - flux_retour_cfas_ftp_data:/ftp
       - flux_retour_cfas_server_data:/data
     build:
       args:
@@ -36,22 +35,24 @@ services:
       - FLUX_RETOUR_CFAS_APP_NAME=Flux Retour Cfas
       # logs
       - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
-      - FLUX_RETOUR_CFAS_LOG_STREAMS=elastic-search
+      - FLUX_RETOUR_CFAS_LOG_STREAMS=slack
       - FLUX_RETOUR_CFAS_OUTPUT_DIR=.local/output
       - FLUX_RETOUR_CFAS_PUBLIC_URL=http://localhost
+      # feature flags
+      - FLUX_RETOUR_CFAS_LIMIT_REGIONS_DEPLOYED=true
       # auth
       - FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET=1234
       - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=456
       - FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET=789
       # users
-        ## ymag
+      ## ymag
       - FLUX_RETOUR_CFAS_USERS_YMAG_NAME=ymag
       - FLUX_RETOUR_CFAS_USERS_YMAG_PASSWORD=mdpYmag
       - FLUX_RETOUR_CFAS_USERS_YMAG_PERMISSIONS=apiStatutsSeeder
         ## gesti
       - FLUX_RETOUR_CFAS_USERS_GESTI_NAME=gesti
       - FLUX_RETOUR_CFAS_USERS_GESTI_PASSWORD=mdpGesti
-      - FLUX_RETOUR_CFAS_USERS_GESTI_PERMISSIONS=apiStatutsSeeder,ftpAccess
+      - FLUX_RETOUR_CFAS_USERS_GESTI_PERMISSIONS=apiStatutsSeeder
         ## sc form
       - FLUX_RETOUR_CFAS_USERS_SCFORM_NAME=scform
       - FLUX_RETOUR_CFAS_USERS_SCFORM_PASSWORD=mdpScform
@@ -63,7 +64,7 @@ services:
         ## admin
       - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME=mna-admin
       - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD=password
-      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS=administrator,ftpAccess
+      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS=administrator
       # Tables Correspondance
       - FLUX_RETOUR_CFAS_TABLES_CORRESPONDANCES_ENDPOINT_URL=https://tables-correspondances.apprentissage.beta.gouv.fr/api
       # Mna Catalog
@@ -84,10 +85,6 @@ services:
     volumes:
       - flux_retour_cfas_mongodb_data:/data
 
-  ftp:
-    volumes:
-      - flux_retour_cfas_ftp_data:/data
-
 volumes:
   flux_retour_cfas_mongodb_data:
     driver: local
@@ -98,9 +95,6 @@ volumes:
   flux_retour_cfas_server_data:
     driver: local
     name: flux_retour_cfas_server_data
-  flux_retour_cfas_ftp_data:
-    driver: local
-    name: flux_retour_cfas_ftp_data
   flux_retour_cfas_elastic_search_data:
     driver: local
     name: flux_retour_cfas_elastic_search_data

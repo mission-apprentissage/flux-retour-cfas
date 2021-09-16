@@ -10,7 +10,6 @@ module.exports = {
   elasticSearch: {
     uri: env.get("FLUX_RETOUR_CFAS_ELASTIC_SEARCH_URI").asString(),
   },
-  ftpDir: env.get("FLUX_RETOUR_CFAS_FTP_DIR").required().asString(),
   auth: {
     passwordHashRounds: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS").asInt(),
     user: {
@@ -76,5 +75,8 @@ module.exports = {
     tenantId: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_TENANT_ID").required().asString(),
     region: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_REGION").required().asString(),
     containerName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").required().asString(),
+  },
+  featureFlags: {
+    limitDeployedRegions: env.get("FLUX_RETOUR_CFAS_LIMIT_REGIONS_DEPLOYED").asBool(),
   },
 };
