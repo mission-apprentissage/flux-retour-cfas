@@ -148,6 +148,7 @@ const jobNames = {
   seedRandomizedSample: "seed-randomized-sample",
   identifyUaisInCatalog: "identify-uais-types-catalog",
   mergeDecaUaisFile: "merge-deca-uais-file",
+  rawUserEventsAnalysis: "raw-userEvents-analysis",
   identifyNetworkCma: "identify-network-cma",
   identifyUaisSiretsCouples: "identify-uais-sirets-couples",
   identifyUaisSiretsDuplicates: "identify-uais-sirets-duplicates",
