@@ -10,13 +10,14 @@ services:
     build:
       context: ui
       dockerfile: Dockerfile.dev
+      args:
+        - REACT_APP_FLUX_RETOUR_CFAS_ENV=local
     volumes:
       - ./ui:/app #Allows source folders to be watched
       - ./ui/.env:/app/.env
       - "/app/node_modules"
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - REACT_APP_FLUX_RETOUR_CFAS_ENV=local
 
   server:
     command: ["yarn", "debug"]
