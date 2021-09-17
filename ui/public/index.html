@@ -23,15 +23,14 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
 
-  <% if (process.env.REACT_APP_FLUX_RETOUR_CFAS_ENV==='production' ) { %>
+  <!-- ENV Flag -->
+  <div id="REACT_APP_ENV=%REACT_APP_ENV%"></div>
+
+  <% if (process.env.REACT_APP_ENV==='production' ) { %>
 
     <!-- Plausible -->
     <script defer data-domain="cfas.apprentissage.beta.gouv.fr/tableau-de-bord"
       src="https://plausible.io/js/plausible.js"></script>
-
-    <!-- Flag -->
-    <div id="production"></div>
-
 
     <% } %>
 
