@@ -27,12 +27,25 @@
   <div id="REACT_APP_ENV=%REACT_APP_ENV%"></div>
 
   <% if (process.env.REACT_APP_ENV==='production' ) { %>
-
     <!-- Plausible -->
     <script defer data-domain="cfas.apprentissage.beta.gouv.fr/tableau-de-bord"
       src="https://plausible.io/js/plausible.js"></script>
-
     <% } %>
+
+
+      <% if (process.env.REACT_APP_ENV==='recette' ) { %>
+        <!-- Plausible recette -->
+        <script defer data-domain="cfas-recette.apprentissage.beta.gouv.fr"
+          src="https://plausible.io/js/plausible.js"></script>
+        <% } %>
+
+
+          <% if (process.env.REACT_APP_ENV==='dev' ) { %>
+            <!-- Plausible Dev -->
+            <script defer data-domain="cfas-dev.apprentissage.beta.gouv.fr"
+              src="https://plausible.io/js/plausible.js"></script>
+            <% } %>
+
 
 </head>
 
