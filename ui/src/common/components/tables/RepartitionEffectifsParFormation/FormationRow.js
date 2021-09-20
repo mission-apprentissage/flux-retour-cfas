@@ -2,13 +2,16 @@ import { Box, Flex, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
 import { getPercentage } from "../../../utils/calculUtils";
+import { isDateFuture } from "../../../utils/dateUtils";
 import ProgressCell from "../ProgressCell";
 import AnneeFormationRows from "./AnneeFormationRows";
 
 const FormationRow = ({ formationCfd, intitule, effectifs }) => {
   const [isOpen, setIsOpen] = useState();
-
+  const filtersContext = useFiltersContext();
+  const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
   const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
@@ -33,8 +36,12 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
           label={effectifs.inscritsSansContrat}
           value={getPercentage(effectifs.inscritsSansContrat, total)}
         />
-        <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-        <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+        {shouldHideEffectifs === true && (
+          <>
+            <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
+            <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+          </>
+        )}
       </Tr>
       {isOpen && <AnneeFormationRows formationCfd={formationCfd} />}
     </>

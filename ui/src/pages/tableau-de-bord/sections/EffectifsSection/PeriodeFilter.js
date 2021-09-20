@@ -20,6 +20,7 @@ const PeriodeFilter = ({ value, onChange }) => {
     const lastDayOfSelectedMonth = endOfMonth(selectedDate);
     // if user has selected current month, we choose to use the current date instead of the last day in the month to avoid using dates in the future
     const date = isThisMonth(lastDayOfSelectedMonth) ? new Date() : lastDayOfSelectedMonth;
+    console.log("chips " + date);
     onChange(date);
   };
 

@@ -3,12 +3,15 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { getPercentage } from "../../../common/utils/calculUtils";
+import { useFiltersContext } from "../../../pages/tableau-de-bord/FiltersContext";
+import { isDateFuture } from "../../utils/dateUtils";
 import ProgressCell from "./ProgressCell";
 import Table from "./Table";
 
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
-
+  const filtersContext = useFiltersContext();
+  const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
   if (repartitionEffectifsParCfa) {
     content = (
       <Tbody>
@@ -26,8 +29,13 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 label={effectifs.inscritsSansContrat}
                 value={getPercentage(effectifs.inscritsSansContrat, total)}
               />
-              <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-              <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+
+              {shouldHideEffectifs === true && (
+                <>
+                  <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
+                  <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+                </>
+              )}
             </Tr>
           );
         })}
@@ -36,13 +44,22 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
   }
 
   return (
-    <Table
-      headers={["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
-      loading={loading}
-      error={error}
-    >
-      {content}
-    </Table>
+    <>
+      {shouldHideEffectifs === false && (
+        <Table headers={["Nom de l'organisme", "apprentis", "inscrits sans contrat"]} loading={loading} error={error}>
+          {content}
+        </Table>
+      )}
+      {shouldHideEffectifs === true && (
+        <Table
+          headers={["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
+          loading={loading}
+          error={error}
+        >
+          {content}
+        </Table>
+      )}
+    </>
   );
 };
 
