@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { endOfMonth, format, isThisMonth } from "date-fns";
 
 const DATE_FORMAT = "dd/MM/yyyy";
 
@@ -9,12 +9,10 @@ const DATE_FORMAT = "dd/MM/yyyy";
 export const formatDate = (date) => {
   return date ? format(date, DATE_FORMAT) : "";
 };
-var today = new Date();
-var lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
 export const isDateFuture = (date) => {
-  if (date <= lastDayOfMonth) {
-    return true;
-  }
+  const lastDayOfSelectedMonth = endOfMonth(new Date());
+  const laDate = isThisMonth(lastDayOfSelectedMonth) ? new Date() : lastDayOfSelectedMonth;
+  if (date < laDate) return true;
   return false;
 };

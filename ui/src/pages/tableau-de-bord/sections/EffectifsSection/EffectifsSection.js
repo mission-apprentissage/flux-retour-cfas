@@ -13,7 +13,6 @@ const EffectifsSection = ({ effectifs, loading }) => {
   const filtersContext = useFiltersContext();
 
   const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
-  console.log("iejfuqejfueqhfhqfu " + shouldHideEffectifs);
   let content = null;
   if (loading) {
     content = (
