@@ -11,8 +11,8 @@ export const formatDate = (date) => {
 };
 
 export const isDateFuture = (date) => {
-  const lastDayOfSelectedMonth = endOfMonth(new Date());
-  const laDate = isThisMonth(lastDayOfSelectedMonth) ? new Date() : lastDayOfSelectedMonth;
+  const lastDayOfMonth = endOfMonth(new Date());
+  const laDate = isThisMonth(lastDayOfMonth) ? new Date() : lastDayOfMonth;
   if (date < laDate) return true;
   return false;
 };
