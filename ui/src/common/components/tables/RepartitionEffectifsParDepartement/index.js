@@ -31,7 +31,7 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
 
   return (
     <>
-      {shouldHideEffectifs === true && (
+      {shouldHideEffectifs === false && (
         <Table
           headers={["Département", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
           loading={loading}
@@ -40,7 +40,7 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
           {content}
         </Table>
       )}
-      {shouldHideEffectifs === false && (
+      {shouldHideEffectifs === true && (
         <Table headers={["Département", "apprentis", "inscrits sans contrat"]} loading={loading} error={error}>
           {content}
         </Table>

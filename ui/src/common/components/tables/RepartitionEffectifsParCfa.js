@@ -30,7 +30,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 value={getPercentage(effectifs.inscritsSansContrat, total)}
               />
 
-              {shouldHideEffectifs === true && (
+              {shouldHideEffectifs === false && (
                 <>
                   <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
                   <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
@@ -45,12 +45,12 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
 
   return (
     <>
-      {shouldHideEffectifs === false && (
+      {shouldHideEffectifs === true && (
         <Table headers={["Nom de l'organisme", "apprentis", "inscrits sans contrat"]} loading={loading} error={error}>
           {content}
         </Table>
       )}
-      {shouldHideEffectifs === true && (
+      {shouldHideEffectifs === false && (
         <Table
           headers={["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
           loading={loading}

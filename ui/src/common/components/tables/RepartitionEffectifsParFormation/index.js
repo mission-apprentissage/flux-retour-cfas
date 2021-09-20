@@ -12,7 +12,7 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
   const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
   return (
     <>
-      {shouldHideEffectifs === true && (
+      {shouldHideEffectifs === false && (
         <Table
           headers={["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
           loading={loading}
@@ -33,7 +33,7 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
           </Tbody>
         </Table>
       )}
-      {shouldHideEffectifs === false && (
+      {shouldHideEffectifs === true && (
         <Table headers={["Niveau", "apprentis", "inscrits sans contrat"]} loading={loading} error={error}>
           <Tbody>
             {repartitionEffectifs

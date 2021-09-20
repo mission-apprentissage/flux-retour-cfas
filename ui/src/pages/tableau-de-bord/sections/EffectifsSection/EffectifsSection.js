@@ -11,7 +11,6 @@ import PeriodeFilter from "./PeriodeFilter";
 
 const EffectifsSection = ({ effectifs, loading }) => {
   const filtersContext = useFiltersContext();
-
   const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
   let content = null;
   if (loading) {
@@ -38,7 +37,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
           label={effectifs.inscritsSansContrat.count > 1 ? "inscrits sans contrat" : "inscrit sans contrat"}
           tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
-        {shouldHideEffectifs === true && (
+        {shouldHideEffectifs === false && (
           <>
             <EffectifCard
               count={effectifs.rupturants.count}
@@ -53,7 +52,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
             />
           </>
         )}
-        {shouldHideEffectifs === false && (
+        {shouldHideEffectifs === true && (
           <Box
             as="article"
             backgroundColor="galt"

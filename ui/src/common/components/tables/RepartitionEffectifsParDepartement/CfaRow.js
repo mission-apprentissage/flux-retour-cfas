@@ -19,7 +19,7 @@ const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs }) => {
       </Td>
       <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
       <ProgressCell label={effectifs.inscritsSansContrat} value={getPercentage(effectifs.inscritsSansContrat, total)} />
-      {shouldHideEffectifs === true && (
+      {shouldHideEffectifs === false && (
         <>
           <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
           <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
