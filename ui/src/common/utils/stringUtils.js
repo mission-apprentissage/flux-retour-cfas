@@ -20,8 +20,7 @@ export const truncate = (string, size = 32) => (string.length > size ? string.su
 
 export const pluralize = (text, value, pluralCharacter = "s") => (value > 1 ? `${text}${pluralCharacter}` : `${text}`);
 
-export const pluralizeWord = (text, value, pluralCharacter = "s") =>
-  value > 1 ? `${text}${pluralCharacter}` : `${text}`;
+export const pluralizeWord = (text, value, newText) => (value > 1 ? `${text.replace(text, newText)}` : `${text}`);
 
 export const formatNumber = (number) => {
   if (!number) return number;

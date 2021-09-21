@@ -24,6 +24,7 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
                     key={data.niveauFormation}
                     niveauFormation={data.niveauFormation}
                     effectifs={data.effectifs}
+                    shouldHideEffectifs={shouldHideEffectifs}
                   />
                 );
               })

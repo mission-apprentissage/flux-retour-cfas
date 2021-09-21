@@ -2,16 +2,12 @@ import { Box, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
 import { getPercentage } from "../../../utils/calculUtils";
-import { isDateFuture } from "../../../utils/dateUtils";
 import ProgressCell from "../ProgressCell";
 import CfasRows from "./CfasRows";
 
-const DepartementRow = ({ departementCode, departementNom, effectifs }) => {
+const DepartementRow = ({ departementCode, departementNom, effectifs, shouldHideEffectifs }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const filtersContext = useFiltersContext();
-  const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
   const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
@@ -42,6 +38,7 @@ const DepartementRow = ({ departementCode, departementNom, effectifs }) => {
 DepartementRow.propTypes = {
   departementCode: PropTypes.string.isRequired,
   departementNom: PropTypes.string.isRequired,
+  shouldHideEffectifs: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     rupturants: PropTypes.number.isRequired,

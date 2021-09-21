@@ -4,7 +4,7 @@ import React from "react";
 
 import { Alert, EffectifCard, Section } from "../../../../common/components";
 import { isDateFuture } from "../../../../common/utils/dateUtils";
-import { pluralize } from "../../../../common/utils/stringUtils";
+import { pluralize, pluralizeWord } from "../../../../common/utils/stringUtils";
 import { InfoLine } from "../../../../theme/components/icons";
 import { useFiltersContext } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
@@ -12,7 +12,6 @@ import PeriodeFilter from "./PeriodeFilter";
 
 const EffectifsSection = ({ effectifs, loading }) => {
   const filtersContext = useFiltersContext();
-  const isDateInTheFuture = isDateFuture(filtersContext.state.date);
   let content = null;
   if (loading) {
     content = (
@@ -35,18 +34,18 @@ const EffectifsSection = ({ effectifs, loading }) => {
         />
         <EffectifCard
           count={effectifs.inscritsSansContrat.count}
-          label={pluralize("inscrit sans contrat", effectifs.inscritsSansContrat.count)}
+          label={pluralizeWord("inscrit sans contrat", effectifs.inscritsSansContrat.count, "inscrits sans contrat")}
           tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
           count={effectifs.rupturants.count}
           label={pluralize("rupturant", effectifs.rupturants.count)}
-          validPeriod={!isDateInTheFuture}
+          validPeriod={!isDateFuture(filtersContext.state.date)}
           tooltipLabel="Nombre d’apprenants sans contrat après une rupture au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
           count={effectifs.abandons.count}
-          validPeriod={!isDateInTheFuture}
+          validPeriod={!isDateFuture(filtersContext.state.date)}
           label={pluralize("abandon", effectifs.abandons.count)}
           tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />

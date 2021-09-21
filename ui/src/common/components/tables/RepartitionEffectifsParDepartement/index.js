@@ -25,6 +25,7 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
               departementCode={etablissement_num_departement}
               departementNom={etablissement_nom_departement}
               effectifs={effectifs}
+              shouldHideEffectifs={shouldHideEffectifs}
             />
           );
         })}
