@@ -4,7 +4,7 @@ import React from "react";
 
 import { Alert, EffectifCard, Section } from "../../../../common/components";
 import { isDateFuture } from "../../../../common/utils/dateUtils";
-import { pluralize, pluralizeWord } from "../../../../common/utils/stringUtils";
+import { pluralize } from "../../../../common/utils/stringUtils";
 import { InfoLine } from "../../../../theme/components/icons";
 import { useFiltersContext } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
@@ -34,7 +34,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
         />
         <EffectifCard
           count={effectifs.inscritsSansContrat.count}
-          label={pluralizeWord("inscrit sans contrat", effectifs.inscritsSansContrat.count, "inscrits sans contrat")}
+          label={`${pluralize("inscrit", effectifs.inscritsSansContrat.count)} sans contrat`}
           tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
