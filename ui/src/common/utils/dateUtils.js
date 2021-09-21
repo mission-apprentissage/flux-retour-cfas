@@ -8,5 +8,5 @@ const DATE_FORMAT = "dd/MM/yyyy";
  */
 export const formatDate = (date) => (date ? format(date, DATE_FORMAT) : "");
 
-// Elle vérifie si la date est aprés le dernier jour du mois #BestPractices
+// Elle vérifie si la date est aprés le dernier jour du mois
 export const isDateFuture = (date) => date > endOfMonth(new Date());
