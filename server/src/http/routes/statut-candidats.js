@@ -26,7 +26,7 @@ module.exports = ({ statutsCandidats }) => {
     uai_etablissement: Joi.string().required(),
     nom_etablissement: Joi.string().required(),
     statut_apprenant: Joi.number().required(),
-    id_formation: Joi.string().required(),
+    id_formation: Joi.string().allow("", null),
     annee_scolaire: Joi.string().allow("", null),
 
     // optional
@@ -91,7 +91,7 @@ module.exports = ({ statutsCandidats }) => {
             // Build toAddOrUpdateList list
             validStatutsToAddOrUpdate.push({
               ...currentStatutToAddOrUpdate,
-              formation_cfd: currentStatutToAddOrUpdate.id_formation,
+              formation_cfd: currentStatutToAddOrUpdate.id_formation ?? null,
               // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
               periode_formation: currentStatutToAddOrUpdate.periode_formation
                 ? currentStatutToAddOrUpdate.periode_formation.split("-").map(Number)
