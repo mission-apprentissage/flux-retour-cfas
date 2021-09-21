@@ -6,7 +6,7 @@ import { getPercentage } from "../../../utils/calculUtils";
 import ProgressCell from "../ProgressCell";
 import CfasRows from "./CfasRows";
 
-const DepartementRow = ({ departementCode, departementNom, effectifs, shouldHideEffectifs }) => {
+const DepartementRow = ({ departementCode, departementNom, effectifs, isPeriodInvalid }) => {
   const [isOpen, setIsOpen] = useState(false);
   const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
@@ -23,7 +23,7 @@ const DepartementRow = ({ departementCode, departementNom, effectifs, shouldHide
           label={effectifs.inscritsSansContrat}
           value={getPercentage(effectifs.inscritsSansContrat, total)}
         />
-        {!shouldHideEffectifs && (
+        {!isPeriodInvalid && (
           <>
             <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
             <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
@@ -38,7 +38,7 @@ const DepartementRow = ({ departementCode, departementNom, effectifs, shouldHide
 DepartementRow.propTypes = {
   departementCode: PropTypes.string.isRequired,
   departementNom: PropTypes.string.isRequired,
-  shouldHideEffectifs: PropTypes.bool,
+  isPeriodInvalid: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     rupturants: PropTypes.number.isRequired,

@@ -11,7 +11,7 @@ import AnneeFormationRows from "./AnneeFormationRows";
 const FormationRow = ({ formationCfd, intitule, effectifs }) => {
   const [isOpen, setIsOpen] = useState();
   const filtersContext = useFiltersContext();
-  const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
+  const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
@@ -36,7 +36,7 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
           label={effectifs.inscritsSansContrat}
           value={getPercentage(effectifs.inscritsSansContrat, total)}
         />
-        {!shouldHideEffectifs && (
+        {!isPeriodInvalid && (
           <>
             <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
             <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />

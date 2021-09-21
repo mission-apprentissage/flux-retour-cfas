@@ -9,8 +9,8 @@ import NiveauFormationRow from "./NiveauFormationRow";
 
 const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error }) => {
   const filtersContext = useFiltersContext();
-  const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
-  const tableHeader = shouldHideEffectifs
+  const isPeriodInvalid = isDateFuture(filtersContext.state.date);
+  const tableHeader = isPeriodInvalid
     ? ["Niveau", "apprentis", "inscrits sans contrat"]
     : ["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   return (
@@ -24,7 +24,7 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
                     key={data.niveauFormation}
                     niveauFormation={data.niveauFormation}
                     effectifs={data.effectifs}
-                    shouldHideEffectifs={shouldHideEffectifs}
+                    isPeriodInvalid={isPeriodInvalid}
                   />
                 );
               })

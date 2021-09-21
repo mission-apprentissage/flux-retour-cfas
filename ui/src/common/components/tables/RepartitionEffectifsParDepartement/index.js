@@ -10,8 +10,8 @@ import DepartementRow from "./DepartementRow";
 const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement, loading, error }) => {
   let content = null;
   const filtersContext = useFiltersContext();
-  const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
-  const tableHeader = shouldHideEffectifs
+  const isPeriodInvalid = isDateFuture(filtersContext.state.date);
+  const tableHeader = isPeriodInvalid
     ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
     : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (repartitionEffectifsParDepartement) {
@@ -25,7 +25,7 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
               departementCode={etablissement_num_departement}
               departementNom={etablissement_nom_departement}
               effectifs={effectifs}
-              shouldHideEffectifs={shouldHideEffectifs}
+              isPeriodInvalid={isPeriodInvalid}
             />
           );
         })}

@@ -10,8 +10,9 @@ import Table from "../Table";
 
 const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading, error }) => {
   const filtersContext = useFiltersContext();
-  const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
-  const tableHeader = shouldHideEffectifs
+  const isPeriodInvalid = isDateFuture(filtersContext.state.date);
+
+  const tableHeader = isPeriodInvalid
     ? ["Niveau", "apprentis", "inscrits sans contrat"]
     : ["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   return (
@@ -30,7 +31,7 @@ const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading,
                       label={effectifs.inscritsSansContrat}
                       value={getPercentage(effectifs.inscritsSansContrat, total)}
                     />
-                    {!shouldHideEffectifs && (
+                    {!isPeriodInvalid && (
                       <>
                         <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
                         <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />

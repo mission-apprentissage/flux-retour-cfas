@@ -10,7 +10,7 @@ import ProgressCell from "../ProgressCell";
 const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs }) => {
   const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   const filtersContext = useFiltersContext();
-  const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
+  const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   return (
     <Tr>
       <Td color="grey.800" paddingLeft="6w">
@@ -19,7 +19,7 @@ const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs }) => {
       </Td>
       <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
       <ProgressCell label={effectifs.inscritsSansContrat} value={getPercentage(effectifs.inscritsSansContrat, total)} />
-      {!shouldHideEffectifs && (
+      {!isPeriodInvalid && (
         <>
           <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
           <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />

@@ -6,7 +6,7 @@ import { getPercentage } from "../../../utils/calculUtils";
 import ProgressCell from "../ProgressCell";
 import FormationRows from "./FormationRows";
 
-const NiveauFormationRow = ({ niveauFormation, effectifs, shouldHideEffectifs }) => {
+const NiveauFormationRow = ({ niveauFormation, effectifs, isPeriodInvalid }) => {
   const [isOpen, setIsOpen] = useState(false);
   const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
@@ -23,7 +23,7 @@ const NiveauFormationRow = ({ niveauFormation, effectifs, shouldHideEffectifs })
           label={effectifs.inscritsSansContrat}
           value={getPercentage(effectifs.inscritsSansContrat, total)}
         />
-        {!shouldHideEffectifs && (
+        {!isPeriodInvalid && (
           <>
             <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
             <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
@@ -37,7 +37,7 @@ const NiveauFormationRow = ({ niveauFormation, effectifs, shouldHideEffectifs })
 
 NiveauFormationRow.propTypes = {
   niveauFormation: PropTypes.string.isRequired,
-  shouldHideEffectifs: PropTypes.bool,
+  isPeriodInvalid: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     rupturants: PropTypes.number.isRequired,
