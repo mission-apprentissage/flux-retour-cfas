@@ -11,6 +11,9 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
   let content = null;
   const filtersContext = useFiltersContext();
   const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
+  const tableHeader = shouldHideEffectifs
+    ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
+    : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (repartitionEffectifsParDepartement) {
     content = (
       <Tbody>
@@ -30,22 +33,9 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
   }
 
   return (
-    <>
-      {shouldHideEffectifs === false && (
-        <Table
-          headers={["Département", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
-          loading={loading}
-          error={error}
-        >
-          {content}
-        </Table>
-      )}
-      {shouldHideEffectifs === true && (
-        <Table headers={["Département", "apprentis", "inscrits sans contrat"]} loading={loading} error={error}>
-          {content}
-        </Table>
-      )}
-    </>
+    <Table headers={tableHeader} loading={loading} error={error}>
+      {content}
+    </Table>
   );
 };
 

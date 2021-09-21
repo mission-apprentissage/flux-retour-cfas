@@ -12,6 +12,9 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
   let content = null;
   const filtersContext = useFiltersContext();
   const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
+  const tableHeader = shouldHideEffectifs
+    ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
+    : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (repartitionEffectifsParCfa) {
     content = (
       <Tbody>
@@ -29,8 +32,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 label={effectifs.inscritsSansContrat}
                 value={getPercentage(effectifs.inscritsSansContrat, total)}
               />
-
-              {shouldHideEffectifs === false && (
+              {!shouldHideEffectifs && (
                 <>
                   <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
                   <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
@@ -44,22 +46,9 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
   }
 
   return (
-    <>
-      {shouldHideEffectifs === true && (
-        <Table headers={["Nom de l'organisme", "apprentis", "inscrits sans contrat"]} loading={loading} error={error}>
-          {content}
-        </Table>
-      )}
-      {shouldHideEffectifs === false && (
-        <Table
-          headers={["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
-          loading={loading}
-          error={error}
-        >
-          {content}
-        </Table>
-      )}
-    </>
+    <Table headers={tableHeader} loading={loading} error={error}>
+      {content}
+    </Table>
   );
 };
 

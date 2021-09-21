@@ -27,7 +27,7 @@ const DepartementRow = ({ departementCode, departementNom, effectifs }) => {
           label={effectifs.inscritsSansContrat}
           value={getPercentage(effectifs.inscritsSansContrat, total)}
         />
-        {shouldHideEffectifs === false && (
+        {!shouldHideEffectifs && (
           <>
             <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
             <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />

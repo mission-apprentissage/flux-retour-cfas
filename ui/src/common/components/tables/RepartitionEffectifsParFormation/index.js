@@ -10,46 +10,26 @@ import NiveauFormationRow from "./NiveauFormationRow";
 const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error }) => {
   const filtersContext = useFiltersContext();
   const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
+  const tableHeader = shouldHideEffectifs
+    ? ["Niveau", "apprentis", "inscrits sans contrat"]
+    : ["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   return (
     <>
-      {shouldHideEffectifs === false && (
-        <Table
-          headers={["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
-          loading={loading}
-          error={error}
-        >
-          <Tbody>
-            {repartitionEffectifs
-              ? repartitionEffectifs.map((data) => {
-                  return (
-                    <NiveauFormationRow
-                      key={data.niveauFormation}
-                      niveauFormation={data.niveauFormation}
-                      effectifs={data.effectifs}
-                    />
-                  );
-                })
-              : null}
-          </Tbody>
-        </Table>
-      )}
-      {shouldHideEffectifs === true && (
-        <Table headers={["Niveau", "apprentis", "inscrits sans contrat"]} loading={loading} error={error}>
-          <Tbody>
-            {repartitionEffectifs
-              ? repartitionEffectifs.map((data) => {
-                  return (
-                    <NiveauFormationRow
-                      key={data.niveauFormation}
-                      niveauFormation={data.niveauFormation}
-                      effectifs={data.effectifs}
-                    />
-                  );
-                })
-              : null}
-          </Tbody>
-        </Table>
-      )}
+      <Table headers={tableHeader} loading={loading} error={error}>
+        <Tbody>
+          {repartitionEffectifs
+            ? repartitionEffectifs.map((data) => {
+                return (
+                  <NiveauFormationRow
+                    key={data.niveauFormation}
+                    niveauFormation={data.niveauFormation}
+                    effectifs={data.effectifs}
+                  />
+                );
+              })
+            : null}
+        </Tbody>
+      </Table>
     </>
   );
 };

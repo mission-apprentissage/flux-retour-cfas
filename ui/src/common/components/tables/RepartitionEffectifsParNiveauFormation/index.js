@@ -11,58 +11,37 @@ import Table from "../Table";
 const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading, error }) => {
   const filtersContext = useFiltersContext();
   const shouldHideEffectifs = isDateFuture(filtersContext.state.date);
+  const tableHeader = shouldHideEffectifs
+    ? ["Niveau", "apprentis", "inscrits sans contrat"]
+    : ["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   return (
     <>
-      {shouldHideEffectifs === false && (
-        <Table
-          headers={["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
-          loading={loading}
-          error={error}
-        >
-          <Tbody>
-            {repartitionEffectifs
-              ? repartitionEffectifs.map(({ niveauFormation, effectifs }, index) => {
-                  const total =
-                    effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
-                  return (
-                    <Tr key={niveauFormation + index}>
-                      <Td color="grey.800">Niveau {niveauFormation}</Td>
-                      <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-                      <ProgressCell
-                        label={effectifs.inscritsSansContrat}
-                        value={getPercentage(effectifs.inscritsSansContrat, total)}
-                      />
-                      <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-                      <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
-                    </Tr>
-                  );
-                })
-              : null}
-          </Tbody>
-        </Table>
-      )}
-      {shouldHideEffectifs === true && (
-        <Table headers={["Niveau", "apprentis", "inscrits sans contrat"]} loading={loading} error={error}>
-          <Tbody>
-            {repartitionEffectifs
-              ? repartitionEffectifs.map(({ niveauFormation, effectifs }, index) => {
-                  const total =
-                    effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
-                  return (
-                    <Tr key={niveauFormation + index}>
-                      <Td color="grey.800">Niveau {niveauFormation}</Td>
-                      <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-                      <ProgressCell
-                        label={effectifs.inscritsSansContrat}
-                        value={getPercentage(effectifs.inscritsSansContrat, total)}
-                      />
-                    </Tr>
-                  );
-                })
-              : null}
-          </Tbody>
-        </Table>
-      )}
+      <Table headers={tableHeader} loading={loading} error={error}>
+        <Tbody>
+          {repartitionEffectifs
+            ? repartitionEffectifs.map(({ niveauFormation, effectifs }, index) => {
+                const total =
+                  effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
+                return (
+                  <Tr key={niveauFormation + index}>
+                    <Td color="grey.800">Niveau {niveauFormation}</Td>
+                    <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
+                    <ProgressCell
+                      label={effectifs.inscritsSansContrat}
+                      value={getPercentage(effectifs.inscritsSansContrat, total)}
+                    />
+                    {!shouldHideEffectifs && (
+                      <>
+                        <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
+                        <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+                      </>
+                    )}
+                  </Tr>
+                );
+              })
+            : null}
+        </Tbody>
+      </Table>
     </>
   );
 };
