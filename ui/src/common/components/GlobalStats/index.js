@@ -1,4 +1,4 @@
-import { Alert, AlertIcon, Box, Heading, HStack, Skeleton, Stack } from "@chakra-ui/react";
+import { Box, Heading, HStack, Skeleton } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -27,19 +27,9 @@ export const StatsSkeleton = () => {
   );
 };
 
-const GlobalStats = ({ stats, lastImportDates, networksStats }) => {
+const GlobalStats = ({ stats, networksStats }) => {
   return (
     <Section marginBottom="8w">
-      {lastImportDates && (
-        <Stack spacing="2w" marginTop="4w">
-          {lastImportDates.map((item, index) => (
-            <Alert key={index} status="info" backgroundColor="galt">
-              <AlertIcon />
-              Dernier import de données de {item.source} réalisé le {item.date || "N/A"}
-            </Alert>
-          ))}
-        </Stack>
-      )}
       <Heading as="h2" variant="h2" marginTop="4w">
         Candidats
       </Heading>
@@ -244,12 +234,6 @@ GlobalStats.propTypes = {
     nbDistinctCandidatsWithStatutHistory3: PropTypes.number,
     nbStatutsAnneeFormationMissing: PropTypes.number,
   }).isRequired,
-  lastImportDates: PropTypes.arrayOf(
-    PropTypes.shape({
-      source: PropTypes.string,
-      date: PropTypes.string,
-    }).isRequired
-  ),
   networksStats: PropTypes.arrayOf(
     PropTypes.shape({
       nomReseau: PropTypes.string,

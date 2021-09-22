@@ -6,7 +6,7 @@ const { Stats } = require("../../common/model");
 /**
  * Ce script permet de calculer les statistiques
  */
-runScript(async ({ stats, userEvents }) => {
+runScript(async ({ stats }) => {
   // Add global stats
   logger.info(`Calculating Global Stats`);
   await calculateDataSourceGlobalStats(stats, dataSource.all);
@@ -22,10 +22,6 @@ runScript(async ({ stats, userEvents }) => {
   // Add networks stats
   logger.info(`Calculating Network Stats`);
   await calculateNetworksStats(stats);
-
-  // Add lastImport stats
-  logger.info(`Calculating Last import Stats`);
-  await calculateLastImportStats(stats, userEvents);
 
   logger.info("Ended !");
 }, jobNames.calculateStats);
@@ -54,19 +50,5 @@ const calculateNetworksStats = async (stats) => {
     type: statsTypes.networksStats,
     date: new Date(),
     data: networksStats,
-  }).save();
-};
-
-/**
- * Calcul les stats des derniers imports
- * @param {*} stats
- * @param {*} userEvents
- */
-const calculateLastImportStats = async (stats, userEvents) => {
-  const lastImportStats = await userEvents.getLastImportDatesForSources();
-  await new Stats({
-    type: statsTypes.importDatesStats,
-    date: new Date(),
-    data: lastImportStats,
   }).save();
 };

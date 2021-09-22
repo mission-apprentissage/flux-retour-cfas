@@ -16,12 +16,10 @@ module.exports = () => {
       const allStats = await Stats.findOne({ dataSource: dataSource.all, type: statsTypes.tdbStats })
         .sort({ date: "desc" })
         .lean();
-      const lastImportDates = await Stats.findOne({ type: statsTypes.importDatesStats }).sort({ date: "desc" }).lean();
       const networksStats = await Stats.findOne({ type: statsTypes.networksStats }).sort({ date: "desc" }).lean();
 
       return res.json({
         stats: allStats?.data,
-        lastImportDates: lastImportDates?.data,
         networksStats: networksStats?.data,
       });
     })

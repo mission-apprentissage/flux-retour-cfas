@@ -2,7 +2,6 @@ const { UserEvent } = require("../model");
 
 module.exports = () => ({
   getLastUserEventDate,
-  getLastImportDatesForSources,
   getDataForUai,
   getDataForSiret,
   countDataForUai,
@@ -15,25 +14,6 @@ const getLastUserEventDate = async ({ username, type, action }) => {
   });
   return lastUserEventDate?.date.toLocaleString("fr-FR");
 };
-
-const getLastImportDatesForSources = async () => [
-  {
-    source: "gesti",
-    date: await getLastUserEventDate({
-      username: "gesti",
-      type: "ftp",
-      action: "upload",
-    }),
-  },
-  {
-    source: "ymag",
-    date: await getLastUserEventDate({
-      username: "ymag",
-      type: "POST",
-      action: "statut-candidats",
-    }),
-  },
-];
 
 const getDataForUai = async (uai) => {
   return await UserEvent.find({ "data.uai_etablissement": uai });

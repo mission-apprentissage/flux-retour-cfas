@@ -31,32 +31,6 @@ integrationTests(__filename, () => {
     assert.notStrictEqual(found, firstDateCreated);
   });
 
-  it("Permet de retrouver la date des derniers imports par source", async () => {
-    const { getLastImportDatesForSources } = await userEvents();
-
-    // Add events
-    const gestiEvent = new UserEvent({
-      username: "gesti",
-      type: "ftp",
-      action: "upload",
-      data: null,
-    });
-    const ymagEvent = new UserEvent({
-      username: "ymag",
-      type: "POST",
-      action: "statut-candidats",
-      data: null,
-    });
-    await gestiEvent.save();
-    await ymagEvent.save();
-
-    const found = await getLastImportDatesForSources();
-    assert.notStrictEqual(found, null);
-    assert.strictEqual(found.length, 2);
-    assert.strictEqual(found[0].source, "gesti");
-    assert.strictEqual(found[1].source, "ymag");
-  });
-
   it("Permet de retrouver les données envoyées pour un uai", async () => {
     const { getDataForUai } = await userEvents();
 
