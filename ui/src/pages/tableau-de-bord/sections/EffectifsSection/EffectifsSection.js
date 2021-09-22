@@ -3,16 +3,16 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Alert, EffectifCard, Section } from "../../../../common/components";
-import { Info } from "../../../../theme/components/icons";
+import { isDateFuture } from "../../../../common/utils/dateUtils";
+import { pluralize } from "../../../../common/utils/stringUtils";
+import { InfoLine } from "../../../../theme/components/icons";
 import { useFiltersContext } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import PeriodeFilter from "./PeriodeFilter";
 
 const EffectifsSection = ({ effectifs, loading }) => {
   const filtersContext = useFiltersContext();
-
   let content = null;
-
   if (loading) {
     content = (
       <HStack spacing="2w">
@@ -29,22 +29,24 @@ const EffectifsSection = ({ effectifs, loading }) => {
       <HStack spacing="2w">
         <EffectifCard
           count={effectifs.apprentis.count}
-          label="apprentis"
+          label={pluralize("apprenti", effectifs.apprentis.count)}
           tooltipLabel="Nombre d’apprenants en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
           count={effectifs.inscritsSansContrat.count}
-          label="inscrits sans contrat"
+          label={`${pluralize("inscrit", effectifs.inscritsSansContrat.count)} sans contrat`}
           tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
           count={effectifs.rupturants.count}
-          label="rupturants"
+          label={pluralize("rupturant", effectifs.rupturants.count)}
+          validPeriod={!isDateFuture(filtersContext.state.date)}
           tooltipLabel="Nombre d’apprenants sans contrat après une rupture au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
           count={effectifs.abandons.count}
-          label="abandons"
+          validPeriod={!isDateFuture(filtersContext.state.date)}
+          label={pluralize("abandon", effectifs.abandons.count)}
           tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
       </HStack>
@@ -73,7 +75,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
           p={5}
         >
           <Text as="span">
-            <Info h="20px" w="20px" />
+            <InfoLine h="14px" w="14px" color="grey.500" ml={1} mb={1} />
           </Text>
         </Tooltip>
       </HStack>

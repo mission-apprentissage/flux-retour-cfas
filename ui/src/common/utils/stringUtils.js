@@ -5,9 +5,7 @@ import { roundToOne } from "./calculUtils";
  * @param {string} str
  * @param {string} substr
  */
-export const stringContains = (str, substr) => {
-  return str.toLowerCase().indexOf(substr.toLowerCase()) > -1;
-};
+export const stringContains = (str, substr) => str.toLowerCase().indexOf(substr.toLowerCase()) > -1;
 
 export const displayEvolutionPercentage = (evolutionData) =>
   evolutionData === null
@@ -16,17 +14,11 @@ export const displayEvolutionPercentage = (evolutionData) =>
     ? `+${roundToOne(evolutionData)}%`
     : `${roundToOne(evolutionData)}%`;
 
-export const toPrettyYearLabel = (year) => {
-  return year === 1 ? `${year}ère année` : `${year}ème année`;
-};
+export const toPrettyYearLabel = (year) => (year === 1 ? `${year}ère année` : `${year}ème année`);
 
-export const truncate = (string, size = 32) => {
-  return string.length > size ? string.substr(0, size - 1) + "..." : string;
-};
+export const truncate = (string, size = 32) => (string.length > size ? string.substr(0, size - 1) + "..." : string);
 
-export const pluralize = (text, value, pluralCharacter = "s") => {
-  return value > 1 ? `${text}${pluralCharacter}` : `${text}`;
-};
+export const pluralize = (text, value, pluralCharacter = "s") => (value > 1 ? `${text}${pluralCharacter}` : `${text}`);
 
 export const formatNumber = (number) => {
   if (!number) return number;

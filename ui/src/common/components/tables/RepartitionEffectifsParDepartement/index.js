@@ -2,12 +2,18 @@ import { Tbody } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
+import { isDateFuture } from "../../../utils/dateUtils";
 import Table from "../Table";
 import DepartementRow from "./DepartementRow";
 
 const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement, loading, error }) => {
   let content = null;
-
+  const filtersContext = useFiltersContext();
+  const isPeriodInvalid = isDateFuture(filtersContext.state.date);
+  const tableHeader = isPeriodInvalid
+    ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
+    : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (repartitionEffectifsParDepartement) {
     content = (
       <Tbody>
@@ -19,6 +25,7 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
               departementCode={etablissement_num_departement}
               departementNom={etablissement_nom_departement}
               effectifs={effectifs}
+              isPeriodInvalid={isPeriodInvalid}
             />
           );
         })}
@@ -27,11 +34,7 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
   }
 
   return (
-    <Table
-      headers={["Département", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
-      loading={loading}
-      error={error}
-    >
+    <Table headers={tableHeader} loading={loading} error={error}>
       {content}
     </Table>
   );

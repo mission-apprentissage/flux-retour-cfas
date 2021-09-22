@@ -3,12 +3,18 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { getPercentage } from "../../../common/utils/calculUtils";
+import { useFiltersContext } from "../../../pages/tableau-de-bord/FiltersContext";
+import { isDateFuture } from "../../utils/dateUtils";
 import ProgressCell from "./ProgressCell";
 import Table from "./Table";
 
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
-
+  const filtersContext = useFiltersContext();
+  const isPeriodInvalid = isDateFuture(filtersContext.state.date);
+  const tableHeader = isPeriodInvalid
+    ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
+    : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (repartitionEffectifsParCfa) {
     content = (
       <Tbody>
@@ -26,8 +32,12 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 label={effectifs.inscritsSansContrat}
                 value={getPercentage(effectifs.inscritsSansContrat, total)}
               />
-              <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-              <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+              {!isPeriodInvalid && (
+                <>
+                  <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
+                  <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+                </>
+              )}
             </Tr>
           );
         })}
@@ -36,11 +46,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
   }
 
   return (
-    <Table
-      headers={["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
-      loading={loading}
-      error={error}
-    >
+    <Table headers={tableHeader} loading={loading} error={error}>
       {content}
     </Table>
   );

@@ -1,10 +1,10 @@
-import { Box, Tooltip } from "@chakra-ui/react";
+import { Box, Text, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { formatNumber } from "../../utils/stringUtils";
 
-const EffectifCard = ({ label, count, tooltipLabel }) => {
+const EffectifCard = ({ label, count, tooltipLabel, validPeriod = true }) => {
   const hasTooltip = Boolean(tooltipLabel);
   return (
     <Box
@@ -13,10 +13,10 @@ const EffectifCard = ({ label, count, tooltipLabel }) => {
       fontSize="gamma"
       padding="3w"
       color="grey.800"
-      height="6rem"
+      height="7rem"
       minWidth="16rem"
     >
-      <strong>{formatNumber(count)}</strong>
+      <strong>{validPeriod ? formatNumber(count) : "_"}</strong>
       &nbsp;
       <span>{label}</span>
       {hasTooltip && (
@@ -29,6 +29,13 @@ const EffectifCard = ({ label, count, tooltipLabel }) => {
           <Box as="i" className="ri-information-line" fontSize="epsilon" color="grey.500" marginLeft="1v" />
         </Tooltip>
       )}
+      {!validPeriod && (
+        <>
+          <Text color="grey.700" fontSize="14px" mt={1}>
+            cet indice ne peut être calculé sur la période sélectionnée
+          </Text>
+        </>
+      )}
     </Box>
   );
 };
@@ -37,6 +44,7 @@ EffectifCard.propTypes = {
   label: PropTypes.string.isRequired,
   count: PropTypes.number.isRequired,
   tooltipLabel: PropTypes.string,
+  validPeriod: PropTypes.boolean,
 };
 
 export default EffectifCard;
