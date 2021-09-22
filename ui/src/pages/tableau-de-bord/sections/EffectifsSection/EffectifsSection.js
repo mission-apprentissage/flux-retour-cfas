@@ -83,8 +83,8 @@ const EffectifsSection = ({ effectifs, loading }) => {
       <Section paddingX="-5w" marginBottom="4w">
         <Alert>
           La collecte des effectifs 2021-2022 est en cours ce qui peut expliquer pour certains organismes des
-          informations incomplètes. Les chiffres seront disponibles progressivement d’ici début septembre. Nous vous
-          remercions de votre compréhension.
+          informations incomplètes. Les chiffres seront disponibles progressivement. Nous vous remercions de votre
+          compréhension.
         </Alert>
       </Section>
       {content}
