@@ -32,7 +32,7 @@ runScript(async ({ db }) => {
     const infoCodeFromUai = normalizeCodeTerritoire(uaiToUpdate.slice(0, 3));
     const info = infoMap[infoCodeFromUai];
 
-    if ((!info, !info.region.nom)) return;
+    if (!info) return;
 
     const updateResult = await db.collection("statutsCandidats").updateMany(
       { uai_etablissement: uaiToUpdate },
