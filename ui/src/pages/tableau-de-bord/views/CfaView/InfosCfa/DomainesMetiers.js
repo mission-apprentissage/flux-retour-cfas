@@ -5,8 +5,8 @@ import React from "react";
 import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
 
 const DomainesMetiers = ({ domainesMetiers }) => {
-  const [displayDomaines, setDisplayDomaines] = useBoolean();
-  const domainesMetierToDisplay = displayDomaines
+  const [notDisplayDomaines, setNotDisplayDomaines] = useBoolean(true);
+  const domainesMetierToDisplay = notDisplayDomaines
     ? [...domainesMetiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS)]
     : domainesMetiers;
 
@@ -29,8 +29,8 @@ const DomainesMetiers = ({ domainesMetiers }) => {
           </Tag>
         </>
       ))}
-      <Button size="sm" onClick={setDisplayDomaines.toggle} mt="1rem" color="white">
-        {displayDomaines ? "afficher les domaines" : "masquer les domaines"}
+      <Button size="sm" onClick={setNotDisplayDomaines.toggle} mt="1rem" color="white">
+        {notDisplayDomaines ? "afficher les domaines" : "masquer les domaines"}
       </Button>
     </HStack>
   );
