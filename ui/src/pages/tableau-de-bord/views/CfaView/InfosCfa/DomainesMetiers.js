@@ -5,34 +5,39 @@ import React from "react";
 import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
 
 const DomainesMetiers = ({ domainesMetiers }) => {
-  const [notDisplayDomaines, setNotDisplayDomaines] = useBoolean(true);
-  const domainesMetierToDisplay = notDisplayDomaines
+  const [hideDomainesMetiers, setHideDomainesMetiers] = useBoolean(true);
+  const hideComponent = domainesMetiers.length != 0;
+  const domainesMetierToDisplay = hideDomainesMetiers
     ? [...domainesMetiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS)]
     : domainesMetiers;
 
   return (
-    <HStack marginTop="1w" flexWrap="wrap">
-      {domainesMetierToDisplay.map((item, i) => (
-        <>
-          <br />
-          <br />
-          <Tag
-            key={i}
-            fontSize="omega"
-            paddingX="2w"
-            paddingY="1w"
-            borderRadius="20px"
-            color="white"
-            background="rgba(255, 255, 255, 0.24)"
-          >
-            {item}
-          </Tag>
-        </>
-      ))}
-      <Button size="sm" onClick={setNotDisplayDomaines.toggle} mt="1rem" color="white">
-        {notDisplayDomaines ? "afficher les domaines" : "masquer les domaines"}
-      </Button>
-    </HStack>
+    <>
+      {hideComponent && (
+        <HStack marginTop="1w" flexWrap="wrap">
+          {domainesMetierToDisplay.map((item, i) => (
+            <>
+              <br />
+              <br />
+              <Tag
+                key={i}
+                fontSize="omega"
+                paddingX="2w"
+                paddingY="1w"
+                borderRadius="20px"
+                color="white"
+                background="rgba(255, 255, 255, 0.24)"
+              >
+                {item}
+              </Tag>
+            </>
+          ))}
+          <Button size="sm" onClick={setHideDomainesMetiers.toggle} mt="1rem" color="white">
+            {hideDomainesMetiers ? "afficher les domaines" : "masquer les domaines"}
+          </Button>
+        </HStack>
+      )}
+    </>
   );
 };
 
