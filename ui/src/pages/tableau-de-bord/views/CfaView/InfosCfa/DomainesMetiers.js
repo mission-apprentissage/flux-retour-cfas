@@ -6,14 +6,13 @@ import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/d
 
 const DomainesMetiers = ({ domainesMetiers }) => {
   const [hideDomainesMetiers, setHideDomainesMetiers] = useBoolean(true);
-  const hideComponent = domainesMetiers.length != 0;
   const domainesMetierToDisplay = hideDomainesMetiers
     ? [...domainesMetiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS)]
     : domainesMetiers;
 
   return (
     <>
-      {hideComponent && (
+      {domainesMetiers.length != 0 && (
         <HStack marginTop="1w" flexWrap="wrap">
           {domainesMetierToDisplay.map((item, i) => (
             <>
