@@ -5,7 +5,6 @@ import React from "react";
 import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
 
 const DomainesMetiers = ({ domainesMetiers }) => {
-  // const [show, setShow] = useBoolean();
   const [displayDomaines, setDisplayDomaines] = useBoolean();
 
   const domainesMetierToDisplay = displayDomaines
