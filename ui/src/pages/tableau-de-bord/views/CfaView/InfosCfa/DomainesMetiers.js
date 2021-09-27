@@ -6,7 +6,6 @@ import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/d
 
 const DomainesMetiers = ({ domainesMetiers }) => {
   const [displayDomaines, setDisplayDomaines] = useBoolean();
-
   const domainesMetierToDisplay = displayDomaines
     ? [...domainesMetiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS)]
     : domainesMetiers;
