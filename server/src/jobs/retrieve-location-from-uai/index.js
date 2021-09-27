@@ -41,7 +41,7 @@ runScript(async ({ db }) => {
           etablissement_num_departement: info.code,
           etablissement_nom_departement: info.nom,
           etablissement_num_region: info.codeRegion,
-          etablissement_nom_region: info.region.nom,
+          etablissement_nom_region: info.region?.nom,
         },
       }
     );
