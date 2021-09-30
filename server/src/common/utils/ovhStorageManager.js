@@ -37,5 +37,11 @@ module.exports = async () => {
       }
       await storage.objects().download(`${config.ovhStorage.containerName}/${filePath}`, fileDestination);
     },
+    uploadFileTo: async (file, path) => {
+      if (!(await storage.containers().exist(config.ovhStorage.containerName))) {
+        return null;
+      }
+      await storage.objects().save(file, `${config.ovhStorage.containerName}/${path}`);
+    },
   };
 };

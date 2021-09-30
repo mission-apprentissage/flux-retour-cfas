@@ -37,3 +37,9 @@ const toCsv = async (data, outputDirectoryFileName, options = {}) => {
   }
 };
 module.exports.toCsv = toCsv;
+
+const toDataCsv = async (data) => {
+  const csvData = parse(data);
+  await writeFile(csvData, "utf8");
+};
+module.exports.toDataCsv = toDataCsv;
