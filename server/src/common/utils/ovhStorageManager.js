@@ -41,7 +41,7 @@ module.exports = async () => {
       if (!(await storage.containers().exist(config.ovhStorage.containerName))) {
         return null;
       }
-      await storage.objects().save(file, `${config.ovhStorage.containerName}/${path}`);
+      await storage.objects().save_with_result(file, `${config.ovhStorage.containerName}/${path}`);
     },
   };
 };
