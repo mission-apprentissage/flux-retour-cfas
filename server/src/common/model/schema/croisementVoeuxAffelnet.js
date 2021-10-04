@@ -7,10 +7,10 @@ const croisementVoeuxAffelnet = new Schema({
     description: "N° INE du jeune",
     index: true,
   },
-  status_apprenant: {
+  statut_apprenant: {
     type: Number,
     default: null,
-    description: "Status apprenant",
+    description: "Statut apprenant",
   },
 });
 
