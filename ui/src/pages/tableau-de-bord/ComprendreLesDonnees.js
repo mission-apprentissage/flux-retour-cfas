@@ -1,4 +1,4 @@
-import { Box, Grid, GridItem, Heading, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { Box, Grid, GridItem, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import React from "react";
 
 import { Page } from "../../common/components";
@@ -26,23 +26,27 @@ const ComprendreLesDonnees = () => {
                   SOMMAIRE
                 </Text>
                 <Box mt={2}>
-                  <Text>
-                    <Text as="span" fontWeight="700">
-                      1.
-                    </Text>{" "}
-                    De manière générale
-                  </Text>
-                  <Text mt={2}>
-                    <Text as="span" fontWeight="700">
-                      2.
-                    </Text>{" "}
-                    Vous êtes un organisme de formation
-                  </Text>
+                  <Link href="#maniere">
+                    <Text>
+                      <Text as="span" fontWeight="700">
+                        1.
+                      </Text>{" "}
+                      De manière générale
+                    </Text>
+                  </Link>
+                  <Link href="#organismeFormation">
+                    <Text mt={2}>
+                      <Text as="span" fontWeight="700">
+                        2.
+                      </Text>{" "}
+                      Vous êtes un organisme de formation
+                    </Text>
+                  </Link>
                 </Box>
               </Box>
             </GridItem>
             <GridItem colSpan={4} ml="8rem" mx={10}>
-              <Heading as="h1" variant="h1" marginBottom="1w" color="black">
+              <Heading as="h1" variant="h1" marginBottom="1w" color="black" id="maniere">
                 De manière générale
               </Heading>
               <Box mt={10}>
@@ -121,7 +125,7 @@ const ComprendreLesDonnees = () => {
                 </Text>
               </Box>
               <Box py="8rem">
-                <Heading as="h1" variant="h1" marginBottom="1w" color="black">
+                <Heading as="h1" variant="h1" marginBottom="1w" color="black" id="organismeFormation">
                   Vous êtes un organisme de formation
                 </Heading>
                 <Box py={8}>
