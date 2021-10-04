@@ -46,6 +46,8 @@ const NavBar = () => {
     <Section>
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
         <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>
+        <NavItem to="/comprendre-donnees">Comprendre les données</NavItem>
+
         {isAdmin && (
           <>
             <NavItem to="/stats">Statistiques Globales</NavItem>
