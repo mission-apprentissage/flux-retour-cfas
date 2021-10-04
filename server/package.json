@@ -58,6 +58,7 @@
     "support:merge-deca-uais-file": "node -r dotenv/config src/jobs/support/deca-merge-uais-file/index.js",
     "support:raw-data-analysis": "node -r dotenv/config src/jobs/support/raw-data-analysis/index.js",
     "retrieve-location-from-uai": "node -r dotenv/config src/jobs/retrieve-location-from-uai/index.js",
+    "export-data-for-voeuxAffelnet": "node -r dotenv/config src/jobs/export-data-for-voeuxAffelnet/index.js",
     "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
     "calculate:stats": "node -r dotenv/config src/jobs/stats/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",

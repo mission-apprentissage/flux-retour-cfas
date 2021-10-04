@@ -20,4 +20,5 @@ module.exports = {
   Formation: getModel("formations"),
   Log: getModel("logs"),
   Stats: getModel("stats"),
+  CroisementVoeuxAffelnet: getModel("croisementVoeuxAffelnet"),
 };

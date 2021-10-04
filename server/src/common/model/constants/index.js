@@ -179,6 +179,7 @@ const jobNames = {
   checkSiretValidity: "check-siret-validity",
   checkUaiValidity: "check-uai-validity",
   fixHistoriqueStatutApprenant: "fix-historique-statut-apprenant-date-statut",
+  exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
   cfasCroisementDeca: "cfas-croisement-cfas-deca",
   calculateStats: "calculate-stats",
