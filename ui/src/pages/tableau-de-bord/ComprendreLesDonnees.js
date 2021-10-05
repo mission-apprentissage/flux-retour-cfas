@@ -7,19 +7,13 @@ const ComprendreLesDonnees = () => {
   return (
     <Page>
       <Box color="grey.800">
-        <Box
-          bg="#F9F8F6"
-          p={10}
-          backgroundColor="galt"
-          paddingY="8w"
-          boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)"
-        >
+        <Box p="5w" backgroundColor="galt" paddingY="8w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
           <Heading as="h1" variant="h1" marginBottom="1w" ml={10}>
             Comprendre les données
           </Heading>
         </Box>
-        <Box py={20} ml={20}>
-          <Grid h="250vh" templateRows="repeat(2, 1fr)" templateColumns="repeat(5, 1fr)" gap={4}>
+        <Box py="10w" ml="10w">
+          <Grid h="2000px" templateRows="repeat(2, 1fr)" templateColumns="repeat(5, 1fr)" gap={4}>
             <GridItem rowSpan={2} colSpan={1} bg="#F9F8F6" h="170px">
               <Box ml={3} py={4}>
                 <Text fontSize="epsilon" fontWeight="700">
@@ -125,7 +119,7 @@ const ComprendreLesDonnees = () => {
                 </Text>
               </Box>
               <Box py="8rem">
-                <Heading as="h1" variant="h1" marginBottom="1w" color="black" id="organismeFormation">
+                <Heading as="h2" variant="h1" marginBottom="1w" color="black" id="organismeFormation">
                   Vous êtes un organisme de formation
                 </Heading>
                 <Box py={8}>
