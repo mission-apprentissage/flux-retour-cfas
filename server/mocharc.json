@@ -1,0 +1,6 @@
+{
+  "recursive": true,
+  "exit": true,
+  "timeout": 5000,
+  "require": "dotenv/config"
+}
