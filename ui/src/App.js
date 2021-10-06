@@ -5,6 +5,7 @@ import useAuth from "./common/hooks/useAuth";
 import { isUserAdmin } from "./common/utils/rolesUtils";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
+import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import UserStatsPage from "./pages/user-stats";
 
@@ -14,6 +15,7 @@ const App = () => {
       <Switch>
         <Route exact path="/login" component={LoginPage} />
         <Route path="/tableau-de-bord" exact component={TableauDeBordPage} />
+        <Route path="/comprendre-donnees" exact component={ComprendreLesDonnees} />
 
         <Route exact path="/">
           <Redirect to="/tableau-de-bord" />
