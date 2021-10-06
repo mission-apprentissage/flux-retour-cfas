@@ -14,7 +14,7 @@ const ComprendreLesDonnees = () => {
         </Box>
         <Box py="10w" ml="10w">
           <Grid h="2000px" templateRows="repeat(2, 1fr)" templateColumns="repeat(5, 1fr)" gap={4}>
-            <GridItem rowSpan={2} colSpan={1} bg="#F9F8F6" h="170px">
+            <GridItem rowSpan={2} colSpan={1} bg="galt" h="170px">
               <Box ml={3} py={4}>
                 <Text fontSize="epsilon" fontWeight="700">
                   SOMMAIRE
