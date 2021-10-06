@@ -1,4 +1,4 @@
-import { Box, Grid, GridItem, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { Box, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import React from "react";
 
 import { Page } from "../../common/components";
@@ -8,18 +8,18 @@ const ComprendreLesDonnees = () => {
     <Page>
       <Box color="grey.800">
         <Box p="5w" backgroundColor="galt" paddingY="8w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
-          <Heading as="h1" variant="h1" marginBottom="1w" ml={10}>
+          <Heading as="h1" variant="h1" marginBottom="1w" ml="5w">
             Comprendre les données
           </Heading>
         </Box>
         <Box py="10w" ml="10w">
-          <Grid h="2000px" templateRows="repeat(2, 1fr)" templateColumns="repeat(5, 1fr)" gap={4}>
-            <GridItem rowSpan={2} colSpan={1} bg="galt" h="170px">
-              <Box ml={3} py={4}>
+          <Flex>
+            <Box bg="galt" w="20%" h="170px">
+              <Box ml="2w" py="2w">
                 <Text fontSize="epsilon" fontWeight="700">
                   SOMMAIRE
                 </Text>
-                <Box mt={2}>
+                <Box mt="1w">
                   <Link href="#maniere">
                     <Text>
                       <Text as="span" fontWeight="700">
@@ -29,7 +29,7 @@ const ComprendreLesDonnees = () => {
                     </Text>
                   </Link>
                   <Link href="#organismeFormation">
-                    <Text mt={2}>
+                    <Text mt="1w">
                       <Text as="span" fontWeight="700">
                         2.
                       </Text>{" "}
@@ -38,12 +38,12 @@ const ComprendreLesDonnees = () => {
                   </Link>
                 </Box>
               </Box>
-            </GridItem>
-            <GridItem colSpan={4} ml="8rem" mx={10}>
+            </Box>
+            <Box ml="10w" w="70%">
               <Heading as="h1" variant="h1" marginBottom="1w" color="black" id="maniere">
                 De manière générale
               </Heading>
-              <Box mt={10}>
+              <Box mt="5w">
                 <Text fontSize="beta" fontWeight="700">
                   D&apos;où viennent les chiffres ?
                 </Text>
@@ -51,7 +51,7 @@ const ComprendreLesDonnees = () => {
                   Nous collectons des données auprès des organismes de formation en nous connectant à leur ERP.{" "}
                 </Text>
               </Box>
-              <Box mt={10}>
+              <Box mt="5w">
                 <Text fontSize="beta" fontWeight="700">
                   Quelles sont les données collectées et leur format ?
                 </Text>
@@ -59,7 +59,7 @@ const ComprendreLesDonnees = () => {
                   Les données sont collectées par la clé d’entrée de l’apprenant, les champs récupérés sont les suivants
                   :
                 </Text>
-                <UnorderedList ml={9}>
+                <UnorderedList ml="5w">
                   <ListItem>INE ;</ListItem>
                   <ListItem>Nom de l’apprenant ;</ListItem>
                   <ListItem>Prénoms de l’apprenant ;</ListItem>
@@ -74,9 +74,9 @@ const ComprendreLesDonnees = () => {
                   <ListItem>SIRET de l’organisme de formation ;</ListItem>
                   <ListItem>Raison sociale ;</ListItem>
                 </UnorderedList>
-                <Box fontWeight="700" mt={4}>
+                <Box fontWeight="700" mt="2w">
                   <Text>Définitions :</Text>
-                  <UnorderedList ml={9}>
+                  <UnorderedList ml="5w">
                     <ListItem>
                       Un apprenant unique est identifié quand il y a unicité sur la combinaison suivante : Nom, Prénom,
                       CFD de la formation, UAI de l’organisme de formation, INE.On décompte donc 1 apprenant pour 1
@@ -89,7 +89,7 @@ const ComprendreLesDonnees = () => {
                   </UnorderedList>
                 </Box>
               </Box>
-              <Box mt={10}>
+              <Box mt="5w">
                 <Text fontSize="beta" fontWeight="700">
                   A quelle date l&apos;indice &quot;Effectif&quot; est-il arrêté ?
                 </Text>
@@ -104,7 +104,7 @@ const ComprendreLesDonnees = () => {
                   comptabilisés au 31 décembre.
                 </Text>
               </Box>
-              <Box mt={10}>
+              <Box mt="5w">
                 <Text fontSize="beta" fontWeight="700">
                   Y a-t-il un traitement statistique des données ?
                 </Text>
@@ -118,11 +118,11 @@ const ComprendreLesDonnees = () => {
                   dans le Tableau de bord
                 </Text>
               </Box>
-              <Box py="8rem">
+              <Box py="10w">
                 <Heading as="h2" variant="h1" marginBottom="1w" color="black" id="organismeFormation">
                   Vous êtes un organisme de formation
                 </Heading>
-                <Box py={8}>
+                <Box py="4w">
                   <Text fontSize="beta" fontWeight="700">
                     ‌Sur la page de votre organisme, vous constatez un écart entre les chiffres dont vous disposez et
                     ceux du tableau de bord
@@ -141,7 +141,7 @@ const ComprendreLesDonnees = () => {
                     cause pour la corriger si possible.
                   </Text>
                 </Box>
-                <Box py={8}>
+                <Box py="4w">
                   <Text fontSize="beta" fontWeight="700">
                     Vous ne retrouvez pas votre organisme dans la liste proposée
                   </Text>
@@ -153,7 +153,7 @@ const ComprendreLesDonnees = () => {
                     l&apos;adresse suivante : tableau-de-bord@apprentissage.beta.gouv.fr
                   </Text>
                 </Box>
-                <Box py={8}>
+                <Box py="4w">
                   <Text fontSize="beta" fontWeight="700">
                     Vous ne voyez pas votre réseau dans la liste proposée
                   </Text>
@@ -165,8 +165,8 @@ const ComprendreLesDonnees = () => {
                   </Text>
                 </Box>
               </Box>
-            </GridItem>
-          </Grid>
+            </Box>
+          </Flex>
         </Box>
       </Box>
     </Page>
