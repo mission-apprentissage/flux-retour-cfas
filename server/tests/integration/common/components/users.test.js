@@ -2,7 +2,7 @@ const assert = require("assert");
 const integrationTests = require("../../../utils/integrationTests");
 const users = require("../../../../src/common/components/users");
 const { User } = require("../../../../src/common/model");
-const { administrator } = require("../../../../src/common/roles");
+const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
 
 integrationTests(__filename, () => {
   it("Permet de créer un utilisateur", async () => {
@@ -22,17 +22,36 @@ integrationTests(__filename, () => {
   it("Permet de créer un utilisateur avec les droits d'admin", async () => {
     const { createUser } = await users();
 
-    const user = await createUser("userAdmin", "password", { permissions: [administrator] });
+    const user = await createUser("userAdmin", "password", { permissions: [apiRoles.administrator] });
     const found = await User.findOne({ username: "userAdmin" });
 
-    assert.strictEqual(user.permissions.includes(administrator), true);
-    assert.strictEqual(found.permissions.includes(administrator), true);
+    assert.strictEqual(user.permissions.includes(apiRoles.administrator), true);
+    assert.strictEqual(found.permissions.includes(apiRoles.administrator), true);
+  });
+
+  it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
+    const { createUser } = await users();
+
+    const user = await createUser("userAdmin", "password", {
+      permissions: [tdbRoles.network],
+      email: "email@test.fr",
+      network: "test",
+    });
+    const found = await User.findOne({ username: "userAdmin" });
+
+    assert.strictEqual(user.permissions.includes(tdbRoles.network), true);
+    assert.strictEqual(user.network === "test", true);
+    assert.strictEqual(user.email === "email@test.fr", true);
+
+    assert.strictEqual(found.permissions.includes(tdbRoles.network), true);
+    assert.strictEqual(found.network === "test", true);
+    assert.strictEqual(found.email === "email@test.fr", true);
   });
 
   it("Permet de supprimer un utilisateur", async () => {
     const { createUser, removeUser } = await users();
 
-    await createUser("userToDelete", "password", { permissions: [administrator] });
+    await createUser("userToDelete", "password", { permissions: [apiRoles.administrator] });
     await removeUser("userToDelete");
 
     const found = await User.findOne({ username: "userToDelete" });

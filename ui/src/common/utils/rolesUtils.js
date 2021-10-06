@@ -5,8 +5,8 @@ export const isUserInRole = (auth, role) =>
 
 export const isUserAdmin = (auth) => isUserInRole(auth, roles.administrator);
 
-export const roles = {
-  role1: "role1",
-  role2: "role2",
+const roles = {
   administrator: "administrator",
+  pilot: "pilot",
+  network: "network",
 };

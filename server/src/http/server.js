@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const { apiStatutsSeeder, administrator } = require("../common/roles");
+const { apiRoles } = require("../common/roles");
 
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
@@ -24,7 +24,7 @@ module.exports = async (components) => {
   const app = express();
 
   const checkJwtToken = jwtAuthMiddleware(components);
-  const adminOnly = permissionsMiddleware([administrator]);
+  const adminOnly = permissionsMiddleware([apiRoles.administrator]);
 
   app.use(bodyParser.json());
   app.use(corsMiddleware());
@@ -33,7 +33,7 @@ module.exports = async (components) => {
   app.use(
     "/api/statut-candidats",
     jwtAuthMiddleware(components),
-    permissionsMiddleware([apiStatutsSeeder]),
+    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     statutCandidatsRoute(components)
   );
   app.use("/api/login", loginRoute(components));

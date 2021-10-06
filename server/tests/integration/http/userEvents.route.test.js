@@ -1,12 +1,12 @@
 const assert = require("assert");
 const httpTests = require("../../utils/httpTests");
 const { UserEvent } = require("../../../src/common/model");
-const { administrator } = require("../../../src/common/roles");
+const { apiRoles } = require("../../../src/common/roles");
 
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie qu'on peut récupérer les dernières dates des users events via API", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const bearerToken = await createAndLogUser("user", "password", { permissions: [administrator] });
+    const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
 
     // Add events
     const ymagEvent = new UserEvent({
