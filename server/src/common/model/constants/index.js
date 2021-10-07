@@ -112,6 +112,10 @@ const REGIONS_DEPLOYEES = [
     nom: "Île-de-France",
     code: "11",
   },
+  {
+    nom: "Hauts-de-France",
+    code: "32",
+  },
 ];
 
 /**
