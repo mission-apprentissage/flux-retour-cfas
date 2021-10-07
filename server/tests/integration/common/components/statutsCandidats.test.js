@@ -264,15 +264,15 @@ integrationTests(__filename, () => {
       assert.ok(thirdUpdated.updated_at);
     });
 
-    it("Vérifie qu'on ne crée pas de données quand le statut candidat n'a pas de champ annee_scolaire", async () => {
+    it("Vérifie qu'on peut créer un statut sans annee_scolaire", async () => {
       const { addOrUpdateStatuts } = await statutsCandidats();
       const randomStatut = createRandomStatutCandidat();
       delete randomStatut.annee_scolaire;
 
       const result = await addOrUpdateStatuts([randomStatut]);
-      assert.equal(result.added.length, 0);
+      assert.equal(result.added.length, 1);
       assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidat.countDocuments(), 0);
+      assert.equal(await StatutCandidat.countDocuments(), 1);
     });
 
     it("Vérifie qu'on ne crée pas de données quand le statut candidat a un champ annee_scolaire invalide", async () => {
@@ -291,11 +291,25 @@ integrationTests(__filename, () => {
       const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
 
       const result = await addOrUpdateStatuts([statutWithAnneeScolaire, statutWithoutAnneeScolaire]);
-      assert.equal(result.added.length, 1);
+      assert.equal(result.added.length, 2);
       const addedElement = result.added[0];
       assert.equal(addedElement.annee_scolaire, statutWithAnneeScolaire.annee_scolaire);
       assert.equal(addedElement.nom_apprenant, statutWithAnneeScolaire.nom_apprenant);
       assert.equal(result.updated.length, 0);
+      assert.equal(await StatutCandidat.countDocuments(), 2);
+    });
+
+    it("Vérifie qu'on ne crée pas de doublon pour un statut créé sans annee_scolaire", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
+
+      const result = await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
+      assert.equal(result.added.length, 1);
+      assert.equal(result.updated.length, 0);
+
+      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
+      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
+      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
       assert.equal(await StatutCandidat.countDocuments(), 1);
     });
 
@@ -1003,6 +1017,20 @@ integrationTests(__filename, () => {
       const foundFormations = await Formation.find();
       assert.deepEqual(foundFormations.length, 1);
       assert.deepEqual(foundFormations[0].created_at, formation.created_at);
+    });
+
+    it("Vérifie qu'on peut créer un statut sans annee_scolaire", async () => {
+      const { createStatutCandidat } = await statutsCandidats();
+
+      // Create statut
+      const statutWithoutAnneeScolaire = { ...createRandomStatutCandidat(), annee_scolaire: undefined };
+      const createdStatut = await createStatutCandidat(statutWithoutAnneeScolaire);
+
+      assert.ok(createdStatut);
+      assert.equal(createdStatut.prenom_apprenant, statutWithoutAnneeScolaire.prenom_apprenant);
+      assert.equal(createdStatut.nom_apprenant, statutWithoutAnneeScolaire.nom_apprenant);
+      assert.equal(createdStatut.formation_cfd, statutWithoutAnneeScolaire.formation_cfd);
+      assert.equal(createdStatut.uai_etablissement, statutWithoutAnneeScolaire.uai_etablissement);
     });
   });
 

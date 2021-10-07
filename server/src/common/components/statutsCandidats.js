@@ -42,15 +42,15 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    const anneeScolaireValidation = validateAnneeScolaire(item.annee_scolaire);
-
-    // for now we don't want to throw an error for missing annee_scolaire, we will just ignore the item
-    // TODO move it to API joi schema
-    // If CFD not present ignore item too
-    const mandatoryFieldsInvalid = anneeScolaireValidation.error || !item.formation_cfd;
-
-    if (mandatoryFieldsInvalid) {
+    // if CFD not present ignore item
+    if (!item.formation_cfd) {
       return;
+    }
+
+    // annee_scolaire is not mandatory but it must be valid, otherwise ignore item
+    if (item.annee_scolaire !== null && item.annee_scolaire !== undefined) {
+      const anneeScolaireValidation = validateAnneeScolaire(item.annee_scolaire);
+      if (anneeScolaireValidation.error) return;
     }
 
     const foundItem = await getStatut({
