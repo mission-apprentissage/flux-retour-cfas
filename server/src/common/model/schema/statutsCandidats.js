@@ -17,16 +17,6 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Prénom du jeune",
   },
-  prenom2_apprenant: {
-    type: String,
-    default: null,
-    description: "Prénom 2 du jeune",
-  },
-  prenom3_apprenant: {
-    type: String,
-    default: null,
-    description: "Prénom 3 du jeune",
-  },
   ne_pas_solliciter: {
     type: Boolean,
     default: false,
@@ -253,6 +243,11 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Numéro de téléphone du jeune",
   },
+  code_postal_apprenant: {
+    type: String,
+    default: null,
+    description: "Code postal du jeune",
+  },
   date_de_naissance_apprenant: {
     type: Date,
     default: null,
@@ -268,6 +263,16 @@ const statutsCandidatsSchema = new Schema({
     type: String,
     default: null,
     description: "Code postal de l'établissement formateur",
+  },
+  etablissement_formateur_code_commune_insee: {
+    type: String,
+    default: null,
+    description: "Code commune de l'établissement formateur",
+  },
+  etablissement_formateur_ville: {
+    type: String,
+    default: null,
+    description: "Ville de l'établissement formateur",
   },
   contrat_date_debut: {
     type: Date,
