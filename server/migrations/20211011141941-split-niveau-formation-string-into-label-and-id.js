@@ -1,8 +1,8 @@
 /*
   niveau_formation used to be a string with example value `"3 (Bac, CAP...)"`
   We now split it into two fields :
-    - niveau_formation : number (parsed from niveau_formation string)
-    - niveau_formation : string (the former niveau_formation)
+    - niveau_formation : parsed from niveau_formation string
+    - niveau_formation : the former niveau_formation
 */
 
 const { asyncForEach } = require("../src/common/utils/asyncUtils");
