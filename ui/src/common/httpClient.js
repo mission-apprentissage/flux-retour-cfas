@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 
-import { getAuth } from "./auth";
+import { getAuth } from "./auth/auth";
 
 class AuthError extends Error {
   constructor(json, statusCode) {
