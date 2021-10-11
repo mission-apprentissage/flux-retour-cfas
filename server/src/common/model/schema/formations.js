@@ -14,7 +14,11 @@ const formationSchema = new Schema(
     },
     niveau: {
       type: String,
-      description: "Niveau récupéré depuis Tables de Correspondances",
+      description: "Niveau de formation récupéré via Tables de Correspondances",
+    },
+    niveau_libelle: {
+      type: String,
+      description: "Libellé du niveau de formation récupéré via Tables de Correspondances",
     },
     tokenized_libelle: {
       type: String,

@@ -70,7 +70,12 @@ const statutsCandidatsSchema = new Schema({
   niveau_formation: {
     type: String,
     default: null,
-    description: "Le niveau de la formation",
+    description: "Le niveau de la formation (ex: 3)",
+  },
+  niveau_formation_libelle: {
+    type: String,
+    default: null,
+    description: "Libellé du niveau de la formation (ex: '3 (BTS, DUT...)')",
   },
   uai_etablissement: {
     type: String,

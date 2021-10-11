@@ -15,7 +15,8 @@ class Formation {
         })
         .required(),
       libelle: Joi.string().allow(""),
-      niveau: Joi.string().allow(null, ""),
+      niveau: Joi.string().allow(null),
+      niveau_libelle: Joi.string().allow(null, ""),
       metiers: Joi.array().items(Joi.string().allow(null, "")).allow(null),
     });
 

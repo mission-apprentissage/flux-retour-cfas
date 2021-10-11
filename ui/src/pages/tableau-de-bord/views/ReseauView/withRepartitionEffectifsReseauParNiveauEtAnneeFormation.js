@@ -19,7 +19,11 @@ const withRepartitionEffectifsReseauParNiveauEtAnneeFormation = (Component) => {
     const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-niveau-formation?${queryParams}`);
 
     const repartitionEffectifs = data?.map((repartition) => {
-      return { niveauFormation: repartition.niveau_formation, effectifs: repartition.effectifs };
+      return {
+        niveauFormation: repartition.niveau_formation,
+        niveauFormationLibelle: repartition.niveau_formation_libelle,
+        effectifs: repartition.effectifs,
+      };
     });
 
     return <Component {...props} repartitionEffectifs={repartitionEffectifs} loading={loading} error={error} />;
