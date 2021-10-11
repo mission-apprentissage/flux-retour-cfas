@@ -39,8 +39,6 @@ const createRandomStatutCandidat = (params = {}) => {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
-    prenom2_apprenant: faker.datatype.boolean() ? faker.name.firstName().toUpperCase() : null,
-    prenom3_apprenant: faker.datatype.boolean() ? faker.name.firstName().toUpperCase() : null,
     ne_pas_solliciter: faker.datatype.boolean(),
     email_contact: faker.internet.email(),
 
@@ -78,8 +76,6 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
-    prenom2_apprenant: faker.datatype.boolean() ? faker.name.firstName().toUpperCase() : null,
-    prenom3_apprenant: faker.datatype.boolean() ? faker.name.firstName().toUpperCase() : null,
     ne_pas_solliciter: faker.datatype.boolean(),
     email_contact: faker.internet.email(),
 

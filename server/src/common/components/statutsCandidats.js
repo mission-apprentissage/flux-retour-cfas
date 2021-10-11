@@ -133,8 +133,6 @@ const createStatutCandidat = async (itemToCreate) => {
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant,
     prenom_apprenant: itemToCreate.prenom_apprenant,
-    prenom2_apprenant: itemToCreate.prenom2_apprenant,
-    prenom3_apprenant: itemToCreate.prenom3_apprenant,
     ne_pas_solliciter: itemToCreate.ne_pas_solliciter,
     email_contact: itemToCreate.email_contact,
     formation_cfd: itemToCreate.formation_cfd,

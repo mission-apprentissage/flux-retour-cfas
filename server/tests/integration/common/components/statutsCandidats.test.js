@@ -103,8 +103,6 @@ integrationTests(__filename, () => {
       assert.strictEqual(found.ine_apprenant, randomStatut.ine_apprenant);
       assert.strictEqual(found.nom_apprenant, randomStatut.nom_apprenant);
       assert.strictEqual(found.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.strictEqual(found.prenom2_apprenant, randomStatut.prenom2_apprenant);
-      assert.strictEqual(found.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.strictEqual(found.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.strictEqual(found.email_contact, randomStatut.email_contact);
       assert.strictEqual(found.formation_cfd, randomStatut.formation_cfd);
@@ -691,8 +689,6 @@ integrationTests(__filename, () => {
       const validCfd = "abcd1234";
       const validUai = "0123456Z";
 
-      const updatedPrenom2 = "Sam";
-      const updatedPrenom3 = "Billy";
       const updatedEmail = "other@email.fr";
 
       // Create 2 distinct items
@@ -711,8 +707,6 @@ integrationTests(__filename, () => {
       // send the same statut but with updates on prenom2-3 & email
       const sameStatutWithUpdatesPrenomEmail = {
         ...uniqueStatutToCreate,
-        prenom2_apprenant: updatedPrenom2,
-        prenom3_apprenant: updatedPrenom3,
         email_contact: updatedEmail,
       };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithUpdatesPrenomEmail]);
@@ -725,8 +719,6 @@ integrationTests(__filename, () => {
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.prenom2_apprenant, updatedPrenom2);
-      assert.deepStrictEqual(found.prenom3_apprenant, updatedPrenom3);
       assert.deepStrictEqual(found.email_contact, updatedEmail);
       assert.notDeepStrictEqual(found.updated_at, null);
     });
@@ -846,8 +838,6 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatutJson.ine_apprenant, randomStatut.ine_apprenant);
       assert.strictEqual(createdStatutJson.nom_apprenant, randomStatut.nom_apprenant);
       assert.strictEqual(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.strictEqual(createdStatutJson.prenom2_apprenant, randomStatut.prenom2_apprenant);
-      assert.strictEqual(createdStatutJson.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.strictEqual(createdStatutJson.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.strictEqual(createdStatutJson.email_contact, randomStatut.email_contact);
       assert.strictEqual(createdStatutJson.formation_cfd, randomStatut.formation_cfd);

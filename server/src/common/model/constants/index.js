@@ -233,8 +233,6 @@ const dataSource = {
 
 const statutsCandidatsStringFields = [
   "ine_apprenant",
-  "prenom2_apprenant",
-  "prenom3_apprenant",
   "email_contact",
   "libelle_court_formation",
   "libelle_long_formation",
