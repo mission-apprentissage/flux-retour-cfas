@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
-const { apiStatutsSeeder } = require("../../../src/common/roles");
+const { apiRoles } = require("../../../src/common/roles");
 const { StatutCandidat } = require("../../../src/common/model");
 const {
   createRandomStatutsCandidatsApiInputList,
@@ -18,7 +18,7 @@ const createApiUser = async () => {
   const { createUser } = await users();
 
   return await createUser(user.name, user.password, {
-    permissions: [apiStatutsSeeder],
+    permissions: [apiRoles.apiStatutsSeeder],
   });
 };
 

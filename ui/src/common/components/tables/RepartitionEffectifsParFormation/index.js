@@ -2,30 +2,36 @@ import { Tbody } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
+import { isDateFuture } from "../../../utils/dateUtils";
 import Table from "../Table";
 import NiveauFormationRow from "./NiveauFormationRow";
 
 const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error }) => {
+  const filtersContext = useFiltersContext();
+  const isPeriodInvalid = isDateFuture(filtersContext.state.date);
+  const tableHeader = isPeriodInvalid
+    ? ["Niveau", "apprentis", "inscrits sans contrat"]
+    : ["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   return (
-    <Table
-      headers={["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"]}
-      loading={loading}
-      error={error}
-    >
-      <Tbody>
-        {repartitionEffectifs
-          ? repartitionEffectifs.map((data) => {
-              return (
-                <NiveauFormationRow
-                  key={data.niveauFormation}
-                  niveauFormation={data.niveauFormation}
-                  effectifs={data.effectifs}
-                />
-              );
-            })
-          : null}
-      </Tbody>
-    </Table>
+    <>
+      <Table headers={tableHeader} loading={loading} error={error}>
+        <Tbody>
+          {repartitionEffectifs
+            ? repartitionEffectifs.map((data) => {
+                return (
+                  <NiveauFormationRow
+                    key={data.niveauFormation}
+                    niveauFormation={data.niveauFormation}
+                    effectifs={data.effectifs}
+                    isPeriodInvalid={isPeriodInvalid}
+                  />
+                );
+              })
+            : null}
+        </Tbody>
+      </Table>
+    </>
   );
 };
 

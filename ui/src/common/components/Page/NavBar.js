@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import React from "react";
 import { NavLink, useRouteMatch } from "react-router-dom";
 
+import { isUserAuthorizedForRoles, roles } from "../../auth/roles";
 import useAuth from "../../hooks/useAuth";
-import { isUserAdmin } from "../../utils/rolesUtils";
 import Section from "../Section/Section";
 
 const NavItem = ({ to, children }) => {
@@ -40,12 +40,14 @@ NavItem.propTypes = {
 const NavBar = () => {
   const [auth] = useAuth();
 
-  const isAdmin = isUserAdmin(auth);
+  const isAdmin = isUserAuthorizedForRoles(auth, roles.administrator);
 
   return (
     <Section>
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
         <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>
+        <NavItem to="/comprendre-donnees">Comprendre les données</NavItem>
+
         {isAdmin && (
           <>
             <NavItem to="/stats">Statistiques Globales</NavItem>

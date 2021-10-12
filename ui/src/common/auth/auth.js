@@ -1,7 +1,7 @@
 import { createGlobalState } from "react-hooks-global-state";
 
-import { subscribeToHttpEvent } from "./httpClient";
-import decodeJWT from "./utils/decodeJWT";
+import { subscribeToHttpEvent } from "../httpClient";
+import decodeJWT from "../utils/decodeJWT";
 
 const access_token = localStorage.getItem("flux-retour-cfas:access_token");
 

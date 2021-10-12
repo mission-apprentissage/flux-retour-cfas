@@ -27,11 +27,15 @@ module.exports = async () => {
     createUser: async (username, password, options = {}) => {
       const hash = options.hash || sha512Utils.hash(password);
       const permissions = options.permissions || [];
+      const network = options.network || null;
+      const email = options.email || null;
 
       const user = new User({
         username,
+        email,
         password: hash,
         permissions: permissions,
+        network,
       });
 
       await user.save();

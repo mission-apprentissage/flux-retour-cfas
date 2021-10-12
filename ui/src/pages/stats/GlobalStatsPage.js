@@ -11,10 +11,7 @@ const GlobalStatsPage = () => {
   let content;
   if (loading) content = <StatsSkeleton />;
   if (error) content = <p>Erreur lors du chargement des statistiques</p>;
-  if (data && !loading)
-    content = (
-      <GlobalStats stats={data.stats} lastImportDates={data.lastImportDates} networksStats={data.networksStats} />
-    );
+  if (data && !loading) content = <GlobalStats stats={data.stats} networksStats={data.networksStats} />;
 
   return (
     <Page>
