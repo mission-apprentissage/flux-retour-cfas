@@ -243,10 +243,10 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Numéro de téléphone du jeune",
   },
-  code_postal_apprenant: {
+  code_commune_insee_apprenant: {
     type: String,
     default: null,
-    description: "Code postal du jeune",
+    description: "Code commune insee du jeune",
   },
   date_de_naissance_apprenant: {
     type: Date,
@@ -258,11 +258,6 @@ const statutsCandidatsSchema = new Schema({
     implicit_type: "geo_point",
     default: null,
     description: "Latitude et longitude de l'établissement formateur",
-  },
-  etablissement_formateur_code_postal: {
-    type: String,
-    default: null,
-    description: "Code postal de l'établissement formateur",
   },
   etablissement_formateur_code_commune_insee: {
     type: String,
