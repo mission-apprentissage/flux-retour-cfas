@@ -49,6 +49,13 @@ module.exports = ({ statutsCandidats }) => {
     contrat_date_debut: Joi.date().allow(null),
     contrat_date_fin: Joi.date().allow(null),
     contrat_date_rupture: Joi.date().allow(null),
+
+    // TODO remove when ERPs stop sending us this information
+    nom_representant_legal: Joi.string().allow(null, ""),
+    tel_representant_legal: Joi.string().allow(null, ""),
+    tel2_representant_legal: Joi.string().allow(null, ""),
+    prenom2_apprenant: Joi.string().allow(null, ""),
+    prenom3_apprenant: Joi.string().allow(null, ""),
   });
 
   /**
