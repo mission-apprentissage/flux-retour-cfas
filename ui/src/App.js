@@ -18,12 +18,7 @@ const App = () => {
         <Route path="/comprendre-donnees" exact component={ComprendreLesDonnees} />
 
         {/* Secured Tdb Pages */}
-        <ProtectedRolesRoute
-          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
-          path="/tableau-de-bord"
-          exact
-          component={TableauDeBordPage}
-        />
+        <Route path="/tableau-de-bord" exact component={TableauDeBordPage} />
         <Route exact path="/">
           <Redirect to="/tableau-de-bord" />
         </Route>
