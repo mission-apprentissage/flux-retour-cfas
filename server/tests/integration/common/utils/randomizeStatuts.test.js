@@ -20,8 +20,6 @@ integrationTests(__filename, () => {
       assert.equal(result.ine_apprenant, randomStatut.ine_apprenant);
       assert.equal(result.nom_apprenant, randomStatut.nom_apprenant);
       assert.equal(result.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.equal(result.prenom2_apprenant, randomStatut.prenom2_apprenant);
-      assert.equal(result.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.equal(result.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.equal(result.email_contact, randomStatut.email_contact);
       assert.equal(result.formation_cfd, randomStatut.formation_cfd);
@@ -41,8 +39,6 @@ integrationTests(__filename, () => {
         ine_apprenant: result.ine_apprenant,
         nom_apprenant: result.nom_apprenant,
         prenom_apprenant: result.prenom_apprenant,
-        prenom2_apprenant: result.prenom2_apprenant,
-        prenom3_apprenant: result.prenom3_apprenant,
         email_contact: result.email_contact,
         formation_cfd: result.formation_cfd,
         uai_etablissement: result.uai_etablissement,
@@ -64,8 +60,6 @@ integrationTests(__filename, () => {
       assert.deepEqual(result.ine_apprenant, randomStatut.ine_apprenant);
       assert.deepEqual(result.nom_apprenant, randomStatut.nom_apprenant);
       assert.deepEqual(result.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.deepEqual(result.prenom2_apprenant, randomStatut.prenom2_apprenant);
-      assert.deepEqual(result.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.deepEqual(result.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.deepEqual(result.email_contact, randomStatut.email_contact);
       assert.deepEqual(result.formation_cfd, randomStatut.formation_cfd);
@@ -85,8 +79,6 @@ integrationTests(__filename, () => {
         ine_apprenant: result.ine_apprenant,
         nom_apprenant: result.nom_apprenant,
         prenom_apprenant: result.prenom_apprenant,
-        prenom2_apprenant: result.prenom2_apprenant,
-        prenom3_apprenant: result.prenom3_apprenant,
         email_contact: result.email_contact,
         formation_cfd: result.formation_cfd,
         uai_etablissement: result.uai_etablissement,

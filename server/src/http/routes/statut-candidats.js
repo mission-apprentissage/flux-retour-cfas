@@ -31,28 +31,25 @@ module.exports = ({ statutsCandidats }) => {
 
     // optional
     ine_apprenant: Joi.string().allow(null, ""),
-    prenom2_apprenant: Joi.string().allow(null, ""),
-    prenom3_apprenant: Joi.string().allow(null, ""),
+    id_erp_apprenant: Joi.string().allow(null),
     email_contact: Joi.string().allow(null, ""),
+    tel_apprenant: Joi.string().allow(null),
+    code_commune_insee_apprenant: Joi.string().allow(null),
+    date_de_naissance_apprenant: Joi.date().allow(null),
+
+    siret_etablissement: Joi.string().allow(null, ""),
+    etablissement_formateur_geo_coordonnees: Joi.string().allow(null),
+    etablissement_formateur_code_commune_insee: Joi.string().allow(null),
+
     libelle_court_formation: Joi.string().allow(null, ""),
     libelle_long_formation: Joi.string().allow(null, ""),
-    siret_etablissement: Joi.string().allow(null, ""),
-    date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
     periode_formation: Joi.string().allow(null, ""),
     annee_formation: Joi.number().allow(null),
-    id_erp_apprenant: Joi.string().allow(null),
-    tel_apprenant: Joi.string().allow(null),
-    date_de_naissance_apprenant: Joi.date().allow(null),
-    etablissement_formateur_geo_coordonnees: Joi.string().allow(null),
-    etablissement_formateur_code_postal: Joi.string().allow(null),
+    date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
+
     contrat_date_debut: Joi.date().allow(null),
     contrat_date_fin: Joi.date().allow(null),
     contrat_date_rupture: Joi.date().allow(null),
-
-    // TODO remove when ERPs stop sending us this information
-    nom_representant_legal: Joi.string().allow(null, ""),
-    tel_representant_legal: Joi.string().allow(null, ""),
-    tel2_representant_legal: Joi.string().allow(null, ""),
   });
 
   /**
@@ -81,7 +78,9 @@ module.exports = ({ statutsCandidats }) => {
 
         // Validate items one by one
         await asyncForEach(req.body, (currentStatutToAddOrUpdate) => {
-          const statutValidation = statutCandidatItemSchema.validate(currentStatutToAddOrUpdate);
+          const statutValidation = statutCandidatItemSchema.validate(currentStatutToAddOrUpdate, {
+            stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
+          });
 
           if (statutValidation.error) {
             nbItemsInvalid++;
