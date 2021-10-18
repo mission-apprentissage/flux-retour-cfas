@@ -82,7 +82,7 @@ httpTests(__filename, ({ startServer }) => {
   const requiredFields = [
     "prenom_apprenant",
     "nom_apprenant",
-    // "id_formation", // TODO put back
+    "id_formation",
     "uai_etablissement",
     "statut_apprenant",
     // "annee_scolaire", TODO put back

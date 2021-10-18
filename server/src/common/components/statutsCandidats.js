@@ -42,11 +42,6 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // if CFD not present ignore item
-    if (!item.formation_cfd) {
-      return;
-    }
-
     // annee_scolaire is not mandatory but it must be valid, otherwise ignore item
     if (item.annee_scolaire !== null && item.annee_scolaire !== undefined) {
       const anneeScolaireValidation = validateAnneeScolaire(item.annee_scolaire);
