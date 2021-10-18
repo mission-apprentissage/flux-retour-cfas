@@ -88,12 +88,12 @@ integrationTests(__filename, () => {
       nockGetMetiersByCfd(dataForGetMetiersByCfd);
 
       const cfd = "13534005";
-      await FormationModel.deleteMany({ cfd });
       const created = await createFormation(cfd);
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
         libelle: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
-        niveau: "7 (Master, titre ingénieur...)",
+        niveau: "7",
+        niveau_libelle: "7 (Master, titre ingénieur...)",
         metiers: dataForGetMetiersByCfd.metiers,
         updated_at: null,
       });
@@ -104,12 +104,12 @@ integrationTests(__filename, () => {
       nockGetMetiersByCfd(dataForGetMetiersByCfd);
 
       const cfd = "13534005";
-      await FormationModel.deleteMany({ cfd });
       const created = await createFormation(cfd);
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
         libelle: "",
-        niveau: "7 (Master, titre ingénieur...)",
+        niveau: "7",
+        niveau_libelle: "7 (Master, titre ingénieur...)",
         metiers: dataForGetMetiersByCfd.metiers,
         updated_at: null,
       });
@@ -248,6 +248,34 @@ integrationTests(__filename, () => {
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
+    });
+  });
+
+  describe("getNiveauFormationFromLibelle", () => {
+    const { getNiveauFormationFromLibelle } = formationsComponent();
+
+    it("should return null when passed null", () => {
+      assert.equal(getNiveauFormationFromLibelle(null), null);
+    });
+
+    it("should return null when passed empty string", () => {
+      assert.equal(getNiveauFormationFromLibelle(null), null);
+    });
+
+    it("should return null when passed empty undefined", () => {
+      assert.equal(getNiveauFormationFromLibelle(undefined), null);
+    });
+
+    it("should return null when it cannot parse number from passed string", () => {
+      assert.equal(getNiveauFormationFromLibelle("BTS, DUT..."), null);
+    });
+
+    it("should return niveau when passed a number as string", () => {
+      assert.equal(getNiveauFormationFromLibelle("0"), "0");
+    });
+
+    it("should return parsed niveau when passed a string", () => {
+      assert.equal(getNiveauFormationFromLibelle("3 (BTS, DUT...)"), "3");
     });
   });
 });

@@ -127,6 +127,8 @@ const createStatutCandidat = async (itemToCreate) => {
     await createFormation(itemToCreate.formation_cfd);
   }
 
+  const formationInfo = await getFormationWithCfd(itemToCreate.formation_cfd);
+
   const toAdd = new StatutCandidat({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant,
@@ -139,7 +141,8 @@ const createStatutCandidat = async (itemToCreate) => {
     formation_cfd_valid: validateCfd(itemToCreate.formation_cfd),
     libelle_court_formation: itemToCreate.libelle_court_formation,
     libelle_long_formation: itemToCreate.libelle_long_formation,
-    niveau_formation: (await getFormationWithCfd(itemToCreate.formation_cfd))?.niveau,
+    niveau_formation: formationInfo?.niveau,
+    niveau_formation_libelle: formationInfo?.niveau_libelle,
     uai_etablissement: itemToCreate.uai_etablissement,
     uai_etablissement_valid: validateUai(itemToCreate.uai_etablissement),
     siret_etablissement: itemToCreate.siret_etablissement,

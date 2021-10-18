@@ -10,6 +10,7 @@ module.exports = () => ({
   existsFormation,
   getFormationWithCfd,
   searchFormations,
+  getNiveauFormationFromLibelle,
 });
 
 /**
@@ -33,6 +34,13 @@ const buildFormationLibelle = (formationFromTCO) => {
   return formationFromTCO.intitule_long || "";
 };
 
+const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
+  if (niveauFormationLibelle == null || niveauFormationLibelle === "") return null;
+
+  const niveau = niveauFormationLibelle.split(" ")[0];
+  return isNaN(parseInt(niveau, 10)) ? null : niveau;
+};
+
 /**
  * Fetches data for given CFD in Tables de Correspondances and creates a new Formation in DB
  * @param {string} cfd
@@ -53,7 +61,8 @@ const createFormation = async (cfd) => {
   const formationEntity = Formation.create({
     cfd,
     libelle: buildFormationLibelle(formationInfo),
-    niveau: formationInfo?.niveau,
+    niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
+    niveau_libelle: formationInfo?.niveau,
     metiers: metiersFromCfd?.metiers,
   });
 

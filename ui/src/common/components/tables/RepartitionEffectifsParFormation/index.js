@@ -23,6 +23,7 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
                   <NiveauFormationRow
                     key={data.niveauFormation}
                     niveauFormation={data.niveauFormation}
+                    niveauFormationLibelle={data.niveauFormationLibelle}
                     effectifs={data.effectifs}
                     isPeriodInvalid={isPeriodInvalid}
                   />
@@ -39,6 +40,7 @@ RepartitionEffectifsParFormation.propTypes = {
   repartitionEffectifs: PropTypes.arrayOf(
     PropTypes.shape({
       niveauFormation: PropTypes.string.isRequired,
+      niveauFormationLibelle: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
         inscritsSansContrat: PropTypes.number.isRequired,
