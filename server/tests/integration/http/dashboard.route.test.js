@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const {
-  historySequenceProspectToInscritToApprentiToAbandon,
+  historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
@@ -27,7 +27,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
         });
         const toAdd = new StatutCandidat(randomStatut);
@@ -88,7 +88,7 @@ httpTests(__filename, ({ startServer }) => {
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
         const randomStatut = createRandomStatutCandidat({
-          historique_statut_apprenant: historySequenceProspectToInscritToApprentiToAbandon,
+          historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });

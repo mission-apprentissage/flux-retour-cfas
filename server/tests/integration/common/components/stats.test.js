@@ -26,7 +26,6 @@ integrationTests(__filename, () => {
 
     // Check stats existence
     assert.strictEqual(allStats.nbStatutsCandidats > 0, true);
-    assert.strictEqual(allStats.nbStatutsProspect > 0, true);
     assert.strictEqual(allStats.nbStatutsInscrits > 0, true);
     assert.strictEqual(allStats.nbStatutsApprentis > 0, true);
     assert.strictEqual(allStats.nbStatutsAbandon > 0, true);
@@ -43,27 +42,10 @@ integrationTests(__filename, () => {
     assert.strictEqual(allStats.nbDistinctCandidatsWithIne > 0, true);
     assert.strictEqual(allStats.nbDistinctCandidatsWithoutIne > 0, true);
     assert.strictEqual(allStats.nbStatutsSansIne > 0, true);
-    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectInscrit, 3);
-    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectApprenti, 0);
-    assert.strictEqual(allStats.nbDistinctCandidatsWithChangingStatutProspectAbandon, 0);
 
     assert.strictEqual(allStats.nbCfasDistinctUai > 0, true);
     assert.strictEqual(allStats.nbCfasDistinctSiret > 0, true);
     assert.strictEqual(allStats.nbStatutsAnneeFormationMissing > 0, true);
-  });
-
-  it("Permet de récupérer le nb de statuts prospect", async () => {
-    // Seed with sample data for value prospect
-    const nbStatutsForTest = 10;
-    const createStatutsCandidats = await statutsCandidats();
-    await seedRandomizedSampleWithStatut(createStatutsCandidats, nbStatutsForTest, codesStatutsCandidats.prospect);
-
-    // Calcul stats
-    const statsModule = await stats();
-    const nbStatuts = await statsModule.getNbStatutsProspect();
-
-    // Check stats value
-    assert.strictEqual(nbStatuts, nbStatutsForTest);
   });
 
   it("Permet de récupérer le nb de statuts inscrit", async () => {
@@ -103,24 +85,6 @@ integrationTests(__filename, () => {
     // Calcul stats
     const statsModule = await stats();
     const nbStatuts = await statsModule.getNbStatutsAbandon();
-
-    // Check stats value
-    assert.strictEqual(nbStatuts, nbStatutsForTest);
-  });
-
-  it("Permet de récupérer le nb de statuts abandon prospects", async () => {
-    // Seed with sample data for value abandonProspects
-    const nbStatutsForTest = 10;
-    const createStatutsCandidats = await statutsCandidats();
-    await seedRandomizedSampleWithStatut(
-      createStatutsCandidats,
-      nbStatutsForTest,
-      codesStatutsCandidats.abandonProspects
-    );
-
-    // Calcul stats
-    const statsModule = await stats();
-    const nbStatuts = await statsModule.getNbStatutsAbandonProspects();
 
     // Check stats value
     assert.strictEqual(nbStatuts, nbStatutsForTest);
