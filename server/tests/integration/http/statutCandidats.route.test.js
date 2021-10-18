@@ -246,6 +246,32 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepEqual(await StatutCandidat.countDocuments({}), nbValidItems);
   });
 
+  it("Vérifie l'ajout via route statut-candidats d'un statut avec champs non renseignés dans le schéma mais ignorés en base", async () => {
+    const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
+
+    // Generate random statut and add unknown key
+    const unknownKeyName = "prenom_apprenant2";
+    const payload = [{ ...createRandomStatutCandidatApiInput(), [unknownKeyName]: "should not be stored" }];
+
+    // Call Api Route
+    const response = await httpClient.post("/api/statut-candidats", payload, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    // Check Api Route data
+    assert.equal(response.status, 200);
+    assert.equal(response.data.status, "OK");
+    assert.equal(response.data.ok, 1);
+
+    const allStatuts = await StatutCandidat.find().lean();
+    const createdStatut = allStatuts[0];
+    assert.equal(createdStatut[unknownKeyName], undefined);
+  });
+
   it("Vérifie que la route statut-candidats/test fonctionne avec un jeton JWT", async () => {
     const { httpClient } = await startServer();
     await createApiUser();
