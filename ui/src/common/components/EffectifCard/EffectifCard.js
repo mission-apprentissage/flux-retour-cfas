@@ -31,8 +31,8 @@ const EffectifCard = ({ label, count, tooltipLabel, validPeriod = true }) => {
       )}
       {!validPeriod && (
         <>
-          <Text color="grey.700" fontSize="14px" mt={1}>
-            cet indice ne peut être calculé sur la période sélectionnée
+          <Text color="grey.700" fontSize="zeta" fontWeight="700" mt="1v">
+            cet indice ne peut être calculé sur <br /> la période sélectionnée
           </Text>
         </>
       )}
