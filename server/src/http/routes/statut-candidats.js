@@ -4,6 +4,7 @@ const Joi = require("joi");
 const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
+const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
@@ -27,7 +28,7 @@ module.exports = ({ statutsCandidats }) => {
     nom_etablissement: Joi.string().required(),
     statut_apprenant: Joi.number().required(),
     id_formation: Joi.string().required(),
-    annee_scolaire: Joi.string().allow("", null),
+    annee_scolaire: anneeScolaireSchema.allow("", null),
 
     // optional
     ine_apprenant: Joi.string().allow(null, ""),
