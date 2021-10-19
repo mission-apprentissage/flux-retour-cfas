@@ -28,7 +28,7 @@ const DomainesMetiers = ({ domainesMetiers }) => {
           color="white"
           textDecoration="underline"
         >
-          {showAllDomainesMetiers ? "masquer tous les domaines" : "afficher tous les domaines"}
+          {showAllDomainesMetiers ? "masquer les domaines" : "afficher tous les domaines"}
         </Button>
       )}
     </Wrap>
