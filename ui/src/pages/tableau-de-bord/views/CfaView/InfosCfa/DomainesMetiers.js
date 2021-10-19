@@ -1,42 +1,37 @@
-import { Button, HStack, Tag, useBoolean } from "@chakra-ui/react";
+import { Button, useBoolean, Wrap } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { Tag } from "../../../../../common/components";
 import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
 
 const DomainesMetiers = ({ domainesMetiers }) => {
-  const [hideDomainesMetiers, setHideDomainesMetiers] = useBoolean(true);
-  const domainesMetierToDisplay = hideDomainesMetiers
-    ? [...domainesMetiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS)]
-    : domainesMetiers;
+  const [showAllDomainesMetiers, setShowAllDomainesMetiers] = useBoolean(false);
+  const domainesMetierToDisplay = showAllDomainesMetiers
+    ? domainesMetiers
+    : [...domainesMetiers.slice(0, MAX_DISPLAYED_DOMAINE_METIERS)];
+
+  const displayShowMoreButton = domainesMetiers.length > MAX_DISPLAYED_DOMAINE_METIERS;
 
   return (
-    <>
-      {domainesMetiers.length != 0 && (
-        <HStack marginTop="1w" flexWrap="wrap">
-          {domainesMetierToDisplay.map((item, i) => (
-            <>
-              <br />
-              <br />
-              <Tag
-                key={i}
-                fontSize="omega"
-                paddingX="2w"
-                paddingY="1w"
-                borderRadius="20px"
-                color="white"
-                background="rgba(255, 255, 255, 0.24)"
-              >
-                {item}
-              </Tag>
-            </>
-          ))}
-          <Button size="sm" onClick={setHideDomainesMetiers.toggle} mt="1rem" color="white">
-            {hideDomainesMetiers ? "afficher les domaines" : "masquer les domaines"}
-          </Button>
-        </HStack>
+    <Wrap marginTop="1w" spacing="1w">
+      {domainesMetierToDisplay.map((item) => (
+        <Tag key={item}>{item}</Tag>
+      ))}
+      {displayShowMoreButton && (
+        <Button
+          size="sm"
+          fontSize="omega"
+          onClick={setShowAllDomainesMetiers.toggle}
+          mt="1w"
+          marginLeft="1w"
+          color="white"
+          textDecoration="underline"
+        >
+          {showAllDomainesMetiers ? "masquer tous les domaines" : "afficher tous les domaines"}
+        </Button>
       )}
-    </>
+    </Wrap>
   );
 };
 

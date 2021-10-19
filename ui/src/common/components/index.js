@@ -5,6 +5,7 @@ export { default as SecondarySelectButton } from "./SelectButton/SecondarySelect
 export { default as OverlayMenu } from "./OverlayMenu/OverlayMenu";
 export { default as MenuTabs } from "./OverlayMenu/MenuTabs";
 export { default as FilterOption } from "./FilterOption/FilterOption";
+export { default as Tag } from "./Tag/Tag";
 
 export { default as InfoModal } from "./Modal/InfoModal";
 
