@@ -12,7 +12,7 @@ const CfaView = ({ cfaUai, filters, effectifs, loading }) => {
   return (
     <Page>
       <IndicesHeaderSection />
-      <CfaSection filters={filters} cfaUai={cfaUai} />
+      {cfaUai && <CfaSection filters={filters} cfaUai={cfaUai} />}
       {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
       <RepartionCfaNiveauAnneesSection filters={filters} />
     </Page>
@@ -22,7 +22,7 @@ const CfaView = ({ cfaUai, filters, effectifs, loading }) => {
 CfaView.propTypes = {
   effectifs: effectifsPropType,
   loading: PropTypes.bool.isRequired,
-  cfaUai: PropTypes.string.isRequired,
+  cfaUai: PropTypes.string,
   filters: filtersPropTypes.state,
 };
 

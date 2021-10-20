@@ -59,6 +59,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
         <Heading as="h2" variant="h2">
           Effectifs
         </Heading>
+
         <PeriodeFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
         <Tooltip
           bg="#F9F8F6"

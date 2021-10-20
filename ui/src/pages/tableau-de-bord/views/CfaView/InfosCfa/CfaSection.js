@@ -5,6 +5,7 @@ import React from "react";
 import { Section } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
 import CfaDetail from "./CfaDetail";
+import CfaLinkCopySection from "./CfaLinkCopySection";
 import DataFeedbackSection from "./DataFeedbackSection/DataFeedbackSection";
 import { infosCfaPropType } from "./propTypes";
 import SousEtablissementSelection from "./SousEtablissementSelection";
@@ -24,6 +25,7 @@ const CfaSection = ({ infosCfa, filters, loading, error }) => {
           </div>
           <Box justifySelf="flex-end">
             <DataFeedbackSection uai={infosCfa?.uai} />
+            {infosCfa?.url_tdb && <CfaLinkCopySection link={infosCfa?.url_tdb} />}
           </Box>
         </Flex>
       </Section>

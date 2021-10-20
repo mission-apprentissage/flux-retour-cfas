@@ -7,6 +7,7 @@ import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
+import CfaWithoutNetworkPage from "./pages/tableau-de-bord/views/CfaWithoutNetwork/CfaWithoutNetworkPage";
 import UserStatsPage from "./pages/user-stats";
 
 const App = () => {
@@ -15,6 +16,8 @@ const App = () => {
       <Switch>
         {/* Public pages */}
         <Route exact path="/login" component={LoginPage} />
+        <Route path="/tableau-de-bord" exact component={TableauDeBordPage} />
+        <Route exact path="/cfa/:accessToken" component={CfaWithoutNetworkPage} />
         <Route path="/comprendre-donnees" exact component={ComprendreLesDonnees} />
 
         {/* Secured Tdb Pages */}

@@ -109,8 +109,26 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
           uai: cfaFound.uai_etablissement,
           sousEtablissements: sousEtablissements,
           adresse: cfaFound.etablissement_adresse,
+          url_tdb: cfaInReferentiel ? cfas.getUrlTdbFromAccessToken(cfaInReferentiel?.url_access_token) : null,
         });
       }
+    })
+  );
+
+  /**
+   * Gets the uai for cfa by accessToken
+   */
+  router.get(
+    "/url-access-token/:token",
+    tryCatch(async (req, res) => {
+      const { token } = req.params;
+
+      // Search cfa in statuts
+      const cfaFound = await Cfa.findOne({ url_access_token: token }).lean();
+
+      return cfaFound
+        ? res.json({ uai: cfaFound?.uai })
+        : res.status(404).json({ message: `No cfa found for access_token ${token}` });
     })
   );
 

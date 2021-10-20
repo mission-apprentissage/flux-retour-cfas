@@ -1,3 +1,4 @@
+const config = require("../../../config");
 const { StatutCandidat: StatutCandidatModel, CfaAnnuaire } = require("../model");
 
 module.exports = () => ({
@@ -6,6 +7,7 @@ module.exports = () => ({
   getCfaFirstTransmissionDateFromSiret,
   getSiretNatureFromAnnuaire,
   getSousEtablissementsForUai,
+  getUrlTdbFromAccessToken,
 });
 
 const SEARCH_RESULTS_LIMIT = 100;
@@ -107,3 +109,5 @@ const getSiretNatureFromAnnuaire = async (siret) => {
   const cfaInAnnuaireFromSiret = await CfaAnnuaire.findOne({ siret: siret }).lean();
   return { responsable: cfaInAnnuaireFromSiret?.responsable, formateur: cfaInAnnuaireFromSiret?.formateur };
 };
+
+const getUrlTdbFromAccessToken = (accessToken) => `${config.publicUrl}/cfa/${accessToken}`;

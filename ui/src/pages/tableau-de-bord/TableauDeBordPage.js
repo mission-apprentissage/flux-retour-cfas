@@ -4,7 +4,7 @@ import { FiltersProvider, useFiltersContext } from "./FiltersContext";
 import useEffectifs from "./useEffectifs";
 import { CfaView, DepartementView, FormationView, RegionView, ReseauView } from "./views";
 
-const TableauDeBordPage = () => {
+export const TableauDeBordView = () => {
   const [effectifs, loading, error] = useEffectifs();
   const { state: filters } = useFiltersContext();
 
@@ -37,12 +37,12 @@ const TableauDeBordPage = () => {
   return <DepartementView filters={filters} effectifs={effectifs} loading={loading} error={error} />;
 };
 
-const TableauDeBordPageContainer = () => {
+const TableauDeBordPage = () => {
   return (
     <FiltersProvider>
-      <TableauDeBordPage />
+      <TableauDeBordView />
     </FiltersProvider>
   );
 };
 
-export default TableauDeBordPageContainer;
+export default TableauDeBordPage;

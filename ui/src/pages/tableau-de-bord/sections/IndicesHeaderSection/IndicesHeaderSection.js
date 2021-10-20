@@ -34,5 +34,4 @@ const IndicesHeaderSection = () => {
     </Section>
   );
 };
-
 export default IndicesHeaderSection;
