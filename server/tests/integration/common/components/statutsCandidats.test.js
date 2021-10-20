@@ -273,14 +273,22 @@ integrationTests(__filename, () => {
       assert.equal(await StatutCandidat.countDocuments(), 1);
     });
 
-    it("Vérifie qu'on ne crée pas de données quand le statut candidat a un champ annee_scolaire invalide", async () => {
+    it("Vérifie qu'un statut sans annee_scolaire est updaté lorsque le même statut est envoyé avec annee_scolaire", async () => {
       const { addOrUpdateStatuts } = await statutsCandidats();
-      const randomStatut = createRandomStatutCandidat({ annee_scolaire: "123" });
+      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
+      const sameStatutWithAnneeScolaire = { ...statutWithoutAnneeScolaire, annee_scolaire: "2021-2022" };
 
-      const result = await addOrUpdateStatuts([randomStatut]);
-      assert.equal(result.added.length, 0);
-      assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidat.countDocuments(), 0);
+      // create the statut
+      const result1 = await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
+      assert.equal(result1.added.length, 1);
+      assert.equal(result1.updated.length, 0);
+      assert.equal(result1.added[0].annee_scolaire, null);
+      // send the same statut but with annee_scolaire, it should update it
+      const result2 = await addOrUpdateStatuts([sameStatutWithAnneeScolaire]);
+      assert.equal(result2.added.length, 0);
+      assert.equal(result2.updated.length, 1);
+      assert.equal(result2.updated[0].annee_scolaire, sameStatutWithAnneeScolaire.annee_scolaire);
+      assert.equal(await StatutCandidat.countDocuments(), 1);
     });
 
     it("Vérifie qu'un statut avec annee_scolaire dans un batch de statuts sans annee_scolaire est quand même créé", async () => {

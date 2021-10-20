@@ -9,7 +9,6 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
-const { validateAnneeScolaire } = require("../domain/anneeScolaire");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
@@ -42,19 +41,25 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // annee_scolaire is not mandatory but it must be valid, otherwise ignore item
-    if (item.annee_scolaire !== null && item.annee_scolaire !== undefined) {
-      const anneeScolaireValidation = validateAnneeScolaire(item.annee_scolaire);
-      if (anneeScolaireValidation.error) return;
-    }
-
-    const foundItem = await getStatut({
+    let foundItem = await getStatut({
       nom_apprenant: item.nom_apprenant,
       prenom_apprenant: item.prenom_apprenant,
       formation_cfd: item.formation_cfd,
       uai_etablissement: item.uai_etablissement,
       annee_scolaire: item.annee_scolaire,
     });
+
+    // if statut has annee_scolaire provided but was not found with it, ignore annee_scolaire in query:
+    // it might have been created without it in the first place and we want to update the existing statut
+    if (!foundItem && item.annee_scolaire) {
+      foundItem = await getStatut({
+        nom_apprenant: item.nom_apprenant,
+        prenom_apprenant: item.prenom_apprenant,
+        formation_cfd: item.formation_cfd,
+        uai_etablissement: item.uai_etablissement,
+        annee_scolaire: null,
+      });
+    }
 
     if (!foundItem) {
       const addedItem = await createStatutCandidat(item);
