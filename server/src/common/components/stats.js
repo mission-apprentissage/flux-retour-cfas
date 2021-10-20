@@ -204,8 +204,6 @@ const getNbDistinctCandidatsWithoutIne = async (filters = {}) => {
         _id: {
           nom: "$nom_apprenant",
           prenom: "$prenom_apprenant",
-          prenom2: "$prenom2_apprenant",
-          prenom3: "$prenom3_apprenant",
           email: "$email_contact",
         },
       },
@@ -240,8 +238,6 @@ const getNbDistinctCandidatsWithMultiUaisWithoutIne = async (filters = {}) => {
         _id: {
           nom: "$nom_apprenant",
           prenom: "$prenom_apprenant",
-          prenom2: "$prenom2_apprenant",
-          prenom3: "$prenom3_apprenant",
           email: "$email_contact",
         },
         uais: { $addToSet: "$uai_etablissement" },
@@ -278,8 +274,6 @@ const getDistinctCandidatsWithMultiCfdsWithoutIne = async (filters = {}) => {
         _id: {
           nom: "$nom_apprenant",
           prenom: "$prenom_apprenant",
-          prenom2: "$prenom2_apprenant",
-          prenom3: "$prenom3_apprenant",
           email: "$email_contact",
         },
         idsFormations: { $addToSet: "$formation_cfd" },
@@ -299,8 +293,6 @@ const getNbDistinctCandidatsWithHistoryNbItems = async (nbChangements, filters) 
         _id: {
           nom: "$nom_apprenant",
           prenom: "$prenom_apprenant",
-          prenom2: "$prenom2_apprenant",
-          prenom3: "$prenom3_apprenant",
           email: "$email_contact",
         },
       },

@@ -202,16 +202,21 @@ integrationTests(__filename, () => {
     it("Permet de récupérer les effectifs par niveau_formation à une date donnée", async () => {
       const filterQuery = { uai_etablissement: "0123456Z" };
 
-      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "1" });
-      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "2" });
-      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "3" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "1", niveau_formation_libelle: "1 blabla" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "2", niveau_formation_libelle: "2 blabla" });
+      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "3", niveau_formation_libelle: "3 blabla" });
       await seedStatutsCandidats({ ...filterQuery, niveau_formation: null });
-      await seedStatutsCandidats({ uai_etablissement: "0123456T", niveau_formation: "1" });
+      await seedStatutsCandidats({
+        uai_etablissement: "0123456T",
+        niveau_formation: 1,
+        niveau_formation_libelle: "1 blabla",
+      });
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResult = [
         {
           niveau_formation: "1",
+          niveau_formation_libelle: "1 blabla",
           effectifs: {
             apprentis: 5,
             inscritsSansContrat: 15,
@@ -221,6 +226,7 @@ integrationTests(__filename, () => {
         },
         {
           niveau_formation: "2",
+          niveau_formation_libelle: "2 blabla",
           effectifs: {
             apprentis: 5,
             inscritsSansContrat: 15,
@@ -230,6 +236,7 @@ integrationTests(__filename, () => {
         },
         {
           niveau_formation: "3",
+          niveau_formation_libelle: "3 blabla",
           effectifs: {
             apprentis: 5,
             inscritsSansContrat: 15,

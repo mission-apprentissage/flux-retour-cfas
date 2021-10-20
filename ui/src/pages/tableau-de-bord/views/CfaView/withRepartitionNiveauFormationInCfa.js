@@ -13,8 +13,8 @@ const withRepartitionNiveauFormationInCfa = (Component) => {
     });
     const [data, loading, error] = useFetch(`/api/dashboard/effectifs-par-niveau-formation?${queryParams}`);
 
-    const repartitionEffectifs = data?.map(({ niveau_formation, effectifs }) => {
-      return { niveauFormation: niveau_formation, effectifs };
+    const repartitionEffectifs = data?.map(({ niveau_formation, niveau_formation_libelle, effectifs }) => {
+      return { niveauFormation: niveau_formation, niveauFormationLibelle: niveau_formation_libelle, effectifs };
     });
 
     return <Component {...props} repartitionEffectifs={repartitionEffectifs} loading={loading} error={error} />;

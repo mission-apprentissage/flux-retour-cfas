@@ -20,12 +20,12 @@ const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading,
       <Table headers={tableHeader} loading={loading} error={error}>
         <Tbody>
           {repartitionEffectifs
-            ? repartitionEffectifs.map(({ niveauFormation, effectifs }, index) => {
+            ? repartitionEffectifs.map(({ niveauFormation, niveauFormationLibelle, effectifs }, index) => {
                 const total =
                   effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
                 return (
                   <Tr key={niveauFormation + index}>
-                    <Td color="grey.800">Niveau {niveauFormation}</Td>
+                    <Td color="grey.800">Niveau {niveauFormationLibelle}</Td>
                     <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
                     <ProgressCell
                       label={effectifs.inscritsSansContrat}
@@ -51,6 +51,7 @@ RepartitionEffectifsParNiveauFormation.propTypes = {
   repartitionEffectifs: PropTypes.arrayOf(
     PropTypes.shape({
       niveauFormation: PropTypes.string.isRequired,
+      niveauFormationLibelle: PropTypes.string.isRequired,
       effectifs: PropTypes.shape({
         apprentis: PropTypes.number.isRequired,
         inscritsSansContrat: PropTypes.number.isRequired,

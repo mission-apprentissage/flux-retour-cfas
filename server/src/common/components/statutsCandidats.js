@@ -9,7 +9,6 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
-const { validateAnneeScolaire } = require("../domain/anneeScolaire");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
@@ -42,24 +41,25 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // if CFD not present ignore item
-    if (!item.formation_cfd) {
-      return;
-    }
-
-    // annee_scolaire is not mandatory but it must be valid, otherwise ignore item
-    if (item.annee_scolaire !== null && item.annee_scolaire !== undefined) {
-      const anneeScolaireValidation = validateAnneeScolaire(item.annee_scolaire);
-      if (anneeScolaireValidation.error) return;
-    }
-
-    const foundItem = await getStatut({
+    let foundItem = await getStatut({
       nom_apprenant: item.nom_apprenant,
       prenom_apprenant: item.prenom_apprenant,
       formation_cfd: item.formation_cfd,
       uai_etablissement: item.uai_etablissement,
       annee_scolaire: item.annee_scolaire,
     });
+
+    // if statut has annee_scolaire provided but was not found with it, ignore annee_scolaire in query:
+    // it might have been created without it in the first place and we want to update the existing statut
+    if (!foundItem && item.annee_scolaire) {
+      foundItem = await getStatut({
+        nom_apprenant: item.nom_apprenant,
+        prenom_apprenant: item.prenom_apprenant,
+        formation_cfd: item.formation_cfd,
+        uai_etablissement: item.uai_etablissement,
+        annee_scolaire: null,
+      });
+    }
 
     if (!foundItem) {
       const addedItem = await createStatutCandidat(item);
@@ -127,19 +127,20 @@ const createStatutCandidat = async (itemToCreate) => {
     await createFormation(itemToCreate.formation_cfd);
   }
 
+  const formationInfo = await getFormationWithCfd(itemToCreate.formation_cfd);
+
   const toAdd = new StatutCandidat({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant,
     prenom_apprenant: itemToCreate.prenom_apprenant,
-    prenom2_apprenant: itemToCreate.prenom2_apprenant,
-    prenom3_apprenant: itemToCreate.prenom3_apprenant,
     ne_pas_solliciter: itemToCreate.ne_pas_solliciter,
     email_contact: itemToCreate.email_contact,
     formation_cfd: itemToCreate.formation_cfd,
     formation_cfd_valid: validateCfd(itemToCreate.formation_cfd),
     libelle_court_formation: itemToCreate.libelle_court_formation,
     libelle_long_formation: itemToCreate.libelle_long_formation,
-    niveau_formation: (await getFormationWithCfd(itemToCreate.formation_cfd))?.niveau,
+    niveau_formation: formationInfo?.niveau,
+    niveau_formation_libelle: formationInfo?.niveau_libelle,
     uai_etablissement: itemToCreate.uai_etablissement,
     uai_etablissement_valid: validateUai(itemToCreate.uai_etablissement),
     siret_etablissement: itemToCreate.siret_etablissement,
@@ -164,9 +165,10 @@ const createStatutCandidat = async (itemToCreate) => {
     annee_scolaire: itemToCreate.annee_scolaire,
     id_erp_apprenant: itemToCreate.id_erp_apprenant,
     tel_apprenant: itemToCreate.tel_apprenant,
+    code_commune_insee_apprenant: itemToCreate.code_commune_insee_apprenant,
     date_de_naissance_apprenant: itemToCreate.date_de_naissance_apprenant,
     etablissement_formateur_geo_coordonnees: itemToCreate.etablissement_formateur_geo_coordonnees,
-    etablissement_formateur_code_postal: itemToCreate.etablissement_formateur_code_postal,
+    etablissement_formateur_code_commune_insee: itemToCreate.etablissement_formateur_code_commune_insee,
     contrat_date_debut: itemToCreate.contrat_date_debut,
     contrat_date_fin: itemToCreate.contrat_date_fin,
     contrat_date_rupture: itemToCreate.contrat_date_rupture,

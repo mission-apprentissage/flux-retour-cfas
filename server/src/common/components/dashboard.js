@@ -114,6 +114,7 @@ const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, pr
  * @param {*} filters
  * @returns [{
  *  niveau: string
+ *  niveau_libelle: string
  *  effectifs: {
  *    apprentis: number
  *    inscritsSansContrat: number
@@ -123,8 +124,8 @@ const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, pr
  * }]
  */
 const getEffectifsCountByNiveauFormationAtDate = async (searchDate, filters = {}) => {
-  const projection = { niveau_formation: 1 };
-  const groupedBy = { _id: "$niveau_formation" };
+  const projection = { niveau_formation: 1, niveau_formation_libelle: 1 };
+  const groupedBy = { _id: "$niveau_formation", niveau_libelle: { $first: "$niveau_formation_libelle" } };
   // compute number of apprentis, abandons, inscrits sans contrat and rupturants
   const effectifsByNiveauFormation = await getEffectifsCountAtDate(
     searchDate,
@@ -136,9 +137,10 @@ const getEffectifsCountByNiveauFormationAtDate = async (searchDate, filters = {}
     }
   );
 
-  return effectifsByNiveauFormation.map(({ _id, ...effectifs }) => {
+  return effectifsByNiveauFormation.map(({ _id, niveau_libelle, ...effectifs }) => {
     return {
       niveau_formation: _id,
+      niveau_formation_libelle: niveau_libelle,
       effectifs: {
         apprentis: effectifs.apprentis || 0,
         inscritsSansContrat: effectifs.inscritsSansContrat || 0,

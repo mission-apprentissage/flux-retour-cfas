@@ -9,7 +9,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 
 /**
  * Ce script permet de mettre à jour les niveaux des StatutsCandidats en se basant sur le référentiel Formations
- * Pour chaque formation du référentiel ayant un niveau, on mets à jour les statuts matchant sur le cfd
+ * Pour chaque formation du référentiel ayant un niveau, on met à jour les statuts matchant sur le cfd
  */
 runScript(async () => {
   logger.info("Run StatutCandidats - Niveau Retrieving Job");
@@ -28,7 +28,10 @@ runScript(async () => {
     await asyncForEach(statutsForFormation, async (currentStatutToUpdate) => {
       await StatutCandidat.findByIdAndUpdate(
         currentStatutToUpdate._id,
-        { niveau_formation: currentFormation.niveau },
+        {
+          niveau_formation: currentFormation.niveau,
+          niveau_formation_libelle: currentFormation.niveau_libelle,
+        },
         { new: true }
       );
     });

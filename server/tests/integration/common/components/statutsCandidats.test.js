@@ -103,8 +103,6 @@ integrationTests(__filename, () => {
       assert.strictEqual(found.ine_apprenant, randomStatut.ine_apprenant);
       assert.strictEqual(found.nom_apprenant, randomStatut.nom_apprenant);
       assert.strictEqual(found.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.strictEqual(found.prenom2_apprenant, randomStatut.prenom2_apprenant);
-      assert.strictEqual(found.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.strictEqual(found.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.strictEqual(found.email_contact, randomStatut.email_contact);
       assert.strictEqual(found.formation_cfd, randomStatut.formation_cfd);
@@ -275,14 +273,22 @@ integrationTests(__filename, () => {
       assert.equal(await StatutCandidat.countDocuments(), 1);
     });
 
-    it("Vérifie qu'on ne crée pas de données quand le statut candidat a un champ annee_scolaire invalide", async () => {
+    it("Vérifie qu'un statut sans annee_scolaire est updaté lorsque le même statut est envoyé avec annee_scolaire", async () => {
       const { addOrUpdateStatuts } = await statutsCandidats();
-      const randomStatut = createRandomStatutCandidat({ annee_scolaire: "123" });
+      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
+      const sameStatutWithAnneeScolaire = { ...statutWithoutAnneeScolaire, annee_scolaire: "2021-2022" };
 
-      const result = await addOrUpdateStatuts([randomStatut]);
-      assert.equal(result.added.length, 0);
-      assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidat.countDocuments(), 0);
+      // create the statut
+      const result1 = await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
+      assert.equal(result1.added.length, 1);
+      assert.equal(result1.updated.length, 0);
+      assert.equal(result1.added[0].annee_scolaire, null);
+      // send the same statut but with annee_scolaire, it should update it
+      const result2 = await addOrUpdateStatuts([sameStatutWithAnneeScolaire]);
+      assert.equal(result2.added.length, 0);
+      assert.equal(result2.updated.length, 1);
+      assert.equal(result2.updated[0].annee_scolaire, sameStatutWithAnneeScolaire.annee_scolaire);
+      assert.equal(await StatutCandidat.countDocuments(), 1);
     });
 
     it("Vérifie qu'un statut avec annee_scolaire dans un batch de statuts sans annee_scolaire est quand même créé", async () => {
@@ -691,8 +697,6 @@ integrationTests(__filename, () => {
       const validCfd = "abcd1234";
       const validUai = "0123456Z";
 
-      const updatedPrenom2 = "Sam";
-      const updatedPrenom3 = "Billy";
       const updatedEmail = "other@email.fr";
 
       // Create 2 distinct items
@@ -711,8 +715,6 @@ integrationTests(__filename, () => {
       // send the same statut but with updates on prenom2-3 & email
       const sameStatutWithUpdatesPrenomEmail = {
         ...uniqueStatutToCreate,
-        prenom2_apprenant: updatedPrenom2,
-        prenom3_apprenant: updatedPrenom3,
         email_contact: updatedEmail,
       };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithUpdatesPrenomEmail]);
@@ -725,8 +727,6 @@ integrationTests(__filename, () => {
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.prenom2_apprenant, updatedPrenom2);
-      assert.deepStrictEqual(found.prenom3_apprenant, updatedPrenom3);
       assert.deepStrictEqual(found.email_contact, updatedEmail);
       assert.notDeepStrictEqual(found.updated_at, null);
     });
@@ -846,8 +846,6 @@ integrationTests(__filename, () => {
       assert.strictEqual(createdStatutJson.ine_apprenant, randomStatut.ine_apprenant);
       assert.strictEqual(createdStatutJson.nom_apprenant, randomStatut.nom_apprenant);
       assert.strictEqual(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.strictEqual(createdStatutJson.prenom2_apprenant, randomStatut.prenom2_apprenant);
-      assert.strictEqual(createdStatutJson.prenom3_apprenant, randomStatut.prenom3_apprenant);
       assert.strictEqual(createdStatutJson.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.strictEqual(createdStatutJson.email_contact, randomStatut.email_contact);
       assert.strictEqual(createdStatutJson.formation_cfd, randomStatut.formation_cfd);

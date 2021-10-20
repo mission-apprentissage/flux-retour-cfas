@@ -41,7 +41,11 @@ const buildCfasFromCsvAndExcludedFile = async (referenceFilePath, excludedFilePa
  * @param {*} downloadDestinationFilePath
  * @param {*} referenceFilePath
  */
-const downloadIfNeeded = async (downloadDestinationFilePath, referenceFilePath) => {
+const downloadIfNeeded = async (downloadDestinationFilePath, referenceFilePath, clearFile = false) => {
+  if (clearFile === true && fs.existsSync(referenceFilePath)) {
+    logger.info(`File ${referenceFilePath} already present - deleting it.`);
+    fs.removeSync(referenceFilePath);
+  }
   if (!fs.existsSync(referenceFilePath)) {
     const storageMgr = await ovhStorageManager();
     await storageMgr.downloadFileTo(downloadDestinationFilePath, referenceFilePath);
