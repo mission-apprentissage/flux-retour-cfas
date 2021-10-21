@@ -85,7 +85,7 @@ httpTests(__filename, ({ startServer }) => {
     "id_formation",
     "uai_etablissement",
     "statut_apprenant",
-    // "annee_scolaire", TODO put back
+    "annee_scolaire",
   ];
   requiredFields.forEach((requiredField) => {
     it(`Vérifie qu'on ne crée pas de donnée et renvoie une 200 + ERROR lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
@@ -119,8 +119,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  // TODO put it back
-  it.skip("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ annee_scolaire ne respecte pas le format", async () => {
+  it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ annee_scolaire ne respecte pas le format", async () => {
     const { httpClient } = await startServer();
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
@@ -134,10 +133,12 @@ httpTests(__filename, ({ startServer }) => {
       },
     });
     // check response
-    assert.equal(response.status, 400);
     assert.equal(response.data.status, "ERROR");
+    assert.equal(response.data.validationErrors.length, 1);
     assert.equal(
-      response.data.message.includes('annee_scolaire" with value "2021,2022" fails to match the required pattern'),
+      response.data.validationErrors[0].details[0].message.includes(
+        '"annee_scolaire" with value "2021,2022" fails to match the required pattern'
+      ),
       true
     );
     // check that no data was created
