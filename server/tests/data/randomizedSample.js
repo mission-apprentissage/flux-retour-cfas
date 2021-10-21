@@ -2,6 +2,7 @@ const faker = require("faker/locale/fr");
 const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
 const { subYears, subMonths, addYears } = require("date-fns");
+const { codesStatutsCandidats } = require("../../src/common/model/constants");
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -9,7 +10,7 @@ const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase()
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
 const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
 const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
-const getRandomStatutApprenant = () => Math.floor(Math.random() * Math.floor(4));
+const getRandomStatutApprenant = () => faker.random.arrayElement(Object.values(codesStatutsCandidats));
 const getRandomPeriodeFormation = (anneeScolaire) => {
   const yearToInclude = Number(anneeScolaire.slice(0, 4));
   const startYear = faker.random.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);

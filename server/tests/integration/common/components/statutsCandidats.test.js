@@ -2,14 +2,8 @@ const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidat, Cfa, Formation } = require("../../../../src/common/model");
-const { codesStatutsMajStatutCandidats, codesStatutsCandidats } = require("../../../../src/common/model/constants");
-const {
-  statutsTest,
-  statutsTestUpdate,
-  simpleStatut,
-  simpleStatutBadUpdate,
-  simpleProspectStatut,
-} = require("../../../data/sample");
+const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
+const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../data/sample");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
@@ -733,41 +727,10 @@ integrationTests(__filename, () => {
   });
 
   describe("updateStatutCandidat", () => {
-    it("Vérifie l'update d'un statut avec erreur de cohérence sur le statut apprenant", async () => {
-      const { createStatutCandidat, updateStatut } = await statutsCandidats();
-
-      // Add statut test
-      const createdStatut = await createStatutCandidat(simpleStatut);
-
-      const updatedStatut = await updateStatut(createdStatut._id, simpleStatutBadUpdate);
-
-      assert.strictEqual(updatedStatut.ine_apprenant, simpleStatutBadUpdate.ine_apprenant);
-      assert.strictEqual(updatedStatut.nom_apprenant, simpleStatut.nom_apprenant);
-      assert.strictEqual(updatedStatut.prenom_apprenant, simpleStatut.prenom_apprenant);
-      assert.strictEqual(updatedStatut.ne_pas_solliciter, simpleStatutBadUpdate.ne_pas_solliciter);
-      assert.strictEqual(updatedStatut.email_contact, simpleStatutBadUpdate.email_contact);
-      assert.strictEqual(updatedStatut.formation_cfd, simpleStatut.formation_cfd);
-      assert.strictEqual(updatedStatut.uai_etablissement, simpleStatut.uai_etablissement);
-      assert.strictEqual(updatedStatut.annee_scolaire, simpleStatut.annee_scolaire);
-      assert.strictEqual(updatedStatut.siret_etablissement, simpleStatutBadUpdate.siret_etablissement);
-      assert.strictEqual(updatedStatut.statut_apprenant, simpleStatutBadUpdate.statut_apprenant);
-      assert.strictEqual(updatedStatut.statut_mise_a_jour_statut, codesStatutsMajStatutCandidats.ko);
-      assert.equal(
-        new Date(updatedStatut.date_metier_mise_a_jour_statut).getTime(),
-        new Date(simpleStatutBadUpdate.date_metier_mise_a_jour_statut).getTime()
-      );
-      assert.equal(
-        new Date(updatedStatut.erreur_mise_a_jour_statut.date_mise_a_jour_statut).getTime(),
-        new Date(simpleStatutBadUpdate.date_metier_mise_a_jour_statut).getTime()
-      );
-      assert.notDeepStrictEqual(updatedStatut.erreur_mise_a_jour_statut, null);
-      assert.notDeepStrictEqual(updatedStatut.updated_at, null);
-    });
-
     it("Vérifie qu'on update PAS historique_statut_apprenant quand un statut_apprenant identique à l'actuel est envoyé", async () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 
-      const createdStatut = await createStatutCandidat(simpleProspectStatut);
+      const createdStatut = await createStatutCandidat(simpleStatut);
 
       assert.deepStrictEqual(createdStatut.historique_statut_apprenant.length, 1);
       assert.deepStrictEqual(
@@ -777,7 +740,7 @@ integrationTests(__filename, () => {
       assert.deepStrictEqual(createdStatut.historique_statut_apprenant[0].position_statut, 1);
 
       // Mise à jour du statut avec le même statut_apprenant
-      await updateStatut(createdStatut._id, { statut_apprenant: codesStatutsCandidats.prospect });
+      await updateStatut(createdStatut._id, { statut_apprenant: simpleStatut.statut_apprenant });
 
       // Check value in db
       const found = await StatutCandidat.findById(createdStatut._id);
@@ -787,7 +750,7 @@ integrationTests(__filename, () => {
     it("Vérifie qu'on update historique_statut_apprenant quand un NOUVEAU statut_apprenant est envoyé", async () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 
-      const createdStatut = await createStatutCandidat(simpleProspectStatut);
+      const createdStatut = await createStatutCandidat(simpleStatut);
 
       assert.strictEqual(createdStatut.historique_statut_apprenant.length, 1);
       assert.strictEqual(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);

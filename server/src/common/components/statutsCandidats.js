@@ -1,9 +1,5 @@
 const { StatutCandidat, Cfa } = require("../model");
-const {
-  codesMajStatutsInterdits,
-  codesStatutsMajStatutCandidats,
-  duplicatesTypesCodes,
-} = require("../model/constants");
+const { duplicatesTypesCodes } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
@@ -81,18 +77,6 @@ const updateStatut = async (existingItemId, toUpdate) => {
 
   const existingItem = await StatutCandidat.findById(existingItemId);
   const dateMiseAJourStatut = new Date(toUpdate.date_metier_mise_a_jour_statut) || new Date();
-
-  // Check if maj statut is valid
-  if (isMajStatutInvalid(existingItem.statut_apprenant, toUpdate.statut_apprenant)) {
-    toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ko;
-    toUpdate.erreur_mise_a_jour_statut = {
-      date_mise_a_jour_statut: dateMiseAJourStatut,
-      ancien_statut: existingItem.statut_apprenant,
-      nouveau_statut_souhaite: toUpdate.statut_apprenant,
-    };
-  } else {
-    toUpdate.statut_mise_a_jour_statut = codesStatutsMajStatutCandidats.ok;
-  }
 
   // statut_apprenant has changed?
   if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
@@ -198,10 +182,6 @@ const getFindStatutQuery = (
   uai_etablissement,
   annee_scolaire,
 });
-
-const isMajStatutInvalid = (statutSource, statutDest) => {
-  return codesMajStatutsInterdits.some((x) => x.source === statutSource && x.destination === statutDest);
-};
 
 /**
  * Récupération de la liste des statuts en doublons stricts pour les filtres passés en paramètres

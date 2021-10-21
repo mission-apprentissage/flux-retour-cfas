@@ -2,7 +2,6 @@
  * Codes des statuts des candidats
  */
 const codesStatutsCandidats = {
-  prospect: 1,
   inscrit: 2,
   apprenti: 3,
   abandon: 0,
@@ -16,21 +15,6 @@ const codesStatutsMajStatutCandidats = {
   ok: 0,
   ko: 1,
 };
-
-/**
- * Liste des changements de statuts interdits
- * Ex: passage du statut inscrit au statut prospect n'est pas cohérent
- */
-const codesMajStatutsInterdits = [
-  {
-    source: codesStatutsCandidats.inscrit,
-    destination: codesStatutsCandidats.prospect,
-  },
-  {
-    source: codesStatutsCandidats.apprenti,
-    destination: codesStatutsCandidats.prospect,
-  },
-];
 
 /**
  * Noms des réseaux de CFAS
@@ -243,7 +227,6 @@ const statutsCandidatsStringFields = [
 
 module.exports = {
   codesStatutsCandidats,
-  codesMajStatutsInterdits,
   codesStatutsMajStatutCandidats,
   reseauxCfas,
   REGIONS_DEPLOYEES,
