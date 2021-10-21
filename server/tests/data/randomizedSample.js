@@ -6,6 +6,7 @@ const { subYears, subMonths, addYears } = require("date-fns");
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
 const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
+const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
 const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
 const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
 const getRandomStatutApprenant = () => Math.floor(Math.random() * Math.floor(4));
@@ -63,6 +64,8 @@ const createRandomStatutCandidat = (params = {}) => {
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
+    date_entree_formation: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
+    formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
 
     ...params,
   };
@@ -101,6 +104,8 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
+    date_entree_formation: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
+    formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
 
     ...params,
   };

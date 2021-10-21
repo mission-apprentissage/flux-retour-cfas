@@ -284,6 +284,16 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Date de rupture du contrat",
   },
+  date_entree_formation: {
+    type: Date,
+    default: null,
+    description: "Date d'entrée dans la formation",
+  },
+  formation_rncp: {
+    type: String,
+    default: null,
+    description: "Code RNCP de la formation du candidat",
+  },
 });
 
 module.exports = statutsCandidatsSchema;

@@ -46,11 +46,13 @@ module.exports = ({ statutsCandidats }) => {
     libelle_long_formation: Joi.string().allow(null, ""),
     periode_formation: Joi.string().allow(null, ""),
     annee_formation: Joi.number().allow(null),
+    formation_rncp: Joi.string().allow(null, ""),
     date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
 
     contrat_date_debut: Joi.date().allow(null),
     contrat_date_fin: Joi.date().allow(null),
     contrat_date_rupture: Joi.date().allow(null),
+    date_entree_formation: Joi.date().allow(null),
   });
 
   /**

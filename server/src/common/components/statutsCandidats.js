@@ -172,6 +172,8 @@ const createStatutCandidat = async (itemToCreate) => {
     contrat_date_debut: itemToCreate.contrat_date_debut,
     contrat_date_fin: itemToCreate.contrat_date_fin,
     contrat_date_rupture: itemToCreate.contrat_date_rupture,
+    date_entree_formation: itemToCreate.date_entree_formation,
+    formation_rncp: itemToCreate.formation_rncp,
 
     source: itemToCreate.source,
 
