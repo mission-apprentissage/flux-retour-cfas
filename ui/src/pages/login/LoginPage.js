@@ -1,11 +1,12 @@
-import { Box, Center, Flex, Heading, Text } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 
+import { AppHeader } from "../../common/components";
 import useAuth from "../../common/hooks/useAuth";
 import { _post } from "../../common/httpClient";
-import LoginForm from "./LoginForm";
+import LoginBlock from "./LoginBlock";
 
 const LoginPage = ({ history }) => {
   const [, setAuth] = useAuth();
@@ -23,18 +24,12 @@ const LoginPage = ({ history }) => {
   };
 
   return (
-    <Center background="bluefrance" height="100vh" flexDirection="column">
-      <Flex fontSize="beta" fontWeight="700" color="white">
-        <Box as="i" className="ri-shield-star-fill" mr="5" />
-        <Text>Tableau de bord - Flux Cfas</Text>
-      </Flex>
-      <Box background="white" borderRadius="2%" width="28rem" mt="4">
-        <Heading mt={4} fontWeight="700" marginBottom="2w" textAlign="center">
-          Connexion
-        </Heading>
-        <LoginForm onSubmit={login} />
+    <>
+      <AppHeader />
+      <Box paddingTop="6w" paddingLeft="120px" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
+        <LoginBlock onSubmit={login} />
       </Box>
-    </Center>
+    </>
   );
 };
 

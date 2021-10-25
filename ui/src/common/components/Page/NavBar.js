@@ -43,7 +43,7 @@ const NavBar = () => {
   const isAdmin = isUserAuthorizedForRoles(auth, roles.administrator);
 
   return (
-    <Section>
+    <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
         <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>
         <NavItem to="/comprendre-donnees">Comprendre les données</NavItem>
