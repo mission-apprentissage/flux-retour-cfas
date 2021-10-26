@@ -1,56 +1,50 @@
-import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Text } from "@chakra-ui/react";
+import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Text } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import PropTypes from "prop-types";
 import React from "react";
 import * as Yup from "yup";
 
+const formValidationSchema = Yup.object().shape({
+  username: Yup.string().required("Requis"),
+  password: Yup.string().required("Requis"),
+});
+
 const LoginForm = ({ onSubmit }) => {
   return (
-    <Box p={8} maxWidth="500px" borderTopWidth={1} boxShadow="lg">
-      <Formik
-        initialValues={{ username: "", password: "" }}
-        validationSchema={Yup.object().shape({
-          username: Yup.string().required("Requis"),
-          password: Yup.string().required("Requis"),
-        })}
-        onSubmit={onSubmit}
-      >
-        {({ status = {} }) => {
-          return (
-            <Form>
-              <Box marginBottom="2w">
-                <Field name="username">
-                  {({ field, meta }) => (
+    <Formik initialValues={{ username: "", password: "" }} validationSchema={formValidationSchema} onSubmit={onSubmit}>
+      {({ status = {} }) => {
+        return (
+          <Form>
+            <Box marginBottom="4w">
+              <Field name="username">
+                {({ field, meta }) => (
+                  <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
+                    <FormLabel color="grey.800">identifiant</FormLabel>
+                    <Input {...field} id={field.name} placeholder="Votre identifiant..." />
+                    <FormErrorMessage>{meta.error}</FormErrorMessage>
+                  </FormControl>
+                )}
+              </Field>
+              <Field name="password">
+                {({ field, meta }) => {
+                  return (
                     <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                      <FormLabel>Identifiant</FormLabel>
-                      <Input {...field} id={field.name} placeholder="Votre identifiant..." />
+                      <FormLabel color="grey.800">mot de passe</FormLabel>
+                      <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." />
                       <FormErrorMessage>{meta.error}</FormErrorMessage>
                     </FormControl>
-                  )}
-                </Field>
-                <Field name="password">
-                  {({ field, meta }) => {
-                    return (
-                      <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                        <FormLabel>Mot de passe</FormLabel>
-                        <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." />
-                        <FormErrorMessage>{meta.error}</FormErrorMessage>
-                      </FormControl>
-                    );
-                  }}
-                </Field>
-              </Box>
-              <Flex justifyContent="flex-end">
-                <Button variant="primary" type="submit">
-                  Connexion
-                </Button>
-              </Flex>
-              {status.error && <Text color="error">{status.error}</Text>}
-            </Form>
-          );
-        }}
-      </Formik>
-    </Box>
+                  );
+                }}
+              </Field>
+            </Box>
+            <Button variant="primary" type="submit">
+              Connexion
+            </Button>
+            {status.error && <Text color="error">{status.error}</Text>}
+          </Form>
+        );
+      }}
+    </Formik>
   );
 };
 
