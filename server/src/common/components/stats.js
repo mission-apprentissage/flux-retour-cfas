@@ -1,16 +1,13 @@
 const { StatutCandidat } = require("../../common/model");
 const { codesStatutsCandidats, reseauxCfas } = require("../../common/model/constants");
 const { asyncForEach } = require("../utils/asyncUtils");
-const { containsSubArray } = require("../utils/subArrayUtils");
 
 module.exports = () => {
   return {
     getAllStats,
-    getNbStatutsProspect,
     getNbStatutsInscrit,
     getNbStatutsApprenti,
     getNbStatutsAbandon,
-    getNbStatutsAbandonProspects,
     getNbDistinctCfasByUai,
     getNbDistinctCfasBySiret,
     getNetworkStats,
@@ -24,11 +21,9 @@ const getAllStats = async (filters = {}) => {
     updated_at: { $ne: null },
   });
 
-  const nbStatutsProspect = await getNbStatutsProspect(filters);
   const nbStatutsInscrits = await getNbStatutsInscrit(filters);
   const nbStatutsApprentis = await getNbStatutsApprenti(filters);
   const nbStatutsAbandon = await getNbStatutsAbandon(filters);
-  const nbStatutsAbandonProspects = await getNbStatutsAbandonProspects(filters);
 
   const nbDistinctCandidatsWithIne = await getNbDistinctCandidatsWithIne(filters);
   const nbDistinctCandidatsWithoutIne = await getNbDistinctCandidatsWithoutIne(filters);
@@ -47,51 +42,6 @@ const getAllStats = async (filters = {}) => {
   const nbInvalidSirets = await getNbInvalidSirets(filters);
   const nbInvalidSiretsAndUais = await getNbInvalidSiretsAndUais(filters);
 
-  const candidatsWithHistory = await StatutCandidat.find(
-    {
-      ...filters,
-      "historique_statut_apprenant.1": { $exists: true },
-    },
-    { historique_statut_apprenant: 1 }
-  ).lean();
-
-  const nbDistinctCandidatsWithChangingStatutProspectInscrit = candidatsWithHistory.filter((statut) => {
-    const sortedStatutsValuesHistory = statut.historique_statut_apprenant
-      .sort((a, b) => a.position_statut > b.position_statut)
-      .map((item) => item.valeur_statut);
-    return containsSubArray(sortedStatutsValuesHistory, [
-      codesStatutsCandidats.prospect,
-      codesStatutsCandidats.inscrit,
-    ]);
-  }).length;
-  const nbDistinctCandidatsWithChangingStatutProspectApprenti = candidatsWithHistory.filter((statut) => {
-    const sortedStatutsValuesHistory = statut.historique_statut_apprenant
-      .sort((a, b) => a.position_statut > b.position_statut)
-      .map((item) => item.valeur_statut);
-    return containsSubArray(sortedStatutsValuesHistory, [
-      codesStatutsCandidats.prospect,
-      codesStatutsCandidats.apprenti,
-    ]);
-  }).length;
-  const nbDistinctCandidatsWithChangingStatutProspectAbandon = candidatsWithHistory.filter((statut) => {
-    const sortedStatutsValuesHistory = statut.historique_statut_apprenant
-      .sort((a, b) => a.position_statut > b.position_statut)
-      .map((item) => item.valeur_statut);
-    return containsSubArray(sortedStatutsValuesHistory, [
-      codesStatutsCandidats.prospect,
-      codesStatutsCandidats.abandon,
-    ]);
-  }).length;
-  const nbDistinctCandidatsWithChangingStatutProspectAbandonProspect = candidatsWithHistory.filter((statut) => {
-    const sortedStatutsValuesHistory = statut.historique_statut_apprenant
-      .sort((a, b) => a.position_statut > b.position_statut)
-      .map((item) => item.valeur_statut);
-    return containsSubArray(sortedStatutsValuesHistory, [
-      codesStatutsCandidats.prospect,
-      codesStatutsCandidats.abandonProspects,
-    ]);
-  }).length;
-
   const nbCandidatsMultiUaisWithIne = await getNbDistinctCandidatsWithMultiUaisWithIne(filters);
   const nbCandidatsMultiUaisWithoutIne = await getNbDistinctCandidatsWithMultiUaisWithoutIne(filters);
 
@@ -109,11 +59,9 @@ const getAllStats = async (filters = {}) => {
   return {
     nbStatutsCandidats: nbAllStatutCandidats,
     nbStatutsCandidatsMisAJour,
-    nbStatutsProspect,
     nbStatutsInscrits,
     nbStatutsApprentis,
     nbStatutsAbandon,
-    nbStatutsAbandonProspects,
     nbDistinctCandidatsWithIne,
     nbDistinctCandidatsWithoutIne,
     nbDistinctCandidatsTotal: nbDistinctCandidatsWithIne + nbDistinctCandidatsWithoutIne,
@@ -132,10 +80,6 @@ const getAllStats = async (filters = {}) => {
     nbDistinctCandidatsWithStatutHistory2,
     nbDistinctCandidatsWithStatutHistory3,
 
-    nbDistinctCandidatsWithChangingStatutProspectInscrit,
-    nbDistinctCandidatsWithChangingStatutProspectApprenti,
-    nbDistinctCandidatsWithChangingStatutProspectAbandon,
-    nbDistinctCandidatsWithChangingStatutProspectAbandonProspect,
     nbCfasDistinctUai,
     nbCfasDistinctSiret,
     nbInvalidUais,
@@ -163,12 +107,6 @@ const getNetworkStats = async () => {
   return networksStatutsCandidatsCount;
 };
 
-const getNbStatutsProspect = async (filters = {}) =>
-  await StatutCandidat.countDocuments({
-    statut_apprenant: codesStatutsCandidats.prospect,
-    ...filters,
-  });
-
 const getNbStatutsInscrit = async (filters = {}) =>
   await StatutCandidat.countDocuments({
     statut_apprenant: codesStatutsCandidats.inscrit,
@@ -184,12 +122,6 @@ const getNbStatutsApprenti = async (filters = {}) =>
 const getNbStatutsAbandon = async (filters = {}) =>
   await StatutCandidat.countDocuments({
     statut_apprenant: codesStatutsCandidats.abandon,
-    ...filters,
-  });
-
-const getNbStatutsAbandonProspects = async (filters = {}) =>
-  await StatutCandidat.countDocuments({
-    statut_apprenant: codesStatutsCandidats.abandonProspects,
     ...filters,
   });
 

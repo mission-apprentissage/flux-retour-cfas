@@ -5,6 +5,7 @@ const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
+const { codesStatutsCandidats } = require("../../common/model/constants");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
@@ -26,10 +27,11 @@ module.exports = ({ statutsCandidats }) => {
     ne_pas_solliciter: Joi.boolean().required(),
     uai_etablissement: Joi.string().required(),
     nom_etablissement: Joi.string().required(),
-    statut_apprenant: Joi.number().required(),
     id_formation: Joi.string().required(),
     annee_scolaire: anneeScolaireSchema.allow("", null),
-
+    statut_apprenant: Joi.number()
+      .valid(codesStatutsCandidats.apprenti, codesStatutsCandidats.inscrit, codesStatutsCandidats.abandon)
+      .required(),
     // optional
     ine_apprenant: Joi.string().allow(null, ""),
     id_erp_apprenant: Joi.string().allow(null),
@@ -46,11 +48,13 @@ module.exports = ({ statutsCandidats }) => {
     libelle_long_formation: Joi.string().allow(null, ""),
     periode_formation: Joi.string().allow(null, ""),
     annee_formation: Joi.number().allow(null),
+    formation_rncp: Joi.string().allow(null, ""),
     date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
 
     contrat_date_debut: Joi.date().allow(null),
     contrat_date_fin: Joi.date().allow(null),
     contrat_date_rupture: Joi.date().allow(null),
+    date_entree_formation: Joi.date().allow(null),
   });
 
   /**

@@ -41,11 +41,6 @@ const identifyCfas = async () => {
         if (uaiFoundInStatuts) {
           logger.info(`Uai ${_uai} found in StatutsCandidats - adding to export`);
 
-          const nbStatutsProspect = await StatutCandidat.countDocuments({
-            statut_apprenant: codesStatutsCandidats.prospect,
-            uai_etablissement: _uai,
-          });
-
           const nbStatutsInscrits = await StatutCandidat.countDocuments({
             statut_apprenant: codesStatutsCandidats.inscrit,
             uai_etablissement: _uai,
@@ -61,20 +56,13 @@ const identifyCfas = async () => {
             uai_etablissement: _uai,
           });
 
-          const nbStatutsAbandonProspects = await StatutCandidat.countDocuments({
-            statut_apprenant: codesStatutsCandidats.abandonProspects,
-            uai_etablissement: _uai,
-          });
-
           statutsForCma.push({
             uai: uaiFoundInStatuts.uai_etablissement,
             siret: uaiFoundInStatuts.siret_etablissement,
             nom_cfa: uaiFoundInStatuts.nom_etablissement,
-            nb_statuts_prospects: nbStatutsProspect,
             nb_statuts_inscrits: nbStatutsInscrits,
             nb_statuts_apprentis: nbStatutsApprentis,
             nb_statuts_abandon: nbStatutsAbandon,
-            nb_statuts_abandon_prospects: nbStatutsAbandonProspects,
           });
         }
       }
