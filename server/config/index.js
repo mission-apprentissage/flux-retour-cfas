@@ -53,6 +53,11 @@ module.exports = {
       password: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_PERMISSIONS").default([]).asArray(),
     },
+    aurion: {
+      name: env.get("FLUX_RETOUR_CFAS_USERS_AURION_NAME").asString(),
+      password: env.get("FLUX_RETOUR_CFAS_USERS_AURION_PASSWORD").required().asString(),
+      permissions: env.get("FLUX_RETOUR_CFAS_USERS_AURION_PERMISSIONS").default([]).asArray(),
+    },
     defaultAdmin: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),
