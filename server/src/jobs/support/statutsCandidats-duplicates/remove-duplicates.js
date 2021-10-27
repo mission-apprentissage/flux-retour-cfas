@@ -14,9 +14,7 @@ let mongo;
  * Ce script permet de nettoyer les doublons des statuts identifiés
  * Ce script prends plusieurs paramètres en argument :
  * --duplicatesTypeCode : types de doublons à supprimer : 1/2/3/4 cf duplicatesTypesCodes
- * --mode : forAll / forUai
- *   permets de nettoyer les doublons dans toute la BDD / pour une région / pour un UAI
- * --uai : si mode forUai actif, permet de préciser l'uai souhaité
+ * --duplicatesTypeCode : types de doublons à supprimer : 1/2/3/4 cf duplicatesTypesCodes
  * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
  */
 runScript(async ({ statutsCandidats, db }) => {
@@ -24,8 +22,6 @@ runScript(async ({ statutsCandidats, db }) => {
   args = arg(
     {
       "--duplicatesTypeCode": Number,
-      "--mode": String,
-      "--uai": String,
       "--allowDiskUse": Boolean,
     },
     { argv: process.argv.slice(2) }
@@ -34,25 +30,10 @@ runScript(async ({ statutsCandidats, db }) => {
   if (!args["--duplicatesTypeCode"])
     throw new Error("missing required argument: --duplicatesTypeCode  (should be in [1/2/3/4])");
 
-  if (!args["--mode"])
-    throw new Error("missing required argument: --mode  (should be in [forAll / forRegion / forUai])");
-
   // Handle allowDiskUseMode param
   const allowDiskUseMode = args["--allowDiskUse"] ? true : false;
 
-  switch (args["--mode"]) {
-    case "forAll":
-      await removeAll(statutsCandidats, args["--duplicatesTypeCode"], allowDiskUseMode);
-      break;
-
-    case "forUai":
-      if (!args["--uai"]) throw new Error("missing required argument: --uai");
-      await removeAllDuplicatesForUai(statutsCandidats, args["--uai"], args["--duplicatesTypeCode"], allowDiskUseMode);
-      break;
-
-    default:
-      throw new Error("bad argument: --mode (should be in [forAll / forRegion / forUai])");
-  }
+  await removeAll(statutsCandidats, args["--duplicatesTypeCode"], allowDiskUseMode);
 
   logger.info("Job Ended !");
 }, jobNames.removeStatutsCandidatsDuplicates);
@@ -63,39 +44,7 @@ runScript(async ({ statutsCandidats, db }) => {
  * @param {*} duplicatesTypesCode
  */
 const removeAll = async (statutsCandidats, duplicatesTypesCode, allowDiskUseMode) => {
-  logger.info(`Removing all statuts duplicates`);
-
   const filterQuery = {};
-  const jobTimestamp = Date.now();
-
-  const duplicatesRemoved = await removeStatutsCandidatsDuplicatesForFilters(
-    statutsCandidats,
-    duplicatesTypesCode,
-    filterQuery,
-    allowDiskUseMode
-  );
-
-  await asyncForEach(duplicatesRemoved, async (duplicate) => {
-    await new DuplicateEvent({
-      jobType: "remove-duplicates",
-      args,
-      filters: filterQuery,
-      jobTimestamp,
-      ...duplicate,
-    }).save();
-  });
-};
-
-/**
- * Supprime les doublons de type duplicatesTypesCode pour un uai
- * @param {*} statutsCandidats
- * @param {*} uai
- * @param {*} duplicatesTypesCode
- */
-const removeAllDuplicatesForUai = async (statutsCandidats, uai, duplicatesTypesCode, allowDiskUseMode) => {
-  logger.info(`Removing all statuts duplicates for uai : ${uai}`);
-
-  const filterQuery = { uai_etablissement: uai };
   const jobTimestamp = Date.now();
 
   const duplicatesRemoved = await removeStatutsCandidatsDuplicatesForFilters(
@@ -130,15 +79,15 @@ const removeStatutsCandidatsDuplicatesForFilters = async (
   filters = {},
   allowDiskUseMode
 ) => {
-  const duplicatesForType = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filters, allowDiskUseMode);
+  const duplicatesGroups = await statutsCandidats.getDuplicatesList(duplicatesTypesCode, filters, allowDiskUseMode);
   const duplicatesRemoved = [];
 
-  if (duplicatesForType) {
-    await asyncForEach(duplicatesForType, async (duplicateItem) => {
+  if (duplicatesGroups) {
+    await asyncForEach(duplicatesGroups, async (duplicateGroup) => {
       logger.info(
-        `Removing ${duplicateItem.duplicatesCount} duplicates with common data : ${duplicateItem.commonData}`
+        `Removing ${duplicateGroup.duplicatesCount} duplicates with common data : ${duplicateGroup.commonData}`
       );
-      const removalInfo = await removeDuplicates(duplicateItem);
+      const removalInfo = await removeDuplicates(duplicateGroup);
       duplicatesRemoved.push(removalInfo);
     });
   }
@@ -149,10 +98,10 @@ const removeStatutsCandidatsDuplicatesForFilters = async (
  * Supprime les mauvais doublons pour la liste des doublons d'uai
  * @param {*} idsToRemove
  */
-const removeDuplicates = async (duplicatesForType) => {
+const removeDuplicates = async (duplicatesGroups) => {
   const statutsFound = [];
 
-  await asyncForEach(duplicatesForType.duplicatesIds, async (duplicateId) => {
+  await asyncForEach(duplicatesGroups.duplicatesIds, async (duplicateId) => {
     statutsFound.push(await StatutCandidat.findById(duplicateId).lean());
   });
 
@@ -175,7 +124,7 @@ const removeDuplicates = async (duplicatesForType) => {
   });
 
   return {
-    ...duplicatesForType,
+    ...duplicatesGroups,
     data: {
       keptStatutId: mostRecentStatut._id,
       removedIds: statutsToRemove.map((statut) => statut._id),
