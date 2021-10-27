@@ -1000,7 +1000,7 @@ integrationTests(__filename, () => {
       const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
 
       // Create 10 random statuts
-      for (let index = 0; index < 10; index++) {
+      for (let index = 0; index < 5; index++) {
         await createStatutCandidat(createRandomStatutCandidat());
       }
 
@@ -1013,8 +1013,7 @@ integrationTests(__filename, () => {
         annee_scolaire: "2022-2023",
       };
       for (let index = 0; index < 3; index++) {
-        const toAdd = new StatutCandidat(createRandomStatutCandidat(commonData));
-        await toAdd.save();
+        await createStatutCandidat(createRandomStatutCandidat(commonData));
       }
 
       const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.unique.code);
@@ -1030,7 +1029,7 @@ integrationTests(__filename, () => {
       const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
 
       // Create 10 random statuts
-      for (let index = 0; index < 10; index++) {
+      for (let index = 0; index < 5; index++) {
         await createStatutCandidat(createRandomStatutCandidat());
       }
 
@@ -1042,8 +1041,7 @@ integrationTests(__filename, () => {
         annee_scolaire: "2020-2021",
       };
       for (let index = 0; index < 4; index++) {
-        const toAdd = new StatutCandidat(createRandomStatutCandidat(commonData));
-        await toAdd.save();
+        await createStatutCandidat(createRandomStatutCandidat(commonData));
       }
 
       const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.prenom_apprenant.code);
@@ -1054,6 +1052,65 @@ integrationTests(__filename, () => {
       assert.equal(duplicatesListFound[0].duplicatesIds.length, 4);
       assert.deepEqual(duplicatesListFound[0].commonData, commonData);
       assert.deepEqual(duplicatesListFound[0].discriminants.prenom_apprenants.length, 4);
+    });
+
+    it("Vérifie la récupération des doublons de statuts candidats n'ayant jamais eu d'update", async () => {
+      const { createStatutCandidat, addOrUpdateStatuts, getDuplicatesList } = await statutsCandidats();
+
+      // Create 10 random statuts
+      for (let index = 0; index < 0; index++) {
+        await createStatutCandidat(createRandomStatutCandidat());
+      }
+
+      // Create 2 duplicates for Jean Dupont
+      const firstDup = {
+        formation_cfd: "01022103",
+        uai_etablissement: "0762518Z",
+        prenom_apprenant: "Jean",
+        nom_apprenant: "Dupont",
+        annee_scolaire: "2022-2023",
+        statut_apprenant: 2,
+      };
+      await createStatutCandidat(createRandomStatutCandidat(firstDup));
+      await createStatutCandidat(createRandomStatutCandidat(firstDup));
+
+      // create 2 duplicates with a different statut_apprenant
+      const secondDup = {
+        formation_cfd: "01022105",
+        uai_etablissement: "0769999P",
+        prenom_apprenant: "Marie",
+        nom_apprenant: "Durand",
+        annee_scolaire: "2021-2022",
+        statut_apprenant: 2,
+      };
+      await createStatutCandidat(createRandomStatutCandidat(secondDup));
+      await createStatutCandidat(createRandomStatutCandidat({ ...secondDup, statut_apprenant: 3 }));
+
+      // create 2 duplicates and update one of them
+      const thirdDups = {
+        formation_cfd: "01022106",
+        uai_etablissement: "0769888P",
+        prenom_apprenant: "John",
+        nom_apprenant: "Doe",
+        annee_scolaire: "2021-2022",
+        statut_apprenant: 2,
+      };
+      await createStatutCandidat(createRandomStatutCandidat(thirdDups));
+      await createStatutCandidat(createRandomStatutCandidat(thirdDups));
+      await addOrUpdateStatuts([createRandomStatutCandidat({ ...thirdDups, statut_apprenant: 3 })]);
+
+      const duplicatesListFound = await getDuplicatesList(
+        duplicatesTypesCodes.unique.code,
+        {},
+        { duplicatesWithNoUpdate: true }
+      );
+
+      // 1 cas de doublons trouvé
+      assert.equal(duplicatesListFound.length, 1);
+      assert.equal(duplicatesListFound[0].duplicatesCount, 2);
+      assert.equal(duplicatesListFound[0].duplicatesIds.length, 2);
+      assert.deepEqual(duplicatesListFound[0].commonData.prenom_apprenant, firstDup.prenom_apprenant);
+      assert.deepEqual(duplicatesListFound[0].commonData.nom_apprenant, firstDup.nom_apprenant);
     });
   });
 });
