@@ -1,6 +1,7 @@
 import { debounce } from "debounce";
 import React, { useEffect, useState } from "react";
 
+import { getFilteredQueryForUser } from "../../../../../common/auth/roles";
 import { _post } from "../../../../../common/httpClient";
 import { omitNullishValues } from "../../../../../common/utils/omitNullishValues";
 import { filtersPropTypes } from "../../../FiltersContext";
@@ -8,12 +9,12 @@ import { filtersPropTypes } from "../../../FiltersContext";
 const SEARCH_DEBOUNCE_TIME = 300;
 
 const searchCfas = debounce(async (searchCriteria, callback) => {
-  const searchRequestBody = omitNullishValues({
+  const queryFilteredForUser = getFilteredQueryForUser({
     searchTerm: searchCriteria.searchTerm,
     etablissement_num_region: searchCriteria.region?.code ?? null,
     etablissement_num_departement: searchCriteria.departement?.code ?? null,
   });
-  const result = await _post("/api/cfas/search", searchRequestBody);
+  const result = await _post("/api/cfas/search", omitNullishValues(queryFilteredForUser));
   callback(result);
 }, SEARCH_DEBOUNCE_TIME);
 

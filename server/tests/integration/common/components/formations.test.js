@@ -233,6 +233,23 @@ integrationTests(__filename, () => {
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
     });
 
+    it("returns results matching libelle and etablissement_reseau", async () => {
+      const searchTerm = "decoration";
+      const etablissement_reseaux = "RESEAU_TEST";
+
+      await new StatutCandidatModel({
+        ...createRandomStatutCandidat(),
+        etablissement_reseaux: [etablissement_reseaux],
+        formation_cfd: formationsSeed[2].cfd,
+        formation_cfd_valid: true,
+      }).save();
+
+      const results = await searchFormations({ searchTerm, etablissement_reseaux });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].cfd, formationsSeed[2].cfd);
+    });
+
     it("returns results matching libelle and uai_etablissement", async () => {
       const searchTerm = "decoration";
       const uai_etablissement = "0762232N";

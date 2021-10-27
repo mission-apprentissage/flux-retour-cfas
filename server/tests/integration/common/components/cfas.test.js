@@ -18,6 +18,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "01",
         uai_etablissement: "0152290X",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
       {
         ...createRandomStatutCandidat(),
@@ -26,6 +27,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "01",
         uai_etablissement: "0152232N",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
       {
         ...createRandomStatutCandidat(),
@@ -34,6 +36,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "123",
         uai_etablissement: "0392232X",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
       {
         ...createRandomStatutCandidat(),
@@ -42,6 +45,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "02",
         uai_etablissement: "0752232O",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
       {
         ...createRandomStatutCandidat(),
@@ -50,6 +54,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "039",
         uai_etablissement: "0152232Z",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
     ];
 
@@ -145,6 +150,14 @@ integrationTests(__filename, () => {
     it("returns list of CFA matching searchTerm AND additional filter (etablissement_num_region)", async () => {
       const actual = await searchCfas({ searchTerm: "CFA", etablissement_num_region: "123" });
       const expected = [statutsSeed[2]];
+
+      assert.equal(actual.length, 1);
+      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
+    });
+
+    it("returns list of CFA matching searchTerm AND additional filter (etablissement_reseaux)", async () => {
+      const actual = await searchCfas({ searchTerm: "FACULTE", etablissement_reseaux: "RESEAU_TEST" });
+      const expected = [statutsSeed[4]];
 
       assert.equal(actual.length, 1);
       assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);

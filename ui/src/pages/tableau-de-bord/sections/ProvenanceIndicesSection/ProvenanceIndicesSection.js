@@ -1,6 +1,7 @@
 import { Box, Skeleton, Text } from "@chakra-ui/react";
 import React from "react";
 
+import { getFilteredQueryForUser } from "../../../../common/auth/roles";
 import Section from "../../../../common/components/Section/Section";
 import { usePostFetch } from "../../../../common/hooks/useFetch";
 import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
@@ -15,7 +16,7 @@ const buildRequestBody = (filters) => {
     etablissement_reseaux: filters.reseau?.nom ?? null,
   };
 
-  return omitNullishValues(flattenedFilters);
+  return getFilteredQueryForUser(omitNullishValues(flattenedFilters));
 };
 
 const ProvenanceIndicesSection = () => {

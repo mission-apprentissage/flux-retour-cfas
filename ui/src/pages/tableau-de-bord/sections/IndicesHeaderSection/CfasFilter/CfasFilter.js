@@ -1,6 +1,8 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
+import { getAuthUserRole } from "../../../../../common/auth/auth";
+import { roles } from "../../../../../common/auth/roles";
 import { OverlayMenu, SecondarySelectButton } from "../../../../../common/components";
 import MenuTabs from "../../../../../common/components/OverlayMenu/MenuTabs";
 import { filtersPropTypes } from "../../../FiltersContext";
@@ -9,6 +11,20 @@ import ReseauxPanel from "./ReseauxPanel";
 
 const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const userRole = getAuthUserRole();
+
+  let buttonLabelForUser = "";
+  let isReseauPanelVisible = false;
+
+  if (userRole === roles.administrator || userRole === roles.pilot) {
+    buttonLabelForUser = "Sélectionner un organisme ou un réseau";
+    isReseauPanelVisible = true;
+  }
+
+  if (userRole === roles.network) {
+    buttonLabelForUser = "Sélectionner un organisme";
+    isReseauPanelVisible = false;
+  }
 
   const onCfaClick = (cfa) => {
     onCfaChange(cfa);
@@ -20,7 +36,7 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
     setIsOpen(false);
   };
 
-  const buttonLabel = filters.cfa?.nom_etablissement || filters.reseau?.nom || "Sélectionner un organisme ou un réseau";
+  const buttonLabel = filters.cfa?.nom_etablissement || filters.reseau?.nom || buttonLabelForUser;
 
   return (
     <div>
@@ -39,9 +55,11 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <MenuTabs tabNames={["Organismes de formation", "Réseaux"]}>
+          <MenuTabs
+            tabNames={isReseauPanelVisible ? ["Organismes de formation", "Réseaux"] : ["Organismes de formation"]}
+          >
             <CfaPanel onCfaClick={onCfaClick} value={filters.cfa} filters={filters} />
-            <ReseauxPanel onReseauClick={onReseauClick} value={filters.reseau} />
+            {isReseauPanelVisible === true && <ReseauxPanel onReseauClick={onReseauClick} value={filters.reseau} />}
           </MenuTabs>
         </OverlayMenu>
       )}
