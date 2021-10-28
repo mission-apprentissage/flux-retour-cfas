@@ -1,8 +1,8 @@
 import * as React from "react";
 import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 
+import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
-import { ProtectedRolesRoute, ProtectedRoute } from "./common/auth/routes";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
@@ -16,21 +16,23 @@ const App = () => {
       <Switch>
         {/* Public pages */}
         <Route exact path="/login" component={LoginPage} />
-        <Route path="/tableau-de-bord" exact component={TableauDeBordPage} />
         <Route exact path="/cfa/:accessToken" component={CfaWithoutNetworkPage} />
         <Route path="/comprendre-donnees" exact component={ComprendreLesDonnees} />
 
-        {/* Secured Tdb Pages */}
-        <Route path="/tableau-de-bord" exact component={TableauDeBordPage} />
+        {/* Protected pages */}
         <Route exact path="/">
           <Redirect to="/tableau-de-bord" />
         </Route>
-
-        {/* Secured admin pages */}
-        <ProtectedRolesRoute authorizedRoles={[roles.administrator]} path="/stats" exact component={GlobalStatsPage} />
+        <ProtectedRoute
+          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
+          path="/tableau-de-bord"
+          exact
+          component={TableauDeBordPage}
+        />
+        <ProtectedRoute authorizedRoles={[roles.administrator]} path="/stats" exact component={GlobalStatsPage} />
         <ProtectedRoute authorizedRoles={[roles.administrator]} path="/stats/:dataSource" component={UserStatsPage} />
 
-        {/* Forbidden page */}
+        {/* NotFound page */}
         <Route component={() => <div>404</div>} />
       </Switch>
     </Router>

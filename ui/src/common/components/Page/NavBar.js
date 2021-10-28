@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { NavLink, useRouteMatch } from "react-router-dom";
 
-import { isUserAuthorizedForRoles, roles } from "../../auth/roles";
+import { hasUserRoles, roles } from "../../auth/roles";
 import useAuth from "../../hooks/useAuth";
 import Section from "../Section/Section";
 
@@ -40,7 +40,7 @@ NavItem.propTypes = {
 const NavBar = () => {
   const [auth] = useAuth();
 
-  const isAdmin = isUserAuthorizedForRoles(auth, roles.administrator);
+  const isAdmin = hasUserRoles(auth, roles.administrator);
 
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
