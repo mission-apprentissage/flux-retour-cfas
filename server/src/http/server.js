@@ -19,6 +19,7 @@ const dashboardRoute = require("./routes/dashboard");
 const cfasRoute = require("./routes/cfas");
 const formationRoutes = require("./routes/formations");
 const healthcheckRoute = require("./routes/healthcheck");
+const demandeAcces = require("./routes/demande-acces");
 
 module.exports = async (components) => {
   const app = express();
@@ -37,6 +38,7 @@ module.exports = async (components) => {
     statutCandidatsRoute(components)
   );
   app.use("/api/login", loginRoute(components));
+  app.use("/api/demande-acces", demandeAcces(components));
   app.use("/api/stats", checkJwtToken, statsRoute(components));
   app.use("/api/formations", formationRoutes(components));
   app.use("/api/cfas", cfasRoute(components));

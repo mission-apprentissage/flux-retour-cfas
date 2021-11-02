@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-d
 
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
+import DemandeAccesPage from "./pages/demande-acces/DemandeAccesPage";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
@@ -16,6 +17,7 @@ const App = () => {
       <Switch>
         {/* Public pages */}
         <Route exact path="/login" component={LoginPage} />
+        <Route exact path="/demande-acces" component={DemandeAccesPage} />
         <Route exact path="/cfa/:accessToken" component={CfaWithoutNetworkPage} />
         <Route path="/comprendre-donnees" exact component={ComprendreLesDonnees} />
 
@@ -32,8 +34,8 @@ const App = () => {
         <ProtectedRoute authorizedRoles={[roles.administrator]} path="/stats" exact component={GlobalStatsPage} />
         <ProtectedRoute authorizedRoles={[roles.administrator]} path="/stats/:dataSource" component={UserStatsPage} />
 
-        {/* NotFound page */}
-        <Route component={() => <div>404</div>} />
+        {/* Not found page */}
+        <Route component={() => <div>404 - Page not found</div>} />
       </Switch>
     </Router>
   );
