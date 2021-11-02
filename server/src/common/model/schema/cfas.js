@@ -26,6 +26,11 @@ const cfasSchema = new Schema({
     default: null,
     description: "Nom de l'établissement",
   },
+  adresse: {
+    type: String,
+    default: null,
+    description: "Adresse de l'établissement",
+  },
   branchement_tdb: {
     type: Boolean,
     default: false,

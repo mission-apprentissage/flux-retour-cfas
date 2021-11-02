@@ -28,7 +28,7 @@ module.exports = ({ statutsCandidats }) => {
     uai_etablissement: Joi.string().required(),
     nom_etablissement: Joi.string().required(),
     id_formation: Joi.string().required(),
-    annee_scolaire: anneeScolaireSchema.allow("", null),
+    annee_scolaire: anneeScolaireSchema.required(),
     statut_apprenant: Joi.number()
       .valid(codesStatutsCandidats.apprenti, codesStatutsCandidats.inscrit, codesStatutsCandidats.abandon)
       .required(),

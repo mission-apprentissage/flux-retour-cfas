@@ -225,6 +225,12 @@ const statutsCandidatsStringFields = [
   "periode_formation",
 ];
 
+const jobEventActions = {
+  started: "started",
+  executed: "executed",
+  ended: "ended",
+};
+
 module.exports = {
   codesStatutsCandidats,
   codesStatutsMajStatutCandidats,
@@ -236,4 +242,5 @@ module.exports = {
   statsTypes,
   dataSource,
   statutsCandidatsStringFields,
+  jobEventStatuts: jobEventActions,
 };

@@ -83,6 +83,7 @@ const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
     uai: statutForCfa.uai_etablissement,
     sirets: allSirets,
     nom: statutForCfa.nom_etablissement.trim() ?? null,
+    adresse: statutForCfa.etablissement_adresse,
     branchement_tdb: true,
     source_seed_cfa: "StatutsCandidats",
     erps: [statutForCfa.source],
@@ -103,6 +104,7 @@ const updateCfaFromStatutCandidat = async (cfas, idCfa, statutForCfa, allSirets)
       $set: {
         uai: statutForCfa.uai_etablissement,
         nom: statutForCfa.nom_etablissement.trim() ?? null,
+        adresse: statutForCfa.etablissement_adresse,
         sirets: allSirets,
         branchement_tdb: true,
         source_seed_cfa: "StatutsCandidats",

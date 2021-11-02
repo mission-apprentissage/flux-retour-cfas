@@ -1,4 +1,4 @@
-import { Box, Td, Tr } from "@chakra-ui/react";
+import { Box, Link, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -7,14 +7,23 @@ import { getPercentage } from "../../../utils/calculUtils";
 import { isDateFuture } from "../../../utils/dateUtils";
 import ProgressCell from "../ProgressCell";
 
-const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs }) => {
+const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs, onCfaClick }) => {
   const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
+
   return (
     <Tr>
       <Td color="grey.800" paddingLeft="6w">
-        <Box>{nom_etablissement}</Box>
+        <Box>
+          <Link
+            onClick={() => onCfaClick({ nom_etablissement, uai_etablissement })}
+            color="bluefrance"
+            whiteSpace="nowrap"
+          >
+            {nom_etablissement}
+          </Link>
+        </Box>
         <Box fontSize="omega">UAI : {uai_etablissement}</Box>
       </Td>
       <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
@@ -38,6 +47,7 @@ CfaRow.propTypes = {
     rupturants: PropTypes.number.isRequired,
     abandons: PropTypes.number.isRequired,
   }).isRequired,
+  onCfaClick: PropTypes.func.isRequired,
 };
 
 export default CfaRow;

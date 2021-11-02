@@ -189,7 +189,11 @@ const getFindStatutQuery = (
  * @param {*} filters
  * @returns
  */
-const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDiskUse = false) => {
+const findStatutsDuplicates = async (
+  duplicatesTypesCode,
+  filters = {},
+  { allowDiskUse = false, duplicatesWithNoUpdate = false } = {}
+) => {
   let unicityQueryGroup = {};
 
   switch (duplicatesTypesCode) {
@@ -205,6 +209,8 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         // Ajout des ids unique de chaque doublons
         duplicatesIds: { $addToSet: "$_id" },
         etablissement_num_region: { $addToSet: "$etablissement_num_region" },
+        // ajout des différents statut_apprenant
+        statut_apprenants: { $addToSet: "$statut_apprenant" },
         count: { $sum: 1 },
       };
       break;
@@ -222,6 +228,8 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // Ajout des différents formation_cfd en doublon potentiel
         formation_cfds: { $addToSet: "$formation_cfd" },
+        // ajout des différents statut_apprenant
+        statut_apprenants: { $addToSet: "$statut_apprenant" },
         count: { $sum: 1 },
       };
       break;
@@ -239,6 +247,8 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // Ajout des différentes prenom_apprenant en doublon potentiel
         prenom_apprenants: { $addToSet: "$prenom_apprenant" },
+        // ajout des différents statut_apprenant
+        statut_apprenants: { $addToSet: "$statut_apprenant" },
         count: { $sum: 1 },
       };
       break;
@@ -256,6 +266,8 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
         etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // Ajout des différents nom_apprenant en doublon potentiel
         nom_apprenants: { $addToSet: "$nom_apprenant" },
+        // ajout des différents statut_apprenant
+        statut_apprenants: { $addToSet: "$statut_apprenant" },
         count: { $sum: 1 },
       };
       break;
@@ -263,6 +275,8 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
     default:
       throw new Error("findStatutsDuplicates Error :  duplicatesTypesCode not matching any code");
   }
+
+  if (duplicatesWithNoUpdate) filters.historique_statut_apprenant = { $size: 1 };
 
   const aggregateQuery = [
     // Filtrage sur les filtres passées en paramètres
@@ -276,6 +290,7 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
     // Récupération des statuts en doublons = regroupement count > 1
     {
       $match: {
+        ...(duplicatesWithNoUpdate ? { statut_apprenants: { $size: 1 } } : {}),
         count: { $gt: 1 },
       },
     },
@@ -296,9 +311,9 @@ const findStatutsDuplicates = async (duplicatesTypesCode, filters = {}, allowDis
  * @param {*} allowDiskUse
  * @returns
  */
-const getDuplicatesList = async (duplicatesTypeCode, filters = {}, allowDiskUse = false) => {
+const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
   // Récupération des doublons pour le type souhaité
-  const duplicates = await findStatutsDuplicates(duplicatesTypeCode, filters, allowDiskUse);
+  const duplicates = await findStatutsDuplicates(duplicatesTypeCode, filters, options);
 
   return duplicates.map((duplicateItem) => {
     const { _id, count, duplicatesIds, ...discriminants } = duplicateItem;

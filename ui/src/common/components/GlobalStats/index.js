@@ -63,13 +63,6 @@ const GlobalStats = ({ stats, networksStats }) => {
         </HStack>
         <HStack spacing="2w" mt="3w">
           <StatCard
-            label="Statuts Prospect"
-            stat={stats.nbStatutsProspect}
-            background="bluesoft.200"
-            color="grey.800"
-            indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.prospects}
-          />
-          <StatCard
             label="Statuts Inscrit"
             stat={stats.nbStatutsInscrits}
             background="yellowmedium.200"
@@ -86,13 +79,6 @@ const GlobalStats = ({ stats, networksStats }) => {
           <StatCard
             label="Statuts Abandon"
             stat={stats.nbStatutsAbandon}
-            background="orangesoft.200"
-            color="grey.800"
-            indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
-          />
-          <StatCard
-            label="Statuts Abandon de Prospects"
-            stat={stats.nbStatutsAbandonProspects}
             background="orangesoft.200"
             color="grey.800"
             indicatorColor={STATUTS_APPRENANTS_INDICATOR_COLORS.abandons}
@@ -158,28 +144,6 @@ const GlobalStats = ({ stats, networksStats }) => {
           <StatCard background="info" label="Statuts sans mise à jour" stat={stats.nbStatutsWithoutHistory} />
         </HStack>
         <HStack spacing="2w" mt="3w">
-          <StatCard
-            label="Prospect vers Inscrit"
-            stat={stats.nbDistinctCandidatsWithChangingStatutProspectInscrit}
-            background="success"
-          />
-          <StatCard
-            label="Prospect vers Apprenti"
-            stat={stats.nbDistinctCandidatsWithChangingStatutProspectApprenti}
-            background="success"
-          />
-          <StatCard
-            label="Prospect vers Abandon"
-            stat={stats.nbDistinctCandidatsWithChangingStatutProspectAbandon}
-            background="warning"
-          />
-          <StatCard
-            label="Prospect vers Abandon Prospect"
-            stat={stats.nbDistinctCandidatsWithChangingStatutProspectAbandonProspect}
-            background="warning"
-          />
-        </HStack>
-        <HStack spacing="2w" mt="3w">
           <StatCard label="1 mise à jour" stat={stats.nbDistinctCandidatsWithStatutHistory1} background="info" />
           <StatCard label="2 mises à jour" stat={stats.nbDistinctCandidatsWithStatutHistory2} background="info" />
           <StatCard label="3 mises à jour" stat={stats.nbDistinctCandidatsWithStatutHistory3} background="info" />
@@ -218,17 +182,11 @@ GlobalStats.propTypes = {
     nbCandidatsMultiCfdsWithoutIne: PropTypes.number,
     nbStatutsCandidats: PropTypes.number,
     nbStatutsSansIne: PropTypes.number,
-    nbStatutsProspect: PropTypes.number,
     nbStatutsInscrits: PropTypes.number,
     nbStatutsApprentis: PropTypes.number,
     nbStatutsAbandon: PropTypes.number,
-    nbStatutsAbandonProspects: PropTypes.number,
     nbStatutsCandidatsMisAJour: PropTypes.number,
     nbStatutsWithoutHistory: PropTypes.number,
-    nbDistinctCandidatsWithChangingStatutProspectInscrit: PropTypes.number,
-    nbDistinctCandidatsWithChangingStatutProspectApprenti: PropTypes.number,
-    nbDistinctCandidatsWithChangingStatutProspectAbandon: PropTypes.number,
-    nbDistinctCandidatsWithChangingStatutProspectAbandonProspect: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory1: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory2: PropTypes.number,
     nbDistinctCandidatsWithStatutHistory3: PropTypes.number,

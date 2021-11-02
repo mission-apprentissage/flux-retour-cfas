@@ -5,6 +5,7 @@ const config = require("../../config");
 const { access, mkdir } = require("fs").promises;
 const { JobEvent } = require("../common/model");
 const { formatDuration, intervalToDuration } = require("date-fns");
+const { jobEventStatuts } = require("../common/model/constants");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -47,24 +48,23 @@ module.exports = {
 
       await ensureOutputDirExists();
       const components = await createComponents();
+      await new JobEvent({ jobname: jobName, action: jobEventStatuts.started }).save();
       await job(components);
+
       const endDate = new Date();
       const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
 
-      const jobEventStop = new JobEvent({
+      await new JobEvent({
         jobname: jobName,
-        action: "Run Job",
-        data: {
-          startDate,
-          endDate,
-          duration,
-        },
-      });
-      await jobEventStop.save();
+        action: jobEventStatuts.executed,
+        data: { startDate, endDate, duration },
+      }).save();
 
       await exit();
     } catch (e) {
       await exit(e);
+    } finally {
+      await new JobEvent({ jobname: jobName, action: jobEventStatuts.ended }).save();
     }
   },
 };

@@ -16,7 +16,7 @@ module.exports = new Schema({
     type: String,
     default: null,
     required: true,
-    description: "L'action ayant eu lieu",
+    description: "L'action en cours",
   },
   data: {
     type: Object,
