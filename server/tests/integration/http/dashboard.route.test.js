@@ -9,17 +9,6 @@ const {
 const { StatutCandidat } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
-  describe("/api/dashboard/etablissements-stats route", () => {
-    it("Vérifie qu'on peut récupérer des statistiques d'établissements via API", async () => {
-      const { httpClient } = await startServer();
-
-      const response = await httpClient.get("/api/dashboard/etablissements-stats");
-
-      assert.deepStrictEqual(response.status, 200);
-      assert.deepStrictEqual(response.data.nbEtablissements, 0);
-    });
-  });
-
   describe("/api/dashboard/effectifs route", () => {
     it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts sans filtres", async () => {
       const { httpClient } = await startServer();

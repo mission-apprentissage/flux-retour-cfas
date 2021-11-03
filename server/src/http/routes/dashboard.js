@@ -17,31 +17,6 @@ module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
 
   /**
-   * Gets the general stats for the dashboard
-   */
-  router.get(
-    "/etablissements-stats",
-    tryCatch(async (req, res) => {
-      // Add user event
-      const event = new UserEvent({
-        username: "dashboard",
-        type: "GET",
-        action: "api/dashboard/etablissements-stats",
-        data: null,
-      });
-      await event.save();
-
-      // Get nbEtablissement data
-      const nbEtablissements = await stats.getNbDistinctCfasBySiret();
-
-      // Return data
-      return res.json({
-        nbEtablissements,
-      });
-    })
-  );
-
-  /**
    * Gets region conversion stats
    */
   router.post(
