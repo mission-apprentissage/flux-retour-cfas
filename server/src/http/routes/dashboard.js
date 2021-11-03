@@ -4,55 +4,17 @@ const Joi = require("joi");
 const { UserEvent } = require("../../common/model");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 
+const commonEffectifsFilters = {
+  etablissement_num_region: Joi.string().allow(null, ""),
+  etablissement_num_departement: Joi.string().allow(null, ""),
+  formation_cfd: Joi.string().allow(null, ""),
+  uai_etablissement: Joi.string().allow(null, ""),
+  siret_etablissement: Joi.string().allow(null, ""),
+  etablissement_reseaux: Joi.string().allow(null, ""),
+};
+
 module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
-
-  /**
-   * Schema for effectif validation
-   */
-  const dashboardEffectifInputSchema = Joi.object({
-    date: Joi.date().required(),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    formation_cfd: Joi.string().allow(null, ""),
-    uai_etablissement: Joi.string().allow(null, ""),
-    siret_etablissement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
-
-  /**
-   * Schema for organismes count validation
-   */
-  const organismesCountInputSchema = Joi.object({
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    formation_cfd: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
-
-  /**
-   * Schema for effetctifs by CFA body
-   */
-  const dashboardEffectifsByCfaBodySchema = Joi.object({
-    date: Joi.date().required(),
-    formation_cfd: Joi.string().allow(null, ""),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
-
-  /**
-   * Schema for nouveaux contrats
-   */
-  const nouveauxContratsQueryBodySchema = Joi.object({
-    startDate: Joi.date().required(),
-    endDate: Joi.date().required(),
-    formation_cfd: Joi.string().allow(null, ""),
-    uai_etablissement: Joi.string().allow(null, ""),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
 
   /**
    * Gets the general stats for the dashboard
@@ -86,7 +48,7 @@ module.exports = ({ stats, dashboard }) => {
     "/total-organismes",
     tryCatch(async (req, res) => {
       // Validate schema
-      await organismesCountInputSchema.validateAsync(req.body, {
+      await commonEffectifsFilters.validateAsync(req.body, {
         abortEarly: false,
       });
 
@@ -105,7 +67,11 @@ module.exports = ({ stats, dashboard }) => {
     "/effectifs",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardEffectifInputSchema.validateAsync(req.query, {
+      const validationSchema = Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, {
         abortEarly: false,
       });
 
@@ -146,11 +112,7 @@ module.exports = ({ stats, dashboard }) => {
     tryCatch(async (req, res) => {
       await Joi.object({
         date: Joi.date().required(),
-        uai_etablissement: Joi.string().allow(null, ""),
-        siret_etablissement: Joi.string().allow(null, ""),
-        etablissement_reseaux: Joi.string().allow(null, ""),
-        etablissement_num_region: Joi.string().allow(null, ""),
-        etablissement_num_departement: Joi.string().allow(null, ""),
+        ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
 
       const { date: dateFromParams, ...filtersFromBody } = req.query;
@@ -174,12 +136,8 @@ module.exports = ({ stats, dashboard }) => {
     tryCatch(async (req, res) => {
       await Joi.object({
         date: Joi.date().required(),
-        uai_etablissement: Joi.string().allow(null, ""),
-        siret_etablissement: Joi.string().allow(null, ""),
-        etablissement_reseaux: Joi.string().allow(null, ""),
-        etablissement_num_region: Joi.string().allow(null, ""),
-        etablissement_num_departement: Joi.string().allow(null, ""),
         niveau_formation: Joi.string().allow(null, ""),
+        ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
 
       const { date: dateFromParams, ...filtersFromBody } = req.query;
@@ -201,15 +159,11 @@ module.exports = ({ stats, dashboard }) => {
   router.get(
     "/effectifs-par-annee-formation",
     tryCatch(async (req, res) => {
-      await Joi.object({
+      const validationSchema = Joi.object({
         date: Joi.date().required(),
-        formation_cfd: Joi.string().allow(null, ""),
-        uai_etablissement: Joi.string().allow(null, ""),
-        siret_etablissement: Joi.string().allow(null, ""),
-        etablissement_reseaux: Joi.string().allow(null, ""),
-        etablissement_num_region: Joi.string().allow(null, ""),
-        etablissement_num_departement: Joi.string().allow(null, ""),
-      }).validateAsync(req.query, { abortEarly: false });
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, { abortEarly: false });
 
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
@@ -228,7 +182,11 @@ module.exports = ({ stats, dashboard }) => {
     "/effectifs-par-cfa",
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardEffectifsByCfaBodySchema.validateAsync(req.query, {
+      const validationSchema = Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, {
         abortEarly: false,
       });
 
@@ -248,10 +206,11 @@ module.exports = ({ stats, dashboard }) => {
   router.get(
     "/effectifs-par-departement",
     tryCatch(async (req, res) => {
-      await Joi.object({
+      const validationSchema = Joi.object({
         date: Joi.date().required(),
-        etablissement_num_region: Joi.string().allow(null, ""),
-      }).validateAsync(req.query, { abortEarly: false });
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, { abortEarly: false });
 
       const { date: dateFromQuery, ...filtersFromBody } = req.query;
       const date = new Date(dateFromQuery);
@@ -269,7 +228,12 @@ module.exports = ({ stats, dashboard }) => {
     "/chiffres-cles",
     tryCatch(async (req, res) => {
       // Validate schema
-      await nouveauxContratsQueryBodySchema.validateAsync(req.query, {
+      const validationSchema = Joi.object({
+        startDate: Joi.date().required(),
+        endDate: Joi.date().required(),
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, {
         abortEarly: false,
       });
 
