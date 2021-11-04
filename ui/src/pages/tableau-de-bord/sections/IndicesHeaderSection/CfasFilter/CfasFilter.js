@@ -1,30 +1,18 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { getAuthUserRole } from "../../../../../common/auth/auth";
-import { roles } from "../../../../../common/auth/roles";
 import { OverlayMenu, SecondarySelectButton } from "../../../../../common/components";
 import MenuTabs from "../../../../../common/components/OverlayMenu/MenuTabs";
 import { filtersPropTypes } from "../../../FiltersContext";
 import CfaPanel from "./CfasPanel";
 import ReseauxPanel from "./ReseauxPanel";
 
-const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
+const CfasFilter = ({ onCfaChange, onReseauChange, filters, displayReseauPanel = true }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const userRole = getAuthUserRole();
 
-  let buttonLabelForUser = "";
-  let isReseauPanelVisible = false;
-
-  if (userRole === roles.administrator || userRole === roles.pilot) {
-    buttonLabelForUser = "Sélectionner un organisme ou un réseau";
-    isReseauPanelVisible = true;
-  }
-
-  if (userRole === roles.network) {
-    buttonLabelForUser = "Sélectionner un organisme";
-    isReseauPanelVisible = false;
-  }
+  const buttonLabelForUser = displayReseauPanel
+    ? "Sélectionner un organisme ou un réseau"
+    : "Sélectionner un organisme";
 
   const onCfaClick = (cfa) => {
     onCfaChange(cfa);
@@ -56,10 +44,10 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <MenuTabs
-            tabNames={isReseauPanelVisible ? ["Organismes de formation", "Réseaux"] : ["Organismes de formation"]}
+            tabNames={displayReseauPanel ? ["Organismes de formation", "Réseaux"] : ["Organismes de formation"]}
           >
             <CfaPanel onCfaClick={onCfaClick} value={filters.cfa} filters={filters} />
-            {isReseauPanelVisible === true && <ReseauxPanel onReseauClick={onReseauClick} value={filters.reseau} />}
+            {displayReseauPanel === true && <ReseauxPanel onReseauClick={onReseauClick} value={filters.reseau} />}
           </MenuTabs>
         </OverlayMenu>
       )}
@@ -71,6 +59,7 @@ CfasFilter.propTypes = {
   onCfaChange: PropTypes.func.isRequired,
   onReseauChange: PropTypes.func.isRequired,
   filters: filtersPropTypes.state,
+  displayReseauPanel: PropTypes.bool,
 };
 
 export default CfasFilter;
