@@ -1,6 +1,8 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
+const { apiRoles } = require("../../../src/common/roles");
+
 const {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
@@ -10,8 +12,19 @@ const { StatutCandidat } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
   describe("/api/dashboard/effectifs route", () => {
-    it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts sans filtres", async () => {
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();
+
+      const response = await httpClient.get("/api/dashboard/effectifs", {
+        params: { date: "2020-10-10T00:00:00.000Z" },
+      });
+
+      assert.equal(response.status, 401);
+    });
+
+    it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts sans filtres", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
 
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
@@ -61,6 +74,7 @@ httpTests(__filename, ({ startServer }) => {
       // Check good api call
       const response = await httpClient.get("/api/dashboard/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z" },
+        headers: bearerToken,
       });
 
       assert.equal(response.status, 200);
@@ -71,7 +85,8 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts avec filtres", async () => {
-      const { httpClient } = await startServer();
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const filterQuery = { etablissement_num_region: "84" };
 
       // Add 10 statuts for filter with history sequence - full
@@ -117,6 +132,7 @@ httpTests(__filename, ({ startServer }) => {
       // Check good api call
       const response = await httpClient.get("/api/dashboard/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z", ...filterQuery },
+        headers: bearerToken,
       });
 
       const indices = response.data;
@@ -127,6 +143,7 @@ httpTests(__filename, ({ startServer }) => {
       // Check bad api call
       const badResponse = await httpClient.get("/api/dashboard/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_region: "99" },
+        headers: bearerToken,
       });
 
       assert.deepStrictEqual(badResponse.status, 200);
@@ -139,7 +156,8 @@ httpTests(__filename, ({ startServer }) => {
 
   describe("/api/dashboard/effectifs-par-niveau-formation route", () => {
     it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux de formation via API", async () => {
-      const { httpClient } = await startServer();
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
@@ -165,7 +183,9 @@ httpTests(__filename, ({ startServer }) => {
       await toAdd.save();
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
-      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-formation?${searchParams}`);
+      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-formation?${searchParams}`, {
+        headers: bearerToken,
+      });
 
       assert.equal(response.status, 200);
       assert.equal(response.data.length, 2);
@@ -187,8 +207,8 @@ httpTests(__filename, ({ startServer }) => {
 
   describe("/api/dashboard/total-organismes route", () => {
     it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une région", async () => {
-      const { httpClient } = await startServer();
-
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const regionNumTest = "28";
 
       // Add 1 statut for region
@@ -203,15 +223,21 @@ httpTests(__filename, ({ startServer }) => {
       ).save();
 
       // Check good api call
-      const response = await httpClient.post("/api/dashboard/total-organismes", {
-        etablissement_num_region: regionNumTest,
+      const response = await httpClient.get("/api/dashboard/total-organismes", {
+        params: {
+          etablissement_num_region: regionNumTest,
+        },
+        headers: bearerToken,
       });
 
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, { nbOrganismes: 1 });
 
-      const badRegionResponse = await httpClient.post("/api/dashboard/total-organismes", {
-        etablissement_num_region: "01",
+      const badRegionResponse = await httpClient.get("/api/dashboard/total-organismes", {
+        params: {
+          etablissement_num_region: "01",
+        },
+        headers: bearerToken,
       });
 
       assert.deepStrictEqual(badRegionResponse.status, 200);
@@ -219,8 +245,8 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une formation", async () => {
-      const { httpClient } = await startServer();
-
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const formationCfd = "abcd1234";
 
       // Add 1 statut for formation
@@ -236,8 +262,11 @@ httpTests(__filename, ({ startServer }) => {
       ).save();
 
       // Check good api call
-      const response = await httpClient.post("/api/dashboard/total-organismes", {
-        formation_cfd: formationCfd,
+      const response = await httpClient.get("/api/dashboard/total-organismes", {
+        params: {
+          formation_cfd: formationCfd,
+        },
+        headers: bearerToken,
       });
 
       assert.equal(response.status, 200);

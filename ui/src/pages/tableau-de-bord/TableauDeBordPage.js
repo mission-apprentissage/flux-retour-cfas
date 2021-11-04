@@ -1,5 +1,8 @@
 import React from "react";
 
+import { getAuthUserNetwork, getAuthUserRole } from "../../common/auth/auth";
+import { roles } from "../../common/auth/roles";
+import { DEFAULT_REGION } from "../../common/constants/defaultRegion";
 import { FiltersProvider, useFiltersContext } from "./FiltersContext";
 import useEffectifs from "./useEffectifs";
 import { CfaView, DepartementView, FormationView, RegionView, ReseauView } from "./views";
@@ -38,8 +41,18 @@ export const TableauDeBordView = () => {
 };
 
 const TableauDeBordPage = () => {
+  if (getAuthUserRole() === roles.network) {
+    const fixedFiltersState = { reseau: { nom: getAuthUserNetwork() } };
+    const defaultFiltersState = { region: DEFAULT_REGION, ...fixedFiltersState };
+    return (
+      <FiltersProvider defaultState={defaultFiltersState} fixedState={fixedFiltersState}>
+        <TableauDeBordView />
+      </FiltersProvider>
+    );
+  }
+
   return (
-    <FiltersProvider>
+    <FiltersProvider defaultState={{ region: DEFAULT_REGION }}>
       <TableauDeBordView />
     </FiltersProvider>
   );

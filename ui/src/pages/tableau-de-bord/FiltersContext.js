@@ -3,7 +3,6 @@ import qs from "query-string";
 import { createContext, useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 
-import { DEFAULT_REGION } from "../../common/constants/defaultRegion";
 import { omitNullishValues } from "../../common/utils/omitNullishValues";
 
 const FiltersContext = createContext();
@@ -77,32 +76,35 @@ const isStateValid = (state) => {
   return Boolean(state.date?.getTime());
 };
 
-export const FiltersProvider = ({ children, defaultState = null }) => {
+export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }) => {
   const history = useHistory();
   const currentQueryString = history.location.search.slice(1);
 
-  const updateQueryStringWithState = (state) => {
-    const queryString = stateToQueryString(state);
+  const updateUrlWithState = (state) => {
+    // in some cases, we want some fields in the state to never change (network for a network user for example)
+    const newState = { ...state, ...fixedState };
+    // serialize state to url query string
+    const queryString = stateToQueryString(newState);
     history.push({ search: queryString });
   };
+  const initialState = { ...getDefaultState(), ...defaultState };
 
   // make sure a valid state is always set, otherwise set it to default
   const parsedStateFromQueryString = parseQueryString(currentQueryString);
   const parsedStateIsValid = isStateValid(parsedStateFromQueryString);
-  const initialState = defaultState ?? { ...getDefaultState(), region: DEFAULT_REGION };
   const state = parsedStateIsValid ? parsedStateFromQueryString : initialState;
   useEffect(() => {
-    if (!parsedStateIsValid) updateQueryStringWithState(initialState);
+    if (!parsedStateIsValid) updateUrlWithState(initialState);
   }, [currentQueryString]);
 
   const setters = {
-    setDate: (value) => updateQueryStringWithState(setDate(state, value)),
-    setRegion: (value) => updateQueryStringWithState(setRegion(state, value)),
-    setDepartement: (value) => updateQueryStringWithState(setDepartement(state, value)),
-    setCfa: (value) => updateQueryStringWithState(setCfa(state, value)),
-    setReseau: (value) => updateQueryStringWithState(setReseau(state, value)),
-    setFormation: (value) => updateQueryStringWithState(setFormation(state, value)),
-    setSousEtablissement: (value) => updateQueryStringWithState(setSousEtablissement(state, value)),
+    setDate: (value) => updateUrlWithState(setDate(state, value)),
+    setRegion: (value) => updateUrlWithState(setRegion(state, value)),
+    setDepartement: (value) => updateUrlWithState(setDepartement(state, value)),
+    setCfa: (value) => updateUrlWithState(setCfa(state, value)),
+    setReseau: (value) => updateUrlWithState(setReseau(state, value)),
+    setFormation: (value) => updateUrlWithState(setFormation(state, value)),
+    setSousEtablissement: (value) => updateUrlWithState(setSousEtablissement(state, value)),
   };
 
   const contextValue = {
@@ -110,11 +112,7 @@ export const FiltersProvider = ({ children, defaultState = null }) => {
     setters,
   };
 
-  return (
-    <FiltersContext.Provider defaultState={defaultState} value={contextValue}>
-      {children}
-    </FiltersContext.Provider>
-  );
+  return <FiltersContext.Provider value={contextValue}>{children}</FiltersContext.Provider>;
 };
 
 export const useFiltersContext = () => {
@@ -155,4 +153,5 @@ export const filtersPropTypes = {
 FiltersProvider.propTypes = {
   children: PropTypes.node.isRequired,
   defaultState: filtersStatePropType,
+  fixedState: filtersStatePropType,
 };

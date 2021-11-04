@@ -44,7 +44,7 @@ EffectifCard.propTypes = {
   label: PropTypes.string.isRequired,
   count: PropTypes.number.isRequired,
   tooltipLabel: PropTypes.string,
-  validPeriod: PropTypes.boolean,
+  validPeriod: PropTypes.bool,
 };
 
 export default EffectifCard;

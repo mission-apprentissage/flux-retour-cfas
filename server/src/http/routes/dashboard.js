@@ -3,6 +3,15 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { UserEvent } = require("../../common/model");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
+const { tdbRoles } = require("../../common/roles");
+
+const applyUserRoleFilter = (req, _res, next) => {
+  // users with network role should not be able to see data for other reseau
+  if (req.user.permissions.includes(tdbRoles.network)) {
+    req.query.etablissement_reseaux = req.user.network;
+  }
+  next();
+};
 
 const commonEffectifsFilters = {
   etablissement_num_region: Joi.string().allow(null, ""),
@@ -19,15 +28,16 @@ module.exports = ({ stats, dashboard }) => {
   /**
    * Gets region conversion stats
    */
-  router.post(
+  router.get(
     "/total-organismes",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
-      await commonEffectifsFilters.validateAsync(req.body, {
+      await Joi.object(commonEffectifsFilters).validateAsync(req.query, {
         abortEarly: false,
       });
 
-      const nbOrganismes = await stats.getNbDistinctCfasByUai(req.body);
+      const nbOrganismes = await stats.getNbDistinctCfasByUai(req.query);
 
       return res.json({
         nbOrganismes,
@@ -40,6 +50,7 @@ module.exports = ({ stats, dashboard }) => {
    */
   router.get(
     "/effectifs",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
       const validationSchema = Joi.object({
@@ -84,6 +95,7 @@ module.exports = ({ stats, dashboard }) => {
    */
   router.get(
     "/effectifs-par-niveau-formation",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       await Joi.object({
         date: Joi.date().required(),
@@ -108,6 +120,7 @@ module.exports = ({ stats, dashboard }) => {
    */
   router.get(
     "/effectifs-par-formation",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       await Joi.object({
         date: Joi.date().required(),
@@ -133,6 +146,7 @@ module.exports = ({ stats, dashboard }) => {
    */
   router.get(
     "/effectifs-par-annee-formation",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       const validationSchema = Joi.object({
         date: Joi.date().required(),
@@ -155,6 +169,7 @@ module.exports = ({ stats, dashboard }) => {
 
   router.get(
     "/effectifs-par-cfa",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
       const validationSchema = Joi.object({
@@ -180,6 +195,7 @@ module.exports = ({ stats, dashboard }) => {
 
   router.get(
     "/effectifs-par-departement",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       const validationSchema = Joi.object({
         date: Joi.date().required(),
@@ -201,6 +217,7 @@ module.exports = ({ stats, dashboard }) => {
 
   router.get(
     "/chiffres-cles",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
       const validationSchema = Joi.object({
