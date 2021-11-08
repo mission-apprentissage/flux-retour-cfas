@@ -97,8 +97,16 @@ const REGIONS_DEPLOYEES = [
     code: "11",
   },
   {
-    nom: "Hauts-de-France",
-    code: "32",
+    nom: "Occitanie",
+    code: "76",
+  },
+  {
+    nom: "Grand Est",
+    code: "44",
+  },
+  {
+    nom: "Nouvelle-Aquitaine",
+    code: "75",
   },
 ];
 
