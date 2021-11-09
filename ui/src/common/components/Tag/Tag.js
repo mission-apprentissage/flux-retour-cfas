@@ -1,6 +1,6 @@
 import { chakra } from "@chakra-ui/react";
 
-const Tag = chakra("Tag", {
+const Tag = chakra("span", {
   baseStyle: {
     fontSize: "omega",
     paddingX: "2w",
