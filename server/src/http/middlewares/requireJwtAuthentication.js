@@ -1,8 +1,21 @@
 const passport = require("passport");
 const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const config = require("../../../config");
+const { tdbRoles } = require("../../common/roles");
 
-module.exports = ({ users }) => {
+module.exports = ({ users, cfas }) => {
+  const findUserOrCfa = async (usernameOrUai) => {
+    const foundUser = await users.getUser(usernameOrUai);
+
+    if (foundUser) return foundUser;
+
+    const foundCfa = await cfas.getFromUai(usernameOrUai);
+
+    if (foundCfa) return { username: usernameOrUai, permissions: [tdbRoles.cfa] };
+
+    return null;
+  };
+
   const jwtStrategyOptions = {
     // jwt can be passed as header or query parameter
     jwtFromRequest: ExtractJwt.fromExtractors([
@@ -15,7 +28,7 @@ module.exports = ({ users }) => {
   passport.use(
     new JwtStrategy(jwtStrategyOptions, async (jwt_payload, done) => {
       try {
-        const foundUser = await users.getUser(jwt_payload.sub);
+        const foundUser = await findUserOrCfa(jwt_payload.sub);
         if (!foundUser) {
           return done(null, false);
         }

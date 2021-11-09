@@ -10,6 +10,10 @@ const applyUserRoleFilter = (req, _res, next) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
     req.query.etablissement_reseaux = req.user.network;
   }
+  // users with cfa role should not be able to see data for other cfas
+  if (req.user?.permissions.includes(tdbRoles.cfa)) {
+    req.query.uai_etablissement = req.user?.username;
+  }
   next();
 };
 

@@ -8,7 +8,7 @@ import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
-import CfaWithoutNetworkPage from "./pages/tableau-de-bord/views/CfaWithoutNetwork/CfaWithoutNetworkPage";
+import CfaWithoutNetworkPage from "./pages/tableau-de-bord/views/CfaWithoutNetwork";
 import UserStatsPage from "./pages/user-stats";
 
 const App = () => {

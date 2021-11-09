@@ -9,6 +9,7 @@ module.exports = () => ({
   getSousEtablissementsForUai,
   getUrlTdbFromAccessToken,
   getFromAccessToken,
+  getFromUai,
 });
 
 const SEARCH_RESULTS_LIMIT = 100;
@@ -115,4 +116,8 @@ const getUrlTdbFromAccessToken = (accessToken) => `${config.publicUrl}/cfa/${acc
 
 const getFromAccessToken = async (accessToken) => {
   return Cfa.findOne({ url_access_token: accessToken }).lean();
+};
+
+const getFromUai = async (uai) => {
+  return Cfa.findOne({ uai }).lean();
 };

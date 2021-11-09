@@ -1,11 +1,9 @@
 import { Heading } from "@chakra-ui/layout";
 import PropTypes from "prop-types";
 import React from "react";
-import { Redirect } from "react-router";
 
 import { Page, Section } from "../../../../common/components";
-import { useFetch } from "../../../../common/hooks/useFetch";
-import { FiltersProvider, getDefaultState, useFiltersContext } from "../../FiltersContext";
+import { useFiltersContext } from "../../FiltersContext";
 import { EffectifsSection } from "../../sections";
 import useEffectifs from "../../useEffectifs";
 import CfaSection from "../CfaView/InfosCfa/CfaSection";
@@ -33,31 +31,4 @@ CfaWithoutNetworkView.propTypes = {
   cfaUai: PropTypes.string.isRequired,
 };
 
-const CfaWithoutNetworkPage = ({ match }) => {
-  const [data, loading, error] = useFetch(`/api/cfas/url-access-token/${match?.params.accessToken}`);
-
-  let content = null;
-
-  if (error) content = <Redirect to="/404"></Redirect>;
-
-  if (data && !loading) {
-    const defaultCfaState = { ...getDefaultState(), cfa: { uai_etablissement: data.uai } };
-    content = (
-      <FiltersProvider defaultState={defaultCfaState}>
-        <CfaWithoutNetworkView cfaUai={data.uai} />
-      </FiltersProvider>
-    );
-  }
-
-  return <>{content}</>;
-};
-
-CfaWithoutNetworkPage.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      accessToken: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
-};
-
-export default CfaWithoutNetworkPage;
+export default CfaWithoutNetworkView;

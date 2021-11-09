@@ -8,6 +8,7 @@ const tdbRoles = {
   administrator: "administrator",
   pilot: "pilot",
   network: "network",
+  cfa: "cfa",
 };
 
 module.exports = {
