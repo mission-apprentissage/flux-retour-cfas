@@ -62,9 +62,9 @@ const ComprendreLesDonnees = () => {
                 <UnorderedList ml="5w">
                   <ListItem>INE ;</ListItem>
                   <ListItem>Nom de l’apprenant ;</ListItem>
-                  <ListItem>Prénoms de l’apprenant ;</ListItem>
+                  <ListItem>Prénom de l’apprenant ;</ListItem>
                   <ListItem>Adresse mail de l’apprenant ;</ListItem>
-                  <ListItem>Statut de l’apprenant : prospect, inscrit, apprenti et abandon ;</ListItem>
+                  <ListItem>Statut de l’apprenant : inscrit, apprenti et abandon ;</ListItem>
                   <ListItem>Intitulé de la formation ;</ListItem>
                   <ListItem>Code formation diplôme ;</ListItem>
                   <ListItem>Année de la formation ;</ListItem>
@@ -79,7 +79,7 @@ const ComprendreLesDonnees = () => {
                   <UnorderedList ml="5w">
                     <ListItem>
                       Un apprenant unique est identifié quand il y a unicité sur la combinaison suivante : Nom, Prénom,
-                      CFD de la formation, UAI de l’organisme de formation, INE.On décompte donc 1 apprenant pour 1
+                      CFD de la formation, UAI de l’organisme de formation.On décompte donc 1 apprenant pour 1
                       combinaison.
                     </ListItem>
                     <ListItem>
@@ -94,7 +94,7 @@ const ComprendreLesDonnees = () => {
                   A quelle date l&apos;indice &quot;Effectif&quot; est-il arrêté ?
                 </Text>
                 <Text>
-                  ‌A ce jour, Yparéo nous transmet les données de manière quotidienne et Gesti chaque lundi. De fait,
+                  ‌A ce jour, Yparéo, Gesti et SC Form nous transmettent les données de manière quotidienne. De fait,
                   les données sont constamment rafraîchies. ‌Lorsque vous consultez le mois en cours, les effectifs
                   affichés sont ceux du dernier jour disponible, par exemple si le 12 janvier 2021, vous sélectionnez la
                   période &quot;janvier 2021&quot; , vous pourrez connaître les effectifs comptabilisés au 12 janvier.
@@ -132,7 +132,7 @@ const ComprendreLesDonnees = () => {
                     correctement. En effet, nous importons les données chaque nuit et nous construisons un historique
                     des statuts de chaque apprenant afin de pouvoir vous restituer les données rétrospectivement. Afin
                     de ne pas comptabiliser un apprenant 2 fois, nous procédons à un dédoublonnement basé sur :
-                    l&apos;INE (lorsqu&apos;il est renseigné) ou sur la combinaison : Nom-Prenoms-Mail. Cependant, il
+                    l&apos;sur la combinaison Nom-Prénom-UAI-CFD. Cependant, il
                     peut arriver que cette opération ne suffise pas à identifier une candidature : par exemple, si le
                     candidat a changé d&apos;adresse mail, alors il ne sera pas reconnu comme doublon et pourra être
                     comptabilisé 2 fois. ‌Si cet écart est supérieur à quelques unités, nous vous invitons à cliquer sur
@@ -149,19 +149,17 @@ const ComprendreLesDonnees = () => {
                     ‌Pour chercher votre établissement vous pouvez utiliser le numéro d&apos;UAI, le numéro de SIRET ou
                     le nom. ‌Si votre organisme ne remonte pas dans la liste : assurez vous que l&apos;UAI et le SIRET
                     renseignés dans votre ERP ne comportent pas d&apos;erreur ; assurez-vous également d&apos;avoir bien
-                    effectué le paramétrage nécessaire dans votre ERP. Pour obtenir le pas à pas, écrivez-nous à
+                    effectué le paramétrage nécessaire dans votre système d'information. Pour obtenir le pas à pas, écrivez-nous à
                     l&apos;adresse suivante : tableau-de-bord@apprentissage.beta.gouv.fr
                   </Text>
                 </Box>
                 <Box py="4w">
                   <Text fontSize="beta" fontWeight="700">
-                    Vous ne voyez pas votre réseau dans la liste proposée
+                    Vous utilisez un logiciel qui n'est pas encore référencé
                   </Text>
                   <Text>
-                    ‌Nous référençons les différents réseaux au fur et à mesure que nous collectons les informations. Si
-                    vous faîtes partie d&apos;un réseau, vous pouvez demander à être référencé en nous fournissant la
-                    liste exhaustive des établissements sur le plan national : SIRET - UAI - Nom du CFA, à
-                    l&quot;adresse suivante : tableau-de-bord@apprentissage.beta.gouv.fr
+                    ‌Nous vous invitons à signaler à votre éditeur de logiciel votre besoin de pouvoir transmettre vos données au Tableau
+                    de bord et à nous écrire à l'adresse suivante : tableau-de-bord@apprentissage.beta.gouv.fr
                   </Text>
                 </Box>
               </Box>
