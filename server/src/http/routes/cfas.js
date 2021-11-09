@@ -124,11 +124,10 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     tryCatch(async (req, res) => {
       const { token } = req.params;
 
-      // Search cfa in statuts
-      const cfaFound = await Cfa.findOne({ url_access_token: token }).lean();
+      const cfaFound = await cfas.getFromAccessToken(token);
 
       return cfaFound
-        ? res.json({ uai: cfaFound?.uai })
+        ? res.json({ uai: cfaFound.uai })
         : res.status(404).json({ message: `No cfa found for access_token ${token}` });
     })
   );

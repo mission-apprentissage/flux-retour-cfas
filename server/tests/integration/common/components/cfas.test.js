@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const cfasComponent = require("../../../../src/common/components/cfas");
-const { StatutCandidat: StatutCandidatModel } = require("../../../../src/common/model");
+const { StatutCandidat: StatutCandidatModel, Cfa } = require("../../../../src/common/model");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
 const { addDays } = require("date-fns");
@@ -270,6 +270,27 @@ integrationTests(__filename, () => {
     it("returns first date when good siret is passed", async () => {
       const getCfaFirstTransmissionDateFromGoodSiret = await getCfaFirstTransmissionDateFromSiret(siretToSearch);
       assert.deepEqual(getCfaFirstTransmissionDateFromGoodSiret, firstDate);
+    });
+  });
+  describe("getFromAccessToken", () => {
+    const { getFromAccessToken } = cfasComponent();
+
+    it("returns Cfa found with access token", async () => {
+      const token = "token";
+      const cfaInDb = await new Cfa({
+        uai: "0762290X",
+        sirets: [],
+        nom: "hello",
+        url_access_token: "token",
+      }).save();
+      const cfaFound = await getFromAccessToken(token);
+      assert.equal(cfaFound.uai, cfaInDb.uai);
+    });
+
+    it("returns nothing when cfa not found", async () => {
+      const token = "token";
+      const cfaFound = await getFromAccessToken(token);
+      assert.equal(cfaFound, null);
     });
   });
 });

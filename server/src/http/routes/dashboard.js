@@ -7,7 +7,7 @@ const { tdbRoles } = require("../../common/roles");
 
 const applyUserRoleFilter = (req, _res, next) => {
   // users with network role should not be able to see data for other reseau
-  if (req.user.permissions.includes(tdbRoles.network)) {
+  if (req.user?.permissions.includes(tdbRoles.network)) {
     req.query.etablissement_reseaux = req.user.network;
   }
   next();
