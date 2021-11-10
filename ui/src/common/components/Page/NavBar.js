@@ -39,13 +39,14 @@ NavItem.propTypes = {
 
 const NavBar = () => {
   const [auth] = useAuth();
-
+  console.log(auth);
   const isAdmin = hasUserRoles(auth, roles.administrator);
+  const isCfa = hasUserRoles(auth, roles.cfa);
 
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
-        <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>
+        {!isCfa && <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>}
         <NavItem to="/comprendre-donnees">Comprendre les données</NavItem>
 
         {isAdmin && (

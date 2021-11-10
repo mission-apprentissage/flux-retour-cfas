@@ -9,4 +9,5 @@ export const roles = {
   administrator: "administrator",
   pilot: "pilot",
   network: "network",
+  cfa: "cfa",
 };
