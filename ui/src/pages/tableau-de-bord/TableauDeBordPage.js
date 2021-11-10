@@ -23,14 +23,14 @@ export const TableauDeBordView = () => {
     );
   }
 
-  if (filters.reseau) {
-    return <ReseauView effectifs={effectifs} loading={loading} filters={filters} reseau={filters.reseau.nom} />;
-  }
-
   if (filters.formation) {
     return (
       <FormationView formationCfd={filters.formation.cfd} loading={loading} filters={filters} effectifs={effectifs} />
     );
+  }
+
+  if (filters.reseau) {
+    return <ReseauView effectifs={effectifs} loading={loading} filters={filters} reseau={filters.reseau.nom} />;
   }
 
   if (filters.region) {
