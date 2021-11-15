@@ -1,6 +1,6 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const Joi = require("joi");
+const Joi = require("joi").extend(require("@joi/date"));
 const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
@@ -20,6 +20,7 @@ module.exports = ({ statutsCandidats }) => {
   /**
    * Schema for item validation
    */
+  const dateSchema = Joi.date().format("iso");
   const statutCandidatItemSchema = Joi.object({
     // required fields
     nom_apprenant: Joi.string().required(),
@@ -38,7 +39,7 @@ module.exports = ({ statutsCandidats }) => {
     email_contact: Joi.string().allow(null, ""),
     tel_apprenant: Joi.string().allow(null),
     code_commune_insee_apprenant: Joi.string().allow(null),
-    date_de_naissance_apprenant: Joi.date().allow(null),
+    date_de_naissance_apprenant: dateSchema.allow(null),
 
     siret_etablissement: Joi.string().allow(null, ""),
     etablissement_formateur_geo_coordonnees: Joi.string().allow(null),
@@ -49,12 +50,12 @@ module.exports = ({ statutsCandidats }) => {
     periode_formation: Joi.string().allow(null, ""),
     annee_formation: Joi.number().allow(null),
     formation_rncp: Joi.string().allow(null, ""),
-    date_metier_mise_a_jour_statut: Joi.date().allow(null, ""),
+    date_metier_mise_a_jour_statut: dateSchema.allow(null, ""),
 
-    contrat_date_debut: Joi.date().allow(null),
-    contrat_date_fin: Joi.date().allow(null),
-    contrat_date_rupture: Joi.date().allow(null),
-    date_entree_formation: Joi.date().allow(null),
+    contrat_date_debut: dateSchema.allow(null),
+    contrat_date_fin: dateSchema.allow(null),
+    contrat_date_rupture: dateSchema.allow(null),
+    date_entree_formation: dateSchema.allow(null),
   });
 
   /**

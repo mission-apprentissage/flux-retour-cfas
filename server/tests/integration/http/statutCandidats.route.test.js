@@ -53,6 +53,18 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.data.status, "OK");
   });
 
+  it("Vérifie que la route statut-candidats renvoie une 401 pour un user non authentifié", async () => {
+    const { httpClient } = await startServer();
+
+    const response = await httpClient.post("/api/statut-candidats", [], {
+      headers: {
+        Authorization: "",
+      },
+    });
+
+    assert.deepEqual(response.status, 401);
+  });
+
   it("Vérifie que la route statut-candidats renvoie une 403 pour un user n'ayant pas la permission", async () => {
     const { httpClient } = await startServer();
 
@@ -140,6 +152,34 @@ httpTests(__filename, ({ startServer }) => {
         '"annee_scolaire" with value "2021,2022" fails to match the required pattern'
       ),
       true
+    );
+    // check that no data was created
+    assert.equal(await StatutCandidat.countDocuments({}), 0);
+  });
+
+  it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque les champs date ne sont pas iso", async () => {
+    const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
+
+    // set required field as undefined
+    const input = [
+      createRandomStatutCandidatApiInput({
+        date_metier_mise_a_jour_statut: "14/07/2021",
+      }),
+    ];
+    // perform request
+    const response = await httpClient.post("/api/statut-candidats", input, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    // check response
+    assert.equal(response.data.status, "ERROR");
+    assert.equal(response.data.validationErrors.length, 1);
+    assert.equal(
+      response.data.validationErrors[0].details[0].message,
+      '"date_metier_mise_a_jour_statut" must be in ISO 8601 date format'
     );
     // check that no data was created
     assert.equal(await StatutCandidat.countDocuments({}), 0);
