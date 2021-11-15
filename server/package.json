@@ -68,6 +68,7 @@
     "prepare": "cd .. && husky install server/.husky"
   },
   "dependencies": {
+    "@joi/date": "2.1.0",
     "@mission-apprentissage/tco-service-node": "2.22.3",
     "arg": "5.0.0",
     "async": "3.2.1",
