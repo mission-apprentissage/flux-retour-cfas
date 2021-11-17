@@ -1,8 +1,9 @@
 import * as React from "react";
-import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
+import { navigationPages } from "./common/constants/navigationPages";
 import DemandeAccesPage from "./pages/demande-acces/DemandeAccesPage";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
@@ -16,23 +17,33 @@ const App = () => {
     <Router>
       <Switch>
         {/* Public pages */}
-        <Route exact path="/login" component={LoginPage} />
+        <Route exact path={navigationPages.Login.path} component={LoginPage} />
         <Route exact path="/demande-acces" component={DemandeAccesPage} />
         <Route exact path="/cfa/:accessToken" component={CfaWithoutNetworkPage} />
-        <Route path="/comprendre-donnees" exact component={ComprendreLesDonnees} />
+        <Route path={navigationPages.ComprendreLesDonnees.path} exact component={ComprendreLesDonnees} />
 
         {/* Protected pages */}
-        <Route exact path="/">
-          <Redirect to="/tableau-de-bord" />
-        </Route>
+        <Route exact path={navigationPages.Login.path} component={LoginPage} />
+        <Route path={navigationPages.ComprendreLesDonnees.path} exact component={ComprendreLesDonnees} />
+
+        {/* Secured Tdb Pages */}
         <ProtectedRoute
-          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
-          path="/tableau-de-bord"
+          path={navigationPages.TableauDeBord.path}
           exact
           component={TableauDeBordPage}
+          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
         />
-        <ProtectedRoute authorizedRoles={[roles.administrator]} path="/stats" exact component={GlobalStatsPage} />
-        <ProtectedRoute authorizedRoles={[roles.administrator]} path="/stats/:dataSource" component={UserStatsPage} />
+        <ProtectedRoute
+          authorizedRoles={[roles.administrator]}
+          path={navigationPages.Stats.path}
+          exact
+          component={GlobalStatsPage}
+        />
+        <ProtectedRoute
+          authorizedRoles={[roles.administrator]}
+          path={`${navigationPages.Login.path}/:dataSource`}
+          component={UserStatsPage}
+        />
 
         {/* Not found page */}
         <Route component={() => <div>404 - Page not found</div>} />
