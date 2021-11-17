@@ -157,32 +157,35 @@ httpTests(__filename, ({ startServer }) => {
     assert.equal(await StatutCandidat.countDocuments({}), 0);
   });
 
-  it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque les champs date ne sont pas iso", async () => {
-    const { httpClient } = await startServer();
-    await createApiUser();
-    const accessToken = await getJwtForUser(httpClient);
+  const invalidDates = ["2020", "2020-10", "2020-10-", "2020-10-1", "13/11/2020", "abc", true];
+  invalidDates.forEach((invalidDate) => {
+    it(`Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque les champs date ne sont pas iso (${invalidDate})`, async () => {
+      const { httpClient } = await startServer();
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
 
-    // set required field as undefined
-    const input = [
-      createRandomStatutCandidatApiInput({
-        date_metier_mise_a_jour_statut: "14/07/2021",
-      }),
-    ];
-    // perform request
-    const response = await httpClient.post("/api/statut-candidats", input, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      // set required field as undefined
+      const input = [
+        createRandomStatutCandidatApiInput({
+          date_metier_mise_a_jour_statut: invalidDate,
+        }),
+      ];
+      // perform request
+      const response = await httpClient.post("/api/statut-candidats", input, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      // check response
+      assert.equal(response.data.status, "ERROR");
+      assert.equal(response.data.validationErrors.length, 1);
+      assert.equal(
+        response.data.validationErrors[0].details[0].message.includes("date_metier_mise_a_jour_statut"),
+        true
+      );
+      // check that no data was created
+      assert.equal(await StatutCandidat.countDocuments({}), 0);
     });
-    // check response
-    assert.equal(response.data.status, "ERROR");
-    assert.equal(response.data.validationErrors.length, 1);
-    assert.equal(
-      response.data.validationErrors[0].details[0].message,
-      '"date_metier_mise_a_jour_statut" must be in iso format'
-    );
-    // check that no data was created
-    assert.equal(await StatutCandidat.countDocuments({}), 0);
   });
 
   it("Vérifie l'ajout via route statut-candidats de données complètes", async () => {

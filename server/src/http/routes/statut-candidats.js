@@ -21,7 +21,7 @@ module.exports = ({ statutsCandidats }) => {
    * Schema for item validation
    */
   const dateSchema = Joi.string()
-    .min(10) // make sure the passed date containes at least YYYY-MM-DD
+    .regex(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/) // make sure the passed date containes at least YYYY-MM-DD
     .custom((val, helpers) => {
       const { value, error } = Joi.date().iso().validate(val);
       return error ? helpers.error("string.isoDate") : value;
