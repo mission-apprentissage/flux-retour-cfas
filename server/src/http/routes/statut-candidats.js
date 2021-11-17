@@ -1,6 +1,6 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const Joi = require("joi").extend(require("@joi/date"));
+const Joi = require("joi");
 const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
@@ -20,7 +20,12 @@ module.exports = ({ statutsCandidats }) => {
   /**
    * Schema for item validation
    */
-  const dateSchema = Joi.date().format("iso");
+  const dateSchema = Joi.string()
+    .min(10) // make sure the passed date containes at least YYYY-MM-DD
+    .custom((val, helpers) => {
+      const { value, error } = Joi.date().iso().validate(val);
+      return error ? helpers.error("string.isoDate") : value;
+    });
   const statutCandidatItemSchema = Joi.object({
     // required fields
     nom_apprenant: Joi.string().required(),

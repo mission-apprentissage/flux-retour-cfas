@@ -179,7 +179,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.equal(response.data.validationErrors.length, 1);
     assert.equal(
       response.data.validationErrors[0].details[0].message,
-      '"date_metier_mise_a_jour_statut" must be in ISO 8601 date format'
+      '"date_metier_mise_a_jour_statut" must be in iso format'
     );
     // check that no data was created
     assert.equal(await StatutCandidat.countDocuments({}), 0);
