@@ -1,6 +1,6 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const Joi = require("joi").extend(require("@joi/date"));
+const Joi = require("joi");
 const { UserEvent } = require("../../common/model/index");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
