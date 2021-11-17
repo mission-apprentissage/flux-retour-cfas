@@ -11,11 +11,10 @@ const AppHeader = () => {
         <Logo />
         <Box marginLeft="5w">
           <Heading as="h1" variant="h1" fontSize="gamma">
-            Données ouvertes de l&apos;apprentissage
+            Le tableau de bord de l&apos;apprentissage
           </Heading>
           <Text fontFamily="Marianne" color="grey.700" fontSize="zeta">
-            Collecter auprès des organismes de formation les données clés pour les mettre à disposition des acteurs de
-            l&apos;apprentissage
+            Mettre à disposition des différents acteurs les données clés de l&apos;apprentissage en temps réel
           </Text>
         </Box>
       </Flex>
