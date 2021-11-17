@@ -1,13 +1,14 @@
-import { Box, Button, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 import { Redirect } from "react-router";
 import { NavLink } from "react-router-dom";
 
-import { AppHeader, Section } from "../../common/components";
+import { Logo, Section } from "../../common/components";
 import BetaDisclaimer from "../../common/components/BetaDisclaimer/BetaDisclaimer";
 import useAuth from "../../common/hooks/useAuth";
 import ApercuDesDonneesSection from "./ApercuDesDonneesSection";
+import dashboardIllustration from "./dashboard-illustration.svg";
 import RgpdSection from "./RgpdSection";
 
 const VousEtesCard = ({ children, linkText, linkHref }) => {
@@ -41,16 +42,22 @@ const HomePage = () => {
 
   return (
     <>
-      <AppHeader />
-
-      <Section marginTop="4w" paddingY="4w">
-        <Heading as="h1" fontSize="40px">
-          Le tableau de bord de l&apos;apprentissage
-        </Heading>
-        <Text fontSize="alpha" color="grey.800" marginTop="1w">
-          Mettre à disposition des <strong>différents acteurs</strong> les <strong>données clés</strong> de
-          l&apos;apprentissage en <strong>temps réel</strong>
-        </Text>
+      <Section>
+        <Logo />
+      </Section>
+      <Section paddingY="4w">
+        <Flex>
+          <div>
+            <Heading as="h1" fontSize="40px">
+              Le tableau de bord de l&apos;apprentissage
+            </Heading>
+            <Text fontSize="alpha" color="grey.800" marginTop="1w">
+              Mettre à disposition des <strong>différents acteurs</strong> les <strong>données clés</strong> de
+              l&apos;apprentissage en <strong>temps réel</strong>
+            </Text>
+          </div>
+          <img src={dashboardIllustration} alt="illustration tableau de bord" />
+        </Flex>
         <HStack spacing="3w" marginTop="6w">
           <VousEtesCard linkText="Accéder au tableau de bord" linkHref="/login">
             une <strong>Institution ou une organisation</strong>
