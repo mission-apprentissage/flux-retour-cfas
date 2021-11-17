@@ -1,4 +1,4 @@
-import { Box, Flex, Link, Text } from "@chakra-ui/react";
+import { Flex, Heading, Link, Text } from "@chakra-ui/react";
 import React from "react";
 
 import Section from "../Section/Section";
@@ -8,22 +8,14 @@ const CONTACT_ADDRESS = "tableau-de-bord@apprentissage.beta.gouv.fr";
 const BetaDisclaimer = () => {
   return (
     <Section background="galt" paddingY="4w">
-      <Flex>
-        <Box
-          as="legend"
-          paddingX="1w"
-          paddingY="1v"
-          fontSize="zeta"
-          backgroundColor="bluefrance"
-          color="white"
-          borderRadius="4px"
-          marginRight="2w"
-        >
-          beta
-        </Box>
+      <Heading color="grey.800" as="h2" fontSize="beta">
+        Une question ?
+      </Heading>
+      <Flex marginTop="1w">
         <Text color="grey.800">
-          Cet outil est en construction, pour nous signaler un besoin, une donnée manquante ou une anomalie,
-          contactez-nous&nbsp;:&nbsp;
+          Le service Tableau de bord de l’apprentissage est porté par la Mission interministérielle pour
+          l’apprentissage. Vous avez besoin d’en savoir plus sur les données collectées, les différents types d’accès
+          aux données, etc. contacter l’équipe&nbsp;:&nbsp;
           <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
             {CONTACT_ADDRESS}
           </Link>
