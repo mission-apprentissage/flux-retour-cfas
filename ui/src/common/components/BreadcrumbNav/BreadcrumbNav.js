@@ -2,17 +2,19 @@ import { Box, Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@chakra-ui/reac
 import PropTypes from "prop-types";
 import React from "react";
 
-const BreadcrumbNav = ({ links, activeLink }) => {
+const BreadcrumbNav = ({ links }) => {
+  const currentLink = links.at(-1);
+  const otherLinks = links.slice(0, -1);
   return (
     <Breadcrumb separator={<Box className="ri-arrow-right-s-line" />}>
-      {links.map((item, index) => (
+      {otherLinks.map((item, index) => (
         <BreadcrumbItem key={index}>
           <BreadcrumbLink href={item.path}>{item.title}</BreadcrumbLink>
         </BreadcrumbItem>
       ))}
       <BreadcrumbItem isCurrentPage>
-        <BreadcrumbLink href={activeLink.path} textDecoration="none" color="black">
-          {activeLink.title}
+        <BreadcrumbLink href={currentLink.path} textDecoration="none" color="black">
+          {currentLink.title}
         </BreadcrumbLink>
       </BreadcrumbItem>
     </Breadcrumb>
@@ -26,10 +28,6 @@ BreadcrumbNav.propTypes = {
       title: PropTypes.string.isRequired,
     }).isRequired
   ).isRequired,
-  activeLink: PropTypes.shape({
-    path: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  }).isRequired,
 };
 
 export default BreadcrumbNav;

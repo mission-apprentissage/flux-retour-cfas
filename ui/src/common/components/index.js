@@ -18,6 +18,7 @@ export { default as AppHeader } from "./Page/AppHeader";
 export { default as Logo } from "./Logo/Logo";
 export { default as Section } from "./Section/Section";
 export { default as Highlight } from "./Highlight/Highlight";
+export { default as BreadcrumbNav } from "./BreadcrumbNav/BreadcrumbNav";
 
 export { default as Table } from "./tables/Table";
 
