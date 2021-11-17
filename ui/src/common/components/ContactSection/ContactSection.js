@@ -5,7 +5,7 @@ import Section from "../Section/Section";
 
 const CONTACT_ADDRESS = "tableau-de-bord@apprentissage.beta.gouv.fr";
 
-const BetaDisclaimer = () => {
+const ContactSection = () => {
   return (
     <Section background="galt" paddingY="4w">
       <Heading color="grey.800" as="h2" fontSize="beta">
@@ -25,4 +25,4 @@ const BetaDisclaimer = () => {
   );
 };
 
-export default BetaDisclaimer;
+export default ContactSection;

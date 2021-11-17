@@ -5,7 +5,7 @@ import { Redirect } from "react-router";
 import { NavLink } from "react-router-dom";
 
 import { Logo, Section } from "../../common/components";
-import BetaDisclaimer from "../../common/components/BetaDisclaimer/BetaDisclaimer";
+import ContactSection from "../../common/components/ContactSection/ContactSection";
 import useAuth from "../../common/hooks/useAuth";
 import ApercuDesDonneesSection from "./ApercuDesDonneesSection";
 import dashboardIllustration from "./dashboard-illustration.svg";
@@ -72,7 +72,7 @@ const HomePage = () => {
 
       <RgpdSection />
 
-      <BetaDisclaimer />
+      <ContactSection />
     </>
   );
 };

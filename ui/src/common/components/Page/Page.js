@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import BetaDisclaimer from "../BetaDisclaimer/BetaDisclaimer";
+import ContactSection from "../ContactSection/ContactSection";
 import AppHeader from "./AppHeader";
 import NavBar from "./NavBar";
 
@@ -11,7 +11,7 @@ const Page = ({ children }) => {
       <AppHeader />
       <NavBar />
       {children}
-      <BetaDisclaimer />
+      <ContactSection />
     </>
   );
 };
