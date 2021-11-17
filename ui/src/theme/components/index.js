@@ -1,3 +1,4 @@
+import { Breadcrumb } from "./breadcrumb";
 import { Button } from "./button";
 import { Heading } from "./heading";
 import { Input } from "./input";
@@ -12,4 +13,5 @@ export default {
   Textarea,
   Tabs,
   Heading,
+  Breadcrumb,
 };
