@@ -7,8 +7,12 @@ import { filtersPropTypes } from "../../../FiltersContext";
 import CfaPanel from "./CfasPanel";
 import ReseauxPanel from "./ReseauxPanel";
 
-const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
+const CfasFilter = ({ onCfaChange, onReseauChange, filters, displayReseauPanel = true }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const buttonLabelForUser = displayReseauPanel
+    ? "Sélectionner un organisme ou un réseau"
+    : "Sélectionner un organisme";
 
   const onCfaClick = (cfa) => {
     onCfaChange(cfa);
@@ -20,7 +24,7 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
     setIsOpen(false);
   };
 
-  const buttonLabel = filters.cfa?.nom_etablissement || filters.reseau?.nom || "Sélectionner un organisme ou un réseau";
+  const buttonLabel = filters.cfa?.nom_etablissement || filters.reseau?.nom || buttonLabelForUser;
 
   return (
     <div>
@@ -39,9 +43,11 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters }) => {
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <MenuTabs tabNames={["Organismes de formation", "Réseaux"]}>
+          <MenuTabs
+            tabNames={displayReseauPanel ? ["Organismes de formation", "Réseaux"] : ["Organismes de formation"]}
+          >
             <CfaPanel onCfaClick={onCfaClick} value={filters.cfa} filters={filters} />
-            <ReseauxPanel onReseauClick={onReseauClick} value={filters.reseau} />
+            {displayReseauPanel === true && <ReseauxPanel onReseauClick={onReseauClick} value={filters.reseau} />}
           </MenuTabs>
         </OverlayMenu>
       )}
@@ -53,6 +59,7 @@ CfasFilter.propTypes = {
   onCfaChange: PropTypes.func.isRequired,
   onReseauChange: PropTypes.func.isRequired,
   filters: filtersPropTypes.state,
+  displayReseauPanel: PropTypes.bool,
 };
 
 export default CfasFilter;

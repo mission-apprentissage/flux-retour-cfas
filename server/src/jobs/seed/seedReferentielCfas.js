@@ -19,10 +19,6 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 runScript(async ({ cfas }) => {
   logger.info("Seeding referentiel CFAs");
 
-  // Clear all existing cfas
-  logger.info(`Clearing cfas collection...`);
-  await Cfa.deleteMany({});
-
   await seedCfasFromStatutsCandidatsUaisValid(cfas);
   await seedMetiersFromLbaApi();
 
@@ -64,7 +60,7 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
     // Create or update CFA
     if (statutForUai) {
       if (cfaExistant) {
-        await updateCfaFromStatutCandidat(cfas, cfaExistant._id, statutForUai, allSiretsForUai);
+        await updateCfaFromStatutCandidat(cfas, cfaExistant, statutForUai, allSiretsForUai);
       } else {
         await createCfaFromStatutCandidat(cfas, statutForUai, allSiretsForUai);
       }
@@ -97,9 +93,9 @@ const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
  * Update cfa from statut
  * @param {*} statutForCfa
  */
-const updateCfaFromStatutCandidat = async (cfas, idCfa, statutForCfa, allSirets) => {
+const updateCfaFromStatutCandidat = async (cfas, cfaExistant, statutForCfa, allSirets) => {
   await Cfa.findOneAndUpdate(
-    { _id: idCfa },
+    { _id: cfaExistant._id },
     {
       $set: {
         uai: statutForCfa.uai_etablissement,

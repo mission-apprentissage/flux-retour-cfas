@@ -3,94 +3,45 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { UserEvent } = require("../../common/model");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
+const { tdbRoles } = require("../../common/roles");
+
+const applyUserRoleFilter = (req, _res, next) => {
+  // users with network role should not be able to see data for other reseau
+  if (req.user?.permissions.includes(tdbRoles.network)) {
+    req.query.etablissement_reseaux = req.user.network;
+  }
+  // users with cfa role should not be able to see data for other cfas
+  if (req.user?.permissions.includes(tdbRoles.cfa)) {
+    req.query.uai_etablissement = req.user?.username;
+  }
+  next();
+};
+
+const commonEffectifsFilters = {
+  etablissement_num_region: Joi.string().allow(null, ""),
+  etablissement_num_departement: Joi.string().allow(null, ""),
+  formation_cfd: Joi.string().allow(null, ""),
+  uai_etablissement: Joi.string().allow(null, ""),
+  siret_etablissement: Joi.string().allow(null, ""),
+  etablissement_reseaux: Joi.string().allow(null, ""),
+};
 
 module.exports = ({ stats, dashboard }) => {
   const router = express.Router();
 
   /**
-   * Schema for effectif validation
-   */
-  const dashboardEffectifInputSchema = Joi.object({
-    date: Joi.date().required(),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    formation_cfd: Joi.string().allow(null, ""),
-    uai_etablissement: Joi.string().allow(null, ""),
-    siret_etablissement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
-
-  /**
-   * Schema for organismes count validation
-   */
-  const organismesCountInputSchema = Joi.object({
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    formation_cfd: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
-
-  /**
-   * Schema for effetctifs by CFA body
-   */
-  const dashboardEffectifsByCfaBodySchema = Joi.object({
-    date: Joi.date().required(),
-    formation_cfd: Joi.string().allow(null, ""),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
-
-  /**
-   * Schema for nouveaux contrats
-   */
-  const nouveauxContratsQueryBodySchema = Joi.object({
-    startDate: Joi.date().required(),
-    endDate: Joi.date().required(),
-    formation_cfd: Joi.string().allow(null, ""),
-    uai_etablissement: Joi.string().allow(null, ""),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
-
-  /**
-   * Gets the general stats for the dashboard
-   */
-  router.get(
-    "/etablissements-stats",
-    tryCatch(async (req, res) => {
-      // Add user event
-      const event = new UserEvent({
-        username: "dashboard",
-        type: "GET",
-        action: "api/dashboard/etablissements-stats",
-        data: null,
-      });
-      await event.save();
-
-      // Get nbEtablissement data
-      const nbEtablissements = await stats.getNbDistinctCfasBySiret();
-
-      // Return data
-      return res.json({
-        nbEtablissements,
-      });
-    })
-  );
-
-  /**
    * Gets region conversion stats
    */
-  router.post(
+  router.get(
     "/total-organismes",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
-      await organismesCountInputSchema.validateAsync(req.body, {
+      await Joi.object(commonEffectifsFilters).validateAsync(req.query, {
         abortEarly: false,
       });
 
-      const nbOrganismes = await stats.getNbDistinctCfasByUai(req.body);
+      const nbOrganismes = await stats.getNbDistinctCfasByUai(req.query);
 
       return res.json({
         nbOrganismes,
@@ -103,9 +54,14 @@ module.exports = ({ stats, dashboard }) => {
    */
   router.get(
     "/effectifs",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardEffectifInputSchema.validateAsync(req.query, {
+      const validationSchema = Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, {
         abortEarly: false,
       });
 
@@ -143,14 +99,11 @@ module.exports = ({ stats, dashboard }) => {
    */
   router.get(
     "/effectifs-par-niveau-formation",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       await Joi.object({
         date: Joi.date().required(),
-        uai_etablissement: Joi.string().allow(null, ""),
-        siret_etablissement: Joi.string().allow(null, ""),
-        etablissement_reseaux: Joi.string().allow(null, ""),
-        etablissement_num_region: Joi.string().allow(null, ""),
-        etablissement_num_departement: Joi.string().allow(null, ""),
+        ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
 
       const { date: dateFromParams, ...filtersFromBody } = req.query;
@@ -171,15 +124,12 @@ module.exports = ({ stats, dashboard }) => {
    */
   router.get(
     "/effectifs-par-formation",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       await Joi.object({
         date: Joi.date().required(),
-        uai_etablissement: Joi.string().allow(null, ""),
-        siret_etablissement: Joi.string().allow(null, ""),
-        etablissement_reseaux: Joi.string().allow(null, ""),
-        etablissement_num_region: Joi.string().allow(null, ""),
-        etablissement_num_departement: Joi.string().allow(null, ""),
         niveau_formation: Joi.string().allow(null, ""),
+        ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
 
       const { date: dateFromParams, ...filtersFromBody } = req.query;
@@ -200,16 +150,13 @@ module.exports = ({ stats, dashboard }) => {
    */
   router.get(
     "/effectifs-par-annee-formation",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
-      await Joi.object({
+      const validationSchema = Joi.object({
         date: Joi.date().required(),
-        formation_cfd: Joi.string().allow(null, ""),
-        uai_etablissement: Joi.string().allow(null, ""),
-        siret_etablissement: Joi.string().allow(null, ""),
-        etablissement_reseaux: Joi.string().allow(null, ""),
-        etablissement_num_region: Joi.string().allow(null, ""),
-        etablissement_num_departement: Joi.string().allow(null, ""),
-      }).validateAsync(req.query, { abortEarly: false });
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, { abortEarly: false });
 
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
@@ -226,9 +173,14 @@ module.exports = ({ stats, dashboard }) => {
 
   router.get(
     "/effectifs-par-cfa",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
-      await dashboardEffectifsByCfaBodySchema.validateAsync(req.query, {
+      const validationSchema = Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, {
         abortEarly: false,
       });
 
@@ -247,11 +199,13 @@ module.exports = ({ stats, dashboard }) => {
 
   router.get(
     "/effectifs-par-departement",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
-      await Joi.object({
+      const validationSchema = Joi.object({
         date: Joi.date().required(),
-        etablissement_num_region: Joi.string().allow(null, ""),
-      }).validateAsync(req.query, { abortEarly: false });
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, { abortEarly: false });
 
       const { date: dateFromQuery, ...filtersFromBody } = req.query;
       const date = new Date(dateFromQuery);
@@ -267,9 +221,15 @@ module.exports = ({ stats, dashboard }) => {
 
   router.get(
     "/chiffres-cles",
+    applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
-      await nouveauxContratsQueryBodySchema.validateAsync(req.query, {
+      const validationSchema = Joi.object({
+        startDate: Joi.date().required(),
+        endDate: Joi.date().required(),
+        ...commonEffectifsFilters,
+      });
+      await validationSchema.validateAsync(req.query, {
         abortEarly: false,
       });
 

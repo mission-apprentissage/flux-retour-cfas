@@ -208,12 +208,12 @@ httpTests(__filename, ({ startServer }) => {
     assert.equal(response.data.message, "Success");
   });
 
-  it("Vérifie l'ajout via route statut-candidats de 50 données randomisées", async () => {
+  it("Vérifie l'ajout via route statut-candidats de 20 données randomisées", async () => {
     const { httpClient } = await startServer();
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
 
-    const nbItemsToTest = 50;
+    const nbItemsToTest = 20;
     // Generate random data
     const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
 

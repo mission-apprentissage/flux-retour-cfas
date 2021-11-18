@@ -8,12 +8,13 @@ import { filtersPropTypes } from "../../../FiltersContext";
 const SEARCH_DEBOUNCE_TIME = 300;
 
 const searchCfas = debounce(async (searchCriteria, callback) => {
-  const searchRequestBody = omitNullishValues({
+  const query = {
     searchTerm: searchCriteria.searchTerm,
     etablissement_num_region: searchCriteria.region?.code ?? null,
     etablissement_num_departement: searchCriteria.departement?.code ?? null,
-  });
-  const result = await _post("/api/cfas/search", searchRequestBody);
+    etablissement_reseaux: searchCriteria.reseau?.nom ?? null,
+  };
+  const result = await _post("/api/cfas/search", omitNullishValues(query));
   callback(result);
 }, SEARCH_DEBOUNCE_TIME);
 

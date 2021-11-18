@@ -1,22 +1,18 @@
-import { Heading } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Highlight, Page } from "../../../../common/components";
+import { Page } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import { EffectifsSection, IndicesHeaderSection, ProvenanceIndicesSection } from "../../sections";
+import InfosReseauSection from "./InfosReseauSection";
 import RepartitionEffectifsReseau from "./RepartitionEffectifsReseau";
 
 const ReseauView = ({ reseau, effectifs, filters, loading }) => {
   return (
     <Page>
       <IndicesHeaderSection />
-      <Highlight>
-        <Heading color="white" fontSize="gamma" marginTop="1w">
-          Réseau {reseau}
-        </Heading>
-      </Highlight>
+      <InfosReseauSection reseau={reseau} />
       <ProvenanceIndicesSection />
       <EffectifsSection effectifs={effectifs} loading={loading} />
       <RepartitionEffectifsReseau filters={filters} />

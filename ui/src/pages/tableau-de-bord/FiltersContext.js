@@ -3,7 +3,6 @@ import qs from "query-string";
 import { createContext, useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 
-import { DEFAULT_REGION } from "../../common/constants/defaultRegion";
 import { omitNullishValues } from "../../common/utils/omitNullishValues";
 
 const FiltersContext = createContext();
@@ -63,47 +62,49 @@ const parseQueryString = (queryString) => {
   };
 };
 
-const getDefaultState = () => {
-  return {
-    date: new Date(),
-    departement: null,
-    region: DEFAULT_REGION,
-    formation: null,
-    cfa: null,
-    reseau: null,
-    sousEtablissement: null,
-  };
-};
+export const getDefaultState = () => ({
+  date: new Date(),
+  departement: null,
+  region: null,
+  formation: null,
+  cfa: null,
+  reseau: null,
+  sousEtablissement: null,
+});
 
 const isStateValid = (state) => {
   return Boolean(state.date?.getTime());
 };
 
-export const FiltersProvider = ({ children }) => {
+export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }) => {
   const history = useHistory();
   const currentQueryString = history.location.search.slice(1);
 
-  const updateQueryStringWithState = (state) => {
-    const queryString = stateToQueryString(state);
+  const updateUrlWithState = (state) => {
+    // in some cases, we want some fields in the state to never change (network for a network user for example)
+    const newState = { ...state, ...fixedState };
+    // serialize state to url query string
+    const queryString = stateToQueryString(newState);
     history.push({ search: queryString });
   };
+  const initialState = { ...getDefaultState(), ...defaultState };
 
   // make sure a valid state is always set, otherwise set it to default
   const parsedStateFromQueryString = parseQueryString(currentQueryString);
   const parsedStateIsValid = isStateValid(parsedStateFromQueryString);
-  const state = parsedStateIsValid ? parsedStateFromQueryString : getDefaultState();
+  const state = parsedStateIsValid ? parsedStateFromQueryString : initialState;
   useEffect(() => {
-    if (!parsedStateIsValid) updateQueryStringWithState(getDefaultState());
+    if (!parsedStateIsValid) updateUrlWithState(initialState);
   }, [currentQueryString]);
 
   const setters = {
-    setDate: (value) => updateQueryStringWithState(setDate(state, value)),
-    setRegion: (value) => updateQueryStringWithState(setRegion(state, value)),
-    setDepartement: (value) => updateQueryStringWithState(setDepartement(state, value)),
-    setCfa: (value) => updateQueryStringWithState(setCfa(state, value)),
-    setReseau: (value) => updateQueryStringWithState(setReseau(state, value)),
-    setFormation: (value) => updateQueryStringWithState(setFormation(state, value)),
-    setSousEtablissement: (value) => updateQueryStringWithState(setSousEtablissement(state, value)),
+    setDate: (value) => updateUrlWithState(setDate(state, value)),
+    setRegion: (value) => updateUrlWithState(setRegion(state, value)),
+    setDepartement: (value) => updateUrlWithState(setDepartement(state, value)),
+    setCfa: (value) => updateUrlWithState(setCfa(state, value)),
+    setReseau: (value) => updateUrlWithState(setReseau(state, value)),
+    setFormation: (value) => updateUrlWithState(setFormation(state, value)),
+    setSousEtablissement: (value) => updateUrlWithState(setSousEtablissement(state, value)),
   };
 
   const contextValue = {
@@ -114,39 +115,43 @@ export const FiltersProvider = ({ children }) => {
   return <FiltersContext.Provider value={contextValue}>{children}</FiltersContext.Provider>;
 };
 
-FiltersProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
 export const useFiltersContext = () => {
   return useContext(FiltersContext);
 };
 
+export const filtersStatePropType = PropTypes.shape({
+  date: PropTypes.instanceOf(Date),
+  cfa: PropTypes.shape({
+    uai_etablissement: PropTypes.string.isRequired,
+    nom_etablissement: PropTypes.string.isRequired,
+  }),
+  region: PropTypes.shape({
+    nom: PropTypes.string.isRequired,
+    code: PropTypes.string.isRequired,
+  }),
+  departement: PropTypes.shape({
+    nom: PropTypes.string.isRequired,
+    code: PropTypes.string.isRequired,
+  }),
+  reseau: PropTypes.shape({
+    nom: PropTypes.string.isRequired,
+  }),
+  formation: PropTypes.shape({
+    cfd: PropTypes.string.isRequired,
+    libelle: PropTypes.string.isRequired,
+  }),
+  sousEtablissement: PropTypes.shape({
+    nom_etablissement: PropTypes.string,
+    siret_etablissement: PropTypes.string.isRequired,
+  }),
+});
+
 export const filtersPropTypes = {
-  state: PropTypes.shape({
-    date: PropTypes.instanceOf(Date),
-    cfa: PropTypes.shape({
-      uai_etablissement: PropTypes.string.isRequired,
-      nom_etablissement: PropTypes.string.isRequired,
-    }),
-    region: PropTypes.shape({
-      nom: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-    }),
-    departement: PropTypes.shape({
-      nom: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-    }),
-    reseau: PropTypes.shape({
-      nom: PropTypes.string.isRequired,
-    }),
-    formation: PropTypes.shape({
-      cfd: PropTypes.string.isRequired,
-      libelle: PropTypes.string.isRequired,
-    }),
-    sousEtablissement: PropTypes.shape({
-      nom_etablissement: PropTypes.string,
-      siret_etablissement: PropTypes.string.isRequired,
-    }),
-  }).isRequired,
+  state: filtersStatePropType.isRequired,
+};
+
+FiltersProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+  defaultState: filtersStatePropType,
+  fixedState: filtersStatePropType,
 };

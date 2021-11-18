@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { NavLink, useRouteMatch } from "react-router-dom";
 
-import { isUserAuthorizedForRoles, roles } from "../../auth/roles";
+import { hasUserRoles, roles } from "../../auth/roles";
 import useAuth from "../../hooks/useAuth";
 import Section from "../Section/Section";
 
@@ -39,13 +39,13 @@ NavItem.propTypes = {
 
 const NavBar = () => {
   const [auth] = useAuth();
-
-  const isAdmin = isUserAuthorizedForRoles(auth, roles.administrator);
+  const isAdmin = hasUserRoles(auth, roles.administrator);
+  const isCfa = hasUserRoles(auth, roles.cfa);
 
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
-        <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>
+        {!isCfa && <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>}
         <NavItem to="/comprendre-donnees">Comprendre les données</NavItem>
 
         {isAdmin && (

@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const cfasComponent = require("../../../../src/common/components/cfas");
-const { StatutCandidat: StatutCandidatModel } = require("../../../../src/common/model");
+const { StatutCandidat: StatutCandidatModel, Cfa } = require("../../../../src/common/model");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
 const { addDays } = require("date-fns");
@@ -18,6 +18,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "01",
         uai_etablissement: "0152290X",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
       {
         ...createRandomStatutCandidat(),
@@ -26,6 +27,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "01",
         uai_etablissement: "0152232N",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
       {
         ...createRandomStatutCandidat(),
@@ -34,6 +36,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "123",
         uai_etablissement: "0392232X",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
       {
         ...createRandomStatutCandidat(),
@@ -42,6 +45,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "02",
         uai_etablissement: "0752232O",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
       {
         ...createRandomStatutCandidat(),
@@ -50,6 +54,7 @@ integrationTests(__filename, () => {
         etablissement_num_region: "039",
         uai_etablissement: "0152232Z",
         uai_etablissement_valid: true,
+        etablissement_reseaux: "RESEAU_TEST",
       },
     ];
 
@@ -145,6 +150,14 @@ integrationTests(__filename, () => {
     it("returns list of CFA matching searchTerm AND additional filter (etablissement_num_region)", async () => {
       const actual = await searchCfas({ searchTerm: "CFA", etablissement_num_region: "123" });
       const expected = [statutsSeed[2]];
+
+      assert.equal(actual.length, 1);
+      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
+    });
+
+    it("returns list of CFA matching searchTerm AND additional filter (etablissement_reseaux)", async () => {
+      const actual = await searchCfas({ searchTerm: "FACULTE", etablissement_reseaux: "RESEAU_TEST" });
+      const expected = [statutsSeed[4]];
 
       assert.equal(actual.length, 1);
       assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
@@ -257,6 +270,27 @@ integrationTests(__filename, () => {
     it("returns first date when good siret is passed", async () => {
       const getCfaFirstTransmissionDateFromGoodSiret = await getCfaFirstTransmissionDateFromSiret(siretToSearch);
       assert.deepEqual(getCfaFirstTransmissionDateFromGoodSiret, firstDate);
+    });
+  });
+  describe("getFromAccessToken", () => {
+    const { getFromAccessToken } = cfasComponent();
+
+    it("returns Cfa found with access token", async () => {
+      const token = "token";
+      const cfaInDb = await new Cfa({
+        uai: "0762290X",
+        sirets: [],
+        nom: "hello",
+        url_access_token: "token",
+      }).save();
+      const cfaFound = await getFromAccessToken(token);
+      assert.equal(cfaFound.uai, cfaInDb.uai);
+    });
+
+    it("returns nothing when cfa not found", async () => {
+      const token = "token";
+      const cfaFound = await getFromAccessToken(token);
+      assert.equal(cfaFound, null);
     });
   });
 });
