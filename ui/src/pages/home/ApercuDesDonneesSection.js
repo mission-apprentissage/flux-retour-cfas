@@ -2,28 +2,8 @@ import { Box, Divider, Flex, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Section } from "../../common/components";
-
-const ERP_STATE = {
-  ready: "ready",
-  ongoing: "ongoing",
-  coming: "coming",
-};
-
-const ERP_STATE_COLOR = {
-  [ERP_STATE.ready]: "#00A95F",
-  [ERP_STATE.ongoing]: "#FA6B29",
-  [ERP_STATE.coming]: "#A9947C",
-};
-
-const ERPS = [
-  { name: "Gesti", state: ERP_STATE.ready },
-  { name: "Ymag", state: ERP_STATE.ready },
-  { name: "SC Form", state: ERP_STATE.ready },
-  { name: "FCA Manager", state: ERP_STATE.ongoing },
-  { name: "Hyperplanning", state: ERP_STATE.coming },
-  { name: "Valsoftware", state: ERP_STATE.coming },
-];
+import { Badge, Section } from "../../common/components";
+import { ERP_STATE_COLOR, ERPS } from "../../common/constants/erps";
 
 const Count = ({ count, label }) => {
   return (
@@ -39,19 +19,6 @@ const Count = ({ count, label }) => {
 Count.propTypes = {
   count: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-};
-
-const ErpStateLegend = ({ text, backgroundColor }) => {
-  return (
-    <Box as="legend" fontSize="omega" padding="1v" fontWeight="700" backgroundColor={backgroundColor} color="white">
-      {text}
-    </Box>
-  );
-};
-
-ErpStateLegend.propTypes = {
-  text: PropTypes.string.isRequired,
-  backgroundColor: PropTypes.string.isRequired,
 };
 
 const ApercuDesDonneesSection = () => {
@@ -72,7 +39,7 @@ const ApercuDesDonneesSection = () => {
         Aujourd&apos;hui, le tableau de bord est interfaçable avec :
       </Text>
       <Flex justifyContent="space-between">
-        <HStack spacing="4w" paddingY="3v">
+        <HStack spacing="3w" paddingY="3v">
           {ERPS.map(({ name, state }) => {
             return (
               <Flex key={name} fontSize="epsilon" color="grey.800" alignItems="center">
@@ -89,9 +56,9 @@ const ApercuDesDonneesSection = () => {
           })}
         </HStack>
         <HStack spacing="2w">
-          <ErpStateLegend text="opérationnel" backgroundColor={ERP_STATE_COLOR.ready} />
-          <ErpStateLegend text="en cours" backgroundColor={ERP_STATE_COLOR.ongoing} />
-          <ErpStateLegend text="à venir" backgroundColor={ERP_STATE_COLOR.coming} />
+          <Badge backgroundColor={ERP_STATE_COLOR.ready}>opérationnel</Badge>
+          <Badge backgroundColor={ERP_STATE_COLOR.ongoing}>en cours</Badge>
+          <Badge backgroundColor={ERP_STATE_COLOR.coming}>à venir</Badge>
         </HStack>
       </Flex>
     </Section>
