@@ -1,7 +1,8 @@
 import { Box, Text } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 import React from "react";
 
-const Logo = () => {
+const Logo = ({ scale = 1 }) => {
   let fontSize = "0.7875rem";
   let beforeWidth = "2.0625rem";
   let beforeHeight = "0.75rem";
@@ -14,12 +15,13 @@ const Logo = () => {
   let afterPaddingTop = "1.65625rem";
 
   return (
-    <Box paddingY="3w">
+    <Box scale={scale} paddingY="3w">
       <Text
         display="inline-block"
         color="grey.800"
         fontSize={fontSize}
         fontWeight="700"
+        transform="auto"
         textTransform="uppercase"
         lineHeight="1.03175em"
         letterSpacing="-0.01em"
@@ -52,6 +54,10 @@ const Logo = () => {
       </Text>
     </Box>
   );
+};
+
+Logo.propTypes = {
+  scale: PropTypes.number,
 };
 
 export default Logo;

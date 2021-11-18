@@ -4,7 +4,7 @@ import React from "react";
 import { Redirect } from "react-router";
 import { NavLink } from "react-router-dom";
 
-import { Logo, Section } from "../../common/components";
+import { Footer, Logo, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import useAuth from "../../common/hooks/useAuth";
 import ApercuDesDonneesSection from "./ApercuDesDonneesSection";
@@ -73,6 +73,7 @@ const HomePage = () => {
       <RgpdSection />
 
       <ContactSection />
+      <Footer />
     </>
   );
 };
