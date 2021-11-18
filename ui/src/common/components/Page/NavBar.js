@@ -39,7 +39,6 @@ NavItem.propTypes = {
 
 const NavBar = () => {
   const [auth] = useAuth();
-  console.log(auth);
   const isAdmin = hasUserRoles(auth, roles.administrator);
   const isCfa = hasUserRoles(auth, roles.cfa);
 
