@@ -4,7 +4,7 @@ export const navigationPages = {
     title: "Login",
   },
   Accueil: {
-    path: "/accueil",
+    path: "/",
     title: "Accueil",
   },
   DemandeAcces: {

@@ -1,37 +1,14 @@
-import { Box, Button, Flex, Heading, HStack, Text } from "@chakra-ui/react";
-import PropTypes from "prop-types";
+import { Flex, Heading, HStack, Text } from "@chakra-ui/react";
 import React from "react";
 import { Redirect } from "react-router";
-import { NavLink } from "react-router-dom";
 
-import { Footer, Logo, Section } from "../../common/components";
+import { Footer, LinkCard, Logo, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
+import { navigationPages } from "../../common/constants/navigationPages";
 import useAuth from "../../common/hooks/useAuth";
 import ApercuDesDonneesSection from "./ApercuDesDonneesSection";
 import dashboardIllustration from "./dashboard-illustration.svg";
 import RgpdSection from "./RgpdSection";
-
-const VousEtesCard = ({ children, linkText, linkHref }) => {
-  return (
-    <Box background="bluefrance" fontSize="gamma" paddingY="3w" paddingX="4w" flex="1">
-      <Text color="white" marginBottom="2w">
-        Vous êtes {children}
-      </Text>
-      <NavLink to={linkHref}>
-        <Button background="#9A9AFF" size="lg" color="bluefrance" padding="3w" paddingY="0">
-          {linkText}
-          <Box as="i" className="ri-arrow-right-line" marginLeft="1w" verticalAlign="middle" />
-        </Button>
-      </NavLink>
-    </Box>
-  );
-};
-
-VousEtesCard.propTypes = {
-  linkHref: PropTypes.string.isRequired,
-  linkText: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired,
-};
 
 const HomePage = () => {
   const [auth] = useAuth();
@@ -59,12 +36,15 @@ const HomePage = () => {
           <img src={dashboardIllustration} alt="illustration tableau de bord" />
         </Flex>
         <HStack spacing="3w" marginTop="6w">
-          <VousEtesCard linkText="Accéder au tableau de bord" linkHref="/login">
-            une <strong>Institution ou une organisation</strong>
-          </VousEtesCard>
-          <VousEtesCard linkText="Transmettre et consulter vos données" linkHref="/">
-            un <strong>organisme de formation</strong>
-          </VousEtesCard>
+          <LinkCard linkText="Accéder au tableau de bord" linkHref={navigationPages.Login.path}>
+            Vous êtes une <strong>Institution ou une organisation</strong>
+          </LinkCard>
+          <LinkCard
+            linkText="Transmettre et consulter vos données"
+            linkHref={navigationPages.TransmettreEtConsulterVosDonnees.path}
+          >
+            Vous êtes un <strong>organisme de formation</strong>
+          </LinkCard>
         </HStack>
       </Section>
 
