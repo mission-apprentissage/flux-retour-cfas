@@ -12,6 +12,7 @@ import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import CfaWithoutNetworkPage from "./pages/tableau-de-bord/views/CfaWithoutNetwork";
+import { TransmettreConsulterVosDonneesPage } from "./pages/transmettre-consulter-vos-donnees";
 import UserStatsPage from "./pages/user-stats";
 
 const App = () => {
@@ -20,6 +21,11 @@ const App = () => {
       <Switch>
         {/* Public pages */}
         <Route exact path="/" component={HomePage} />
+        <Route
+          exact
+          path={navigationPages.TransmettreEtConsulterVosDonnees.path}
+          component={TransmettreConsulterVosDonneesPage}
+        />
         <Route exact path={navigationPages.Login.path} component={LoginPage} />
         <Route path={navigationPages.ComprendreLesDonnees.path} exact component={ComprendreLesDonnees} />
         <Route path={navigationPages.ConsulterVosDonnees.path} exact component={AskAccessLinkPage} />
