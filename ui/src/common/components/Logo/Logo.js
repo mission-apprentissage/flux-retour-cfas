@@ -14,7 +14,7 @@ const Logo = () => {
   let afterPaddingTop = "1.65625rem";
 
   return (
-    <Box p={[0, 0, 4]}>
+    <Box paddingY="3w">
       <Text
         display="inline-block"
         color="grey.800"
