@@ -23,7 +23,7 @@ const AcquisitionCfaBarGraph = () => {
       data={data}
       indexBy="month"
       keys={["Nombre d'organismes"]}
-      margin={{ top: 32, right: 0, bottom: 32, left: 16 }}
+      margin={{ top: 0, right: 0, bottom: 32, left: 16 }}
       colors="#6A94F8"
       padding={0.4}
       enableGridY={false}

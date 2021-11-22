@@ -20,7 +20,7 @@ const TransmettreConsulterVosDonneesPage = () => {
         <Text fontSize="gamma" marginTop="2w" color="grey.800" fontWeight="700">
           Vous êtes un organisme de formation
         </Text>
-        <HStack spacing="3w" marginTop="2w">
+        <HStack spacing="3w" marginTop="2w" alignItems="stretch">
           <LinkCard linkText="Transmettre vos données" linkHref="/login">
             <strong>Vous ne transmettez pas encore vos données</strong> au tableau de bord
           </LinkCard>
@@ -43,8 +43,8 @@ const TransmettreConsulterVosDonneesPage = () => {
           </strong>
         </Text>
 
-        <HStack spacing="3w" marginTop="6w" alignItems="flex-start" height="400px">
-          <Box paddingY="3w" paddingX="4w" background="galt" flex="3" height="100%">
+        <HStack spacing="3w" marginTop="6w" alignItems="stretch">
+          <Box paddingY="3w" paddingX="4w" background="galt" flex="3">
             <Heading as="h4" fontSize="gamma">
               Organismes de formation qui transmettent leurs données
             </Heading>
@@ -55,7 +55,7 @@ const TransmettreConsulterVosDonneesPage = () => {
               <AcquisitionCfaBarGraph />
             </Box>
           </Box>
-          <Box paddingY="3w" paddingX="4w" background="galt" minWidth="300px" flex="1" height="100%">
+          <Box paddingY="3w" paddingX="4w" background="galt" minWidth="300px" flex="1">
             <Text color="grey.800" fontWeight="700" fontSize="gamma">
               Aujourd&apos;hui le tableau de bord est interfaçable avec :
             </Text>
