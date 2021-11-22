@@ -26,7 +26,6 @@ const AcquisitionCfaBarGraph = () => {
       margin={{ top: 32, right: 0, bottom: 32, left: 16 }}
       colors="#6A94F8"
       padding={0.4}
-      enableLabel={false}
       enableGridY={false}
       axisBottom={{ tickSize: 0, tickPadding: 16 }}
       axisLeft={{
@@ -37,6 +36,11 @@ const AcquisitionCfaBarGraph = () => {
       }}
       axisTop={null}
       axisRight={null}
+      enableLabel
+      theme={{
+        fontFamily: "Marianne",
+        textColor: "#1E1E1E",
+      }}
     />
   );
 };
