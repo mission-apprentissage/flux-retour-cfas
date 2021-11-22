@@ -15,7 +15,7 @@ const CfaWithoutNetworkView = ({ cfaUai }) => {
 
   return (
     <Page>
-      <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
+      <Section backgroundColor="galt" paddingY="4w" withShadow>
         <Heading as="h1" variant="h1" marginBottom="1w">
           Visualiser les indices en temps réel
         </Heading>
