@@ -10,7 +10,10 @@ export default function useAuth() {
       setAuth(null);
     } else {
       localStorage.setItem("flux-retour-cfas:access_token", access_token);
-      setAuth(decodeJWT(access_token));
+      const decodedAccessToken = decodeJWT(access_token);
+      localStorage.setItem("flux-retour-cfas:userPermissions", decodedAccessToken.permissions);
+      localStorage.setItem("flux-retour-cfas:userNetwork", decodedAccessToken.network);
+      setAuth(decodedAccessToken);
     }
   };
 

@@ -2,7 +2,7 @@ import { Heading, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Alert, EffectifCard, Section } from "../../../../common/components";
+import { EffectifCard, Section } from "../../../../common/components";
 import { isDateFuture } from "../../../../common/utils/dateUtils";
 import { pluralize } from "../../../../common/utils/stringUtils";
 import { InfoLine } from "../../../../theme/components/icons";
@@ -59,6 +59,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
         <Heading as="h2" variant="h2">
           Effectifs
         </Heading>
+
         <PeriodeFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
         <Tooltip
           bg="#F9F8F6"
@@ -79,14 +80,6 @@ const EffectifsSection = ({ effectifs, loading }) => {
           </Text>
         </Tooltip>
       </HStack>
-
-      <Section paddingX="-5w" marginBottom="4w">
-        <Alert>
-          La collecte des effectifs 2021-2022 est en cours ce qui peut expliquer pour certains organismes des
-          informations incomplètes. Les chiffres seront disponibles progressivement. Nous vous remercions de votre
-          compréhension.
-        </Alert>
-      </Section>
       {content}
     </Section>
   );

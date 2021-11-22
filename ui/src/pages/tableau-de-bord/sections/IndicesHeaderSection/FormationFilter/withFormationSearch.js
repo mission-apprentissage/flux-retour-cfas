@@ -8,13 +8,13 @@ import { filtersPropTypes } from "../../../FiltersContext";
 const SEARCH_DEBOUNCE_TIME = 300;
 
 const searchFormationByIntituleOrCfd = debounce(async (searchParams, callback) => {
-  const searchRequestBody = omitNullishValues({
+  const query = {
     searchTerm: searchParams.searchTerm,
     etablissement_num_region: searchParams.region?.code ?? null,
     etablissement_num_departement: searchParams.departement?.code ?? null,
-  });
-
-  const result = await _post("/api/formations/search", searchRequestBody);
+    etablissement_reseaux: searchParams.reseau?.nom ?? null,
+  };
+  const result = await _post("/api/formations/search", omitNullishValues(query));
   callback(result);
 }, SEARCH_DEBOUNCE_TIME);
 

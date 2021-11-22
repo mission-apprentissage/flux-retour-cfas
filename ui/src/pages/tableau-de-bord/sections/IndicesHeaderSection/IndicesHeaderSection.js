@@ -1,7 +1,9 @@
 import { Box, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
+import { hasUserRoles, roles } from "../../../../common/auth/roles";
 import { Section } from "../../../../common/components";
+import useAuth from "../../../../common/hooks/useAuth";
 import { useFiltersContext } from "../../FiltersContext";
 import CfasFilter from "./CfasFilter/CfasFilter";
 import FormationFilter from "./FormationFilter/FormationFilter";
@@ -9,6 +11,9 @@ import TerritoireFilter from "./TerritoireFilter/TerritoireFilter";
 
 const IndicesHeaderSection = () => {
   const filtersContext = useFiltersContext();
+  const [auth] = useAuth();
+
+  const displayReseauPanel = hasUserRoles(auth, [roles.administrator, roles.pilot]);
 
   return (
     <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
@@ -25,6 +30,7 @@ const IndicesHeaderSection = () => {
           filters={filtersContext.state}
           onCfaChange={filtersContext.setters.setCfa}
           onReseauChange={filtersContext.setters.setReseau}
+          displayReseauPanel={displayReseauPanel}
         />
         <Box as="span" color="grey.800">
           ou
@@ -34,5 +40,4 @@ const IndicesHeaderSection = () => {
     </Section>
   );
 };
-
 export default IndicesHeaderSection;

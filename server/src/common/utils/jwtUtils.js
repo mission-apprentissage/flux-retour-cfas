@@ -18,7 +18,7 @@ module.exports = {
   createActivationToken: (subject, options = {}) => createToken("activation", subject, options),
   createPasswordToken: (subject, options = {}) => createToken("password", subject, options),
   createUserToken: (user, options = {}) => {
-    const payload = { permissions: user.permissions };
+    const payload = { permissions: user.permissions, network: user.network };
     return createToken("user", user.username, { payload, ...options });
   },
 };

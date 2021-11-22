@@ -1,6 +1,7 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Button, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 import LoginForm from "./LoginForm";
 
@@ -14,6 +15,14 @@ const LoginBlock = ({ onSubmit }) => {
         Merci de vous identifier pour consulter les données.
       </Text>
       <LoginForm onSubmit={onSubmit} />
+      <Text marginTop="4w" color="grey.800">
+        Vous n&apos;avez pas reçu vos identifiants de connexion ?
+      </Text>
+      <NavLink to="/demande-acces">
+        <Button variant="ghost" marginTop="2w">
+          Demander mes identifiants
+        </Button>
+      </NavLink>
     </Box>
   );
 };

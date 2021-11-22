@@ -1,3 +1,5 @@
+const crypto = require("crypto");
+
 const trimObjValues = (data) => {
   data.forEach(function (o) {
     Object.keys(o).forEach(function (key) {
@@ -55,3 +57,15 @@ module.exports.paginate = paginate;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 module.exports.sleep = sleep;
+
+/**
+ * Generates a random password with a fixed length and made of characters belonging to a specified wishlist
+ * @param {*} length
+ * @param {*} wishlist
+ * @returns
+ */
+const generatePassword = (length = 20, wishlist = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz") =>
+  Array.from(crypto.randomFillSync(new Uint32Array(length)))
+    .map((x) => wishlist[x % wishlist.length])
+    .join("");
+module.exports.generatePassword = generatePassword;

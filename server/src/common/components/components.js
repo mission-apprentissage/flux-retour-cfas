@@ -8,11 +8,13 @@ const formationsComponent = require("./formations");
 const createStats = require("./stats");
 const createDashboard = require("./dashboard");
 const cfaDataFeedbackComponent = require("./cfaDataFeedback");
+const demandeAccesComponent = require("./demandeAcces");
 
 module.exports = async (options = {}) => {
   const users = options.users || (await createUsers());
   const userEvents = options.userEvents || createUserEvents();
   const jobEvents = options.jobEvents || createJobEvents();
+  const demandeAcces = options.demandeAcces || demandeAccesComponent();
   const statutsCandidats = options.statutsCandidats || createStatutsCandidats();
   const formations = options.formations || formationsComponent();
   const cfas = options.cfas || cfasComponent();
@@ -24,6 +26,7 @@ module.exports = async (options = {}) => {
     users,
     userEvents,
     jobEvents,
+    demandeAcces,
     db: options.db || (await connectToMongo()).db,
     statutsCandidats,
     cfaDataFeedback,

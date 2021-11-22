@@ -1,26 +1,28 @@
 import { Box, Skeleton, Text } from "@chakra-ui/react";
+import qs from "query-string";
 import React from "react";
 
 import Section from "../../../../common/components/Section/Section";
-import { usePostFetch } from "../../../../common/hooks/useFetch";
-import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
+import { useFetch } from "../../../../common/hooks/useFetch";
+import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { pick } from "../../../../common/utils/pick";
 import { formatNumber } from "../../../../common/utils/stringUtils";
 import { useFiltersContext } from "../../FiltersContext";
 
-const buildRequestBody = (filters) => {
-  const flattenedFilters = {
-    etablissement_num_region: filters.region?.code ?? null,
-    etablissement_num_departement: filters.departement?.code ?? null,
-    formation_cfd: filters.formation?.cfd ?? null,
-    etablissement_reseaux: filters.reseau?.nom ?? null,
-  };
-
-  return omitNullishValues(flattenedFilters);
+const buildRequestQuery = (filters) => {
+  return qs.stringify(
+    pick(mapFiltersToApiFormat(filters), [
+      "etablissement_num_region",
+      "etablissement_num_departement",
+      "etablissement_reseaux",
+      "formation_cfd",
+    ])
+  );
 };
 
 const ProvenanceIndicesSection = () => {
   const { state: filters } = useFiltersContext();
-  const [data, loading, error] = usePostFetch("/api/dashboard/total-organismes", buildRequestBody(filters));
+  const [data, loading, error] = useFetch(`/api/dashboard/total-organismes?${buildRequestQuery(filters)}`);
 
   let content = null;
   if (loading) {

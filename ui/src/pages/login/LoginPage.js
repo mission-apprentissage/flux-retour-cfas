@@ -26,7 +26,7 @@ const LoginPage = ({ history }) => {
   return (
     <>
       <AppHeader />
-      <Box paddingTop="6w" paddingLeft="120px" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
+      <Box paddingY="6w" paddingLeft="120px" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
         <LoginBlock onSubmit={login} />
       </Box>
     </>

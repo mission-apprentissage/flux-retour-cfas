@@ -11,6 +11,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     searchTerm: Joi.string().min(3),
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
+    etablissement_reseaux: Joi.string().allow(null, ""),
   }).min(1);
 
   const dataFeedbackBodyValidationSchema = Joi.object({
@@ -109,8 +110,25 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
           uai: cfaFound.uai_etablissement,
           sousEtablissements: sousEtablissements,
           adresse: cfaFound.etablissement_adresse,
+          url_tdb: cfaInReferentiel ? cfas.getUrlTdbFromAccessToken(cfaInReferentiel?.url_access_token) : null,
         });
       }
+    })
+  );
+
+  /**
+   * Gets the uai for cfa by accessToken
+   */
+  router.get(
+    "/url-access-token/:token",
+    tryCatch(async (req, res) => {
+      const { token } = req.params;
+
+      const cfaFound = await cfas.getFromAccessToken(token);
+
+      return cfaFound
+        ? res.json({ uai: cfaFound.uai })
+        : res.status(404).json({ message: `No cfa found for access_token ${token}` });
     })
   );
 

@@ -4,6 +4,8 @@ import { subscribeToHttpEvent } from "../httpClient";
 import decodeJWT from "../utils/decodeJWT";
 
 const access_token = localStorage.getItem("flux-retour-cfas:access_token");
+export const getAuthUserRole = () => localStorage.getItem("flux-retour-cfas:userPermissions");
+export const getAuthUserNetwork = () => localStorage.getItem("flux-retour-cfas:userNetwork");
 
 const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
   auth: access_token ? decodeJWT(access_token) : null,

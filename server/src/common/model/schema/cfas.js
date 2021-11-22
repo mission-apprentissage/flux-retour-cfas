@@ -71,6 +71,11 @@ const cfasSchema = new Schema({
     default: [],
     description: "Les domaines métiers rattachés à l'établissement",
   },
+  url_access_token: {
+    type: String,
+    default: null,
+    description: "Le token permettant l'accès au CFA à sa propre page",
+  },
 });
 
 module.exports = cfasSchema;
