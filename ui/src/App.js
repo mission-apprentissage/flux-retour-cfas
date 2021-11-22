@@ -46,7 +46,7 @@ const App = () => {
         />
         <ProtectedRoute
           authorizedRoles={[roles.administrator]}
-          path={`${navigationPages.Login.path}/:dataSource`}
+          path={`${navigationPages.Stats.path}/:dataSource`}
           component={UserStatsPage}
         />
 

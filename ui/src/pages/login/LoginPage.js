@@ -1,9 +1,10 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 
-import { AppHeader } from "../../common/components";
+import { AppHeader, BreadcrumbNav, Footer, Section } from "../../common/components";
+import { navigationPages } from "../../common/constants/navigationPages";
 import useAuth from "../../common/hooks/useAuth";
 import { _post } from "../../common/httpClient";
 import LoginBlock from "./LoginBlock";
@@ -26,9 +27,20 @@ const LoginPage = ({ history }) => {
   return (
     <>
       <AppHeader />
-      <Box paddingY="6w" paddingLeft="120px" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
-        <LoginBlock onSubmit={login} />
-      </Box>
+      <Section background="galt" withShadow paddingY="3w">
+        <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.Login]} />
+        <HStack justifyContent="space-between" spacing="8w" marginTop="5w" alignItems="flex-start">
+          <Box>
+            <Heading as="h1">{navigationPages.Login.title}</Heading>
+            <Text color="grey.800" fontWeight="700" fontSize="gamma" marginTop="2w">
+              Vous êtes une institution ou une organisation professionnelle, connectez-vous au tableau de bord pour
+              consulter les effectifs sur votre territoire.
+            </Text>
+          </Box>
+          <LoginBlock onSubmit={login} />
+        </HStack>
+      </Section>
+      <Footer />
     </>
   );
 };
