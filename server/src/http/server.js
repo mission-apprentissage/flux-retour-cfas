@@ -22,6 +22,7 @@ const cfasRoute = require("./routes/cfas");
 const formationRoutes = require("./routes/formations");
 const healthcheckRoute = require("./routes/healthcheck");
 const demandeAcces = require("./routes/demande-acces");
+const demandeLienAccesRoute = require("./routes/demande-lien-acces");
 
 module.exports = async (components) => {
   const app = express();
@@ -36,11 +37,12 @@ module.exports = async (components) => {
   // open routes
   app.use("/api/login", loginRoute(components));
   app.use("/api/login-cfa", loginCfaRoute(components));
-  app.use("/api/demande-acces", demandeAcces(components));
   app.use("/api/formations", formationRoutes(components));
   app.use("/api/cfas", cfasRoute(components));
   app.use("/api/referentiel", referentielRoute());
   app.use("/api/healthcheck", healthcheckRoute(components));
+  app.use("/api/demande-acces", demandeAcces(components));
+  app.use("/api/demande-lien-acces", demandeLienAccesRoute(components));
 
   // requires JWT auth
   app.use(

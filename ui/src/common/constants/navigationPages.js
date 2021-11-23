@@ -7,6 +7,10 @@ export const navigationPages = {
     path: "/accueil",
     title: "Accueil",
   },
+  DemandeAcces: {
+    path: "/demande-acces",
+    title: "Demande d'acces",
+  },
   ComprendreLesDonnees: {
     path: "/comprendre-les-donnees",
     title: "Comprendre les données",
@@ -18,6 +22,10 @@ export const navigationPages = {
   ConsulterVosDonnees: {
     path: "/consulter-vos-donnees",
     title: "Consulter vos données",
+  },
+  Cfa: {
+    path: "/cfa",
+    title: "Cfa",
   },
   TableauDeBord: {
     path: "/tableau-de-bord",

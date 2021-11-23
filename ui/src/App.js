@@ -5,6 +5,7 @@ import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
 import { navigationPages } from "./common/constants/navigationPages";
 import DemandeAccesPage from "./pages/demande-acces/DemandeAccesPage";
+import AskAccessLinkPage from "./pages/home/cfa/AskAccessLinkPage/AskAccessLinkPage";
 import HomePage from "./pages/home/HomePage";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
@@ -20,11 +21,12 @@ const App = () => {
         {/* Public pages */}
         <Route exact path="/" component={HomePage} />
         <Route exact path={navigationPages.Login.path} component={LoginPage} />
-        <Route exact path="/demande-acces" component={DemandeAccesPage} />
-        <Route exact path="/cfa/:accessToken" component={CfaWithoutNetworkPage} />
         <Route path={navigationPages.ComprendreLesDonnees.path} exact component={ComprendreLesDonnees} />
+        <Route path={navigationPages.ConsulterVosDonnees.path} exact component={AskAccessLinkPage} />
+        <Route exact path={navigationPages.DemandeAcces.path} component={DemandeAccesPage} />
+        <Route exact path={`${navigationPages.Cfa.path}/:accessToken`} component={CfaWithoutNetworkPage} />
 
-        {/* Secured Tdb Pages */}
+        {/* Secured Pages */}
         <ProtectedRoute
           path={navigationPages.TableauDeBord.path}
           exact
