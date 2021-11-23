@@ -40,7 +40,6 @@
     "siret:check-validity": "node -r dotenv/config src/jobs/siret/check-siret-validity.js",
     "uai:check-validity": "node -r dotenv/config src/jobs/uai/check-uai-validity.js",
     "formation:retrieve-from-cfd": "node -r dotenv/config src/jobs/formation-retrieve-from-cfd/index.js",
-    "statutsCandidats:retrieve-location": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-location/index.js",
     "statutsCandidats:retrieve-networks": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-networks/index.js",
     "statutsCandidats:retrieve-niveaux": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-niveaux/index.js",
     "statutsCandidats:retrieve-sirets-catalogue": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-sirets-catalogue/index.js",
