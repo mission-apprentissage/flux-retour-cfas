@@ -1,7 +1,6 @@
-import qs from "query-string";
+import { useQuery } from "react-query";
 
-import { useFetch } from "../../common/hooks/useFetch";
-import { mapFiltersToApiFormat } from "../../common/utils/mapFiltersToApiFormat";
+import { fetchEfffectifs } from "../../common/api/tableauDeBord";
 import { useFiltersContext } from "./FiltersContext";
 
 const mapEffectifsData = (effectifsData) => {
@@ -24,9 +23,11 @@ const mapEffectifsData = (effectifsData) => {
 const useEffectifs = () => {
   const filtersContext = useFiltersContext();
 
-  const queryParams = qs.stringify(mapFiltersToApiFormat(filtersContext.state));
-  const [data, loading, error] = useFetch(`/api/dashboard/effectifs?${queryParams}`);
+  const { status, data, error } = useQuery(["effectifs", filtersContext.state], () =>
+    fetchEfffectifs(filtersContext.state)
+  );
 
+  const loading = status === "loading";
   const effectifs = data && mapEffectifsData(data);
 
   return [effectifs, loading, error];
