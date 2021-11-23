@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 
-import { fetchEfffectifs } from "../../common/api/tableauDeBord";
+import { fetchEffectifs } from "../../common/api/tableauDeBord";
 import { useFiltersContext } from "./FiltersContext";
 
 const mapEffectifsData = (effectifsData) => {
@@ -24,7 +24,7 @@ const useEffectifs = () => {
   const filtersContext = useFiltersContext();
 
   const { status, data, error } = useQuery(["effectifs", filtersContext.state], () =>
-    fetchEfffectifs(filtersContext.state)
+    fetchEffectifs(filtersContext.state)
   );
 
   const loading = status === "loading";
