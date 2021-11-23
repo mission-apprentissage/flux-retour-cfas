@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
 import { navigationPages } from "./common/constants/navigationPages";
-import DemandeAccesPage from "./pages/demande-acces/DemandeAccesPage";
 import HomePage from "./pages/home/HomePage";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
@@ -28,7 +27,6 @@ const App = () => {
         <Route exact path={navigationPages.Login.path} component={LoginPage} />
         <Route path={navigationPages.ComprendreLesDonnees.path} exact component={ComprendreLesDonnees} />
         <Route path={navigationPages.ConsulterVosDonnees.path} exact component={ConsulterVosDonneesPage} />
-        <Route exact path={navigationPages.DemandeAcces.path} component={DemandeAccesPage} />
         <Route exact path={`${navigationPages.Cfa.path}/:accessToken`} component={CfaWithoutNetworkPage} />
 
         {/* Secured Pages */}
