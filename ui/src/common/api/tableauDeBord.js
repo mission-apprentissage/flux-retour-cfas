@@ -14,3 +14,9 @@ export const fetchEffectifsParCfa = (filters) => {
   const url = `/api/dashboard/effectifs-par-cfa?${queryParameters}`;
   return _get(url);
 };
+
+export const fetchEffectifsParFormation = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-formation?${queryParameters}`;
+  return _get(url);
+};
