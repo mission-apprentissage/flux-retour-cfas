@@ -20,14 +20,6 @@ const codesStatutsMajStatutCandidats = {
  * Noms des réseaux de CFAS
  */
 const reseauxCfas = {
-  // CCCA_BTP: {
-  //   nomReseau: "CCCA Btp",
-  //   nomFichier: "cfas-ccca-btp",
-  // },
-  // CCCI_France: {
-  //   nomReseau: "CCI France",
-  //   nomFichier: "cfas-cci-france",
-  // },
   CMA: {
     nomReseau: "CMA",
     nomFichier: "cfas-cma",
@@ -43,14 +35,21 @@ const reseauxCfas = {
     nomFichier: "cfas-anasup",
     encoding: "utf8",
   },
-  // PROMOTRANS: {
-  //   nomReseau: "PROMOTRANS",
-  //   nomFichier: "cfas-promotrans",
-  // },
-  // COMPAGNONS_DU_DEVOIR: {
-  //   nomReseau: "COMPAGNONS DU DEVOIR",
-  //   nomFichier: "cfas-compagnons-du-devoir",
-  // },
+  CCI: {
+    nomReseau: "CCI",
+    nomFichier: "cfas-cci",
+    encoding: "utf8",
+  },
+  CFA_EC: {
+    nomReseau: "CFA EC",
+    nomFichier: "cfas-cfa-ec",
+    encoding: "utf8",
+  },
+  GRETA: {
+    nomReseau: "GRETA",
+    nomFichier: "cfas-greta",
+    encoding: "utf8",
+  },
   UIMM: {
     nomReseau: "UIMM",
     nomFichier: "cfas-uimm",
