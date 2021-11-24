@@ -1,7 +1,7 @@
 export const navigationPages = {
   Login: {
     path: "/login",
-    title: "Login",
+    title: "Accéder au tableau de bord",
   },
   Accueil: {
     path: "/",
