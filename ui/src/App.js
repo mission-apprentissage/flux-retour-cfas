@@ -5,14 +5,13 @@ import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
 import { navigationPages } from "./common/constants/navigationPages";
 import DemandeAccesPage from "./pages/demande-acces/DemandeAccesPage";
-import AskAccessLinkPage from "./pages/home/cfa/AskAccessLinkPage/AskAccessLinkPage";
 import HomePage from "./pages/home/HomePage";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import CfaWithoutNetworkPage from "./pages/tableau-de-bord/views/CfaWithoutNetwork";
-import { TransmettreConsulterVosDonneesPage } from "./pages/transmettre-consulter-vos-donnees";
+import { ConsulterVosDonneesPage, TransmettreConsulterVosDonneesPage } from "./pages/transmettre-consulter-vos-donnees";
 import UserStatsPage from "./pages/user-stats";
 
 const App = () => {
@@ -28,7 +27,7 @@ const App = () => {
         />
         <Route exact path={navigationPages.Login.path} component={LoginPage} />
         <Route path={navigationPages.ComprendreLesDonnees.path} exact component={ComprendreLesDonnees} />
-        <Route path={navigationPages.ConsulterVosDonnees.path} exact component={AskAccessLinkPage} />
+        <Route path={navigationPages.ConsulterVosDonnees.path} exact component={ConsulterVosDonneesPage} />
         <Route exact path={navigationPages.DemandeAcces.path} component={DemandeAccesPage} />
         <Route exact path={`${navigationPages.Cfa.path}/:accessToken`} component={CfaWithoutNetworkPage} />
 

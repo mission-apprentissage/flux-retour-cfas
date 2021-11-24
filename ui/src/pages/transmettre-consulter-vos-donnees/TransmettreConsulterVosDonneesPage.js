@@ -1,7 +1,7 @@
 import { Box, Heading, HStack, List, ListItem, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { AppHeader, Badge, BreadcrumbNav, LinkCard, Section } from "../../common/components";
+import { AppHeader, Badge, BreadcrumbNav, Footer, LinkCard, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { ERP_STATE_COLOR, ERPS } from "../../common/constants/erps";
 import { navigationPages } from "../../common/constants/navigationPages";
@@ -15,17 +15,18 @@ const TransmettreConsulterVosDonneesPage = () => {
       <Section paddingY="4w" background="galt" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
         <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.TransmettreEtConsulterVosDonnees]} />
         <Heading as="h1" fontSize="alpha" color="grey.800" marginTop="5w">
-          Transmettre et consulter vos données
+          Autoriser la collecte de vos données et les consulter
         </Heading>
         <Text fontSize="gamma" marginTop="2w" color="grey.800" fontWeight="700">
-          Vous êtes un organisme de formation
+          Vous êtes un organisme de formation en apprentissage
         </Text>
         <HStack spacing="3w" marginTop="2w" alignItems="stretch">
-          <LinkCard linkText="Transmettre vos données" linkHref="/login">
-            <strong>Vous ne transmettez pas encore vos données</strong> au tableau de bord
+          <LinkCard linkText="Consulter vos données" linkHref={navigationPages.ConsulterVosDonnees.path}>
+            <strong>Vous autorisez déjà la collecte de vos données</strong> et leur affichage dans le tableau de bord
           </LinkCard>
-          <LinkCard linkText="Consulter vos données" linkHref="/">
-            <strong>Vous transmettez déjà vos données</strong> au tableau de bord
+          <LinkCard linkText="Transmettre vos données" linkHref={navigationPages.TransmettreVosDonnees.path}>
+            <strong>Vous n&apos;autorisez pas encore la collecte de vos données</strong> et leur affichage dans le
+            tableau de bord
           </LinkCard>
         </HStack>
       </Section>
@@ -85,6 +86,7 @@ const TransmettreConsulterVosDonneesPage = () => {
       </Section>
 
       <ContactSection />
+      <Footer />
     </>
   );
 };

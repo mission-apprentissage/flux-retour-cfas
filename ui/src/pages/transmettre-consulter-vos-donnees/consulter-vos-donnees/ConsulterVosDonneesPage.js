@@ -1,12 +1,12 @@
 import { Box, Button, Heading, Text, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 
-import { AppHeader, Section } from "../../../../common/components";
-import BreadcrumbNav from "../../../../common/components/BreadcrumbNav/BreadcrumbNav";
-import { navigationPages } from "../../../../common/constants/navigationPages";
-import AskAccessLinkModal from "./AskAccessLinkModal";
+import { AppHeader, Footer, Section } from "../../../common/components";
+import BreadcrumbNav from "../../../common/components/BreadcrumbNav/BreadcrumbNav";
+import { navigationPages } from "../../../common/constants/navigationPages";
+import AskAccessLinkModal from "./AskAccessLink/AskAccessLinkModal";
 
-const AskAccessLinkPage = () => {
+const ConsulterVosDonneesPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -15,8 +15,11 @@ const AskAccessLinkPage = () => {
       <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
         <Box width="500px">
           <BreadcrumbNav
-            links={[navigationPages.Accueil, navigationPages.TransmettreEtConsulterVosDonnees]}
-            activeLink={navigationPages.ConsulterVosDonnees}
+            links={[
+              navigationPages.Accueil,
+              navigationPages.TransmettreEtConsulterVosDonnees,
+              navigationPages.ConsulterVosDonnees,
+            ]}
           />
           <Heading paddingTop="5w" as="h1" variant="h1" marginBottom="1w">
             {navigationPages.ConsulterVosDonnees.title}
@@ -31,8 +34,9 @@ const AskAccessLinkPage = () => {
           <AskAccessLinkModal isOpen={isOpen} onClose={onClose} />
         </Box>
       </Section>
+      <Footer />
     </>
   );
 };
 
-export default AskAccessLinkPage;
+export default ConsulterVosDonneesPage;

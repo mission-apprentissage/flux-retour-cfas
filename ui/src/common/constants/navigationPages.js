@@ -19,6 +19,10 @@ export const navigationPages = {
     path: "/transmettre-consulter-vos-donnees",
     title: "Transmettre et consulter vos données",
   },
+  TransmettreVosDonnees: {
+    path: "/transmettre-vos-donnees",
+    title: "Transmettre vos données",
+  },
   ConsulterVosDonnees: {
     path: "/consulter-vos-donnees",
     title: "Consulter vos données",
