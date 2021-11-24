@@ -8,3 +8,9 @@ export const fetchEffectifs = (filters) => {
   const url = `/api/dashboard/effectifs?${queryParameters}`;
   return _get(url);
 };
+
+export const fetchEffectifsParCfa = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-cfa?${queryParameters}`;
+  return _get(url);
+};
