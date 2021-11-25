@@ -20,3 +20,9 @@ export const fetchEffectifsParFormation = (filters) => {
   const url = `/api/dashboard/effectifs-par-formation?${queryParameters}`;
   return _get(url);
 };
+
+export const fetchEffectifsParNiveauFormation = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-niveau-formation?${queryParameters}`;
+  return _get(url);
+};
