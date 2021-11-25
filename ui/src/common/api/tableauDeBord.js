@@ -32,3 +32,9 @@ export const fetchEffectifsParAnneeFormation = (filters) => {
   const url = `/api/dashboard/effectifs-par-annee-formation?${queryParameters}`;
   return _get(url);
 };
+
+export const fetchEffectifsParDepartement = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-departement?${queryParameters}`;
+  return _get(url);
+};
