@@ -60,3 +60,8 @@ export const fetchCfa = (cfaUai) => {
   const url = `/api/cfas/${cfaUai}`;
   return _get(url);
 };
+
+/* Regions */
+export const fetchRegions = () => {
+  return _get("/api/referentiel/regions");
+};
