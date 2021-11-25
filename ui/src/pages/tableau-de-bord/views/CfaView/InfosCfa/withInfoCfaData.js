@@ -1,12 +1,13 @@
 import PropTypes from "prop-types";
 import React from "react";
+import { useQuery } from "react-query";
 
-import { useFetch } from "../../../../../common/hooks/useFetch";
+import { fetchCfa } from "../../../../../common/api/tableauDeBord";
 
 const withInfoCfaData = (Component) => {
   const WithInfoCfaData = ({ cfaUai, ...props }) => {
-    const [data, loading, error] = useFetch(`/api/cfas/${cfaUai}`);
-    return data ? <Component {...props} infosCfa={data} loading={loading} error={error} /> : null;
+    const { data, isLoading, error } = useQuery(["cfas", cfaUai], () => fetchCfa(cfaUai));
+    return data ? <Component {...props} infosCfa={data} loading={isLoading} error={error} /> : null;
   };
 
   WithInfoCfaData.propTypes = {

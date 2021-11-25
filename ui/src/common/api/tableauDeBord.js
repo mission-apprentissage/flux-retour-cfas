@@ -54,3 +54,9 @@ export const fetchFormation = (formationCfd) => {
   const url = `/api/formations/${formationCfd}`;
   return _get(url);
 };
+
+/* CFAs */
+export const fetchCfa = (cfaUai) => {
+  const url = `/api/cfas/${cfaUai}`;
+  return _get(url);
+};
