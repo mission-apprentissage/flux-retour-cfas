@@ -3,6 +3,8 @@ import qs from "query-string";
 import { _get } from "../httpClient";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
+/* Effectifs */
+
 export const fetchEffectifs = (filters) => {
   const queryParameters = qs.stringify(mapFiltersToApiFormat(filters));
   const url = `/api/dashboard/effectifs?${queryParameters}`;
@@ -36,5 +38,13 @@ export const fetchEffectifsParAnneeFormation = (filters) => {
 export const fetchEffectifsParDepartement = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/dashboard/effectifs-par-departement?${queryParameters}`;
+  return _get(url);
+};
+
+/* Total organismes */
+
+export const fetchTotalOrganismes = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/total-organismes?${queryParameters}`;
   return _get(url);
 };
