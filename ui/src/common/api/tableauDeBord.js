@@ -48,3 +48,9 @@ export const fetchTotalOrganismes = (filters) => {
   const url = `/api/dashboard/total-organismes?${queryParameters}`;
   return _get(url);
 };
+
+/* Formations */
+export const fetchFormation = (formationCfd) => {
+  const url = `/api/formations/${formationCfd}`;
+  return _get(url);
+};
