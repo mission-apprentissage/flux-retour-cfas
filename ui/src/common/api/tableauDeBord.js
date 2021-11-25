@@ -61,6 +61,11 @@ export const fetchCfa = (cfaUai) => {
   return _get(url);
 };
 
+/* Reseaux */
+export const fetchReseaux = () => {
+  return _get("/api/referentiel/networks");
+};
+
 /* Regions */
 export const fetchRegions = () => {
   return _get("/api/referentiel/regions");
