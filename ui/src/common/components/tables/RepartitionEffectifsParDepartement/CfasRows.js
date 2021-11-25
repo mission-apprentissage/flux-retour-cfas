@@ -13,7 +13,9 @@ const CfasRows = ({ departementCode }) => {
     date: filters.state.date.toISOString(),
     etablissement_num_departement: departementCode,
   };
-  const { data, isLoading } = useQuery(["effectifsParCfa", requestFilters], () => fetchEffectifsParCfa(requestFilters));
+  const { data, isLoading } = useQuery(["effectifs-par-cfa", requestFilters], () =>
+    fetchEffectifsParCfa(requestFilters)
+  );
 
   if (isLoading) {
     return <RowsSkeleton nbRows={3} nbColumns={5} />;

@@ -14,7 +14,7 @@ const withRepartitionEffectifsTerritoireParCfa = (Component) => {
       "etablissement_num_departement",
     ]);
 
-    const { data, isLoading, error } = useQuery(["effectifsParCfa", fetchFilters], () =>
+    const { data, isLoading, error } = useQuery(["effectifs-par-cfa", fetchFilters], () =>
       fetchEffectifsParCfa(fetchFilters)
     );
 
