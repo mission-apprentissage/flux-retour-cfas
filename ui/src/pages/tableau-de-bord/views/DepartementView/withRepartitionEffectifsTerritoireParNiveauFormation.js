@@ -1,4 +1,3 @@
-import qs from "query-string";
 import React from "react";
 import { useQuery } from "react-query";
 
