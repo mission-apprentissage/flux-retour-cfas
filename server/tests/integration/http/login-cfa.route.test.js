@@ -12,7 +12,7 @@ httpTests(__filename, ({ startServer }) => {
     const token = "eyP33IyEAisoErO";
     await new Cfa({
       uai: "0594889A",
-      url_access_token: token,
+      access_token: token,
     }).save();
 
     const response = await httpClient.post("/api/login-cfa", {
@@ -34,7 +34,7 @@ httpTests(__filename, ({ startServer }) => {
     const token = "eyP33IyEAisoErO";
     await new Cfa({
       uai: "0594889A",
-      url_access_token: token,
+      access_token: token,
     }).save();
 
     const response = await httpClient.post("/api/login-cfa", {
@@ -50,7 +50,7 @@ httpTests(__filename, ({ startServer }) => {
     const token = "eyP33IyEAisoErO";
     await new Cfa({
       uai: "0594889A",
-      url_access_token: token,
+      access_token: token,
     }).save();
 
     const response = await httpClient.post("/api/login-cfa");

@@ -281,7 +281,7 @@ integrationTests(__filename, () => {
         uai: "0762290X",
         sirets: [],
         nom: "hello",
-        url_access_token: "token",
+        access_token: "token",
       }).save();
       const cfaFound = await getFromAccessToken(token);
       assert.equal(cfaFound.uai, cfaInDb.uai);

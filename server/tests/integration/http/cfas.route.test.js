@@ -4,7 +4,6 @@ const httpTests = require("../../utils/httpTests");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 const { StatutCandidat: StatutCandidatModel, Cfa } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
-const cfasComponent = require("../../../src/common/components/cfas");
 
 httpTests(__filename, ({ startServer }) => {
   let httpClient;
@@ -102,7 +101,6 @@ httpTests(__filename, ({ startServer }) => {
   describe("GET /cfas/:uai", () => {
     it("Vérifie qu'on peut récupérer les informations d'un CFA via son UAI", async () => {
       const { httpClient } = await startServer();
-      const { getUrlTdbFromAccessToken } = cfasComponent();
 
       const nomTest = "TEST NOM";
       const siretTest = "77929544300013";
@@ -110,7 +108,6 @@ httpTests(__filename, ({ startServer }) => {
       const adresseTest = "TEST ADRESSE";
       const reseauxTest = ["Reseau1", "Reseau2"];
       const accessTokenTest = "TEST_TOKEN";
-      const urlTdbTest = getUrlTdbFromAccessToken(accessTokenTest);
 
       const cfaInfos = {
         nom_etablissement: nomTest,
@@ -130,7 +127,8 @@ httpTests(__filename, ({ startServer }) => {
         nom: nomTest,
         uai: uaiTest,
         reseaux: reseauxTest,
-        url_access_token: accessTokenTest,
+        access_token: accessTokenTest,
+        private_url: "http://hello.world",
       });
       await cfaReferenceToAdd.save();
 
@@ -146,7 +144,7 @@ httpTests(__filename, ({ startServer }) => {
         adresse: adresseTest,
         reseaux: reseauxTest,
         domainesMetiers: [],
-        url_tdb: urlTdbTest,
+        url_tdb: "http://hello.world",
       });
     });
 
@@ -222,7 +220,7 @@ httpTests(__filename, ({ startServer }) => {
         nom: nomTest,
         uai: uaiTest,
         reseaux: reseauxTest,
-        url_access_token: tokenTest,
+        access_token: tokenTest,
       });
       await cfaReferenceToAdd.save();
 
