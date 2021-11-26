@@ -5,6 +5,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { Cfa } = require("../../common/model");
 const { jobNames } = require("../../common/model/constants");
 const { generatePassword } = require("../../common/utils/miscUtils");
+const config = require("../../../config");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -18,15 +19,20 @@ runScript(async () => {
 }, jobNames.seedCfasAccessTokens);
 
 const seedCfaAccessTokens = async () => {
-  const cfasWithoutAccessToken = await Cfa.find({ url_access_token: null }).lean();
+  const cfasWithoutAccessToken = await Cfa.find({ access_token: null }).lean();
   loadingBar.start(cfasWithoutAccessToken.length, 0);
 
   await asyncForEach(cfasWithoutAccessToken, async (cfaWithoutAccessToken) => {
     loadingBar.increment();
 
     // Generate accesToken & set it with url for cfa
-    const urlAccessToken = generatePassword();
-    await Cfa.findOneAndUpdate({ _id: cfaWithoutAccessToken._id }, { $set: { url_access_token: urlAccessToken } });
+    const accessToken = generatePassword();
+    const privateUrl = config.publicUrl + "/cfa/" + accessToken;
+
+    await Cfa.findOneAndUpdate(
+      { _id: cfaWithoutAccessToken._id },
+      { $set: { access_token: accessToken, private_url: privateUrl } }
+    );
   });
 
   loadingBar.stop();

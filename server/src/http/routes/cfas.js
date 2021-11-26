@@ -110,7 +110,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
           uai: cfaFound.uai_etablissement,
           sousEtablissements: sousEtablissements,
           adresse: cfaFound.etablissement_adresse,
-          url_tdb: cfaInReferentiel ? cfas.getUrlTdbFromAccessToken(cfaInReferentiel?.url_access_token) : null,
+          url_tdb: cfaInReferentiel ? cfaInReferentiel?.private_url : null,
         });
       }
     })
