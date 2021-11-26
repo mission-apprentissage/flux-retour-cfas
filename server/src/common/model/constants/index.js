@@ -168,6 +168,7 @@ const jobNames = {
   statutsCandidatsSanitizeEmptyStrings: "statutsCandidats-sanitize-empty-strings",
   statutsCandidatsRetrieveFormationsInCatalog: "statutsCandidats-retrieve-formation-in-catalog",
   createIndexes: "create-indexes",
+  createRcoStatutsCollection: "create-rco-statuts-collection",
   clearUsers: "clear-users",
   clearCfas: "clear-cfas",
   clearStatutsCandidats: "clear-statuts-candidats",

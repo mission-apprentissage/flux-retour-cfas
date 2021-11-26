@@ -72,6 +72,29 @@ const createRandomStatutCandidat = (params = {}) => {
   };
 };
 
+const createRandomRcoStatutCandidat = (params = {}) => {
+  const annee_scolaire = getRandomAnneeScolaire();
+  const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+
+  return {
+    statutCandidatId: faker.datatype.uuid(),
+    uai_etablissement: getRandomUaiEtablissement(),
+    nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
+    etablissement_formateur_code_commune_insee: faker.datatype.boolean() ? faker.address.zipCode() : null,
+    statut_apprenant: getRandomStatutApprenant(),
+    periode_formation: isPresent() ? periode_formation : null,
+    annee_formation: getRandomAnneeFormation(),
+    annee_scolaire,
+    code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
+    date_de_naissance_apprenant: faker.datatype.boolean() ? getRandomDateNaissance() : null,
+    contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
+    contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
+    formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
+
+    ...params,
+  };
+};
+
 // random statutCandidat shaped along our REST API schema
 const createRandomStatutCandidatApiInput = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
@@ -137,4 +160,5 @@ module.exports = {
   createRandomStatutsCandidatsApiInputList,
   getRandomSiretEtablissement,
   getRandomUaiEtablissement,
+  createRandomRcoStatutCandidat,
 };

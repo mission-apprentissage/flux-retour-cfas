@@ -22,4 +22,5 @@ module.exports = {
   Log: getModel("logs"),
   Stats: getModel("stats"),
   CroisementVoeuxAffelnet: getModel("croisementVoeuxAffelnet"),
+  RcoStatutCandidat: getModel("rcoStatutsCandidats"),
 };

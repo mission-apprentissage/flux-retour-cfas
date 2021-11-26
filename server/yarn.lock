@@ -3480,6 +3480,15 @@ oleoduc@0.5.9:
     duplexer3 "0.1.4"
     parallel-transform "1.2.0"
 
+oleoduc@0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/oleoduc/-/oleoduc-0.6.0.tgz#cdab4be5caae575b0cae5218a4a390a688603323"
+  integrity sha512-0jB/qzhhI+D1dYla2Wq9w9I6bOIGbjZbEfnLogG8tAZY3YwzYd5K06n05sqiESs50PHslhSm6RUAxIW+DJkSOw==
+  dependencies:
+    cyclist "1.0.1"
+    duplexer3 "0.1.4"
+    parallel-transform "1.2.0"
+
 on-finished@~2.3.0:
   version "2.3.0"
   resolved "https://registry.npmjs.org/on-finished/-/on-finished-2.3.0.tgz"
