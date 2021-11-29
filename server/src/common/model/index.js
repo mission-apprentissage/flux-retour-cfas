@@ -24,4 +24,5 @@ module.exports = {
   CroisementVoeuxAffelnet: getModel("croisementVoeuxAffelnet"),
   RcoStatutCandidat: getModel("rcoStatutsCandidats"),
   DemandeLienAcces: getModel("demandeLienAcces"),
+  DemandeBranchementErp: getModel("demandesBranchementErp"),
 };

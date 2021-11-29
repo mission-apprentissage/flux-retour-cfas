@@ -11,9 +11,24 @@ export const ERP_STATE_COLOR = {
 };
 
 export const ERPS = [
-  { name: "Gesti", state: ERP_STATE.ready },
-  { name: "Ymag", state: ERP_STATE.ready },
-  { name: "SC Form", state: ERP_STATE.ready },
+  {
+    name: "Gesti",
+    state: ERP_STATE.ready,
+    helpFilePath: "/erpsHelpFiles/tdb-tuto-gesti.pdf",
+    contactMail: "contact@gesti.fr",
+  },
+  {
+    name: "Ymag",
+    state: ERP_STATE.ready,
+    helpFilePath: "/erpsHelpFiles/tdb-tuto-ymag.pdf",
+    contactMail: "contact@ymag.fr",
+  },
+  {
+    name: "SC Form",
+    state: ERP_STATE.ready,
+    helpFilePath: "/erpsHelpFiles/tdb-tuto-scform.pdf",
+    contactMail: "contact@scform.fr",
+  },
   { name: "FCA Manager", state: ERP_STATE.ongoing },
   { name: "Hyperplanning", state: ERP_STATE.coming },
   { name: "Valsoftware", state: ERP_STATE.coming },

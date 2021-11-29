@@ -9,7 +9,7 @@ const Footer = () => (
     <Section borderTopWidth="2px" borderTopColor="bluefrance" background="white" paddingY="4w">
       <Flex justifyContent="space-between">
         <Box marginLeft="5w">
-          <Logo scale="1.5" />
+          <Logo scale={1.5} />
         </Box>
         <Box w="50%" marginRight="6w">
           <Stack fontSize="zeta" color="gray.600" spacing="3w">
