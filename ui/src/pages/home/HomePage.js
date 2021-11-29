@@ -38,13 +38,13 @@ const HomePage = () => {
         </Flex>
         <HStack spacing="3w" marginTop="6w">
           <LinkCard linkText="Accéder au tableau de bord" linkHref={navigationPages.Login.path}>
-            Vous êtes une <strong>Institution ou une organisation</strong>
+            Vous êtes une <strong>institution ou une organisation professionnelle </strong> (OPCO, branche, etc.)
           </LinkCard>
           <LinkCard
-            linkText="Transmettre et consulter vos données"
+            linkText="Autoriser la collecte de vos données et les consulter"
             linkHref={navigationPages.TransmettreEtConsulterVosDonnees.path}
           >
-            Vous êtes un <strong>organisme de formation</strong>
+            Vous êtes un <strong>organisme de formation en apprntissage</strong>
           </LinkCard>
         </HStack>
       </Section>
