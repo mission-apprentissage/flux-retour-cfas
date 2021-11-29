@@ -24,7 +24,7 @@ const TransmettreConsulterVosDonneesPage = () => {
           <LinkCard linkText="Consulter vos données" linkHref={navigationPages.ConsulterVosDonnees.path}>
             <strong>Vous autorisez déjà la collecte de vos données</strong> et leur affichage dans le tableau de bord
           </LinkCard>
-          <LinkCard linkText="Transmettre vos données" linkHref={navigationPages.TransmettreVosDonnees.path}>
+          <LinkCard linkText="Autoriser la collecte" linkHref={navigationPages.TransmettreVosDonnees.path}>
             <strong>Vous n&apos;autorisez pas encore la collecte de vos données</strong> et leur affichage dans le
             tableau de bord
           </LinkCard>
