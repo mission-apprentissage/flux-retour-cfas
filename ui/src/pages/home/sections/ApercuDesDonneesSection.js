@@ -2,8 +2,8 @@ import { Box, Divider, Flex, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Badge, Section } from "../../common/components";
-import { ERP_STATE_COLOR, ERPS } from "../../common/constants/erps";
+import { Badge, Section } from "../../../common/components";
+import { ERP_STATE_COLOR, ERPS } from "../../../common/constants/erps";
 
 const Count = ({ count, label }) => {
   return (

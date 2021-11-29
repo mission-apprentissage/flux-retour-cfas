@@ -1,6 +1,7 @@
 import { Box, Flex, HStack, Link, Stack, StackDivider, Text } from "@chakra-ui/react";
 import React from "react";
 
+import { navigationPages } from "../../constants/navigationPages";
 import { Logo } from "..";
 import Section from "../Section/Section";
 
@@ -40,7 +41,7 @@ const Footer = () => (
         <Link href="#">Plan du site</Link>
         <Link href="#">Accessibilité</Link>
         <Link href="#">Mentions légales</Link>
-        <Link href="#">Données personnelles</Link>
+        <Link href={navigationPages.DonneesPersonnelles.path}>Données personnelles</Link>
         <Link href="#">Gestion des cookies</Link>
       </HStack>
       <Text marginTop="3w">

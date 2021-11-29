@@ -27,6 +27,15 @@ export const navigationPages = {
     path: "/consulter-vos-donnees",
     title: "Consulter vos données",
   },
+  DonneesPersonnelles: {
+    path: "/donnees-personnelles",
+    anchors: {
+      missionInteretPublic: "mission-interet-public",
+      faciliterPilotage: "faciliter-pilotage-operationnel",
+      minimisationDonnees: "minimisation-donnees",
+    },
+    title: "Protection des données à caractère personnel",
+  },
   Cfa: {
     path: "/cfa",
     title: "Cfa",

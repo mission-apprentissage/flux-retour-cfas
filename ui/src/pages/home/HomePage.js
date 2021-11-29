@@ -1,14 +1,15 @@
-import { Flex, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, Text } from "@chakra-ui/react";
 import React from "react";
 import { Redirect } from "react-router";
+import { NavLink } from "react-router-dom";
 
 import { Footer, LinkCard, Logo, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { navigationPages } from "../../common/constants/navigationPages";
 import useAuth from "../../common/hooks/useAuth";
-import ApercuDesDonneesSection from "./ApercuDesDonneesSection";
 import dashboardIllustration from "./dashboard-illustration.svg";
-import RgpdSection from "./RgpdSection";
+import ApercuDesDonneesSection from "./sections/ApercuDesDonneesSection";
+import RgpdSection from "./sections/RgpdSection";
 
 const HomePage = () => {
   const [auth] = useAuth();
@@ -49,9 +50,14 @@ const HomePage = () => {
       </Section>
 
       <ApercuDesDonneesSection />
+      <RgpdSection marginTop="6w" />
 
-      <RgpdSection />
-
+      <Section paddingY="4w">
+        <Flex alignItems="center">
+          <Box as="i" paddingRight="1w" className="ri-arrow-right-line" />
+          <NavLink to={navigationPages.DonneesPersonnelles.path}>en savoir plus</NavLink>
+        </Flex>
+      </Section>
       <ContactSection />
       <Footer />
     </>
