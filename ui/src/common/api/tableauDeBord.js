@@ -8,3 +8,33 @@ export const fetchEffectifs = (filters) => {
   const url = `/api/dashboard/effectifs?${queryParameters}`;
   return _get(url);
 };
+
+export const fetchEffectifsParCfa = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-cfa?${queryParameters}`;
+  return _get(url);
+};
+
+export const fetchEffectifsParFormation = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-formation?${queryParameters}`;
+  return _get(url);
+};
+
+export const fetchEffectifsParNiveauFormation = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-niveau-formation?${queryParameters}`;
+  return _get(url);
+};
+
+export const fetchEffectifsParAnneeFormation = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-annee-formation?${queryParameters}`;
+  return _get(url);
+};
+
+export const fetchEffectifsParDepartement = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/dashboard/effectifs-par-departement?${queryParameters}`;
+  return _get(url);
+};
