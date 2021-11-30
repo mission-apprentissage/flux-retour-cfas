@@ -26,7 +26,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
 
   if (effectifs && !loading) {
     content = (
-      <HStack spacing="2w">
+      <HStack spacing="2w" alignItems="stretch">
         <EffectifCard
           count={effectifs.apprentis.count}
           label={pluralize("apprenti", effectifs.apprentis.count)}
