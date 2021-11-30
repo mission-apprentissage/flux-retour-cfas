@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, Tag, Text } from "@chakra-ui/react";
 import React from "react";
 import { Redirect } from "react-router";
 import { NavLink } from "react-router-dom";
@@ -26,6 +26,9 @@ const HomePage = () => {
       <Section paddingY="4w">
         <Flex>
           <div>
+            <Tag marginBottom="1w" bgColor="bluefrance" color="white">
+              beta
+            </Tag>
             <Heading as="h1" fontSize="40px">
               Le tableau de bord de l&apos;apprentissage
             </Heading>
@@ -36,15 +39,15 @@ const HomePage = () => {
           </div>
           <img src={dashboardIllustration} alt="illustration tableau de bord" />
         </Flex>
-        <HStack spacing="3w" marginTop="6w">
+        <HStack spacing="3w" marginTop="6w" alignItems="stretch">
           <LinkCard linkText="Accéder au tableau de bord" linkHref={navigationPages.Login.path}>
-            Vous êtes une <strong>institution ou une organisation professionnelle </strong> (OPCO, branche, etc.)
+            Vous êtes une <strong>Institution ou une organisation professionnelle</strong> (OPCO, branche, etc.)
           </LinkCard>
           <LinkCard
             linkText="Autoriser la collecte de vos données et les consulter"
             linkHref={navigationPages.TransmettreEtConsulterVosDonnees.path}
           >
-            Vous êtes un <strong>organisme de formation en apprntissage</strong>
+            Vous êtes un <strong>organisme de formation en apprentissage</strong>
           </LinkCard>
         </HStack>
       </Section>

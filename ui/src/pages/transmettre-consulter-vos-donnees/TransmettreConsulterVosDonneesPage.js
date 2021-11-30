@@ -1,7 +1,7 @@
 import { Box, Heading, HStack, List, ListItem, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { AppHeader, Badge, BreadcrumbNav, Footer, LinkCard, Section } from "../../common/components";
+import { Badge, BreadcrumbNav, Footer, Header, LinkCard, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { ERP_STATE_COLOR, ERPS } from "../../common/constants/erps";
 import { navigationPages } from "../../common/constants/navigationPages";
@@ -10,7 +10,7 @@ import AcquisitionCfaBarGraph from "./AcquisitionCfaBarGraph";
 const TransmettreConsulterVosDonneesPage = () => {
   return (
     <>
-      <AppHeader />
+      <Header />
 
       <Section paddingY="4w" background="galt" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
         <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.TransmettreEtConsulterVosDonnees]} />

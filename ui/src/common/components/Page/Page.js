@@ -3,13 +3,13 @@ import React from "react";
 
 import { Footer } from "..";
 import ContactSection from "../ContactSection/ContactSection";
-import AppHeader from "./AppHeader";
+import Header from "./Header";
 import NavBar from "./NavBar";
 
 const Page = ({ children }) => {
   return (
     <>
-      <AppHeader />
+      <Header />
       <NavBar />
       {children}
       <ContactSection />

@@ -16,7 +16,7 @@ export { default as InfoModal } from "./Modal/InfoModal";
 export { default as EffectifCard } from "./EffectifCard/EffectifCard";
 
 export { default as Page } from "./Page/Page";
-export { default as AppHeader } from "./Page/AppHeader";
+export { default as Header } from "./Page/Header";
 export { default as Footer } from "./Page/Footer";
 export { default as Logo } from "./Logo/Logo";
 export { default as Section } from "./Section/Section";

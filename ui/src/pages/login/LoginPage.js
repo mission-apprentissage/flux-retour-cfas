@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 
-import { AppHeader, BreadcrumbNav, Footer, Section } from "../../common/components";
+import { BreadcrumbNav, Footer, Header, Section } from "../../common/components";
 import { navigationPages } from "../../common/constants/navigationPages";
 import useAuth from "../../common/hooks/useAuth";
 import { _post } from "../../common/httpClient";
@@ -26,7 +26,7 @@ const LoginPage = ({ history }) => {
 
   return (
     <>
-      <AppHeader />
+      <Header />
       <Section background="galt" withShadow paddingY="3w">
         <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.Login]} />
         <HStack justifyContent="space-between" spacing="8w" marginTop="5w" alignItems="flex-start">

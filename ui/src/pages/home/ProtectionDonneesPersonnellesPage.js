@@ -1,7 +1,7 @@
 import { Box, Divider, Flex, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { AppHeader, BreadcrumbNav, ContactSection, Footer, Section } from "../../common/components";
+import { BreadcrumbNav, ContactSection, Footer, Header, Section } from "../../common/components";
 import { navigationPages } from "../../common/constants/navigationPages";
 import RgpdSection from "./sections/RgpdSection";
 
@@ -10,7 +10,7 @@ const currentPage = navigationPages.DonneesPersonnelles;
 const ProtectionDonneesPersonnellesPage = () => {
   return (
     <>
-      <AppHeader />
+      <Header />
       <Section paddingY="4w">
         <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.DonneesPersonnelles]} />
       </Section>

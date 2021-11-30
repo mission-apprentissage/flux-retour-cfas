@@ -20,10 +20,18 @@ const Footer = () => (
               dolore magna aliqua.
             </Text>
             <HStack spacing="3w" fontWeight="700">
-              <Link href="#">legifrance.gouv.fr</Link>
-              <Link href="#">gouvernement.fr</Link>
-              <Link href="#">service-public.fr</Link>
-              <Link href="#">data.gouv.fr</Link>
+              <Link target="_blank" href="https://www.legifrance.gouv.fr/">
+                legifrance.gouv.fr
+              </Link>
+              <Link target="_blank" href="https://www.gouvernement.fr/">
+                gouvernement.fr
+              </Link>
+              <Link target="_blank" href="https://www.service-public.fr/">
+                service-public.fr
+              </Link>
+              <Link target="_blank" href="https://www.data.gouv.fr/fr/">
+                data.gouv.fr
+              </Link>
             </HStack>
           </Stack>
         </Box>
