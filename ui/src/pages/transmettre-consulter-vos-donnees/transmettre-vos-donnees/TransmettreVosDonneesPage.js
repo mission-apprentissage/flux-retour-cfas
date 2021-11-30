@@ -1,7 +1,7 @@
 import { Box, Heading, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { AppHeader, Footer, Section } from "../../../common/components";
+import { Footer, Header, Section } from "../../../common/components";
 import BreadcrumbNav from "../../../common/components/BreadcrumbNav/BreadcrumbNav";
 import { navigationPages } from "../../../common/constants/navigationPages";
 import DemandeBranchementErpForm from "./TransmettreVosDonneesForm/DemandeBranchementErpForm";
@@ -9,7 +9,7 @@ import DemandeBranchementErpForm from "./TransmettreVosDonneesForm/DemandeBranch
 const TransmettreVosDonneesPage = () => {
   return (
     <>
-      <AppHeader />
+      <Header />
       <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
         <Box width="50%">
           <BreadcrumbNav
