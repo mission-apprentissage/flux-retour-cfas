@@ -44,7 +44,7 @@ const HomePage = () => {
             Vous êtes une <strong>Institution ou une organisation professionnelle</strong> (OPCO, branche, etc.)
           </LinkCard>
           <LinkCard
-            linkText="Autoriser la collecte de vos données et les consulter"
+            linkText="Transmettre et consulter vos données"
             linkHref={navigationPages.TransmettreEtConsulterVosDonnees.path}
           >
             Vous êtes un <strong>organisme de formation en apprentissage</strong>
