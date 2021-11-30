@@ -11,6 +11,7 @@ const cfaDataFeedbackComponent = require("./cfaDataFeedback");
 const demandeAccesComponent = require("./demandeAcces");
 const demandeLienAccesComponent = require("./demandeLienAcces");
 const demandeBranchementErpComponent = require("./demandeBranchementErp");
+const createCacheComponent = require("./cache");
 
 module.exports = async (options = {}) => {
   const users = options.users || (await createUsers());
@@ -25,6 +26,7 @@ module.exports = async (options = {}) => {
   const dashboard = options.dashboard || createDashboard();
   const demandeLienAcces = options.demandeLienAcces || demandeLienAccesComponent();
   const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
+  const cache = createCacheComponent(options.redisClient);
 
   return {
     users,
@@ -32,6 +34,7 @@ module.exports = async (options = {}) => {
     jobEvents,
     demandeAcces,
     demandeBranchementErp,
+    cache,
     db: options.db || (await connectToMongo()).db,
     statutsCandidats,
     cfaDataFeedback,

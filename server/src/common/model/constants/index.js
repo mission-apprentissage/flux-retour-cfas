@@ -137,6 +137,7 @@ const jobNames = {
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
   cfasCroisementDeca: "cfas-croisement-cfas-deca",
   calculateStats: "calculate-stats",
+  warmUpCache: "warm-up-cache",
 };
 
 /**

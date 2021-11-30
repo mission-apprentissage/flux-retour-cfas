@@ -86,4 +86,7 @@ module.exports = {
     region: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_REGION").required().asString(),
     containerName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").required().asString(),
   },
+  redis: {
+    uri: env.get("FLUX_RETOUR_CFAS_REDIS_URI").required().asString(),
+  },
 };
