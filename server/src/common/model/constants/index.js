@@ -68,52 +68,6 @@ const reseauxCfas = {
 };
 
 /**
- * Liste des régions déployées
- */
-const REGIONS_DEPLOYEES = [
-  {
-    nom: "Normandie",
-    code: "28",
-  },
-  {
-    nom: "Centre-Val de Loire",
-    code: "24",
-  },
-  {
-    nom: "Auvergne-Rhône-Alpes",
-    code: "84",
-  },
-  {
-    nom: "Bretagne",
-    code: "53",
-  },
-  {
-    nom: "Pays de la Loire",
-    code: "52",
-  },
-  {
-    nom: "Hauts-de-France",
-    code: "32",
-  },
-  {
-    nom: "Île-de-France",
-    code: "11",
-  },
-  {
-    nom: "Occitanie",
-    code: "76",
-  },
-  {
-    nom: "Grand Est",
-    code: "44",
-  },
-  {
-    nom: "Nouvelle-Aquitaine",
-    code: "75",
-  },
-];
-
-/**
  * Noms des ERPs
  */
 const erps = {
@@ -243,16 +197,91 @@ const jobEventActions = {
   ended: "ended",
 };
 
+const regions = [
+  {
+    nom: "Guadeloupe",
+    code: "01",
+  },
+  {
+    nom: "Martinique",
+    code: "02",
+  },
+  {
+    nom: "Guyane",
+    code: "03",
+  },
+  {
+    nom: "La Réunion",
+    code: "04",
+  },
+  {
+    nom: "Mayotte",
+    code: "06",
+  },
+  {
+    nom: "Île-de-France",
+    code: "11",
+  },
+  {
+    nom: "Centre-Val de Loire",
+    code: "24",
+  },
+  {
+    nom: "Bourgogne-Franche-Comté",
+    code: "27",
+  },
+  {
+    nom: "Normandie",
+    code: "28",
+  },
+  {
+    nom: "Hauts-de-France",
+    code: "32",
+  },
+  {
+    nom: "Grand Est",
+    code: "44",
+  },
+  {
+    nom: "Pays de la Loire",
+    code: "52",
+  },
+  {
+    nom: "Bretagne",
+    code: "53",
+  },
+  {
+    nom: "Nouvelle-Aquitaine",
+    code: "75",
+  },
+  {
+    nom: "Occitanie",
+    code: "76",
+  },
+  {
+    nom: "Auvergne-Rhône-Alpes",
+    code: "84",
+  },
+  {
+    nom: "Provence-Alpes-Côte d'Azur",
+    code: "93",
+  },
+  {
+    nom: "Corse",
+    code: "94",
+  },
+];
+
 module.exports = {
   codesStatutsCandidats,
   codesStatutsMajStatutCandidats,
   reseauxCfas,
-  REGIONS_DEPLOYEES,
   jobNames,
   erps,
   duplicatesTypesCodes,
   statsTypes,
   dataSource,
+  regions,
   statutsCandidatsStringFields,
   jobEventStatuts: jobEventActions,
 };
