@@ -8,7 +8,6 @@ import {
   Input,
   ModalBody,
   ModalFooter,
-  ModalHeader,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -17,7 +16,6 @@ import PropTypes from "prop-types";
 import React from "react";
 import * as Yup from "yup";
 
-import ModalClosingButton from "../../../../common/components/ModalClosingButton/ModalClosingButton";
 import { uaiRegex } from "../../../../common/domain/uai";
 import withSubmitAccessLinkDemand, { SUBMIT_STATE } from "./withSubmitAccessLinkDemand";
 
@@ -25,51 +23,33 @@ const formInitialValues = { nom_organisme: "", uai_organisme: "", code_postal_or
 
 const SuccessMessage = () => {
   return (
-    <>
-      <ModalHeader paddingX="8w" fontWeight="700" color="grey.800" fontSize="alpha" textAlign="left">
-        <Flex marginTop="5w" alignItems="center">
-          <Box as="i" className="ri-arrow-right-line" />
-          <Text paddingLeft="2w">Demander votre lien d&apos;accès</Text>
+    <ModalBody paddingX="8w" marginBottom="5w">
+      <Stack paddingX="4w" paddingY="3w" borderWidth="1px" borderColor="bluefrance" spacing="1w">
+        <Flex fontWeight="700" fontSize="beta" color="grey.800" alignItems="center">
+          <Box as="i" fontSize="alpha" textColor="bluefrance" className="ri-checkbox-circle-fill" />
+          <Text paddingLeft="2w">Votre demande a bien été envoyée !</Text>
         </Flex>
-      </ModalHeader>
-      <ModalClosingButton />
-      <ModalBody paddingX="8w" marginBottom="5w">
-        <Stack paddingX="4w" paddingY="3w" borderWidth="1px" borderColor="bluefrance" spacing="1w">
-          <Flex fontWeight="700" fontSize="beta" color="grey.800" alignItems="center">
-            <Box as="i" fontSize="alpha" textColor="bluefrance" className="ri-checkbox-circle-fill" />
-            <Text paddingLeft="2w">Votre demande a bien été envoyée !</Text>
-          </Flex>
-          <Text textAlign="center" color="grey.800">
-            Vous recevrez votre lien d&apos;accès par mail sous 72h
-          </Text>
-        </Stack>
-      </ModalBody>
-    </>
+        <Text textAlign="center" color="grey.800">
+          Vous recevrez votre lien d&apos;accès par mail sous 72h
+        </Text>
+      </Stack>
+    </ModalBody>
   );
 };
 
 const ErrorMessage = () => {
   return (
-    <>
-      <ModalHeader paddingX="8w" fontWeight="700" color="grey.800" fontSize="alpha" textAlign="left">
-        <Flex marginTop="5w" alignItems="center">
-          <Box as="i" className="ri-arrow-right-line" />
-          <Text paddingLeft="2w">Demander votre lien d&apos;accès</Text>
+    <ModalBody paddingX="8w" marginBottom="5w">
+      <Stack paddingX="4w" paddingY="3w" borderWidth="1px" borderColor="bluefrance" spacing="1w">
+        <Flex fontWeight="700" fontSize="beta" color="grey.800" alignItems="center">
+          <Box as="i" fontSize="alpha" textColor="bluefrance" className="ri-checkbox-circle-fill" />
+          <Text paddingLeft="2w">Nous avons rencontré une erreur lors de la soumission de votre demande.</Text>
         </Flex>
-      </ModalHeader>
-      <ModalClosingButton />
-      <ModalBody paddingX="8w" marginBottom="5w">
-        <Stack paddingX="4w" paddingY="3w" borderWidth="1px" borderColor="bluefrance" spacing="1w">
-          <Flex fontWeight="700" fontSize="beta" color="grey.800" alignItems="center">
-            <Box as="i" fontSize="alpha" textColor="bluefrance" className="ri-checkbox-circle-fill" />
-            <Text paddingLeft="2w">Nous avons rencontré une erreur lors de la soumission de votre demande.</Text>
-          </Flex>
-          <Text textAlign="center" color="grey.800">
-            Merci de réessayer ultérieurement.
-          </Text>
-        </Stack>
-      </ModalBody>
-    </>
+        <Text textAlign="center" color="grey.800">
+          Merci de réessayer ultérieurement.
+        </Text>
+      </Stack>
+    </ModalBody>
   );
 };
 
@@ -97,13 +77,6 @@ const AskAccessLinkModalContent = ({ onClose, sendAccessLinkDemand, submitState 
     >
       {({ isSubmitting }) => (
         <Form>
-          <ModalHeader paddingX="8w" fontWeight="700" color="grey.800" fontSize="alpha" textAlign="left">
-            <Flex marginTop="5w" alignItems="center">
-              <Box as="i" className="ri-arrow-right-line" />
-              <Text paddingLeft="2w">Demander votre lien d&apos;accès</Text>
-            </Flex>
-          </ModalHeader>
-          <ModalClosingButton marginY="5w" />
           <ModalBody paddingX="8w" marginBottom="5w">
             <Stack paddingX="4w" paddingY="5w" borderWidth="1px" borderColor="bluefrance" spacing="4w">
               <Field name="nom_organisme">

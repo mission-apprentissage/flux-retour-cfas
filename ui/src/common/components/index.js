@@ -11,8 +11,6 @@ export { default as FilterOption } from "./FilterOption/FilterOption";
 export { default as Tag } from "./Tag/Tag";
 export { default as LinkCard } from "./LinkCard/LinkCard";
 
-export { default as InfoModal } from "./Modal/InfoModal";
-
 export { default as EffectifCard } from "./EffectifCard/EffectifCard";
 
 export { default as Page } from "./Page/Page";

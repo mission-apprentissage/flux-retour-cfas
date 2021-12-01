@@ -5,9 +5,7 @@ import {
   FormLabel,
   Input,
   ModalBody,
-  ModalCloseButton,
   ModalFooter,
-  ModalHeader,
   Stack,
   Text,
   Textarea,
@@ -23,33 +21,21 @@ const formInitialValues = { email: "", details: "" };
 
 const SuccessMessage = () => {
   return (
-    <>
-      <ModalHeader marginY="2w" fontWeight="400" fontSize="beta" textAlign="center">
-        Merci !
-      </ModalHeader>
-      <ModalCloseButton />
-      <ModalBody paddingX="8w" marginBottom="5w">
-        <Text textAlign="center" color="grey.800">
-          Nous avons bien pris en compte votre retour.
-        </Text>
-      </ModalBody>
-    </>
+    <ModalBody paddingX="8w" marginBottom="5w">
+      <Text textAlign="center" color="grey.800">
+        Nous avons bien pris en compte votre retour.
+      </Text>
+    </ModalBody>
   );
 };
 
 const ErrorMessage = () => {
   return (
-    <>
-      <ModalHeader marginY="2w" fontWeight="400" fontSize="beta" textAlign="center">
-        Erreur
-      </ModalHeader>
-      <ModalCloseButton />
-      <ModalBody paddingX="8w" marginBottom="5w">
-        <Text textAlign="center" color="grey.800">
-          Nous avons rencontré une erreur lors de la soumission de votre signalement. Merci de réessayer.
-        </Text>
-      </ModalBody>
-    </>
+    <ModalBody paddingX="8w" marginBottom="5w">
+      <Text textAlign="center" color="grey.800">
+        Nous avons rencontré une erreur lors de la soumission de votre signalement. Merci de réessayer.
+      </Text>
+    </ModalBody>
   );
 };
 
@@ -73,10 +59,6 @@ const DataFeedbackModalContent = ({ onClose, sendDataFeedback, submitState }) =>
     >
       {({ isSubmitting }) => (
         <Form>
-          <ModalHeader marginY="2w" fontWeight="700" color="grey.800" fontSize="alpha" textAlign="center">
-            Signaler une anomalie
-          </ModalHeader>
-          <ModalCloseButton />
           <ModalBody paddingX="8w" marginBottom="5w">
             <Stack spacing="4w">
               <Field name="email">
