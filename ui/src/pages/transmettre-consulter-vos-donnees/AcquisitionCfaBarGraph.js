@@ -23,20 +23,21 @@ const AcquisitionCfaBarGraph = () => {
       data={data}
       indexBy="month"
       keys={["Nombre d'organismes"]}
-      margin={{ top: 0, right: 0, bottom: 32, left: 16 }}
+      margin={{ top: 16, right: 0, bottom: 32, left: 56 }}
       colors="#6A94F8"
       padding={0.4}
       enableGridY={false}
-      axisBottom={{ tickSize: 0, tickPadding: 16 }}
+      axisBottom={{ tickSize: 0, tickPadding: 12 }}
       axisLeft={{
         legend: "Nombre d'organismes",
-        legendPosition: "start",
-        legendOffset: -10,
-        renderTick: () => null,
+        legendPosition: "middle",
+        legendOffset: -48,
+        tickSize: 0,
+        tickPadding: 0,
       }}
       axisTop={null}
       axisRight={null}
-      enableLabel
+      enableLabel={false}
       theme={{
         fontFamily: "Marianne",
         textColor: "#1E1E1E",
