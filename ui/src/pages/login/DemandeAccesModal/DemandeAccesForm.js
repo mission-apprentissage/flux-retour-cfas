@@ -49,9 +49,9 @@ const PROFIL_OPTIONS = [
   "Conseil régional",
   "Académie",
   "Carif-Oref",
-  "Autre acteur régional",
   "Opco",
   "Réseau",
+  "Autre acteur régional",
 ];
 
 const DemandeAccesForm = ({ onSubmit, onClose }) => {
