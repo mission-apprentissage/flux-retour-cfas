@@ -6,35 +6,26 @@ import { Logo } from "..";
 import Section from "../Section/Section";
 
 const Footer = () => (
-  <>
+  <footer>
     <Section borderTopWidth="2px" borderTopColor="bluefrance" background="white" paddingY="4w">
-      <Flex justifyContent="space-between">
-        <Box marginLeft="5w">
-          <Logo scale={1.5} />
-        </Box>
-        <Box w="50%" marginRight="6w">
-          <Stack fontSize="zeta" color="gray.600" spacing="3w">
-            <Text>Texte optionnel 3 lignes maximum.</Text>
-            <Text>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-              dolore magna aliqua.
-            </Text>
-            <HStack spacing="3w" fontWeight="700">
-              <Link target="_blank" href="https://www.legifrance.gouv.fr/">
-                legifrance.gouv.fr
-              </Link>
-              <Link target="_blank" href="https://www.gouvernement.fr/">
-                gouvernement.fr
-              </Link>
-              <Link target="_blank" href="https://www.service-public.fr/">
-                service-public.fr
-              </Link>
-              <Link target="_blank" href="https://www.data.gouv.fr/fr/">
-                data.gouv.fr
-              </Link>
-            </HStack>
-          </Stack>
-        </Box>
+      <Flex justifyContent="space-between" paddingX="5w">
+        <Logo scale={1.5} />
+        <Stack fontSize="zeta" color="gray.600" spacing="3w">
+          <HStack spacing="3w" fontWeight="700">
+            <Link target="_blank" href="https://www.legifrance.gouv.fr/">
+              legifrance.gouv.fr
+            </Link>
+            <Link target="_blank" href="https://www.gouvernement.fr/">
+              gouvernement.fr
+            </Link>
+            <Link target="_blank" href="https://www.service-public.fr/">
+              service-public.fr
+            </Link>
+            <Link target="_blank" href="https://www.data.gouv.fr/fr/">
+              data.gouv.fr
+            </Link>
+          </HStack>
+        </Stack>
       </Flex>
     </Section>
     <Section
@@ -47,7 +38,7 @@ const Footer = () => (
     >
       <HStack divider={<StackDivider borderColor="gray.200" />} spacing="3w">
         <Link href="#">Plan du site</Link>
-        <Link href="#">Accessibilité</Link>
+        <Link href="#">Accessibilité : Non conforme</Link>
         <Link href="#">Mentions légales</Link>
         <Link href={navigationPages.DonneesPersonnelles.path}>Données personnelles</Link>
         <Link href="#">Gestion des cookies</Link>
@@ -62,7 +53,7 @@ const Footer = () => (
         </Link>
       </Text>
     </Section>
-  </>
+  </footer>
 );
 
 export default Footer;
