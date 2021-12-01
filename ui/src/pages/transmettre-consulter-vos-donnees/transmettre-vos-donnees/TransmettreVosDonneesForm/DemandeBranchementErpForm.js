@@ -133,7 +133,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                   logiciel de gestion.
                 </Text>
               </Stack>
-              <Link href={ERPS[values.erpIndex].helpFilePath}>
+              <Link target="_blank" href={ERPS[values.erpIndex].helpFilePath}>
                 <Button leftIcon={<Box as="i" className="ri-download-line" />} variant="primary">
                   Télécharger le pas à pas
                 </Button>
@@ -184,7 +184,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                 <Field name="uai_organisme">
                   {({ field, meta }) => (
                     <FormControl isRequired isInvalid={meta.error && meta.touched}>
-                      <FormLabel color="grey.800">UAI de l&apos;organisme</FormLabel>
+                      <FormLabel color="grey.800">UAI formateur de l&apos;organisme</FormLabel>
                       <Input {...field} id={field.name} placeholder="Ex : 0011171T" />
                       <FormErrorMessage>{meta.error}</FormErrorMessage>
                     </FormControl>
@@ -214,11 +214,11 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                 <Text color="grey.800">
                   <strong>L&apos;interfaçage du tableau de bord avec cet ERP n’a pas encore démarré.</strong>
                   Nous vous invitons à lui faire part de votre besoin de transmettre vos données au Tableau de bord de
-                  l&apos;apprentissage afin d&apos;accélérer leur mise en oeuvre.
+                  l&apos;apprentissage.
                 </Text>
               </Stack>
               <Text marginTop="2w" color="grey.800" fontWeight="700">
-                Merci de nous communiquer les informations sur votre organisme pour nous aider à prioriser nos travaux :
+                Merci de nous communiquer les informations sur votre organisme :
               </Text>
               <Stack paddingY="3w" spacing="4w">
                 <Field name="nom_organisme">
@@ -233,7 +233,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                 <Field name="uai_organisme">
                   {({ field, meta }) => (
                     <FormControl isRequired isInvalid={meta.error && meta.touched}>
-                      <FormLabel color="grey.800">UAI de l&apos;organisme</FormLabel>
+                      <FormLabel color="grey.800">UAI formateur de l&apos;organisme</FormLabel>
                       <Input {...field} id={field.name} placeholder="Ex : 0011171T" />
                       <FormErrorMessage>{meta.error}</FormErrorMessage>
                     </FormControl>

@@ -41,7 +41,7 @@ const HomePage = () => {
         </Flex>
         <HStack spacing="3w" marginTop="6w" alignItems="stretch">
           <LinkCard linkText="Accéder au tableau de bord" linkHref={navigationPages.Login.path}>
-            Vous êtes une <strong>Institution ou une organisation professionnelle</strong> (OPCO, branche, etc.)
+            Vous êtes une <strong>Institution ou une organisation professionnelle</strong> (OPCO, branche, etc...)
           </LinkCard>
           <LinkCard
             linkText="Transmettre et consulter vos données"

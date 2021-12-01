@@ -15,7 +15,7 @@ const ContactSection = () => {
         <Text color="grey.800">
           Le service Tableau de bord de l’apprentissage est porté par la Mission interministérielle pour
           l’apprentissage. Vous avez besoin d’en savoir plus sur les données collectées, les différents types d’accès
-          aux données, etc. contacter l’équipe&nbsp;:&nbsp;
+          aux données, etc... Contacter l’équipe&nbsp;:&nbsp;
           <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
             {CONTACT_ADDRESS}
           </Link>

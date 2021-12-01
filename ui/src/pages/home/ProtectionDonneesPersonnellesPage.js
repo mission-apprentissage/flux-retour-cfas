@@ -37,7 +37,7 @@ const ProtectionDonneesPersonnellesPage = () => {
                 <li>Le consentement des personnes ;</li>
                 <li>Une obligation légale ;</li>
                 <li>L’existence d’un contrat ;</li>
-                <li>Une mission d’intérêt public, etc</li>
+                <li>Une mission d’intérêt public, etc...</li>
               </ul>
             </Text>
             <Text paddingY="2w" fontSize="epsilon" color="grey.800">
@@ -81,10 +81,10 @@ const ProtectionDonneesPersonnellesPage = () => {
             <Text paddingLeft="2w" fontSize="epsilon" color="grey.800">
               <ul>
                 <li>
-                  <strong>Avoir une tendance de l’évolution</strong> du nombre d’apprentis ;
+                  <strong>D&apos;avoir une tendance de l’évolution</strong> du nombre d’apprentis ;
                 </li>
                 <li>
-                  <strong>Dénombrer et identifier les CFAs</strong> dans lesquels des jeunes sont en recherche de
+                  <strong>De dénombrer et identifier les CFAs</strong> dans lesquels des jeunes sont en recherche de
                   contrat ou en risque de décrochage ;
                 </li>
                 <li>
