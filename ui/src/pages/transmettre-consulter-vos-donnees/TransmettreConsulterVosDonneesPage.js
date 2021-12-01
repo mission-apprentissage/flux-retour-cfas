@@ -22,10 +22,14 @@ const TransmettreConsulterVosDonneesPage = () => {
         </Text>
         <HStack spacing="3w" marginTop="2w" alignItems="stretch">
           <LinkCard linkText="Consulter vos données" linkHref={navigationPages.ConsulterVosDonnees.path}>
-            <strong>Vous transmettez déjà vos données</strong> au tableau de bord
+            <strong>Vous transmettez déjà vos données</strong> au tableau
+            <br />
+            de bord
           </LinkCard>
           <LinkCard linkText="Transmettre vos données" linkHref={navigationPages.TransmettreVosDonnees.path}>
-            <strong>Vous ne transmettez pas encore vos données</strong> au tableau de bord
+            <strong>Vous ne transmettez pas encore vos données</strong>
+            <br />
+            au tableau de bord
           </LinkCard>
         </HStack>
       </Section>
