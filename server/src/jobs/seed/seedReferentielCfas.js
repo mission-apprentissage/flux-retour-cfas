@@ -9,7 +9,8 @@ const { Cfa, StatutCandidat } = require("../../common/model");
 const { jobNames, reseauxCfas, erps } = require("../../common/model/constants/");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
-const { sleep } = require("../../common/utils/miscUtils");
+const { sleep, generatePassword } = require("../../common/utils/miscUtils");
+const config = require("../../../config");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -78,6 +79,8 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
  * @param {*} statutForCfa
  */
 const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
+  const accessToken = generatePassword();
+
   await new Cfa({
     uai: statutForCfa.uai_etablissement,
     sirets: allSirets,
@@ -88,6 +91,8 @@ const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
     erps: [statutForCfa.source],
     region_nom: statutForCfa.etablissement_nom_region,
     region_num: statutForCfa.etablissement_num_region,
+    access_token: accessToken,
+    private_url: `${config.publicUrl}/cfas/${accessToken}`,
     first_transmission_date: await cfas.getCfaFirstTransmissionDateFromUai(statutForCfa.uai_etablissement),
   }).save();
 };
@@ -206,6 +211,8 @@ const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau, nomF
  * @param {*} nomFichier
  */
 const addCfaFromNetwork = async (currentCfa, nomReseau, nomFichier) => {
+  const accessToken = generatePassword();
+
   // Add cfa in référentiel
   const cfaToAdd = new Cfa({
     nom: currentCfa.nom?.trim(),
@@ -217,6 +224,8 @@ const addCfaFromNetwork = async (currentCfa, nomReseau, nomFichier) => {
     telephone: currentCfa.telephone ?? null,
     reseaux: [nomReseau],
     fichiers_reference: [`${nomFichier}.csv`],
+    access_token: accessToken,
+    private_url: `${config.publicUrl}/cfas/${accessToken}`,
     source_seed_cfa: "NetworkFile",
   });
 
