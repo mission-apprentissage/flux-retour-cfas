@@ -4,7 +4,15 @@ import React from "react";
 
 const Badge = ({ children, backgroundColor }) => {
   return (
-    <Box as="legend" fontSize="omega" padding="1v" fontWeight="700" backgroundColor={backgroundColor} color="white">
+    <Box
+      as="legend"
+      fontSize="omega"
+      paddingX="1v"
+      paddingY="2px"
+      fontWeight="700"
+      backgroundColor={backgroundColor}
+      color="white"
+    >
       {children}
     </Box>
   );

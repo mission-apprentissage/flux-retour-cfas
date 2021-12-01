@@ -11,7 +11,7 @@ const RgpdCard = ({ legend, text, backgroundColor, href }) => {
   return (
     <Link style={{ textDecoration: "none" }} href={href}>
       <Box backgroundColor={backgroundColor} w="400px" paddingX="4w" paddingY="3w" height="180px">
-        <Box as="legend" fontSize="epsilon" padding="1w" backgroundColor="white" color={backgroundColor}>
+        <Box as="legend" fontSize="epsilon" paddingY="1w" paddingX="3v" backgroundColor="white" color={backgroundColor}>
           {legend}
         </Box>
         <Text fontSize="gamma" color="white" marginTop="2w">
