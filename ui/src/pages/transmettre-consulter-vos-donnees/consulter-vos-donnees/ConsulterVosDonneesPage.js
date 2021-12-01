@@ -12,7 +12,12 @@ const ConsulterVosDonneesPage = () => {
   return (
     <>
       <Header />
-      <Section backgroundColor="galt" paddingY="4w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
+      <Section
+        backgroundColor="galt"
+        paddingTop="4w"
+        paddingBottom="300px"
+        boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)"
+      >
         <Box width="500px">
           <BreadcrumbNav
             links={[
