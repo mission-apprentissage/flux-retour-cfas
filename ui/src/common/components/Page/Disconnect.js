@@ -15,9 +15,9 @@ const Disconnect = () => {
   };
 
   return (
-    <Flex alignItems="center">
+    <Flex alignItems="center" fontSize="zeta">
       <Link onClick={logout}>Déconnexion</Link>
-      <Box as="i" marginLeft="2w" className="ri-logout-box-r-line"></Box>
+      <Box as="i" marginLeft="3v" className="ri-logout-box-r-line"></Box>
     </Flex>
   );
 };

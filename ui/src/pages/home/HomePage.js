@@ -3,7 +3,7 @@ import React from "react";
 import { Redirect } from "react-router";
 import { NavLink } from "react-router-dom";
 
-import { Footer, LinkCard, Logo, Section } from "../../common/components";
+import { Footer, Header, LinkCard, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { navigationPages } from "../../common/constants/navigationPages";
 import useAuth from "../../common/hooks/useAuth";
@@ -20,9 +20,7 @@ const HomePage = () => {
 
   return (
     <>
-      <Section>
-        <Logo />
-      </Section>
+      <Header withText={false} />
       <Section paddingY="4w">
         <Flex>
           <div>

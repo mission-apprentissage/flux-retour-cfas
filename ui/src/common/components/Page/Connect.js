@@ -13,18 +13,19 @@ const Connect = () => {
     borderLeftColor: "bluefrance",
   };
   return (
-    <Flex alignItems={"center"}>
+    <Flex alignItems="center">
       <Menu>
         <MenuButton
           as={Button}
           _active={{ color: "bluefrance" }}
           _hover={{ background: "white" }}
-          variant={"link"}
-          cursor={"pointer"}
+          fontSize="zeta"
+          variant="link"
+          cursor="pointer"
           minW={0}
         >
           Connexion
-          <Box as="i" marginLeft="2w" className="ri-arrow-down-s-line"></Box>
+          <Box as="i" marginLeft="3v" className="ri-arrow-down-s-line"></Box>
         </MenuButton>
         <MenuList color="grey.800" rounded="0" padding="2w">
           <MenuItem _hover={menuItemHover} marginTop="2w">
