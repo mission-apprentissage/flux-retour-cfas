@@ -24,6 +24,8 @@ import withSubmitBranchementErpDemand, { SUBMIT_STATE } from "./withSubmitBranch
 
 const formInitialValues = { erpIndex: 0, nom_organisme: "", uai_organisme: "", nb_apprentis: "", email_demandeur: "" };
 
+const ErpSelectionList = [{ name: "Sélectionnez une option", state: null }].concat(ERPS);
+
 const Message = ({ iconClassName, title, message }) => {
   return (
     <>
@@ -110,7 +112,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                 <FormControl isRequired isInvalid={meta.error && meta.touched}>
                   <FormLabel color="grey.800">ERP ou logiciel de gestion utilisé</FormLabel>
                   <Select {...field}>
-                    {ERPS.map((erp, index) => (
+                    {ErpSelectionList.map((erp, index) => (
                       <option key={index} value={index}>
                         {erp.name}
                       </option>
@@ -123,7 +125,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
           </Stack>
 
           {/* Cas ERP Ready */}
-          {ERPS[values.erpIndex].state === ERP_STATE.ready && (
+          {ErpSelectionList[values.erpIndex].state === ERP_STATE.ready && (
             <>
               <Stack marginTop="3w" marginBottom="3w" direction="row">
                 <Box w="2%" bg="#6A6AF4" marginRight="3w" />
@@ -133,7 +135,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                   logiciel de gestion.
                 </Text>
               </Stack>
-              <Link target="_blank" href={ERPS[values.erpIndex].helpFilePath}>
+              <Link target="_blank" href={ErpSelectionList[values.erpIndex].helpFilePath}>
                 <Button leftIcon={<Box as="i" className="ri-download-line" />} variant="primary">
                   Télécharger le pas à pas
                 </Button>
@@ -143,7 +145,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                 <Link
                   color="bluefrance"
                   textDecoration="underline"
-                  href={`mailto:${ERPS[values.erpIndex].contactMail}`}
+                  href={`mailto:${ErpSelectionList[values.erpIndex].contactMail}`}
                 >
                   contactez leur service support
                 </Link>
@@ -156,7 +158,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
           )}
 
           {/* Cas ERP OnGoing */}
-          {ERPS[values.erpIndex].state === ERP_STATE.ongoing && (
+          {ErpSelectionList[values.erpIndex].state === ERP_STATE.ongoing && (
             <>
               <Stack marginTop="3w" marginBottom="3w" direction="row">
                 <Box w="2%" bg="#6A6AF4" marginRight="3w" />
@@ -207,7 +209,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
           )}
 
           {/* Cas ERP Coming */}
-          {ERPS[values.erpIndex].state === ERP_STATE.coming && (
+          {ErpSelectionList[values.erpIndex].state === ERP_STATE.coming && (
             <>
               <Stack marginTop="3w" marginBottom="3w" direction="row">
                 <Box w="2%" bg="#6A6AF4" marginRight="3w" />
