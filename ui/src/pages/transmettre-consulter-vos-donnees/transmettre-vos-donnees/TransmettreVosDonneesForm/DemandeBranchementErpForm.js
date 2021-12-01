@@ -141,14 +141,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                 </Button>
               </Link>
               <Text marginTop="2w" fontSize="omega" fontWeight="800" color="grey.800">
-                Ce pas à pas a été élaboré par votre ERP, en cas de difficulté{" "}
-                <Link
-                  color="bluefrance"
-                  textDecoration="underline"
-                  href={`mailto:${ErpSelectionList[values.erpIndex].contactMail}`}
-                >
-                  contactez leur service support
-                </Link>
+                Ce pas à pas a été élaboré par votre ERP, en cas de difficulté contactez leur service support.
               </Text>
               <HStack marginTop="10w" spacing="1w">
                 <Box as="i" className="ri-arrow-left-line"></Box>
