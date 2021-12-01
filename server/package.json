@@ -33,6 +33,7 @@
     "clear:cfas": "node -r dotenv/config src/jobs/clear/clearCfas.js",
     "clean:statutsCandidats": "node -r dotenv/config src/jobs/clean/cleanStatutsCandidats.js",
     "clean:cfaDataFeedback": "node -r dotenv/config src/jobs/clean/cleanCfaDataFeedback.js",
+    "purge:events": "node -r dotenv/config src/jobs/purgeEvents/index.js",
     "stats": "node -r dotenv/config src/jobs/compute-stats-statuts-candidats/index.js",
     "run:tests": "node -r dotenv/config src/jobs/test/index.js",
     "siret:retrieve-gesti": "node -r dotenv/config src/jobs/siret/retrieve-sirets-from-gesti-uais.js",
