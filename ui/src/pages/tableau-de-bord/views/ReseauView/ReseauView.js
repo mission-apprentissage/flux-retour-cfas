@@ -1,12 +1,14 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Page } from "../../../../common/components";
+import { DataNetworkAlert, Page } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import { EffectifsSection, IndicesHeaderSection, ProvenanceIndicesSection } from "../../sections";
 import InfosReseauSection from "./InfosReseauSection";
 import RepartitionEffectifsReseau from "./RepartitionEffectifsReseau";
+
+const RESEAU_WITH_DATA_ALERT = "MFR";
 
 const ReseauView = ({ reseau, effectifs, filters, loading }) => {
   return (
@@ -14,6 +16,7 @@ const ReseauView = ({ reseau, effectifs, filters, loading }) => {
       <IndicesHeaderSection />
       <InfosReseauSection reseau={reseau} />
       <ProvenanceIndicesSection />
+      {reseau === RESEAU_WITH_DATA_ALERT && <DataNetworkAlert paddingY="4w" />}
       <EffectifsSection effectifs={effectifs} loading={loading} />
       <RepartitionEffectifsReseau filters={filters} />
     </Page>
