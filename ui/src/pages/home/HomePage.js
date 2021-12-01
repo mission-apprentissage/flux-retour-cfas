@@ -47,7 +47,12 @@ const HomePage = () => {
             linkText="Transmettre et consulter vos données"
             linkHref={navigationPages.TransmettreEtConsulterVosDonnees.path}
           >
-            Vous êtes un <strong>organisme de formation en apprentissage</strong>
+            Vous êtes un{" "}
+            <strong>
+              organisme de formation en
+              <br />
+              apprentissage
+            </strong>
           </LinkCard>
         </HStack>
       </Section>
