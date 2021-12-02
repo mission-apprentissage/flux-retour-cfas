@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, useLocation } from "react-router-dom";
 
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
@@ -17,9 +17,20 @@ import {
 } from "./pages/transmettre-consulter-vos-donnees";
 import UserStatsPage from "./pages/user-stats";
 
+const ScrollToTopOnRouteChange = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    if (!location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
+  return null;
+};
+
 const App = () => {
   return (
     <Router>
+      <ScrollToTopOnRouteChange />
       <Switch>
         {/* Public pages */}
         <Route exact path="/" component={HomePage} />

@@ -22,6 +22,7 @@
     "react-hooks-global-state": "1.0.1",
     "react-query": "3.33.7",
     "react-router-dom": "5.2.0",
+    "react-router-hash-link": "2.4.3",
     "react-scripts": "4.0.3",
     "remixicon": "2.5.0",
     "yup": "0.32.9"

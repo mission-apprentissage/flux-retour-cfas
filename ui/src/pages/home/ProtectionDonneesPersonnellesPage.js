@@ -32,14 +32,12 @@ const ProtectionDonneesPersonnellesPage = () => {
             <Text fontSize="epsilon" color="grey.800">
               Il existe plusieurs bases légales pour fonder un traitement de données à caractère personnel :
             </Text>
-            <Text paddingLeft="2w" fontSize="epsilon" color="grey.800">
-              <ul>
-                <li>Le consentement des personnes ;</li>
-                <li>Une obligation légale ;</li>
-                <li>L’existence d’un contrat ;</li>
-                <li>Une mission d’intérêt public, etc...</li>
-              </ul>
-            </Text>
+            <Box as="ul" paddingLeft="2w" fontSize="epsilon" color="grey.800">
+              <li>Le consentement des personnes ;</li>
+              <li>Une obligation légale ;</li>
+              <li>L’existence d’un contrat ;</li>
+              <li>Une mission d’intérêt public, etc...</li>
+            </Box>
             <Text paddingY="2w" fontSize="epsilon" color="grey.800">
               C’est sur cette dernière base légale que se fonde notre traitement. En effet, la Mission a accès à
               certaines données à caractère personnel (état civil, coordonnées, code formation, statut inscrit,
@@ -78,20 +76,18 @@ const ProtectionDonneesPersonnellesPage = () => {
             <Text paddingY="2w" fontSize="epsilon" color="grey.800">
               L’affichage des données en temps réel auprès des acteurs institutionnels leur permet :
             </Text>
-            <Text paddingLeft="2w" fontSize="epsilon" color="grey.800">
-              <ul>
-                <li>
-                  <strong>D&apos;avoir une tendance de l’évolution</strong> du nombre d’apprentis ;
-                </li>
-                <li>
-                  <strong>De dénombrer et identifier les CFAs</strong> dans lesquels des jeunes sont en recherche de
-                  contrat ou en risque de décrochage ;
-                </li>
-                <li>
-                  <strong>D&apos;évaluer l’impact</strong> des plans d’actions régionaux.
-                </li>
-              </ul>
-            </Text>
+            <Box as="ul" paddingLeft="2w" fontSize="epsilon" color="grey.800">
+              <li>
+                <strong>D&apos;avoir une tendance de l’évolution</strong> du nombre d’apprentis ;
+              </li>
+              <li>
+                <strong>De dénombrer et identifier les CFAs</strong> dans lesquels des jeunes sont en recherche de
+                contrat ou en risque de décrochage ;
+              </li>
+              <li>
+                <strong>D&apos;évaluer l’impact</strong> des plans d’actions régionaux.
+              </li>
+            </Box>
           </Box>
         </Flex>
       </Section>
@@ -116,39 +112,33 @@ const ProtectionDonneesPersonnellesPage = () => {
             <Text fontSize="epsilon" color="grey.800">
               Données concernant l’apprenant :
             </Text>
-            <Text marginBottom="2w" paddingLeft="2w" fontSize="epsilon" color="grey.800">
-              <ul>
-                <li>
-                  <strong>Identification</strong> : nom, prénom, date de naissance, tel, e-mail, Code Insee résidence,
-                  INE ;
-                </li>
-                <li>
-                  <strong>Formation suivie</strong> : Code Formation Diplôme, RNCP, libellé, période de la formation,
-                  année dans la formation, année scolaire, date début de formation ;
-                </li>
-                <li>
-                  <strong>Le statut de l’apprenant</strong> : apprenti, inscrit sans contrat, rupturant, abandon
-                </li>
-              </ul>
-            </Text>
+            <Box as="ul" marginBottom="2w" paddingLeft="2w" fontSize="epsilon" color="grey.800">
+              <li>
+                <strong>Identification</strong> : nom, prénom, date de naissance, tel, e-mail, Code Insee résidence, INE
+                ;
+              </li>
+              <li>
+                <strong>Formation suivie</strong> : Code Formation Diplôme, RNCP, libellé, période de la formation,
+                année dans la formation, année scolaire, date début de formation ;
+              </li>
+              <li>
+                <strong>Le statut de l’apprenant</strong> : apprenti, inscrit sans contrat, rupturant, abandon
+              </li>
+            </Box>
             <Text fontSize="epsilon" color="grey.800">
               Données concernant l’organisme :
             </Text>
-            <Text marginBottom="2w" paddingLeft="2w" fontSize="epsilon" color="grey.800">
-              <ul>
-                <li>
-                  <strong>Identification</strong> : UAI, SIRET, Nom, Code Insee CFA Formateur
-                </li>
-              </ul>
-            </Text>
+            <Box as="ul" marginBottom="2w" paddingLeft="2w" fontSize="epsilon" color="grey.800">
+              <li>
+                <strong>Identification</strong> : UAI, SIRET, Nom, Code Insee CFA Formateur
+              </li>
+            </Box>
             <Text fontSize="epsilon" color="grey.800">
               Données concernant le contrat de travail :
             </Text>
-            <Text paddingLeft="2w" fontSize="epsilon" color="grey.800">
-              <ul>
-                <li>Date de début et date de fin</li>
-              </ul>
-            </Text>
+            <Box as="ul" paddingLeft="2w" fontSize="epsilon" color="grey.800">
+              <li>Date de début et date de fin</li>
+            </Box>
           </Box>
         </Flex>
       </Section>

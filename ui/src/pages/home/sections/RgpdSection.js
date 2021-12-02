@@ -1,6 +1,7 @@
-import { Box, Heading, HStack, Link, Text } from "@chakra-ui/react";
+import { Box, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
+import { HashLink } from "react-router-hash-link";
 
 import { Section } from "../../../common/components";
 import { navigationPages } from "../../../common/constants/navigationPages";
@@ -9,7 +10,7 @@ const currentPage = navigationPages.DonneesPersonnelles;
 
 const RgpdCard = ({ legend, text, backgroundColor, href }) => {
   return (
-    <Link style={{ textDecoration: "none" }} href={href}>
+    <HashLink to={href}>
       <Box backgroundColor={backgroundColor} w="400px" paddingX="4w" paddingY="3w" height="180px">
         <Box as="legend" fontSize="epsilon" paddingY="1w" paddingX="3v" backgroundColor="white" color={backgroundColor}>
           {legend}
@@ -18,7 +19,7 @@ const RgpdCard = ({ legend, text, backgroundColor, href }) => {
           {text}
         </Text>
       </Box>
-    </Link>
+    </HashLink>
   );
 };
 
@@ -32,7 +33,7 @@ RgpdCard.propTypes = {
 const RgpdSection = (props) => {
   return (
     <Section {...props}>
-      <Heading as="h1" fontSize="alpha" color="grey.800">
+      <Heading as="h2" fontSize="alpha" color="grey.800">
         {currentPage.title}
       </Heading>
       <Text fontSize="epsilon" marginTop="2w" color="grey.800">
