@@ -1,9 +1,9 @@
 const itemBaseStyle = {
   spacing: "5px",
   fontSize: "12px",
-  color: "gray.500",
+  color: "grey.500",
   separator: {
-    color: "gray.500",
+    color: "grey.500",
   },
 };
 

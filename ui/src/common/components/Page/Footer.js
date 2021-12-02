@@ -10,7 +10,7 @@ const Footer = () => (
     <Section borderTopWidth="2px" borderTopColor="bluefrance" background="white" paddingY="4w">
       <Flex justifyContent="space-between" paddingX="5w">
         <Logo scale={1.5} />
-        <Stack fontSize="zeta" color="gray.600" spacing="3w">
+        <Stack fontSize="zeta" color="grey.600" spacing="3w">
           <HStack spacing="3w" fontWeight="700">
             <Link target="_blank" href="https://www.legifrance.gouv.fr/">
               legifrance.gouv.fr
@@ -31,12 +31,12 @@ const Footer = () => (
     <Section
       borderTopWidth="1px"
       fontSize="omega"
-      color="gray.500"
-      borderTopColor="gray.200"
+      color="grey.500"
+      borderTopColor="grey.200"
       background="white"
       paddingY="2w"
     >
-      <HStack divider={<StackDivider borderColor="gray.200" />} spacing="3w">
+      <HStack divider={<StackDivider borderColor="grey.200" />} spacing="3w">
         <Link href="#">Plan du site</Link>
         <Link href="#">Accessibilité : Non conforme</Link>
         <Link href="#">Mentions légales</Link>

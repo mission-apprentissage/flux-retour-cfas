@@ -9,12 +9,10 @@ const LinkCard = ({ children, linkText, linkHref }) => {
       <Text color="white" marginBottom="2w">
         {children}
       </Text>
-      <NavLink to={linkHref}>
-        <Button background="#9A9AFF" size="lg" color="bluefrance" padding="3w" paddingY="0">
-          {linkText}
-          <Box as="i" className="ri-arrow-right-line" marginLeft="1w" verticalAlign="middle" />
-        </Button>
-      </NavLink>
+      <Button as={NavLink} to={linkHref} variant="primary-dark" size="lg" padding="3w" paddingY="0">
+        {linkText}
+        <Box as="i" className="ri-arrow-right-line" marginLeft="1w" verticalAlign="middle" />
+      </Button>
     </Box>
   );
 };

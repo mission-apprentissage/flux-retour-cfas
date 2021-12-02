@@ -24,6 +24,18 @@ export const Button = {
         color: "grey.600",
       },
     },
+    ["primary-dark"]: {
+      ...baseStyle,
+      background: "#9a9aff",
+      color: "bluefrance",
+      _hover: {
+        background: "#8585f6",
+      },
+      _disabled: {
+        background: "grey.700",
+        color: "grey.400",
+      },
+    },
     ["select-primary"]: {
       ...baseStyle,
       color: "bluefrance",
@@ -50,7 +62,7 @@ export const Button = {
         borderColor: "bluefrance",
       },
     },
-    ghost: {
+    secondary: {
       ...baseStyle,
       border: "solid 1px",
       background: "transparent",
