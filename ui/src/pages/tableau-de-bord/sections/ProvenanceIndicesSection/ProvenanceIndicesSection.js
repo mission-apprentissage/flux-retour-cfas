@@ -1,34 +1,32 @@
 import { Box, Skeleton, Text } from "@chakra-ui/react";
-import qs from "query-string";
 import React from "react";
+import { useQuery } from "react-query";
 
+import { fetchTotalOrganismes } from "../../../../common/api/tableauDeBord";
 import Section from "../../../../common/components/Section/Section";
-import { useFetch } from "../../../../common/hooks/useFetch";
 import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
 import { pick } from "../../../../common/utils/pick";
 import { formatNumber } from "../../../../common/utils/stringUtils";
 import { useFiltersContext } from "../../FiltersContext";
 
-const buildRequestQuery = (filters) => {
-  return qs.stringify(
-    pick(mapFiltersToApiFormat(filters), [
-      "etablissement_num_region",
-      "etablissement_num_departement",
-      "etablissement_reseaux",
-      "formation_cfd",
-    ])
-  );
-};
-
 const ProvenanceIndicesSection = () => {
   const { state: filters } = useFiltersContext();
-  const [data, loading, error] = useFetch(`/api/dashboard/total-organismes?${buildRequestQuery(filters)}`);
+  const requestFilters = pick(mapFiltersToApiFormat(filters), [
+    "etablissement_num_region",
+    "etablissement_num_departement",
+    "etablissement_reseaux",
+    "formation_cfd",
+  ]);
+  const { data, isLoading, error } = useQuery(["total-organismes", requestFilters], () =>
+    fetchTotalOrganismes(requestFilters)
+  );
 
   let content = null;
-  if (loading) {
+
+  if (isLoading) {
     content = <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
   }
-  if (data?.nbOrganismes != null && !loading) {
+  if (data?.nbOrganismes) {
     content = (
       <Text color="grey.600" fontWeight="400" fontSize="omega">
         Les indices affichés sont calculés grâce aux {formatNumber(data.nbOrganismes)} organismes qui ont transmis leurs
@@ -36,7 +34,7 @@ const ProvenanceIndicesSection = () => {
       </Text>
     );
   }
-  if (error && !loading) {
+  if (error) {
     content = (
       <Text fontSize="omega" color="warning">
         <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />

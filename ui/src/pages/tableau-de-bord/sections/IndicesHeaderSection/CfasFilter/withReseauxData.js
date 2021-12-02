@@ -1,10 +1,12 @@
 import React from "react";
+import { useQuery } from "react-query";
 
-import { useFetch } from "../../../../../common/hooks/useFetch";
+import { fetchReseaux } from "../../../../../common/api/tableauDeBord";
 
 const withReseauxData = (Component) => {
   const WithReseauxData = (props) => {
-    const [reseaux] = useFetch("/api/referentiel/networks");
+    // reseaux are very unlikely during the user's session, thus the infinite staleTime
+    const { data: reseaux } = useQuery("reseaux", () => fetchReseaux(), { staleTime: Infinity });
 
     const sortedReseaux = reseaux
       ? reseaux.slice().sort((a, b) => {

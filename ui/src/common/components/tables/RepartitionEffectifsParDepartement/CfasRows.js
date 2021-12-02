@@ -1,21 +1,23 @@
 import PropTypes from "prop-types";
-import qs from "query-string";
 import React from "react";
+import { useQuery } from "react-query";
 
 import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
-import { useFetch } from "../../../hooks/useFetch";
+import { fetchEffectifsParCfa } from "../../../api/tableauDeBord";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import CfaRow from "./CfaRow";
 
 const CfasRows = ({ departementCode }) => {
   const filters = useFiltersContext();
-  const queryParams = qs.stringify({
+  const requestFilters = {
     date: filters.state.date.toISOString(),
     etablissement_num_departement: departementCode,
-  });
-  const [data, loading] = useFetch(`/api/dashboard/effectifs-par-cfa?${queryParams}`);
+  };
+  const { data, isLoading } = useQuery(["effectifs-par-cfa", requestFilters], () =>
+    fetchEffectifsParCfa(requestFilters)
+  );
 
-  if (loading) {
+  if (isLoading) {
     return <RowsSkeleton nbRows={3} nbColumns={5} />;
   }
 

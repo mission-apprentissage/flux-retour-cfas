@@ -4,6 +4,7 @@ import React from "react";
 import { NavLink, useRouteMatch } from "react-router-dom";
 
 import { hasUserRoles, roles } from "../../auth/roles";
+import { navigationPages } from "../../constants/navigationPages";
 import useAuth from "../../hooks/useAuth";
 import Section from "../Section/Section";
 
@@ -45,12 +46,12 @@ const NavBar = () => {
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
-        {!isCfa && <NavItem to="/tableau-de-bord">Indices en temps réel</NavItem>}
-        <NavItem to="/comprendre-donnees">Comprendre les données</NavItem>
+        {!isCfa && <NavItem to={navigationPages.TableauDeBord.path}>Indices en temps réel</NavItem>}
+        <NavItem to={navigationPages.ComprendreLesDonnees.path}>{navigationPages.ComprendreLesDonnees.title}</NavItem>
 
         {isAdmin && (
           <>
-            <NavItem to="/stats">Statistiques Globales</NavItem>
+            <NavItem to={navigationPages.Stats.path}>Statistiques Globales</NavItem>
             <NavItem to="/stats/ymag">Statistiques Ymag</NavItem>
             <NavItem to="/stats/gesti">Statistiques Gesti</NavItem>
           </>

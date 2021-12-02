@@ -1,16 +1,16 @@
 import PropTypes from "prop-types";
-import qs from "query-string";
 import React from "react";
+import { useQuery } from "react-query";
 
 import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
-import { useFetch } from "../../../hooks/useFetch";
+import { fetchEffectifsParAnneeFormation } from "../../../api/tableauDeBord";
 import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
 import { pick } from "../../../utils/pick";
 import AnneeFormationRow from "./AnneeFormationRow";
 
 const AnneeFormationRows = ({ formationCfd }) => {
   const { state: filters } = useFiltersContext();
-  const queryParams = qs.stringify({
+  const requestFilters = {
     formation_cfd: formationCfd,
     ...pick(mapFiltersToApiFormat(filters), [
       "date",
@@ -20,9 +20,10 @@ const AnneeFormationRows = ({ formationCfd }) => {
       "etablissement_num_departement",
       "etablissement_reseaux",
     ]),
-  });
-  const [data] = useFetch(`/api/dashboard/effectifs-par-annee-formation?${queryParams}`);
-
+  };
+  const { data } = useQuery(["effectifs-par-annee-formation", requestFilters], () =>
+    fetchEffectifsParAnneeFormation(requestFilters)
+  );
   if (!data) return null;
 
   return (

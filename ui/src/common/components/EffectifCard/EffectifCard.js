@@ -13,7 +13,7 @@ const EffectifCard = ({ label, count, tooltipLabel, validPeriod = true }) => {
       fontSize="gamma"
       padding="3w"
       color="grey.800"
-      height="7rem"
+      minHeight="6rem"
       minWidth="16rem"
     >
       <strong>{validPeriod ? formatNumber(count) : "_"}</strong>

@@ -6,6 +6,7 @@ import { omitNullishValues } from "../../../../../common/utils/omitNullishValues
 import { filtersPropTypes } from "../../../FiltersContext";
 
 const SEARCH_DEBOUNCE_TIME = 300;
+const MINIMUM_CHARS_TO_PERFORM_SEARCH = 4;
 
 const searchFormationByIntituleOrCfd = debounce(async (searchParams, callback) => {
   const query = {
@@ -25,10 +26,10 @@ const withFormationSearch = (Component) => {
     const [searchResults, setSearchResults] = useState();
 
     useEffect(() => {
-      // perform search with searchTerm only if longer than 3 characters
-      const searchCriteria = searchTerm.length > 3 ? { searchTerm, ...filters } : filters;
-      // perform search if there is at least one search criterion
-      if (Object.keys(searchCriteria).length !== 0) {
+      // perform search if user has entered at least 4 chars or none
+      if (searchTerm.length === 0 || searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH) {
+        const searchCriteria =
+          searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH ? { searchTerm, ...filters } : filters;
         setSearchResults(null);
         setLoading(true);
         searchFormationByIntituleOrCfd(searchCriteria, (result) => {

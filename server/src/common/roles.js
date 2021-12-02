@@ -1,6 +1,6 @@
 const apiRoles = {
   apiStatutsSeeder: "apiStatutsSeeder",
-  apiStatutsConsumer: "apiStatutsConsumer",
+  apiStatutsConsumer: { anonymousDataConsumer: "apiAnonymousStatutsDataConsumer" },
   administrator: "administrator",
 };
 

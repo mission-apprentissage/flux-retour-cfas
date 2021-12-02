@@ -1,17 +1,17 @@
 import { Box, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import React from "react";
 
-import { Page } from "../../common/components";
+import { Page, Section } from "../../common/components";
 
 const ComprendreLesDonnees = () => {
   return (
     <Page>
       <Box color="grey.800">
-        <Box p="5w" backgroundColor="galt" paddingY="8w" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.06)">
-          <Heading as="h1" variant="h1" marginBottom="1w" ml="5w">
+        <Section backgroundColor="galt" paddingY="8w" withShadow>
+          <Heading as="h1" variant="h1" marginBottom="1w">
             Comprendre les données
           </Heading>
-        </Box>
+        </Section>
         <Box py="10w" ml="10w">
           <Flex>
             <Box bg="galt" w="20%" h="170px">

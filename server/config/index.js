@@ -58,6 +58,11 @@ module.exports = {
       password: env.get("FLUX_RETOUR_CFAS_USERS_AURION_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_AURION_PERMISSIONS").default([]).asArray(),
     },
+    rco: {
+      name: env.get("FLUX_RETOUR_CFAS_USERS_RCO_NAME").required().asString(),
+      password: env.get("FLUX_RETOUR_CFAS_USERS_RCO_PASSWORD").required().asString(),
+      permissions: env.get("FLUX_RETOUR_CFAS_USERS_RCO_PERMISSIONS").default([]).asArray(),
+    },
     defaultAdmin: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),
@@ -80,8 +85,5 @@ module.exports = {
     tenantId: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_TENANT_ID").required().asString(),
     region: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_REGION").required().asString(),
     containerName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").required().asString(),
-  },
-  featureFlags: {
-    limitDeployedRegions: env.get("FLUX_RETOUR_CFAS_LIMIT_REGIONS_DEPLOYED").asBool(),
   },
 };

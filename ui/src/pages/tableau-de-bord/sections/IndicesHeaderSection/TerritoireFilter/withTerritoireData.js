@@ -1,13 +1,18 @@
 import React from "react";
+import { useQuery } from "react-query";
 
-import { useFetch } from "../../../../../common/hooks/useFetch";
-
-const GEO_API_URL = "https://geo.api.gouv.fr";
+import { fetchDepartements } from "../../../../../common/api/geoData";
+import { fetchRegions } from "../../../../../common/api/tableauDeBord";
 
 const withTerritoiresData = (Component) => {
   const WithTerritoiresData = (props) => {
-    const [departements, departementsLoading] = useFetch(`${GEO_API_URL}/departements`);
-    const [regions, regionsLoading] = useFetch("/api/referentiel/regions");
+    // departements and regions are very unlikely to change, thus the infinite stale time
+    const { data: departements, isLoading: departementsLoading } = useQuery("departement", () => fetchDepartements(), {
+      staleTime: Infinity,
+    });
+    const { data: regions, isLoading: regionsLoading } = useQuery("regions", () => fetchRegions(), {
+      staleTime: Infinity,
+    });
 
     const regionsCodes = regions?.map((region) => region.code) || [];
 
