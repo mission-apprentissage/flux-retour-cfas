@@ -1,38 +1,72 @@
 import * as React from "react";
-import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, useLocation } from "react-router-dom";
 
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
-import DemandeAccesPage from "./pages/demande-acces/DemandeAccesPage";
+import { navigationPages } from "./common/constants/navigationPages";
+import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import LoginPage from "./pages/login/LoginPage";
 import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import CfaWithoutNetworkPage from "./pages/tableau-de-bord/views/CfaWithoutNetwork";
+import {
+  ConsulterVosDonneesPage,
+  TransmettreConsulterVosDonneesPage,
+  TransmettreVosDonneesPage,
+} from "./pages/transmettre-consulter-vos-donnees";
 import UserStatsPage from "./pages/user-stats";
+
+const ScrollToTopOnRouteChange = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    if (!location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
+  return null;
+};
 
 const App = () => {
   return (
     <Router>
+      <ScrollToTopOnRouteChange />
       <Switch>
         {/* Public pages */}
-        <Route exact path="/login" component={LoginPage} />
-        <Route exact path="/demande-acces" component={DemandeAccesPage} />
-        <Route exact path="/cfa/:accessToken" component={CfaWithoutNetworkPage} />
-        <Route path="/comprendre-donnees" exact component={ComprendreLesDonnees} />
+        <Route exact path="/" component={HomePage} />
+        <Route exact path={navigationPages.Login.path} component={LoginPage} />
+        <Route
+          exact
+          path={navigationPages.TransmettreEtConsulterVosDonnees.path}
+          component={TransmettreConsulterVosDonneesPage}
+        />
+        <Route path={navigationPages.ConsulterVosDonnees.path} exact component={ConsulterVosDonneesPage} />
+        <Route path={navigationPages.TransmettreVosDonnees.path} exact component={TransmettreVosDonneesPage} />
+        <Route path={navigationPages.ComprendreLesDonnees.path} exact component={ComprendreLesDonnees} />
+        <Route path={navigationPages.ConsulterVosDonnees.path} exact component={ConsulterVosDonneesPage} />
 
-        {/* Protected pages */}
-        <Route exact path="/">
-          <Redirect to="/tableau-de-bord" />
-        </Route>
+        {/* Secured By Token Pages */}
+        <Route exact path={`${navigationPages.Cfa.path}/:accessToken`} component={CfaWithoutNetworkPage} />
+        <Route path={navigationPages.DonneesPersonnelles.path} exact component={ProtectionDonneesPersonnellesPage} />
+
+        {/* Secured By Auth Pages */}
         <ProtectedRoute
-          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
-          path="/tableau-de-bord"
+          path={navigationPages.TableauDeBord.path}
           exact
           component={TableauDeBordPage}
+          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
         />
-        <ProtectedRoute authorizedRoles={[roles.administrator]} path="/stats" exact component={GlobalStatsPage} />
-        <ProtectedRoute authorizedRoles={[roles.administrator]} path="/stats/:dataSource" component={UserStatsPage} />
+        <ProtectedRoute
+          authorizedRoles={[roles.administrator]}
+          path={navigationPages.Stats.path}
+          exact
+          component={GlobalStatsPage}
+        />
+        <ProtectedRoute
+          authorizedRoles={[roles.administrator]}
+          path={`${navigationPages.Stats.path}/:dataSource`}
+          component={UserStatsPage}
+        />
 
         {/* Not found page */}
         <Route component={() => <div>404 - Page not found</div>} />

@@ -23,4 +23,6 @@ module.exports = {
   Stats: getModel("stats"),
   CroisementVoeuxAffelnet: getModel("croisementVoeuxAffelnet"),
   RcoStatutCandidat: getModel("rcoStatutsCandidats"),
+  DemandeLienAcces: getModel("demandeLienAcces"),
+  DemandeBranchementErp: getModel("demandesBranchementErp"),
 };

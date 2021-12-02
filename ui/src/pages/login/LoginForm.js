@@ -15,7 +15,7 @@ const LoginForm = ({ onSubmit }) => {
       {({ status = {} }) => {
         return (
           <Form>
-            <Box marginBottom="4w">
+            <Box marginBottom="2w">
               <Field name="username">
                 {({ field, meta }) => (
                   <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
