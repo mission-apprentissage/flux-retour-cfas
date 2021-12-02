@@ -33,7 +33,7 @@ const ConsulterVosDonneesPage = () => {
             Vous transmettez déja vos données au tableau de bord,&nbsp;
             <strong>utilisez votre lien d&apos;accès pour consulter la page de votre organisme de formation</strong>
           </Text>
-          <Button type="submit" variant="ghost" onClick={onOpen}>
+          <Button type="submit" variant="secondary" onClick={onOpen}>
             Demander votre lien d&apos;accès
           </Button>
           <AskAccessLinkModal isOpen={isOpen} onClose={onClose} />

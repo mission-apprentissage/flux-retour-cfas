@@ -100,7 +100,7 @@ const DemandeAccesForm = ({ onSubmit, onClose }) => {
               </Stack>
             </ModalBody>
             <ModalFooter paddingY="3w" marginTop="8w" boxShadow="0px -4px 16px 0px rgba(0, 0, 0, 0.08)">
-              <Button variant="ghost" type="button" marginRight="2w" onClick={onClose}>
+              <Button variant="secondary" type="button" marginRight="2w" onClick={onClose}>
                 Annuler
               </Button>
               <Button type="submit" variant="primary" isLoading={isSubmitting}>

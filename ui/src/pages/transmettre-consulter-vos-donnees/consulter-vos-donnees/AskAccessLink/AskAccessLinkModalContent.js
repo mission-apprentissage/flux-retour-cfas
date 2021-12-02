@@ -119,7 +119,7 @@ const AskAccessLinkModalContent = ({ onClose, sendAccessLinkDemand, submitState 
           </ModalBody>
           <Box boxShadow="dark-lg">
             <ModalFooter>
-              <Button variant="ghost" type="button" marginRight="2w" onClick={onClose}>
+              <Button variant="secondary" type="button" marginRight="2w" onClick={onClose}>
                 Annuler
               </Button>
               <Button type="submit" variant="primary" isLoading={isSubmitting}>

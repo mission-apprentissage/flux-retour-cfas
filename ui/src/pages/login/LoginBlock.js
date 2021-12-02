@@ -15,7 +15,7 @@ const LoginBlock = ({ onSubmit }) => {
       <Text marginTop="4w" color="grey.800">
         Vous n&apos;avez pas reçu vos identifiants de connexion ?
       </Text>
-      <Button variant="ghost" marginTop="2w" onClick={onOpen}>
+      <Button variant="secondary" marginTop="2w" onClick={onOpen}>
         Demander mes identifiants
       </Button>
       <DemandeAccesModal isOpen={isOpen} onClose={onClose} />

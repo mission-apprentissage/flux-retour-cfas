@@ -83,7 +83,7 @@ const DataFeedbackModalContent = ({ onClose, sendDataFeedback, submitState }) =>
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="ghost" type="button" marginRight="2w" onClick={onClose}>
+            <Button variant="secondary" type="button" marginRight="2w" onClick={onClose}>
               Annuler
             </Button>
             <Button type="submit" variant="primary" isLoading={isSubmitting}>
