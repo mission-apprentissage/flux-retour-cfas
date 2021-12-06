@@ -2,7 +2,7 @@ const axios = require("axios");
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const config = require("../../../config");
-const { jobNames, REGIONS_DEPLOYEES } = require("../../common/model/constants");
+const { jobNames, regions } = require("../../common/model/constants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 
 const ROUTES_TO_WARM_UP = [
@@ -19,7 +19,7 @@ runScript(async () => {
 
   const response = await axios.post("/api/login", {
     username: config.users.defaultAdmin.name,
-    password: config.users.defaultAdmin.password + 1,
+    password: config.users.defaultAdmin.password,
   });
   const { access_token } = response.data;
 
@@ -42,7 +42,7 @@ runScript(async () => {
     await performRequest(route, commonParams);
 
     // warm up cache with effectifs for every regions
-    await asyncForEach(REGIONS_DEPLOYEES, async (region) => {
+    await asyncForEach(regions, async (region) => {
       logger.info(`Warming up cache for route ${route} for region ${region.nom}`);
       await performRequest(route, {
         ...commonParams,
