@@ -1,4 +1,5 @@
 const path = require("path");
+const redisMock = require("redis-mock");
 // eslint-disable-next-line node/no-unpublished-require
 const nock = require("nock");
 const config = require("../../config");
@@ -23,6 +24,11 @@ module.exports = {
   cleanAll: () => {
     nock.cleanAll();
     const models = require("../../src/common/model");
-    return Promise.all([emptyDir(testDataDir), ...Object.values(models).map((m) => m.deleteMany())]);
+    const redisClient = redisMock.createClient();
+    return Promise.all([
+      emptyDir(testDataDir),
+      ...Object.values(models).map((m) => m.deleteMany()),
+      redisClient.flushall(),
+    ]);
   },
 };

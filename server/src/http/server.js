@@ -24,6 +24,7 @@ const healthcheckRoute = require("./routes/healthcheck");
 const demandeAcces = require("./routes/demande-acces");
 const demandeLienAccesRoute = require("./routes/demande-lien-acces");
 const demandeBranchementErpRoute = require("./routes/demande-branchement-erp");
+const cacheRouter = require("./routes/cache");
 
 module.exports = async (components) => {
   const app = express();
@@ -60,7 +61,10 @@ module.exports = async (components) => {
     rcoRoute(components)
   );
   app.use("/api/dashboard", requireJwtAuthentication, dashboardRoute(components));
+
+  // admin routes
   app.use("/api/stats", requireJwtAuthentication, adminOnly, statsRoute(components));
+  app.use("/api/cache", requireJwtAuthentication, adminOnly, cacheRouter(components));
   app.use("/api/userEvents", requireJwtAuthentication, adminOnly, userEventsRoute(components));
   app.use("/api/config", requireJwtAuthentication, adminOnly, configRoute());
 

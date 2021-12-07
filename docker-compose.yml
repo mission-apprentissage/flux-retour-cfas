@@ -70,16 +70,27 @@ services:
       - flux_retour_cfas_network
     depends_on:
       - mongodb
+      - redis
     environment:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
       - FLUX_RETOUR_CFAS_OUTPUT_DIR=/data
       - FLUX_RETOUR_CFAS_ELASTIC_SEARCH_URI=http://elasticsearch:9200
+      - FLUX_RETOUR_CFAS_REDIS_URI=redis://redis:6379
 
   mongodb:
     image: mongo:5.0.2-focal
     container_name: flux_retour_cfas_mongodb
     mem_limit: 1g
     restart: unless-stopped
+    networks:
+      - flux_retour_cfas_network
+
+  redis:
+    image: 'bitnami/redis:latest'
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
     networks:
       - flux_retour_cfas_network
 
