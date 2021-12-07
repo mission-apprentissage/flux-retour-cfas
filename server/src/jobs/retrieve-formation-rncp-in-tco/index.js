@@ -18,16 +18,23 @@ runScript(async ({ db }) => {
   logger.info(`${allValidCfds.length} valid CFD found. Will search for RNCP in TCO...`);
   loadingBar.start(allValidCfds.length, 0);
 
-  let matchedCount = 0;
+  let matchedCfdCount = 0;
+  let matchedStatutCandidatsCount = 0;
 
-  await asyncForEach(allValidCfds.slice(0, 50), async (cfd) => {
+  await asyncForEach(allValidCfds, async (cfd) => {
     const cfdInfo = await getCfdInfo(cfd);
 
     if (cfdInfo?.rncp?.code_rncp) {
-      matchedCount++;
+      matchedCfdCount++;
+
+      const nbStatutsMatched = await db.collection("statutsCandidats").countDocuments({
+        formation_cfd: cfd,
+      });
+      matchedStatutCandidatsCount += nbStatutsMatched;
     }
     loadingBar.increment();
   });
   loadingBar.stop();
-  logger.info(`${matchedCount} RNCP found`);
+  logger.info(`${matchedCfdCount} RNCP found for ${allValidCfds.length} valid CFDs`);
+  logger.info(`${matchedStatutCandidatsCount} statuts candidats with RNCP found in TCO`);
 }, "retrieve-rncp-in-tco-for-cfds");
