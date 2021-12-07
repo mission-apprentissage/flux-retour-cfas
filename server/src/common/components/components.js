@@ -26,7 +26,7 @@ module.exports = async (options = {}) => {
   const dashboard = options.dashboard || createDashboard();
   const demandeLienAcces = options.demandeLienAcces || demandeLienAccesComponent();
   const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
-  const cache = createCacheComponent(options.redisClient);
+  const cache = options.cache || createCacheComponent(options.redisClient);
 
   return {
     users,

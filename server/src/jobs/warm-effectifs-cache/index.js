@@ -7,8 +7,8 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 
 const ROUTES_TO_WARM_UP = [
   "/api/dashboard/effectifs",
-  "/api/dashboard/effectifs-par-departement",
   "/api/dashboard/effectifs-par-niveau-formation",
+  "/api/dashboard/effectifs-par-departement",
 ];
 
 /*
@@ -36,11 +36,11 @@ runScript(async () => {
     date: new Date().toISOString(),
   };
 
-  await asyncForEach(ROUTES_TO_WARM_UP, async (route) => {
-    // warm up cache with effectifs on national level
-    logger.info(`Warming up cache for route ${route} on national level`);
-    await performRequest(route, commonParams);
+  // warm up cache with effectifs on national level (we don't need repartition by departement)
+  await performRequest(ROUTES_TO_WARM_UP[0], commonParams);
+  await performRequest(ROUTES_TO_WARM_UP[1], commonParams);
 
+  await asyncForEach(ROUTES_TO_WARM_UP, async (route) => {
     // warm up cache with effectifs for every regions
     await asyncForEach(regions, async (region) => {
       logger.info(`Warming up cache for route ${route} for region ${region.nom}`);
