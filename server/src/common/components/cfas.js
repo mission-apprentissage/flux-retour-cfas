@@ -10,7 +10,7 @@ module.exports = () => ({
   getFromUai,
 });
 
-const SEARCH_RESULTS_LIMIT = 100;
+const SEARCH_RESULTS_LIMIT = 50;
 
 /**
  * Returns list of CFA information matching passed criteria
@@ -20,6 +20,7 @@ const SEARCH_RESULTS_LIMIT = 100;
 const searchCfas = async (searchCriteria) => {
   const { searchTerm, ...otherCriteria } = searchCriteria;
   const matchQuery = {
+    uai_etablissement_valid: true,
     ...otherCriteria,
     ...(searchTerm
       ? {
