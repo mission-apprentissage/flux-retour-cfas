@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import React from "react";
 
 const BreadcrumbNav = ({ links }) => {
-  const currentLink = links.at(-1);
-  const otherLinks = links.slice(0, -1);
+  const currentLink = links.slice().pop(); // get the last element (can't use Array.at() because of Safari)
+  const otherLinks = links.slice(0, -1); // get all elements but the last one
   return (
     <Breadcrumb separator={<Box className="ri-arrow-right-s-line" />}>
       {otherLinks.map((item, index) => (
