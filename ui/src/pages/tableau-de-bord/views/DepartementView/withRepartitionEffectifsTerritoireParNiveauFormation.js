@@ -17,7 +17,11 @@ const withRepartitionEffectifsTerritoireParNiveauFormation = (Component) => {
       fetchEffectifsParNiveauFormation(requestFilters)
     );
     const repartitionEffectifs = data?.map((repartition) => {
-      return { niveauFormation: repartition.niveau_formation, effectifs: repartition.effectifs };
+      return {
+        niveauFormation: repartition.niveau_formation,
+        niveauFormationLibelle: repartition.niveau_formation_libelle,
+        effectifs: repartition.effectifs,
+      };
     });
 
     return <Component {...props} repartitionEffectifs={repartitionEffectifs} loading={isLoading} error={error} />;
