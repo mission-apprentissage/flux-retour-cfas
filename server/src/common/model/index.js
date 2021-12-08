@@ -20,7 +20,6 @@ module.exports = {
   CroisementCfasDeca: getModel("croisementCfasDeca"),
   Formation: getModel("formations"),
   Log: getModel("logs"),
-  Stats: getModel("stats"),
   CroisementVoeuxAffelnet: getModel("croisementVoeuxAffelnet"),
   RcoStatutCandidat: getModel("rcoStatutsCandidats"),
   DemandeLienAcces: getModel("demandeLienAcces"),
