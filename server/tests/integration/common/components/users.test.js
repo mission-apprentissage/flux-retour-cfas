@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const users = require("../../../../src/common/components/users");
 const { User } = require("../../../../src/common/model");
@@ -9,14 +9,14 @@ integrationTests(__filename, () => {
     const { createUser } = await users();
 
     const created = await createUser("user", "password");
-    assert.strictEqual(created.username, "user");
-    assert.strictEqual(created.permissions.length, 0);
-    assert.strictEqual(created.password.startsWith("$6$rounds="), true);
+    assert.equal(created.username, "user");
+    assert.equal(created.permissions.length, 0);
+    assert.equal(created.password.startsWith("$6$rounds="), true);
 
     const found = await User.findOne({ username: "user" });
-    assert.strictEqual(found.username, "user");
-    assert.strictEqual(found.permissions.length, 0);
-    assert.strictEqual(found.password.startsWith("$6$rounds="), true);
+    assert.equal(found.username, "user");
+    assert.equal(found.permissions.length, 0);
+    assert.equal(found.password.startsWith("$6$rounds="), true);
   });
 
   it("Permet de créer un utilisateur avec les droits d'admin", async () => {
@@ -25,8 +25,8 @@ integrationTests(__filename, () => {
     const user = await createUser("userAdmin", "password", { permissions: [apiRoles.administrator] });
     const found = await User.findOne({ username: "userAdmin" });
 
-    assert.strictEqual(user.permissions.includes(apiRoles.administrator), true);
-    assert.strictEqual(found.permissions.includes(apiRoles.administrator), true);
+    assert.equal(user.permissions.includes(apiRoles.administrator), true);
+    assert.equal(found.permissions.includes(apiRoles.administrator), true);
   });
 
   it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
@@ -39,13 +39,13 @@ integrationTests(__filename, () => {
     });
     const found = await User.findOne({ username: "userAdmin" });
 
-    assert.strictEqual(user.permissions.includes(tdbRoles.network), true);
-    assert.strictEqual(user.network === "test", true);
-    assert.strictEqual(user.email === "email@test.fr", true);
+    assert.equal(user.permissions.includes(tdbRoles.network), true);
+    assert.equal(user.network === "test", true);
+    assert.equal(user.email === "email@test.fr", true);
 
-    assert.strictEqual(found.permissions.includes(tdbRoles.network), true);
-    assert.strictEqual(found.network === "test", true);
-    assert.strictEqual(found.email === "email@test.fr", true);
+    assert.equal(found.permissions.includes(tdbRoles.network), true);
+    assert.equal(found.network === "test", true);
+    assert.equal(found.email === "email@test.fr", true);
   });
 
   it("Permet de supprimer un utilisateur", async () => {
@@ -55,7 +55,7 @@ integrationTests(__filename, () => {
     await removeUser("userToDelete");
 
     const found = await User.findOne({ username: "userToDelete" });
-    assert.strictEqual(found, null);
+    assert.equal(found, null);
   });
 
   it("Vérifie que le mot de passe est valide", async () => {
@@ -64,7 +64,7 @@ integrationTests(__filename, () => {
     await createUser("user", "password");
     const user = await authenticate("user", "password");
 
-    assert.strictEqual(user.username, "user");
+    assert.equal(user.username, "user");
   });
 
   it("Vérifie que le mot de passe est invalide", async () => {
@@ -73,7 +73,7 @@ integrationTests(__filename, () => {
     await createUser("user", "password");
     const user = await authenticate("user", "INVALID");
 
-    assert.strictEqual(user, null);
+    assert.equal(user, null);
   });
 
   it("Vérifie qu'on peut changer le mot de passe d'un utilisateur", async () => {
@@ -83,6 +83,6 @@ integrationTests(__filename, () => {
     await changePassword("user", "newPassword");
     const user = await authenticate("user", "newPassword");
 
-    assert.strictEqual(user.username, "user");
+    assert.equal(user.username, "user");
   });
 });

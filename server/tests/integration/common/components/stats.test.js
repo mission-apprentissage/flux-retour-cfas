@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const stats = require("../../../../src/common/components/stats");
@@ -27,7 +27,7 @@ integrationTests(__filename, () => {
     const nbStatuts = await statsModule.getNbDistinctCfasByUai();
 
     // Check stats value
-    assert.strictEqual(nbStatuts, 3);
+    assert.equal(nbStatuts, 3);
   });
 
   it("Permet de récupérer le nb d'etablissements distincts par siret", async () => {
@@ -48,6 +48,6 @@ integrationTests(__filename, () => {
     const nbCfas = await statsModule.getNbDistinctCfasBySiret();
 
     // Check stats value
-    assert.strictEqual(nbCfas, 3);
+    assert.equal(nbCfas, 3);
   });
 });

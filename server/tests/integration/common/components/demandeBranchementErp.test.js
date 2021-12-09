@@ -17,11 +17,11 @@ integrationTests(__filename, () => {
     await create(testDemande);
 
     const foundDemand = await DemandeBranchementErp.findOne({ erp: testDemande.erp }).lean();
-    assert.strictEqual(foundDemand.erp, testDemande.erp);
-    assert.strictEqual(foundDemand.nom_organisme, testDemande.nom_organisme);
-    assert.strictEqual(foundDemand.uai_organisme, testDemande.uai_organisme);
-    assert.strictEqual(foundDemand.email_demandeur, testDemande.email_demandeur);
-    assert.notStrictEqual(foundDemand.created_at, null);
+    assert.equal(foundDemand.erp, testDemande.erp);
+    assert.equal(foundDemand.nom_organisme, testDemande.nom_organisme);
+    assert.equal(foundDemand.uai_organisme, testDemande.uai_organisme);
+    assert.equal(foundDemand.email_demandeur, testDemande.email_demandeur);
+    assert.notEqual(foundDemand.created_at, null);
   });
 
   it("Permet de vérifier la création d'une demande de branchement ERP pas encore interfacé", async () => {
@@ -38,11 +38,11 @@ integrationTests(__filename, () => {
     await create(testDemande);
 
     const foundDemand = await DemandeBranchementErp.findOne({ erp: testDemande.erp }).lean();
-    assert.strictEqual(foundDemand.erp, testDemande.erp);
-    assert.strictEqual(foundDemand.nom_organisme, testDemande.nom_organisme);
-    assert.strictEqual(foundDemand.uai_organisme, testDemande.uai_organisme);
-    assert.strictEqual(foundDemand.email_demandeur, testDemande.email_demandeur);
-    assert.strictEqual(foundDemand.nb_apprentis, testDemande.nb_apprentis);
-    assert.notStrictEqual(foundDemand.created_at, null);
+    assert.equal(foundDemand.erp, testDemande.erp);
+    assert.equal(foundDemand.nom_organisme, testDemande.nom_organisme);
+    assert.equal(foundDemand.uai_organisme, testDemande.uai_organisme);
+    assert.equal(foundDemand.email_demandeur, testDemande.email_demandeur);
+    assert.equal(foundDemand.nb_apprentis, testDemande.nb_apprentis);
+    assert.notEqual(foundDemand.created_at, null);
   });
 });
