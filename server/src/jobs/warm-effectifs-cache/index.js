@@ -37,6 +37,7 @@ runScript(async () => {
   };
 
   // warm up cache with effectifs on national level (we don't need repartition by departement)
+  logger.info(`Warming up cache for national effectifs`);
   await performRequest(ROUTES_TO_WARM_UP[0], commonParams);
   await performRequest(ROUTES_TO_WARM_UP[1], commonParams);
 
@@ -49,6 +50,6 @@ runScript(async () => {
         etablissement_num_region: region.code,
       });
     });
-    logger.info("END", jobNames.warmUpCache);
   });
+  logger.info("END", jobNames.warmUpCache);
 }, jobNames.warmUpCache);
