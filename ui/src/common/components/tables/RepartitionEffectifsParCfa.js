@@ -1,4 +1,4 @@
-import { Box, Tbody, Td, Tr } from "@chakra-ui/react";
+import { Box, Link, Tbody, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -24,7 +24,13 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
           return (
             <Tr key={"headerRow_" + index}>
               <Td color="grey.800">
-                <Box>{nom_etablissement}</Box>
+                <Link
+                  onClick={() => filtersContext.setters.setCfa({ nom_etablissement, uai_etablissement })}
+                  color="bluefrance"
+                  whiteSpace="nowrap"
+                >
+                  {nom_etablissement}
+                </Link>
                 <Box fontSize="omega">UAI : {uai_etablissement}</Box>
               </Td>
               <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
@@ -65,6 +71,7 @@ RepartitionEffectifsParCfa.propTypes = {
       }).isRequired,
     }).isRequired
   ),
+  // onCfaClick: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   error: PropTypes.object,
 };
