@@ -17,7 +17,7 @@ const ROUTES_TO_WARM_UP = [
 runScript(async () => {
   logger.info("START", jobNames.warmUpCache);
 
-  const response = await axios.post("/api/login", {
+  const response = await axios.post(`${config.publicUrl}/api/login`, {
     username: config.users.defaultAdmin.name,
     password: config.users.defaultAdmin.password,
   });
