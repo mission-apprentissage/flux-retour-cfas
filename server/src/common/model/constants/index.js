@@ -136,7 +136,6 @@ const jobNames = {
   exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
   cfasCroisementDeca: "cfas-croisement-cfas-deca",
-  calculateStats: "calculate-stats",
   warmUpCache: "warm-up-cache",
 };
 
@@ -160,26 +159,6 @@ const duplicatesTypesCodes = {
     name: "Nom",
     code: 4,
   },
-};
-
-/**
- * Types de stats possibles
- */
-const statsTypes = {
-  uaiStats: "UaiStats",
-  tdbStats: "TdbStats",
-  networksStats: "NetworksStats",
-  importDatesStats: "ImportDatesStats",
-  siretsNotFoundTco: "SiretsNotFoundInTCO",
-};
-
-/**
- * Type de source des données
- */
-const dataSource = {
-  all: "all",
-  ymag: "ymag",
-  gesti: "gesti",
 };
 
 const statutsCandidatsStringFields = [
@@ -280,8 +259,6 @@ module.exports = {
   jobNames,
   erps,
   duplicatesTypesCodes,
-  statsTypes,
-  dataSource,
   regions,
   statutsCandidatsStringFields,
   jobEventStatuts: jobEventActions,

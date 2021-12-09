@@ -13,7 +13,6 @@ const rcoRoute = require("./routes/rco");
 const statutCandidatsRoute = require("./routes/statut-candidats");
 const loginRoute = require("./routes/login");
 const loginCfaRoute = require("./routes/login-cfa.route");
-const statsRoute = require("./routes/stats");
 const userEventsRoute = require("./routes/userEvents");
 const configRoute = require("./routes/config");
 const referentielRoute = require("./routes/referentiel");
@@ -63,7 +62,6 @@ module.exports = async (components) => {
   app.use("/api/dashboard", requireJwtAuthentication, dashboardRoute(components));
 
   // admin routes
-  app.use("/api/stats", requireJwtAuthentication, adminOnly, statsRoute(components));
   app.use("/api/cache", requireJwtAuthentication, adminOnly, cacheRouter(components));
   app.use("/api/userEvents", requireJwtAuthentication, adminOnly, userEventsRoute(components));
   app.use("/api/config", requireJwtAuthentication, adminOnly, configRoute());

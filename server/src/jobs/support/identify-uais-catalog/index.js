@@ -1,8 +1,8 @@
 const cliProgress = require("cli-progress");
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
-const { jobNames, statsTypes } = require("../../../common/model/constants/index");
-const { StatutCandidat, Stats } = require("../../../common/model");
+const { jobNames } = require("../../../common/model/constants/index");
+const { StatutCandidat } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { getFormations2021 } = require("../../../common/apis/apiCatalogueMna");
 
@@ -76,23 +76,6 @@ runScript(async () => {
   });
 
   loadingBar.stop();
-
-  // Add stats entry
-  await new Stats({
-    type: statsTypes.uaiStats,
-    date: new Date(),
-    data: {
-      nbDistinctUais: allDistinctUais.length,
-      uaisNotFoundCatalog,
-      nbNotFoundInCatalog: uaisNotFoundCatalog.length,
-      uaisAsFormation,
-      nbUaisFormation: uaisAsFormation.length,
-      uaisAsFormateur,
-      nbUaisFormateur: uaisAsFormateur.length,
-      uaisAsGestionnaire,
-      nbUaisGestionnaire: uaisAsGestionnaire.length,
-    },
-  }).save();
 
   logger.info(`Nb d'UAIs différents dans les statuts : ${allDistinctUais.length}`);
   logger.info(`Nb d'UAIs responsable non trouvés dans le catalogue : ${uaisNotFoundCatalog.length}`);
