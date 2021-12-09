@@ -14,12 +14,6 @@ httpTests(__filename, ({ startServer }) => {
   });
 
   describe("POST /cfas/search", () => {
-    it("sends a 400 HTTP response when no body provided", async () => {
-      const response = await httpClient.post("/api/cfas/search", {});
-
-      assert.equal(response.status, 400);
-    });
-
     it("sends a 200 HTTP empty response when no match", async () => {
       const response = await httpClient.post("/api/cfas/search", { searchTerm: "blabla" });
 
@@ -30,6 +24,7 @@ httpTests(__filename, ({ startServer }) => {
     it("sends a 200 HTTP response with results when match", async () => {
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
+        uai_etablissement_valid: true,
         nom_etablissement: "FACULTE SCIENCES NANCY",
         nom_etablissement_tokenized: buildTokenizedString("FACULTE SCIENCES NANCY", 3),
       }).save();

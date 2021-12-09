@@ -35,6 +35,10 @@ const setSousEtablissement = (state, sousEtablissement) => {
   return { ...state, sousEtablissement };
 };
 
+const resetTerritoire = (state) => {
+  return { ...state, departement: null, region: null };
+};
+
 const stateToQueryString = (state) => {
   return qs.stringify(
     omitNullishValues({
@@ -105,6 +109,7 @@ export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }
     setReseau: (value) => updateUrlWithState(setReseau(state, value)),
     setFormation: (value) => updateUrlWithState(setFormation(state, value)),
     setSousEtablissement: (value) => updateUrlWithState(setSousEtablissement(state, value)),
+    resetTerritoire: () => updateUrlWithState(resetTerritoire(state)),
   };
 
   const contextValue = {

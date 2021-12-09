@@ -4,8 +4,9 @@ import React, { useState } from "react";
 
 import { FilterOption, SearchInput } from "../../../../../common/components";
 import { stringContains } from "../../../../../common/utils/stringUtils";
+import TouteLaFranceOption from "./TouteLaFranceOption";
 
-const DepartementOptions = ({ departements, onDepartementClick, currentFilter }) => {
+const DepartementOptions = ({ departements, onDepartementClick, onTouteLaFranceClick, currentFilter }) => {
   const [departementSearchTerm, setDepartementSearchTerm] = useState("");
 
   const filteredDepartements = departementSearchTerm
@@ -20,6 +21,7 @@ const DepartementOptions = ({ departements, onDepartementClick, currentFilter })
         onChange={setDepartementSearchTerm}
       />
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
+        <TouteLaFranceOption onClick={onTouteLaFranceClick} />
         {filteredDepartements.map((filter) => (
           <FilterOption
             key={filter.code}
@@ -42,6 +44,7 @@ DepartementOptions.propTypes = {
     }).isRequired
   ).isRequired,
   onDepartementClick: PropTypes.func.isRequired,
+  onTouteLaFranceClick: PropTypes.func.isRequired,
   currentFilter: PropTypes.shape({
     nom: PropTypes.string.isRequired,
     code: PropTypes.string.isRequired,
