@@ -1,16 +1,11 @@
 FROM node:16.6.0-stretch
 
-# handle .npmrc : copy local one for dev, create one using NPM_TOKEN arg for production & recette
-ARG NPM_TOKEN
-RUN touch .npmrc && echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN\n@mission-apprentissage:registry=https://npm.pkg.github.com" > /tmp/.npmrc ;
-
 #Install and cache node_modules
 COPY package.json yarn.lock /tmp/
 RUN cd /tmp && \
     yarn install --frozen-lockfile && \
     mkdir -p /app && \
-    mv /tmp/node_modules /app/ && \
-    rm -f .npmrc
+    mv /tmp/node_modules /app/ && 
 
 COPY ./ /app
 WORKDIR /app
