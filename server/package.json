@@ -62,7 +62,7 @@
     "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
     "cache:warmup": "node -r dotenv/config src/jobs/warm-effectifs-cache/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
-    "identify:antidated-history-statuts": "node -r dotenv/config src/jobs/identify-statuts-history-antidated/index.js",
+    "identify:bad-history-statuts": "node -r dotenv/config src/jobs/identify-bad-statuts-history/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down",

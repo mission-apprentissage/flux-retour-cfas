@@ -18,6 +18,7 @@ module.exports = () => ({
   getEffectifsCountByDepartementAtDate,
   getContratsCountAtDate,
   getStatutsWithHistoryDateUnordered,
+  getStatutsWithBadDate,
 });
 
 /*
@@ -564,6 +565,30 @@ const getStatutsWithHistoryDateUnordered = async () => {
     },
     // Filtre sur isHistoryDateOrdered = false
     { $match: { isHistoryDateOrdered: false } },
+  ];
+
+  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  return result;
+};
+
+const getStatutsWithBadDate = async () => {
+  const aggregationPipeline = [
+    // Filtrage historique > 1 élement
+    { $match: { "historique_statut_apprenant.1": { $exists: true } } },
+    // Ajout d'un flag hasHistoryBadDate - fonction d'identification des historiques avec date invalide (< année 2000)
+    {
+      $addFields: {
+        hasHistoryBadDate: {
+          $function: {
+            body: "function(historique_statut_apprenant){return historique_statut_apprenant.some((item) => item.date_statut <= new Date(`2000-01-01`))}",
+            args: ["$historique_statut_apprenant"],
+            lang: "js",
+          },
+        },
+      },
+    },
+    // Filtre sur hasHistoryBadDate
+    { $match: { hasHistoryBadDate: true } },
   ];
 
   const result = await StatutCandidat.aggregate(aggregationPipeline);
