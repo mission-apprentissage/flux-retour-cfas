@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const { UserEvent } = require("../../../src/common/model");
 const { apiRoles } = require("../../../src/common/roles");
@@ -28,7 +28,7 @@ httpTests(__filename, ({ startServer }) => {
       }
     );
 
-    assert.strictEqual(response.status, 200);
+    assert.equal(response.status, 200);
     // assert.ok(response.data.lastDate);
   });
 });

@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const integrationTests = require("../../utils/integrationTests");
 const { StatutCandidat, User } = require("../../../src/common/model");
 const { clearStatutsCandidats, clearAll } = require("../../../src/jobs/clear/utils/clearUtils");
@@ -6,12 +6,12 @@ const { clearStatutsCandidats, clearAll } = require("../../../src/jobs/clear/uti
 integrationTests(__filename, () => {
   it("Vérifie la suppression des statuts candidats depuis le job", async () => {
     await clearStatutsCandidats();
-    assert.deepStrictEqual((await StatutCandidat.countDocuments({})) === 0, true);
+    assert.deepEqual((await StatutCandidat.countDocuments({})) === 0, true);
   });
 
   it("Vérifie la suppression de toutes les données depuis le job", async () => {
     await clearAll();
-    assert.deepStrictEqual((await StatutCandidat.countDocuments({})) === 0, true);
-    assert.deepStrictEqual((await User.countDocuments({})) === 0, true);
+    assert.deepEqual((await StatutCandidat.countDocuments({})) === 0, true);
+    assert.deepEqual((await User.countDocuments({})) === 0, true);
   });
 });
