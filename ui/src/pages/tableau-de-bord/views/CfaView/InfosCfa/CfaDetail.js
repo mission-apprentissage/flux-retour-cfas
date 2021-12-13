@@ -57,7 +57,7 @@ const CfaDetail = ({ infosCfa, loading, error }) => {
             {reseaux.join(", ")}
           </Text>
         )}
-        <DomainesMetiers domainesMetiers={domainesMetiers} />
+        {domainesMetiers && <DomainesMetiers domainesMetiers={domainesMetiers} />}
       </Highlight>
     );
   }

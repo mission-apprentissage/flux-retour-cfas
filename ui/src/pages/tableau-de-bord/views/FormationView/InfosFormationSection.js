@@ -38,7 +38,7 @@ const InfosFormationSection = ({ infosFormation, loading, error }) => {
         <Heading color="white" fontSize="gamma" marginTop="1w">
           {infosFormation.libelle}
         </Heading>
-        <DomainesMetiers domainesMetiers={infosFormation.metiers} />
+        {infosFormation.metiers && <DomainesMetiers domainesMetiers={infosFormation.metiers} />}
       </>
     );
   }
@@ -50,7 +50,7 @@ InfosFormationSection.propTypes = {
   infosFormation: PropTypes.shape({
     libelle: PropTypes.string.isRequired,
     cfd: PropTypes.string.isRequired,
-    metiers: PropTypes.arrayOf(PropTypes.string).isRequired,
+    metiers: PropTypes.arrayOf(PropTypes.string),
   }),
   loading: PropTypes.bool,
   error: PropTypes.object,
