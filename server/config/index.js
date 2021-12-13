@@ -7,9 +7,6 @@ module.exports = {
   mongodb: {
     uri: env.get("FLUX_RETOUR_CFAS_MONGODB_URI").required().asString(),
   },
-  elasticSearch: {
-    uri: env.get("FLUX_RETOUR_CFAS_ELASTIC_SEARCH_URI").asString(),
-  },
   auth: {
     passwordHashRounds: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS").asInt(),
     user: {

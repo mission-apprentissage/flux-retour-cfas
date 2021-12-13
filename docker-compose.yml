@@ -1,45 +1,10 @@
 version: "2.4"
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
-    container_name: flux_retour_cfas_elastic_search
-    volumes:
-      - flux_retour_cfas_elastic_search_data:/data
-    ports:
-      - 9200:9200
-    environment:
-      - ES_JAVA_OPTS=-Xmx512m -Xms512m
-      - cluster.name=docker-cluster
-      - discovery.type=single-node
-      - discovery.zen.minimum_master_nodes=1
-      - network.host=0.0.0.0
-    networks:
-      - flux_retour_cfas_network
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana-oss:7.10.2
-    container_name: flux_retour_cfas_kibana
-    depends_on:
-      - elasticsearch
-    mem_limit: 256m
-    environment:
-      - SERVER_BASEPATH=/kibana
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - 5601:5601
-    volumes:
-      - ./elasticsearch/kibana.yml:/data
-    networks:
-      - flux_retour_cfas_network
-
   reverse_proxy:
     image: flux_retour_cfas_reverse_proxy
     container_name: flux_retour_cfas_reverse_proxy
     build:
       context: reverse_proxy
-      args:
-        - KIBANA_BASIC_AUTH=${KIBANA_BASIC_AUTH}
     mem_limit: 256m
     restart: unless-stopped
     ports:
@@ -74,7 +39,6 @@ services:
     environment:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
       - FLUX_RETOUR_CFAS_OUTPUT_DIR=/data
-      - FLUX_RETOUR_CFAS_ELASTIC_SEARCH_URI=http://elasticsearch:9200
       - FLUX_RETOUR_CFAS_REDIS_URI=redis://redis:6379
 
   mongodb:
