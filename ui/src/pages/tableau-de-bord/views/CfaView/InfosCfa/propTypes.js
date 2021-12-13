@@ -10,6 +10,6 @@ export const infosCfaPropType = PropTypes.shape({
   ).isRequired,
   libelleLong: PropTypes.string.isRequired,
   reseaux: PropTypes.arrayOf(PropTypes.string).isRequired,
-  domainesMetiers: PropTypes.arrayOf(PropTypes.string).isRequired,
+  domainesMetiers: PropTypes.arrayOf(PropTypes.string),
   adresse: PropTypes.string,
 });
