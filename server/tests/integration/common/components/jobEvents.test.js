@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const jobEvents = require("../../../../src/common/components/jobEvents");
 const { JobEvent } = require("../../../../src/common/model");
@@ -28,7 +28,7 @@ integrationTests(__filename, () => {
     }).save();
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
-    assert.strictEqual(isEnded, true);
+    assert.equal(isEnded, true);
   });
 
   it("Permet de vérifier si le job courant n'est pas dans l'action terminée", async () => {
@@ -48,6 +48,6 @@ integrationTests(__filename, () => {
     }).save();
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
-    assert.strictEqual(isEnded, false);
+    assert.equal(isEnded, false);
   });
 });

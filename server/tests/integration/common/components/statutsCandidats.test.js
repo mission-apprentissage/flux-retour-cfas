@@ -93,19 +93,19 @@ integrationTests(__filename, () => {
         annee_scolaire: randomStatut.annee_scolaire,
       });
 
-      assert.notDeepStrictEqual(found, null);
-      assert.strictEqual(found.ine_apprenant, randomStatut.ine_apprenant);
-      assert.strictEqual(found.nom_apprenant, randomStatut.nom_apprenant);
-      assert.strictEqual(found.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.strictEqual(found.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
-      assert.strictEqual(found.email_contact, randomStatut.email_contact);
-      assert.strictEqual(found.formation_cfd, randomStatut.formation_cfd);
-      assert.strictEqual(found.libelle_court_formation, randomStatut.libelle_court_formation);
-      assert.strictEqual(found.libelle_long_formation, randomStatut.libelle_long_formation);
-      assert.strictEqual(found.uai_etablissement, randomStatut.uai_etablissement);
-      assert.strictEqual(found.siret_etablissement, randomStatut.siret_etablissement);
-      assert.strictEqual(found.nom_etablissement, randomStatut.nom_etablissement);
-      assert.strictEqual(found.statut_apprenant, randomStatut.statut_apprenant);
+      assert.notEqual(found, null);
+      assert.equal(found.ine_apprenant, randomStatut.ine_apprenant);
+      assert.equal(found.nom_apprenant, randomStatut.nom_apprenant);
+      assert.equal(found.prenom_apprenant, randomStatut.prenom_apprenant);
+      assert.equal(found.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
+      assert.equal(found.email_contact, randomStatut.email_contact);
+      assert.equal(found.formation_cfd, randomStatut.formation_cfd);
+      assert.equal(found.libelle_court_formation, randomStatut.libelle_court_formation);
+      assert.equal(found.libelle_long_formation, randomStatut.libelle_long_formation);
+      assert.equal(found.uai_etablissement, randomStatut.uai_etablissement);
+      assert.equal(found.siret_etablissement, randomStatut.siret_etablissement);
+      assert.equal(found.nom_etablissement, randomStatut.nom_etablissement);
+      assert.equal(found.statut_apprenant, randomStatut.statut_apprenant);
       assert.equal(found.annee_scolaire, randomStatut.annee_scolaire);
     });
 
@@ -123,7 +123,7 @@ integrationTests(__filename, () => {
         uai_etablissement: toAdd.uai_etablissement,
         annee_scolaire: toAdd.annee_scolaire,
       });
-      assert.strictEqual(found, null);
+      assert.equal(found, null);
     });
 
     it("Vérifie la mauvaise récupération d'un statut sur mauvais prenom", async () => {
@@ -140,7 +140,7 @@ integrationTests(__filename, () => {
         uai_etablissement: toAdd.uai_etablissement,
         annee_scolaire: toAdd.annee_scolaire,
       });
-      assert.strictEqual(found, null);
+      assert.equal(found, null);
     });
 
     it("Vérifie la mauvaise récupération d'un statut sur un mauvais formation_cfd", async () => {
@@ -157,7 +157,7 @@ integrationTests(__filename, () => {
         uai_etablissement: toAdd.uai_etablissement,
         annee_scolaire: toAdd.annee_scolaire,
       });
-      assert.deepStrictEqual(found, null);
+      assert.equal(found, null);
     });
 
     it("Vérifie la mauvaise récupération d'un statut sur mauvais uai_etablissement", async () => {
@@ -174,7 +174,7 @@ integrationTests(__filename, () => {
         uai_etablissement: "BAD_UAI",
         annee_scolaire: toAdd.annee_scolaire,
       });
-      assert.strictEqual(found, null);
+      assert.equal(found, null);
     });
   });
 
@@ -186,71 +186,71 @@ integrationTests(__filename, () => {
       await addOrUpdateStatuts(statutsTest);
 
       // Checks addOrUpdateStatuts method
-      assert.strictEqual(await StatutCandidat.countDocuments({}), statutsTest.length);
+      assert.equal(await StatutCandidat.countDocuments({}), statutsTest.length);
       const { added, updated } = await addOrUpdateStatuts(statutsTestUpdate);
 
       // Check added
-      assert.strictEqual(added.length, 1);
+      assert.equal(added.length, 1);
       const foundAdded = await StatutCandidat.findById(added[0]._id).lean();
-      assert.strictEqual(foundAdded.ine_apprenant, statutsTestUpdate[3].ine_apprenant);
-      assert.strictEqual(foundAdded.nom_apprenant, statutsTestUpdate[3].nom_apprenant);
-      assert.strictEqual(foundAdded.prenom_apprenant, statutsTestUpdate[3].prenom_apprenant);
-      assert.strictEqual(foundAdded.ne_pas_solliciter, statutsTestUpdate[3].ne_pas_solliciter);
-      assert.strictEqual(foundAdded.email_contact, statutsTestUpdate[3].email_contact);
-      assert.strictEqual(foundAdded.formation_cfd, statutsTestUpdate[3].formation_cfd);
-      assert.strictEqual(foundAdded.uai_etablissement, statutsTestUpdate[3].uai_etablissement);
-      assert.strictEqual(foundAdded.siret_etablissement, statutsTestUpdate[3].siret_etablissement);
-      assert.strictEqual(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
-      assert.strictEqual(foundAdded.updated_at, null);
-      assert.strictEqual(foundAdded.annee_formation, statutsTestUpdate[3].annee_formation);
+      assert.equal(foundAdded.ine_apprenant, statutsTestUpdate[3].ine_apprenant);
+      assert.equal(foundAdded.nom_apprenant, statutsTestUpdate[3].nom_apprenant);
+      assert.equal(foundAdded.prenom_apprenant, statutsTestUpdate[3].prenom_apprenant);
+      assert.equal(foundAdded.ne_pas_solliciter, statutsTestUpdate[3].ne_pas_solliciter);
+      assert.equal(foundAdded.email_contact, statutsTestUpdate[3].email_contact);
+      assert.equal(foundAdded.formation_cfd, statutsTestUpdate[3].formation_cfd);
+      assert.equal(foundAdded.uai_etablissement, statutsTestUpdate[3].uai_etablissement);
+      assert.equal(foundAdded.siret_etablissement, statutsTestUpdate[3].siret_etablissement);
+      assert.equal(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
+      assert.equal(foundAdded.updated_at, null);
+      assert.equal(foundAdded.annee_formation, statutsTestUpdate[3].annee_formation);
       assert.equal(foundAdded.annee_scolaire, statutsTestUpdate[3].annee_scolaire);
       assert.deepEqual(foundAdded.periode_formation, statutsTestUpdate[3].periode_formation);
 
       // Check updated
-      assert.strictEqual(updated.length, 3);
+      assert.equal(updated.length, 3);
 
       const firstUpdated = await StatutCandidat.findById(updated[0]._id).lean();
-      assert.strictEqual(firstUpdated.ine_apprenant, statutsTestUpdate[0].ine_apprenant);
-      assert.strictEqual(firstUpdated.nom_apprenant, statutsTestUpdate[0].nom_apprenant);
-      assert.strictEqual(firstUpdated.prenom_apprenant, statutsTestUpdate[0].prenom_apprenant);
-      assert.strictEqual(firstUpdated.ne_pas_solliciter, statutsTestUpdate[0].ne_pas_solliciter);
-      assert.strictEqual(firstUpdated.email_contact, statutsTestUpdate[0].email_contact);
-      assert.strictEqual(firstUpdated.formation_cfd, statutsTestUpdate[0].formation_cfd);
-      assert.strictEqual(firstUpdated.libelle_court_formation, statutsTestUpdate[0].libelle_court_formation);
-      assert.strictEqual(firstUpdated.libelle_long_formation, statutsTestUpdate[0].libelle_long_formation);
-      assert.strictEqual(firstUpdated.uai_etablissement, statutsTestUpdate[0].uai_etablissement);
-      assert.strictEqual(firstUpdated.siret_etablissement, statutsTestUpdate[0].siret_etablissement);
-      assert.strictEqual(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
-      assert.strictEqual(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
+      assert.equal(firstUpdated.ine_apprenant, statutsTestUpdate[0].ine_apprenant);
+      assert.equal(firstUpdated.nom_apprenant, statutsTestUpdate[0].nom_apprenant);
+      assert.equal(firstUpdated.prenom_apprenant, statutsTestUpdate[0].prenom_apprenant);
+      assert.equal(firstUpdated.ne_pas_solliciter, statutsTestUpdate[0].ne_pas_solliciter);
+      assert.equal(firstUpdated.email_contact, statutsTestUpdate[0].email_contact);
+      assert.equal(firstUpdated.formation_cfd, statutsTestUpdate[0].formation_cfd);
+      assert.equal(firstUpdated.libelle_court_formation, statutsTestUpdate[0].libelle_court_formation);
+      assert.equal(firstUpdated.libelle_long_formation, statutsTestUpdate[0].libelle_long_formation);
+      assert.equal(firstUpdated.uai_etablissement, statutsTestUpdate[0].uai_etablissement);
+      assert.equal(firstUpdated.siret_etablissement, statutsTestUpdate[0].siret_etablissement);
+      assert.equal(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
+      assert.equal(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
       assert.equal(firstUpdated.annee_scolaire, statutsTestUpdate[0].annee_scolaire);
       assert.ok(firstUpdated.date_mise_a_jour_statut);
       assert.ok(firstUpdated.updated_at);
 
       const secondUpdated = await StatutCandidat.findById(updated[1]._id).lean();
-      assert.strictEqual(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
-      assert.strictEqual(secondUpdated.nom_apprenant, statutsTestUpdate[1].nom_apprenant);
-      assert.strictEqual(secondUpdated.prenom_apprenant, statutsTestUpdate[1].prenom_apprenant);
-      assert.strictEqual(secondUpdated.ne_pas_solliciter, statutsTestUpdate[1].ne_pas_solliciter);
-      assert.strictEqual(secondUpdated.email_contact, statutsTestUpdate[1].email_contact);
-      assert.strictEqual(secondUpdated.formation_cfd, statutsTestUpdate[1].formation_cfd);
-      assert.strictEqual(secondUpdated.uai_etablissement, statutsTestUpdate[1].uai_etablissement);
-      assert.strictEqual(secondUpdated.siret_etablissement, statutsTestUpdate[1].siret_etablissement);
-      assert.strictEqual(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
-      assert.strictEqual(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
+      assert.equal(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
+      assert.equal(secondUpdated.nom_apprenant, statutsTestUpdate[1].nom_apprenant);
+      assert.equal(secondUpdated.prenom_apprenant, statutsTestUpdate[1].prenom_apprenant);
+      assert.equal(secondUpdated.ne_pas_solliciter, statutsTestUpdate[1].ne_pas_solliciter);
+      assert.equal(secondUpdated.email_contact, statutsTestUpdate[1].email_contact);
+      assert.equal(secondUpdated.formation_cfd, statutsTestUpdate[1].formation_cfd);
+      assert.equal(secondUpdated.uai_etablissement, statutsTestUpdate[1].uai_etablissement);
+      assert.equal(secondUpdated.siret_etablissement, statutsTestUpdate[1].siret_etablissement);
+      assert.equal(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
+      assert.equal(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
       assert.equal(secondUpdated.annee_scolaire, statutsTestUpdate[1].annee_scolaire);
       assert.ok(secondUpdated.date_mise_a_jour_statut);
       assert.ok(secondUpdated.updated_at);
 
       const thirdUpdated = await StatutCandidat.findById(updated[2]._id).lean();
-      assert.strictEqual(thirdUpdated.nom_apprenant, statutsTestUpdate[2].nom_apprenant);
-      assert.strictEqual(thirdUpdated.prenom_apprenant, statutsTestUpdate[2].prenom_apprenant);
-      assert.strictEqual(thirdUpdated.ne_pas_solliciter, statutsTestUpdate[2].ne_pas_solliciter);
-      assert.strictEqual(thirdUpdated.email_contact, statutsTestUpdate[2].email_contact);
-      assert.strictEqual(thirdUpdated.formation_cfd, statutsTestUpdate[2].formation_cfd);
-      assert.strictEqual(thirdUpdated.uai_etablissement, statutsTestUpdate[2].uai_etablissement);
-      assert.strictEqual(thirdUpdated.siret_etablissement, statutsTestUpdate[2].siret_etablissement);
-      assert.strictEqual(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
-      assert.strictEqual(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
+      assert.equal(thirdUpdated.nom_apprenant, statutsTestUpdate[2].nom_apprenant);
+      assert.equal(thirdUpdated.prenom_apprenant, statutsTestUpdate[2].prenom_apprenant);
+      assert.equal(thirdUpdated.ne_pas_solliciter, statutsTestUpdate[2].ne_pas_solliciter);
+      assert.equal(thirdUpdated.email_contact, statutsTestUpdate[2].email_contact);
+      assert.equal(thirdUpdated.formation_cfd, statutsTestUpdate[2].formation_cfd);
+      assert.equal(thirdUpdated.uai_etablissement, statutsTestUpdate[2].uai_etablissement);
+      assert.equal(thirdUpdated.siret_etablissement, statutsTestUpdate[2].siret_etablissement);
+      assert.equal(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
+      assert.equal(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
       assert.equal(thirdUpdated.annee_scolaire, statutsTestUpdate[2].annee_scolaire);
       assert.ok(thirdUpdated.date_mise_a_jour_statut);
       assert.ok(thirdUpdated.updated_at);
@@ -318,23 +318,23 @@ integrationTests(__filename, () => {
 
       const statutWithoutSiret = { ...createRandomStatutCandidat(), siret_etablissement: null };
       const result = await addOrUpdateStatuts([statutWithoutSiret]);
-      assert.strictEqual(result.added.length, 1);
-      assert.strictEqual(result.updated.length, 0);
+      assert.equal(result.added.length, 1);
+      assert.equal(result.updated.length, 0);
 
       // send the same statut but with a siret
       const sameStatutWithSiret = { ...statutWithoutSiret, siret_etablissement: "12312312300099" };
       const { added, updated } = await addOrUpdateStatuts([sameStatutWithSiret]);
 
       // statut should have been updated
-      assert.strictEqual(added.length, 0, "added problem");
-      assert.strictEqual(updated.length, 1);
+      assert.equal(added.length, 0, "added problem");
+      assert.equal(updated.length, 1);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 1);
+      assert.equal(count, 1);
 
       // check in db
       const found = await StatutCandidat.findById(result.added[0]._id);
-      assert.deepStrictEqual(found.siret_etablissement, "12312312300099");
-      assert.notStrictEqual(found.updated_at, null);
+      assert.equal(found.siret_etablissement, "12312312300099");
+      assert.notEqual(found.updated_at, null);
     });
 
     it("Vérifie qu'un changement sur le champ periode_formation d'un statut existant est considéré comme un update", async () => {
@@ -342,18 +342,18 @@ integrationTests(__filename, () => {
 
       const statutWithoutPeriodeFormation = createRandomStatutCandidat({ periode_formation: null });
       const result = await addOrUpdateStatuts([statutWithoutPeriodeFormation]);
-      assert.strictEqual(result.added.length, 1);
-      assert.strictEqual(result.updated.length, 0);
+      assert.equal(result.added.length, 1);
+      assert.equal(result.updated.length, 0);
 
       // send the same statut but with a different periode_formation
       const sameStatutWithPeriodeFormation = { ...statutWithoutPeriodeFormation, periode_formation: [2021, 2022] };
       const { added, updated } = await addOrUpdateStatuts([sameStatutWithPeriodeFormation]);
 
       // statut should have been updated
-      assert.strictEqual(added.length, 0);
-      assert.strictEqual(updated.length, 1);
+      assert.equal(added.length, 0);
+      assert.equal(updated.length, 1);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 1);
+      assert.equal(count, 1);
 
       // check in db
       const found = await StatutCandidat.findById(result.added[0]._id).lean();
@@ -366,22 +366,22 @@ integrationTests(__filename, () => {
 
       const statutWithoutAnneeFormation = createRandomStatutCandidat({ annee_formation: null });
       const result = await addOrUpdateStatuts([statutWithoutAnneeFormation]);
-      assert.strictEqual(result.added.length, 1);
-      assert.strictEqual(result.updated.length, 0);
+      assert.equal(result.added.length, 1);
+      assert.equal(result.updated.length, 0);
 
       // send the same statut but with a different annee_formation
       const sameStatutWithAnneeFormation = { ...statutWithoutAnneeFormation, annee_formation: 2020 };
       const { added, updated } = await addOrUpdateStatuts([sameStatutWithAnneeFormation]);
 
       // statut should have been updated
-      assert.strictEqual(added.length, 0);
-      assert.strictEqual(updated.length, 1);
+      assert.equal(added.length, 0);
+      assert.equal(updated.length, 1);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 1);
+      assert.equal(count, 1);
 
       // check in db
       const found = await StatutCandidat.findById(result.added[0]._id).lean();
-      assert.strictEqual(found.annee_formation, 2020);
+      assert.equal(found.annee_formation, 2020);
       assert.notEqual(found.updated_at, null);
     });
 
@@ -403,23 +403,23 @@ integrationTests(__filename, () => {
         uai_etablissement: validUai,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
 
       // send the same statut information but with a different nom
       const sameStatutInformationWithDifferentNom = { ...uniqueStatutToCreate, nom_apprenant: sampleNom2 };
       const secondCallResult = await addOrUpdateStatuts([sameStatutInformationWithDifferentNom]);
 
       // a new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 1);
-      assert.strictEqual(secondCallResult.updated.length, 0);
+      assert.equal(secondCallResult.added.length, 1);
+      assert.equal(secondCallResult.updated.length, 0);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 2);
+      assert.equal(count, 2);
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.nom_apprenant, sampleNom);
-      assert.strictEqual(found.updated_at, null);
+      assert.equal(found.nom_apprenant, sampleNom);
+      assert.equal(found.updated_at, null);
     });
 
     it("Vérifie que prenom_apprenant est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un prenom_apprenant différent)", async () => {
@@ -440,23 +440,23 @@ integrationTests(__filename, () => {
         uai_etablissement: validUai,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
 
       // send the same statut but with a different prenom
       const sameStatutWithDifferentPrenom = { ...uniqueStatutToCreate, prenom_apprenant: samplePrenom2 };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentPrenom]);
 
       // a new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 1);
-      assert.strictEqual(secondCallResult.updated.length, 0);
+      assert.equal(secondCallResult.added.length, 1);
+      assert.equal(secondCallResult.updated.length, 0);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 2);
+      assert.equal(count, 2);
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.prenom_apprenant, samplePrenom);
-      assert.strictEqual(found.updated_at, null);
+      assert.equal(found.prenom_apprenant, samplePrenom);
+      assert.equal(found.updated_at, null);
     });
 
     it("Vérifie que formation_cfd est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un formation_cfd différent)", async () => {
@@ -477,23 +477,23 @@ integrationTests(__filename, () => {
         uai_etablissement: validUai,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
 
       // send the same statut but with a different cfd
       const sameStatutWithDifferentCfd = { ...uniqueStatutToCreate, formation_cfd: validCfd2 };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentCfd]);
 
       // a new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 1);
-      assert.strictEqual(secondCallResult.updated.length, 0);
+      assert.equal(secondCallResult.added.length, 1);
+      assert.equal(secondCallResult.updated.length, 0);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 2);
+      assert.equal(count, 2);
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.formation_cfd, validCfd);
-      assert.strictEqual(found.updated_at, null);
+      assert.equal(found.formation_cfd, validCfd);
+      assert.equal(found.updated_at, null);
     });
 
     it("Vérifie que annee_scolaire est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un annee_scolaire différent)", async () => {
@@ -552,23 +552,23 @@ integrationTests(__filename, () => {
         uai_etablissement: validUai,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
 
       // send the same statut information but with a different uai
       const sameStatutWithDifferentUai = { ...uniqueStatutToCreate, uai_etablissement: validUai2 };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentUai]);
 
       // a new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 1);
-      assert.strictEqual(secondCallResult.updated.length, 0);
+      assert.equal(secondCallResult.added.length, 1);
+      assert.equal(secondCallResult.updated.length, 0);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 2);
+      assert.equal(count, 2);
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.uai_etablissement, validUai);
-      assert.strictEqual(found.updated_at, null);
+      assert.equal(found.uai_etablissement, validUai);
+      assert.equal(found.updated_at, null);
     });
 
     it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une période différente", async () => {
@@ -587,23 +587,23 @@ integrationTests(__filename, () => {
       // Create 2 distinct items
       const uniqueStatutToCreate = createRandomStatutCandidat(input);
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
 
       // send the same statut but with a different periode_formation
       const sameStatutWithDifferentPeriode = { ...uniqueStatutToCreate, periode_formation: samplePeriode2 };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentPeriode]);
 
       // no new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 0);
-      assert.strictEqual(secondCallResult.updated.length, 1);
+      assert.equal(secondCallResult.added.length, 0);
+      assert.equal(secondCallResult.updated.length, 1);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 1);
+      assert.equal(count, 1);
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.periode_formation.join(), samplePeriode2.join());
-      assert.notDeepStrictEqual(found.updated_at, null);
+      assert.deepEqual(found.periode_formation.join(), samplePeriode2.join());
+      assert.notEqual(found.updated_at, null);
     });
 
     it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une année différente", async () => {
@@ -626,23 +626,23 @@ integrationTests(__filename, () => {
         annee_formation: sampleAnnee,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
 
       // send the same statut but with a different annee_formation
       const sameStatutWithDifferentAnnee = { ...uniqueStatutToCreate, annee_formation: sampleAnnee2 };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentAnnee]);
 
       // no new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 0);
-      assert.strictEqual(secondCallResult.updated.length, 1);
+      assert.equal(secondCallResult.added.length, 0);
+      assert.equal(secondCallResult.updated.length, 1);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 1);
+      assert.equal(count, 1);
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.annee_formation, sampleAnnee2);
-      assert.notDeepStrictEqual(found.updated_at, null);
+      assert.equal(found.annee_formation, sampleAnnee2);
+      assert.notEqual(found.updated_at, null);
     });
 
     it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec un siret_etablissement différent", async () => {
@@ -665,21 +665,21 @@ integrationTests(__filename, () => {
         siret_etablissement,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
 
       // send the same statut but with a different siret_etablissement
       const sameStatutWithDifferentAnnee = { ...uniqueStatutToCreate, siret_etablissement: siret_etablissement2 };
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithDifferentAnnee]);
 
       // no new statut should have been created
-      assert.strictEqual(secondCallResult.added.length, 0);
-      assert.strictEqual(secondCallResult.updated.length, 1);
+      assert.equal(secondCallResult.added.length, 0);
+      assert.equal(secondCallResult.updated.length, 1);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 1);
+      assert.equal(count, 1);
 
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.siret_etablissement, siret_etablissement2);
+      assert.equal(found.siret_etablissement, siret_etablissement2);
     });
 
     it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une différence sur les prénoms 2-3 / email", async () => {
@@ -703,8 +703,8 @@ integrationTests(__filename, () => {
         email_contact: sampleEmail,
       };
       const firstCallResult = await addOrUpdateStatuts([uniqueStatutToCreate]);
-      assert.strictEqual(firstCallResult.added.length, 1);
-      assert.strictEqual(firstCallResult.updated.length, 0);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
 
       // send the same statut but with updates on prenom2-3 & email
       const sameStatutWithUpdatesPrenomEmail = {
@@ -714,15 +714,15 @@ integrationTests(__filename, () => {
       const secondCallResult = await addOrUpdateStatuts([sameStatutWithUpdatesPrenomEmail]);
 
       // no new statut should have been created but update only
-      assert.strictEqual(secondCallResult.added.length, 0);
-      assert.strictEqual(secondCallResult.updated.length, 1);
+      assert.equal(secondCallResult.added.length, 0);
+      assert.equal(secondCallResult.updated.length, 1);
       const count = await StatutCandidat.countDocuments();
-      assert.strictEqual(count, 1);
+      assert.equal(count, 1);
 
       // check in db
       const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
-      assert.deepStrictEqual(found.email_contact, updatedEmail);
-      assert.notDeepStrictEqual(found.updated_at, null);
+      assert.equal(found.email_contact, updatedEmail);
+      assert.notEqual(found.updated_at, null);
     });
   });
 
@@ -732,19 +732,16 @@ integrationTests(__filename, () => {
 
       const createdStatut = await createStatutCandidat(simpleStatut);
 
-      assert.deepStrictEqual(createdStatut.historique_statut_apprenant.length, 1);
-      assert.deepStrictEqual(
-        createdStatut.historique_statut_apprenant[0].valeur_statut,
-        createdStatut.statut_apprenant
-      );
-      assert.deepStrictEqual(createdStatut.historique_statut_apprenant[0].position_statut, 1);
+      assert.equal(createdStatut.historique_statut_apprenant.length, 1);
+      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
 
       // Mise à jour du statut avec le même statut_apprenant
       await updateStatut(createdStatut._id, { statut_apprenant: simpleStatut.statut_apprenant });
 
       // Check value in db
       const found = await StatutCandidat.findById(createdStatut._id);
-      assert.strictEqual(found.historique_statut_apprenant.length, 1);
+      assert.equal(found.historique_statut_apprenant.length, 1);
     });
 
     it("Vérifie qu'on update historique_statut_apprenant quand un NOUVEAU statut_apprenant est envoyé", async () => {
@@ -752,9 +749,9 @@ integrationTests(__filename, () => {
 
       const createdStatut = await createStatutCandidat(simpleStatut);
 
-      assert.strictEqual(createdStatut.historique_statut_apprenant.length, 1);
-      assert.strictEqual(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.strictEqual(createdStatut.historique_statut_apprenant[0].position_statut, 1);
+      assert.equal(createdStatut.historique_statut_apprenant.length, 1);
+      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
 
       // Mise à jour du statut avec nouveau statut_apprenant
       const updatePayload = {
@@ -780,20 +777,20 @@ integrationTests(__filename, () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 
       const createdStatut = await createStatutCandidat(createRandomStatutCandidat());
-      assert.strictEqual(createdStatut.updated_at, null);
+      assert.equal(createdStatut.updated_at, null);
 
       // First update
       await updateStatut(createdStatut._id, { prenom_apprenant: "André-Pierre" });
       // Check value in db
       const foundAfterFirstUpdate = await StatutCandidat.findById(createdStatut._id);
-      assert.notStrictEqual(foundAfterFirstUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
-      assert.notStrictEqual(foundAfterFirstUpdate.updated_at, null);
+      assert.notEqual(foundAfterFirstUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
+      assert.notEqual(foundAfterFirstUpdate.updated_at, null);
 
       // Second update
       await updateStatut(createdStatut._id, { nom_apprenant: "Gignac" });
       const foundAfterSecondUpdate = await StatutCandidat.findById(createdStatut._id);
-      assert.notStrictEqual(foundAfterSecondUpdate.nom_apprenant, createdStatut.nom_apprenant);
-      assert.notStrictEqual(foundAfterSecondUpdate.updated_at, foundAfterFirstUpdate.updated_at);
+      assert.notEqual(foundAfterSecondUpdate.nom_apprenant, createdStatut.nom_apprenant);
+      assert.notEqual(foundAfterSecondUpdate.updated_at, foundAfterFirstUpdate.updated_at);
     });
   });
 
@@ -806,22 +803,22 @@ integrationTests(__filename, () => {
       const createdStatut = await createStatutCandidat(randomStatut);
       const createdStatutJson = createdStatut.toJSON();
 
-      assert.strictEqual(createdStatutJson.ine_apprenant, randomStatut.ine_apprenant);
-      assert.strictEqual(createdStatutJson.nom_apprenant, randomStatut.nom_apprenant);
-      assert.strictEqual(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.strictEqual(createdStatutJson.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
-      assert.strictEqual(createdStatutJson.email_contact, randomStatut.email_contact);
-      assert.strictEqual(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
-      assert.strictEqual(createdStatutJson.libelle_court_formation, randomStatut.libelle_court_formation);
-      assert.strictEqual(createdStatutJson.libelle_long_formation, randomStatut.libelle_long_formation);
-      assert.strictEqual(createdStatutJson.uai_etablissement, randomStatut.uai_etablissement);
-      assert.strictEqual(createdStatutJson.siret_etablissement, randomStatut.siret_etablissement);
-      assert.strictEqual(createdStatutJson.nom_etablissement, randomStatut.nom_etablissement);
-      assert.strictEqual(createdStatutJson.statut_apprenant, randomStatut.statut_apprenant);
-      assert.strictEqual(createdStatutJson.source, randomStatut.source);
-      assert.strictEqual(createdStatutJson.annee_formation, randomStatut.annee_formation);
-      assert.deepStrictEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
-      assert.deepStrictEqual(createdStatutJson.annee_scolaire, randomStatut.annee_scolaire);
+      assert.equal(createdStatutJson.ine_apprenant, randomStatut.ine_apprenant);
+      assert.equal(createdStatutJson.nom_apprenant, randomStatut.nom_apprenant);
+      assert.equal(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant);
+      assert.equal(createdStatutJson.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
+      assert.equal(createdStatutJson.email_contact, randomStatut.email_contact);
+      assert.equal(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
+      assert.equal(createdStatutJson.libelle_court_formation, randomStatut.libelle_court_formation);
+      assert.equal(createdStatutJson.libelle_long_formation, randomStatut.libelle_long_formation);
+      assert.equal(createdStatutJson.uai_etablissement, randomStatut.uai_etablissement);
+      assert.equal(createdStatutJson.siret_etablissement, randomStatut.siret_etablissement);
+      assert.equal(createdStatutJson.nom_etablissement, randomStatut.nom_etablissement);
+      assert.equal(createdStatutJson.statut_apprenant, randomStatut.statut_apprenant);
+      assert.equal(createdStatutJson.source, randomStatut.source);
+      assert.equal(createdStatutJson.annee_formation, randomStatut.annee_formation);
+      assert.deepEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
+      assert.deepEqual(createdStatutJson.annee_scolaire, randomStatut.annee_scolaire);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid", async () => {
@@ -830,7 +827,7 @@ integrationTests(__filename, () => {
       const statutWithInvalidSiret = { ...createRandomStatutCandidat(), siret_etablissement: "invalid-siret" };
       const createdStatut = await createStatutCandidat(statutWithInvalidSiret);
 
-      assert.strictEqual(createdStatut.siret_etablissement_valid, false);
+      assert.equal(createdStatut.siret_etablissement_valid, false);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid", async () => {
@@ -840,7 +837,7 @@ integrationTests(__filename, () => {
       const statutWithValidSiret = { ...createRandomStatutCandidat(), siret_etablissement: validSiret };
       const createdStatut = await createStatutCandidat(statutWithValidSiret);
 
-      assert.strictEqual(createdStatut.siret_etablissement_valid, true);
+      assert.equal(createdStatut.siret_etablissement_valid, true);
     });
 
     it("Vérifie la création d'un statut avec un uai invalide", async () => {
@@ -849,7 +846,7 @@ integrationTests(__filename, () => {
       const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: "invalid-uai" };
       const createdStatut = await createStatutCandidat(statutWithInvalidUai);
 
-      assert.strictEqual(createdStatut.uai_etablissement_valid, false);
+      assert.equal(createdStatut.uai_etablissement_valid, false);
     });
 
     it("Vérifie la création d'un statut avec un uai valide", async () => {
@@ -859,7 +856,7 @@ integrationTests(__filename, () => {
       const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: validUai };
       const createdStatut = await createStatutCandidat(statutWithInvalidUai);
 
-      assert.strictEqual(createdStatut.uai_etablissement_valid, true);
+      assert.equal(createdStatut.uai_etablissement_valid, true);
     });
 
     it("Vérifie la création d'un statut avec un cfd invalide", async () => {
@@ -869,7 +866,7 @@ integrationTests(__filename, () => {
       const statutWithInvalidUai = { ...createRandomStatutCandidat(), formation_cfd: invalidCfd };
       const createdStatut = await createStatutCandidat(statutWithInvalidUai);
 
-      assert.strictEqual(createdStatut.formation_cfd_valid, false);
+      assert.equal(createdStatut.formation_cfd_valid, false);
     });
 
     it("Vérifie la création d'un statut avec un cfd valide", async () => {
@@ -879,7 +876,7 @@ integrationTests(__filename, () => {
       const statutWithInvalidUai = { ...createRandomStatutCandidat(), formation_cfd: validCfd };
       const createdStatut = await createStatutCandidat(statutWithInvalidUai);
 
-      assert.strictEqual(createdStatut.formation_cfd_valid, true);
+      assert.equal(createdStatut.formation_cfd_valid, true);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret invalide on ne set pas le champ etablissement_reseaux", async () => {
@@ -899,8 +896,8 @@ integrationTests(__filename, () => {
 
       // Check uai & reseaux in created statut
       const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
-      assert.deepStrictEqual(siret_etablissement_valid, false);
-      assert.deepStrictEqual(etablissement_reseaux.length, 0);
+      assert.equal(siret_etablissement_valid, false);
+      assert.equal(etablissement_reseaux.length, 0);
     });
 
     it("Vérifie qu'à la création d'un statut avec un uai valide on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
@@ -920,10 +917,10 @@ integrationTests(__filename, () => {
 
       // Check uai & reseaux in created statut
       const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
-      assert.deepStrictEqual(uai_etablissement_valid, true);
-      assert.deepStrictEqual(etablissement_reseaux.length, 2);
-      assert.deepStrictEqual(etablissement_reseaux[0], reseauxCfas.ANASUP.nomReseau);
-      assert.deepStrictEqual(etablissement_reseaux[1], reseauxCfas.BTP_CFA.nomReseau);
+      assert.equal(uai_etablissement_valid, true);
+      assert.equal(etablissement_reseaux.length, 2);
+      assert.equal(etablissement_reseaux[0], reseauxCfas.ANASUP.nomReseau);
+      assert.equal(etablissement_reseaux[1], reseauxCfas.BTP_CFA.nomReseau);
     });
 
     it("Vérifie qu'à la création d'un statut avec un uai invalide on ne set pas le champ etablissement_reseaux", async () => {
@@ -943,8 +940,8 @@ integrationTests(__filename, () => {
 
       // Check uai & reseaux in created statut
       const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
-      assert.deepStrictEqual(uai_etablissement_valid, false);
-      assert.deepStrictEqual(etablissement_reseaux.length, 0);
+      assert.equal(uai_etablissement_valid, false);
+      assert.equal(etablissement_reseaux.length, 0);
     });
 
     it("Vérifie qu'à la création d'un statut avec un CFD valide on crée la formation correspondante si elle n'existe pas", async () => {
@@ -958,8 +955,8 @@ integrationTests(__filename, () => {
       assert.ok(createdStatut);
       // Check that formation was created
       const foundFormations = await Formation.find();
-      assert.deepEqual(foundFormations.length, 1);
-      assert.deepEqual(foundFormations[0].cfd, cfd);
+      assert.equal(foundFormations.length, 1);
+      assert.equal(foundFormations[0].cfd, cfd);
     });
 
     it("Vérifie qu'à la création d'un statut avec un CFD valide on ne crée pas de formation si elle existe", async () => {
@@ -976,8 +973,8 @@ integrationTests(__filename, () => {
       assert.ok(createdStatut);
       // Check that new formation was not created
       const foundFormations = await Formation.find();
-      assert.deepEqual(foundFormations.length, 1);
-      assert.deepEqual(foundFormations[0].created_at, formation.created_at);
+      assert.equal(foundFormations.length, 1);
+      assert.equal(foundFormations[0].created_at.getTime(), formation.created_at.getTime());
     });
 
     it("Vérifie qu'on peut créer un statut sans annee_scolaire", async () => {

@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const userEvents = require("../../../../src/common/components/userEvents");
 const { UserEvent } = require("../../../../src/common/model");
@@ -27,8 +27,8 @@ integrationTests(__filename, () => {
     await secondEvent.save();
 
     const found = await getLastUserEventDate({ username: "TEST", type: "TYPE", action: "ACTION" });
-    assert.notStrictEqual(found, null);
-    assert.notStrictEqual(found, firstDateCreated);
+    assert.notEqual(found, null);
+    assert.notEqual(found, firstDateCreated);
   });
 
   it("Permet de retrouver les données envoyées pour un uai", async () => {
@@ -51,10 +51,10 @@ integrationTests(__filename, () => {
     await ymagEvent.save();
 
     const found = await getDataForUai("123456");
-    assert.notDeepStrictEqual(found, []);
-    assert.deepStrictEqual(found.length, 2);
-    assert.deepStrictEqual(found[0].username, "gesti");
-    assert.deepStrictEqual(found[1].username, "ymag");
+    assert.notDeepEqual(found, []);
+    assert.deepEqual(found.length, 2);
+    assert.deepEqual(found[0].username, "gesti");
+    assert.deepEqual(found[1].username, "ymag");
   });
 
   it("Permet de retrouver les données envoyées pour un siret", async () => {
@@ -77,10 +77,10 @@ integrationTests(__filename, () => {
     await ymagEvent.save();
 
     const found = await getDataForSiret("12345678911111");
-    assert.notDeepStrictEqual(found, []);
-    assert.deepStrictEqual(found.length, 2);
-    assert.deepStrictEqual(found[0].username, "gesti");
-    assert.deepStrictEqual(found[1].username, "ymag");
+    assert.notDeepEqual(found, []);
+    assert.deepEqual(found.length, 2);
+    assert.deepEqual(found[0].username, "gesti");
+    assert.deepEqual(found[1].username, "ymag");
   });
 
   it("Permet de ne pas retrouver les données envoyées pour un mauvais uai", async () => {
@@ -96,12 +96,12 @@ integrationTests(__filename, () => {
     await ymagEvent.save();
 
     const badUaiFound = await getDataForUai("BADUAI");
-    assert.deepStrictEqual(badUaiFound, []);
+    assert.deepEqual(badUaiFound, []);
 
     const goodUaiFound = await getDataForUai("123456");
-    assert.notDeepStrictEqual(goodUaiFound, []);
-    assert.deepStrictEqual(goodUaiFound.length, 1);
-    assert.deepStrictEqual(goodUaiFound[0].username, "ymag");
+    assert.notDeepEqual(goodUaiFound, []);
+    assert.deepEqual(goodUaiFound.length, 1);
+    assert.deepEqual(goodUaiFound[0].username, "ymag");
   });
 
   it("Permet de ne pas retrouver les données envoyées pour un mauvais siret", async () => {
@@ -117,12 +117,12 @@ integrationTests(__filename, () => {
     await ymagEvent.save();
 
     const badFound = await getDataForSiret("BADSIRET");
-    assert.deepStrictEqual(badFound, []);
+    assert.deepEqual(badFound, []);
 
     const goodFound = await getDataForSiret("12345678911111");
-    assert.notDeepStrictEqual(goodFound, []);
-    assert.deepStrictEqual(goodFound.length, 1);
-    assert.deepStrictEqual(goodFound[0].username, "ymag");
+    assert.notDeepEqual(goodFound, []);
+    assert.deepEqual(goodFound.length, 1);
+    assert.deepEqual(goodFound[0].username, "ymag");
   });
 
   it("Permet de compter les données envoyées pour un uai", async () => {
@@ -145,7 +145,7 @@ integrationTests(__filename, () => {
     await ymagEvent.save();
 
     const count = await countDataForUai("123456");
-    assert.deepStrictEqual(count, 2);
+    assert.deepEqual(count, 2);
   });
 
   it("Permet de compter les données envoyées pour un siret", async () => {
@@ -168,6 +168,6 @@ integrationTests(__filename, () => {
     await ymagEvent.save();
 
     const count = await countDataForSiret("12345678911111");
-    assert.deepStrictEqual(count, 2);
+    assert.deepEqual(count, 2);
   });
 });

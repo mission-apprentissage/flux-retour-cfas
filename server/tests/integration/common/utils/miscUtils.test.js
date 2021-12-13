@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const { uniqueValues } = require("../../../../src/common/utils/miscUtils");
 
 describe("uniqueValues", () => {
@@ -26,7 +26,7 @@ describe("uniqueValues", () => {
     const uniqueArray = uniqueValues(testArray, ["annee", "libelle"]);
 
     // Check unique length
-    assert.deepStrictEqual(uniqueArray.length, simpleArray.length);
+    assert.deepEqual(uniqueArray.length, simpleArray.length);
   });
 
   it("Vérifie la récupération des combinaisons uniques pour des objets à 3 champs", async () => {
@@ -58,6 +58,6 @@ describe("uniqueValues", () => {
     const uniqueArray = uniqueValues(testArray, ["annee", "libelle", "format"]);
 
     // Check unique length
-    assert.deepStrictEqual(uniqueArray.length, simpleArray.length);
+    assert.deepEqual(uniqueArray.length, simpleArray.length);
   });
 });

@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const integrationTests = require("../../utils/integrationTests");
 const statutsCandidats = require("../../../src/common/components/statutsCandidats");
 const { seedSample } = require("../../../src/jobs/seed/utils/seedUtils");
@@ -18,6 +18,6 @@ integrationTests(__filename, () => {
     const createStatutsCandidats = await statutsCandidats();
     await seedSample(createStatutsCandidats);
 
-    assert.deepStrictEqual((await StatutCandidat.countDocuments({})) > 0, true);
+    assert.deepEqual((await StatutCandidat.countDocuments({})) > 0, true);
   });
 });

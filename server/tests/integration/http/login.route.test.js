@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const config = require("../../../config");
 const jwt = require("jsonwebtoken");
 const httpTests = require("../../utils/httpTests");
@@ -15,13 +15,13 @@ httpTests(__filename, ({ startServer }) => {
       password: "password",
     });
 
-    assert.strictEqual(response.status, 200);
+    assert.equal(response.status, 200);
     const decoded = jwt.verify(response.data.access_token, config.auth.user.jwtSecret);
     assert.ok(decoded.iat);
     assert.ok(decoded.exp);
-    assert.strictEqual(decoded.sub, "user");
-    assert.strictEqual(decoded.iss, config.appName);
-    assert.deepStrictEqual(decoded.permissions, []);
+    assert.equal(decoded.sub, "user");
+    assert.equal(decoded.iss, config.appName);
+    assert.deepEqual(decoded.permissions, []);
   });
 
   it("Vérifie qu'un mot de passe invalide est rejeté", async () => {
@@ -33,7 +33,7 @@ httpTests(__filename, ({ startServer }) => {
       password: "INVALID",
     });
 
-    assert.strictEqual(response.status, 401);
+    assert.equal(response.status, 401);
   });
 
   it("Vérifie qu'un login invalide est rejeté", async () => {
@@ -44,7 +44,7 @@ httpTests(__filename, ({ startServer }) => {
       password: "INVALID",
     });
 
-    assert.strictEqual(response.status, 401);
+    assert.equal(response.status, 401);
   });
 
   it("Vérifie que le mot de passe est rehashé si trop faible", async () => {
@@ -56,15 +56,15 @@ httpTests(__filename, ({ startServer }) => {
       password: "password",
     });
 
-    assert.strictEqual(response.status, 200);
+    assert.equal(response.status, 200);
     const found = await User.findOne({ username: "user" });
-    assert.strictEqual(found.password.startsWith("$6$rounds=1000"), true);
+    assert.equal(found.password.startsWith("$6$rounds=1000"), true);
 
     response = await httpClient.post("/api/login", {
       username: "user",
       password: "password",
     });
-    assert.strictEqual(response.status, 200);
+    assert.equal(response.status, 200);
   });
 
   it("Vérifie que le mot de passe n'est pas rehashé si ok", async () => {
@@ -77,9 +77,9 @@ httpTests(__filename, ({ startServer }) => {
       password: "password",
     });
 
-    assert.strictEqual(response.status, 200);
+    assert.equal(response.status, 200);
     const found = await User.findOne({ username: "user" });
-    assert.strictEqual(previous.password, found.password);
+    assert.equal(previous.password, found.password);
   });
 
   it("Vérifie que le mot de passe n'est pas rehashé si invalide", async () => {
@@ -92,8 +92,8 @@ httpTests(__filename, ({ startServer }) => {
       password: "invalid",
     });
 
-    assert.strictEqual(response.status, 401);
+    assert.equal(response.status, 401);
     const found = await User.findOne({ username: "user" });
-    assert.strictEqual(previous.password, found.password);
+    assert.equal(previous.password, found.password);
   });
 });
