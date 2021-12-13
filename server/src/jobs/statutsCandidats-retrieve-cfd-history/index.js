@@ -1,11 +1,10 @@
 const { runScript } = require("../scriptWrapper");
-const { mongooseInstance } = require("../../common/mongodb");
+const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { StatutCandidat } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
-const { initTcoModel, getCfdInfo, bcnImporter } = require("@mission-apprentissage/tco-service-node");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -15,14 +14,6 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  */
 runScript(async ({ db }) => {
   logger.info("Run CFD History Retrieving Job");
-
-  // Init Tco & BCN
-  try {
-    await initTcoModel(mongooseInstance, { noElastic: true });
-    await bcnImporter();
-  } catch (error) {
-    logger.error(error);
-  }
 
   // Retrieve CFD
   await retrieveCfdHistory(db);
