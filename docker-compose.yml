@@ -81,7 +81,6 @@ services:
     image: mongo:5.0.2-focal
     container_name: flux_retour_cfas_mongodb
     command: --wiredTigerCacheSizeGB 3
-    mem_limit: 3g
     restart: unless-stopped
     networks:
       - flux_retour_cfas_network
