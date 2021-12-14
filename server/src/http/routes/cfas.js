@@ -12,7 +12,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     etablissement_num_region: Joi.string().allow(null, ""),
     etablissement_num_departement: Joi.string().allow(null, ""),
     etablissement_reseaux: Joi.string().allow(null, ""),
-  }).min(1);
+  });
 
   const dataFeedbackBodyValidationSchema = Joi.object({
     uai: Joi.string().required(),

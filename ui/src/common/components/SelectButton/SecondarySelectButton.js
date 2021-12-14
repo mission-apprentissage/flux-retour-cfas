@@ -1,4 +1,4 @@
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, Divider } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -27,20 +27,40 @@ const SecondarySelectButton = ({
       <Box as="span" verticalAlign="middle" textOverflow="ellipsis" maxWidth="600px" overflow="hidden">
         {children}
       </Box>
+      <Box
+        fontSize="epsilon"
+        as="i"
+        className="ri-arrow-down-s-line"
+        marginLeft="1v"
+        paddingTop="2px"
+        verticalAlign="middle"
+      />
       {isClearable && (
-        <Box
-          fontSize="epsilon"
-          as="i"
-          verticalAlign="middle"
-          className="ri-close-circle-fill"
-          marginLeft="1v"
-          opacity="0.3"
-          _hover={{ opacity: "0.5" }}
-          onClick={(event) => {
-            event.stopPropagation();
-            clearIconOnClick();
-          }}
-        />
+        <>
+          <Divider
+            height="22px"
+            marginTop="2px"
+            marginLeft="1w"
+            marginRight="1v"
+            orientation="vertical"
+            verticalAlign="middle"
+            opacity="0.3"
+          />
+          <Box
+            paddingTop="2px"
+            fontSize="epsilon"
+            as="i"
+            verticalAlign="middle"
+            className="ri-close-circle-fill"
+            marginLeft="1v"
+            opacity="0.3"
+            _hover={{ opacity: "0.5" }}
+            onClick={(event) => {
+              event.stopPropagation();
+              clearIconOnClick();
+            }}
+          />
+        </>
       )}
     </Button>
   );

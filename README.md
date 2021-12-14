@@ -80,6 +80,8 @@ Pour la gestion et l'execution locale de l'application nous utilisons la bibliot
 
 **Ce fichier est privé et n'est pas disponible dans le repository.**
 
+Un fichier `.env.test` peut être placé dans le même dossier pour charger une configuration spécifique à l'exécution des tests.
+
 ## Conteneurs Docker
 
 ### Présentation de la configuration Docker
@@ -89,7 +91,8 @@ Pour fonctionner ce projet a besoin des éléments dockérisés suivants :
 - Un serveur Web Nginx jouant le role de reverse proxy, _défini dans le service `reverse_proxy` du docker-compose_.
 - Un serveur Node Express, _défini dans le service `server` du docker-compose_.
 - Un réseau _défini dans `flux_retour_cfas_network` du docker-compose_.
-- Une base de donnée mongoDb _défini dans le service `mongodb` du docker-compose_.
+- Une base de donnée mongoDb _définie dans le service `mongodb` du docker-compose_.
+- Une base de données redis utilisée pour le cache applicatif serveur _définie dans le service redis du docker-compose_
 - Une interface Web en React, _définie dans le service `ui` du docker-compose_.
 
 ### Serveur Nodes & Nginx - Reverse Proxy
@@ -103,6 +106,10 @@ Dans la configuration de nginx, on fait référence au fichier `/reverse_proxy/a
 ### Base de données MongoDb
 
 Le base de données est une MongoDb et utilise le port par défaut 27017.
+
+### Base de données Redis
+
+Redis est utilisé pour cacher certaines réponses de l'API. Utilise le port par défaut 6379.
 
 ### Ui - React
 

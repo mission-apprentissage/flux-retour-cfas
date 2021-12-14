@@ -44,8 +44,4 @@ export const navigationPages = {
     path: "/tableau-de-bord",
     title: "Tableau de bord",
   },
-  Stats: {
-    path: "/stats",
-    title: "Stats",
-  },
 };

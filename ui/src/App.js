@@ -6,7 +6,6 @@ import { roles } from "./common/auth/roles";
 import { navigationPages } from "./common/constants/navigationPages";
 import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import LoginPage from "./pages/login/LoginPage";
-import GlobalStatsPage from "./pages/stats/GlobalStatsPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import CfaWithoutNetworkPage from "./pages/tableau-de-bord/views/CfaWithoutNetwork";
@@ -15,7 +14,6 @@ import {
   TransmettreConsulterVosDonneesPage,
   TransmettreVosDonneesPage,
 } from "./pages/transmettre-consulter-vos-donnees";
-import UserStatsPage from "./pages/user-stats";
 
 const ScrollToTopOnRouteChange = () => {
   const location = useLocation();
@@ -55,17 +53,6 @@ const App = () => {
           exact
           component={TableauDeBordPage}
           authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
-        />
-        <ProtectedRoute
-          authorizedRoles={[roles.administrator]}
-          path={navigationPages.Stats.path}
-          exact
-          component={GlobalStatsPage}
-        />
-        <ProtectedRoute
-          authorizedRoles={[roles.administrator]}
-          path={`${navigationPages.Stats.path}/:dataSource`}
-          component={UserStatsPage}
         />
 
         {/* Not found page */}

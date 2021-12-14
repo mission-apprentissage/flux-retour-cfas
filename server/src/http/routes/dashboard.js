@@ -1,7 +1,8 @@
 const express = require("express");
+const stringify = require("json-stringify-deterministic");
+const { format } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { UserEvent } = require("../../common/model");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles } = require("../../common/roles");
 
@@ -26,7 +27,12 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
-module.exports = ({ stats, dashboard }) => {
+const getCacheKeyForRoute = (route, filters) => {
+  // we use json-stringify-deterministic to make sure that {a: 1, b: 2} stringified is the same as {b: 2, a: 1}
+  return `${route}:${stringify(filters)}`;
+};
+
+module.exports = ({ stats, dashboard, cache }) => {
   const router = express.Router();
 
   /**
@@ -74,23 +80,27 @@ module.exports = ({ stats, dashboard }) => {
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
 
-      // Add user event
-      const event = new UserEvent({
-        username: "dashboard",
-        type: "GET",
-        action: "api/dashboard/effectifs",
-        data: { date, filters },
+      // try to retrieve from cache
+      const cacheKey = getCacheKeyForRoute(req.path, {
+        date: format(date, "yyyy-MM-dd"),
+        filters,
       });
-      await event.save();
+      const fromCache = await cache.get(cacheKey);
 
-      // Build response
-      return res.json({
-        date,
-        apprentis: await dashboard.getApprentisCountAtDate(date, filters),
-        rupturants: await dashboard.getRupturantsCountAtDate(date, filters),
-        inscritsSansContrat: await dashboard.getInscritsSansContratCountAtDate(date, filters),
-        abandons: await dashboard.getAbandonsCountAtDate(date, filters),
-      });
+      if (fromCache) {
+        return res.json(JSON.parse(fromCache));
+      } else {
+        const response = {
+          date,
+          apprentis: await dashboard.getApprentisCountAtDate(date, filters),
+          rupturants: await dashboard.getRupturantsCountAtDate(date, filters),
+          inscritsSansContrat: await dashboard.getInscritsSansContratCountAtDate(date, filters),
+          abandons: await dashboard.getAbandonsCountAtDate(date, filters),
+        };
+        // cache the result
+        await cache.set(cacheKey, JSON.stringify(response));
+        return res.json(response);
+      }
     })
   );
 
@@ -113,9 +123,20 @@ module.exports = ({ stats, dashboard }) => {
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
 
-      const effectifsParNiveauFormation = await dashboard.getEffectifsCountByNiveauFormationAtDate(date, filters);
+      // try to retrieve from cache
+      const cacheKey = getCacheKeyForRoute(req.path, {
+        date: format(date, "yyyy-MM-dd"),
+        filters,
+      });
+      const fromCache = await cache.get(cacheKey);
 
-      return res.json(effectifsParNiveauFormation);
+      if (fromCache) {
+        return res.json(JSON.parse(fromCache));
+      } else {
+        const effectifsParNiveauFormation = await dashboard.getEffectifsCountByNiveauFormationAtDate(date, filters);
+        await cache.set(cacheKey, JSON.stringify(effectifsParNiveauFormation));
+        return res.json(effectifsParNiveauFormation);
+      }
     })
   );
 
@@ -139,9 +160,20 @@ module.exports = ({ stats, dashboard }) => {
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
 
-      const effectifsParFormation = await dashboard.getEffectifsCountByFormationAtDate(date, filters);
+      // try to retrieve from cache
+      const cacheKey = getCacheKeyForRoute(req.path, {
+        date: format(date, "yyyy-MM-dd"),
+        filters,
+      });
+      const fromCache = await cache.get(cacheKey);
 
-      return res.json(effectifsParFormation);
+      if (fromCache) {
+        return res.json(JSON.parse(fromCache));
+      } else {
+        const effectifsParFormation = await dashboard.getEffectifsCountByFormationAtDate(date, filters);
+        await cache.set(cacheKey, JSON.stringify(effectifsParFormation));
+        return res.json(effectifsParFormation);
+      }
     })
   );
 
@@ -165,9 +197,21 @@ module.exports = ({ stats, dashboard }) => {
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
 
-      const effectifsParAnneeFormation = await dashboard.getEffectifsCountByAnneeFormationAtDate(date, filters);
+      // try to retrieve from cache
+      const cacheKey = getCacheKeyForRoute(req.path, {
+        date: format(date, "yyyy-MM-dd"),
+        filters,
+      });
+      const fromCache = await cache.get(cacheKey);
 
-      return res.json(effectifsParAnneeFormation);
+      if (fromCache) {
+        return res.json(JSON.parse(fromCache));
+      } else {
+        const effectifsParAnneeFormation = await dashboard.getEffectifsCountByAnneeFormationAtDate(date, filters);
+        await cache.set(cacheKey, JSON.stringify(effectifsParAnneeFormation));
+
+        return res.json(effectifsParAnneeFormation);
+      }
     })
   );
 
@@ -191,9 +235,21 @@ module.exports = ({ stats, dashboard }) => {
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
 
-      const effectifsByCfaAtDate = await dashboard.getEffectifsCountByCfaAtDate(date, filters);
+      // try to retrieve from cache
+      const cacheKey = getCacheKeyForRoute(req.path, {
+        date: format(date, "yyyy-MM-dd"),
+        filters,
+      });
+      const fromCache = await cache.get(cacheKey);
 
-      return res.json(effectifsByCfaAtDate);
+      if (fromCache) {
+        return res.json(JSON.parse(fromCache));
+      } else {
+        const effectifsByCfaAtDate = await dashboard.getEffectifsCountByCfaAtDate(date, filters);
+        await cache.set(cacheKey, JSON.stringify(effectifsByCfaAtDate));
+
+        return res.json(effectifsByCfaAtDate);
+      }
     })
   );
 
@@ -213,9 +269,21 @@ module.exports = ({ stats, dashboard }) => {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
-      const effectifsByDepartementAtDate = await dashboard.getEffectifsCountByDepartementAtDate(date, filters);
 
-      return res.json(effectifsByDepartementAtDate);
+      // try to retrieve from cache
+      const cacheKey = getCacheKeyForRoute(req.path, {
+        date: format(date, "yyyy-MM-dd"),
+        filters,
+      });
+      const fromCache = await cache.get(cacheKey);
+
+      if (fromCache) {
+        return res.json(JSON.parse(fromCache));
+      } else {
+        const effectifsByDepartementAtDate = await dashboard.getEffectifsCountByDepartementAtDate(date, filters);
+        await cache.set(cacheKey, JSON.stringify(effectifsByDepartementAtDate));
+        return res.json(effectifsByDepartementAtDate);
+      }
     })
   );
 

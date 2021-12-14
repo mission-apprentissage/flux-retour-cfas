@@ -1,16 +1,16 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const { flattenHistoriqueStatutApprenant } = require("../../../../src/common/utils/flattenHistoriqueStatutApprenant");
 
 describe("flattenHistoriqueStatutApprenant", () => {
   it("Vérifie qu'un historique est renvoyé vide", async () => {
     const input = [];
     const expectedOutput = [];
-    assert.deepStrictEqual(flattenHistoriqueStatutApprenant(input), expectedOutput);
+    assert.deepEqual(flattenHistoriqueStatutApprenant(input), expectedOutput);
   });
   it("Vérifie qu'un historique de valeur undefined renvoie []", async () => {
     const input = undefined;
     const expectedOutput = [];
-    assert.deepStrictEqual(flattenHistoriqueStatutApprenant(input), expectedOutput);
+    assert.deepEqual(flattenHistoriqueStatutApprenant(input), expectedOutput);
   });
   it("Vérifie qu'un historique avec un seul élément n'est pas modifié", async () => {
     const input = [
@@ -20,7 +20,7 @@ describe("flattenHistoriqueStatutApprenant", () => {
         date_statut: "2020-11-01T06:37:01.881Z",
       },
     ];
-    assert.deepStrictEqual(flattenHistoriqueStatutApprenant(input), input);
+    assert.deepEqual(flattenHistoriqueStatutApprenant(input), input);
   });
   it("Vérifie qu'un historique avec une séquence de statuts identiques conserve uniquement le premier élément", async () => {
     const input = [
@@ -41,7 +41,7 @@ describe("flattenHistoriqueStatutApprenant", () => {
       },
     ];
     const expectedOutput = [input[0]];
-    assert.deepStrictEqual(flattenHistoriqueStatutApprenant(input), expectedOutput);
+    assert.deepEqual(flattenHistoriqueStatutApprenant(input), expectedOutput);
   });
   it("Vérifie qu'un historique avec plusieurs séquences de statuts identiques conserve uniquement le premier élément de chaque séquence", async () => {
     const input = [
@@ -102,6 +102,6 @@ describe("flattenHistoriqueStatutApprenant", () => {
       },
     ];
     const expectedOutput = [input[0], input[3], input[5], input[6], input[8]];
-    assert.deepStrictEqual(flattenHistoriqueStatutApprenant(input), expectedOutput);
+    assert.deepEqual(flattenHistoriqueStatutApprenant(input), expectedOutput);
   });
 });

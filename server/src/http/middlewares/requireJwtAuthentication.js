@@ -17,11 +17,8 @@ module.exports = ({ users, cfas }) => {
   };
 
   const jwtStrategyOptions = {
-    // jwt can be passed as header or query parameter
-    jwtFromRequest: ExtractJwt.fromExtractors([
-      ExtractJwt.fromUrlQueryParameter("access_token"),
-      ExtractJwt.fromAuthHeaderAsBearerToken(),
-    ]),
+    // JWT can be passed as header
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: config.auth.user.jwtSecret,
   };
 

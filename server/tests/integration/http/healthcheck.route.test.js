@@ -1,4 +1,4 @@
-const assert = require("assert");
+const assert = require("assert").strict;
 const config = require("../../../config");
 const httpTests = require("../../utils/httpTests");
 
@@ -8,9 +8,9 @@ httpTests(__filename, ({ startServer }) => {
 
     const response = await httpClient.get("/api/healthcheck");
 
-    assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.data.name, `Serveur MNA - ${config.appName}`);
-    assert.strictEqual(response.data.healthcheck.mongodb, true);
+    assert.equal(response.status, 200);
+    assert.equal(response.data.name, `Serveur MNA - ${config.appName}`);
+    assert.equal(response.data.healthcheck.mongodb, true);
     assert.ok(response.data.env);
     assert.ok(response.data.version);
   });

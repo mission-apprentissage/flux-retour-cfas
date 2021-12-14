@@ -5,18 +5,21 @@ import React from "react";
 import { Section } from "../../../../common/components";
 import RepartitionEffectifsParDepartement from "../../../../common/components/tables/RepartitionEffectifsParDepartement";
 import RepartitionEffectifsParNiveauFormation from "../../../../common/components/tables/RepartitionEffectifsParNiveauFormation";
+import useFetchEffectifsParNiveauFormation from "../../../../common/hooks/useFetchEffectifsParNiveauFormation";
 import { filtersPropTypes } from "../../FiltersContext";
 import withRepartitionEffectifsRegionParDepartement from "./withRepartitionEffectifsRegionParDepartement";
-import withRepartitionEffectifsRegionParNiveauFormation from "./withRepartitionEffectifsRegionParNiveauFormation";
 
 const RepartitionEffectifsRegionParDepartement = withRepartitionEffectifsRegionParDepartement(
   RepartitionEffectifsParDepartement
 );
-const RepartitionEffectifsRegionParNiveauFormation = withRepartitionEffectifsRegionParNiveauFormation(
-  RepartitionEffectifsParNiveauFormation
-);
 
 const RepartitionEffectifsRegion = ({ filters }) => {
+  const {
+    data: repartitionEffectifsParNiveauFormation,
+    loading: isEffectifsParNiveauFormationLoading,
+    error,
+  } = useFetchEffectifsParNiveauFormation(filters);
+
   return (
     <Section paddingY="4w">
       <Heading as="h3" variant="h3">
@@ -38,7 +41,11 @@ const RepartitionEffectifsRegion = ({ filters }) => {
             <RepartitionEffectifsRegionParDepartement filters={filters} />
           </TabPanel>
           <TabPanel>
-            <RepartitionEffectifsRegionParNiveauFormation filters={filters} />
+            <RepartitionEffectifsParNiveauFormation
+              repartitionEffectifs={repartitionEffectifsParNiveauFormation}
+              isEffectifsParNiveauFormationLoading={isEffectifsParNiveauFormationLoading}
+              error={error}
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>

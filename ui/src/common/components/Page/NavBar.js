@@ -40,7 +40,6 @@ NavItem.propTypes = {
 
 const NavBar = () => {
   const [auth] = useAuth();
-  const isAdmin = hasUserRoles(auth, roles.administrator);
   const isCfa = hasUserRoles(auth, roles.cfa);
 
   return (
@@ -48,14 +47,6 @@ const NavBar = () => {
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
         {!isCfa && <NavItem to={navigationPages.TableauDeBord.path}>Indices en temps réel</NavItem>}
         <NavItem to={navigationPages.ComprendreLesDonnees.path}>{navigationPages.ComprendreLesDonnees.title}</NavItem>
-
-        {isAdmin && (
-          <>
-            <NavItem to={navigationPages.Stats.path}>Statistiques Globales</NavItem>
-            <NavItem to="/stats/ymag">Statistiques Ymag</NavItem>
-            <NavItem to="/stats/gesti">Statistiques Gesti</NavItem>
-          </>
-        )}
       </HStack>
     </Section>
   );

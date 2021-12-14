@@ -23,6 +23,7 @@ const IndicesHeaderSection = () => {
       <TerritoireFilter
         onDepartementChange={filtersContext.setters.setDepartement}
         onRegionChange={filtersContext.setters.setRegion}
+        onTerritoireReset={filtersContext.setters.resetTerritoire}
         filters={filtersContext.state}
       />
       <HStack marginTop="3w">

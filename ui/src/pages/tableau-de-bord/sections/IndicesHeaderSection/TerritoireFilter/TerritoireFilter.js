@@ -7,7 +7,14 @@ import DepartementOptions from "./DepartementOptions";
 import RegionOptions from "./RegionOptions";
 import withTerritoiresData from "./withTerritoireData";
 
-const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, regions, departements }) => {
+const TerritoireFilter = ({
+  filters,
+  onRegionChange,
+  onDepartementChange,
+  onTerritoireReset,
+  regions,
+  departements,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onDepartementClick = (departement) => {
@@ -20,9 +27,14 @@ const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, region
     setIsOpen(false);
   };
 
+  const onTouteLaFranceClick = () => {
+    onTerritoireReset();
+    setIsOpen(false);
+  };
+
   const tabLabels = [`Région (${regions.length})`, `Département (${departements.length})`];
 
-  const buttonLabel = filters.region?.nom || filters.departement?.nom;
+  const buttonLabel = filters.region?.nom || filters.departement?.nom || "Toute la France";
 
   return (
     <div>
@@ -33,10 +45,16 @@ const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, region
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <MenuTabs tabNames={tabLabels}>
-            <RegionOptions regions={regions} onRegionClick={onRegionClick} currentFilter={filters.region} />
+            <RegionOptions
+              regions={regions}
+              onRegionClick={onRegionClick}
+              onTouteLaFranceClick={onTouteLaFranceClick}
+              currentFilter={filters.region}
+            />
             <DepartementOptions
               departements={departements}
               onDepartementClick={onDepartementClick}
+              onTouteLaFranceClick={onTouteLaFranceClick}
               currentFilter={filters.departement}
             />
           </MenuTabs>
@@ -49,6 +67,7 @@ const TerritoireFilter = ({ filters, onRegionChange, onDepartementChange, region
 TerritoireFilter.propTypes = {
   onRegionChange: PropTypes.func.isRequired,
   onDepartementChange: PropTypes.func.isRequired,
+  onTerritoireReset: PropTypes.func.isRequired,
   filters: filtersPropTypes.state,
   regions: PropTypes.arrayOf(
     PropTypes.shape({

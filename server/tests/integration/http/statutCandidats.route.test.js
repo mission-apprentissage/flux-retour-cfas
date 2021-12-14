@@ -49,8 +49,8 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     // Check Api Route data
-    assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.data.status, "OK");
+    assert.equal(response.status, 200);
+    assert.equal(response.data.status, "OK");
   });
 
   it("Vérifie que la route statut-candidats renvoie une 401 pour un user non authentifié", async () => {

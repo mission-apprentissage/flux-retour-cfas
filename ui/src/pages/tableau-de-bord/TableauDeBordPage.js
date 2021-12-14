@@ -5,7 +5,7 @@ import { roles } from "../../common/auth/roles";
 import { DEFAULT_REGION } from "../../common/constants/defaultRegion";
 import { FiltersProvider, useFiltersContext } from "./FiltersContext";
 import useEffectifs from "./useEffectifs";
-import { CfaView, DepartementView, FormationView, RegionView, ReseauView } from "./views";
+import { CfaView, DepartementView, FormationView, NationalView, RegionView, ReseauView } from "./views";
 
 export const TableauDeBordView = () => {
   const [effectifs, loading, error] = useEffectifs();
@@ -37,7 +37,11 @@ export const TableauDeBordView = () => {
     return <RegionView effectifs={effectifs} loading={loading} filters={filters} />;
   }
 
-  return <DepartementView filters={filters} effectifs={effectifs} loading={loading} error={error} />;
+  if (filters.departement) {
+    return <DepartementView filters={filters} effectifs={effectifs} loading={loading} error={error} />;
+  }
+
+  return <NationalView effectifs={effectifs} loading={loading} error={error} />;
 };
 
 const TableauDeBordPage = () => {
@@ -52,7 +56,7 @@ const TableauDeBordPage = () => {
   }
 
   return (
-    <FiltersProvider defaultState={{ region: DEFAULT_REGION }}>
+    <FiltersProvider>
       <TableauDeBordView />
     </FiltersProvider>
   );
