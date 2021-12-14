@@ -27,6 +27,14 @@ const SecondarySelectButton = ({
       <Box as="span" verticalAlign="middle" textOverflow="ellipsis" maxWidth="600px" overflow="hidden">
         {children}
       </Box>
+      <Box
+        fontSize="epsilon"
+        as="i"
+        className="ri-arrow-down-s-line"
+        marginLeft="1v"
+        paddingTop="2px"
+        verticalAlign="middle"
+      />
       {isClearable && (
         <>
           <Divider
