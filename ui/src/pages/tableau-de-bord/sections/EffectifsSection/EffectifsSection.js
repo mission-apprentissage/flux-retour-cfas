@@ -8,7 +8,7 @@ import { pluralize } from "../../../../common/utils/stringUtils";
 import { InfoLine } from "../../../../theme/components/icons";
 import { useFiltersContext } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
-import PeriodeFilter from "./PeriodeFilter";
+import DateFilter from "./DateFilter";
 
 const EffectifsSection = ({ effectifs, loading }) => {
   const filtersContext = useFiltersContext();
@@ -57,10 +57,10 @@ const EffectifsSection = ({ effectifs, loading }) => {
     <Section paddingY="4w">
       <HStack marginBottom="2w">
         <Heading as="h2" variant="h2">
-          Effectifs
+          Vue globale
         </Heading>
 
-        <PeriodeFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
+        <DateFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
         <Tooltip
           bg="#F9F8F6"
           label={
