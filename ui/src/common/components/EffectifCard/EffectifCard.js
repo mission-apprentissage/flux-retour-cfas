@@ -4,7 +4,7 @@ import React from "react";
 
 import { formatNumber } from "../../utils/stringUtils";
 
-const EffectifCard = ({ label, count, tooltipLabel, validPeriod = true }) => {
+const EffectifCard = ({ label, count, tooltipLabel, hideCount = false, hideReason }) => {
   const hasTooltip = Boolean(tooltipLabel);
   return (
     <Box
@@ -16,7 +16,7 @@ const EffectifCard = ({ label, count, tooltipLabel, validPeriod = true }) => {
       minHeight="6rem"
       minWidth="16rem"
     >
-      <strong>{validPeriod ? formatNumber(count) : "_"}</strong>
+      <strong>{hideCount ? "_" : formatNumber(count)}</strong>
       &nbsp;
       <span>{label}</span>
       {hasTooltip && (
@@ -29,12 +29,10 @@ const EffectifCard = ({ label, count, tooltipLabel, validPeriod = true }) => {
           <Box as="i" className="ri-information-line" fontSize="epsilon" color="grey.500" marginLeft="1v" />
         </Tooltip>
       )}
-      {!validPeriod && (
-        <>
-          <Text color="grey.700" fontSize="zeta" fontWeight="700" mt="1v">
-            cet indice ne peut être calculé sur <br /> la période sélectionnée
-          </Text>
-        </>
+      {hideCount && (
+        <Text color="grey.700" fontSize="zeta" fontWeight="700" mt="1v">
+          {hideReason}
+        </Text>
       )}
     </Box>
   );
@@ -44,7 +42,8 @@ EffectifCard.propTypes = {
   label: PropTypes.string.isRequired,
   count: PropTypes.number.isRequired,
   tooltipLabel: PropTypes.string,
-  validPeriod: PropTypes.bool,
+  hideCount: PropTypes.bool,
+  hideReason: PropTypes.node,
 };
 
 export default EffectifCard;

@@ -25,6 +25,8 @@ const EffectifsSection = ({ effectifs, loading }) => {
   }
 
   if (effectifs && !loading) {
+    const shouldDisplayRupturantsCount = false;
+    const shouldDisplayAbandons = !isDateFuture(filtersContext.state.date);
     content = (
       <HStack spacing="2w" alignItems="stretch">
         <EffectifCard
@@ -38,16 +40,22 @@ const EffectifsSection = ({ effectifs, loading }) => {
           tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
-          count={effectifs.rupturants.count}
+          count={shouldDisplayRupturantsCount}
+          hideCount={!shouldDisplayRupturantsCount}
           label={pluralize("rupturant", effectifs.rupturants.count)}
-          validPeriod={!isDateFuture(filtersContext.state.date)}
           tooltipLabel="Nombre d’apprenants sans contrat après une rupture au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
+          hideReason="correctif en cours sur cet indice"
         />
         <EffectifCard
-          count={effectifs.abandons.count}
-          validPeriod={!isDateFuture(filtersContext.state.date)}
+          count={shouldDisplayAbandons ? effectifs.abandons.count : "_"}
+          hideCount={!shouldDisplayAbandons}
           label={pluralize("abandon", effectifs.abandons.count)}
           tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
+          hideReason={
+            <span>
+              cet indice ne peut être calculé sur <br /> la période sélectionnée
+            </span>
+          }
         />
       </HStack>
     );
