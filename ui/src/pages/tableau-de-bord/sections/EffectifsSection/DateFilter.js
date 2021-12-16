@@ -1,5 +1,5 @@
 import "react-datepicker/dist/react-datepicker.css";
-import "./PeriodeFilter.css";
+import "./DateFilter.css";
 
 import { endOfMonth, format, isThisMonth } from "date-fns";
 import fr from "date-fns/locale/fr";
@@ -11,9 +11,9 @@ import PrimarySelectButton from "../../../../common/components/SelectButton/Prim
 
 registerLocale("fr", fr);
 
-const PeriodeFilter = ({ value, onChange }) => {
+const DateFilter = ({ value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const buttonLabel = format(value, "MMMM yyyy", { locale: fr });
+  const buttonLabel = format(value, "dd MMMM yyyy", { locale: fr });
 
   const onChangeCb = (selectedDate) => {
     // by default, once a month is selected we use its last day
@@ -36,7 +36,7 @@ const PeriodeFilter = ({ value, onChange }) => {
         onCalendarOpen={() => setIsOpen(true)}
         customInput={
           <PrimarySelectButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
-            en {buttonLabel}
+            Le {buttonLabel}
           </PrimarySelectButton>
         }
       />
@@ -44,9 +44,9 @@ const PeriodeFilter = ({ value, onChange }) => {
   );
 };
 
-PeriodeFilter.propTypes = {
+DateFilter.propTypes = {
   value: PropTypes.instanceOf(Date).isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
-export default PeriodeFilter;
+export default DateFilter;
