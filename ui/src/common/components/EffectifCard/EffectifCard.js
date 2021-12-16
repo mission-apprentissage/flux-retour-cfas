@@ -4,20 +4,23 @@ import React from "react";
 
 import { formatNumber } from "../../utils/stringUtils";
 
-const EffectifCard = ({ label, count, tooltipLabel, validPeriod = true }) => {
+const EffectifCard = ({ label, count, tooltipLabel, hideCount = false, infoText, warningText }) => {
   const hasTooltip = Boolean(tooltipLabel);
   return (
     <Box
       as="article"
       backgroundColor="galt"
       fontSize="gamma"
-      padding="3w"
+      paddingX="3w"
+      paddingY="2w"
       color="grey.800"
-      minHeight="6rem"
+      minHeight="136px"
       minWidth="16rem"
     >
-      <strong>{validPeriod ? formatNumber(count) : "_"}</strong>
-      &nbsp;
+      <Box display="flex" justifyContent="space-between">
+        <strong>{hideCount ? "_" : formatNumber(count)}</strong>
+        {warningText && <Box as="i" className="ri-alert-fill" color="warning" fontSize="24px" marginTop="-6px" />}
+      </Box>
       <span>{label}</span>
       {hasTooltip && (
         <Tooltip
@@ -26,15 +29,13 @@ const EffectifCard = ({ label, count, tooltipLabel, validPeriod = true }) => {
           label={<Box padding="1w">{tooltipLabel}</Box>}
           aria-label={tooltipLabel}
         >
-          <Box as="i" className="ri-information-line" fontSize="epsilon" color="grey.500" marginLeft="1v" />
+          <Box as="i" className="ri-information-line" fontSize="epsilon" color="grey.500" marginLeft="1w" />
         </Tooltip>
       )}
-      {!validPeriod && (
-        <>
-          <Text color="grey.700" fontSize="zeta" fontWeight="700" mt="1v">
-            cet indice ne peut être calculé sur <br /> la période sélectionnée
-          </Text>
-        </>
+      {(infoText || warningText) && (
+        <Text color={infoText ? "grey.700" : "warning"} fontSize="omega" fontWeight="700" mt="1v">
+          {infoText || warningText}
+        </Text>
       )}
     </Box>
   );
@@ -44,7 +45,9 @@ EffectifCard.propTypes = {
   label: PropTypes.string.isRequired,
   count: PropTypes.number.isRequired,
   tooltipLabel: PropTypes.string,
-  validPeriod: PropTypes.bool,
+  hideCount: PropTypes.bool,
+  infoText: PropTypes.node,
+  warningText: PropTypes.string,
 };
 
 export default EffectifCard;
