@@ -6,12 +6,8 @@ import { Section } from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
 import RepartitionEffectifsParFormation from "../../../../common/components/tables/RepartitionEffectifsParFormation";
 import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
+import useFetchEffectifsParNiveauFormation from "../../../../common/hooks/useFetchEffectifsParNiveauFormation";
 import { filtersPropTypes } from "../../FiltersContext";
-import withRepartitionEffectifsReseauParNiveauEtAnneeFormation from "./withRepartitionEffectifsReseauParNiveauEtAnneeFormation";
-
-const RepartitionEffectifsReseauParFormation = withRepartitionEffectifsReseauParNiveauEtAnneeFormation(
-  RepartitionEffectifsParFormation
-);
 
 const RepartitionEffectifsReseau = ({ filters }) => {
   const {
@@ -19,6 +15,12 @@ const RepartitionEffectifsReseau = ({ filters }) => {
     loading: isEffectifsParCfaLoading,
     error: effectifsParCfaError,
   } = useFetchEffectifsParCfa(filters);
+
+  const {
+    data: effectifsParNiveauFormation,
+    loading: isEffectifsParNiveauFormationLoading,
+    error: effectifsParNiveauFormationError,
+  } = useFetchEffectifsParNiveauFormation(filters);
 
   return (
     <Section paddingY="4w">
@@ -45,7 +47,11 @@ const RepartitionEffectifsReseau = ({ filters }) => {
             />
           </TabPanel>
           <TabPanel>
-            <RepartitionEffectifsReseauParFormation filters={filters} />
+            <RepartitionEffectifsParFormation
+              repartitionEffectifs={effectifsParNiveauFormation}
+              loading={isEffectifsParNiveauFormationLoading}
+              error={effectifsParNiveauFormationError}
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>
