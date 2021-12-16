@@ -13,7 +13,12 @@ const DepartementRow = ({ departementCode, departementNom, effectifs, isPeriodIn
     <>
       <Tr background="galt" onClick={() => setIsOpen(!isOpen)} cursor="pointer" _hover={{ background: "galt_hover" }}>
         <Td color="bluefrance">
-          <Box as="i" className={isOpen ? "ri-subtract-line" : "ri-add-line"} verticalAlign="middle" fontSize="beta" />
+          <Box
+            as="i"
+            className={isOpen ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
+            verticalAlign="middle"
+            fontSize="beta"
+          />
           <Box as="span" fontWeight="700" verticalAlign="middle" marginLeft="1w">
             {departementNom} ({departementCode})
           </Box>
