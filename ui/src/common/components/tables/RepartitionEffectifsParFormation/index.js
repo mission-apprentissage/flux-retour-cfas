@@ -11,8 +11,14 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
-    ? ["Niveau", "apprentis", "inscrits sans contrat"]
-    : ["Niveau", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
+    ? ["Liste des formations par niveaux et année de formation", "apprentis", "inscrits sans contrat"]
+    : [
+        "Liste des formations par niveaux et année de formation",
+        "apprentis",
+        "inscrits sans contrat",
+        "rupturants",
+        "abandons",
+      ];
   return (
     <>
       <Table headers={tableHeader} loading={loading} error={error}>

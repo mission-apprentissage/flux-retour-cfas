@@ -12,8 +12,14 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
-    ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
-    : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
+    ? ["Liste des organismes de formation par département", "apprentis", "inscrits sans contrat"]
+    : [
+        "Liste des organismes de formation par département",
+        "apprentis",
+        "inscrits sans contrat",
+        "rupturants",
+        "abandons",
+      ];
   if (repartitionEffectifsParDepartement) {
     content = (
       <Tbody>

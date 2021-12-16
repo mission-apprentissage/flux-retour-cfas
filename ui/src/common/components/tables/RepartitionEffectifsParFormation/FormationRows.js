@@ -6,6 +6,7 @@ import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersCont
 import { fetchEffectifsParFormation } from "../../../api/tableauDeBord";
 import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
 import { pick } from "../../../utils/pick";
+import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import FormationRow from "./FormationRow";
 
@@ -34,7 +35,7 @@ const FormationRows = ({ niveauFormation }) => {
 
   return (
     <>
-      {data.map(({ formation_cfd, intitule, effectifs }) => {
+      {sortAlphabeticallyBy("intitule")(data).map(({ formation_cfd, intitule, effectifs }) => {
         return (
           <FormationRow formationCfd={formation_cfd} intitule={intitule} effectifs={effectifs} key={formation_cfd} />
         );
