@@ -25,8 +25,13 @@ const EffectifsSection = ({ effectifs, loading }) => {
   }
 
   if (effectifs && !loading) {
-    const shouldDisplayRupturantsCount = false;
-    const shouldDisplayAbandons = !isDateFuture(filtersContext.state.date);
+    const shouldWarnAboutDateAvailability = isDateFuture(filtersContext.state.date);
+    const infoTextAboutDateAvailability = (
+      <span>
+        cet indice ne peut être calculé sur <br /> la période sélectionnée
+      </span>
+    );
+
     content = (
       <HStack spacing="2w" alignItems="stretch">
         <EffectifCard
@@ -40,22 +45,18 @@ const EffectifsSection = ({ effectifs, loading }) => {
           tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
         />
         <EffectifCard
-          count={shouldDisplayRupturantsCount}
-          hideCount={!shouldDisplayRupturantsCount}
+          count={effectifs.rupturants.count}
           label={pluralize("rupturant", effectifs.rupturants.count)}
           tooltipLabel="Nombre d’apprenants sans contrat après une rupture au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
-          hideReason="correctif en cours sur cet indice"
+          hideCount
+          warningText="correctif en cours"
         />
         <EffectifCard
-          count={shouldDisplayAbandons ? effectifs.abandons.count : "_"}
-          hideCount={!shouldDisplayAbandons}
+          count={effectifs.abandons.count}
+          hideCount={shouldWarnAboutDateAvailability}
           label={pluralize("abandon", effectifs.abandons.count)}
           tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
-          hideReason={
-            <span>
-              cet indice ne peut être calculé sur <br /> la période sélectionnée
-            </span>
-          }
+          infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
         />
       </HStack>
     );
