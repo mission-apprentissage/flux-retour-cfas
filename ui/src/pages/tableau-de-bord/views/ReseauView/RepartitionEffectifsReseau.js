@@ -5,16 +5,21 @@ import React from "react";
 import { Section } from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
 import RepartitionEffectifsParFormation from "../../../../common/components/tables/RepartitionEffectifsParFormation";
+import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
 import { filtersPropTypes } from "../../FiltersContext";
-import withRepartitionEffectifsReseauParCfa from "./withRepartitionEffectifsReseauParCfaData";
 import withRepartitionEffectifsReseauParNiveauEtAnneeFormation from "./withRepartitionEffectifsReseauParNiveauEtAnneeFormation";
 
-const RepartitionEffectifsReseauParCfa = withRepartitionEffectifsReseauParCfa(RepartitionEffectifsParCfa);
 const RepartitionEffectifsReseauParFormation = withRepartitionEffectifsReseauParNiveauEtAnneeFormation(
   RepartitionEffectifsParFormation
 );
 
 const RepartitionEffectifsReseau = ({ filters }) => {
+  const {
+    data: effectifsParCfa,
+    loading: isEffectifsParCfaLoading,
+    error: effectifsParCfaError,
+  } = useFetchEffectifsParCfa(filters);
+
   return (
     <Section paddingY="4w">
       <Heading as="h3" variant="h3">
@@ -33,7 +38,11 @@ const RepartitionEffectifsReseau = ({ filters }) => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <RepartitionEffectifsReseauParCfa filters={filters} />
+            <RepartitionEffectifsParCfa
+              repartitionEffectifsParCfa={effectifsParCfa}
+              loading={isEffectifsParCfaLoading}
+              error={effectifsParCfaError}
+            />
           </TabPanel>
           <TabPanel>
             <RepartitionEffectifsReseauParFormation filters={filters} />
