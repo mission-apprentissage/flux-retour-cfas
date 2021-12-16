@@ -28,6 +28,7 @@ runScript(async () => {
       nom_etablissement: currentStatut.nom_etablissement,
       etablissement_formateur_code_commune_insee: currentStatut.etablissement_formateur_code_commune_insee,
       statut_apprenant: currentStatut.statut_apprenant,
+      formation_cfd: currentStatut.formation_cfd,
       periode_formation: currentStatut.periode_formation,
       annee_formation: currentStatut.annee_formation,
       annee_scolaire: currentStatut.annee_scolaire,
