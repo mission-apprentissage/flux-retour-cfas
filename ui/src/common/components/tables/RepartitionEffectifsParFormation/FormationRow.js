@@ -20,7 +20,7 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
           <Flex>
             <Box
               as="i"
-              className={isOpen ? "ri-subtract-line" : "ri-add-line"}
+              className={isOpen ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
               verticalAlign="middle"
               color="bluefrance"
               fontSize="beta"
