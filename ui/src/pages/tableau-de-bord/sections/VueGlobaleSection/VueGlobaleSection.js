@@ -9,17 +9,19 @@ import { InfoLine } from "../../../../theme/components/icons";
 import { useFiltersContext } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import DateFilter from "./DateFilter";
+import OrganismesCountCard from "./OrganismesCountCard";
 
-const EffectifsSection = ({ effectifs, loading }) => {
+const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) => {
   const filtersContext = useFiltersContext();
   let content = null;
   if (loading) {
     content = (
       <HStack spacing="2w">
-        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
+        {showOrganismesCount && <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />}
+        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
       </HStack>
     );
   }
@@ -34,6 +36,7 @@ const EffectifsSection = ({ effectifs, loading }) => {
 
     content = (
       <HStack spacing="2w" alignItems="stretch">
+        {showOrganismesCount && <OrganismesCountCard />}
         <EffectifCard
           count={effectifs.apprentis.count}
           label={pluralize("apprenti", effectifs.apprentis.count)}
@@ -94,9 +97,10 @@ const EffectifsSection = ({ effectifs, loading }) => {
   );
 };
 
-EffectifsSection.propTypes = {
+VueGlobaleSection.propTypes = {
   loading: PropTypes.bool.isRequired,
+  showOrganismesCount: PropTypes.bool,
   effectifs: effectifsPropType,
 };
 
-export default EffectifsSection;
+export default VueGlobaleSection;
