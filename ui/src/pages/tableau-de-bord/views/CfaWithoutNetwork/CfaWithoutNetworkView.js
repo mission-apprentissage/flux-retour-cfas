@@ -4,7 +4,7 @@ import React from "react";
 
 import { Page, Section } from "../../../../common/components";
 import { useFiltersContext } from "../../FiltersContext";
-import { EffectifsSection } from "../../sections";
+import { VueGlobaleSection } from "../../sections";
 import useEffectifs from "../../useEffectifs";
 import CfaSection from "../CfaView/InfosCfa/CfaSection";
 import RepartionCfaNiveauAnneesSection from "../CfaView/RepartionCfaNiveauAnneesSection";
@@ -21,7 +21,7 @@ const CfaWithoutNetworkView = ({ cfaUai }) => {
         </Heading>
       </Section>
       {cfaUai && <CfaSection filters={filters} cfaUai={cfaUai} />}
-      {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
+      {effectifs && <VueGlobaleSection effectifs={effectifs} loading={loading} />}
       <RepartionCfaNiveauAnneesSection filters={filters} />
     </Page>
   );

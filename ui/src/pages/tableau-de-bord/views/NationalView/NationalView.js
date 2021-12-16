@@ -3,14 +3,13 @@ import React from "react";
 
 import { Page } from "../../../../common/components";
 import { effectifsPropType } from "../../propTypes";
-import { EffectifsSection, IndicesHeaderSection, ProvenanceIndicesSection } from "../../sections";
+import { IndicesHeaderSection, VueGlobaleSection } from "../../sections";
 
 const NationalView = ({ effectifs, loading }) => {
   return (
     <Page>
       <IndicesHeaderSection />
-      <ProvenanceIndicesSection />
-      <EffectifsSection effectifs={effectifs} loading={loading} />
+      <VueGlobaleSection effectifs={effectifs} loading={loading} showOrganismesCount />
     </Page>
   );
 };

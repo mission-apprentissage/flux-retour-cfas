@@ -4,7 +4,7 @@ import React from "react";
 import { DataNetworkAlert, Page } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
-import { EffectifsSection, IndicesHeaderSection, ProvenanceIndicesSection } from "../../sections";
+import { IndicesHeaderSection, VueGlobaleSection } from "../../sections";
 import InfosReseauSection from "./InfosReseauSection";
 import RepartitionEffectifsReseau from "./RepartitionEffectifsReseau";
 
@@ -15,9 +15,8 @@ const ReseauView = ({ reseau, effectifs, filters, loading }) => {
     <Page>
       <IndicesHeaderSection />
       <InfosReseauSection reseau={reseau} />
-      <ProvenanceIndicesSection />
       {reseau === RESEAU_WITH_DATA_ALERT && <DataNetworkAlert paddingY="4w" />}
-      <EffectifsSection effectifs={effectifs} loading={loading} />
+      <VueGlobaleSection effectifs={effectifs} loading={loading} showOrganismesCount />
       <RepartitionEffectifsReseau filters={filters} />
     </Page>
   );

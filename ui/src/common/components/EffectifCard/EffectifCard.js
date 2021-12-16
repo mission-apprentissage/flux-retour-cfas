@@ -10,28 +10,36 @@ const EffectifCard = ({ label, count, tooltipLabel, hideCount = false, infoText,
     <Box
       as="article"
       backgroundColor="galt"
-      fontSize="gamma"
       paddingX="3w"
       paddingY="2w"
       color="grey.800"
       minHeight="136px"
       minWidth="16rem"
     >
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between" fontSize="gamma">
         <strong>{hideCount ? "_" : formatNumber(count)}</strong>
         {warningText && <Box as="i" className="ri-alert-fill" color="warning" fontSize="24px" marginTop="-6px" />}
       </Box>
-      <span>{label}</span>
-      {hasTooltip && (
-        <Tooltip
-          background="bluefrance"
-          color="white"
-          label={<Box padding="1w">{tooltipLabel}</Box>}
-          aria-label={tooltipLabel}
-        >
-          <Box as="i" className="ri-information-line" fontSize="epsilon" color="grey.500" marginLeft="1w" />
-        </Tooltip>
-      )}
+      <Text fontSize="epsilon">
+        {label}
+        {hasTooltip && (
+          <Tooltip
+            background="bluefrance"
+            color="white"
+            label={<Box padding="1w">{tooltipLabel}</Box>}
+            aria-label={tooltipLabel}
+          >
+            <Box
+              as="i"
+              className="ri-information-line"
+              fontSize="epsilon"
+              color="grey.500"
+              marginLeft="1w"
+              verticalAlign="middle"
+            />
+          </Tooltip>
+        )}
+      </Text>
       {(infoText || warningText) && (
         <Text color={infoText ? "grey.700" : "warning"} fontSize="omega" fontWeight="700" mt="1v">
           {infoText || warningText}

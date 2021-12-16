@@ -4,15 +4,14 @@ import React from "react";
 import { Page } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
-import { EffectifsSection, IndicesHeaderSection, ProvenanceIndicesSection } from "../../sections";
+import { IndicesHeaderSection, VueGlobaleSection } from "../../sections";
 import RepartitionEffectifsTerritoire from "./RepartitionEffectifsTerritoire";
 
 const GenericView = ({ effectifs, loading, filters }) => {
   return (
     <Page>
       <IndicesHeaderSection />
-      <ProvenanceIndicesSection />
-      <EffectifsSection effectifs={effectifs} loading={loading} />
+      <VueGlobaleSection effectifs={effectifs} loading={loading} showOrganismesCount />
       <RepartitionEffectifsTerritoire filters={filters} />
     </Page>
   );
