@@ -12,7 +12,7 @@ const RepartionCfaNiveauAnneesSection = ({ filters }) => {
   return (
     <Section paddingY="4w">
       <Heading as="h3" variant="h3">
-        Répartition des effectifs par formations
+        Répartition des effectifs
       </Heading>
       <RepartitionEffectifsCfaParFormation filters={filters} />
     </Section>

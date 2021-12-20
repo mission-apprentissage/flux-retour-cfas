@@ -6,6 +6,7 @@ import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersCont
 import { fetchEffectifsParAnneeFormation } from "../../../api/tableauDeBord";
 import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
 import { pick } from "../../../utils/pick";
+import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
 import AnneeFormationRow from "./AnneeFormationRow";
 
 const AnneeFormationRows = ({ formationCfd }) => {
@@ -28,12 +29,9 @@ const AnneeFormationRows = ({ formationCfd }) => {
 
   return (
     <>
-      {data
-        .slice()
-        .sort((a, b) => (a.annee_formation < b.annee_formation ? 1 : -1))
-        .map(({ annee_formation, effectifs }) => {
-          return <AnneeFormationRow key={annee_formation} anneeFormation={annee_formation} effectifs={effectifs} />;
-        })}
+      {sortAlphabeticallyBy("annee_formation", data).map(({ annee_formation, effectifs }) => {
+        return <AnneeFormationRow key={annee_formation} anneeFormation={annee_formation} effectifs={effectifs} />;
+      })}
     </>
   );
 };

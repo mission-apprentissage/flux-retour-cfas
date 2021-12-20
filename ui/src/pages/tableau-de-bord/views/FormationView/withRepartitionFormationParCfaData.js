@@ -4,6 +4,7 @@ import { useQuery } from "react-query";
 import { fetchEffectifsParCfa } from "../../../../common/api/tableauDeBord";
 import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
 import { pick } from "../../../../common/utils/pick";
+import { sortAlphabeticallyBy } from "../../../../common/utils/sortAlphabetically";
 import { filtersPropTypes } from "../../FiltersContext";
 
 const withRepartitionFormationParCfa = (Component) => {
@@ -18,7 +19,10 @@ const withRepartitionFormationParCfa = (Component) => {
     const { data, isLoading, error } = useQuery(["effectifs-par-cfa", requestFilters], () =>
       fetchEffectifsParCfa(requestFilters)
     );
-    return <Component {...props} repartitionEffectifsParCfa={data} loading={isLoading} error={error} />;
+
+    const effectifs = sortAlphabeticallyBy("nom_etablissement", data || []);
+
+    return <Component {...props} repartitionEffectifsParCfa={effectifs} loading={isLoading} error={error} />;
   };
 
   WithRepartitionFormationParCfa.propTypes = {

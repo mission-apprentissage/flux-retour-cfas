@@ -4,6 +4,7 @@ import { useQuery } from "react-query";
 
 import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
 import { fetchEffectifsParCfa } from "../../../api/tableauDeBord";
+import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import CfaRow from "./CfaRow";
 
@@ -25,7 +26,7 @@ const CfasRows = ({ departementCode }) => {
 
   return (
     <>
-      {data.map(({ uai_etablissement, nom_etablissement, effectifs }) => {
+      {sortAlphabeticallyBy("nom_etablissement", data).map(({ uai_etablissement, nom_etablissement, effectifs }) => {
         return (
           <CfaRow
             uai_etablissement={uai_etablissement}
