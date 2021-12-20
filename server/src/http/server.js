@@ -20,8 +20,8 @@ const dashboardRoute = require("./routes/dashboard");
 const cfasRoute = require("./routes/cfas");
 const formationRoutes = require("./routes/formations");
 const healthcheckRoute = require("./routes/healthcheck");
-const demandeAcces = require("./routes/demande-acces");
-const demandeLienAccesRoute = require("./routes/demande-lien-acces");
+const demandeIdentifiants = require("./routes/demande-identifiants");
+const demandeLienPriveRoute = require("./routes/demande-lien-prive");
 const demandeBranchementErpRoute = require("./routes/demande-branchement-erp");
 const cacheRouter = require("./routes/cache");
 
@@ -42,8 +42,8 @@ module.exports = async (components) => {
   app.use("/api/cfas", cfasRoute(components));
   app.use("/api/referentiel", referentielRoute());
   app.use("/api/healthcheck", healthcheckRoute(components));
-  app.use("/api/demande-acces", demandeAcces(components));
-  app.use("/api/demande-lien-acces", demandeLienAccesRoute(components));
+  app.use("/api/demande-identifiants", demandeIdentifiants(components));
+  app.use("/api/demande-lien-prive", demandeLienPriveRoute(components));
   app.use("/api/demande-branchement-erp", demandeBranchementErpRoute(components));
 
   // requires JWT auth

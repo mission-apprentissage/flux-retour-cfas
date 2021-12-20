@@ -3,11 +3,11 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import ModalClosingButton from "../../../common/components/ModalClosingButton/ModalClosingButton";
-import DemandeAccesForm from "./DemandeAccesForm";
-import useDemandeAccesSubmit, { REQUEST_STATE } from "./useDemandeAccesSubmit";
+import DemandeAccesForm from "./AskIdentifiantsForm";
+import useAskIdentifiantsSubmit, { REQUEST_STATE } from "./useAskIdentifiantsSubmit";
 
-const RequestAccessModal = ({ isOpen, onClose }) => {
-  const [submitState, submit] = useDemandeAccesSubmit();
+const AskIdentifiantsModal = ({ isOpen, onClose }) => {
+  const [submitState, submit] = useAskIdentifiantsSubmit();
 
   const content =
     submitState === REQUEST_STATE.success ? (
@@ -46,9 +46,9 @@ const RequestAccessModal = ({ isOpen, onClose }) => {
   );
 };
 
-RequestAccessModal.propTypes = {
+AskIdentifiantsModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
-export default RequestAccessModal;
+export default AskIdentifiantsModal;

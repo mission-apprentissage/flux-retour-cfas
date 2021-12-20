@@ -11,7 +11,6 @@ module.exports = {
   User: getModel("users"),
   UserEvent: getModel("userEvents"),
   JobEvent: getModel("jobEvents", true),
-  DemandeAccesModel: getModel("demandesAcces"),
   DuplicateEvent: getModel("duplicatesEvents"),
   Cfa: getModel("cfas", true),
   CfaAnnuaire: getModel("cfasAnnuaire"),
@@ -21,6 +20,7 @@ module.exports = {
   Log: getModel("logs"),
   CroisementVoeuxAffelnet: getModel("croisementVoeuxAffelnet"),
   RcoStatutCandidat: getModel("rcoStatutsCandidats"),
-  DemandeLienAcces: getModel("demandeLienAcces"),
+  DemandeIdentifiantsModel: getModel("demandesIdentifiants"),
+  DemandeLienPriveModel: getModel("demandesLienPrive"),
   DemandeBranchementErp: getModel("demandesBranchementErp"),
 };

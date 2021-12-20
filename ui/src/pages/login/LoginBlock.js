@@ -3,7 +3,7 @@ import { Box, Button, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import DemandeAccesModal from "./DemandeAccesModal/DemandeAccesModal";
+import AskIdentifiantsModal from "./AskIdentifiantsModal/AskIdentifiantsModal";
 import LoginForm from "./LoginForm";
 
 const LoginBlock = ({ onSubmit }) => {
@@ -18,7 +18,7 @@ const LoginBlock = ({ onSubmit }) => {
       <Button variant="secondary" marginTop="2w" onClick={onOpen}>
         Demander mes identifiants
       </Button>
-      <DemandeAccesModal isOpen={isOpen} onClose={onClose} />
+      <AskIdentifiantsModal isOpen={isOpen} onClose={onClose} />
     </Box>
   );
 };

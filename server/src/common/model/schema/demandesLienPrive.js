@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const demandeLienAcces = new Schema({
+module.exports = new Schema({
   nom_organisme: {
     type: String,
     required: true,
@@ -31,5 +31,3 @@ const demandeLienAcces = new Schema({
     description: "Date à laquelle la demande a été effectuée",
   },
 });
-
-module.exports = demandeLienAcces;

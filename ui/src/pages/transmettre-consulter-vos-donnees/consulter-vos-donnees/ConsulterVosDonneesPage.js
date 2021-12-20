@@ -4,7 +4,7 @@ import React from "react";
 import { Footer, Header, Section } from "../../../common/components";
 import BreadcrumbNav from "../../../common/components/BreadcrumbNav/BreadcrumbNav";
 import { navigationPages } from "../../../common/constants/navigationPages";
-import AskAccessLinkModal from "./AskAccessLink/AskAccessLinkModal";
+import AskPrivateLinkModal from "./AskPrivateLink/AskPrivateLinkModal";
 
 const ConsulterVosDonneesPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -36,7 +36,7 @@ const ConsulterVosDonneesPage = () => {
           <Button type="submit" variant="secondary" onClick={onOpen}>
             Demander votre lien d&apos;accès
           </Button>
-          <AskAccessLinkModal isOpen={isOpen} onClose={onClose} />
+          <AskPrivateLinkModal isOpen={isOpen} onClose={onClose} />
         </Box>
       </Section>
       <Footer />
