@@ -4,7 +4,7 @@ import React from "react";
 import { Page } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
-import { EffectifsSection, IndicesHeaderSection } from "../../sections";
+import { IndicesHeaderSection, VueGlobaleSection } from "../../sections";
 import CfaSection from "./InfosCfa/CfaSection";
 import RepartionCfaNiveauAnneesSection from "./RepartionCfaNiveauAnneesSection";
 
@@ -13,7 +13,7 @@ const CfaView = ({ cfaUai, filters, effectifs, loading }) => {
     <Page>
       <IndicesHeaderSection />
       {cfaUai && <CfaSection filters={filters} cfaUai={cfaUai} />}
-      {effectifs && <EffectifsSection effectifs={effectifs} loading={loading} />}
+      {effectifs && <VueGlobaleSection effectifs={effectifs} loading={loading} />}
       <RepartionCfaNiveauAnneesSection filters={filters} />
     </Page>
   );

@@ -4,7 +4,7 @@ import React from "react";
 import { Page } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
-import { EffectifsSection, IndicesHeaderSection, ProvenanceIndicesSection } from "../../sections";
+import { IndicesHeaderSection, VueGlobaleSection } from "../../sections";
 import InfosFormationSection from "./InfosFormationSection";
 import RepartitionFormationParCfa from "./RepartitionFormationParCfa";
 
@@ -13,8 +13,7 @@ const FormationView = ({ formationCfd, filters, effectifs, loading }) => {
     <Page>
       <IndicesHeaderSection />
       <InfosFormationSection formationCfd={formationCfd} />
-      <ProvenanceIndicesSection />
-      <EffectifsSection effectifs={effectifs} loading={loading} />
+      <VueGlobaleSection effectifs={effectifs} loading={loading} showOrganismesCount />
       <RepartitionFormationParCfa formationCfd={formationCfd} filters={filters} />
     </Page>
   );

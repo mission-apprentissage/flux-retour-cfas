@@ -8,25 +8,35 @@ import { pluralize } from "../../../../common/utils/stringUtils";
 import { InfoLine } from "../../../../theme/components/icons";
 import { useFiltersContext } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
-import PeriodeFilter from "./PeriodeFilter";
+import DateFilter from "./DateFilter";
+import OrganismesCountCard from "./OrganismesCountCard";
 
-const EffectifsSection = ({ effectifs, loading }) => {
+const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) => {
   const filtersContext = useFiltersContext();
   let content = null;
   if (loading) {
     content = (
       <HStack spacing="2w">
-        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="6rem" startColor="grey.300" endColor="galt" />
+        {showOrganismesCount && <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />}
+        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
       </HStack>
     );
   }
 
   if (effectifs && !loading) {
+    const shouldWarnAboutDateAvailability = isDateFuture(filtersContext.state.date);
+    const infoTextAboutDateAvailability = (
+      <span>
+        cet indice ne peut être calculé sur <br /> la période sélectionnée
+      </span>
+    );
+
     content = (
       <HStack spacing="2w" alignItems="stretch">
+        {showOrganismesCount && <OrganismesCountCard />}
         <EffectifCard
           count={effectifs.apprentis.count}
           label={pluralize("apprenti", effectifs.apprentis.count)}
@@ -40,14 +50,16 @@ const EffectifsSection = ({ effectifs, loading }) => {
         <EffectifCard
           count={effectifs.rupturants.count}
           label={pluralize("rupturant", effectifs.rupturants.count)}
-          validPeriod={!isDateFuture(filtersContext.state.date)}
           tooltipLabel="Nombre d’apprenants sans contrat après une rupture au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
+          hideCount
+          warningText="correctif en cours"
         />
         <EffectifCard
           count={effectifs.abandons.count}
-          validPeriod={!isDateFuture(filtersContext.state.date)}
+          hideCount={shouldWarnAboutDateAvailability}
           label={pluralize("abandon", effectifs.abandons.count)}
           tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
+          infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
         />
       </HStack>
     );
@@ -57,10 +69,10 @@ const EffectifsSection = ({ effectifs, loading }) => {
     <Section paddingY="4w">
       <HStack marginBottom="2w">
         <Heading as="h2" variant="h2">
-          Effectifs
+          Vue globale
         </Heading>
 
-        <PeriodeFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
+        <DateFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
         <Tooltip
           bg="#F9F8F6"
           label={
@@ -85,9 +97,10 @@ const EffectifsSection = ({ effectifs, loading }) => {
   );
 };
 
-EffectifsSection.propTypes = {
+VueGlobaleSection.propTypes = {
   loading: PropTypes.bool.isRequired,
+  showOrganismesCount: PropTypes.bool,
   effectifs: effectifsPropType,
 };
 
-export default EffectifsSection;
+export default VueGlobaleSection;

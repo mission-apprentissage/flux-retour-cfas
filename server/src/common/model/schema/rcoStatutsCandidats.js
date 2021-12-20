@@ -29,6 +29,12 @@ const rcoStatutsCandidatsSchema = new Schema({
     description: "Statut de l'apprenant",
     index: true,
   },
+  formation_cfd: {
+    type: String,
+    default: null,
+    description: "CFD de la formation du candidat",
+    index: true,
+  },
   periode_formation: {
     type: [Number],
     default: [],
