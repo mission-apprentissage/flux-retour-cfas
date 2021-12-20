@@ -26,7 +26,7 @@ const CfasRows = ({ departementCode }) => {
 
   return (
     <>
-      {sortAlphabeticallyBy("nom_etablissement")(data).map(({ uai_etablissement, nom_etablissement, effectifs }) => {
+      {sortAlphabeticallyBy("nom_etablissement", data).map(({ uai_etablissement, nom_etablissement, effectifs }) => {
         return (
           <CfaRow
             uai_etablissement={uai_etablissement}

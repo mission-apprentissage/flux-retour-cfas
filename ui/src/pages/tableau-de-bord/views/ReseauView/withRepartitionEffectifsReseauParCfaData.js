@@ -20,7 +20,7 @@ const withRepartitionEffectifsReseauParCfa = (Component) => {
       fetchEffectifsParCfa(requestFilters)
     );
 
-    const effectifs = sortAlphabeticallyBy("nom_etablissement")(data || []);
+    const effectifs = sortAlphabeticallyBy("nom_etablissement", data || []);
 
     return <Component {...props} repartitionEffectifsParCfa={effectifs} loading={isLoading} error={error} />;
   };

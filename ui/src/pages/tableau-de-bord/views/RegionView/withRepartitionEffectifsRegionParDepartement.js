@@ -14,7 +14,7 @@ const withRepartitionEffectifsTerritoireParDepartement = (Component) => {
       fetchEffectifsParDepartement(requestFilters)
     );
 
-    const effectifs = sortAlphabeticallyBy("etablissement_nom_departement")(data || []);
+    const effectifs = sortAlphabeticallyBy("etablissement_nom_departement", data || []);
 
     return <Component {...props} repartitionEffectifsParDepartement={effectifs} loading={isLoading} error={error} />;
   };

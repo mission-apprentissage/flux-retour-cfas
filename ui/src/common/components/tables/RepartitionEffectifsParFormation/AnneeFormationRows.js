@@ -29,7 +29,7 @@ const AnneeFormationRows = ({ formationCfd }) => {
 
   return (
     <>
-      {sortAlphabeticallyBy("annee_formation")(data).map(({ annee_formation, effectifs }) => {
+      {sortAlphabeticallyBy("annee_formation", data).map(({ annee_formation, effectifs }) => {
         return <AnneeFormationRow key={annee_formation} anneeFormation={annee_formation} effectifs={effectifs} />;
       })}
     </>
