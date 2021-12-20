@@ -5,7 +5,6 @@ import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
 
 const useFetchEffectifsParDepartement = (filters = {}) => {
-  console.log("FILTERS PASSED TO HOOK", filters);
   const requestFilters = mapFiltersToApiFormat(filters);
   const { data, isLoading, error } = useQuery(["effectifs-par-departement", requestFilters], () =>
     fetchEffectifsParDepartement(requestFilters)
