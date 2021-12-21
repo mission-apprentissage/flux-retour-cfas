@@ -64,6 +64,11 @@ const rcoStatutsCandidatsSchema = new Schema({
     default: null,
     description: "Date de début du contrat",
   },
+  contrat_date_fin: {
+    type: Date,
+    default: null,
+    description: "Date de fin du contrat",
+  },
   contrat_date_rupture: {
     type: Date,
     default: null,
