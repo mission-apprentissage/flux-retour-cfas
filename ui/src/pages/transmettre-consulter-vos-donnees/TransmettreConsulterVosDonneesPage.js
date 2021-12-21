@@ -5,6 +5,7 @@ import { Badge, BreadcrumbNav, Footer, Header, LinkCard, Section } from "../../c
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { ERP_STATE_COLOR, ERPS } from "../../common/constants/erps";
 import { navigationPages } from "../../common/constants/navigationPages";
+import { productName } from "../../common/constants/productName";
 import AcquisitionCfaBarGraph from "./AcquisitionCfaBarGraph";
 
 const TransmettreConsulterVosDonneesPage = () => {
@@ -22,25 +23,25 @@ const TransmettreConsulterVosDonneesPage = () => {
         </Text>
         <HStack spacing="3w" marginTop="2w" alignItems="stretch">
           <LinkCard linkText="Consulter vos données" linkHref={navigationPages.ConsulterVosDonnees.path}>
-            <strong>Vous transmettez déjà vos données</strong> au tableau
+            <strong>Vous transmettez déjà vos données</strong>
             <br />
-            de bord
+            au {productName}
           </LinkCard>
           <LinkCard linkText="Transmettre vos données" linkHref={navigationPages.TransmettreVosDonnees.path}>
             <strong>Vous ne transmettez pas encore vos données</strong>
             <br />
-            au tableau de bord
+            au {productName}
           </LinkCard>
         </HStack>
       </Section>
 
       <Section paddingY="8w">
         <Heading as="h3" fontSize="beta">
-          Pourquoi transmettre vos données au tableau de bord ?
+          Pourquoi transmettre vos données au {productName} ?
         </Heading>
         <Text color="grey.800" marginTop="3w">
-          Différentes institutions (Conseil régionaux, DREETS, Opco, etc.) consultent le tableau de bord quotidiennement
-          pour suivre l’évolution des effectifs.&nbsp;
+          Différentes institutions (Conseils régionaux, DREETS, Opco, etc.) consultent le {productName}
+          quotidiennement pour suivre l’évolution des effectifs.&nbsp;
           <strong>
             Elles se servent de ces données pour évaluer les montants des aides aux organismes de formation et pour
             mettre en place des plans d’actions.
@@ -61,7 +62,7 @@ const TransmettreConsulterVosDonneesPage = () => {
           </Box>
           <Box paddingY="3w" paddingX="4w" background="galt" minWidth="300px" flex="1">
             <Text color="grey.800" fontWeight="700" fontSize="gamma">
-              Aujourd&apos;hui le tableau de bord est interfaçable avec :
+              Aujourd&apos;hui le {productName} est interfaçable avec :
             </Text>
             <List marginTop="3v" spacing="1w">
               {ERPS.map(({ name, state }) => {

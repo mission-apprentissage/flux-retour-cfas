@@ -6,6 +6,7 @@ import { NavLink } from "react-router-dom";
 import { Footer, Header, LinkCard, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { navigationPages } from "../../common/constants/navigationPages";
+import { productName } from "../../common/constants/productName";
 import useAuth from "../../common/hooks/useAuth";
 import dashboardIllustration from "./dashboard-illustration.svg";
 import ApercuDesDonneesSection from "./sections/ApercuDesDonneesSection";
@@ -28,7 +29,7 @@ const HomePage = () => {
               beta
             </Tag>
             <Heading as="h1" fontSize="40px">
-              Le tableau de bord de l&apos;apprentissage
+              Le {productName}
             </Heading>
             <Text fontSize="alpha" color="grey.800" marginTop="1w">
               Mettre à disposition des <strong>différents acteurs</strong> les <strong>données clés</strong> de
@@ -38,7 +39,7 @@ const HomePage = () => {
           <img src={dashboardIllustration} alt="illustration tableau de bord" />
         </Flex>
         <HStack spacing="3w" marginTop="6w" alignItems="stretch">
-          <LinkCard linkText="Accéder au tableau de bord" linkHref={navigationPages.Login.path}>
+          <LinkCard linkText={`Accéder au ${productName}`} linkHref={navigationPages.Login.path}>
             Vous êtes une <strong>Institution ou une organisation professionnelle</strong> (OPCO, branche, etc...)
           </LinkCard>
           <LinkCard
