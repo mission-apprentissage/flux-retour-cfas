@@ -14,7 +14,7 @@ const FormationView = ({ formationCfd, filters, effectifs, loading }) => {
       <IndicesHeaderSection />
       <InfosFormationSection formationCfd={formationCfd} />
       <VueGlobaleSection effectifs={effectifs} loading={loading} showOrganismesCount />
-      <RepartitionFormationParCfa formationCfd={formationCfd} filters={filters} />
+      <RepartitionFormationParCfa filters={filters} />
     </Page>
   );
 };
