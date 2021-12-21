@@ -11,7 +11,7 @@ const useFetchEffectifsParCfa = (filters = {}) => {
     fetchEffectifsParCfa(requestFilters)
   );
 
-  const effectifs = sortAlphabeticallyBy("nom_etablissement", data || []);
+  const effectifs = data ? sortAlphabeticallyBy("nom_etablissement", data) : [];
 
   return { data: effectifs, loading: isLoading, error };
 };

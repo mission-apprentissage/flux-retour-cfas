@@ -9,7 +9,7 @@ const useFetchEffectifsParDepartement = (filters = {}) => {
   const { data, isLoading, error } = useQuery(["effectifs-par-departement", requestFilters], () =>
     fetchEffectifsParDepartement(requestFilters)
   );
-  const effectifs = sortAlphabeticallyBy("etablissement_nom_departement", data || []);
+  const effectifs = data ? sortAlphabeticallyBy("etablissement_nom_departement", data) : [];
 
   return { data: effectifs, loading: isLoading, error };
 };
