@@ -137,6 +137,7 @@ const jobNames = {
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
   cfasCroisementDeca: "cfas-croisement-cfas-deca",
   warmUpCache: "warm-up-cache",
+  retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
 };
 
 /**

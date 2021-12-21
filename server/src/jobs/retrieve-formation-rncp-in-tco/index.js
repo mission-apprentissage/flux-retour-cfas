@@ -4,6 +4,7 @@ const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
 const logger = require("../../common/logger");
+const { jobNames } = require("../../common/model/constants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -46,4 +47,4 @@ runScript(async ({ db }) => {
   loadingBar.stop();
   logger.info(`${matchedCfdCount} RNCP found for ${allValidCfds.length} valid CFDs`);
   logger.info(`${updatedStatutCandidatCount} statuts candidats updated with RNCP found in TCO`);
-}, "retrieve-rncp-in-tco-for-cfds");
+}, jobNames.retrieveRncp);
