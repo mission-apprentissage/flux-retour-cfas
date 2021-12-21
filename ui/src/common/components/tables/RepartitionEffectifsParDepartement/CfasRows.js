@@ -9,9 +9,9 @@ import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import CfaRow from "./CfaRow";
 
 const CfasRows = ({ departementCode }) => {
-  const filters = useFiltersContext();
+  const filtersContext = useFiltersContext();
   const requestFilters = {
-    date: filters.state.date.toISOString(),
+    date: filtersContext.state.date.toISOString(),
     etablissement_num_departement: departementCode,
   };
   const { data, isLoading } = useQuery(["effectifs-par-cfa", requestFilters], () =>
@@ -33,7 +33,10 @@ const CfasRows = ({ departementCode }) => {
             nom_etablissement={nom_etablissement}
             effectifs={effectifs}
             key={uai_etablissement}
-            onCfaClick={filters.setters.setCfa}
+            onCfaClick={() => {
+              filtersContext.setters.setCfa({ nom_etablissement, uai_etablissement });
+              window.scrollTo(0, 0);
+            }}
           />
         );
       })}

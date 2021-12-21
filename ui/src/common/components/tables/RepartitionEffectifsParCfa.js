@@ -25,7 +25,10 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
             <Tr key={"headerRow_" + index}>
               <Td color="grey.800">
                 <Link
-                  onClick={() => filtersContext.setters.setCfa({ nom_etablissement, uai_etablissement })}
+                  onClick={() => {
+                    filtersContext.setters.setCfa({ nom_etablissement, uai_etablissement });
+                    window.scrollTo(0, 0);
+                  }}
                   color="bluefrance"
                   whiteSpace="nowrap"
                 >
@@ -71,7 +74,6 @@ RepartitionEffectifsParCfa.propTypes = {
       }).isRequired,
     }).isRequired
   ),
-  // onCfaClick: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   error: PropTypes.object,
 };
