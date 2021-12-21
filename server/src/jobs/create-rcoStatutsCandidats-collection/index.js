@@ -35,6 +35,7 @@ runScript(async () => {
       code_commune_insee_apprenant: currentStatut.code_commune_insee_apprenant,
       date_de_naissance_apprenant: currentStatut.date_de_naissance_apprenant,
       contrat_date_debut: currentStatut.contrat_date_debut,
+      contrat_date_fin: currentStatut.contrat_date_fin,
       contrat_date_rupture: currentStatut.contrat_date_rupture,
       formation_rncp: currentStatut.formation_rncp,
     }).save();
