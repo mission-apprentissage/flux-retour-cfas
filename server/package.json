@@ -58,6 +58,7 @@
     "support:identify-uais-catalog": "node -r dotenv/config src/jobs/support/identify-uais-catalog/index.js",
     "support:merge-deca-uais-file": "node -r dotenv/config src/jobs/support/deca-merge-uais-file/index.js",
     "support:raw-data-analysis": "node -r dotenv/config src/jobs/support/raw-data-analysis/index.js",
+    "support:retrieve-formation-rncp-in-tco": "node -r dotenv/config src/jobs/support/retrieve-formation-rncp-in-tco/index.js",
     "retrieve-location-from-uai": "node -r dotenv/config src/jobs/retrieve-location-from-uai/index.js",
     "fix-historique-date-statut-format": "node -r dotenv/config src/jobs/fix-historique-date-statut-format/index.js",
     "cache:warmup": "node -r dotenv/config src/jobs/warm-effectifs-cache/index.js",
