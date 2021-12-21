@@ -8,18 +8,19 @@ const logger = require("../../common/logger");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Ce script permet d'analyser le nombre de CFD en base pour lesquels on trouve un RNCP dans les TCO
+ * Ce script permet de récupérer les RNCP pour les statuts n'en ayant pas ; le code RNCP est retrouvé via le CFD dans les TCO
  */
 runScript(async ({ db }) => {
   const allValidCfds = await db.collection("statutsCandidats").distinct("formation_cfd", {
     formation_cfd_valid: true,
+    formation_rncp: null,
   });
 
-  logger.info(`${allValidCfds.length} valid CFD found. Will search for RNCP in TCO...`);
+  logger.info(`${allValidCfds.length} valid CFD found for statuts without RNCP. Will search for RNCP in TCO...`);
   loadingBar.start(allValidCfds.length, 0);
 
   let matchedCfdCount = 0;
-  let matchedStatutCandidatsCount = 0;
+  let updatedStatutCandidatCount = 0;
 
   await asyncForEach(allValidCfds, async (cfd) => {
     const cfdInfo = await getCfdInfo(cfd);
@@ -27,14 +28,22 @@ runScript(async ({ db }) => {
     if (cfdInfo?.rncp?.code_rncp) {
       matchedCfdCount++;
 
-      const nbStatutsMatched = await db.collection("statutsCandidats").countDocuments({
-        formation_cfd: cfd,
-      });
-      matchedStatutCandidatsCount += nbStatutsMatched;
+      const { modifiedCount } = await db.collection("statutsCandidats").updateMany(
+        {
+          formation_cfd: cfd,
+          formation_rncp: null,
+        },
+        {
+          $set: {
+            formation_rncp: cfdInfo.rncp.code_rncp,
+          },
+        }
+      );
+      updatedStatutCandidatCount += modifiedCount;
     }
     loadingBar.increment();
   });
   loadingBar.stop();
   logger.info(`${matchedCfdCount} RNCP found for ${allValidCfds.length} valid CFDs`);
-  logger.info(`${matchedStatutCandidatsCount} statuts candidats with RNCP found in TCO`);
+  logger.info(`${updatedStatutCandidatCount} statuts candidats updated with RNCP found in TCO`);
 }, "retrieve-rncp-in-tco-for-cfds");
