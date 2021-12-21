@@ -4,6 +4,7 @@ import React from "react";
 import { Footer, Header, Section } from "../../../common/components";
 import BreadcrumbNav from "../../../common/components/BreadcrumbNav/BreadcrumbNav";
 import { navigationPages } from "../../../common/constants/navigationPages";
+import { productName } from "../../../common/constants/productName";
 import AskPrivateLinkModal from "./AskPrivateLink/AskPrivateLinkModal";
 
 const ConsulterVosDonneesPage = () => {
@@ -30,7 +31,7 @@ const ConsulterVosDonneesPage = () => {
             {navigationPages.ConsulterVosDonnees.title}
           </Heading>
           <Text marginBottom="2w" color="black">
-            Vous transmettez déja vos données au tableau de bord,&nbsp;
+            Vous transmettez déja vos données au {productName}&nbsp;
             <strong>utilisez votre lien d&apos;accès pour consulter la page de votre organisme de formation</strong>
           </Text>
           <Button type="submit" variant="secondary" onClick={onOpen}>
