@@ -1,6 +1,7 @@
 import { Box, Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 const BreadcrumbNav = ({ links }) => {
   const currentLink = links.slice().pop(); // get the last element (can't use Array.at() because of Safari)
@@ -9,11 +10,13 @@ const BreadcrumbNav = ({ links }) => {
     <Breadcrumb separator={<Box className="ri-arrow-right-s-line" />}>
       {otherLinks.map((item, index) => (
         <BreadcrumbItem key={index}>
-          <BreadcrumbLink href={item.path}>{item.title}</BreadcrumbLink>
+          <BreadcrumbLink as={NavLink} to={item.path}>
+            {item.title}
+          </BreadcrumbLink>
         </BreadcrumbItem>
       ))}
       <BreadcrumbItem isCurrentPage>
-        <BreadcrumbLink href={currentLink.path} textDecoration="none" color="black">
+        <BreadcrumbLink as={NavLink} to={currentLink.path} textDecoration="none" color="black">
           {currentLink.title}
         </BreadcrumbLink>
       </BreadcrumbItem>
