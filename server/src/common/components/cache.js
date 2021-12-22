@@ -7,7 +7,7 @@ module.exports = (redisClient) => {
       return redisClient.set(cacheKey, value);
     },
     clear: () => {
-      return redisClient.flushall();
+      return redisClient.flushAll();
     },
   };
 };
