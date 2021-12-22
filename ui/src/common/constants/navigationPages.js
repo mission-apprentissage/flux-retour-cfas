@@ -37,7 +37,7 @@ export const navigationPages = {
     title: "Protection des données à caractère personnel",
   },
   Cfa: {
-    path: "/cfa",
+    path: "/cfas",
     title: "Cfa",
   },
   TableauDeBord: {
