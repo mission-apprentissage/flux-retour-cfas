@@ -27,6 +27,7 @@ runScript(async () => {
       uai_etablissement: currentStatut.uai_etablissement,
       nom_etablissement: currentStatut.nom_etablissement,
       etablissement_formateur_code_commune_insee: currentStatut.etablissement_formateur_code_commune_insee,
+      etablissement_code_postal: currentStatut.etablissement_code_postal,
       statut_apprenant: currentStatut.statut_apprenant,
       formation_cfd: currentStatut.formation_cfd,
       periode_formation: currentStatut.periode_formation,

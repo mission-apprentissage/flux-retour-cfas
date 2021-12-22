@@ -23,6 +23,11 @@ const rcoStatutsCandidatsSchema = new Schema({
     default: null,
     description: "Code commune de l'établissement formateur",
   },
+  etablissement_code_postal: {
+    type: String,
+    default: null,
+    description: "Code postal établissement",
+  },
   statut_apprenant: {
     type: Number,
     default: null,
