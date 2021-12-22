@@ -31,7 +31,7 @@ const HomePage = () => {
             <Heading as="h1" fontSize="40px">
               Le {productName}
             </Heading>
-            <Text fontSize="alpha" color="grey.800" marginTop="1w">
+            <Text fontSize="beta" color="grey.800" marginTop="1w">
               Mettre à disposition des <strong>différents acteurs</strong> les <strong>données clés</strong> de
               l&apos;apprentissage en <strong>temps réel</strong>
             </Text>
