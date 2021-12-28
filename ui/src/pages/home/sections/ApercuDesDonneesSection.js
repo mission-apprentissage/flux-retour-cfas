@@ -4,6 +4,7 @@ import React from "react";
 
 import { Badge, Section } from "../../../common/components";
 import { ERP_STATE_COLOR, ERPS } from "../../../common/constants/erps";
+import { productName } from "../../../common/constants/productName";
 
 const Count = ({ count, label }) => {
   return (
@@ -36,7 +37,7 @@ const ApercuDesDonneesSection = () => {
       <Divider marginY="3w" />
 
       <Text fontWeight="700" color="grey.800" fontSize="gamma">
-        Aujourd&apos;hui, le tableau de bord est interfaçable avec :
+        Aujourd&apos;hui, le {productName} est interfaçable avec :
       </Text>
       <Flex justifyContent="space-between">
         <HStack spacing="3w" paddingY="3v">

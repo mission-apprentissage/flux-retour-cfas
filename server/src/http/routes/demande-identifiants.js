@@ -2,10 +2,10 @@ const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
-module.exports = (components) => {
+module.exports = ({ demandeIdentifiants }) => {
   const router = express.Router();
 
-  const demandeAccesBodyValidationSchema = Joi.object({
+  const demandeIdentifiantsBodyValidationSchema = Joi.object({
     region: Joi.string().required(),
     profil: Joi.string().required(),
     email: Joi.string().required(),
@@ -14,10 +14,8 @@ module.exports = (components) => {
   router.post(
     "/",
     tryCatch(async (req, res) => {
-      await demandeAccesBodyValidationSchema.validateAsync(req.body);
-
-      await components.demandeAcces.create(req.body);
-
+      await demandeIdentifiantsBodyValidationSchema.validateAsync(req.body);
+      await demandeIdentifiants.create(req.body);
       return res.json({});
     })
   );

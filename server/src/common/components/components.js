@@ -8,8 +8,8 @@ const formationsComponent = require("./formations");
 const createStats = require("./stats");
 const createDashboard = require("./dashboard");
 const cfaDataFeedbackComponent = require("./cfaDataFeedback");
-const demandeAccesComponent = require("./demandeAcces");
-const demandeLienAccesComponent = require("./demandeLienAcces");
+const demandeIdentifiantsComponent = require("./demandeIdentifiants");
+const demandeLienPriveComponent = require("./demandeLienPrive");
 const demandeBranchementErpComponent = require("./demandeBranchementErp");
 const createCacheComponent = require("./cache");
 
@@ -17,14 +17,14 @@ module.exports = async (options = {}) => {
   const users = options.users || (await createUsers());
   const userEvents = options.userEvents || createUserEvents();
   const jobEvents = options.jobEvents || createJobEvents();
-  const demandeAcces = options.demandeAcces || demandeAccesComponent();
   const statutsCandidats = options.statutsCandidats || createStatutsCandidats();
   const formations = options.formations || formationsComponent();
   const cfas = options.cfas || cfasComponent();
   const cfaDataFeedback = options.cfas || cfaDataFeedbackComponent();
   const stats = options.stats || createStats();
   const dashboard = options.dashboard || createDashboard();
-  const demandeLienAcces = options.demandeLienAcces || demandeLienAccesComponent();
+  const demandeIdentifiants = options.demandeIdentifiants || demandeIdentifiantsComponent();
+  const demandeLienPrive = options.demandeLienPrive || demandeLienPriveComponent();
   const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
   const cache = options.cache || createCacheComponent(options.redisClient);
 
@@ -32,8 +32,6 @@ module.exports = async (options = {}) => {
     users,
     userEvents,
     jobEvents,
-    demandeAcces,
-    demandeBranchementErp,
     cache,
     db: options.db || (await connectToMongo()).db,
     statutsCandidats,
@@ -42,6 +40,8 @@ module.exports = async (options = {}) => {
     cfas,
     stats,
     dashboard,
-    demandeLienAcces,
+    demandeIdentifiants,
+    demandeBranchementErp,
+    demandeLienPrive,
   };
 };

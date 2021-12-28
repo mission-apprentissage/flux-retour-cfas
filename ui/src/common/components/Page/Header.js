@@ -2,6 +2,7 @@ import { Box, Flex, Heading, Tag, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { productName } from "../../constants/productName";
 import useAuth from "../../hooks/useAuth";
 import Logo from "../Logo/Logo";
 import Section from "../Section/Section";
@@ -20,7 +21,7 @@ const Header = ({ withText = true }) => {
           {withText && (
             <Box marginLeft="5w">
               <Heading as="h1" variant="h1" fontSize="gamma">
-                Le tableau de bord de l&apos;apprentissage{" "}
+                Le {productName}{" "}
                 <Tag marginBottom="1w" bgColor="bluefrance" color="white">
                   beta
                 </Tag>

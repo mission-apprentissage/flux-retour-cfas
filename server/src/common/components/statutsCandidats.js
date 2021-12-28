@@ -76,10 +76,12 @@ const updateStatut = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
   const existingItem = await StatutCandidat.findById(existingItemId);
-  const dateMiseAJourStatut = new Date(toUpdate.date_metier_mise_a_jour_statut) || new Date();
 
   // statut_apprenant has changed?
   if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
+    const dateMiseAJourStatut = toUpdate.date_metier_mise_a_jour_statut
+      ? new Date(toUpdate.date_metier_mise_a_jour_statut)
+      : new Date();
     toUpdate.date_mise_a_jour_statut = new Date();
 
     toUpdate.historique_statut_apprenant = [

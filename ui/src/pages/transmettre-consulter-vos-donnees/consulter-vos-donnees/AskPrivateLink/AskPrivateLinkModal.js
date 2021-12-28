@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import ModalClosingButton from "../../../../common/components/ModalClosingButton/ModalClosingButton";
-import AskAccessLinkModalContent from "./AskAccessLinkModalContent";
+import AskPrivateLinkModalContent from "./AskPrivateLinkModalContent";
 
 const AskAccessLinkModal = ({ isOpen, onClose }) => {
   return (
@@ -17,7 +17,7 @@ const AskAccessLinkModal = ({ isOpen, onClose }) => {
           </Box>
         </ModalHeader>
         <ModalClosingButton />
-        <AskAccessLinkModalContent onClose={onClose} />
+        <AskPrivateLinkModalContent onClose={onClose} />
       </ModalContent>
     </Modal>
   );

@@ -30,7 +30,7 @@ const Table = ({ headers, loading, error, children }) => {
                 key={header}
                 textTransform="initial"
                 textColor="grey.800"
-                fontSize="epsilon"
+                fontSize="zeta"
                 fontWeight="700"
                 paddingY="3w"
                 letterSpacing="0px"

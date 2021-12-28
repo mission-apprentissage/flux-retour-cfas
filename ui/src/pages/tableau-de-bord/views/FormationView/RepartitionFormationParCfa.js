@@ -1,27 +1,25 @@
 import { Heading } from "@chakra-ui/react";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
+import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
 import { filtersPropTypes } from "../../FiltersContext";
-import withRepartitionFormationParCfa from "./withRepartitionFormationParCfaData";
 
-const RepartitionEffectifsFormationParCfa = withRepartitionFormationParCfa(RepartitionEffectifsParCfa);
+const RepartitionFormationParCfa = ({ filters }) => {
+  const { data, isLoading, error } = useFetchEffectifsParCfa(filters);
 
-const RepartitionFormationParCfa = ({ formationCfd, filters }) => {
   return (
     <Section paddingY="4w">
       <Heading as="h3" variant="h3">
-        Répartition des effectifs par organismes de formation
+        Répartition des effectifs
       </Heading>
-      <RepartitionEffectifsFormationParCfa formationCfd={formationCfd} filters={filters} />
+      <RepartitionEffectifsParCfa repartitionEffectifsParCfa={data} loading={isLoading} error={error} />
     </Section>
   );
 };
 
 RepartitionFormationParCfa.propTypes = {
-  formationCfd: PropTypes.string.isRequired,
   filters: filtersPropTypes.state,
 };
 

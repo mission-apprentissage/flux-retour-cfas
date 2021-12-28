@@ -5,19 +5,20 @@ import React from "react";
 import { Section } from "../../../../common/components";
 import RepartitionEffectifsParDepartement from "../../../../common/components/tables/RepartitionEffectifsParDepartement";
 import RepartitionEffectifsParNiveauFormation from "../../../../common/components/tables/RepartitionEffectifsParNiveauFormation";
+import useFetchEffectifsParDepartement from "../../../../common/hooks/useFetchEffectifsParDepartement";
 import useFetchEffectifsParNiveauFormation from "../../../../common/hooks/useFetchEffectifsParNiveauFormation";
 import { filtersPropTypes } from "../../FiltersContext";
-import withRepartitionEffectifsRegionParDepartement from "./withRepartitionEffectifsRegionParDepartement";
-
-const RepartitionEffectifsRegionParDepartement = withRepartitionEffectifsRegionParDepartement(
-  RepartitionEffectifsParDepartement
-);
 
 const RepartitionEffectifsRegion = ({ filters }) => {
   const {
-    data: repartitionEffectifsParNiveauFormation,
+    data: effectifsParDepartement,
+    loading: isEffectifsParDepartementLoading,
+    error: effectifsParDepartementError,
+  } = useFetchEffectifsParDepartement(filters);
+  const {
+    data: effectifsParNiveauFormation,
     loading: isEffectifsParNiveauFormationLoading,
-    error,
+    error: effectifsParNiveauFormationError,
   } = useFetchEffectifsParNiveauFormation(filters);
 
   return (
@@ -38,13 +39,17 @@ const RepartitionEffectifsRegion = ({ filters }) => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <RepartitionEffectifsRegionParDepartement filters={filters} />
+            <RepartitionEffectifsParDepartement
+              effectifs={effectifsParDepartement}
+              loading={isEffectifsParDepartementLoading}
+              error={effectifsParDepartementError}
+            />
           </TabPanel>
           <TabPanel>
             <RepartitionEffectifsParNiveauFormation
-              repartitionEffectifs={repartitionEffectifsParNiveauFormation}
+              repartitionEffectifs={effectifsParNiveauFormation}
               isEffectifsParNiveauFormationLoading={isEffectifsParNiveauFormationLoading}
-              error={error}
+              error={effectifsParNiveauFormationError}
             />
           </TabPanel>
         </TabPanels>

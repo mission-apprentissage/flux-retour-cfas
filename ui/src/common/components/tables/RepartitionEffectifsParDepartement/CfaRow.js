@@ -16,11 +16,7 @@ const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs, onCfaClick })
     <Tr>
       <Td color="grey.800" paddingLeft="6w">
         <Box>
-          <Link
-            onClick={() => onCfaClick({ nom_etablissement, uai_etablissement })}
-            color="bluefrance"
-            whiteSpace="nowrap"
-          >
+          <Link onClick={onCfaClick} color="bluefrance" whiteSpace="nowrap">
             {nom_etablissement}
           </Link>
         </Box>

@@ -17,7 +17,7 @@ import React from "react";
 import * as Yup from "yup";
 
 import { uaiRegex } from "../../../../common/domain/uai";
-import withSubmitAccessLinkDemand, { SUBMIT_STATE } from "./withSubmitAccessLinkDemand";
+import withSubmitPrivateLinkDemand, { SUBMIT_STATE } from "./withSubmitPrivateLinkDemand";
 
 const formInitialValues = { nom_organisme: "", uai_organisme: "", code_postal_organisme: "", email_demandeur: "" };
 
@@ -53,7 +53,7 @@ const ErrorMessage = () => {
   );
 };
 
-const AskAccessLinkModalContent = ({ onClose, sendAccessLinkDemand, submitState }) => {
+const AskPrivateLinkModalContent = ({ onClose, sendPrivateLinkDemand, submitState }) => {
   if (submitState === SUBMIT_STATE.success) {
     return <SuccessMessage />;
   }
@@ -73,7 +73,7 @@ const AskAccessLinkModalContent = ({ onClose, sendAccessLinkDemand, submitState 
           .required("Requis"),
         email_demandeur: Yup.string().email("Format d'email invalide").required("Requis"),
       })}
-      onSubmit={sendAccessLinkDemand}
+      onSubmit={sendPrivateLinkDemand}
     >
       {({ isSubmitting }) => (
         <Form>
@@ -133,10 +133,10 @@ const AskAccessLinkModalContent = ({ onClose, sendAccessLinkDemand, submitState 
   );
 };
 
-AskAccessLinkModalContent.propTypes = {
-  sendAccessLinkDemand: PropTypes.func.isRequired,
+AskPrivateLinkModalContent.propTypes = {
+  sendPrivateLinkDemand: PropTypes.func.isRequired,
   submitState: PropTypes.oneOf(Object.values(SUBMIT_STATE)).isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
-export default withSubmitAccessLinkDemand(AskAccessLinkModalContent);
+export default withSubmitPrivateLinkDemand(AskPrivateLinkModalContent);

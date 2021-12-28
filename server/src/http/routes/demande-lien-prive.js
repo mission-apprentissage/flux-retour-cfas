@@ -3,10 +3,10 @@ const Joi = require("joi");
 const { uaiRegex } = require("../../common/domain/uai");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
-module.exports = ({ demandeLienAcces }) => {
+module.exports = ({ demandeLienPrive }) => {
   const router = express.Router();
 
-  const demandeLienAccesValidationSchema = Joi.object({
+  const demandeLienPriveValidationSchema = Joi.object({
     nom_organisme: Joi.string().required(),
     uai_organisme: Joi.string().regex(uaiRegex).required(),
     code_postal_organisme: Joi.string()
@@ -18,7 +18,7 @@ module.exports = ({ demandeLienAcces }) => {
   router.post(
     "/",
     tryCatch(async (req, res) => {
-      const { error } = demandeLienAccesValidationSchema.validate(req.body);
+      const { error } = demandeLienPriveValidationSchema.validate(req.body);
 
       if (error) {
         return res.status(400).json({
@@ -27,7 +27,7 @@ module.exports = ({ demandeLienAcces }) => {
         });
       }
 
-      const created = await demandeLienAcces.create(req.body);
+      const created = await demandeLienPrive.create(req.body);
       return res.json(created);
     })
   );

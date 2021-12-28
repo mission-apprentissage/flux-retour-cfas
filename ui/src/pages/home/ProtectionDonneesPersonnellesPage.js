@@ -3,6 +3,7 @@ import React from "react";
 
 import { BreadcrumbNav, ContactSection, Footer, Header, Section } from "../../common/components";
 import { navigationPages } from "../../common/constants/navigationPages";
+import { productName } from "../../common/constants/productName";
 import RgpdSection from "./sections/RgpdSection";
 
 const currentPage = navigationPages.DonneesPersonnelles;
@@ -69,9 +70,9 @@ const ProtectionDonneesPersonnellesPage = () => {
           </Box>
           <Box padding="4w" w="70%">
             <Text fontSize="epsilon" color="grey.800">
-              Le Tableau de bord de l’apprentissage vise à mettre à disposition de toutes les parties prenantes de la
-              formation en apprentissage les données clés, de manière dynamique, afin de permettre un pilotage
-              opérationnel réactif dans les territoires.
+              Le {productName} vise à mettre à disposition de toutes les parties prenantes de la formation en
+              apprentissage les données clés, de manière dynamique, afin de permettre un pilotage opérationnel réactif
+              dans les territoires.
             </Text>
             <Text paddingY="2w" fontSize="epsilon" color="grey.800">
               L’affichage des données en temps réel auprès des acteurs institutionnels leur permet :
@@ -106,7 +107,7 @@ const ProtectionDonneesPersonnellesPage = () => {
           </Box>
           <Box padding="4w" w="70%">
             <Text marginBottom="2w" fontSize="epsilon" color="grey.800">
-              Dans le respect du RGPD, seules les données utiles à la construction du Tableau de bord de l’apprentissage
+              Dans le respect du RGPD, seules les données utiles à la construction du {productName}
               sont collectées.
             </Text>
             <Text fontSize="epsilon" color="grey.800">
@@ -134,7 +135,7 @@ const ProtectionDonneesPersonnellesPage = () => {
               </li>
             </Box>
             <Text fontSize="epsilon" color="grey.800">
-              Données concernant le contrat de travail :
+              Données concernant le contrat d&apos;apprentissage :
             </Text>
             <Box as="ul" paddingLeft="2w" fontSize="epsilon" color="grey.800">
               <li>Date de début et date de fin</li>

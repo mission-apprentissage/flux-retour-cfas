@@ -8,7 +8,8 @@
   "env": {
     "browser": true,
     "es6": true,
-    "node": true
+    "node": true,
+    "jest/globals": true
   },
   "extends": [
     "eslint:recommended",
@@ -24,7 +25,7 @@
     "import/order": "off",
     "simple-import-sort/imports": "error"
   },
-  "plugins": ["simple-import-sort", "import", "prettier"],
+  "plugins": ["simple-import-sort", "import", "jest", "prettier"],
   "parserOptions": {
     "ecmaVersion": 2020, 
     "sourceType": "module",

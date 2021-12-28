@@ -54,7 +54,7 @@ const PROFIL_OPTIONS = [
   "Autre acteur régional",
 ];
 
-const DemandeAccesForm = ({ onSubmit, onClose }) => {
+const AskIdentifiantsForm = ({ onSubmit, onClose }) => {
   return (
     <Formik initialValues={initialValues} validationSchema={formValidationSchema} onSubmit={onSubmit}>
       {({ status = {}, isSubmitting }) => {
@@ -115,9 +115,9 @@ const DemandeAccesForm = ({ onSubmit, onClose }) => {
   );
 };
 
-DemandeAccesForm.propTypes = {
+AskIdentifiantsForm.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
 
-export default DemandeAccesForm;
+export default AskIdentifiantsForm;

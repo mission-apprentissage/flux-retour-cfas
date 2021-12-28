@@ -19,6 +19,7 @@ import { NavLink } from "react-router-dom";
 import * as Yup from "yup";
 
 import { ERP_STATE, ERPS } from "../../../../common/constants/erps";
+import { productName } from "../../../../common/constants/productName";
 import { uaiRegex } from "../../../../common/domain/uai";
 import withSubmitBranchementErpDemand, { SUBMIT_STATE } from "./withSubmitBranchementErpDemand";
 
@@ -130,7 +131,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
               <Stack marginTop="3w" marginBottom="3w" direction="row">
                 <Box w="2%" bg="#6A6AF4" marginRight="3w" />
                 <Text color="grey.800">
-                  <strong>Le tableau de bord est interfacé avec cet ERP.</strong> Vous pouvez l&apos;autoriser à
+                  <strong>Le {productName} est interfacé avec cet ERP.</strong> Vous pouvez l&apos;autoriser à
                   transmettre vos données en 2 clics via une fonctionnalité disponible dans l&apos;interface de votre
                   logiciel de gestion.
                 </Text>
@@ -157,10 +158,10 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                 <Box w="2%" bg="#6A6AF4" marginRight="3w" />
                 <Text color="grey.800">
                   <strong>
-                    L&apos;interfaçage du tableau de bord avec cet ERP a démarré mais les travaux ne sont pas achevés.
+                    L&apos;interfaçage du {productName} avec cet ERP a démarré mais les travaux ne sont pas achevés.
                   </strong>
-                  Nous vous invitons à lui faire part de votre besoin de transmettre vos données au Tableau de bord de
-                  l&apos;apprentissage afin d&apos;accélérer leur livraison.
+                  Nous vous invitons à lui faire part de votre besoin de transmettre vos données au {productName} afin
+                  d&apos;accélérer leur livraison.
                 </Text>
               </Stack>
               <Text marginTop="2w" color="grey.800" fontWeight="700">
@@ -207,9 +208,8 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
               <Stack marginTop="3w" marginBottom="3w" direction="row">
                 <Box w="2%" bg="#6A6AF4" marginRight="3w" />
                 <Text color="grey.800">
-                  <strong>L&apos;interfaçage du tableau de bord avec cet ERP n’a pas encore démarré.</strong>
-                  Nous vous invitons à lui faire part de votre besoin de transmettre vos données au Tableau de bord de
-                  l&apos;apprentissage.
+                  <strong>L&apos;interfaçage du {productName} avec cet ERP n’a pas encore démarré.</strong>
+                  Nous vous invitons à lui faire part de votre besoin de transmettre vos données au {productName}.
                 </Text>
               </Stack>
               <Text marginTop="2w" color="grey.800" fontWeight="700">

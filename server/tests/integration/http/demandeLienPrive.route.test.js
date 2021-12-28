@@ -1,6 +1,6 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
-const { DemandeLienAcces } = require("../../../src/common/model");
+const { DemandeLienPriveModel } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
   let httpClient;
@@ -10,12 +10,12 @@ httpTests(__filename, ({ startServer }) => {
     httpClient = _httpClient;
   });
 
-  describe("POST /demande-lien-acces", () => {
+  describe("POST /demande-lien-prive", () => {
     it("sends a 400 HTTP response when no body provided", async () => {
-      const response = await httpClient.post("/api/demande-lien-acces", {});
+      const response = await httpClient.post("/api/demande-lien-prive", {});
 
       assert.equal(response.status, 400);
-      const found = await DemandeLienAcces.countDocuments();
+      const found = await DemandeLienPriveModel.countDocuments();
       assert.equal(found, 0);
     });
 
@@ -27,10 +27,10 @@ httpTests(__filename, ({ startServer }) => {
         email_demandeur: "test@email.fr",
       };
 
-      const response = await httpClient.post("/api/demande-lien-acces", testDemande);
+      const response = await httpClient.post("/api/demande-lien-prive", testDemande);
 
       assert.equal(response.status, 400);
-      const found = await DemandeLienAcces.countDocuments();
+      const found = await DemandeLienPriveModel.countDocuments();
       assert.equal(found, 0);
     });
 
@@ -42,14 +42,14 @@ httpTests(__filename, ({ startServer }) => {
         email_demandeur: "test@email.fr",
       };
 
-      const response = await httpClient.post("/api/demande-lien-acces", testDemande);
+      const response = await httpClient.post("/api/demande-lien-prive", testDemande);
 
       assert.equal(response.status, 400);
-      const found = await DemandeLienAcces.countDocuments();
+      const found = await DemandeLienPriveModel.countDocuments();
       assert.equal(found, 0);
     });
 
-    it("sends a 200 HTTP response and good data when demande lien acces was created", async () => {
+    it("sends a 200 HTTP response and good data when demande lien prive was created", async () => {
       const testDemande = {
         nom_organisme: "TEST-ORGA",
         uai_organisme: "0762232N",
@@ -57,10 +57,10 @@ httpTests(__filename, ({ startServer }) => {
         email_demandeur: "test@email.fr",
       };
 
-      const response = await httpClient.post("/api/demande-lien-acces", testDemande);
+      const response = await httpClient.post("/api/demande-lien-prive", testDemande);
 
       assert.equal(response.status, 200);
-      const found = await DemandeLienAcces.find().lean();
+      const found = await DemandeLienPriveModel.find().lean();
       assert.equal(found.length, 1);
       assert.equal(found[0].nom_organisme, testDemande.nom_organisme);
       assert.equal(found[0].uai_organisme, testDemande.uai_organisme);

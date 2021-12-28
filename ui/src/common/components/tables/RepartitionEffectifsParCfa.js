@@ -13,8 +13,8 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
-    ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
-    : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
+    ? ["Liste des organismes de formation", "apprentis", "inscrits sans contrat"]
+    : ["Liste des organismes de formation", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (repartitionEffectifsParCfa) {
     content = (
       <Tbody>
@@ -25,7 +25,10 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
             <Tr key={"headerRow_" + index}>
               <Td color="grey.800">
                 <Link
-                  onClick={() => filtersContext.setters.setCfa({ nom_etablissement, uai_etablissement })}
+                  onClick={() => {
+                    filtersContext.setters.setCfa({ nom_etablissement, uai_etablissement });
+                    window.scrollTo(0, 0);
+                  }}
                   color="bluefrance"
                   whiteSpace="nowrap"
                 >
@@ -71,7 +74,6 @@ RepartitionEffectifsParCfa.propTypes = {
       }).isRequired,
     }).isRequired
   ),
-  // onCfaClick: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   error: PropTypes.object,
 };

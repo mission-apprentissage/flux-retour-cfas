@@ -8,23 +8,23 @@ export const SUBMIT_STATE = {
   fail: "fail",
 };
 
-const withSubmitAccessLinkDemand = (Component) => {
-  const WithSubmitAccessLinkDemand = ({ ...props }) => {
+const withSubmitPrivateLinkDemand = (Component) => {
+  const WithSubmitPrivateLinkDemand = ({ ...props }) => {
     const [submitState, setSubmitState] = useState(SUBMIT_STATE.waiting);
 
-    const sendAccessLinkDemand = async (formData) => {
+    const sendPrivateLinkDemand = async (formData) => {
       try {
-        await _post("/api/demande-lien-acces", formData);
+        await _post("/api/demande-lien-prive", formData);
         setSubmitState(SUBMIT_STATE.success);
       } catch (err) {
         setSubmitState(SUBMIT_STATE.fail);
       }
     };
 
-    return <Component sendAccessLinkDemand={sendAccessLinkDemand} submitState={submitState} {...props} />;
+    return <Component sendPrivateLinkDemand={sendPrivateLinkDemand} submitState={submitState} {...props} />;
   };
 
-  return WithSubmitAccessLinkDemand;
+  return WithSubmitPrivateLinkDemand;
 };
 
-export default withSubmitAccessLinkDemand;
+export default withSubmitPrivateLinkDemand;

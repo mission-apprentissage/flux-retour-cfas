@@ -5,6 +5,7 @@ import { HashLink } from "react-router-hash-link";
 
 import { Section } from "../../../common/components";
 import { navigationPages } from "../../../common/constants/navigationPages";
+import { productName } from "../../../common/constants/productName";
 
 const currentPage = navigationPages.DonneesPersonnelles;
 
@@ -37,8 +38,8 @@ const RgpdSection = (props) => {
         {currentPage.title}
       </Heading>
       <Text fontSize="epsilon" marginTop="2w" color="grey.800">
-        Le Tableau de Bord de l&apos;Apprentissage est construit dans le respect de la vie privée des personnes et
-        applique les standards de sécurité de l&apos;Etat.
+        Le {productName} est construit dans le respect de la vie privée des personnes et applique les standards de
+        sécurité de l&apos;Etat.
       </Text>
       <HStack alignItems="center" spacing="4w" marginTop="3w" fontWeight="700">
         <RgpdCard

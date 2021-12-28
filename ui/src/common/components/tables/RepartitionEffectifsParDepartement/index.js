@@ -7,17 +7,23 @@ import { isDateFuture } from "../../../utils/dateUtils";
 import Table from "../Table";
 import DepartementRow from "./DepartementRow";
 
-const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement, loading, error }) => {
+const RepartitionEffectifsParDepartement = ({ effectifs, loading, error }) => {
   let content = null;
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
-    ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
-    : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
-  if (repartitionEffectifsParDepartement) {
+    ? ["Liste des organismes de formation par département", "apprentis", "inscrits sans contrat"]
+    : [
+        "Liste des organismes de formation par département",
+        "apprentis",
+        "inscrits sans contrat",
+        "rupturants",
+        "abandons",
+      ];
+  if (effectifs) {
     content = (
       <Tbody>
-        {repartitionEffectifsParDepartement.map((item) => {
+        {effectifs.map((item) => {
           const { etablissement_num_departement, etablissement_nom_departement, effectifs } = item;
           return (
             <DepartementRow
@@ -41,7 +47,7 @@ const RepartitionEffectifsParDepartement = ({ repartitionEffectifsParDepartement
 };
 
 RepartitionEffectifsParDepartement.propTypes = {
-  repartitionEffectifsParDepartement: PropTypes.arrayOf(
+  effectifs: PropTypes.arrayOf(
     PropTypes.shape({
       uai_etablissement: PropTypes.string,
       nom_etablissement: PropTypes.string.isRequired,

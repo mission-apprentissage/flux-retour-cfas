@@ -2,6 +2,7 @@ import { Box, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@chakra
 import React from "react";
 
 import { Page, Section } from "../../common/components";
+import { productName } from "../../common/constants/productName";
 
 const ComprendreLesDonnees = () => {
   return (
@@ -115,7 +116,7 @@ const ComprendreLesDonnees = () => {
                   données exposées correspondent aux effectifs des CFA en temps réel. De ce fait, lorsqu&apos;un
                   établissement enregistre une information dans son Système d&apos;Information (Inscription, Nouveau
                   Contrat...) l&apos;information est restituée le lendemain ou la semaine suivante au plus tard (Gesti)
-                  dans le Tableau de bord
+                  dans le {productName}.
                 </Text>
               </Box>
               <Box py="10w">
@@ -125,7 +126,7 @@ const ComprendreLesDonnees = () => {
                 <Box py="4w">
                   <Text fontSize="beta" fontWeight="700">
                     ‌Sur la page de votre organisme, vous constatez un écart entre les chiffres dont vous disposez et
-                    ceux du tableau de bord
+                    ceux du {productName}
                   </Text>
                   <Text>
                     ‌Si cet écart est faible, il peut s&apos;expliquer par un dédoublonnement qui ne s&apos;est pas fait
@@ -158,7 +159,7 @@ const ComprendreLesDonnees = () => {
                   </Text>
                   <Text>
                     ‌Nous vous invitons à signaler à votre éditeur de logiciel votre besoin de pouvoir transmettre vos
-                    données au Tableau de bord et à nous écrire à l&apos;adresse suivante :
+                    données au {productName} et à nous écrire à l&apos;adresse suivante :
                     tableau-de-bord@apprentissage.beta.gouv.fr
                   </Text>
                 </Box>
