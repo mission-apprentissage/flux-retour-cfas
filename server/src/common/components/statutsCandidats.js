@@ -79,19 +79,28 @@ const updateStatut = async (existingItemId, toUpdate) => {
 
   // statut_apprenant has changed?
   if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
-    const dateMiseAJourStatut = toUpdate.date_metier_mise_a_jour_statut
-      ? new Date(toUpdate.date_metier_mise_a_jour_statut)
-      : new Date();
-    toUpdate.date_mise_a_jour_statut = new Date();
+    const historique = existingItem.historique_statut_apprenant.slice();
+    const newHistoriqueElement = {
+      valeur_statut: toUpdate.statut_apprenant,
+      date_statut: toUpdate.date_metier_mise_a_jour_statut
+        ? new Date(toUpdate.date_metier_mise_a_jour_statut)
+        : new Date(),
+    };
 
-    toUpdate.historique_statut_apprenant = [
-      ...existingItem.historique_statut_apprenant,
-      {
-        valeur_statut: toUpdate.statut_apprenant,
-        position_statut: existingItem.historique_statut_apprenant.length + 1,
-        date_statut: dateMiseAJourStatut,
-      },
-    ];
+    // add new element to historique
+    historique.push(newHistoriqueElement);
+    // sort historique chronologically
+    const historiqueSorted = historique.sort((a, b) => {
+      return a.date_statut.getTime() - b.date_statut.getTime();
+    });
+
+    // find new element index in sorted historique to remove subsequent ones
+    const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
+
+    toUpdate.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1).map((el, index) => {
+      return { ...el, position_statut: index + 1 };
+    });
+    toUpdate.statut_apprenant = newHistoriqueElement.valeur_statut;
   }
 
   // Update & return

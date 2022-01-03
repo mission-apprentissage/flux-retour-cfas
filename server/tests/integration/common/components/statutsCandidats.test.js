@@ -1,4 +1,5 @@
 const assert = require("assert").strict;
+const { addDays } = require("date-fns");
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidat, Cfa, Formation } = require("../../../../src/common/model");
@@ -772,6 +773,7 @@ integrationTests(__filename, () => {
         new Date(updatePayload.date_metier_mise_a_jour_statut).getTime()
       );
     });
+
     it("Vérifie qu'on update historique_statut_apprenant avec la date actuelle lorsque date_metier_mise_a_jour_statut n'est pas fourni", async () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 
@@ -797,6 +799,39 @@ integrationTests(__filename, () => {
         found.historique_statut_apprenant[1].date_statut.toLocaleDateString(),
         new Date().toLocaleDateString()
       );
+    });
+
+    it("Vérifie qu'on update historique_statut_apprenant en supprimant les éléments d'historique postérieurs à la date_metier_mise_a_jour_statut envoyée", async () => {
+      const { updateStatut, createStatutCandidat } = await statutsCandidats();
+
+      const createdStatut = await createStatutCandidat(simpleStatut);
+      // update created statut to add an element with date_statut 90 days after now date
+      await updateStatut(createdStatut._id, {
+        ...simpleStatut,
+        date_metier_mise_a_jour_statut: addDays(new Date(), 90),
+        statut_apprenant: codesStatutsCandidats.inscrit,
+      });
+
+      const found1 = await StatutCandidat.findById(createdStatut._id);
+      assert.equal(found1.historique_statut_apprenant.length, 2);
+      assert.equal(found1.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.inscrit);
+
+      // update du statut avec une date antérieur au dernier élément de historique_statut_apprenant
+      const updatePayload = {
+        statut_apprenant: codesStatutsCandidats.abandon,
+        date_metier_mise_a_jour_statut: new Date(),
+      };
+      await updateStatut(createdStatut._id, { ...simpleStatut, ...updatePayload });
+
+      // historique should contain the new element and the one date with a later date should be removed
+      const found2 = await StatutCandidat.findById(createdStatut._id);
+      assert.equal(found2.historique_statut_apprenant.length, 2);
+      assert.equal(found2.historique_statut_apprenant[1].valeur_statut, updatePayload.statut_apprenant);
+      assert.equal(
+        found2.historique_statut_apprenant[1].date_statut.getTime(),
+        updatePayload.date_metier_mise_a_jour_statut.getTime()
+      );
+      assert.equal(found2.statut_apprenant, updatePayload.statut_apprenant);
     });
 
     it("Vérifie qu'on met à jour updated_at après un update", async () => {
