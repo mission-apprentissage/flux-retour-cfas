@@ -138,6 +138,7 @@ const jobNames = {
   cfasCroisementDeca: "cfas-croisement-cfas-deca",
   warmUpCache: "warm-up-cache",
   retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
+  statutsAvecDateIdentiqueDansHistorique: "statuts-avec-date-identique-dans-historique",
 };
 
 /**

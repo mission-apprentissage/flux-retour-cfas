@@ -1,6 +1,7 @@
 const omit = require("lodash.omit");
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
+const { jobNames } = require("../../common/model/constants");
 
 const hasStatutsWithSameDateInHistorique = (historique) => {
   const dates = [];
@@ -31,4 +32,4 @@ runScript(async ({ db }) => {
   logger.info(
     `Fond ${count} documents with at least two statuts with equal dates in historique_statut_apprenant and stored them in collection statutsAvecDateIdentiqueDansHistorique`
   );
-}, "statutsAvecDateIdentiqueDansHistorique");
+}, jobNames.statutsAvecDateIdentiqueDansHistorique);
