@@ -54,7 +54,7 @@ const TransmettreConsulterVosDonneesPage = () => {
               Organismes de formation qui transmettent leurs données
             </Heading>
             <Text fontWeight="700" fontSize="alpha" color="grey.800">
-              1 835
+              2 039
             </Text>
             <Box height="260px">
               <AcquisitionCfaBarGraph />

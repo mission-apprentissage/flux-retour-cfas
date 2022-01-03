@@ -15,6 +15,7 @@ const data = [
   { month: "sept 2021", "Nombre d'organismes": 1537 },
   { month: "oct 2021", "Nombre d'organismes": 1642 },
   { month: "nov 2021", "Nombre d'organismes": 1835 },
+  { month: "dec 2021", "Nombre d'organismes": 2039 },
 ];
 
 const AcquisitionCfaBarGraph = () => {
