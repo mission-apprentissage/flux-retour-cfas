@@ -52,7 +52,7 @@ const createRandomStatutCandidat = (params = {}) => {
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
-    date_metier_mise_a_jour_statut: faker.datatype.boolean() ? faker.date.past() : null,
+    date_metier_mise_a_jour_statut: faker.date.past(),
     periode_formation: isPresent() ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
@@ -118,7 +118,7 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
-    date_metier_mise_a_jour_statut: faker.datatype.boolean() ? faker.date.past() : null,
+    date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
     annee_formation: getRandomAnneeFormation(),
     periode_formation: isPresent() ? periode_formation.join("-") : "",
     annee_scolaire,
