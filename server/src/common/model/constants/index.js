@@ -122,6 +122,7 @@ const jobNames = {
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
   warmUpCache: "warm-up-cache",
   retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
+  statutsAvecDateIdentiqueDansHistorique: "statuts-avec-date-identique-dans-historique",
 };
 
 /**
