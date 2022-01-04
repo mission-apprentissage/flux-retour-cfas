@@ -284,16 +284,6 @@ const statutsCandidatsSchema = new Schema({
     default: null,
     description: "Code RNCP de la formation du candidat",
   },
-  history_antidated: {
-    type: Boolean,
-    default: false,
-    description: "Indique si l'historique des statuts a des dates antidatées",
-  },
-  history_with_bad_date: {
-    type: Boolean,
-    default: false,
-    description: "Indique si l'historique des statuts a des dates au mauvais format (< 2000)",
-  },
 });
 
 module.exports = statutsCandidatsSchema;

@@ -1,46 +1,45 @@
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const { StatutCandidat } = require("../../common/model");
 const cliProgress = require("cli-progress");
+const omit = require("lodash.omit");
+
+const { runScript } = require("../scriptWrapper");
+const { collectionNames } = require("../constants");
+const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
-runScript(async ({ dashboard }) => {
-  await identifyHistoryDateUnordered(dashboard);
-  await identifyHistoryWithBadDates(dashboard);
+runScript(async ({ dashboard, db }) => {
+  await identifyHistoryDateUnordered({ dashboard, db });
+  await identifyHistoryWithBadDates({ dashboard, db });
 }, "Identify-Statuts-Antidated");
 
-const identifyHistoryDateUnordered = async (dashboard) => {
-  logger.info("Run Identifying Antidated History Statuts....");
+const identifyHistoryDateUnordered = async ({ dashboard, db }) => {
+  const resultsCollection = db.collection(collectionNames.statutsAvecHistoriqueSansOrdreChronologique);
+  await resultsCollection.deleteMany({});
 
-  // Clear flag (false)
-  await StatutCandidat.updateMany({ history_antidated: false });
+  // Identify all statuts with historique_statut_apprenant unordered
+  const statutsWithUnorderedHistory = await dashboard.getStatutsWithHistoryDateUnordered();
 
-  // Identify all statuts with antidated history
-  const statutsWithHistoryAntidated = await dashboard.getStatutsWithHistoryDateUnordered();
-
-  loadingBar.start(statutsWithHistoryAntidated.length, 0);
+  loadingBar.start(statutsWithUnorderedHistory.length, 0);
 
   // Update flag to true
-  await asyncForEach(statutsWithHistoryAntidated, async (currentStatutWithAntidatedHistory) => {
+  await asyncForEach(statutsWithUnorderedHistory, async (statutWithUnorderedHistory) => {
     loadingBar.increment();
-    await StatutCandidat.findByIdAndUpdate(
-      currentStatutWithAntidatedHistory._id,
-      { $set: { history_antidated: true } },
-      { new: true }
-    );
+    await resultsCollection.insertOne({
+      ...omit(statutWithUnorderedHistory, "_id"),
+      original_id: statutWithUnorderedHistory._id,
+    });
   });
 
   loadingBar.stop();
-  logger.info("End Identifying Antidated History Statuts....");
+  logger.info("End Identifying unordered history Statuts....");
 };
 
-const identifyHistoryWithBadDates = async (dashboard) => {
+const identifyHistoryWithBadDates = async ({ db, dashboard }) => {
   logger.info("Run Identifying History Statuts with bad dates....");
 
-  // Clear flag (false)
-  await StatutCandidat.updateMany({ history_with_bad_date: false });
+  const resultsCollection = db.collection(collectionNames.statutsAvecDatesInvalidesDansHistoriqu);
+  await resultsCollection.deleteMany({});
 
   // Identify all statuts with bad dates in history
   const statutsWithBadDatesInHistory = await dashboard.getStatutsWithBadDate();
@@ -48,13 +47,12 @@ const identifyHistoryWithBadDates = async (dashboard) => {
   loadingBar.start(statutsWithBadDatesInHistory.length, 0);
 
   // Update flag to true
-  await asyncForEach(statutsWithBadDatesInHistory, async (currentStatutWithAntidatedHistory) => {
+  await asyncForEach(statutsWithBadDatesInHistory, async (statutWithBadeDates) => {
     loadingBar.increment();
-    await StatutCandidat.findByIdAndUpdate(
-      currentStatutWithAntidatedHistory._id,
-      { $set: { history_with_bad_date: true } },
-      { new: true }
-    );
+    await resultsCollection.insertOne({
+      ...omit(statutWithBadeDates, "_id"),
+      original_id: statutWithBadeDates._id,
+    });
   });
 
   loadingBar.stop();
