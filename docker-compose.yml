@@ -39,7 +39,7 @@ services:
     environment:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
       - FLUX_RETOUR_CFAS_OUTPUT_DIR=/data
-      - FLUX_RETOUR_CFAS_REDIS_URI=redis://redis:6379
+      - FLUX_RETOUR_CFAS_REDIS_URI=redis://redis:6481
 
   mongodb:
     image: mongo:5.0.2-focal
@@ -51,7 +51,7 @@ services:
   redis:
     image: 'bitnami/redis:latest'
     ports:
-      - 6379:6379
+      - 6481:6481
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
