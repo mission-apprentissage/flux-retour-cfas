@@ -2,6 +2,7 @@ const cliProgress = require("cli-progress");
 const omit = require("lodash.omit");
 
 const { runScript } = require("../scriptWrapper");
+const { collectionNames } = require("../constants");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 
@@ -13,7 +14,7 @@ runScript(async ({ dashboard, db }) => {
 }, "Identify-Statuts-Antidated");
 
 const identifyHistoryDateUnordered = async ({ dashboard, db }) => {
-  const resultsCollection = db.collection("statutsAvecHistoriqueSansOrdreChronologique");
+  const resultsCollection = db.collection(collectionNames.statutsAvecHistoriqueSansOrdreChronologique);
   await resultsCollection.deleteMany({});
 
   // Identify all statuts with historique_statut_apprenant unordered
@@ -31,13 +32,13 @@ const identifyHistoryDateUnordered = async ({ dashboard, db }) => {
   });
 
   loadingBar.stop();
-  logger.info("End Identifying unordered h istory Statuts....");
+  logger.info("End Identifying unordered history Statuts....");
 };
 
 const identifyHistoryWithBadDates = async ({ db, dashboard }) => {
   logger.info("Run Identifying History Statuts with bad dates....");
 
-  const resultsCollection = db.collection("statutsAvecDatesInvalidesDansHistorique");
+  const resultsCollection = db.collection(collectionNames.statutsAvecDatesInvalidesDansHistoriqu);
   await resultsCollection.deleteMany({});
 
   // Identify all statuts with bad dates in history
