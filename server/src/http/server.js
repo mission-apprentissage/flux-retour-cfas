@@ -11,6 +11,7 @@ const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 
 const rcoRoute = require("./routes/rco");
 const statutCandidatsRoute = require("./routes/statut-candidats");
+const lienPriveCfaRoute = require("./routes/lien-prive-cfa");
 const loginRoute = require("./routes/login");
 const loginCfaRoute = require("./routes/login-cfa.route");
 const userEventsRoute = require("./routes/userEvents");
@@ -52,6 +53,12 @@ module.exports = async (components) => {
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     statutCandidatsRoute(components)
+  );
+  app.use(
+    "/api/liens-prives-cfas",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    lienPriveCfaRoute(components)
   );
   app.use(
     "/api/rco",
