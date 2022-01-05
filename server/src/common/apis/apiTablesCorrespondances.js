@@ -7,20 +7,22 @@ const config = require("../../../config");
 const API_ENDPOINT = config.tablesCorrespondances.endpoint;
 
 const getCfdInfo = async (cfd) => {
+  const url = `${API_ENDPOINT}/cfd`;
   try {
-    const { data } = await axios.post(`${API_ENDPOINT}/cfd`, {
+    const { data } = await axios.post(url, {
       cfd,
     });
     return data.result;
   } catch (error) {
-    logger.error(`getCfdInfo: something went wrong`);
+    logger.error(`getCfdInfo: something went wrong while requesting ${url}`, error.response.data);
     return null;
   }
 };
 
 const getSiretInfo = async (siret) => {
+  const url = `${API_ENDPOINT}/siret`;
   try {
-    const { data } = await axios.post(`${API_ENDPOINT}/siret`, {
+    const { data } = await axios.post(url, {
       siret,
     });
 
@@ -29,45 +31,44 @@ const getSiretInfo = async (siret) => {
     }
     return data.result;
   } catch (error) {
-    logger.error(`getSiretInfo: something went wrong`);
+    logger.error(`getSiretInfo: something went wrong while requesting ${url}`, error.response.data);
     return null;
   }
 };
 
 const getRncpInfo = async (rncp) => {
+  const url = `${API_ENDPOINT}/rncp`;
   try {
-    const { data } = await axios.post(`${API_ENDPOINT}/rncp`, {
+    const { data } = await axios.post(url, {
       rncp,
     });
     return data.result;
   } catch (error) {
-    logger.error(`getRncpInfo: something went wrong`);
+    logger.error(`getRncpInfo: something went wrong while requesting ${url}`, error.response.data);
     return null;
   }
 };
 
 const getEtablissementByUai = async (uai) => {
+  const query = JSON.stringify({ uai });
+  const url = `${API_ENDPOINT}/entity/etablissements/siret-uai?query=${encodeURIComponent(query)}`;
   try {
-    const query = JSON.stringify({ uai });
-    const { data } = await axios.get(
-      `${API_ENDPOINT}/entity/etablissements/siret-uai?query=${encodeURIComponent(query)}`
-    );
+    const { data } = await axios.get(url);
     return data;
   } catch (error) {
-    logger.error(`getEtablissementByUai: something went wrong`);
+    logger.error(`getEtablissementByUai: something went wrong while requesting ${url}`, error.response.data);
     return null;
   }
 };
 
 const getEtablissementBySiret = async (siret) => {
+  const query = JSON.stringify({ siret });
+  const url = `${API_ENDPOINT}/entity/etablissements/siret-uai?query=${encodeURIComponent(query)}`;
   try {
-    const query = JSON.stringify({ siret });
-    const { data } = await axios.get(
-      `${API_ENDPOINT}/entity/etablissements/siret-uai?query=${encodeURIComponent(query)}`
-    );
+    const { data } = await axios.get(url);
     return data;
   } catch (error) {
-    logger.error(`getEtablissementBySiret: something went wrong`);
+    logger.error(`getEtablissementBySiret: something went wrong while requesting ${url}`, error.response.data);
     return null;
   }
 };
