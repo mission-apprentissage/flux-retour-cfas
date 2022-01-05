@@ -12,7 +12,7 @@ const getMetiersBySiret = async (siret) => {
     const { data } = await axios.get(url);
     return data;
   } catch (err) {
-    logger.error(`getMetiersBySiret: something went wrong while requesting ${url}`, err);
+    logger.error(`getMetiersBySiret: something went wrong while requesting ${url}`, err.response.data);
     return null;
   }
 };
@@ -23,7 +23,7 @@ const getMetiersBySirets = async (sirets) => {
     const { data } = await axios.get(url);
     return data;
   } catch (err) {
-    logger.error(`getMetiersBySirets: something went wrong while requesting ${url}`, err);
+    logger.error(`getMetiersBySirets: something went wrong while requesting ${url}`, err.response.data);
     return null;
   }
 };
@@ -34,7 +34,7 @@ const getMetiersByCfd = async (cfd) => {
     const { data } = await axios.get(url);
     return data;
   } catch (err) {
-    logger.error(`getMetiersByCfd: something went wrong while requesting ${url}`, err);
+    logger.error(`getMetiersByCfd: something went wrong while requesting ${url}`, err.response.data);
     return null;
   }
 };
