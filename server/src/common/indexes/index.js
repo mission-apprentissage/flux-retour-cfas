@@ -1,6 +1,9 @@
-const { createFormationsCollectionIndexes } = require("./formations.indexes");
-const { createStatutsCandidatsCollectionIndexes } = require("./statutsCandidats.indexes");
-const { createUserEventsCollectionIndexes } = require("./userEvents.indexes");
+const { createFormationsCollectionIndexes, dropFormationsCollectionIndexes } = require("./formations.indexes");
+const {
+  createStatutsCandidatsCollectionIndexes,
+  dropStatutsCandidatsCollectionIndexes,
+} = require("./statutsCandidats.indexes");
+const { createUserEventsCollectionIndexes, dropUserEventsCollectionIndexes } = require("./userEvents.indexes");
 
 const createIndexes = async (db) => {
   await createUserEventsCollectionIndexes(db);
@@ -8,4 +11,10 @@ const createIndexes = async (db) => {
   await createFormationsCollectionIndexes(db);
 };
 
-module.exports = { createIndexes };
+const dropIndexes = async (db) => {
+  await dropStatutsCandidatsCollectionIndexes(db);
+  await dropFormationsCollectionIndexes(db);
+  await dropUserEventsCollectionIndexes(db);
+};
+
+module.exports = { createIndexes, dropIndexes };

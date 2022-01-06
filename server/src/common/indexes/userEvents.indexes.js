@@ -5,4 +5,10 @@ const createUserEventsCollectionIndexes = async (db) => {
   await collection.createIndex({ action: 1 }, { name: "action" });
 };
 
-module.exports = { createUserEventsCollectionIndexes };
+const dropUserEventsCollectionIndexes = async (db) => {
+  const collection = db.collection("userEvents");
+
+  await collection.dropIndexes();
+};
+
+module.exports = { createUserEventsCollectionIndexes, dropUserEventsCollectionIndexes };
