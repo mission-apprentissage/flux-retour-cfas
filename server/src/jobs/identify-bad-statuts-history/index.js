@@ -8,17 +8,17 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
-runScript(async ({ dashboard, db }) => {
-  await identifyHistoryDateUnordered({ dashboard, db });
-  await identifyHistoryWithBadDates({ dashboard, db });
+runScript(async ({ effectifs, db }) => {
+  await identifyHistoryDateUnordered({ effectifs, db });
+  await identifyHistoryWithBadDates({ effectifs, db });
 }, "Identify-Statuts-Antidated");
 
-const identifyHistoryDateUnordered = async ({ dashboard, db }) => {
+const identifyHistoryDateUnordered = async ({ effectifs, db }) => {
   const resultsCollection = db.collection(collectionNames.statutsAvecHistoriqueSansOrdreChronologique);
   await resultsCollection.deleteMany({});
 
   // Identify all statuts with historique_statut_apprenant unordered
-  const statutsWithUnorderedHistory = await dashboard.getStatutsWithHistoryDateUnordered();
+  const statutsWithUnorderedHistory = await effectifs.getStatutsWithHistoryDateUnordered();
 
   loadingBar.start(statutsWithUnorderedHistory.length, 0);
 
@@ -35,14 +35,14 @@ const identifyHistoryDateUnordered = async ({ dashboard, db }) => {
   logger.info("End Identifying unordered history Statuts....");
 };
 
-const identifyHistoryWithBadDates = async ({ db, dashboard }) => {
+const identifyHistoryWithBadDates = async ({ db, effectifs }) => {
   logger.info("Run Identifying History Statuts with bad dates....");
 
   const resultsCollection = db.collection(collectionNames.statutsAvecDatesInvalidesDansHistoriqu);
   await resultsCollection.deleteMany({});
 
   // Identify all statuts with bad dates in history
-  const statutsWithBadDatesInHistory = await dashboard.getStatutsWithBadDate();
+  const statutsWithBadDatesInHistory = await effectifs.getStatutsWithBadDate();
 
   loadingBar.start(statutsWithBadDatesInHistory.length, 0);
 

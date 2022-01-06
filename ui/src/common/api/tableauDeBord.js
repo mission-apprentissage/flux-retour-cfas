@@ -7,37 +7,37 @@ import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 export const fetchEffectifs = (filters) => {
   const queryParameters = qs.stringify(mapFiltersToApiFormat(filters));
-  const url = `/api/dashboard/effectifs?${queryParameters}`;
+  const url = `/api/effectifs?${queryParameters}`;
   return _get(url);
 };
 
 export const fetchEffectifsParCfa = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/dashboard/effectifs-par-cfa?${queryParameters}`;
+  const url = `/api/effectifs/cfa?${queryParameters}`;
   return _get(url);
 };
 
 export const fetchEffectifsParFormation = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/dashboard/effectifs-par-formation?${queryParameters}`;
+  const url = `/api/effectifs/formation?${queryParameters}`;
   return _get(url);
 };
 
 export const fetchEffectifsParNiveauFormation = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/dashboard/effectifs-par-niveau-formation?${queryParameters}`;
+  const url = `/api/effectifs/niveau-formation?${queryParameters}`;
   return _get(url);
 };
 
 export const fetchEffectifsParAnneeFormation = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/dashboard/effectifs-par-annee-formation?${queryParameters}`;
+  const url = `/api/effectifs/annee-formation?${queryParameters}`;
   return _get(url);
 };
 
 export const fetchEffectifsParDepartement = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/dashboard/effectifs-par-departement?${queryParameters}`;
+  const url = `/api/effectifs/departement?${queryParameters}`;
   return _get(url);
 };
 
@@ -45,7 +45,7 @@ export const fetchEffectifsParDepartement = (filters) => {
 
 export const fetchTotalOrganismes = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/dashboard/total-organismes?${queryParameters}`;
+  const url = `/api/effectifs/total-organismes?${queryParameters}`;
   return _get(url);
 };
 

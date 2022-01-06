@@ -11,11 +11,11 @@ const {
 const { StatutCandidat } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
-  describe("/api/dashboard/effectifs route", () => {
+  describe("/api/effectifs route", () => {
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();
 
-      const response = await httpClient.get("/api/dashboard/effectifs", {
+      const response = await httpClient.get("/api/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z" },
       });
 
@@ -72,7 +72,7 @@ httpTests(__filename, ({ startServer }) => {
       };
 
       // Check good api call
-      const response = await httpClient.get("/api/dashboard/effectifs", {
+      const response = await httpClient.get("/api/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z" },
         headers: bearerToken,
       });
@@ -130,7 +130,7 @@ httpTests(__filename, ({ startServer }) => {
       };
 
       // Check good api call
-      const response = await httpClient.get("/api/dashboard/effectifs", {
+      const response = await httpClient.get("/api/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z", ...filterQuery },
         headers: bearerToken,
       });
@@ -141,7 +141,7 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
 
       // Check bad api call
-      const badResponse = await httpClient.get("/api/dashboard/effectifs", {
+      const badResponse = await httpClient.get("/api/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_region: "99" },
         headers: bearerToken,
       });
@@ -154,7 +154,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  describe("/api/dashboard/effectifs-par-niveau-formation route", () => {
+  describe("/api/effectifs/niveau-formation route", () => {
     it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux de formation via API", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
@@ -183,7 +183,7 @@ httpTests(__filename, ({ startServer }) => {
       await toAdd.save();
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
-      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-formation?${searchParams}`, {
+      const response = await httpClient.get(`/api/effectifs/niveau-formation?${searchParams}`, {
         headers: bearerToken,
       });
 
@@ -205,7 +205,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  describe("/api/dashboard/total-organismes route", () => {
+  describe("/api/effectifs/total-organismes route", () => {
     it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une région", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
@@ -223,7 +223,7 @@ httpTests(__filename, ({ startServer }) => {
       ).save();
 
       // Check good api call
-      const response = await httpClient.get("/api/dashboard/total-organismes", {
+      const response = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           etablissement_num_region: regionNumTest,
         },
@@ -233,7 +233,7 @@ httpTests(__filename, ({ startServer }) => {
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, { nbOrganismes: 1 });
 
-      const badRegionResponse = await httpClient.get("/api/dashboard/total-organismes", {
+      const badRegionResponse = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           etablissement_num_region: "01",
         },
@@ -262,7 +262,7 @@ httpTests(__filename, ({ startServer }) => {
       ).save();
 
       // Check good api call
-      const response = await httpClient.get("/api/dashboard/total-organismes", {
+      const response = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           formation_cfd: formationCfd,
         },

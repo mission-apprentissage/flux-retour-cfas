@@ -8,7 +8,7 @@ const {
 } = require("../../../data/historySequenceSamples");
 const { StatutCandidat } = require("../../../../src/common/model");
 const { codesStatutsCandidats, reseauxCfas } = require("../../../../src/common/model/constants");
-const dashboardComponent = require("../../../../src/common/components/dashboard");
+const effectifsComponent = require("../../../../src/common/components/effectifs");
 
 integrationTests(__filename, () => {
   const seedStatutsCandidats = async (statutsProps) => {
@@ -44,7 +44,7 @@ integrationTests(__filename, () => {
   };
 
   describe("getApprentisCountAtDate", () => {
-    const { getApprentisCountAtDate } = dashboardComponent();
+    const { getApprentisCountAtDate } = effectifsComponent();
 
     it("gets count of apprentis at one date", async () => {
       await seedStatutsCandidats();
@@ -153,7 +153,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getAbandonsCountAtDate", () => {
-    const { getAbandonsCountAtDate } = dashboardComponent();
+    const { getAbandonsCountAtDate } = effectifsComponent();
 
     it("gets count of abandons at one date", async () => {
       await seedStatutsCandidats();
@@ -197,7 +197,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getEffectifsCountByNiveauFormationAtDate", () => {
-    const { getEffectifsCountByNiveauFormationAtDate } = dashboardComponent();
+    const { getEffectifsCountByNiveauFormationAtDate } = effectifsComponent();
 
     it("Permet de récupérer les effectifs par niveau_formation à une date donnée", async () => {
       const filterQuery = { uai_etablissement: "0123456Z" };
@@ -254,7 +254,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getEffectifsCountByAnneeFormationAtDate", () => {
-    const { getEffectifsCountByAnneeFormationAtDate } = dashboardComponent();
+    const { getEffectifsCountByAnneeFormationAtDate } = effectifsComponent();
 
     it("Permet de récupérer les effectifs par annee_formation à une date donnée", async () => {
       const filterQuery = { uai_etablissement: "0123456Z" };
@@ -313,7 +313,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getEffectifsCountByFormationAtDate", () => {
-    const { getEffectifsCountByFormationAtDate } = dashboardComponent();
+    const { getEffectifsCountByFormationAtDate } = effectifsComponent();
 
     it("Permet de récupérer les effectifs par formation_cfd à une date donnée", async () => {
       const filterQuery = { uai_etablissement: "0123456Z" };
@@ -366,7 +366,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getEffectifsCountByCfaAtDate", () => {
-    const { getEffectifsCountByCfaAtDate } = dashboardComponent();
+    const { getEffectifsCountByCfaAtDate } = effectifsComponent();
 
     it("Permet de récupérer les effectifs par CFA à une date donnée pour une formation", async () => {
       const filterQuery = { formation_cfd: "77929544300013" };
@@ -413,7 +413,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getEffectifsCountByDepartementAtDate", () => {
-    const { getEffectifsCountByDepartementAtDate } = dashboardComponent();
+    const { getEffectifsCountByDepartementAtDate } = effectifsComponent();
 
     it("Permet de récupérer les effectifs par departement à une date donnée", async () => {
       const departement1 = {
@@ -458,7 +458,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getNouveauxContratsCountInDateRange", () => {
-    const { getNouveauxContratsCountInDateRange } = dashboardComponent();
+    const { getNouveauxContratsCountInDateRange } = effectifsComponent();
 
     beforeEach(async () => {
       const statuts = [
@@ -526,7 +526,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getRupturantsCountAtDate", () => {
-    const { getRupturantsCountAtDate } = dashboardComponent();
+    const { getRupturantsCountAtDate } = effectifsComponent();
 
     beforeEach(async () => {
       const statuts = [
@@ -610,7 +610,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getNbRupturesContratAtDate", () => {
-    const { getNbRupturesContratAtDate } = dashboardComponent();
+    const { getNbRupturesContratAtDate } = effectifsComponent();
 
     it("gets count of ruptures for apprentis to abandon at date", async () => {
       const statuts = [
@@ -901,7 +901,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getInscritsSansContratCountAtDate", () => {
-    const { getInscritsSansContratCountAtDate } = dashboardComponent();
+    const { getInscritsSansContratCountAtDate } = effectifsComponent();
 
     beforeEach(async () => {
       const statuts = [
@@ -983,7 +983,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getContratsCountAtDate", () => {
-    const { getContratsCountAtDate } = dashboardComponent();
+    const { getContratsCountAtDate } = effectifsComponent();
 
     it("gets count of contrats now", async () => {
       const statuts = [
