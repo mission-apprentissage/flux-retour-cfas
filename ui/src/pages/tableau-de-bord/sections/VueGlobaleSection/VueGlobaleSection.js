@@ -51,7 +51,6 @@ const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) 
           count={effectifs.rupturants.count}
           label={pluralize("rupturant", effectifs.rupturants.count)}
           tooltipLabel="Nombre d’apprenants sans contrat après une rupture au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
-          hideCount
           warningText="correctif en cours"
         />
         <EffectifCard
