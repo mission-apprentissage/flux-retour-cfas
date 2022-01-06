@@ -131,10 +131,21 @@ integrationTests(__filename, () => {
       await asyncForEach(formationsSeed, async (formationSeed) => {
         const formation = Formation.create(formationSeed);
         await new FormationModel(formation).save();
+
+        await new StatutCandidatModel({
+          ...createRandomStatutCandidat(),
+          formation_cfd: formation.cfd,
+          formation_cfd_valid: true,
+        }).save();
       });
     });
 
     const validCases = [
+      {
+        caseDescription: "when searchTerm does not anything",
+        searchTerm: "nope",
+        expectedResult: [],
+      },
       {
         caseDescription: "when searchTerm matches cfd perfectly",
         searchTerm: formationsSeed[0].cfd,
@@ -264,6 +275,22 @@ integrationTests(__filename, () => {
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
+    });
+
+    it("sould not return anything when cfd is invalid", async () => {
+      const searchTerm = "invalide";
+
+      const formation = Formation.create({ cfd: "0102210X", libelle: searchTerm });
+      await new FormationModel(formation).save();
+      await new StatutCandidatModel({
+        ...createRandomStatutCandidat(),
+        formation_cfd: "0102210X",
+        formation_cfd_valid: false,
+      }).save();
+
+      const results = await searchFormations({ searchTerm });
+
+      assert.equal(results.length, 0);
     });
   });
 

@@ -1,8 +1,9 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
-const { FormationModel } = require("../../../src/common/model");
+const { FormationModel, StatutCandidatModel } = require("../../../src/common/model");
 const { Formation } = require("../../../src/common/domain/formation");
+const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 
 httpTests(__filename, ({ startServer }) => {
   const formationsSeed = [{ cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" }];
@@ -11,6 +12,11 @@ httpTests(__filename, ({ startServer }) => {
     await asyncForEach(formationsSeed, async (formationSeed) => {
       const formation = Formation.create(formationSeed);
       await new FormationModel(formation).save();
+      await new StatutCandidatModel({
+        ...createRandomStatutCandidat(),
+        formation_cfd: formation.cfd,
+        formation_cfd_valid: true,
+      }).save();
     });
   };
 
@@ -31,7 +37,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.equal(response.status, 400);
   });
 
-  it("sends a 200 HTTP response with results when searchTerm is provided", async () => {
+  it.only("sends a 200 HTTP response with results when searchTerm is provided", async () => {
     const response = await httpClient.post("/api/formations/search", { searchTerm: "traiteur" });
 
     assert.equal(response.status, 200);
