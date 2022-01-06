@@ -58,6 +58,7 @@
     "statutsCandidats-bad-history:identify-antidated": "node -r dotenv/config src/jobs/statutsCandidats-bad-history/identifyAntidated.js",
     "statutsCandidats-bad-history:identify-bad-dates": "node -r dotenv/config src/jobs/statutsCandidats-bad-history/identifyBadDates.js",
     "statutsCandidats-bad-history:clean-bad-rupturants": "node -r dotenv/config src/jobs/statutsCandidats-bad-history/cleanBadRupturants.js",
+    "identify:history-with-same-time": "node -r dotenv/config src/jobs/identify-history-with-same-time-statut/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down",
