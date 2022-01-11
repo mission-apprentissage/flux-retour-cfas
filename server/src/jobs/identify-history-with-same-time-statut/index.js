@@ -7,11 +7,9 @@ const hasStatutsInscritsOrApprentisWithSameDateInHistorique = (historique) => {
   const dates = [];
   for (let index = 0; index < historique.length; index++) {
     // check only for statuts inscrits or apprentis
-    if (
-      historique[index].valeur_statut === codesStatutsCandidats.inscrit ||
-      historique[index].valeur_statut === codesStatutsCandidats.apprenti
-    ) {
-      const date = historique[index].date_statut.getTime();
+    const date = historique[index].date_statut.getTime();
+    const statut = historique[index].valeur_statut;
+    if (statut === codesStatutsCandidats.inscrit || statut === codesStatutsCandidats.apprenti) {
       if (dates.includes(date)) {
         return true;
       }
@@ -25,6 +23,7 @@ runScript(async ({ db }) => {
   logger.info(`Identification for statuts inscrits / apprentis with equal dates in historique_statut_apprenant`);
 
   const resultCollection = db.collection("statutsAvecDateIdentiqueDansHistorique");
+  await resultCollection.deleteMany();
   // create a cursor over all the statuts with an historique of size > 1
   const statutsCandidatsCollection = db.collection("statutsCandidats");
   const cursor = statutsCandidatsCollection.find({ "historique_statut_apprenant.1": { $exists: true } });
