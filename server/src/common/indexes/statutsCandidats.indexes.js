@@ -6,6 +6,7 @@ const createStatutsCandidatsCollectionIndexes = async (db) => {
   await collection.createIndex({ siret_etablissement_valid: 1 }, { name: "siret_etablissement_valid" });
   await collection.createIndex({ uai_etablissement_valid: 1 }, { name: "uai_etablissement_valid" });
   await collection.createIndex({ formation_cfd: 1 }, { name: "formation_cfd" });
+  await collection.createIndex({ formation_cfd_valid: 1 }, { name: "formation_cfd_valid" });
   await collection.createIndex({ etablissement_num_region: 1 }, { name: "etablissement_num_region" });
   await collection.createIndex({ etablissement_num_departement: 1 }, { name: "etablissement_num_departement" });
   await collection.createIndex({ annee_scolaire: 1 }, { name: "annee_scolaire" });

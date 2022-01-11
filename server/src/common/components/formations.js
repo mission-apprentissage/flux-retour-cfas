@@ -5,6 +5,8 @@ const { getMetiersByCfd } = require("../apis/apiLba");
 
 const { Formation } = require("../domain/formation");
 
+const SEARCH_RESULTS_LIMIT = 50;
+
 module.exports = () => ({
   createFormation,
   existsFormation,
@@ -81,25 +83,25 @@ const createFormation = async (cfd) => {
  */
 const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
-  const searchTermFilterQuery = searchTerm
+
+  const eligibleCfds = await StatutCandidatModel.distinct("formation_cfd", {
+    formation_cfd_valid: true,
+    ...otherFilters,
+  });
+
+  const matchStage = searchTerm
     ? {
         $or: [{ $text: { $search: searchTerm } }, { cfd: new RegExp(searchTerm, "g") }],
+        cfd: { $in: eligibleCfds },
       }
-    : {};
+    : { cfd: { $in: eligibleCfds } };
 
-  if (Object.keys(otherFilters).length > 0) {
-    const filters = {
-      formation_cfd_valid: true,
-      ...otherFilters,
-    };
+  const sortStage = searchTerm
+    ? {
+        score: { $meta: "textScore" },
+        libelle: 1,
+      }
+    : { libelle: 1 };
 
-    const eligibleCfds = await StatutCandidatModel.distinct("formation_cfd", filters);
-
-    return FormationModel.find({
-      ...searchTermFilterQuery,
-      cfd: { $in: eligibleCfds },
-    }).lean();
-  }
-
-  return FormationModel.find(searchTermFilterQuery).lean();
+  return FormationModel.aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }]);
 };

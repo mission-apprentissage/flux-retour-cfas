@@ -3,6 +3,7 @@ import { useQuery } from "react-query";
 
 import { fetchDepartements } from "../../../../../common/api/geoData";
 import { fetchRegions } from "../../../../../common/api/tableauDeBord";
+import { sortAlphabeticallyBy } from "../../../../../common/utils/sortAlphabetically";
 
 const withTerritoiresData = (Component) => {
   const WithTerritoiresData = (props) => {
@@ -14,16 +15,11 @@ const withTerritoiresData = (Component) => {
       staleTime: Infinity,
     });
 
-    const regionsCodes = regions?.map((region) => region.code) || [];
-
-    // limit to départements in available régions
-    const departementsOptions = Array.isArray(departements)
-      ? departements.filter((departement) => regionsCodes.indexOf(departement.codeRegion) > -1)
-      : [];
-
+    const sortedRegions = sortAlphabeticallyBy("nom", regions || []);
+    const sortedDepartements = sortAlphabeticallyBy("nom", departements || []);
     const isLoading = departementsLoading || regionsLoading;
 
-    return <Component {...props} departements={departementsOptions} regions={regions || []} loading={isLoading} />;
+    return <Component {...props} departements={sortedDepartements} regions={sortedRegions} loading={isLoading} />;
   };
 
   return WithTerritoiresData;
