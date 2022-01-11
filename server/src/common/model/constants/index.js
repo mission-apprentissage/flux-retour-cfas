@@ -129,6 +129,7 @@ const jobNames = {
   statutsAvecDateIdentiqueDansHistorique: "statuts-avec-date-identique-dans-historique",
   statutsCandidatsRemoveHistoriqueElementWithInvalidValeurStatut:
     "statuts-candidats-remove-historique-element-with-invalid-valeur-statut",
+  statutsAvecDerniersElementsHistoriqueDateIdentique: "statuts-avec-date-identique-dans-historique",
 };
 
 /**
