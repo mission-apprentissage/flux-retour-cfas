@@ -5,4 +5,10 @@ const createFormationsCollectionIndexes = async (db) => {
   await collection.createIndex({ cfd: 1 }, { unique: true });
 };
 
-module.exports = { createFormationsCollectionIndexes };
+const dropFormationsCollectionIndexes = async (db) => {
+  const collection = db.collection("formations");
+
+  await collection.dropIndexes();
+};
+
+module.exports = { createFormationsCollectionIndexes, dropFormationsCollectionIndexes };
