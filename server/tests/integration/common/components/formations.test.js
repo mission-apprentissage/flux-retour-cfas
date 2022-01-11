@@ -277,7 +277,7 @@ integrationTests(__filename, () => {
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
     });
 
-    it("sould not return anything when cfd is invalid", async () => {
+    it("should not return anything when cfd is invalid", async () => {
       const searchTerm = "invalide";
 
       const formation = Formation.create({ cfd: "0102210X", libelle: searchTerm });

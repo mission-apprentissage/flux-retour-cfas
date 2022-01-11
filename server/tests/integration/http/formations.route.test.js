@@ -37,7 +37,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.equal(response.status, 400);
   });
 
-  it.only("sends a 200 HTTP response with results when searchTerm is provided", async () => {
+  it("sends a 200 HTTP response with results when searchTerm is provided", async () => {
     const response = await httpClient.post("/api/formations/search", { searchTerm: "traiteur" });
 
     assert.equal(response.status, 200);
