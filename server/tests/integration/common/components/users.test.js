@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const users = require("../../../../src/common/components/users");
-const { User } = require("../../../../src/common/model");
+const { UserModel } = require("../../../../src/common/model");
 const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
 
 integrationTests(__filename, () => {
@@ -13,7 +13,7 @@ integrationTests(__filename, () => {
     assert.equal(created.permissions.length, 0);
     assert.equal(created.password.startsWith("$6$rounds="), true);
 
-    const found = await User.findOne({ username: "user" });
+    const found = await UserModel.findOne({ username: "user" });
     assert.equal(found.username, "user");
     assert.equal(found.permissions.length, 0);
     assert.equal(found.password.startsWith("$6$rounds="), true);
@@ -23,7 +23,7 @@ integrationTests(__filename, () => {
     const { createUser } = await users();
 
     const user = await createUser("userAdmin", "password", { permissions: [apiRoles.administrator] });
-    const found = await User.findOne({ username: "userAdmin" });
+    const found = await UserModel.findOne({ username: "userAdmin" });
 
     assert.equal(user.permissions.includes(apiRoles.administrator), true);
     assert.equal(found.permissions.includes(apiRoles.administrator), true);
@@ -37,7 +37,7 @@ integrationTests(__filename, () => {
       email: "email@test.fr",
       network: "test",
     });
-    const found = await User.findOne({ username: "userAdmin" });
+    const found = await UserModel.findOne({ username: "userAdmin" });
 
     assert.equal(user.permissions.includes(tdbRoles.network), true);
     assert.equal(user.network === "test", true);
@@ -54,7 +54,7 @@ integrationTests(__filename, () => {
     await createUser("userToDelete", "password", { permissions: [apiRoles.administrator] });
     await removeUser("userToDelete");
 
-    const found = await User.findOne({ username: "userToDelete" });
+    const found = await UserModel.findOne({ username: "userToDelete" });
     assert.equal(found, null);
   });
 

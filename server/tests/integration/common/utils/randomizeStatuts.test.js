@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { historySequenceApprentiToAbandon } = require("../../../data/historySequenceSamples");
-const { StatutCandidat } = require("../../../../src/common/model");
+const { StatutCandidatModel } = require("../../../../src/common/model");
 const integrationTests = require("../../../utils/integrationTests");
 
 integrationTests(__filename, () => {
@@ -12,7 +12,7 @@ integrationTests(__filename, () => {
 
       const randomStatut = createRandomStatutCandidat();
 
-      const toAdd = new StatutCandidat(randomStatut);
+      const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
       const result = toAdd.toJSON();
 
@@ -52,7 +52,7 @@ integrationTests(__filename, () => {
         historique_statut_apprenant: historySequenceApprentiToAbandon,
       });
 
-      const toAdd = new StatutCandidat(randomStatut);
+      const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
       const result = toAdd.toJSON();
 
@@ -75,7 +75,7 @@ integrationTests(__filename, () => {
       assert.deepEqual(result.historique_statut_apprenant, randomStatut.historique_statut_apprenant);
 
       // Checks exists method
-      const found = await StatutCandidat.countDocuments({
+      const found = await StatutCandidatModel.countDocuments({
         ine_apprenant: result.ine_apprenant,
         nom_apprenant: result.nom_apprenant,
         prenom_apprenant: result.prenom_apprenant,

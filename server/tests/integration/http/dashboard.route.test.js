@@ -8,7 +8,7 @@ const {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
-const { StatutCandidat } = require("../../../src/common/model");
+const { StatutCandidatModel } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
   describe("/api/effectifs route", () => {
@@ -32,7 +32,7 @@ httpTests(__filename, ({ startServer }) => {
           historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -42,7 +42,7 @@ httpTests(__filename, ({ startServer }) => {
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -52,12 +52,12 @@ httpTests(__filename, ({ startServer }) => {
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
       // this one should be ignored because of annee_scolaire
-      await new StatutCandidat(
+      await new StatutCandidatModel(
         createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2021-2022",
@@ -96,7 +96,7 @@ httpTests(__filename, ({ startServer }) => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -107,7 +107,7 @@ httpTests(__filename, ({ startServer }) => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -118,7 +118,7 @@ httpTests(__filename, ({ startServer }) => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -168,7 +168,7 @@ httpTests(__filename, ({ startServer }) => {
           niveau_formation: "1",
           niveau_formation_libelle: "1 (blabla)",
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -179,7 +179,7 @@ httpTests(__filename, ({ startServer }) => {
         niveau_formation: "2",
         niveau_formation_libelle: "2 (blabla)",
       });
-      const toAdd = new StatutCandidat(randomStatut);
+      const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
@@ -212,7 +212,7 @@ httpTests(__filename, ({ startServer }) => {
       const regionNumTest = "28";
 
       // Add 1 statut for region
-      await new StatutCandidat(
+      await new StatutCandidatModel(
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
           siret_etablissement: "77929544300013",
@@ -250,7 +250,7 @@ httpTests(__filename, ({ startServer }) => {
       const formationCfd = "abcd1234";
 
       // Add 1 statut for formation
-      await new StatutCandidat(
+      await new StatutCandidatModel(
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
           siret_etablissement: getRandomSiretEtablissement(),

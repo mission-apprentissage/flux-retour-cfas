@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const cliProgress = require("cli-progress");
-const { StatutCandidat } = require("../../common/model");
+const { StatutCandidatModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
 const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
@@ -17,7 +17,7 @@ runScript(async () => {
 
   // Récupère tous les coupes UAI - CFD existants pour les statuts avec sirets invalides & uai valides
   const uaiCfdCouples = (
-    await StatutCandidat.aggregate([
+    await StatutCandidatModel.aggregate([
       {
         $match: {
           uai_etablissement_valid: true,
@@ -53,7 +53,7 @@ runScript(async () => {
 
     if (infoCatalog?.length > 0) {
       // Récupère tous les statuts ayant ce couple UAI & CFD et un siret invalide
-      const statutsForUaiCfdCouple = await StatutCandidat.find({
+      const statutsForUaiCfdCouple = await StatutCandidatModel.find({
         uai_etablissement: currentUaiCfd.uai,
         formation_cfd: currentUaiCfd.cfd,
         siret_etablissement_valid: false,
@@ -61,7 +61,7 @@ runScript(async () => {
 
       await asyncForEach(statutsForUaiCfdCouple, async (currentStatutToUpdate) => {
         // MAJ etablissement_gestionnaire_siret && etablissement_formateur_siret
-        await StatutCandidat.findByIdAndUpdate(
+        await StatutCandidatModel.findByIdAndUpdate(
           currentStatutToUpdate._id,
           {
             etablissement_gestionnaire_siret: infoCatalog[0].etablissement_gestionnaire_siret,

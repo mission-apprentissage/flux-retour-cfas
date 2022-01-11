@@ -2,7 +2,7 @@ const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { oleoduc, transformData } = require("oleoduc");
-const { RcoStatutCandidat } = require("../../common/model");
+const { RcoStatutCandidatModel } = require("../../common/model");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { jobNames, jobEventStatuts } = require("../../common/model/constants");
 
@@ -24,7 +24,7 @@ module.exports = ({ jobEvents }) => {
         });
       } else {
         let stream = oleoduc(
-          RcoStatutCandidat.find({}, { statut_apprenant: 0, created_at: 0, updated_at: 0, _id: 0, __v: 0 })
+          RcoStatutCandidatModel.find({}, { statut_apprenant: 0, created_at: 0, updated_at: 0, _id: 0, __v: 0 })
             .limit(limit)
             .cursor(),
           transformData((item) => `${JSON.stringify(item)}\n`)

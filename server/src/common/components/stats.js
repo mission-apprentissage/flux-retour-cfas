@@ -1,4 +1,4 @@
-const { StatutCandidat } = require("../../common/model");
+const { StatutCandidatModel } = require("../../common/model");
 
 module.exports = () => {
   return {
@@ -8,7 +8,7 @@ module.exports = () => {
 };
 
 const getNbDistinctCfasByUai = async (filters = {}) => {
-  const distinctCfas = await StatutCandidat.distinct("uai_etablissement", {
+  const distinctCfas = await StatutCandidatModel.distinct("uai_etablissement", {
     ...filters,
     uai_etablissement_valid: true,
   });
@@ -16,7 +16,7 @@ const getNbDistinctCfasByUai = async (filters = {}) => {
 };
 
 const getNbDistinctCfasBySiret = async (filters = {}) => {
-  const distinctCfas = await StatutCandidat.distinct("siret_etablissement", {
+  const distinctCfas = await StatutCandidatModel.distinct("siret_etablissement", {
     ...filters,
     siret_etablissement_valid: true,
   });

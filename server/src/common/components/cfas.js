@@ -1,4 +1,4 @@
-const { StatutCandidat: StatutCandidatModel, CfaAnnuaire, Cfa } = require("../model");
+const { StatutCandidatModel, CfaAnnuaireModel, CfaModel } = require("../model");
 
 module.exports = () => ({
   searchCfas,
@@ -107,14 +107,14 @@ const getSousEtablissementsForUai = (uai) => {
  * @returns
  */
 const getSiretNatureFromAnnuaire = async (siret) => {
-  const cfaInAnnuaireFromSiret = await CfaAnnuaire.findOne({ siret: siret }).lean();
+  const cfaInAnnuaireFromSiret = await CfaAnnuaireModel.findOne({ siret: siret }).lean();
   return { responsable: cfaInAnnuaireFromSiret?.responsable, formateur: cfaInAnnuaireFromSiret?.formateur };
 };
 
 const getFromAccessToken = async (accessToken) => {
-  return Cfa.findOne({ access_token: accessToken }).lean();
+  return CfaModel.findOne({ access_token: accessToken }).lean();
 };
 
 const getFromUai = async (uai) => {
-  return Cfa.findOne({ uai }).lean();
+  return CfaModel.findOne({ uai }).lean();
 };

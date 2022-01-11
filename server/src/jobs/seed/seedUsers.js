@@ -6,7 +6,7 @@ const { downloadIfNeeded } = require("./utils/seedUtils");
 const { jobNames } = require("../../common/model/constants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
-const { User } = require("../../common/model");
+const { UserModel } = require("../../common/model");
 const arg = require("arg");
 
 const usersFileName = config.env === "production" ? "users" : "users-recette";
@@ -32,7 +32,7 @@ runScript(async ({ users }) => {
  */
 const createUsers = async (usersModule, usersList) => {
   await asyncForEach(usersList, async (user) => {
-    if ((await User.countDocuments({ username: user.name })) !== 0) {
+    if ((await UserModel.countDocuments({ username: user.name })) !== 0) {
       logger.info(`User ${user.name} already exists - no creation needed`);
     } else {
       logger.info(`Creating user ${user.name}`);

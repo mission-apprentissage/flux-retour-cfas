@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const cfaDataFeedback = new Schema({
+module.exports = new Schema({
   siret: {
     type: String,
     description: "Siret de l'établissement",
@@ -36,5 +36,3 @@ const cfaDataFeedback = new Schema({
     description: "Date à laquelle le feedback a été laissé",
   },
 });
-
-module.exports = cfaDataFeedback;

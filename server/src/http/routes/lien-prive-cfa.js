@@ -1,7 +1,7 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { Cfa } = require("../../common/model");
+const { CfaModel } = require("../../common/model");
 const pick = require("lodash.pick");
 
 module.exports = () => {
@@ -20,7 +20,7 @@ module.exports = () => {
         ? { uai: { $in: uais }, erps: req.user.username, private_url: { $nin: [null, ""] } }
         : { erps: req.user.username, private_url: { $nin: [null, ""] } };
 
-      const allCfas = await Cfa.paginate(query, { page, limit });
+      const allCfas = await CfaModel.paginate(query, { page, limit });
       const cfaDataWithPrivateLink = allCfas.docs.map((item) => pick(item._doc, ["nom", "uai", "private_url"]));
 
       return res.json({

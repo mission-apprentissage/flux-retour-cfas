@@ -1,4 +1,4 @@
-const { StatutCandidat, Cfa } = require("../model");
+const { StatutCandidatModel, CfaModel } = require("../model");
 const { duplicatesTypesCodes } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
@@ -18,13 +18,13 @@ module.exports = () => ({
 
 const existsStatut = async ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
   const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire);
-  const count = await StatutCandidat.countDocuments(query);
+  const count = await StatutCandidatModel.countDocuments(query);
   return count !== 0;
 };
 
 const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
   const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire);
-  return StatutCandidat.findOne(query);
+  return StatutCandidatModel.findOne(query);
 };
 
 /**
@@ -75,7 +75,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
 const updateStatut = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
-  const existingItem = await StatutCandidat.findById(existingItemId);
+  const existingItem = await StatutCandidatModel.findById(existingItemId);
 
   // statut_apprenant has changed?
   if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
@@ -108,14 +108,14 @@ const updateStatut = async (existingItemId, toUpdate) => {
     ...toUpdate,
     updated_at: new Date(),
   };
-  const updated = await StatutCandidat.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
+  const updated = await StatutCandidatModel.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
   return updated;
 };
 
 const createStatutCandidat = async (itemToCreate) => {
   // if statut candidat établissement has a VALID uai try to retrieve information in Referentiel CFAs
   const etablissementInReferentielCfaFromUai =
-    validateUai(itemToCreate.uai_etablissement) && (await Cfa.findOne({ uai: itemToCreate.uai_etablissement }));
+    validateUai(itemToCreate.uai_etablissement) && (await CfaModel.findOne({ uai: itemToCreate.uai_etablissement }));
 
   // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
   if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {
@@ -124,7 +124,7 @@ const createStatutCandidat = async (itemToCreate) => {
 
   const formationInfo = await getFormationWithCfd(itemToCreate.formation_cfd);
 
-  const toAdd = new StatutCandidat({
+  const toAdd = new StatutCandidatModel({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant,
     prenom_apprenant: itemToCreate.prenom_apprenant,
@@ -308,8 +308,8 @@ const findStatutsDuplicates = async (
   ];
 
   const statutsFound = allowDiskUse
-    ? await StatutCandidat.aggregate(aggregateQuery).allowDiskUse(true).exec()
-    : await StatutCandidat.aggregate(aggregateQuery);
+    ? await StatutCandidatModel.aggregate(aggregateQuery).allowDiskUse(true).exec()
+    : await StatutCandidatModel.aggregate(aggregateQuery);
 
   return statutsFound;
 };

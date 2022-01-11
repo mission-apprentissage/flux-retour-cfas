@@ -2,7 +2,7 @@ const logger = require("../../../common/logger");
 const arg = require("arg");
 const { runScript } = require("../../scriptWrapper");
 const { jobNames } = require("../../../common/model/constants/index");
-const { StatutCandidat, DuplicateEvent } = require("../../../common/model");
+const { StatutCandidatModel, DuplicateEventModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const sortBy = require("lodash.sortby");
 const omit = require("lodash.omit");
@@ -62,7 +62,7 @@ runScript(async ({ statutsCandidats, db }) => {
   }
 
   await asyncForEach(duplicatesRemoved, async (duplicate) => {
-    await new DuplicateEvent({
+    await new DuplicateEventModel({
       jobType: "remove-duplicates",
       args,
       filters: filterQuery,
@@ -80,7 +80,7 @@ const removeDuplicates = async (duplicatesGroup) => {
   const statutsFound = [];
 
   await asyncForEach(duplicatesGroup.duplicatesIds, async (duplicateId) => {
-    statutsFound.push(await StatutCandidat.findById(duplicateId).lean());
+    statutsFound.push(await StatutCandidatModel.findById(duplicateId).lean());
   });
 
   // will sort by created_at, last item is the one with the most recent date
@@ -91,7 +91,7 @@ const removeDuplicates = async (duplicatesGroup) => {
   // Remove duplicates
   await asyncForEach(statutsToRemove, async (toRemove) => {
     try {
-      await StatutCandidat.findByIdAndDelete(toRemove._id);
+      await StatutCandidatModel.findByIdAndDelete(toRemove._id);
       // archive the deleted duplicate in dedicated collection
       await mongo
         .collection("statutsCandidatsDuplicatesRemoved")

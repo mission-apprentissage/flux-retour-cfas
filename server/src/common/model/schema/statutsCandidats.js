@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const statutsCandidatsSchema = new Schema({
+module.exports = new Schema({
   ine_apprenant: {
     type: String,
     default: null,
@@ -285,5 +285,3 @@ const statutsCandidatsSchema = new Schema({
     description: "Code RNCP de la formation du candidat",
   },
 });
-
-module.exports = statutsCandidatsSchema;

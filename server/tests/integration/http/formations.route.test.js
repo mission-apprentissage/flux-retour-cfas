@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
-const { Formation: FormationModel } = require("../../../src/common/model");
+const { FormationModel } = require("../../../src/common/model");
 const { Formation } = require("../../../src/common/domain/formation");
 
 httpTests(__filename, ({ startServer }) => {

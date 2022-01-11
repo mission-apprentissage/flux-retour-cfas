@@ -1,24 +1,24 @@
 const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const userEvents = require("../../../../src/common/components/userEvents");
-const { UserEvent } = require("../../../../src/common/model");
+const { UserEventModel } = require("../../../../src/common/model");
 
 integrationTests(__filename, () => {
   it("Permet de retrouver la date du dernier userEvent", async () => {
     const { getLastUserEventDate } = await userEvents();
 
     // Add first user event
-    const firstEvent = new UserEvent({
+    const firstEvent = new UserEventModel({
       username: "TEST",
       type: "TYPE",
       action: "ACTION",
       data: null,
     });
     await firstEvent.save();
-    const firstDateCreated = await UserEvent.findOne({ username: "TEST", type: "TYPE", action: "ACTION" });
+    const firstDateCreated = await UserEventModel.findOne({ username: "TEST", type: "TYPE", action: "ACTION" });
 
     // Add second user event
-    const secondEvent = new UserEvent({
+    const secondEvent = new UserEventModel({
       username: "TEST",
       type: "TYPE",
       action: "ACTION",
@@ -35,13 +35,13 @@ integrationTests(__filename, () => {
     const { getDataForUai } = await userEvents();
 
     // Add events
-    const gestiEvent = new UserEvent({
+    const gestiEvent = new UserEventModel({
       username: "gesti",
       type: "ftp",
       action: "upload",
       data: [{ uai_etablissement: "123456" }],
     });
-    const ymagEvent = new UserEvent({
+    const ymagEvent = new UserEventModel({
       username: "ymag",
       type: "POST",
       action: "statut-candidats",
@@ -61,13 +61,13 @@ integrationTests(__filename, () => {
     const { getDataForSiret } = await userEvents();
 
     // Add events
-    const gestiEvent = new UserEvent({
+    const gestiEvent = new UserEventModel({
       username: "gesti",
       type: "ftp",
       action: "upload",
       data: [{ siret_etablissement: "12345678911111" }],
     });
-    const ymagEvent = new UserEvent({
+    const ymagEvent = new UserEventModel({
       username: "ymag",
       type: "POST",
       action: "statut-candidats",
@@ -87,7 +87,7 @@ integrationTests(__filename, () => {
     const { getDataForUai } = await userEvents();
 
     // Add events
-    const ymagEvent = new UserEvent({
+    const ymagEvent = new UserEventModel({
       username: "ymag",
       type: "POST",
       action: "statut-candidats",
@@ -108,7 +108,7 @@ integrationTests(__filename, () => {
     const { getDataForSiret } = await userEvents();
 
     // Add events
-    const ymagEvent = new UserEvent({
+    const ymagEvent = new UserEventModel({
       username: "ymag",
       type: "POST",
       action: "statut-candidats",
@@ -129,13 +129,13 @@ integrationTests(__filename, () => {
     const { countDataForUai } = await userEvents();
 
     // Add events
-    const gestiEvent = new UserEvent({
+    const gestiEvent = new UserEventModel({
       username: "gesti",
       type: "ftp",
       action: "upload",
       data: [{ uai_etablissement: "123456" }],
     });
-    const ymagEvent = new UserEvent({
+    const ymagEvent = new UserEventModel({
       username: "ymag",
       type: "POST",
       action: "statut-candidats",
@@ -152,13 +152,13 @@ integrationTests(__filename, () => {
     const { countDataForSiret } = await userEvents();
 
     // Add events
-    const gestiEvent = new UserEvent({
+    const gestiEvent = new UserEventModel({
       username: "gesti",
       type: "ftp",
       action: "upload",
       data: [{ siret_etablissement: "12345678911111" }],
     });
-    const ymagEvent = new UserEvent({
+    const ymagEvent = new UserEventModel({
       username: "ymag",
       type: "POST",
       action: "statut-candidats",

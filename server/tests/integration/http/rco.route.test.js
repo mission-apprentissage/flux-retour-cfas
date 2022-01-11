@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
-const { RcoStatutCandidat, JobEvent } = require("../../../src/common/model");
+const { RcoStatutCandidatModel, JobEventModel } = require("../../../src/common/model");
 const { createRandomRcoStatutCandidat } = require("../../data/randomizedSample");
 const { jobNames, jobEventStatuts } = require("../../../src/common/model/constants");
 
@@ -46,13 +46,13 @@ httpTests(__filename, ({ startServer }) => {
     const uaiTest = "0152290X";
 
     // Add ended Job Event
-    await new JobEvent({
+    await new JobEventModel({
       jobname: jobNames.createRcoStatutsCollection,
       action: jobEventStatuts.ended,
     }).save();
 
     for (let index = 0; index < 10; index++) {
-      await new RcoStatutCandidat({ ...createRandomRcoStatutCandidat(), uai_etablissement: uaiTest }).save();
+      await new RcoStatutCandidatModel({ ...createRandomRcoStatutCandidat(), uai_etablissement: uaiTest }).save();
     }
 
     // Call Api Route
@@ -82,13 +82,13 @@ httpTests(__filename, ({ startServer }) => {
     const formation_rncpTest = "RNCP34945";
 
     // Add ended Job Event
-    await new JobEvent({
+    await new JobEventModel({
       jobname: jobNames.createRcoStatutsCollection,
       action: jobEventStatuts.ended,
     }).save();
 
     for (let index = 0; index < 10; index++) {
-      await new RcoStatutCandidat({
+      await new RcoStatutCandidatModel({
         ...createRandomRcoStatutCandidat(),
         etablissement_formateur_code_commune_insee: etablissement_formateur_code_commune_inseeTest,
         etablissement_code_postal: etablissement_code_postalTest,
@@ -154,13 +154,13 @@ httpTests(__filename, ({ startServer }) => {
     const uaiTest = "0152290X";
 
     // Add ended Job Event
-    await new JobEvent({
+    await new JobEventModel({
       jobname: jobNames.createRcoStatutsCollection,
       action: jobEventStatuts.started,
     }).save();
 
     for (let index = 0; index < 10; index++) {
-      await new RcoStatutCandidat({ ...createRandomRcoStatutCandidat(), uai_etablissement: uaiTest }).save();
+      await new RcoStatutCandidatModel({ ...createRandomRcoStatutCandidat(), uai_etablissement: uaiTest }).save();
     }
 
     // Call Api Route

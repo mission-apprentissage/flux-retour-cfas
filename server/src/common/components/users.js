@@ -1,4 +1,4 @@
-const { User } = require("../model");
+const { UserModel } = require("../model");
 const sha512Utils = require("../utils/sha512Utils");
 
 const rehashPassword = (user, password) => {
@@ -9,7 +9,7 @@ const rehashPassword = (user, password) => {
 module.exports = async () => {
   return {
     authenticate: async (username, password) => {
-      const user = await User.findOne({ username });
+      const user = await UserModel.findOne({ username });
       if (!user) {
         return null;
       }
@@ -23,14 +23,14 @@ module.exports = async () => {
       }
       return null;
     },
-    getUser: (username) => User.findOne({ username }),
+    getUser: (username) => UserModel.findOne({ username }),
     createUser: async (username, password, options = {}) => {
       const hash = options.hash || sha512Utils.hash(password);
       const permissions = options.permissions || [];
       const network = options.network || null;
       const email = options.email || null;
 
-      const user = new User({
+      const user = new UserModel({
         username,
         email,
         password: hash,
@@ -42,7 +42,7 @@ module.exports = async () => {
       return user.toObject();
     },
     removeUser: async (username) => {
-      const user = await User.findOne({ username });
+      const user = await UserModel.findOne({ username });
       if (!user) {
         throw new Error(`Unable to find user ${username}`);
       }
@@ -50,7 +50,7 @@ module.exports = async () => {
       return await user.deleteOne({ username });
     },
     changePassword: async (username, newPassword) => {
-      const user = await User.findOne({ username });
+      const user = await UserModel.findOne({ username });
       if (!user) {
         throw new Error(`Unable to find user ${username}`);
       }

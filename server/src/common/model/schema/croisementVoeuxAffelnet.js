@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const croisementVoeuxAffelnet = new Schema({
+module.exports = new Schema({
   ine_apprenant: {
     type: String,
     default: null,
@@ -42,5 +42,3 @@ const croisementVoeuxAffelnet = new Schema({
     description: 'Année scolaire sur laquelle le statut candidat est enregistré (ex: "2020-2021")',
   },
 });
-
-module.exports = croisementVoeuxAffelnet;

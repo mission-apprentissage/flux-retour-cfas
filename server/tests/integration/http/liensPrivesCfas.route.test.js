@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const { apiRoles } = require("../../../src/common/roles");
-const { Cfa } = require("../../../src/common/model");
+const { CfaModel } = require("../../../src/common/model");
 const users = require("../../../src/common/components/users");
 const pick = require("lodash.pick");
 
@@ -82,7 +82,7 @@ httpTests(__filename, ({ startServer }) => {
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
 
-    const cfaToAdd = new Cfa({
+    const cfaToAdd = new CfaModel({
       uai: "0451582A",
       siret: "31521327200067",
       nom: "TEST CFA",
@@ -114,35 +114,35 @@ httpTests(__filename, ({ startServer }) => {
 
     // Add 4 cfas for this ERP - 1 Cfa for other erp
     const cfasToAdd = [
-      new Cfa({
+      new CfaModel({
         uai: "0451582A",
         siret: "31521327200061",
         nom: "TEST CFA",
         erps: [user.name],
         private_url: "http://test",
       }),
-      new Cfa({
+      new CfaModel({
         uai: "0451582B",
         siret: "99921327200062",
         nom: "TEST CFA 2",
         erps: [user.name],
         private_url: "http://test2",
       }),
-      new Cfa({
+      new CfaModel({
         uai: "0451582C",
         siret: "99921327200063",
         nom: "TEST CFA 3",
         erps: [user.name],
         private_url: "http://test3",
       }),
-      new Cfa({
+      new CfaModel({
         uai: "0451582D",
         siret: "99921327200064",
         nom: "TEST CFA 4",
         erps: [user.name],
         private_url: "http://test4",
       }),
-      new Cfa({
+      new CfaModel({
         uai: "0451582E",
         siret: "11121327200065",
         nom: "TEST CFA 5",
@@ -179,28 +179,28 @@ httpTests(__filename, ({ startServer }) => {
 
     // Add 4 Cfas - only 2 with test UAI to search
     const cfasToAdd = [
-      new Cfa({
+      new CfaModel({
         uai: uaiTest1,
         siret: "31521327200061",
         nom: "TEST CFA",
         erps: [user.name],
         private_url: "http://test",
       }),
-      new Cfa({
+      new CfaModel({
         uai: uaiTest2,
         siret: "99921327200062",
         nom: "TEST CFA 2",
         erps: [user.name],
         private_url: "http://test2",
       }),
-      new Cfa({
+      new CfaModel({
         uai: "0451582C",
         siret: "99921327200063",
         nom: "TEST CFA 3",
         erps: [user.name],
         private_url: "http://test3",
       }),
-      new Cfa({
+      new CfaModel({
         uai: "0451582D",
         siret: "99921327200064",
         nom: "TEST CFA 4",
@@ -235,7 +235,7 @@ httpTests(__filename, ({ startServer }) => {
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
 
-    const cfaToAdd = new Cfa({
+    const cfaToAdd = new CfaModel({
       uai: "0451582A",
       siret: "31521327200067",
       nom: "TEST CFA",

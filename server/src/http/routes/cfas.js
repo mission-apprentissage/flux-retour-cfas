@@ -1,7 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { Cfa, StatutCandidat } = require("../../common/model");
+const { CfaModel, StatutCandidatModel } = require("../../common/model");
 const pick = require("lodash.pick");
 
 module.exports = ({ cfas, cfaDataFeedback }) => {
@@ -47,7 +47,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
       }).validateAsync(req.query, { abortEarly: false });
 
       const jsonQuery = JSON.parse(query);
-      const allData = await Cfa.paginate(jsonQuery, { page, limit });
+      const allData = await CfaModel.paginate(jsonQuery, { page, limit });
       const omittedData = allData.docs.map((item) =>
         pick(item._doc, ["uai", "sirets", "nom", "reseaux", "region_nom", "region_num", "metiers"])
       );
@@ -91,7 +91,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
       const { uai } = req.params;
 
       // Search cfa in statuts
-      const cfaFound = await StatutCandidat.findOne({
+      const cfaFound = await StatutCandidatModel.findOne({
         uai_etablissement: uai,
       }).lean();
 
@@ -99,7 +99,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
         return res.status(404).json({ message: `No cfa found for uai ${uai}` });
       } else {
         // Search reseaux for cfa in référentiel
-        const cfaInReferentiel = await Cfa.findOne({ uai }).lean();
+        const cfaInReferentiel = await CfaModel.findOne({ uai }).lean();
         const sousEtablissements = await cfas.getSousEtablissementsForUai(uai);
 
         // Build response

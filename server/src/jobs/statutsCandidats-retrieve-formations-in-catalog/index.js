@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const { StatutCandidat } = require("../../common/model");
+const { StatutCandidatModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
 const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
@@ -23,7 +23,7 @@ runScript(async () => {
  */
 const retrieveFormationsInCatalog = async () => {
   // Récupère tous les coupes SIRET - CFD existants pour les statuts avec sirets valides
-  const allSiretCfdCouples = await StatutCandidat.aggregate([
+  const allSiretCfdCouples = await StatutCandidatModel.aggregate([
     { $match: { siret_etablissement_valid: true } },
     { $group: { _id: { siret: "$siret_etablissement", cfd: "$formation_cfd" } } },
     {
@@ -53,7 +53,7 @@ const retrieveFormationsInCatalog = async () => {
 
     if (formationsFoundInCatalog.length > 0) {
       // Si formation trouvée dans catalogue MNA , update de tous les statutsCandidats pour ce CFD + Siret
-      await StatutCandidat.updateMany(
+      await StatutCandidatModel.updateMany(
         { formation_cfd: currentSiretCfdCouple.cfd, siret_etablissement: currentSiretCfdCouple.siret },
         { match_formation_mnaCatalog_cfd_siret: true }
       );

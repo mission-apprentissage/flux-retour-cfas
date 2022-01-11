@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const { addDays } = require("date-fns");
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
-const { StatutCandidat, Cfa, Formation } = require("../../../../src/common/model");
+const { StatutCandidatModel, CfaModel, FormationModel } = require("../../../../src/common/model");
 const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
 const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../data/sample");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
@@ -82,7 +82,7 @@ integrationTests(__filename, () => {
       const { getStatut } = await statutsCandidats();
 
       const randomStatut = createRandomStatutCandidat();
-      const toAdd = new StatutCandidat(randomStatut);
+      const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
 
       // Checks exists method
@@ -113,7 +113,7 @@ integrationTests(__filename, () => {
     it("Vérifie la mauvaise récupération d'un statut sur mauvais nom", async () => {
       const { getStatut } = await statutsCandidats();
 
-      const toAdd = new StatutCandidat(createRandomStatutCandidat());
+      const toAdd = new StatutCandidatModel(createRandomStatutCandidat());
       await toAdd.save();
 
       // Checks exists method
@@ -130,7 +130,7 @@ integrationTests(__filename, () => {
     it("Vérifie la mauvaise récupération d'un statut sur mauvais prenom", async () => {
       const { getStatut } = await statutsCandidats();
 
-      const toAdd = new StatutCandidat(createRandomStatutCandidat());
+      const toAdd = new StatutCandidatModel(createRandomStatutCandidat());
       await toAdd.save();
 
       // Checks exists method
@@ -147,7 +147,7 @@ integrationTests(__filename, () => {
     it("Vérifie la mauvaise récupération d'un statut sur un mauvais formation_cfd", async () => {
       const { getStatut } = await statutsCandidats();
 
-      const toAdd = new StatutCandidat(statutsTest[0]);
+      const toAdd = new StatutCandidatModel(statutsTest[0]);
       await toAdd.save();
 
       // Checks exists method
@@ -164,7 +164,7 @@ integrationTests(__filename, () => {
     it("Vérifie la mauvaise récupération d'un statut sur mauvais uai_etablissement", async () => {
       const { getStatut } = await statutsCandidats();
 
-      const toAdd = new StatutCandidat(statutsTest[0]);
+      const toAdd = new StatutCandidatModel(statutsTest[0]);
       await toAdd.save();
 
       // Checks exists method
@@ -187,12 +187,12 @@ integrationTests(__filename, () => {
       await addOrUpdateStatuts(statutsTest);
 
       // Checks addOrUpdateStatuts method
-      assert.equal(await StatutCandidat.countDocuments({}), statutsTest.length);
+      assert.equal(await StatutCandidatModel.countDocuments({}), statutsTest.length);
       const { added, updated } = await addOrUpdateStatuts(statutsTestUpdate);
 
       // Check added
       assert.equal(added.length, 1);
-      const foundAdded = await StatutCandidat.findById(added[0]._id).lean();
+      const foundAdded = await StatutCandidatModel.findById(added[0]._id).lean();
       assert.equal(foundAdded.ine_apprenant, statutsTestUpdate[3].ine_apprenant);
       assert.equal(foundAdded.nom_apprenant, statutsTestUpdate[3].nom_apprenant);
       assert.equal(foundAdded.prenom_apprenant, statutsTestUpdate[3].prenom_apprenant);
@@ -210,7 +210,7 @@ integrationTests(__filename, () => {
       // Check updated
       assert.equal(updated.length, 3);
 
-      const firstUpdated = await StatutCandidat.findById(updated[0]._id).lean();
+      const firstUpdated = await StatutCandidatModel.findById(updated[0]._id).lean();
       assert.equal(firstUpdated.ine_apprenant, statutsTestUpdate[0].ine_apprenant);
       assert.equal(firstUpdated.nom_apprenant, statutsTestUpdate[0].nom_apprenant);
       assert.equal(firstUpdated.prenom_apprenant, statutsTestUpdate[0].prenom_apprenant);
@@ -227,7 +227,7 @@ integrationTests(__filename, () => {
       assert.ok(firstUpdated.date_mise_a_jour_statut);
       assert.ok(firstUpdated.updated_at);
 
-      const secondUpdated = await StatutCandidat.findById(updated[1]._id).lean();
+      const secondUpdated = await StatutCandidatModel.findById(updated[1]._id).lean();
       assert.equal(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
       assert.equal(secondUpdated.nom_apprenant, statutsTestUpdate[1].nom_apprenant);
       assert.equal(secondUpdated.prenom_apprenant, statutsTestUpdate[1].prenom_apprenant);
@@ -242,7 +242,7 @@ integrationTests(__filename, () => {
       assert.ok(secondUpdated.date_mise_a_jour_statut);
       assert.ok(secondUpdated.updated_at);
 
-      const thirdUpdated = await StatutCandidat.findById(updated[2]._id).lean();
+      const thirdUpdated = await StatutCandidatModel.findById(updated[2]._id).lean();
       assert.equal(thirdUpdated.nom_apprenant, statutsTestUpdate[2].nom_apprenant);
       assert.equal(thirdUpdated.prenom_apprenant, statutsTestUpdate[2].prenom_apprenant);
       assert.equal(thirdUpdated.ne_pas_solliciter, statutsTestUpdate[2].ne_pas_solliciter);
@@ -265,7 +265,7 @@ integrationTests(__filename, () => {
       const result = await addOrUpdateStatuts([randomStatut]);
       assert.equal(result.added.length, 1);
       assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidat.countDocuments(), 1);
+      assert.equal(await StatutCandidatModel.countDocuments(), 1);
     });
 
     it("Vérifie qu'un statut sans annee_scolaire est updaté lorsque le même statut est envoyé avec annee_scolaire", async () => {
@@ -283,7 +283,7 @@ integrationTests(__filename, () => {
       assert.equal(result2.added.length, 0);
       assert.equal(result2.updated.length, 1);
       assert.equal(result2.updated[0].annee_scolaire, sameStatutWithAnneeScolaire.annee_scolaire);
-      assert.equal(await StatutCandidat.countDocuments(), 1);
+      assert.equal(await StatutCandidatModel.countDocuments(), 1);
     });
 
     it("Vérifie qu'un statut avec annee_scolaire dans un batch de statuts sans annee_scolaire est quand même créé", async () => {
@@ -297,7 +297,7 @@ integrationTests(__filename, () => {
       assert.equal(addedElement.annee_scolaire, statutWithAnneeScolaire.annee_scolaire);
       assert.equal(addedElement.nom_apprenant, statutWithAnneeScolaire.nom_apprenant);
       assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidat.countDocuments(), 2);
+      assert.equal(await StatutCandidatModel.countDocuments(), 2);
     });
 
     it("Vérifie qu'on ne crée pas de doublon pour un statut créé sans annee_scolaire", async () => {
@@ -311,7 +311,7 @@ integrationTests(__filename, () => {
       await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
       await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
       await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      assert.equal(await StatutCandidat.countDocuments(), 1);
+      assert.equal(await StatutCandidatModel.countDocuments(), 1);
     });
 
     it("Vérifie qu'on update le siret_etablissement d'un statut existant qui n'en a pas avec le SIRET de l'élément passé si le reste des infos est identique", async () => {
@@ -329,11 +329,11 @@ integrationTests(__filename, () => {
       // statut should have been updated
       assert.equal(added.length, 0, "added problem");
       assert.equal(updated.length, 1);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await StatutCandidat.findById(result.added[0]._id);
+      const found = await StatutCandidatModel.findById(result.added[0]._id);
       assert.equal(found.siret_etablissement, "12312312300099");
       assert.notEqual(found.updated_at, null);
     });
@@ -353,11 +353,11 @@ integrationTests(__filename, () => {
       // statut should have been updated
       assert.equal(added.length, 0);
       assert.equal(updated.length, 1);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await StatutCandidat.findById(result.added[0]._id).lean();
+      const found = await StatutCandidatModel.findById(result.added[0]._id).lean();
       assert.deepEqual(found.periode_formation, [2021, 2022]);
       assert.notEqual(found.updated_at, null);
     });
@@ -377,11 +377,11 @@ integrationTests(__filename, () => {
       // statut should have been updated
       assert.equal(added.length, 0);
       assert.equal(updated.length, 1);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await StatutCandidat.findById(result.added[0]._id).lean();
+      const found = await StatutCandidatModel.findById(result.added[0]._id).lean();
       assert.equal(found.annee_formation, 2020);
       assert.notEqual(found.updated_at, null);
     });
@@ -414,11 +414,11 @@ integrationTests(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.nom_apprenant, sampleNom);
       assert.equal(found.updated_at, null);
     });
@@ -451,11 +451,11 @@ integrationTests(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.prenom_apprenant, samplePrenom);
       assert.equal(found.updated_at, null);
     });
@@ -488,11 +488,11 @@ integrationTests(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.formation_cfd, validCfd);
       assert.equal(found.updated_at, null);
     });
@@ -526,11 +526,11 @@ integrationTests(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 2);
 
       // check in db that first created element was not updated
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.annee_scolaire, anneeScolaire);
       assert.equal(found.updated_at, null);
     });
@@ -563,11 +563,11 @@ integrationTests(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.uai_etablissement, validUai);
       assert.equal(found.updated_at, null);
     });
@@ -598,11 +598,11 @@ integrationTests(__filename, () => {
       // no new statut should have been created
       assert.equal(secondCallResult.added.length, 0);
       assert.equal(secondCallResult.updated.length, 1);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.deepEqual(found.periode_formation.join(), samplePeriode2.join());
       assert.notEqual(found.updated_at, null);
     });
@@ -637,11 +637,11 @@ integrationTests(__filename, () => {
       // no new statut should have been created
       assert.equal(secondCallResult.added.length, 0);
       assert.equal(secondCallResult.updated.length, 1);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.annee_formation, sampleAnnee2);
       assert.notEqual(found.updated_at, null);
     });
@@ -676,10 +676,10 @@ integrationTests(__filename, () => {
       // no new statut should have been created
       assert.equal(secondCallResult.added.length, 0);
       assert.equal(secondCallResult.updated.length, 1);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 1);
 
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.siret_etablissement, siret_etablissement2);
     });
 
@@ -717,11 +717,11 @@ integrationTests(__filename, () => {
       // no new statut should have been created but update only
       assert.equal(secondCallResult.added.length, 0);
       assert.equal(secondCallResult.updated.length, 1);
-      const count = await StatutCandidat.countDocuments();
+      const count = await StatutCandidatModel.countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await StatutCandidat.findById(firstCallResult.added[0]._id);
+      const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.email_contact, updatedEmail);
       assert.notEqual(found.updated_at, null);
     });
@@ -741,7 +741,7 @@ integrationTests(__filename, () => {
       await updateStatut(createdStatut._id, { statut_apprenant: simpleStatut.statut_apprenant });
 
       // Check value in db
-      const found = await StatutCandidat.findById(createdStatut._id);
+      const found = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found.historique_statut_apprenant.length, 1);
     });
 
@@ -762,7 +762,7 @@ integrationTests(__filename, () => {
       await updateStatut(createdStatut._id, updatePayload);
 
       // Check value in db
-      const found = await StatutCandidat.findById(createdStatut._id);
+      const found = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found.historique_statut_apprenant.length, 2);
       assert.equal(found.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
       assert.equal(found.historique_statut_apprenant[0].position_statut, 1);
@@ -791,7 +791,7 @@ integrationTests(__filename, () => {
       await updateStatut(createdStatut._id, updatePayload);
 
       // Check value in db
-      const found = await StatutCandidat.findById(createdStatut._id);
+      const found = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found.historique_statut_apprenant.length, 2);
       assert.equal(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
       assert.equal(found.historique_statut_apprenant[1].position_statut, 2);
@@ -812,7 +812,7 @@ integrationTests(__filename, () => {
         statut_apprenant: codesStatutsCandidats.inscrit,
       });
 
-      const found1 = await StatutCandidat.findById(createdStatut._id);
+      const found1 = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found1.historique_statut_apprenant.length, 2);
       assert.equal(found1.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.inscrit);
 
@@ -824,7 +824,7 @@ integrationTests(__filename, () => {
       await updateStatut(createdStatut._id, { ...simpleStatut, ...updatePayload });
 
       // historique should contain the new element and the one date with a later date should be removed
-      const found2 = await StatutCandidat.findById(createdStatut._id);
+      const found2 = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found2.historique_statut_apprenant.length, 2);
       assert.equal(found2.historique_statut_apprenant[1].valeur_statut, updatePayload.statut_apprenant);
       assert.equal(
@@ -843,13 +843,13 @@ integrationTests(__filename, () => {
       // First update
       await updateStatut(createdStatut._id, { prenom_apprenant: "André-Pierre" });
       // Check value in db
-      const foundAfterFirstUpdate = await StatutCandidat.findById(createdStatut._id);
+      const foundAfterFirstUpdate = await StatutCandidatModel.findById(createdStatut._id);
       assert.notEqual(foundAfterFirstUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
       assert.notEqual(foundAfterFirstUpdate.updated_at, null);
 
       // Second update
       await updateStatut(createdStatut._id, { nom_apprenant: "Gignac" });
-      const foundAfterSecondUpdate = await StatutCandidat.findById(createdStatut._id);
+      const foundAfterSecondUpdate = await StatutCandidatModel.findById(createdStatut._id);
       assert.notEqual(foundAfterSecondUpdate.nom_apprenant, createdStatut.nom_apprenant);
       assert.notEqual(foundAfterSecondUpdate.updated_at, foundAfterFirstUpdate.updated_at);
     });
@@ -945,7 +945,7 @@ integrationTests(__filename, () => {
       const invalidSiret = "invalid";
 
       // Create sample cfa in referentiel
-      const referenceCfa = new Cfa({
+      const referenceCfa = new CfaModel({
         sirets: [invalidSiret],
         reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
@@ -966,7 +966,7 @@ integrationTests(__filename, () => {
       const validUai = "0631450J";
 
       // Create sample cfa in referentiel
-      const referenceCfa = new Cfa({
+      const referenceCfa = new CfaModel({
         uai: validUai,
         reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
@@ -989,7 +989,7 @@ integrationTests(__filename, () => {
       const invalidUai = "invalid";
 
       // Create sample cfa in referentiel
-      const referenceCfa = new Cfa({
+      const referenceCfa = new CfaModel({
         uai: invalidUai,
         reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
       });
@@ -1015,7 +1015,7 @@ integrationTests(__filename, () => {
 
       assert.ok(createdStatut);
       // Check that formation was created
-      const foundFormations = await Formation.find();
+      const foundFormations = await FormationModel.find();
       assert.equal(foundFormations.length, 1);
       assert.equal(foundFormations[0].cfd, cfd);
     });
@@ -1025,7 +1025,7 @@ integrationTests(__filename, () => {
 
       const cfd = "01022104";
       // Create formation
-      const formation = await new Formation({ cfd }).save();
+      const formation = await new FormationModel({ cfd }).save();
 
       // Create statut
       const statutWithValidCfd = { ...createRandomStatutCandidat(), formation_cfd: cfd };
@@ -1033,7 +1033,7 @@ integrationTests(__filename, () => {
 
       assert.ok(createdStatut);
       // Check that new formation was not created
-      const foundFormations = await Formation.find();
+      const foundFormations = await FormationModel.find();
       assert.equal(foundFormations.length, 1);
       assert.equal(foundFormations[0].created_at.getTime(), formation.created_at.getTime());
     });

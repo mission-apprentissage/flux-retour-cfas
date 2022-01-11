@@ -1,6 +1,6 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
-const { UserEvent } = require("../../../src/common/model");
+const { UserEventModel } = require("../../../src/common/model");
 const { apiRoles } = require("../../../src/common/roles");
 
 httpTests(__filename, ({ startServer }) => {
@@ -9,7 +9,7 @@ httpTests(__filename, ({ startServer }) => {
     const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
 
     // Add events
-    const ymagEvent = new UserEvent({
+    const ymagEvent = new UserEventModel({
       username: "gesti",
       type: "ftp",
       action: "upload",

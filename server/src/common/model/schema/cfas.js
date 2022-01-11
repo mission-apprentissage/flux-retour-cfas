@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const cfasSchema = new Schema({
+module.exports = new Schema({
   uai: {
     type: String,
     default: null,
@@ -82,5 +82,3 @@ const cfasSchema = new Schema({
     description: "L'url via laquelle le CFA peut accéder à sa propre page",
   },
 });
-
-module.exports = cfasSchema;

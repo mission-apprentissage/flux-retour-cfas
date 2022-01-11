@@ -6,7 +6,7 @@ const {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../../data/historySequenceSamples");
-const { StatutCandidat } = require("../../../../src/common/model");
+const { StatutCandidatModel } = require("../../../../src/common/model");
 const { codesStatutsCandidats, reseauxCfas } = require("../../../../src/common/model/constants");
 const effectifsComponent = require("../../../../src/common/components/effectifs");
 
@@ -18,7 +18,7 @@ integrationTests(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
         ...statutsProps,
       });
-      const toAdd = new StatutCandidat(randomStatut);
+      const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
     }
 
@@ -28,7 +28,7 @@ integrationTests(__filename, () => {
         historique_statut_apprenant: historySequenceApprenti,
         ...statutsProps,
       });
-      const toAdd = new StatutCandidat(randomStatut);
+      const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
     }
 
@@ -38,7 +38,7 @@ integrationTests(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprenti,
         ...statutsProps,
       });
-      const toAdd = new StatutCandidat(randomStatut);
+      const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
     }
   };
@@ -506,7 +506,7 @@ integrationTests(__filename, () => {
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
     });
@@ -585,7 +585,7 @@ integrationTests(__filename, () => {
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
     });
@@ -655,7 +655,7 @@ integrationTests(__filename, () => {
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
 
@@ -706,7 +706,7 @@ integrationTests(__filename, () => {
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
 
@@ -798,7 +798,7 @@ integrationTests(__filename, () => {
       ];
 
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
 
@@ -890,7 +890,7 @@ integrationTests(__filename, () => {
       ];
 
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
 
@@ -958,7 +958,7 @@ integrationTests(__filename, () => {
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
     });
@@ -1038,7 +1038,7 @@ integrationTests(__filename, () => {
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
 
@@ -1103,7 +1103,7 @@ integrationTests(__filename, () => {
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
 
@@ -1173,7 +1173,7 @@ integrationTests(__filename, () => {
         }),
       ];
       for (let index = 0; index < statuts.length; index++) {
-        const toAdd = new StatutCandidat(statuts[index]);
+        const toAdd = new StatutCandidatModel(statuts[index]);
         await toAdd.save();
       }
 

@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const { StatutCandidat, RcoStatutCandidat } = require("../../common/model");
+const { StatutCandidatModel, RcoStatutCandidatModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames, codesStatutsCandidats } = require("../../common/model/constants");
 
@@ -12,17 +12,17 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  */
 runScript(async () => {
   logger.info("Create RCO Statuts Collection");
-  const allStatutsInscrits = await StatutCandidat.find({ statut_apprenant: codesStatutsCandidats.inscrit }).lean();
+  const allStatutsInscrits = await StatutCandidatModel.find({ statut_apprenant: codesStatutsCandidats.inscrit }).lean();
 
   // Clear if existing RCO Statuts collection
   logger.info(`Clearing existing RCO Statuts Collection ...`);
-  await RcoStatutCandidat.deleteMany({});
+  await RcoStatutCandidatModel.deleteMany({});
 
   logger.info(`Building rcoStatutsCollection for ${allStatutsInscrits.length} statuts `);
   loadingBar.start(allStatutsInscrits.length, 0);
 
   await asyncForEach(allStatutsInscrits, async (currentStatut) => {
-    await new RcoStatutCandidat({
+    await new RcoStatutCandidatModel({
       statutCandidatId: currentStatut._id,
       uai_etablissement: currentStatut.uai_etablissement,
       nom_etablissement: currentStatut.nom_etablissement,

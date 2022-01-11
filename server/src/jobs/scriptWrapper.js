@@ -3,7 +3,7 @@ const createComponents = require("../common/components/components");
 const logger = require("../common/logger");
 const config = require("../../config");
 const { access, mkdir } = require("fs").promises;
-const { JobEvent } = require("../common/model");
+const { JobEventModel } = require("../common/model");
 const { formatDuration, intervalToDuration } = require("date-fns");
 const { jobEventStatuts } = require("../common/model/constants");
 
@@ -48,13 +48,13 @@ module.exports = {
 
       await ensureOutputDirExists();
       const components = await createComponents();
-      await new JobEvent({ jobname: jobName, action: jobEventStatuts.started }).save();
+      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.started }).save();
       await job(components);
 
       const endDate = new Date();
       const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
 
-      await new JobEvent({
+      await new JobEventModel({
         jobname: jobName,
         action: jobEventStatuts.executed,
         data: { startDate, endDate, duration },
@@ -64,7 +64,7 @@ module.exports = {
     } catch (e) {
       await exit(e);
     } finally {
-      await new JobEvent({ jobname: jobName, action: jobEventStatuts.ended }).save();
+      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.ended }).save();
     }
   },
 };

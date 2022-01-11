@@ -1,4 +1,4 @@
-const { Formation: FormationModel, StatutCandidat: StatutCandidatModel } = require("../model");
+const { FormationModel, StatutCandidatModel } = require("../model");
 const { validateCfd } = require("../domain/cfd");
 const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
 const { getMetiersByCfd } = require("../apis/apiLba");

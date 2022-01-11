@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const cfasComponent = require("../../../../src/common/components/cfas");
-const { StatutCandidat: StatutCandidatModel, Cfa } = require("../../../../src/common/model");
+const { StatutCandidatModel, CfaModel } = require("../../../../src/common/model");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
 const { addDays } = require("date-fns");
@@ -277,7 +277,7 @@ integrationTests(__filename, () => {
 
     it("returns Cfa found with access token", async () => {
       const token = "token";
-      const cfaInDb = await new Cfa({
+      const cfaInDb = await new CfaModel({
         uai: "0762290X",
         sirets: [],
         nom: "hello",

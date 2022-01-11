@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
-const { StatutCandidat } = require("../../../src/common/model");
+const { StatutCandidatModel } = require("../../../src/common/model");
 const {
   createRandomStatutsCandidatsApiInputList,
   createRandomStatutCandidatApiInput,
@@ -127,7 +127,7 @@ httpTests(__filename, ({ startServer }) => {
       );
 
       // check that no data was created
-      assert.equal(await StatutCandidat.countDocuments({}), 0);
+      assert.equal(await StatutCandidatModel.countDocuments({}), 0);
     });
   });
 
@@ -154,7 +154,7 @@ httpTests(__filename, ({ startServer }) => {
       true
     );
     // check that no data was created
-    assert.equal(await StatutCandidat.countDocuments({}), 0);
+    assert.equal(await StatutCandidatModel.countDocuments({}), 0);
   });
 
   const invalidDates = ["2020", "2020-10", "2020-10-", "2020-10-1", "13/11/2020", "abc", true];
@@ -184,7 +184,7 @@ httpTests(__filename, ({ startServer }) => {
         true
       );
       // check that no data was created
-      assert.equal(await StatutCandidat.countDocuments({}), 0);
+      assert.equal(await StatutCandidatModel.countDocuments({}), 0);
     });
   });
 
@@ -231,7 +231,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepEqual(response.data.status, "OK");
 
     // Check Nb Items added
-    assert.deepEqual(await StatutCandidat.countDocuments({}), nbItemsToTest);
+    assert.deepEqual(await StatutCandidatModel.countDocuments({}), nbItemsToTest);
   });
 
   it("Vérifie l'erreur d'ajout via route statut-candidats pour un trop grande nb de données randomisées (>100)", async () => {
@@ -252,7 +252,7 @@ httpTests(__filename, ({ startServer }) => {
 
     // Check Api Route data & Data not added
     assert.deepEqual(response.status, 413);
-    assert.equal(await StatutCandidat.countDocuments({}), 0);
+    assert.equal(await StatutCandidatModel.countDocuments({}), 0);
   });
 
   it("Vérifie l'ajout via route statut-candidats de 10 statuts valides et 3 statuts invalides", async () => {
@@ -287,7 +287,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.equal(response.data.validationErrors.length, 3);
 
     // Check Nb Items added
-    assert.deepEqual(await StatutCandidat.countDocuments({}), nbValidItems);
+    assert.deepEqual(await StatutCandidatModel.countDocuments({}), nbValidItems);
   });
 
   it("Vérifie l'ajout via route statut-candidats d'un statut avec champs non renseignés dans le schéma mais ignorés en base", async () => {
@@ -311,7 +311,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.equal(response.data.status, "OK");
     assert.equal(response.data.ok, 1);
 
-    const allStatuts = await StatutCandidat.find().lean();
+    const allStatuts = await StatutCandidatModel.find().lean();
     const createdStatut = allStatuts[0];
     assert.equal(createdStatut[unknownKeyName], undefined);
   });

@@ -7,8 +7,7 @@ const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
 const { dataForGetMetiersByCfd } = require("../../../data/apiLba");
 const formationsComponent = require("../../../../src/common/components/formations");
-const { Formation: FormationModel } = require("../../../../src/common/model");
-const { StatutCandidat: StatutCandidatModel } = require("../../../../src/common/model");
+const { FormationModel, StatutCandidatModel } = require("../../../../src/common/model");
 const { Formation } = require("../../../../src/common/domain/formation");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 

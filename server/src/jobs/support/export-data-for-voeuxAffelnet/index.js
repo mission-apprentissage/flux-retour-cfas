@@ -1,7 +1,7 @@
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
-const { StatutCandidat } = require("../../../common/model");
-const { CroisementVoeuxAffelnet } = require("../../../common/model");
+const { StatutCandidatModel } = require("../../../common/model");
+const { CroisementVoeuxAffelnetModel } = require("../../../common/model");
 const cliProgress = require("cli-progress");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
@@ -14,7 +14,7 @@ const { jobNames } = require("../../../common/model/constants");
 runScript(async () => {
   logger.info("Récupère les statuts avec INE et sirets valides pour export vers Affelnet");
 
-  const allIneDataForAffelnet = await StatutCandidat.aggregate([
+  const allIneDataForAffelnet = await StatutCandidatModel.aggregate([
     { $match: { siret_etablissement_valid: true, ine_apprenant: { $ne: "" } } },
     {
       $group: {
@@ -46,12 +46,12 @@ runScript(async () => {
   ]);
 
   logger.info(`Clearing existing CroisementVoeuxAffelnet collection ...`);
-  await CroisementVoeuxAffelnet.deleteMany({});
+  await CroisementVoeuxAffelnetModel.deleteMany({});
 
   loadingBar.start(allIneDataForAffelnet.length, 0);
   await asyncForEach(allIneDataForAffelnet, async (currentAffelnetExportData) => {
     loadingBar.increment();
-    await new CroisementVoeuxAffelnet({
+    await new CroisementVoeuxAffelnetModel({
       ine_apprenant: currentAffelnetExportData.ine,
       statut_apprenant: currentAffelnetExportData.statut,
       uai_etablissement: currentAffelnetExportData.uai,

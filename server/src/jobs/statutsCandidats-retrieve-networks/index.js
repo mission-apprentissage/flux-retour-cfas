@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const { StatutCandidat, Cfa } = require("../../common/model");
+const { StatutCandidatModel, CfaModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
 
@@ -23,7 +23,7 @@ runScript(async () => {
  */
 const retrieveNetworks = async () => {
   // Parse tous les CFAs du référentiel avec un réseau
-  const cfasWithReseaux = await Cfa.find({
+  const cfasWithReseaux = await CfaModel.find({
     reseaux: { $exists: true },
   }).lean();
 
@@ -34,7 +34,7 @@ const retrieveNetworks = async () => {
     // Si siret fourni on update les statuts pour ce siret
     if (cfaReferentiel.sirets) {
       // Recupération des statutsCandidats pour ces sirets
-      const statutsForSirets = await StatutCandidat.find({
+      const statutsForSirets = await StatutCandidatModel.find({
         siret_etablissement: { $in: cfaReferentiel.sirets },
       }).lean();
       if (statutsForSirets) {
@@ -44,7 +44,7 @@ const retrieveNetworks = async () => {
       // Sinon si uai fourni on update les statuts pour cet uai
       if (cfaReferentiel.uai) {
         // Recupération des statutsCandidats pour cet uai
-        const statutsForUai = await StatutCandidat.find({ uai_etablissement: cfaReferentiel.uai }).lean();
+        const statutsForUai = await StatutCandidatModel.find({ uai_etablissement: cfaReferentiel.uai }).lean();
         if (statutsForUai) {
           await updateNetworksForStatuts(statutsForUai, cfaReferentiel);
         }
@@ -84,7 +84,7 @@ const updateNetworksForStatuts = async (statutsToUpdate, cfaReferentiel) => {
  * @param {*} reseauxToAdd
  */
 const addReseauxToStatutCandidat = async (currentStatutForSiret, reseauxToAdd) => {
-  await StatutCandidat.findByIdAndUpdate(
+  await StatutCandidatModel.findByIdAndUpdate(
     currentStatutForSiret._id,
     {
       $addToSet: {

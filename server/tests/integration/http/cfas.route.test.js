@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const httpTests = require("../../utils/httpTests");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
-const { StatutCandidat: StatutCandidatModel, Cfa } = require("../../../src/common/model");
+const { StatutCandidatModel, CfaModel } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
 httpTests(__filename, ({ startServer }) => {
@@ -73,7 +73,7 @@ httpTests(__filename, ({ startServer }) => {
       const sampleRegion_num = "28";
 
       // Add Cfa with region_num / region_nom for valid UAI
-      await new Cfa({
+      await new CfaModel({
         uai: validBody.uai,
         region_nom: sampleRegion_nom,
         region_num: sampleRegion_num,
@@ -117,7 +117,7 @@ httpTests(__filename, ({ startServer }) => {
       await toAdd.save();
 
       // Add Cfa in referentiel
-      const cfaReferenceToAdd = new Cfa({
+      const cfaReferenceToAdd = new CfaModel({
         sirets: [siretTest],
         nom: nomTest,
         uai: uaiTest,
@@ -210,7 +210,7 @@ httpTests(__filename, ({ startServer }) => {
       await toAdd.save();
 
       // Add Cfa in referentiel
-      const cfaReferenceToAdd = new Cfa({
+      const cfaReferenceToAdd = new CfaModel({
         sirets: [siretTest],
         nom: nomTest,
         uai: uaiTest,
@@ -238,7 +238,7 @@ httpTests(__filename, ({ startServer }) => {
       nom: "Centre-Val de Loire",
     };
 
-    await new Cfa({
+    await new CfaModel({
       uai: "0451582A",
       siret: "31521327200067",
       nom: "TEST CFA",
