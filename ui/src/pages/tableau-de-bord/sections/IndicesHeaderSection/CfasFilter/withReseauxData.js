@@ -9,9 +9,9 @@ const withReseauxData = (Component) => {
     // reseaux are very unlikely during the user's session, thus the infinite staleTime
     const { data } = useQuery("reseaux", () => fetchReseaux(), { staleTime: Infinity });
 
-    const reseaux = sortAlphabeticallyBy("nom", data || []);
+    const reseauxSorted = sortAlphabeticallyBy("nom", data || []);
 
-    return <Component {...props} reseaux={reseaux} />;
+    return <Component {...props} reseaux={reseauxSorted} />;
   };
 
   return WithReseauxData;

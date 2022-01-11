@@ -15,11 +15,11 @@ const withTerritoiresData = (Component) => {
       staleTime: Infinity,
     });
 
-    const regionsSorted = sortAlphabeticallyBy("nom", regions || []);
-    const departementsSorted = sortAlphabeticallyBy("nom", departements || []);
+    const sortedRegions = sortAlphabeticallyBy("nom", regions || []);
+    const sortedDepartements = sortAlphabeticallyBy("nom", departements || []);
     const isLoading = departementsLoading || regionsLoading;
 
-    return <Component {...props} departements={departementsSorted} regions={regionsSorted} loading={isLoading} />;
+    return <Component {...props} departements={sortedDepartements} regions={sortedRegions} loading={isLoading} />;
   };
 
   return WithTerritoiresData;
