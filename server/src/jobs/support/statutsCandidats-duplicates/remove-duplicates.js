@@ -85,8 +85,8 @@ const removeDuplicates = async (duplicatesGroup) => {
 
   // will sort by created_at, last item is the one with the most recent date
   const sortedByCreatedAt = sortBy(statutsFound, "created_at");
-  // get the oldest statut first
-  const [oldestStatut, ...statutsToRemove] = sortedByCreatedAt;
+  // get the newest statut first
+  const [newestStatut, ...statutsToRemove] = sortedByCreatedAt.slice().reverse();
 
   // Remove duplicates
   await asyncForEach(statutsToRemove, async (toRemove) => {
@@ -104,7 +104,7 @@ const removeDuplicates = async (duplicatesGroup) => {
   return {
     ...duplicatesGroup,
     data: {
-      keptStatutId: oldestStatut._id,
+      keptStatutId: newestStatut._id,
       removedIds: statutsToRemove.map((statut) => statut._id),
       removedCount: statutsToRemove.length,
     },
