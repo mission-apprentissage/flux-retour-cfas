@@ -45,18 +45,6 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
       annee_scolaire: item.annee_scolaire,
     });
 
-    // if statut has annee_scolaire provided but was not found with it, ignore annee_scolaire in query:
-    // it might have been created without it in the first place and we want to update the existing statut
-    if (!foundItem && item.annee_scolaire) {
-      foundItem = await getStatut({
-        nom_apprenant: item.nom_apprenant,
-        prenom_apprenant: item.prenom_apprenant,
-        formation_cfd: item.formation_cfd,
-        uai_etablissement: item.uai_etablissement,
-        annee_scolaire: null,
-      });
-    }
-
     if (!foundItem) {
       const addedItem = await createStatutCandidat(item);
       added.push(addedItem);
