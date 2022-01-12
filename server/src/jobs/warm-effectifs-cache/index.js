@@ -5,11 +5,7 @@ const config = require("../../../config");
 const { jobNames, regions } = require("../../common/model/constants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 
-const ROUTES_TO_WARM_UP = [
-  "/api/dashboard/effectifs",
-  "/api/dashboard/effectifs-par-niveau-formation",
-  "/api/dashboard/effectifs-par-departement",
-];
+const ROUTES_TO_WARM_UP = ["/api/effectifs", "/api/effectifs/niveau-formation", "/api/effectifs/departement"];
 
 /*
     This job will perform expensive requests made by the UI to warm up the cache

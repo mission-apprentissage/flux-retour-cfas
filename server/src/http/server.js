@@ -11,12 +11,13 @@ const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 
 const rcoRoute = require("./routes/rco");
 const statutCandidatsRoute = require("./routes/statut-candidats");
+const lienPriveCfaRoute = require("./routes/lien-prive-cfa");
 const loginRoute = require("./routes/login");
 const loginCfaRoute = require("./routes/login-cfa.route");
 const userEventsRoute = require("./routes/userEvents");
 const configRoute = require("./routes/config");
 const referentielRoute = require("./routes/referentiel");
-const dashboardRoute = require("./routes/dashboard");
+const effectifsRoute = require("./routes/effectifs");
 const cfasRoute = require("./routes/cfas");
 const formationRoutes = require("./routes/formations");
 const healthcheckRoute = require("./routes/healthcheck");
@@ -54,12 +55,18 @@ module.exports = async (components) => {
     statutCandidatsRoute(components)
   );
   app.use(
+    "/api/liens-prives-cfas",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    lienPriveCfaRoute(components)
+  );
+  app.use(
     "/api/rco",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
     rcoRoute(components)
   );
-  app.use("/api/dashboard", requireJwtAuthentication, dashboardRoute(components));
+  app.use("/api/effectifs", requireJwtAuthentication, effectifsRoute(components));
 
   // admin routes
   app.use("/api/cache", requireJwtAuthentication, adminOnly, cacheRouter(components));

@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const config = require("../../../config");
 const jwt = require("jsonwebtoken");
 const httpTests = require("../../utils/httpTests");
-const { User } = require("../../../src/common/model");
+const { UserModel } = require("../../../src/common/model");
 const { hash } = require("../../../src/common/utils/sha512Utils");
 
 httpTests(__filename, ({ startServer }) => {
@@ -57,7 +57,7 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     assert.equal(response.status, 200);
-    const found = await User.findOne({ username: "user" });
+    const found = await UserModel.findOne({ username: "user" });
     assert.equal(found.password.startsWith("$6$rounds=1000"), true);
 
     response = await httpClient.post("/api/login", {
@@ -70,7 +70,7 @@ httpTests(__filename, ({ startServer }) => {
   it("Vérifie que le mot de passe n'est pas rehashé si ok", async () => {
     const { httpClient, components } = await startServer();
     await components.users.createUser("user", "password", { hash: hash("password", 1001) });
-    const previous = await User.findOne({ username: "user" });
+    const previous = await UserModel.findOne({ username: "user" });
 
     const response = await httpClient.post("/api/login", {
       username: "user",
@@ -78,14 +78,14 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     assert.equal(response.status, 200);
-    const found = await User.findOne({ username: "user" });
+    const found = await UserModel.findOne({ username: "user" });
     assert.equal(previous.password, found.password);
   });
 
   it("Vérifie que le mot de passe n'est pas rehashé si invalide", async () => {
     const { httpClient, components } = await startServer();
     await components.users.createUser("user", "password", { hash: hash("password", 1000) });
-    const previous = await User.findOne({ username: "user" });
+    const previous = await UserModel.findOne({ username: "user" });
 
     const response = await httpClient.post("/api/login", {
       username: "user",
@@ -93,7 +93,7 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     assert.equal(response.status, 401);
-    const found = await User.findOne({ username: "user" });
+    const found = await UserModel.findOne({ username: "user" });
     assert.equal(previous.password, found.password);
   });
 });

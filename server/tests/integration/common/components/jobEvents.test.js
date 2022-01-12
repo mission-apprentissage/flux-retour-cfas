@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const jobEvents = require("../../../../src/common/components/jobEvents");
-const { JobEvent } = require("../../../../src/common/model");
+const { JobEventModel } = require("../../../../src/common/model");
 const { jobEventStatuts } = require("../../../../src/common/model/constants");
 
 integrationTests(__filename, () => {
@@ -10,19 +10,19 @@ integrationTests(__filename, () => {
 
     const testJobName = "TEST-JOB";
     // Add started event
-    await new JobEvent({
+    await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.started,
     }).save();
 
     // Add executed event
-    await new JobEvent({
+    await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.executed,
     }).save();
 
     // Add ended event
-    await new JobEvent({
+    await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.ended,
     }).save();
@@ -36,13 +36,13 @@ integrationTests(__filename, () => {
 
     const testJobName = "TEST-JOB";
     // Add started event
-    await new JobEvent({
+    await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.started,
     }).save();
 
     // Add executed event
-    await new JobEvent({
+    await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.executed,
     }).save();

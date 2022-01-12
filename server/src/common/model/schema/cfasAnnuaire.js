@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const cfasAnnuaireSchema = new Schema({
+module.exports = new Schema({
   siret: {
     type: String,
     default: null,
@@ -80,5 +80,3 @@ const cfasAnnuaireSchema = new Schema({
     description: "Nom de la région de l'adresse",
   },
 });
-
-module.exports = cfasAnnuaireSchema;

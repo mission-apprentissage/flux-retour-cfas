@@ -1,46 +1,46 @@
 const logger = require("../../../common/logger");
-const { User, StatutCandidat, Log, UserEvent, Cfa } = require("../../../common/model");
+const { UserModel, StatutCandidatModel, LogModel, UserEventModel, CfaModel } = require("../../../common/model");
 
 const clearAll = async () => {
   logger.info("Suppression en cours");
 
-  await StatutCandidat.deleteMany({});
+  await StatutCandidatModel.deleteMany({});
   logger.info(`StatutsCandidats supprimés`);
 
-  await User.deleteMany({});
+  await UserModel.deleteMany({});
   logger.info(`Users supprimés`);
 };
 
 const clearStatutsCandidats = async () => {
   logger.info("Suppression en cours");
-  await StatutCandidat.deleteMany({});
+  await StatutCandidatModel.deleteMany({});
   logger.info(`StatutsCandidats supprimés`);
 };
 
 const clearUsers = async () => {
   logger.info("Suppression en cours");
 
-  await User.deleteMany({});
+  await UserModel.deleteMany({});
   logger.info(`Users supprimés`);
 
-  await UserEvent.deleteMany({});
+  await UserEventModel.deleteMany({});
   logger.info(`UserEvents supprimés`);
 };
 
 const clearCfas = async () => {
   logger.info("Suppression en cours");
 
-  await Cfa.deleteMany({});
+  await CfaModel.deleteMany({});
   logger.info(`Cfas supprimés`);
 };
 
 const clearLogsAndEvents = async () => {
   logger.info("Suppression en cours");
 
-  await Log.deleteMany({});
+  await LogModel.deleteMany({});
   logger.info(`Logs supprimés`);
 
-  await UserEvent.deleteMany({});
+  await UserEventModel.deleteMany({});
   logger.info(`UserEvents supprimés`);
 };
 module.exports = {

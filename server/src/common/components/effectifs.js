@@ -1,5 +1,5 @@
 const { codesStatutsCandidats } = require("../model/constants");
-const { StatutCandidat } = require("../model");
+const { StatutCandidatModel } = require("../model");
 const { isWithinInterval } = require("date-fns");
 const { countSubArrayInArray } = require("../utils/subArrayUtils");
 const { mergeObjectsBy } = require("../utils/mergeObjectsBy");
@@ -317,7 +317,7 @@ const getEffectifsCountByDepartementAtDate = async (searchDate, filters = {}) =>
 };
 
 const getNouveauxContratsCountInDateRange = async (dateRange, filters = {}) => {
-  const statutsWithStatutApprenant3InHistorique = await StatutCandidat.aggregate([
+  const statutsWithStatutApprenant3InHistorique = await StatutCandidatModel.aggregate([
     { $match: { ...filters, "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.apprenti } },
   ]);
 
@@ -384,7 +384,7 @@ const getRupturantsCountAtDate = async (searchDate, filters = {}, options = {}) 
     },
   ];
 
-  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
 
   if (!options.groupedBy) {
     return result.length === 1 ? result[0].count : 0;
@@ -417,7 +417,7 @@ const getInscritsSansContratCountAtDate = async (searchDate, filters = {}, optio
     },
   ];
 
-  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
 
   if (!options.groupedBy) {
     return result.length === 1 ? result[0].count : 0;
@@ -444,7 +444,7 @@ const getApprentisCountAtDate = async (searchDate, filters = {}, options = {}) =
     },
   ];
 
-  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
 
   if (!options.groupedBy) {
     return result.length === 1 ? result[0].count : 0;
@@ -459,7 +459,7 @@ const getApprentisCountAtDate = async (searchDate, filters = {}, options = {}) =
  * @returns
  */
 const getContratsCountAtDate = async (searchDate, filters = {}) => {
-  const apprentisAtDate = await StatutCandidat.aggregate([
+  const apprentisAtDate = await StatutCandidatModel.aggregate([
     {
       $match: {
         ...filters,
@@ -493,7 +493,7 @@ const getAbandonsCountAtDate = async (searchDate, filters = {}, options = {}) =>
     },
   ];
 
-  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
 
   if (!options.groupedBy) {
     return result.length === 1 ? result[0].count : 0;
@@ -511,7 +511,7 @@ const getAbandonsCountAtDate = async (searchDate, filters = {}, options = {}) =>
  * @returns
  */
 const getNbRupturesContratAtDate = async (searchDate, filters = {}) => {
-  const inscritsOrAbandonsAtDate = await StatutCandidat.aggregate([
+  const inscritsOrAbandonsAtDate = await StatutCandidatModel.aggregate([
     // Filtrage sur les filtres passées en paramètres
     {
       $match: {
@@ -567,7 +567,7 @@ const getStatutsWithHistoryDateUnordered = async () => {
     { $match: { isHistoryDateOrdered: false } },
   ];
 
-  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
   return result;
 };
 
@@ -591,6 +591,6 @@ const getStatutsWithBadDate = async () => {
     { $match: { hasHistoryBadDate: true } },
   ];
 
-  const result = await StatutCandidat.aggregate(aggregationPipeline);
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
   return result;
 };

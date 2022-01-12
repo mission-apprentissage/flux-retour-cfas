@@ -5,7 +5,7 @@ const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
 const { downloadIfNeeded } = require("./utils/seedUtils");
-const { CfaAnnuaire } = require("../../common/model");
+const { CfaAnnuaireModel } = require("../../common/model");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const annuaireJsonFilePath = path.join(__dirname, `./assets/annuaireCfas.json`);
@@ -25,7 +25,7 @@ runScript(async ({ cfas }) => {
 const seedCfasFromAnnuaireJsonFile = async () => {
   // Clear if existing annuaire cfa collection
   logger.info(`Clearing existing annuaire CFAs collection ...`);
-  await CfaAnnuaire.deleteMany({});
+  await CfaAnnuaireModel.deleteMany({});
 
   // Gets the referentiel file
   await downloadIfNeeded(`cfas-annuaire/annuaireCfas.json`, annuaireJsonFilePath);
@@ -40,7 +40,7 @@ const seedCfasFromAnnuaireJsonFile = async () => {
     await asyncForEach(cfasAnnuaire, async (currentCfaAnnuaire) => {
       loadingBar.increment();
 
-      await new CfaAnnuaire({
+      await new CfaAnnuaireModel({
         siret: currentCfaAnnuaire.siret,
         raison_sociale: currentCfaAnnuaire.raison_sociale,
         uais: currentCfaAnnuaire.uais,

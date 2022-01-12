@@ -1,7 +1,7 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { UserEvent } = require("../../common/model/index");
+const { UserEventModel } = require("../../common/model/index");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
@@ -79,7 +79,7 @@ module.exports = ({ statutsCandidats }) => {
         await statutsCandidatListSchema.validateAsync(req.body, { abortEarly: false });
 
         // Add user event
-        const event = new UserEvent({
+        const event = new UserEventModel({
           username: req.user.username,
           type: "POST",
           action: "statut-candidats",

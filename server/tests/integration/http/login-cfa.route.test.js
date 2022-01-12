@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const config = require("../../../config");
 const jwt = require("jsonwebtoken");
 const httpTests = require("../../utils/httpTests");
-const { Cfa } = require("../../../src/common/model");
+const { CfaModel } = require("../../../src/common/model");
 const { tdbRoles } = require("../../../src/common/roles");
 
 httpTests(__filename, ({ startServer }) => {
@@ -10,7 +10,7 @@ httpTests(__filename, ({ startServer }) => {
     const { httpClient } = await startServer();
     // create cfa in db
     const token = "eyP33IyEAisoErO";
-    await new Cfa({
+    await new CfaModel({
       uai: "0594889A",
       access_token: token,
     }).save();
@@ -32,7 +32,7 @@ httpTests(__filename, ({ startServer }) => {
     const { httpClient } = await startServer();
     // create cfa in db
     const token = "eyP33IyEAisoErO";
-    await new Cfa({
+    await new CfaModel({
       uai: "0594889A",
       access_token: token,
     }).save();
@@ -48,7 +48,7 @@ httpTests(__filename, ({ startServer }) => {
     const { httpClient } = await startServer();
     // create cfa in db
     const token = "eyP33IyEAisoErO";
-    await new Cfa({
+    await new CfaModel({
       uai: "0594889A",
       access_token: token,
     }).save();

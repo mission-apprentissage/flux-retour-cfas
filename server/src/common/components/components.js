@@ -6,7 +6,7 @@ const createStatutsCandidats = require("./statutsCandidats");
 const cfasComponent = require("./cfas");
 const formationsComponent = require("./formations");
 const createStats = require("./stats");
-const createDashboard = require("./dashboard");
+const createEffectifs = require("./effectifs");
 const cfaDataFeedbackComponent = require("./cfaDataFeedback");
 const demandeIdentifiantsComponent = require("./demandeIdentifiants");
 const demandeLienPriveComponent = require("./demandeLienPrive");
@@ -22,7 +22,7 @@ module.exports = async (options = {}) => {
   const cfas = options.cfas || cfasComponent();
   const cfaDataFeedback = options.cfas || cfaDataFeedbackComponent();
   const stats = options.stats || createStats();
-  const dashboard = options.dashboard || createDashboard();
+  const effectifs = options.effectifs || createEffectifs();
   const demandeIdentifiants = options.demandeIdentifiants || demandeIdentifiantsComponent();
   const demandeLienPrive = options.demandeLienPrive || demandeLienPriveComponent();
   const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
@@ -39,7 +39,7 @@ module.exports = async (options = {}) => {
     formations,
     cfas,
     stats,
-    dashboard,
+    effectifs,
     demandeIdentifiants,
     demandeBranchementErp,
     demandeLienPrive,

@@ -32,7 +32,7 @@ const getCacheKeyForRoute = (route, filters) => {
   return `${route}:${stringify(filters)}`;
 };
 
-module.exports = ({ stats, dashboard, cache }) => {
+module.exports = ({ stats, effectifs, cache }) => {
   const router = express.Router();
 
   /**
@@ -59,7 +59,7 @@ module.exports = ({ stats, dashboard, cache }) => {
    * Gets the effectifs data for input period & query
    */
   router.get(
-    "/effectifs",
+    "/",
     applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
@@ -92,10 +92,10 @@ module.exports = ({ stats, dashboard, cache }) => {
       } else {
         const response = {
           date,
-          apprentis: await dashboard.getApprentisCountAtDate(date, filters),
-          rupturants: await dashboard.getRupturantsCountAtDate(date, filters),
-          inscritsSansContrat: await dashboard.getInscritsSansContratCountAtDate(date, filters),
-          abandons: await dashboard.getAbandonsCountAtDate(date, filters),
+          apprentis: await effectifs.getApprentisCountAtDate(date, filters),
+          rupturants: await effectifs.getRupturantsCountAtDate(date, filters),
+          inscritsSansContrat: await effectifs.getInscritsSansContratCountAtDate(date, filters),
+          abandons: await effectifs.getAbandonsCountAtDate(date, filters),
         };
         // cache the result
         await cache.set(cacheKey, JSON.stringify(response));
@@ -108,7 +108,7 @@ module.exports = ({ stats, dashboard, cache }) => {
    * Get effectifs details by niveau_formation
    */
   router.get(
-    "/effectifs-par-niveau-formation",
+    "/niveau-formation",
     applyUserRoleFilter,
     tryCatch(async (req, res) => {
       await Joi.object({
@@ -133,7 +133,7 @@ module.exports = ({ stats, dashboard, cache }) => {
       if (fromCache) {
         return res.json(JSON.parse(fromCache));
       } else {
-        const effectifsParNiveauFormation = await dashboard.getEffectifsCountByNiveauFormationAtDate(date, filters);
+        const effectifsParNiveauFormation = await effectifs.getEffectifsCountByNiveauFormationAtDate(date, filters);
         await cache.set(cacheKey, JSON.stringify(effectifsParNiveauFormation));
         return res.json(effectifsParNiveauFormation);
       }
@@ -144,7 +144,7 @@ module.exports = ({ stats, dashboard, cache }) => {
    * Get effectifs details by formation_cfd
    */
   router.get(
-    "/effectifs-par-formation",
+    "/formation",
     applyUserRoleFilter,
     tryCatch(async (req, res) => {
       await Joi.object({
@@ -170,7 +170,7 @@ module.exports = ({ stats, dashboard, cache }) => {
       if (fromCache) {
         return res.json(JSON.parse(fromCache));
       } else {
-        const effectifsParFormation = await dashboard.getEffectifsCountByFormationAtDate(date, filters);
+        const effectifsParFormation = await effectifs.getEffectifsCountByFormationAtDate(date, filters);
         await cache.set(cacheKey, JSON.stringify(effectifsParFormation));
         return res.json(effectifsParFormation);
       }
@@ -181,7 +181,7 @@ module.exports = ({ stats, dashboard, cache }) => {
    * Get effectifs details by annee_formation
    */
   router.get(
-    "/effectifs-par-annee-formation",
+    "/annee-formation",
     applyUserRoleFilter,
     tryCatch(async (req, res) => {
       const validationSchema = Joi.object({
@@ -207,7 +207,7 @@ module.exports = ({ stats, dashboard, cache }) => {
       if (fromCache) {
         return res.json(JSON.parse(fromCache));
       } else {
-        const effectifsParAnneeFormation = await dashboard.getEffectifsCountByAnneeFormationAtDate(date, filters);
+        const effectifsParAnneeFormation = await effectifs.getEffectifsCountByAnneeFormationAtDate(date, filters);
         await cache.set(cacheKey, JSON.stringify(effectifsParAnneeFormation));
 
         return res.json(effectifsParAnneeFormation);
@@ -216,7 +216,7 @@ module.exports = ({ stats, dashboard, cache }) => {
   );
 
   router.get(
-    "/effectifs-par-cfa",
+    "/cfa",
     applyUserRoleFilter,
     tryCatch(async (req, res) => {
       // Validate schema
@@ -245,7 +245,7 @@ module.exports = ({ stats, dashboard, cache }) => {
       if (fromCache) {
         return res.json(JSON.parse(fromCache));
       } else {
-        const effectifsByCfaAtDate = await dashboard.getEffectifsCountByCfaAtDate(date, filters);
+        const effectifsByCfaAtDate = await effectifs.getEffectifsCountByCfaAtDate(date, filters);
         await cache.set(cacheKey, JSON.stringify(effectifsByCfaAtDate));
 
         return res.json(effectifsByCfaAtDate);
@@ -254,7 +254,7 @@ module.exports = ({ stats, dashboard, cache }) => {
   );
 
   router.get(
-    "/effectifs-par-departement",
+    "/departement",
     applyUserRoleFilter,
     tryCatch(async (req, res) => {
       const validationSchema = Joi.object({
@@ -280,7 +280,7 @@ module.exports = ({ stats, dashboard, cache }) => {
       if (fromCache) {
         return res.json(JSON.parse(fromCache));
       } else {
-        const effectifsByDepartementAtDate = await dashboard.getEffectifsCountByDepartementAtDate(date, filters);
+        const effectifsByDepartementAtDate = await effectifs.getEffectifsCountByDepartementAtDate(date, filters);
         await cache.set(cacheKey, JSON.stringify(effectifsByDepartementAtDate));
         return res.json(effectifsByDepartementAtDate);
       }
@@ -304,8 +304,8 @@ module.exports = ({ stats, dashboard, cache }) => {
       const { startDate, endDate, ...filters } = req.query;
       const dateRange = [new Date(startDate), new Date(endDate)];
 
-      const nouveauxContratsCountInDateRange = await dashboard.getNouveauxContratsCountInDateRange(dateRange, filters);
-      const rupturesCountInDateRange = await dashboard.getNbRupturesContratAtDate(dateRange[1], filters);
+      const nouveauxContratsCountInDateRange = await effectifs.getNouveauxContratsCountInDateRange(dateRange, filters);
+      const rupturesCountInDateRange = await effectifs.getNbRupturesContratAtDate(dateRange[1], filters);
 
       return res.json({ nbContrats: nouveauxContratsCountInDateRange, nbRuptures: rupturesCountInDateRange });
     })

@@ -1,4 +1,4 @@
-const { CfaDataFeedback: CfaDataFeedbackModel, Cfa } = require("../model");
+const { CfaDataFeedbackModel, CfaModel } = require("../model");
 const { validateUai } = require("../domain/uai");
 
 module.exports = () => ({
@@ -14,7 +14,7 @@ const createCfaDataFeedback = async ({ uai, email, details }) => {
     throw Error("Invalid UAI");
   }
 
-  const cfaFromUai = await Cfa.findOne({ uai: uai }).lean();
+  const cfaFromUai = await CfaModel.findOne({ uai: uai }).lean();
 
   const newCfaDataFeedbackDocument = new CfaDataFeedbackModel({
     uai,

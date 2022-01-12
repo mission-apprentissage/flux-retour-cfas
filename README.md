@@ -109,7 +109,7 @@ Le base de données est une MongoDb et utilise le port par défaut 27017.
 
 ### Base de données Redis
 
-Redis est utilisé pour cacher certaines réponses de l'API. Utilise le port par défaut 6379.
+Redis est utilisé pour cacher certaines réponses de l'API. Utilise le port par défaut mais n'est pas exposé en dehors du réseau Docker.
 
 ### Ui - React
 

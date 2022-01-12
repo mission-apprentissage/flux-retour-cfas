@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const formationSchema = new Schema(
+module.exports = new Schema(
   {
     cfd: {
       type: String,
@@ -42,5 +42,3 @@ const formationSchema = new Schema(
   },
   { versionKey: false } // don't add automatic Mongoose __v field
 );
-
-module.exports = formationSchema;

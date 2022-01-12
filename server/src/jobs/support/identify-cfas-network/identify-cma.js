@@ -3,7 +3,7 @@ const path = require("path");
 const { runScript } = require("../../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { StatutCandidat } = require("../../../common/model");
+const { StatutCandidatModel } = require("../../../common/model");
 const { downloadIfNeeded } = require("./utils");
 const { toXlsx } = require("../../../common/utils/exporterUtils");
 const { codesStatutsCandidats, jobNames } = require("../../../common/model/constants/index");
@@ -37,21 +37,21 @@ const identifyCfas = async () => {
     uaisForCma.map((x) => x.uai),
     async (_uai) => {
       if (_uai) {
-        const uaiFoundInStatuts = await StatutCandidat.findOne({ uai_etablissement: _uai });
+        const uaiFoundInStatuts = await StatutCandidatModel.findOne({ uai_etablissement: _uai });
         if (uaiFoundInStatuts) {
           logger.info(`Uai ${_uai} found in StatutsCandidats - adding to export`);
 
-          const nbStatutsInscrits = await StatutCandidat.countDocuments({
+          const nbStatutsInscrits = await StatutCandidatModel.countDocuments({
             statut_apprenant: codesStatutsCandidats.inscrit,
             uai_etablissement: _uai,
           });
 
-          const nbStatutsApprentis = await StatutCandidat.countDocuments({
+          const nbStatutsApprentis = await StatutCandidatModel.countDocuments({
             statut_apprenant: codesStatutsCandidats.apprenti,
             uai_etablissement: _uai,
           });
 
-          const nbStatutsAbandon = await StatutCandidat.countDocuments({
+          const nbStatutsAbandon = await StatutCandidatModel.countDocuments({
             statut_apprenant: codesStatutsCandidats.abandon,
             uai_etablissement: _uai,
           });

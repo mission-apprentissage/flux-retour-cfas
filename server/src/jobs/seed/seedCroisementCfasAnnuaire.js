@@ -3,7 +3,7 @@ const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
-const { CfaAnnuaire, CroisementCfasAnnuaire, Cfa } = require("../../common/model");
+const { CfaAnnuaireModel, CroisementCfasAnnuaireModel, CfaModel } = require("../../common/model");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -22,9 +22,9 @@ runScript(async ({ cfas }) => {
 const seedCroisementCfasAnnuaire = async () => {
   // Clear if existing annuaire cfa collection
   logger.info(`Clearing existing CroisementCfasAnnuaireTdb collection ...`);
-  await CroisementCfasAnnuaire.deleteMany({});
+  await CroisementCfasAnnuaireModel.deleteMany({});
 
-  const cfasAnnuaire = await CfaAnnuaire.find({}).lean();
+  const cfasAnnuaire = await CfaAnnuaireModel.find({}).lean();
   logger.info(`Seeding Croisement CFAs Annuaire from ${cfasAnnuaire.length} CFAs in annuaire`);
 
   loadingBar.start(cfasAnnuaire.length, 0);
@@ -52,9 +52,9 @@ const seedCroisementCfasAnnuaire = async () => {
  *
  */
 const searchCroisementSiretResponsable = async (currentCfaAnnuaire) => {
-  const cfaInTdb = await Cfa.findOne({ siret: currentCfaAnnuaire.siret }).lean();
+  const cfaInTdb = await CfaModel.findOne({ siret: currentCfaAnnuaire.siret }).lean();
   if (cfaInTdb) {
-    await new CroisementCfasAnnuaire({
+    await new CroisementCfasAnnuaireModel({
       annuaire_siret_responsable: currentCfaAnnuaire.siret,
       annuaire_nom_associé: currentCfaAnnuaire.raison_sociale,
       present_tdb_match_siret_responsable: true,
@@ -67,9 +67,9 @@ const searchCroisementSiretResponsable = async (currentCfaAnnuaire) => {
  *
  */
 const searchCroisementSiretFormateur = async (currentCfaAnnuaire) => {
-  const cfaInTdb = await Cfa.findOne({ siret: currentCfaAnnuaire.siret }).lean();
+  const cfaInTdb = await CfaModel.findOne({ siret: currentCfaAnnuaire.siret }).lean();
   if (cfaInTdb) {
-    await new CroisementCfasAnnuaire({
+    await new CroisementCfasAnnuaireModel({
       annuaire_siret_formateur: currentCfaAnnuaire.siret,
       annuaire_nom_associé: currentCfaAnnuaire.raison_sociale,
       present_tdb_match_siret_formateur: true,
@@ -82,9 +82,9 @@ const searchCroisementSiretFormateur = async (currentCfaAnnuaire) => {
  *
  */
 const searchCroisementUais = async (currentCfaAnnuaire) => {
-  const cfaInTdb = await Cfa.findOne({ uai: { $in: currentCfaAnnuaire.uais } }).lean();
+  const cfaInTdb = await CfaModel.findOne({ uai: { $in: currentCfaAnnuaire.uais } }).lean();
   if (cfaInTdb) {
-    await new CroisementCfasAnnuaire({
+    await new CroisementCfasAnnuaireModel({
       annuaire_uai: cfaInTdb.uai,
       annuaire_nom_associé: currentCfaAnnuaire.raison_sociale,
       present_tdb_match_uai: true,

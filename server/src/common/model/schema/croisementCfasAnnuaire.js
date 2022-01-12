@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const croisementCfasAnnuaire = new Schema({
+module.exports = new Schema({
   annuaire_siret_responsable: {
     type: String,
     default: null,
@@ -45,5 +45,3 @@ const croisementCfasAnnuaire = new Schema({
     description: "Nom dans le Tdb de l'établissement",
   },
 });
-
-module.exports = croisementCfasAnnuaire;

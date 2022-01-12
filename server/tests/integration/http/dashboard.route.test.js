@@ -8,14 +8,14 @@ const {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
-const { StatutCandidat } = require("../../../src/common/model");
+const { StatutCandidatModel } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
-  describe("/api/dashboard/effectifs route", () => {
+  describe("/api/effectifs route", () => {
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();
 
-      const response = await httpClient.get("/api/dashboard/effectifs", {
+      const response = await httpClient.get("/api/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z" },
       });
 
@@ -32,7 +32,7 @@ httpTests(__filename, ({ startServer }) => {
           historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -42,7 +42,7 @@ httpTests(__filename, ({ startServer }) => {
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -52,12 +52,12 @@ httpTests(__filename, ({ startServer }) => {
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
       // this one should be ignored because of annee_scolaire
-      await new StatutCandidat(
+      await new StatutCandidatModel(
         createRandomStatutCandidat({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2021-2022",
@@ -72,7 +72,7 @@ httpTests(__filename, ({ startServer }) => {
       };
 
       // Check good api call
-      const response = await httpClient.get("/api/dashboard/effectifs", {
+      const response = await httpClient.get("/api/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z" },
         headers: bearerToken,
       });
@@ -96,7 +96,7 @@ httpTests(__filename, ({ startServer }) => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -107,7 +107,7 @@ httpTests(__filename, ({ startServer }) => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -118,7 +118,7 @@ httpTests(__filename, ({ startServer }) => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -130,7 +130,7 @@ httpTests(__filename, ({ startServer }) => {
       };
 
       // Check good api call
-      const response = await httpClient.get("/api/dashboard/effectifs", {
+      const response = await httpClient.get("/api/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z", ...filterQuery },
         headers: bearerToken,
       });
@@ -141,7 +141,7 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
 
       // Check bad api call
-      const badResponse = await httpClient.get("/api/dashboard/effectifs", {
+      const badResponse = await httpClient.get("/api/effectifs", {
         params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_region: "99" },
         headers: bearerToken,
       });
@@ -154,7 +154,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  describe("/api/dashboard/effectifs-par-niveau-formation route", () => {
+  describe("/api/effectifs/niveau-formation route", () => {
     it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux de formation via API", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
@@ -168,7 +168,7 @@ httpTests(__filename, ({ startServer }) => {
           niveau_formation: "1",
           niveau_formation_libelle: "1 (blabla)",
         });
-        const toAdd = new StatutCandidat(randomStatut);
+        const toAdd = new StatutCandidatModel(randomStatut);
         await toAdd.save();
       }
 
@@ -179,11 +179,11 @@ httpTests(__filename, ({ startServer }) => {
         niveau_formation: "2",
         niveau_formation_libelle: "2 (blabla)",
       });
-      const toAdd = new StatutCandidat(randomStatut);
+      const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
-      const response = await httpClient.get(`/api/dashboard/effectifs-par-niveau-formation?${searchParams}`, {
+      const response = await httpClient.get(`/api/effectifs/niveau-formation?${searchParams}`, {
         headers: bearerToken,
       });
 
@@ -205,14 +205,14 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  describe("/api/dashboard/total-organismes route", () => {
+  describe("/api/effectifs/total-organismes route", () => {
     it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une région", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const regionNumTest = "28";
 
       // Add 1 statut for region
-      await new StatutCandidat(
+      await new StatutCandidatModel(
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
           siret_etablissement: "77929544300013",
@@ -223,7 +223,7 @@ httpTests(__filename, ({ startServer }) => {
       ).save();
 
       // Check good api call
-      const response = await httpClient.get("/api/dashboard/total-organismes", {
+      const response = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           etablissement_num_region: regionNumTest,
         },
@@ -233,7 +233,7 @@ httpTests(__filename, ({ startServer }) => {
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, { nbOrganismes: 1 });
 
-      const badRegionResponse = await httpClient.get("/api/dashboard/total-organismes", {
+      const badRegionResponse = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           etablissement_num_region: "01",
         },
@@ -250,7 +250,7 @@ httpTests(__filename, ({ startServer }) => {
       const formationCfd = "abcd1234";
 
       // Add 1 statut for formation
-      await new StatutCandidat(
+      await new StatutCandidatModel(
         createRandomStatutCandidat({
           nom_etablissement: "TEST CFA",
           siret_etablissement: getRandomSiretEtablissement(),
@@ -262,7 +262,7 @@ httpTests(__filename, ({ startServer }) => {
       ).save();
 
       // Check good api call
-      const response = await httpClient.get("/api/dashboard/total-organismes", {
+      const response = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           formation_cfd: formationCfd,
         },

@@ -2,7 +2,7 @@ const { runScript } = require("../scriptWrapper");
 const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const { StatutCandidat } = require("../../common/model");
+const { StatutCandidatModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
 
@@ -39,7 +39,7 @@ const retrieveCfdHistory = async (db) => {
 
     if (cfdInfo?.result) {
       // Update in statuts
-      await StatutCandidat.updateMany(
+      await StatutCandidatModel.updateMany(
         { formation_cfd: currentCfd },
         {
           formation_cfd_is_outdated: cfdInfo?.result?.cfd_outdated ?? false,

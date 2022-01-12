@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const { StatutCandidat, Cfa } = require("../../common/model");
+const { StatutCandidatModel, CfaModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
 
@@ -24,7 +24,7 @@ runScript(async () => {
  */
 const retrieveDataConnections = async () => {
   // Parse tous les CFAs du référentiel
-  const allCfas = await Cfa.find({}).lean();
+  const allCfas = await CfaModel.find({}).lean();
 
   logger.info(`Searching for ${allCfas.length} CFAs in référentiel`);
   loadingBar.start(allCfas.length, 0);
@@ -33,9 +33,9 @@ const retrieveDataConnections = async () => {
     // Si uai fourni on update les statuts pour cet uai
     if (cfaReferentiel.uai) {
       // Vérification d'existence de statutsCandidats pour cet uai
-      const statutsForUai = await StatutCandidat.exists({ uai_etablissement: cfaReferentiel.uai });
+      const statutsForUai = await StatutCandidatModel.exists({ uai_etablissement: cfaReferentiel.uai });
       if (statutsForUai) {
-        await Cfa.findByIdAndUpdate(
+        await CfaModel.findByIdAndUpdate(
           cfaReferentiel._id,
           {
             $set: { branchement_flux_cfa_erp: true },

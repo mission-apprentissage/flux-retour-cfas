@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 
-const rcoStatutsCandidatsSchema = new Schema({
+module.exports = new Schema({
   statutCandidatId: {
     type: String,
     default: null,
@@ -95,5 +95,3 @@ const rcoStatutsCandidatsSchema = new Schema({
     description: "Date d'ajout en base de données",
   },
 });
-
-module.exports = rcoStatutsCandidatsSchema;

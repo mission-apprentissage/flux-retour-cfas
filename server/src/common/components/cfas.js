@@ -1,4 +1,4 @@
-const { StatutCandidat: StatutCandidatModel, CfaAnnuaire, Cfa } = require("../model");
+const { StatutCandidatModel, CfaAnnuaireModel, CfaModel } = require("../model");
 
 module.exports = () => ({
   searchCfas,
@@ -19,15 +19,22 @@ const SEARCH_RESULTS_LIMIT = 50;
  */
 const searchCfas = async (searchCriteria) => {
   const { searchTerm, ...otherCriteria } = searchCriteria;
+
   const matchQuery = {
     uai_etablissement_valid: true,
     ...otherCriteria,
-    ...(searchTerm
-      ? {
-          $or: [{ $text: { $search: searchTerm } }, { uai_etablissement: searchTerm.toUpperCase() }],
-        }
-      : {}),
   };
+
+  if (searchTerm) {
+    matchQuery.$or = [{ $text: { $search: searchTerm } }, { uai_etablissement: searchTerm.toUpperCase() }];
+  }
+
+  const sortStage = searchTerm
+    ? {
+        score: { $meta: "textScore" },
+        nom_etablissement: 1,
+      }
+    : { nom_etablissement: 1 };
 
   const found = await StatutCandidatModel.aggregate([
     {
@@ -39,6 +46,9 @@ const searchCfas = async (searchCriteria) => {
         nom_etablissement: { $first: "$nom_etablissement" },
         etablissement_num_departement: { $first: "$etablissement_num_departement" },
       },
+    },
+    {
+      $sort: sortStage,
     },
     {
       $limit: SEARCH_RESULTS_LIMIT,
@@ -107,14 +117,14 @@ const getSousEtablissementsForUai = (uai) => {
  * @returns
  */
 const getSiretNatureFromAnnuaire = async (siret) => {
-  const cfaInAnnuaireFromSiret = await CfaAnnuaire.findOne({ siret: siret }).lean();
+  const cfaInAnnuaireFromSiret = await CfaAnnuaireModel.findOne({ siret: siret }).lean();
   return { responsable: cfaInAnnuaireFromSiret?.responsable, formateur: cfaInAnnuaireFromSiret?.formateur };
 };
 
 const getFromAccessToken = async (accessToken) => {
-  return Cfa.findOne({ access_token: accessToken }).lean();
+  return CfaModel.findOne({ access_token: accessToken }).lean();
 };
 
 const getFromUai = async (uai) => {
-  return Cfa.findOne({ uai }).lean();
+  return CfaModel.findOne({ uai }).lean();
 };

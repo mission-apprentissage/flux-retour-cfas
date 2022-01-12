@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const cliProgress = require("cli-progress");
-const { StatutCandidat, Formation } = require("../../common/model");
+const { StatutCandidatModel, FormationModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
 
@@ -15,18 +15,18 @@ runScript(async () => {
   logger.info("Run StatutCandidats - Niveau Retrieving Job");
 
   // get all valid formations with niveau & cfd not empty
-  const formationsWithNiveau = await Formation.find({ niveau: { $ne: "" }, cfd: { $ne: "" } });
+  const formationsWithNiveau = await FormationModel.find({ niveau: { $ne: "" }, cfd: { $ne: "" } });
   logger.info(`${formationsWithNiveau.length} Formations with niveau & cfd`);
 
   loadingBar.start(formationsWithNiveau.length, 0);
 
   await asyncForEach(formationsWithNiveau, async (currentFormation) => {
     // get all statutsCandidats for this cfd
-    const statutsForFormation = await StatutCandidat.find({ formation_cfd: currentFormation.cfd });
+    const statutsForFormation = await StatutCandidatModel.find({ formation_cfd: currentFormation.cfd });
 
     // Update niveau for all statutsCandidats
     await asyncForEach(statutsForFormation, async (currentStatutToUpdate) => {
-      await StatutCandidat.findByIdAndUpdate(
+      await StatutCandidatModel.findByIdAndUpdate(
         currentStatutToUpdate._id,
         {
           niveau_formation: currentFormation.niveau,

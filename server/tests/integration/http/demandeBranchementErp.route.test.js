@@ -1,6 +1,6 @@
 const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
-const { DemandeBranchementErp } = require("../../../src/common/model");
+const { DemandeBranchementErpModel } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
   let httpClient;
@@ -15,7 +15,7 @@ httpTests(__filename, ({ startServer }) => {
       const response = await httpClient.post("/api/demande-branchement-erp", {});
 
       assert.equal(response.status, 400);
-      const found = await DemandeBranchementErp.countDocuments();
+      const found = await DemandeBranchementErpModel.countDocuments();
       assert.equal(found, 0);
     });
 
@@ -30,7 +30,7 @@ httpTests(__filename, ({ startServer }) => {
       const response = await httpClient.post("/api/demande-branchement-erp", testDemande);
 
       assert.equal(response.status, 400);
-      const found = await DemandeBranchementErp.countDocuments();
+      const found = await DemandeBranchementErpModel.countDocuments();
       assert.equal(found, 0);
     });
 
@@ -46,7 +46,7 @@ httpTests(__filename, ({ startServer }) => {
       const response = await httpClient.post("/api/demande-branchement-erp", testDemande);
 
       assert.equal(response.status, 400);
-      const found = await DemandeBranchementErp.countDocuments();
+      const found = await DemandeBranchementErpModel.countDocuments();
       assert.equal(found, 0);
     });
 
@@ -61,7 +61,7 @@ httpTests(__filename, ({ startServer }) => {
       const response = await httpClient.post("/api/demande-branchement-erp", testDemande);
 
       assert.equal(response.status, 200);
-      const found = await DemandeBranchementErp.find().lean();
+      const found = await DemandeBranchementErpModel.find().lean();
       assert.equal(found.length, 1);
       assert.equal(found[0].nom_organisme, testDemande.nom_organisme);
       assert.equal(found[0].uai_organisme, testDemande.uai_organisme);
@@ -80,7 +80,7 @@ httpTests(__filename, ({ startServer }) => {
       const response = await httpClient.post("/api/demande-branchement-erp", testDemande);
 
       assert.equal(response.status, 200);
-      const found = await DemandeBranchementErp.find().lean();
+      const found = await DemandeBranchementErpModel.find().lean();
       assert.equal(found.length, 1);
       assert.equal(found[0].nom_organisme, testDemande.nom_organisme);
       assert.equal(found[0].uai_organisme, testDemande.uai_organisme);

@@ -2,7 +2,7 @@ const { runScript } = require("../scriptWrapper");
 const cliProgress = require("cli-progress");
 const path = require("path");
 const logger = require("../../common/logger");
-const { CfaDataFeedback } = require("../../common/model");
+const { CfaDataFeedbackModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
 const { downloadIfNeeded } = require("./utils");
@@ -33,7 +33,7 @@ const removeFeedbacksFromJson = async () => {
   loadingBar.start(allFeedbacksToRemove.length, 0);
 
   await asyncForEach(allFeedbacksToRemove, async (feedbackToRemove) => {
-    await CfaDataFeedback.findOneAndDelete({
+    await CfaDataFeedbackModel.findOneAndDelete({
       siret: feedbackToRemove.siret,
       email: feedbackToRemove.email,
       details: feedbackToRemove.details,

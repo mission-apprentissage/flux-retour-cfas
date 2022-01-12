@@ -27,11 +27,11 @@ const ApercuDesDonneesSection = () => {
     <Section background="galt" paddingY="4w">
       <Heading as="h2">Aperçu des données</Heading>
       <HStack marginTop="3w" spacing="8w" fontSize="gamma" color="grey.800">
-        <Count count="228 062" label="Apprentis" />
-        <Count count="10 027" label="Jeunes sans contrat" />
-        <Count count="5 856" label="Rupturants" />
-        <Count count="10 238" label="Abandons" />
-        <Count count="1 834" label="Organismes de formation" />
+        <Count count="270 314" label="Apprentis" />
+        <Count count="10 250" label="Jeunes sans contrat" />
+        <Count count="7 183" label="Rupturants" />
+        <Count count="17 177" label="Abandons" />
+        <Count count="2 039" label="Organismes de formation" />
       </HStack>
 
       <Divider marginY="3w" />

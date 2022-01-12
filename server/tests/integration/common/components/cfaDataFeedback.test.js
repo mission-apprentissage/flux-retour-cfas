@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const integrationTests = require("../../../utils/integrationTests");
 const cfaDataFeedbackComponent = require("../../../../src/common/components/cfaDataFeedback");
-const { Cfa } = require("../../../../src/common/model");
+const { CfaModel } = require("../../../../src/common/model");
 
 integrationTests(__filename, () => {
   describe("createCfaDataFeedback", () => {
@@ -22,7 +22,7 @@ integrationTests(__filename, () => {
       const sampleRegion_num = "28";
 
       // Add Cfa with region_num / region_nom for valid UAI
-      await new Cfa({
+      await new CfaModel({
         uai: sampleUai,
         region_nom: sampleRegion_nom,
         region_num: sampleRegion_num,

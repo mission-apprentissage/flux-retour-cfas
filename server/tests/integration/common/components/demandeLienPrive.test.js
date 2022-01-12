@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const integrationTests = require("../../../utils/integrationTests");
 const demandeLienPrive = require("../../../../src/common/components/demandeLienPrive");
-const { DemandeLienPriveModel, Cfa } = require("../../../../src/common/model");
+const { DemandeLienPriveModel, CfaModel } = require("../../../../src/common/model");
 
 integrationTests(__filename, () => {
   it("Permet de vérifier la création d'une demande de lien privé avec un CFA non présent en base", async () => {
@@ -31,7 +31,7 @@ integrationTests(__filename, () => {
     const testNom = "TEST-ORGA";
     const testCodePostal = "75010";
 
-    await new Cfa({
+    await new CfaModel({
       uai: testUai,
       nom: testNom,
     }).save();
@@ -60,7 +60,7 @@ integrationTests(__filename, () => {
     const testNom = "TEST-ORGA";
     const testCodePostal = "75010";
 
-    await new Cfa({
+    await new CfaModel({
       uai: testUai,
       nom: testNom,
     }).save();
