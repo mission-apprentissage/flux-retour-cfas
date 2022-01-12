@@ -38,6 +38,8 @@ module.exports = ({ statutsCandidats }) => {
     statut_apprenant: Joi.number()
       .valid(codesStatutsCandidats.apprenti, codesStatutsCandidats.inscrit, codesStatutsCandidats.abandon)
       .required(),
+    date_metier_mise_a_jour_statut: dateSchema.required(),
+
     // optional
     ine_apprenant: Joi.string().allow(null, ""),
     id_erp_apprenant: Joi.string().allow(null),
@@ -55,7 +57,6 @@ module.exports = ({ statutsCandidats }) => {
     periode_formation: Joi.string().allow(null, ""),
     annee_formation: Joi.number().allow(null),
     formation_rncp: Joi.string().allow(null, ""),
-    date_metier_mise_a_jour_statut: dateSchema.allow(null, ""),
 
     contrat_date_debut: dateSchema.allow(null),
     contrat_date_fin: dateSchema.allow(null),

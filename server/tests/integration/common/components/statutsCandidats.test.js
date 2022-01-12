@@ -774,33 +774,6 @@ integrationTests(__filename, () => {
       );
     });
 
-    it("Vérifie qu'on update historique_statut_apprenant avec la date actuelle lorsque date_metier_mise_a_jour_statut n'est pas fourni", async () => {
-      const { updateStatut, createStatutCandidat } = await statutsCandidats();
-
-      const createdStatut = await createStatutCandidat(simpleStatut);
-
-      assert.equal(createdStatut.historique_statut_apprenant.length, 1);
-      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
-
-      // Mise à jour du statut avec nouveau statut_apprenant
-      const updatePayload = {
-        statut_apprenant: codesStatutsCandidats.abandon,
-        date_metier_mise_a_jour_statut: null,
-      };
-      await updateStatut(createdStatut._id, updatePayload);
-
-      // Check value in db
-      const found = await StatutCandidatModel.findById(createdStatut._id);
-      assert.equal(found.historique_statut_apprenant.length, 2);
-      assert.equal(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
-      assert.equal(found.historique_statut_apprenant[1].position_statut, 2);
-      assert.equal(
-        found.historique_statut_apprenant[1].date_statut.toLocaleDateString(),
-        new Date().toLocaleDateString()
-      );
-    });
-
     it("Vérifie qu'on update historique_statut_apprenant en supprimant les éléments d'historique postérieurs à la date_metier_mise_a_jour_statut envoyée", async () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 

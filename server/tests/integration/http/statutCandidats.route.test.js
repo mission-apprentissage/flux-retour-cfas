@@ -98,6 +98,7 @@ httpTests(__filename, ({ startServer }) => {
     "uai_etablissement",
     "statut_apprenant",
     "annee_scolaire",
+    "date_metier_mise_a_jour_statut",
   ];
   requiredFields.forEach((requiredField) => {
     it(`Vérifie qu'on ne crée pas de donnée et renvoie une 200 + ERROR lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
