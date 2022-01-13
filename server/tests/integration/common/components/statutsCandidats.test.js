@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const { addDays } = require("date-fns");
+const { addDays, differenceInMilliseconds, isEqual } = require("date-fns");
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidatModel, CfaModel, FormationModel } = require("../../../../src/common/model");
@@ -9,6 +9,10 @@ const { createRandomStatutCandidat } = require("../../../data/randomizedSample")
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
+
+const isApproximatelyNow = (date) => {
+  return Math.abs(differenceInMilliseconds(date, new Date())) < 10;
+};
 
 integrationTests(__filename, () => {
   beforeEach(() => {
@@ -736,6 +740,7 @@ integrationTests(__filename, () => {
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
       assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
+      assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec le même statut_apprenant
       await updateStatut(createdStatut._id, { statut_apprenant: simpleStatut.statut_apprenant });
@@ -753,6 +758,7 @@ integrationTests(__filename, () => {
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
       assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
+      assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec nouveau statut_apprenant
       const updatePayload = {
@@ -763,15 +769,18 @@ integrationTests(__filename, () => {
 
       // Check value in db
       const found = await StatutCandidatModel.findById(createdStatut._id);
-      assert.equal(found.historique_statut_apprenant.length, 2);
-      assert.equal(found.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(found.historique_statut_apprenant[0].position_statut, 1);
-      assert.equal(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
-      assert.equal(found.historique_statut_apprenant[1].position_statut, 2);
+      const updatedHistorique = found.historique_statut_apprenant;
+      assert.equal(updatedHistorique.length, 2);
+      assert.equal(updatedHistorique[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(updatedHistorique[0].position_statut, 1);
+      assert.equal(updatedHistorique[1].valeur_statut, codesStatutsCandidats.abandon);
+      assert.equal(updatedHistorique[1].position_statut, 2);
       assert.equal(
-        found.historique_statut_apprenant[1].date_statut.getTime(),
+        updatedHistorique[1].date_statut.getTime(),
         new Date(updatePayload.date_metier_mise_a_jour_statut).getTime()
       );
+      assert.equal(isApproximatelyNow(updatedHistorique[1].date_reception), true);
+      assert.equal(isEqual(updatedHistorique[1].date_reception, updatedHistorique[0].date_reception), false);
     });
 
     it("Vérifie qu'on update historique_statut_apprenant en supprimant les éléments d'historique postérieurs à la date_metier_mise_a_jour_statut envoyée", async () => {
@@ -788,6 +797,7 @@ integrationTests(__filename, () => {
       const found1 = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found1.historique_statut_apprenant.length, 2);
       assert.equal(found1.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.inscrit);
+      assert.equal(isApproximatelyNow(found1.historique_statut_apprenant[1].date_reception), true);
 
       // update du statut avec une date antérieur au dernier élément de historique_statut_apprenant
       const updatePayload = {
@@ -805,6 +815,7 @@ integrationTests(__filename, () => {
         updatePayload.date_metier_mise_a_jour_statut.getTime()
       );
       assert.equal(found2.statut_apprenant, updatePayload.statut_apprenant);
+      assert.equal(isApproximatelyNow(found2.historique_statut_apprenant[1].date_reception), true);
     });
 
     it("Vérifie qu'on met à jour updated_at après un update", async () => {
@@ -853,6 +864,14 @@ integrationTests(__filename, () => {
       assert.equal(createdStatutJson.annee_formation, randomStatut.annee_formation);
       assert.deepEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
       assert.deepEqual(createdStatutJson.annee_scolaire, randomStatut.annee_scolaire);
+      assert.equal(createdStatutJson.historique_statut_apprenant.length, 1);
+      assert.equal(createdStatutJson.historique_statut_apprenant[0].valeur_statut, randomStatut.statut_apprenant);
+      assert.equal(
+        createdStatutJson.historique_statut_apprenant[0].date_statut.getTime(),
+        randomStatut.date_metier_mise_a_jour_statut.getTime()
+      );
+      assert.equal(isApproximatelyNow(createdStatutJson.historique_statut_apprenant[0].date_reception), true);
+      assert.equal(createdStatutJson.updated_at, null);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid", async () => {

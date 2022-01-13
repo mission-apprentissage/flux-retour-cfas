@@ -83,6 +83,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
     const newHistoriqueElement = {
       valeur_statut: toUpdate.statut_apprenant,
       date_statut: new Date(toUpdate.date_metier_mise_a_jour_statut),
+      date_reception: new Date(),
     };
 
     // add new element to historique
@@ -147,6 +148,7 @@ const createStatutCandidat = async (itemToCreate) => {
         valeur_statut: itemToCreate.statut_apprenant,
         position_statut: 1,
         date_statut: new Date(itemToCreate.date_metier_mise_a_jour_statut),
+        date_reception: new Date(),
       },
     ],
     date_mise_a_jour_statut: itemToCreate.date_mise_a_jour_statut,
