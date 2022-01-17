@@ -120,6 +120,7 @@ const jobNames = {
   cleanCfaDataFeedback: "clean-cfaDataFeedback",
   exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
+  repostLastStatutsReceived: "repost-last-statuts-received",
   warmUpCache: "warm-up-cache",
   retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
   statutsAvecDateIdentiqueDansHistorique: "statuts-avec-date-identique-dans-historique",

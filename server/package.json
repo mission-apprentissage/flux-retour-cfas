@@ -55,6 +55,7 @@
     "cache:warmup": "node -r dotenv/config src/jobs/warm-effectifs-cache/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
     "identify:bad-history-statuts": "node -r dotenv/config src/jobs/identify-bad-statuts-history/index.js",
+    "repost:lastStatuts-to-env": "node -r dotenv/config src/jobs/repost-last-statuts-received-to-env/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down",
