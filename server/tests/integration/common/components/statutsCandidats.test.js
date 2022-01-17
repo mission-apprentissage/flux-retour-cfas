@@ -11,7 +11,7 @@ const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespon
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 const isApproximatelyNow = (date) => {
-  return Math.abs(differenceInMilliseconds(date, new Date())) < 10;
+  return Math.abs(differenceInMilliseconds(date, new Date())) < 50;
 };
 
 integrationTests(__filename, () => {
