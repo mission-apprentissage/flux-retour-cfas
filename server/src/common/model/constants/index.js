@@ -123,6 +123,8 @@ const jobNames = {
   warmUpCache: "warm-up-cache",
   retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
   statutsAvecDateIdentiqueDansHistorique: "statuts-avec-date-identique-dans-historique",
+  statutsCandidatsRemoveHistoriqueElementWithInvalidValeurStatut:
+    "statuts-candidats-remove-historique-element-with-invalid-valeur-statut",
 };
 
 /**
