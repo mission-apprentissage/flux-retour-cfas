@@ -11,7 +11,7 @@ const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespon
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 const isApproximatelyNow = (date) => {
-  return Math.abs(differenceInMilliseconds(date, new Date())) < 10;
+  return Math.abs(differenceInMilliseconds(date, new Date())) < 50;
 };
 
 integrationTests(__filename, () => {
@@ -82,7 +82,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getStatut", () => {
-    it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd & uai_etablissement", async () => {
+    it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd, uai_etablissement et annee_scolaire", async () => {
       const { getStatut } = await statutsCandidats();
 
       const randomStatut = createRandomStatutCandidat();
@@ -181,6 +181,23 @@ integrationTests(__filename, () => {
       });
       assert.equal(found, null);
     });
+
+    it("Vérifie la mauvaise récupération d'un statut sur mauvais annee_scolaire", async () => {
+      const { getStatut } = await statutsCandidats();
+
+      const toAdd = new StatutCandidatModel(statutsTest[0]);
+      await toAdd.save();
+
+      // Checks exists method
+      const found = await getStatut({
+        nom_apprenant: toAdd.nom_apprenant,
+        prenom_apprenant: toAdd.prenom_apprenant,
+        formation_cfd: toAdd.formation_cfd,
+        uai_etablissement: toAdd.uai_etablissement,
+        annee_scolaire: "2000-2001",
+      });
+      assert.equal(found, null);
+    });
   });
 
   describe("addOrUpdateStatuts", () => {
@@ -269,52 +286,6 @@ integrationTests(__filename, () => {
       const result = await addOrUpdateStatuts([randomStatut]);
       assert.equal(result.added.length, 1);
       assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidatModel.countDocuments(), 1);
-    });
-
-    it("Vérifie qu'un statut sans annee_scolaire est updaté lorsque le même statut est envoyé avec annee_scolaire", async () => {
-      const { addOrUpdateStatuts } = await statutsCandidats();
-      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
-      const sameStatutWithAnneeScolaire = { ...statutWithoutAnneeScolaire, annee_scolaire: "2021-2022" };
-
-      // create the statut
-      const result1 = await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      assert.equal(result1.added.length, 1);
-      assert.equal(result1.updated.length, 0);
-      assert.equal(result1.added[0].annee_scolaire, null);
-      // send the same statut but with annee_scolaire, it should update it
-      const result2 = await addOrUpdateStatuts([sameStatutWithAnneeScolaire]);
-      assert.equal(result2.added.length, 0);
-      assert.equal(result2.updated.length, 1);
-      assert.equal(result2.updated[0].annee_scolaire, sameStatutWithAnneeScolaire.annee_scolaire);
-      assert.equal(await StatutCandidatModel.countDocuments(), 1);
-    });
-
-    it("Vérifie qu'un statut avec annee_scolaire dans un batch de statuts sans annee_scolaire est quand même créé", async () => {
-      const { addOrUpdateStatuts } = await statutsCandidats();
-      const statutWithAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: "2021-2022" });
-      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
-
-      const result = await addOrUpdateStatuts([statutWithAnneeScolaire, statutWithoutAnneeScolaire]);
-      assert.equal(result.added.length, 2);
-      const addedElement = result.added[0];
-      assert.equal(addedElement.annee_scolaire, statutWithAnneeScolaire.annee_scolaire);
-      assert.equal(addedElement.nom_apprenant, statutWithAnneeScolaire.nom_apprenant);
-      assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidatModel.countDocuments(), 2);
-    });
-
-    it("Vérifie qu'on ne crée pas de doublon pour un statut créé sans annee_scolaire", async () => {
-      const { addOrUpdateStatuts } = await statutsCandidats();
-      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
-
-      const result = await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      assert.equal(result.added.length, 1);
-      assert.equal(result.updated.length, 0);
-
-      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
       assert.equal(await StatutCandidatModel.countDocuments(), 1);
     });
 
@@ -1028,20 +999,6 @@ integrationTests(__filename, () => {
       const foundFormations = await FormationModel.find();
       assert.equal(foundFormations.length, 1);
       assert.equal(foundFormations[0].created_at.getTime(), formation.created_at.getTime());
-    });
-
-    it("Vérifie qu'on peut créer un statut sans annee_scolaire", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-
-      // Create statut
-      const statutWithoutAnneeScolaire = { ...createRandomStatutCandidat(), annee_scolaire: undefined };
-      const createdStatut = await createStatutCandidat(statutWithoutAnneeScolaire);
-
-      assert.ok(createdStatut);
-      assert.equal(createdStatut.prenom_apprenant, statutWithoutAnneeScolaire.prenom_apprenant);
-      assert.equal(createdStatut.nom_apprenant, statutWithoutAnneeScolaire.nom_apprenant);
-      assert.equal(createdStatut.formation_cfd, statutWithoutAnneeScolaire.formation_cfd);
-      assert.equal(createdStatut.uai_etablissement, statutWithoutAnneeScolaire.uai_etablissement);
     });
   });
 
