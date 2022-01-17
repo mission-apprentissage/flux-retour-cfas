@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const { addDays } = require("date-fns");
+const { addDays, differenceInMilliseconds, isEqual } = require("date-fns");
 const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidatModel, CfaModel, FormationModel } = require("../../../../src/common/model");
@@ -9,6 +9,10 @@ const { createRandomStatutCandidat } = require("../../../data/randomizedSample")
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
+
+const isApproximatelyNow = (date) => {
+  return Math.abs(differenceInMilliseconds(date, new Date())) < 50;
+};
 
 integrationTests(__filename, () => {
   beforeEach(() => {
@@ -78,7 +82,7 @@ integrationTests(__filename, () => {
   });
 
   describe("getStatut", () => {
-    it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd & uai_etablissement", async () => {
+    it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd, uai_etablissement et annee_scolaire", async () => {
       const { getStatut } = await statutsCandidats();
 
       const randomStatut = createRandomStatutCandidat();
@@ -177,6 +181,23 @@ integrationTests(__filename, () => {
       });
       assert.equal(found, null);
     });
+
+    it("Vérifie la mauvaise récupération d'un statut sur mauvais annee_scolaire", async () => {
+      const { getStatut } = await statutsCandidats();
+
+      const toAdd = new StatutCandidatModel(statutsTest[0]);
+      await toAdd.save();
+
+      // Checks exists method
+      const found = await getStatut({
+        nom_apprenant: toAdd.nom_apprenant,
+        prenom_apprenant: toAdd.prenom_apprenant,
+        formation_cfd: toAdd.formation_cfd,
+        uai_etablissement: toAdd.uai_etablissement,
+        annee_scolaire: "2000-2001",
+      });
+      assert.equal(found, null);
+    });
   });
 
   describe("addOrUpdateStatuts", () => {
@@ -265,52 +286,6 @@ integrationTests(__filename, () => {
       const result = await addOrUpdateStatuts([randomStatut]);
       assert.equal(result.added.length, 1);
       assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidatModel.countDocuments(), 1);
-    });
-
-    it("Vérifie qu'un statut sans annee_scolaire est updaté lorsque le même statut est envoyé avec annee_scolaire", async () => {
-      const { addOrUpdateStatuts } = await statutsCandidats();
-      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
-      const sameStatutWithAnneeScolaire = { ...statutWithoutAnneeScolaire, annee_scolaire: "2021-2022" };
-
-      // create the statut
-      const result1 = await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      assert.equal(result1.added.length, 1);
-      assert.equal(result1.updated.length, 0);
-      assert.equal(result1.added[0].annee_scolaire, null);
-      // send the same statut but with annee_scolaire, it should update it
-      const result2 = await addOrUpdateStatuts([sameStatutWithAnneeScolaire]);
-      assert.equal(result2.added.length, 0);
-      assert.equal(result2.updated.length, 1);
-      assert.equal(result2.updated[0].annee_scolaire, sameStatutWithAnneeScolaire.annee_scolaire);
-      assert.equal(await StatutCandidatModel.countDocuments(), 1);
-    });
-
-    it("Vérifie qu'un statut avec annee_scolaire dans un batch de statuts sans annee_scolaire est quand même créé", async () => {
-      const { addOrUpdateStatuts } = await statutsCandidats();
-      const statutWithAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: "2021-2022" });
-      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
-
-      const result = await addOrUpdateStatuts([statutWithAnneeScolaire, statutWithoutAnneeScolaire]);
-      assert.equal(result.added.length, 2);
-      const addedElement = result.added[0];
-      assert.equal(addedElement.annee_scolaire, statutWithAnneeScolaire.annee_scolaire);
-      assert.equal(addedElement.nom_apprenant, statutWithAnneeScolaire.nom_apprenant);
-      assert.equal(result.updated.length, 0);
-      assert.equal(await StatutCandidatModel.countDocuments(), 2);
-    });
-
-    it("Vérifie qu'on ne crée pas de doublon pour un statut créé sans annee_scolaire", async () => {
-      const { addOrUpdateStatuts } = await statutsCandidats();
-      const statutWithoutAnneeScolaire = createRandomStatutCandidat({ annee_scolaire: null });
-
-      const result = await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      assert.equal(result.added.length, 1);
-      assert.equal(result.updated.length, 0);
-
-      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
-      await addOrUpdateStatuts([statutWithoutAnneeScolaire]);
       assert.equal(await StatutCandidatModel.countDocuments(), 1);
     });
 
@@ -736,6 +711,7 @@ integrationTests(__filename, () => {
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
       assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
+      assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec le même statut_apprenant
       await updateStatut(createdStatut._id, { statut_apprenant: simpleStatut.statut_apprenant });
@@ -753,6 +729,7 @@ integrationTests(__filename, () => {
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
       assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
+      assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec nouveau statut_apprenant
       const updatePayload = {
@@ -763,42 +740,18 @@ integrationTests(__filename, () => {
 
       // Check value in db
       const found = await StatutCandidatModel.findById(createdStatut._id);
-      assert.equal(found.historique_statut_apprenant.length, 2);
-      assert.equal(found.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(found.historique_statut_apprenant[0].position_statut, 1);
-      assert.equal(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
-      assert.equal(found.historique_statut_apprenant[1].position_statut, 2);
+      const updatedHistorique = found.historique_statut_apprenant;
+      assert.equal(updatedHistorique.length, 2);
+      assert.equal(updatedHistorique[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(updatedHistorique[0].position_statut, 1);
+      assert.equal(updatedHistorique[1].valeur_statut, codesStatutsCandidats.abandon);
+      assert.equal(updatedHistorique[1].position_statut, 2);
       assert.equal(
-        found.historique_statut_apprenant[1].date_statut.getTime(),
+        updatedHistorique[1].date_statut.getTime(),
         new Date(updatePayload.date_metier_mise_a_jour_statut).getTime()
       );
-    });
-
-    it("Vérifie qu'on update historique_statut_apprenant avec la date actuelle lorsque date_metier_mise_a_jour_statut n'est pas fourni", async () => {
-      const { updateStatut, createStatutCandidat } = await statutsCandidats();
-
-      const createdStatut = await createStatutCandidat(simpleStatut);
-
-      assert.equal(createdStatut.historique_statut_apprenant.length, 1);
-      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
-
-      // Mise à jour du statut avec nouveau statut_apprenant
-      const updatePayload = {
-        statut_apprenant: codesStatutsCandidats.abandon,
-        date_metier_mise_a_jour_statut: null,
-      };
-      await updateStatut(createdStatut._id, updatePayload);
-
-      // Check value in db
-      const found = await StatutCandidatModel.findById(createdStatut._id);
-      assert.equal(found.historique_statut_apprenant.length, 2);
-      assert.equal(found.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.abandon);
-      assert.equal(found.historique_statut_apprenant[1].position_statut, 2);
-      assert.equal(
-        found.historique_statut_apprenant[1].date_statut.toLocaleDateString(),
-        new Date().toLocaleDateString()
-      );
+      assert.equal(isApproximatelyNow(updatedHistorique[1].date_reception), true);
+      assert.equal(isEqual(updatedHistorique[1].date_reception, updatedHistorique[0].date_reception), false);
     });
 
     it("Vérifie qu'on update historique_statut_apprenant en supprimant les éléments d'historique postérieurs à la date_metier_mise_a_jour_statut envoyée", async () => {
@@ -815,6 +768,7 @@ integrationTests(__filename, () => {
       const found1 = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found1.historique_statut_apprenant.length, 2);
       assert.equal(found1.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.inscrit);
+      assert.equal(isApproximatelyNow(found1.historique_statut_apprenant[1].date_reception), true);
 
       // update du statut avec une date antérieur au dernier élément de historique_statut_apprenant
       const updatePayload = {
@@ -832,6 +786,7 @@ integrationTests(__filename, () => {
         updatePayload.date_metier_mise_a_jour_statut.getTime()
       );
       assert.equal(found2.statut_apprenant, updatePayload.statut_apprenant);
+      assert.equal(isApproximatelyNow(found2.historique_statut_apprenant[1].date_reception), true);
     });
 
     it("Vérifie qu'on met à jour updated_at après un update", async () => {
@@ -880,6 +835,14 @@ integrationTests(__filename, () => {
       assert.equal(createdStatutJson.annee_formation, randomStatut.annee_formation);
       assert.deepEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
       assert.deepEqual(createdStatutJson.annee_scolaire, randomStatut.annee_scolaire);
+      assert.equal(createdStatutJson.historique_statut_apprenant.length, 1);
+      assert.equal(createdStatutJson.historique_statut_apprenant[0].valeur_statut, randomStatut.statut_apprenant);
+      assert.equal(
+        createdStatutJson.historique_statut_apprenant[0].date_statut.getTime(),
+        randomStatut.date_metier_mise_a_jour_statut.getTime()
+      );
+      assert.equal(isApproximatelyNow(createdStatutJson.historique_statut_apprenant[0].date_reception), true);
+      assert.equal(createdStatutJson.updated_at, null);
     });
 
     it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid", async () => {
@@ -1036,20 +999,6 @@ integrationTests(__filename, () => {
       const foundFormations = await FormationModel.find();
       assert.equal(foundFormations.length, 1);
       assert.equal(foundFormations[0].created_at.getTime(), formation.created_at.getTime());
-    });
-
-    it("Vérifie qu'on peut créer un statut sans annee_scolaire", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-
-      // Create statut
-      const statutWithoutAnneeScolaire = { ...createRandomStatutCandidat(), annee_scolaire: undefined };
-      const createdStatut = await createStatutCandidat(statutWithoutAnneeScolaire);
-
-      assert.ok(createdStatut);
-      assert.equal(createdStatut.prenom_apprenant, statutWithoutAnneeScolaire.prenom_apprenant);
-      assert.equal(createdStatut.nom_apprenant, statutWithoutAnneeScolaire.nom_apprenant);
-      assert.equal(createdStatut.formation_cfd, statutWithoutAnneeScolaire.formation_cfd);
-      assert.equal(createdStatut.uai_etablissement, statutWithoutAnneeScolaire.uai_etablissement);
     });
   });
 
