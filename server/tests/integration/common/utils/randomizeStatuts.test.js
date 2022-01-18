@@ -8,34 +8,31 @@ const integrationTests = require("../../../utils/integrationTests");
 integrationTests(__filename, () => {
   describe("createRandomStatutCandidat", () => {
     it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
-      const { existsStatut } = await statutsCandidats();
+      const { getStatut, createStatutCandidat } = await statutsCandidats();
 
-      const randomStatut = createRandomStatutCandidat();
-
-      const toAdd = new StatutCandidatModel(randomStatut);
-      await toAdd.save();
-      const result = toAdd.toJSON();
+      const randomStatutProps = createRandomStatutCandidat();
+      const result = await (await createStatutCandidat(randomStatutProps)).toJSON();
 
       // Checks creation
-      assert.equal(result.ine_apprenant, randomStatut.ine_apprenant);
-      assert.equal(result.nom_apprenant, randomStatut.nom_apprenant);
-      assert.equal(result.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.equal(result.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
-      assert.equal(result.email_contact, randomStatut.email_contact);
-      assert.equal(result.formation_cfd, randomStatut.formation_cfd);
-      assert.equal(result.libelle_court_formation, randomStatut.libelle_court_formation);
-      assert.equal(result.libelle_long_formation, randomStatut.libelle_long_formation);
-      assert.equal(result.uai_etablissement, randomStatut.uai_etablissement);
-      assert.equal(result.siret_etablissement, randomStatut.siret_etablissement);
-      assert.equal(result.nom_etablissement, randomStatut.nom_etablissement);
-      assert.equal(result.statut_apprenant, randomStatut.statut_apprenant);
-      assert.equal(result.source, randomStatut.source);
-      assert.equal(result.annee_formation, randomStatut.annee_formation);
-      assert.deepEqual(result.periode_formation, randomStatut.periode_formation);
-      assert.equal(result.annee_scolaire, randomStatut.annee_scolaire);
+      assert.equal(result.ine_apprenant, randomStatutProps.ine_apprenant);
+      assert.equal(result.nom_apprenant, randomStatutProps.nom_apprenant.toUpperCase());
+      assert.equal(result.prenom_apprenant, randomStatutProps.prenom_apprenant.toUpperCase());
+      assert.equal(result.ne_pas_solliciter, randomStatutProps.ne_pas_solliciter);
+      assert.equal(result.email_contact, randomStatutProps.email_contact);
+      assert.equal(result.formation_cfd, randomStatutProps.formation_cfd);
+      assert.equal(result.libelle_court_formation, randomStatutProps.libelle_court_formation);
+      assert.equal(result.libelle_long_formation, randomStatutProps.libelle_long_formation);
+      assert.equal(result.uai_etablissement, randomStatutProps.uai_etablissement);
+      assert.equal(result.siret_etablissement, randomStatutProps.siret_etablissement);
+      assert.equal(result.nom_etablissement, randomStatutProps.nom_etablissement);
+      assert.equal(result.statut_apprenant, randomStatutProps.statut_apprenant);
+      assert.equal(result.source, randomStatutProps.source);
+      assert.equal(result.annee_formation, randomStatutProps.annee_formation);
+      assert.deepEqual(result.periode_formation, randomStatutProps.periode_formation);
+      assert.equal(result.annee_scolaire, randomStatutProps.annee_scolaire);
 
       // Checks exists method
-      const found = await existsStatut({
+      const found = await getStatut({
         ine_apprenant: result.ine_apprenant,
         nom_apprenant: result.nom_apprenant,
         prenom_apprenant: result.prenom_apprenant,
@@ -44,7 +41,7 @@ integrationTests(__filename, () => {
         uai_etablissement: result.uai_etablissement,
         annee_scolaire: result.annee_scolaire,
       });
-      assert.equal(found, true);
+      assert.ok(found);
     });
 
     it("Vérifie l'existence d'un statut de candidat randomisé avec params", async () => {

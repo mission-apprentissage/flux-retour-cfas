@@ -8,7 +8,6 @@ const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
-  existsStatut,
   getStatut,
   addOrUpdateStatuts,
   createStatutCandidat,
@@ -16,15 +15,14 @@ module.exports = () => ({
   getDuplicatesList,
 });
 
-const existsStatut = async ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
-  const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire);
-  const count = await StatutCandidatModel.countDocuments(query);
-  return count !== 0;
-};
-
 const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
-  const query = getFindStatutQuery(nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire);
-  return StatutCandidatModel.findOne(query);
+  return StatutCandidatModel.findOne({
+    nom_apprenant: nom_apprenant.toUpperCase(),
+    prenom_apprenant: prenom_apprenant.toUpperCase(),
+    formation_cfd,
+    uai_etablissement,
+    annee_scolaire,
+  }).lean();
 };
 
 /**
@@ -113,8 +111,8 @@ const createStatutCandidat = async (itemToCreate) => {
 
   const toAdd = new StatutCandidatModel({
     ine_apprenant: itemToCreate.ine_apprenant,
-    nom_apprenant: itemToCreate.nom_apprenant,
-    prenom_apprenant: itemToCreate.prenom_apprenant,
+    nom_apprenant: itemToCreate.nom_apprenant.toUpperCase(),
+    prenom_apprenant: itemToCreate.prenom_apprenant.toUpperCase(),
     ne_pas_solliciter: itemToCreate.ne_pas_solliciter,
     email_contact: itemToCreate.email_contact,
     formation_cfd: itemToCreate.formation_cfd,
@@ -165,20 +163,6 @@ const createStatutCandidat = async (itemToCreate) => {
   });
   return toAdd.save();
 };
-
-const getFindStatutQuery = (
-  nom_apprenant = null,
-  prenom_apprenant = null,
-  formation_cfd,
-  uai_etablissement,
-  annee_scolaire
-) => ({
-  nom_apprenant,
-  prenom_apprenant,
-  formation_cfd,
-  uai_etablissement,
-  annee_scolaire,
-});
 
 /**
  * Récupération de la liste des statuts en doublons stricts pour les filtres passés en paramètres
