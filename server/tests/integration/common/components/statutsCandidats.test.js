@@ -20,34 +20,60 @@ integrationTests(__filename, () => {
     nockGetMetiersByCfd();
   });
 
-  describe("existsStatut", () => {
-    it("Vérifie l'existence d'un statut de candidat à partir de bons paramètres", async () => {
-      const { existsStatut, createStatutCandidat } = await statutsCandidats();
+  describe("getStatut", () => {
+    it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd, uai_etablissement et annee_scolaire", async () => {
+      const { getStatut, createStatutCandidat } = await statutsCandidats();
 
-      const sampleNom = "SMITH";
-      const samplePrenom = "John";
-      const validCfd = "abcd1234";
-      const validUai = "0123456Z";
-      const anneeScolaire = "2021-2022";
+      const randomStatutProps = createRandomStatutCandidat();
+      const createdStatut = await createStatutCandidat(randomStatutProps);
 
-      const statutToCreate = createRandomStatutCandidat({
-        nom_apprenant: sampleNom,
-        prenom_apprenant: samplePrenom,
-        formation_cfd: validCfd,
-        uai_etablissement: validUai,
-        annee_scolaire: anneeScolaire,
+      const found = await getStatut({
+        nom_apprenant: randomStatutProps.nom_apprenant,
+        prenom_apprenant: randomStatutProps.prenom_apprenant,
+        formation_cfd: randomStatutProps.formation_cfd,
+        uai_etablissement: randomStatutProps.uai_etablissement,
+        annee_scolaire: randomStatutProps.annee_scolaire,
       });
 
-      await createStatutCandidat(statutToCreate);
+      assert.equal(found._id.equals(createdStatut._id.toString()), true);
+    });
 
-      const found = await existsStatut({
-        nom_apprenant: sampleNom,
-        prenom_apprenant: samplePrenom,
-        formation_cfd: validCfd,
-        uai_etablissement: validUai,
-        annee_scolaire: anneeScolaire,
+    it("Vérifie que la récupération d'un statut est insensible à la casse de nom_apprenant", async () => {
+      const { getStatut, createStatutCandidat } = await statutsCandidats();
+
+      const randomStatutProps = createRandomStatutCandidat({
+        nom_apprenant: "SMITH",
       });
-      assert.equal(found, true);
+      const createdStatut = await createStatutCandidat(randomStatutProps);
+
+      const found = await getStatut({
+        nom_apprenant: "Smith",
+        prenom_apprenant: randomStatutProps.prenom_apprenant,
+        formation_cfd: randomStatutProps.formation_cfd,
+        uai_etablissement: randomStatutProps.uai_etablissement,
+        annee_scolaire: randomStatutProps.annee_scolaire,
+      });
+
+      assert.equal(found._id.equals(createdStatut._id.toString()), true);
+    });
+
+    it("Vérifie que la récupération d'un statut est insensible à la casse de prenom_apprenant", async () => {
+      const { getStatut, createStatutCandidat } = await statutsCandidats();
+
+      const randomStatutProps = createRandomStatutCandidat({
+        prenom_apprenant: "John",
+      });
+      const createdStatut = await createStatutCandidat(randomStatutProps);
+
+      const found = await getStatut({
+        nom_apprenant: randomStatutProps.nom_apprenant,
+        prenom_apprenant: "JOHN",
+        formation_cfd: randomStatutProps.formation_cfd,
+        uai_etablissement: randomStatutProps.uai_etablissement,
+        annee_scolaire: randomStatutProps.annee_scolaire,
+      });
+
+      assert.equal(found._id.equals(createdStatut._id.toString()), true);
     });
 
     const unicityCriterion = [
@@ -59,144 +85,22 @@ integrationTests(__filename, () => {
     ];
 
     unicityCriterion.forEach((unicityCriteria) => {
-      it(`Vérifie qu'on ne peut pas retrouver un statut candidat avec un ${unicityCriteria} incorrect`, async () => {
-        const { existsStatut, createStatutCandidat } = await statutsCandidats();
+      it(`Vérifie qu'on ne trouve pas le statut créé quand ${unicityCriteria} a changé`, async () => {
+        const { getStatut, createStatutCandidat } = await statutsCandidats();
 
-        const unicityInfo = {
-          nom_apprenant: "SMITH",
-          prenom_apprenant: "John",
-          formation_cfd: "abcd1234",
-          uai_etablissement: "0123456Z",
-          annee_scolaire: "2020-2021",
-        };
-        const statutToCreate = createRandomStatutCandidat(unicityInfo);
-        await createStatutCandidat(statutToCreate);
+        const randomStatutProps = createRandomStatutCandidat();
+        await createStatutCandidat(randomStatutProps);
 
-        const found = await existsStatut({
-          ...unicityInfo,
-          [unicityCriteria]: "incorrect",
+        const found = await getStatut({
+          nom_apprenant: randomStatutProps.nom_apprenant,
+          prenom_apprenant: randomStatutProps.prenom_apprenant,
+          formation_cfd: randomStatutProps.formation_cfd,
+          uai_etablissement: randomStatutProps.uai_etablissement,
+          annee_scolaire: randomStatutProps.annee_scolaire,
+          [unicityCriteria]: "changed",
         });
-        assert.equal(found, false);
+        assert.equal(found, null);
       });
-    });
-  });
-
-  describe("getStatut", () => {
-    it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd, uai_etablissement et annee_scolaire", async () => {
-      const { getStatut } = await statutsCandidats();
-
-      const randomStatut = createRandomStatutCandidat();
-      const toAdd = new StatutCandidatModel(randomStatut);
-      await toAdd.save();
-
-      // Checks exists method
-      const found = await getStatut({
-        nom_apprenant: randomStatut.nom_apprenant,
-        prenom_apprenant: randomStatut.prenom_apprenant,
-        formation_cfd: randomStatut.formation_cfd,
-        uai_etablissement: randomStatut.uai_etablissement,
-        annee_scolaire: randomStatut.annee_scolaire,
-      });
-
-      assert.notEqual(found, null);
-      assert.equal(found.ine_apprenant, randomStatut.ine_apprenant);
-      assert.equal(found.nom_apprenant, randomStatut.nom_apprenant);
-      assert.equal(found.prenom_apprenant, randomStatut.prenom_apprenant);
-      assert.equal(found.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
-      assert.equal(found.email_contact, randomStatut.email_contact);
-      assert.equal(found.formation_cfd, randomStatut.formation_cfd);
-      assert.equal(found.libelle_court_formation, randomStatut.libelle_court_formation);
-      assert.equal(found.libelle_long_formation, randomStatut.libelle_long_formation);
-      assert.equal(found.uai_etablissement, randomStatut.uai_etablissement);
-      assert.equal(found.siret_etablissement, randomStatut.siret_etablissement);
-      assert.equal(found.nom_etablissement, randomStatut.nom_etablissement);
-      assert.equal(found.statut_apprenant, randomStatut.statut_apprenant);
-      assert.equal(found.annee_scolaire, randomStatut.annee_scolaire);
-    });
-
-    it("Vérifie la mauvaise récupération d'un statut sur mauvais nom", async () => {
-      const { getStatut } = await statutsCandidats();
-
-      const toAdd = new StatutCandidatModel(createRandomStatutCandidat());
-      await toAdd.save();
-
-      // Checks exists method
-      const found = await getStatut({
-        nom_apprenant: "BAD_NOM",
-        prenom_apprenant: toAdd.prenom_apprenant,
-        formation_cfd: toAdd.formation_cfd,
-        uai_etablissement: toAdd.uai_etablissement,
-        annee_scolaire: toAdd.annee_scolaire,
-      });
-      assert.equal(found, null);
-    });
-
-    it("Vérifie la mauvaise récupération d'un statut sur mauvais prenom", async () => {
-      const { getStatut } = await statutsCandidats();
-
-      const toAdd = new StatutCandidatModel(createRandomStatutCandidat());
-      await toAdd.save();
-
-      // Checks exists method
-      const found = await getStatut({
-        nom_apprenant: toAdd.nom_apprenant,
-        prenom_apprenant: "BAD_PRENOM",
-        formation_cfd: toAdd.formation_cfd,
-        uai_etablissement: toAdd.uai_etablissement,
-        annee_scolaire: toAdd.annee_scolaire,
-      });
-      assert.equal(found, null);
-    });
-
-    it("Vérifie la mauvaise récupération d'un statut sur un mauvais formation_cfd", async () => {
-      const { getStatut } = await statutsCandidats();
-
-      const toAdd = new StatutCandidatModel(statutsTest[0]);
-      await toAdd.save();
-
-      // Checks exists method
-      const found = await getStatut({
-        nom_apprenant: toAdd.nom_apprenant,
-        prenom_apprenant: toAdd.prenom_apprenant,
-        formation_cfd: "BAD_ID_FORMATION",
-        uai_etablissement: toAdd.uai_etablissement,
-        annee_scolaire: toAdd.annee_scolaire,
-      });
-      assert.equal(found, null);
-    });
-
-    it("Vérifie la mauvaise récupération d'un statut sur mauvais uai_etablissement", async () => {
-      const { getStatut } = await statutsCandidats();
-
-      const toAdd = new StatutCandidatModel(statutsTest[0]);
-      await toAdd.save();
-
-      // Checks exists method
-      const found = await getStatut({
-        nom_apprenant: toAdd.nom_apprenant,
-        prenom_apprenant: toAdd.prenom_apprenant,
-        formation_cfd: toAdd.formation_cfd,
-        uai_etablissement: "BAD_UAI",
-        annee_scolaire: toAdd.annee_scolaire,
-      });
-      assert.equal(found, null);
-    });
-
-    it("Vérifie la mauvaise récupération d'un statut sur mauvais annee_scolaire", async () => {
-      const { getStatut } = await statutsCandidats();
-
-      const toAdd = new StatutCandidatModel(statutsTest[0]);
-      await toAdd.save();
-
-      // Checks exists method
-      const found = await getStatut({
-        nom_apprenant: toAdd.nom_apprenant,
-        prenom_apprenant: toAdd.prenom_apprenant,
-        formation_cfd: toAdd.formation_cfd,
-        uai_etablissement: toAdd.uai_etablissement,
-        annee_scolaire: "2000-2001",
-      });
-      assert.equal(found, null);
     });
   });
 
@@ -215,8 +119,8 @@ integrationTests(__filename, () => {
       assert.equal(added.length, 1);
       const foundAdded = await StatutCandidatModel.findById(added[0]._id).lean();
       assert.equal(foundAdded.ine_apprenant, statutsTestUpdate[3].ine_apprenant);
-      assert.equal(foundAdded.nom_apprenant, statutsTestUpdate[3].nom_apprenant);
-      assert.equal(foundAdded.prenom_apprenant, statutsTestUpdate[3].prenom_apprenant);
+      assert.equal(foundAdded.nom_apprenant.toUpperCase(), statutsTestUpdate[3].nom_apprenant.toUpperCase());
+      assert.equal(foundAdded.prenom_apprenant.toUpperCase(), statutsTestUpdate[3].prenom_apprenant.toUpperCase());
       assert.equal(foundAdded.ne_pas_solliciter, statutsTestUpdate[3].ne_pas_solliciter);
       assert.equal(foundAdded.email_contact, statutsTestUpdate[3].email_contact);
       assert.equal(foundAdded.formation_cfd, statutsTestUpdate[3].formation_cfd);
@@ -233,8 +137,8 @@ integrationTests(__filename, () => {
 
       const firstUpdated = await StatutCandidatModel.findById(updated[0]._id).lean();
       assert.equal(firstUpdated.ine_apprenant, statutsTestUpdate[0].ine_apprenant);
-      assert.equal(firstUpdated.nom_apprenant, statutsTestUpdate[0].nom_apprenant);
-      assert.equal(firstUpdated.prenom_apprenant, statutsTestUpdate[0].prenom_apprenant);
+      assert.equal(firstUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[0].nom_apprenant.toUpperCase());
+      assert.equal(firstUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[0].prenom_apprenant.toUpperCase());
       assert.equal(firstUpdated.ne_pas_solliciter, statutsTestUpdate[0].ne_pas_solliciter);
       assert.equal(firstUpdated.email_contact, statutsTestUpdate[0].email_contact);
       assert.equal(firstUpdated.formation_cfd, statutsTestUpdate[0].formation_cfd);
@@ -250,8 +154,8 @@ integrationTests(__filename, () => {
 
       const secondUpdated = await StatutCandidatModel.findById(updated[1]._id).lean();
       assert.equal(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
-      assert.equal(secondUpdated.nom_apprenant, statutsTestUpdate[1].nom_apprenant);
-      assert.equal(secondUpdated.prenom_apprenant, statutsTestUpdate[1].prenom_apprenant);
+      assert.equal(secondUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[1].nom_apprenant.toUpperCase());
+      assert.equal(secondUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[1].prenom_apprenant.toUpperCase());
       assert.equal(secondUpdated.ne_pas_solliciter, statutsTestUpdate[1].ne_pas_solliciter);
       assert.equal(secondUpdated.email_contact, statutsTestUpdate[1].email_contact);
       assert.equal(secondUpdated.formation_cfd, statutsTestUpdate[1].formation_cfd);
@@ -264,8 +168,8 @@ integrationTests(__filename, () => {
       assert.ok(secondUpdated.updated_at);
 
       const thirdUpdated = await StatutCandidatModel.findById(updated[2]._id).lean();
-      assert.equal(thirdUpdated.nom_apprenant, statutsTestUpdate[2].nom_apprenant);
-      assert.equal(thirdUpdated.prenom_apprenant, statutsTestUpdate[2].prenom_apprenant);
+      assert.equal(thirdUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[2].nom_apprenant.toUpperCase());
+      assert.equal(thirdUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[2].prenom_apprenant.toUpperCase());
       assert.equal(thirdUpdated.ne_pas_solliciter, statutsTestUpdate[2].ne_pas_solliciter);
       assert.equal(thirdUpdated.email_contact, statutsTestUpdate[2].email_contact);
       assert.equal(thirdUpdated.formation_cfd, statutsTestUpdate[2].formation_cfd);
@@ -431,7 +335,7 @@ integrationTests(__filename, () => {
 
       // check in db
       const found = await StatutCandidatModel.findById(firstCallResult.added[0]._id);
-      assert.equal(found.prenom_apprenant, samplePrenom);
+      assert.equal(found.prenom_apprenant, samplePrenom.toUpperCase());
       assert.equal(found.updated_at, null);
     });
 
@@ -820,8 +724,8 @@ integrationTests(__filename, () => {
       const createdStatutJson = createdStatut.toJSON();
 
       assert.equal(createdStatutJson.ine_apprenant, randomStatut.ine_apprenant);
-      assert.equal(createdStatutJson.nom_apprenant, randomStatut.nom_apprenant);
-      assert.equal(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant);
+      assert.equal(createdStatutJson.nom_apprenant, randomStatut.nom_apprenant.toUpperCase());
+      assert.equal(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant.toUpperCase());
       assert.equal(createdStatutJson.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.equal(createdStatutJson.email_contact, randomStatut.email_contact);
       assert.equal(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
@@ -1015,8 +919,8 @@ integrationTests(__filename, () => {
       const commonData = {
         formation_cfd: "01022103",
         uai_etablissement: "0762518Z",
-        prenom_apprenant: "Jean",
-        nom_apprenant: "Dupont",
+        prenom_apprenant: "JEAN",
+        nom_apprenant: "DUPONT",
         annee_scolaire: "2022-2023",
       };
       for (let index = 0; index < 3; index++) {
@@ -1044,7 +948,7 @@ integrationTests(__filename, () => {
       const commonData = {
         formation_cfd: "01022103",
         uai_etablissement: "0762518Z",
-        nom_apprenant: "Wachosky",
+        nom_apprenant: "WACHOSKY",
         annee_scolaire: "2020-2021",
       };
       for (let index = 0; index < 4; index++) {
@@ -1073,8 +977,8 @@ integrationTests(__filename, () => {
       const firstDup = {
         formation_cfd: "01022103",
         uai_etablissement: "0762518Z",
-        prenom_apprenant: "Jean",
-        nom_apprenant: "Dupont",
+        prenom_apprenant: "JEA",
+        nom_apprenant: "DUPONT",
         annee_scolaire: "2022-2023",
         statut_apprenant: 2,
       };

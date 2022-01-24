@@ -108,6 +108,9 @@ const jobNames = {
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
   statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
   statutsCandidatsRetrieveFormationsInCatalog: "statutsCandidats-retrieve-formation-in-catalog",
+  statutsCandidatsBadHistoryIdentifyAntidated: "statutsCandidats-bad-history-identify-antidated",
+  statutsCandidatsBadHistoryCleanAntidated: "statutsCandidats-bad-history-clean-antidated",
+  statutsCandidatsBadHistoryIdentifyBadDates: "statutsCandidats-bad-history-identify-badDates",
   createIndexes: "create-indexes",
   createRcoStatutsCollection: "create-rco-statuts-collection",
   clearUsers: "clear-users",
@@ -120,9 +123,13 @@ const jobNames = {
   cleanCfaDataFeedback: "clean-cfaDataFeedback",
   exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
+  repostLastStatutsReceived: "repost-last-statuts-received",
   warmUpCache: "warm-up-cache",
   retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
   statutsAvecDateIdentiqueDansHistorique: "statuts-avec-date-identique-dans-historique",
+  statutsCandidatsRemoveHistoriqueElementWithInvalidValeurStatut:
+    "statuts-candidats-remove-historique-element-with-invalid-valeur-statut",
+  statutsAvecDerniersElementsHistoriqueDateIdentique: "statuts-avec-date-identique-dans-historique",
 };
 
 /**
