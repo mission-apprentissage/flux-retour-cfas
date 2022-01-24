@@ -13,6 +13,8 @@ module.exports = () => ({
   createStatutCandidat,
   updateStatut,
   getDuplicatesList,
+  getStatutsWithHistoryDateUnordered,
+  getStatutsWithBadDate,
 });
 
 const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
@@ -305,4 +307,60 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
       discriminants,
     };
   });
+};
+
+/**
+ * Récupération de la liste des statuts avec un historique antidaté
+ * @returns
+ */
+const getStatutsWithHistoryDateUnordered = async () => {
+  const aggregationPipeline = [
+    // Filtrage historique > 1 élement
+    { $match: { "historique_statut_apprenant.1": { $exists: true } } },
+    // Ajout d'un flag isHistoryDateOrdered - fonction d'identification des historiques avec des dates désordonnées
+    {
+      $addFields: {
+        isHistoryDateOrdered: {
+          $function: {
+            body: "function(historique_statut_apprenant){return historique_statut_apprenant.slice(1).every((item, i) => historique_statut_apprenant[i].date_statut <= item.date_statut)}",
+            args: ["$historique_statut_apprenant"],
+            lang: "js",
+          },
+        },
+      },
+    },
+    // Filtre sur isHistoryDateOrdered = false
+    { $match: { isHistoryDateOrdered: false } },
+  ];
+
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
+  return result;
+};
+
+/**
+ * Récupération de la liste des statuts ayant une date invalide (< année 2000)
+ * @returns
+ */
+const getStatutsWithBadDate = async () => {
+  const aggregationPipeline = [
+    // Filtrage historique > 1 élement
+    { $match: { "historique_statut_apprenant.1": { $exists: true } } },
+    // Ajout d'un flag hasHistoryBadDate - fonction d'identification des historiques avec date invalide (< année 2000)
+    {
+      $addFields: {
+        hasHistoryBadDate: {
+          $function: {
+            body: "function(historique_statut_apprenant){return historique_statut_apprenant.some((item) => item.date_statut <= new Date(`2000-01-01`))}",
+            args: ["$historique_statut_apprenant"],
+            lang: "js",
+          },
+        },
+      },
+    },
+    // Filtre sur hasHistoryBadDate
+    { $match: { hasHistoryBadDate: true } },
+  ];
+
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
+  return result;
 };

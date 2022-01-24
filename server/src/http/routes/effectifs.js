@@ -36,7 +36,7 @@ module.exports = ({ stats, effectifs, cache }) => {
   const router = express.Router();
 
   /**
-   * Gets region conversion stats
+   * Gets nb organismes formation
    */
   router.get(
     "/total-organismes",
@@ -92,10 +92,10 @@ module.exports = ({ stats, effectifs, cache }) => {
       } else {
         const response = {
           date,
-          apprentis: await effectifs.getApprentisCountAtDate(date, filters),
-          rupturants: await effectifs.getRupturantsCountAtDate(date, filters),
-          inscritsSansContrat: await effectifs.getInscritsSansContratCountAtDate(date, filters),
-          abandons: await effectifs.getAbandonsCountAtDate(date, filters),
+          apprentis: await effectifs.apprentis.getCountAtDate(date, filters),
+          rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
+          inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
+          abandons: await effectifs.abandons.getCountAtDate(date, filters),
         };
         // cache the result
         await cache.set(cacheKey, JSON.stringify(response));
@@ -215,6 +215,9 @@ module.exports = ({ stats, effectifs, cache }) => {
     })
   );
 
+  /**
+   * Get effectifs details by cfa
+   */
   router.get(
     "/cfa",
     applyUserRoleFilter,
@@ -253,6 +256,9 @@ module.exports = ({ stats, effectifs, cache }) => {
     })
   );
 
+  /**
+   * Get effectifs details by departement
+   */
   router.get(
     "/departement",
     applyUserRoleFilter,
@@ -284,30 +290,6 @@ module.exports = ({ stats, effectifs, cache }) => {
         await cache.set(cacheKey, JSON.stringify(effectifsByDepartementAtDate));
         return res.json(effectifsByDepartementAtDate);
       }
-    })
-  );
-
-  router.get(
-    "/chiffres-cles",
-    applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      // Validate schema
-      const validationSchema = Joi.object({
-        startDate: Joi.date().required(),
-        endDate: Joi.date().required(),
-        ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, {
-        abortEarly: false,
-      });
-
-      const { startDate, endDate, ...filters } = req.query;
-      const dateRange = [new Date(startDate), new Date(endDate)];
-
-      const nouveauxContratsCountInDateRange = await effectifs.getNouveauxContratsCountInDateRange(dateRange, filters);
-      const rupturesCountInDateRange = await effectifs.getNbRupturesContratAtDate(dateRange[1], filters);
-
-      return res.json({ nbContrats: nouveauxContratsCountInDateRange, nbRuptures: rupturesCountInDateRange });
     })
   );
 
