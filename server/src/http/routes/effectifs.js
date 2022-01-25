@@ -27,6 +27,11 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
+const validateReqQuery = (validationSchema) => async (req, res, next) => {
+  await validationSchema.validateAsync(req.query, { abortEarly: false });
+  next();
+};
+
 const getCacheKeyForRoute = (route, filters) => {
   // we use json-stringify-deterministic to make sure that {a: 1, b: 2} stringified is the same as {b: 2, a: 1}
   return `${route}:${stringify(filters)}`;
@@ -61,18 +66,14 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      // Validate schema
-      const validationSchema = Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, {
-        abortEarly: false,
-      });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       // Gets & format params:
-      // eslint-disable-next-line no-unused-vars
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
       const filters = {
@@ -110,12 +111,13 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/niveau-formation",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      await Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      }).validateAsync(req.query, { abortEarly: false });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
       const filters = {
@@ -146,13 +148,14 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/formation",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      await Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         niveau_formation: Joi.string().allow(null, ""),
         ...commonEffectifsFilters,
-      }).validateAsync(req.query, { abortEarly: false });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
       const filters = {
@@ -183,13 +186,13 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/annee-formation",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      const validationSchema = Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, { abortEarly: false });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
       const filters = {
@@ -221,16 +224,13 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/cfa",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      // Validate schema
-      const validationSchema = Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, {
-        abortEarly: false,
-      });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromQuery, ...filtersFromBody } = req.query;
       const date = new Date(dateFromQuery);
       const filters = {
@@ -262,13 +262,13 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/departement",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      const validationSchema = Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, { abortEarly: false });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromQuery, ...filtersFromBody } = req.query;
       const date = new Date(dateFromQuery);
       const filters = {
