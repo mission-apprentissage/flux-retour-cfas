@@ -1,10 +1,12 @@
 const express = require("express");
 const stringify = require("json-stringify-deterministic");
+const { parseAsync } = require("json2csv");
 const { format } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles } = require("../../common/roles");
+const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 
 const applyUserRoleFilter = (req, _res, next) => {
   // users with network role should not be able to see data for other reseau
@@ -37,7 +39,7 @@ const getCacheKeyForRoute = (route, filters) => {
   return `${route}:${stringify(filters)}`;
 };
 
-module.exports = ({ stats, effectifs, cache }) => {
+module.exports = ({ stats, effectifs, cfas, formations, cache }) => {
   const router = express.Router();
 
   /**
@@ -290,6 +292,87 @@ module.exports = ({ stats, effectifs, cache }) => {
         await cache.set(cacheKey, JSON.stringify(effectifsByDepartementAtDate));
         return res.json(effectifsByDepartementAtDate);
       }
+    })
+  );
+
+  router.get(
+    "/export-csv-repartition-effectifs-par-organisme",
+    applyUserRoleFilter,
+    validateReqQuery(
+      Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      })
+    ),
+    tryCatch(async (req, res) => {
+      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromQuery);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
+
+      const effectifsByCfaAtDate = await effectifs.getEffectifsCountByCfaAtDate(date, filters);
+      const formattedForCsv = await Promise.all(
+        effectifsByCfaAtDate.map(async ({ uai_etablissement, nom_etablissement, effectifs }) => {
+          const cfa = await cfas.getFromUai(uai_etablissement);
+          return {
+            DEPARTEMENT: getDepartementCodeFromUai(uai_etablissement),
+            RESEAUX: cfa.reseaux?.length > 0 ? JSON.stringify(cfa.reseaux) : "",
+            "NOM DE L'ÉTABLISSEMENT": nom_etablissement,
+            UAI: uai_etablissement,
+            SIRET: cfa.sirets?.length > 0 ? JSON.stringify(cfa.sirets) : "",
+            APPRENTIS: effectifs.apprentis,
+            "SANS CONTRAT": effectifs.inscritsSansContrat,
+            RUPTURANTS: effectifs.rupturants,
+            ABANDONS: effectifs.abandons,
+          };
+        })
+      );
+
+      const csv = await parseAsync(formattedForCsv);
+
+      return res.attachment("export-csv-repartition-effectifs-par-organisme.csv").send(csv);
+    })
+  );
+
+  router.get(
+    "/export-csv-repartition-effectifs-par-formation",
+    applyUserRoleFilter,
+    validateReqQuery(
+      Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      })
+    ),
+    tryCatch(async (req, res) => {
+      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromQuery);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
+
+      const effectifsParFormation = await effectifs.getEffectifsCountByFormationAtDate(date, filters);
+      const formattedForCsv = await Promise.all(
+        effectifsParFormation.map(async ({ formation_cfd, intitule, effectifs }) => {
+          const formation = await formations.getFormationWithCfd(formation_cfd);
+          return {
+            NIVEAU: formation?.niveau,
+            "INTITULE NIVEAU": formation?.niveau_libelle,
+            "INTITULE DE LA FORMATION": intitule,
+            CFD: formation_cfd,
+            APPRENTIS: effectifs.apprentis,
+            "SANS CONTRAT": effectifs.inscritsSansContrat,
+            RUPTURANTS: effectifs.rupturants,
+            ABANDONS: effectifs.abandons,
+          };
+        })
+      );
+
+      const csv = await parseAsync(formattedForCsv);
+
+      return res.attachment("export-csv-repartition-effectifs-par-formation.csv").send(csv);
     })
   );
 

@@ -1,8 +1,8 @@
-import { Box, Heading } from "@chakra-ui/react";
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
+import { Heading } from "@chakra-ui/react";
+import { TabPanel } from "@chakra-ui/tabs";
 import React from "react";
 
-import { Section } from "../../../../common/components";
+import { RepartitionEffectifsTabs, Section } from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
 import RepartitionEffectifsParFormation from "../../../../common/components/tables/RepartitionEffectifsParFormation";
 import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
@@ -27,34 +27,22 @@ const RepartitionEffectifsReseau = ({ filters }) => {
       <Heading as="h3" variant="h3">
         Répartition des effectifs
       </Heading>
-      <Tabs isLazy lazyBehavior="keepMounted">
-        <TabList>
-          <Tab>
-            <Box as="i" className="ri-community-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
-            Organismes de formation
-          </Tab>
-          <Tab>
-            <Box as="i" className="ri-book-mark-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
-            Formations
-          </Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <RepartitionEffectifsParCfa
-              repartitionEffectifsParCfa={effectifsParCfa}
-              loading={isEffectifsParCfaLoading}
-              error={effectifsParCfaError}
-            />
-          </TabPanel>
-          <TabPanel>
-            <RepartitionEffectifsParFormation
-              repartitionEffectifs={effectifsParNiveauFormation}
-              loading={isEffectifsParNiveauFormationLoading}
-              error={effectifsParNiveauFormationError}
-            />
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+      <RepartitionEffectifsTabs>
+        <TabPanel>
+          <RepartitionEffectifsParCfa
+            repartitionEffectifsParCfa={effectifsParCfa}
+            loading={isEffectifsParCfaLoading}
+            error={effectifsParCfaError}
+          />
+        </TabPanel>
+        <TabPanel>
+          <RepartitionEffectifsParFormation
+            repartitionEffectifs={effectifsParNiveauFormation}
+            loading={isEffectifsParNiveauFormationLoading}
+            error={effectifsParNiveauFormationError}
+          />
+        </TabPanel>
+      </RepartitionEffectifsTabs>
     </Section>
   );
 };

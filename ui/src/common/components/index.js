@@ -24,3 +24,7 @@ export { default as BreadcrumbNav } from "./BreadcrumbNav/BreadcrumbNav";
 export { default as Table } from "./tables/Table";
 
 export { default as TableSkeleton } from "./skeletons/TableSkeleton";
+
+export { default as RepartitionEffectifsTabs } from "./RepartitionEffectifsTabs/RepartitionEffectifsTabs";
+export { default as ExportRepartitionByFormationButton } from "./ExportRepartitionByFormationButton/ExportRepartitionByFormationButton";
+export { default as ExportRepartitionByOrganismeButton } from "./ExportRepartitionByOrganismeButton/ExportRepartitionByOrganismeButton";
