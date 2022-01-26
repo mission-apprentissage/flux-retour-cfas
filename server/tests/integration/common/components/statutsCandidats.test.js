@@ -61,13 +61,13 @@ integrationTests(__filename, () => {
       const { getStatut, createStatutCandidat } = await statutsCandidats();
 
       const randomStatutProps = createRandomStatutCandidat({
-        prenom_apprenant: "John",
+        prenom_apprenant: "John Abdoul-Bæstoï*",
       });
       const createdStatut = await createStatutCandidat(randomStatutProps);
 
       const found = await getStatut({
         nom_apprenant: randomStatutProps.nom_apprenant,
-        prenom_apprenant: "JOHN",
+        prenom_apprenant: "jOhN AbDoUl-BÆSTOÏ*",
         formation_cfd: randomStatutProps.formation_cfd,
         uai_etablissement: randomStatutProps.uai_etablissement,
         annee_scolaire: randomStatutProps.annee_scolaire,

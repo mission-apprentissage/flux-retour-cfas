@@ -19,8 +19,8 @@ module.exports = () => ({
 
 const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
   return StatutCandidatModel.findOne({
-    nom_apprenant: nom_apprenant.toUpperCase(),
-    prenom_apprenant: prenom_apprenant.toUpperCase(),
+    nom_apprenant: { $regex: new RegExp(nom_apprenant, "i") },
+    prenom_apprenant: { $regex: new RegExp(prenom_apprenant, "i") },
     formation_cfd,
     uai_etablissement,
     annee_scolaire,
