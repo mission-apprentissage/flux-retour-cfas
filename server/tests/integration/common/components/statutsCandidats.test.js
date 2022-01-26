@@ -61,13 +61,13 @@ integrationTests(__filename, () => {
       const { getStatut, createStatutCandidat } = await statutsCandidats();
 
       const randomStatutProps = createRandomStatutCandidat({
-        prenom_apprenant: "John",
+        prenom_apprenant: "John Abdoul-Bæstoï*",
       });
       const createdStatut = await createStatutCandidat(randomStatutProps);
 
       const found = await getStatut({
         nom_apprenant: randomStatutProps.nom_apprenant,
-        prenom_apprenant: "JOHN",
+        prenom_apprenant: "jOhN AbDoUl-BÆSTOÏ*",
         formation_cfd: randomStatutProps.formation_cfd,
         uai_etablissement: randomStatutProps.uai_etablissement,
         annee_scolaire: randomStatutProps.annee_scolaire,
@@ -607,6 +607,91 @@ integrationTests(__filename, () => {
   });
 
   describe("updateStatutCandidat", () => {
+    it("Vérifie qu'on ne peut pas update le champ prenom_apprenant", async () => {
+      const { updateStatut, createStatutCandidat } = await statutsCandidats();
+
+      const createdStatut = await createStatutCandidat(
+        createRandomStatutCandidat({
+          prenom_apprenant: "John",
+        })
+      );
+      assert.equal(createdStatut.updated_at, null);
+
+      // First update
+      await updateStatut(createdStatut._id, { prenom_apprenant: "André-Pierre" });
+      // Check value in db
+      const foundAfterUpdate = await StatutCandidatModel.findById(createdStatut._id);
+      assert.equal(foundAfterUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
+    });
+
+    it("Vérifie qu'on ne peut pas update le champ nom_apprenant", async () => {
+      const { updateStatut, createStatutCandidat } = await statutsCandidats();
+
+      const createdStatut = await createStatutCandidat(
+        createRandomStatutCandidat({
+          nom_apprenant: "Macron",
+        })
+      );
+      assert.equal(createdStatut.updated_at, null);
+
+      // First update
+      await updateStatut(createdStatut._id, { nom_apprenant: "Philippe" });
+      // Check value in db
+      const foundAfterUpdate = await StatutCandidatModel.findById(createdStatut._id);
+      assert.equal(foundAfterUpdate.nom_apprenant, createdStatut.nom_apprenant);
+    });
+
+    it("Vérifie qu'on ne peut pas update le champ annee_scolaire", async () => {
+      const { updateStatut, createStatutCandidat } = await statutsCandidats();
+
+      const createdStatut = await createStatutCandidat(
+        createRandomStatutCandidat({
+          annee_scolaire: "2021-2022",
+        })
+      );
+      assert.equal(createdStatut.updated_at, null);
+
+      // First update
+      await updateStatut(createdStatut._id, { annee_scolaire: "2022-2023" });
+      // Check value in db
+      const foundAfterUpdate = await StatutCandidatModel.findById(createdStatut._id);
+      assert.equal(foundAfterUpdate.annee_scolaire, createdStatut.annee_scolaire);
+    });
+
+    it("Vérifie qu'on ne peut pas update le champ uai_etablissement", async () => {
+      const { updateStatut, createStatutCandidat } = await statutsCandidats();
+
+      const createdStatut = await createStatutCandidat(
+        createRandomStatutCandidat({
+          uai_etablissement: "0123456Z",
+        })
+      );
+      assert.equal(createdStatut.updated_at, null);
+
+      // First update
+      await updateStatut(createdStatut._id, { uai_etablissement: "0123499X" });
+      // Check value in db
+      const foundAfterUpdate = await StatutCandidatModel.findById(createdStatut._id);
+      assert.equal(foundAfterUpdate.uai_etablissement, createdStatut.uai_etablissement);
+    });
+
+    it("Vérifie qu'on ne peut pas update le champ formation_cfd", async () => {
+      const { updateStatut, createStatutCandidat } = await statutsCandidats();
+
+      const createdStatut = await createStatutCandidat(
+        createRandomStatutCandidat({
+          formation_cfd: "abcd1234",
+        })
+      );
+      assert.equal(createdStatut.updated_at, null);
+
+      // First update
+      await updateStatut(createdStatut._id, { formation_cfd: "abcd9999" });
+      // Check value in db
+      const foundAfterUpdate = await StatutCandidatModel.findById(createdStatut._id);
+      assert.equal(foundAfterUpdate.formation_cfd, createdStatut.formation_cfd);
+    });
+
     it("Vérifie qu'on update PAS historique_statut_apprenant quand un statut_apprenant identique à l'actuel est envoyé", async () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 
@@ -700,16 +785,16 @@ integrationTests(__filename, () => {
       assert.equal(createdStatut.updated_at, null);
 
       // First update
-      await updateStatut(createdStatut._id, { prenom_apprenant: "André-Pierre" });
+      await updateStatut(createdStatut._id, { email_contact: "mail@example.com" });
       // Check value in db
       const foundAfterFirstUpdate = await StatutCandidatModel.findById(createdStatut._id);
-      assert.notEqual(foundAfterFirstUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
+      assert.notEqual(foundAfterFirstUpdate.email_contact, createdStatut.email_contact);
       assert.notEqual(foundAfterFirstUpdate.updated_at, null);
 
       // Second update
-      await updateStatut(createdStatut._id, { nom_apprenant: "Gignac" });
+      await updateStatut(createdStatut._id, { periode_formation: [2030, 2033] });
       const foundAfterSecondUpdate = await StatutCandidatModel.findById(createdStatut._id);
-      assert.notEqual(foundAfterSecondUpdate.nom_apprenant, createdStatut.nom_apprenant);
+      assert.notEqual(foundAfterSecondUpdate.periode_formation, createdStatut.periode_formation);
       assert.notEqual(foundAfterSecondUpdate.updated_at, foundAfterFirstUpdate.updated_at);
     });
   });
