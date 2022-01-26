@@ -1,4 +1,5 @@
 const { StatutCandidatModel, CfaModel } = require("../model");
+const omit = require("lodash.omit");
 const { duplicatesTypesCodes } = require("../model/constants");
 const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
@@ -63,14 +64,23 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
 const updateStatut = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
+  // strip unicity criteria because it does not make sense to update them
+  const updatePayload = omit(
+    toUpdate,
+    "prenom_apprenant",
+    "nom_apprenant",
+    "annee_scolaire",
+    "formation_cfd",
+    "uai_etablissement"
+  );
   const existingItem = await StatutCandidatModel.findById(existingItemId);
 
   // statut_apprenant has changed?
-  if (existingItem.statut_apprenant !== toUpdate.statut_apprenant) {
+  if (existingItem.statut_apprenant !== updatePayload.statut_apprenant) {
     const historique = existingItem.historique_statut_apprenant.slice();
     const newHistoriqueElement = {
-      valeur_statut: toUpdate.statut_apprenant,
-      date_statut: new Date(toUpdate.date_metier_mise_a_jour_statut),
+      valeur_statut: updatePayload.statut_apprenant,
+      date_statut: new Date(updatePayload.date_metier_mise_a_jour_statut),
       date_reception: new Date(),
     };
 
@@ -84,15 +94,15 @@ const updateStatut = async (existingItemId, toUpdate) => {
     // find new element index in sorted historique to remove subsequent ones
     const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
 
-    toUpdate.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1).map((el, index) => {
+    updatePayload.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1).map((el, index) => {
       return { ...el, position_statut: index + 1 };
     });
-    toUpdate.statut_apprenant = newHistoriqueElement.valeur_statut;
+    updatePayload.statut_apprenant = newHistoriqueElement.valeur_statut;
   }
 
   // Update & return
   const updateQuery = {
-    ...toUpdate,
+    ...updatePayload,
     updated_at: new Date(),
   };
   const updated = await StatutCandidatModel.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
