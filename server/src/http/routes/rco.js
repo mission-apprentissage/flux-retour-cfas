@@ -1,23 +1,24 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { oleoduc, transformData } = require("oleoduc");
-const { RcoStatutCandidatModel } = require("../../common/model");
-const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { jobNames, jobEventStatuts } = require("../../common/model/constants");
+const { oleoduc, transformIntoJSON } = require("oleoduc");
+const { sendJsonStream } = require("../../common/utils/httpUtils");
+const { findAndPaginate } = require("../../common/utils/dbUtils");
 
-module.exports = ({ jobEvents }) => {
+module.exports = ({ db, jobEvents }) => {
   const router = express.Router();
 
   /**
-   * Récupération des statuts pour RCO au format NDJson
+   * Récupération des statuts pour RCO avec pagination
    */
   router.get(
-    "/statutsCandidats.ndjson",
+    "/statutsCandidats",
     tryCatch(async (req, res) => {
-      let { limit } = await Joi.object({ limit: Joi.number().default(1000000) }).validateAsync(req.query, {
-        abortEarly: false,
-      });
+      const { page, limit } = await Joi.object({
+        page: Joi.number().default(1),
+        limit: Joi.number().default(1000),
+      }).validateAsync(req.query, { abortEarly: false });
 
       if (!(await jobEvents.isJobInAction(jobNames.createRcoStatutsCollection, jobEventStatuts.ended))) {
         // Job RCO not ended, no data should be get
@@ -26,11 +27,24 @@ module.exports = ({ jobEvents }) => {
           message: "Les données ne sont pas disponibles, merci de renvoyer une requête dans quelques instants",
         });
       } else {
-        let stream = oleoduc(
-          RcoStatutCandidatModel.find({}, { created_at: 0, updated_at: 0, _id: 0, __v: 0 }).limit(limit).cursor(),
-          transformData((item) => `${JSON.stringify(item)}\n`)
+        const { find, pagination } = await findAndPaginate(
+          db.collection("rcoStatutsCandidats"),
+          {},
+          { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
         );
-        return sendJsonStream(stream, res);
+
+        return sendJsonStream(
+          oleoduc(
+            find.stream(),
+            transformIntoJSON({
+              arrayPropertyName: "rcoStatutsCandidats",
+              arrayWrapper: {
+                pagination,
+              },
+            })
+          ),
+          res
+        );
       }
     })
   );

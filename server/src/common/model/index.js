@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
-const getModel = (modelName, paginateEnabled = false) => {
+const getModel = (modelName, { enablePagination = false } = {}) => {
   const Schema = require(`./schema/${modelName}`);
-  paginateEnabled === true && Schema.plugin(require("mongoose-paginate"));
+  enablePagination === true && Schema.plugin(require("mongoose-paginate"));
   return mongoose.model(modelName, Schema, modelName);
 };
 
@@ -10,16 +10,16 @@ module.exports = {
   StatutCandidatModel: getModel("statutsCandidats"),
   UserModel: getModel("users"),
   UserEventModel: getModel("userEvents"),
-  JobEventModel: getModel("jobEvents", true),
+  JobEventModel: getModel("jobEvents", { enablePagination: true }),
   DuplicateEventModel: getModel("duplicatesEvents"),
-  CfaModel: getModel("cfas", true),
+  CfaModel: getModel("cfas", { enablePagination: true }),
   CfaAnnuaireModel: getModel("cfasAnnuaire"),
   CroisementCfasAnnuaireModel: getModel("croisementCfasAnnuaire"),
   CfaDataFeedbackModel: getModel("cfaDataFeedback"),
   FormationModel: getModel("formations"),
   LogModel: getModel("logs"),
   CroisementVoeuxAffelnetModel: getModel("croisementVoeuxAffelnet"),
-  RcoStatutCandidatModel: getModel("rcoStatutsCandidats"),
+  RcoStatutCandidatModel: getModel("rcoStatutsCandidats", { enablePagination: true }),
   DemandeIdentifiantsModel: getModel("demandesIdentifiants"),
   DemandeLienPriveModel: getModel("demandesLienPrive"),
   DemandeBranchementErpModel: getModel("demandesBranchementErp"),
