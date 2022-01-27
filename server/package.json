@@ -21,6 +21,7 @@
     "seed:sample": "node -r dotenv/config src/jobs/seed/seedSample.js",
     "seed:randomizedSample": "node -r dotenv/config src/jobs/seed/seedRandomizedSample.js",
     "seed:referentielCfas": "node -r dotenv/config src/jobs/seed/seedReferentielCfas.js",
+    "seed:clearAssets": "node -r dotenv/config src/jobs/seed/clearAssets.js",
     "seed:annuaireCfas": "node -r dotenv/config src/jobs/seed/seedAnnuaireCfas.js",
     "seed:croisementCfasAnnuaire": "node -r dotenv/config src/jobs/seed/seedCroisementCfasAnnuaire.js",
     "clear:all": "node -r dotenv/config src/jobs/clear/clearAll.js",
