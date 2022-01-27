@@ -149,7 +149,6 @@ const createStatutCandidat = async (itemToCreate) => {
         date_reception: new Date(),
       },
     ],
-    date_mise_a_jour_statut: itemToCreate.date_mise_a_jour_statut,
     date_metier_mise_a_jour_statut: itemToCreate.date_metier_mise_a_jour_statut,
     periode_formation: itemToCreate.periode_formation,
     annee_formation: itemToCreate.annee_formation,

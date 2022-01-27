@@ -179,11 +179,6 @@ module.exports = new Schema({
     default: [],
     description: "Historique du statut de l'apprenant",
   },
-  date_mise_a_jour_statut: {
-    type: Date,
-    default: Date.now,
-    description: "Date de mise à jour du statut",
-  },
   date_metier_mise_a_jour_statut: {
     type: Date,
     default: null,
