@@ -4,7 +4,6 @@ import React from "react";
 
 import { Highlight } from "../../../../../common/components";
 import { pluralize } from "../../../../../common/utils/stringUtils";
-import { filtersPropTypes } from "../../../FiltersContext";
 import DomainesMetiers from "./DomainesMetiers";
 import { infosCfaPropType } from "./propTypes";
 
@@ -66,7 +65,6 @@ const CfaDetail = ({ infosCfa, loading, error }) => {
 };
 
 CfaDetail.propTypes = {
-  filters: filtersPropTypes.state,
   infosCfa: infosCfaPropType,
   loading: PropTypes.bool,
   error: PropTypes.object,
