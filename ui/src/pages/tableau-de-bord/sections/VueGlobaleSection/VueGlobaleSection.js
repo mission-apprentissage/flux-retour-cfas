@@ -40,23 +40,23 @@ const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) 
         <EffectifCard
           count={effectifs.apprentis.count}
           label={pluralize("apprenti", effectifs.apprentis.count)}
-          tooltipLabel="Nombre d’apprenants en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
+          tooltipLabel="Nombre d’apprenants en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours). Cet indice est basé sur la date de début de contrat saisie par le CFA."
         />
         <EffectifCard
           count={effectifs.inscritsSansContrat.count}
           label={`${pluralize("inscrit", effectifs.inscritsSansContrat.count)} sans contrat`}
-          tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
+          tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation à la date affichée. Cet indice est basé sur la date d'enregistrement de l'inscription et l'absence de date de début de contrat."
         />
         <EffectifCard
           count={effectifs.rupturants.count}
           label={pluralize("rupturant", effectifs.rupturants.count)}
-          tooltipLabel="Nombre d’apprenants sans contrat après une rupture au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
+          tooltipLabel="Nombre d’apprenants en recherche de contrat après une rupture et toujours dans cette situation à la date affichée . Cet indice est déduit des apprenants passant du statut apprenti au statut stagiaire de la formation professionnelle, selon les saisies effectuées par les CFA."
         />
         <EffectifCard
           count={effectifs.abandons.count}
           hideCount={shouldWarnAboutDateAvailability}
           label={pluralize("abandon", effectifs.abandons.count)}
-          tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation au dernier jour du mois (ou J-1 si mois en cours). Cet indice est déduit des saisies effectuées dans Yparéo et/ou Gesti."
+          tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation, à la date affichée. Cet indice est basé sur les dossiers cloturés, selon les saisies effectuées par les CFA."
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
         />
       </HStack>
@@ -76,8 +76,8 @@ const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) 
           label={
             <Text>
               La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois. <br />
-              Vous pouvez consulter les effectifs d&apos;apprentis et d&apos;inscrits dans les mois à venir.
-              <br /> A noter : l&apos;année scolaire court du 1er août au 31 juillet
+          
+              <br /> A noter : la période de référence pour l&apos;année scolaire court du 1er août au 31 juillet
             </Text>
           }
           aria-label="A tooltip"
