@@ -28,6 +28,7 @@
     "react-router-hash-link": "2.4.3",
     "react-scripts": "4.0.3",
     "remixicon": "2.5.0",
+    "whatwg-fetch": "3.6.2",
     "yup": "0.32.9"
   },
   "scripts": {

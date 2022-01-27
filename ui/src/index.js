@@ -1,5 +1,6 @@
 import "./index.css";
 import "remixicon/fonts/remixicon.css";
+import "whatwg-fetch";
 
 import { ChakraProvider } from "@chakra-ui/react";
 import * as React from "react";
