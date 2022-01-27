@@ -76,7 +76,6 @@ const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) 
           label={
             <Text>
               La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois. <br />
-          
               <br /> A noter : la période de référence pour l&apos;année scolaire court du 1er août au 31 juillet
             </Text>
           }
