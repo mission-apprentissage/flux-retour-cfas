@@ -696,7 +696,6 @@ integrationTests(__filename, () => {
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
       assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec le même statut_apprenant
@@ -714,7 +713,6 @@ integrationTests(__filename, () => {
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
       assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec nouveau statut_apprenant
@@ -729,9 +727,7 @@ integrationTests(__filename, () => {
       const updatedHistorique = found.historique_statut_apprenant;
       assert.equal(updatedHistorique.length, 2);
       assert.equal(updatedHistorique[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(updatedHistorique[0].position_statut, 1);
       assert.equal(updatedHistorique[1].valeur_statut, codesStatutsCandidats.abandon);
-      assert.equal(updatedHistorique[1].position_statut, 2);
       assert.equal(
         updatedHistorique[1].date_statut.getTime(),
         new Date(updatePayload.date_metier_mise_a_jour_statut).getTime()

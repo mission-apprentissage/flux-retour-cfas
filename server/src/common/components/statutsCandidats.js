@@ -94,9 +94,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
     // find new element index in sorted historique to remove subsequent ones
     const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
 
-    updatePayload.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1).map((el, index) => {
-      return { ...el, position_statut: index + 1 };
-    });
+    updatePayload.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1);
     updatePayload.statut_apprenant = newHistoriqueElement.valeur_statut;
   }
 
@@ -144,7 +142,6 @@ const createStatutCandidat = async (itemToCreate) => {
     historique_statut_apprenant: [
       {
         valeur_statut: itemToCreate.statut_apprenant,
-        position_statut: 1,
         date_statut: new Date(itemToCreate.date_metier_mise_a_jour_statut),
         date_reception: new Date(),
       },
