@@ -245,6 +245,13 @@ const regions = [
   },
 ];
 
+const effectifsIndicators = {
+  apprentis: "apprentis",
+  inscritsSansContrats: "inscritsSansContrats",
+  rupturants: "rupturants",
+  abandons: "abandons",
+};
+
 module.exports = {
   codesStatutsCandidats,
   codesStatutsMajStatutCandidats,
@@ -255,4 +262,5 @@ module.exports = {
   regions,
   statutsCandidatsStringFields,
   jobEventStatuts: jobEventActions,
+  effectifsIndicators,
 };

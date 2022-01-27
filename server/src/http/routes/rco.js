@@ -9,8 +9,11 @@ const { jobNames, jobEventStatuts } = require("../../common/model/constants");
 module.exports = ({ jobEvents }) => {
   const router = express.Router();
 
+  /**
+   * Récupération des statuts pour RCO au format NDJson
+   */
   router.get(
-    "/rcoStatutsCandidats.ndjson",
+    "/statutsCandidats.ndjson",
     tryCatch(async (req, res) => {
       let { limit } = await Joi.object({ limit: Joi.number().default(1000000) }).validateAsync(req.query, {
         abortEarly: false,
@@ -24,9 +27,7 @@ module.exports = ({ jobEvents }) => {
         });
       } else {
         let stream = oleoduc(
-          RcoStatutCandidatModel.find({}, { statut_apprenant: 0, created_at: 0, updated_at: 0, _id: 0, __v: 0 })
-            .limit(limit)
-            .cursor(),
+          RcoStatutCandidatModel.find({}, { created_at: 0, updated_at: 0, _id: 0, __v: 0 }).limit(limit).cursor(),
           transformData((item) => `${JSON.stringify(item)}\n`)
         );
         return sendJsonStream(stream, res);
