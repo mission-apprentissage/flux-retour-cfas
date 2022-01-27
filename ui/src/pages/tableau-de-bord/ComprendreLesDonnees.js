@@ -129,28 +129,24 @@ const ComprendreLesDonnees = () => {
                     ceux du {productName}
                   </Text>
                   <Text>
-                    ‌Si cet écart est faible, il peut s&apos;expliquer par un dédoublonnement qui ne s&apos;est pas fait
-                    correctement. En effet, nous importons les données chaque nuit et nous construisons un historique
-                    des statuts de chaque apprenant afin de pouvoir vous restituer les données rétrospectivement. Afin
-                    de ne pas comptabiliser un apprenant 2 fois, nous procédons à un dédoublonnement basé sur :
-                    l&apos;sur la combinaison Nom-Prénom-UAI-CFD. Cependant, il peut arriver que cette opération ne
-                    suffise pas à identifier une candidature : par exemple, si le candidat a changé d&apos;adresse mail,
-                    alors il ne sera pas reconnu comme doublon et pourra être comptabilisé 2 fois. ‌Si cet écart est
-                    supérieur à quelques unités, nous vous invitons à cliquer sur le lien &quot;je signale une
-                    anomalie&quot;sur la page de votre CFA et nous détailler l&apos;anomalie que vous constatez afin de
-                    nous permettre d&apos;investiguer et d&apos;identifier la cause pour la corriger si possible.
+                    ‌Nombre d&apos;Apprentis : si cet écart est faible, il peut s&apos;expliquer par un dédoublonnement
+                    qui ne s&apos;est pas fait correctement. En effet, nous importons les données chaque nuit et nous
+                    construisons un historique des statuts de chaque apprenant afin de pouvoir vous restituer les
+                    données rétrospectivement. Afin de ne pas comptabiliser un apprenant 2 fois, nous procédons à un
+                    dédoublonnement basé sur : l&apos;sur la combinaison Nom-Prénom-UAI-CFD. Cependant, il peut arriver
+                    que cette opération ne suffise pas à identifier une candidature : par exemple, si le candidat a
+                    changé d&apos;adresse mail, alors il ne sera pas reconnu comme doublon et pourra être comptabilisé 2
+                    fois. ‌Si cet écart est supérieur à quelques unités, nous vous invitons à cliquer sur le lien
+                    &quot;je signale une anomalie&quot;sur la page de votre CFA et nous détailler l&apos;anomalie que
+                    vous constatez afin de nous permettre d&apos;investiguer et d&apos;identifier la cause pour la
+                    corriger si possible.
                   </Text>
-                </Box>
-                <Box py="4w">
-                  <Text fontSize="beta" fontWeight="700">
-                    Vous ne retrouvez pas votre organisme dans la liste proposée
-                  </Text>
-                  <Text>
-                    ‌Pour chercher votre établissement vous pouvez utiliser le numéro d&apos;UAI, le numéro de SIRET ou
-                    le nom. ‌Si votre organisme ne remonte pas dans la liste : assurez vous que l&apos;UAI et le SIRET
-                    renseignés dans votre ERP ne comportent pas d&apos;erreur ; assurez-vous également d&apos;avoir bien
-                    effectué le paramétrage nécessaire dans votre système d&apos;information. Pour obtenir le pas à pas,
-                    écrivez-nous à l&apos;adresse suivante : tableau-de-bord@apprentissage.beta.gouv.fr
+                  <Text mt="5w">
+                    ‌Nombre d&apos;Inscrits sans contrat : si vous constatez un écart sur cet indicateur, il est
+                    probable que vous transmettez des données pour des apprenants qui ne sont pas en formation
+                    apprentissage et de fait, ils sont considérés &quot;sans contrat&quot;. Vous devez alors, vérifier
+                    le paramétrage dans votre application, corriger et nous adresser un mail pour nous signaler cette
+                    correction.
                   </Text>
                 </Box>
                 <Box py="4w">
