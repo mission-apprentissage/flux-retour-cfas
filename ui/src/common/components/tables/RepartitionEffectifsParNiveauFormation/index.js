@@ -16,34 +16,32 @@ const RepartitionEffectifsParNiveauFormation = ({ repartitionEffectifs, loading,
     ? ["Niveaux de formation", "apprentis", "inscrits sans contrat"]
     : ["Niveaux de formation", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   return (
-    <>
-      <Table headers={tableHeader} loading={loading} error={error}>
-        <Tbody>
-          {repartitionEffectifs
-            ? repartitionEffectifs.map(({ niveauFormation, niveauFormationLibelle, effectifs }, index) => {
-                const total =
-                  effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
-                return (
-                  <Tr key={niveauFormation + index}>
-                    <Td color="grey.800">Niveau {niveauFormationLibelle}</Td>
-                    <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-                    <ProgressCell
-                      label={effectifs.inscritsSansContrat}
-                      value={getPercentage(effectifs.inscritsSansContrat, total)}
-                    />
-                    {!isPeriodInvalid && (
-                      <>
-                        <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-                        <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
-                      </>
-                    )}
-                  </Tr>
-                );
-              })
-            : null}
-        </Tbody>
-      </Table>
-    </>
+    <Table headers={tableHeader} loading={loading} error={error}>
+      <Tbody>
+        {repartitionEffectifs
+          ? repartitionEffectifs.map(({ niveauFormation, niveauFormationLibelle, effectifs }, index) => {
+              const total =
+                effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
+              return (
+                <Tr key={niveauFormation + index}>
+                  <Td color="grey.800">Niveau {niveauFormationLibelle}</Td>
+                  <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
+                  <ProgressCell
+                    label={effectifs.inscritsSansContrat}
+                    value={getPercentage(effectifs.inscritsSansContrat, total)}
+                  />
+                  {!isPeriodInvalid && (
+                    <>
+                      <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
+                      <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+                    </>
+                  )}
+                </Tr>
+              );
+            })
+          : null}
+      </Tbody>
+    </Table>
   );
 };
 
