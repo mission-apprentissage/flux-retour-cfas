@@ -149,7 +149,6 @@ integrationTests(__filename, () => {
       assert.equal(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
       assert.equal(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
       assert.equal(firstUpdated.annee_scolaire, statutsTestUpdate[0].annee_scolaire);
-      assert.ok(firstUpdated.date_mise_a_jour_statut);
       assert.ok(firstUpdated.updated_at);
 
       const secondUpdated = await StatutCandidatModel.findById(updated[1]._id).lean();
@@ -164,7 +163,6 @@ integrationTests(__filename, () => {
       assert.equal(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
       assert.equal(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
       assert.equal(secondUpdated.annee_scolaire, statutsTestUpdate[1].annee_scolaire);
-      assert.ok(secondUpdated.date_mise_a_jour_statut);
       assert.ok(secondUpdated.updated_at);
 
       const thirdUpdated = await StatutCandidatModel.findById(updated[2]._id).lean();
@@ -178,7 +176,6 @@ integrationTests(__filename, () => {
       assert.equal(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
       assert.equal(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
       assert.equal(thirdUpdated.annee_scolaire, statutsTestUpdate[2].annee_scolaire);
-      assert.ok(thirdUpdated.date_mise_a_jour_statut);
       assert.ok(thirdUpdated.updated_at);
     });
 
