@@ -12,7 +12,7 @@ const currentPage = navigationPages.DonneesPersonnelles;
 const RgpdCard = ({ legend, text, backgroundColor, href }) => {
   return (
     <HashLink to={href}>
-      <Box backgroundColor={backgroundColor} w="400px" paddingX="4w" paddingY="3w" height="180px">
+      <Box backgroundColor={backgroundColor} width="400px" paddingX="4w" paddingY="3w" height="180px">
         <Box as="legend" fontSize="epsilon" paddingY="1w" paddingX="3v" backgroundColor="white" color={backgroundColor}>
           {legend}
         </Box>

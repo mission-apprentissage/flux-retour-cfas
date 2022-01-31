@@ -25,7 +25,7 @@ const HomePage = () => {
       <Section paddingY="4w">
         <Flex>
           <div>
-            <Tag marginBottom="1w" bgColor="bluefrance" color="white">
+            <Tag marginBottom="1w" backgroundColor="bluefrance" color="white">
               beta
             </Tag>
             <Heading as="h1" fontSize="40px">

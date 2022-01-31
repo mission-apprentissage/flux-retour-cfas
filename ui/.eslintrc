@@ -5,6 +5,7 @@
       "version": "detect"
     }
   },
+  "parser": "@typescript-eslint/parser",
   "env": {
     "browser": true,
     "es6": true,
@@ -31,10 +32,11 @@
     "react/no-unused-prop-types": "error",
     "react/no-unused-state": "error",
     "react/jsx-no-useless-fragment": "error",
+    "chakra-ui/props-shorthand": ["error", {"noShorthand": true}],
     "import/order": "off",
     "simple-import-sort/imports": "error"
   },
-  "plugins": ["simple-import-sort", "import", "jest", "prettier"],
+  "plugins": ["simple-import-sort","import", "chakra-ui", "jest", "prettier"],
   "parserOptions": {
     "ecmaVersion": 2020, 
     "sourceType": "module",
