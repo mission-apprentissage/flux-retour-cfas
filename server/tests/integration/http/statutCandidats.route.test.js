@@ -9,6 +9,7 @@ const {
 } = require("../../data/randomizedSample");
 const { nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../utils/nockApis/nock-Lba");
+const { cfdRegex } = require("../../../src/common/domain/cfd");
 
 const user = {
   name: "userApi",
@@ -336,5 +337,59 @@ httpTests(__filename, ({ startServer }) => {
     // Check Api Route data
     assert.deepEqual(response.status, 200);
     assert.deepEqual(response.data.msg, "ok");
+  });
+
+  it("Vérifie l'ajout via route statut-candidats pour un statut avec bon code CFD (id_formation)", async () => {
+    const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
+
+    const goodCfd = "50033610";
+
+    // Generate random data with good cfd
+    const simpleStatutWithGoodCfd = { ...createRandomStatutCandidatApiInput(), id_formation: goodCfd };
+
+    const response = await httpClient.post("/api/statut-candidats", [simpleStatutWithGoodCfd], {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    // Check data added
+    assert.deepEqual(response.status, 200);
+    assert.ok(response.data.status);
+    assert.ok(response.data.message);
+    assert.deepEqual(response.data.status, "OK");
+
+    // Check Nb Items added
+    assert.deepEqual(await StatutCandidatModel.countDocuments({}), 1);
+  });
+
+  it("Vérifie l'erreur d'ajout via route statut-candidats pour un statut avec mauvais code CFD (id_formation)", async () => {
+    const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
+
+    const badCfd = "abc123456";
+
+    // Generate random data with bad cfd
+    const simpleStatutWithBadCfd = { ...createRandomStatutCandidatApiInput(), id_formation: badCfd };
+
+    const response = await httpClient.post("/api/statut-candidats", [simpleStatutWithBadCfd], {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    // check response & validation errors
+    assert.equal(response.data.status, "ERROR");
+    assert.equal(response.data.validationErrors.length, 1);
+    assert.equal(
+      response.data.validationErrors[0].details[0].message.includes(
+        `"id_formation" with value "${badCfd}" fails to match the required pattern: ${cfdRegex}`
+      ),
+      true
+    );
+    assert.equal(await StatutCandidatModel.countDocuments({}), 0);
   });
 });
