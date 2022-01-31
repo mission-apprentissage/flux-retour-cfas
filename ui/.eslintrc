@@ -16,12 +16,21 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
     "plugin:prettier/recommended" // Make sure this is always the last element in the array.
   ],
   "rules": {
     "prettier/prettier": "error",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "warn",
+    "react/button-has-type": "error",
+    "react/destructuring-assignment": "error",
+    "react/no-did-mount-set-state": "error",
+    "react/no-did-update-set-state": "error",
+    "react/no-unsafe": "error",
+    "react/no-unused-prop-types": "error",
+    "react/no-unused-state": "error",
+    "react/jsx-no-useless-fragment": "error",
     "import/order": "off",
     "simple-import-sort/imports": "error"
   },

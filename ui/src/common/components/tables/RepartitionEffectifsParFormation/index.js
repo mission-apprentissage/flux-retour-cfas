@@ -20,25 +20,23 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
         "abandons",
       ];
   return (
-    <>
-      <Table headers={tableHeader} loading={loading} error={error}>
-        <Tbody>
-          {repartitionEffectifs
-            ? repartitionEffectifs.map((data) => {
-                return (
-                  <NiveauFormationRow
-                    key={data.niveauFormation}
-                    niveauFormation={data.niveauFormation}
-                    niveauFormationLibelle={data.niveauFormationLibelle}
-                    effectifs={data.effectifs}
-                    isPeriodInvalid={isPeriodInvalid}
-                  />
-                );
-              })
-            : null}
-        </Tbody>
-      </Table>
-    </>
+    <Table headers={tableHeader} loading={loading} error={error}>
+      <Tbody>
+        {repartitionEffectifs
+          ? repartitionEffectifs.map((data) => {
+              return (
+                <NiveauFormationRow
+                  key={data.niveauFormation}
+                  niveauFormation={data.niveauFormation}
+                  niveauFormationLibelle={data.niveauFormationLibelle}
+                  effectifs={data.effectifs}
+                  isPeriodInvalid={isPeriodInvalid}
+                />
+              );
+            })
+          : null}
+      </Tbody>
+    </Table>
   );
 };
 

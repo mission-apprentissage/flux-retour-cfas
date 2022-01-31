@@ -17,12 +17,10 @@ const CfaLinkCopySection = ({ link }) => {
   };
 
   return (
-    <>
-      <Button variant="link" onClick={() => copyLinkAndToast()}>
-        <Box as="i" className="ri-link" marginRight="1v" paddingTop="1px" />
-        <p>Copier l&apos;URL d&apos;accès</p>
-      </Button>
-    </>
+    <Button variant="link" onClick={() => copyLinkAndToast()}>
+      <Box as="i" className="ri-link" marginRight="1v" paddingTop="1px" />
+      <p>Copier l&apos;URL d&apos;accès</p>
+    </Button>
   );
 };
 
