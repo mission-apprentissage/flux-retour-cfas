@@ -2,7 +2,7 @@ import { Box, Flex } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { DataNetworkAlert, Section } from "../../../../../common/components";
+import { Section } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
 import CfaDetail from "./CfaDetail";
 import CfaLinkCopySection from "./CfaLinkCopySection";
@@ -10,8 +10,6 @@ import DataFeedbackSection from "./DataFeedbackSection/DataFeedbackSection";
 import { infosCfaPropType } from "./propTypes";
 import SousEtablissementSelection from "./SousEtablissementSelection";
 import withInfoCfaData from "./withInfoCfaData";
-
-const RESEAU_WITH_DATA_ALERT = "MFR";
 
 const CfaSection = ({ infosCfa, filters, loading, error }) => {
   return (
@@ -30,7 +28,6 @@ const CfaSection = ({ infosCfa, filters, loading, error }) => {
           </Box>
         </Flex>
       </Section>
-      {infosCfa?.reseaux.includes(RESEAU_WITH_DATA_ALERT) === true && <DataNetworkAlert paddingY="4w" />}
     </>
   );
 };

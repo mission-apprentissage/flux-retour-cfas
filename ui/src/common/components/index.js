@@ -1,5 +1,4 @@
 export { default as Alert } from "./Alert/Alert";
-export { default as DataNetworkAlert } from "./Alert/DataNetworkAlert";
 
 export { default as Badge } from "./Badge/Badge";
 export { default as SearchInput } from "./SearchInput/SearchInput";
