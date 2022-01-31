@@ -14,17 +14,17 @@ export const ERPS = [
   {
     name: "Gesti",
     state: ERP_STATE.ready,
-    helpFilePath: "/erpsHelpFiles/tdb-tuto-gesti.pdf",
+    helpFilePath: "/erpsHelpFiles/tdb-pas-a-pas-gesti.pdf",
   },
   {
     name: "Ymag",
     state: ERP_STATE.ready,
-    helpFilePath: "/erpsHelpFiles/tdb-tuto-ymag.pdf",
+    helpFilePath: "/erpsHelpFiles/tdb-pas-a-pas-ymag.pdf",
   },
   {
     name: "SC Form",
     state: ERP_STATE.ready,
-    helpFilePath: "/erpsHelpFiles/tdb-tuto-scform.pdf",
+    helpFilePath: "/erpsHelpFiles/tdb-pas-a-pas-scform.pdf",
   },
   { name: "FCA Manager", state: ERP_STATE.ongoing },
   { name: "Hyperplanning", state: ERP_STATE.coming },
