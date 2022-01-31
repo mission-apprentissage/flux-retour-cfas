@@ -60,6 +60,11 @@ module.exports = {
       password: env.get("FLUX_RETOUR_CFAS_USERS_RCO_PASSWORD").required().asString(),
       permissions: env.get("FLUX_RETOUR_CFAS_USERS_RCO_PERMISSIONS").default([]).asArray(),
     },
+    formasup: {
+      name: env.get("FLUX_RETOUR_CFAS_USERS_FORMASUP_NAME").required().asString(),
+      password: env.get("FLUX_RETOUR_CFAS_USERS_FORMASUP_PASSWORD").required().asString(),
+      permissions: env.get("FLUX_RETOUR_CFAS_USERS_FORMASUP_PERMISSIONS").default([]).asArray(),
+    },
     defaultAdmin: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),
