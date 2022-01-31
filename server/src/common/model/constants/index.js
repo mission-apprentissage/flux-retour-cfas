@@ -121,6 +121,7 @@ const jobNames = {
   clearLogs: "clear-logs",
   clearAll: "clear-all",
   cleanStatutsCandidats: "clean-statuts-candidats",
+  cleanStatutsCandidatsInvalidCfd: "clean-statuts-candidats-invalid-cfd",
   cleanCfaDataFeedback: "clean-cfaDataFeedback",
   exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
