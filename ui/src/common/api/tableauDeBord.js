@@ -70,3 +70,17 @@ export const fetchReseaux = () => {
 export const fetchRegions = () => {
   return _get("/api/referentiel/regions");
 };
+
+/* CSV export of effectifs repartition by organisme */
+export const fetchRepartitionByOrganismeCsvExport = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/effectifs/export-csv-repartition-effectifs-par-organisme?${queryParameters}`;
+  return _get(url, { jsonResponse: false });
+};
+
+/* CSV export of effectifs repartition by formation */
+export const fetchRepartitionByFormationCsvExport = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/effectifs/export-csv-repartition-effectifs-par-formation?${queryParameters}`;
+  return _get(url, { jsonResponse: false });
+};
