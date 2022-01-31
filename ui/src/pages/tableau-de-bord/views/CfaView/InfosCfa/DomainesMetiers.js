@@ -23,7 +23,7 @@ const DomainesMetiers = ({ domainesMetiers }) => {
           size="sm"
           fontSize="omega"
           onClick={setShowAllDomainesMetiers.toggle}
-          mt="1w"
+          marginTop="1w"
           marginLeft="1w"
           color="white"
           textDecoration="underline"

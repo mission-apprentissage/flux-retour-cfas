@@ -16,13 +16,13 @@ const Header = ({ withText = true }) => {
   return (
     <Section as="header">
       <Flex justifyContent="space-between">
-        <Flex p="2" alignItems="center">
+        <Flex padding="2" alignItems="center">
           <Logo />
           {withText && (
             <Box marginLeft="5w">
               <Heading as="h1" variant="h1" fontSize="gamma">
                 Le {productName}{" "}
-                <Tag marginBottom="1w" bgColor="bluefrance" color="white">
+                <Tag marginBottom="1w" backgroundColor="bluefrance" color="white">
                   beta
                 </Tag>
               </Heading>

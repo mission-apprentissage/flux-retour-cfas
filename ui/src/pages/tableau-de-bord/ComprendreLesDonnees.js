@@ -13,14 +13,14 @@ const ComprendreLesDonnees = () => {
             Comprendre les données
           </Heading>
         </Section>
-        <Box py="10w" ml="10w">
+        <Box py="10w" marginLeft="10w">
           <Flex>
-            <Box bg="galt" w="20%" h="170px">
-              <Box ml="2w" py="2w">
+            <Box background="galt" width="20%" height="170px">
+              <Box marginLeft="2w" py="2w">
                 <Text fontSize="epsilon" fontWeight="700">
                   SOMMAIRE
                 </Text>
-                <Box mt="1w">
+                <Box marginTop="1w">
                   <Link href="#maniere">
                     <Text>
                       <Text as="span" fontWeight="700">
@@ -30,7 +30,7 @@ const ComprendreLesDonnees = () => {
                     </Text>
                   </Link>
                   <Link href="#organismeFormation">
-                    <Text mt="1w">
+                    <Text marginTop="1w">
                       <Text as="span" fontWeight="700">
                         2.
                       </Text>{" "}
@@ -40,11 +40,11 @@ const ComprendreLesDonnees = () => {
                 </Box>
               </Box>
             </Box>
-            <Box ml="10w" w="70%">
+            <Box marginLeft="10w" width="70%">
               <Heading as="h1" variant="h1" marginBottom="1w" color="black" id="maniere">
                 De manière générale
               </Heading>
-              <Box mt="5w">
+              <Box marginTop="5w">
                 <Text fontSize="beta" fontWeight="700">
                   D&apos;où viennent les chiffres ?
                 </Text>
@@ -52,7 +52,7 @@ const ComprendreLesDonnees = () => {
                   Nous collectons des données auprès des organismes de formation en nous connectant à leur ERP.{" "}
                 </Text>
               </Box>
-              <Box mt="5w">
+              <Box marginTop="5w">
                 <Text fontSize="beta" fontWeight="700">
                   Quelles sont les données collectées et leur format ?
                 </Text>
@@ -60,7 +60,7 @@ const ComprendreLesDonnees = () => {
                   Les données sont collectées par la clé d’entrée de l’apprenant, les champs récupérés sont les suivants
                   :
                 </Text>
-                <UnorderedList ml="5w">
+                <UnorderedList marginLeft="5w">
                   <ListItem>INE ;</ListItem>
                   <ListItem>Nom de l’apprenant ;</ListItem>
                   <ListItem>Prénom de l’apprenant ;</ListItem>
@@ -75,9 +75,9 @@ const ComprendreLesDonnees = () => {
                   <ListItem>SIRET de l’organisme de formation ;</ListItem>
                   <ListItem>Raison sociale ;</ListItem>
                 </UnorderedList>
-                <Box fontWeight="700" mt="2w">
+                <Box fontWeight="700" marginTop="2w">
                   <Text>Définitions :</Text>
-                  <UnorderedList ml="5w">
+                  <UnorderedList marginLeft="5w">
                     <ListItem>
                       Un apprenant unique est identifié quand il y a unicité sur la combinaison suivante : Nom, Prénom,
                       CFD de la formation, UAI de l’organisme de formation.On décompte donc 1 apprenant pour 1
@@ -90,7 +90,7 @@ const ComprendreLesDonnees = () => {
                   </UnorderedList>
                 </Box>
               </Box>
-              <Box mt="5w">
+              <Box marginTop="5w">
                 <Text fontSize="beta" fontWeight="700">
                   A quelle date l&apos;indice &quot;Effectif&quot; est-il arrêté ?
                 </Text>
@@ -105,7 +105,7 @@ const ComprendreLesDonnees = () => {
                   comptabilisés au 31 décembre.
                 </Text>
               </Box>
-              <Box mt="5w">
+              <Box marginTop="5w">
                 <Text fontSize="beta" fontWeight="700">
                   Y a-t-il un traitement statistique des données ?
                 </Text>
@@ -141,7 +141,7 @@ const ComprendreLesDonnees = () => {
                     vous constatez afin de nous permettre d&apos;investiguer et d&apos;identifier la cause pour la
                     corriger si possible.
                   </Text>
-                  <Text mt="5w">
+                  <Text marginTop="5w">
                     ‌Nombre d&apos;Inscrits sans contrat : si vous constatez un écart sur cet indicateur, il est
                     probable que vous transmettez des données pour des apprenants qui ne sont pas en formation
                     apprentissage et de fait, ils sont considérés &quot;sans contrat&quot;. Vous devez alors, vérifier

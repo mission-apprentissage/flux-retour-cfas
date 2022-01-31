@@ -72,7 +72,6 @@ const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) 
 
         <DateFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
         <Tooltip
-          bg="#F9F8F6"
           label={
             <Text>
               La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois. <br />
@@ -82,7 +81,7 @@ const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) 
           aria-label="A tooltip"
           background="bluefrance"
           color="white"
-          p={5}
+          padding={5}
         >
           <Text as="span">
             <InfoLine h="14px" w="14px" color="grey.500" ml={1} mb={1} />

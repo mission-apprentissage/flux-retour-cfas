@@ -66,7 +66,7 @@ const AskIdentifiantsForm = ({ onSubmit, onClose }) => {
                   {({ field, meta }) => (
                     <FormControl isRequired isInvalid={meta.error && meta.touched}>
                       <FormLabel color="grey.800">Votre région</FormLabel>
-                      <Select mt="1w" {...field} id={field.name} placeholder="Sélectionnez votre région">
+                      <Select marginTop="1w" {...field} id={field.name} placeholder="Sélectionnez votre région">
                         {REGION_OPTIONS.map((region) => (
                           <option key={region}>{region}</option>
                         ))}
@@ -79,7 +79,7 @@ const AskIdentifiantsForm = ({ onSubmit, onClose }) => {
                   {({ field, meta }) => (
                     <FormControl isRequired isInvalid={meta.error && meta.touched}>
                       <FormLabel color="grey.800">Votre profil</FormLabel>
-                      <Select mt="1w" {...field} id={field.name} placeholder="Sélectionnez votre profil">
+                      <Select marginTop="1w" {...field} id={field.name} placeholder="Sélectionnez votre profil">
                         {PROFIL_OPTIONS.map((profil) => (
                           <option key={profil}>{profil}</option>
                         ))}

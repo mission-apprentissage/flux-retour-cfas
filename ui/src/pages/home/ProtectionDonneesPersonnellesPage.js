@@ -60,7 +60,7 @@ const ProtectionDonneesPersonnellesPage = () => {
       <Section id={currentPage.anchors.faciliterPilotage}>
         <Divider alignSelf="center" />
         <Flex>
-          <Box color="#009099" paddingY="4w" w="30%">
+          <Box color="#009099" paddingY="4w" width="30%">
             <Text fontSize="gamma" fontWeight="700">
               Finalité
             </Text>
@@ -68,7 +68,7 @@ const ProtectionDonneesPersonnellesPage = () => {
               Faciliter le pilotage opérationnel de l&apos;apprentissage
             </Text>
           </Box>
-          <Box padding="4w" w="70%">
+          <Box padding="4w" width="70%">
             <Text fontSize="epsilon" color="grey.800">
               Le {productName} vise à mettre à disposition de toutes les parties prenantes de la formation en
               apprentissage les données clés, de manière dynamique, afin de permettre un pilotage opérationnel réactif
@@ -97,7 +97,7 @@ const ProtectionDonneesPersonnellesPage = () => {
       <Section id={currentPage.anchors.minimisationDonnees}>
         <Divider alignSelf="center" />
         <Flex>
-          <Box color="#465F9D" paddingY="4w" w="30%">
+          <Box color="#465F9D" paddingY="4w" width="30%">
             <Text fontSize="gamma" fontWeight="700">
               Données collectées
             </Text>
@@ -105,7 +105,7 @@ const ProtectionDonneesPersonnellesPage = () => {
               Minimisation des données
             </Text>
           </Box>
-          <Box padding="4w" w="70%">
+          <Box padding="4w" width="70%">
             <Text marginBottom="2w" fontSize="epsilon" color="grey.800">
               Dans le respect du RGPD, seules les données utiles à la construction du {productName}
               sont collectées.

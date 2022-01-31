@@ -129,7 +129,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
           {ErpSelectionList[values.erpIndex].state === ERP_STATE.ready && (
             <>
               <Stack marginTop="3w" marginBottom="3w" direction="row">
-                <Box w="2%" bg="#6A6AF4" marginRight="3w" />
+                <Box width="2%" background="#6A6AF4" marginRight="3w" />
                 <Text color="grey.800">
                   <strong>Le {productName} est interfacé avec cet ERP.</strong> Vous pouvez l&apos;autoriser à
                   transmettre vos données en 2 clics via une fonctionnalité disponible dans l&apos;interface de votre
@@ -155,7 +155,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
           {ErpSelectionList[values.erpIndex].state === ERP_STATE.ongoing && (
             <>
               <Stack marginTop="3w" marginBottom="3w" direction="row">
-                <Box w="2%" bg="#6A6AF4" marginRight="3w" />
+                <Box width="2%" background="#6A6AF4" marginRight="3w" />
                 <Text color="grey.800">
                   <strong>
                     L&apos;interfaçage du {productName} avec cet ERP a démarré mais les travaux ne sont pas achevés.
@@ -206,7 +206,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
           {ErpSelectionList[values.erpIndex].state === ERP_STATE.coming && (
             <>
               <Stack marginTop="3w" marginBottom="3w" direction="row">
-                <Box w="2%" bg="#6A6AF4" marginRight="3w" />
+                <Box width="2%" background="#6A6AF4" marginRight="3w" />
                 <Text color="grey.800">
                   <strong>L&apos;interfaçage du {productName} avec cet ERP n’a pas encore démarré.</strong>
                   Nous vous invitons à lui faire part de votre besoin de transmettre vos données au {productName}.

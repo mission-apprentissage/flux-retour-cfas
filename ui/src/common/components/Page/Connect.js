@@ -22,7 +22,7 @@ const Connect = () => {
           fontSize="zeta"
           variant="link"
           cursor="pointer"
-          minW={0}
+          minWidth={0}
         >
           Connexion
           <Box as="i" marginLeft="3v" className="ri-arrow-down-s-line"></Box>
