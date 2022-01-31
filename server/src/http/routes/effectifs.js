@@ -353,11 +353,12 @@ module.exports = ({ stats, effectifs, cfas, formations, cache }) => {
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
 
-      const effectifsParFormation = await effectifs.getEffectifsCountByFormationAtDate(date, filters);
+      const effectifsParFormation = await effectifs.getEffectifsCountByFormationAndDepartementAtDate(date, filters);
       const formattedForCsv = await Promise.all(
-        effectifsParFormation.map(async ({ formation_cfd, intitule, effectifs }) => {
+        effectifsParFormation.map(async ({ formation_cfd, departement, intitule, effectifs }) => {
           const formation = await formations.getFormationWithCfd(formation_cfd);
           return {
+            DEPARTEMENT: departement,
             NIVEAU: formation?.niveau,
             "INTITULE NIVEAU": formation?.niveau_libelle,
             "INTITULE DE LA FORMATION": intitule,
