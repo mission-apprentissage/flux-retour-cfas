@@ -36,7 +36,7 @@
     "import/order": "off",
     "simple-import-sort/imports": "error"
   },
-  "plugins": ["simple-import-sort","import", "chakra-ui", "jest", "prettier"],
+  "plugins": ["simple-import-sort","import", "react-hooks","chakra-ui", "jest", "prettier"],
   "parserOptions": {
     "ecmaVersion": 2020, 
     "sourceType": "module",
