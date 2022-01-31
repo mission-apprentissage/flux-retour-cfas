@@ -1,11 +1,8 @@
 const { UserEventModel } = require("../model");
 
 module.exports = () => ({
+  createUserEvent,
   getLastUserEventDate,
-  getDataForUai,
-  getDataForSiret,
-  countDataForUai,
-  countDataForSiret,
 });
 
 const getLastUserEventDate = async ({ username, type, action }) => {
@@ -15,18 +12,15 @@ const getLastUserEventDate = async ({ username, type, action }) => {
   return lastUserEventDate?.date.toLocaleString("fr-FR");
 };
 
-const getDataForUai = async (uai) => {
-  return await UserEventModel.find({ "data.uai_etablissement": uai });
-};
+const createUserEvent = async ({ username, type, action, data }) => {
+  const event = new UserEventModel({
+    username,
+    type,
+    action,
+    data,
+    time: new Date(),
+  });
+  await event.save();
 
-const countDataForUai = async (uai) => {
-  return await UserEventModel.countDocuments({ "data.uai_etablissement": uai });
-};
-
-const getDataForSiret = async (siret) => {
-  return await UserEventModel.find({ "data.siret_etablissement": siret });
-};
-
-const countDataForSiret = async (siret) => {
-  return await UserEventModel.countDocuments({ "data.siret_etablissement": siret });
+  return;
 };

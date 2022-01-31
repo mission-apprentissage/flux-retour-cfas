@@ -1,7 +1,6 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { UserEventModel } = require("../../common/model/index");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
@@ -10,7 +9,7 @@ const { cfdRegex } = require("../../common/domain/cfd");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
-module.exports = ({ statutsCandidats }) => {
+module.exports = ({ statutsCandidats, userEvents }) => {
   const router = express.Router();
 
   /**
@@ -82,13 +81,12 @@ module.exports = ({ statutsCandidats }) => {
         await statutsCandidatListSchema.validateAsync(req.body, { abortEarly: false });
 
         // Add user event
-        const event = new UserEventModel({
+        await userEvents.createUserEvent({
           username: req.user.username,
           type: "POST",
           action: "statut-candidats",
           data: req.body,
         });
-        await event.save();
 
         // Validate items one by one
         await asyncForEach(req.body, (currentStatutToAddOrUpdate) => {
