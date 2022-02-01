@@ -1,11 +1,11 @@
 import { Skeleton, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
 
 import { SearchInput } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
 import FormationsList from "./FormationsList";
-import withFormationSearch from "./withFormationSearch";
+import useFormationSearch from "./useFormationSearch";
 
 const NoResults = () => {
   return (
@@ -27,12 +27,15 @@ const Loading = () => {
   );
 };
 
-const FormationFilterMenu = ({ filters, searchTerm, loading, searchResults, onSearchTermChange, onFormationClick }) => {
+const FormationFilterMenu = ({ filters, onFormationClick }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data: searchResults, loading } = useFormationSearch(searchTerm, filters);
+
   return (
     <>
       <SearchInput
         value={searchTerm}
-        onChange={onSearchTermChange}
+        onChange={setSearchTerm}
         placeholder="Rechercher un libellé de formation ou un CFD"
       />
       {searchResults?.length === 0 && <NoResults />}
@@ -47,17 +50,8 @@ const FormationFilterMenu = ({ filters, searchTerm, loading, searchResults, onSe
 };
 
 FormationFilterMenu.propTypes = {
-  searchResults: PropTypes.arrayOf(
-    PropTypes.shape({
-      cfd: PropTypes.string.isRequired,
-      libelle: PropTypes.string.isRequired,
-    })
-  ),
-  loading: PropTypes.bool.isRequired,
-  onSearchTermChange: PropTypes.func.isRequired,
   onFormationClick: PropTypes.func.isRequired,
-  searchTerm: PropTypes.string,
   filters: filtersPropTypes.state,
 };
 
-export default withFormationSearch(FormationFilterMenu);
+export default FormationFilterMenu;
