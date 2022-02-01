@@ -15,7 +15,7 @@ module.exports = ({ users, userEvents }) => {
 
       const token = createUserToken(authenticatedUser);
 
-      await userEvents.createUserEvent({ username, action: "login" });
+      await userEvents.create({ username, action: "login" });
       return res.json({ access_token: token });
     })
   );

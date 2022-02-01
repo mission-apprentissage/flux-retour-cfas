@@ -81,7 +81,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
         await statutsCandidatListSchema.validateAsync(req.body, { abortEarly: false });
 
         // Add user event
-        await userEvents.createUserEvent({
+        await userEvents.create({
           username: req.user.username,
           type: "POST",
           action: "statut-candidats",

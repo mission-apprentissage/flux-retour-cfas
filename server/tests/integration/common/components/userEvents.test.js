@@ -35,9 +35,9 @@ integrationTests(__filename, () => {
 
   describe("createUserEvent", () => {
     it("Permet de créer un userEvent et de le sauver en base", async () => {
-      const { createUserEvent } = await userEvents();
+      const { create } = userEvents();
 
-      await createUserEvent({ username: "admin", type: "any", action: "test", data: { hello: "world" } });
+      await create({ username: "admin", type: "any", action: "test", data: { hello: "world" } });
       const foundInDb = await UserEventModel.findOne({ username: "admin" });
       assert.ok(foundInDb);
     });

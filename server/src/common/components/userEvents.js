@@ -1,7 +1,7 @@
 const { UserEventModel } = require("../model");
 
 module.exports = () => ({
-  createUserEvent,
+  create,
   getLastUserEventDate,
 });
 
@@ -12,7 +12,7 @@ const getLastUserEventDate = async ({ username, type, action }) => {
   return lastUserEventDate?.date.toLocaleString("fr-FR");
 };
 
-const createUserEvent = async ({ username, type, action, data }) => {
+const create = async ({ username, type, action, data }) => {
   const event = new UserEventModel({
     username,
     type,
