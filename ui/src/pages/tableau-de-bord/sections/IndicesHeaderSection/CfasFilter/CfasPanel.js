@@ -1,10 +1,11 @@
 import { Skeleton, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
 
 import { SearchInput } from "../../../../../common/components";
+import { filtersPropTypes } from "../../../FiltersContext";
 import CfasList from "./CfasList";
-import withCfaSearch from "./withCfaSearch";
+import useCfaSearch from "./useCfaSearch";
 
 const Loading = () => {
   return (
@@ -18,12 +19,15 @@ const Loading = () => {
   );
 };
 
-const CfaPanel = ({ value, loading, onCfaClick, searchTerm, onSearchTermChange, searchResults }) => {
+const CfaPanel = ({ value, onCfaClick, filters }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data: searchResults, loading } = useCfaSearch(searchTerm, filters);
+
   return (
     <div>
       <SearchInput
         value={searchTerm}
-        onChange={onSearchTermChange}
+        onChange={setSearchTerm}
         placeholder="Rechercher le nom d'un organisme de formation ou son UAI"
       />
       {searchResults?.length === 0 && (
@@ -43,15 +47,7 @@ CfaPanel.propTypes = {
     uai_etablissement: PropTypes.string.isRequired,
     nom_etablissement: PropTypes.string.isRequired,
   }),
-  onSearchTermChange: PropTypes.func.isRequired,
-  searchTerm: PropTypes.string,
-  loading: PropTypes.bool.isRequired,
-  searchResults: PropTypes.arrayOf(
-    PropTypes.shape({
-      uai_etablissement: PropTypes.string.isRequired,
-      nom_etablissement: PropTypes.string.isRequired,
-    })
-  ),
+  filters: filtersPropTypes.state,
 };
 
-export default withCfaSearch(CfaPanel);
+export default CfaPanel;
