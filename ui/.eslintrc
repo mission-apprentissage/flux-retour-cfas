@@ -17,11 +17,11 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
     "plugin:prettier/recommended" // Make sure this is always the last element in the array.
   ],
   "rules": {
     "prettier/prettier": "error",
+    /* REACT */
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "warn",
     "react/button-has-type": "error",
@@ -32,11 +32,16 @@
     "react/no-unused-prop-types": "error",
     "react/no-unused-state": "error",
     "react/jsx-no-useless-fragment": "error",
+    /* REACT HOOKS */
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    /* CHAKRA */
     "chakra-ui/props-shorthand": ["error", {"noShorthand": true}],
+    /* IMPORT ORDER */
     "import/order": "off",
     "simple-import-sort/imports": "error"
   },
-  "plugins": ["simple-import-sort","import", "react-hooks","chakra-ui", "jest", "prettier"],
+  "plugins": ["simple-import-sort", "import", "react", "react-hooks", "chakra-ui", "jest", "prettier"],
   "parserOptions": {
     "ecmaVersion": 2020, 
     "sourceType": "module",
