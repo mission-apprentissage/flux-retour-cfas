@@ -18,7 +18,7 @@ const create = async ({ username, type, action, data }) => {
     type,
     action,
     data,
-    time: new Date(),
+    date: new Date(),
   });
   await event.save();
 
