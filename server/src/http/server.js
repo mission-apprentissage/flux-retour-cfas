@@ -14,7 +14,6 @@ const statutCandidatsRoute = require("./routes/statut-candidats");
 const lienPriveCfaRoute = require("./routes/lien-prive-cfa");
 const loginRoute = require("./routes/login");
 const loginCfaRoute = require("./routes/login-cfa.route");
-const userEventsRoute = require("./routes/userEvents");
 const configRoute = require("./routes/config");
 const referentielRoute = require("./routes/referentiel");
 const effectifsRoute = require("./routes/effectifs");
@@ -70,7 +69,6 @@ module.exports = async (components) => {
 
   // admin routes
   app.use("/api/cache", requireJwtAuthentication, adminOnly, cacheRouter(components));
-  app.use("/api/userEvents", requireJwtAuthentication, adminOnly, userEventsRoute(components));
   app.use("/api/config", requireJwtAuthentication, adminOnly, configRoute());
 
   app.use(errorMiddleware());
