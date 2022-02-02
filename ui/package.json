@@ -58,7 +58,6 @@
   },
   "devDependencies": {
     "@typescript-eslint/parser": "5.10.2",
-    "eslint": "8.8.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-chakra-ui": "0.4.0",
     "eslint-plugin-import": "2.25.4",
