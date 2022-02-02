@@ -30,7 +30,8 @@ const CfaWithoutNetworkPage = ({ match }) => {
       }
     };
     effect();
-  }, [cfaAccessToken, setAuth]);
+    // eslint-disable-next-line
+  }, [cfaAccessToken]);
 
   if (pageState === PAGE_STATES.error) return <Redirect to="/404"></Redirect>;
 
