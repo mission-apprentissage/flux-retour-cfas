@@ -122,6 +122,53 @@ module.exports = () => {
   };
 
   /**
+   * Récupération des effectifs par formation et département à une date donnée
+   * @param {Date} searchDate
+   * @param {*} filters
+   * @returns [{
+   *  formation_cfd: string
+   *  departement: string
+   *  intitule: string
+   *  effectifs: {
+   *    apprentis: number
+   *    inscritsSansContrat: number
+   *    rupturants: number
+   *    abandons: number
+   *  }
+   * }]
+   */
+  const getEffectifsCountByFormationAndDepartementAtDate = async (searchDate, filters = {}) => {
+    const projection = {
+      formation_cfd: 1,
+      etablissement_num_departement: 1,
+      libelle_long_formation: 1,
+    };
+    const groupedBy = {
+      _id: { formation_cfd: "$formation_cfd", departement: "$etablissement_num_departement" },
+      // we will send libelle_long_formation along with the grouped effectifs so we need to project it
+      libelle_long_formation: { $first: "$libelle_long_formation" },
+    };
+    const effectifsByFormationAndDepartement = await getEffectifsCountAtDate(searchDate, filters, {
+      groupedBy,
+      projection,
+    });
+
+    return effectifsByFormationAndDepartement.map(({ _id, libelle_long_formation, ...effectifs }) => {
+      return {
+        formation_cfd: _id.formation_cfd,
+        departement: _id.departement,
+        intitule: libelle_long_formation,
+        effectifs: {
+          apprentis: effectifs.apprentis || 0,
+          inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+          rupturants: effectifs.rupturants || 0,
+          abandons: effectifs.abandons || 0,
+        },
+      };
+    });
+  };
+
+  /**
    * Récupération des effectifs par annee_formation à une date donnée
    * @param {Date} searchDate
    * @param {*} filters
@@ -253,5 +300,6 @@ module.exports = () => {
     getEffectifsCountByFormationAtDate,
     getEffectifsCountByAnneeFormationAtDate,
     getEffectifsCountByDepartementAtDate,
+    getEffectifsCountByFormationAndDepartementAtDate,
   };
 };
