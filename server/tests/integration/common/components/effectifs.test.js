@@ -297,8 +297,81 @@ integrationTests(__filename, () => {
 
       const effectifsByDepartement = await getEffectifsCountByDepartementAtDate(date);
       // we will sort results because we don't care of the order in the test
-      const sortByDepartement = (a, b) => (a.etablissement_num_departement > b.etablissement_num_departement ? 1 : -1);
+      const sortByDepartement = (a, b) =>
+        Number(a.etablissement_num_departement) > Number(b.etablissement_num_departement) ? 1 : -1;
       assert.deepEqual(effectifsByDepartement.sort(sortByDepartement), expectedResult);
+    });
+  });
+
+  describe("getEffectifsCountByFormationAndDepartementAtDate", () => {
+    it("Permet de récupérer les effectifs par departement ET formation à une date donnée", async () => {
+      const { getEffectifsCountByFormationAndDepartementAtDate } = await effectifs();
+      const departement1 = {
+        etablissement_num_departement: "75",
+        etablissement_nom_departement: "Paris",
+      };
+      const departement2 = {
+        etablissement_num_departement: "77",
+        etablissement_nom_departement: "Seine-et-Marne",
+      };
+      const cfd1 = "77929544300000";
+      const cfd2 = "77929544300001";
+      await seedStatutsCandidats({ ...departement1, formation_cfd: cfd1, libelle_long_formation: "x" });
+      await seedStatutsCandidats({ ...departement1, formation_cfd: cfd1, libelle_long_formation: "x" });
+      await seedStatutsCandidats({ ...departement2, formation_cfd: cfd1, libelle_long_formation: "x" });
+      await seedStatutsCandidats({ ...departement2, formation_cfd: cfd2, libelle_long_formation: "x" });
+      await seedStatutsCandidats({ ...departement2, formation_cfd: cfd2, libelle_long_formation: "x" });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          departement: "75",
+          formation_cfd: cfd1,
+          intitule: "x",
+          effectifs: {
+            apprentis: 10,
+            inscritsSansContrat: 30,
+            rupturants: 0,
+            abandons: 20,
+          },
+        },
+        {
+          departement: "77",
+          formation_cfd: cfd2,
+          intitule: "x",
+          effectifs: {
+            apprentis: 10,
+            inscritsSansContrat: 30,
+            rupturants: 0,
+            abandons: 20,
+          },
+        },
+        {
+          departement: "77",
+          formation_cfd: cfd1,
+          intitule: "x",
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+      ];
+
+      const effectifsByDepartementAndFormation = await getEffectifsCountByFormationAndDepartementAtDate(date);
+      // we will sort results because we don't care of the order in the test
+      const sortByDepartementAndCfd = (a, b) => {
+        if (a.departement === b.departement) {
+          return Number(a.formation_cfd) < Number(b.formation_cfd) ? 1 : -1;
+        }
+        return Number(a.departement) > Number(b.departement) ? 1 : -1;
+      };
+      const sorted = effectifsByDepartementAndFormation.sort(sortByDepartementAndCfd);
+      assert.equal(effectifsByDepartementAndFormation.length, 3);
+      assert.deepEqual(sorted[0], expectedResult[0]);
+      assert.deepEqual(sorted[1], expectedResult[1]);
+      assert.deepEqual(sorted[2], expectedResult[2]);
     });
   });
 });

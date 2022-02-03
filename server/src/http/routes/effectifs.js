@@ -39,7 +39,7 @@ const getCacheKeyForRoute = (route, filters) => {
   return `${route}:${stringify(filters)}`;
 };
 
-module.exports = ({ stats, effectifs, cfas, formations, cache }) => {
+module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => {
   const router = express.Router();
 
   /**
@@ -305,12 +305,20 @@ module.exports = ({ stats, effectifs, cfas, formations, cache }) => {
       })
     ),
     tryCatch(async (req, res) => {
+      // build filters from req.query
       const { date: dateFromQuery, ...filtersFromBody } = req.query;
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
+
+      // create event
+      await userEvents.create({
+        action: "export-csv-repartition-effectifs-par-organisme",
+        username: req.username,
+        data: req.query,
+      });
 
       const effectifsByCfaAtDate = await effectifs.getEffectifsCountByCfaAtDate(date, filters);
       const formattedForCsv = await Promise.all(
@@ -346,6 +354,7 @@ module.exports = ({ stats, effectifs, cfas, formations, cache }) => {
       })
     ),
     tryCatch(async (req, res) => {
+      // build filters from req.query
       const { date: dateFromQuery, ...filtersFromBody } = req.query;
       const date = new Date(dateFromQuery);
       const filters = {
@@ -353,11 +362,19 @@ module.exports = ({ stats, effectifs, cfas, formations, cache }) => {
         annee_scolaire: getAnneeScolaireFromDate(date),
       };
 
-      const effectifsParFormation = await effectifs.getEffectifsCountByFormationAtDate(date, filters);
+      // create event
+      await userEvents.create({
+        action: "export-csv-repartition-effectifs-par-formation",
+        username: req.username,
+        data: req.query,
+      });
+
+      const effectifsParFormation = await effectifs.getEffectifsCountByFormationAndDepartementAtDate(date, filters);
       const formattedForCsv = await Promise.all(
-        effectifsParFormation.map(async ({ formation_cfd, intitule, effectifs }) => {
+        effectifsParFormation.map(async ({ formation_cfd, departement, intitule, effectifs }) => {
           const formation = await formations.getFormationWithCfd(formation_cfd);
           return {
+            DEPARTEMENT: departement,
             NIVEAU: formation?.niveau,
             "INTITULE NIVEAU": formation?.niveau_libelle,
             "INTITULE DE LA FORMATION": intitule,

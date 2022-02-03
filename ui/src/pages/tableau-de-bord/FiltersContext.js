@@ -99,7 +99,7 @@ export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }
   const state = parsedStateIsValid ? parsedStateFromQueryString : initialState;
   useEffect(() => {
     if (!parsedStateIsValid) updateUrlWithState(initialState);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    /* eslint-disable-next-line */
   }, [currentQueryString]);
 
   const setters = {
