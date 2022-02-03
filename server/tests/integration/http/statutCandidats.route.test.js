@@ -159,6 +159,31 @@ httpTests(__filename, ({ startServer }) => {
     assert.equal(await StatutCandidatModel.countDocuments({}), 0);
   });
 
+  it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ uai_etablissement ne respecte pas le format", async () => {
+    const { httpClient } = await startServer();
+    await createApiUser();
+    const accessToken = await getJwtForUser(httpClient);
+
+    const input = [createRandomStatutCandidatApiInput({ uai_etablissement: "invalide" })];
+    // perform request
+    const response = await httpClient.post("/api/statut-candidats", input, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    // check response
+    assert.equal(response.data.status, "ERROR");
+    assert.equal(response.data.validationErrors.length, 1);
+    assert.equal(
+      response.data.validationErrors[0].details[0].message.includes(
+        '"uai_etablissement" with value "invalide" fails to match the required pattern'
+      ),
+      true
+    );
+    // check that no data was created
+    assert.equal(await StatutCandidatModel.countDocuments({}), 0);
+  });
+
   const invalidDates = ["2020", "2020-10", "2020-10-", "2020-10-1", "13/11/2020", "abc", true];
   invalidDates.forEach((invalidDate) => {
     it(`Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque les champs date ne sont pas iso (${invalidDate})`, async () => {

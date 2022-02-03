@@ -6,6 +6,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
 const { codesStatutsCandidats } = require("../../common/model/constants");
 const { cfdRegex } = require("../../common/domain/cfd");
+const { uaiRegex } = require("../../common/domain/uai");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
@@ -32,7 +33,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
     nom_apprenant: Joi.string().required(),
     prenom_apprenant: Joi.string().required(),
     ne_pas_solliciter: Joi.boolean().required(),
-    uai_etablissement: Joi.string().required(),
+    uai_etablissement: Joi.string().regex(uaiRegex).required(),
     nom_etablissement: Joi.string().required(),
     id_formation: Joi.string().regex(cfdRegex).required(),
     annee_scolaire: anneeScolaireSchema.required(),
