@@ -154,6 +154,10 @@ const duplicatesTypesCodes = {
     name: "Nom",
     code: 4,
   },
+  uai_etablissement: {
+    name: "Uai",
+    code: 5,
+  },
 };
 
 const statutsCandidatsStringFields = [

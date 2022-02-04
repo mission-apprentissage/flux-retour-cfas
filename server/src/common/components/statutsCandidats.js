@@ -223,6 +223,23 @@ const findStatutsDuplicates = async (
       };
       break;
 
+    case duplicatesTypesCodes.uai_etablissement.code:
+      unicityQueryGroup = {
+        _id: {
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
+          formation_cfd: "$formation_cfd",
+          annee_scolaire: "$annee_scolaire",
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des différents uais en doublon potentiel
+        uais: { $addToSet: "$uai_etablissement" },
+        count: { $sum: 1 },
+      };
+      break;
+
     case duplicatesTypesCodes.prenom_apprenant.code:
       unicityQueryGroup = {
         _id: {

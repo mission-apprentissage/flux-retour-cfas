@@ -5,7 +5,7 @@ const statutsCandidats = require("../../../../src/common/components/statutsCandi
 const { StatutCandidatModel, CfaModel, FormationModel } = require("../../../../src/common/model");
 const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
 const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../data/sample");
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { createRandomStatutCandidat, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
@@ -1100,6 +1100,36 @@ integrationTests(__filename, () => {
       assert.equal(duplicatesListFound[0].duplicatesIds.length, 2);
       assert.deepEqual(duplicatesListFound[0].commonData.prenom_apprenant, firstDup.prenom_apprenant);
       assert.deepEqual(duplicatesListFound[0].commonData.nom_apprenant, firstDup.nom_apprenant);
+    });
+
+    it("Vérifie la récupération des doublons d'uai", async () => {
+      const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
+
+      // Create 10 random statuts without duplicates
+      for (let index = 0; index < 5; index++) {
+        await createStatutCandidat(createRandomStatutCandidat());
+      }
+
+      // Create 4 statuts with same unicity group but different uai
+      const commonData = {
+        nom_apprenant: `KANTE`,
+        prenom_apprenant: `NGOLO`,
+        date_de_naissance_apprenant: new Date("2002-10-10T00:00:00.000+0000"),
+        formation_cfd: "01022103",
+        annee_scolaire: "2020-2021",
+      };
+      for (let index = 0; index < 4; index++) {
+        await createStatutCandidat(
+          createRandomStatutCandidat({ ...commonData, uai_etablissement: getRandomUaiEtablissement() })
+        );
+      }
+
+      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.uai_etablissement.code);
+
+      // 1 cas de doublons trouvé avec 4 doublons
+      assert.equal(duplicatesListFound.length, 1);
+      assert.equal(duplicatesListFound[0].duplicatesCount, 4);
+      assert.equal(duplicatesListFound[0].duplicatesIds.length, 4);
     });
   });
 });
