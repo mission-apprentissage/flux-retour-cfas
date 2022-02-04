@@ -232,8 +232,8 @@ const findStatutsDuplicates = async (
           formation_cfd: "$formation_cfd",
           annee_scolaire: "$annee_scolaire",
         },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des ids unique de chaque doublons avec date de création
+        duplicatesCreatedDatesAndIds: { $addToSet: { id: "$_id", created_at: "$created_at" } },
         // Ajout des différents uais en doublon potentiel
         uais: { $addToSet: "$uai_etablissement" },
         count: { $sum: 1 },
@@ -326,7 +326,7 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
     return {
       commonData: _id,
       duplicatesCount: count,
-      duplicatesIds: duplicatesIds,
+      duplicatesIds: duplicatesIds ?? null,
       discriminants,
     };
   });

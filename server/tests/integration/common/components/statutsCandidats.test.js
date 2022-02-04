@@ -1129,7 +1129,7 @@ integrationTests(__filename, () => {
       // 1 cas de doublons trouvé avec 4 doublons
       assert.equal(duplicatesListFound.length, 1);
       assert.equal(duplicatesListFound[0].duplicatesCount, 4);
-      assert.equal(duplicatesListFound[0].duplicatesIds.length, 4);
+      assert.equal(duplicatesListFound[0].discriminants.duplicatesCreatedDatesAndIds.length, 4);
     });
   });
 });
