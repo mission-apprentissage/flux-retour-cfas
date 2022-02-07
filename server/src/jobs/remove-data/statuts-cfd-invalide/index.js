@@ -7,4 +7,4 @@ runScript(async () => {
   logger.info("Suppression des statutsCandidats avec formation_cfd invalide ....");
   await StatutCandidatModel.deleteMany({ formation_cfd_valid: false });
   logger.info("StatutsCandidats avec formation_cfd invalide nettoyés avec succès !");
-}, jobNames.cleanStatutsCandidatsInvalidCfd);
+}, jobNames.removeStatutsCandidatsInvalidCfd);
