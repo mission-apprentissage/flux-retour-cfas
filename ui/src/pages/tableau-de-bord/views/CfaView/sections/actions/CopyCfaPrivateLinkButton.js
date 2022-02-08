@@ -2,7 +2,7 @@ import { Box, Button, useToast } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-const CfaLinkCopySection = ({ link }) => {
+const CopyCfaPrivateLinkButton = ({ link }) => {
   const toast = useToast();
 
   const copyLinkAndToast = () => {
@@ -24,8 +24,8 @@ const CfaLinkCopySection = ({ link }) => {
   );
 };
 
-CfaLinkCopySection.propTypes = {
+CopyCfaPrivateLinkButton.propTypes = {
   link: PropTypes.string.isRequired,
 };
 
-export default CfaLinkCopySection;
+export default CopyCfaPrivateLinkButton;

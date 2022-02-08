@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { _post } from "../../../../../../common/httpClient";
+import { _post } from "../../../../../../../common/httpClient";
 
 export const SUBMIT_STATE = {
   waiting: "waiting",

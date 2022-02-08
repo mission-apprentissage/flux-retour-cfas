@@ -2,7 +2,7 @@ import { List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { FilterOption } from "../../../../../../common/components";
+import { FilterOption } from "../../../../../../../common/components";
 
 const SousEtablissementsList = ({ sousEtablissements, onSousEtablissementClick, value }) => {
   return (

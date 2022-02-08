@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { OverlayMenu, SecondarySelectButton } from "../../../../../../common/components";
+import { OverlayMenu, SecondarySelectButton } from "../../../../../../../common/components";
 import SousEtablissementList from "./SousEtablissementList";
 
 const SousEtablissementFilter = ({ value, sousEtablissements, onSousEtablissementChange }) => {

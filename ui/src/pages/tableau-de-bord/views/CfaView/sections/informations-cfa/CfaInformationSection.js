@@ -1,28 +1,16 @@
-import { Box, Heading, HStack, Skeleton, Text } from "@chakra-ui/react";
+import { Box, Heading, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Highlight } from "../../../../../common/components";
-import { pluralize } from "../../../../../common/utils/stringUtils";
+import { Highlight } from "../../../../../../common/components";
+import { pluralize } from "../../../../../../common/utils/stringUtils";
+import { infosCfaPropType } from "../../propTypes";
+import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
-import { infosCfaPropType } from "./propTypes";
 
-const CfaDetail = ({ infosCfa, loading, error }) => {
+const CfaInformationSection = ({ infosCfa, loading, error }) => {
   if (loading) {
-    return (
-      <Highlight>
-        <Skeleton height="1rem" width="250px" marginBottom="1w" />
-        <Skeleton height="2rem" width="600px" marginBottom="1w" />
-        <Skeleton height="1rem" width="800px" marginBottom="1w" />
-        <Skeleton height="1rem" width="150px" marginBottom="1w" />
-        <HStack marginTop="1w">
-          <Skeleton height="2rem" width="300px" marginBottom="1w" />
-          <Skeleton height="2rem" width="300px" marginBottom="1w" />
-          <Skeleton height="2rem" width="300px" marginBottom="1w" />
-          <Skeleton height="2rem" width="300px" marginBottom="1w" />
-        </HStack>
-      </Highlight>
-    );
+    return <CfaInformationSkeleton />;
   }
 
   if (error) {
@@ -64,10 +52,10 @@ const CfaDetail = ({ infosCfa, loading, error }) => {
   return null;
 };
 
-CfaDetail.propTypes = {
+CfaInformationSection.propTypes = {
   infosCfa: infosCfaPropType,
   loading: PropTypes.bool,
   error: PropTypes.object,
 };
 
-export default CfaDetail;
+export default CfaInformationSection;
