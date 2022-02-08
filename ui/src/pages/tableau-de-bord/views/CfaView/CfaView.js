@@ -2,31 +2,31 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Page } from "../../../../common/components";
+import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import { IndicesHeaderSection, VueGlobaleSection } from "../../sections";
-import { infosCfaPropType } from "./propTypes";
 import { ActionsSection, CfaInformationSection, RepartitionSection } from "./sections";
-import withInfoCfaData from "./withInfoCfaData";
 
-const CfaView = ({ infosCfa, filters, effectifs, loading, error }) => {
+const CfaView = ({ cfaUai, filters, effectifs, effectifsLoading }) => {
+  const { data: infosCfa, loading: infosCfaLoading, error: infosCfaError } = useFetchCfaInfo(cfaUai);
+
   return (
     <Page>
       <IndicesHeaderSection />
-      <CfaInformationSection infosCfa={infosCfa} loading={loading} error={error} />
+      <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
       {infosCfa && <ActionsSection infosCfa={infosCfa} />}
-      <VueGlobaleSection effectifs={effectifs} loading={loading} />
+      <VueGlobaleSection effectifs={effectifs} loading={effectifsLoading} />
       <RepartitionSection filters={filters} />
     </Page>
   );
 };
 
 CfaView.propTypes = {
-  infosCfa: infosCfaPropType,
+  cfaUai: PropTypes.string.isRequired,
   effectifs: effectifsPropType,
-  loading: PropTypes.bool.isRequired,
-  error: PropTypes.object,
+  effectifsLoading: PropTypes.bool.isRequired,
   filters: filtersPropTypes.state,
 };
 
-export default withInfoCfaData(CfaView);
+export default CfaView;
