@@ -316,7 +316,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       // create event
       await userEvents.create({
         action: "export-csv-repartition-effectifs-par-organisme",
-        username: req.username,
+        username: req.user.username,
         data: req.query,
       });
 
@@ -365,7 +365,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       // create event
       await userEvents.create({
         action: "export-csv-repartition-effectifs-par-formation",
-        username: req.username,
+        username: req.user.username,
         data: req.query,
       });
 
