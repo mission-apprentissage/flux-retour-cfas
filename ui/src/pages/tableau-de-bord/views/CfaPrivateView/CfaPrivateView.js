@@ -9,7 +9,7 @@ import useEffectifs from "../../useEffectifs";
 import { ActionsSection, CfaInformationSection, RepartitionSection } from "../CfaView/sections";
 import withInfoCfaData from "../CfaView/withInfoCfaData";
 
-const CfaWithoutNetworkView = ({ infosCfa, loading, error }) => {
+const CfaPrivateView = ({ infosCfa, loading, error }) => {
   const [effectifs, effectifsLoading] = useEffectifs();
   const { state: filters } = useFiltersContext();
 
@@ -28,10 +28,10 @@ const CfaWithoutNetworkView = ({ infosCfa, loading, error }) => {
   );
 };
 
-CfaWithoutNetworkView.propTypes = {
+CfaPrivateView.propTypes = {
   infosCfa: PropTypes.object,
   error: PropTypes.object,
   loading: PropTypes.bool.isRequired,
 };
 
-export default withInfoCfaData(CfaWithoutNetworkView);
+export default withInfoCfaData(CfaPrivateView);

@@ -8,7 +8,7 @@ import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import LoginPage from "./pages/login/LoginPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
-import CfaWithoutNetworkPage from "./pages/tableau-de-bord/views/CfaWithoutNetwork";
+import CfaPrivatePage from "./pages/tableau-de-bord/views/CfaPrivateView";
 import {
   ConsulterVosDonneesPage,
   TransmettreConsulterVosDonneesPage,
@@ -44,9 +44,9 @@ const App = () => {
         <Route path={navigationPages.ConsulterVosDonnees.path} exact component={ConsulterVosDonneesPage} />
 
         {/* Secured By Token Pages */}
-        <Route exact path={`${navigationPages.Cfa.path}/:accessToken`} component={CfaWithoutNetworkPage} />
+        <Route exact path={`${navigationPages.Cfa.path}/:accessToken`} component={CfaPrivatePage} />
         {/* Workaround because we sent some links with /cfas/xxx and others with /cfa/xxx */}
-        <Route exact path={`/cfa/:accessToken`} component={CfaWithoutNetworkPage} />
+        <Route exact path={`/cfa/:accessToken`} component={CfaPrivatePage} />
         <Route path={navigationPages.DonneesPersonnelles.path} exact component={ProtectionDonneesPersonnellesPage} />
 
         {/* Secured By Auth Pages */}

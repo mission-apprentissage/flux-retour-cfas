@@ -5,7 +5,7 @@ import { Redirect } from "react-router";
 import useAuth from "../../../../common/hooks/useAuth";
 import { _post } from "../../../../common/httpClient";
 import { FiltersProvider, getDefaultState } from "../../FiltersContext";
-import CfaWithoutNetworkView from "./CfaWithoutNetworkView";
+import CfaPrivateView from "./CfaPrivateView";
 
 const PAGE_STATES = {
   loading: "loading",
@@ -13,7 +13,7 @@ const PAGE_STATES = {
   ready: "ready",
 };
 
-const CfaWithoutNetworkPage = ({ match }) => {
+const CfaPrivateViewPage = ({ match }) => {
   const [auth, setAuth] = useAuth();
   const [pageState, setPageState] = useState(PAGE_STATES.loading);
   const cfaAccessToken = match.params.accessToken;
@@ -40,7 +40,7 @@ const CfaWithoutNetworkPage = ({ match }) => {
     const defaultCfaState = { ...getDefaultState(), cfa: { uai_etablissement: uai } };
     return (
       <FiltersProvider defaultState={defaultCfaState}>
-        <CfaWithoutNetworkView cfaUai={uai} />
+        <CfaPrivateView cfaUai={uai} />
       </FiltersProvider>
     );
   }
@@ -48,7 +48,7 @@ const CfaWithoutNetworkPage = ({ match }) => {
   return null;
 };
 
-CfaWithoutNetworkPage.propTypes = {
+CfaPrivateViewPage.propTypes = {
   match: PropTypes.shape({
     params: PropTypes.shape({
       accessToken: PropTypes.string.isRequired,
@@ -56,4 +56,4 @@ CfaWithoutNetworkPage.propTypes = {
   }).isRequired,
 };
 
-export default CfaWithoutNetworkPage;
+export default CfaPrivateViewPage;
