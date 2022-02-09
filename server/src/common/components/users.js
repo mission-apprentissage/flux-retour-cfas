@@ -1,11 +1,15 @@
+const { addHours, isAfter } = require("date-fns");
 const { UserModel } = require("../model");
 const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
 const sha512Utils = require("../utils/sha512Utils");
+const { validatePassword } = require("../domain/password");
 
 const rehashPassword = (user, password) => {
   user.password = sha512Utils.hash(password);
   return user.save();
 };
+
+const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 24;
 
 module.exports = async () => {
   return {
@@ -44,6 +48,44 @@ module.exports = async () => {
       await user.save();
       return user.toObject();
     },
+    generatePasswordUpdateToken: async (username) => {
+      const user = await UserModel.findOne({ username });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const token = generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
+
+      user.password_update_token = token;
+      user.password_update_token_expiry = addHours(new Date(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS); // token will only be valid for 24 hours
+      await user.save();
+      return token;
+    },
+    updatePassword: async (updateToken, password) => {
+      if (!validatePassword(password)) throw new Error("Password must be valid (at least 16 characters)");
+      // find user with password_update_token and ensures it exists
+      const user = await UserModel.findOne({
+        password_update_token: updateToken,
+        password_update_token_expiry: { $exists: true },
+      });
+
+      // throw if user is not found
+      if (!user) throw new Error("User not found");
+
+      // token must be valid
+      if (isAfter(new Date(), user.password_update_token_expiry)) {
+        throw new Error("Password update token has expired");
+      }
+
+      // we store password hashes only
+      const passwordHash = sha512Utils.hash(password);
+      user.password = passwordHash;
+      user.password_update_token = null;
+      user.password_update_token_expiry = null;
+
+      await user.save();
+    },
     removeUser: async (username) => {
       const user = await UserModel.findOne({ username });
       if (!user) {
@@ -51,17 +93,6 @@ module.exports = async () => {
       }
 
       return await user.deleteOne({ username });
-    },
-    changePassword: async (username, newPassword) => {
-      const user = await UserModel.findOne({ username });
-      if (!user) {
-        throw new Error(`Unable to find user ${username}`);
-      }
-
-      user.password = sha512Utils.hash(newPassword);
-      await user.save();
-
-      return user.toObject();
     },
   };
 };
