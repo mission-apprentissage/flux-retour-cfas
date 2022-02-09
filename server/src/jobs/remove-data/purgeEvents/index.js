@@ -1,6 +1,6 @@
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const { jobNames } = require("../../common/model/constants");
+const { runScript } = require("../../scriptWrapper");
+const logger = require("../../../common/logger");
+const { jobNames } = require("../../../common/model/constants");
 const { purgeUserEvents } = require("./purgeUserEvents");
 const { purgeJobEvents } = require("./purgeJobEvents");
 

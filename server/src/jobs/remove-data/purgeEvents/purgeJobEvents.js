@@ -1,5 +1,5 @@
-const logger = require("../../common/logger");
-const { JobEventModel } = require("../../common/model");
+const logger = require("../../../common/logger");
+const { JobEventModel } = require("../../../common/model");
 
 const purgeJobEvents = async (lastDateToKeep) => {
   logger.info(`... Purging JobEvent data ...`);

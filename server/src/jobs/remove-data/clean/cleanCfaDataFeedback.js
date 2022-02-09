@@ -1,10 +1,10 @@
-const { runScript } = require("../scriptWrapper");
+const { runScript } = require("../../scriptWrapper");
 const cliProgress = require("cli-progress");
 const path = require("path");
-const logger = require("../../common/logger");
-const { CfaDataFeedbackModel } = require("../../common/model");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const logger = require("../../../common/logger");
+const { CfaDataFeedbackModel } = require("../../../common/model");
+const { asyncForEach } = require("../../../common/utils/asyncUtils");
+const { jobNames } = require("../../../common/model/constants");
 const { downloadIfNeeded } = require("./utils");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);

@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const integrationTests = require("../../utils/integrationTests");
 const { StatutCandidatModel, UserModel } = require("../../../src/common/model");
-const { clearStatutsCandidats, clearAll } = require("../../../src/jobs/clear/utils/clearUtils");
+const { clearStatutsCandidats, clearAll } = require("../../../src/jobs/remove-data/clear/utils/clearUtils");
 
 integrationTests(__filename, () => {
   it("Vérifie la suppression des statuts candidats depuis le job", async () => {

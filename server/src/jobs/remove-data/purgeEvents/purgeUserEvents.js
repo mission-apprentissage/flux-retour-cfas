@@ -1,5 +1,5 @@
-const logger = require("../../common/logger");
-const { UserEventModel } = require("../../common/model");
+const logger = require("../../../common/logger");
+const { UserEventModel } = require("../../../common/model");
 
 const purgeUserEvents = async (lastDateToKeep) => {
   logger.info(`... Purging UserEvents ...`);

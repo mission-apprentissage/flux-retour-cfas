@@ -1,7 +1,7 @@
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const { jobNames } = require("../../common/model/constants");
-const { StatutCandidatModel } = require("../../common/model");
+const { runScript } = require("../../scriptWrapper");
+const logger = require("../../../common/logger");
+const { jobNames } = require("../../../common/model/constants");
+const { StatutCandidatModel } = require("../../../common/model");
 
 runScript(async () => {
   logger.info("Suppression de tous réseaux des statuts cfas ....");

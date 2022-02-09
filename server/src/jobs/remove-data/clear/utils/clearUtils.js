@@ -1,5 +1,5 @@
-const logger = require("../../../common/logger");
-const { UserModel, StatutCandidatModel, LogModel, UserEventModel, CfaModel } = require("../../../common/model");
+const logger = require("../../../../common/logger");
+const { UserModel, StatutCandidatModel, LogModel, UserEventModel, CfaModel } = require("../../../../common/model");
 
 const clearAll = async () => {
   logger.info("Suppression en cours");
