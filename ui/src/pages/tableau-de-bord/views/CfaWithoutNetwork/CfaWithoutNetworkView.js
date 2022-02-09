@@ -6,11 +6,11 @@ import { Page, Section } from "../../../../common/components";
 import { useFiltersContext } from "../../FiltersContext";
 import { VueGlobaleSection } from "../../sections";
 import useEffectifs from "../../useEffectifs";
-import CfaSection from "../CfaView/InfosCfa/CfaSection";
-import RepartionCfaNiveauAnneesSection from "../CfaView/RepartionCfaNiveauAnneesSection";
+import { ActionsSection, CfaInformationSection, RepartitionSection } from "../CfaView/sections";
+import withInfoCfaData from "../CfaView/withInfoCfaData";
 
-const CfaWithoutNetworkView = ({ cfaUai }) => {
-  const [effectifs, loading] = useEffectifs();
+const CfaWithoutNetworkView = ({ infosCfa, loading, error }) => {
+  const [effectifs, effectifsLoading] = useEffectifs();
   const { state: filters } = useFiltersContext();
 
   return (
@@ -20,15 +20,18 @@ const CfaWithoutNetworkView = ({ cfaUai }) => {
           Visualiser les indices en temps réel
         </Heading>
       </Section>
-      {cfaUai && <CfaSection filters={filters} cfaUai={cfaUai} />}
-      {effectifs && <VueGlobaleSection effectifs={effectifs} loading={loading} />}
-      <RepartionCfaNiveauAnneesSection filters={filters} />
+      <CfaInformationSection infosCfa={infosCfa} loading={loading} error={error} />
+      {infosCfa && <ActionsSection infosCfa={infosCfa} />}
+      {effectifs && <VueGlobaleSection effectifs={effectifs} loading={effectifsLoading} />}
+      <RepartitionSection filters={filters} />
     </Page>
   );
 };
 
 CfaWithoutNetworkView.propTypes = {
-  cfaUai: PropTypes.string.isRequired,
+  infosCfa: PropTypes.object,
+  error: PropTypes.object,
+  loading: PropTypes.bool.isRequired,
 };
 
-export default CfaWithoutNetworkView;
+export default withInfoCfaData(CfaWithoutNetworkView);

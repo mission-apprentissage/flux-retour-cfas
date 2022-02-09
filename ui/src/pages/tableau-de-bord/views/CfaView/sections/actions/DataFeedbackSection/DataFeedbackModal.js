@@ -2,7 +2,7 @@ import { Box, Modal, ModalContent, ModalHeader, ModalOverlay } from "@chakra-ui/
 import PropTypes from "prop-types";
 import React from "react";
 
-import ModalClosingButton from "../../../../../../common/components/ModalClosingButton/ModalClosingButton";
+import ModalClosingButton from "../../../../../../../common/components/ModalClosingButton/ModalClosingButton";
 import DataFeedbackModalContent from "./DataFeedbackModalContent";
 
 const DataFeedbackModal = ({ isOpen, onClose, uai }) => {

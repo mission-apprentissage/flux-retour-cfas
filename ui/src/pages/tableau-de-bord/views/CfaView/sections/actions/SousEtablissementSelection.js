@@ -2,7 +2,7 @@ import { Flex, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../FiltersContext";
+import { useFiltersContext } from "../../../../FiltersContext";
 import SousEtablissementFilter from "./SousEtablissementFilter/SousEtablissementFilter";
 
 const SousEtablissementSelection = ({ sousEtablissements }) => {

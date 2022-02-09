@@ -2,8 +2,8 @@ import { Button, useBoolean, Wrap } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Tag } from "../../../../../common/components";
-import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../common/constants/domainesMetiers";
+import { Tag } from "../../../../../../common/components";
+import { MAX_DISPLAYED_DOMAINE_METIERS } from "../../../../../../common/constants/domainesMetiers";
 
 const DomainesMetiers = ({ domainesMetiers }) => {
   const [showAllDomainesMetiers, setShowAllDomainesMetiers] = useBoolean(false);
