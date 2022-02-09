@@ -4,7 +4,7 @@ export const infosCfaPropType = PropTypes.shape({
   uai: PropTypes.string.isRequired,
   sousEtablissements: PropTypes.arrayOf(
     PropTypes.shape({
-      siret_etablissement: PropTypes.string.isRequired,
+      siret_etablissement: PropTypes.string,
       nom_etablissement: PropTypes.string,
     }).isRequired
   ).isRequired,

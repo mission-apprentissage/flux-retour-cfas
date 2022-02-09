@@ -3,10 +3,22 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Highlight } from "../../../../../../common/components";
-import { pluralize } from "../../../../../../common/utils/stringUtils";
 import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
+
+const formatSiretInformation = (sousEtablissements) => {
+  const multipleSirets = sousEtablissements.length > 1;
+
+  if (multipleSirets) {
+    `${sousEtablissements.length} SIRETs pour cet organisme`;
+  } else {
+    if (sousEtablissements[0].siret_etablissement) {
+      return `SIRET : ${sousEtablissements[0].siret_etablissement}`;
+    }
+    return "SIRET non renseigné pour cet organisme";
+  }
+};
 
 const CfaInformationSection = ({ infosCfa, loading, error }) => {
   if (loading) {
@@ -29,8 +41,7 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
     return (
       <Highlight>
         <Text color="white" fontSize="omega">
-          UAI&nbsp;:&nbsp;{uai} - {sousEtablissements.length} {pluralize("SIRET", sousEtablissements.length, "S")} pour
-          cet organisme
+          UAI&nbsp;:&nbsp;{uai} - {formatSiretInformation(sousEtablissements)}
         </Text>
         <Heading color="white" fontSize="gamma" marginTop="1w">
           {libelleLong}
