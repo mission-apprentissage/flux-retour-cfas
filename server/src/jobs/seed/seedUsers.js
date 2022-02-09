@@ -16,9 +16,6 @@ let args = [];
 runScript(async ({ users }) => {
   args = arg({ "--clearCsvFile": Boolean }, { argv: process.argv.slice(2) });
 
-  logger.info("-> Seed API Users from config...");
-  await seedApiUsers(users);
-
   logger.info("-> Seed Tdb Users from csv...");
   await seedTdbUsers(users, args["--clearCsvFile"]);
 
@@ -48,14 +45,6 @@ const createUsers = async (usersModule, usersList) => {
       }
     }
   });
-};
-
-/**
- * Seeding API Users
- */
-const seedApiUsers = async (usersModule) => {
-  const usersListFromConfig = Object.values(config.users);
-  await createUsers(usersModule, usersListFromConfig);
 };
 
 /**
