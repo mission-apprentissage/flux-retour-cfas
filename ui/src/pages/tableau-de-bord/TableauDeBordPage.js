@@ -17,8 +17,7 @@ export const TableauDeBordView = () => {
         cfaUai={filters.cfa.uai_etablissement}
         filters={filters}
         effectifs={effectifs}
-        loading={loading}
-        error={error}
+        effectifsLoading={loading}
       />
     );
   }

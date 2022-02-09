@@ -3,14 +3,15 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Page, Section } from "../../../../common/components";
+import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { useFiltersContext } from "../../FiltersContext";
 import { VueGlobaleSection } from "../../sections";
 import useEffectifs from "../../useEffectifs";
 import { ActionsSection, CfaInformationSection, RepartitionSection } from "../CfaView/sections";
-import withInfoCfaData from "../CfaView/withInfoCfaData";
 
-const CfaPrivateView = ({ infosCfa, loading, error }) => {
+const CfaPrivateView = ({ cfaUai }) => {
   const [effectifs, effectifsLoading] = useEffectifs();
+  const { data: infosCfa, loading: infosCfaLoading, error: infosCfaError } = useFetchCfaInfo(cfaUai);
   const { state: filters } = useFiltersContext();
 
   return (
@@ -20,7 +21,7 @@ const CfaPrivateView = ({ infosCfa, loading, error }) => {
           Visualiser les indices en temps réel
         </Heading>
       </Section>
-      <CfaInformationSection infosCfa={infosCfa} loading={loading} error={error} />
+      <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
       {infosCfa && <ActionsSection infosCfa={infosCfa} />}
       {effectifs && <VueGlobaleSection effectifs={effectifs} loading={effectifsLoading} />}
       <RepartitionSection filters={filters} />
@@ -29,9 +30,7 @@ const CfaPrivateView = ({ infosCfa, loading, error }) => {
 };
 
 CfaPrivateView.propTypes = {
-  infosCfa: PropTypes.object,
-  error: PropTypes.object,
-  loading: PropTypes.bool.isRequired,
+  cfaUai: PropTypes.string.isRequired,
 };
 
-export default withInfoCfaData(CfaPrivateView);
+export default CfaPrivateView;
