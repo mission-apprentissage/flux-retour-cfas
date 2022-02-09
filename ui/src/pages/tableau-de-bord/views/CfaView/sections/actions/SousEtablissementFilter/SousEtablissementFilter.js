@@ -12,7 +12,9 @@ const SousEtablissementFilter = ({ value, sousEtablissements, onSousEtablissemen
     setIsOpen(false);
   };
 
-  const buttonLabel = value ? `${value.nom_etablissement} - SIRET : ${value.siret_etablissement}` : "Tous les SIRETS";
+  const buttonLabel = value
+    ? `${value.nom_etablissement} - SIRET : ${value.siret_etablissement || "N/A"}`
+    : "Tous les SIRETS";
 
   return (
     <>
