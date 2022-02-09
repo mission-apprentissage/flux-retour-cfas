@@ -17,7 +17,7 @@ const SousEtablissementsList = ({ sousEtablissements, onSousEtablissementClick, 
             }}
             isSelected={value === siret_etablissement}
           >
-            SIRET : {siret_etablissement} - {nom_etablissement}
+            SIRET : {siret_etablissement || "N/A"} - {nom_etablissement}
           </FilterOption>
         );
       })}
