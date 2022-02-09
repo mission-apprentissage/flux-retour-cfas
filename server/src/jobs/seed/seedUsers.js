@@ -34,7 +34,9 @@ const createUsers = async (usersModule, usersList) => {
     } else {
       logger.info(`Creating user ${user.name}`);
       try {
-        await usersModule.createUser(user.name, user.password, {
+        await usersModule.createUser({
+          username: user.name,
+          password: user.password,
           permissions: user.permissions,
           network: user.network ?? null,
           email: user.email ?? null,

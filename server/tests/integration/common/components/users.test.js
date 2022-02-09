@@ -5,10 +5,10 @@ const { UserModel } = require("../../../../src/common/model");
 const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
 
 integrationTests(__filename, () => {
-  it("Permet de créer un utilisateur", async () => {
+  it("Permet de créer un utilisateur avec mot de passe", async () => {
     const { createUser } = await users();
 
-    const created = await createUser("user", "password");
+    const created = await createUser({ username: "user", password: "password" });
     assert.equal(created.username, "user");
     assert.equal(created.permissions.length, 0);
     assert.equal(created.password.startsWith("$6$rounds="), true);
@@ -19,10 +19,26 @@ integrationTests(__filename, () => {
     assert.equal(found.password.startsWith("$6$rounds="), true);
   });
 
+  it("Crée un utilisateur avec mot de passe random quand pas de mot de passe fourni", async () => {
+    const { createUser } = await users();
+
+    const created = await createUser({ username: "user" });
+    assert.equal(created.username, "user");
+    assert.equal(created.permissions.length, 0);
+    assert.equal(created.password.startsWith("$6$rounds="), true);
+
+    const found = await UserModel.findOne({ username: "user" });
+    assert.equal(found.username, "user");
+  });
+
   it("Permet de créer un utilisateur avec les droits d'admin", async () => {
     const { createUser } = await users();
 
-    const user = await createUser("userAdmin", "password", { permissions: [apiRoles.administrator] });
+    const user = await createUser({
+      username: "userAdmin",
+      password: "password",
+      permissions: [apiRoles.administrator],
+    });
     const found = await UserModel.findOne({ username: "userAdmin" });
 
     assert.equal(user.permissions.includes(apiRoles.administrator), true);
@@ -32,7 +48,9 @@ integrationTests(__filename, () => {
   it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
     const { createUser } = await users();
 
-    const user = await createUser("userAdmin", "password", {
+    const user = await createUser({
+      username: "userAdmin",
+      password: "password",
       permissions: [tdbRoles.network],
       email: "email@test.fr",
       network: "test",
@@ -51,7 +69,11 @@ integrationTests(__filename, () => {
   it("Permet de supprimer un utilisateur", async () => {
     const { createUser, removeUser } = await users();
 
-    await createUser("userToDelete", "password", { permissions: [apiRoles.administrator] });
+    await createUser({
+      username: "userToDelete",
+      password: "password",
+      permissions: [apiRoles.administrator],
+    });
     await removeUser("userToDelete");
 
     const found = await UserModel.findOne({ username: "userToDelete" });
@@ -61,7 +83,10 @@ integrationTests(__filename, () => {
   it("Vérifie que le mot de passe est valide", async () => {
     const { createUser, authenticate } = await users();
 
-    await createUser("user", "password");
+    await createUser({
+      username: "user",
+      password: "password",
+    });
     const user = await authenticate("user", "password");
 
     assert.equal(user.username, "user");
@@ -70,7 +95,10 @@ integrationTests(__filename, () => {
   it("Vérifie que le mot de passe est invalide", async () => {
     const { createUser, authenticate } = await users();
 
-    await createUser("user", "password");
+    await createUser({
+      username: "user",
+      password: "password",
+    });
     const user = await authenticate("user", "INVALID");
 
     assert.equal(user, null);
@@ -79,7 +107,10 @@ integrationTests(__filename, () => {
   it("Vérifie qu'on peut changer le mot de passe d'un utilisateur", async () => {
     const { createUser, authenticate, changePassword } = await users();
 
-    await createUser("user", "password");
+    await createUser({
+      username: "user",
+      password: "password",
+    });
     await changePassword("user", "newPassword");
     const user = await authenticate("user", "newPassword");
 
