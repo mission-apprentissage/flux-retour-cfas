@@ -133,6 +133,8 @@ const jobNames = {
   statutsCandidatsRemoveHistoriqueElementWithInvalidValeurStatut:
     "statuts-candidats-remove-historique-element-with-invalid-valeur-statut",
   statutsAvecDerniersElementsHistoriqueDateIdentique: "statuts-avec-date-identique-dans-historique",
+  createErpUser: "users:create-erp-user",
+  generatePasswordUpdateToken: "users:generate-password-update-token",
 };
 
 /**

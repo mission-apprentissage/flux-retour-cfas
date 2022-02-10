@@ -24,6 +24,8 @@
     "seed:clearAssets": "node -r dotenv/config src/jobs/seed/clearAssets.js",
     "seed:annuaireCfas": "node -r dotenv/config src/jobs/seed/seedAnnuaireCfas.js",
     "seed:croisementCfasAnnuaire": "node -r dotenv/config src/jobs/seed/seedCroisementCfasAnnuaire.js",
+    "users:create-erp-user": "node -r dotenv/config src/jobs/users/create-erp-user/index.js",
+    "users:generate-password-update-token": "node -r dotenv/config src/jobs/users/generate-password-update-token/index.js",
     "clear:all": "node -r dotenv/config src/jobs/remove-data/clear/clearAll.js",
     "clear:all-statutsCandidats": "node -r dotenv/config src/jobs/remove-data/clear/clearStatutsCandidats.js",
     "clear:statutsCandidats-networks": "node -r dotenv/config src/jobs/remove-data/clear/clearStatutsCandidatsNetworks.js",
