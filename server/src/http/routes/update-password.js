@@ -2,7 +2,7 @@ const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
-module.exports = ({ users }) => {
+module.exports = ({ users, userEvents }) => {
   const router = express.Router();
 
   const updatedPasswordValidationSchema = Joi.object({
@@ -16,7 +16,12 @@ module.exports = ({ users }) => {
       await updatedPasswordValidationSchema.validateAsync(req.body);
 
       try {
-        await users.updatePassword(req.body.token, req.body.newPassword);
+        const updatedUser = await users.updatePassword(req.body.token, req.body.newPassword);
+
+        await userEvents.create({
+          username: updatedUser.username,
+          action: "update-password",
+        });
         return res.json({ message: "success" });
       } catch (err) {
         return res.status(500).json({ message: "Could not update password" });

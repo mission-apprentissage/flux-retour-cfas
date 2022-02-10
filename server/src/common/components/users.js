@@ -85,6 +85,8 @@ module.exports = async () => {
       user.password_update_token_expiry = null;
 
       await user.save();
+
+      return user.toObject();
     },
     removeUser: async (username) => {
       const user = await UserModel.findOne({ username });
