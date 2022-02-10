@@ -191,25 +191,6 @@ integrationTests(__filename, () => {
       );
     });
 
-    it("renvoie une erreur lorsque le nouveau mot de passe est trop court", async () => {
-      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
-
-      // create user
-      await createUser({ username: "user" });
-      // generate update token
-      const token = await generatePasswordUpdateToken("user");
-
-      const shortPassword = "hello-world";
-
-      await assert.rejects(
-        () => updatePassword(token, shortPassword),
-        (err) => {
-          assert.equal(err.message, "Password must be valid (at least 16 characters)");
-          return true;
-        }
-      );
-    });
-
     it("renvoie une erreur lorsque l'update est fait plus de 24h après la création du token", async () => {
       const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
 
@@ -239,6 +220,28 @@ integrationTests(__filename, () => {
 
       await assert.rejects(
         () => updatePassword(null, "super-long-strong-password"),
+        (err) => {
+          assert.equal(err.message, "User not found");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque l'update a déjà été fait", async () => {
+      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
+
+      // create user
+      await createUser({ username: "user" });
+
+      // generate update token
+      const token = await generatePasswordUpdateToken("user");
+
+      // update password first time
+      await updatePassword(token, "new-password-strong");
+
+      // try again
+      await assert.rejects(
+        () => updatePassword(token, "super-long-strong-password"),
         (err) => {
           assert.equal(err.message, "User not found");
           return true;

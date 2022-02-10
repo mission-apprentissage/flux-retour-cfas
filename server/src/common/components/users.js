@@ -67,7 +67,7 @@ module.exports = async () => {
       // find user with password_update_token and ensures it exists
       const user = await UserModel.findOne({
         password_update_token: updateToken,
-        password_update_token_expiry: { $exists: true },
+        password_update_token_expiry: { $ne: null },
       });
 
       // throw if user is not found
