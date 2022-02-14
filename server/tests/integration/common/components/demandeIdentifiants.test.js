@@ -1,9 +1,8 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const demandeIdentifiants = require("../../../../src/common/components/demandeIdentifiants");
 const { DemandeIdentifiantsModel } = require("../../../../src/common/model");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   it("Permet de vérifier la création d'une demande d'identifiants", async () => {
     const { create } = await demandeIdentifiants();
 

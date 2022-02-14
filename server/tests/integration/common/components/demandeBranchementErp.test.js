@@ -1,9 +1,8 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const demandeBranchementErp = require("../../../../src/common/components/demandeBranchementErp");
 const { DemandeBranchementErpModel } = require("../../../../src/common/model");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   it("Permet de vérifier la création d'une demande de branchement ERP en cours d'interfacage", async () => {
     const { create } = await demandeBranchementErp();
 

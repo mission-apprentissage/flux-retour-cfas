@@ -1,6 +1,5 @@
 const assert = require("assert").strict;
 const { addDays, differenceInMilliseconds, isEqual } = require("date-fns");
-const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidatModel, CfaModel, FormationModel } = require("../../../../src/common/model");
 const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
@@ -14,7 +13,7 @@ const isApproximatelyNow = (date) => {
   return Math.abs(differenceInMilliseconds(date, new Date())) < 50;
 };
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   beforeEach(() => {
     nockGetCfdInfo();
     nockGetMetiersByCfd();

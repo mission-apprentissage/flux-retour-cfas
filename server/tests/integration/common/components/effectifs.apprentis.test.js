@@ -1,5 +1,4 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const {
   historySequenceInscritToApprentiToAbandon,
@@ -10,7 +9,7 @@ const { StatutCandidatModel } = require("../../../../src/common/model");
 const { reseauxCfas } = require("../../../../src/common/model/constants");
 const { EffectifsApprentis } = require("../../../../src/common/components/effectifs/apprentis");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   const seedStatutsCandidats = async (statutsProps) => {
     // Add 10 statuts with history sequence - full
     for (let index = 0; index < 10; index++) {

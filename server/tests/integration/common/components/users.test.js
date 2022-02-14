@@ -1,11 +1,10 @@
 const assert = require("assert").strict;
 const { differenceInMinutes, subMinutes } = require("date-fns");
-const integrationTests = require("../../../utils/integrationTests");
 const users = require("../../../../src/common/components/users");
 const { UserModel } = require("../../../../src/common/model");
 const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   it("Permet de créer un utilisateur avec mot de passe", async () => {
     const { createUser } = await users();
 

@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
 const { StatutCandidatModel } = require("../../../src/common/model");
@@ -29,7 +29,7 @@ const getJwtForUser = async (httpClient) => {
   return data.access_token;
 };
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   beforeEach(() => {
     nockGetCfdInfo();
     nockGetMetiersByCfd();

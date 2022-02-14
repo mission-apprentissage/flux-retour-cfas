@@ -1,12 +1,11 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const stats = require("../../../../src/common/components/stats");
 const { nockGetSiretInfo, nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   beforeEach(() => {
     nockGetSiretInfo();
     nockGetCfdInfo();

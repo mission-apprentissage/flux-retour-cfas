@@ -1,10 +1,9 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const jobEvents = require("../../../../src/common/components/jobEvents");
 const { JobEventModel } = require("../../../../src/common/model");
 const { jobEventStatuts } = require("../../../../src/common/model/constants");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
     const { isJobInAction } = await jobEvents();
 

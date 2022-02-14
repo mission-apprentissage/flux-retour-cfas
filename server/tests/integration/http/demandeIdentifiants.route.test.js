@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { DemandeIdentifiantsModel } = require("../../../src/common/model");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   let httpClient;
 
   beforeEach(async () => {

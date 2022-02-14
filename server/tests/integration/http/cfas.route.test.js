@@ -1,11 +1,11 @@
 const assert = require("assert").strict;
 const omit = require("lodash.omit");
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 const { StatutCandidatModel, CfaModel } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   let httpClient;
 
   beforeEach(async () => {

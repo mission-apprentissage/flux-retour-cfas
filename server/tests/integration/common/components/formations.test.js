@@ -2,7 +2,6 @@ const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
-const integrationTests = require("../../../utils/integrationTests");
 const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
 const { dataForGetMetiersByCfd } = require("../../../data/apiLba");
@@ -11,7 +10,7 @@ const { FormationModel, StatutCandidatModel } = require("../../../../src/common/
 const { Formation } = require("../../../../src/common/domain/formation");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   describe("existsFormation", () => {
     const { existsFormation } = formationsComponent();
 

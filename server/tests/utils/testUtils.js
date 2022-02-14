@@ -1,34 +1,32 @@
-const path = require("path");
-const redisMock = require("redis-mock");
 // eslint-disable-next-line node/no-unpublished-require
-const nock = require("nock");
-const config = require("../../config");
-const { emptyDir } = require("fs-extra");
-const { connectToMongo } = require("../../src/common/mongodb");
-const { createIndexes } = require("../../src/common/indexes");
+const axiosist = require("axiosist");
+const createComponents = require("../../src/common/components/components");
+const server = require("../../src/http/server");
+const { mongooseInstance } = require("../../src/common/mongodb");
 
-const testDataDir = path.join(__dirname, "../../.local/test");
-let mongoHolder = null;
+const startServer = async () => {
+  const components = await createComponents({ db: mongooseInstance.connection, ovhStorage: {} });
+  const app = await server(components);
+  const httpClient = axiosist(app);
 
-const connectToMongoForTests = async () => {
-  if (!mongoHolder) {
-    const uri = config.mongodb.uri.split("flux-retour-cfas").join("flux-retour-cfas_test");
-    mongoHolder = await connectToMongo(uri);
-  }
-  await createIndexes(mongoHolder.db);
-  return mongoHolder;
+  return {
+    httpClient,
+    components,
+    createAndLogUser: async (username, password, options) => {
+      await components.users.createUser({ username, password, ...options });
+
+      const response = await httpClient.post("/api/login", {
+        username: username,
+        password: password,
+      });
+
+      return {
+        Authorization: "Bearer " + response.data.access_token,
+      };
+    },
+  };
 };
 
 module.exports = {
-  connectToMongoForTests: mongoHolder || connectToMongoForTests,
-  cleanAll: () => {
-    nock.cleanAll();
-    const models = require("../../src/common/model");
-    const redisClient = redisMock.createClient();
-    return Promise.all([
-      emptyDir(testDataDir),
-      ...Object.values(models).map((m) => m.deleteMany()),
-      redisClient.flushall(),
-    ]);
-  },
+  startServer,
 };

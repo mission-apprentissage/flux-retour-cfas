@@ -1,9 +1,8 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const demandeLienPrive = require("../../../../src/common/components/demandeLienPrive");
 const { DemandeLienPriveModel, CfaModel } = require("../../../../src/common/model");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   it("Permet de vérifier la création d'une demande de lien privé avec un CFA non présent en base", async () => {
     const { create } = await demandeLienPrive();
 

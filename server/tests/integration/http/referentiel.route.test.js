@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { reseauxCfas, regions } = require("../../../src/common/model/constants");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   it("Vérifie qu'on peut récupérer les réseaux référentiels via API", async () => {
     const { httpClient } = await startServer();
 
