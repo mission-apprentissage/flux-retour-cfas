@@ -3,9 +3,14 @@ const axiosist = require("axiosist");
 const createComponents = require("../../src/common/components/components");
 const server = require("../../src/http/server");
 const { mongooseInstance } = require("../../src/common/mongodb");
+const redisFakeClient = require("./redisClientMock");
 
 const startServer = async () => {
-  const components = await createComponents({ db: mongooseInstance.connection, ovhStorage: {} });
+  const components = await createComponents({
+    db: mongooseInstance.connection,
+    redisClient: redisFakeClient,
+    ovhStorage: {},
+  });
   const app = await server(components);
   const httpClient = axiosist(app);
 

@@ -1,6 +1,7 @@
 const nock = require("nock"); // eslint-disable-line node/no-unpublished-require
 const { connectToMongo, closeMongoConnection } = require("../../src/common/mongodb");
 const { clearAllCollections } = require("./mongoUtils");
+const redisFakeClient = require("./redisClientMock");
 
 // disable HTTP requests on the network for tests, except to reach local server
 nock.disableNetConnect();
@@ -18,6 +19,7 @@ exports.mochaHooks = {
   afterEach: async () => {
     nock.cleanAll();
     await clearAllCollections();
+    await redisFakeClient.flushall();
   },
 };
 
