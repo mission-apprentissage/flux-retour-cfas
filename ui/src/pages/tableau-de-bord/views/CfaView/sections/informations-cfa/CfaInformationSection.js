@@ -13,7 +13,7 @@ export const formatSiretInformation = (sousEtablissements) => {
   if (multipleSirets) {
     return `${sousEtablissements.length} SIRET pour cet organisme`;
   } else {
-    if (sousEtablissements[0].siret_etablissement) {
+    if (sousEtablissements[0]?.siret_etablissement) {
       return `SIRET : ${sousEtablissements[0].siret_etablissement}`;
     }
     return "SIRET non renseigné pour cet organisme";
