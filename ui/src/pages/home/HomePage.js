@@ -3,6 +3,7 @@ import React from "react";
 import { Redirect } from "react-router";
 import { NavLink } from "react-router-dom";
 
+import { hasUserRoles, roles } from "../../common/auth/roles";
 import { Footer, Header, LinkCard, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { navigationPages } from "../../common/constants/navigationPages";
@@ -15,7 +16,7 @@ import RgpdSection from "./sections/RgpdSection";
 const HomePage = () => {
   const [auth] = useAuth();
 
-  if (auth?.sub) {
+  if (auth?.sub && hasUserRoles(auth, [roles.pilot, roles.administrator, roles.network])) {
     return <Redirect to="/tableau-de-bord" />;
   }
 
