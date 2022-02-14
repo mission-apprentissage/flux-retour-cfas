@@ -7,8 +7,6 @@ const {
   createRandomStatutsCandidatsApiInputList,
   createRandomStatutCandidatApiInput,
 } = require("../../data/randomizedSample");
-const { nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
-const { nockGetMetiersByCfd } = require("../../utils/nockApis/nock-Lba");
 const { cfdRegex } = require("../../../src/common/domain/cfd");
 
 const user = {
@@ -30,11 +28,6 @@ const getJwtForUser = async (httpClient) => {
 };
 
 describe(__filename, () => {
-  beforeEach(() => {
-    nockGetCfdInfo();
-    nockGetMetiersByCfd();
-  });
-
   it("Vérifie que la route statut-candidats fonctionne avec un tableau vide", async () => {
     const { httpClient } = await startServer();
     await createApiUser();

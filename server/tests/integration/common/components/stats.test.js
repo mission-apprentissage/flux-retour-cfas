@@ -1,17 +1,9 @@
 const assert = require("assert").strict;
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const stats = require("../../../../src/common/components/stats");
-const { nockGetSiretInfo, nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
-const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 describe(__filename, () => {
-  beforeEach(() => {
-    nockGetSiretInfo();
-    nockGetCfdInfo();
-    nockGetMetiersByCfd();
-  });
-
   it("Permet de récupérer le nb d'etablissements distincts par uai", async () => {
     // Seed with sample data
     const { addOrUpdateStatuts } = await statutsCandidats();

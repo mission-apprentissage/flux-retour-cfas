@@ -6,19 +6,12 @@ const { codesStatutsCandidats } = require("../../../../src/common/model/constant
 const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../data/sample");
 const { createRandomStatutCandidat, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
-const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
-const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 const isApproximatelyNow = (date) => {
   return Math.abs(differenceInMilliseconds(date, new Date())) < 50;
 };
 
 describe(__filename, () => {
-  beforeEach(() => {
-    nockGetCfdInfo();
-    nockGetMetiersByCfd();
-  });
-
   describe("getStatut", () => {
     it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd, uai_etablissement et annee_scolaire", async () => {
       const { getStatut, createStatutCandidat } = await statutsCandidats();
