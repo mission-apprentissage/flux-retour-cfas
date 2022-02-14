@@ -7,11 +7,11 @@ import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
 
-const formatSiretInformation = (sousEtablissements) => {
+export const formatSiretInformation = (sousEtablissements) => {
   const multipleSirets = sousEtablissements.length > 1;
 
   if (multipleSirets) {
-    `${sousEtablissements.length} SIRETs pour cet organisme`;
+    return `${sousEtablissements.length} SIRET pour cet organisme`;
   } else {
     if (sousEtablissements[0].siret_etablissement) {
       return `SIRET : ${sousEtablissements[0].siret_etablissement}`;
