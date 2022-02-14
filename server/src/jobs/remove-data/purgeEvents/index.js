@@ -1,7 +1,7 @@
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
 const { jobNames } = require("../../../common/model/constants");
-const { purgeUserEvents } = require("./purgeUserEvents");
+const { purgeStatutsImportsUserEvents } = require("./purgeStatutsImportsUserEvents");
 const { purgeJobEvents } = require("./purgeJobEvents");
 
 const { subDays } = require("date-fns");
@@ -15,7 +15,7 @@ runScript(async () => {
   const lastDateToKeep = subDays(new Date(), NB_DAYS_TO_KEEP);
 
   logger.info(`Running Purging Job for data older than ${lastDateToKeep} ...`);
-  await purgeUserEvents(lastDateToKeep);
+  await purgeStatutsImportsUserEvents(lastDateToKeep);
   await purgeJobEvents(lastDateToKeep);
   logger.info("End Purging Job");
 }, jobNames.cfasRetrieveDataConnection);
