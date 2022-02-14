@@ -5,12 +5,11 @@ const indexBy = require("lodash.indexby");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const logger = require("../../common/logger");
+const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 
 const GEO_API_HOST = "https://geo.api.gouv.fr";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-
-const normalizeCodeTerritoire = (code) => (Number(code) < 10 ? `0${Number(code)}` : Number(code).toString());
 
 /**
  * Ce script permet de créer un export contenant les CFAS sans SIRET
@@ -29,7 +28,7 @@ runScript(async ({ db }) => {
   let matchedCount = 0;
 
   await asyncForEach(allValidUais, async (uaiToUpdate) => {
-    const infoCodeFromUai = normalizeCodeTerritoire(uaiToUpdate.slice(0, 3));
+    const infoCodeFromUai = getDepartementCodeFromUai(uaiToUpdate);
     const info = infoMap[infoCodeFromUai];
 
     if (!info) return;

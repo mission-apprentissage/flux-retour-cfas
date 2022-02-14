@@ -13,14 +13,14 @@ const ComprendreLesDonnees = () => {
             Comprendre les données
           </Heading>
         </Section>
-        <Box py="10w" ml="10w">
+        <Box py="10w" marginLeft="10w">
           <Flex>
-            <Box bg="galt" w="20%" h="170px">
-              <Box ml="2w" py="2w">
+            <Box background="galt" width="20%" height="170px">
+              <Box marginLeft="2w" py="2w">
                 <Text fontSize="epsilon" fontWeight="700">
                   SOMMAIRE
                 </Text>
-                <Box mt="1w">
+                <Box marginTop="1w">
                   <Link href="#maniere">
                     <Text>
                       <Text as="span" fontWeight="700">
@@ -30,7 +30,7 @@ const ComprendreLesDonnees = () => {
                     </Text>
                   </Link>
                   <Link href="#organismeFormation">
-                    <Text mt="1w">
+                    <Text marginTop="1w">
                       <Text as="span" fontWeight="700">
                         2.
                       </Text>{" "}
@@ -40,11 +40,11 @@ const ComprendreLesDonnees = () => {
                 </Box>
               </Box>
             </Box>
-            <Box ml="10w" w="70%">
+            <Box marginLeft="10w" width="70%">
               <Heading as="h1" variant="h1" marginBottom="1w" color="black" id="maniere">
                 De manière générale
               </Heading>
-              <Box mt="5w">
+              <Box marginTop="5w">
                 <Text fontSize="beta" fontWeight="700">
                   D&apos;où viennent les chiffres ?
                 </Text>
@@ -52,7 +52,7 @@ const ComprendreLesDonnees = () => {
                   Nous collectons des données auprès des organismes de formation en nous connectant à leur ERP.{" "}
                 </Text>
               </Box>
-              <Box mt="5w">
+              <Box marginTop="5w">
                 <Text fontSize="beta" fontWeight="700">
                   Quelles sont les données collectées et leur format ?
                 </Text>
@@ -60,24 +60,30 @@ const ComprendreLesDonnees = () => {
                   Les données sont collectées par la clé d’entrée de l’apprenant, les champs récupérés sont les suivants
                   :
                 </Text>
-                <UnorderedList ml="5w">
+                <UnorderedList marginLeft="5w">
                   <ListItem>INE ;</ListItem>
                   <ListItem>Nom de l’apprenant ;</ListItem>
                   <ListItem>Prénom de l’apprenant ;</ListItem>
+                  <ListItem>Date de naissance de l’apprenant ;</ListItem>
+                  <ListItem>Code Postal du lieu de résidence de l’apprenant ;</ListItem>
                   <ListItem>Adresse mail de l’apprenant ;</ListItem>
                   <ListItem>Statut de l’apprenant : inscrit, apprenti et abandon ;</ListItem>
                   <ListItem>Intitulé de la formation ;</ListItem>
                   <ListItem>Code formation diplôme ;</ListItem>
+                  <ListItem>RNCP;</ListItem>
                   <ListItem>Année de la formation ;</ListItem>
                   <ListItem>Date de début et date de fin de la formation ;</ListItem>
                   <ListItem>Localisation ;</ListItem>
                   <ListItem>UAI de l’organisme de formation ;</ListItem>
                   <ListItem>SIRET de l’organisme de formation ;</ListItem>
                   <ListItem>Raison sociale ;</ListItem>
+                  <ListItem>Code Postal du lieu de formation ;</ListItem>
+                  <ListItem>Date de début et date de fin du contrat en apprentissage ;</ListItem>
+                  <ListItem>Date de rupture de contrat ;</ListItem>
                 </UnorderedList>
-                <Box fontWeight="700" mt="2w">
+                <Box fontWeight="700" marginTop="2w">
                   <Text>Définitions :</Text>
-                  <UnorderedList ml="5w">
+                  <UnorderedList marginLeft="5w">
                     <ListItem>
                       Un apprenant unique est identifié quand il y a unicité sur la combinaison suivante : Nom, Prénom,
                       CFD de la formation, UAI de l’organisme de formation.On décompte donc 1 apprenant pour 1
@@ -90,7 +96,7 @@ const ComprendreLesDonnees = () => {
                   </UnorderedList>
                 </Box>
               </Box>
-              <Box mt="5w">
+              <Box marginTop="5w">
                 <Text fontSize="beta" fontWeight="700">
                   A quelle date l&apos;indice &quot;Effectif&quot; est-il arrêté ?
                 </Text>
@@ -105,7 +111,7 @@ const ComprendreLesDonnees = () => {
                   comptabilisés au 31 décembre.
                 </Text>
               </Box>
-              <Box mt="5w">
+              <Box marginTop="5w">
                 <Text fontSize="beta" fontWeight="700">
                   Y a-t-il un traitement statistique des données ?
                 </Text>
@@ -115,8 +121,7 @@ const ComprendreLesDonnees = () => {
                   (d&apos;Apprenti à Abandon, par exemple) mais nous ne faisons aucun traitement statistique. ‌Les
                   données exposées correspondent aux effectifs des CFA en temps réel. De ce fait, lorsqu&apos;un
                   établissement enregistre une information dans son Système d&apos;Information (Inscription, Nouveau
-                  Contrat...) l&apos;information est restituée le lendemain ou la semaine suivante au plus tard (Gesti)
-                  dans le {productName}.
+                  Contrat...) l&apos;information est restituée le lendemain dans le {productName}.
                 </Text>
               </Box>
               <Box py="10w">
@@ -129,28 +134,24 @@ const ComprendreLesDonnees = () => {
                     ceux du {productName}
                   </Text>
                   <Text>
-                    ‌Si cet écart est faible, il peut s&apos;expliquer par un dédoublonnement qui ne s&apos;est pas fait
-                    correctement. En effet, nous importons les données chaque nuit et nous construisons un historique
-                    des statuts de chaque apprenant afin de pouvoir vous restituer les données rétrospectivement. Afin
-                    de ne pas comptabiliser un apprenant 2 fois, nous procédons à un dédoublonnement basé sur :
-                    l&apos;sur la combinaison Nom-Prénom-UAI-CFD. Cependant, il peut arriver que cette opération ne
-                    suffise pas à identifier une candidature : par exemple, si le candidat a changé d&apos;adresse mail,
-                    alors il ne sera pas reconnu comme doublon et pourra être comptabilisé 2 fois. ‌Si cet écart est
-                    supérieur à quelques unités, nous vous invitons à cliquer sur le lien &quot;je signale une
-                    anomalie&quot;sur la page de votre CFA et nous détailler l&apos;anomalie que vous constatez afin de
-                    nous permettre d&apos;investiguer et d&apos;identifier la cause pour la corriger si possible.
+                    ‌Nombre d&apos;Apprentis : si cet écart est faible, il peut s&apos;expliquer par un dédoublonnement
+                    qui ne s&apos;est pas fait correctement. En effet, nous importons les données chaque nuit et nous
+                    construisons un historique des statuts de chaque apprenant afin de pouvoir vous restituer les
+                    données rétrospectivement. Afin de ne pas comptabiliser un apprenant 2 fois, nous procédons à un
+                    dédoublonnement basé sur la combinaison Nom-Prénom-UAI-CFD. Cependant, il peut arriver que cette
+                    opération ne suffise pas à identifier une candidature : par exemple, si le candidat a changé
+                    d&apos;adresse mail, alors il ne sera pas reconnu comme doublon et pourra être comptabilisé 2 fois.
+                    ‌Si cet écart est supérieur à quelques unités, nous vous invitons à cliquer sur le lien &quot;je
+                    signale une anomalie&quot;sur la page de votre CFA et nous détailler l&apos;anomalie que vous
+                    constatez afin de nous permettre d&apos;investiguer et d&apos;identifier la cause pour la corriger
+                    si possible.
                   </Text>
-                </Box>
-                <Box py="4w">
-                  <Text fontSize="beta" fontWeight="700">
-                    Vous ne retrouvez pas votre organisme dans la liste proposée
-                  </Text>
-                  <Text>
-                    ‌Pour chercher votre établissement vous pouvez utiliser le numéro d&apos;UAI, le numéro de SIRET ou
-                    le nom. ‌Si votre organisme ne remonte pas dans la liste : assurez vous que l&apos;UAI et le SIRET
-                    renseignés dans votre ERP ne comportent pas d&apos;erreur ; assurez-vous également d&apos;avoir bien
-                    effectué le paramétrage nécessaire dans votre système d&apos;information. Pour obtenir le pas à pas,
-                    écrivez-nous à l&apos;adresse suivante : tableau-de-bord@apprentissage.beta.gouv.fr
+                  <Text marginTop="5w">
+                    ‌Nombre d&apos;Inscrits sans contrat : si vous constatez un écart sur cet indicateur, il est
+                    probable que vous transmettez des données pour des apprenants qui ne sont pas en formation
+                    apprentissage et de fait, ils sont considérés &quot;sans contrat&quot;. Vous devez alors, vérifier
+                    le paramétrage dans votre application, corriger et nous adresser un mail pour nous signaler cette
+                    correction.
                   </Text>
                 </Box>
                 <Box py="4w">

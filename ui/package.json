@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas-ui",
-  "version": "2.63.1",
+  "version": "2.64.0",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -13,8 +13,6 @@
     "@nivo/bar": "0.74.0",
     "@nivo/core": "0.74.0",
     "date-fns": "2.23.0",
-    "debounce": "1.2.1",
-    "eslint-plugin-jest": "25.3.0",
     "formik": "2.2.9",
     "framer-motion": "4.1.17",
     "jsonwebtoken": "8.5.1",
@@ -28,6 +26,8 @@
     "react-router-hash-link": "2.4.3",
     "react-scripts": "4.0.3",
     "remixicon": "2.5.0",
+    "typescript": "4.5.5",
+    "whatwg-fetch": "3.6.2",
     "yup": "0.32.9"
   },
   "scripts": {
@@ -56,11 +56,14 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
-    "eslint": "7.32.0",
+    "@typescript-eslint/parser": "5.10.2",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-import": "2.24.0",
-    "eslint-plugin-prettier": "3.4.0",
-    "eslint-plugin-react": "7.24.0",
+    "eslint-plugin-chakra-ui": "0.4.0",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-jest": "26.0.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-react": "7.28.0",
+    "eslint-plugin-react-hooks": "4.3.0",
     "eslint-plugin-simple-import-sort": "7.0.0",
     "local-web-server": "5.1.0",
     "prettier": "2.3.2"

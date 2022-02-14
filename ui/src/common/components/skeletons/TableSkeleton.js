@@ -6,7 +6,7 @@ import RowsSkeleton from "./RowsSkeleton";
 
 const TableSkeleton = ({ headers, nbRows = 5 }) => {
   return (
-    <Table mt="2w">
+    <Table marginTop="2w">
       <Thead>
         <Tr background="galt">
           {headers.map((header) => {

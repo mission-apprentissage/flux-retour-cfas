@@ -21,7 +21,10 @@ class HTTPError extends Error {
 }
 
 const emitter = new EventEmitter();
-const handleResponse = (path, response) => {
+
+const handleResponse = (path, response, options = {}) => {
+  const { jsonResponse = true } = options;
+
   let statusCode = response.status;
   if (statusCode >= 400 && statusCode < 600) {
     emitter.emit("http:error", response);
@@ -36,7 +39,7 @@ const handleResponse = (path, response) => {
       );
     }
   }
-  return response.json();
+  return jsonResponse ? response.json() : response;
 };
 
 const getHeaders = () => {
@@ -49,11 +52,11 @@ const getHeaders = () => {
   };
 };
 
-export const _get = (path) => {
+export const _get = (path, options) => {
   return fetch(path, {
     method: "GET",
     headers: getHeaders(),
-  }).then((res) => handleResponse(path, res));
+  }).then((res) => handleResponse(path, res, options));
 };
 
 export const _post = (path, body) => {

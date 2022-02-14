@@ -5,7 +5,7 @@ const statutsCandidats = require("../../../../src/common/components/statutsCandi
 const { StatutCandidatModel, CfaModel, FormationModel } = require("../../../../src/common/model");
 const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
 const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../data/sample");
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { createRandomStatutCandidat, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
 const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
@@ -149,7 +149,6 @@ integrationTests(__filename, () => {
       assert.equal(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
       assert.equal(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
       assert.equal(firstUpdated.annee_scolaire, statutsTestUpdate[0].annee_scolaire);
-      assert.ok(firstUpdated.date_mise_a_jour_statut);
       assert.ok(firstUpdated.updated_at);
 
       const secondUpdated = await StatutCandidatModel.findById(updated[1]._id).lean();
@@ -164,7 +163,6 @@ integrationTests(__filename, () => {
       assert.equal(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
       assert.equal(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
       assert.equal(secondUpdated.annee_scolaire, statutsTestUpdate[1].annee_scolaire);
-      assert.ok(secondUpdated.date_mise_a_jour_statut);
       assert.ok(secondUpdated.updated_at);
 
       const thirdUpdated = await StatutCandidatModel.findById(updated[2]._id).lean();
@@ -178,7 +176,6 @@ integrationTests(__filename, () => {
       assert.equal(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
       assert.equal(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
       assert.equal(thirdUpdated.annee_scolaire, statutsTestUpdate[2].annee_scolaire);
-      assert.ok(thirdUpdated.date_mise_a_jour_statut);
       assert.ok(thirdUpdated.updated_at);
     });
 
@@ -699,7 +696,6 @@ integrationTests(__filename, () => {
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
       assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec le même statut_apprenant
@@ -717,7 +713,6 @@ integrationTests(__filename, () => {
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(createdStatut.historique_statut_apprenant[0].position_statut, 1);
       assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec nouveau statut_apprenant
@@ -732,9 +727,7 @@ integrationTests(__filename, () => {
       const updatedHistorique = found.historique_statut_apprenant;
       assert.equal(updatedHistorique.length, 2);
       assert.equal(updatedHistorique[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(updatedHistorique[0].position_statut, 1);
       assert.equal(updatedHistorique[1].valeur_statut, codesStatutsCandidats.abandon);
-      assert.equal(updatedHistorique[1].position_statut, 2);
       assert.equal(
         updatedHistorique[1].date_statut.getTime(),
         new Date(updatePayload.date_metier_mise_a_jour_statut).getTime()
@@ -1107,6 +1100,36 @@ integrationTests(__filename, () => {
       assert.equal(duplicatesListFound[0].duplicatesIds.length, 2);
       assert.deepEqual(duplicatesListFound[0].commonData.prenom_apprenant, firstDup.prenom_apprenant);
       assert.deepEqual(duplicatesListFound[0].commonData.nom_apprenant, firstDup.nom_apprenant);
+    });
+
+    it("Vérifie la récupération des doublons d'uai", async () => {
+      const { createStatutCandidat, getDuplicatesList } = await statutsCandidats();
+
+      // Create 10 random statuts without duplicates
+      for (let index = 0; index < 5; index++) {
+        await createStatutCandidat(createRandomStatutCandidat());
+      }
+
+      // Create 4 statuts with same unicity group but different uai
+      const commonData = {
+        nom_apprenant: `KANTE`,
+        prenom_apprenant: `NGOLO`,
+        date_de_naissance_apprenant: new Date("2002-10-10T00:00:00.000+0000"),
+        formation_cfd: "01022103",
+        annee_scolaire: "2020-2021",
+      };
+      for (let index = 0; index < 4; index++) {
+        await createStatutCandidat(
+          createRandomStatutCandidat({ ...commonData, uai_etablissement: getRandomUaiEtablissement() })
+        );
+      }
+
+      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.uai_etablissement.code);
+
+      // 1 cas de doublons trouvé avec 4 doublons
+      assert.equal(duplicatesListFound.length, 1);
+      assert.equal(duplicatesListFound[0].duplicatesCount, 4);
+      assert.equal(duplicatesListFound[0].discriminants.duplicatesCreatedDatesAndIds.length, 4);
     });
   });
 });

@@ -14,6 +14,8 @@ module.exports = () => ({
   createStatutCandidat,
   updateStatut,
   getDuplicatesList,
+  getStatutsWithHistoryDateUnordered,
+  getStatutsWithBadDate,
 });
 
 const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
@@ -92,9 +94,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
     // find new element index in sorted historique to remove subsequent ones
     const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
 
-    updatePayload.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1).map((el, index) => {
-      return { ...el, position_statut: index + 1 };
-    });
+    updatePayload.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1);
     updatePayload.statut_apprenant = newHistoriqueElement.valeur_statut;
   }
 
@@ -142,12 +142,10 @@ const createStatutCandidat = async (itemToCreate) => {
     historique_statut_apprenant: [
       {
         valeur_statut: itemToCreate.statut_apprenant,
-        position_statut: 1,
         date_statut: new Date(itemToCreate.date_metier_mise_a_jour_statut),
         date_reception: new Date(),
       },
     ],
-    date_mise_a_jour_statut: itemToCreate.date_mise_a_jour_statut,
     date_metier_mise_a_jour_statut: itemToCreate.date_metier_mise_a_jour_statut,
     periode_formation: itemToCreate.periode_formation,
     annee_formation: itemToCreate.annee_formation,
@@ -221,6 +219,23 @@ const findStatutsDuplicates = async (
         formation_cfds: { $addToSet: "$formation_cfd" },
         // ajout des différents statut_apprenant
         statut_apprenants: { $addToSet: "$statut_apprenant" },
+        count: { $sum: 1 },
+      };
+      break;
+
+    case duplicatesTypesCodes.uai_etablissement.code:
+      unicityQueryGroup = {
+        _id: {
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
+          formation_cfd: "$formation_cfd",
+          annee_scolaire: "$annee_scolaire",
+        },
+        // Ajout des ids unique de chaque doublons avec date de création
+        duplicatesCreatedDatesAndIds: { $addToSet: { id: "$_id", created_at: "$created_at" } },
+        // Ajout des différents uais en doublon potentiel
+        uais: { $addToSet: "$uai_etablissement" },
         count: { $sum: 1 },
       };
       break;
@@ -311,8 +326,64 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
     return {
       commonData: _id,
       duplicatesCount: count,
-      duplicatesIds: duplicatesIds,
+      duplicatesIds: duplicatesIds ?? null,
       discriminants,
     };
   });
+};
+
+/**
+ * Récupération de la liste des statuts avec un historique antidaté
+ * @returns
+ */
+const getStatutsWithHistoryDateUnordered = async () => {
+  const aggregationPipeline = [
+    // Filtrage historique > 1 élement
+    { $match: { "historique_statut_apprenant.1": { $exists: true } } },
+    // Ajout d'un flag isHistoryDateOrdered - fonction d'identification des historiques avec des dates désordonnées
+    {
+      $addFields: {
+        isHistoryDateOrdered: {
+          $function: {
+            body: "function(historique_statut_apprenant){return historique_statut_apprenant.slice(1).every((item, i) => historique_statut_apprenant[i].date_statut <= item.date_statut)}",
+            args: ["$historique_statut_apprenant"],
+            lang: "js",
+          },
+        },
+      },
+    },
+    // Filtre sur isHistoryDateOrdered = false
+    { $match: { isHistoryDateOrdered: false } },
+  ];
+
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
+  return result;
+};
+
+/**
+ * Récupération de la liste des statuts ayant une date invalide (< année 2000)
+ * @returns
+ */
+const getStatutsWithBadDate = async () => {
+  const aggregationPipeline = [
+    // Filtrage historique > 1 élement
+    { $match: { "historique_statut_apprenant.1": { $exists: true } } },
+    // Ajout d'un flag hasHistoryBadDate - fonction d'identification des historiques avec date invalide (< année 2000)
+    {
+      $addFields: {
+        hasHistoryBadDate: {
+          $function: {
+            body: "function(historique_statut_apprenant){return historique_statut_apprenant.some((item) => item.date_statut <= new Date(`2000-01-01`))}",
+            args: ["$historique_statut_apprenant"],
+            lang: "js",
+          },
+        },
+      },
+    },
+    // Filtre sur hasHistoryBadDate
+    { $match: { hasHistoryBadDate: true } },
+  ];
+
+  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
+  return result;
 };

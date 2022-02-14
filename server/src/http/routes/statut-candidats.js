@@ -1,15 +1,16 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { UserEventModel } = require("../../common/model/index");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
 const { codesStatutsCandidats } = require("../../common/model/constants");
+const { cfdRegex } = require("../../common/domain/cfd");
+const { uaiRegex } = require("../../common/domain/uai");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
-module.exports = ({ statutsCandidats }) => {
+module.exports = ({ statutsCandidats, userEvents }) => {
   const router = express.Router();
 
   /**
@@ -26,14 +27,15 @@ module.exports = ({ statutsCandidats }) => {
       const { value, error } = Joi.date().iso().validate(val);
       return error ? helpers.error("string.isoDate") : value;
     });
+
   const statutCandidatItemSchema = Joi.object({
     // required fields
     nom_apprenant: Joi.string().required(),
     prenom_apprenant: Joi.string().required(),
     ne_pas_solliciter: Joi.boolean().required(),
-    uai_etablissement: Joi.string().required(),
+    uai_etablissement: Joi.string().regex(uaiRegex).required(),
     nom_etablissement: Joi.string().required(),
-    id_formation: Joi.string().required(),
+    id_formation: Joi.string().regex(cfdRegex).required(),
     annee_scolaire: anneeScolaireSchema.required(),
     statut_apprenant: Joi.number()
       .valid(codesStatutsCandidats.apprenti, codesStatutsCandidats.inscrit, codesStatutsCandidats.abandon)
@@ -80,13 +82,12 @@ module.exports = ({ statutsCandidats }) => {
         await statutsCandidatListSchema.validateAsync(req.body, { abortEarly: false });
 
         // Add user event
-        const event = new UserEventModel({
+        await userEvents.create({
           username: req.user.username,
           type: "POST",
           action: "statut-candidats",
           data: req.body,
         });
-        await event.save();
 
         // Validate items one by one
         await asyncForEach(req.body, (currentStatutToAddOrUpdate) => {

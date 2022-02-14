@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Highlight } from "../../../../common/components";
-import DomainesMetiers from "../CfaView/InfosCfa/DomainesMetiers";
+import DomainesMetiers from "../CfaView/sections/informations-cfa/DomainesMetiers";
 import withInfoFormationData from "./withInfoFormationData";
 
 const InfosFormationSection = ({ infosFormation, loading, error }) => {

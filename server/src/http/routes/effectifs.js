@@ -1,10 +1,12 @@
 const express = require("express");
 const stringify = require("json-stringify-deterministic");
+const { parseAsync } = require("json2csv");
 const { format } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles } = require("../../common/roles");
+const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 
 const applyUserRoleFilter = (req, _res, next) => {
   // users with network role should not be able to see data for other reseau
@@ -27,16 +29,21 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
+const validateReqQuery = (validationSchema) => async (req, res, next) => {
+  await validationSchema.validateAsync(req.query, { abortEarly: false });
+  next();
+};
+
 const getCacheKeyForRoute = (route, filters) => {
   // we use json-stringify-deterministic to make sure that {a: 1, b: 2} stringified is the same as {b: 2, a: 1}
   return `${route}:${stringify(filters)}`;
 };
 
-module.exports = ({ stats, effectifs, cache }) => {
+module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => {
   const router = express.Router();
 
   /**
-   * Gets region conversion stats
+   * Gets nb organismes formation
    */
   router.get(
     "/total-organismes",
@@ -61,18 +68,14 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      // Validate schema
-      const validationSchema = Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, {
-        abortEarly: false,
-      });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       // Gets & format params:
-      // eslint-disable-next-line no-unused-vars
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
       const filters = {
@@ -92,10 +95,10 @@ module.exports = ({ stats, effectifs, cache }) => {
       } else {
         const response = {
           date,
-          apprentis: await effectifs.getApprentisCountAtDate(date, filters),
-          rupturants: await effectifs.getRupturantsCountAtDate(date, filters),
-          inscritsSansContrat: await effectifs.getInscritsSansContratCountAtDate(date, filters),
-          abandons: await effectifs.getAbandonsCountAtDate(date, filters),
+          apprentis: await effectifs.apprentis.getCountAtDate(date, filters),
+          rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
+          inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
+          abandons: await effectifs.abandons.getCountAtDate(date, filters),
         };
         // cache the result
         await cache.set(cacheKey, JSON.stringify(response));
@@ -110,12 +113,13 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/niveau-formation",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      await Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      }).validateAsync(req.query, { abortEarly: false });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
       const filters = {
@@ -146,13 +150,14 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/formation",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      await Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         niveau_formation: Joi.string().allow(null, ""),
         ...commonEffectifsFilters,
-      }).validateAsync(req.query, { abortEarly: false });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
       const filters = {
@@ -183,13 +188,13 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/annee-formation",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      const validationSchema = Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, { abortEarly: false });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
       const filters = {
@@ -215,19 +220,19 @@ module.exports = ({ stats, effectifs, cache }) => {
     })
   );
 
+  /**
+   * Get effectifs details by cfa
+   */
   router.get(
     "/cfa",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      // Validate schema
-      const validationSchema = Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, {
-        abortEarly: false,
-      });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromQuery, ...filtersFromBody } = req.query;
       const date = new Date(dateFromQuery);
       const filters = {
@@ -253,16 +258,19 @@ module.exports = ({ stats, effectifs, cache }) => {
     })
   );
 
+  /**
+   * Get effectifs details by departement
+   */
   router.get(
     "/departement",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      const validationSchema = Joi.object({
+    validateReqQuery(
+      Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      });
-      await validationSchema.validateAsync(req.query, { abortEarly: false });
-
+      })
+    ),
+    tryCatch(async (req, res) => {
       const { date: dateFromQuery, ...filtersFromBody } = req.query;
       const date = new Date(dateFromQuery);
       const filters = {
@@ -288,26 +296,100 @@ module.exports = ({ stats, effectifs, cache }) => {
   );
 
   router.get(
-    "/chiffres-cles",
+    "/export-csv-repartition-effectifs-par-organisme",
     applyUserRoleFilter,
-    tryCatch(async (req, res) => {
-      // Validate schema
-      const validationSchema = Joi.object({
-        startDate: Joi.date().required(),
-        endDate: Joi.date().required(),
+    validateReqQuery(
+      Joi.object({
+        date: Joi.date().required(),
         ...commonEffectifsFilters,
+      })
+    ),
+    tryCatch(async (req, res) => {
+      // build filters from req.query
+      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromQuery);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
+
+      // create event
+      await userEvents.create({
+        action: "export-csv-repartition-effectifs-par-organisme",
+        username: req.user.username,
+        data: req.query,
       });
-      await validationSchema.validateAsync(req.query, {
-        abortEarly: false,
+
+      const effectifsByCfaAtDate = await effectifs.getEffectifsCountByCfaAtDate(date, filters);
+      const formattedForCsv = await Promise.all(
+        effectifsByCfaAtDate.map(async ({ uai_etablissement, nom_etablissement, effectifs }) => {
+          const cfa = await cfas.getFromUai(uai_etablissement);
+          return {
+            DEPARTEMENT: getDepartementCodeFromUai(uai_etablissement),
+            RESEAUX: cfa.reseaux?.length > 0 ? JSON.stringify(cfa.reseaux) : "",
+            "NOM DE L'ÉTABLISSEMENT": nom_etablissement,
+            UAI: uai_etablissement,
+            SIRET: cfa.sirets?.length > 0 ? JSON.stringify(cfa.sirets) : "",
+            APPRENTIS: effectifs.apprentis,
+            "SANS CONTRAT": effectifs.inscritsSansContrat,
+            RUPTURANTS: effectifs.rupturants,
+            ABANDONS: effectifs.abandons,
+          };
+        })
+      );
+
+      const csv = await parseAsync(formattedForCsv);
+
+      return res.attachment("export-csv-repartition-effectifs-par-organisme.csv").send(csv);
+    })
+  );
+
+  router.get(
+    "/export-csv-repartition-effectifs-par-formation",
+    applyUserRoleFilter,
+    validateReqQuery(
+      Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      })
+    ),
+    tryCatch(async (req, res) => {
+      // build filters from req.query
+      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromQuery);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
+
+      // create event
+      await userEvents.create({
+        action: "export-csv-repartition-effectifs-par-formation",
+        username: req.user.username,
+        data: req.query,
       });
 
-      const { startDate, endDate, ...filters } = req.query;
-      const dateRange = [new Date(startDate), new Date(endDate)];
+      const effectifsParFormation = await effectifs.getEffectifsCountByFormationAndDepartementAtDate(date, filters);
+      const formattedForCsv = await Promise.all(
+        effectifsParFormation.map(async ({ formation_cfd, departement, intitule, effectifs }) => {
+          const formation = await formations.getFormationWithCfd(formation_cfd);
+          return {
+            DEPARTEMENT: departement,
+            NIVEAU: formation?.niveau,
+            "INTITULE NIVEAU": formation?.niveau_libelle,
+            "INTITULE DE LA FORMATION": intitule,
+            CFD: formation_cfd,
+            APPRENTIS: effectifs.apprentis,
+            "SANS CONTRAT": effectifs.inscritsSansContrat,
+            RUPTURANTS: effectifs.rupturants,
+            ABANDONS: effectifs.abandons,
+          };
+        })
+      );
 
-      const nouveauxContratsCountInDateRange = await effectifs.getNouveauxContratsCountInDateRange(dateRange, filters);
-      const rupturesCountInDateRange = await effectifs.getNbRupturesContratAtDate(dateRange[1], filters);
+      const csv = await parseAsync(formattedForCsv);
 
-      return res.json({ nbContrats: nouveauxContratsCountInDateRange, nbRuptures: rupturesCountInDateRange });
+      return res.attachment("export-csv-repartition-effectifs-par-formation.csv").send(csv);
     })
   );
 

@@ -41,7 +41,7 @@ const EffectifCard = ({ label, count, tooltipLabel, hideCount = false, infoText,
         )}
       </Text>
       {(infoText || warningText) && (
-        <Text color={infoText ? "grey.700" : "warning"} fontSize="omega" fontWeight="700" mt="1v">
+        <Text color={infoText ? "grey.700" : "warning"} fontSize="omega" fontWeight="700" marginTop="1v">
           {infoText || warningText}
         </Text>
       )}

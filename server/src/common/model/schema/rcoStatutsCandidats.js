@@ -28,12 +28,6 @@ module.exports = new Schema({
     default: null,
     description: "Code postal établissement",
   },
-  statut_apprenant: {
-    type: Number,
-    default: null,
-    description: "Statut de l'apprenant",
-    index: true,
-  },
   formation_cfd: {
     type: String,
     default: null,
@@ -83,6 +77,11 @@ module.exports = new Schema({
     type: String,
     default: null,
     description: "Code RNCP de la formation du candidat",
+  },
+  statut_calcule: {
+    type: String,
+    default: null,
+    description: "Indicateur lié au statut candidat",
   },
   updated_at: {
     type: Date,

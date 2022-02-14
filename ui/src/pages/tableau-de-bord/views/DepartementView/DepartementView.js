@@ -21,7 +21,6 @@ GenericView.propTypes = {
   effectifs: effectifsPropType,
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  error: PropTypes.object,
 };
 
 export default GenericView;

@@ -16,7 +16,6 @@ describe("flattenHistoriqueStatutApprenant", () => {
     const input = [
       {
         valeur_statut: 3,
-        position_statut: 1,
         date_statut: "2020-11-01T06:37:01.881Z",
       },
     ];
@@ -26,17 +25,14 @@ describe("flattenHistoriqueStatutApprenant", () => {
     const input = [
       {
         valeur_statut: 3,
-        position_statut: 1,
         date_statut: "2020-11-01T06:37:01.881Z",
       },
       {
         valeur_statut: 3,
-        position_statut: 2,
         date_statut: "2020-11-02T06:42:26.907Z",
       },
       {
         valeur_statut: 3,
-        position_statut: 3,
         date_statut: "2020-11-03T06:42:00.547Z",
       },
     ];
@@ -47,57 +43,46 @@ describe("flattenHistoriqueStatutApprenant", () => {
     const input = [
       {
         valeur_statut: 1,
-        position_statut: 1,
         date_statut: "2020-10-01T06:37:01.881Z",
       },
       {
         valeur_statut: 1,
-        position_statut: 2,
         date_statut: "2020-10-02T06:37:01.881Z",
       },
       {
         valeur_statut: 1,
-        position_statut: 3,
         date_statut: "2020-10-03T06:37:01.881Z",
       },
       {
         valeur_statut: 3,
-        position_statut: 4,
         date_statut: "2020-11-01T06:37:01.881Z",
       },
       {
         valeur_statut: 3,
-        position_statut: 5,
         date_statut: "2020-11-02T06:42:26.907Z",
       },
       {
         valeur_statut: 1,
-        position_statut: 6,
         date_statut: "2020-12-09T08:30:22.199Z",
       },
       {
         valeur_statut: 3,
-        position_statut: 7,
         date_statut: "2020-12-10T07:57:21.574Z",
       },
       {
         valeur_statut: 3,
-        position_statut: 8,
         date_statut: "2020-12-11T08:21:08.315Z",
       },
       {
         valeur_statut: 0,
-        position_statut: 9,
         date_statut: "2020-12-12T07:48:32.326Z",
       },
       {
         valeur_statut: 0,
-        position_statut: 10,
         date_statut: "2020-12-13T07:48:32.326Z",
       },
       {
         valeur_statut: 0,
-        position_statut: 11,
         date_statut: "2020-12-14T07:48:32.326Z",
       },
     ];

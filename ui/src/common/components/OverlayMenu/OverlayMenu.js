@@ -3,18 +3,19 @@ import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 
 const OverlayMenu = ({ onClose, children }) => {
-  const menuRef = useRef(null);
+  const menuRef = useRef();
   const [menuMaxHeight, setMenuMaxHeight] = useState("100%");
 
   useEffect(() => {
-    // compute max-height for menu considering viewport, current y axis position and the 16px marginTop
-    const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-    const menuHeight = menuRef?.current
-      ? `${viewportHeight - menuRef.current.getBoundingClientRect().y - 16}px`
-      : "100%";
-
-    setMenuMaxHeight(menuHeight);
-  });
+    setTimeout(() => {
+      const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+      // compute max-height for menu considering viewport, current y axis position and the 16px marginTop
+      const menuHeight = menuRef?.current
+        ? `${viewportHeight - menuRef.current.getBoundingClientRect().y - 16}px`
+        : "100%";
+      setMenuMaxHeight(menuHeight);
+    }, 0);
+  }, []);
 
   return (
     <div>

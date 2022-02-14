@@ -8,7 +8,7 @@ module.exports = new Schema({
   },
   date: {
     type: Date,
-    default: () => new Date(),
+    required: true,
     description: "La date de l'evenement",
   },
   type: {

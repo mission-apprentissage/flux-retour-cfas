@@ -1,6 +1,6 @@
 import qs from "query-string";
 
-import { _get } from "../httpClient";
+import { _get, _post } from "../httpClient";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 /* Effectifs */
@@ -69,4 +69,28 @@ export const fetchReseaux = () => {
 /* Regions */
 export const fetchRegions = () => {
   return _get("/api/referentiel/regions");
+};
+
+/* CSV export of effectifs repartition by organisme */
+export const fetchRepartitionByOrganismeCsvExport = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/effectifs/export-csv-repartition-effectifs-par-organisme?${queryParameters}`;
+  return _get(url, { jsonResponse: false });
+};
+
+/* CSV export of effectifs repartition by formation */
+export const fetchRepartitionByFormationCsvExport = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/effectifs/export-csv-repartition-effectifs-par-formation?${queryParameters}`;
+  return _get(url, { jsonResponse: false });
+};
+
+/* CFA Search */
+export const fetchSearchCfas = async (filters) => {
+  return await _post("/api/cfas/search", filters);
+};
+
+/* Formations Search */
+export const fetchSearchFormations = async (filters) => {
+  return await _post("/api/formations/search", filters);
 };

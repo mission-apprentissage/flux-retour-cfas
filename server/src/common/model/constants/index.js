@@ -93,6 +93,7 @@ const jobNames = {
   seedSample: "seed-sample",
   seedReferentielCfas: "seed-referentiel-cfas",
   seedAnnuaireCfas: "seed-annuaire-cfas",
+  clearSeedAssets: "clear-seed-assets",
   seedCroisementCfasAnnuaire: "seed-croisement-cfas-annuaire",
   seedRandomizedSample: "seed-randomized-sample",
   identifyUaisInCatalog: "identify-uais-types-catalog",
@@ -120,6 +121,8 @@ const jobNames = {
   clearLogs: "clear-logs",
   clearAll: "clear-all",
   cleanStatutsCandidats: "clean-statuts-candidats",
+  removeStatutsCandidatsInvalidCfd: "remove-statuts-candidats-invalid-cfd",
+  removeStatutsCandidatsInvalidUai: "remove-statuts-candidats-invalid-uai",
   cleanCfaDataFeedback: "clean-cfaDataFeedback",
   exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
@@ -151,6 +154,10 @@ const duplicatesTypesCodes = {
   nom_apprenant: {
     name: "Nom",
     code: 4,
+  },
+  uai_etablissement: {
+    name: "Uai",
+    code: 5,
   },
 };
 
@@ -245,6 +252,13 @@ const regions = [
   },
 ];
 
+const effectifsIndicators = {
+  apprentis: "apprentis",
+  inscritsSansContrats: "inscritsSansContrats",
+  rupturants: "rupturants",
+  abandons: "abandons",
+};
+
 module.exports = {
   codesStatutsCandidats,
   codesStatutsMajStatutCandidats,
@@ -255,4 +269,5 @@ module.exports = {
   regions,
   statutsCandidatsStringFields,
   jobEventStatuts: jobEventActions,
+  effectifsIndicators,
 };

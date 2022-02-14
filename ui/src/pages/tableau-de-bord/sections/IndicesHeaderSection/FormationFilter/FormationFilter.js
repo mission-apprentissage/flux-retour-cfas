@@ -35,14 +35,7 @@ const FormationFilter = ({ filters, onFormationChange }) => {
 };
 
 FormationFilter.propTypes = {
-  searchResults: PropTypes.arrayOf(
-    PropTypes.shape({
-      cfd: PropTypes.string.isRequired,
-      libelle: PropTypes.string.isRequired,
-    })
-  ),
   onFormationChange: PropTypes.func.isRequired,
-  searchTerm: PropTypes.string,
   filters: filtersPropTypes.state,
 };
 
