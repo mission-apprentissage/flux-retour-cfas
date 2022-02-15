@@ -209,6 +209,7 @@ const findStatutsDuplicates = async (
         _id: {
           nom_apprenant: "$nom_apprenant",
           prenom_apprenant: "$prenom_apprenant",
+          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
           uai_etablissement: "$uai_etablissement",
           annee_scolaire: "$annee_scolaire",
         },

@@ -51,6 +51,7 @@
     "support:identify-uais-sirets-couples": "node -r dotenv/config src/jobs/support/identify-uais-sirets-couples/index.js",
     "support:identify-uais-catalog": "node -r dotenv/config src/jobs/support/identify-uais-catalog/index.js",
     "support:identify-uais-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates-uais/identify.js",
+    "support:identify-cfd-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates-cfd/identify.js",
     "support:clean-uais-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates-uais/clean.js",
     "support:merge-deca-uais-file": "node -r dotenv/config src/jobs/support/deca-merge-uais-file/index.js",
     "retrieve-formation-rncp-in-tco": "node -r dotenv/config src/jobs/retrieve-formation-rncp-in-tco/index.js",
