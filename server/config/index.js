@@ -30,41 +30,6 @@ module.exports = {
   slackWebhookUrl: env.get("FLUX_RETOUR_CFAS_SLACK_WEBHOOK_URL").asString(),
   outputDir: env.get("FLUX_RETOUR_CFAS_OUTPUT_DIR").required().asString(),
   users: {
-    ymag: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_YMAG_NAME").asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_YMAG_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_YMAG_PERMISSIONS").default([]).asArray(),
-    },
-    gesti: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_NAME").asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_GESTI_PERMISSIONS").default([]).asArray(),
-    },
-    scform: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_NAME").asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_SCFORM_PERMISSIONS").default([]).asArray(),
-    },
-    fca_manager: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_NAME").asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_FCA_MANAGER_PERMISSIONS").default([]).asArray(),
-    },
-    aurion: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_AURION_NAME").asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_AURION_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_AURION_PERMISSIONS").default([]).asArray(),
-    },
-    rco: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_RCO_NAME").required().asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_RCO_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_RCO_PERMISSIONS").default([]).asArray(),
-    },
-    formasup: {
-      name: env.get("FLUX_RETOUR_CFAS_USERS_FORMASUP_NAME").required().asString(),
-      password: env.get("FLUX_RETOUR_CFAS_USERS_FORMASUP_PASSWORD").required().asString(),
-      permissions: env.get("FLUX_RETOUR_CFAS_USERS_FORMASUP_PERMISSIONS").default([]).asArray(),
-    },
     defaultAdmin: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
       password: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD").required().asString(),

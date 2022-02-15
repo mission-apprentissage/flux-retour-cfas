@@ -18,9 +18,7 @@ const user = {
 const createApiUser = async () => {
   const { createUser } = await users();
 
-  return await createUser(user.name, user.password, {
-    permissions: [apiRoles.apiStatutsSeeder],
-  });
+  return await createUser({ username: user.name, password: user.password, permissions: [apiRoles.apiStatutsSeeder] });
 };
 
 const getJwtForUser = async (httpClient) => {
@@ -72,7 +70,9 @@ httpTests(__filename, ({ startServer }) => {
     // Create a normal user
     const { createUser } = await users();
 
-    const userWithoutPermission = await createUser("normal-user", "password", {
+    const userWithoutPermission = await createUser({
+      username: "normal-user",
+      password: "password",
       permissions: [],
     });
     assert.deepEqual(userWithoutPermission.permissions.length, 0);

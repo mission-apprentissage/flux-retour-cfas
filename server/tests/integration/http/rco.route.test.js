@@ -11,7 +11,9 @@ const user = { name: "rcoUser", password: "password" };
 const createApiUser = async () => {
   const { createUser } = await users();
 
-  return await createUser(user.name, user.password, {
+  return await createUser({
+    username: user.name,
+    password: user.password,
     permissions: [apiRoles.apiStatutsConsumer.anonymousDataConsumer],
   });
 };

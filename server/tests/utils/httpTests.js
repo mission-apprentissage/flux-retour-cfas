@@ -16,7 +16,7 @@ const startServer = async () => {
     httpClient,
     components,
     createAndLogUser: async (username, password, options) => {
-      await components.users.createUser(username, password, options);
+      await components.users.createUser({ username, password, ...options });
 
       const response = await httpClient.post("/api/login", {
         username: username,

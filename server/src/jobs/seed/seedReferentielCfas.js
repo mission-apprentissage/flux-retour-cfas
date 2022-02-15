@@ -9,7 +9,7 @@ const { CfaModel, StatutCandidatModel } = require("../../common/model");
 const { jobNames, reseauxCfas, erps } = require("../../common/model/constants/");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
-const { sleep, generatePassword } = require("../../common/utils/miscUtils");
+const { sleep, generateRandomAlphanumericPhrase } = require("../../common/utils/miscUtils");
 const config = require("../../../config");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -79,7 +79,7 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
  * @param {*} statutForCfa
  */
 const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
-  const accessToken = generatePassword();
+  const accessToken = generateRandomAlphanumericPhrase();
 
   await new CfaModel({
     uai: statutForCfa.uai_etablissement,
@@ -211,7 +211,7 @@ const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau, nomF
  * @param {*} nomFichier
  */
 const addCfaFromNetwork = async (currentCfa, nomReseau, nomFichier) => {
-  const accessToken = generatePassword();
+  const accessToken = generateRandomAlphanumericPhrase();
 
   // Add cfa in référentiel
   const cfaToAdd = new CfaModel({

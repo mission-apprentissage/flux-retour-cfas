@@ -1,4 +1,5 @@
 const { UserModel } = require("../model");
+const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
 const sha512Utils = require("../utils/sha512Utils");
 
 const rehashPassword = (user, password) => {
@@ -24,17 +25,19 @@ module.exports = async () => {
       return null;
     },
     getUser: (username) => UserModel.findOne({ username }),
-    createUser: async (username, password, options = {}) => {
-      const hash = options.hash || sha512Utils.hash(password);
-      const permissions = options.permissions || [];
-      const network = options.network || null;
-      const email = options.email || null;
+    createUser: async (userProps) => {
+      const username = userProps.username;
+      const password = userProps.password || generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
+      const passwordHash = sha512Utils.hash(password);
+      const permissions = userProps.permissions || [];
+      const network = userProps.network || null;
+      const email = userProps.email || null;
 
       const user = new UserModel({
         username,
+        password: passwordHash,
         email,
-        password: hash,
-        permissions: permissions,
+        permissions,
         network,
       });
 
