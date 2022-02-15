@@ -57,6 +57,26 @@ integrationTests(__filename, () => {
       assert.equal(found._id.equals(createdStatut._id.toString()), true);
     });
 
+    it("Vérifie que la récupération d'un statut fonctionne avec des caractères spéciaux", async () => {
+      const { getStatut, createStatutCandidat } = await statutsCandidats();
+
+      const randomStatutProps = createRandomStatutCandidat({
+        nom_apprenant: "ABDILLAH (R)",
+        prenom_apprenant: "*Paul",
+      });
+      const createdStatut = await createStatutCandidat(randomStatutProps);
+
+      const found = await getStatut({
+        nom_apprenant: "ABDILLAH (R)",
+        prenom_apprenant: "*Paul",
+        formation_cfd: randomStatutProps.formation_cfd,
+        uai_etablissement: randomStatutProps.uai_etablissement,
+        annee_scolaire: randomStatutProps.annee_scolaire,
+      });
+
+      assert.equal(found._id.equals(createdStatut._id.toString()), true);
+    });
+
     it("Vérifie que la récupération d'un statut est insensible à la casse de prenom_apprenant", async () => {
       const { getStatut, createStatutCandidat } = await statutsCandidats();
 

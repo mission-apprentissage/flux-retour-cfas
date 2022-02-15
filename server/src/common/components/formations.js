@@ -4,6 +4,7 @@ const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
 const { getMetiersByCfd } = require("../apis/apiLba");
 
 const { Formation } = require("../domain/formation");
+const { escapeRegExp } = require("../utils/regexUtils");
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -91,7 +92,7 @@ const searchFormations = async (searchCriteria) => {
 
   const matchStage = searchTerm
     ? {
-        $or: [{ $text: { $search: searchTerm } }, { cfd: new RegExp(searchTerm, "g") }],
+        $or: [{ $text: { $search: searchTerm } }, { cfd: new RegExp(escapeRegExp(searchTerm), "g") }],
         cfd: { $in: eligibleCfds },
       }
     : { cfd: { $in: eligibleCfds } };
