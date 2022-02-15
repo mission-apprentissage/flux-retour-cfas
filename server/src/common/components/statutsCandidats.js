@@ -6,6 +6,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
+const { escapeRegExp } = require("../utils/regexUtils");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
@@ -20,8 +21,8 @@ module.exports = () => ({
 
 const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
   return StatutCandidatModel.findOne({
-    nom_apprenant: { $regex: new RegExp(nom_apprenant, "i") },
-    prenom_apprenant: { $regex: new RegExp(prenom_apprenant, "i") },
+    nom_apprenant: { $regex: new RegExp(escapeRegExp(nom_apprenant), "i") },
+    prenom_apprenant: { $regex: new RegExp(escapeRegExp(prenom_apprenant), "i") },
     formation_cfd,
     uai_etablissement,
     annee_scolaire,
