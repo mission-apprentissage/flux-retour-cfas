@@ -85,10 +85,7 @@ const createFormation = async (cfd) => {
 const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
 
-  const eligibleCfds = await StatutCandidatModel.distinct("formation_cfd", {
-    formation_cfd_valid: true,
-    ...otherFilters,
-  });
+  const eligibleCfds = await StatutCandidatModel.distinct("formation_cfd", otherFilters);
 
   const matchStage = searchTerm
     ? {

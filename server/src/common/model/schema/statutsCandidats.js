@@ -43,10 +43,6 @@ module.exports = new Schema({
     default: null,
     description: "Nouveau CFD de la formation du candidat si cfd d'origine outdated",
   },
-  formation_cfd_valid: {
-    type: Boolean,
-    description: "Le champ formation_cfd est-il un cfd valide ?",
-  },
   libelle_court_formation: {
     type: String,
     default: null,

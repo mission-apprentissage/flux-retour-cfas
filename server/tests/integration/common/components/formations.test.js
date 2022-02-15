@@ -135,7 +135,6 @@ integrationTests(__filename, () => {
         await new StatutCandidatModel({
           ...createRandomStatutCandidat(),
           formation_cfd: formation.cfd,
-          formation_cfd_valid: true,
         }).save();
       });
     });
@@ -217,7 +216,6 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         etablissement_num_region,
         formation_cfd: formationsSeed[2].cfd,
-        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormations({ searchTerm, etablissement_num_region });
@@ -234,7 +232,6 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         etablissement_num_departement,
         formation_cfd: formationsSeed[2].cfd,
-        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormations({ searchTerm, etablissement_num_departement });
@@ -251,7 +248,6 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         etablissement_reseaux: [etablissement_reseaux],
         formation_cfd: formationsSeed[2].cfd,
-        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormations({ searchTerm, etablissement_reseaux });
@@ -268,29 +264,12 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         uai_etablissement,
         formation_cfd: formationsSeed[2].cfd,
-        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormations({ searchTerm, uai_etablissement });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
-    });
-
-    it("should not return anything when cfd is invalid", async () => {
-      const searchTerm = "invalide";
-
-      const formation = Formation.create({ cfd: "0102210X", libelle: searchTerm });
-      await new FormationModel(formation).save();
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
-        formation_cfd: "0102210X",
-        formation_cfd_valid: false,
-      }).save();
-
-      const results = await searchFormations({ searchTerm });
-
-      assert.equal(results.length, 0);
     });
   });
 

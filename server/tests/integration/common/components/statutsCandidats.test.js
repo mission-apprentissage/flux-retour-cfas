@@ -885,26 +885,6 @@ integrationTests(__filename, () => {
       assert.equal(createdStatut.uai_etablissement_valid, true);
     });
 
-    it("Vérifie la création d'un statut avec un cfd invalide", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-
-      const invalidCfd = "0123";
-      const statutWithInvalidUai = { ...createRandomStatutCandidat(), formation_cfd: invalidCfd };
-      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
-
-      assert.equal(createdStatut.formation_cfd_valid, false);
-    });
-
-    it("Vérifie la création d'un statut avec un cfd valide", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-
-      const validCfd = "abcd1234";
-      const statutWithInvalidUai = { ...createRandomStatutCandidat(), formation_cfd: validCfd };
-      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
-
-      assert.equal(createdStatut.formation_cfd_valid, true);
-    });
-
     it("Vérifie qu'à la création d'un statut avec un siret invalide on ne set pas le champ etablissement_reseaux", async () => {
       const { createStatutCandidat } = await statutsCandidats();
       const invalidSiret = "invalid";

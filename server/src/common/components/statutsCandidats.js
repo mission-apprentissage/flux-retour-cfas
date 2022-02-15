@@ -127,7 +127,6 @@ const createStatutCandidat = async (itemToCreate) => {
     ne_pas_solliciter: itemToCreate.ne_pas_solliciter,
     email_contact: itemToCreate.email_contact,
     formation_cfd: itemToCreate.formation_cfd,
-    formation_cfd_valid: validateCfd(itemToCreate.formation_cfd),
     libelle_court_formation: itemToCreate.libelle_court_formation,
     libelle_long_formation: itemToCreate.libelle_long_formation,
     niveau_formation: formationInfo?.niveau,

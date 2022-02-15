@@ -28,7 +28,7 @@ const retrieveCfdHistory = async (db) => {
   const collection = db.collection("statutsCandidats");
 
   // get all valid CFDs
-  const allCfds = await collection.distinct("formation_cfd", { formation_cfd_valid: true });
+  const allCfds = await collection.distinct("formation_cfd");
 
   logger.info(`Searching for ${allCfds.length} CFD in statutsCandidats`);
   loadingBar.start(allCfds.length, 0);

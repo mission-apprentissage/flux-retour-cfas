@@ -13,7 +13,6 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  */
 runScript(async ({ db }) => {
   const allValidCfds = await db.collection("statutsCandidats").distinct("formation_cfd", {
-    formation_cfd_valid: true,
     formation_rncp: null,
   });
 

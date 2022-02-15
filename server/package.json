@@ -32,7 +32,6 @@
     "clear:cfas": "node -r dotenv/config src/jobs/remove-data/clear/clearCfas.js",
     "clean:statutsCandidats": "node -r dotenv/config src/jobs/remove-data/clean/cleanStatutsCandidats.js",
     "clean:cfaDataFeedback": "node -r dotenv/config src/jobs/remove-data/clean/cleanCfaDataFeedback.js",
-    "remove:statutsCandidats-invalid-cfd": "node -r dotenv/config src/jobs/remove-data/statuts-cfd-invalide/index.js",
     "remove:statutsCandidats-invalid-uai": "node -r dotenv/config src/jobs/remove-data/statuts-uai-invalide/index.js",
     "purge:events": "node -r dotenv/config src/jobs/remove-data/purgeEvents/index.js",
     "formation:retrieve-from-cfd": "node -r dotenv/config src/jobs/formation-retrieve-from-cfd/index.js",

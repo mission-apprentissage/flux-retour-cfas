@@ -15,7 +15,6 @@ httpTests(__filename, ({ startServer }) => {
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
         formation_cfd: formation.cfd,
-        formation_cfd_valid: true,
       }).save();
     });
   };
