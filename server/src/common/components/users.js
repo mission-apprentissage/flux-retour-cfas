@@ -1,4 +1,4 @@
-const { addHours, isAfter } = require("date-fns");
+const { addHours, isBefore } = require("date-fns");
 const { UserModel } = require("../model");
 const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
 const sha512Utils = require("../utils/sha512Utils");
@@ -10,6 +10,10 @@ const rehashPassword = (user, password) => {
 };
 
 const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 24;
+
+const isUserPasswordUpdatedTokenValid = (user) => {
+  return Boolean(user.password_update_token_expiry) && isBefore(new Date(), user.password_update_token_expiry);
+};
 
 module.exports = async () => {
   return {
@@ -74,7 +78,7 @@ module.exports = async () => {
       if (!user) throw new Error("User not found");
 
       // token must be valid
-      if (isAfter(new Date(), user.password_update_token_expiry)) {
+      if (!isUserPasswordUpdatedTokenValid(user)) {
         throw new Error("Password update token has expired");
       }
 
