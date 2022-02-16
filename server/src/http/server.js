@@ -24,6 +24,7 @@ const demandeIdentifiants = require("./routes/demande-identifiants");
 const demandeLienPriveRoute = require("./routes/demande-lien-prive");
 const demandeBranchementErpRoute = require("./routes/demande-branchement-erp");
 const cacheRouter = require("./routes/cache");
+const updatePasswordRouter = require("./routes/update-password");
 
 module.exports = async (components) => {
   const app = express();
@@ -45,6 +46,7 @@ module.exports = async (components) => {
   app.use("/api/demande-identifiants", demandeIdentifiants(components));
   app.use("/api/demande-lien-prive", demandeLienPriveRoute(components));
   app.use("/api/demande-branchement-erp", demandeBranchementErpRoute(components));
+  app.use("/api/update-password", updatePasswordRouter(components));
 
   // requires JWT auth
   app.use(

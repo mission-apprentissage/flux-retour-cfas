@@ -18,6 +18,14 @@ module.exports = new Schema({
     default: null,
     description: "Le mot de passe hashé",
   },
+  password_update_token: {
+    type: String,
+    description: "Token généré afin de sécuriser le changement de mot de passe",
+  },
+  password_update_token_expiry: {
+    type: Date,
+    description: "Date d'expiration du token généré afin de sécuriser le changement de mot de passe",
+  },
   network: {
     type: String,
     default: null,
