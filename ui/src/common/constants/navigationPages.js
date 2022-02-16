@@ -44,4 +44,8 @@ export const navigationPages = {
     path: "/tableau-de-bord",
     title: "Tableau de bord",
   },
+  ModifierMotDePasse: {
+    path: "/modifier-mot-de-passe",
+    title: "Modifiez votre mot de passe",
+  },
 };
