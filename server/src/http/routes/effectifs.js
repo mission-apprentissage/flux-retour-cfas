@@ -7,6 +7,7 @@ const Joi = require("joi");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles } = require("../../common/roles");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
+const validateRequestQuery = require("../middlewares/validateRequestQuery");
 
 const applyUserRoleFilter = (req, _res, next) => {
   // users with network role should not be able to see data for other reseau
@@ -29,11 +30,6 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
-const validateReqQuery = (validationSchema) => async (req, res, next) => {
-  await validationSchema.validateAsync(req.query, { abortEarly: false });
-  next();
-};
-
 const getCacheKeyForRoute = (route, filters) => {
   // we use json-stringify-deterministic to make sure that {a: 1, b: 2} stringified is the same as {b: 2, a: 1}
   return `${route}:${stringify(filters)}`;
@@ -48,12 +44,8 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/total-organismes",
     applyUserRoleFilter,
+    validateRequestQuery(Joi.object(commonEffectifsFilters)),
     tryCatch(async (req, res) => {
-      // Validate schema
-      await Joi.object(commonEffectifsFilters).validateAsync(req.query, {
-        abortEarly: false,
-      });
-
       const nbOrganismes = await stats.getNbDistinctCfasByUai(req.query);
 
       return res.json({
@@ -68,7 +60,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -113,7 +105,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/niveau-formation",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -150,7 +142,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/formation",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         niveau_formation: Joi.string().allow(null, ""),
@@ -188,7 +180,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/annee-formation",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -226,7 +218,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/cfa",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -264,7 +256,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/departement",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -298,7 +290,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/export-csv-repartition-effectifs-par-organisme",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -347,7 +339,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/export-csv-repartition-effectifs-par-formation",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,

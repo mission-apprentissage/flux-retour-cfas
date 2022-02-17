@@ -231,27 +231,4 @@ httpTests(__filename, ({ startServer }) => {
       assert.equal(response.status, 404);
     });
   });
-
-  it("Vérifie qu'on peut récupérer une liste paginée de cfas pour une région en query", async () => {
-    const regionToTest = {
-      code: "24",
-      nom: "Centre-Val de Loire",
-    };
-
-    await new CfaModel({
-      uai: "0451582A",
-      siret: "31521327200067",
-      nom: "TEST CFA",
-      region_nom: regionToTest.nom,
-      region_num: regionToTest.code,
-    }).save();
-
-    const response = await httpClient.get(`/api/cfas?query={"region_num":${regionToTest.code}}`);
-
-    assert.equal(response.status, 200);
-    assert.equal(response.data.cfas.length, 1);
-    assert.deepEqual(response.data.cfas[0].nom, "TEST CFA");
-    assert.deepEqual(response.data.cfas[0].region_nom, regionToTest.nom);
-    assert.deepEqual(response.data.cfas[0].region_num, regionToTest.code);
-  });
 });

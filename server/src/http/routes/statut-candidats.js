@@ -7,16 +7,12 @@ const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolai
 const { codesStatutsCandidats } = require("../../common/model/constants");
 const { cfdRegex } = require("../../common/domain/cfd");
 const { uaiRegex } = require("../../common/domain/uai");
+const validateRequestBody = require("../middlewares/validateRequestBody");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
 module.exports = ({ statutsCandidats, userEvents }) => {
   const router = express.Router();
-
-  /**
-   * Schema for list validation
-   */
-  const statutsCandidatListSchema = Joi.array().max(POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH);
 
   /**
    * Schema for item validation
@@ -71,15 +67,13 @@ module.exports = ({ statutsCandidats, userEvents }) => {
    */
   router.post(
     "/",
+    validateRequestBody(Joi.array().max(POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH)),
     tryCatch(async (req, res) => {
       try {
         let nbItemsValid = 0;
         let nbItemsInvalid = 0;
         let validationErrors = [];
         let validStatutsToAddOrUpdate = [];
-
-        // Validate list
-        await statutsCandidatListSchema.validateAsync(req.body, { abortEarly: false });
 
         // Add user event
         await userEvents.create({
