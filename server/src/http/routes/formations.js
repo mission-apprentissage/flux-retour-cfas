@@ -1,16 +1,10 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
+const validateRequestBody = require("../middlewares/validateRequestBody");
 
 module.exports = ({ formations }) => {
   const router = express.Router();
-
-  const searchBodyValidationSchema = Joi.object({
-    searchTerm: Joi.string().min(3),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
 
   const getFormationParamsSchema = Joi.object({
     cfd: Joi.string().required(),
@@ -18,13 +12,15 @@ module.exports = ({ formations }) => {
 
   router.post(
     "/search",
+    validateRequestBody(
+      Joi.object({
+        searchTerm: Joi.string().min(3),
+        etablissement_num_region: Joi.string().allow(null, ""),
+        etablissement_num_departement: Joi.string().allow(null, ""),
+        etablissement_reseaux: Joi.string().allow(null, ""),
+      })
+    ),
     tryCatch(async (req, res) => {
-      const { error } = searchBodyValidationSchema.validate(req.body);
-
-      if (error) {
-        return res.status(400).json({ status: "INPUT_VALIDATION_ERROR", message: error.message });
-      }
-
       const foundFormations = await formations.searchFormations(req.body);
 
       return res.json(foundFormations.map(({ cfd, libelle }) => ({ cfd, libelle })));

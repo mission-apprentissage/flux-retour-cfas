@@ -3,35 +3,23 @@ const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { CfaModel, StatutCandidatModel } = require("../../common/model");
 const pick = require("lodash.pick");
+const validateRequestBody = require("../middlewares/validateRequestBody");
+const validateRequestQuery = require("../middlewares/validateRequestQuery");
 
 module.exports = ({ cfas, cfaDataFeedback }) => {
   const router = express.Router();
 
-  const searchBodyValidationSchema = Joi.object({
-    searchTerm: Joi.string().min(3),
-    etablissement_num_region: Joi.string().allow(null, ""),
-    etablissement_num_departement: Joi.string().allow(null, ""),
-    etablissement_reseaux: Joi.string().allow(null, ""),
-  });
-
-  const dataFeedbackBodyValidationSchema = Joi.object({
-    uai: Joi.string().required(),
-    email: Joi.string().required(),
-    details: Joi.string().required(),
-  });
-
   router.post(
     "/search",
+    validateRequestBody(
+      Joi.object({
+        searchTerm: Joi.string().min(3),
+        etablissement_num_region: Joi.string().allow(null, ""),
+        etablissement_num_departement: Joi.string().allow(null, ""),
+        etablissement_reseaux: Joi.string().allow(null, ""),
+      })
+    ),
     tryCatch(async (req, res) => {
-      const { error } = searchBodyValidationSchema.validate(req.body);
-
-      if (error) {
-        return res.status(400).json({
-          status: "INPUT_VALIDATION_ERROR",
-          message: error.message,
-        });
-      }
-
       const foundCfas = await cfas.searchCfas(req.body);
       return res.json(foundCfas);
     })
@@ -39,12 +27,17 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
 
   router.get(
     "/",
+    validateRequestQuery(
+      Joi.object({
+        query: Joi.string(),
+        page: Joi.number(),
+        limit: Joi.number(),
+      })
+    ),
     tryCatch(async (req, res) => {
-      const { query, page, limit } = await Joi.object({
-        query: Joi.string().default("{}"),
-        page: Joi.number().default(1),
-        limit: Joi.number().default(50),
-      }).validateAsync(req.query, { abortEarly: false });
+      const query = req.query.query ?? "{}";
+      const page = Number(req.query.page ?? 1);
+      const limit = Number(req.query.limit ?? 50);
 
       const jsonQuery = JSON.parse(query);
       const allData = await CfaModel.paginate(jsonQuery, { page, limit });
@@ -66,16 +59,14 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
 
   router.post(
     "/data-feedback",
+    validateRequestBody(
+      Joi.object({
+        uai: Joi.string().required(),
+        email: Joi.string().required(),
+        details: Joi.string().required(),
+      })
+    ),
     tryCatch(async (req, res) => {
-      const { error } = dataFeedbackBodyValidationSchema.validate(req.body);
-
-      if (error) {
-        return res.status(400).json({
-          status: "INPUT_VALIDATION_ERROR",
-          message: error.message,
-        });
-      }
-
       const created = await cfaDataFeedback.createCfaDataFeedback(req.body);
 
       return res.json(created);

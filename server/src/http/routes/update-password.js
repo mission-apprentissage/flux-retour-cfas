@@ -1,20 +1,20 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
+const validateRequestBody = require("../middlewares/validateRequestBody");
 
 module.exports = ({ users, userEvents }) => {
   const router = express.Router();
 
-  const updatedPasswordValidationSchema = Joi.object({
-    token: Joi.string().required(),
-    newPassword: Joi.string().min(16).required(),
-  });
-
   router.post(
     "/",
+    validateRequestBody(
+      Joi.object({
+        token: Joi.string().required(),
+        newPassword: Joi.string().min(16).required(),
+      })
+    ),
     tryCatch(async (req, res) => {
-      await updatedPasswordValidationSchema.validateAsync(req.body);
-
       try {
         const updatedUser = await users.updatePassword(req.body.token, req.body.newPassword);
 
