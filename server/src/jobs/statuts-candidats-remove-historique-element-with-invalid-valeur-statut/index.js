@@ -28,7 +28,7 @@ runScript(async ({ db }) => {
       return Object.values(codesStatutsCandidats).includes(historiqueElem.valeur_statut);
     });
 
-    if (cleanedHistorique.length !== document.historique_statut_apprenant) {
+    if (cleanedHistorique.length !== document.historique_statut_apprenant.length) {
       await collection.findOneAndUpdate(
         { _id: document._id },
         { $set: { historique_statut_apprenant: cleanedHistorique } }
