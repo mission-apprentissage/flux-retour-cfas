@@ -32,6 +32,15 @@ const startServer = async () => {
   };
 };
 
+const wait = async (time) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, time);
+  });
+};
+
 module.exports = {
   startServer,
+  wait,
 };
