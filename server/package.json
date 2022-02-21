@@ -34,6 +34,7 @@
     "clear:cfas": "node -r dotenv/config src/jobs/remove-data/clear/clearCfas.js",
     "clean:cfaDataFeedback": "node -r dotenv/config src/jobs/remove-data/clean/cleanCfaDataFeedback.js",
     "remove:inscritsSansContrats-nonRecus-depuis": "node -r dotenv/config src/jobs/remove-data/statuts-inscritsSsContrats-nonRecus-depuis/index.js",
+    "remove:statutsCandidats-nonRecus-forUai": "node -r dotenv/config src/jobs/remove-data/statuts-nonRecus-forUai/index.js",
     "remove:statutsCandidats-invalid-uai": "node -r dotenv/config src/jobs/remove-data/statuts-uai-invalide/index.js",
     "remove:statutsCandidats-gesti-enCoursRecrutement": "node -r dotenv/config src/jobs/remove-data/remove-gesti-encours-recrutement/index.js",
     "purge:events": "node -r dotenv/config src/jobs/remove-data/purgeEvents/index.js",
