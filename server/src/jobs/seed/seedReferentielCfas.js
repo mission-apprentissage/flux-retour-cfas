@@ -40,9 +40,7 @@ runScript(async ({ cfas, ovhStorage }) => {
  */
 const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
   // All distinct valid uais
-  const allUais = await StatutCandidatModel.distinct("uai_etablissement", {
-    uai_etablissement_valid: true,
-  });
+  const allUais = await StatutCandidatModel.distinct("uai_etablissement");
 
   logger.info(`Seeding Referentiel CFAs from ${allUais.length} UAIs found in statutsCandidats`);
 

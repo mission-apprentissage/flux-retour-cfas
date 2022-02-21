@@ -858,25 +858,6 @@ describe(__filename, () => {
       assert.equal(createdStatut.siret_etablissement_valid, true);
     });
 
-    it("Vérifie la création d'un statut avec un uai invalide", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-
-      const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: "invalid-uai" };
-      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
-
-      assert.equal(createdStatut.uai_etablissement_valid, false);
-    });
-
-    it("Vérifie la création d'un statut avec un uai valide", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-
-      const validUai = "0123456Z";
-      const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: validUai };
-      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
-
-      assert.equal(createdStatut.uai_etablissement_valid, true);
-    });
-
     it("Vérifie qu'à la création d'un statut avec un siret invalide on ne set pas le champ etablissement_reseaux", async () => {
       const { createStatutCandidat } = await statutsCandidats();
       const invalidSiret = "invalid";
@@ -898,7 +879,7 @@ describe(__filename, () => {
       assert.equal(etablissement_reseaux.length, 0);
     });
 
-    it("Vérifie qu'à la création d'un statut avec un uai valide on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
+    it("Vérifie qu'à la création d'un statut on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
       const { createStatutCandidat } = await statutsCandidats();
       const validUai = "0631450J";
 
@@ -914,32 +895,10 @@ describe(__filename, () => {
       const createdStatut = await createStatutCandidat(statutWithValidUai);
 
       // Check uai & reseaux in created statut
-      const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
-      assert.equal(uai_etablissement_valid, true);
+      const { etablissement_reseaux } = createdStatut;
       assert.equal(etablissement_reseaux.length, 2);
       assert.equal(etablissement_reseaux[0], reseauxCfas.ANASUP.nomReseau);
       assert.equal(etablissement_reseaux[1], reseauxCfas.BTP_CFA.nomReseau);
-    });
-
-    it("Vérifie qu'à la création d'un statut avec un uai invalide on ne set pas le champ etablissement_reseaux", async () => {
-      const { createStatutCandidat } = await statutsCandidats();
-      const invalidUai = "invalid";
-
-      // Create sample cfa in referentiel
-      const referenceCfa = new CfaModel({
-        uai: invalidUai,
-        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
-      });
-      await referenceCfa.save();
-
-      // Create statut
-      const statutWithInvalidUai = { ...createRandomStatutCandidat(), uai_etablissement: invalidUai };
-      const createdStatut = await createStatutCandidat(statutWithInvalidUai);
-
-      // Check uai & reseaux in created statut
-      const { uai_etablissement_valid, etablissement_reseaux } = createdStatut;
-      assert.equal(uai_etablissement_valid, false);
-      assert.equal(etablissement_reseaux.length, 0);
     });
 
     it("Vérifie qu'à la création d'un statut avec un CFD valide on crée la formation correspondante si elle n'existe pas", async () => {

@@ -23,7 +23,6 @@ const identifyMultipleSirets = async () => {
   const uaiSiretsCouples = await StatutCandidatModel.aggregate([
     {
       $match: {
-        uai_etablissement_valid: true,
         siret_etablissement_valid: true,
       },
     },
@@ -57,7 +56,6 @@ const identifyMultipleUais = async () => {
   const siretsUaisCouples = await StatutCandidatModel.aggregate([
     {
       $match: {
-        uai_etablissement_valid: true,
         siret_etablissement_valid: true,
       },
     },

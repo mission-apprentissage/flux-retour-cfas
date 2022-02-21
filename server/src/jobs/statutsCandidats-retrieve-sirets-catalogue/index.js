@@ -15,12 +15,11 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 runScript(async () => {
   logger.info("Run StatutCandidats - Siret Catalogue Retrieving Job");
 
-  // Récupère tous les coupes UAI - CFD existants pour les statuts avec sirets invalides & uai valides
+  // Récupère tous les coupes UAI - CFD existants pour les statuts avec sirets invalides
   const uaiCfdCouples = (
     await StatutCandidatModel.aggregate([
       {
         $match: {
-          uai_etablissement_valid: true,
           siret_etablissement_valid: false,
         },
       },

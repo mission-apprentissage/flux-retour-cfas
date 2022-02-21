@@ -1,7 +1,6 @@
 const { StatutCandidatModel, CfaModel } = require("../model");
 const omit = require("lodash.omit");
 const { duplicatesTypesCodes } = require("../model/constants");
-const { validateUai } = require("../domain/uai");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
@@ -110,8 +109,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
 
 const createStatutCandidat = async (itemToCreate) => {
   // if statut candidat établissement has a VALID uai try to retrieve information in Referentiel CFAs
-  const etablissementInReferentielCfaFromUai =
-    validateUai(itemToCreate.uai_etablissement) && (await CfaModel.findOne({ uai: itemToCreate.uai_etablissement }));
+  const etablissementInReferentielCfaFromUai = await CfaModel.findOne({ uai: itemToCreate.uai_etablissement });
 
   // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
   if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {
@@ -132,7 +130,6 @@ const createStatutCandidat = async (itemToCreate) => {
     niveau_formation: formationInfo?.niveau,
     niveau_formation_libelle: formationInfo?.niveau_libelle,
     uai_etablissement: itemToCreate.uai_etablissement,
-    uai_etablissement_valid: validateUai(itemToCreate.uai_etablissement),
     siret_etablissement: itemToCreate.siret_etablissement,
     siret_etablissement_valid: validateSiret(itemToCreate.siret_etablissement),
     nom_etablissement: itemToCreate.nom_etablissement,
