@@ -2,13 +2,16 @@ const assert = require("assert").strict;
 const httpTests = require("../../utils/httpTests");
 const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const { apiRoles } = require("../../../src/common/roles");
+const { effectifsIndicators } = require("../../../src/common/model/constants");
 
 const {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
+  historySequenceApprentiToInscrit,
 } = require("../../data/historySequenceSamples");
-const { StatutCandidatModel } = require("../../../src/common/model");
+const { StatutCandidatModel, CfaModel } = require("../../../src/common/model");
+const { parseXlsxHeaderStreamToJson } = require("../../../src/common/utils/exporterUtils");
 
 httpTests(__filename, ({ startServer }) => {
   describe("/api/effectifs route", () => {
@@ -151,6 +154,217 @@ httpTests(__filename, ({ startServer }) => {
       assert.deepStrictEqual(badResponse.data.rupturants, 0);
       assert.deepStrictEqual(badResponse.data.apprentis, 0);
       assert.deepStrictEqual(badResponse.data.abandons, 0);
+    });
+  });
+
+  describe("/api/effectifs/export-xlsx-data-lists route", () => {
+    const seedStatutsCandidats = async (statutsProps) => {
+      const nbAbandons = 10;
+      const nbApprentis = 5;
+
+      // Add 10 statuts with history sequence - full
+      for (let index = 0; index < nbAbandons; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+          ...statutsProps,
+        });
+        const toAdd = new StatutCandidatModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 5 statuts with history sequence - simple apprenti
+      for (let index = 0; index < nbApprentis; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          historique_statut_apprenant: historySequenceApprenti,
+          ...statutsProps,
+        });
+        const toAdd = new StatutCandidatModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 15 statuts with history sequence - inscritToApprenti
+      for (let index = 0; index < 15; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          historique_statut_apprenant: historySequenceInscritToApprenti,
+          ...statutsProps,
+        });
+        const toAdd = new StatutCandidatModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 8 statuts with history sequence - inscritToApprentiToInscrit (rupturant)
+      for (let index = 0; index < 8; index++) {
+        const randomStatut = createRandomStatutCandidat({
+          historique_statut_apprenant: historySequenceApprentiToInscrit,
+          ...statutsProps,
+        });
+        const toAdd = new StatutCandidatModel(randomStatut);
+        await toAdd.save();
+      }
+    };
+
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+      const { httpClient } = await startServer();
+
+      const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
+        headers: {
+          Authorization: "",
+        },
+      });
+
+      assert.equal(response.status, 401);
+    });
+
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié en tant que CFA", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+
+      const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.apprentis },
+        headers: bearerToken,
+      });
+
+      assert.equal(response.status, 403);
+    });
+
+    it("Vérifie qu'on peut récupérer des listes de données des apprentis via API pour un CFA", async () => {
+      const { httpClient } = await startServer();
+
+      const cfaToken = "abdsbnbsfdpfdfjsdkjdfs";
+      const cfaUai = "9994889A";
+
+      await new CfaModel({
+        uai: cfaUai,
+        access_token: cfaToken,
+      }).save();
+
+      const responseLoginCfa = await httpClient.post("/api/login-cfa", {
+        cfaAccessToken: cfaToken,
+      });
+
+      assert.equal(responseLoginCfa.status, 200);
+      const bearerToken = responseLoginCfa.data.access_token;
+
+      await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
+
+      // Check good api call
+      const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.apprentis },
+        responseType: "arraybuffer",
+        headers: {
+          Authorization: `Bearer ${bearerToken}`,
+        },
+      });
+
+      const apprentisList = parseXlsxHeaderStreamToJson(response.data, 3);
+
+      assert.equal(response.status, 200);
+      assert.equal(apprentisList.length, 5);
+    });
+
+    it("Vérifie qu'on peut récupérer des listes de données des inscrits sans contrats via API pour un CFA", async () => {
+      const { httpClient } = await startServer();
+
+      const cfaToken = "abdsbnbsfdpfdfjsdkjdfs";
+      const cfaUai = "9994889A";
+
+      await new CfaModel({
+        uai: cfaUai,
+        access_token: cfaToken,
+      }).save();
+
+      const responseLoginCfa = await httpClient.post("/api/login-cfa", {
+        cfaAccessToken: cfaToken,
+      });
+
+      assert.equal(responseLoginCfa.status, 200);
+      const bearerToken = responseLoginCfa.data.access_token;
+
+      await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
+
+      // Check good api call
+      const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.inscritsSansContrats },
+        responseType: "arraybuffer",
+        headers: {
+          Authorization: `Bearer ${bearerToken}`,
+        },
+      });
+
+      const inscritsSansContratsList = parseXlsxHeaderStreamToJson(response.data, 3);
+
+      assert.equal(response.status, 200);
+      assert.equal(inscritsSansContratsList.length, 15);
+    });
+
+    it("Vérifie qu'on peut récupérer des listes de données des abandons via API pour un CFA", async () => {
+      const { httpClient } = await startServer();
+
+      const cfaToken = "abdsbnbsfdpfdfjsdkjdfs";
+      const cfaUai = "9994889A";
+
+      await new CfaModel({
+        uai: cfaUai,
+        access_token: cfaToken,
+      }).save();
+
+      const responseLoginCfa = await httpClient.post("/api/login-cfa", {
+        cfaAccessToken: cfaToken,
+      });
+
+      assert.equal(responseLoginCfa.status, 200);
+      const bearerToken = responseLoginCfa.data.access_token;
+
+      await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
+
+      // Check good api call
+      const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.abandons },
+        responseType: "arraybuffer",
+        headers: {
+          Authorization: `Bearer ${bearerToken}`,
+        },
+      });
+
+      const abandonsList = parseXlsxHeaderStreamToJson(response.data, 3);
+
+      assert.equal(response.status, 200);
+      assert.equal(abandonsList.length, 10);
+    });
+
+    it("Vérifie qu'on peut récupérer des listes de données des rupturants via API pour un CFA", async () => {
+      const { httpClient } = await startServer();
+
+      const cfaToken = "abdsbnbsfdpfdfjsdkjdfs";
+      const cfaUai = "9994889A";
+
+      await new CfaModel({
+        uai: cfaUai,
+        access_token: cfaToken,
+      }).save();
+
+      const responseLoginCfa = await httpClient.post("/api/login-cfa", {
+        cfaAccessToken: cfaToken,
+      });
+
+      assert.equal(responseLoginCfa.status, 200);
+      const bearerToken = responseLoginCfa.data.access_token;
+
+      await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
+
+      // Check good api call
+      const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.rupturants },
+        responseType: "arraybuffer",
+        headers: {
+          Authorization: `Bearer ${bearerToken}`,
+        },
+      });
+
+      const rupturantsList = parseXlsxHeaderStreamToJson(response.data, 3);
+
+      assert.equal(response.status, 200);
+      assert.equal(rupturantsList.length, 8);
     });
   });
 

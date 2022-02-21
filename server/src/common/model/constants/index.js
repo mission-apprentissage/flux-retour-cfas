@@ -8,6 +8,18 @@ const codesStatutsCandidats = {
 };
 
 /**
+ * Nom des statuts
+ */
+const statutsCandidatsNames = [
+  { code: codesStatutsCandidats.abandon, name: "abandon" },
+  { code: codesStatutsCandidats.inscrit, name: "inscrit" },
+  { code: codesStatutsCandidats.apprenti, name: "apprenti" },
+];
+
+const getStatutNameFromCode = (statutCode) =>
+  statutsCandidatsNames.find((item) => item.code === statutCode)?.name ?? "NC";
+
+/**
  * Code pour le statut de la mise à jour du statut candidat
  * Ex: passage du statut
  */
@@ -271,4 +283,6 @@ module.exports = {
   statutsCandidatsStringFields,
   jobEventStatuts: jobEventActions,
   effectifsIndicators,
+  statutsCandidatsNames,
+  getStatutNameFromCode,
 };
