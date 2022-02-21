@@ -80,10 +80,6 @@ module.exports = new Schema({
     index: true,
     sparse: true,
   },
-  uai_etablissement_valid: {
-    type: Boolean,
-    description: "Le champ uai_etablissement est-il valide ?",
-  },
   siret_etablissement: {
     type: String,
     default: null,

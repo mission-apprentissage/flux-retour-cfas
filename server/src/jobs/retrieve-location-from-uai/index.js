@@ -17,17 +17,15 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 runScript(async ({ db }) => {
   const { data } = await axios.get(`${GEO_API_HOST}/departements?fields=nom,code,codeRegion,codePostal,region`);
   const infoMap = indexBy(data, "code");
-  const allValidUais = await db.collection("statutsCandidats").distinct("uai_etablissement", {
-    uai_etablissement_valid: true,
-  });
+  const allUais = await db.collection("statutsCandidats").distinct("uai_etablissement");
 
-  logger.info(`${allValidUais.length} valid UAI found. Will update matching statuts candidats...`);
-  loadingBar.start(allValidUais.length, 0);
+  logger.info(`${allUais.length} UAI found. Will update matching statuts candidats...`);
+  loadingBar.start(allUais.length, 0);
 
   let modifiedCount = 0;
   let matchedCount = 0;
 
-  await asyncForEach(allValidUais, async (uaiToUpdate) => {
+  await asyncForEach(allUais, async (uaiToUpdate) => {
     const infoCodeFromUai = getDepartementCodeFromUai(uaiToUpdate);
     const info = infoMap[infoCodeFromUai];
 

@@ -431,7 +431,6 @@ describe(__filename, () => {
           nom_etablissement: "TEST CFA",
           siret_etablissement: "77929544300013",
           uai_etablissement: "0762232N",
-          uai_etablissement_valid: true,
           etablissement_num_region: regionNumTest,
         })
       ).save();
@@ -470,7 +469,6 @@ describe(__filename, () => {
           siret_etablissement: getRandomSiretEtablissement(),
           siret_etablissement_valid: true,
           uai_etablissement: "0762232N",
-          uai_etablissement_valid: true,
           formation_cfd: formationCfd,
         })
       ).save();

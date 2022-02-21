@@ -24,7 +24,6 @@ describe(__filename, () => {
     it("sends a 200 HTTP response with results when match", async () => {
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
-        uai_etablissement_valid: true,
         nom_etablissement: "FACULTE SCIENCES NANCY",
         nom_etablissement_tokenized: buildTokenizedString("FACULTE SCIENCES NANCY", 3),
       }).save();
@@ -108,7 +107,6 @@ describe(__filename, () => {
         nom_etablissement: nomTest,
         siret_etablissement: siretTest,
         uai_etablissement: uaiTest,
-        uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
       };
 
@@ -153,7 +151,6 @@ describe(__filename, () => {
       const cfaInfos = {
         nom_etablissement: nomTest,
         uai_etablissement: uaiTest,
-        uai_etablissement_valid: true,
         siret_etablissement: "77929544300013",
         etablissement_adresse: adresseTest,
       };
@@ -201,7 +198,6 @@ describe(__filename, () => {
         nom_etablissement: nomTest,
         siret_etablissement: siretTest,
         uai_etablissement: uaiTest,
-        uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
       };
 

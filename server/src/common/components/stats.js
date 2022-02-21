@@ -8,10 +8,7 @@ module.exports = () => {
 };
 
 const getNbDistinctCfasByUai = async (filters = {}) => {
-  const distinctCfas = await StatutCandidatModel.distinct("uai_etablissement", {
-    ...filters,
-    uai_etablissement_valid: true,
-  });
+  const distinctCfas = await StatutCandidatModel.distinct("uai_etablissement", filters);
   return distinctCfas ? distinctCfas.length : 0;
 };
 

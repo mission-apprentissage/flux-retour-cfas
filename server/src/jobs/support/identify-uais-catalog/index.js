@@ -13,7 +13,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  */
 runScript(async () => {
   logger.info(`Identifying UAIs types from Statuts`);
-  const allDistinctUais = await StatutCandidatModel.distinct("uai_etablissement", { uai_etablissement_valid: true });
+  const allDistinctUais = await StatutCandidatModel.distinct("uai_etablissement");
 
   loadingBar.start(allDistinctUais.length, 0);
 
