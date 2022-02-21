@@ -11,6 +11,7 @@ const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
 const { sleep, generateRandomAlphanumericPhrase } = require("../../common/utils/miscUtils");
 const config = require("../../../config");
+const { validateUai } = require("../../common/domain/uai");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -30,6 +31,8 @@ runScript(async ({ cfas }) => {
   await seedCfasNetworkFromCsv(reseauxCfas.CCI);
   await seedCfasNetworkFromCsv(reseauxCfas.CFA_EC);
   await seedCfasNetworkFromCsv(reseauxCfas.GRETA);
+
+  await identifyUaiValidity();
 
   logger.info("End seeding référentiel CFAs !");
 }, jobNames.seedReferentielCfas);
@@ -263,4 +266,16 @@ const seedMetiersFromLbaApi = async () => {
   });
 
   loadingBar.stop();
+};
+
+const identifyUaiValidity = async () => {
+  const allCfasWithUai = await CfaModel.find({ uai: { $exists: true } });
+
+  await asyncForEach(allCfasWithUai, async (currentCfaWithUai) => {
+    // Update metiers list
+    await CfaModel.findOneAndUpdate(
+      { _id: currentCfaWithUai._id },
+      { $set: { uai_valid: validateUai(currentCfaWithUai.uai) } }
+    );
+  });
 };
