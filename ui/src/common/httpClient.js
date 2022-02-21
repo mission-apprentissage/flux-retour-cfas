@@ -1,5 +1,3 @@
-import EventEmitter from "events";
-
 import { getAuth } from "./auth/auth";
 
 class AuthError extends Error {
@@ -20,15 +18,11 @@ class HTTPError extends Error {
   }
 }
 
-const emitter = new EventEmitter();
-
 const handleResponse = (path, response, options = {}) => {
   const { jsonResponse = true } = options;
 
   let statusCode = response.status;
   if (statusCode >= 400 && statusCode < 600) {
-    emitter.emit("http:error", response);
-
     if (statusCode === 401 || statusCode === 403) {
       throw new AuthError(response.json(), statusCode);
     } else {
@@ -81,5 +75,3 @@ export const _delete = (path) => {
     headers: getHeaders(),
   }).then((res) => handleResponse(path, res));
 };
-
-export const subscribeToHttpEvent = (eventName, callback) => emitter.on(eventName, callback);
