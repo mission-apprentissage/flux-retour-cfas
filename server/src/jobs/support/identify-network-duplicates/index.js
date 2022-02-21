@@ -1,8 +1,6 @@
-const fs = require("fs-extra");
 const path = require("path");
 const groupBy = require("lodash.groupby");
 const logger = require("../../../common/logger");
-const ovhStorageManager = require("../../../common/utils/ovhStorageManager");
 const { runScript } = require("../../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
 const { reseauxCfas } = require("../../../common/model/constants/");
@@ -12,18 +10,18 @@ const { jobNames } = require("../../../common/model/constants/index");
 /**
  * Ce script permet d'identifier les doublons dans les fichiers de référence des réseaux
  */
-runScript(async () => {
+runScript(async ({ ovhStorage }) => {
   logger.info("Identifying Network Referentiel Duplicates");
 
-  await identifyDuplicatesForNetwork(reseauxCfas.CCCA_BTP);
-  await identifyDuplicatesForNetwork(reseauxCfas.CCCI_France);
-  await identifyDuplicatesForNetwork(reseauxCfas.CMA);
-  await identifyDuplicatesForNetwork(reseauxCfas.AGRI);
-  await identifyDuplicatesForNetwork(reseauxCfas.ANASUP);
-  await identifyDuplicatesForNetwork(reseauxCfas.PROMOTRANS);
-  await identifyDuplicatesForNetwork(reseauxCfas.COMPAGNONS_DU_DEVOIR);
-  await identifyDuplicatesForNetwork(reseauxCfas.UIMM);
-  await identifyDuplicatesForNetwork(reseauxCfas.BTP_CFA);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.CCI);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.CMA);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.AGRI);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.ANASUP);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.UIMM);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.BTP_CFA);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.CFA_EC);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.GRETA);
+  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.MFR);
 
   logger.info("End identifying Network Referentiel Duplicates");
 }, jobNames.identifyNetworkDuplicates);
@@ -31,17 +29,12 @@ runScript(async () => {
 /**
  * Identify duplicates for Network
  */
-const identifyDuplicatesForNetwork = async ({ nomReseau, nomFichier }) => {
+const identifyDuplicatesForNetwork = async (ovhStorage, { nomReseau, nomFichier }) => {
   logger.info(`Identifying duplicates for network ${nomReseau}`);
   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
-  if (!fs.existsSync(cfasReferenceFilePath)) {
-    const storageMgr = await ovhStorageManager();
-    await storageMgr.downloadFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
-  } else {
-    logger.info(`File ${cfasReferenceFilePath} already in data folder.`);
-  }
+  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
 
   // Read data from CSV
   const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath, "latin1");

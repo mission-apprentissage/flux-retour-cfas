@@ -8,7 +8,7 @@ const server = require("../../src/http/server");
 const startServer = async () => {
   const { db } = await connectToMongoForTests();
   const redisFakeClient = redisMock.createClient();
-  const components = await createComponents({ db, redisClient: redisFakeClient });
+  const components = await createComponents({ db, redisClient: redisFakeClient, ovhStorage: {} });
   const app = await server(components);
   const httpClient = axiosist(app);
 

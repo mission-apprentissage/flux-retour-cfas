@@ -5,7 +5,6 @@ const logger = require("../../../common/logger");
 const { CfaDataFeedbackModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { jobNames } = require("../../../common/model/constants");
-const { downloadIfNeeded } = require("./utils");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const feedbacksToRemoveFilePath = path.join(__dirname, `./assets/feedbacksToRemove.json`);
@@ -13,9 +12,9 @@ const feedbacksToRemoveFilePath = path.join(__dirname, `./assets/feedbacksToRemo
 /**
  * Ce script permet nettoyer les Feedbacks en utilisant un fichier JSON de feedbacks à supprimer
  */
-runScript(async () => {
+runScript(async ({ ovhStorage }) => {
   logger.info("Run Clean CFA Data Feedback Job");
-  await removeFeedbacksFromJson();
+  await removeFeedbacksFromJson(ovhStorage);
   logger.info("End Clean CFA Data Feedback Job");
 }, jobNames.cleanCfaDataFeedback);
 
@@ -23,9 +22,9 @@ runScript(async () => {
  * Parse tous les Feedback depuis un fichier JSON
  * Si feedback présent en base, suppression
  */
-const removeFeedbacksFromJson = async () => {
+const removeFeedbacksFromJson = async (ovhStorage) => {
   // Gets the referentiel file
-  await downloadIfNeeded(`feedback/feedbacksToRemove.json`, feedbacksToRemoveFilePath);
+  await ovhStorage.downloadIfNeededFileTo(`feedback/feedbacksToRemove.json`, feedbacksToRemoveFilePath);
 
   const allFeedbacksToRemove = require(feedbacksToRemoveFilePath);
 

@@ -1,6 +1,5 @@
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { downloadIfNeeded } = require("./utils");
 const path = require("path");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
@@ -13,11 +12,14 @@ const statutsGestiToRemoveFilePath = path.join(__dirname, `./assets/statuts-gest
  * Ces statuts n'ont pas vocation a être stockés
  * Ces statuts ont été identifiés dans un CSV fourni par GESTI
  */
-runScript(async () => {
+runScript(async ({ ovhStorage }) => {
   logger.info("Start Remove Gesti En cours de recrutement");
 
   // Gets the reference file & data
-  await downloadIfNeeded(`gesti/statuts-gesti-encours-recrutement-toRemove.csv`, statutsGestiToRemoveFilePath);
+  await ovhStorage.downloadIfNeededFileTo(
+    `gesti/statuts-gesti-encours-recrutement-toRemove.csv`,
+    statutsGestiToRemoveFilePath
+  );
   const toRemoveData = readJsonFromCsvFile(statutsGestiToRemoveFilePath, "utf8");
 
   let totalDeletedCount = 0;

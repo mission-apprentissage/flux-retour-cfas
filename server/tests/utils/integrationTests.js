@@ -7,7 +7,7 @@ module.exports = (desc, cb) => {
 
     beforeEach(async () => {
       let [{ db }] = await Promise.all([connectToMongoForTests()]);
-      const components = await createComponents({ db });
+      const components = await createComponents({ db, ovhStorage: {} });
       context = { db, components };
     });
 

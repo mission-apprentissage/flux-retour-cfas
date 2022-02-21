@@ -1,8 +1,6 @@
 const cliProgress = require("cli-progress");
-const fs = require("fs-extra");
 const path = require("path");
 const logger = require("../../common/logger");
-const ovhStorageManager = require("../../common/utils/ovhStorageManager");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { CfaModel, StatutCandidatModel } = require("../../common/model");
@@ -18,19 +16,19 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 /**
  * Script qui initialise la collection CFAs de référence
  */
-runScript(async ({ cfas }) => {
+runScript(async ({ cfas, ovhStorage }) => {
   logger.info("Seeding referentiel CFAs");
 
   await seedCfasFromStatutsCandidatsUaisValid(cfas);
   await seedMetiersFromLbaApi();
 
-  await seedCfasNetworkFromCsv(reseauxCfas.CMA);
-  await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
-  await seedCfasNetworkFromCsv(reseauxCfas.AGRI);
-  await seedCfasNetworkFromCsv(reseauxCfas.MFR);
-  await seedCfasNetworkFromCsv(reseauxCfas.CCI);
-  await seedCfasNetworkFromCsv(reseauxCfas.CFA_EC);
-  await seedCfasNetworkFromCsv(reseauxCfas.GRETA);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CMA);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.UIMM);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.AGRI);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.MFR);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CCI);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CFA_EC);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.GRETA);
 
   await identifyUaiValidity();
 
@@ -131,17 +129,12 @@ const updateCfaFromStatutCandidat = async (cfas, cfaExistant, statutForCfa, allS
  * 2.a - If cfa in data has siret - check if update or creation needed
  * 2.b - If cfa in data has uai - check if update or creation needed
  */
-const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier, encoding }) => {
+const seedCfasNetworkFromCsv = async (ovhStorage, { nomReseau, nomFichier, encoding }) => {
   logger.info(`Seeding CFAs for network ${nomReseau}`);
   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
-  if (!fs.existsSync(cfasReferenceFilePath)) {
-    const storageMgr = await ovhStorageManager();
-    await storageMgr.downloadFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
-  } else {
-    logger.info(`File ${cfasReferenceFilePath} already in data folder.`);
-  }
+  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
 
   const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
   loadingBar.start(allCfasForNetwork.length, 0);

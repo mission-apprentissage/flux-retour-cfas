@@ -46,7 +46,7 @@
     "statutsCandidats:retrieve-sirets-catalogue": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-sirets-catalogue/index.js",
     "cfas:retrieve-data-connection": "node -r dotenv/config src/jobs/cfas-retrieve-data-connection/index.js",
     "support:export-voeuxAffelnet": "node -r dotenv/config src/jobs/support/export-data-for-voeuxAffelnet/index.js",
-    "support:identify-cma": "node -r dotenv/config src/jobs/identify-cfas-network/identify-cma.js",
+    "support:identify-cma": "node -r dotenv/config src/jobs/support/identify-cfas-network/identify-cma.js",
     "support:identify-network-duplicates": "node -r dotenv/config src/jobs/support/identify-network-duplicates/index.js",
     "support:remove-statutsCandidats-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates/remove-duplicates.js",
     "support:identify-cfas-with-invalid-siret": "node -r dotenv/config src/jobs/support/identify-cfas-with-invalid-siret/index.js",

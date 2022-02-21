@@ -12,9 +12,11 @@ const demandeIdentifiantsComponent = require("./demandeIdentifiants");
 const demandeLienPriveComponent = require("./demandeLienPrive");
 const demandeBranchementErpComponent = require("./demandeBranchementErp");
 const createCacheComponent = require("./cache");
+const createOvhStorageComponent = require("./ovhStorage");
 
 module.exports = async (options = {}) => {
   const users = options.users || (await createUsers());
+  const ovhStorage = options.ovhStorage || createOvhStorageComponent();
   const userEvents = options.userEvents || createUserEvents();
   const jobEvents = options.jobEvents || createJobEvents();
   const statutsCandidats = options.statutsCandidats || createStatutsCandidats();
@@ -30,6 +32,7 @@ module.exports = async (options = {}) => {
 
   return {
     users,
+    ovhStorage,
     userEvents,
     jobEvents,
     cache,
