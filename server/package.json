@@ -38,7 +38,6 @@
     "purge:events": "node -r dotenv/config src/jobs/remove-data/purgeEvents/index.js",
     "formation:retrieve-from-cfd": "node -r dotenv/config src/jobs/formation-retrieve-from-cfd/index.js",
     "rco:create-rco-statutsCandidats": "node -r dotenv/config src/jobs/create-rcoStatutsCandidats-collection/index.js",
-    "statutsCandidats:retrieve-cfd-history": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-cfd-history/index.js",
     "statutsCandidats:retrieve-formations-in-catalog": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-formations-in-catalog/index.js",
     "statutsCandidats:retrieve-networks": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-networks/index.js",
     "statutsCandidats:retrieve-niveaux": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-niveaux/index.js",

@@ -105,7 +105,6 @@ const jobNames = {
   removeStatutsCandidatsDuplicates: "remove-statutsCandidats-duplicates",
   formationRetrieveFromCfd: "formation-retrieve-from-cfd",
   statutsCandidatsRetrieveNetworks: "statutsCandidats-retrieve-networks",
-  statutsCandidatsRetrieveCfdHistory: "statutsCandidats-retrieve-cfd-history",
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
   statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
   statutsCandidatsRetrieveFormationsInCatalog: "statutsCandidats-retrieve-formation-in-catalog",
