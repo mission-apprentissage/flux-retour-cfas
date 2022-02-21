@@ -43,6 +43,16 @@ module.exports = new Schema({
     default: null,
     description: "Nouveau CFD de la formation du candidat si cfd d'origine outdated",
   },
+  formation_cfd_start_date: {
+    type: Date,
+    default: null,
+    description: "Date d'ouverture du CFD",
+  },
+  formation_cfd_end_date: {
+    type: Date,
+    default: null,
+    description: "Date de fermeture du CFD",
+  },
   libelle_court_formation: {
     type: String,
     default: null,
