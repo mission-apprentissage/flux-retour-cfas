@@ -1,10 +1,9 @@
 const assert = require("assert").strict;
 const omit = require("lodash.omit");
-const integrationTests = require("../../../utils/integrationTests");
 const cfaDataFeedbackComponent = require("../../../../src/common/components/cfaDataFeedback");
 const { CfaModel } = require("../../../../src/common/model");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   describe("createCfaDataFeedback", () => {
     const { createCfaDataFeedback } = cfaDataFeedbackComponent();
 

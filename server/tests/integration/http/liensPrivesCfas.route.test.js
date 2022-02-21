@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { apiRoles } = require("../../../src/common/roles");
 const { CfaModel } = require("../../../src/common/model");
 const users = require("../../../src/common/components/users");
@@ -24,7 +24,7 @@ const getJwtForUser = async (httpClient) => {
   return data.access_token;
 };
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   it("Vérifie que la route liens-prives-cfas renvoie une 401 pour un user non authentifié", async () => {
     const { httpClient } = await startServer();
 

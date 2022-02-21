@@ -3,9 +3,8 @@ const statutsCandidats = require("../../../../src/common/components/statutsCandi
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { historySequenceApprentiToAbandon } = require("../../../data/historySequenceSamples");
 const { StatutCandidatModel } = require("../../../../src/common/model");
-const integrationTests = require("../../../utils/integrationTests");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   describe("createRandomStatutCandidat", () => {
     it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
       const { getStatut, createStatutCandidat } = await statutsCandidats();

@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   describe("POST /update-password", () => {
     it("renvoie une 200 quand le token fourni et le nouveau mot de passe sont corrects", async () => {
       const { httpClient, components } = await startServer();

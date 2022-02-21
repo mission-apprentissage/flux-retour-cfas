@@ -1,11 +1,10 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 
 const { StatutCandidatModel } = require("../../../../src/common/model");
 const { EffectifsRupturants } = require("../../../../src/common/components/effectifs/rupturants");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   beforeEach(async () => {
     const statuts = [
       // following statuts are potential rupturants (depends on date)

@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const { apiRoles } = require("../../../src/common/roles");
 const { effectifsIndicators } = require("../../../src/common/model/constants");
@@ -13,7 +13,7 @@ const {
 const { StatutCandidatModel, CfaModel } = require("../../../src/common/model");
 const { parseXlsxHeaderStreamToJson } = require("../../../src/common/utils/exporterUtils");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   describe("/api/effectifs route", () => {
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();

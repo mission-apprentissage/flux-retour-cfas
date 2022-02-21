@@ -1,12 +1,11 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const cfasComponent = require("../../../../src/common/components/cfas");
 const { StatutCandidatModel, CfaModel } = require("../../../../src/common/model");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
 const { addDays } = require("date-fns");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   describe("searchCfas", () => {
     const { searchCfas } = cfasComponent();
 

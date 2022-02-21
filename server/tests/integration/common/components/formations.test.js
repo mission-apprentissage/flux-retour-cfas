@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
 const omit = require("lodash.omit");
+// eslint-disable-next-line node/no-unpublished-require
+const nock = require("nock");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
-const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
-const integrationTests = require("../../../utils/integrationTests");
 const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
 const { dataForGetMetiersByCfd } = require("../../../data/apiLba");
@@ -10,8 +10,9 @@ const formationsComponent = require("../../../../src/common/components/formation
 const { FormationModel, StatutCandidatModel } = require("../../../../src/common/model");
 const { Formation } = require("../../../../src/common/domain/formation");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   describe("existsFormation", () => {
     const { existsFormation } = formationsComponent();
 
@@ -84,7 +85,6 @@ integrationTests(__filename, () => {
 
     it("returns created formation when cfd was found in Tables de Correspondaces with intitule_long", async () => {
       nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
-      nockGetMetiersByCfd(dataForGetMetiersByCfd);
 
       const cfd = "13534005";
       const created = await createFormation(cfd);
@@ -99,8 +99,9 @@ integrationTests(__filename, () => {
     });
 
     it("returns created formation when cfd was found in Tables de Correspondaces without intitule_long", async () => {
+      nock.cleanAll();
+      nockGetMetiersByCfd();
       nockGetCfdInfo(dataForGetCfdInfo.withoutIntituleLong);
-      nockGetMetiersByCfd(dataForGetMetiersByCfd);
 
       const cfd = "13534005";
       const created = await createFormation(cfd);

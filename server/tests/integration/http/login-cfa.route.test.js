@@ -1,11 +1,11 @@
 const assert = require("assert").strict;
 const config = require("../../../config");
 const jwt = require("jsonwebtoken");
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { CfaModel } = require("../../../src/common/model");
 const { tdbRoles } = require("../../../src/common/roles");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   it("Vérifie qu'on peut se connecter avec un access token cfa", async () => {
     const { httpClient } = await startServer();
     // create cfa in db

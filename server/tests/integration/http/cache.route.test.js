@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   describe("POST /cache/clear", () => {
     it("sends a 403 HTTP response when caller is not admin", async () => {
       const { httpClient, createAndLogUser } = await startServer();

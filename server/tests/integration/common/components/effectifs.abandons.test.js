@@ -1,5 +1,4 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const {
   historySequenceInscritToApprentiToAbandon,
@@ -9,7 +8,7 @@ const {
 const { StatutCandidatModel } = require("../../../../src/common/model");
 const { EffectifsAbandons } = require("../../../../src/common/components/effectifs/abandons");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   const seedStatutsCandidats = async (statutsProps) => {
     const abandonsStatuts = [];
 

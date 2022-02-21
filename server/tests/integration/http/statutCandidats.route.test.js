@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
 const { StatutCandidatModel } = require("../../../src/common/model");
@@ -7,8 +7,6 @@ const {
   createRandomStatutsCandidatsApiInputList,
   createRandomStatutCandidatApiInput,
 } = require("../../data/randomizedSample");
-const { nockGetCfdInfo } = require("../../utils/nockApis/nock-tablesCorrespondances");
-const { nockGetMetiersByCfd } = require("../../utils/nockApis/nock-Lba");
 const { cfdRegex } = require("../../../src/common/domain/cfd");
 
 const user = {
@@ -29,12 +27,7 @@ const getJwtForUser = async (httpClient) => {
   return data.access_token;
 };
 
-httpTests(__filename, ({ startServer }) => {
-  beforeEach(() => {
-    nockGetCfdInfo();
-    nockGetMetiersByCfd();
-  });
-
+describe(__filename, () => {
   it("Vérifie que la route statut-candidats fonctionne avec un tableau vide", async () => {
     const { httpClient } = await startServer();
     await createApiUser();

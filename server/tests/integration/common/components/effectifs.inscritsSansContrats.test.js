@@ -1,12 +1,11 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 
 const { StatutCandidatModel } = require("../../../../src/common/model");
 const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
 const { EffectifsInscritsSansContrats } = require("../../../../src/common/components/effectifs/inscrits-sans-contrats");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   const inscritsSansContrats = new EffectifsInscritsSansContrats();
 
   beforeEach(async () => {

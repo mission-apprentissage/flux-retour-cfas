@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
 const { RcoStatutCandidatModel, JobEventModel } = require("../../../src/common/model");
@@ -26,7 +26,7 @@ const getJwtForUser = async (httpClient) => {
   return data.access_token;
 };
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   describe("GET rco/test", () => {
     it("Vérifie que la route rco/test fonctionne avec un jeton JWT", async () => {
       const { httpClient } = await startServer();
