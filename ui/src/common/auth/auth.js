@@ -14,5 +14,7 @@ export const getAuth = () => getGlobalState("auth");
 export const useAuthState = () => useGlobalState("auth");
 export const resetAuth = () => {
   localStorage.removeItem("flux-retour-cfas:access_token");
+  localStorage.removeItem("flux-retour-cfas:userPermissions");
+  localStorage.removeItem("flux-retour-cfas:userNetwork");
   setGlobalState("auth", null);
 };
