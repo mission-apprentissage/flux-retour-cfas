@@ -28,7 +28,11 @@ module.exports = new Schema({
   nom: {
     type: String,
     default: null,
-    description: "Nom de l'établissement",
+    description: "Nom de l'organisme de formation",
+  },
+  nom_tokenized: {
+    type: String,
+    description: "Nom de l'organisme de formation tokenized pour la recherche textuelle",
   },
   adresse: {
     type: String,

@@ -74,11 +74,6 @@ module.exports = new Schema({
     default: null,
     description: "Nom de l'établissement d'origine",
   },
-  nom_etablissement_tokenized: {
-    type: String,
-    default: null,
-    description: "Nom de l'établissement d'origine tokenized pour la recherche textuelle",
-  },
   etablissement_reseaux: {
     type: [String],
     default: [],

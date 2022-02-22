@@ -1,4 +1,6 @@
+const { getDepartementCodeFromUai } = require("../domain/uai");
 const { StatutCandidatModel, CfaAnnuaireModel, CfaModel } = require("../model");
+const { escapeRegExp } = require("../utils/regexUtils");
 
 module.exports = () => ({
   searchCfas,
@@ -15,17 +17,20 @@ const SEARCH_RESULTS_LIMIT = 50;
 /**
  * Returns list of CFA information matching passed criteria
  * @param {{}} searchCriteria
- * @return {Array<{uai_etablissement: string, nom_etablissement: string, etablissement_num_departement: string}>} Array of CFA information
+ * @return {Array<{uai: string, nom: string}>} Array of CFA information
  */
 const searchCfas = async (searchCriteria) => {
   const { searchTerm, ...otherCriteria } = searchCriteria;
 
-  const matchQuery = searchTerm
-    ? {
-        $or: [{ $text: { $search: searchTerm } }, { uai_etablissement: searchTerm.toUpperCase() }],
-        ...otherCriteria,
-      }
-    : otherCriteria;
+  const matchStage = {};
+  if (searchTerm) {
+    matchStage.$or = [{ $text: { $search: searchTerm } }, { uai: new RegExp(escapeRegExp(searchTerm), "g") }];
+  }
+  // if other criteria have been provided, find the list of uai matching those criteria in the StatutCandidat collection
+  if (Object.keys(otherCriteria).length > 0) {
+    const eligibleUais = await StatutCandidatModel.distinct("uai_etablissement", otherCriteria);
+    matchStage.uai = { $in: eligibleUais };
+  }
 
   const sortStage = searchTerm
     ? {
@@ -34,34 +39,19 @@ const searchCfas = async (searchCriteria) => {
       }
     : { nom_etablissement: 1 };
 
-  const found = await StatutCandidatModel.aggregate([
-    {
-      $match: matchQuery,
-    },
-    {
-      $group: {
-        _id: "$uai_etablissement",
-        nom_etablissement: { $first: "$nom_etablissement" },
-        etablissement_num_departement: { $first: "$etablissement_num_departement" },
-      },
-    },
-    {
-      $sort: sortStage,
-    },
-    {
-      $limit: SEARCH_RESULTS_LIMIT,
-    },
-    {
-      $project: {
-        _id: 0,
-        uai_etablissement: "$_id",
-        nom_etablissement: 1,
-        etablissement_num_departement: 1,
-      },
-    },
+  const found = await CfaModel.aggregate([
+    { $match: matchStage },
+    { $sort: sortStage },
+    { $limit: SEARCH_RESULTS_LIMIT },
   ]);
 
-  return found;
+  return found.map((cfa) => {
+    return {
+      uai: cfa.uai,
+      nom: cfa.nom,
+      departement: getDepartementCodeFromUai(cfa.uai),
+    };
+  });
 };
 
 /**
