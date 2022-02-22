@@ -5,7 +5,6 @@ const { apiRoles } = require("../common/roles");
 
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
-const corsMiddleware = require("./middlewares/corsMiddleware");
 const requireJwtAuthenticationMiddleware = require("./middlewares/requireJwtAuthentication");
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 
@@ -33,7 +32,6 @@ module.exports = async (components) => {
   const adminOnly = permissionsMiddleware([apiRoles.administrator]);
 
   app.use(bodyParser.json());
-  app.use(corsMiddleware());
   app.use(logMiddleware());
 
   // open routes
