@@ -1,6 +1,6 @@
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { jobNames } = require("../../../common/model/constants");
+const { jobNames } = require("../../../common/constants/jobsConstants");
 const { StatutCandidatModel } = require("../../../common/model");
 
 runScript(async () => {

@@ -3,9 +3,9 @@ const groupBy = require("lodash.groupby");
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
-const { reseauxCfas } = require("../../../common/model/constants/");
+const { reseauxCfas } = require("../../../common/constants/networksConstants");
 const { toXlsx } = require("../../../common/utils/exporterUtils");
-const { jobNames } = require("../../../common/model/constants/index");
+const { jobNames } = require("../../../common/constants/jobsConstants");
 
 /**
  * Ce script permet d'identifier les doublons dans les fichiers de référence des réseaux

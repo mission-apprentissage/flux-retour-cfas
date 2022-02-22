@@ -1,7 +1,7 @@
 const logger = require("../../../common/logger");
 const arg = require("arg");
 const { runScript } = require("../../scriptWrapper");
-const { jobNames } = require("../../../common/model/constants/index");
+const { jobNames } = require("../../../common/constants/jobsConstants");
 const { StatutCandidatModel, DuplicateEventModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const sortBy = require("lodash.sortby");

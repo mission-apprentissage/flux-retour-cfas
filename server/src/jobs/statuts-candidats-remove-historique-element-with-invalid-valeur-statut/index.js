@@ -1,7 +1,8 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const cliProgress = require("cli-progress");
-const { jobNames, codesStatutsCandidats } = require("../../common/model/constants");
+const { jobNames } = require("../../common/constants/jobsConstants");
+const { codesStatutsCandidats } = require("../../common/constants/statutsCandidatsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

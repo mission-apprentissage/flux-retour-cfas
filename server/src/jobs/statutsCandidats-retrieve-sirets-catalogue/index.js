@@ -3,7 +3,7 @@ const logger = require("../../common/logger");
 const cliProgress = require("cli-progress");
 const { StatutCandidatModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const { jobNames } = require("../../common/constants/jobsConstants");
 const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);

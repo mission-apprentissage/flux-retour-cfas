@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { StatutCandidatModel } = require("../../../../src/common/model");
 const effectifs = require("../../../../src/common/components/effectifs");
-const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
+const { codesStatutsCandidats } = require("../../../../src/common/constants/statutsCandidatsConstants");
 
 describe(__filename, () => {
   const seedStatutsCandidats = async (statutsProps) => {

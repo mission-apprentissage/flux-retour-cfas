@@ -4,7 +4,7 @@ const omit = require("lodash.omit");
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const { jobNames } = require("../../common/constants/jobsConstants");
 const { collectionNames } = require("../constants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);

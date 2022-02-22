@@ -2,7 +2,7 @@ const faker = require("faker/locale/fr");
 const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
 const { subYears, subMonths, addYears } = require("date-fns");
-const { codesStatutsCandidats } = require("../../src/common/model/constants");
+const { codesStatutsCandidats } = require("../../src/common/constants/statutsCandidatsConstants");
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();

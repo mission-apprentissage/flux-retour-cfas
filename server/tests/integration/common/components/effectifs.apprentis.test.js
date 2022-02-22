@@ -6,7 +6,7 @@ const {
   historySequenceInscritToApprenti,
 } = require("../../../data/historySequenceSamples");
 const { StatutCandidatModel } = require("../../../../src/common/model");
-const { reseauxCfas } = require("../../../../src/common/model/constants");
+const { reseauxCfas } = require("../../../../src/common/constants/networksConstants");
 const { EffectifsApprentis } = require("../../../../src/common/components/effectifs/apprentis");
 
 describe(__filename, () => {

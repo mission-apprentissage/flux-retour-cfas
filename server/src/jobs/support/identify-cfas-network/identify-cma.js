@@ -5,7 +5,8 @@ const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { StatutCandidatModel } = require("../../../common/model");
 const { toXlsx } = require("../../../common/utils/exporterUtils");
-const { codesStatutsCandidats, jobNames } = require("../../../common/model/constants/index");
+const { jobNames } = require("../../../common/constants/jobsConstants");
+const { codesStatutsCandidats } = require("../../../common/constants/statutsCandidatsConstants");
 
 const cmaReferenceFilePath = path.join(__dirname, `./assets/cfas-cma.csv`);
 

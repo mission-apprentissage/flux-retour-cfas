@@ -1,6 +1,7 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { reseauxCfas, regions } = require("../../common/model/constants");
+const { reseauxCfas } = require("../../common/constants/networksConstants");
+const { regions } = require("../../common/constants/localisationConstants");
 
 module.exports = () => {
   const router = express.Router();

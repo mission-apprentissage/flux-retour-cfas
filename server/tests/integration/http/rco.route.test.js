@@ -4,7 +4,8 @@ const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
 const { RcoStatutCandidatModel, JobEventModel } = require("../../../src/common/model");
 const { createRandomRcoStatutCandidat } = require("../../data/randomizedSample");
-const { jobNames, jobEventStatuts, effectifsIndicators } = require("../../../src/common/model/constants");
+const { jobNames, jobEventStatuts } = require("../../../src/common/constants/jobsConstants");
+const { effectifsIndicators } = require("../../../src/common/constants/statutsCandidatsConstants");
 
 const user = { name: "rcoUser", password: "password" };
 
