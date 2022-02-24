@@ -43,9 +43,15 @@ module.exports = new Schema({
     default: null,
     description: "Nouveau CFD de la formation du candidat si cfd d'origine outdated",
   },
-  formation_cfd_valid: {
-    type: Boolean,
-    description: "Le champ formation_cfd est-il un cfd valide ?",
+  formation_cfd_start_date: {
+    type: Date,
+    default: null,
+    description: "Date d'ouverture du CFD",
+  },
+  formation_cfd_end_date: {
+    type: Date,
+    default: null,
+    description: "Date de fermeture du CFD",
   },
   libelle_court_formation: {
     type: String,
@@ -73,10 +79,6 @@ module.exports = new Schema({
     description: "Code uai de l'établissement d'origine",
     index: true,
     sparse: true,
-  },
-  uai_etablissement_valid: {
-    type: Boolean,
-    description: "Le champ uai_etablissement est-il valide ?",
   },
   siret_etablissement: {
     type: String,

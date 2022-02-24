@@ -1,11 +1,11 @@
-import { Skeleton, Stack, Text } from "@chakra-ui/react";
+import { Box, Divider, Skeleton, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { SearchInput } from "../../../../../common/components";
+import { InputLegend, SearchInput } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
 import FormationsList from "./FormationsList";
-import useFormationSearch from "./useFormationSearch";
+import useFormationSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useFormationSearch";
 
 const NoResults = () => {
   return (
@@ -38,6 +38,14 @@ const FormationFilterMenu = ({ filters, onFormationClick }) => {
         onChange={setSearchTerm}
         placeholder="Rechercher un libellé de formation ou un CFD"
       />
+      {searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH && (
+        <Box paddingLeft="1w" paddingTop="3v">
+          <InputLegend>
+            Merci de renseigner au minimum {MINIMUM_CHARS_TO_PERFORM_SEARCH} caractères pour lancer la recherche
+          </InputLegend>
+          <Divider marginTop="3v" borderBottomColor="grey.300" orientation="horizontal" />
+        </Box>
+      )}
       {searchResults?.length === 0 && <NoResults />}
       {loading && <Loading />}
       <FormationsList

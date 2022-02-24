@@ -1,35 +1,36 @@
 const cliProgress = require("cli-progress");
-const fs = require("fs-extra");
 const path = require("path");
 const logger = require("../../common/logger");
-const ovhStorageManager = require("../../common/utils/ovhStorageManager");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { CfaModel, StatutCandidatModel } = require("../../common/model");
 const { jobNames, reseauxCfas, erps } = require("../../common/model/constants/");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
-const { sleep, generatePassword } = require("../../common/utils/miscUtils");
+const { sleep, generateRandomAlphanumericPhrase } = require("../../common/utils/miscUtils");
 const config = require("../../../config");
+const { validateUai } = require("../../common/domain/uai");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
  * Script qui initialise la collection CFAs de référence
  */
-runScript(async ({ cfas }) => {
+runScript(async ({ cfas, ovhStorage }) => {
   logger.info("Seeding referentiel CFAs");
 
   await seedCfasFromStatutsCandidatsUaisValid(cfas);
   await seedMetiersFromLbaApi();
 
-  await seedCfasNetworkFromCsv(reseauxCfas.CMA);
-  await seedCfasNetworkFromCsv(reseauxCfas.UIMM);
-  await seedCfasNetworkFromCsv(reseauxCfas.AGRI);
-  await seedCfasNetworkFromCsv(reseauxCfas.MFR);
-  await seedCfasNetworkFromCsv(reseauxCfas.CCI);
-  await seedCfasNetworkFromCsv(reseauxCfas.CFA_EC);
-  await seedCfasNetworkFromCsv(reseauxCfas.GRETA);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CMA);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.UIMM);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.AGRI);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.MFR);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CCI);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CFA_EC);
+  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.GRETA);
+
+  await identifyUaiValidity();
 
   logger.info("End seeding référentiel CFAs !");
 }, jobNames.seedReferentielCfas);
@@ -39,9 +40,7 @@ runScript(async ({ cfas }) => {
  */
 const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
   // All distinct valid uais
-  const allUais = await StatutCandidatModel.distinct("uai_etablissement", {
-    uai_etablissement_valid: true,
-  });
+  const allUais = await StatutCandidatModel.distinct("uai_etablissement");
 
   logger.info(`Seeding Referentiel CFAs from ${allUais.length} UAIs found in statutsCandidats`);
 
@@ -79,7 +78,7 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
  * @param {*} statutForCfa
  */
 const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
-  const accessToken = generatePassword();
+  const accessToken = generateRandomAlphanumericPhrase();
 
   await new CfaModel({
     uai: statutForCfa.uai_etablissement,
@@ -128,17 +127,12 @@ const updateCfaFromStatutCandidat = async (cfas, cfaExistant, statutForCfa, allS
  * 2.a - If cfa in data has siret - check if update or creation needed
  * 2.b - If cfa in data has uai - check if update or creation needed
  */
-const seedCfasNetworkFromCsv = async ({ nomReseau, nomFichier, encoding }) => {
+const seedCfasNetworkFromCsv = async (ovhStorage, { nomReseau, nomFichier, encoding }) => {
   logger.info(`Seeding CFAs for network ${nomReseau}`);
   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
-  if (!fs.existsSync(cfasReferenceFilePath)) {
-    const storageMgr = await ovhStorageManager();
-    await storageMgr.downloadFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
-  } else {
-    logger.info(`File ${cfasReferenceFilePath} already in data folder.`);
-  }
+  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
 
   const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
   loadingBar.start(allCfasForNetwork.length, 0);
@@ -211,7 +205,7 @@ const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau, nomF
  * @param {*} nomFichier
  */
 const addCfaFromNetwork = async (currentCfa, nomReseau, nomFichier) => {
-  const accessToken = generatePassword();
+  const accessToken = generateRandomAlphanumericPhrase();
 
   // Add cfa in référentiel
   const cfaToAdd = new CfaModel({
@@ -263,4 +257,16 @@ const seedMetiersFromLbaApi = async () => {
   });
 
   loadingBar.stop();
+};
+
+const identifyUaiValidity = async () => {
+  const allCfasWithUai = await CfaModel.find({ uai: { $exists: true } });
+
+  await asyncForEach(allCfasWithUai, async (currentCfaWithUai) => {
+    // Update metiers list
+    await CfaModel.findOneAndUpdate(
+      { _id: currentCfaWithUai._id },
+      { $set: { uai_valid: validateUai(currentCfaWithUai.uai) } }
+    );
+  });
 };

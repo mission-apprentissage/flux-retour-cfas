@@ -32,6 +32,17 @@ const historySequenceApprentiToAbandon = [
   },
 ];
 
+const historySequenceApprentiToInscrit = [
+  {
+    valeur_statut: codesStatutsCandidats.apprenti,
+    date_statut: new Date("2020-09-15T00:00:00.000+0000"),
+  },
+  {
+    valeur_statut: codesStatutsCandidats.inscrit,
+    date_statut: new Date("2020-10-01T00:00:00.000+0000"),
+  },
+];
+
 const historySequenceInscritToApprenti = [
   {
     valeur_statut: codesStatutsCandidats.inscrit,
@@ -65,4 +76,5 @@ module.exports = {
   historySequenceInscritToApprenti,
   historySequenceInscritToApprentiToAbandon,
   historySequenceAbandon,
+  historySequenceApprentiToInscrit,
 };

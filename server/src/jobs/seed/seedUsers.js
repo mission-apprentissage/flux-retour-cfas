@@ -2,7 +2,6 @@ const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const config = require("../../../config");
 const path = require("path");
-const { downloadIfNeeded } = require("./utils/seedUtils");
 const { jobNames } = require("../../common/model/constants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
@@ -13,14 +12,11 @@ const usersFileName = config.env === "production" ? "users" : "users-recette";
 const usersFromCsvFile = path.join(__dirname, `./assets/${usersFileName}.csv`);
 let args = [];
 
-runScript(async ({ users }) => {
+runScript(async ({ users, ovhStorage }) => {
   args = arg({ "--clearCsvFile": Boolean }, { argv: process.argv.slice(2) });
 
-  logger.info("-> Seed API Users from config...");
-  await seedApiUsers(users);
-
   logger.info("-> Seed Tdb Users from csv...");
-  await seedTdbUsers(users, args["--clearCsvFile"]);
+  await seedTdbUsers(users, ovhStorage, args["--clearCsvFile"]);
 
   logger.info("-> All users are successfully created !");
 }, jobNames.seedUsers);
@@ -37,7 +33,9 @@ const createUsers = async (usersModule, usersList) => {
     } else {
       logger.info(`Creating user ${user.name}`);
       try {
-        await usersModule.createUser(user.name, user.password, {
+        await usersModule.createUser({
+          username: user.name,
+          password: user.password,
           permissions: user.permissions,
           network: user.network ?? null,
           email: user.email ?? null,
@@ -51,19 +49,11 @@ const createUsers = async (usersModule, usersList) => {
 };
 
 /**
- * Seeding API Users
- */
-const seedApiUsers = async (usersModule) => {
-  const usersListFromConfig = Object.values(config.users);
-  await createUsers(usersModule, usersListFromConfig);
-};
-
-/**
  * Seeding Tdb Users
  * @param {*} users
  */
-const seedTdbUsers = async (usersModule, clearCsvFile = false) => {
-  await downloadIfNeeded(`users/${usersFileName}.csv`, usersFromCsvFile, clearCsvFile);
+const seedTdbUsers = async (usersModule, ovhStorage, clearCsvFile = false) => {
+  await ovhStorage.downloadIfNeededFileTo(`users/${usersFileName}.csv`, usersFromCsvFile, clearCsvFile);
   const usersFromCsv = readJsonFromCsvFile(usersFromCsvFile, "utf8");
 
   const usersToCreate = usersFromCsv.map((item) => ({

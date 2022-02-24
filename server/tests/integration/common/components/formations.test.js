@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
 const omit = require("lodash.omit");
+// eslint-disable-next-line node/no-unpublished-require
+const nock = require("nock");
 const { nockGetCfdInfo } = require("../../../utils/nockApis/nock-tablesCorrespondances");
-const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
-const integrationTests = require("../../../utils/integrationTests");
 const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
 const { dataForGetMetiersByCfd } = require("../../../data/apiLba");
@@ -10,8 +10,9 @@ const formationsComponent = require("../../../../src/common/components/formation
 const { FormationModel, StatutCandidatModel } = require("../../../../src/common/model");
 const { Formation } = require("../../../../src/common/domain/formation");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   describe("existsFormation", () => {
     const { existsFormation } = formationsComponent();
 
@@ -84,7 +85,6 @@ integrationTests(__filename, () => {
 
     it("returns created formation when cfd was found in Tables de Correspondaces with intitule_long", async () => {
       nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
-      nockGetMetiersByCfd(dataForGetMetiersByCfd);
 
       const cfd = "13534005";
       const created = await createFormation(cfd);
@@ -99,8 +99,9 @@ integrationTests(__filename, () => {
     });
 
     it("returns created formation when cfd was found in Tables de Correspondaces without intitule_long", async () => {
+      nock.cleanAll();
+      nockGetMetiersByCfd();
       nockGetCfdInfo(dataForGetCfdInfo.withoutIntituleLong);
-      nockGetMetiersByCfd(dataForGetMetiersByCfd);
 
       const cfd = "13534005";
       const created = await createFormation(cfd);
@@ -135,7 +136,6 @@ integrationTests(__filename, () => {
         await new StatutCandidatModel({
           ...createRandomStatutCandidat(),
           formation_cfd: formation.cfd,
-          formation_cfd_valid: true,
         }).save();
       });
     });
@@ -217,7 +217,6 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         etablissement_num_region,
         formation_cfd: formationsSeed[2].cfd,
-        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormations({ searchTerm, etablissement_num_region });
@@ -234,7 +233,6 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         etablissement_num_departement,
         formation_cfd: formationsSeed[2].cfd,
-        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormations({ searchTerm, etablissement_num_departement });
@@ -251,7 +249,6 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         etablissement_reseaux: [etablissement_reseaux],
         formation_cfd: formationsSeed[2].cfd,
-        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormations({ searchTerm, etablissement_reseaux });
@@ -268,29 +265,12 @@ integrationTests(__filename, () => {
         ...createRandomStatutCandidat(),
         uai_etablissement,
         formation_cfd: formationsSeed[2].cfd,
-        formation_cfd_valid: true,
       }).save();
 
       const results = await searchFormations({ searchTerm, uai_etablissement });
 
       assert.equal(results.length, 1);
       assert.ok(results[0].cfd, formationsSeed[2].cfd);
-    });
-
-    it("should not return anything when cfd is invalid", async () => {
-      const searchTerm = "invalide";
-
-      const formation = Formation.create({ cfd: "0102210X", libelle: searchTerm });
-      await new FormationModel(formation).save();
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
-        formation_cfd: "0102210X",
-        formation_cfd_valid: false,
-      }).save();
-
-      const results = await searchFormations({ searchTerm });
-
-      assert.equal(results.length, 0);
     });
   });
 

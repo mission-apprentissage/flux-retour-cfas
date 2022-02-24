@@ -20,14 +20,12 @@ const SEARCH_RESULTS_LIMIT = 50;
 const searchCfas = async (searchCriteria) => {
   const { searchTerm, ...otherCriteria } = searchCriteria;
 
-  const matchQuery = {
-    uai_etablissement_valid: true,
-    ...otherCriteria,
-  };
-
-  if (searchTerm) {
-    matchQuery.$or = [{ $text: { $search: searchTerm } }, { uai_etablissement: searchTerm.toUpperCase() }];
-  }
+  const matchQuery = searchTerm
+    ? {
+        $or: [{ $text: { $search: searchTerm } }, { uai_etablissement: searchTerm.toUpperCase() }],
+        ...otherCriteria,
+      }
+    : otherCriteria;
 
   const sortStage = searchTerm
     ? {

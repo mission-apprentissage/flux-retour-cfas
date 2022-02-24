@@ -9,6 +9,7 @@ export { default as MenuTabs } from "./OverlayMenu/MenuTabs";
 export { default as FilterOption } from "./FilterOption/FilterOption";
 export { default as Tag } from "./Tag/Tag";
 export { default as LinkCard } from "./LinkCard/LinkCard";
+export { default as InputLegend } from "./InputLegend/InputLegend";
 
 export { default as EffectifCard } from "./EffectifCard/EffectifCard";
 
@@ -28,3 +29,4 @@ export { default as TableSkeleton } from "./skeletons/TableSkeleton";
 export { default as RepartitionEffectifsTabs } from "./RepartitionEffectifsTabs/RepartitionEffectifsTabs";
 export { default as ExportRepartitionByFormationButton } from "./ExportRepartitionByFormationButton/ExportRepartitionByFormationButton";
 export { default as ExportRepartitionByOrganismeButton } from "./ExportRepartitionByOrganismeButton/ExportRepartitionByOrganismeButton";
+export { default as DownloadEffectifLink } from "./DownloadEffectifLink/DownloadEffectifLink";

@@ -1,6 +1,4 @@
-import EventEmitter from "events";
-
-import { getAuth } from "./auth/auth";
+import { getAuth, resetAuth } from "./auth/auth";
 
 class AuthError extends Error {
   constructor(json, statusCode) {
@@ -20,24 +18,19 @@ class HTTPError extends Error {
   }
 }
 
-const emitter = new EventEmitter();
-
 const handleResponse = (path, response, options = {}) => {
   const { jsonResponse = true } = options;
 
   let statusCode = response.status;
   if (statusCode >= 400 && statusCode < 600) {
-    emitter.emit("http:error", response);
-
-    if (statusCode === 401 || statusCode === 403) {
+    if (statusCode === 401) {
+      resetAuth();
       throw new AuthError(response.json(), statusCode);
-    } else {
-      throw new HTTPError(
-        `Server returned ${statusCode} when requesting resource ${path}`,
-        response.json(),
-        statusCode
-      );
     }
+    if (statusCode === 403) {
+      throw new AuthError(response.json(), statusCode);
+    }
+    throw new HTTPError(`Server returned ${statusCode} when requesting resource ${path}`, response.json(), statusCode);
   }
   return jsonResponse ? response.json() : response;
 };
@@ -81,5 +74,3 @@ export const _delete = (path) => {
     headers: getHeaders(),
   }).then((res) => handleResponse(path, res));
 };
-
-export const subscribeToHttpEvent = (eventName, callback) => emitter.on(eventName, callback);

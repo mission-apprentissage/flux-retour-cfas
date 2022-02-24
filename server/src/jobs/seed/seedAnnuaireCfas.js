@@ -4,7 +4,6 @@ const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/model/constants");
-const { downloadIfNeeded } = require("./utils/seedUtils");
 const { CfaAnnuaireModel } = require("../../common/model");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -13,22 +12,22 @@ const annuaireJsonFilePath = path.join(__dirname, `./assets/annuaireCfas.json`);
 /**
  * Script qui initialise la collection CFAs de l'annuaire
  */
-runScript(async ({ cfas }) => {
+runScript(async ({ cfas, ovhStorage }) => {
   logger.info("Seeding annuaire CFAs");
-  await seedCfasFromAnnuaireJsonFile(cfas);
+  await seedCfasFromAnnuaireJsonFile(cfas, ovhStorage);
   logger.info("End seeding annuaire CFAs !");
 }, jobNames.seedAnnuaireCfas);
 
 /**
  * Seed des cfas depuis un fichier JSON annuaire
  */
-const seedCfasFromAnnuaireJsonFile = async () => {
+const seedCfasFromAnnuaireJsonFile = async (cfas, ovhStorage) => {
   // Clear if existing annuaire cfa collection
   logger.info(`Clearing existing annuaire CFAs collection ...`);
   await CfaAnnuaireModel.deleteMany({});
 
   // Gets the referentiel file
-  await downloadIfNeeded(`cfas-annuaire/annuaireCfas.json`, annuaireJsonFilePath);
+  await ovhStorage.downloadIfNeededFileTo(`cfas-annuaire/annuaireCfas.json`, annuaireJsonFilePath);
 
   const cfasAnnuaire = require(annuaireJsonFilePath);
 

@@ -6,6 +6,7 @@ import { roles } from "./common/auth/roles";
 import { navigationPages } from "./common/constants/navigationPages";
 import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import LoginPage from "./pages/login/LoginPage";
+import { ModifierMotDePassePage } from "./pages/modifier-mot-de-passe";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import CfaPrivatePage from "./pages/tableau-de-bord/views/CfaPrivateView";
@@ -56,6 +57,9 @@ const App = () => {
           component={TableauDeBordPage}
           authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
         />
+
+        {/* Change password */}
+        <Route path={navigationPages.ModifierMotDePasse.path} exact component={ModifierMotDePassePage} />
 
         {/* Not found page */}
         <Route component={() => <div>404 - Page not found</div>} />

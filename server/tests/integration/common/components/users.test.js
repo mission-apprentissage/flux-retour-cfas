@@ -1,14 +1,14 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
+const { differenceInMinutes, subMinutes } = require("date-fns");
 const users = require("../../../../src/common/components/users");
 const { UserModel } = require("../../../../src/common/model");
 const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
 
-integrationTests(__filename, () => {
-  it("Permet de créer un utilisateur", async () => {
+describe(__filename, () => {
+  it("Permet de créer un utilisateur avec mot de passe", async () => {
     const { createUser } = await users();
 
-    const created = await createUser("user", "password");
+    const created = await createUser({ username: "user", password: "password" });
     assert.equal(created.username, "user");
     assert.equal(created.permissions.length, 0);
     assert.equal(created.password.startsWith("$6$rounds="), true);
@@ -19,10 +19,26 @@ integrationTests(__filename, () => {
     assert.equal(found.password.startsWith("$6$rounds="), true);
   });
 
+  it("Crée un utilisateur avec mot de passe random quand pas de mot de passe fourni", async () => {
+    const { createUser } = await users();
+
+    const created = await createUser({ username: "user" });
+    assert.equal(created.username, "user");
+    assert.equal(created.permissions.length, 0);
+    assert.equal(created.password.startsWith("$6$rounds="), true);
+
+    const found = await UserModel.findOne({ username: "user" });
+    assert.equal(found.username, "user");
+  });
+
   it("Permet de créer un utilisateur avec les droits d'admin", async () => {
     const { createUser } = await users();
 
-    const user = await createUser("userAdmin", "password", { permissions: [apiRoles.administrator] });
+    const user = await createUser({
+      username: "userAdmin",
+      password: "password",
+      permissions: [apiRoles.administrator],
+    });
     const found = await UserModel.findOne({ username: "userAdmin" });
 
     assert.equal(user.permissions.includes(apiRoles.administrator), true);
@@ -32,7 +48,9 @@ integrationTests(__filename, () => {
   it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
     const { createUser } = await users();
 
-    const user = await createUser("userAdmin", "password", {
+    const user = await createUser({
+      username: "userAdmin",
+      password: "password",
       permissions: [tdbRoles.network],
       email: "email@test.fr",
       network: "test",
@@ -51,7 +69,11 @@ integrationTests(__filename, () => {
   it("Permet de supprimer un utilisateur", async () => {
     const { createUser, removeUser } = await users();
 
-    await createUser("userToDelete", "password", { permissions: [apiRoles.administrator] });
+    await createUser({
+      username: "userToDelete",
+      password: "password",
+      permissions: [apiRoles.administrator],
+    });
     await removeUser("userToDelete");
 
     const found = await UserModel.findOne({ username: "userToDelete" });
@@ -61,7 +83,10 @@ integrationTests(__filename, () => {
   it("Vérifie que le mot de passe est valide", async () => {
     const { createUser, authenticate } = await users();
 
-    await createUser("user", "password");
+    await createUser({
+      username: "user",
+      password: "password",
+    });
     const user = await authenticate("user", "password");
 
     assert.equal(user.username, "user");
@@ -70,19 +95,157 @@ integrationTests(__filename, () => {
   it("Vérifie que le mot de passe est invalide", async () => {
     const { createUser, authenticate } = await users();
 
-    await createUser("user", "password");
+    await createUser({
+      username: "user",
+      password: "password",
+    });
     const user = await authenticate("user", "INVALID");
 
     assert.equal(user, null);
   });
 
-  it("Vérifie qu'on peut changer le mot de passe d'un utilisateur", async () => {
-    const { createUser, authenticate, changePassword } = await users();
+  describe("generatePasswordUpdateToken", () => {
+    it("génère un token avec expiration à +48", async () => {
+      const { createUser, generatePasswordUpdateToken } = await users();
 
-    await createUser("user", "password");
-    await changePassword("user", "newPassword");
-    const user = await authenticate("user", "newPassword");
+      // create user
+      const user = await createUser({ username: "user" });
 
-    assert.equal(user.username, "user");
+      const token = await generatePasswordUpdateToken("user");
+      const userInDb = await UserModel.findOne({ _id: user._id });
+
+      assert.equal(userInDb.password_update_token, token);
+      // a few milliseconds have passed since creation
+      // so we'll juste make sure expiry is in 47 hours 59 minutes
+      const twentyFourHoursInMinutesIsh = 48 * 60 - 1;
+      assert.equal(differenceInMinutes(userInDb.password_update_token_expiry, new Date()), twentyFourHoursInMinutesIsh);
+    });
+
+    it("renvoie une erreur quand le user n'est pas trouvé", async () => {
+      const { createUser, generatePasswordUpdateToken } = await users();
+
+      // create user
+      await createUser({ username: "nope" });
+
+      await assert.rejects(
+        () => generatePasswordUpdateToken("user"),
+        (err) => {
+          assert.equal(err.message, "User not found");
+          return true;
+        }
+      );
+    });
+  });
+
+  describe("updatePassword", () => {
+    it("modifie le mot de passe d'un user et invalide le token d'update", async () => {
+      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
+
+      // create user
+      const user = await createUser({ username: "user" });
+      // generate update token
+      const token = await generatePasswordUpdateToken("user");
+
+      await updatePassword(token, "new-password-strong");
+      const foundAfterUpdate = await UserModel.findOne({ _id: user._id });
+
+      assert.notEqual(foundAfterUpdate.password, user.password);
+      assert.equal(foundAfterUpdate.password_update_token, null);
+      assert.equal(foundAfterUpdate.password_update_token_expiry, null);
+    });
+
+    it("renvoie une erreur quand le token passé ne permet pas de retrouver le user", async () => {
+      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
+
+      // create user
+      await createUser({ username: "user" });
+      // generate update token
+      await generatePasswordUpdateToken("user");
+
+      await assert.rejects(
+        () => updatePassword("wrong token", "new-password-strong"),
+        (err) => {
+          assert.equal(err.message, "User not found");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque le nouveau mot de passe est trop court", async () => {
+      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
+
+      // create user
+      await createUser({ username: "user" });
+      // generate update token
+      const token = await generatePasswordUpdateToken("user");
+
+      const shortPassword = "hello-world";
+
+      await assert.rejects(
+        () => updatePassword(token, shortPassword),
+        (err) => {
+          assert.equal(err.message, "Password must be valid (at least 16 characters)");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque l'update est fait plus de 24h après la création du token", async () => {
+      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
+
+      // create user
+      await createUser({ username: "user" });
+      // generate update token
+      const token = await generatePasswordUpdateToken("user");
+      // force password_update_token_expiry to 10 minutes ago
+      const user = await UserModel.findOne({ username: "user" });
+      user.password_update_token_expiry = subMinutes(new Date(), 10);
+      await user.save();
+
+      await assert.rejects(
+        () => updatePassword(token, "super-long-strong-password"),
+        (err) => {
+          assert.equal(err.message, "Password update token has expired");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque l'update est tenté avec un token null", async () => {
+      const { createUser, updatePassword } = await users();
+
+      // create user
+      await createUser({ username: "user" });
+
+      await assert.rejects(
+        () => updatePassword(null, "super-long-strong-password"),
+        (err) => {
+          assert.equal(err.message, "User not found");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque l'update a déjà été fait", async () => {
+      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
+
+      // create user
+      await createUser({ username: "user" });
+
+      // generate update token
+      const token = await generatePasswordUpdateToken("user");
+
+      // update password first time
+      await updatePassword(token, "new-password-strong");
+
+      // try again
+      await assert.rejects(
+        () => updatePassword(token, "super-long-strong-password"),
+        (err) => {
+          assert.equal(err.message, "User not found");
+          return true;
+        }
+      );
+    });
   });
 });

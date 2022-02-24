@@ -6,17 +6,32 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles } = require("../../common/roles");
+const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
+const { effectifsIndicators, getStatutNameFromCode } = require("../../common/model/constants");
+const omit = require("lodash.omit");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
+const validateRequestQuery = require("../middlewares/validateRequestQuery");
+const { toXlsxBuffer } = require("../../common/utils/exporterUtils");
 
-const applyUserRoleFilter = (req, _res, next) => {
-  // users with network role should not be able to see data for other reseau
+const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
     req.query.etablissement_reseaux = req.user.network;
   }
-  // users with cfa role should not be able to see data for other cfas
+};
+
+const filterQueryForCfaRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.cfa)) {
     req.query.uai_etablissement = req.user?.username;
   }
+};
+
+const applyUserRoleFilter = (req, _res, next) => {
+  // users with network role should not be able to see data for other reseau
+  filterQueryForNetworkRole(req);
+
+  // users with cfa role should not be able to see data for other cfas
+  filterQueryForCfaRole(req);
+
   next();
 };
 
@@ -27,11 +42,6 @@ const commonEffectifsFilters = {
   uai_etablissement: Joi.string().allow(null, ""),
   siret_etablissement: Joi.string().allow(null, ""),
   etablissement_reseaux: Joi.string().allow(null, ""),
-};
-
-const validateReqQuery = (validationSchema) => async (req, res, next) => {
-  await validationSchema.validateAsync(req.query, { abortEarly: false });
-  next();
 };
 
 const getCacheKeyForRoute = (route, filters) => {
@@ -48,12 +58,8 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/total-organismes",
     applyUserRoleFilter,
+    validateRequestQuery(Joi.object(commonEffectifsFilters)),
     tryCatch(async (req, res) => {
-      // Validate schema
-      await Joi.object(commonEffectifsFilters).validateAsync(req.query, {
-        abortEarly: false,
-      });
-
       const nbOrganismes = await stats.getNbDistinctCfasByUai(req.query);
 
       return res.json({
@@ -63,12 +69,12 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   );
 
   /**
-   * Gets the effectifs data for input period & query
+   * Gets the effectifs count for input period & query
    */
   router.get(
     "/",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -108,12 +114,164 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   );
 
   /**
+   * Export xlsx of the effectifs data lists for input period & query
+   */
+  router.get(
+    "/export-xlsx-data-lists",
+    permissionsMiddleware([tdbRoles.cfa]),
+    applyUserRoleFilter,
+    validateRequestQuery(
+      Joi.object({
+        date: Joi.date().required(),
+        effectif_indicateur: Joi.string().required(),
+        ...commonEffectifsFilters,
+      })
+    ),
+    tryCatch(async (req, res) => {
+      // Gets & format params:
+      // eslint-disable-next-line no-unused-vars
+      const { date: dateFromParams, effectif_indicateur: effectifIndicateurFromParams, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromParams);
+      const filters = { ...filtersFromBody, annee_scolaire: getAnneeScolaireFromDate(date) };
+
+      // create event
+      await userEvents.create({
+        action: "export-xlsx-data-lists",
+        username: req.user.username,
+        data: req.query,
+      });
+
+      // Build effectifs data formatted for date
+      const effectifsFormattedAtDate = await buildEffectifsFormattedAtDate(effectifIndicateurFromParams, date, filters);
+
+      // Get cfas infos for headers
+      const cfaInfos = await cfas.getFromUai(req.query.uai_etablissement);
+
+      // Build headers
+      const headers = [
+        ["Liste nominative des effectifs"],
+        [`${cfaInfos.nom} - UAI : ${cfaInfos.uai} - SIRET : ${cfaInfos.sirets.join(",")}`],
+        [
+          "Si vous constatez une ou plusieurs anomalie(s), merci d'envoyer un mail à tableau-de-bord@apprentissage.beta.gouv.fr",
+        ],
+      ];
+
+      // Build & return xlsx stream
+      const xlsxStream = await toXlsxBuffer(headers, effectifsFormattedAtDate, "Données Tdb");
+      return res.attachment("export-xlsx-data-lists.xlsx").send(xlsxStream);
+    })
+  );
+
+  /**
+   * Build a list of effectif data well-formatted for specific indicator, date & filters
+   * @param {*} effectifIndicateurFromParams
+   * @param {*} date
+   * @param {*} filters
+   * @returns
+   */
+  const buildEffectifsFormattedAtDate = async (effectifIndicateurFromParams, date, filters) => {
+    let effectifsFormattedAtDate;
+
+    const projection = {
+      uai_etablissement: 1,
+      siret_etablissement: 1,
+      nom_etablissement: 1,
+      nom_apprenant: 1,
+      prenom_apprenant: 1,
+      date_de_naissance_apprenant: 1,
+      formation_cfd: 1,
+      formation_rncp: 1,
+      libelle_long_formation: 1,
+      annee_formation: 1,
+      annee_scolaire: 1,
+      contrat_date_debut: 1,
+      contrat_date_rupture: 1,
+      date_metier_mise_a_jour_statut: 1,
+      historique_statut_apprenant: 1,
+      statut_apprenant_at_date: 1,
+    };
+
+    // Build data list for indicator
+    switch (effectifIndicateurFromParams) {
+      case effectifsIndicators.apprentis:
+        effectifsFormattedAtDate = (await effectifs.apprentis.getListAtDate(date, filters, { projection })).map(
+          (item) => ({
+            ...item,
+            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            historique_statut_apprenant: JSON.stringify(
+              item.historique_statut_apprenant.map((item) => ({
+                date: item.date_statut,
+                statut: getStatutNameFromCode(item.valeur_statut),
+              }))
+            ),
+          })
+        );
+        break;
+
+      case effectifsIndicators.abandons:
+        effectifsFormattedAtDate = (await effectifs.abandons.getListAtDate(date, filters, { projection })).map(
+          (item) => ({
+            ...item,
+            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            date_abandon: item.statut_apprenant_at_date.date_statut, // Specific for abandons indicateur
+            historique_statut_apprenant: JSON.stringify(
+              item.historique_statut_apprenant.map((item) => ({
+                date: item.date_statut,
+                statut: getStatutNameFromCode(item.valeur_statut),
+              }))
+            ),
+          })
+        );
+        break;
+
+      case effectifsIndicators.inscritsSansContrats:
+        effectifsFormattedAtDate = (
+          await effectifs.inscritsSansContrats.getListAtDate(date, filters, { projection })
+        ).map((item) => ({
+          ...item,
+          statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+          date_inscription: item.statut_apprenant_at_date.date_statut, // Specific for inscrits sans contrats indicateur
+          historique_statut_apprenant: JSON.stringify(
+            item.historique_statut_apprenant.map((item) => ({
+              date: item.date_statut,
+              statut: getStatutNameFromCode(item.valeur_statut),
+            }))
+          ),
+        }));
+        break;
+
+      case effectifsIndicators.rupturants:
+        effectifsFormattedAtDate = (await effectifs.rupturants.getListAtDate(date, filters, { projection })).map(
+          (item) => ({
+            ...item,
+            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            historique_statut_apprenant: JSON.stringify(
+              item.historique_statut_apprenant.map((item) => ({
+                date: item.date_statut,
+                statut: getStatutNameFromCode(item.valeur_statut),
+              }))
+            ),
+          })
+        );
+        break;
+
+      default:
+        break;
+    }
+
+    // Omit useless data
+    return effectifsFormattedAtDate.map((item) => {
+      return omit(item, ["_id", "statut_apprenant_at_date", "date_metier_mise_a_jour_statut"]);
+    });
+  };
+
+  /**
    * Get effectifs details by niveau_formation
    */
   router.get(
     "/niveau-formation",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -150,7 +308,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/formation",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         niveau_formation: Joi.string().allow(null, ""),
@@ -188,7 +346,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/annee-formation",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -226,7 +384,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/cfa",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -264,7 +422,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/departement",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -298,7 +456,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/export-csv-repartition-effectifs-par-organisme",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
@@ -347,7 +505,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   router.get(
     "/export-csv-repartition-effectifs-par-formation",
     applyUserRoleFilter,
-    validateReqQuery(
+    validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,

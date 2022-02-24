@@ -1,11 +1,11 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 const { FormationModel, StatutCandidatModel } = require("../../../src/common/model");
 const { Formation } = require("../../../src/common/domain/formation");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   const formationsSeed = [{ cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" }];
 
   const seedFormations = async () => {
@@ -15,7 +15,6 @@ httpTests(__filename, ({ startServer }) => {
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
         formation_cfd: formation.cfd,
-        formation_cfd_valid: true,
       }).save();
     });
   };

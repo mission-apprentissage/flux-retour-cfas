@@ -5,7 +5,6 @@ const { apiRoles } = require("../common/roles");
 
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
-const corsMiddleware = require("./middlewares/corsMiddleware");
 const requireJwtAuthenticationMiddleware = require("./middlewares/requireJwtAuthentication");
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 
@@ -24,6 +23,7 @@ const demandeIdentifiants = require("./routes/demande-identifiants");
 const demandeLienPriveRoute = require("./routes/demande-lien-prive");
 const demandeBranchementErpRoute = require("./routes/demande-branchement-erp");
 const cacheRouter = require("./routes/cache");
+const updatePasswordRouter = require("./routes/update-password");
 
 module.exports = async (components) => {
   const app = express();
@@ -32,7 +32,6 @@ module.exports = async (components) => {
   const adminOnly = permissionsMiddleware([apiRoles.administrator]);
 
   app.use(bodyParser.json());
-  app.use(corsMiddleware());
   app.use(logMiddleware());
 
   // open routes
@@ -45,6 +44,7 @@ module.exports = async (components) => {
   app.use("/api/demande-identifiants", demandeIdentifiants(components));
   app.use("/api/demande-lien-prive", demandeLienPriveRoute(components));
   app.use("/api/demande-branchement-erp", demandeBranchementErpRoute(components));
+  app.use("/api/update-password", updatePasswordRouter(components));
 
   // requires JWT auth
   app.use(

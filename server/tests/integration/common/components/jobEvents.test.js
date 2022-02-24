@@ -1,10 +1,10 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const jobEvents = require("../../../../src/common/components/jobEvents");
 const { JobEventModel } = require("../../../../src/common/model");
 const { jobEventStatuts } = require("../../../../src/common/model/constants");
+const { wait } = require("../../../utils/testUtils");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
     const { isJobInAction } = await jobEvents();
 
@@ -15,11 +15,16 @@ integrationTests(__filename, () => {
       action: jobEventStatuts.started,
     }).save();
 
+    // leave a tiny amount of time, otherwise the jobEvent date field will have the millisecond and test will result in a false-negative
+    await wait(1);
+
     // Add executed event
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.executed,
     }).save();
+
+    await wait(1);
 
     // Add ended event
     await new JobEventModel({

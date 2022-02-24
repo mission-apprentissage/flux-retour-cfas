@@ -4,7 +4,6 @@ const { runScript } = require("../../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { StatutCandidatModel } = require("../../../common/model");
-const { downloadIfNeeded } = require("./utils");
 const { toXlsx } = require("../../../common/utils/exporterUtils");
 const { codesStatutsCandidats, jobNames } = require("../../../common/model/constants/index");
 
@@ -13,17 +12,17 @@ const cmaReferenceFilePath = path.join(__dirname, `./assets/cfas-cma.csv`);
 /**
  * Ce script permet de créer un export contenant tous les statuts pour le réseau CMA
  */
-runScript(async () => {
+runScript(async ({ ovhStorage }) => {
   logger.info("Exporting Cfas identified for CMA Network");
-  await identifyCfas();
+  await identifyCfas(ovhStorage);
   logger.info("End exporting Cfas identified for CMA Network");
 }, jobNames.identifyNetworkCma);
 
-const identifyCfas = async () => {
+const identifyCfas = async (ovhStorage) => {
   const statutsForCma = [];
 
   // Gets the referentiel file
-  await downloadIfNeeded(`cfas-reseaux/cfas-cma.csv`, cmaReferenceFilePath);
+  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/cfas-cma.csv`, cmaReferenceFilePath);
 
   // Read uais from reference file
   const uaisForCma = readJsonFromCsvFile(cmaReferenceFilePath);

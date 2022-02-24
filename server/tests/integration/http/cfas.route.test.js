@@ -1,11 +1,11 @@
 const assert = require("assert").strict;
 const omit = require("lodash.omit");
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { createRandomStatutCandidat } = require("../../data/randomizedSample");
 const { StatutCandidatModel, CfaModel } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   let httpClient;
 
   beforeEach(async () => {
@@ -24,7 +24,6 @@ httpTests(__filename, ({ startServer }) => {
     it("sends a 200 HTTP response with results when match", async () => {
       await new StatutCandidatModel({
         ...createRandomStatutCandidat(),
-        uai_etablissement_valid: true,
         nom_etablissement: "FACULTE SCIENCES NANCY",
         nom_etablissement_tokenized: buildTokenizedString("FACULTE SCIENCES NANCY", 3),
       }).save();
@@ -108,7 +107,6 @@ httpTests(__filename, ({ startServer }) => {
         nom_etablissement: nomTest,
         siret_etablissement: siretTest,
         uai_etablissement: uaiTest,
-        uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
       };
 
@@ -153,7 +151,6 @@ httpTests(__filename, ({ startServer }) => {
       const cfaInfos = {
         nom_etablissement: nomTest,
         uai_etablissement: uaiTest,
-        uai_etablissement_valid: true,
         siret_etablissement: "77929544300013",
         etablissement_adresse: adresseTest,
       };
@@ -201,7 +198,6 @@ httpTests(__filename, ({ startServer }) => {
         nom_etablissement: nomTest,
         siret_etablissement: siretTest,
         uai_etablissement: uaiTest,
-        uai_etablissement_valid: true,
         etablissement_adresse: adresseTest,
       };
 
@@ -230,28 +226,5 @@ httpTests(__filename, ({ startServer }) => {
       const response = await httpClient.get(`/api/cfas/url-access-token/unknown`);
       assert.equal(response.status, 404);
     });
-  });
-
-  it("Vérifie qu'on peut récupérer une liste paginée de cfas pour une région en query", async () => {
-    const regionToTest = {
-      code: "24",
-      nom: "Centre-Val de Loire",
-    };
-
-    await new CfaModel({
-      uai: "0451582A",
-      siret: "31521327200067",
-      nom: "TEST CFA",
-      region_nom: regionToTest.nom,
-      region_num: regionToTest.code,
-    }).save();
-
-    const response = await httpClient.get(`/api/cfas?query={"region_num":${regionToTest.code}}`);
-
-    assert.equal(response.status, 200);
-    assert.equal(response.data.cfas.length, 1);
-    assert.deepEqual(response.data.cfas[0].nom, "TEST CFA");
-    assert.deepEqual(response.data.cfas[0].region_nom, regionToTest.nom);
-    assert.deepEqual(response.data.cfas[0].region_num, regionToTest.code);
   });
 });

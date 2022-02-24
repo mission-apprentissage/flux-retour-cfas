@@ -21,8 +21,8 @@ const Table = ({ headers, loading, error, children }) => {
   }
 
   return (
-    <ChakraTable>
-      <Thead>
+    <ChakraTable position="relative">
+      <Thead position="sticky" top="0" zIndex="1">
         <Tr background="galt">
           {headers.map((header) => {
             return (

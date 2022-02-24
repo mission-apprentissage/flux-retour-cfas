@@ -1,10 +1,19 @@
-import { Box, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Flex, Text, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { formatNumber } from "../../utils/stringUtils";
+import { DownloadEffectifLink } from "..";
 
-const EffectifCard = ({ label, count, tooltipLabel, hideCount = false, infoText, warningText }) => {
+const EffectifCard = ({
+  label,
+  count,
+  effectifIndicateur = null,
+  tooltipLabel,
+  hideCount = false,
+  infoText,
+  warningText,
+}) => {
   const hasTooltip = Boolean(tooltipLabel);
   return (
     <Box
@@ -45,6 +54,11 @@ const EffectifCard = ({ label, count, tooltipLabel, hideCount = false, infoText,
           {infoText || warningText}
         </Text>
       )}
+      {effectifIndicateur !== null && count > 0 && (
+        <Flex alignItems="center">
+          <DownloadEffectifLink effectifIndicateur={effectifIndicateur} count={count} />
+        </Flex>
+      )}
     </Box>
   );
 };
@@ -52,6 +66,7 @@ const EffectifCard = ({ label, count, tooltipLabel, hideCount = false, infoText,
 EffectifCard.propTypes = {
   label: PropTypes.string.isRequired,
   count: PropTypes.number.isRequired,
+  effectifIndicateur: PropTypes.string,
   tooltipLabel: PropTypes.string,
   hideCount: PropTypes.bool,
   infoText: PropTypes.node,

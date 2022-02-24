@@ -2,7 +2,6 @@ const logger = require("../../../common/logger");
 const path = require("path");
 const { runScript } = require("../../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
-const { downloadIfNeeded } = require("./utils");
 const { jobNames } = require("../../../common/model/constants/index");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 
@@ -13,17 +12,17 @@ const decaFilePath = path.join(__dirname, `./assets/donnees_deca_2021.csv`);
 /**
  * Ce script permet de fusionner la sommes des UAIs dans le fichier DECA
  */
-runScript(async () => {
+runScript(async ({ ovhStorage }) => {
   logger.info("Merge DECA UAIs File");
-  await mergeDecaUaisFile();
+  await mergeDecaUaisFile(ovhStorage);
   logger.info("End Merging DECA UAIs File");
 }, jobNames.mergeDecaUaisFile);
 
-const mergeDecaUaisFile = async () => {
+const mergeDecaUaisFile = async (ovhStorage) => {
   const mergedDecaData = [];
 
   // Gets the referentiel file
-  await downloadIfNeeded(`deca/donnees_deca_2021.csv`, decaFilePath);
+  await ovhStorage.downloadIfNeeded(`deca/donnees_deca_2021.csv`, decaFilePath);
 
   const decaData = readJsonFromCsvFile(decaFilePath, "utf8");
 

@@ -6,6 +6,10 @@ module.exports = new Schema({
     default: null,
     description: "Code uai de l'établissement",
   },
+  uai_valid: {
+    type: Boolean,
+    description: "Le champ uai est-il valide ?",
+  },
   sirets: {
     type: [String],
     default: [],

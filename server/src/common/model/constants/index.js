@@ -8,6 +8,18 @@ const codesStatutsCandidats = {
 };
 
 /**
+ * Nom des statuts
+ */
+const statutsCandidatsNames = [
+  { code: codesStatutsCandidats.abandon, name: "abandon" },
+  { code: codesStatutsCandidats.inscrit, name: "inscrit" },
+  { code: codesStatutsCandidats.apprenti, name: "apprenti" },
+];
+
+const getStatutNameFromCode = (statutCode) =>
+  statutsCandidatsNames.find((item) => item.code === statutCode)?.name ?? "NC";
+
+/**
  * Code pour le statut de la mise à jour du statut candidat
  * Ex: passage du statut
  */
@@ -105,7 +117,6 @@ const jobNames = {
   removeStatutsCandidatsDuplicates: "remove-statutsCandidats-duplicates",
   formationRetrieveFromCfd: "formation-retrieve-from-cfd",
   statutsCandidatsRetrieveNetworks: "statutsCandidats-retrieve-networks",
-  statutsCandidatsRetrieveCfdHistory: "statutsCandidats-retrieve-cfd-history",
   statutsCandidatsRetrieveNiveaux: "statutsCandidats-retrieve-niveaux",
   statutsCandidatsRetrieveSiretCatalog: "statutsCandidats-retrieve-siret-catalog",
   statutsCandidatsRetrieveFormationsInCatalog: "statutsCandidats-retrieve-formation-in-catalog",
@@ -133,6 +144,8 @@ const jobNames = {
   statutsCandidatsRemoveHistoriqueElementWithInvalidValeurStatut:
     "statuts-candidats-remove-historique-element-with-invalid-valeur-statut",
   statutsAvecDerniersElementsHistoriqueDateIdentique: "statuts-avec-date-identique-dans-historique",
+  createErpUser: "users:create-erp-user",
+  generatePasswordUpdateToken: "users:generate-password-update-token",
 };
 
 /**
@@ -270,4 +283,6 @@ module.exports = {
   statutsCandidatsStringFields,
   jobEventStatuts: jobEventActions,
   effectifsIndicators,
+  statutsCandidatsNames,
+  getStatutNameFromCode,
 };

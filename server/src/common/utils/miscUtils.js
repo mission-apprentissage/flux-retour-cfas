@@ -64,8 +64,12 @@ module.exports.sleep = sleep;
  * @param {*} wishlist
  * @returns
  */
-const generatePassword = (length = 20, wishlist = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz") =>
-  Array.from(crypto.randomFillSync(new Uint32Array(length)))
-    .map((x) => wishlist[x % wishlist.length])
+const generateRandomAlphanumericPhrase = (length = 20) => {
+  const alphanumeric = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  return Array.from(crypto.randomFillSync(new Uint32Array(length)))
+    .map((x) => alphanumeric[x % alphanumeric.length])
     .join("");
-module.exports.generatePassword = generatePassword;
+};
+
+module.exports.generateRandomAlphanumericPhrase = generateRandomAlphanumericPhrase;

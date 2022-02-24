@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { EffectifCard, Section } from "../../../../common/components";
+import { EFFECTIF_INDICATEURS } from "../../../../common/constants/effectifIndicateur";
 import { isDateFuture } from "../../../../common/utils/dateUtils";
 import { pluralize } from "../../../../common/utils/stringUtils";
 import { InfoLine } from "../../../../theme/components/icons";
@@ -11,7 +12,7 @@ import { effectifsPropType } from "../../propTypes";
 import DateFilter from "./DateFilter";
 import OrganismesCountCard from "./OrganismesCountCard";
 
-const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) => {
+const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, showOrganismesCount = false }) => {
   const filtersContext = useFiltersContext();
   let content = null;
   if (loading) {
@@ -40,21 +41,25 @@ const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) 
         <EffectifCard
           count={effectifs.apprentis.count}
           label={pluralize("apprenti", effectifs.apprentis.count)}
+          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.apprentis : null}
           tooltipLabel="Nombre d’apprenants en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours). Cet indice est basé sur la date de début de contrat saisie par le CFA."
         />
         <EffectifCard
           count={effectifs.inscritsSansContrat.count}
           label={`${pluralize("inscrit", effectifs.inscritsSansContrat.count)} sans contrat`}
+          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.inscritsSansContrats : null}
           tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation à la date affichée. Cet indice est basé sur la date d'enregistrement de l'inscription et l'absence de date de début de contrat."
         />
         <EffectifCard
           count={effectifs.rupturants.count}
           label={pluralize("rupturant", effectifs.rupturants.count)}
+          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.rupturants : null}
           tooltipLabel="Nombre d’apprenants en recherche de contrat après une rupture et toujours dans cette situation à la date affichée . Cet indice est déduit des apprenants passant du statut apprenti au statut stagiaire de la formation professionnelle, selon les saisies effectuées par les CFA."
         />
         <EffectifCard
           count={effectifs.abandons.count}
           hideCount={shouldWarnAboutDateAvailability}
+          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.abandons : null}
           label={pluralize("abandon", effectifs.abandons.count)}
           tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation, à la date affichée. Cet indice est basé sur les dossiers cloturés, selon les saisies effectuées par les CFA."
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
@@ -95,6 +100,7 @@ const VueGlobaleSection = ({ effectifs, loading, showOrganismesCount = false }) 
 
 VueGlobaleSection.propTypes = {
   loading: PropTypes.bool.isRequired,
+  allowDownloadDataList: PropTypes.bool,
   showOrganismesCount: PropTypes.bool,
   effectifs: effectifsPropType,
 };

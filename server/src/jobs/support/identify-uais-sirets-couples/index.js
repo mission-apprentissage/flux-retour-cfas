@@ -22,7 +22,6 @@ const identifyUaisSiretsCouples = async () => {
   const uaiSiretsCouples = await StatutCandidatModel.aggregate([
     {
       $match: {
-        uai_etablissement_valid: true,
         siret_etablissement_valid: true,
       },
     },

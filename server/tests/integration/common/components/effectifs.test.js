@@ -1,40 +1,65 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
-const {
-  historySequenceInscritToApprentiToAbandon,
-  historySequenceApprenti,
-  historySequenceInscritToApprenti,
-} = require("../../../data/historySequenceSamples");
 const { StatutCandidatModel } = require("../../../../src/common/model");
 const effectifs = require("../../../../src/common/components/effectifs");
+const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   const seedStatutsCandidats = async (statutsProps) => {
-    // Add 10 statuts with history sequence - full
-    for (let index = 0; index < 10; index++) {
+    const nbAbandons = 10;
+    const nbApprentis = 5;
+
+    // Add 10 statuts with full sequence, inscrit -> apprenti -> abandon
+    for (let index = 0; index < nbAbandons; index++) {
       const randomStatut = createRandomStatutCandidat({
-        historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+        historique_statut_apprenant: [
+          {
+            valeur_statut: codesStatutsCandidats.inscrit,
+            date_statut: new Date("2020-09-12T00:00:00.000+0000"),
+          },
+          {
+            valeur_statut: codesStatutsCandidats.apprenti,
+            date_statut: new Date("2020-09-23T00:00:00.000+0000"),
+          },
+          {
+            valeur_statut: codesStatutsCandidats.abandon,
+            date_statut: new Date("2020-10-02T00:00:00.000+0000"),
+          },
+        ],
         ...statutsProps,
       });
       const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
     }
 
-    // Add 5 statuts with history sequence - simple apprenti
-    for (let index = 0; index < 5; index++) {
+    // Add 5 statuts with simple apprenti sequence
+    for (let index = 0; index < nbApprentis; index++) {
       const randomStatut = createRandomStatutCandidat({
-        historique_statut_apprenant: historySequenceApprenti,
+        historique_statut_apprenant: [
+          {
+            valeur_statut: codesStatutsCandidats.apprenti,
+            date_statut: new Date("2020-08-30T00:00:00.000+0000"),
+          },
+        ],
         ...statutsProps,
       });
       const toAdd = new StatutCandidatModel(randomStatut);
       await toAdd.save();
     }
 
-    // Add 15 statuts with history sequence - inscritToApprenti
+    // Add 15 statuts with inscrit -> apprenti sequence
     for (let index = 0; index < 15; index++) {
       const randomStatut = createRandomStatutCandidat({
-        historique_statut_apprenant: historySequenceInscritToApprenti,
+        historique_statut_apprenant: [
+          {
+            valeur_statut: codesStatutsCandidats.inscrit,
+            date_statut: new Date("2020-09-29T00:00:00.000+0000"),
+          },
+          {
+            valeur_statut: codesStatutsCandidats.apprenti,
+            date_statut: new Date("2020-10-15T00:00:00.000+0000"),
+          },
+        ],
         ...statutsProps,
       });
       const toAdd = new StatutCandidatModel(randomStatut);

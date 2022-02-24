@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const httpTests = require("../../utils/httpTests");
+const { startServer } = require("../../utils/testUtils");
 const { apiRoles } = require("../../../src/common/roles");
 const { CfaModel } = require("../../../src/common/model");
 const users = require("../../../src/common/components/users");
@@ -13,9 +13,7 @@ const user = {
 const createApiUser = async () => {
   const { createUser } = await users();
 
-  return await createUser(user.name, user.password, {
-    permissions: [apiRoles.apiStatutsSeeder],
-  });
+  return await createUser({ username: user.name, password: user.password, permissions: [apiRoles.apiStatutsSeeder] });
 };
 
 const getJwtForUser = async (httpClient) => {
@@ -26,7 +24,7 @@ const getJwtForUser = async (httpClient) => {
   return data.access_token;
 };
 
-httpTests(__filename, ({ startServer }) => {
+describe(__filename, () => {
   it("Vérifie que la route liens-prives-cfas renvoie une 401 pour un user non authentifié", async () => {
     const { httpClient } = await startServer();
 
@@ -45,7 +43,9 @@ httpTests(__filename, ({ startServer }) => {
     // Create a normal user
     const { createUser } = await users();
 
-    const userWithoutPermission = await createUser("normal-user", "password", {
+    const userWithoutPermission = await createUser({
+      username: "normal-user",
+      password: "password",
       permissions: [],
     });
     assert.deepEqual(userWithoutPermission.permissions.length, 0);

@@ -3,6 +3,7 @@ const collectionNames = {
   statutsAvecHistoriqueSansOrdreChronologique: "statutsAvecHistoriqueSansOrdreChronologique",
   statutsAvecDerniersElementsHistoriqueDateIdentique: "statutsAvecDerniersElementsHistoriqueDateIdentique",
   statutsCandidatsDoublonsUais: "statutsCandidatsDoublonsUais",
+  statutsCandidatsDoublonsCfd: "statutsCandidatsDoublonsCfd",
 };
 
 module.exports = {

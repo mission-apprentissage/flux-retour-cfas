@@ -1,12 +1,11 @@
 const assert = require("assert").strict;
-const integrationTests = require("../../../utils/integrationTests");
 const cfasComponent = require("../../../../src/common/components/cfas");
 const { StatutCandidatModel, CfaModel } = require("../../../../src/common/model");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
 const { addDays } = require("date-fns");
 
-integrationTests(__filename, () => {
+describe(__filename, () => {
   describe("searchCfas", () => {
     const { searchCfas } = cfasComponent();
 
@@ -17,7 +16,6 @@ integrationTests(__filename, () => {
         etablissement_num_departement: "15",
         etablissement_num_region: "01",
         uai_etablissement: "0152290X",
-        uai_etablissement_valid: true,
         etablissement_reseaux: "RESEAU_TEST",
       },
       {
@@ -26,7 +24,6 @@ integrationTests(__filename, () => {
         etablissement_num_departement: "15",
         etablissement_num_region: "01",
         uai_etablissement: "0152232N",
-        uai_etablissement_valid: true,
         etablissement_reseaux: "RESEAU_TEST",
       },
       {
@@ -35,7 +32,6 @@ integrationTests(__filename, () => {
         etablissement_num_departement: "39",
         etablissement_num_region: "123",
         uai_etablissement: "0392232X",
-        uai_etablissement_valid: true,
         etablissement_reseaux: "RESEAU_TEST",
       },
       {
@@ -44,7 +40,6 @@ integrationTests(__filename, () => {
         etablissement_num_departement: "75",
         etablissement_num_region: "02",
         uai_etablissement: "0752232O",
-        uai_etablissement_valid: true,
         etablissement_reseaux: "RESEAU_TEST",
       },
       {
@@ -53,7 +48,6 @@ integrationTests(__filename, () => {
         etablissement_num_departement: "15",
         etablissement_num_region: "039",
         uai_etablissement: "0152232Z",
-        uai_etablissement_valid: true,
         etablissement_reseaux: "RESEAU_TEST",
       },
     ];

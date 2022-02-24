@@ -94,3 +94,10 @@ export const fetchSearchCfas = async (filters) => {
 export const fetchSearchFormations = async (filters) => {
   return await _post("/api/formations/search", filters);
 };
+
+/* CSV export of effectifs data list for indicateur */
+export const fetchEffectifsDataListXlsxExport = (filters, effectifIndicateur) => {
+  const queryParameters = qs.stringify({ ...filters, effectif_indicateur: effectifIndicateur });
+  const url = `/api/effectifs/export-xlsx-data-lists?${queryParameters}`;
+  return _get(url, { jsonResponse: false });
+};
