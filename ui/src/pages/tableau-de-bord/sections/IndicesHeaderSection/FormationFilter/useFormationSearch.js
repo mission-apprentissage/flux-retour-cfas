@@ -4,7 +4,7 @@ import { fetchSearchFormations } from "../../../../../common/api/tableauDeBord";
 import useDebounce from "../../../../../common/hooks/useDebounce";
 import { omitNullishValues } from "../../../../../common/utils/omitNullishValues";
 
-const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;
+export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;
 const SEARCH_DEBOUNCE_TIME = 300;
 
 const useFormationSearch = (searchTerm, filters) => {
