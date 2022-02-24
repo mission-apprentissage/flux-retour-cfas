@@ -1,11 +1,19 @@
-import { Skeleton, Stack, Text } from "@chakra-ui/react";
+import { Box, Divider, Skeleton, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { SearchInput } from "../../../../../common/components";
+import { InputLegend, SearchInput } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
 import CfasList from "./CfasList";
-import useCfaSearch from "./useCfaSearch";
+import useCfaSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useCfaSearch";
+
+const NoResults = () => {
+  return (
+    <Text color="grey.800" fontWeight="700" paddingTop="2w" paddingLeft="1w">
+      Il n&apos;y a aucun résultat pour votre recherche sur le territoire sélectionné
+    </Text>
+  );
+};
 
 const Loading = () => {
   return (
@@ -30,11 +38,15 @@ const CfaPanel = ({ value, onCfaClick, filters }) => {
         onChange={setSearchTerm}
         placeholder="Rechercher le nom d'un organisme de formation ou son UAI"
       />
-      {searchResults?.length === 0 && (
-        <Text color="grey.800" fontWeight="700" paddingTop="2w" paddingLeft="1w">
-          Il n&apos;y a aucun résultat pour votre recherche sur le territoire sélectionné
-        </Text>
+      {searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH && (
+        <Box paddingLeft="1w" paddingTop="3v">
+          <InputLegend>
+            Merci de renseigner au minimum {MINIMUM_CHARS_TO_PERFORM_SEARCH} caractères pour lancer la recherche
+          </InputLegend>
+          <Divider marginTop="3v" borderBottomColor="grey.300" orientation="horizontal" />
+        </Box>
       )}
+      {searchResults?.length === 0 && <NoResults />}
       {loading && <Loading />}
       <CfasList cfas={searchResults} onCfaClick={onCfaClick} selectedValue={value} />
     </div>
