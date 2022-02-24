@@ -134,6 +134,13 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromParams);
       const filters = { ...filtersFromBody, annee_scolaire: getAnneeScolaireFromDate(date) };
 
+      // create event
+      await userEvents.create({
+        action: "export-xlsx-data-lists",
+        username: req.user.username,
+        data: req.query,
+      });
+
       // Build effectifs data formatted for date
       const effectifsFormattedAtDate = await buildEffectifsFormattedAtDate(effectifIndicateurFromParams, date, filters);
 
