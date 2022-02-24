@@ -23,7 +23,9 @@ const CfaPrivateView = ({ cfaUai }) => {
       </Section>
       <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
       {infosCfa && <ActionsSection infosCfa={infosCfa} />}
-      {effectifs && <VueGlobaleSection allowDownloadDataList={true} effectifs={effectifs} loading={effectifsLoading} />}
+      {effectifs && (
+        <VueGlobaleSection allowDownloadDataList={false} effectifs={effectifs} loading={effectifsLoading} />
+      )}
       <RepartitionSection filters={filters} />
     </Page>
   );
