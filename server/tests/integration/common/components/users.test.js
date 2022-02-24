@@ -105,7 +105,7 @@ describe(__filename, () => {
   });
 
   describe("generatePasswordUpdateToken", () => {
-    it("génère un token avec expiration à +24h", async () => {
+    it("génère un token avec expiration à +48", async () => {
       const { createUser, generatePasswordUpdateToken } = await users();
 
       // create user
@@ -116,8 +116,8 @@ describe(__filename, () => {
 
       assert.equal(userInDb.password_update_token, token);
       // a few milliseconds have passed since creation
-      // so we'll juste make sure expiry is in 23 hours 59 minutes
-      const twentyFourHoursInMinutesIsh = 24 * 60 - 1;
+      // so we'll juste make sure expiry is in 47 hours 59 minutes
+      const twentyFourHoursInMinutesIsh = 48 * 60 - 1;
       assert.equal(differenceInMinutes(userInDb.password_update_token_expiry, new Date()), twentyFourHoursInMinutesIsh);
     });
 

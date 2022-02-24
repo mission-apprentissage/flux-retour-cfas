@@ -9,7 +9,7 @@ const rehashPassword = (user, password) => {
   return user.save();
 };
 
-const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 24;
+const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
 
 const isUserPasswordUpdatedTokenValid = (user) => {
   return Boolean(user.password_update_token_expiry) && isBefore(new Date(), user.password_update_token_expiry);
