@@ -27,6 +27,10 @@ export const navigationPages = {
     path: "/consulter-vos-donnees",
     title: "Consulter vos données",
   },
+  Statistiques: {
+    path: "/statistiques",
+    title: "Statistiques",
+  },
   DonneesPersonnelles: {
     path: "/donnees-personnelles",
     anchors: {

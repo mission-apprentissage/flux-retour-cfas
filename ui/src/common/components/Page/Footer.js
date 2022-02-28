@@ -38,6 +38,7 @@ const Footer = () => (
     >
       <HStack divider={<StackDivider borderColor="grey.200" />} spacing="3w">
         <Link href="#">Plan du site</Link>
+        <Link href={navigationPages.Statistiques.path}>{navigationPages.Statistiques.title}</Link>
         <Link href="#">Accessibilité : Non conforme</Link>
         <Link href="#">Mentions légales</Link>
         <Link href={navigationPages.DonneesPersonnelles.path}>Données personnelles</Link>

@@ -261,7 +261,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
     // Omit useless data
     return effectifsFormattedAtDate.map((item) => {
-      return omit(item, ["_id", "statut_apprenant_at_date", "date_metier_mise_a_jour_statut"]);
+      return omit(item, ["_id", "statut_apprenant_at_date", "previousStatutAtDate", "date_metier_mise_a_jour_statut"]);
     });
   };
 
