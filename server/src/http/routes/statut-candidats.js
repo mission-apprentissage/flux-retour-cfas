@@ -71,7 +71,6 @@ module.exports = ({ statutsCandidats, userEvents }) => {
     tryCatch(async (req, res) => {
       try {
         let nbItemsValid = 0;
-        let nbItemsInvalid = 0;
         let validationErrors = [];
         let validStatutsToAddOrUpdate = [];
 
@@ -84,14 +83,15 @@ module.exports = ({ statutsCandidats, userEvents }) => {
         });
 
         // Validate items one by one
-        await asyncForEach(req.body, (currentStatutToAddOrUpdate) => {
+        await asyncForEach(req.body, (currentStatutToAddOrUpdate, index) => {
           const statutValidation = statutCandidatItemSchema.validate(currentStatutToAddOrUpdate, {
             stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
+            abortEarly: false, // make sure every invalid field will be communicated to the caller
           });
 
           if (statutValidation.error) {
-            nbItemsInvalid++;
             validationErrors.push(statutValidation.error);
+            logger.warn(`Could not validate item from ${req.user.username} at index ${index}`, statutValidation.error);
           } else {
             nbItemsValid++;
             // Build toAddOrUpdateList list
@@ -112,9 +112,9 @@ module.exports = ({ statutsCandidats, userEvents }) => {
 
         res.json({
           status: validationErrors.length > 0 ? `ERROR` : "OK",
-          message: validationErrors.length > 0 ? `Error : ${nbItemsInvalid} items not valid` : "Success",
+          message: validationErrors.length > 0 ? `Error : ${validationErrors.length} items not valid` : "Success",
           ok: nbItemsValid,
-          ko: nbItemsInvalid,
+          ko: validationErrors.length,
           validationErrors,
         });
       } catch (err) {
