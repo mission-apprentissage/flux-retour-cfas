@@ -36,7 +36,7 @@ const StatistiquesPage = () => {
               <iframe
                 src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/8af240fe-aaed-466e-a903-537b328a749f"
                 width="100%"
-                height="100%"
+                height="1000px"
                 allowtransparency
               ></iframe>
             </TabPanel>
@@ -44,7 +44,7 @@ const StatistiquesPage = () => {
               <iframe
                 src="https://cfas.apprentissage.beta.gouv.fr/metabase/public/dashboard/3725a628-f37b-4220-8e55-b63241835b13"
                 width="100%"
-                height="100%"
+                height="1000px"
                 allowtransparency
               ></iframe>
             </TabPanel>
