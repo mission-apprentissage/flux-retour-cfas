@@ -1,7 +1,9 @@
 import PropTypes from "prop-types";
 import React from "react";
 
+import { hasUserRoles, roles } from "../../../../common/auth/roles";
 import { Page } from "../../../../common/components";
+import useAuth from "../../../../common/hooks/useAuth";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
@@ -10,13 +12,15 @@ import { ActionsSection, CfaInformationSection, RepartitionSection } from "./sec
 
 const CfaView = ({ cfaUai, filters, effectifs, effectifsLoading }) => {
   const { data: infosCfa, loading: infosCfaLoading, error: infosCfaError } = useFetchCfaInfo(cfaUai);
+  const [auth] = useAuth();
+  const isAdmin = hasUserRoles(auth, roles.administrator);
 
   return (
     <Page>
       <IndicesHeaderSection />
       <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
       {infosCfa && <ActionsSection infosCfa={infosCfa} />}
-      <VueGlobaleSection effectifs={effectifs} loading={effectifsLoading} />
+      <VueGlobaleSection allowDownloadDataList={isAdmin} effectifs={effectifs} loading={effectifsLoading} />
       <RepartitionSection filters={filters} />
     </Page>
   );

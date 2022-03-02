@@ -215,35 +215,23 @@ describe(__filename, () => {
       assert.equal(response.status, 401);
     });
 
-    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié en tant que CFA", async () => {
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié en tant qu'admin", async () => {
       const { httpClient, createAndLogUser } = await startServer();
-      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
         params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.apprentis },
-        headers: bearerToken,
+        headers: authHeader,
       });
 
       assert.equal(response.status, 403);
     });
 
-    it("Vérifie qu'on peut récupérer des listes de données des apprentis via API pour un CFA", async () => {
-      const { httpClient } = await startServer();
-
-      const cfaToken = "abdsbnbsfdpfdfjsdkjdfs";
+    it("Vérifie qu'on peut récupérer des listes de données des apprentis via API pour un admin", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const cfaUai = "9994889A";
-
-      await new CfaModel({
-        uai: cfaUai,
-        access_token: cfaToken,
-      }).save();
-
-      const responseLoginCfa = await httpClient.post("/api/login-cfa", {
-        cfaAccessToken: cfaToken,
-      });
-
-      assert.equal(responseLoginCfa.status, 200);
-      const bearerToken = responseLoginCfa.data.access_token;
+      await new CfaModel({ uai_etablissement: cfaUai }).save();
 
       await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
@@ -251,9 +239,7 @@ describe(__filename, () => {
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
         params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.apprentis },
         responseType: "arraybuffer",
-        headers: {
-          Authorization: `Bearer ${bearerToken}`,
-        },
+        headers: authHeader,
       });
 
       const apprentisList = parseXlsxHeaderStreamToJson(response.data, 3);
@@ -262,23 +248,11 @@ describe(__filename, () => {
       assert.equal(apprentisList.length, 5);
     });
 
-    it("Vérifie qu'on peut récupérer des listes de données des inscrits sans contrats via API pour un CFA", async () => {
-      const { httpClient } = await startServer();
-
-      const cfaToken = "abdsbnbsfdpfdfjsdkjdfs";
+    it("Vérifie qu'on peut récupérer des listes de données des inscrits sans contrats via API pour un admin", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const cfaUai = "9994889A";
-
-      await new CfaModel({
-        uai: cfaUai,
-        access_token: cfaToken,
-      }).save();
-
-      const responseLoginCfa = await httpClient.post("/api/login-cfa", {
-        cfaAccessToken: cfaToken,
-      });
-
-      assert.equal(responseLoginCfa.status, 200);
-      const bearerToken = responseLoginCfa.data.access_token;
+      await new CfaModel({ uai_etablissement: cfaUai }).save();
 
       await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
@@ -286,9 +260,7 @@ describe(__filename, () => {
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
         params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.inscritsSansContrats },
         responseType: "arraybuffer",
-        headers: {
-          Authorization: `Bearer ${bearerToken}`,
-        },
+        headers: authHeader,
       });
 
       const inscritsSansContratsList = parseXlsxHeaderStreamToJson(response.data, 3);
@@ -297,23 +269,11 @@ describe(__filename, () => {
       assert.equal(inscritsSansContratsList.length, 15);
     });
 
-    it("Vérifie qu'on peut récupérer des listes de données des abandons via API pour un CFA", async () => {
-      const { httpClient } = await startServer();
-
-      const cfaToken = "abdsbnbsfdpfdfjsdkjdfs";
+    it("Vérifie qu'on peut récupérer des listes de données des abandons via API pour un admin", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const cfaUai = "9994889A";
-
-      await new CfaModel({
-        uai: cfaUai,
-        access_token: cfaToken,
-      }).save();
-
-      const responseLoginCfa = await httpClient.post("/api/login-cfa", {
-        cfaAccessToken: cfaToken,
-      });
-
-      assert.equal(responseLoginCfa.status, 200);
-      const bearerToken = responseLoginCfa.data.access_token;
+      await new CfaModel({ uai_etablissement: cfaUai }).save();
 
       await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
@@ -321,9 +281,7 @@ describe(__filename, () => {
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
         params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.abandons },
         responseType: "arraybuffer",
-        headers: {
-          Authorization: `Bearer ${bearerToken}`,
-        },
+        headers: authHeader,
       });
 
       const abandonsList = parseXlsxHeaderStreamToJson(response.data, 3);
@@ -333,22 +291,10 @@ describe(__filename, () => {
     });
 
     it("Vérifie qu'on peut récupérer des listes de données des rupturants via API pour un CFA", async () => {
-      const { httpClient } = await startServer();
-
-      const cfaToken = "abdsbnbsfdpfdfjsdkjdfs";
+      const { httpClient, createAndLogUser } = await startServer();
+      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const cfaUai = "9994889A";
-
-      await new CfaModel({
-        uai: cfaUai,
-        access_token: cfaToken,
-      }).save();
-
-      const responseLoginCfa = await httpClient.post("/api/login-cfa", {
-        cfaAccessToken: cfaToken,
-      });
-
-      assert.equal(responseLoginCfa.status, 200);
-      const bearerToken = responseLoginCfa.data.access_token;
+      await new CfaModel({ uai_etablissement: cfaUai }).save();
 
       await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
@@ -356,9 +302,7 @@ describe(__filename, () => {
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
         params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.rupturants },
         responseType: "arraybuffer",
-        headers: {
-          Authorization: `Bearer ${bearerToken}`,
-        },
+        headers: authHeader,
       });
 
       const rupturantsList = parseXlsxHeaderStreamToJson(response.data, 3);
