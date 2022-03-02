@@ -5,7 +5,7 @@ const { format } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
-const { tdbRoles } = require("../../common/roles");
+const { tdbRoles, apiRoles } = require("../../common/roles");
 const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
 const { effectifsIndicators, getStatutNameFromCode } = require("../../common/model/constants");
 const omit = require("lodash.omit");
@@ -118,7 +118,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
    */
   router.get(
     "/export-xlsx-data-lists",
-    permissionsMiddleware([tdbRoles.cfa]),
+    permissionsMiddleware([apiRoles.administrator]),
     applyUserRoleFilter,
     validateRequestQuery(
       Joi.object({
