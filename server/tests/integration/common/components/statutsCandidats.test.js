@@ -133,7 +133,6 @@ describe(__filename, () => {
       assert.equal(foundAdded.ine_apprenant, statutsTestUpdate[3].ine_apprenant);
       assert.equal(foundAdded.nom_apprenant.toUpperCase(), statutsTestUpdate[3].nom_apprenant.toUpperCase());
       assert.equal(foundAdded.prenom_apprenant.toUpperCase(), statutsTestUpdate[3].prenom_apprenant.toUpperCase());
-      assert.equal(foundAdded.ne_pas_solliciter, statutsTestUpdate[3].ne_pas_solliciter);
       assert.equal(foundAdded.email_contact, statutsTestUpdate[3].email_contact);
       assert.equal(foundAdded.formation_cfd, statutsTestUpdate[3].formation_cfd);
       assert.equal(foundAdded.uai_etablissement, statutsTestUpdate[3].uai_etablissement);
@@ -151,7 +150,6 @@ describe(__filename, () => {
       assert.equal(firstUpdated.ine_apprenant, statutsTestUpdate[0].ine_apprenant);
       assert.equal(firstUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[0].nom_apprenant.toUpperCase());
       assert.equal(firstUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[0].prenom_apprenant.toUpperCase());
-      assert.equal(firstUpdated.ne_pas_solliciter, statutsTestUpdate[0].ne_pas_solliciter);
       assert.equal(firstUpdated.email_contact, statutsTestUpdate[0].email_contact);
       assert.equal(firstUpdated.formation_cfd, statutsTestUpdate[0].formation_cfd);
       assert.equal(firstUpdated.libelle_court_formation, statutsTestUpdate[0].libelle_court_formation);
@@ -167,7 +165,6 @@ describe(__filename, () => {
       assert.equal(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
       assert.equal(secondUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[1].nom_apprenant.toUpperCase());
       assert.equal(secondUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[1].prenom_apprenant.toUpperCase());
-      assert.equal(secondUpdated.ne_pas_solliciter, statutsTestUpdate[1].ne_pas_solliciter);
       assert.equal(secondUpdated.email_contact, statutsTestUpdate[1].email_contact);
       assert.equal(secondUpdated.formation_cfd, statutsTestUpdate[1].formation_cfd);
       assert.equal(secondUpdated.uai_etablissement, statutsTestUpdate[1].uai_etablissement);
@@ -180,7 +177,6 @@ describe(__filename, () => {
       const thirdUpdated = await StatutCandidatModel.findById(updated[2]._id).lean();
       assert.equal(thirdUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[2].nom_apprenant.toUpperCase());
       assert.equal(thirdUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[2].prenom_apprenant.toUpperCase());
-      assert.equal(thirdUpdated.ne_pas_solliciter, statutsTestUpdate[2].ne_pas_solliciter);
       assert.equal(thirdUpdated.email_contact, statutsTestUpdate[2].email_contact);
       assert.equal(thirdUpdated.formation_cfd, statutsTestUpdate[2].formation_cfd);
       assert.equal(thirdUpdated.uai_etablissement, statutsTestUpdate[2].uai_etablissement);
@@ -816,7 +812,6 @@ describe(__filename, () => {
       assert.equal(createdStatutJson.ine_apprenant, randomStatut.ine_apprenant);
       assert.equal(createdStatutJson.nom_apprenant, randomStatut.nom_apprenant.toUpperCase());
       assert.equal(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant.toUpperCase());
-      assert.equal(createdStatutJson.ne_pas_solliciter, randomStatut.ne_pas_solliciter);
       assert.equal(createdStatutJson.email_contact, randomStatut.email_contact);
       assert.equal(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
       assert.equal(createdStatutJson.libelle_court_formation, randomStatut.libelle_court_formation);

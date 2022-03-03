@@ -28,7 +28,6 @@ module.exports = ({ statutsCandidats, userEvents }) => {
     // required fields
     nom_apprenant: Joi.string().required(),
     prenom_apprenant: Joi.string().required(),
-    ne_pas_solliciter: Joi.boolean().required(),
     uai_etablissement: Joi.string().regex(uaiRegex).required(),
     nom_etablissement: Joi.string().required(),
     id_formation: Joi.string().regex(cfdRegex).required(),
