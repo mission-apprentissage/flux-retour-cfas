@@ -41,7 +41,6 @@ const createRandomStatutCandidat = (params = {}) => {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
-    ne_pas_solliciter: faker.datatype.boolean(),
     email_contact: faker.internet.email(),
 
     formation_cfd: getRandomIdFormation(),
@@ -107,7 +106,6 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
-    ne_pas_solliciter: faker.datatype.boolean(),
     email_contact: faker.internet.email(),
 
     id_formation: getRandomIdFormation(),

@@ -17,11 +17,6 @@ module.exports = new Schema({
     default: null,
     description: "Prénom du jeune",
   },
-  ne_pas_solliciter: {
-    type: Boolean,
-    default: false,
-    description: "Ne pas solliciter le jeune ou ses parents",
-  },
   email_contact: {
     type: String,
     default: null,
