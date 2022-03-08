@@ -31,6 +31,10 @@ export const navigationPages = {
     path: "/statistiques",
     title: "Statistiques",
   },
+  Support: {
+    path: "/support",
+    title: "Support",
+  },
   DonneesPersonnelles: {
     path: "/donnees-personnelles",
     anchors: {

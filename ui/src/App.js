@@ -8,6 +8,7 @@ import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import LoginPage from "./pages/login/LoginPage";
 import { ModifierMotDePassePage } from "./pages/modifier-mot-de-passe";
 import StatistiquesPage from "./pages/statistiques/StatistiquesPage";
+import SupportPage from "./pages/support/SupportPage";
 import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import CfaPrivatePage from "./pages/tableau-de-bord/views/CfaPrivateView";
@@ -35,6 +36,7 @@ const App = () => {
         {/* Public pages */}
         <Route exact path="/" component={HomePage} />
         <Route exact path={navigationPages.Statistiques.path} component={StatistiquesPage} />
+        <Route exact path={navigationPages.Support.path} component={SupportPage} />
         <Route exact path={navigationPages.Login.path} component={LoginPage} />
         <Route
           exact
