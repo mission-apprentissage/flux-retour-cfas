@@ -4,7 +4,7 @@ import React from "react";
 import { Footer, Header, Section } from "../../../common/components";
 import BreadcrumbNav from "../../../common/components/BreadcrumbNav/BreadcrumbNav";
 import { navigationPages } from "../../../common/constants/navigationPages";
-import DemandeBranchementErpForm from "./TransmettreVosDonneesForm/DemandeBranchementErpForm";
+import TransmettreVosDonneesFormBlock from "./TransmettreVosDonneesFormBlock";
 
 const TransmettreVosDonneesPage = () => {
   return (
@@ -26,7 +26,7 @@ const TransmettreVosDonneesPage = () => {
             Afin de mieux vous guider, merci de renseigner le formulaire ci dessous :
           </Text>
           <Box padding="4w" background="white" borderColor="bluefrance" border="1px solid" minWidth="420px">
-            <DemandeBranchementErpForm />
+            <TransmettreVosDonneesFormBlock />
           </Box>
         </Box>
       </Section>
