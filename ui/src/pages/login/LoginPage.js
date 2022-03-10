@@ -1,4 +1,4 @@
-import { Box, Heading, HStack, Text } from "@chakra-ui/react";
+import { Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
@@ -31,13 +31,13 @@ const LoginPage = ({ history }) => {
       <Section background="galt" withShadow paddingY="3w">
         <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.Login]} />
         <HStack justifyContent="space-between" spacing="8w" marginTop="5w" alignItems="flex-start">
-          <Box>
+          <div>
             <Heading as="h1">{navigationPages.Login.title}</Heading>
             <Text color="grey.800" fontWeight="700" fontSize="gamma" marginTop="2w">
               Vous êtes une institution ou une organisation professionnelle, connectez-vous au {productName} pour
               consulter les effectifs sur votre territoire.
             </Text>
-          </Box>
+          </div>
           <LoginBlock onSubmit={login} />
         </HStack>
       </Section>
