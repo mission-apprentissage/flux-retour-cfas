@@ -186,7 +186,6 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       annee_scolaire: 1,
       contrat_date_debut: 1,
       contrat_date_rupture: 1,
-      date_metier_mise_a_jour_statut: 1,
       historique_statut_apprenant: 1,
       statut_apprenant_at_date: 1,
     };
@@ -261,7 +260,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
     // Omit useless data
     return effectifsFormattedAtDate.map((item) => {
-      return omit(item, ["_id", "statut_apprenant_at_date", "previousStatutAtDate", "date_metier_mise_a_jour_statut"]);
+      return omit(item, ["_id", "statut_apprenant_at_date", "previousStatutAtDate"]);
     });
   };
 

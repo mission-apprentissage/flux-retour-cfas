@@ -23,7 +23,6 @@ describe(__filename, () => {
       assert.equal(result.uai_etablissement, randomStatutProps.uai_etablissement);
       assert.equal(result.siret_etablissement, randomStatutProps.siret_etablissement);
       assert.equal(result.nom_etablissement, randomStatutProps.nom_etablissement);
-      assert.equal(result.statut_apprenant, randomStatutProps.statut_apprenant);
       assert.equal(result.source, randomStatutProps.source);
       assert.equal(result.annee_formation, randomStatutProps.annee_formation);
       assert.deepEqual(result.periode_formation, randomStatutProps.periode_formation);
@@ -62,7 +61,6 @@ describe(__filename, () => {
       assert.deepEqual(result.uai_etablissement, randomStatut.uai_etablissement);
       assert.deepEqual(result.siret_etablissement, randomStatut.siret_etablissement);
       assert.deepEqual(result.nom_etablissement, randomStatut.nom_etablissement);
-      assert.deepEqual(result.statut_apprenant, randomStatut.statut_apprenant);
       assert.deepEqual(result.source, randomStatut.source);
       assert.deepEqual(result.annee_formation, randomStatut.annee_formation);
       assert.deepEqual(result.periode_formation, randomStatut.periode_formation);

@@ -1,94 +1,5 @@
 const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/statutsCandidatsConstants");
 
-const simpleStatut = {
-  ine_apprenant: "12345",
-  nom_apprenant: "testNom",
-  prenom_apprenant: "testPrenom",
-  email_contact: "testemail_contact@test.fr",
-  formation_cfd: "testformation_cfd",
-  libelle_court_formation: "testlibelle_court_formation",
-  libelle_long_formation: "testlibelle_long_formation",
-  uai_etablissement: "testuai_etablissement",
-  siret_etablissement: "11111111111111",
-  nom_etablissement: "testnom_etablissement",
-  statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
-  date_metier_mise_a_jour_statut: "2020-01-10T17:42:36.000Z",
-  periode_formation: [2020, 2021],
-  annee_formation: 2020,
-  annee_scolaire: "2020-2021",
-};
-
-const statutsTest = [
-  {
-    ine_apprenant: "12345",
-    nom_apprenant: "testNom",
-    prenom_apprenant: "testPrenom",
-    email_contact: "testemail_contact@test.fr",
-    formation_cfd: "testformation_cfd",
-    libelle_court_formation: "testlibelle_court_formation",
-    libelle_long_formation: "testlibelle_long_formation",
-    uai_etablissement: "testuai_etablissement",
-    siret_etablissement: "11111111111111",
-    nom_etablissement: "testnom_etablissement",
-    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
-    date_metier_mise_a_jour_statut: "2020-01-10T17:42:36.000Z",
-    periode_formation: [2020, 2021],
-    annee_formation: 1,
-    annee_scolaire: "2020-2021",
-  },
-  {
-    ine_apprenant: "6789",
-    nom_apprenant: "test2Nom",
-    prenom_apprenant: "test2Prenom",
-    email_contact: "test2email_contact@test.fr",
-    formation_cfd: "test2formation_cfd",
-    uai_etablissement: "testuai_etablissement",
-    siret_etablissement: "11111111111111",
-    nom_etablissement: "testnom_etablissement",
-    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
-    annee_formation: 0,
-    annee_scolaire: "2020-2021",
-  },
-  {
-    nom_apprenant: "test3Nom",
-    prenom_apprenant: "test3Prenom",
-    email_contact: "test3email_contact@test.fr",
-    formation_cfd: "test3formation_cfd",
-    uai_etablissement: "testuai_etablissement",
-    siret_etablissement: "11111111111111",
-    nom_etablissement: "testnom_etablissement",
-    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
-    annee_formation: 1,
-    annee_scolaire: "2020-2021",
-  },
-];
-
-const statutsTestUpdate = [
-  {
-    ...statutsTest[0],
-    annee_formation: 2,
-  },
-  statutsTest[1],
-  {
-    ...statutsTest[2],
-    annee_formation: 2,
-  },
-  {
-    ine_apprenant: "99999",
-    nom_apprenant: "nouveauNom",
-    prenom_apprenant: "nouveauPrenom",
-    email_contact: "nouvelEmail@email.fr",
-    formation_cfd: "nouvelleFormation",
-    uai_etablissement: "testuai_etablissement",
-    siret_etablissement: "11111111111111",
-    nom_etablissement: "testnom_etablissement",
-    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
-    periode_formation: [2019, 2021],
-    annee_formation: 2,
-    annee_scolaire: "2020-2021",
-  },
-];
-
 const simpleStatutBadUpdate = {
   ine_apprenant: "12345",
   nom_apprenant: "testNom",
@@ -518,9 +429,6 @@ const fullSample = [
 ];
 
 module.exports = {
-  statutsTest,
-  statutsTestUpdate,
-  simpleStatut,
   simpleStatutBadUpdate,
   fullSample,
   fullSampleWithUpdates,

@@ -6,6 +6,7 @@ const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { escapeRegExp } = require("../utils/regexUtils");
+const { isSameDay } = require("date-fns");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
@@ -75,9 +76,15 @@ const updateStatut = async (existingItemId, toUpdate) => {
   );
   const existingItem = await StatutCandidatModel.findById(existingItemId);
 
-  // statut_apprenant has changed?
-  if (existingItem.statut_apprenant !== updatePayload.statut_apprenant) {
-    const historique = existingItem.historique_statut_apprenant.slice();
+  // new statut_apprenant to add ?
+  const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {
+    return (
+      historiqueItem.valeur_statut === toUpdate.statut_apprenant &&
+      isSameDay(new Date(historiqueItem.date_statut), new Date(toUpdate.date_metier_mise_a_jour_statut))
+    );
+  });
+
+  if (!statutExistsInHistorique) {
     const newHistoriqueElement = {
       valeur_statut: updatePayload.statut_apprenant,
       date_statut: new Date(updatePayload.date_metier_mise_a_jour_statut),
@@ -85,6 +92,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
     };
 
     // add new element to historique
+    const historique = existingItem.historique_statut_apprenant.slice();
     historique.push(newHistoriqueElement);
     // sort historique chronologically
     const historiqueSorted = historique.sort((a, b) => {
@@ -134,7 +142,6 @@ const createStatutCandidat = async (itemToCreate) => {
     nom_etablissement: itemToCreate.nom_etablissement,
     nom_etablissement_tokenized:
       itemToCreate.nom_etablissement && buildTokenizedString(itemToCreate.nom_etablissement, 3),
-    statut_apprenant: itemToCreate.statut_apprenant,
     historique_statut_apprenant: [
       {
         valeur_statut: itemToCreate.statut_apprenant,
@@ -142,7 +149,6 @@ const createStatutCandidat = async (itemToCreate) => {
         date_reception: new Date(),
       },
     ],
-    date_metier_mise_a_jour_statut: itemToCreate.date_metier_mise_a_jour_statut,
     periode_formation: itemToCreate.periode_formation,
     annee_formation: itemToCreate.annee_formation,
     annee_scolaire: itemToCreate.annee_scolaire,
@@ -195,7 +201,7 @@ const findStatutsDuplicates = async (
         duplicatesIds: { $addToSet: "$_id" },
         etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$statut_apprenant" },
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
       };
       break;
@@ -215,7 +221,7 @@ const findStatutsDuplicates = async (
         // Ajout des différents formation_cfd en doublon potentiel
         formation_cfds: { $addToSet: "$formation_cfd" },
         // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$statut_apprenant" },
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
       };
       break;
@@ -251,7 +257,7 @@ const findStatutsDuplicates = async (
         // Ajout des différentes prenom_apprenant en doublon potentiel
         prenom_apprenants: { $addToSet: "$prenom_apprenant" },
         // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$statut_apprenant" },
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
       };
       break;
@@ -270,7 +276,7 @@ const findStatutsDuplicates = async (
         // Ajout des différents nom_apprenant en doublon potentiel
         nom_apprenants: { $addToSet: "$nom_apprenant" },
         // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$statut_apprenant" },
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
       };
       break;
