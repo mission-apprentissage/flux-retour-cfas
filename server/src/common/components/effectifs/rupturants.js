@@ -1,4 +1,4 @@
-const { codesStatutsCandidats } = require("../../constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../constants/statutsCandidatsConstants");
 const { Indicator } = require("./indicator");
 
 class EffectifsRupturants extends Indicator {
@@ -15,12 +15,12 @@ class EffectifsRupturants extends Indicator {
       {
         $match: {
           ...filters,
-          "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.inscrit,
+          "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
           "historique_statut_apprenant.1": { $exists: true },
         },
       },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
-      { $match: { "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.inscrit } },
+      { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
       // set previousStatutAtDate to be the element in historique_statut_apprenant juste before statut_apprenant_at_date
       {
         $addFields: {
@@ -42,7 +42,7 @@ class EffectifsRupturants extends Indicator {
           },
         },
       },
-      { $match: { "previousStatutAtDate.valeur_statut": codesStatutsCandidats.apprenti } },
+      { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
     ];
   }
 }

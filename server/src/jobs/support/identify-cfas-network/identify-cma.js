@@ -6,7 +6,7 @@ const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { StatutCandidatModel } = require("../../../common/model");
 const { toXlsx } = require("../../../common/utils/exporterUtils");
 const { jobNames } = require("../../../common/constants/jobsConstants");
-const { codesStatutsCandidats } = require("../../../common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../../common/constants/statutsCandidatsConstants");
 
 const cmaReferenceFilePath = path.join(__dirname, `./assets/cfas-cma.csv`);
 
@@ -42,17 +42,17 @@ const identifyCfas = async (ovhStorage) => {
           logger.info(`Uai ${_uai} found in StatutsCandidats - adding to export`);
 
           const nbStatutsInscrits = await StatutCandidatModel.countDocuments({
-            statut_apprenant: codesStatutsCandidats.inscrit,
+            statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
             uai_etablissement: _uai,
           });
 
           const nbStatutsApprentis = await StatutCandidatModel.countDocuments({
-            statut_apprenant: codesStatutsCandidats.apprenti,
+            statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
             uai_etablissement: _uai,
           });
 
           const nbStatutsAbandon = await StatutCandidatModel.countDocuments({
-            statut_apprenant: codesStatutsCandidats.abandon,
+            statut_apprenant: CODES_STATUT_APPRENANT.abandon,
             uai_etablissement: _uai,
           });
 

@@ -1,7 +1,7 @@
 /**
  * Codes des statuts des candidats
  */
-const codesStatutsCandidats = {
+const CODES_STATUT_APPRENANT = {
   inscrit: 2,
   apprenti: 3,
   abandon: 0,
@@ -10,10 +10,10 @@ const codesStatutsCandidats = {
 /**
  * Nom des statuts
  */
-const statutsCandidatsNames = [
-  { code: codesStatutsCandidats.abandon, name: "abandon" },
-  { code: codesStatutsCandidats.inscrit, name: "inscrit" },
-  { code: codesStatutsCandidats.apprenti, name: "apprenti" },
+const STATUT_APPRENANT_LABELS = [
+  { code: CODES_STATUT_APPRENANT.abandon, name: "abandon" },
+  { code: CODES_STATUT_APPRENANT.inscrit, name: "inscrit" },
+  { code: CODES_STATUT_APPRENANT.apprenti, name: "apprenti" },
 ];
 
 /**
@@ -22,7 +22,7 @@ const statutsCandidatsNames = [
  * @returns
  */
 const getStatutNameFromCode = (statutCode) =>
-  statutsCandidatsNames.find((item) => item.code === statutCode)?.name ?? "NC";
+  STATUT_APPRENANT_LABELS.find((item) => item.code === statutCode)?.name ?? "NC";
 
 /**
  * Code pour le statut de la mise à jour du statut candidat
@@ -83,11 +83,11 @@ const effectifsIndicators = {
 };
 
 module.exports = {
-  codesStatutsCandidats,
+  CODES_STATUT_APPRENANT,
   codesStatutsMajStatutCandidats,
   duplicatesTypesCodes,
   statutsCandidatsStringFields,
   effectifsIndicators,
-  statutsCandidatsNames,
+  STATUT_APPRENANT_LABELS,
   getStatutNameFromCode,
 };
