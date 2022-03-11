@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const { apiRoles } = require("../../../src/common/roles");
-const { effectifsIndicators } = require("../../../src/common/model/constants");
+const { effectifsIndicators } = require("../../../src/common/constants/statutsCandidatsConstants");
 
 const {
   historySequenceInscritToApprentiToAbandon,

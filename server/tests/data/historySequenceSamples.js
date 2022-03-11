@@ -1,4 +1,4 @@
-const { codesStatutsCandidats } = require("../../src/common/model/constants");
+const { codesStatutsCandidats } = require("../../src/common/constants/statutsCandidatsConstants");
 
 const historySequenceApprenti = [
   {

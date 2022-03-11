@@ -1,7 +1,7 @@
 const path = require("path");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
-const { jobNames } = require("../../common/model/constants");
+const { jobNames } = require("../../common/constants/jobsConstants");
 
 const fs = require("fs-extra");
 

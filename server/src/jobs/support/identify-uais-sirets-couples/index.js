@@ -2,7 +2,7 @@ const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
 const path = require("path");
 const { toCsv } = require("../../../common/utils/exporterUtils");
-const { jobNames } = require("../../../common/model/constants/index");
+const { jobNames } = require("../../../common/constants/jobsConstants");
 const { StatutCandidatModel } = require("../../../common/model");
 
 /**

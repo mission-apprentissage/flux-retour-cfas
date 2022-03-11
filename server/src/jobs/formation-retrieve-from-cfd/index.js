@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const { jobNames } = require("../../common/constants/jobsConstants");
 
 /*
     Ce script récupère tous les CFDs valides présents dans la collection StatutsCandidats et crée une formation en base pour chacun si elle n'existe pas

@@ -2,10 +2,13 @@ const assert = require("assert").strict;
 const { addDays, differenceInMilliseconds, isEqual } = require("date-fns");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidatModel, CfaModel, FormationModel } = require("../../../../src/common/model");
-const { codesStatutsCandidats } = require("../../../../src/common/model/constants");
+const {
+  codesStatutsCandidats,
+  duplicatesTypesCodes,
+} = require("../../../../src/common/constants/statutsCandidatsConstants");
 const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../data/sample");
 const { createRandomStatutCandidat, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
-const { reseauxCfas, duplicatesTypesCodes } = require("../../../../src/common/model/constants");
+const { reseauxCfas } = require("../../../../src/common/constants/networksConstants");
 
 const isApproximatelyNow = (date) => {
   return Math.abs(differenceInMilliseconds(date, new Date())) < 50;

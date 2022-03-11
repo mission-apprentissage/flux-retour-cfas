@@ -2,7 +2,7 @@ const logger = require("../../../common/logger");
 const path = require("path");
 const { runScript } = require("../../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
-const { jobNames } = require("../../../common/model/constants/index");
+const { jobNames } = require("../../../common/constants/jobsConstants");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 
 const groupby = require("lodash.groupby");

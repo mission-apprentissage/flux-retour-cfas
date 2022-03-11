@@ -2,7 +2,7 @@ const { isEqual } = require("date-fns");
 
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { jobNames } = require("../../common/model/constants");
+const { jobNames } = require("../../common/constants/jobsConstants");
 const { collectionNames } = require("../constants");
 const cliProgress = require("cli-progress");
 const { identifyElementCausingWrongRupturantSequence } = require("./utils");

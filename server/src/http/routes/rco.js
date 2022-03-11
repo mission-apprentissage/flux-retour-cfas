@@ -1,7 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { jobNames, jobEventStatuts } = require("../../common/model/constants");
+const { jobNames, jobEventStatuts } = require("../../common/constants/jobsConstants");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { findAndPaginate } = require("../../common/utils/dbUtils");

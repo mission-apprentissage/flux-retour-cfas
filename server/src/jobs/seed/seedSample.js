@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { seedSample } = require("./utils/seedUtils");
-const { jobNames } = require("../../common/model/constants");
+const { jobNames } = require("../../common/constants/jobsConstants");
 
 runScript(async ({ statutsCandidats }) => {
   logger.info("Seeding data with Sample...");

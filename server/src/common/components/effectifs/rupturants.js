@@ -1,4 +1,4 @@
-const { codesStatutsCandidats } = require("../../model/constants");
+const { codesStatutsCandidats } = require("../../constants/statutsCandidatsConstants");
 const { Indicator } = require("./indicator");
 
 class EffectifsRupturants extends Indicator {

@@ -4,7 +4,7 @@ const path = require("path");
 const logger = require("../../../common/logger");
 const { CfaDataFeedbackModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { jobNames } = require("../../../common/model/constants");
+const { jobNames } = require("../../../common/constants/jobsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const feedbacksToRemoveFilePath = path.join(__dirname, `./assets/feedbacksToRemove.json`);

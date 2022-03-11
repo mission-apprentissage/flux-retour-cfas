@@ -1,7 +1,7 @@
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
 const { clearStatutsCandidats } = require("./utils/clearUtils");
-const { jobNames } = require("../../../common/model/constants");
+const { jobNames } = require("../../../common/constants/jobsConstants");
 
 runScript(async () => {
   logger.info("Suppression de tous les statutsCandidats ....");

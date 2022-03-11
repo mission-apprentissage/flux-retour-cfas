@@ -1,6 +1,6 @@
 const { StatutCandidatModel, CfaModel } = require("../model");
 const omit = require("lodash.omit");
-const { duplicatesTypesCodes } = require("../model/constants");
+const { duplicatesTypesCodes } = require("../constants/statutsCandidatsConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");

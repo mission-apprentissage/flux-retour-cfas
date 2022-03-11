@@ -2,7 +2,7 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const { jobNames } = require("../../common/constants/jobsConstants");
 const { CfaAnnuaireModel, CroisementCfasAnnuaireModel, CfaModel } = require("../../common/model");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
