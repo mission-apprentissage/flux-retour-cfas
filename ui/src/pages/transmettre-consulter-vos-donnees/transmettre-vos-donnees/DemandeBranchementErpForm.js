@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -18,82 +17,15 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import * as Yup from "yup";
 
-import { ERP_STATE, ERPS } from "../../../../common/constants/erps";
-import { productName } from "../../../../common/constants/productName";
-import { uaiRegex } from "../../../../common/domain/uai";
-import withSubmitBranchementErpDemand, { SUBMIT_STATE } from "./withSubmitBranchementErpDemand";
+import { ERP_STATE, ERPS } from "../../../common/constants/erps";
+import { productName } from "../../../common/constants/productName";
+import { uaiRegex } from "../../../common/domain/uai";
 
 const formInitialValues = { erpIndex: 0, nom_organisme: "", uai_organisme: "", nb_apprentis: "", email_demandeur: "" };
 
 const ErpSelectionList = [{ name: "Sélectionnez une option", state: null }].concat(ERPS);
 
-const Message = ({ iconClassName, title, message }) => {
-  return (
-    <>
-      <Flex fontWeight="700" fontSize="beta" color="grey.800" alignItems="center">
-        <Box as="i" fontSize="alpha" textColor="bluefrance" className={iconClassName} />
-        <Text paddingLeft="2w">{title}</Text>
-      </Flex>
-      <Text paddingX="6w" color="grey.800">
-        {message}
-      </Text>
-      <HStack marginTop="10w" spacing="1w">
-        <Box as="i" className="ri-arrow-left-line"></Box>
-        <NavLink to="/">Retourner à la page d&apos;accueil</NavLink>
-      </HStack>
-    </>
-  );
-};
-
-Message.propTypes = {
-  iconClassName: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  message: PropTypes.string.isRequired,
-};
-
-const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpState }) => {
-  if (submitState === SUBMIT_STATE.success) {
-    if (erpState === ERP_STATE.ongoing) {
-      return (
-        <Message
-          iconClassName="ri-checkbox-circle-fill"
-          title="Vos coordonnées ont bien été envoyées"
-          message="Vous serez tenu informé de l’évolution des travaux d’interfaçage avec votre ERP."
-        />
-      );
-    }
-    if (erpState === ERP_STATE.coming) {
-      return (
-        <Message
-          iconClassName="ri-checkbox-circle-fill"
-          title="Vos informations ont bien été envoyées"
-          message="Vous serez tenu informé de l’évolution des travaux d’interfaçage avec votre ERP."
-        />
-      );
-    }
-  }
-
-  if (submitState === SUBMIT_STATE.fail) {
-    if (erpState === ERP_STATE.ongoing) {
-      return (
-        <Message
-          iconClassName="ri-close-circle-fill"
-          title="Nous avons rencontré une erreur lors de la soumission de vos coordonnées."
-          message="Merci de réessayer ultérieurement."
-        />
-      );
-    }
-    if (erpState === ERP_STATE.coming) {
-      return (
-        <Message
-          iconClassName="ri-close-circle-fill"
-          title="Nous avons rencontré une erreur lors de la soumission de vos informations"
-          message="Merci de réessayer ultérieurement."
-        />
-      );
-    }
-  }
-
+const DemandeBranchementErpForm = ({ onSubmit }) => {
   return (
     <Formik
       initialValues={formInitialValues}
@@ -103,7 +35,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
         nb_apprentis: Yup.string(),
         email_demandeur: Yup.string().email("Format d'email invalide").required("Requis"),
       })}
-      onSubmit={sendBranchementErpDemand}
+      onSubmit={onSubmit}
     >
       {({ isSubmitting, values }) => (
         <Form>
@@ -160,8 +92,8 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                   <strong>
                     L&apos;interfaçage du {productName} avec cet ERP a démarré mais les travaux ne sont pas achevés.
                   </strong>
-                  Nous vous invitons à lui faire part de votre besoin de transmettre vos données au {productName} afin
-                  d&apos;accélérer leur livraison.
+                  &nbsp;Nous vous invitons à lui faire part de votre besoin de transmettre vos données au {productName}{" "}
+                  afin d&apos;accélérer leur livraison.
                 </Text>
               </Stack>
               <Text marginTop="2w" color="grey.800" fontWeight="700">
@@ -209,7 +141,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
                 <Box width="2%" background="#6A6AF4" marginRight="3w" />
                 <Text color="grey.800">
                   <strong>L&apos;interfaçage du {productName} avec cet ERP n’a pas encore démarré.</strong>
-                  Nous vous invitons à lui faire part de votre besoin de transmettre vos données au {productName}.
+                  &nbsp;Nous vous invitons à lui faire part de votre besoin de transmettre vos données au {productName}.
                 </Text>
               </Stack>
               <Text marginTop="2w" color="grey.800" fontWeight="700">
@@ -265,9 +197,7 @@ const DemandeBranchementErpForm = ({ sendBranchementErpDemand, submitState, erpS
 };
 
 DemandeBranchementErpForm.propTypes = {
-  sendBranchementErpDemand: PropTypes.func.isRequired,
-  submitState: PropTypes.oneOf(Object.values(SUBMIT_STATE)).isRequired,
-  erpState: PropTypes.oneOf(Object.values(ERP_STATE)).isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
-export default withSubmitBranchementErpDemand(DemandeBranchementErpForm);
+export default DemandeBranchementErpForm;
