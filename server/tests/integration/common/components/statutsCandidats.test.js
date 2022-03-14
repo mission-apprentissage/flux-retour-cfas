@@ -201,6 +201,21 @@ describe(__filename, () => {
       assert.equal(await StatutCandidatModel.countDocuments(), 1);
     });
 
+    it("Vérifie qu'on peut créer un statut avec une période formation sur une même année", async () => {
+      const { addOrUpdateStatuts } = await statutsCandidats();
+      const samplePeriodSameYear = [2021, 2021];
+
+      const statutWithPeriodeFormationOnSameYear = {
+        ...createRandomStatutCandidat(),
+        periode_formation: samplePeriodSameYear,
+      };
+
+      const result = await addOrUpdateStatuts([statutWithPeriodeFormationOnSameYear]);
+      assert.equal(result.added.length, 1);
+      assert.equal(result.updated.length, 0);
+      assert.equal(await StatutCandidatModel.countDocuments(), 1);
+    });
+
     it("Vérifie qu'on update le siret_etablissement d'un statut existant qui n'en a pas avec le SIRET de l'élément passé si le reste des infos est identique", async () => {
       const { addOrUpdateStatuts } = await statutsCandidats();
 
