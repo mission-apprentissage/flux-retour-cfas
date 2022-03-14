@@ -6,17 +6,6 @@ const config = require("../../../config");
 
 const API_ENDPOINT = config.mnaCatalogApi.endpoint;
 
-const getFormations2021Count = async () => {
-  const url = `${API_ENDPOINT}/entity/formations2021/count`;
-  try {
-    const { data } = await axios.get(url);
-    return data;
-  } catch (err) {
-    logger.error(`getFormations2021Count: something went wrong while requesting ${url}`, err);
-    return null;
-  }
-};
-
 const getFormations2021 = async (options) => {
   const url = `${API_ENDPOINT}/entity/formations2021`;
   try {
@@ -41,6 +30,5 @@ const getFormations2021 = async (options) => {
 };
 
 module.exports = {
-  getFormations2021Count,
   getFormations2021,
 };
