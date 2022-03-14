@@ -12,6 +12,7 @@ const { getMetiersBySirets } = require("../../common/apis/apiLba");
 const { sleep, generateRandomAlphanumericPhrase } = require("../../common/utils/miscUtils");
 const config = require("../../../config");
 const { validateUai } = require("../../common/domain/uai");
+const { Cfa } = require("../../common/domain/cfa");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -86,6 +87,7 @@ const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
     uai: statutForCfa.uai_etablissement,
     sirets: allSirets,
     nom: statutForCfa.nom_etablissement.trim() ?? null,
+    nom_tokenized: Cfa.createTokenizedNom(statutForCfa.nom_etablissement),
     adresse: statutForCfa.etablissement_adresse,
     branchement_tdb: true,
     source_seed_cfa: "StatutsCandidats",
@@ -109,6 +111,7 @@ const updateCfaFromStatutCandidat = async (cfas, cfaExistant, statutForCfa, allS
       $set: {
         uai: statutForCfa.uai_etablissement,
         nom: statutForCfa.nom_etablissement.trim() ?? null,
+        nom_tokenized: Cfa.createTokenizedNom(statutForCfa.nom_etablissement),
         adresse: statutForCfa.etablissement_adresse,
         sirets: allSirets,
         branchement_tdb: true,

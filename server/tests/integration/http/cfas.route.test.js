@@ -22,17 +22,17 @@ describe(__filename, () => {
     });
 
     it("sends a 200 HTTP response with results when match", async () => {
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
-        nom_etablissement: "FACULTE SCIENCES NANCY",
-        nom_etablissement_tokenized: buildTokenizedString("FACULTE SCIENCES NANCY", 3),
+      await new CfaModel({
+        nom: "BTP CFA Somme",
+        nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
+        uai: "0801302F",
       }).save();
 
-      const response = await httpClient.post("/api/cfas/search", { searchTerm: "FACULTE" });
+      const response = await httpClient.post("/api/cfas/search", { searchTerm: "Somme" });
 
       assert.equal(response.status, 200);
       assert.equal(response.data.length, 1);
-      assert.deepEqual(response.data[0].nom_etablissement, "FACULTE SCIENCES NANCY");
+      assert.deepEqual(response.data[0].uai, "0801302F");
     });
   });
 

@@ -4,7 +4,6 @@ const { duplicatesTypesCodes } = require("../constants/statutsCandidatsConstants
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
-const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { escapeRegExp } = require("../utils/regexUtils");
 const { isEqual } = require("date-fns");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
@@ -140,8 +139,6 @@ const createStatutCandidat = async (itemToCreate) => {
     siret_etablissement: itemToCreate.siret_etablissement,
     siret_etablissement_valid: validateSiret(itemToCreate.siret_etablissement),
     nom_etablissement: itemToCreate.nom_etablissement,
-    nom_etablissement_tokenized:
-      itemToCreate.nom_etablissement && buildTokenizedString(itemToCreate.nom_etablissement, 3),
     historique_statut_apprenant: [
       {
         valeur_statut: itemToCreate.statut_apprenant,

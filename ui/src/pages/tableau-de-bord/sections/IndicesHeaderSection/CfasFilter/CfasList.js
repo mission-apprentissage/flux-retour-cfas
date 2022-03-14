@@ -16,7 +16,7 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
             }}
             isSelected={selectedValue?.uai_etablissement === cfa.uai_etablissement}
           >
-            {cfa.nom_etablissement} ({cfa.etablissement_num_departement})
+            {cfa.nom_etablissement} ({cfa.departement})
           </FilterOption>
         ))}
     </List>
@@ -29,6 +29,7 @@ CfasList.propTypes = {
     PropTypes.shape({
       uai_etablissement: PropTypes.string.isRequired,
       nom_etablissement: PropTypes.string.isRequired,
+      departement: PropTypes.string.isRequired,
     }).isRequired
   ),
   selectedValue: PropTypes.shape({
