@@ -3,7 +3,7 @@ const { addDays, differenceInMilliseconds, isEqual } = require("date-fns");
 const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
 const { StatutCandidatModel, CfaModel, FormationModel } = require("../../../../src/common/model");
 const {
-  codesStatutsCandidats,
+  CODES_STATUT_APPRENANT,
   duplicatesTypesCodes,
 } = require("../../../../src/common/constants/statutsCandidatsConstants");
 const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../data/sample");
@@ -743,7 +743,7 @@ describe(__filename, () => {
 
       // Mise à jour du statut avec nouveau statut_apprenant
       const updatePayload = {
-        statut_apprenant: codesStatutsCandidats.abandon,
+        statut_apprenant: CODES_STATUT_APPRENANT.abandon,
         date_metier_mise_a_jour_statut: new Date().toISOString(),
       };
       await updateStatut(createdStatut._id, updatePayload);
@@ -753,7 +753,7 @@ describe(__filename, () => {
       const updatedHistorique = found.historique_statut_apprenant;
       assert.equal(updatedHistorique.length, 2);
       assert.equal(updatedHistorique[0].valeur_statut, createdStatut.statut_apprenant);
-      assert.equal(updatedHistorique[1].valeur_statut, codesStatutsCandidats.abandon);
+      assert.equal(updatedHistorique[1].valeur_statut, CODES_STATUT_APPRENANT.abandon);
       assert.equal(
         updatedHistorique[1].date_statut.getTime(),
         new Date(updatePayload.date_metier_mise_a_jour_statut).getTime()
@@ -770,17 +770,17 @@ describe(__filename, () => {
       await updateStatut(createdStatut._id, {
         ...simpleStatut,
         date_metier_mise_a_jour_statut: addDays(new Date(), 90),
-        statut_apprenant: codesStatutsCandidats.inscrit,
+        statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
       });
 
       const found1 = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found1.historique_statut_apprenant.length, 2);
-      assert.equal(found1.historique_statut_apprenant[1].valeur_statut, codesStatutsCandidats.inscrit);
+      assert.equal(found1.historique_statut_apprenant[1].valeur_statut, CODES_STATUT_APPRENANT.inscrit);
       assert.equal(isApproximatelyNow(found1.historique_statut_apprenant[1].date_reception), true);
 
       // update du statut avec une date antérieur au dernier élément de historique_statut_apprenant
       const updatePayload = {
-        statut_apprenant: codesStatutsCandidats.abandon,
+        statut_apprenant: CODES_STATUT_APPRENANT.abandon,
         date_metier_mise_a_jour_statut: new Date(),
       };
       await updateStatut(createdStatut._id, { ...simpleStatut, ...updatePayload });

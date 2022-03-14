@@ -1,4 +1,4 @@
-const { codesStatutsCandidats } = require("../../src/common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/statutsCandidatsConstants");
 
 const simpleStatut = {
   ine_apprenant: "12345",
@@ -11,7 +11,7 @@ const simpleStatut = {
   uai_etablissement: "testuai_etablissement",
   siret_etablissement: "11111111111111",
   nom_etablissement: "testnom_etablissement",
-  statut_apprenant: codesStatutsCandidats.apprenti,
+  statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
   date_metier_mise_a_jour_statut: "2020-01-10T17:42:36.000Z",
   periode_formation: [2020, 2021],
   annee_formation: 2020,
@@ -30,7 +30,7 @@ const statutsTest = [
     uai_etablissement: "testuai_etablissement",
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     date_metier_mise_a_jour_statut: "2020-01-10T17:42:36.000Z",
     periode_formation: [2020, 2021],
     annee_formation: 1,
@@ -45,7 +45,7 @@ const statutsTest = [
     uai_etablissement: "testuai_etablissement",
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 0,
     annee_scolaire: "2020-2021",
   },
@@ -57,7 +57,7 @@ const statutsTest = [
     uai_etablissement: "testuai_etablissement",
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 1,
     annee_scolaire: "2020-2021",
   },
@@ -82,7 +82,7 @@ const statutsTestUpdate = [
     uai_etablissement: "testuai_etablissement",
     siret_etablissement: "11111111111111",
     nom_etablissement: "testnom_etablissement",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     periode_formation: [2019, 2021],
     annee_formation: 2,
     annee_scolaire: "2020-2021",
@@ -100,7 +100,7 @@ const simpleStatutBadUpdate = {
   uai_etablissement: "testuai_etablissement",
   siret_etablissement: "11111111111111",
   nom_etablissement: "testnom_etablissement",
-  statut_apprenant: codesStatutsCandidats.inscrit,
+  statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
   periode_formation: [2020, 2022],
   date_metier_mise_a_jour_statut: "2022-01-01T12:00:00.000Z",
   annee_formation: 1,
@@ -119,7 +119,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000001S",
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     periode_formation: [2020, 2021],
     annee_formation: 2020,
   },
@@ -135,7 +135,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000001S",
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     periode_formation: [2020, 2021],
     annee_formation: 2020,
   },
@@ -172,7 +172,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000001S",
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
-    statut_apprenant: codesStatutsCandidats.apprenti,
+    statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
     periode_formation: [2020, 2021],
     annee_formation: 2020,
   },
@@ -187,7 +187,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000008S",
     siret_etablissement: "00000000000008",
     nom_etablissement: "Etablissement 3",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {
@@ -202,7 +202,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000001S",
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
-    statut_apprenant: codesStatutsCandidats.apprenti,
+    statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
     annee_formation: 2021,
   },
   {
@@ -247,7 +247,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000002D",
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {
@@ -277,7 +277,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000002D",
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {
@@ -307,7 +307,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000002D",
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {
@@ -337,7 +337,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000002D",
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {
@@ -367,7 +367,7 @@ const fullSampleWithUpdates = [
     uai_etablissement: "0000002D",
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
-    statut_apprenant: codesStatutsCandidats.apprenti,
+    statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
     annee_formation: 2021,
   },
 ];
@@ -385,7 +385,7 @@ const fullSample = [
     uai_etablissement: "0000001S",
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {
@@ -400,7 +400,7 @@ const fullSample = [
     uai_etablissement: "0000001S",
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {
@@ -424,7 +424,7 @@ const fullSample = [
     uai_etablissement: "0000001S",
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
-    statut_apprenant: codesStatutsCandidats.apprenti,
+    statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
     annee_formation: 2021,
   },
   {
@@ -437,7 +437,7 @@ const fullSample = [
     uai_etablissement: "0000008S",
     siret_etablissement: "00000000000008",
     nom_etablissement: "Etablissement 3",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {
@@ -452,7 +452,7 @@ const fullSample = [
     uai_etablissement: "0000001S",
     siret_etablissement: "00000000000001",
     nom_etablissement: "Etablissement de test",
-    statut_apprenant: codesStatutsCandidats.apprenti,
+    statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
     annee_formation: 2021,
   },
   {
@@ -497,7 +497,7 @@ const fullSample = [
     uai_etablissement: "0000002D",
     siret_etablissement: "00000000000022",
     nom_etablissement: "Etablissement de sport",
-    statut_apprenant: codesStatutsCandidats.inscrit,
+    statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
     annee_formation: 2021,
   },
   {

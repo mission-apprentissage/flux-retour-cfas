@@ -2,7 +2,7 @@ const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const cliProgress = require("cli-progress");
 const { jobNames } = require("../../common/constants/jobsConstants");
-const { codesStatutsCandidats } = require("../../common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../common/constants/statutsCandidatsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -26,7 +26,7 @@ runScript(async ({ db }) => {
     const document = await cursor.next();
     // only keep valid valeur_statut
     const cleanedHistorique = document.historique_statut_apprenant.filter((historiqueElem) => {
-      return Object.values(codesStatutsCandidats).includes(historiqueElem.valeur_statut);
+      return Object.values(CODES_STATUT_APPRENANT).includes(historiqueElem.valeur_statut);
     });
 
     if (cleanedHistorique.length !== document.historique_statut_apprenant.length) {

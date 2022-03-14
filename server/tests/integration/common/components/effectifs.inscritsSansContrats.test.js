@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 
 const { StatutCandidatModel } = require("../../../../src/common/model");
-const { codesStatutsCandidats } = require("../../../../src/common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/statutsCandidatsConstants");
 const { EffectifsInscritsSansContrats } = require("../../../../src/common/components/effectifs/inscrits-sans-contrats");
 
 describe(__filename, () => {
@@ -14,19 +14,19 @@ describe(__filename, () => {
       createRandomStatutCandidat({
         etablissement_num_region: "199",
         historique_statut_apprenant: [
-          { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
-          { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
         ],
       }),
       createRandomStatutCandidat({
         historique_statut_apprenant: [
-          { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-10-03T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-10-03T00:00:00") },
         ],
       }),
       createRandomStatutCandidat({
         etablissement_num_region: "199",
         historique_statut_apprenant: [
-          { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
         ],
       }),
       createRandomStatutCandidat({
@@ -35,30 +35,30 @@ describe(__filename, () => {
       }),
       createRandomStatutCandidat({
         historique_statut_apprenant: [
-          { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-03-22T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-03-22T00:00:00") },
         ],
       }),
       createRandomStatutCandidat({
         historique_statut_apprenant: [
-          { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-03-22T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-03-22T00:00:00") },
         ],
       }),
       createRandomStatutCandidat({
         historique_statut_apprenant: [
-          { valeur_statut: codesStatutsCandidats.abandon, date_statut: new Date("2020-03-25T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.abandon, date_statut: new Date("2020-03-25T00:00:00") },
         ],
       }),
       createRandomStatutCandidat({
         historique_statut_apprenant: [
-          { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-09-24T00:00:00") },
-          { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-10-30T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-24T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-10-30T00:00:00") },
         ],
       }),
       createRandomStatutCandidat({
         historique_statut_apprenant: [
-          { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-09-24T00:00:00") },
-          { valeur_statut: codesStatutsCandidats.apprenti, date_statut: new Date("2020-11-30T00:00:00") },
-          { valeur_statut: codesStatutsCandidats.inscrit, date_statut: new Date("2020-12-30T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-24T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-11-30T00:00:00") },
+          { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-12-30T00:00:00") },
         ],
       }),
     ];

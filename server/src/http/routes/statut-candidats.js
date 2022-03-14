@@ -4,7 +4,7 @@ const Joi = require("joi");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { codesStatutsCandidats } = require("../../common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../common/constants/statutsCandidatsConstants");
 const { cfdRegex } = require("../../common/domain/cfd");
 const { uaiRegex } = require("../../common/domain/uai");
 const validateRequestBody = require("../middlewares/validateRequestBody");
@@ -33,7 +33,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
     id_formation: Joi.string().regex(cfdRegex).required(),
     annee_scolaire: anneeScolaireSchema.required(),
     statut_apprenant: Joi.number()
-      .valid(codesStatutsCandidats.apprenti, codesStatutsCandidats.inscrit, codesStatutsCandidats.abandon)
+      .valid(CODES_STATUT_APPRENANT.apprenti, CODES_STATUT_APPRENANT.inscrit, CODES_STATUT_APPRENANT.abandon)
       .required(),
     date_metier_mise_a_jour_statut: dateSchema.required(),
 

@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { StatutCandidatModel } = require("../../../../src/common/model");
 const effectifs = require("../../../../src/common/components/effectifs");
-const { codesStatutsCandidats } = require("../../../../src/common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/statutsCandidatsConstants");
 
 describe(__filename, () => {
   const seedStatutsCandidats = async (statutsProps) => {
@@ -14,15 +14,15 @@ describe(__filename, () => {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: [
           {
-            valeur_statut: codesStatutsCandidats.inscrit,
+            valeur_statut: CODES_STATUT_APPRENANT.inscrit,
             date_statut: new Date("2020-09-12T00:00:00.000+0000"),
           },
           {
-            valeur_statut: codesStatutsCandidats.apprenti,
+            valeur_statut: CODES_STATUT_APPRENANT.apprenti,
             date_statut: new Date("2020-09-23T00:00:00.000+0000"),
           },
           {
-            valeur_statut: codesStatutsCandidats.abandon,
+            valeur_statut: CODES_STATUT_APPRENANT.abandon,
             date_statut: new Date("2020-10-02T00:00:00.000+0000"),
           },
         ],
@@ -37,7 +37,7 @@ describe(__filename, () => {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: [
           {
-            valeur_statut: codesStatutsCandidats.apprenti,
+            valeur_statut: CODES_STATUT_APPRENANT.apprenti,
             date_statut: new Date("2020-08-30T00:00:00.000+0000"),
           },
         ],
@@ -52,11 +52,11 @@ describe(__filename, () => {
       const randomStatut = createRandomStatutCandidat({
         historique_statut_apprenant: [
           {
-            valeur_statut: codesStatutsCandidats.inscrit,
+            valeur_statut: CODES_STATUT_APPRENANT.inscrit,
             date_statut: new Date("2020-09-29T00:00:00.000+0000"),
           },
           {
-            valeur_statut: codesStatutsCandidats.apprenti,
+            valeur_statut: CODES_STATUT_APPRENANT.apprenti,
             date_statut: new Date("2020-10-15T00:00:00.000+0000"),
           },
         ],
