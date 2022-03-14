@@ -63,6 +63,8 @@ const createFormation = async (cfd) => {
   const metiersFromCfd = await getMetiersByCfd(cfd);
   const formationEntity = Formation.create({
     cfd,
+    cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
+    cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
     libelle: buildFormationLibelle(formationInfo),
     niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
     niveau_libelle: formationInfo?.niveau,

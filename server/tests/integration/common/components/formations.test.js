@@ -83,13 +83,15 @@ describe(__filename, () => {
       }
     });
 
-    it("returns created formation when cfd was found in Tables de Correspondaces with intitule_long", async () => {
+    it("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {
       nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
 
       const cfd = "13534005";
       const created = await createFormation(cfd);
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
+        cfd_start_date: new Date(dataForGetCfdInfo.withIntituleLong.date_ouverture),
+        cfd_end_date: new Date(dataForGetCfdInfo.withIntituleLong.date_fermeture),
         libelle: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
         niveau: "7",
         niveau_libelle: "7 (Master, titre ingénieur...)",
@@ -107,6 +109,8 @@ describe(__filename, () => {
       const created = await createFormation(cfd);
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
         cfd,
+        cfd_start_date: new Date(dataForGetCfdInfo.withIntituleLong.date_ouverture),
+        cfd_end_date: new Date(dataForGetCfdInfo.withIntituleLong.date_fermeture),
         libelle: "",
         niveau: "7",
         niveau_libelle: "7 (Master, titre ingénieur...)",

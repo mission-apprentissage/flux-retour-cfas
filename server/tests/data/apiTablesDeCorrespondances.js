@@ -15,6 +15,9 @@ const dataForGetSiretInfo = {
 const dataForGetCfdInfo = {
   withIntituleLong: {
     cfd: "1463430A",
+    cfd_outdated: true,
+    date_fermeture: 1630368000000,
+    date_ouverture: 1093996800000,
     specialite: null,
     niveau: "7 (Master, titre ingénieur...)",
     intitule_long: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
@@ -53,6 +56,9 @@ const dataForGetCfdInfo = {
   },
   withoutIntituleLong: {
     cfd: "1463430A",
+    cfd_outdated: true,
+    date_fermeture: 1630368000000,
+    date_ouverture: 1093996800000,
     specialite: null,
     niveau: "7 (Master, titre ingénieur...)",
     intitule_long: null,
