@@ -6,7 +6,7 @@ const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { escapeRegExp } = require("../utils/regexUtils");
-const { isSameDay } = require("date-fns");
+const { isEqual } = require("date-fns");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
@@ -80,7 +80,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
   const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {
     return (
       historiqueItem.valeur_statut === toUpdate.statut_apprenant &&
-      isSameDay(new Date(historiqueItem.date_statut), new Date(toUpdate.date_metier_mise_a_jour_statut))
+      isEqual(new Date(historiqueItem.date_statut), new Date(toUpdate.date_metier_mise_a_jour_statut))
     );
   });
 
