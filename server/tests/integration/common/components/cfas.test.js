@@ -3,7 +3,7 @@ const cfasComponent = require("../../../../src/common/components/cfas");
 const { StatutCandidatModel, CfaModel } = require("../../../../src/common/model");
 const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
 const { addDays } = require("date-fns");
-const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
+const { Cfa } = require("../../../../src/common/domain/cfa");
 
 describe(__filename, () => {
   describe("searchCfas", () => {
@@ -61,7 +61,7 @@ describe(__filename, () => {
 
     beforeEach(async () => {
       for (let i = 0; i < cfaSeed.length; i++) {
-        const newCfa = new CfaModel({ ...cfaSeed[i], nom_tokenized: buildTokenizedString(cfaSeed[i].nom, 4) });
+        const newCfa = new CfaModel({ ...cfaSeed[i], nom_tokenized: Cfa.createTokenizedNom(cfaSeed[i].nom) });
         await newCfa.save();
       }
 
