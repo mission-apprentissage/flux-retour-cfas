@@ -6,7 +6,6 @@ const {
   CODES_STATUT_APPRENANT,
   duplicatesTypesCodes,
 } = require("../../../../src/common/constants/statutsCandidatsConstants");
-const { statutsTest, statutsTestUpdate, simpleStatut } = require("../../../data/sample");
 const { createRandomStatutCandidat, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
 const { reseauxCfas } = require("../../../../src/common/constants/networksConstants");
 
@@ -123,71 +122,96 @@ describe(__filename, () => {
     it("Vérifie l'ajout ou la mise à jour d'un statut'", async () => {
       const { addOrUpdateStatuts } = await statutsCandidats();
 
-      // Add statuts test
-      await addOrUpdateStatuts(statutsTest);
+      const seed1 = [
+        createRandomStatutCandidat({
+          nom_apprenant: "MBAPPE",
+          prenom_apprenant: "Kylian",
+          statut_apprenant: CODES_STATUT_APPRENANT.abandon,
+        }),
+        createRandomStatutCandidat({
+          nom_apprenant: "ALONSO",
+          prenom_apprenant: "Marcos",
+          statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
+        }),
+        createRandomStatutCandidat({
+          nom_apprenant: "HAVERTZ",
+          prenom_apprenant: "Kai",
+          statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
+        }),
+      ];
 
-      // Checks addOrUpdateStatuts method
-      assert.equal(await StatutCandidatModel.countDocuments({}), statutsTest.length);
-      const { added, updated } = await addOrUpdateStatuts(statutsTestUpdate);
+      // Add statuts test
+      await addOrUpdateStatuts(seed1);
+      assert.equal(await StatutCandidatModel.countDocuments(), 3);
+
+      const seed2 = [
+        seed1[0],
+        { ...seed1[1], statut_apprenant: CODES_STATUT_APPRENANT.abandon, date_metier_mise_a_jour_statut: new Date() },
+        { ...seed1[2], email_contact: "updated@mail.com" },
+        { ...seed1[2], nom_apprenant: "WERNER", prenom_apprenant: "Timo" },
+      ];
+      const { added, updated } = await addOrUpdateStatuts(seed2);
 
       // Check added
       assert.equal(added.length, 1);
       const foundAdded = await StatutCandidatModel.findById(added[0]._id).lean();
-      assert.equal(foundAdded.ine_apprenant, statutsTestUpdate[3].ine_apprenant);
-      assert.equal(foundAdded.nom_apprenant.toUpperCase(), statutsTestUpdate[3].nom_apprenant.toUpperCase());
-      assert.equal(foundAdded.prenom_apprenant.toUpperCase(), statutsTestUpdate[3].prenom_apprenant.toUpperCase());
-      assert.equal(foundAdded.email_contact, statutsTestUpdate[3].email_contact);
-      assert.equal(foundAdded.formation_cfd, statutsTestUpdate[3].formation_cfd);
-      assert.equal(foundAdded.uai_etablissement, statutsTestUpdate[3].uai_etablissement);
-      assert.equal(foundAdded.siret_etablissement, statutsTestUpdate[3].siret_etablissement);
-      assert.equal(foundAdded.statut_apprenant, statutsTestUpdate[3].statut_apprenant);
+      assert.equal(foundAdded.nom_apprenant.toUpperCase(), seed2[3].nom_apprenant.toUpperCase());
+      assert.equal(foundAdded.prenom_apprenant.toUpperCase(), seed2[3].prenom_apprenant.toUpperCase());
+      assert.equal(foundAdded.email_contact, seed2[3].email_contact);
+      assert.equal(foundAdded.formation_cfd, seed2[3].formation_cfd);
+      assert.equal(foundAdded.uai_etablissement, seed2[3].uai_etablissement);
+      assert.equal(foundAdded.historique_statut_apprenant[0].valeur_statut, seed2[3].statut_apprenant);
+      assert.equal(
+        foundAdded.historique_statut_apprenant[0].date_statut.getTime(),
+        seed2[3].date_metier_mise_a_jour_statut.getTime()
+      );
+      assert.equal(foundAdded.annee_scolaire, seed2[3].annee_scolaire);
       assert.equal(foundAdded.updated_at, null);
-      assert.equal(foundAdded.annee_formation, statutsTestUpdate[3].annee_formation);
-      assert.equal(foundAdded.annee_scolaire, statutsTestUpdate[3].annee_scolaire);
-      assert.deepEqual(foundAdded.periode_formation, statutsTestUpdate[3].periode_formation);
 
       // Check updated
       assert.equal(updated.length, 3);
 
       const firstUpdated = await StatutCandidatModel.findById(updated[0]._id).lean();
-      assert.equal(firstUpdated.ine_apprenant, statutsTestUpdate[0].ine_apprenant);
-      assert.equal(firstUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[0].nom_apprenant.toUpperCase());
-      assert.equal(firstUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[0].prenom_apprenant.toUpperCase());
-      assert.equal(firstUpdated.email_contact, statutsTestUpdate[0].email_contact);
-      assert.equal(firstUpdated.formation_cfd, statutsTestUpdate[0].formation_cfd);
-      assert.equal(firstUpdated.libelle_court_formation, statutsTestUpdate[0].libelle_court_formation);
-      assert.equal(firstUpdated.libelle_long_formation, statutsTestUpdate[0].libelle_long_formation);
-      assert.equal(firstUpdated.uai_etablissement, statutsTestUpdate[0].uai_etablissement);
-      assert.equal(firstUpdated.siret_etablissement, statutsTestUpdate[0].siret_etablissement);
-      assert.equal(firstUpdated.nom_etablissement, statutsTestUpdate[0].nom_etablissement);
-      assert.equal(firstUpdated.statut_apprenant, statutsTestUpdate[0].statut_apprenant);
-      assert.equal(firstUpdated.annee_scolaire, statutsTestUpdate[0].annee_scolaire);
-      assert.ok(firstUpdated.updated_at);
+      assert.equal(firstUpdated.nom_apprenant.toUpperCase(), seed1[0].nom_apprenant.toUpperCase());
+      assert.equal(firstUpdated.prenom_apprenant.toUpperCase(), seed1[0].prenom_apprenant.toUpperCase());
+      assert.equal(firstUpdated.uai_etablissement, seed1[0].uai_etablissement);
+      assert.equal(firstUpdated.formation_cfd, seed1[0].formation_cfd);
+      assert.equal(firstUpdated.annee_scolaire, seed1[0].annee_scolaire);
+      assert.equal(firstUpdated.historique_statut_apprenant.length, 1);
+      assert.equal(firstUpdated.historique_statut_apprenant[0].valeur_statut, seed1[0].statut_apprenant);
+      assert.equal(
+        firstUpdated.historique_statut_apprenant[0].date_statut.getTime(),
+        seed1[0].date_metier_mise_a_jour_statut.getTime()
+      );
+      assert.equal(isApproximatelyNow(firstUpdated.updated_at), true);
 
       const secondUpdated = await StatutCandidatModel.findById(updated[1]._id).lean();
-      assert.equal(secondUpdated.ine_apprenant, statutsTestUpdate[1].ine_apprenant);
-      assert.equal(secondUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[1].nom_apprenant.toUpperCase());
-      assert.equal(secondUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[1].prenom_apprenant.toUpperCase());
-      assert.equal(secondUpdated.email_contact, statutsTestUpdate[1].email_contact);
-      assert.equal(secondUpdated.formation_cfd, statutsTestUpdate[1].formation_cfd);
-      assert.equal(secondUpdated.uai_etablissement, statutsTestUpdate[1].uai_etablissement);
-      assert.equal(secondUpdated.siret_etablissement, statutsTestUpdate[1].siret_etablissement);
-      assert.equal(secondUpdated.nom_etablissement, statutsTestUpdate[1].nom_etablissement);
-      assert.equal(secondUpdated.statut_apprenant, statutsTestUpdate[1].statut_apprenant);
-      assert.equal(secondUpdated.annee_scolaire, statutsTestUpdate[1].annee_scolaire);
-      assert.ok(secondUpdated.updated_at);
+      assert.equal(secondUpdated.nom_apprenant.toUpperCase(), seed1[1].nom_apprenant.toUpperCase());
+      assert.equal(secondUpdated.prenom_apprenant.toUpperCase(), seed1[1].prenom_apprenant.toUpperCase());
+      assert.equal(secondUpdated.uai_etablissement, seed1[1].uai_etablissement);
+      assert.equal(secondUpdated.formation_cfd, seed1[1].formation_cfd);
+      assert.equal(secondUpdated.annee_scolaire, seed1[1].annee_scolaire);
+      assert.equal(secondUpdated.historique_statut_apprenant.length, 2);
+      assert.equal(secondUpdated.historique_statut_apprenant[1].valeur_statut, seed2[1].statut_apprenant);
+      assert.equal(
+        secondUpdated.historique_statut_apprenant[1].date_statut.getTime(),
+        seed2[1].date_metier_mise_a_jour_statut.getTime()
+      );
+      assert.equal(isApproximatelyNow(secondUpdated.updated_at), true);
 
       const thirdUpdated = await StatutCandidatModel.findById(updated[2]._id).lean();
-      assert.equal(thirdUpdated.nom_apprenant.toUpperCase(), statutsTestUpdate[2].nom_apprenant.toUpperCase());
-      assert.equal(thirdUpdated.prenom_apprenant.toUpperCase(), statutsTestUpdate[2].prenom_apprenant.toUpperCase());
-      assert.equal(thirdUpdated.email_contact, statutsTestUpdate[2].email_contact);
-      assert.equal(thirdUpdated.formation_cfd, statutsTestUpdate[2].formation_cfd);
-      assert.equal(thirdUpdated.uai_etablissement, statutsTestUpdate[2].uai_etablissement);
-      assert.equal(thirdUpdated.siret_etablissement, statutsTestUpdate[2].siret_etablissement);
-      assert.equal(thirdUpdated.nom_etablissement, statutsTestUpdate[2].nom_etablissement);
-      assert.equal(thirdUpdated.statut_apprenant, statutsTestUpdate[2].statut_apprenant);
-      assert.equal(thirdUpdated.annee_scolaire, statutsTestUpdate[2].annee_scolaire);
-      assert.ok(thirdUpdated.updated_at);
+      assert.equal(thirdUpdated.nom_apprenant.toUpperCase(), seed1[2].nom_apprenant.toUpperCase());
+      assert.equal(thirdUpdated.prenom_apprenant.toUpperCase(), seed1[2].prenom_apprenant.toUpperCase());
+      assert.equal(thirdUpdated.uai_etablissement, seed1[2].uai_etablissement);
+      assert.equal(thirdUpdated.formation_cfd, seed1[2].formation_cfd);
+      assert.equal(thirdUpdated.annee_scolaire, seed1[2].annee_scolaire);
+      assert.equal(thirdUpdated.historique_statut_apprenant.length, 1);
+      assert.equal(thirdUpdated.historique_statut_apprenant[0].valeur_statut, seed1[2].statut_apprenant);
+      assert.equal(
+        thirdUpdated.historique_statut_apprenant[0].date_statut.getTime(),
+        seed1[2].date_metier_mise_a_jour_statut.getTime()
+      );
+      assert.equal(isApproximatelyNow(thirdUpdated.updated_at), true);
     });
 
     it("Vérifie qu'on peut créer un statut sans annee_scolaire", async () => {
@@ -715,36 +739,47 @@ describe(__filename, () => {
       assert.equal(foundAfterUpdate.formation_cfd, createdStatut.formation_cfd);
     });
 
-    it("Vérifie qu'on update PAS historique_statut_apprenant quand un statut_apprenant identique à l'actuel est envoyé", async () => {
+    it("Vérifie que historique_statut_apprenant reste inchangé lorsque le statut_apprenant et date_metier_mise_a_jour_statut fournis existent déjà", async () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 
-      const createdStatut = await createStatutCandidat(simpleStatut);
+      const randomStatutCandidatProps = createRandomStatutCandidat({
+        date_metier_mise_a_jour_statut: new Date("2022-04-01"),
+        statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
+      });
+      const createdStatut = await createStatutCandidat(randomStatutCandidatProps);
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
-      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, CODES_STATUT_APPRENANT.apprenti);
       assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec le même statut_apprenant
-      await updateStatut(createdStatut._id, { statut_apprenant: simpleStatut.statut_apprenant });
+      await updateStatut(createdStatut._id, {
+        statut_apprenant: randomStatutCandidatProps.statut_apprenant,
+        date_metier_mise_a_jour_statut: new Date("2022-04-01"),
+      });
 
       // Check value in db
       const found = await StatutCandidatModel.findById(createdStatut._id);
       assert.equal(found.historique_statut_apprenant.length, 1);
     });
 
-    it("Vérifie qu'on update historique_statut_apprenant quand un NOUVEAU statut_apprenant est envoyé", async () => {
+    it("Vérifie qu'on ajoute un élément à historique_statut_apprenant lorsque le statut_apprenant et date_metier_mise_a_jour_statut fournis n'existent pas", async () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 
-      const createdStatut = await createStatutCandidat(simpleStatut);
+      const randomStatutCandidatProps = createRandomStatutCandidat({
+        date_metier_mise_a_jour_statut: new Date("2022-04-01"),
+        statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
+      });
+      const createdStatut = await createStatutCandidat(randomStatutCandidatProps);
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
-      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, CODES_STATUT_APPRENANT.inscrit);
       assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
 
       // Mise à jour du statut avec nouveau statut_apprenant
       const updatePayload = {
         statut_apprenant: CODES_STATUT_APPRENANT.abandon,
-        date_metier_mise_a_jour_statut: new Date().toISOString(),
+        date_metier_mise_a_jour_statut: "2022-05-13",
       };
       await updateStatut(createdStatut._id, updatePayload);
 
@@ -752,7 +787,7 @@ describe(__filename, () => {
       const found = await StatutCandidatModel.findById(createdStatut._id);
       const updatedHistorique = found.historique_statut_apprenant;
       assert.equal(updatedHistorique.length, 2);
-      assert.equal(updatedHistorique[0].valeur_statut, createdStatut.statut_apprenant);
+      assert.equal(updatedHistorique[0].valeur_statut, CODES_STATUT_APPRENANT.inscrit);
       assert.equal(updatedHistorique[1].valeur_statut, CODES_STATUT_APPRENANT.abandon);
       assert.equal(
         updatedHistorique[1].date_statut.getTime(),
@@ -765,10 +800,14 @@ describe(__filename, () => {
     it("Vérifie qu'on update historique_statut_apprenant en supprimant les éléments d'historique postérieurs à la date_metier_mise_a_jour_statut envoyée", async () => {
       const { updateStatut, createStatutCandidat } = await statutsCandidats();
 
-      const createdStatut = await createStatutCandidat(simpleStatut);
+      const randomStatutCandidatProps = createRandomStatutCandidat({
+        date_metier_mise_a_jour_statut: new Date(),
+        statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
+      });
+      const createdStatut = await createStatutCandidat(randomStatutCandidatProps);
       // update created statut to add an element with date_statut 90 days after now date
       await updateStatut(createdStatut._id, {
-        ...simpleStatut,
+        ...randomStatutCandidatProps,
         date_metier_mise_a_jour_statut: addDays(new Date(), 90),
         statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
       });
@@ -783,7 +822,7 @@ describe(__filename, () => {
         statut_apprenant: CODES_STATUT_APPRENANT.abandon,
         date_metier_mise_a_jour_statut: new Date(),
       };
-      await updateStatut(createdStatut._id, { ...simpleStatut, ...updatePayload });
+      await updateStatut(createdStatut._id, { ...randomStatutCandidatProps, ...updatePayload });
 
       // historique should contain the new element and the one date with a later date should be removed
       const found2 = await StatutCandidatModel.findById(createdStatut._id);
@@ -793,7 +832,6 @@ describe(__filename, () => {
         found2.historique_statut_apprenant[1].date_statut.getTime(),
         updatePayload.date_metier_mise_a_jour_statut.getTime()
       );
-      assert.equal(found2.statut_apprenant, updatePayload.statut_apprenant);
       assert.equal(isApproximatelyNow(found2.historique_statut_apprenant[1].date_reception), true);
     });
 
@@ -837,7 +875,6 @@ describe(__filename, () => {
       assert.equal(createdStatutJson.uai_etablissement, randomStatut.uai_etablissement);
       assert.equal(createdStatutJson.siret_etablissement, randomStatut.siret_etablissement);
       assert.equal(createdStatutJson.nom_etablissement, randomStatut.nom_etablissement);
-      assert.equal(createdStatutJson.statut_apprenant, randomStatut.statut_apprenant);
       assert.equal(createdStatutJson.source, randomStatut.source);
       assert.equal(createdStatutJson.annee_formation, randomStatut.annee_formation);
       assert.deepEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
@@ -1016,31 +1053,19 @@ describe(__filename, () => {
       }
 
       // Create 2 duplicates for Jean Dupont
-      const firstDup = {
+      const firstDupUnicityKey = {
         formation_cfd: "01022103",
         uai_etablissement: "0762518Z",
-        prenom_apprenant: "JEA",
+        prenom_apprenant: "JEAN",
         nom_apprenant: "DUPONT",
         annee_scolaire: "2022-2023",
-        statut_apprenant: 2,
+        statut_apprenant: 1,
       };
-      await createStatutCandidat(createRandomStatutCandidat(firstDup));
-      await createStatutCandidat(createRandomStatutCandidat(firstDup));
+      await createStatutCandidat(createRandomStatutCandidat(firstDupUnicityKey));
+      await createStatutCandidat(createRandomStatutCandidat(firstDupUnicityKey));
 
-      // create 2 duplicates with a different statut_apprenant
+      // create 2 duplicates and update one of them with a new statut_apprenant
       const secondDup = {
-        formation_cfd: "01022105",
-        uai_etablissement: "0769999P",
-        prenom_apprenant: "Marie",
-        nom_apprenant: "Durand",
-        annee_scolaire: "2021-2022",
-        statut_apprenant: 2,
-      };
-      await createStatutCandidat(createRandomStatutCandidat(secondDup));
-      await createStatutCandidat(createRandomStatutCandidat({ ...secondDup, statut_apprenant: 3 }));
-
-      // create 2 duplicates and update one of them
-      const thirdDups = {
         formation_cfd: "01022106",
         uai_etablissement: "0769888P",
         prenom_apprenant: "John",
@@ -1048,9 +1073,11 @@ describe(__filename, () => {
         annee_scolaire: "2021-2022",
         statut_apprenant: 2,
       };
-      await createStatutCandidat(createRandomStatutCandidat(thirdDups));
-      await createStatutCandidat(createRandomStatutCandidat(thirdDups));
-      await addOrUpdateStatuts([createRandomStatutCandidat({ ...thirdDups, statut_apprenant: 3 })]);
+      await createStatutCandidat(createRandomStatutCandidat(secondDup));
+      await createStatutCandidat(createRandomStatutCandidat(secondDup));
+      await addOrUpdateStatuts([
+        createRandomStatutCandidat({ ...secondDup, statut_apprenant: 3, date_metier_mise_a_jour_statut: new Date() }),
+      ]);
 
       const duplicatesListFound = await getDuplicatesList(
         duplicatesTypesCodes.unique.code,
@@ -1062,8 +1089,8 @@ describe(__filename, () => {
       assert.equal(duplicatesListFound.length, 1);
       assert.equal(duplicatesListFound[0].duplicatesCount, 2);
       assert.equal(duplicatesListFound[0].duplicatesIds.length, 2);
-      assert.deepEqual(duplicatesListFound[0].commonData.prenom_apprenant, firstDup.prenom_apprenant);
-      assert.deepEqual(duplicatesListFound[0].commonData.nom_apprenant, firstDup.nom_apprenant);
+      assert.deepEqual(duplicatesListFound[0].commonData.prenom_apprenant, firstDupUnicityKey.prenom_apprenant);
+      assert.deepEqual(duplicatesListFound[0].commonData.nom_apprenant, firstDupUnicityKey.nom_apprenant);
     });
 
     it("Vérifie la récupération des doublons d'uai", async () => {

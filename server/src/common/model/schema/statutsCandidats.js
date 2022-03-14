@@ -165,21 +165,10 @@ module.exports = new Schema({
     default: null,
     description: "Siret de l'établissement formateur - depuis le catalogue",
   },
-  statut_apprenant: {
-    type: Number,
-    default: null,
-    description: "Statut de l'apprenant",
-    index: true,
-  },
   historique_statut_apprenant: {
     type: [Object],
     default: [],
     description: "Historique du statut de l'apprenant",
-  },
-  date_metier_mise_a_jour_statut: {
-    type: Date,
-    default: null,
-    description: "Date métier de mise à jour du statut",
   },
   periode_formation: {
     type: [Number],
