@@ -4,28 +4,28 @@ module.exports = new Schema({
   ine_apprenant: {
     type: String,
     default: null,
-    description: "N° INE du jeune",
+    description: "N° INE de l'apprenant",
     index: true,
   },
   nom_apprenant: {
     type: String,
     default: null,
-    description: "Nom du jeune",
+    description: "Nom de l'apprenant",
   },
   prenom_apprenant: {
     type: String,
     default: null,
-    description: "Prénom du jeune",
+    description: "Prénom de l'apprenant",
   },
   email_contact: {
     type: String,
     default: null,
-    description: "Adresse mail de contact du jeune",
+    description: "Adresse mail de contact de l'apprenant",
   },
   formation_cfd: {
     type: String,
     default: null,
-    description: "CFD de la formation du candidat",
+    description: "CFD de la formation à laquelle l'apprenant est inscrit",
     index: true,
   },
   libelle_court_formation: {
@@ -51,7 +51,7 @@ module.exports = new Schema({
   uai_etablissement: {
     type: String,
     default: null,
-    description: "Code uai de l'établissement d'origine",
+    description: "Code uai de l'établissement formateur",
     index: true,
     sparse: true,
   },
@@ -82,63 +82,63 @@ module.exports = new Schema({
   etablissement_adresse: {
     type: String,
     default: null,
-    description: "Adresse complète de l'établissement",
+    description: "Adresse complète du CFA",
   },
   etablissement_code_postal: {
     type: String,
     default: null,
-    description: "Code postal établissement",
+    description: "Code postal du CFA",
   },
   etablissement_localite: {
     type: String,
     default: null,
-    description: "Localité établissement",
+    description: "Localité du CFA",
   },
   etablissement_geo_coordonnees: {
     type: String,
     implicit_type: "geo_point",
     default: null,
-    description: "Latitude et longitude de l'établissement",
+    description: "Latitude et longitude du CFA",
   },
   etablissement_nom_region: {
     type: String,
     default: null,
-    description: "Région de l'établissement",
+    description: "Région du CFA",
   },
   etablissement_num_region: {
     type: String,
     default: null,
-    description: "Numéro de la région de l'établissement",
+    description: "Numéro de la région du CFA",
   },
   etablissement_num_departement: {
     type: String,
     default: null,
-    description: "Numéro de departement de l'établissement",
+    description: "Numéro de departement du CFA",
   },
   etablissement_nom_departement: {
     type: String,
     default: null,
-    description: "Nom du departement de l'établissement",
+    description: "Nom du departement du CFA",
   },
   etablissement_nom_academie: {
     type: String,
     default: null,
-    description: "Nom de l'académie de l'établissement",
+    description: "Nom de l'académie du CFA",
   },
   etablissement_num_academie: {
     type: String,
     default: null,
-    description: "Numéro de l'académie de l'établissement",
+    description: "Numéro de l'académie du CFA",
   },
   etablissement_gestionnaire_siret: {
     type: String,
     default: null,
-    description: "Siret de l'établissement gestionnaire - depuis le catalogue",
+    description: "Siret du CFA gestionnaire - depuis le catalogue",
   },
   etablissement_formateur_siret: {
     type: String,
     default: null,
-    description: "Siret de l'établissement formateur - depuis le catalogue",
+    description: "Siret du CFA formateur - depuis le catalogue",
   },
   historique_statut_apprenant: {
     type: [Object],
@@ -157,12 +157,12 @@ module.exports = new Schema({
   },
   annee_scolaire: {
     type: String,
-    description: 'Année scolaire sur laquelle le statut candidat est enregistré (ex: "2020-2021")',
+    description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
   },
   updated_at: {
     type: Date,
     default: null,
-    description: "Date d'ajout en base de données",
+    description: "Date de mise à jour en base de données",
   },
   created_at: {
     type: Date,
@@ -171,7 +171,7 @@ module.exports = new Schema({
   },
   source: {
     type: String,
-    description: "Source du statut candidat (Ymag, Gesti...)",
+    description: "Source du dossier apprenant (Ymag, Gesti...)",
     index: true,
   },
   match_formation_mnaCatalog_cfd_siret: {
@@ -182,22 +182,22 @@ module.exports = new Schema({
   id_erp_apprenant: {
     type: String,
     default: null,
-    description: "Identifiant du jeune dans l'erp",
+    description: "Identifiant de l'apprenant dans l'erp",
   },
   tel_apprenant: {
     type: String,
     default: null,
-    description: "Numéro de téléphone du jeune",
+    description: "Numéro de téléphone de l'apprenant",
   },
   code_commune_insee_apprenant: {
     type: String,
     default: null,
-    description: "Code commune insee du jeune",
+    description: "Code commune insee de l'apprenant",
   },
   date_de_naissance_apprenant: {
     type: Date,
     default: null,
-    description: "Date de naissance du jeune",
+    description: "Date de naissance de l'apprenant",
   },
   etablissement_formateur_geo_coordonnees: {
     type: String,
@@ -238,6 +238,6 @@ module.exports = new Schema({
   formation_rncp: {
     type: String,
     default: null,
-    description: "Code RNCP de la formation du candidat",
+    description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
   },
 });

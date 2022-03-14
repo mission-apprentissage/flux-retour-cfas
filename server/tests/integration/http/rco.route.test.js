@@ -2,10 +2,10 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
-const { RcoStatutCandidatModel, JobEventModel } = require("../../../src/common/model");
-const { createRandomRcoStatutCandidat } = require("../../data/randomizedSample");
 const { jobNames, jobEventStatuts } = require("../../../src/common/constants/jobsConstants");
-const { effectifsIndicators } = require("../../../src/common/constants/statutsCandidatsConstants");
+const { effectifsIndicators } = require("../../../src/common/constants/dossierApprenantConstants");
+const { RcoDossierApprenantModel, JobEventModel } = require("../../../src/common/model");
+const { createRandomRcoDossierApprenant } = require("../../data/randomizedSample");
 
 const user = { name: "rcoUser", password: "password" };
 
@@ -58,8 +58,8 @@ describe(__filename, () => {
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoStatutCandidatModel({
-          ...createRandomRcoStatutCandidat(),
+        await new RcoDossierApprenantModel({
+          ...createRandomRcoDossierApprenant(),
           uai_etablissement: uaiTest,
         }).save();
       }
@@ -91,8 +91,8 @@ describe(__filename, () => {
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoStatutCandidatModel({
-          ...createRandomRcoStatutCandidat(),
+        await new RcoDossierApprenantModel({
+          ...createRandomRcoDossierApprenant(),
           uai_etablissement: uaiTest,
         }).save();
       }
@@ -128,8 +128,8 @@ describe(__filename, () => {
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoStatutCandidatModel({
-          ...createRandomRcoStatutCandidat(),
+        await new RcoDossierApprenantModel({
+          ...createRandomRcoDossierApprenant(),
           etablissement_formateur_code_commune_insee: etablissement_formateur_code_commune_inseeTest,
           etablissement_code_postal: etablissement_code_postalTest,
           periode_formation: periode_formationTest,
@@ -193,13 +193,13 @@ describe(__filename, () => {
         action: jobEventStatuts.ended,
       }).save();
 
-      await new RcoStatutCandidatModel({
-        ...createRandomRcoStatutCandidat(),
+      await new RcoDossierApprenantModel({
+        ...createRandomRcoDossierApprenant(),
         statut_calcule: effectifsIndicators.apprentis,
       }).save();
 
-      await new RcoStatutCandidatModel({
-        ...createRandomRcoStatutCandidat(),
+      await new RcoDossierApprenantModel({
+        ...createRandomRcoDossierApprenant(),
         statut_calcule: effectifsIndicators.inscritsSansContrats,
       }).save();
 

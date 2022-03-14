@@ -11,7 +11,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 
 runScript(async ({ effectifs, db }) => {
   await identifyHistoryWithBadDates({ effectifs, db });
-}, jobNames.statutsCandidatsBadHistoryIdentifyBadDates);
+}, jobNames.dossiersApprenantsBadHistoryIdentifyBadDates);
 
 const identifyHistoryWithBadDates = async ({ effectifs, db }) => {
   logger.info("Run identification statuts-candidats with historique_statut_apprenant with non-chronological order...");
@@ -20,7 +20,7 @@ const identifyHistoryWithBadDates = async ({ effectifs, db }) => {
   await resultsCollection.deleteMany({});
 
   // Identify all statuts with bad dates in history
-  const statutsWithBadDatesInHistory = await effectifs.getStatutsWithBadDate();
+  const statutsWithBadDatesInHistory = await effectifs.getDossierApprenantsWithBadDate();
 
   loadingBar.start(statutsWithBadDatesInHistory.length, 0);
 

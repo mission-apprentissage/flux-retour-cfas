@@ -1,7 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { CfaModel, StatutCandidatModel } = require("../../common/model");
+const { CfaModel, DossierApprenantModel } = require("../../common/model");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 
 module.exports = ({ cfas, cfaDataFeedback }) => {
@@ -48,7 +48,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
       const { uai } = req.params;
 
       // Search cfa in statuts
-      const cfaFound = await StatutCandidatModel.findOne({
+      const cfaFound = await DossierApprenantModel.findOne({
         uai_etablissement: uai,
       }).lean();
 

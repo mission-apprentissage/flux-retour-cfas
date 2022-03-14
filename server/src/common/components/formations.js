@@ -1,4 +1,4 @@
-const { FormationModel, StatutCandidatModel } = require("../model");
+const { FormationModel, DossierApprenantModel } = require("../model");
 const { validateCfd } = require("../domain/cfd");
 const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
 const { getMetiersByCfd } = require("../apis/apiLba");
@@ -87,7 +87,7 @@ const createFormation = async (cfd) => {
 const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
 
-  const eligibleCfds = await StatutCandidatModel.distinct("formation_cfd", otherFilters);
+  const eligibleCfds = await DossierApprenantModel.distinct("formation_cfd", otherFilters);
 
   const matchStage = searchTerm
     ? {

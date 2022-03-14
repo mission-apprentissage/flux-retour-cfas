@@ -1,16 +1,16 @@
 const assert = require("assert").strict;
-const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
+const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
 const stats = require("../../../../src/common/components/stats");
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 
 describe(__filename, () => {
   it("Permet de récupérer le nb d'etablissements distincts par uai", async () => {
     // Seed with sample data
-    const { addOrUpdateStatuts } = await statutsCandidats();
-    await addOrUpdateStatuts([
-      createRandomStatutCandidat({ uai_etablissement: "0762232N" }),
-      createRandomStatutCandidat({ uai_etablissement: "0762232X" }),
-      createRandomStatutCandidat({ uai_etablissement: "0762232Z" }),
+    const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
+    await addOrUpdateDossiersApprenants([
+      createRandomDossierApprenant({ uai_etablissement: "0762232N" }),
+      createRandomDossierApprenant({ uai_etablissement: "0762232X" }),
+      createRandomDossierApprenant({ uai_etablissement: "0762232Z" }),
     ]);
 
     // Calcul stats
@@ -23,15 +23,15 @@ describe(__filename, () => {
 
   it("Permet de récupérer le nb d'etablissements distincts par siret", async () => {
     // Seed with sample data
-    const { addOrUpdateStatuts } = await statutsCandidats();
-    await addOrUpdateStatuts([
-      createRandomStatutCandidat({ siret_etablissement: "80070060000010" }),
-      createRandomStatutCandidat({ siret_etablissement: "80070060000011" }),
-      createRandomStatutCandidat({ siret_etablissement: "80070060000011" }),
-      createRandomStatutCandidat({ siret_etablissement: "80070060000012" }),
-      createRandomStatutCandidat({ siret_etablissement: "80070060000012" }),
-      createRandomStatutCandidat({ siret_etablissement: "80070060000012" }),
-      createRandomStatutCandidat({ siret_etablissement: "80070060000012" }),
+    const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
+    await addOrUpdateDossiersApprenants([
+      createRandomDossierApprenant({ siret_etablissement: "80070060000010" }),
+      createRandomDossierApprenant({ siret_etablissement: "80070060000011" }),
+      createRandomDossierApprenant({ siret_etablissement: "80070060000011" }),
+      createRandomDossierApprenant({ siret_etablissement: "80070060000012" }),
+      createRandomDossierApprenant({ siret_etablissement: "80070060000012" }),
+      createRandomDossierApprenant({ siret_etablissement: "80070060000012" }),
+      createRandomDossierApprenant({ siret_etablissement: "80070060000012" }),
     ]);
 
     // Calcul stats

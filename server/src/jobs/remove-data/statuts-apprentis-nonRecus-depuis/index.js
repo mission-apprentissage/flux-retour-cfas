@@ -3,7 +3,7 @@ const Joi = require("joi");
 
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { StatutCandidatModel } = require("../../../common/model");
+const { DossierApprenantModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 
 runScript(async ({ effectifs }) => {
@@ -33,7 +33,7 @@ runScript(async ({ effectifs }) => {
   let count = 0;
 
   await asyncForEach(toDelete, async (statut) => {
-    const result = await StatutCandidatModel.deleteOne({ _id: statut._id });
+    const result = await DossierApprenantModel.deleteOne({ _id: statut._id });
     count += result.deletedCount;
   });
 

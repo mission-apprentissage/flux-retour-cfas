@@ -3,10 +3,10 @@ const path = require("path");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { CfaModel, StatutCandidatModel } = require("../../common/model");
 const { jobNames } = require("../../common/constants/jobsConstants");
 const { reseauxCfas } = require("../../common/constants/networksConstants");
 const { erps } = require("../../common/constants/erpsConstants");
+const { CfaModel, DossierApprenantModel } = require("../../common/model");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
 const { sleep, generateRandomAlphanumericPhrase } = require("../../common/utils/miscUtils");
@@ -22,7 +22,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 runScript(async ({ cfas, ovhStorage }) => {
   logger.info("Seeding referentiel CFAs");
 
-  await seedCfasFromStatutsCandidatsUaisValid(cfas);
+  await seedCfasFromDossiersApprenantsUaisValid(cfas);
   await seedMetiersFromLbaApi();
 
   await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CMA);
@@ -41,11 +41,11 @@ runScript(async ({ cfas, ovhStorage }) => {
 /**
  * Seed des cfas depuis statuts candidats avec UAIs valid
  */
-const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
+const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
   // All distinct valid uais
-  const allUais = await StatutCandidatModel.distinct("uai_etablissement");
+  const allUais = await DossierApprenantModel.distinct("uai_etablissement");
 
-  logger.info(`Seeding Referentiel CFAs from ${allUais.length} UAIs found in statutsCandidats`);
+  logger.info(`Seeding Referentiel CFAs from ${allUais.length} UAIs found in DossierApprenant`);
 
   loadingBar.start(allUais.length, 0);
 
@@ -53,10 +53,10 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
     loadingBar.increment();
 
     // Gets statuts & sirets for UAI
-    const statutForUai = await StatutCandidatModel.findOne({
+    const statutForUai = await DossierApprenantModel.findOne({
       uai_etablissement: currentUai,
     });
-    const allSiretsForUai = await StatutCandidatModel.distinct("siret_etablissement", {
+    const allSiretsForUai = await DossierApprenantModel.distinct("siret_etablissement", {
       uai_etablissement: currentUai,
       siret_etablissement_valid: true,
     });
@@ -66,9 +66,9 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
     // Create or update CFA
     if (statutForUai) {
       if (cfaExistant) {
-        await updateCfaFromStatutCandidat(cfas, cfaExistant, statutForUai, allSiretsForUai);
+        await updateCfaFromDossierApprenant(cfas, cfaExistant, statutForUai, allSiretsForUai);
       } else {
-        await createCfaFromStatutCandidat(cfas, statutForUai, allSiretsForUai);
+        await createCfaFromDossierApprenant(cfas, statutForUai, allSiretsForUai);
       }
     }
   });
@@ -80,7 +80,7 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
  * Create cfa from statut
  * @param {*} statutForCfa
  */
-const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
+const createCfaFromDossierApprenant = async (cfas, statutForCfa, allSirets) => {
   const accessToken = generateRandomAlphanumericPhrase();
 
   await new CfaModel({
@@ -104,7 +104,7 @@ const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
  * Update cfa from statut
  * @param {*} statutForCfa
  */
-const updateCfaFromStatutCandidat = async (cfas, cfaExistant, statutForCfa, allSirets) => {
+const updateCfaFromDossierApprenant = async (cfas, cfaExistant, statutForCfa, allSirets) => {
   await CfaModel.findOneAndUpdate(
     { _id: cfaExistant._id },
     {

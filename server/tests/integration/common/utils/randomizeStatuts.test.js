@@ -1,16 +1,16 @@
 const assert = require("assert").strict;
-const statutsCandidats = require("../../../../src/common/components/statutsCandidats");
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { historySequenceApprentiToAbandon } = require("../../../data/historySequenceSamples");
-const { StatutCandidatModel } = require("../../../../src/common/model");
+const { DossierApprenantModel } = require("../../../../src/common/model");
 
 describe(__filename, () => {
-  describe("createRandomStatutCandidat", () => {
+  describe("createRandomDossierApprenant", () => {
     it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
-      const { getStatut, createStatutCandidat } = await statutsCandidats();
+      const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
-      const randomStatutProps = createRandomStatutCandidat();
-      const result = await (await createStatutCandidat(randomStatutProps)).toJSON();
+      const randomStatutProps = createRandomDossierApprenant();
+      const result = await (await createDossierApprenant(randomStatutProps)).toJSON();
 
       // Checks creation
       assert.equal(result.ine_apprenant, randomStatutProps.ine_apprenant);
@@ -29,7 +29,7 @@ describe(__filename, () => {
       assert.equal(result.annee_scolaire, randomStatutProps.annee_scolaire);
 
       // Checks exists method
-      const found = await getStatut({
+      const found = await getDossierApprenant({
         ine_apprenant: result.ine_apprenant,
         nom_apprenant: result.nom_apprenant,
         prenom_apprenant: result.prenom_apprenant,
@@ -42,11 +42,11 @@ describe(__filename, () => {
     });
 
     it("Vérifie l'existence d'un statut de candidat randomisé avec params", async () => {
-      const randomStatut = createRandomStatutCandidat({
+      const randomStatut = createRandomDossierApprenant({
         historique_statut_apprenant: historySequenceApprentiToAbandon,
       });
 
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
       const result = toAdd.toJSON();
 
@@ -67,7 +67,7 @@ describe(__filename, () => {
       assert.deepEqual(result.historique_statut_apprenant, randomStatut.historique_statut_apprenant);
 
       // Checks exists method
-      const found = await StatutCandidatModel.countDocuments({
+      const found = await DossierApprenantModel.countDocuments({
         ine_apprenant: result.ine_apprenant,
         nom_apprenant: result.nom_apprenant,
         prenom_apprenant: result.prenom_apprenant,

@@ -4,7 +4,7 @@ const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { jobNames } = require("../../../common/constants/jobsConstants");
-const { duplicatesTypesCodes } = require("../../../common/constants/statutsCandidatsConstants");
+const { duplicatesTypesCodes } = require("../../../common/constants/dossierApprenantConstants");
 
 const { collectionNames } = require("../../constants");
 
@@ -14,18 +14,18 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * Job de suppression des doublons d'UAIs
  * Récupère les doublons et ne conserve que le plus récent
  */
-runScript(async ({ statutsCandidats, db }) => {
-  await cleanUaisDuplicates({ statutsCandidats, db });
-}, jobNames.statutsCandidatsBadHistoryIdentifyAntidated);
+runScript(async ({ dossiersApprenants, db }) => {
+  await cleanUaisDuplicates({ dossiersApprenants, db });
+}, jobNames.dossiersApprenantsBadHistoryIdentifyAntidated);
 
-const cleanUaisDuplicates = async ({ statutsCandidats, db }) => {
+const cleanUaisDuplicates = async ({ dossiersApprenants, db }) => {
   logger.info("Run clean statuts-candidats with duplicates uais...");
 
   const resultsCollection = db.collection(collectionNames.statutsCandidatsDoublonsUais);
   await resultsCollection.deleteMany({});
 
   // Identify all uais duplicates
-  const uaisDuplicates = await statutsCandidats.getDuplicatesList(
+  const uaisDuplicates = await dossiersApprenants.getDuplicatesList(
     duplicatesTypesCodes.uai_etablissement.code,
     {},
     { allowDiskUse: true }
@@ -44,10 +44,10 @@ const cleanUaisDuplicates = async ({ statutsCandidats, db }) => {
 
     // Delete each ancient duplicates
     await asyncForEach(duplicatesIdToRemove, async (currentIdToRemove) => {
-      await db.collection("statutsCandidats").deleteOne({ _id: currentIdToRemove });
+      await db.collection("dossiersApprenants").deleteOne({ _id: currentIdToRemove });
     });
   });
 
   loadingBar.stop();
-  logger.info("End cleaning statuts-candidats with duplicates uais !");
+  logger.info("End cleaning DossierApprenant with duplicates uais !");
 };

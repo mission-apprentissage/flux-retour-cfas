@@ -2,10 +2,10 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
-const { StatutCandidatModel } = require("../../../src/common/model");
+const { DossierApprenantModel } = require("../../../src/common/model");
 const {
-  createRandomStatutsCandidatsApiInputList,
-  createRandomStatutCandidatApiInput,
+  createRandomDossierApprenantApiInputList,
+  createRandomDossierApprenantApiInput,
 } = require("../../data/randomizedSample");
 const { cfdRegex } = require("../../../src/common/domain/cfd");
 
@@ -101,7 +101,7 @@ describe(__filename, () => {
       const accessToken = await getJwtForUser(httpClient);
 
       // set required field as undefined
-      const input = [createRandomStatutCandidatApiInput({ [requiredField]: undefined })];
+      const input = [createRandomDossierApprenantApiInput({ [requiredField]: undefined })];
       // perform request
       const response = await httpClient.post("/api/statut-candidats", input, {
         headers: {
@@ -122,7 +122,7 @@ describe(__filename, () => {
       );
 
       // check that no data was created
-      assert.equal(await StatutCandidatModel.countDocuments({}), 0);
+      assert.equal(await DossierApprenantModel.countDocuments({}), 0);
     });
   });
 
@@ -132,7 +132,7 @@ describe(__filename, () => {
     const accessToken = await getJwtForUser(httpClient);
 
     // set required field as undefined
-    const input = [createRandomStatutCandidatApiInput({ annee_scolaire: "2021,2022" })];
+    const input = [createRandomDossierApprenantApiInput({ annee_scolaire: "2021,2022" })];
     // perform request
     const response = await httpClient.post("/api/statut-candidats", input, {
       headers: {
@@ -149,7 +149,7 @@ describe(__filename, () => {
       true
     );
     // check that no data was created
-    assert.equal(await StatutCandidatModel.countDocuments({}), 0);
+    assert.equal(await DossierApprenantModel.countDocuments({}), 0);
   });
 
   it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ uai_etablissement ne respecte pas le format", async () => {
@@ -157,7 +157,7 @@ describe(__filename, () => {
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
 
-    const input = [createRandomStatutCandidatApiInput({ uai_etablissement: "invalide" })];
+    const input = [createRandomDossierApprenantApiInput({ uai_etablissement: "invalide" })];
     // perform request
     const response = await httpClient.post("/api/statut-candidats", input, {
       headers: {
@@ -174,7 +174,7 @@ describe(__filename, () => {
       true
     );
     // check that no data was created
-    assert.equal(await StatutCandidatModel.countDocuments({}), 0);
+    assert.equal(await DossierApprenantModel.countDocuments({}), 0);
   });
 
   const invalidDates = ["2020", "2020-10", "2020-10-", "2020-10-1", "13/11/2020", "abc", true];
@@ -186,7 +186,7 @@ describe(__filename, () => {
 
       // set required field as undefined
       const input = [
-        createRandomStatutCandidatApiInput({
+        createRandomDossierApprenantApiInput({
           date_metier_mise_a_jour_statut: invalidDate,
         }),
       ];
@@ -204,7 +204,7 @@ describe(__filename, () => {
         true
       );
       // check that no data was created
-      assert.equal(await StatutCandidatModel.countDocuments({}), 0);
+      assert.equal(await DossierApprenantModel.countDocuments({}), 0);
     });
   });
 
@@ -213,7 +213,7 @@ describe(__filename, () => {
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
 
-    const input = createRandomStatutsCandidatsApiInputList(20);
+    const input = createRandomDossierApprenantApiInputList(20);
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", input, {
@@ -235,7 +235,7 @@ describe(__filename, () => {
 
     const nbItemsToTest = 20;
     // Generate random data
-    const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
+    const randomDataList = createRandomDossierApprenantApiInputList(nbItemsToTest);
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", randomDataList, {
@@ -251,7 +251,7 @@ describe(__filename, () => {
     assert.deepEqual(response.data.status, "OK");
 
     // Check Nb Items added
-    assert.deepEqual(await StatutCandidatModel.countDocuments({}), nbItemsToTest);
+    assert.deepEqual(await DossierApprenantModel.countDocuments({}), nbItemsToTest);
   });
 
   it("Vérifie l'erreur d'ajout via route statut-candidats pour un trop grande nb de données randomisées (>100)", async () => {
@@ -262,7 +262,7 @@ describe(__filename, () => {
     const nbItemsToTest = 200;
 
     // Generate random data
-    const randomDataList = createRandomStatutsCandidatsApiInputList(nbItemsToTest);
+    const randomDataList = createRandomDossierApprenantApiInputList(nbItemsToTest);
 
     const response = await httpClient.post("/api/statut-candidats", randomDataList, {
       headers: {
@@ -272,7 +272,7 @@ describe(__filename, () => {
 
     // Check Api Route data & Data not added
     assert.deepEqual(response.status, 413);
-    assert.equal(await StatutCandidatModel.countDocuments({}), 0);
+    assert.equal(await DossierApprenantModel.countDocuments({}), 0);
   });
 
   it("Vérifie l'ajout via route statut-candidats de 10 statuts valides et 3 statuts invalides", async () => {
@@ -283,11 +283,11 @@ describe(__filename, () => {
     // Generate random valid & invalid data
     const nbValidItems = 10;
     const randomValidAndInvalidData = [
-      ...createRandomStatutsCandidatsApiInputList(nbValidItems),
+      ...createRandomDossierApprenantApiInputList(nbValidItems),
       ...[
-        createRandomStatutCandidatApiInput({ prenom_apprenant: null }),
-        createRandomStatutCandidatApiInput({ date_metier_mise_a_jour_statut: true }),
-        createRandomStatutCandidatApiInput({ id_formation: 72 }),
+        createRandomDossierApprenantApiInput({ prenom_apprenant: null }),
+        createRandomDossierApprenantApiInput({ date_metier_mise_a_jour_statut: true }),
+        createRandomDossierApprenantApiInput({ id_formation: 72 }),
       ],
     ];
 
@@ -307,7 +307,7 @@ describe(__filename, () => {
     assert.equal(response.data.validationErrors.length, 3);
 
     // Check Nb Items added
-    assert.deepEqual(await StatutCandidatModel.countDocuments({}), nbValidItems);
+    assert.deepEqual(await DossierApprenantModel.countDocuments({}), nbValidItems);
   });
 
   it("Vérifie l'ajout via route statut-candidats d'un statut avec champs non renseignés dans le schéma mais ignorés en base", async () => {
@@ -317,7 +317,7 @@ describe(__filename, () => {
 
     // Generate random statut and add unknown key
     const unknownKeyName = "prenom_apprenant2";
-    const payload = [{ ...createRandomStatutCandidatApiInput(), [unknownKeyName]: "should not be stored" }];
+    const payload = [{ ...createRandomDossierApprenantApiInput(), [unknownKeyName]: "should not be stored" }];
 
     // Call Api Route
     const response = await httpClient.post("/api/statut-candidats", payload, {
@@ -331,7 +331,7 @@ describe(__filename, () => {
     assert.equal(response.data.status, "OK");
     assert.equal(response.data.ok, 1);
 
-    const allStatuts = await StatutCandidatModel.find().lean();
+    const allStatuts = await DossierApprenantModel.find().lean();
     const createdStatut = allStatuts[0];
     assert.equal(createdStatut[unknownKeyName], undefined);
   });
@@ -365,7 +365,7 @@ describe(__filename, () => {
     const goodCfd = "50033610";
 
     // Generate random data with good cfd
-    const simpleStatutWithGoodCfd = { ...createRandomStatutCandidatApiInput(), id_formation: goodCfd };
+    const simpleStatutWithGoodCfd = { ...createRandomDossierApprenantApiInput(), id_formation: goodCfd };
 
     const response = await httpClient.post("/api/statut-candidats", [simpleStatutWithGoodCfd], {
       headers: {
@@ -380,7 +380,7 @@ describe(__filename, () => {
     assert.deepEqual(response.data.status, "OK");
 
     // Check Nb Items added
-    assert.deepEqual(await StatutCandidatModel.countDocuments({}), 1);
+    assert.deepEqual(await DossierApprenantModel.countDocuments({}), 1);
   });
 
   it("Vérifie l'erreur d'ajout via route statut-candidats pour un statut avec mauvais code CFD (id_formation)", async () => {
@@ -391,7 +391,7 @@ describe(__filename, () => {
     const badCfd = "abc123456";
 
     // Generate random data with bad cfd
-    const simpleStatutWithBadCfd = { ...createRandomStatutCandidatApiInput(), id_formation: badCfd };
+    const simpleStatutWithBadCfd = { ...createRandomDossierApprenantApiInput(), id_formation: badCfd };
 
     const response = await httpClient.post("/api/statut-candidats", [simpleStatutWithBadCfd], {
       headers: {
@@ -408,6 +408,6 @@ describe(__filename, () => {
       ),
       true
     );
-    assert.equal(await StatutCandidatModel.countDocuments({}), 0);
+    assert.equal(await DossierApprenantModel.countDocuments({}), 0);
   });
 });

@@ -4,14 +4,14 @@ const Joi = require("joi");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { CODES_STATUT_APPRENANT } = require("../../common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../common/constants/dossierApprenantConstants");
 const { cfdRegex } = require("../../common/domain/cfd");
 const { uaiRegex } = require("../../common/domain/uai");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
-module.exports = ({ statutsCandidats, userEvents }) => {
+module.exports = ({ dossiersApprenants, userEvents }) => {
   const router = express.Router();
 
   /**
@@ -24,7 +24,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
       return error ? helpers.error("string.isoDate") : value;
     });
 
-  const statutCandidatItemSchema = Joi.object({
+  const dossierApprenantItemSchema = Joi.object({
     // required fields
     nom_apprenant: Joi.string().required(),
     prenom_apprenant: Joi.string().required(),
@@ -83,7 +83,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
 
         // Validate items one by one
         await asyncForEach(req.body, (currentStatutToAddOrUpdate, index) => {
-          const statutValidation = statutCandidatItemSchema.validate(currentStatutToAddOrUpdate, {
+          const statutValidation = dossierApprenantItemSchema.validate(currentStatutToAddOrUpdate, {
             stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
             abortEarly: false, // make sure every invalid field will be communicated to the caller
           });
@@ -107,7 +107,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
         });
 
         // AddOrUpdate valid statuts
-        await statutsCandidats.addOrUpdateStatuts(validStatutsToAddOrUpdate);
+        await dossiersApprenants.addOrUpdateDossiersApprenants(validStatutsToAddOrUpdate);
 
         res.json({
           status: validationErrors.length > 0 ? `ERROR` : "OK",

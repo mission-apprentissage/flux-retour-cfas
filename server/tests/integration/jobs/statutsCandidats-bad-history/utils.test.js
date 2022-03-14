@@ -4,7 +4,7 @@ const {
   identifyElementCausingWrongRupturantSequence,
 } = require("../../../../src/jobs/statutsCandidats-bad-history/utils");
 
-const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/dossierApprenantConstants");
 
 describe("bad-history-utils", () => {
   describe("identifyElementCausingWrongRupturantSequence", () => {

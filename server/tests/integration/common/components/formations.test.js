@@ -7,9 +7,9 @@ const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
 const { dataForGetMetiersByCfd } = require("../../../data/apiLba");
 const formationsComponent = require("../../../../src/common/components/formations");
-const { FormationModel, StatutCandidatModel } = require("../../../../src/common/model");
+const { FormationModel, DossierApprenantModel } = require("../../../../src/common/model");
 const { Formation } = require("../../../../src/common/domain/formation");
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 
 describe(__filename, () => {
@@ -137,8 +137,8 @@ describe(__filename, () => {
         const formation = Formation.create(formationSeed);
         await new FormationModel(formation).save();
 
-        await new StatutCandidatModel({
-          ...createRandomStatutCandidat(),
+        await new DossierApprenantModel({
+          ...createRandomDossierApprenant(),
           formation_cfd: formation.cfd,
         }).save();
       });
@@ -217,8 +217,8 @@ describe(__filename, () => {
       const searchTerm = "decoration";
       const etablissement_num_region = "28";
 
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
+      await new DossierApprenantModel({
+        ...createRandomDossierApprenant(),
         etablissement_num_region,
         formation_cfd: formationsSeed[2].cfd,
       }).save();
@@ -233,8 +233,8 @@ describe(__filename, () => {
       const searchTerm = "decoration";
       const etablissement_num_departement = "77";
 
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
+      await new DossierApprenantModel({
+        ...createRandomDossierApprenant(),
         etablissement_num_departement,
         formation_cfd: formationsSeed[2].cfd,
       }).save();
@@ -249,8 +249,8 @@ describe(__filename, () => {
       const searchTerm = "decoration";
       const etablissement_reseaux = "RESEAU_TEST";
 
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
+      await new DossierApprenantModel({
+        ...createRandomDossierApprenant(),
         etablissement_reseaux: [etablissement_reseaux],
         formation_cfd: formationsSeed[2].cfd,
       }).save();
@@ -265,8 +265,8 @@ describe(__filename, () => {
       const searchTerm = "decoration";
       const uai_etablissement = "0762232N";
 
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
+      await new DossierApprenantModel({
+        ...createRandomDossierApprenant(),
         uai_etablissement,
         formation_cfd: formationsSeed[2].cfd,
       }).save();

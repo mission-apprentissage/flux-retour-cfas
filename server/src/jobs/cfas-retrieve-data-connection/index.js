@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const { StatutCandidatModel, CfaModel } = require("../../common/model");
+const { DossierApprenantModel, CfaModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/constants/jobsConstants");
 
@@ -9,7 +9,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 
 /**
  * Ce script permet de mettre à jour le référentiel des CFAs en
- * précisant si des données sont trouvées dans les StatutsCandidats
+ * précisant si des données sont trouvées dans les DossierApprenant
  */
 runScript(async () => {
   logger.info("Run Cfas Branchement Retrieving Job");
@@ -32,8 +32,8 @@ const retrieveDataConnections = async () => {
   await asyncForEach(allCfas, async (cfaReferentiel) => {
     // Si uai fourni on update les statuts pour cet uai
     if (cfaReferentiel.uai) {
-      // Vérification d'existence de statutsCandidats pour cet uai
-      const statutsForUai = await StatutCandidatModel.exists({ uai_etablissement: cfaReferentiel.uai });
+      // Vérification d'existence de DossierApprenant pour cet uai
+      const statutsForUai = await DossierApprenantModel.exists({ uai_etablissement: cfaReferentiel.uai });
       if (statutsForUai) {
         await CfaModel.findByIdAndUpdate(
           cfaReferentiel._id,

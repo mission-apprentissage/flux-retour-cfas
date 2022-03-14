@@ -21,7 +21,7 @@ const STATUT_APPRENANT_LABELS = [
  * @param {*} statutCode
  * @returns
  */
-const getStatutNameFromCode = (statutCode) =>
+const getStatutApprenantNameFromCode = (statutCode) =>
   STATUT_APPRENANT_LABELS.find((item) => item.code === statutCode)?.name ?? "NC";
 
 /**
@@ -89,5 +89,5 @@ module.exports = {
   statutsCandidatsStringFields,
   effectifsIndicators,
   STATUT_APPRENANT_LABELS,
-  getStatutNameFromCode,
+  getStatutApprenantNameFromCode,
 };

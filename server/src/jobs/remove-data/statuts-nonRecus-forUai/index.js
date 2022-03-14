@@ -3,7 +3,7 @@ const Joi = require("joi");
 
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { StatutCandidatModel } = require("../../../common/model");
+const { DossierApprenantModel } = require("../../../common/model");
 
 runScript(async () => {
   const args = arg({ "--filterDate": String, "--uai": String }, { argv: process.argv.slice(2) });
@@ -23,7 +23,7 @@ runScript(async () => {
   const uai = args["--uai"];
 
   logger.info(`Suppression des données pour l'UAI ${uai} non recues depuis ${date.toISOString()}...`);
-  const result = await StatutCandidatModel.deleteMany({
+  const result = await DossierApprenantModel.deleteMany({
     annee_scolaire: "2021-2022",
     uai_etablissement: uai,
     updated_at: { $lte: date },

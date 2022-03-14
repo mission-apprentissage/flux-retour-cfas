@@ -3,7 +3,7 @@ const Joi = require("joi");
 
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { StatutCandidatModel } = require("../../../common/model");
+const { DossierApprenantModel } = require("../../../common/model");
 
 runScript(async () => {
   const args = arg({ "--filterDate": String }, { argv: process.argv.slice(2) });
@@ -25,7 +25,7 @@ runScript(async () => {
    * non recus depuis le "filterDate"
    * non envoyés par SCForm
    */
-  const result = await StatutCandidatModel.deleteMany({
+  const result = await DossierApprenantModel.deleteMany({
     annee_scolaire: "2021-2022",
     historique_statut_apprenant: { $size: 1 },
     "historique_statut_apprenant.valeur_statut": 2,

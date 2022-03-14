@@ -1,6 +1,6 @@
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
-const { StatutCandidatModel } = require("../../../common/model");
+const { DossierApprenantModel } = require("../../../common/model");
 const { CroisementVoeuxAffelnetModel } = require("../../../common/model");
 const cliProgress = require("cli-progress");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -14,7 +14,7 @@ const { jobNames } = require("../../../common/constants/jobsConstants");
 runScript(async () => {
   logger.info("Récupère les statuts avec INE et sirets valides pour export vers Affelnet");
 
-  const allIneDataForAffelnet = await StatutCandidatModel.aggregate([
+  const allIneDataForAffelnet = await DossierApprenantModel.aggregate([
     { $match: { siret_etablissement_valid: true, ine_apprenant: { $ne: "" } } },
     {
       $group: {

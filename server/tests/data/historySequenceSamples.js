@@ -1,4 +1,4 @@
-const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/dossierApprenantConstants");
 
 const historySequenceApprenti = [
   {

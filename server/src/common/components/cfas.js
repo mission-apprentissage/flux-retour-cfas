@@ -1,5 +1,5 @@
 const { getDepartementCodeFromUai } = require("../domain/uai");
-const { StatutCandidatModel, CfaAnnuaireModel, CfaModel } = require("../model");
+const { DossierApprenantModel, CfaAnnuaireModel, CfaModel } = require("../model");
 const { escapeRegExp } = require("../utils/regexUtils");
 
 module.exports = () => ({
@@ -28,7 +28,7 @@ const searchCfas = async (searchCriteria) => {
   }
   // if other criteria have been provided, find the list of uai matching those criteria in the StatutCandidat collection
   if (Object.keys(otherCriteria).length > 0) {
-    const eligibleUais = await StatutCandidatModel.distinct("uai_etablissement", otherCriteria);
+    const eligibleUais = await DossierApprenantModel.distinct("uai_etablissement", otherCriteria);
     matchStage.uai = { $in: eligibleUais };
   }
 
@@ -55,34 +55,34 @@ const searchCfas = async (searchCriteria) => {
 };
 
 /**
- * Returns the first date of statutCandidat transmission for a UAI
+ * Returns the first date of dossierApprenant transmission for a UAI
  * @param {*} uai
  * @returns
  */
 const getCfaFirstTransmissionDateFromUai = async (uai) => {
-  const historiqueDatesStatutsCandidatsWithUai = await StatutCandidatModel.find({ uai_etablissement: uai })
+  const historiqueDatesDossierApprenantWithUai = await DossierApprenantModel.find({ uai_etablissement: uai })
     .sort("created_at")
     .limit(1)
     .lean();
 
-  return historiqueDatesStatutsCandidatsWithUai.length > 0
-    ? historiqueDatesStatutsCandidatsWithUai[0].created_at
+  return historiqueDatesDossierApprenantWithUai.length > 0
+    ? historiqueDatesDossierApprenantWithUai[0].created_at
     : null;
 };
 
 /**
- * Returns the first date of statutCandidat transmission for a SIRET
+ * Returns the first date of dossierApprenant transmission for a SIRET
  * @param {*} uai
  * @returns {Date|null}
  */
 const getCfaFirstTransmissionDateFromSiret = async (siret) => {
-  const historiqueDatesStatutsCandidatsWithSiret = await StatutCandidatModel.find({ siret_etablissement: siret })
+  const historiqueDatesDossiersApprenantsWithSiret = await DossierApprenantModel.find({ siret_etablissement: siret })
     .sort("created_at")
     .limit(1)
     .lean();
 
-  return historiqueDatesStatutsCandidatsWithSiret.length > 0
-    ? historiqueDatesStatutsCandidatsWithSiret[0].created_at
+  return historiqueDatesDossiersApprenantsWithSiret.length > 0
+    ? historiqueDatesDossiersApprenantsWithSiret[0].created_at
     : null;
 };
 
@@ -92,7 +92,7 @@ const getCfaFirstTransmissionDateFromSiret = async (siret) => {
  * @returns {Array<{siret_etablissement: string, nom_etablissement: string}>}
  */
 const getSousEtablissementsForUai = (uai) => {
-  return StatutCandidatModel.aggregate([
+  return DossierApprenantModel.aggregate([
     { $match: { uai_etablissement: uai, siret_etablissement: { $ne: null } } },
     { $group: { _id: "$siret_etablissement", nom_etablissement: { $first: "$nom_etablissement" } } },
     { $project: { _id: 0, siret_etablissement: "$_id", nom_etablissement: "$nom_etablissement" } },

@@ -1,5 +1,5 @@
 const { isAfter } = require("date-fns");
-const { CODES_STATUT_APPRENANT } = require("../../common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../common/constants/dossierApprenantConstants");
 
 const identifyElementCausingWrongRupturantSequence = (historique) => {
   if (historique.length < 2) return null;

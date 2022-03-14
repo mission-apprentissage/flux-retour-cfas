@@ -1,5 +1,5 @@
-const createStatutsCandidatsCollectionIndexes = async (db) => {
-  const collection = db.collection("statutsCandidats");
+const createDossiersApprenantsCollectionIndexes = async (db) => {
+  const collection = db.collection("dossiersApprenants");
 
   await collection.createIndex({ uai_etablissement: 1 }, { name: "uai_etablissement" });
   await collection.createIndex({ siret_etablissement: 1 }, { name: "siret_etablissement" });
@@ -11,10 +11,10 @@ const createStatutsCandidatsCollectionIndexes = async (db) => {
   await collection.createIndex({ etablissement_reseaux: 1 }, { name: "etablissement_reseaux" });
 };
 
-const dropStatutsCandidatsCollectionIndexes = async (db) => {
-  const collection = db.collection("statutsCandidats");
+const dropDossiersApprenantsCollectionIndexes = async (db) => {
+  const collection = db.collection("dossiersApprenants");
 
   await collection.dropIndexes();
 };
 
-module.exports = { createStatutsCandidatsCollectionIndexes, dropStatutsCandidatsCollectionIndexes };
+module.exports = { createDossiersApprenantsCollectionIndexes, dropDossiersApprenantsCollectionIndexes };

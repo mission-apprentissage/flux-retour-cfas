@@ -7,7 +7,10 @@ const Joi = require("joi");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles, apiRoles } = require("../../common/roles");
 const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
-const { effectifsIndicators, getStatutNameFromCode } = require("../../common/constants/statutsCandidatsConstants");
+const {
+  effectifsIndicators,
+  getStatutApprenantNameFromCode,
+} = require("../../common/constants/dossierApprenantConstants");
 const omit = require("lodash.omit");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
@@ -196,11 +199,11 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
         effectifsFormattedAtDate = (await effectifs.apprentis.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,
-            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
             historique_statut_apprenant: JSON.stringify(
               item.historique_statut_apprenant.map((item) => ({
                 date: item.date_statut,
-                statut: getStatutNameFromCode(item.valeur_statut),
+                statut: getStatutApprenantNameFromCode(item.valeur_statut),
               }))
             ),
           })
@@ -211,12 +214,12 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
         effectifsFormattedAtDate = (await effectifs.abandons.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,
-            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
             date_abandon: item.statut_apprenant_at_date.date_statut, // Specific for abandons indicateur
             historique_statut_apprenant: JSON.stringify(
               item.historique_statut_apprenant.map((item) => ({
                 date: item.date_statut,
-                statut: getStatutNameFromCode(item.valeur_statut),
+                statut: getStatutApprenantNameFromCode(item.valeur_statut),
               }))
             ),
           })
@@ -228,12 +231,12 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
           await effectifs.inscritsSansContrats.getListAtDate(date, filters, { projection })
         ).map((item) => ({
           ...item,
-          statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+          statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
           date_inscription: item.statut_apprenant_at_date.date_statut, // Specific for inscrits sans contrats indicateur
           historique_statut_apprenant: JSON.stringify(
             item.historique_statut_apprenant.map((item) => ({
               date: item.date_statut,
-              statut: getStatutNameFromCode(item.valeur_statut),
+              statut: getStatutApprenantNameFromCode(item.valeur_statut),
             }))
           ),
         }));
@@ -243,11 +246,11 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
         effectifsFormattedAtDate = (await effectifs.rupturants.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,
-            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
             historique_statut_apprenant: JSON.stringify(
               item.historique_statut_apprenant.map((item) => ({
                 date: item.date_statut,
-                statut: getStatutNameFromCode(item.valeur_statut),
+                statut: getStatutApprenantNameFromCode(item.valeur_statut),
               }))
             ),
           })

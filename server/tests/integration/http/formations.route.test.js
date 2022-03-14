@@ -1,9 +1,9 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
-const { FormationModel, StatutCandidatModel } = require("../../../src/common/model");
+const { FormationModel, DossierApprenantModel } = require("../../../src/common/model");
 const { Formation } = require("../../../src/common/domain/formation");
-const { createRandomStatutCandidat } = require("../../data/randomizedSample");
+const { createRandomDossierApprenant } = require("../../data/randomizedSample");
 
 describe(__filename, () => {
   const formationsSeed = [{ cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" }];
@@ -12,8 +12,8 @@ describe(__filename, () => {
     await asyncForEach(formationsSeed, async (formationSeed) => {
       const formation = Formation.create(formationSeed);
       await new FormationModel(formation).save();
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
+      await new DossierApprenantModel({
+        ...createRandomDossierApprenant(),
         formation_cfd: formation.cfd,
       }).save();
     });
