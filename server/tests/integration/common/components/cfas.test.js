@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const cfasComponent = require("../../../../src/common/components/cfas");
-const { StatutCandidatModel, CfaModel } = require("../../../../src/common/model");
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { addDays } = require("date-fns");
 const { Cfa } = require("../../../../src/common/domain/cfa");
 
@@ -28,30 +28,30 @@ describe(__filename, () => {
       },
     ];
 
-    const statutsSeed = [
+    const dossierApprenantSeed = [
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[0].uai,
         etablissement_num_departement: "80",
         etablissement_num_region: "01",
         etablissement_reseaux: "AFTRAL",
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[1].uai,
         etablissement_num_departement: "64",
         etablissement_num_region: "02",
         etablissement_reseaux: "AFTRAL",
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[2].uai,
         etablissement_num_departement: "06",
         etablissement_num_region: "03",
         etablissement_reseaux: "AFTRAL",
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[3].uai,
         etablissement_num_departement: "80",
         etablissement_num_region: "01",
@@ -65,9 +65,9 @@ describe(__filename, () => {
         await newCfa.save();
       }
 
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new StatutCandidatModel(statut).save();
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 
@@ -197,33 +197,33 @@ describe(__filename, () => {
     const { getCfaFirstTransmissionDateFromUai } = cfasComponent();
     const uaiToSearch = "0762290X";
     const firstDate = new Date("2020-08-30T00:00:00.000+0000");
-    const statutsSeed = [
+    const dossierApprenantSeed = [
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
         created_at: addDays(firstDate, 2),
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
         created_at: firstDate,
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
         created_at: addDays(firstDate, 3),
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
         created_at: addDays(firstDate, 4),
       },
     ];
 
     beforeEach(async () => {
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new StatutCandidatModel(statut).save();
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 
@@ -248,33 +248,33 @@ describe(__filename, () => {
 
     const siretToSearch = "80420010000024";
     const firstDate = new Date("2020-06-10T00:00:00.000+0000");
-    const statutsSeed = [
+    const dossierApprenantSeed = [
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
         created_at: addDays(firstDate, 2),
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
         created_at: addDays(firstDate, 3),
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
         created_at: firstDate,
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
         created_at: addDays(firstDate, 4),
       },
     ];
 
     beforeEach(async () => {
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new StatutCandidatModel(statut).save();
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 

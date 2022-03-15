@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
-const { createRandomStatutCandidat, getRandomSiretEtablissement } = require("../../data/randomizedSample");
+const { createRandomDossierApprenant, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const { apiRoles } = require("../../../src/common/roles");
-const { effectifsIndicators } = require("../../../src/common/constants/statutsCandidatsConstants");
+const { effectifsIndicators } = require("../../../src/common/constants/dossierApprenantConstants");
 
 const {
   historySequenceInscritToApprentiToAbandon,
@@ -10,7 +10,7 @@ const {
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
 } = require("../../data/historySequenceSamples");
-const { StatutCandidatModel, CfaModel } = require("../../../src/common/model");
+const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
 const { parseXlsxHeaderStreamToJson } = require("../../../src/common/utils/exporterUtils");
 
 describe(__filename, () => {
@@ -31,37 +31,37 @@ describe(__filename, () => {
 
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
       // this one should be ignored because of annee_scolaire
-      await new StatutCandidatModel(
-        createRandomStatutCandidat({
+      await new DossierApprenantModel(
+        createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2021-2022",
         })
@@ -94,34 +94,34 @@ describe(__filename, () => {
 
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
@@ -158,47 +158,47 @@ describe(__filename, () => {
   });
 
   describe("/api/effectifs/export-xlsx-data-lists route", () => {
-    const seedStatutsCandidats = async (statutsProps) => {
+    const seedDossiersApprenants = async (statutsProps) => {
       const nbAbandons = 10;
       const nbApprentis = 5;
 
       // Add 10 statuts with history sequence - full
       for (let index = 0; index < nbAbandons; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           ...statutsProps,
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
       // Add 5 statuts with history sequence - simple apprenti
       for (let index = 0; index < nbApprentis; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceApprenti,
           ...statutsProps,
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
       // Add 15 statuts with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           ...statutsProps,
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
       // Add 8 statuts with history sequence - inscritToApprentiToInscrit (rupturant)
       for (let index = 0; index < 8; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceApprentiToInscrit,
           ...statutsProps,
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
     };
@@ -233,7 +233,7 @@ describe(__filename, () => {
       const cfaUai = "9994889A";
       await new CfaModel({ uai_etablissement: cfaUai }).save();
 
-      await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
+      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
@@ -254,7 +254,7 @@ describe(__filename, () => {
       const cfaUai = "9994889A";
       await new CfaModel({ uai_etablissement: cfaUai }).save();
 
-      await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
+      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
@@ -275,7 +275,7 @@ describe(__filename, () => {
       const cfaUai = "9994889A";
       await new CfaModel({ uai_etablissement: cfaUai }).save();
 
-      await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
+      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
@@ -296,7 +296,7 @@ describe(__filename, () => {
       const cfaUai = "9994889A";
       await new CfaModel({ uai_etablissement: cfaUai }).save();
 
-      await seedStatutsCandidats({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
+      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
@@ -319,25 +319,25 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomStatutCandidat({
+        const randomStatut = createRandomDossierApprenant({
           ...filterQuery,
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
           niveau_formation: "1",
           niveau_formation_libelle: "1 (blabla)",
         });
-        const toAdd = new StatutCandidatModel(randomStatut);
+        const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
-      const randomStatut = createRandomStatutCandidat({
+      const randomStatut = createRandomDossierApprenant({
         ...filterQuery,
         historique_statut_apprenant: historySequenceApprenti,
         annee_scolaire: "2020-2021",
         niveau_formation: "2",
         niveau_formation_libelle: "2 (blabla)",
       });
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
@@ -370,8 +370,8 @@ describe(__filename, () => {
       const regionNumTest = "28";
 
       // Add 1 statut for region
-      await new StatutCandidatModel(
-        createRandomStatutCandidat({
+      await new DossierApprenantModel(
+        createRandomDossierApprenant({
           nom_etablissement: "TEST CFA",
           siret_etablissement: "77929544300013",
           uai_etablissement: "0762232N",
@@ -407,8 +407,8 @@ describe(__filename, () => {
       const formationCfd = "abcd1234";
 
       // Add 1 statut for formation
-      await new StatutCandidatModel(
-        createRandomStatutCandidat({
+      await new DossierApprenantModel(
+        createRandomDossierApprenant({
           nom_etablissement: "TEST CFA",
           siret_etablissement: getRandomSiretEtablissement(),
           siret_etablissement_valid: true,

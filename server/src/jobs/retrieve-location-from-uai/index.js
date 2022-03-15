@@ -17,7 +17,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 runScript(async ({ db }) => {
   const { data } = await axios.get(`${GEO_API_HOST}/departements?fields=nom,code,codeRegion,codePostal,region`);
   const infoMap = indexBy(data, "code");
-  const allUais = await db.collection("statutsCandidats").distinct("uai_etablissement");
+  const allUais = await db.collection("dossiersApprenants").distinct("uai_etablissement");
 
   logger.info(`${allUais.length} UAI found. Will update matching statuts candidats...`);
   loadingBar.start(allUais.length, 0);
@@ -31,7 +31,7 @@ runScript(async ({ db }) => {
 
     if (!info) return;
 
-    const updateResult = await db.collection("statutsCandidats").updateMany(
+    const updateResult = await db.collection("dossiersApprenants").updateMany(
       { uai_etablissement: uaiToUpdate },
       {
         $set: {

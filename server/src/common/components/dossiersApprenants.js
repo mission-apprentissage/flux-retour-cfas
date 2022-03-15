@@ -1,6 +1,6 @@
-const { StatutCandidatModel, CfaModel } = require("../model");
+const { DossierApprenantModel, CfaModel } = require("../model");
 const omit = require("lodash.omit");
-const { duplicatesTypesCodes } = require("../constants/statutsCandidatsConstants");
+const { duplicatesTypesCodes } = require("../constants/dossierApprenantConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
@@ -9,17 +9,17 @@ const { isEqual } = require("date-fns");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
-  getStatut,
-  addOrUpdateStatuts,
-  createStatutCandidat,
-  updateStatut,
+  getDossierApprenant,
+  addOrUpdateDossiersApprenants,
+  createDossierApprenant,
+  updateDossierApprenant,
   getDuplicatesList,
-  getStatutsWithHistoryDateUnordered,
-  getStatutsWithBadDate,
+  getDossierApprenantsWithHistoryDateUnordered,
+  getDossierApprenantsWithBadDate,
 });
 
-const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
-  return StatutCandidatModel.findOne({
+const getDossierApprenant = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
+  return DossierApprenantModel.findOne({
     nom_apprenant: { $regex: new RegExp(escapeRegExp(nom_apprenant), "i") },
     prenom_apprenant: { $regex: new RegExp(escapeRegExp(prenom_apprenant), "i") },
     formation_cfd,
@@ -29,16 +29,16 @@ const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablis
 };
 
 /**
- * Add or update a list of statuts
+ * Add or update items in a list of DossierApprenant
  * @param {*} itemsToAddOrUpdate
  * @returns
  */
-const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
+const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
   const added = [];
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    let foundItem = await getStatut({
+    let foundItem = await getDossierApprenant({
       nom_apprenant: item.nom_apprenant,
       prenom_apprenant: item.prenom_apprenant,
       formation_cfd: item.formation_cfd,
@@ -47,10 +47,10 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
     });
 
     if (!foundItem) {
-      const addedItem = await createStatutCandidat(item);
+      const addedItem = await createDossierApprenant(item);
       added.push(addedItem);
     } else {
-      const updatedItem = await updateStatut(foundItem._id, item);
+      const updatedItem = await updateDossierApprenant(foundItem._id, item);
       updated.push(updatedItem);
     }
   });
@@ -61,7 +61,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
   };
 };
 
-const updateStatut = async (existingItemId, toUpdate) => {
+const updateDossierApprenant = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
   // strip unicity criteria because it does not make sense to update them
@@ -73,7 +73,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
     "formation_cfd",
     "uai_etablissement"
   );
-  const existingItem = await StatutCandidatModel.findById(existingItemId);
+  const existingItem = await DossierApprenantModel.findById(existingItemId);
 
   // new statut_apprenant to add ?
   const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {
@@ -110,22 +110,22 @@ const updateStatut = async (existingItemId, toUpdate) => {
     ...updatePayload,
     updated_at: new Date(),
   };
-  const updated = await StatutCandidatModel.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
+  const updated = await DossierApprenantModel.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
   return updated;
 };
 
-const createStatutCandidat = async (itemToCreate) => {
-  // if statut candidat établissement has a VALID uai try to retrieve information in Referentiel CFAs
+const createDossierApprenant = async (itemToCreate) => {
+  // if dossier apprenant établissement has a VALID uai try to retrieve information in Referentiel CFAs
   const etablissementInReferentielCfaFromUai = await CfaModel.findOne({ uai: itemToCreate.uai_etablissement });
 
-  // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
+  // if dossier apprenant has a valid cfd, check if it exists in db and create it otherwise
   if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {
     await createFormation(itemToCreate.formation_cfd);
   }
 
   const formationInfo = await getFormationWithCfd(itemToCreate.formation_cfd);
 
-  const toAdd = new StatutCandidatModel({
+  const toAdd = new DossierApprenantModel({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant.toUpperCase(),
     prenom_apprenant: itemToCreate.prenom_apprenant.toUpperCase(),
@@ -172,12 +172,12 @@ const createStatutCandidat = async (itemToCreate) => {
 };
 
 /**
- * Récupération de la liste des statuts en doublons stricts pour les filtres passés en paramètres
+ * Récupération de la liste des DossierApprenant en doublons stricts pour les filtres passés en paramètres
  * @param {*} duplicatesTypesCode
  * @param {*} filters
  * @returns
  */
-const findStatutsDuplicates = async (
+const findDossiersApprenantsDuplicates = async (
   duplicatesTypesCode,
   filters = {},
   { allowDiskUse = false, duplicatesWithNoUpdate = false } = {}
@@ -279,7 +279,7 @@ const findStatutsDuplicates = async (
       break;
 
     default:
-      throw new Error("findStatutsDuplicates Error :  duplicatesTypesCode not matching any code");
+      throw new Error("findDossiersApprenantsDuplicates Error :  duplicatesTypesCode not matching any code");
   }
 
   if (duplicatesWithNoUpdate) filters.historique_statut_apprenant = { $size: 1 };
@@ -293,7 +293,7 @@ const findStatutsDuplicates = async (
     {
       $group: unicityQueryGroup,
     },
-    // Récupération des statuts en doublons = regroupement count > 1
+    // Récupération des DossierApprenant en doublons = regroupement count > 1
     {
       $match: {
         ...(duplicatesWithNoUpdate ? { statut_apprenants: { $size: 1 } } : {}),
@@ -302,15 +302,15 @@ const findStatutsDuplicates = async (
     },
   ];
 
-  const statutsFound = allowDiskUse
-    ? await StatutCandidatModel.aggregate(aggregateQuery).allowDiskUse(true).exec()
-    : await StatutCandidatModel.aggregate(aggregateQuery);
+  const dossiersApprenantsFound = allowDiskUse
+    ? await DossierApprenantModel.aggregate(aggregateQuery).allowDiskUse(true).exec()
+    : await DossierApprenantModel.aggregate(aggregateQuery);
 
-  return statutsFound;
+  return dossiersApprenantsFound;
 };
 
 /**
- * Construction d'une liste de doublons de type duplicatesTypeCode de statutsCandidats
+ * Construction d'une liste de doublons de type duplicatesTypeCode de DossierApprenant
  * regroupés par UAI pour les filtres passés en paramètres
  * @param {*} duplicatesTypeCode
  * @param {*} filters
@@ -319,7 +319,7 @@ const findStatutsDuplicates = async (
  */
 const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
   // Récupération des doublons pour le type souhaité
-  const duplicates = await findStatutsDuplicates(duplicatesTypeCode, filters, options);
+  const duplicates = await findDossiersApprenantsDuplicates(duplicatesTypeCode, filters, options);
 
   return duplicates.map((duplicateItem) => {
     const { _id, count, duplicatesIds, ...discriminants } = duplicateItem;
@@ -333,10 +333,10 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
 };
 
 /**
- * Récupération de la liste des statuts avec un historique antidaté
+ * Récupération de la liste des DossierApprenant avec un historique antidaté
  * @returns
  */
-const getStatutsWithHistoryDateUnordered = async () => {
+const getDossierApprenantsWithHistoryDateUnordered = async () => {
   const aggregationPipeline = [
     // Filtrage historique > 1 élement
     { $match: { "historique_statut_apprenant.1": { $exists: true } } },
@@ -356,15 +356,15 @@ const getStatutsWithHistoryDateUnordered = async () => {
     { $match: { isHistoryDateOrdered: false } },
   ];
 
-  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
+  const result = await DossierApprenantModel.aggregate(aggregationPipeline);
   return result;
 };
 
 /**
- * Récupération de la liste des statuts ayant une date invalide (< année 2000)
+ * Récupération de la liste des DossierApprenant ayant une date invalide (< année 2000)
  * @returns
  */
-const getStatutsWithBadDate = async () => {
+const getDossierApprenantsWithBadDate = async () => {
   const aggregationPipeline = [
     // Filtrage historique > 1 élement
     { $match: { "historique_statut_apprenant.1": { $exists: true } } },
@@ -384,6 +384,6 @@ const getStatutsWithBadDate = async () => {
     { $match: { hasHistoryBadDate: true } },
   ];
 
-  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
+  const result = await DossierApprenantModel.aggregate(aggregationPipeline);
   return result;
 };

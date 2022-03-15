@@ -1,4 +1,4 @@
-const { CODES_STATUT_APPRENANT } = require("../../constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../constants/dossierApprenantConstants");
 const { Indicator } = require("./indicator");
 
 class EffectifsInscritsSansContrats extends Indicator {

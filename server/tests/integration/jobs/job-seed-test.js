@@ -1,14 +1,14 @@
 const assert = require("assert").strict;
-const statutsCandidats = require("../../../src/common/components/statutsCandidats");
+const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
 const { seedSample } = require("../../../src/jobs/seed/utils/seedUtils");
 
-const { StatutCandidatModel } = require("../../../src/common/model");
+const { DossierApprenantModel } = require("../../../src/common/model");
 
 describe(__filename, () => {
   it("Vérifie la création de données de test depuis le job", async () => {
-    const createStatutsCandidats = await statutsCandidats();
-    await seedSample(createStatutsCandidats);
+    const createDossiersApprenant = await dossiersApprenants();
+    await seedSample(createDossiersApprenant);
 
-    assert.deepEqual((await StatutCandidatModel.countDocuments({})) > 0, true);
+    assert.deepEqual((await DossierApprenantModel.countDocuments({})) > 0, true);
   });
 });

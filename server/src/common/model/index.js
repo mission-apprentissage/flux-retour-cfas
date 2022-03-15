@@ -7,7 +7,7 @@ const getModel = (modelName, { enablePagination = false } = {}) => {
 };
 
 module.exports = {
-  StatutCandidatModel: getModel("statutsCandidats"),
+  DossierApprenantModel: getModel("dossiersApprenants"),
   UserModel: getModel("users"),
   UserEventModel: getModel("userEvents"),
   JobEventModel: getModel("jobEvents", { enablePagination: true }),
@@ -19,7 +19,7 @@ module.exports = {
   FormationModel: getModel("formations"),
   LogModel: getModel("logs"),
   CroisementVoeuxAffelnetModel: getModel("croisementVoeuxAffelnet"),
-  RcoStatutCandidatModel: getModel("rcoStatutsCandidats", { enablePagination: true }),
+  RcoDossierApprenantModel: getModel("rcoStatutsCandidats", { enablePagination: true }),
   DemandeIdentifiantsModel: getModel("demandesIdentifiants"),
   DemandeLienPriveModel: getModel("demandesLienPrive"),
   DemandeBranchementErpModel: getModel("demandesBranchementErp"),

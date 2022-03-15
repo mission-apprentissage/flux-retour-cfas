@@ -4,14 +4,14 @@ const Joi = require("joi");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { CODES_STATUT_APPRENANT } = require("../../common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../common/constants/dossierApprenantConstants");
 const { cfdRegex } = require("../../common/domain/cfd");
 const { uaiRegex } = require("../../common/domain/uai");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
-module.exports = ({ statutsCandidats, userEvents }) => {
+module.exports = ({ dossiersApprenants, userEvents }) => {
   const router = express.Router();
 
   /**
@@ -24,7 +24,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
       return error ? helpers.error("string.isoDate") : value;
     });
 
-  const statutCandidatItemSchema = Joi.object({
+  const dossierApprenantItemSchema = Joi.object({
     // required fields
     nom_apprenant: Joi.string().required(),
     prenom_apprenant: Joi.string().required(),
@@ -62,7 +62,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
   });
 
   /**
-   * Route post for Statuts Candidats
+   * Route post for DossierApprenant
    */
   router.post(
     "/",
@@ -71,7 +71,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
       try {
         let nbItemsValid = 0;
         let validationErrors = [];
-        let validStatutsToAddOrUpdate = [];
+        let validDossiersApprenantToAddOrUpdate = [];
 
         // Add user event
         await userEvents.create({
@@ -82,32 +82,35 @@ module.exports = ({ statutsCandidats, userEvents }) => {
         });
 
         // Validate items one by one
-        await asyncForEach(req.body, (currentStatutToAddOrUpdate, index) => {
-          const statutValidation = statutCandidatItemSchema.validate(currentStatutToAddOrUpdate, {
+        await asyncForEach(req.body, (currentDossierApprenant, index) => {
+          const dossierApprenantValidation = dossierApprenantItemSchema.validate(currentDossierApprenant, {
             stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
             abortEarly: false, // make sure every invalid field will be communicated to the caller
           });
 
-          if (statutValidation.error) {
-            validationErrors.push(statutValidation.error);
-            logger.warn(`Could not validate item from ${req.user.username} at index ${index}`, statutValidation.error);
+          if (dossierApprenantValidation.error) {
+            validationErrors.push(dossierApprenantValidation.error);
+            logger.warn(
+              `Could not validate item from ${req.user.username} at index ${index}`,
+              dossierApprenantValidation.error
+            );
           } else {
             nbItemsValid++;
             // Build toAddOrUpdateList list
-            validStatutsToAddOrUpdate.push({
-              ...currentStatutToAddOrUpdate,
-              formation_cfd: currentStatutToAddOrUpdate.id_formation,
+            validDossiersApprenantToAddOrUpdate.push({
+              ...currentDossierApprenant,
+              formation_cfd: currentDossierApprenant.id_formation,
               // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
-              periode_formation: currentStatutToAddOrUpdate.periode_formation
-                ? currentStatutToAddOrUpdate.periode_formation.split("-").map(Number)
+              periode_formation: currentDossierApprenant.periode_formation
+                ? currentDossierApprenant.periode_formation.split("-").map(Number)
                 : null,
               source: req.user.username,
             });
           }
         });
 
-        // AddOrUpdate valid statuts
-        await statutsCandidats.addOrUpdateStatuts(validStatutsToAddOrUpdate);
+        // AddOrUpdate valid DossierApprenant
+        await dossiersApprenants.addOrUpdateDossiersApprenants(validDossiersApprenantToAddOrUpdate);
 
         res.json({
           status: validationErrors.length > 0 ? `ERROR` : "OK",
@@ -127,7 +130,7 @@ module.exports = ({ statutsCandidats, userEvents }) => {
   );
 
   /**
-   * Test route for Statuts Candidats
+   * Test route for dossiers-apprenants
    */
   router.post(
     "/test",

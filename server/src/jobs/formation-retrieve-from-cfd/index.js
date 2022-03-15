@@ -4,7 +4,7 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { jobNames } = require("../../common/constants/jobsConstants");
 
 /*
-    Ce script récupère tous les CFDs valides présents dans la collection StatutsCandidats et crée une formation en base pour chacun si elle n'existe pas
+    Ce script récupère tous les CFDs valides présents dans la collection DossierApprenant et crée une formation en base pour chacun si elle n'existe pas
 */
 runScript(async ({ db, formations }) => {
   logger.info("Run Retrieve Formations from CFD");
@@ -12,11 +12,11 @@ runScript(async ({ db, formations }) => {
   let createdFormationsCount = 0;
   let formationsNotCreated = [];
 
-  const collection = db.collection("statutsCandidats");
+  const collection = db.collection("dossiersApprenants");
 
   // get all valid CFDs
   const allCfds = await collection.distinct("formation_cfd");
-  logger.info(`${allCfds.length} distinct CFDs found in collection StatutsCandidats`);
+  logger.info(`${allCfds.length} distinct CFDs found in collection DossierApprenant`);
 
   // for each CFD, if no formation exists in DB, create and store it
   await asyncForEach(allCfds, async (cfd) => {

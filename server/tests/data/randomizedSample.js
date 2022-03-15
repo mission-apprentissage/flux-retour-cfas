@@ -2,7 +2,7 @@ const faker = require("faker/locale/fr");
 const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
 const { subYears, subMonths, addYears } = require("date-fns");
-const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/dossierApprenantConstants");
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -33,7 +33,7 @@ const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(
 const getRandomCoordonnates = () => `${faker.address.latitude()},${faker.address.longitude()}`;
 const getRandomDateNaissance = () => faker.date.between(subYears(new Date(), 18), subYears(new Date(), 25));
 
-const createRandomStatutCandidat = (params = {}) => {
+const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -71,7 +71,7 @@ const createRandomStatutCandidat = (params = {}) => {
   };
 };
 
-const createRandomRcoStatutCandidat = (params = {}) => {
+const createRandomRcoDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -97,8 +97,8 @@ const createRandomRcoStatutCandidat = (params = {}) => {
   };
 };
 
-// random statutCandidat shaped along our REST API schema
-const createRandomStatutCandidatApiInput = (params = {}) => {
+// random DossierApprenant shaped along our REST API schema
+const createRandomDossierApprenantApiInput = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -149,17 +149,17 @@ const createRandomListOf =
     return randomList;
   };
 
-const createRandomStatutsCandidatsApiInputList = createRandomListOf(createRandomStatutCandidatApiInput);
+const createRandomDossierApprenantApiInputList = createRandomListOf(createRandomDossierApprenantApiInput);
 
-const createRandomStatutsCandidatsList = createRandomListOf(createRandomStatutCandidat);
+const createRandomDossierApprenantList = createRandomListOf(createRandomDossierApprenant);
 
 module.exports = {
   getRandomPeriodeFormation,
-  createRandomStatutCandidat,
-  createRandomStatutCandidatApiInput,
-  createRandomStatutsCandidatsList,
-  createRandomStatutsCandidatsApiInputList,
+  createRandomDossierApprenant,
+  createRandomDossierApprenantApiInput,
+  createRandomDossierApprenantList,
+  createRandomDossierApprenantApiInputList,
   getRandomSiretEtablissement,
   getRandomUaiEtablissement,
-  createRandomRcoStatutCandidat,
+  createRandomRcoDossierApprenant,
 };

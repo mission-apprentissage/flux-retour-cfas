@@ -6,5 +6,5 @@ const { jobNames } = require("../../../common/constants/jobsConstants");
 runScript(async () => {
   logger.info("Suppression de toutes les données ");
   await clearAll();
-  logger.info("StatutsCandidats supprimés avec succès !");
+  logger.info("DossiersApprenants supprimés avec succès !");
 }, jobNames.clearAll);

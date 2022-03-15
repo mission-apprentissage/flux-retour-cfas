@@ -1,9 +1,8 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { RcoStatutCandidatModel } = require("../../common/model");
 const { jobNames } = require("../../common/constants/jobsConstants");
-const { effectifsIndicators } = require("../../common/constants/statutsCandidatsConstants");
-
+const { effectifsIndicators } = require("../../common/constants/dossierApprenantConstants");
+const { RcoDossierApprenantModel } = require("../../common/model");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const cliProgress = require("cli-progress");
@@ -18,7 +17,7 @@ runScript(async ({ effectifs }) => {
 
   // Supprime les données précédentes
   logger.info(`Clearing existing RCO Statuts Collection ...`);
-  await RcoStatutCandidatModel.deleteMany({});
+  await RcoDossierApprenantModel.deleteMany({});
 
   const currentAnneeScolaireFilter = { annee_scolaire: getAnneeScolaireFromDate(new Date()) };
   const projection = {
@@ -67,7 +66,7 @@ runScript(async ({ effectifs }) => {
 
   // Ajout en base pour chaque élement de la liste
   await asyncForEach(allStatutsByIndicators, async (currentStatut) => {
-    await new RcoStatutCandidatModel({
+    await new RcoDossierApprenantModel({
       statutCandidatId: currentStatut.statutCandidatId,
       uai_etablissement: currentStatut.uai_etablissement,
       nom_etablissement: currentStatut.nom_etablissement,

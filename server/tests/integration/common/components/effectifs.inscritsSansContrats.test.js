@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 
-const { StatutCandidatModel } = require("../../../../src/common/model");
-const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/dossierApprenantConstants");
+const { DossierApprenantModel } = require("../../../../src/common/model");
 const { EffectifsInscritsSansContrats } = require("../../../../src/common/components/effectifs/inscrits-sans-contrats");
 
 describe(__filename, () => {
@@ -11,50 +11,50 @@ describe(__filename, () => {
   beforeEach(async () => {
     const statuts = [
       // rupturant, should not be counted
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         etablissement_num_region: "199",
         historique_statut_apprenant: [
           { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-09-13T00:00:00") },
           { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-10-01T00:00:00") },
         ],
       }),
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         historique_statut_apprenant: [
           { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-10-03T00:00:00") },
         ],
       }),
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         etablissement_num_region: "199",
         historique_statut_apprenant: [
           { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
         ],
       }),
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         etablissement_num_region: "199",
         historique_statut_apprenant: [],
       }),
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         historique_statut_apprenant: [
           { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-03-22T00:00:00") },
         ],
       }),
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         historique_statut_apprenant: [
           { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-03-22T00:00:00") },
         ],
       }),
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         historique_statut_apprenant: [
           { valeur_statut: CODES_STATUT_APPRENANT.abandon, date_statut: new Date("2020-03-25T00:00:00") },
         ],
       }),
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         historique_statut_apprenant: [
           { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-24T00:00:00") },
           { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-10-30T00:00:00") },
         ],
       }),
-      createRandomStatutCandidat({
+      createRandomDossierApprenant({
         historique_statut_apprenant: [
           { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-24T00:00:00") },
           { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-11-30T00:00:00") },
@@ -63,7 +63,7 @@ describe(__filename, () => {
       }),
     ];
     for (let index = 0; index < statuts.length; index++) {
-      const toAdd = new StatutCandidatModel(statuts[index]);
+      const toAdd = new DossierApprenantModel(statuts[index]);
       await toAdd.save();
     }
   });

@@ -12,7 +12,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 const destinationApiUrl = env.get("FLUX_RETOUR_CFAS_REPOST_JOB_DEST_API_URL").asString();
 
 /**
- * Ce script permet d'envoyer  les derniers statutsCandidats reçus la veille
+ * Ce script permet d'envoyer  les derniers DossierApprenant reçus la veille
  * via un POST sur la route d'API de l'environnement souhaité
  *
  * L'url de l'api, ainsi que le username / password sont récupérés dans des variables d'environnement (/server/.env)
@@ -21,15 +21,15 @@ const destinationApiUrl = env.get("FLUX_RETOUR_CFAS_REPOST_JOB_DEST_API_URL").as
  * FLUX_RETOUR_CFAS_REPOST_JOB_USERNAME_XXXX FLUX_RETOUR_CFAS_REPOST_JOB_PASSWORD_XXXX et pour chaque ERP
  */
 runScript(async () => {
-  logger.info(`Run Post Last Received StatutsCandidats Job to ${destinationApiUrl}`);
-  await repostLastReceivedStatutsCandidatsToEnv();
-  logger.info(`End Post Last Received StatutsCandidats Job`);
+  logger.info(`Run Post Last Received DossiersApprenants Job to ${destinationApiUrl}`);
+  await repostLastReceivedDossiersApprenantsToEnv();
+  logger.info(`End Post Last Received DossiersApprenants Job`);
 }, jobNames.repostLastStatutsReceived);
 
 /**
  * Cette fonction envoi sur l'API souhaitée l'ensemble des derniers statuts recus la veille
  */
-const repostLastReceivedStatutsCandidatsToEnv = async () => {
+const repostLastReceivedDossiersApprenantsToEnv = async () => {
   // Récupération des usersEvents de la veille
   const lastUserEventsReceived = await UserEventModel.find({
     date: { $gte: startOfDay(subDays(new Date(), 1)), $lt: startOfDay(new Date()) },
@@ -53,7 +53,7 @@ const repostLastReceivedStatutsCandidatsToEnv = async () => {
         if (currentUserAccessToken !== null) {
           // Post des data vers l'API destination
           const response = await axios.post(
-            `${destinationApiUrl}/api/statut-candidats`,
+            `${destinationApiUrl}/api/dossiers-apprenants`,
             currentUserEventToRepost.data,
             { headers: { Authorization: `Bearer ${currentUserAccessToken}` } }
           );
@@ -116,7 +116,7 @@ const getUserTokensMapFromList = async (usernameList) => {
  */
 const isPostStatutsApiAllowed = async (accessToken) => {
   const response = await axios.post(
-    `${destinationApiUrl}/api/statut-candidats/test`,
+    `${destinationApiUrl}/api/dossiers-apprenants/test`,
     {},
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );

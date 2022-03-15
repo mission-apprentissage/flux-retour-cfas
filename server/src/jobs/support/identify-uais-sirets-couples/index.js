@@ -3,7 +3,7 @@ const { runScript } = require("../../scriptWrapper");
 const path = require("path");
 const { toCsv } = require("../../../common/utils/exporterUtils");
 const { jobNames } = require("../../../common/constants/jobsConstants");
-const { StatutCandidatModel } = require("../../../common/model");
+const { DossierApprenantModel } = require("../../../common/model");
 
 /**
  * Ce script permet de créer un export contenant les couples UAIs SIRETS
@@ -19,7 +19,7 @@ runScript(async () => {
  */
 const identifyUaisSiretsCouples = async () => {
   // Gets all uai-sirets couples valid
-  const uaiSiretsCouples = await StatutCandidatModel.aggregate([
+  const uaiSiretsCouples = await DossierApprenantModel.aggregate([
     {
       $match: {
         siret_etablissement_valid: true,

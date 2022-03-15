@@ -20,8 +20,8 @@ runScript(async ({ db }) => {
   const resultCollection = db.collection(collectionNames.statutsAvecDerniersElementsHistoriqueDateIdentique);
   await resultCollection.deleteMany();
   // create a cursor over all the statuts with an historique of size > 1
-  const statutsCandidatsCollection = db.collection("statutsCandidats");
-  const cursor = statutsCandidatsCollection.find({
+  const dosssiersApprenantsCollection = db.collection("dossiersApprenants");
+  const cursor = dosssiersApprenantsCollection.find({
     annee_scolaire: "2021-2022",
     "historique_statut_apprenant.1": { $exists: true },
   });

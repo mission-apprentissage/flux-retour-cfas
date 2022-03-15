@@ -1,24 +1,24 @@
 const { fullSampleWithUpdates } = require("../../../../tests/data/sample");
-const { createRandomStatutsCandidatsList } = require("../../../../tests/data/randomizedSample");
+const { createRandomDossierApprenantList } = require("../../../../tests/data/randomizedSample");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
 
-const seedSample = async (statutsCandidats) => {
-  await statutsCandidats.addOrUpdateStatuts(fullSampleWithUpdates);
+const seedSample = async (dossiersApprenants) => {
+  await dossiersApprenants.addOrUpdateDossiersApprenants(fullSampleWithUpdates);
 };
 
-const seedRandomizedSample = async (statutsCandidats) => {
-  await statutsCandidats.addOrUpdateStatuts(createRandomStatutsCandidatsList());
+const seedRandomizedSample = async (dossiersApprenants) => {
+  await dossiersApprenants.addOrUpdateDossiersApprenants(createRandomDossierApprenantList());
 };
 
-const seedRandomizedSampleWithStatut = async (statutsCandidats, nbStatuts, statutValue) => {
-  const randomStatuts = createRandomStatutsCandidatsList(nbStatuts).map((statutCandidat) => {
+const seedRandomizedSampleWithStatut = async (dossiersApprenants, nbStatuts, statutValue) => {
+  const randomDossiersApprenants = createRandomDossierApprenantList(nbStatuts).map((dossierApprenant) => {
     return {
-      ...statutCandidat,
+      ...dossierApprenant,
       statut_apprenant: statutValue,
     };
   });
 
-  await statutsCandidats.addOrUpdateStatuts(randomStatuts);
+  await dossiersApprenants.addOrUpdateDossiersApprenants(randomDossiersApprenants);
 };
 
 const buildCfasFromCsvAndExcludedFile = async (referenceFilePath, excludedFilePath, encoding) => {

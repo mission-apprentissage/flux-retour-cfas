@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const { startServer } = require("../../utils/testUtils");
-const { createRandomStatutCandidat } = require("../../data/randomizedSample");
-const { StatutCandidatModel, CfaModel } = require("../../../src/common/model");
+const { createRandomDossierApprenant } = require("../../data/randomizedSample");
+const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
 describe(__filename, () => {
@@ -110,8 +110,8 @@ describe(__filename, () => {
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat(cfaInfos);
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const randomStatut = createRandomDossierApprenant(cfaInfos);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
       // Add Cfa in referentiel
@@ -155,8 +155,8 @@ describe(__filename, () => {
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat(cfaInfos);
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const randomStatut = createRandomDossierApprenant(cfaInfos);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
       const response = await httpClient.get(`/api/cfas/${uaiTest}`);
@@ -201,8 +201,8 @@ describe(__filename, () => {
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat(cfaInfos);
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const randomStatut = createRandomDossierApprenant(cfaInfos);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
       // Add Cfa in referentiel

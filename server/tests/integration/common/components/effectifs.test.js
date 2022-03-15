@@ -1,17 +1,17 @@
 const assert = require("assert").strict;
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
-const { StatutCandidatModel } = require("../../../../src/common/model");
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
+const { DossierApprenantModel } = require("../../../../src/common/model");
 const effectifs = require("../../../../src/common/components/effectifs");
-const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/statutsCandidatsConstants");
+const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/dossierApprenantConstants");
 
 describe(__filename, () => {
-  const seedStatutsCandidats = async (statutsProps) => {
+  const seedDossiersApprenants = async (statutsProps) => {
     const nbAbandons = 10;
     const nbApprentis = 5;
 
     // Add 10 statuts with full sequence, inscrit -> apprenti -> abandon
     for (let index = 0; index < nbAbandons; index++) {
-      const randomStatut = createRandomStatutCandidat({
+      const randomStatut = createRandomDossierApprenant({
         historique_statut_apprenant: [
           {
             valeur_statut: CODES_STATUT_APPRENANT.inscrit,
@@ -28,13 +28,13 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
     }
 
     // Add 5 statuts with simple apprenti sequence
     for (let index = 0; index < nbApprentis; index++) {
-      const randomStatut = createRandomStatutCandidat({
+      const randomStatut = createRandomDossierApprenant({
         historique_statut_apprenant: [
           {
             valeur_statut: CODES_STATUT_APPRENANT.apprenti,
@@ -43,13 +43,13 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
     }
 
     // Add 15 statuts with inscrit -> apprenti sequence
     for (let index = 0; index < 15; index++) {
-      const randomStatut = createRandomStatutCandidat({
+      const randomStatut = createRandomDossierApprenant({
         historique_statut_apprenant: [
           {
             valeur_statut: CODES_STATUT_APPRENANT.inscrit,
@@ -62,7 +62,7 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
     }
   };
@@ -73,11 +73,11 @@ describe(__filename, () => {
 
       const filterQuery = { uai_etablissement: "0123456Z" };
 
-      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "1", niveau_formation_libelle: "1 blabla" });
-      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "2", niveau_formation_libelle: "2 blabla" });
-      await seedStatutsCandidats({ ...filterQuery, niveau_formation: "3", niveau_formation_libelle: "3 blabla" });
-      await seedStatutsCandidats({ ...filterQuery, niveau_formation: null });
-      await seedStatutsCandidats({
+      await seedDossiersApprenants({ ...filterQuery, niveau_formation: "1", niveau_formation_libelle: "1 blabla" });
+      await seedDossiersApprenants({ ...filterQuery, niveau_formation: "2", niveau_formation_libelle: "2 blabla" });
+      await seedDossiersApprenants({ ...filterQuery, niveau_formation: "3", niveau_formation_libelle: "3 blabla" });
+      await seedDossiersApprenants({ ...filterQuery, niveau_formation: null });
+      await seedDossiersApprenants({
         uai_etablissement: "0123456T",
         niveau_formation: 1,
         niveau_formation_libelle: "1 blabla",
@@ -130,11 +130,11 @@ describe(__filename, () => {
 
       const filterQuery = { uai_etablissement: "0123456Z" };
 
-      await seedStatutsCandidats({ ...filterQuery, annee_formation: 1 });
-      await seedStatutsCandidats({ ...filterQuery, annee_formation: 2 });
-      await seedStatutsCandidats({ ...filterQuery, annee_formation: 3 });
-      await seedStatutsCandidats({ ...filterQuery, annee_formation: null });
-      await seedStatutsCandidats({ uai_etablissement: "0123456T", annee_formation: 1 });
+      await seedDossiersApprenants({ ...filterQuery, annee_formation: 1 });
+      await seedDossiersApprenants({ ...filterQuery, annee_formation: 2 });
+      await seedDossiersApprenants({ ...filterQuery, annee_formation: 3 });
+      await seedDossiersApprenants({ ...filterQuery, annee_formation: null });
+      await seedDossiersApprenants({ uai_etablissement: "0123456T", annee_formation: 1 });
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResult = [
@@ -189,11 +189,11 @@ describe(__filename, () => {
 
       const filterQuery = { uai_etablissement: "0123456Z" };
 
-      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "a", formation_cfd: "77929544300013" });
-      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "a", formation_cfd: "77929544300013" });
-      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "b", formation_cfd: "77929544300014" });
-      await seedStatutsCandidats({ ...filterQuery, libelle_long_formation: "c", formation_cfd: "77929544300015" });
-      await seedStatutsCandidats({ uai_etablissement: "0123456T", formation_cfd: "77929544300013" });
+      await seedDossiersApprenants({ ...filterQuery, libelle_long_formation: "a", formation_cfd: "77929544300013" });
+      await seedDossiersApprenants({ ...filterQuery, libelle_long_formation: "a", formation_cfd: "77929544300013" });
+      await seedDossiersApprenants({ ...filterQuery, libelle_long_formation: "b", formation_cfd: "77929544300014" });
+      await seedDossiersApprenants({ ...filterQuery, libelle_long_formation: "c", formation_cfd: "77929544300015" });
+      await seedDossiersApprenants({ uai_etablissement: "0123456T", formation_cfd: "77929544300013" });
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResult = [
@@ -249,10 +249,10 @@ describe(__filename, () => {
         uai_etablissement: "012345Z",
         nom_etablissement: "CFA 2",
       };
-      await seedStatutsCandidats({ ...filterQuery, ...cfa1 });
-      await seedStatutsCandidats({ formation_cfd: "12345", ...cfa1 });
-      await seedStatutsCandidats({ ...filterQuery, ...cfa2 });
-      await seedStatutsCandidats({ ...filterQuery, ...cfa2 });
+      await seedDossiersApprenants({ ...filterQuery, ...cfa1 });
+      await seedDossiersApprenants({ formation_cfd: "12345", ...cfa1 });
+      await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
+      await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResult = [
@@ -294,9 +294,9 @@ describe(__filename, () => {
         etablissement_num_departement: "77",
         etablissement_nom_departement: "Seine-et-Marne",
       };
-      await seedStatutsCandidats({ ...departement1 });
-      await seedStatutsCandidats({ ...departement2 });
-      await seedStatutsCandidats({ ...departement2 });
+      await seedDossiersApprenants({ ...departement1 });
+      await seedDossiersApprenants({ ...departement2 });
+      await seedDossiersApprenants({ ...departement2 });
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResult = [
@@ -341,11 +341,11 @@ describe(__filename, () => {
       };
       const cfd1 = "77929544300000";
       const cfd2 = "77929544300001";
-      await seedStatutsCandidats({ ...departement1, formation_cfd: cfd1, libelle_long_formation: "x" });
-      await seedStatutsCandidats({ ...departement1, formation_cfd: cfd1, libelle_long_formation: "x" });
-      await seedStatutsCandidats({ ...departement2, formation_cfd: cfd1, libelle_long_formation: "x" });
-      await seedStatutsCandidats({ ...departement2, formation_cfd: cfd2, libelle_long_formation: "x" });
-      await seedStatutsCandidats({ ...departement2, formation_cfd: cfd2, libelle_long_formation: "x" });
+      await seedDossiersApprenants({ ...departement1, formation_cfd: cfd1, libelle_long_formation: "x" });
+      await seedDossiersApprenants({ ...departement1, formation_cfd: cfd1, libelle_long_formation: "x" });
+      await seedDossiersApprenants({ ...departement2, formation_cfd: cfd1, libelle_long_formation: "x" });
+      await seedDossiersApprenants({ ...departement2, formation_cfd: cfd2, libelle_long_formation: "x" });
+      await seedDossiersApprenants({ ...departement2, formation_cfd: cfd2, libelle_long_formation: "x" });
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const expectedResult = [
