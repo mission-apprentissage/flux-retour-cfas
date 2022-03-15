@@ -14,9 +14,11 @@ const DomainesMetiers = ({ domainesMetiers }) => {
   const displayShowMoreButton = domainesMetiers.length > MAX_DISPLAYED_DOMAINE_METIERS;
 
   return (
-    <Wrap marginTop="1w" spacing="1w">
+    <Wrap marginTop="2w" marginBottom="2w" spacing="1w">
       {domainesMetierToDisplay.map((item) => (
-        <Tag key={item}>{item}</Tag>
+        <Tag backgroundColor="#EEEEEE" textColor="#161616" key={item}>
+          {item}
+        </Tag>
       ))}
       {displayShowMoreButton && (
         <Button
@@ -24,8 +26,8 @@ const DomainesMetiers = ({ domainesMetiers }) => {
           fontSize="omega"
           onClick={setShowAllDomainesMetiers.toggle}
           marginTop="1w"
-          marginLeft="1w"
-          color="white"
+          marginLeft="2w"
+          color="bluefrance"
           textDecoration="underline"
         >
           {showAllDomainesMetiers ? "masquer les domaines" : "afficher tous les domaines"}

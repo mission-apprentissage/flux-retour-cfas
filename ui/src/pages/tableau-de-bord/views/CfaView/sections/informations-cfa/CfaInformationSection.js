@@ -1,24 +1,11 @@
-import { Box, Heading, Text } from "@chakra-ui/react";
+import { Badge, Box, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Highlight } from "../../../../../../common/components";
+import { Section } from "../../../../../../common/components";
 import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
-
-export const formatSiretInformation = (sousEtablissements) => {
-  const multipleSirets = sousEtablissements.length > 1;
-
-  if (multipleSirets) {
-    return `${sousEtablissements.length} SIRET pour cet organisme`;
-  } else {
-    if (sousEtablissements[0]?.siret_etablissement) {
-      return `SIRET : ${sousEtablissements[0].siret_etablissement}`;
-    }
-    return "SIRET non renseigné pour cet organisme";
-  }
-};
 
 const CfaInformationSection = ({ infosCfa, loading, error }) => {
   if (loading) {
@@ -27,36 +14,56 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
 
   if (error) {
     return (
-      <Text fontSize="epsilon" color="white">
-        <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
-        <Box as="span" verticalAlign="middle">
-          Erreur lors de la récupération des informations de l&apos;organisme de formation
-        </Box>
-      </Text>
+      <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
+        <Text fontSize="epsilon" color="black">
+          <Box as="i" className="ri-error-warning-fill" verticalAlign="middle" marginRight="1v" />
+          <Box as="span" verticalAlign="middle">
+            Erreur lors de la récupération des informations de l&apos;organisme de formation
+          </Box>
+        </Text>
+      </Section>
     );
   }
 
   if (infosCfa) {
-    const { uai, sousEtablissements, libelleLong, reseaux, adresse, domainesMetiers } = infosCfa;
+    const { uai, sousEtablissements, reseaux, adresse, domainesMetiers } = infosCfa;
+    const multipleSirets = sousEtablissements.length > 1;
+    const siretToDisplay = sousEtablissements[0]?.siret_etablissement ?? "N/A";
+
     return (
-      <Highlight>
-        <Text color="white" fontSize="omega">
-          UAI&nbsp;:&nbsp;{uai} - {formatSiretInformation(sousEtablissements)}
+      <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
+        <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
+          <HStack>
+            <Text marginBottom="2px">UAI :</Text>
+            <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
+              {uai}
+            </Badge>
+          </HStack>
+          {!multipleSirets && (
+            <HStack>
+              <Text marginBottom="2px">SIRET :</Text>
+              <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
+                {siretToDisplay}
+              </Badge>
+            </HStack>
+          )}
+        </HStack>
+
+        <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
+          {reseaux?.length > 0 ? (
+            <div>
+              Cet organisme fait partie du réseau <b>{reseaux[0]}</b>. Sa domiciliation est {adresse}
+            </div>
+          ) : (
+            <div>La domiciliation de cet organisme est {adresse}</div>
+          )}
+          <b>
+            {multipleSirets && ` Il est identifié par une UAI qui utilise ${sousEtablissements.length} numéros SIRET.`}
+          </b>
         </Text>
-        <Heading color="white" fontSize="gamma" marginTop="1w">
-          {libelleLong}
-        </Heading>
-        <Text color="white" marginTop="1w">
-          {adresse}
-        </Text>
-        {reseaux?.length > 0 && (
-          <Text color="white">
-            Réseau(x)&nbsp;:&nbsp;
-            {reseaux.join(", ")}
-          </Text>
-        )}
+
         {domainesMetiers && <DomainesMetiers domainesMetiers={domainesMetiers} />}
-      </Highlight>
+      </Section>
     );
   }
 
