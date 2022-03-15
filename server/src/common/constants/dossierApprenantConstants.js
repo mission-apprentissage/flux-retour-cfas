@@ -10,7 +10,7 @@ const CODES_STATUT_APPRENANT = {
 /**
  * Nom des statuts
  */
-const STATUT_APPRENANT_LABELS = [
+const LABELS_STATUT_APPRENANT = [
   { code: CODES_STATUT_APPRENANT.abandon, name: "abandon" },
   { code: CODES_STATUT_APPRENANT.inscrit, name: "inscrit" },
   { code: CODES_STATUT_APPRENANT.apprenti, name: "apprenti" },
@@ -22,7 +22,7 @@ const STATUT_APPRENANT_LABELS = [
  * @returns
  */
 const getStatutApprenantNameFromCode = (statutCode) =>
-  STATUT_APPRENANT_LABELS.find((item) => item.code === statutCode)?.name ?? "NC";
+  LABELS_STATUT_APPRENANT.find((item) => item.code === statutCode)?.name ?? "NC";
 
 /**
  * Code pour les types de doublons identifiables
@@ -78,6 +78,6 @@ module.exports = {
   duplicatesTypesCodes,
   statutsCandidatsStringFields,
   effectifsIndicators,
-  STATUT_APPRENANT_LABELS,
+  LABELS_STATUT_APPRENANT,
   getStatutApprenantNameFromCode,
 };
