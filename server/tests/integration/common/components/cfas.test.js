@@ -28,7 +28,7 @@ describe(__filename, () => {
       },
     ];
 
-    const statutsSeed = [
+    const dossierApprenantSeed = [
       {
         ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[0].uai,
@@ -65,9 +65,9 @@ describe(__filename, () => {
         await newCfa.save();
       }
 
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new DossierApprenantModel(statut).save();
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 
@@ -197,7 +197,7 @@ describe(__filename, () => {
     const { getCfaFirstTransmissionDateFromUai } = cfasComponent();
     const uaiToSearch = "0762290X";
     const firstDate = new Date("2020-08-30T00:00:00.000+0000");
-    const statutsSeed = [
+    const dossierApprenantSeed = [
       {
         ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
@@ -221,9 +221,9 @@ describe(__filename, () => {
     ];
 
     beforeEach(async () => {
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new DossierApprenantModel(statut).save();
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 
@@ -248,7 +248,7 @@ describe(__filename, () => {
 
     const siretToSearch = "80420010000024";
     const firstDate = new Date("2020-06-10T00:00:00.000+0000");
-    const statutsSeed = [
+    const dossierApprenantSeed = [
       {
         ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
@@ -272,9 +272,9 @@ describe(__filename, () => {
     ];
 
     beforeEach(async () => {
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new DossierApprenantModel(statut).save();
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 

@@ -26,7 +26,7 @@ const searchCfas = async (searchCriteria) => {
   if (searchTerm) {
     matchStage.$or = [{ $text: { $search: searchTerm } }, { uai: new RegExp(escapeRegExp(searchTerm), "g") }];
   }
-  // if other criteria have been provided, find the list of uai matching those criteria in the StatutCandidat collection
+  // if other criteria have been provided, find the list of uai matching those criteria in the DossierApprenant collection
   if (Object.keys(otherCriteria).length > 0) {
     const eligibleUais = await DossierApprenantModel.distinct("uai_etablissement", otherCriteria);
     matchStage.uai = { $in: eligibleUais };

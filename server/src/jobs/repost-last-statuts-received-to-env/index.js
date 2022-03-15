@@ -53,7 +53,7 @@ const repostLastReceivedDossiersApprenantsToEnv = async () => {
         if (currentUserAccessToken !== null) {
           // Post des data vers l'API destination
           const response = await axios.post(
-            `${destinationApiUrl}/api/statut-candidats`,
+            `${destinationApiUrl}/api/dossiers-apprenants`,
             currentUserEventToRepost.data,
             { headers: { Authorization: `Bearer ${currentUserAccessToken}` } }
           );
@@ -116,7 +116,7 @@ const getUserTokensMapFromList = async (usernameList) => {
  */
 const isPostStatutsApiAllowed = async (accessToken) => {
   const response = await axios.post(
-    `${destinationApiUrl}/api/statut-candidats/test`,
+    `${destinationApiUrl}/api/dossiers-apprenants/test`,
     {},
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );

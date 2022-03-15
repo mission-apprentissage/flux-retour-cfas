@@ -1,5 +1,5 @@
 /**
- * Codes des statuts des candidats
+ * Codes des statuts des apprenants
  */
 const CODES_STATUT_APPRENANT = {
   inscrit: 2,
@@ -23,15 +23,6 @@ const STATUT_APPRENANT_LABELS = [
  */
 const getStatutApprenantNameFromCode = (statutCode) =>
   STATUT_APPRENANT_LABELS.find((item) => item.code === statutCode)?.name ?? "NC";
-
-/**
- * Code pour le statut de la mise à jour du statut candidat
- * Ex: passage du statut
- */
-const codesStatutsMajStatutCandidats = {
-  ok: 0,
-  ko: 1,
-};
 
 /**
  * Code pour les types de doublons identifiables
@@ -84,7 +75,6 @@ const effectifsIndicators = {
 
 module.exports = {
   CODES_STATUT_APPRENANT,
-  codesStatutsMajStatutCandidats,
   duplicatesTypesCodes,
   statutsCandidatsStringFields,
   effectifsIndicators,

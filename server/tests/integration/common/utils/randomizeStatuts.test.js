@@ -6,27 +6,27 @@ const { DossierApprenantModel } = require("../../../../src/common/model");
 
 describe(__filename, () => {
   describe("createRandomDossierApprenant", () => {
-    it("Vérifie l'existence d'un statut de candidat randomisé", async () => {
+    it("Vérifie l'existence d'un DossierApprenant randomisé", async () => {
       const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
-      const randomStatutProps = createRandomDossierApprenant();
-      const result = await (await createDossierApprenant(randomStatutProps)).toJSON();
+      const randomDossierApprenantProps = createRandomDossierApprenant();
+      const result = await (await createDossierApprenant(randomDossierApprenantProps)).toJSON();
 
       // Checks creation
-      assert.equal(result.ine_apprenant, randomStatutProps.ine_apprenant);
-      assert.equal(result.nom_apprenant, randomStatutProps.nom_apprenant.toUpperCase());
-      assert.equal(result.prenom_apprenant, randomStatutProps.prenom_apprenant.toUpperCase());
-      assert.equal(result.email_contact, randomStatutProps.email_contact);
-      assert.equal(result.formation_cfd, randomStatutProps.formation_cfd);
-      assert.equal(result.libelle_court_formation, randomStatutProps.libelle_court_formation);
-      assert.equal(result.libelle_long_formation, randomStatutProps.libelle_long_formation);
-      assert.equal(result.uai_etablissement, randomStatutProps.uai_etablissement);
-      assert.equal(result.siret_etablissement, randomStatutProps.siret_etablissement);
-      assert.equal(result.nom_etablissement, randomStatutProps.nom_etablissement);
-      assert.equal(result.source, randomStatutProps.source);
-      assert.equal(result.annee_formation, randomStatutProps.annee_formation);
-      assert.deepEqual(result.periode_formation, randomStatutProps.periode_formation);
-      assert.equal(result.annee_scolaire, randomStatutProps.annee_scolaire);
+      assert.equal(result.ine_apprenant, randomDossierApprenantProps.ine_apprenant);
+      assert.equal(result.nom_apprenant, randomDossierApprenantProps.nom_apprenant.toUpperCase());
+      assert.equal(result.prenom_apprenant, randomDossierApprenantProps.prenom_apprenant.toUpperCase());
+      assert.equal(result.email_contact, randomDossierApprenantProps.email_contact);
+      assert.equal(result.formation_cfd, randomDossierApprenantProps.formation_cfd);
+      assert.equal(result.libelle_court_formation, randomDossierApprenantProps.libelle_court_formation);
+      assert.equal(result.libelle_long_formation, randomDossierApprenantProps.libelle_long_formation);
+      assert.equal(result.uai_etablissement, randomDossierApprenantProps.uai_etablissement);
+      assert.equal(result.siret_etablissement, randomDossierApprenantProps.siret_etablissement);
+      assert.equal(result.nom_etablissement, randomDossierApprenantProps.nom_etablissement);
+      assert.equal(result.source, randomDossierApprenantProps.source);
+      assert.equal(result.annee_formation, randomDossierApprenantProps.annee_formation);
+      assert.deepEqual(result.periode_formation, randomDossierApprenantProps.periode_formation);
+      assert.equal(result.annee_scolaire, randomDossierApprenantProps.annee_scolaire);
 
       // Checks exists method
       const found = await getDossierApprenant({
@@ -41,7 +41,7 @@ describe(__filename, () => {
       assert.ok(found);
     });
 
-    it("Vérifie l'existence d'un statut de candidat randomisé avec params", async () => {
+    it("Vérifie l'existence d'un DossierApprenant randomisé avec params", async () => {
       const randomStatut = createRandomDossierApprenant({
         historique_statut_apprenant: historySequenceApprentiToAbandon,
       });

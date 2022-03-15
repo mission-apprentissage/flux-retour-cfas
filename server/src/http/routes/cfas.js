@@ -47,7 +47,7 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     tryCatch(async (req, res) => {
       const { uai } = req.params;
 
-      // Search cfa in statuts
+      // Search cfa in DossierApprenant collection
       const cfaFound = await DossierApprenantModel.findOne({
         uai_etablissement: uai,
       }).lean();

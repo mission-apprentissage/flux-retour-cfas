@@ -172,12 +172,12 @@ const createDossierApprenant = async (itemToCreate) => {
 };
 
 /**
- * Récupération de la liste des statuts en doublons stricts pour les filtres passés en paramètres
+ * Récupération de la liste des DossierApprenant en doublons stricts pour les filtres passés en paramètres
  * @param {*} duplicatesTypesCode
  * @param {*} filters
  * @returns
  */
-const findStatutsDuplicates = async (
+const findDossiersApprenantsDuplicates = async (
   duplicatesTypesCode,
   filters = {},
   { allowDiskUse = false, duplicatesWithNoUpdate = false } = {}
@@ -279,7 +279,7 @@ const findStatutsDuplicates = async (
       break;
 
     default:
-      throw new Error("findStatutsDuplicates Error :  duplicatesTypesCode not matching any code");
+      throw new Error("findDossiersApprenantsDuplicates Error :  duplicatesTypesCode not matching any code");
   }
 
   if (duplicatesWithNoUpdate) filters.historique_statut_apprenant = { $size: 1 };
@@ -293,7 +293,7 @@ const findStatutsDuplicates = async (
     {
       $group: unicityQueryGroup,
     },
-    // Récupération des statuts en doublons = regroupement count > 1
+    // Récupération des DossierApprenant en doublons = regroupement count > 1
     {
       $match: {
         ...(duplicatesWithNoUpdate ? { statut_apprenants: { $size: 1 } } : {}),
@@ -302,11 +302,11 @@ const findStatutsDuplicates = async (
     },
   ];
 
-  const statutsFound = allowDiskUse
+  const dossiersApprenantsFound = allowDiskUse
     ? await DossierApprenantModel.aggregate(aggregateQuery).allowDiskUse(true).exec()
     : await DossierApprenantModel.aggregate(aggregateQuery);
 
-  return statutsFound;
+  return dossiersApprenantsFound;
 };
 
 /**
@@ -319,7 +319,7 @@ const findStatutsDuplicates = async (
  */
 const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
   // Récupération des doublons pour le type souhaité
-  const duplicates = await findStatutsDuplicates(duplicatesTypeCode, filters, options);
+  const duplicates = await findDossiersApprenantsDuplicates(duplicatesTypeCode, filters, options);
 
   return duplicates.map((duplicateItem) => {
     const { _id, count, duplicatesIds, ...discriminants } = duplicateItem;
@@ -333,7 +333,7 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
 };
 
 /**
- * Récupération de la liste des statuts avec un historique antidaté
+ * Récupération de la liste des DossierApprenant avec un historique antidaté
  * @returns
  */
 const getDossierApprenantsWithHistoryDateUnordered = async () => {
@@ -361,7 +361,7 @@ const getDossierApprenantsWithHistoryDateUnordered = async () => {
 };
 
 /**
- * Récupération de la liste des statuts ayant une date invalide (< année 2000)
+ * Récupération de la liste des DossierApprenant ayant une date invalide (< année 2000)
  * @returns
  */
 const getDossierApprenantsWithBadDate = async () => {

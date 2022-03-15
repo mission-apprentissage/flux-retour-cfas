@@ -9,7 +9,7 @@ const requireJwtAuthenticationMiddleware = require("./middlewares/requireJwtAuth
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 
 const rcoRoute = require("./routes/rco");
-const dossierApprenantRoute = require("./routes/statut-candidats");
+const dossierApprenantRoute = require("./routes/dossiers-apprenants.route");
 const lienPriveCfaRoute = require("./routes/lien-prive-cfa");
 const loginRoute = require("./routes/login");
 const loginCfaRoute = require("./routes/login-cfa.route");
@@ -47,8 +47,15 @@ module.exports = async (components) => {
   app.use("/api/update-password", updatePasswordRouter(components));
 
   // requires JWT auth
+  // @deprecated to /dossiers-apprenants
   app.use(
     "/api/statut-candidats",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    dossierApprenantRoute(components)
+  );
+  app.use(
+    "/api/dossiers-apprenants",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     dossierApprenantRoute(components)

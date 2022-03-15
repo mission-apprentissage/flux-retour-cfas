@@ -67,7 +67,7 @@ module.exports = new Schema({
   source_seed_cfa: {
     type: String,
     default: null,
-    description: "Source du seed du cfa dans la collection (StatutsCandidats ou fichier d'origine)",
+    description: "Source du seed du cfa dans la collection (DossierApprenant ou fichier d'origine)",
   },
   first_transmission_date: {
     type: Date,

@@ -21,7 +21,7 @@ class Indicator {
   }
 
   /**
-   * Liste tous les statuts correspondants à cet indicateur à la date donnée
+   * Liste tous les DossierApprenant correspondants à cet indicateur à la date donnée
    * @param {*} searchDate Date de recherche
    * @param {*} filters Filtres optionnels
    * @param {*} options Options de regroupement / projection optionnelles
