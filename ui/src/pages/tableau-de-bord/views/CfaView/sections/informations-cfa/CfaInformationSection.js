@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../../../../common/components";
+import { formatSiretSplitted } from "../../../../../../common/utils/stringUtils";
 import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
@@ -28,7 +29,9 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
   if (infosCfa) {
     const { uai, sousEtablissements, reseaux, adresse, domainesMetiers } = infosCfa;
     const multipleSirets = sousEtablissements.length > 1;
-    const siretToDisplay = sousEtablissements[0]?.siret_etablissement ?? "N/A";
+    const siretToDisplay = sousEtablissements[0]?.siret_etablissement
+      ? formatSiretSplitted(sousEtablissements[0]?.siret_etablissement)
+      : "N/A";
 
     return (
       <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
