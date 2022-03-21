@@ -4,7 +4,7 @@ const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
 const logger = require("../../common/logger");
-const { jobNames } = require("../../common/model/constants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -12,7 +12,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * Ce script permet de récupérer les RNCP pour les statuts n'en ayant pas ; le code RNCP est retrouvé via le CFD dans les TCO
  */
 runScript(async ({ db }) => {
-  const allValidCfds = await db.collection("statutsCandidats").distinct("formation_cfd", {
+  const allValidCfds = await db.collection("dossiersApprenants").distinct("formation_cfd", {
     formation_rncp: null,
   });
 
@@ -20,7 +20,7 @@ runScript(async ({ db }) => {
   loadingBar.start(allValidCfds.length, 0);
 
   let matchedCfdCount = 0;
-  let updatedStatutCandidatCount = 0;
+  let updatedDossiersApprenantsCount = 0;
 
   await asyncForEach(allValidCfds, async (cfd) => {
     const cfdInfo = await getCfdInfo(cfd);
@@ -28,7 +28,7 @@ runScript(async ({ db }) => {
     if (cfdInfo?.rncp?.code_rncp) {
       matchedCfdCount++;
 
-      const { modifiedCount } = await db.collection("statutsCandidats").updateMany(
+      const { modifiedCount } = await db.collection("dossiersApprenants").updateMany(
         {
           formation_cfd: cfd,
           formation_rncp: null,
@@ -39,11 +39,11 @@ runScript(async ({ db }) => {
           },
         }
       );
-      updatedStatutCandidatCount += modifiedCount;
+      updatedDossiersApprenantsCount += modifiedCount;
     }
     loadingBar.increment();
   });
   loadingBar.stop();
   logger.info(`${matchedCfdCount} RNCP found for ${allValidCfds.length} valid CFDs`);
-  logger.info(`${updatedStatutCandidatCount} statuts candidats updated with RNCP found in TCO`);
-}, jobNames.retrieveRncp);
+  logger.info(`${updatedDossiersApprenantsCount} statuts candidats updated with RNCP found in TCO`);
+}, JOB_NAMES.retrieveRncp);

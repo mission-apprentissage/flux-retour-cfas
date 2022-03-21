@@ -1,10 +1,10 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { seedRandomizedSample } = require("./utils/seedUtils");
-const { jobNames } = require("../../common/model/constants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
-runScript(async ({ statutsCandidats }) => {
+runScript(async ({ dossiersApprenants }) => {
   logger.info("Seeding data with Randomized sample...");
-  await seedRandomizedSample(statutsCandidats);
+  await seedRandomizedSample(dossiersApprenants);
   logger.info("End seeding data with Randomized sample !");
-}, jobNames.seedRandomizedSample);
+}, JOB_NAMES.seedRandomizedSample);

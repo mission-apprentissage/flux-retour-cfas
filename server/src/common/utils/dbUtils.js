@@ -4,7 +4,7 @@ module.exports = {
     let limit = options.limit || 10;
     let skip = (page - 1) * limit;
 
-    let total = await collection.count(query);
+    let total = await collection.countDocuments(query);
 
     return {
       find: collection

@@ -2,7 +2,7 @@ import { Box, Button, Flex, Menu, MenuButton, MenuItem, MenuList } from "@chakra
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-import { navigationPages } from "../../constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../constants/navigationPages";
 
 const Connect = () => {
   const menuItemHover = {
@@ -29,13 +29,13 @@ const Connect = () => {
         </MenuButton>
         <MenuList color="grey.800" rounded="0" padding="2w">
           <MenuItem _hover={menuItemHover} marginTop="2w">
-            <NavLink to={navigationPages.Login.path}>
+            <NavLink to={NAVIGATION_PAGES.Login.path}>
               Vous êtes une institution ou une organisation professionnelle
             </NavLink>
           </MenuItem>
 
           <MenuItem _hover={menuItemHover} marginTop="2w" marginBottom="4w">
-            <NavLink to={navigationPages.TransmettreEtConsulterVosDonnees.path}>
+            <NavLink to={NAVIGATION_PAGES.TransmettreEtConsulterVosDonnees.path}>
               Vous êtes un organisme de formation en apprentissage
             </NavLink>
           </MenuItem>

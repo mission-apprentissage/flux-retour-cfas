@@ -5,7 +5,7 @@ const config = require("../../config");
 const { access, mkdir } = require("fs").promises;
 const { JobEventModel } = require("../common/model");
 const { formatDuration, intervalToDuration } = require("date-fns");
-const { jobEventStatuts } = require("../common/model/constants");
+const { jobEventStatuts } = require("../common/constants/jobsConstants");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));

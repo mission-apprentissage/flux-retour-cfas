@@ -1,29 +1,29 @@
 const { runScript } = require("../scriptWrapper");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const { StatutCandidatModel } = require("../../common/model");
+const { DossierApprenantModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Ce script permet d'identifier pour chaque statutsCandidats si sa formation est présente dans le catalogue MNA
+ * Ce script permet d'identifier pour chaque DossierApprenant si sa formation est présente dans le catalogue MNA
  * en se basant sur le CFD et le SIRET
  */
 runScript(async () => {
-  logger.info("Run StatutsCandidats retrieve formations in MNA Catalog Job");
+  logger.info("Run DossierApprenant retrieve formations in MNA Catalog Job");
   await retrieveFormationsInCatalog();
-  logger.info("End StatutsCandidats retrieve formations in MNA Catalog Job");
-}, jobNames.statutsCandidatsRetrieveFormationsInCatalog);
+  logger.info("End DossierApprenant retrieve formations in MNA Catalog Job");
+}, JOB_NAMES.dossiersApprenantsRetrieveFormationsInCatalog);
 
 /**
- * Parse tous les Couples SIRET - CFD des StatutsCandidats vérifie si la formation existe dans le catalogue MNA
+ * Parse tous les Couples SIRET - CFD des DossierApprenant vérifie si la formation existe dans le catalogue MNA
  */
 const retrieveFormationsInCatalog = async () => {
   // Récupère tous les coupes SIRET - CFD existants pour les statuts avec sirets valides
-  const allSiretCfdCouples = await StatutCandidatModel.aggregate([
+  const allSiretCfdCouples = await DossierApprenantModel.aggregate([
     { $match: { siret_etablissement_valid: true } },
     { $group: { _id: { siret: "$siret_etablissement", cfd: "$formation_cfd" } } },
     {
@@ -52,8 +52,8 @@ const retrieveFormationsInCatalog = async () => {
     });
 
     if (formationsFoundInCatalog.length > 0) {
-      // Si formation trouvée dans catalogue MNA , update de tous les statutsCandidats pour ce CFD + Siret
-      await StatutCandidatModel.updateMany(
+      // Si formation trouvée dans catalogue MNA , update de tous les DossierApprenant pour ce CFD + Siret
+      await DossierApprenantModel.updateMany(
         { formation_cfd: currentSiretCfdCouple.cfd, siret_etablissement: currentSiretCfdCouple.siret },
         { match_formation_mnaCatalog_cfd_siret: true }
       );

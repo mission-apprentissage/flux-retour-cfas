@@ -28,7 +28,11 @@ module.exports = new Schema({
   nom: {
     type: String,
     default: null,
-    description: "Nom de l'établissement",
+    description: "Nom de l'organisme de formation",
+  },
+  nom_tokenized: {
+    type: String,
+    description: "Nom de l'organisme de formation tokenized pour la recherche textuelle",
   },
   adresse: {
     type: String,
@@ -63,7 +67,7 @@ module.exports = new Schema({
   source_seed_cfa: {
     type: String,
     default: null,
-    description: "Source du seed du cfa dans la collection (StatutsCandidats ou fichier d'origine)",
+    description: "Source du seed du cfa dans la collection (DossierApprenant ou fichier d'origine)",
   },
   first_transmission_date: {
     type: Date,

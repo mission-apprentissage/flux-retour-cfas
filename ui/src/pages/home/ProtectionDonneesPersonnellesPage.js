@@ -2,18 +2,18 @@ import { Box, Divider, Flex, Text } from "@chakra-ui/react";
 import React from "react";
 
 import { BreadcrumbNav, ContactSection, Footer, Header, Section } from "../../common/components";
-import { navigationPages } from "../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { productName } from "../../common/constants/productName";
 import RgpdSection from "./sections/RgpdSection";
 
-const currentPage = navigationPages.DonneesPersonnelles;
+const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
 
 const ProtectionDonneesPersonnellesPage = () => {
   return (
     <>
       <Header />
       <Section paddingY="4w">
-        <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.DonneesPersonnelles]} />
+        <BreadcrumbNav links={[NAVIGATION_PAGES.Accueil, NAVIGATION_PAGES.DonneesPersonnelles]} />
       </Section>
       <RgpdSection marginBottom="4w" />
 

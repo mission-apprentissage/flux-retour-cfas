@@ -1,64 +1,73 @@
 const assert = require("assert").strict;
 const cfasComponent = require("../../../../src/common/components/cfas");
-const { StatutCandidatModel, CfaModel } = require("../../../../src/common/model");
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
-const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
+const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { addDays } = require("date-fns");
+const { Cfa } = require("../../../../src/common/domain/cfa");
 
 describe(__filename, () => {
   describe("searchCfas", () => {
     const { searchCfas } = cfasComponent();
 
-    const statutsSeed = [
+    const cfaSeed = [
       {
-        ...createRandomStatutCandidat(),
-        nom_etablissement: "CFA DU ROANNAIS",
-        etablissement_num_departement: "15",
+        nom: "AFTRAL Amiens",
+        uai: "0802004U",
+      },
+      {
+        nom: "AFTRAL Pau",
+        uai: "0642119F",
+      },
+      {
+        nom: "AFTRAL Nice",
+        uai: "0061989E",
+      },
+      {
+        nom: "BTP CFA Somme",
+        uai: "0801302F",
+      },
+    ];
+
+    const dossierApprenantSeed = [
+      {
+        ...createRandomDossierApprenant(),
+        uai_etablissement: cfaSeed[0].uai,
+        etablissement_num_departement: "80",
         etablissement_num_region: "01",
-        uai_etablissement: "0152290X",
-        etablissement_reseaux: "RESEAU_TEST",
+        etablissement_reseaux: "AFTRAL",
       },
       {
-        ...createRandomStatutCandidat(),
-        nom_etablissement: "cFa dU RO",
-        etablissement_num_departement: "15",
-        etablissement_num_region: "01",
-        uai_etablissement: "0152232N",
-        etablissement_reseaux: "RESEAU_TEST",
-      },
-      {
-        ...createRandomStatutCandidat(),
-        nom_etablissement: "cfa du roanna",
-        etablissement_num_departement: "39",
-        etablissement_num_region: "123",
-        uai_etablissement: "0392232X",
-        etablissement_reseaux: "RESEAU_TEST",
-      },
-      {
-        ...createRandomStatutCandidat(),
-        nom_etablissement: "CFA DUROC",
-        etablissement_num_departement: "75",
+        ...createRandomDossierApprenant(),
+        uai_etablissement: cfaSeed[1].uai,
+        etablissement_num_departement: "64",
         etablissement_num_region: "02",
-        uai_etablissement: "0752232O",
-        etablissement_reseaux: "RESEAU_TEST",
+        etablissement_reseaux: "AFTRAL",
       },
       {
-        ...createRandomStatutCandidat(),
-        nom_etablissement: "FACULTE SCIENCES NANCY",
-        etablissement_num_departement: "15",
-        etablissement_num_region: "039",
-        uai_etablissement: "0152232Z",
-        etablissement_reseaux: "RESEAU_TEST",
+        ...createRandomDossierApprenant(),
+        uai_etablissement: cfaSeed[2].uai,
+        etablissement_num_departement: "06",
+        etablissement_num_region: "03",
+        etablissement_reseaux: "AFTRAL",
+      },
+      {
+        ...createRandomDossierApprenant(),
+        uai_etablissement: cfaSeed[3].uai,
+        etablissement_num_departement: "80",
+        etablissement_num_region: "01",
+        etablissement_reseaux: "BTP",
       },
     ];
 
     beforeEach(async () => {
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new StatutCandidatModel({
-          ...statut,
-          nom_etablissement_tokenized: buildTokenizedString(statut.nom_etablissement, 3),
-        }).save();
+      for (let i = 0; i < cfaSeed.length; i++) {
+        const newCfa = new CfaModel({ ...cfaSeed[i], nom_tokenized: Cfa.createTokenizedNom(cfaSeed[i].nom) });
+        await newCfa.save();
+      }
+
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 
@@ -75,94 +84,112 @@ describe(__filename, () => {
       assert.deepEqual(cfa, []);
     });
 
-    const validsearchTermCases = [
-      {
-        caseDescription: "when searchTerm matches nom_etablissement perfectly",
-        searchTerm: statutsSeed[4].nom_etablissement,
-        expectedResults: [statutsSeed[4]],
-      },
-      {
-        caseDescription: "when searchTerm matches nom_etablissement perfectly but with different case",
-        searchTerm: statutsSeed[4].nom_etablissement.toLowerCase(),
-        expectedResults: [statutsSeed[4]],
-      },
-      {
-        caseDescription: "when searchTerm matches nom_etablissement partially",
-        searchTerm: statutsSeed[4].nom_etablissement.slice(0, 6),
-        expectedResults: [statutsSeed[4]],
-      },
-      {
-        caseDescription: "when searchTerm matches a word in nom_etablissement",
-        searchTerm: "SCIENCES",
-        expectedResults: [statutsSeed[4]],
-      },
-      {
-        caseDescription: "when searchTerm matches a word with different case in nom_etablissement",
-        searchTerm: "cfa du",
-        expectedResults: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
-      },
-      {
-        caseDescription: "when searchTerm matches a word with different diacritics in nom_etablissement",
-        searchTerm: "CFà",
-        expectedResults: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
-      },
-      {
-        caseDescription: "when searchTerm matches a word in nom_etablissement close to others",
-        searchTerm: "CFA DUROC",
-        expectedResults: [statutsSeed[0], statutsSeed[1], statutsSeed[2], statutsSeed[3]],
-      },
-    ];
+    it("returns all cfas when no parameter passed", async () => {
+      const cfasFound = await searchCfas({});
+      assert.equal(cfasFound.length, cfaSeed.length);
+      const allUaiFound = cfasFound.map((cfa) => cfa.uai);
+      const allUaiSeed = cfaSeed.map((cfa) => cfa.uai);
+      assert.deepEqual(allUaiFound, allUaiSeed);
+    });
 
-    validsearchTermCases.forEach(({ searchTerm, caseDescription, expectedResults }) => {
-      it(`returns list of CFA matching ${caseDescription}`, async () => {
-        const actualResults = await searchCfas({ searchTerm });
+    it("returns all cfas in a departement when etablissement_num_departement criteria passed", async () => {
+      const cfasFound = await searchCfas({ etablissement_num_departement: "80" });
 
-        assert.equal(actualResults.length, expectedResults.length);
-        expectedResults.forEach((result) => {
-          const foundResult = actualResults.find((cfa) => cfa.uai_etablissement === result.uai_etablissement);
-          assert.ok(foundResult);
+      assert.equal(cfasFound.length, 2);
+      const allUaiFound = cfasFound.map((cfa) => cfa.uai);
+      const expectedUai = [cfaSeed[3].uai, cfaSeed[0].uai];
+      assert.deepEqual(allUaiFound, expectedUai);
+    });
+
+    it("returns all cfas in a region when etablissement_num_region criteria passed", async () => {
+      const cfasFound = await searchCfas({ etablissement_num_region: "03" });
+
+      assert.equal(cfasFound.length, 1);
+      assert.equal(cfasFound[0].uai, cfaSeed[2].uai);
+    });
+
+    it("return all cfas in a reseau when etablissement_reseaux criteria passed", async () => {
+      const cfasFound = await searchCfas({ etablissement_reseaux: "AFTRAL" });
+
+      assert.equal(cfasFound.length, 3);
+      const allUaiFound = cfasFound.map((cfa) => cfa.uai);
+      const expectedUai = [cfaSeed[2].uai, cfaSeed[1].uai, cfaSeed[0].uai];
+      assert.deepEqual(allUaiFound, expectedUai);
+    });
+
+    it("return all cfas in a reseau and departement when etablissement_reseaux and etablissement_num_departement criteria passed", async () => {
+      const cfasFound = await searchCfas({ etablissement_reseaux: "AFTRAL", etablissement_num_departement: "80" });
+
+      assert.equal(cfasFound.length, 1);
+      assert.equal(cfasFound[0].uai, cfaSeed[0].uai);
+    });
+
+    describe("with search term", () => {
+      const validsearchTermCases = [
+        {
+          caseDescription: "when searchTerm matches several nom partially => AFTRAL",
+          searchTerm: "AFTRAL",
+          expectedResults: [cfaSeed[0], cfaSeed[1], cfaSeed[2]],
+        },
+        {
+          caseDescription: "when searchTerm matches several nom but with different case (aftral)",
+          searchTerm: "aftral",
+          expectedResults: [cfaSeed[0], cfaSeed[1], cfaSeed[2]],
+        },
+        {
+          caseDescription: "when searchTerm matches one nom (BTP CFA Somme)",
+          searchTerm: "BTP CFA Somme",
+          expectedResults: [cfaSeed[3]],
+        },
+        {
+          caseDescription: "when searchTerm matches one nom but partially (BTP Somme)",
+          searchTerm: "BTP Somme",
+          expectedResults: [cfaSeed[3]],
+        },
+        {
+          caseDescription: "when searchTerm matches a word in nom but with different diacritics and case (btp sômme)",
+          searchTerm: "btp sômme",
+          expectedResults: [cfaSeed[3]],
+        },
+      ];
+      validsearchTermCases.forEach(({ searchTerm, caseDescription, expectedResults }) => {
+        it(`returns list of CFA matching ${caseDescription}`, async () => {
+          const actualResults = await searchCfas({ searchTerm });
+          assert.equal(actualResults.length, expectedResults.length);
+          expectedResults.forEach((result) => {
+            const foundResult = actualResults.find((cfa) => cfa.uai_etablissement === result.uai_etablissement);
+            assert.ok(foundResult);
+          });
         });
       });
-    });
 
-    it("returns list of CFA whose UAI matches searchTerm", async () => {
-      const actual = await searchCfas({ searchTerm: statutsSeed[1].uai_etablissement });
-      const expected = [statutsSeed[1]];
+      it("returns list of CFA whose UAI matches searchTerm", async () => {
+        const actual = await searchCfas({ searchTerm: cfaSeed[2].uai });
+        const expected = [cfaSeed[2]];
+        assert.equal(actual.length, 1);
+        assert.deepEqual(actual[0].nom, expected[0].nom);
+      });
 
-      assert.equal(actual.length, 1);
-      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
-    });
+      it("returns list of CFA matching searchTerm AND additional criteria (etablissement_num_departement)", async () => {
+        const actual = await searchCfas({ searchTerm: "AFTRAL", etablissement_num_departement: "80" });
+        const expected = [cfaSeed[0]];
+        assert.equal(actual.length, 1);
+        assert.deepEqual(actual[0].nom, expected[0].nom);
+      });
 
-    it("returns list of CFA matching searchTerm AND additional filter (etablissement_num_departement)", async () => {
-      const actual = await searchCfas({ searchTerm: "CFA", etablissement_num_departement: "75" });
-      const expected = [statutsSeed[3]];
+      it("returns list of CFA matching searchTerm AND additional filter (etablissement_num_region)", async () => {
+        const actual = await searchCfas({ searchTerm: "AFTRAL", etablissement_num_region: "03" });
+        const expected = [cfaSeed[2]];
+        assert.equal(actual.length, 1);
+        assert.deepEqual(actual[0].nom, expected[0].nom);
+      });
 
-      assert.equal(actual.length, 1);
-      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
-    });
-
-    it("returns list of CFA matching searchTerm AND additional filter (etablissement_num_region)", async () => {
-      const actual = await searchCfas({ searchTerm: "CFA", etablissement_num_region: "123" });
-      const expected = [statutsSeed[2]];
-
-      assert.equal(actual.length, 1);
-      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
-    });
-
-    it("returns list of CFA matching searchTerm AND additional filter (etablissement_reseaux)", async () => {
-      const actual = await searchCfas({ searchTerm: "FACULTE", etablissement_reseaux: "RESEAU_TEST" });
-      const expected = [statutsSeed[4]];
-
-      assert.equal(actual.length, 1);
-      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
-    });
-
-    it("returns list of CFA matching a given search criteria (no searchTerm)", async () => {
-      const actual = await searchCfas({ etablissement_num_region: "02" });
-      const expected = [statutsSeed[3]];
-
-      assert.equal(actual.length, 1);
-      assert.deepEqual(actual[0].nom_etablissement, expected[0].nom_etablissement);
+      it("returns list of CFA matching searchTerm AND additional filter (etablissement_reseaux)", async () => {
+        const actual = await searchCfas({ searchTerm: "somme", etablissement_reseaux: "BTP" });
+        const expected = [cfaSeed[3]];
+        assert.equal(actual.length, 1);
+        assert.deepEqual(actual[0].nom, expected[0].nom);
+      });
     });
   });
 
@@ -170,33 +197,33 @@ describe(__filename, () => {
     const { getCfaFirstTransmissionDateFromUai } = cfasComponent();
     const uaiToSearch = "0762290X";
     const firstDate = new Date("2020-08-30T00:00:00.000+0000");
-    const statutsSeed = [
+    const dossierApprenantSeed = [
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
         created_at: addDays(firstDate, 2),
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
         created_at: firstDate,
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
         created_at: addDays(firstDate, 3),
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         uai_etablissement: uaiToSearch,
         created_at: addDays(firstDate, 4),
       },
     ];
 
     beforeEach(async () => {
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new StatutCandidatModel(statut).save();
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 
@@ -221,33 +248,33 @@ describe(__filename, () => {
 
     const siretToSearch = "80420010000024";
     const firstDate = new Date("2020-06-10T00:00:00.000+0000");
-    const statutsSeed = [
+    const dossierApprenantSeed = [
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
         created_at: addDays(firstDate, 2),
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
         created_at: addDays(firstDate, 3),
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
         created_at: firstDate,
       },
       {
-        ...createRandomStatutCandidat(),
+        ...createRandomDossierApprenant(),
         siret_etablissement: siretToSearch,
         created_at: addDays(firstDate, 4),
       },
     ];
 
     beforeEach(async () => {
-      for (let i = 0; i < statutsSeed.length; i++) {
-        const statut = statutsSeed[i];
-        await new StatutCandidatModel(statut).save();
+      for (let i = 0; i < dossierApprenantSeed.length; i++) {
+        const dossierApprenant = dossierApprenantSeed[i];
+        await new DossierApprenantModel(dossierApprenant).save();
       }
     });
 

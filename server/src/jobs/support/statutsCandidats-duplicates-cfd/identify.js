@@ -3,7 +3,7 @@ const cliProgress = require("cli-progress");
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { duplicatesTypesCodes } = require("../../../common/model/constants");
+const { DUPLICATE_TYPE_CODES } = require("../../../common/constants/dossierApprenantConstants");
 const { collectionNames } = require("../../constants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -12,19 +12,19 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * Job d'identification des doublons de CFDs
  * Construit une collection statutsCandidatsDoublonsCfds contenant les doublons
  */
-runScript(async ({ statutsCandidats, effectifs, db }) => {
-  await identifyCfdDuplicates({ statutsCandidats, effectifs, db });
+runScript(async ({ dossiersApprenants, effectifs, db }) => {
+  await identifyCfdDuplicates({ dossiersApprenants, effectifs, db });
 }, "statutsCandidats-identify-cfd-duplicates");
 
-const identifyCfdDuplicates = async ({ statutsCandidats, effectifs, db }) => {
+const identifyCfdDuplicates = async ({ dossiersApprenants, effectifs, db }) => {
   logger.info("Run identification statuts-candidats with duplicates cfd...");
 
   const resultsCollection = db.collection(collectionNames.statutsCandidatsDoublonsCfd);
   await resultsCollection.deleteMany({});
 
   // Identify all duplicates
-  const duplicates = await statutsCandidats.getDuplicatesList(
-    duplicatesTypesCodes.formation_cfd.code,
+  const duplicates = await dossiersApprenants.getDuplicatesList(
+    DUPLICATE_TYPE_CODES.formation_cfd.code,
     {},
     { allowDiskUse: true }
   );
@@ -84,5 +84,5 @@ const identifyCfdDuplicates = async ({ statutsCandidats, effectifs, db }) => {
   });
 
   loadingBar.stop();
-  logger.info("End identification statuts-candidats with duplicates cfd !");
+  logger.info("End identification DossierApprenant with duplicates cfd !");
 };

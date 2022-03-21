@@ -15,11 +15,11 @@ const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs, onCfaClick })
   return (
     <Tr>
       <Td color="grey.800" paddingLeft="6w">
-        <Box>
+        <div>
           <Link onClick={onCfaClick} color="bluefrance" whiteSpace="nowrap">
             {nom_etablissement}
           </Link>
-        </Box>
+        </div>
         <Box fontSize="omega">UAI : {uai_etablissement}</Box>
       </Td>
       <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />

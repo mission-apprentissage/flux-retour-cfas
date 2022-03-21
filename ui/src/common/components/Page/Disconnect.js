@@ -3,7 +3,7 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 
 import useAuth from "../../../common/hooks/useAuth";
-import { navigationPages } from "../../constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../constants/navigationPages";
 
 const Disconnect = () => {
   const history = useHistory();
@@ -11,7 +11,7 @@ const Disconnect = () => {
 
   const logout = () => {
     setAuth(null);
-    history.push(navigationPages.Accueil.path);
+    history.push(NAVIGATION_PAGES.Accueil.path);
   };
 
   return (

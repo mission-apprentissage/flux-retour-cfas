@@ -1,4 +1,4 @@
-const { codesStatutsCandidats } = require("../../model/constants");
+const { CODES_STATUT_APPRENANT } = require("../../constants/dossierApprenantConstants");
 const { Indicator } = require("./indicator");
 
 class EffectifsInscritsSansContrats extends Indicator {
@@ -11,12 +11,12 @@ class EffectifsInscritsSansContrats extends Indicator {
    */
   getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
     return [
-      { $match: { ...filters, "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.inscrit } },
+      { $match: { ...filters, "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       {
         $match: {
-          "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.inscrit,
-          "historique_statut_apprenant.valeur_statut": { $ne: codesStatutsCandidats.apprenti },
+          "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
+          "historique_statut_apprenant.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
         },
       },
     ];

@@ -2,7 +2,7 @@ const logger = require("../../../common/logger");
 const path = require("path");
 const { runScript } = require("../../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
-const { jobNames } = require("../../../common/model/constants/index");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 
 const groupby = require("lodash.groupby");
@@ -16,7 +16,7 @@ runScript(async ({ ovhStorage }) => {
   logger.info("Merge DECA UAIs File");
   await mergeDecaUaisFile(ovhStorage);
   logger.info("End Merging DECA UAIs File");
-}, jobNames.mergeDecaUaisFile);
+}, JOB_NAMES.mergeDecaUaisFile);
 
 const mergeDecaUaisFile = async (ovhStorage) => {
   const mergedDecaData = [];

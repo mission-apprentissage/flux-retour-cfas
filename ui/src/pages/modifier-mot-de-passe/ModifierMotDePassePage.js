@@ -4,7 +4,7 @@ import React from "react";
 
 import { Footer, Header, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
-import { navigationPages } from "../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import ModifierMotPasseForm from "./ModifierMotDePasseForm";
 import useUpdatePassword, { REQUEST_STATE } from "./useUpdatePassword";
 
@@ -16,7 +16,7 @@ const ModifierMotDePassePage = () => {
       <Header />
       <Section background="galt" withShadow paddingY="8w">
         <Heading as="h1" marginBottom="4w">
-          {navigationPages.ModifierMotDePasse.title}
+          {NAVIGATION_PAGES.ModifierMotDePasse.title}
         </Heading>
         <Box padding="4w" background="white" borderColor="bluefrance" border="1px solid" maxWidth="480px">
           {updatePasswordSubmitState === REQUEST_STATE.success ? (

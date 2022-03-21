@@ -1,4 +1,4 @@
-const { codesStatutsCandidats } = require("../../model/constants");
+const { CODES_STATUT_APPRENANT } = require("../../constants/dossierApprenantConstants");
 const { Indicator } = require("./indicator");
 
 class EffectifsAbandons extends Indicator {
@@ -11,9 +11,9 @@ class EffectifsAbandons extends Indicator {
    */
   getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
     return [
-      { $match: { ...filters, "historique_statut_apprenant.valeur_statut": codesStatutsCandidats.abandon } },
+      { $match: { ...filters, "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.abandon } },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
-      { $match: { "statut_apprenant_at_date.valeur_statut": codesStatutsCandidats.abandon } },
+      { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon } },
     ];
   }
 }

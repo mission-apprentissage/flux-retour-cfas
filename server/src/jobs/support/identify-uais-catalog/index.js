@@ -1,8 +1,8 @@
 const cliProgress = require("cli-progress");
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
-const { jobNames } = require("../../../common/model/constants/index");
-const { StatutCandidatModel } = require("../../../common/model");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
+const { DossierApprenantModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { getFormations2021 } = require("../../../common/apis/apiCatalogueMna");
 
@@ -13,7 +13,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  */
 runScript(async () => {
   logger.info(`Identifying UAIs types from Statuts`);
-  const allDistinctUais = await StatutCandidatModel.distinct("uai_etablissement");
+  const allDistinctUais = await DossierApprenantModel.distinct("uai_etablissement");
 
   loadingBar.start(allDistinctUais.length, 0);
 
@@ -84,4 +84,4 @@ runScript(async () => {
   logger.info(`Nb d'UAIs gestionnaires trouvés dans le catalogue : ${uaisAsGestionnaire.length}`);
 
   logger.info("End !");
-}, jobNames.identifyUaisInCatalog);
+}, JOB_NAMES.identifyUaisInCatalog);

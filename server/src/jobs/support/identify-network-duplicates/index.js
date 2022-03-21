@@ -3,9 +3,9 @@ const groupBy = require("lodash.groupby");
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
-const { reseauxCfas } = require("../../../common/model/constants/");
+const { RESEAUX_CFAS } = require("../../../common/constants/networksConstants");
 const { toXlsx } = require("../../../common/utils/exporterUtils");
-const { jobNames } = require("../../../common/model/constants/index");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 
 /**
  * Ce script permet d'identifier les doublons dans les fichiers de référence des réseaux
@@ -13,18 +13,18 @@ const { jobNames } = require("../../../common/model/constants/index");
 runScript(async ({ ovhStorage }) => {
   logger.info("Identifying Network Referentiel Duplicates");
 
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.CCI);
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.CMA);
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.AGRI);
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.ANASUP);
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.UIMM);
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.BTP_CFA);
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.CFA_EC);
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.GRETA);
-  await identifyDuplicatesForNetwork(ovhStorage, reseauxCfas.MFR);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.CCI);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.CMA);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.AGRI);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.ANASUP);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.UIMM);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.BTP_CFA);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.CFA_EC);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.GRETA);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.MFR);
 
   logger.info("End identifying Network Referentiel Duplicates");
-}, jobNames.identifyNetworkDuplicates);
+}, JOB_NAMES.identifyNetworkDuplicates);
 
 /**
  * Identify duplicates for Network

@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 import { hasUserRoles, roles } from "../../common/auth/roles";
 import { Footer, Header, LinkCard, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
-import { navigationPages } from "../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { productName } from "../../common/constants/productName";
 import useAuth from "../../common/hooks/useAuth";
 import dashboardIllustration from "./dashboard-illustration.svg";
@@ -40,12 +40,12 @@ const HomePage = () => {
           <img src={dashboardIllustration} alt="illustration tableau de bord" />
         </Flex>
         <HStack spacing="3w" marginTop="6w" alignItems="stretch">
-          <LinkCard linkText={`Accéder au ${productName}`} linkHref={navigationPages.Login.path}>
+          <LinkCard linkText={`Accéder au ${productName}`} linkHref={NAVIGATION_PAGES.Login.path}>
             Vous êtes une <strong>Institution ou une organisation professionnelle</strong> (OPCO, branche, etc...)
           </LinkCard>
           <LinkCard
             linkText="Transmettre et consulter vos données"
-            linkHref={navigationPages.TransmettreEtConsulterVosDonnees.path}
+            linkHref={NAVIGATION_PAGES.TransmettreEtConsulterVosDonnees.path}
           >
             Vous êtes un{" "}
             <strong>
@@ -63,7 +63,7 @@ const HomePage = () => {
       <Section paddingY="4w">
         <Flex alignItems="center">
           <Box as="i" paddingRight="1w" className="ri-arrow-right-line" />
-          <NavLink to={navigationPages.DonneesPersonnelles.path}>en savoir plus</NavLink>
+          <NavLink to={NAVIGATION_PAGES.DonneesPersonnelles.path}>en savoir plus</NavLink>
         </Flex>
       </Section>
       <ContactSection />

@@ -14,6 +14,8 @@ class Formation {
           return validateCfd(value) ? value : helpers.error("invalid cfd");
         })
         .required(),
+      cfd_start_date: Joi.date(),
+      cfd_end_date: Joi.date(),
       libelle: Joi.string().allow(""),
       niveau: Joi.string().allow(null),
       niveau_libelle: Joi.string().allow(null, ""),

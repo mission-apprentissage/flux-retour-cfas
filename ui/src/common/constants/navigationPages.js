@@ -1,4 +1,4 @@
-export const navigationPages = {
+export const NAVIGATION_PAGES = {
   Login: {
     path: "/login",
     title: "Accéder au tableau de bord",
@@ -30,6 +30,10 @@ export const navigationPages = {
   Statistiques: {
     path: "/statistiques",
     title: "Statistiques",
+  },
+  Support: {
+    path: "/support",
+    title: "Support",
   },
   DonneesPersonnelles: {
     path: "/donnees-personnelles",

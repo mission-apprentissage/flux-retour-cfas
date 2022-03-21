@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
 const omit = require("lodash.omit");
 const { startServer } = require("../../utils/testUtils");
-const { createRandomStatutCandidat } = require("../../data/randomizedSample");
-const { StatutCandidatModel, CfaModel } = require("../../../src/common/model");
+const { createRandomDossierApprenant } = require("../../data/randomizedSample");
+const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
 describe(__filename, () => {
@@ -22,17 +22,17 @@ describe(__filename, () => {
     });
 
     it("sends a 200 HTTP response with results when match", async () => {
-      await new StatutCandidatModel({
-        ...createRandomStatutCandidat(),
-        nom_etablissement: "FACULTE SCIENCES NANCY",
-        nom_etablissement_tokenized: buildTokenizedString("FACULTE SCIENCES NANCY", 3),
+      await new CfaModel({
+        nom: "BTP CFA Somme",
+        nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
+        uai: "0801302F",
       }).save();
 
-      const response = await httpClient.post("/api/cfas/search", { searchTerm: "FACULTE" });
+      const response = await httpClient.post("/api/cfas/search", { searchTerm: "Somme" });
 
       assert.equal(response.status, 200);
       assert.equal(response.data.length, 1);
-      assert.deepEqual(response.data[0].nom_etablissement, "FACULTE SCIENCES NANCY");
+      assert.deepEqual(response.data[0].uai, "0801302F");
     });
   });
 
@@ -110,8 +110,8 @@ describe(__filename, () => {
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat(cfaInfos);
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const randomStatut = createRandomDossierApprenant(cfaInfos);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
       // Add Cfa in referentiel
@@ -155,8 +155,8 @@ describe(__filename, () => {
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat(cfaInfos);
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const randomStatut = createRandomDossierApprenant(cfaInfos);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
       const response = await httpClient.get(`/api/cfas/${uaiTest}`);
@@ -201,8 +201,8 @@ describe(__filename, () => {
         etablissement_adresse: adresseTest,
       };
 
-      const randomStatut = createRandomStatutCandidat(cfaInfos);
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const randomStatut = createRandomDossierApprenant(cfaInfos);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
       // Add Cfa in referentiel

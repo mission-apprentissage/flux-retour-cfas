@@ -8,6 +8,16 @@ module.exports = new Schema(
       unique: true,
       description: "Code cfd de l'établissement",
     },
+    cfd_start_date: {
+      type: Date,
+      default: null,
+      description: "Date d'ouverture du CFD",
+    },
+    cfd_end_date: {
+      type: Date,
+      default: null,
+      description: "Date de fermeture du CFD",
+    },
     libelle: {
       type: String,
       description: "Libellé normalisé depuis Tables de Correspondances",

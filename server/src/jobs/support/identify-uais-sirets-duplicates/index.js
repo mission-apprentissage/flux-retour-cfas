@@ -2,8 +2,8 @@ const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
 const path = require("path");
 const { toCsv, toXlsx } = require("../../../common/utils/exporterUtils");
-const { jobNames } = require("../../../common/model/constants/index");
-const { StatutCandidatModel } = require("../../../common/model");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
+const { DossierApprenantModel } = require("../../../common/model");
 
 /**
  * Ce script permet de créer un export contenant les CFAS sans SIRET
@@ -13,14 +13,14 @@ runScript(async () => {
   await identifyMultipleSirets();
   await identifyMultipleUais();
   logger.info("Ended !");
-}, jobNames.identifyUaisSiretsDuplicates);
+}, JOB_NAMES.identifyUaisSiretsDuplicates);
 
 /**
  * Identifying multiple sirets for uais
  */
 const identifyMultipleSirets = async () => {
   // Gets all uai-sirets couples valid
-  const uaiSiretsCouples = await StatutCandidatModel.aggregate([
+  const uaiSiretsCouples = await DossierApprenantModel.aggregate([
     {
       $match: {
         siret_etablissement_valid: true,
@@ -53,7 +53,7 @@ const identifyMultipleSirets = async () => {
  */
 const identifyMultipleUais = async () => {
   // Gets all sirets-uais couples valid
-  const siretsUaisCouples = await StatutCandidatModel.aggregate([
+  const siretsUaisCouples = await DossierApprenantModel.aggregate([
     {
       $match: {
         siret_etablissement_valid: true,

@@ -1,43 +1,43 @@
 const assert = require("assert").strict;
-const { createRandomStatutCandidat } = require("../../../data/randomizedSample");
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../../data/historySequenceSamples");
-const { StatutCandidatModel } = require("../../../../src/common/model");
-const { reseauxCfas } = require("../../../../src/common/model/constants");
+const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
+const { DossierApprenantModel } = require("../../../../src/common/model");
 const { EffectifsApprentis } = require("../../../../src/common/components/effectifs/apprentis");
 
 describe(__filename, () => {
-  const seedStatutsCandidats = async (statutsProps) => {
+  const seedDossiersApprenants = async (statutsProps) => {
     // Add 10 statuts with history sequence - full
     for (let index = 0; index < 10; index++) {
-      const randomStatut = createRandomStatutCandidat({
+      const randomStatut = createRandomDossierApprenant({
         historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
         ...statutsProps,
       });
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
     }
 
     // Add 5 statuts with history sequence - simple apprenti
     for (let index = 0; index < 5; index++) {
-      const randomStatut = createRandomStatutCandidat({
+      const randomStatut = createRandomDossierApprenant({
         historique_statut_apprenant: historySequenceApprenti,
         ...statutsProps,
       });
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
     }
 
     // Add 15 statuts with history sequence - inscritToApprenti
     for (let index = 0; index < 15; index++) {
-      const randomStatut = createRandomStatutCandidat({
+      const randomStatut = createRandomDossierApprenant({
         historique_statut_apprenant: historySequenceInscritToApprenti,
         ...statutsProps,
       });
-      const toAdd = new StatutCandidatModel(randomStatut);
+      const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
     }
   };
@@ -46,7 +46,7 @@ describe(__filename, () => {
 
   describe("Apprentis - getCountAtDate", () => {
     it("gets count of apprentis at one date", async () => {
-      await seedStatutsCandidats();
+      await seedDossiersApprenants();
 
       const date = new Date("2020-09-15T00:00:00.000+0000");
       const apprentisCount = await apprentis.getCountAtDate(date);
@@ -55,7 +55,7 @@ describe(__filename, () => {
     });
 
     it("gets count of apprentis at another date", async () => {
-      await seedStatutsCandidats();
+      await seedDossiersApprenants();
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisCount = await apprentis.getCountAtDate(date);
@@ -64,7 +64,7 @@ describe(__filename, () => {
     });
 
     it("gets count of apprentis at yet another date", async () => {
-      await seedStatutsCandidats();
+      await seedDossiersApprenants();
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const apprentisCount = await apprentis.getCountAtDate(date);
@@ -73,7 +73,7 @@ describe(__filename, () => {
     });
 
     it("gets count of apprentis at a date when there was no data", async () => {
-      await seedStatutsCandidats();
+      await seedDossiersApprenants();
 
       const date = new Date("2010-10-10T00:00:00.000+0000");
       const apprentisCount = await apprentis.getCountAtDate(date);
@@ -83,7 +83,7 @@ describe(__filename, () => {
 
     it("gets count of apprentis at a date and for a region", async () => {
       const filters = { etablissement_num_region: "28" };
-      await seedStatutsCandidats(filters);
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisCountForRegion = await apprentis.getCountAtDate(date, filters);
@@ -98,7 +98,7 @@ describe(__filename, () => {
 
     it("gets count of apprentis at a date and for a departement", async () => {
       const filters = { etablissement_num_departement: "75" };
-      await seedStatutsCandidats(filters);
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisCountForDepartement = await apprentis.getCountAtDate(date, filters);
@@ -113,7 +113,7 @@ describe(__filename, () => {
 
     it("gets count of apprentis at a date and for a siret_etablissement", async () => {
       const filters = { siret_etablissement: "77929544300013" };
-      await seedStatutsCandidats(filters);
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisCountForSiret = await apprentis.getCountAtDate(date, filters);
@@ -128,7 +128,7 @@ describe(__filename, () => {
 
     it("gets count of apprentis at a date and for a formation_cfd", async () => {
       const filters = { formation_cfd: "2502000D" };
-      await seedStatutsCandidats(filters);
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisCountForCfd = await apprentis.getCountAtDate(date, filters);
@@ -140,8 +140,8 @@ describe(__filename, () => {
     });
 
     it("gets count of apprentis at a date and for a reseau", async () => {
-      const filters = { etablissement_reseaux: reseauxCfas.BTP_CFA.nomReseau };
-      await seedStatutsCandidats(filters);
+      const filters = { etablissement_reseaux: RESEAUX_CFAS.BTP_CFA.nomReseau };
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisCountForReseau = await apprentis.getCountAtDate(date, filters);
@@ -157,7 +157,7 @@ describe(__filename, () => {
 
   describe("Apprentis - getListAtDate", () => {
     it("gets list of apprentis at one date", async () => {
-      await seedStatutsCandidats();
+      await seedDossiersApprenants();
 
       const date = new Date("2020-09-15T00:00:00.000+0000");
       const apprentisList = await apprentis.getListAtDate(date);
@@ -166,7 +166,7 @@ describe(__filename, () => {
     });
 
     it("gets list of apprentis at another date", async () => {
-      await seedStatutsCandidats();
+      await seedDossiersApprenants();
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisList = await apprentis.getListAtDate(date);
@@ -175,7 +175,7 @@ describe(__filename, () => {
     });
 
     it("gets list of apprentis at yet another date - check projection fields", async () => {
-      await seedStatutsCandidats();
+      await seedDossiersApprenants();
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
       const projection = {
@@ -196,7 +196,7 @@ describe(__filename, () => {
     });
 
     it("gets list of apprentis at a date when there was no data", async () => {
-      await seedStatutsCandidats();
+      await seedDossiersApprenants();
 
       const date = new Date("2010-10-10T00:00:00.000+0000");
       const apprentisList = await apprentis.getListAtDate(date);
@@ -206,7 +206,7 @@ describe(__filename, () => {
 
     it("gets list of apprentis at a date and for a region", async () => {
       const filters = { etablissement_num_region: "28" };
-      await seedStatutsCandidats(filters);
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisListForRegion = await apprentis.getListAtDate(date, filters);
@@ -221,7 +221,7 @@ describe(__filename, () => {
 
     it("gets list of apprentis at a date and for a departement", async () => {
       const filters = { etablissement_num_departement: "75" };
-      await seedStatutsCandidats(filters);
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisListForDepartement = await apprentis.getListAtDate(date, filters);
@@ -236,7 +236,7 @@ describe(__filename, () => {
 
     it("gets list of apprentis at a date and for a siret_etablissement", async () => {
       const filters = { siret_etablissement: "77929544300013" };
-      await seedStatutsCandidats(filters);
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisLengthForSiret = await apprentis.getListAtDate(date, filters);
@@ -251,7 +251,7 @@ describe(__filename, () => {
 
     it("gets list of apprentis at a date and for a formation_cfd", async () => {
       const filters = { formation_cfd: "2502000D" };
-      await seedStatutsCandidats(filters);
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisListForCfd = await apprentis.getListAtDate(date, filters);
@@ -263,8 +263,8 @@ describe(__filename, () => {
     });
 
     it("gets list of apprentis at a date and for a reseau", async () => {
-      const filters = { etablissement_reseaux: reseauxCfas.BTP_CFA.nomReseau };
-      await seedStatutsCandidats(filters);
+      const filters = { etablissement_reseaux: RESEAUX_CFAS.BTP_CFA.nomReseau };
+      await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
       const apprentisListForReseau = await apprentis.getListAtDate(date, filters);

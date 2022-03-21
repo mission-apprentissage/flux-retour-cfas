@@ -1,7 +1,7 @@
 import { Box, Flex, HStack, Link, Stack, StackDivider, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { navigationPages } from "../../constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../constants/navigationPages";
 import { Logo } from "..";
 import Section from "../Section/Section";
 
@@ -38,10 +38,10 @@ const Footer = () => (
     >
       <HStack divider={<StackDivider borderColor="grey.200" />} spacing="3w">
         <Link href="#">Plan du site</Link>
-        <Link href={navigationPages.Statistiques.path}>{navigationPages.Statistiques.title}</Link>
+        <Link href={NAVIGATION_PAGES.Statistiques.path}>{NAVIGATION_PAGES.Statistiques.title}</Link>
         <Link href="#">Accessibilité : Non conforme</Link>
         <Link href="#">Mentions légales</Link>
-        <Link href={navigationPages.DonneesPersonnelles.path}>Données personnelles</Link>
+        <Link href={NAVIGATION_PAGES.DonneesPersonnelles.path}>Données personnelles</Link>
         <Link href="#">Gestion des cookies</Link>
       </HStack>
       <Text marginTop="3w">

@@ -7,7 +7,10 @@ const Joi = require("joi");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles, apiRoles } = require("../../common/roles");
 const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
-const { effectifsIndicators, getStatutNameFromCode } = require("../../common/model/constants");
+const {
+  EFFECTIF_INDICATOR_NAMES,
+  getStatutApprenantNameFromCode,
+} = require("../../common/constants/dossierApprenantConstants");
 const omit = require("lodash.omit");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
@@ -186,69 +189,68 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       annee_scolaire: 1,
       contrat_date_debut: 1,
       contrat_date_rupture: 1,
-      date_metier_mise_a_jour_statut: 1,
       historique_statut_apprenant: 1,
       statut_apprenant_at_date: 1,
     };
 
     // Build data list for indicator
     switch (effectifIndicateurFromParams) {
-      case effectifsIndicators.apprentis:
+      case EFFECTIF_INDICATOR_NAMES.apprentis:
         effectifsFormattedAtDate = (await effectifs.apprentis.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,
-            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
             historique_statut_apprenant: JSON.stringify(
               item.historique_statut_apprenant.map((item) => ({
                 date: item.date_statut,
-                statut: getStatutNameFromCode(item.valeur_statut),
+                statut: getStatutApprenantNameFromCode(item.valeur_statut),
               }))
             ),
           })
         );
         break;
 
-      case effectifsIndicators.abandons:
+      case EFFECTIF_INDICATOR_NAMES.abandons:
         effectifsFormattedAtDate = (await effectifs.abandons.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,
-            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
             date_abandon: item.statut_apprenant_at_date.date_statut, // Specific for abandons indicateur
             historique_statut_apprenant: JSON.stringify(
               item.historique_statut_apprenant.map((item) => ({
                 date: item.date_statut,
-                statut: getStatutNameFromCode(item.valeur_statut),
+                statut: getStatutApprenantNameFromCode(item.valeur_statut),
               }))
             ),
           })
         );
         break;
 
-      case effectifsIndicators.inscritsSansContrats:
+      case EFFECTIF_INDICATOR_NAMES.inscritsSansContrats:
         effectifsFormattedAtDate = (
           await effectifs.inscritsSansContrats.getListAtDate(date, filters, { projection })
         ).map((item) => ({
           ...item,
-          statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+          statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
           date_inscription: item.statut_apprenant_at_date.date_statut, // Specific for inscrits sans contrats indicateur
           historique_statut_apprenant: JSON.stringify(
             item.historique_statut_apprenant.map((item) => ({
               date: item.date_statut,
-              statut: getStatutNameFromCode(item.valeur_statut),
+              statut: getStatutApprenantNameFromCode(item.valeur_statut),
             }))
           ),
         }));
         break;
 
-      case effectifsIndicators.rupturants:
+      case EFFECTIF_INDICATOR_NAMES.rupturants:
         effectifsFormattedAtDate = (await effectifs.rupturants.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,
-            statut: getStatutNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
             historique_statut_apprenant: JSON.stringify(
               item.historique_statut_apprenant.map((item) => ({
                 date: item.date_statut,
-                statut: getStatutNameFromCode(item.valeur_statut),
+                statut: getStatutApprenantNameFromCode(item.valeur_statut),
               }))
             ),
           })
@@ -261,7 +263,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
     // Omit useless data
     return effectifsFormattedAtDate.map((item) => {
-      return omit(item, ["_id", "statut_apprenant_at_date", "previousStatutAtDate", "date_metier_mise_a_jour_statut"]);
+      return omit(item, ["_id", "statut_apprenant_at_date", "previousStatutAtDate"]);
     });
   };
 

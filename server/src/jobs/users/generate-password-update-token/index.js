@@ -1,6 +1,6 @@
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { jobNames } = require("../../../common/model/constants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const arg = require("arg");
 const config = require("../../../../config");
 
@@ -20,4 +20,4 @@ runScript(async ({ users }) => {
 
   logger.info(`Password update token for user ${username} successfully created -> ${token}`);
   logger.info(`Password update link -> ${config.publicUrl}/modifier-mot-de-passe?token=${token}`);
-}, jobNames.generatePasswordUpdateToken);
+}, JOB_NAMES.generatePasswordUpdateToken);

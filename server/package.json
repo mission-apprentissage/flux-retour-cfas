@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "2.67.0",
+  "version": "2.68.0",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -24,6 +24,7 @@
     "seed:clearAssets": "node -r dotenv/config src/jobs/seed/clearAssets.js",
     "seed:annuaireCfas": "node -r dotenv/config src/jobs/seed/seedAnnuaireCfas.js",
     "seed:croisementCfasAnnuaire": "node -r dotenv/config src/jobs/seed/seedCroisementCfasAnnuaire.js",
+    "users:create": "node -r dotenv/config src/jobs/users/create/index.js",
     "users:create-erp-user": "node -r dotenv/config src/jobs/users/create-erp-user/index.js",
     "users:generate-password-update-token": "node -r dotenv/config src/jobs/users/generate-password-update-token/index.js",
     "clear:all": "node -r dotenv/config src/jobs/remove-data/clear/clearAll.js",
@@ -47,7 +48,6 @@
     "statutsCandidats:retrieve-sirets-catalogue": "node -r dotenv/config src/jobs/statutsCandidats-retrieve-sirets-catalogue/index.js",
     "cfas:retrieve-data-connection": "node -r dotenv/config src/jobs/cfas-retrieve-data-connection/index.js",
     "support:export-voeuxAffelnet": "node -r dotenv/config src/jobs/support/export-data-for-voeuxAffelnet/index.js",
-    "support:identify-cma": "node -r dotenv/config src/jobs/support/identify-cfas-network/identify-cma.js",
     "support:identify-network-duplicates": "node -r dotenv/config src/jobs/support/identify-network-duplicates/index.js",
     "support:remove-statutsCandidats-duplicates": "node -r dotenv/config src/jobs/support/statutsCandidats-duplicates/remove-duplicates.js",
     "support:identify-cfas-with-invalid-siret": "node -r dotenv/config src/jobs/support/identify-cfas-with-invalid-siret/index.js",

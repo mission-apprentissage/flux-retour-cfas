@@ -3,7 +3,7 @@ const logger = require("../../../common/logger");
 const path = require("path");
 const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { StatutCandidatModel } = require("../../../common/model");
+const { DossierApprenantModel } = require("../../../common/model");
 
 const statutsGestiToRemoveFilePath = path.join(__dirname, `./assets/statuts-gesti-encours-recrutement-toRemove.csv`);
 
@@ -29,7 +29,7 @@ runScript(async ({ ovhStorage }) => {
     return;
   } else {
     await asyncForEach(toRemoveData, async (currentStatutToRemove) => {
-      const { deletedCount } = await StatutCandidatModel.deleteOne({
+      const { deletedCount } = await DossierApprenantModel.deleteOne({
         id_erp_apprenant: currentStatutToRemove.id_erp_apprenant,
         uai_etablissement: currentStatutToRemove.uai_etablissement,
         source: "gesti",

@@ -2,7 +2,7 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { CfaAnnuaireModel, CroisementCfasAnnuaireModel, CfaModel } = require("../../common/model");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -14,7 +14,7 @@ runScript(async ({ cfas }) => {
   logger.info("Seeding croisement CFAs Annuaire");
   await seedCroisementCfasAnnuaire(cfas);
   logger.info("End seeding croisement CFAs Annuaire");
-}, jobNames.seedCroisementCfasAnnuaire);
+}, JOB_NAMES.seedCroisementCfasAnnuaire);
 
 /**
  * Seed du croisement des CFAS Annuaire / Tdb

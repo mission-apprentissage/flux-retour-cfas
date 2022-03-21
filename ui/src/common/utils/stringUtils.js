@@ -1,3 +1,5 @@
+import { validateSiret } from "../domain/siret";
+
 /**
  * Returns true if substring is found in given string. Case insensitive.
  * @param {string} str
@@ -15,3 +17,6 @@ export const formatNumber = (number) => {
   if (!number) return number;
   return Number(number).toLocaleString();
 };
+
+export const formatSiretSplitted = (siret) =>
+  validateSiret(siret) ? `${siret.substr(0, 9)} ${siret.substr(9, siret.length)}` : "SIRET INVALIDE";

@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const jobEvents = require("../../../../src/common/components/jobEvents");
 const { JobEventModel } = require("../../../../src/common/model");
-const { jobEventStatuts } = require("../../../../src/common/model/constants");
+const { jobEventStatuts } = require("../../../../src/common/constants/jobsConstants");
 const { wait } = require("../../../utils/testUtils");
 
 describe(__filename, () => {

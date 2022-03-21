@@ -1,25 +1,25 @@
-const { StatutCandidatModel, CfaModel } = require("../model");
+const { DossierApprenantModel, CfaModel } = require("../model");
 const omit = require("lodash.omit");
-const { duplicatesTypesCodes } = require("../model/constants");
+const { DUPLICATE_TYPE_CODES } = require("../constants/dossierApprenantConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
-const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const { escapeRegExp } = require("../utils/regexUtils");
+const { isEqual } = require("date-fns");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 
 module.exports = () => ({
-  getStatut,
-  addOrUpdateStatuts,
-  createStatutCandidat,
-  updateStatut,
+  getDossierApprenant,
+  addOrUpdateDossiersApprenants,
+  createDossierApprenant,
+  updateDossierApprenant,
   getDuplicatesList,
-  getStatutsWithHistoryDateUnordered,
-  getStatutsWithBadDate,
+  getDossierApprenantsWithHistoryDateUnordered,
+  getDossierApprenantsWithBadDate,
 });
 
-const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
-  return StatutCandidatModel.findOne({
+const getDossierApprenant = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
+  return DossierApprenantModel.findOne({
     nom_apprenant: { $regex: new RegExp(escapeRegExp(nom_apprenant), "i") },
     prenom_apprenant: { $regex: new RegExp(escapeRegExp(prenom_apprenant), "i") },
     formation_cfd,
@@ -29,16 +29,16 @@ const getStatut = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablis
 };
 
 /**
- * Add or update a list of statuts
+ * Add or update items in a list of DossierApprenant
  * @param {*} itemsToAddOrUpdate
  * @returns
  */
-const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
+const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
   const added = [];
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    let foundItem = await getStatut({
+    let foundItem = await getDossierApprenant({
       nom_apprenant: item.nom_apprenant,
       prenom_apprenant: item.prenom_apprenant,
       formation_cfd: item.formation_cfd,
@@ -47,10 +47,10 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
     });
 
     if (!foundItem) {
-      const addedItem = await createStatutCandidat(item);
+      const addedItem = await createDossierApprenant(item);
       added.push(addedItem);
     } else {
-      const updatedItem = await updateStatut(foundItem._id, item);
+      const updatedItem = await updateDossierApprenant(foundItem._id, item);
       updated.push(updatedItem);
     }
   });
@@ -61,7 +61,7 @@ const addOrUpdateStatuts = async (itemsToAddOrUpdate) => {
   };
 };
 
-const updateStatut = async (existingItemId, toUpdate) => {
+const updateDossierApprenant = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
   // strip unicity criteria because it does not make sense to update them
@@ -73,11 +73,17 @@ const updateStatut = async (existingItemId, toUpdate) => {
     "formation_cfd",
     "uai_etablissement"
   );
-  const existingItem = await StatutCandidatModel.findById(existingItemId);
+  const existingItem = await DossierApprenantModel.findById(existingItemId);
 
-  // statut_apprenant has changed?
-  if (existingItem.statut_apprenant !== updatePayload.statut_apprenant) {
-    const historique = existingItem.historique_statut_apprenant.slice();
+  // new statut_apprenant to add ?
+  const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {
+    return (
+      historiqueItem.valeur_statut === toUpdate.statut_apprenant &&
+      isEqual(new Date(historiqueItem.date_statut), new Date(toUpdate.date_metier_mise_a_jour_statut))
+    );
+  });
+
+  if (!statutExistsInHistorique) {
     const newHistoriqueElement = {
       valeur_statut: updatePayload.statut_apprenant,
       date_statut: new Date(updatePayload.date_metier_mise_a_jour_statut),
@@ -85,6 +91,7 @@ const updateStatut = async (existingItemId, toUpdate) => {
     };
 
     // add new element to historique
+    const historique = existingItem.historique_statut_apprenant.slice();
     historique.push(newHistoriqueElement);
     // sort historique chronologically
     const historiqueSorted = historique.sort((a, b) => {
@@ -103,26 +110,25 @@ const updateStatut = async (existingItemId, toUpdate) => {
     ...updatePayload,
     updated_at: new Date(),
   };
-  const updated = await StatutCandidatModel.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
+  const updated = await DossierApprenantModel.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
   return updated;
 };
 
-const createStatutCandidat = async (itemToCreate) => {
-  // if statut candidat établissement has a VALID uai try to retrieve information in Referentiel CFAs
+const createDossierApprenant = async (itemToCreate) => {
+  // if dossier apprenant établissement has a VALID uai try to retrieve information in Referentiel CFAs
   const etablissementInReferentielCfaFromUai = await CfaModel.findOne({ uai: itemToCreate.uai_etablissement });
 
-  // if statut candidat has a valid cfd, check if it exists in db and create it otherwise
+  // if dossier apprenant has a valid cfd, check if it exists in db and create it otherwise
   if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {
     await createFormation(itemToCreate.formation_cfd);
   }
 
   const formationInfo = await getFormationWithCfd(itemToCreate.formation_cfd);
 
-  const toAdd = new StatutCandidatModel({
+  const toAdd = new DossierApprenantModel({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant.toUpperCase(),
     prenom_apprenant: itemToCreate.prenom_apprenant.toUpperCase(),
-    ne_pas_solliciter: itemToCreate.ne_pas_solliciter,
     email_contact: itemToCreate.email_contact,
     formation_cfd: itemToCreate.formation_cfd,
     libelle_court_formation: itemToCreate.libelle_court_formation,
@@ -133,9 +139,6 @@ const createStatutCandidat = async (itemToCreate) => {
     siret_etablissement: itemToCreate.siret_etablissement,
     siret_etablissement_valid: validateSiret(itemToCreate.siret_etablissement),
     nom_etablissement: itemToCreate.nom_etablissement,
-    nom_etablissement_tokenized:
-      itemToCreate.nom_etablissement && buildTokenizedString(itemToCreate.nom_etablissement, 3),
-    statut_apprenant: itemToCreate.statut_apprenant,
     historique_statut_apprenant: [
       {
         valeur_statut: itemToCreate.statut_apprenant,
@@ -143,7 +146,6 @@ const createStatutCandidat = async (itemToCreate) => {
         date_reception: new Date(),
       },
     ],
-    date_metier_mise_a_jour_statut: itemToCreate.date_metier_mise_a_jour_statut,
     periode_formation: itemToCreate.periode_formation,
     annee_formation: itemToCreate.annee_formation,
     annee_scolaire: itemToCreate.annee_scolaire,
@@ -170,12 +172,12 @@ const createStatutCandidat = async (itemToCreate) => {
 };
 
 /**
- * Récupération de la liste des statuts en doublons stricts pour les filtres passés en paramètres
+ * Récupération de la liste des DossierApprenant en doublons stricts pour les filtres passés en paramètres
  * @param {*} duplicatesTypesCode
  * @param {*} filters
  * @returns
  */
-const findStatutsDuplicates = async (
+const findDossiersApprenantsDuplicates = async (
   duplicatesTypesCode,
   filters = {},
   { allowDiskUse = false, duplicatesWithNoUpdate = false } = {}
@@ -183,7 +185,7 @@ const findStatutsDuplicates = async (
   let unicityQueryGroup = {};
 
   switch (duplicatesTypesCode) {
-    case duplicatesTypesCodes.unique.code:
+    case DUPLICATE_TYPE_CODES.unique.code:
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
@@ -196,12 +198,12 @@ const findStatutsDuplicates = async (
         duplicatesIds: { $addToSet: "$_id" },
         etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$statut_apprenant" },
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
       };
       break;
 
-    case duplicatesTypesCodes.formation_cfd.code:
+    case DUPLICATE_TYPE_CODES.formation_cfd.code:
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
@@ -216,12 +218,12 @@ const findStatutsDuplicates = async (
         // Ajout des différents formation_cfd en doublon potentiel
         formation_cfds: { $addToSet: "$formation_cfd" },
         // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$statut_apprenant" },
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
       };
       break;
 
-    case duplicatesTypesCodes.uai_etablissement.code:
+    case DUPLICATE_TYPE_CODES.uai_etablissement.code:
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
@@ -238,7 +240,7 @@ const findStatutsDuplicates = async (
       };
       break;
 
-    case duplicatesTypesCodes.prenom_apprenant.code:
+    case DUPLICATE_TYPE_CODES.prenom_apprenant.code:
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
@@ -252,12 +254,12 @@ const findStatutsDuplicates = async (
         // Ajout des différentes prenom_apprenant en doublon potentiel
         prenom_apprenants: { $addToSet: "$prenom_apprenant" },
         // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$statut_apprenant" },
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
       };
       break;
 
-    case duplicatesTypesCodes.nom_apprenant.code:
+    case DUPLICATE_TYPE_CODES.nom_apprenant.code:
       unicityQueryGroup = {
         _id: {
           prenom_apprenant: "$prenom_apprenant",
@@ -271,13 +273,13 @@ const findStatutsDuplicates = async (
         // Ajout des différents nom_apprenant en doublon potentiel
         nom_apprenants: { $addToSet: "$nom_apprenant" },
         // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$statut_apprenant" },
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
       };
       break;
 
     default:
-      throw new Error("findStatutsDuplicates Error :  duplicatesTypesCode not matching any code");
+      throw new Error("findDossiersApprenantsDuplicates Error :  duplicatesTypesCode not matching any code");
   }
 
   if (duplicatesWithNoUpdate) filters.historique_statut_apprenant = { $size: 1 };
@@ -291,7 +293,7 @@ const findStatutsDuplicates = async (
     {
       $group: unicityQueryGroup,
     },
-    // Récupération des statuts en doublons = regroupement count > 1
+    // Récupération des DossierApprenant en doublons = regroupement count > 1
     {
       $match: {
         ...(duplicatesWithNoUpdate ? { statut_apprenants: { $size: 1 } } : {}),
@@ -300,15 +302,15 @@ const findStatutsDuplicates = async (
     },
   ];
 
-  const statutsFound = allowDiskUse
-    ? await StatutCandidatModel.aggregate(aggregateQuery).allowDiskUse(true).exec()
-    : await StatutCandidatModel.aggregate(aggregateQuery);
+  const dossiersApprenantsFound = allowDiskUse
+    ? await DossierApprenantModel.aggregate(aggregateQuery).allowDiskUse(true).exec()
+    : await DossierApprenantModel.aggregate(aggregateQuery);
 
-  return statutsFound;
+  return dossiersApprenantsFound;
 };
 
 /**
- * Construction d'une liste de doublons de type duplicatesTypeCode de statutsCandidats
+ * Construction d'une liste de doublons de type duplicatesTypeCode de DossierApprenant
  * regroupés par UAI pour les filtres passés en paramètres
  * @param {*} duplicatesTypeCode
  * @param {*} filters
@@ -317,7 +319,7 @@ const findStatutsDuplicates = async (
  */
 const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
   // Récupération des doublons pour le type souhaité
-  const duplicates = await findStatutsDuplicates(duplicatesTypeCode, filters, options);
+  const duplicates = await findDossiersApprenantsDuplicates(duplicatesTypeCode, filters, options);
 
   return duplicates.map((duplicateItem) => {
     const { _id, count, duplicatesIds, ...discriminants } = duplicateItem;
@@ -331,10 +333,10 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
 };
 
 /**
- * Récupération de la liste des statuts avec un historique antidaté
+ * Récupération de la liste des DossierApprenant avec un historique antidaté
  * @returns
  */
-const getStatutsWithHistoryDateUnordered = async () => {
+const getDossierApprenantsWithHistoryDateUnordered = async () => {
   const aggregationPipeline = [
     // Filtrage historique > 1 élement
     { $match: { "historique_statut_apprenant.1": { $exists: true } } },
@@ -354,15 +356,15 @@ const getStatutsWithHistoryDateUnordered = async () => {
     { $match: { isHistoryDateOrdered: false } },
   ];
 
-  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
+  const result = await DossierApprenantModel.aggregate(aggregationPipeline);
   return result;
 };
 
 /**
- * Récupération de la liste des statuts ayant une date invalide (< année 2000)
+ * Récupération de la liste des DossierApprenant ayant une date invalide (< année 2000)
  * @returns
  */
-const getStatutsWithBadDate = async () => {
+const getDossierApprenantsWithBadDate = async () => {
   const aggregationPipeline = [
     // Filtrage historique > 1 élement
     { $match: { "historique_statut_apprenant.1": { $exists: true } } },
@@ -382,6 +384,6 @@ const getStatutsWithBadDate = async () => {
     { $match: { hasHistoryBadDate: true } },
   ];
 
-  const result = await StatutCandidatModel.aggregate(aggregationPipeline);
+  const result = await DossierApprenantModel.aggregate(aggregationPipeline);
   return result;
 };

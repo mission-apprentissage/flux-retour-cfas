@@ -1,5 +1,5 @@
-const createStatutsCandidatsCollectionIndexes = async (db) => {
-  const collection = db.collection("statutsCandidats");
+const createDossiersApprenantsCollectionIndexes = async (db) => {
+  const collection = db.collection("dossiersApprenants");
 
   await collection.createIndex({ uai_etablissement: 1 }, { name: "uai_etablissement" });
   await collection.createIndex({ siret_etablissement: 1 }, { name: "siret_etablissement" });
@@ -9,17 +9,12 @@ const createStatutsCandidatsCollectionIndexes = async (db) => {
   await collection.createIndex({ etablissement_num_departement: 1 }, { name: "etablissement_num_departement" });
   await collection.createIndex({ annee_scolaire: 1 }, { name: "annee_scolaire" });
   await collection.createIndex({ etablissement_reseaux: 1 }, { name: "etablissement_reseaux" });
-
-  await collection.createIndex(
-    { nom_etablissement: "text", tokenized_nom_etablissement: "text" },
-    { default_language: "french" }
-  );
 };
 
-const dropStatutsCandidatsCollectionIndexes = async (db) => {
-  const collection = db.collection("statutsCandidats");
+const dropDossiersApprenantsCollectionIndexes = async (db) => {
+  const collection = db.collection("dossiersApprenants");
 
   await collection.dropIndexes();
 };
 
-module.exports = { createStatutsCandidatsCollectionIndexes, dropStatutsCandidatsCollectionIndexes };
+module.exports = { createDossiersApprenantsCollectionIndexes, dropDossiersApprenantsCollectionIndexes };

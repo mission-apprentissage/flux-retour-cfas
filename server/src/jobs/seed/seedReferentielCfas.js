@@ -3,13 +3,16 @@ const path = require("path");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { CfaModel, StatutCandidatModel } = require("../../common/model");
-const { jobNames, reseauxCfas, erps } = require("../../common/model/constants/");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
+const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
+const { ERPS } = require("../../common/constants/erpsConstants");
+const { CfaModel, DossierApprenantModel } = require("../../common/model");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
 const { sleep, generateRandomAlphanumericPhrase } = require("../../common/utils/miscUtils");
 const config = require("../../../config");
 const { validateUai } = require("../../common/domain/uai");
+const { Cfa } = require("../../common/domain/cfa");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -19,30 +22,30 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 runScript(async ({ cfas, ovhStorage }) => {
   logger.info("Seeding referentiel CFAs");
 
-  await seedCfasFromStatutsCandidatsUaisValid(cfas);
+  await seedCfasFromDossiersApprenantsUaisValid(cfas);
   await seedMetiersFromLbaApi();
 
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CMA);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.UIMM);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.AGRI);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.MFR);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CCI);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CFA_EC);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.GRETA);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CMA);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.UIMM);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.AGRI);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.MFR);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CCI);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CFA_EC);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.GRETA);
 
   await identifyUaiValidity();
 
   logger.info("End seeding référentiel CFAs !");
-}, jobNames.seedReferentielCfas);
+}, JOB_NAMES.seedReferentielCfas);
 
 /**
  * Seed des cfas depuis statuts candidats avec UAIs valid
  */
-const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
+const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
   // All distinct valid uais
-  const allUais = await StatutCandidatModel.distinct("uai_etablissement");
+  const allUais = await DossierApprenantModel.distinct("uai_etablissement");
 
-  logger.info(`Seeding Referentiel CFAs from ${allUais.length} UAIs found in statutsCandidats`);
+  logger.info(`Seeding Referentiel CFAs from ${allUais.length} UAIs found in DossierApprenant`);
 
   loadingBar.start(allUais.length, 0);
 
@@ -50,10 +53,10 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
     loadingBar.increment();
 
     // Gets statuts & sirets for UAI
-    const statutForUai = await StatutCandidatModel.findOne({
+    const statutForUai = await DossierApprenantModel.findOne({
       uai_etablissement: currentUai,
     });
-    const allSiretsForUai = await StatutCandidatModel.distinct("siret_etablissement", {
+    const allSiretsForUai = await DossierApprenantModel.distinct("siret_etablissement", {
       uai_etablissement: currentUai,
       siret_etablissement_valid: true,
     });
@@ -63,9 +66,9 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
     // Create or update CFA
     if (statutForUai) {
       if (cfaExistant) {
-        await updateCfaFromStatutCandidat(cfas, cfaExistant, statutForUai, allSiretsForUai);
+        await updateCfaFromDossierApprenant(cfas, cfaExistant, statutForUai, allSiretsForUai);
       } else {
-        await createCfaFromStatutCandidat(cfas, statutForUai, allSiretsForUai);
+        await createCfaFromDossierApprenant(cfas, statutForUai, allSiretsForUai);
       }
     }
   });
@@ -77,13 +80,14 @@ const seedCfasFromStatutsCandidatsUaisValid = async (cfas) => {
  * Create cfa from statut
  * @param {*} statutForCfa
  */
-const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
+const createCfaFromDossierApprenant = async (cfas, statutForCfa, allSirets) => {
   const accessToken = generateRandomAlphanumericPhrase();
 
   await new CfaModel({
     uai: statutForCfa.uai_etablissement,
     sirets: allSirets,
     nom: statutForCfa.nom_etablissement.trim() ?? null,
+    nom_tokenized: Cfa.createTokenizedNom(statutForCfa.nom_etablissement),
     adresse: statutForCfa.etablissement_adresse,
     branchement_tdb: true,
     source_seed_cfa: "StatutsCandidats",
@@ -100,13 +104,14 @@ const createCfaFromStatutCandidat = async (cfas, statutForCfa, allSirets) => {
  * Update cfa from statut
  * @param {*} statutForCfa
  */
-const updateCfaFromStatutCandidat = async (cfas, cfaExistant, statutForCfa, allSirets) => {
+const updateCfaFromDossierApprenant = async (cfas, cfaExistant, statutForCfa, allSirets) => {
   await CfaModel.findOneAndUpdate(
     { _id: cfaExistant._id },
     {
       $set: {
         uai: statutForCfa.uai_etablissement,
         nom: statutForCfa.nom_etablissement.trim() ?? null,
+        nom_tokenized: Cfa.createTokenizedNom(statutForCfa.nom_etablissement),
         adresse: statutForCfa.etablissement_adresse,
         sirets: allSirets,
         branchement_tdb: true,
@@ -145,7 +150,7 @@ const seedCfasNetworkFromCsv = async (ovhStorage, { nomReseau, nomFichier, encod
       const cfaForSiret = await CfaModel.findOne({ sirets: { $in: [currentCfa.siret] } });
       if (cfaForSiret) {
         // Handle AGRI - Without MFR
-        if (nomReseau === reseauxCfas.AGRI.nomReseau && cfaForSiret.erps.includes(erps.GESTI.nomErp.toLowerCase())) {
+        if (nomReseau === RESEAUX_CFAS.AGRI.nomReseau && cfaForSiret.erps.includes(ERPS.GESTI.nomErp.toLowerCase())) {
           return;
         }
         // Update if needed
@@ -159,7 +164,7 @@ const seedCfasNetworkFromCsv = async (ovhStorage, { nomReseau, nomFichier, encod
 
       if (cfaForUai) {
         // Handle AGRI - Without MFR
-        if (nomReseau === reseauxCfas.AGRI.nomReseau && cfaForUai.erps.includes(erps.GESTI.nomErp.toLowerCase())) {
+        if (nomReseau === RESEAUX_CFAS.AGRI.nomReseau && cfaForUai.erps.includes(ERPS.GESTI.nomErp.toLowerCase())) {
           return;
         }
         // Update if needed

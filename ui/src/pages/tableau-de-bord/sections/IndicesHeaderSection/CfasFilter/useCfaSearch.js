@@ -26,7 +26,12 @@ const useCfaSearch = (searchTerm, filters) => {
     enabled: searchEnabled,
   });
 
-  return { data, loading: isLoading };
+  return {
+    data: data?.map(({ uai, nom, departement }) => {
+      return { uai_etablissement: uai, nom_etablissement: nom, departement };
+    }),
+    loading: isLoading,
+  };
 };
 
 export default useCfaSearch;

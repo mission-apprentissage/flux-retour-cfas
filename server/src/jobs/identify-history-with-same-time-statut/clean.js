@@ -1,6 +1,6 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { jobNames } = require("../../common/model/constants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { collectionNames } = require("../constants");
 const cliProgress = require("cli-progress");
 
@@ -8,7 +8,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 
 runScript(async ({ db }) => {
   await cleanRupturantsWithSameDateElements({ db });
-}, jobNames.statutsCandidatsBadHistoryCleanAntidated);
+}, JOB_NAMES.dossiersApprenantsBadHistoryCleanAntidated);
 
 const cleanRupturantsWithSameDateElements = async ({ db }) => {
   logger.info("Run Cleaning rupturants with same dates in historique_statut_apprenant....");
@@ -30,7 +30,7 @@ const cleanRupturantsWithSameDateElements = async ({ db }) => {
 
     const cleanedHistory = historique.slice(0, -2);
     await db
-      .collection("statutsCandidats")
+      .collection("dossiersApprenants")
       .updateOne(
         { _id: statutWithAntidatedHistory.original_id },
         { $set: { historique_statut_apprenant: cleanedHistory, history_cleaned_date: new Date() } }

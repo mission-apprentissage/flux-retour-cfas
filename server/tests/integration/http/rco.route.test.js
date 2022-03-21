@@ -2,9 +2,10 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
-const { RcoStatutCandidatModel, JobEventModel } = require("../../../src/common/model");
-const { createRandomRcoStatutCandidat } = require("../../data/randomizedSample");
-const { jobNames, jobEventStatuts, effectifsIndicators } = require("../../../src/common/model/constants");
+const { JOB_NAMES, jobEventStatuts } = require("../../../src/common/constants/jobsConstants");
+const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
+const { RcoDossierApprenantModel, JobEventModel } = require("../../../src/common/model");
+const { createRandomRcoDossierApprenant } = require("../../data/randomizedSample");
 
 const user = { name: "rcoUser", password: "password" };
 
@@ -52,13 +53,13 @@ describe(__filename, () => {
 
       // Add ended Job Event
       await new JobEventModel({
-        jobname: jobNames.createRcoStatutsCollection,
+        jobname: JOB_NAMES.createRcoStatutsCollection,
         action: jobEventStatuts.ended,
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoStatutCandidatModel({
-          ...createRandomRcoStatutCandidat(),
+        await new RcoDossierApprenantModel({
+          ...createRandomRcoDossierApprenant(),
           uai_etablissement: uaiTest,
         }).save();
       }
@@ -85,13 +86,13 @@ describe(__filename, () => {
 
       // Add ended Job Event
       await new JobEventModel({
-        jobname: jobNames.createRcoStatutsCollection,
+        jobname: JOB_NAMES.createRcoStatutsCollection,
         action: jobEventStatuts.started,
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoStatutCandidatModel({
-          ...createRandomRcoStatutCandidat(),
+        await new RcoDossierApprenantModel({
+          ...createRandomRcoDossierApprenant(),
           uai_etablissement: uaiTest,
         }).save();
       }
@@ -122,13 +123,13 @@ describe(__filename, () => {
 
       // Add ended Job Event
       await new JobEventModel({
-        jobname: jobNames.createRcoStatutsCollection,
+        jobname: JOB_NAMES.createRcoStatutsCollection,
         action: jobEventStatuts.ended,
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoStatutCandidatModel({
-          ...createRandomRcoStatutCandidat(),
+        await new RcoDossierApprenantModel({
+          ...createRandomRcoDossierApprenant(),
           etablissement_formateur_code_commune_insee: etablissement_formateur_code_commune_inseeTest,
           etablissement_code_postal: etablissement_code_postalTest,
           periode_formation: periode_formationTest,
@@ -188,18 +189,18 @@ describe(__filename, () => {
 
       // Add ended Job Event
       await new JobEventModel({
-        jobname: jobNames.createRcoStatutsCollection,
+        jobname: JOB_NAMES.createRcoStatutsCollection,
         action: jobEventStatuts.ended,
       }).save();
 
-      await new RcoStatutCandidatModel({
-        ...createRandomRcoStatutCandidat(),
-        statut_calcule: effectifsIndicators.apprentis,
+      await new RcoDossierApprenantModel({
+        ...createRandomRcoDossierApprenant(),
+        statut_calcule: EFFECTIF_INDICATOR_NAMES.apprentis,
       }).save();
 
-      await new RcoStatutCandidatModel({
-        ...createRandomRcoStatutCandidat(),
-        statut_calcule: effectifsIndicators.inscritsSansContrats,
+      await new RcoDossierApprenantModel({
+        ...createRandomRcoDossierApprenant(),
+        statut_calcule: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
       }).save();
 
       // Call Api Route
@@ -213,8 +214,11 @@ describe(__filename, () => {
       assert.equal(response.data.pagination.page, 1);
       assert.equal(response.data.pagination.nombre_de_page, 1);
       assert.equal(response.data.pagination.total, 2);
-      assert.strictEqual(response.data.rcoStatutsCandidats[0].statut_calcule, effectifsIndicators.apprentis);
-      assert.strictEqual(response.data.rcoStatutsCandidats[1].statut_calcule, effectifsIndicators.inscritsSansContrats);
+      assert.strictEqual(response.data.rcoStatutsCandidats[0].statut_calcule, EFFECTIF_INDICATOR_NAMES.apprentis);
+      assert.strictEqual(
+        response.data.rcoStatutsCandidats[1].statut_calcule,
+        EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
+      );
     });
   });
 });

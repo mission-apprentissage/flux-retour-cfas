@@ -12,7 +12,7 @@ module.exports = ({ db }) => {
     tryCatch(async (req, res) => {
       let mongodbStatus;
       await db
-        .collection("statutsCandidats")
+        .collection("dossiersApprenants")
         .stats()
         .then(() => {
           mongodbStatus = true;

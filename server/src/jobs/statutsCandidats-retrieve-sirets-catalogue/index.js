@@ -1,23 +1,23 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const cliProgress = require("cli-progress");
-const { StatutCandidatModel } = require("../../common/model");
+const { DossierApprenantModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Ce script permet de retrouver les sirets manquants dans les statutsCandidats depuis le Catalogue
+ * Ce script permet de retrouver les sirets manquants dans les DossierApprenant depuis le Catalogue
  * en se basant sur les UAI et les CFD
  */
 runScript(async () => {
-  logger.info("Run StatutCandidats - Siret Catalogue Retrieving Job");
+  logger.info("Run DossierApprenant - Siret Catalogue Retrieving Job");
 
   // Récupère tous les coupes UAI - CFD existants pour les statuts avec sirets invalides
   const uaiCfdCouples = (
-    await StatutCandidatModel.aggregate([
+    await DossierApprenantModel.aggregate([
       {
         $match: {
           siret_etablissement_valid: false,
@@ -52,7 +52,7 @@ runScript(async () => {
 
     if (infoCatalog?.length > 0) {
       // Récupère tous les statuts ayant ce couple UAI & CFD et un siret invalide
-      const statutsForUaiCfdCouple = await StatutCandidatModel.find({
+      const statutsForUaiCfdCouple = await DossierApprenantModel.find({
         uai_etablissement: currentUaiCfd.uai,
         formation_cfd: currentUaiCfd.cfd,
         siret_etablissement_valid: false,
@@ -60,7 +60,7 @@ runScript(async () => {
 
       await asyncForEach(statutsForUaiCfdCouple, async (currentStatutToUpdate) => {
         // MAJ etablissement_gestionnaire_siret && etablissement_formateur_siret
-        await StatutCandidatModel.findByIdAndUpdate(
+        await DossierApprenantModel.findByIdAndUpdate(
           currentStatutToUpdate._id,
           {
             etablissement_gestionnaire_siret: infoCatalog[0].etablissement_gestionnaire_siret,
@@ -73,5 +73,5 @@ runScript(async () => {
   });
 
   loadingBar.stop();
-  logger.info("End StatutCandidats - Sirets Retrieving Job");
-}, jobNames.statutsCandidatsRetrieveSiretCatalog);
+  logger.info("End DossierApprenant - Sirets Retrieving Job");
+}, JOB_NAMES.dossiersApprenantsRetrieveSiretCatalog);

@@ -2,7 +2,7 @@ const { connectToMongo } = require("../mongodb");
 const createUsers = require("./users");
 const createUserEvents = require("./userEvents");
 const createJobEvents = require("./jobEvents");
-const createStatutsCandidats = require("./statutsCandidats");
+const createDossierApprenant = require("./dossiersApprenants");
 const cfasComponent = require("./cfas");
 const formationsComponent = require("./formations");
 const createStats = require("./stats");
@@ -19,7 +19,7 @@ module.exports = async (options = {}) => {
   const ovhStorage = options.ovhStorage || createOvhStorageComponent();
   const userEvents = options.userEvents || createUserEvents();
   const jobEvents = options.jobEvents || createJobEvents();
-  const statutsCandidats = options.statutsCandidats || createStatutsCandidats();
+  const dossiersApprenants = options.dossiersApprenants || createDossierApprenant();
   const formations = options.formations || formationsComponent();
   const cfas = options.cfas || cfasComponent();
   const cfaDataFeedback = options.cfas || cfaDataFeedbackComponent();
@@ -37,7 +37,7 @@ module.exports = async (options = {}) => {
     jobEvents,
     cache,
     db: options.db || (await connectToMongo()).db,
-    statutsCandidats,
+    dossiersApprenants,
     cfaDataFeedback,
     formations,
     cfas,

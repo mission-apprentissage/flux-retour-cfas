@@ -5,13 +5,13 @@ const { runScript } = require("../scriptWrapper");
 const { collectionNames } = require("../constants");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/model/constants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 runScript(async ({ effectifs, db }) => {
   await identifyHistoryWithBadDates({ effectifs, db });
-}, jobNames.statutsCandidatsBadHistoryIdentifyBadDates);
+}, JOB_NAMES.dossiersApprenantsBadHistoryIdentifyBadDates);
 
 const identifyHistoryWithBadDates = async ({ effectifs, db }) => {
   logger.info("Run identification statuts-candidats with historique_statut_apprenant with non-chronological order...");
@@ -20,7 +20,7 @@ const identifyHistoryWithBadDates = async ({ effectifs, db }) => {
   await resultsCollection.deleteMany({});
 
   // Identify all statuts with bad dates in history
-  const statutsWithBadDatesInHistory = await effectifs.getStatutsWithBadDate();
+  const statutsWithBadDatesInHistory = await effectifs.getDossierApprenantsWithBadDate();
 
   loadingBar.start(statutsWithBadDatesInHistory.length, 0);
 

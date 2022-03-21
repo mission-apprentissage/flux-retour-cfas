@@ -2,7 +2,7 @@ const faker = require("faker/locale/fr");
 const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
 const { subYears, subMonths, addYears } = require("date-fns");
-const { codesStatutsCandidats } = require("../../src/common/model/constants");
+const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/dossierApprenantConstants");
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -10,7 +10,7 @@ const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase()
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
 const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
 const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
-const getRandomStatutApprenant = () => faker.random.arrayElement(Object.values(codesStatutsCandidats));
+const getRandomStatutApprenant = () => faker.random.arrayElement(Object.values(CODES_STATUT_APPRENANT));
 const getRandomPeriodeFormation = (anneeScolaire) => {
   const yearToInclude = Number(anneeScolaire.slice(0, 4));
   const startYear = faker.random.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
@@ -33,7 +33,7 @@ const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(
 const getRandomCoordonnates = () => `${faker.address.latitude()},${faker.address.longitude()}`;
 const getRandomDateNaissance = () => faker.date.between(subYears(new Date(), 18), subYears(new Date(), 25));
 
-const createRandomStatutCandidat = (params = {}) => {
+const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -41,7 +41,6 @@ const createRandomStatutCandidat = (params = {}) => {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
-    ne_pas_solliciter: faker.datatype.boolean(),
     email_contact: faker.internet.email(),
 
     formation_cfd: getRandomIdFormation(),
@@ -72,7 +71,7 @@ const createRandomStatutCandidat = (params = {}) => {
   };
 };
 
-const createRandomRcoStatutCandidat = (params = {}) => {
+const createRandomRcoDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -98,8 +97,8 @@ const createRandomRcoStatutCandidat = (params = {}) => {
   };
 };
 
-// random statutCandidat shaped along our REST API schema
-const createRandomStatutCandidatApiInput = (params = {}) => {
+// random DossierApprenant shaped along our REST API schema
+const createRandomDossierApprenantApiInput = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -107,7 +106,6 @@ const createRandomStatutCandidatApiInput = (params = {}) => {
     ine_apprenant: isPresent() ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
-    ne_pas_solliciter: faker.datatype.boolean(),
     email_contact: faker.internet.email(),
 
     id_formation: getRandomIdFormation(),
@@ -151,17 +149,17 @@ const createRandomListOf =
     return randomList;
   };
 
-const createRandomStatutsCandidatsApiInputList = createRandomListOf(createRandomStatutCandidatApiInput);
+const createRandomDossierApprenantApiInputList = createRandomListOf(createRandomDossierApprenantApiInput);
 
-const createRandomStatutsCandidatsList = createRandomListOf(createRandomStatutCandidat);
+const createRandomDossierApprenantList = createRandomListOf(createRandomDossierApprenant);
 
 module.exports = {
   getRandomPeriodeFormation,
-  createRandomStatutCandidat,
-  createRandomStatutCandidatApiInput,
-  createRandomStatutsCandidatsList,
-  createRandomStatutsCandidatsApiInputList,
+  createRandomDossierApprenant,
+  createRandomDossierApprenantApiInput,
+  createRandomDossierApprenantList,
+  createRandomDossierApprenantApiInputList,
   getRandomSiretEtablissement,
   getRandomUaiEtablissement,
-  createRandomRcoStatutCandidat,
+  createRandomRcoDossierApprenant,
 };

@@ -1,6 +1,7 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { reseauxCfas, regions } = require("../../common/model/constants");
+const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
+const { REGIONS } = require("../../common/constants/localisationConstants");
 
 module.exports = () => {
   const router = express.Router();
@@ -8,7 +9,7 @@ module.exports = () => {
   router.get(
     "/networks",
     tryCatch(async (req, res) => {
-      const networks = Object.keys(reseauxCfas).map((id) => ({ id, nom: reseauxCfas[id].nomReseau }));
+      const networks = Object.keys(RESEAUX_CFAS).map((id) => ({ id, nom: RESEAUX_CFAS[id].nomReseau }));
       return res.json(networks);
     })
   );
@@ -16,7 +17,7 @@ module.exports = () => {
   router.get(
     "/regions",
     tryCatch(async (req, res) => {
-      return res.json(regions);
+      return res.json(REGIONS);
     })
   );
 

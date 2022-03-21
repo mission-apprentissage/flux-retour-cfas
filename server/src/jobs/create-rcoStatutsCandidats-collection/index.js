@@ -1,7 +1,8 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { RcoStatutCandidatModel } = require("../../common/model");
-const { jobNames, effectifsIndicators } = require("../../common/model/constants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
+const { EFFECTIF_INDICATOR_NAMES } = require("../../common/constants/dossierApprenantConstants");
+const { RcoDossierApprenantModel } = require("../../common/model");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const cliProgress = require("cli-progress");
@@ -16,7 +17,7 @@ runScript(async ({ effectifs }) => {
 
   // Supprime les données précédentes
   logger.info(`Clearing existing RCO Statuts Collection ...`);
-  await RcoStatutCandidatModel.deleteMany({});
+  await RcoDossierApprenantModel.deleteMany({});
 
   const currentAnneeScolaireFilter = { annee_scolaire: getAnneeScolaireFromDate(new Date()) };
   const projection = {
@@ -41,22 +42,22 @@ runScript(async ({ effectifs }) => {
 
   const apprentis = (
     await effectifs.apprentis.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })
-  ).map((item) => ({ ...item, statutCandidatId: item._id, statut_calcule: effectifsIndicators.apprentis }));
+  ).map((item) => ({ ...item, statutCandidatId: item._id, statut_calcule: EFFECTIF_INDICATOR_NAMES.apprentis }));
 
   const inscritsSansContrats = (
     await effectifs.inscritsSansContrats.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })
   ).map((item) => ({
     ...item,
     statutCandidatId: item._id,
-    statut_calcule: effectifsIndicators.inscritsSansContrats,
+    statut_calcule: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
   }));
 
   const rupturants = (
     await effectifs.rupturants.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })
-  ).map((item) => ({ ...item, statutCandidatId: item._id, statut_calcule: effectifsIndicators.rupturants }));
+  ).map((item) => ({ ...item, statutCandidatId: item._id, statut_calcule: EFFECTIF_INDICATOR_NAMES.rupturants }));
 
   const abandons = (await effectifs.abandons.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })).map(
-    (item) => ({ ...item, statutCandidatId: item._id, statut_calcule: effectifsIndicators.abandons })
+    (item) => ({ ...item, statutCandidatId: item._id, statut_calcule: EFFECTIF_INDICATOR_NAMES.abandons })
   );
 
   // Construction de la liste totale des données avec flag de chaque indicateur
@@ -65,7 +66,7 @@ runScript(async ({ effectifs }) => {
 
   // Ajout en base pour chaque élement de la liste
   await asyncForEach(allStatutsByIndicators, async (currentStatut) => {
-    await new RcoStatutCandidatModel({
+    await new RcoDossierApprenantModel({
       statutCandidatId: currentStatut.statutCandidatId,
       uai_etablissement: currentStatut.uai_etablissement,
       nom_etablissement: currentStatut.nom_etablissement,
@@ -87,4 +88,4 @@ runScript(async ({ effectifs }) => {
   });
 
   loadingBar.stop();
-}, jobNames.createRcoStatutsCollection);
+}, JOB_NAMES.createRcoStatutsCollection);

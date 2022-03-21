@@ -4,10 +4,10 @@ import React from "react";
 import { HashLink } from "react-router-hash-link";
 
 import { Section } from "../../../common/components";
-import { navigationPages } from "../../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { productName } from "../../../common/constants/productName";
 
-const currentPage = navigationPages.DonneesPersonnelles;
+const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
 
 const RgpdCard = ({ legend, text, backgroundColor, href }) => {
   return (

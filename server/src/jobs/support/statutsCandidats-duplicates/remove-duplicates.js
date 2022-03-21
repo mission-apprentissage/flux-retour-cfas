@@ -1,8 +1,8 @@
 const logger = require("../../../common/logger");
 const arg = require("arg");
 const { runScript } = require("../../scriptWrapper");
-const { jobNames } = require("../../../common/model/constants/index");
-const { StatutCandidatModel, DuplicateEventModel } = require("../../../common/model");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
+const { DossierApprenantModel, DuplicateEventModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const sortBy = require("lodash.sortby");
 const omit = require("lodash.omit");
@@ -13,12 +13,12 @@ let mongo;
 /**
  * Ce script permet de nettoyer les doublons des statuts identifiés
  * Ce script prends plusieurs paramètres en argument :
- * --duplicatesTypeCode : types de doublons à supprimer : 1/2/3/4 cf duplicatesTypesCodes
+ * --duplicatesTypeCode : types de doublons à supprimer : 1/2/3/4 cf DUPLICATE_TYPE_CODES
  * --duplicatesWithNoUpdate : supprime uniquement les doublons sans changement de statut_apprenant
  * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
  * --dry : will run but won't delete any data
  */
-runScript(async ({ statutsCandidats, db }) => {
+runScript(async ({ dossiersApprenants, db }) => {
   mongo = db;
   args = arg(
     {
@@ -42,7 +42,7 @@ runScript(async ({ statutsCandidats, db }) => {
   const filterQuery = {};
   const jobTimestamp = Date.now();
 
-  const duplicatesGroups = await statutsCandidats.getDuplicatesList(duplicatesTypeCode, filterQuery, {
+  const duplicatesGroups = await dossiersApprenants.getDuplicatesList(duplicatesTypeCode, filterQuery, {
     allowDiskUse,
     duplicatesWithNoUpdate,
   });
@@ -73,14 +73,14 @@ runScript(async ({ statutsCandidats, db }) => {
   logger.info(`Removed ${duplicatesRemoved.length} statuts candidats in db`);
 
   logger.info("Job Ended !");
-}, jobNames.removeStatutsCandidatsDuplicates);
+}, JOB_NAMES.removeDossiersApprenantsDuplicates);
 
 /* Will keep the oldest statut in duplicates group, delete the others and store them in a specific collection */
 const removeDuplicates = async (duplicatesGroup) => {
   const statutsFound = [];
 
   await asyncForEach(duplicatesGroup.duplicatesIds, async (duplicateId) => {
-    statutsFound.push(await StatutCandidatModel.findById(duplicateId).lean());
+    statutsFound.push(await DossierApprenantModel.findById(duplicateId).lean());
   });
 
   // will sort by created_at, last item is the one with the most recent date
@@ -91,13 +91,13 @@ const removeDuplicates = async (duplicatesGroup) => {
   // Remove duplicates
   await asyncForEach(statutsToRemove, async (toRemove) => {
     try {
-      await StatutCandidatModel.findByIdAndDelete(toRemove._id);
+      await DossierApprenantModel.findByIdAndDelete(toRemove._id);
       // archive the deleted duplicate in dedicated collection
       await mongo
         .collection("statutsCandidatsDuplicatesRemoved")
         .insertOne({ ...omit(toRemove, "_id"), original_id: toRemove._id });
     } catch (err) {
-      logger.error(`Could not delete statutCandidat with _id ${toRemove._id}`);
+      logger.error(`Could not delete DossierApprenant with _id ${toRemove._id}`);
     }
   });
 

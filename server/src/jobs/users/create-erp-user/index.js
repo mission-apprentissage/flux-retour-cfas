@@ -1,6 +1,6 @@
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { jobNames } = require("../../../common/model/constants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const arg = require("arg");
 const { apiRoles, tdbRoles } = require("../../../common/roles");
 
@@ -22,4 +22,4 @@ runScript(async ({ users }) => {
   });
 
   logger.info(`User ${username} successfully created`);
-}, jobNames.createErpUser);
+}, JOB_NAMES.createErpUser);
