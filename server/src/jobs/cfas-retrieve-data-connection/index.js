@@ -3,7 +3,7 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { DossierApprenantModel, CfaModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -15,7 +15,7 @@ runScript(async () => {
   logger.info("Run Cfas Branchement Retrieving Job");
   await retrieveDataConnections();
   logger.info("End Cfas Branchement Retrieving Job");
-}, jobNames.cfasRetrieveDataConnection);
+}, JOB_NAMES.cfasRetrieveDataConnection);
 
 /**
  * Parse tous les CFAs et vérifie s'il existe des données dans les statuts pour ce CFA

@@ -1,7 +1,7 @@
 /**
  * Noms des réseaux de CFAS
  */
-const reseauxCfas = {
+const RESEAUX_CFAS = {
   CMA: {
     nomReseau: "CMA",
     nomFichier: "cfas-cma",
@@ -49,4 +49,4 @@ const reseauxCfas = {
   },
 };
 
-module.exports = { reseauxCfas };
+module.exports = { RESEAUX_CFAS };

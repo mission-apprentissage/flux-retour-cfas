@@ -2,7 +2,7 @@ const { isEqual } = require("date-fns");
 
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { collectionNames } = require("../constants");
 const cliProgress = require("cli-progress");
 const { identifyElementCausingWrongRupturantSequence } = require("./utils");
@@ -11,7 +11,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 
 runScript(async ({ db }) => {
   await cleanBadHistoryInscritsElements({ db });
-}, jobNames.dossiersApprenantsBadHistoryCleanAntidated);
+}, JOB_NAMES.dossiersApprenantsBadHistoryCleanAntidated);
 
 const cleanBadHistoryInscritsElements = async ({ db }) => {
   logger.info("Run Cleaning Antidated History Statuts inscrits elements....");

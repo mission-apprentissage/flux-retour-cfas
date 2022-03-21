@@ -5,9 +5,9 @@ const { DossierApprenantModel, CfaModel, FormationModel } = require("../../../..
 const { createRandomDossierApprenant, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
 const {
   CODES_STATUT_APPRENANT,
-  duplicatesTypesCodes,
+  DUPLICATE_TYPE_CODES,
 } = require("../../../../src/common/constants/dossierApprenantConstants");
-const { reseauxCfas } = require("../../../../src/common/constants/networksConstants");
+const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
 
 const isApproximatelyNow = (date) => {
   return Math.abs(differenceInMilliseconds(date, new Date())) < 50;
@@ -915,7 +915,7 @@ describe(__filename, () => {
       // Create sample cfa in referentiel
       const referenceCfa = new CfaModel({
         sirets: [invalidSiret],
-        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
+        reseaux: [RESEAUX_CFAS.ANASUP.nomReseau, RESEAUX_CFAS.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
 
@@ -936,7 +936,7 @@ describe(__filename, () => {
       // Create sample cfa in referentiel
       const referenceCfa = new CfaModel({
         uai: validUai,
-        reseaux: [reseauxCfas.ANASUP.nomReseau, reseauxCfas.BTP_CFA.nomReseau],
+        reseaux: [RESEAUX_CFAS.ANASUP.nomReseau, RESEAUX_CFAS.BTP_CFA.nomReseau],
       });
       await referenceCfa.save();
 
@@ -947,8 +947,8 @@ describe(__filename, () => {
       // Check uai & reseaux in created statut
       const { etablissement_reseaux } = createdStatut;
       assert.equal(etablissement_reseaux.length, 2);
-      assert.equal(etablissement_reseaux[0], reseauxCfas.ANASUP.nomReseau);
-      assert.equal(etablissement_reseaux[1], reseauxCfas.BTP_CFA.nomReseau);
+      assert.equal(etablissement_reseaux[0], RESEAUX_CFAS.ANASUP.nomReseau);
+      assert.equal(etablissement_reseaux[1], RESEAUX_CFAS.BTP_CFA.nomReseau);
     });
 
     it("Vérifie qu'à la création d'un statut avec un CFD valide on crée la formation correspondante si elle n'existe pas", async () => {
@@ -1006,7 +1006,7 @@ describe(__filename, () => {
         await createDossierApprenant(createRandomDossierApprenant(commonData));
       }
 
-      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.unique.code);
+      const duplicatesListFound = await getDuplicatesList(DUPLICATE_TYPE_CODES.unique.code);
 
       // 1 cas de doublons trouvé
       assert.equal(duplicatesListFound.length, 1);
@@ -1034,7 +1034,7 @@ describe(__filename, () => {
         await createDossierApprenant(createRandomDossierApprenant(commonData));
       }
 
-      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.prenom_apprenant.code);
+      const duplicatesListFound = await getDuplicatesList(DUPLICATE_TYPE_CODES.prenom_apprenant.code);
 
       // 1 cas de doublons trouvé
       assert.equal(duplicatesListFound.length, 1);
@@ -1080,7 +1080,7 @@ describe(__filename, () => {
       ]);
 
       const duplicatesListFound = await getDuplicatesList(
-        duplicatesTypesCodes.unique.code,
+        DUPLICATE_TYPE_CODES.unique.code,
         {},
         { duplicatesWithNoUpdate: true }
       );
@@ -1115,7 +1115,7 @@ describe(__filename, () => {
         );
       }
 
-      const duplicatesListFound = await getDuplicatesList(duplicatesTypesCodes.uai_etablissement.code);
+      const duplicatesListFound = await getDuplicatesList(DUPLICATE_TYPE_CODES.uai_etablissement.code);
 
       // 1 cas de doublons trouvé avec 4 doublons
       assert.equal(duplicatesListFound.length, 1);

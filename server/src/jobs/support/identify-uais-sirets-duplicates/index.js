@@ -2,7 +2,7 @@ const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
 const path = require("path");
 const { toCsv, toXlsx } = require("../../../common/utils/exporterUtils");
-const { jobNames } = require("../../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DossierApprenantModel } = require("../../../common/model");
 
 /**
@@ -13,7 +13,7 @@ runScript(async () => {
   await identifyMultipleSirets();
   await identifyMultipleUais();
   logger.info("Ended !");
-}, jobNames.identifyUaisSiretsDuplicates);
+}, JOB_NAMES.identifyUaisSiretsDuplicates);
 
 /**
  * Identifying multiple sirets for uais

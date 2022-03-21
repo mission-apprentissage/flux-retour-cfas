@@ -2,7 +2,7 @@ import { Box, Heading, Stack } from "@chakra-ui/react";
 import React from "react";
 
 import { Page, Section } from "../../common/components";
-import { navigationPages } from "../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import Question from "./Question";
 import { questions } from "./questions";
 
@@ -12,7 +12,7 @@ const SupportPage = () => {
       <Box color="grey.800">
         <Section backgroundColor="galt" paddingY="8w" withShadow>
           <Heading as="h1" variant="h1" marginBottom="1w">
-            {navigationPages.Support.title}
+            {NAVIGATION_PAGES.Support.title}
           </Heading>
         </Section>
         <Section paddingY="4w">

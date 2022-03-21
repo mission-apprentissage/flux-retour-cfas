@@ -1,4 +1,4 @@
-export const navigationPages = {
+export const NAVIGATION_PAGES = {
   Login: {
     path: "/login",
     title: "Accéder au tableau de bord",

@@ -3,7 +3,7 @@ import React from "react";
 
 import { Footer, Header, Section } from "../../../common/components";
 import BreadcrumbNav from "../../../common/components/BreadcrumbNav/BreadcrumbNav";
-import { navigationPages } from "../../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import TransmettreVosDonneesFormBlock from "./TransmettreVosDonneesFormBlock";
 
 const TransmettreVosDonneesPage = () => {
@@ -14,13 +14,13 @@ const TransmettreVosDonneesPage = () => {
         <Box width="50%">
           <BreadcrumbNav
             links={[
-              navigationPages.Accueil,
-              navigationPages.TransmettreEtConsulterVosDonnees,
-              navigationPages.TransmettreVosDonnees,
+              NAVIGATION_PAGES.Accueil,
+              NAVIGATION_PAGES.TransmettreEtConsulterVosDonnees,
+              NAVIGATION_PAGES.TransmettreVosDonnees,
             ]}
           />
           <Heading paddingTop="5w" as="h1" variant="h1" marginBottom="1w">
-            {navigationPages.TransmettreVosDonnees.title}
+            {NAVIGATION_PAGES.TransmettreVosDonnees.title}
           </Heading>
           <Text marginBottom="2w" color="black">
             Afin de mieux vous guider, merci de renseigner le formulaire ci dessous :

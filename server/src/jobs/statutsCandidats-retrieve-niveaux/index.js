@@ -3,7 +3,7 @@ const logger = require("../../common/logger");
 const cliProgress = require("cli-progress");
 const { DossierApprenantModel, FormationModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -41,4 +41,4 @@ runScript(async () => {
 
   loadingBar.stop();
   logger.info("End DossierApprenant - Niveau Retrieving Job");
-}, jobNames.dossiersApprenantsRetrieveNiveaux);
+}, JOB_NAMES.dossiersApprenantsRetrieveNiveaux);

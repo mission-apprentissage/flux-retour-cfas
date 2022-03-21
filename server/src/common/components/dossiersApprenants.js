@@ -1,6 +1,6 @@
 const { DossierApprenantModel, CfaModel } = require("../model");
 const omit = require("lodash.omit");
-const { duplicatesTypesCodes } = require("../constants/dossierApprenantConstants");
+const { DUPLICATE_TYPE_CODES } = require("../constants/dossierApprenantConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
 const { validateSiret } = require("../domain/siret");
@@ -185,7 +185,7 @@ const findDossiersApprenantsDuplicates = async (
   let unicityQueryGroup = {};
 
   switch (duplicatesTypesCode) {
-    case duplicatesTypesCodes.unique.code:
+    case DUPLICATE_TYPE_CODES.unique.code:
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
@@ -203,7 +203,7 @@ const findDossiersApprenantsDuplicates = async (
       };
       break;
 
-    case duplicatesTypesCodes.formation_cfd.code:
+    case DUPLICATE_TYPE_CODES.formation_cfd.code:
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
@@ -223,7 +223,7 @@ const findDossiersApprenantsDuplicates = async (
       };
       break;
 
-    case duplicatesTypesCodes.uai_etablissement.code:
+    case DUPLICATE_TYPE_CODES.uai_etablissement.code:
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
@@ -240,7 +240,7 @@ const findDossiersApprenantsDuplicates = async (
       };
       break;
 
-    case duplicatesTypesCodes.prenom_apprenant.code:
+    case DUPLICATE_TYPE_CODES.prenom_apprenant.code:
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
@@ -259,7 +259,7 @@ const findDossiersApprenantsDuplicates = async (
       };
       break;
 
-    case duplicatesTypesCodes.nom_apprenant.code:
+    case DUPLICATE_TYPE_CODES.nom_apprenant.code:
       unicityQueryGroup = {
         _id: {
           prenom_apprenant: "$prenom_apprenant",

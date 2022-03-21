@@ -2,7 +2,7 @@ import { Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/rea
 import React from "react";
 
 import { BreadcrumbNav, ContactSection, Footer, Header, Section } from "../../common/components";
-import { navigationPages } from "../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 
 const StatistiquesPage = () => {
   return (
@@ -10,11 +10,11 @@ const StatistiquesPage = () => {
       <Header />
       <Section backgroundColor="galt" paddingY="8w" withShadow>
         <Heading as="h1" variant="h1" marginBottom="1w">
-          {navigationPages.Statistiques.title}
+          {NAVIGATION_PAGES.Statistiques.title}
         </Heading>
       </Section>
       <Section paddingTop="3w">
-        <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.Statistiques]} />
+        <BreadcrumbNav links={[NAVIGATION_PAGES.Accueil, NAVIGATION_PAGES.Statistiques]} />
       </Section>
       <Section paddingY="4w">
         <Tabs isLazy lazyBehavior="keepMounted">

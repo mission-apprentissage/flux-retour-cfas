@@ -3,9 +3,9 @@ const path = require("path");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
-const { reseauxCfas } = require("../../common/constants/networksConstants");
-const { erps } = require("../../common/constants/erpsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
+const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
+const { ERPS } = require("../../common/constants/erpsConstants");
 const { CfaModel, DossierApprenantModel } = require("../../common/model");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
@@ -25,18 +25,18 @@ runScript(async ({ cfas, ovhStorage }) => {
   await seedCfasFromDossiersApprenantsUaisValid(cfas);
   await seedMetiersFromLbaApi();
 
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CMA);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.UIMM);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.AGRI);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.MFR);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CCI);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.CFA_EC);
-  await seedCfasNetworkFromCsv(ovhStorage, reseauxCfas.GRETA);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CMA);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.UIMM);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.AGRI);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.MFR);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CCI);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CFA_EC);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.GRETA);
 
   await identifyUaiValidity();
 
   logger.info("End seeding référentiel CFAs !");
-}, jobNames.seedReferentielCfas);
+}, JOB_NAMES.seedReferentielCfas);
 
 /**
  * Seed des cfas depuis statuts candidats avec UAIs valid
@@ -150,7 +150,7 @@ const seedCfasNetworkFromCsv = async (ovhStorage, { nomReseau, nomFichier, encod
       const cfaForSiret = await CfaModel.findOne({ sirets: { $in: [currentCfa.siret] } });
       if (cfaForSiret) {
         // Handle AGRI - Without MFR
-        if (nomReseau === reseauxCfas.AGRI.nomReseau && cfaForSiret.erps.includes(erps.GESTI.nomErp.toLowerCase())) {
+        if (nomReseau === RESEAUX_CFAS.AGRI.nomReseau && cfaForSiret.erps.includes(ERPS.GESTI.nomErp.toLowerCase())) {
           return;
         }
         // Update if needed
@@ -164,7 +164,7 @@ const seedCfasNetworkFromCsv = async (ovhStorage, { nomReseau, nomFichier, encod
 
       if (cfaForUai) {
         // Handle AGRI - Without MFR
-        if (nomReseau === reseauxCfas.AGRI.nomReseau && cfaForUai.erps.includes(erps.GESTI.nomErp.toLowerCase())) {
+        if (nomReseau === RESEAUX_CFAS.AGRI.nomReseau && cfaForUai.erps.includes(ERPS.GESTI.nomErp.toLowerCase())) {
           return;
         }
         // Update if needed

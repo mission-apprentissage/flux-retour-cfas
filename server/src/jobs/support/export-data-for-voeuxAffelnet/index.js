@@ -5,7 +5,7 @@ const { CroisementVoeuxAffelnetModel } = require("../../../common/model");
 const cliProgress = require("cli-progress");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { jobNames } = require("../../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 
 /**
  * Ce script permet de créer un export les data vers les voeux Affelnet
@@ -65,4 +65,4 @@ runScript(async () => {
 
   loadingBar.stop();
   logger.info("End ExportData - VoeuxAffelnet Retrieving Job");
-}, jobNames.exportDataForVoeuxAffelnet);
+}, JOB_NAMES.exportDataForVoeuxAffelnet);

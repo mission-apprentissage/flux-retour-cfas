@@ -3,7 +3,7 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { UserEventModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { subDays, startOfDay } = require("date-fns");
 const axios = require("axios").default;
 const env = require("env-var");
@@ -24,7 +24,7 @@ runScript(async () => {
   logger.info(`Run Post Last Received DossiersApprenants Job to ${destinationApiUrl}`);
   await repostLastReceivedDossiersApprenantsToEnv();
   logger.info(`End Post Last Received DossiersApprenants Job`);
-}, jobNames.repostLastStatutsReceived);
+}, JOB_NAMES.repostLastStatutsReceived);
 
 /**
  * Cette fonction envoi sur l'API souhaitée l'ensemble des derniers statuts recus la veille

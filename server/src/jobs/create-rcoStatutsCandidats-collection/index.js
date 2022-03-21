@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { jobNames } = require("../../common/constants/jobsConstants");
-const { effectifsIndicators } = require("../../common/constants/dossierApprenantConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
+const { EFFECTIF_INDICATOR_NAMES } = require("../../common/constants/dossierApprenantConstants");
 const { RcoDossierApprenantModel } = require("../../common/model");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
@@ -42,22 +42,22 @@ runScript(async ({ effectifs }) => {
 
   const apprentis = (
     await effectifs.apprentis.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })
-  ).map((item) => ({ ...item, statutCandidatId: item._id, statut_calcule: effectifsIndicators.apprentis }));
+  ).map((item) => ({ ...item, statutCandidatId: item._id, statut_calcule: EFFECTIF_INDICATOR_NAMES.apprentis }));
 
   const inscritsSansContrats = (
     await effectifs.inscritsSansContrats.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })
   ).map((item) => ({
     ...item,
     statutCandidatId: item._id,
-    statut_calcule: effectifsIndicators.inscritsSansContrats,
+    statut_calcule: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
   }));
 
   const rupturants = (
     await effectifs.rupturants.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })
-  ).map((item) => ({ ...item, statutCandidatId: item._id, statut_calcule: effectifsIndicators.rupturants }));
+  ).map((item) => ({ ...item, statutCandidatId: item._id, statut_calcule: EFFECTIF_INDICATOR_NAMES.rupturants }));
 
   const abandons = (await effectifs.abandons.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })).map(
-    (item) => ({ ...item, statutCandidatId: item._id, statut_calcule: effectifsIndicators.abandons })
+    (item) => ({ ...item, statutCandidatId: item._id, statut_calcule: EFFECTIF_INDICATOR_NAMES.abandons })
   );
 
   // Construction de la liste totale des données avec flag de chaque indicateur
@@ -88,4 +88,4 @@ runScript(async ({ effectifs }) => {
   });
 
   loadingBar.stop();
-}, jobNames.createRcoStatutsCollection);
+}, JOB_NAMES.createRcoStatutsCollection);

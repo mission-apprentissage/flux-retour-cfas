@@ -1,7 +1,7 @@
 const omit = require("lodash.omit");
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { collectionNames } = require("../constants");
 
 const hasTwoLastElementsWithSameDate = (historique) => {
@@ -37,4 +37,4 @@ runScript(async ({ db }) => {
   logger.info(
     `Found ${count} documents with equal dates in two last elements of historique_statut_apprenant and stored them in collection ${collectionNames.statutsAvecDerniersElementsHistoriqueDateIdentique}`
   );
-}, jobNames.statutsAvecDerniersElementsHistoriqueDateIdentique);
+}, JOB_NAMES.statutsAvecDerniersElementsHistoriqueDateIdentique);

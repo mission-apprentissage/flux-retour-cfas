@@ -27,7 +27,7 @@ const getStatutApprenantNameFromCode = (statutCode) =>
 /**
  * Code pour les types de doublons identifiables
  */
-const duplicatesTypesCodes = {
+const DUPLICATE_TYPE_CODES = {
   unique: {
     name: "Uniques (clé d'unicité identique)",
     code: 1,
@@ -51,22 +51,9 @@ const duplicatesTypesCodes = {
 };
 
 /**
- * Liste des champs strings
+ * Liste des nom des indicateurs
  */
-const statutsCandidatsStringFields = [
-  "ine_apprenant",
-  "email_contact",
-  "libelle_court_formation",
-  "libelle_long_formation",
-  "siret_etablissement",
-  "date_metier_mise_a_jour_statut",
-  "periode_formation",
-];
-
-/**
- * Liste des indicateurs
- */
-const effectifsIndicators = {
+const EFFECTIF_INDICATOR_NAMES = {
   apprentis: "apprentis",
   inscritsSansContrats: "inscritsSansContrats",
   rupturants: "rupturants",
@@ -75,9 +62,8 @@ const effectifsIndicators = {
 
 module.exports = {
   CODES_STATUT_APPRENANT,
-  duplicatesTypesCodes,
-  statutsCandidatsStringFields,
-  effectifsIndicators,
+  DUPLICATE_TYPE_CODES,
+  EFFECTIF_INDICATOR_NAMES,
   LABELS_STATUT_APPRENANT,
   getStatutApprenantNameFromCode,
 };

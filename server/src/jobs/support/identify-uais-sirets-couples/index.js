@@ -2,7 +2,7 @@ const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
 const path = require("path");
 const { toCsv } = require("../../../common/utils/exporterUtils");
-const { jobNames } = require("../../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DossierApprenantModel } = require("../../../common/model");
 
 /**
@@ -12,7 +12,7 @@ runScript(async () => {
   logger.info(`Identifying UAI-Sirets couples`);
   await identifyUaisSiretsCouples();
   logger.info("Ended !");
-}, jobNames.identifyUaisSiretsCouples);
+}, JOB_NAMES.identifyUaisSiretsCouples);
 
 /**
  * Identifying uais sirets couples

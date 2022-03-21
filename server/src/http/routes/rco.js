@@ -1,7 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { jobNames, jobEventStatuts } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES, jobEventStatuts } = require("../../common/constants/jobsConstants");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { findAndPaginate } = require("../../common/utils/dbUtils");
@@ -25,7 +25,7 @@ module.exports = ({ db, jobEvents }) => {
       const page = Number(req.query.page ?? 1);
       const limit = Number(req.query.limit ?? 1000);
 
-      if (!(await jobEvents.isJobInAction(jobNames.createRcoStatutsCollection, jobEventStatuts.ended))) {
+      if (!(await jobEvents.isJobInAction(JOB_NAMES.createRcoStatutsCollection, jobEventStatuts.ended))) {
         // Job RCO not ended, no data should be get
         res.status(501).json({
           status: "ERROR",

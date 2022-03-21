@@ -8,7 +8,7 @@ const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUt
 const { tdbRoles, apiRoles } = require("../../common/roles");
 const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
 const {
-  effectifsIndicators,
+  EFFECTIF_INDICATOR_NAMES,
   getStatutApprenantNameFromCode,
 } = require("../../common/constants/dossierApprenantConstants");
 const omit = require("lodash.omit");
@@ -195,7 +195,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
     // Build data list for indicator
     switch (effectifIndicateurFromParams) {
-      case effectifsIndicators.apprentis:
+      case EFFECTIF_INDICATOR_NAMES.apprentis:
         effectifsFormattedAtDate = (await effectifs.apprentis.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,
@@ -210,7 +210,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
         );
         break;
 
-      case effectifsIndicators.abandons:
+      case EFFECTIF_INDICATOR_NAMES.abandons:
         effectifsFormattedAtDate = (await effectifs.abandons.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,
@@ -226,7 +226,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
         );
         break;
 
-      case effectifsIndicators.inscritsSansContrats:
+      case EFFECTIF_INDICATOR_NAMES.inscritsSansContrats:
         effectifsFormattedAtDate = (
           await effectifs.inscritsSansContrats.getListAtDate(date, filters, { projection })
         ).map((item) => ({
@@ -242,7 +242,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
         }));
         break;
 
-      case effectifsIndicators.rupturants:
+      case EFFECTIF_INDICATOR_NAMES.rupturants:
         effectifsFormattedAtDate = (await effectifs.rupturants.getListAtDate(date, filters, { projection })).map(
           (item) => ({
             ...item,

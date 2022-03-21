@@ -1,6 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 
-import { navigationPages } from "../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 
 export const questions = [
   {
@@ -13,7 +13,7 @@ export const questions = [
     answer: [
       "Les personnes autorisées à consulter les données de votre organisme sont les institutions (Conseil régional, Rectorat et DREETS), les organisations professionnelles et le Carif Oref de votre région. Si vous êtes membre d'un réseau, la tête de votre réseau peut également consulter votre page.",
       // eslint-disable-next-line react/jsx-key
-      <Link to={navigationPages.ComprendreLesDonnees.path} as={NavLink} color="bluefrance">
+      <Link to={NAVIGATION_PAGES.ComprendreLesDonnees.path} as={NavLink} color="bluefrance">
         Comprendre les données
       </Link>,
     ],

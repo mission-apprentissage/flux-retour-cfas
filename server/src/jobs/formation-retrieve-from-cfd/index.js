@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 /*
     Ce script récupère tous les CFDs valides présents dans la collection DossierApprenant et crée une formation en base pour chacun si elle n'existe pas
@@ -36,4 +36,4 @@ runScript(async ({ db, formations }) => {
   logger.info(`${createdFormationsCount} formations created in DB`);
   logger.warn(`${formationsNotCreated.length} formations could not be created. CFD list: ${formationsNotCreated}`);
   logger.info("End Retrieve Formations from CFD");
-}, jobNames.formationRetrieveFromCfd);
+}, JOB_NAMES.formationRetrieveFromCfd);

@@ -3,7 +3,7 @@ const logger = require("../../common/logger");
 const cliProgress = require("cli-progress");
 const { DossierApprenantModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -74,4 +74,4 @@ runScript(async () => {
 
   loadingBar.stop();
   logger.info("End DossierApprenant - Sirets Retrieving Job");
-}, jobNames.dossiersApprenantsRetrieveSiretCatalog);
+}, JOB_NAMES.dossiersApprenantsRetrieveSiretCatalog);

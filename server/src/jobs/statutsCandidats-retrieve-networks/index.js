@@ -3,7 +3,7 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { DossierApprenantModel, CfaModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -15,7 +15,7 @@ runScript(async () => {
   logger.info("Run Cfas Network Retrieving Job");
   await retrieveNetworks();
   logger.info("End Cfas Network Retrieving Job");
-}, jobNames.dossiersApprenantsRetrieveNetworks);
+}, JOB_NAMES.dossiersApprenantsRetrieveNetworks);
 
 /**
  * Parse tous les CFAs ayant un réseau de cfas

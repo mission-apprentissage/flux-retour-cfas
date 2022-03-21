@@ -3,7 +3,7 @@ const path = require("path");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { CfaAnnuaireModel } = require("../../common/model");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -16,7 +16,7 @@ runScript(async ({ cfas, ovhStorage }) => {
   logger.info("Seeding annuaire CFAs");
   await seedCfasFromAnnuaireJsonFile(cfas, ovhStorage);
   logger.info("End seeding annuaire CFAs !");
-}, jobNames.seedAnnuaireCfas);
+}, JOB_NAMES.seedAnnuaireCfas);
 
 /**
  * Seed des cfas depuis un fichier JSON annuaire

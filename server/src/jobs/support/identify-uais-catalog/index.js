@@ -1,7 +1,7 @@
 const cliProgress = require("cli-progress");
 const logger = require("../../../common/logger");
 const { runScript } = require("../../scriptWrapper");
-const { jobNames } = require("../../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DossierApprenantModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { getFormations2021 } = require("../../../common/apis/apiCatalogueMna");
@@ -84,4 +84,4 @@ runScript(async () => {
   logger.info(`Nb d'UAIs gestionnaires trouvés dans le catalogue : ${uaisAsGestionnaire.length}`);
 
   logger.info("End !");
-}, jobNames.identifyUaisInCatalog);
+}, JOB_NAMES.identifyUaisInCatalog);

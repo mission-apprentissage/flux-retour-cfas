@@ -3,7 +3,7 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { DossierApprenantModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -16,7 +16,7 @@ runScript(async () => {
   logger.info("Run DossierApprenant retrieve formations in MNA Catalog Job");
   await retrieveFormationsInCatalog();
   logger.info("End DossierApprenant retrieve formations in MNA Catalog Job");
-}, jobNames.dossiersApprenantsRetrieveFormationsInCatalog);
+}, JOB_NAMES.dossiersApprenantsRetrieveFormationsInCatalog);
 
 /**
  * Parse tous les Couples SIRET - CFD des DossierApprenant vérifie si la formation existe dans le catalogue MNA

@@ -4,14 +4,14 @@ const omit = require("lodash.omit");
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { collectionNames } = require("../constants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 runScript(async ({ effectifs, db }) => {
   await identifyHistoryDateUnordered({ effectifs, db });
-}, jobNames.dossiersApprenantsBadHistoryIdentifyAntidated);
+}, JOB_NAMES.dossiersApprenantsBadHistoryIdentifyAntidated);
 
 const identifyHistoryDateUnordered = async ({ effectifs, db }) => {
   logger.info("Run identification statuts-candidats with historique_statut_apprenant with invalid dates...");

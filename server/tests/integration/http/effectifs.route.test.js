@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { createRandomDossierApprenant, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const { apiRoles } = require("../../../src/common/roles");
-const { effectifsIndicators } = require("../../../src/common/constants/dossierApprenantConstants");
+const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
 
 const {
   historySequenceInscritToApprentiToAbandon,
@@ -220,7 +220,7 @@ describe(__filename, () => {
       const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.apprentis },
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
         headers: authHeader,
       });
 
@@ -237,7 +237,7 @@ describe(__filename, () => {
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.apprentis },
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
         responseType: "arraybuffer",
         headers: authHeader,
       });
@@ -258,7 +258,10 @@ describe(__filename, () => {
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.inscritsSansContrats },
+        params: {
+          date: "2020-10-10T00:00:00.000Z",
+          effectif_indicateur: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
+        },
         responseType: "arraybuffer",
         headers: authHeader,
       });
@@ -279,7 +282,7 @@ describe(__filename, () => {
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.abandons },
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.abandons },
         responseType: "arraybuffer",
         headers: authHeader,
       });
@@ -300,7 +303,7 @@ describe(__filename, () => {
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: effectifsIndicators.rupturants },
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.rupturants },
         responseType: "arraybuffer",
         headers: authHeader,
       });

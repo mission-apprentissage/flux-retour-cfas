@@ -3,7 +3,7 @@ const cliProgress = require("cli-progress");
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { duplicatesTypesCodes } = require("../../../common/constants/dossierApprenantConstants");
+const { DUPLICATE_TYPE_CODES } = require("../../../common/constants/dossierApprenantConstants");
 const { collectionNames } = require("../../constants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -24,7 +24,7 @@ const identifyCfdDuplicates = async ({ dossiersApprenants, effectifs, db }) => {
 
   // Identify all duplicates
   const duplicates = await dossiersApprenants.getDuplicatesList(
-    duplicatesTypesCodes.formation_cfd.code,
+    DUPLICATE_TYPE_CODES.formation_cfd.code,
     {},
     { allowDiskUse: true }
   );

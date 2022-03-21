@@ -3,8 +3,8 @@ const cliProgress = require("cli-progress");
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { jobNames } = require("../../../common/constants/jobsConstants");
-const { duplicatesTypesCodes } = require("../../../common/constants/dossierApprenantConstants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
+const { DUPLICATE_TYPE_CODES } = require("../../../common/constants/dossierApprenantConstants");
 const { collectionNames } = require("../../constants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -15,7 +15,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  */
 runScript(async ({ dossiersApprenants, effectifs, db }) => {
   await identifyUaisDuplicates({ dossiersApprenants, effectifs, db });
-}, jobNames.dossiersApprenantsBadHistoryIdentifyAntidated);
+}, JOB_NAMES.dossiersApprenantsBadHistoryIdentifyAntidated);
 
 const identifyUaisDuplicates = async ({ dossiersApprenants, effectifs, db }) => {
   logger.info("Run identification statuts-candidats with duplicates uais...");
@@ -25,7 +25,7 @@ const identifyUaisDuplicates = async ({ dossiersApprenants, effectifs, db }) => 
 
   // Identify all uais duplicates
   const uaisDuplicates = await dossiersApprenants.getDuplicatesList(
-    duplicatesTypesCodes.uai_etablissement.code,
+    DUPLICATE_TYPE_CODES.uai_etablissement.code,
     {},
     { allowDiskUse: true }
   );

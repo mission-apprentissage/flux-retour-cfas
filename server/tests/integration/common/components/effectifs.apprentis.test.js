@@ -5,7 +5,7 @@ const {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../../data/historySequenceSamples");
-const { reseauxCfas } = require("../../../../src/common/constants/networksConstants");
+const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
 const { DossierApprenantModel } = require("../../../../src/common/model");
 const { EffectifsApprentis } = require("../../../../src/common/components/effectifs/apprentis");
 
@@ -140,7 +140,7 @@ describe(__filename, () => {
     });
 
     it("gets count of apprentis at a date and for a reseau", async () => {
-      const filters = { etablissement_reseaux: reseauxCfas.BTP_CFA.nomReseau };
+      const filters = { etablissement_reseaux: RESEAUX_CFAS.BTP_CFA.nomReseau };
       await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
@@ -263,7 +263,7 @@ describe(__filename, () => {
     });
 
     it("gets list of apprentis at a date and for a reseau", async () => {
-      const filters = { etablissement_reseaux: reseauxCfas.BTP_CFA.nomReseau };
+      const filters = { etablissement_reseaux: RESEAUX_CFAS.BTP_CFA.nomReseau };
       await seedDossiersApprenants(filters);
 
       const date = new Date("2020-09-30T00:00:00.000+0000");

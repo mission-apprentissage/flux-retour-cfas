@@ -1,7 +1,7 @@
 const logger = require("../../../common/logger");
 const arg = require("arg");
 const { runScript } = require("../../scriptWrapper");
-const { jobNames } = require("../../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DossierApprenantModel, DuplicateEventModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const sortBy = require("lodash.sortby");
@@ -13,7 +13,7 @@ let mongo;
 /**
  * Ce script permet de nettoyer les doublons des statuts identifiés
  * Ce script prends plusieurs paramètres en argument :
- * --duplicatesTypeCode : types de doublons à supprimer : 1/2/3/4 cf duplicatesTypesCodes
+ * --duplicatesTypeCode : types de doublons à supprimer : 1/2/3/4 cf DUPLICATE_TYPE_CODES
  * --duplicatesWithNoUpdate : supprime uniquement les doublons sans changement de statut_apprenant
  * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
  * --dry : will run but won't delete any data
@@ -73,7 +73,7 @@ runScript(async ({ dossiersApprenants, db }) => {
   logger.info(`Removed ${duplicatesRemoved.length} statuts candidats in db`);
 
   logger.info("Job Ended !");
-}, jobNames.removeDossiersApprenantsDuplicates);
+}, JOB_NAMES.removeDossiersApprenantsDuplicates);
 
 /* Will keep the oldest statut in duplicates group, delete the others and store them in a specific collection */
 const removeDuplicates = async (duplicatesGroup) => {

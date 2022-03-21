@@ -4,7 +4,7 @@ import React from "react";
 import { Badge, BreadcrumbNav, Footer, Header, LinkCard, Section } from "../../common/components";
 import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { ERP_STATE_COLOR, ERPS } from "../../common/constants/erps";
-import { navigationPages } from "../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { productName } from "../../common/constants/productName";
 import AcquisitionCfaBarGraph from "./AcquisitionCfaBarGraph";
 
@@ -14,7 +14,7 @@ const TransmettreConsulterVosDonneesPage = () => {
       <Header />
 
       <Section paddingY="4w" background="galt" boxShadow="inset 0px 12px 12px 0px rgba(30, 30, 30, 0.08)">
-        <BreadcrumbNav links={[navigationPages.Accueil, navigationPages.TransmettreEtConsulterVosDonnees]} />
+        <BreadcrumbNav links={[NAVIGATION_PAGES.Accueil, NAVIGATION_PAGES.TransmettreEtConsulterVosDonnees]} />
         <Heading as="h1" fontSize="alpha" color="grey.800" marginTop="5w">
           Transmettre et consulter vos données
         </Heading>
@@ -22,12 +22,12 @@ const TransmettreConsulterVosDonneesPage = () => {
           Vous êtes un organisme de formation en apprentissage
         </Text>
         <HStack spacing="3w" marginTop="2w" alignItems="stretch">
-          <LinkCard linkText="Consulter vos données" linkHref={navigationPages.ConsulterVosDonnees.path}>
+          <LinkCard linkText="Consulter vos données" linkHref={NAVIGATION_PAGES.ConsulterVosDonnees.path}>
             <strong>Vous transmettez déjà vos données</strong>
             <br />
             au {productName}
           </LinkCard>
-          <LinkCard linkText="Transmettre vos données" linkHref={navigationPages.TransmettreVosDonnees.path}>
+          <LinkCard linkText="Transmettre vos données" linkHref={NAVIGATION_PAGES.TransmettreVosDonnees.path}>
             <strong>Vous ne transmettez pas encore vos données</strong>
             <br />
             au {productName}

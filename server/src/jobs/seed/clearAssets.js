@@ -1,7 +1,7 @@
 const path = require("path");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
-const { jobNames } = require("../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 const fs = require("fs-extra");
 
@@ -12,4 +12,4 @@ runScript(async () => {
   logger.info("Clearing assets from seed job ...");
   await fs.emptyDir(path.join(__dirname, `./assets`));
   logger.info("All assets from seed job deleted !");
-}, jobNames.clearSeedAssets);
+}, JOB_NAMES.clearSeedAssets);

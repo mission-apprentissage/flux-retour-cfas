@@ -1,7 +1,7 @@
 /**
  * Nom des jobs
  */
-const jobNames = {
+const JOB_NAMES = {
   seedUsers: "seed-users",
   seedSample: "seed-sample",
   seedReferentielCfas: "seed-referentiel-cfas",
@@ -51,4 +51,4 @@ const jobEventStatuts = {
   ended: "ended",
 };
 
-module.exports = { jobNames, jobEventStatuts };
+module.exports = { JOB_NAMES, jobEventStatuts };

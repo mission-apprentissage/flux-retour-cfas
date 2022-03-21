@@ -3,7 +3,7 @@ import React from "react";
 
 import { Footer, Header, Section } from "../../../common/components";
 import BreadcrumbNav from "../../../common/components/BreadcrumbNav/BreadcrumbNav";
-import { navigationPages } from "../../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { productName } from "../../../common/constants/productName";
 import AskPrivateLinkModal from "./AskPrivateLink/AskPrivateLinkModal";
 
@@ -22,13 +22,13 @@ const ConsulterVosDonneesPage = () => {
         <Box width="500px">
           <BreadcrumbNav
             links={[
-              navigationPages.Accueil,
-              navigationPages.TransmettreEtConsulterVosDonnees,
-              navigationPages.ConsulterVosDonnees,
+              NAVIGATION_PAGES.Accueil,
+              NAVIGATION_PAGES.TransmettreEtConsulterVosDonnees,
+              NAVIGATION_PAGES.ConsulterVosDonnees,
             ]}
           />
           <Heading paddingTop="5w" as="h1" variant="h1" marginBottom="1w">
-            {navigationPages.ConsulterVosDonnees.title}
+            {NAVIGATION_PAGES.ConsulterVosDonnees.title}
           </Heading>
           <Text marginBottom="2w" color="black">
             Vous transmettez déja vos données au {productName}&nbsp;
