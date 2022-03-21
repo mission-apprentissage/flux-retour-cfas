@@ -432,4 +432,209 @@ describe(__filename, () => {
       assert.deepEqual(response.data, { nbOrganismes: 1 });
     });
   });
+
+  describe("/api/effectifs/formation route", () => {
+    it("Vérifie qu'on peut récupérer les effectifs répartis par formation via API", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const filterQuery = { etablissement_num_region: "84" };
+
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
+          niveau_formation: "1",
+          niveau_formation_libelle: "1 (blabla)",
+          libelle_long_formation: "a",
+          formation_cfd: "77929544300013",
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      const randomStatut = createRandomDossierApprenant({
+        ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
+        niveau_formation: "2",
+        niveau_formation_libelle: "2 (blabla)",
+        libelle_long_formation: "b",
+        formation_cfd: "77929544300014",
+      });
+      const toAdd = new DossierApprenantModel(randomStatut);
+      await toAdd.save();
+
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/formation?${searchParams}`, {
+        headers: bearerToken,
+      });
+
+      assert.equal(response.status, 200);
+      assert.equal(response.data.length, 2);
+    });
+  });
+
+  describe("/api/effectifs/annee-formation route", () => {
+    it("Vérifie qu'on peut récupérer les effectifs répartis par annee-formation via API", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const filterQuery = { etablissement_num_region: "84" };
+
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
+          annee_formation: 1,
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      const randomStatut = createRandomDossierApprenant({
+        ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
+        annee_formation: 2,
+      });
+      const toAdd = new DossierApprenantModel(randomStatut);
+      await toAdd.save();
+
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/annee-formation?${searchParams}`, {
+        headers: bearerToken,
+      });
+
+      assert.equal(response.status, 200);
+      assert.equal(response.data.length, 2);
+    });
+  });
+
+  describe("/api/effectifs/cfa route", () => {
+    it("Vérifie qu'on peut récupérer les effectifs répartis par cfa via API", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const filterQuery = { etablissement_num_region: "84" };
+
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
+          uai_etablissement: "0762232N",
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      const randomStatut = createRandomDossierApprenant({
+        ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
+        uai_etablissement: "0762232X",
+      });
+      const toAdd = new DossierApprenantModel(randomStatut);
+      await toAdd.save();
+
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/cfa?${searchParams}`, {
+        headers: bearerToken,
+      });
+
+      assert.equal(response.status, 200);
+      assert.equal(response.data.length, 2);
+    });
+  });
+
+  describe("/api/effectifs/departement route", () => {
+    it("Vérifie qu'on peut récupérer les effectifs répartis par departement via API", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
+          etablissement_num_departement: "01",
+          etablissement_nom_departement: "Ain",
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      const randomStatut = createRandomDossierApprenant({
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
+        etablissement_num_departement: "91",
+        etablissement_nom_departement: "Essonne",
+      });
+      const toAdd = new DossierApprenantModel(randomStatut);
+      await toAdd.save();
+
+      const searchParams = `date=2020-10-10T00:00:00.000Z`;
+      const response = await httpClient.get(`/api/effectifs/departement?${searchParams}`, {
+        headers: bearerToken,
+      });
+
+      assert.equal(response.status, 200);
+      assert.equal(response.data.length, 2);
+    });
+  });
+
+  describe("/api/effectifs/export-csv-repartition-effectifs-par-organisme route", () => {
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+      const { httpClient } = await startServer();
+
+      const response = await httpClient.get("/api/effectifs/export-csv-repartition-effectifs-par-organisme", {
+        headers: {
+          Authorization: "",
+        },
+      });
+
+      assert.equal(response.status, 401);
+    });
+
+    it("Vérifie qu'on peut récupérer des données CSV en étant authentifié", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const authHeader = await createAndLogUser("user", "password", {
+        permissions: [apiRoles.apiStatutsConsumer.anonymousDataConsumer],
+      });
+
+      const response = await httpClient.get("/api/effectifs/export-csv-repartition-effectifs-par-organisme", {
+        params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_departement: "01" },
+        headers: authHeader,
+      });
+
+      assert.equal(response.status, 200);
+    });
+  });
+
+  describe("/api/effectifs/export-csv-repartition-effectifs-par-formation route", () => {
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+      const { httpClient } = await startServer();
+
+      const response = await httpClient.get("/api/effectifs/export-csv-repartition-effectifs-par-formation", {
+        headers: {
+          Authorization: "",
+        },
+      });
+
+      assert.equal(response.status, 401);
+    });
+
+    it("Vérifie qu'on peut récupérer des données CSV en étant authentifié", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const authHeader = await createAndLogUser("user", "password", {
+        permissions: [apiRoles.apiStatutsConsumer.anonymousDataConsumer],
+      });
+
+      const response = await httpClient.get("/api/effectifs/export-csv-repartition-effectifs-par-formation", {
+        params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_departement: "01" },
+        headers: authHeader,
+      });
+
+      assert.equal(response.status, 200);
+    });
+  });
 });
