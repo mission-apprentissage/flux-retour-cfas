@@ -2,10 +2,47 @@ const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { CfaModel, DossierApprenantModel } = require("../../common/model");
+const pick = require("lodash.pick");
 const validateRequestBody = require("../middlewares/validateRequestBody");
+const validateRequestQuery = require("../middlewares/validateRequestQuery");
 
 module.exports = ({ cfas, cfaDataFeedback }) => {
   const router = express.Router();
+
+  /**
+   * Gets cfas paginated list
+   */
+  router.get(
+    "/",
+    validateRequestQuery(
+      Joi.object({
+        query: Joi.string(),
+        page: Joi.number(),
+        limit: Joi.number(),
+      })
+    ),
+    tryCatch(async (req, res) => {
+      const query = req.query.query ?? "{}";
+      const page = Number(req.query.page ?? 1);
+      const limit = Number(req.query.limit ?? 50);
+
+      const jsonQuery = JSON.parse(query);
+      const allData = await CfaModel.paginate(jsonQuery, { page, limit });
+      const omittedData = allData.docs.map((item) =>
+        pick(item._doc, ["uai", "sirets", "nom", "reseaux", "region_nom", "region_num", "metiers"])
+      );
+
+      return res.json({
+        cfas: omittedData,
+        pagination: {
+          page: allData.page,
+          resultats_par_page: limit,
+          nombre_de_page: allData.pages,
+          total: allData.total,
+        },
+      });
+    })
+  );
 
   router.post(
     "/search",
