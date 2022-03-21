@@ -39,6 +39,7 @@ const JOB_NAMES = {
   retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
   statutsAvecDerniersElementsHistoriqueDateIdentique: "statuts-avec-date-identique-dans-historique",
   createErpUser: "users:create-erp-user",
+  createUser: "users:create-user",
   generatePasswordUpdateToken: "users:generate-password-update-token",
 };
 
