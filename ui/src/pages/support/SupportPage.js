@@ -16,7 +16,7 @@ const SupportPage = () => {
           </Heading>
         </Section>
         <Section paddingY="4w">
-          <Stack spacing="3w">
+          <Stack spacing="3w" maxWidth="1000px">
             {questions.map(({ question, answer }, index) => {
               return <Question key={index} question={question} answer={answer} />;
             })}
