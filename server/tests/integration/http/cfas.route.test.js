@@ -101,29 +101,24 @@ describe(__filename, () => {
       const uaiTest = "0762232N";
       const adresseTest = "TEST ADRESSE";
       const reseauxTest = ["Reseau1", "Reseau2"];
-      const accessTokenTest = "TEST_TOKEN";
 
-      const cfaInfos = {
-        nom_etablissement: nomTest,
-        siret_etablissement: siretTest,
-        uai_etablissement: uaiTest,
-        etablissement_adresse: adresseTest,
-      };
-
-      const randomStatut = createRandomDossierApprenant(cfaInfos);
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
-
-      // Add Cfa in referentiel
-      const cfaReferenceToAdd = new CfaModel({
-        sirets: [siretTest],
+      const cfaProps = {
         nom: nomTest,
         uai: uaiTest,
         reseaux: reseauxTest,
-        access_token: accessTokenTest,
+        sirets: [siretTest],
+        adresse: adresseTest,
         private_url: "http://hello.world",
-      });
-      await cfaReferenceToAdd.save();
+      };
+
+      await new CfaModel(cfaProps).save();
+      await new DossierApprenantModel(
+        createRandomDossierApprenant({
+          siret_etablissement: siretTest,
+          uai_etablissement: uaiTest,
+          nom_etablissement: nomTest,
+        })
+      ).save();
 
       const response = await httpClient.get(`/api/cfas/${uaiTest}`);
 
@@ -131,9 +126,7 @@ describe(__filename, () => {
       assert.deepEqual(response.data, {
         libelleLong: nomTest,
         uai: uaiTest,
-        sousEtablissements: [
-          { siret_etablissement: cfaInfos.siret_etablissement, nom_etablissement: cfaInfos.nom_etablissement },
-        ],
+        sousEtablissements: [{ nom_etablissement: nomTest, siret_etablissement: siretTest }],
         adresse: adresseTest,
         reseaux: reseauxTest,
         domainesMetiers: [],
@@ -141,41 +134,7 @@ describe(__filename, () => {
       });
     });
 
-    it("Vérifie qu'on peut récupérer les informations d'un CFA qui n'est pas dans le référentiel via API", async () => {
-      const { httpClient } = await startServer();
-
-      const nomTest = "TEST NOM";
-      const uaiTest = "0762232N";
-      const adresseTest = "TEST ADRESSE";
-
-      const cfaInfos = {
-        nom_etablissement: nomTest,
-        uai_etablissement: uaiTest,
-        siret_etablissement: "77929544300013",
-        etablissement_adresse: adresseTest,
-      };
-
-      const randomStatut = createRandomDossierApprenant(cfaInfos);
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
-
-      const response = await httpClient.get(`/api/cfas/${uaiTest}`);
-
-      assert.equal(response.status, 200);
-      assert.deepEqual(response.data, {
-        libelleLong: nomTest,
-        uai: uaiTest,
-        adresse: adresseTest,
-        reseaux: [],
-        domainesMetiers: [],
-        sousEtablissements: [
-          { siret_etablissement: cfaInfos.siret_etablissement, nom_etablissement: cfaInfos.nom_etablissement },
-        ],
-        url_tdb: null,
-      });
-    });
-
-    it("Vérifie qu'on reçoit une réponse 404 lorsqu'aucun CFA n'est trouvé pour le SIRET demandé", async () => {
+    it("Vérifie qu'on reçoit une réponse 404 lorsqu'aucun CFA n'est trouvé pour le UAI demandé", async () => {
       const { httpClient } = await startServer();
 
       const response = await httpClient.get(`/api/cfas/unknown`);
