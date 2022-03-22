@@ -2,7 +2,6 @@ const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { CfaModel } = require("../../common/model");
-const pick = require("lodash.pick");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 
 module.exports = () => {
@@ -27,10 +26,14 @@ module.exports = () => {
         : { erps: req.user.username, private_url: { $nin: [null, ""] } };
 
       const allCfas = await CfaModel.paginate(query, { page, limit });
-      const cfaDataWithPrivateLink = allCfas.docs.map((item) => pick(item._doc, ["nom", "uai", "private_url"]));
+      const cfaDataWithPrivateLinkFormatted = allCfas.docs.map((item) => ({
+        nom: item._doc.nom,
+        uai: item._doc.uai,
+        private_url: `${item._doc.private_url}?source=ERP`,
+      }));
 
       return res.json({
-        cfasWithPrivateLink: cfaDataWithPrivateLink,
+        cfasWithPrivateLink: cfaDataWithPrivateLinkFormatted,
         pagination: {
           page: allCfas.page,
           resultats_par_page: limit,
