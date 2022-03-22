@@ -314,4 +314,24 @@ describe(__filename, () => {
       assert.equal(cfaFound, null);
     });
   });
+  describe("getFromUai", () => {
+    const { getFromUai } = cfasComponent();
+
+    it("returns CFA found with UAI", async () => {
+      const uai = "0802004U";
+      const cfaInDb = await new CfaModel({
+        uai,
+        sirets: ["40949392900012"],
+        nom: "hello",
+      }).save();
+      const cfaFound = await getFromUai(uai);
+      assert.equal(cfaFound.uai, cfaInDb.uai);
+    });
+
+    it("returns nothing when cfa not found", async () => {
+      const uai = "0802004U";
+      const cfaFound = await getFromUai(uai);
+      assert.equal(cfaFound, null);
+    });
+  });
 });

@@ -1,7 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { CfaModel, DossierApprenantModel } = require("../../common/model");
+const { CfaModel } = require("../../common/model");
 const pick = require("lodash.pick");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
@@ -84,27 +84,22 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     tryCatch(async (req, res) => {
       const { uai } = req.params;
 
-      // Search cfa in DossierApprenant collection
-      const cfaFound = await DossierApprenantModel.findOne({
-        uai_etablissement: uai,
-      }).lean();
+      const cfaFound = await cfas.getFromUai(uai);
 
       if (!cfaFound) {
         return res.status(404).json({ message: `No cfa found for uai ${uai}` });
       } else {
-        // Search reseaux for cfa in référentiel
-        const cfaInReferentiel = await CfaModel.findOne({ uai }).lean();
         const sousEtablissements = await cfas.getSousEtablissementsForUai(uai);
 
         // Build response
         return res.json({
-          libelleLong: cfaFound.nom_etablissement,
-          reseaux: cfaInReferentiel?.reseaux ?? [],
-          domainesMetiers: cfaInReferentiel?.metiers ?? [],
-          uai: cfaFound.uai_etablissement,
-          sousEtablissements: sousEtablissements,
-          adresse: cfaFound.etablissement_adresse,
-          url_tdb: cfaInReferentiel ? cfaInReferentiel?.private_url : null,
+          libelleLong: cfaFound.nom,
+          reseaux: cfaFound.reseaux,
+          domainesMetiers: cfaFound.metiers,
+          uai: cfaFound.uai,
+          sousEtablissements,
+          adresse: cfaFound.adresse,
+          url_tdb: cfaFound.private_url,
         });
       }
     })
