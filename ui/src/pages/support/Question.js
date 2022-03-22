@@ -21,9 +21,9 @@ const Question = ({ question, answer }) => {
         </Text>
       </Flex>
       {showAnswer && (
-        <Text paddingX="3w" paddingY="1w">
+        <Box paddingX="3w" paddingY="1w">
           {answer}
-        </Text>
+        </Box>
       )}
     </div>
   );
