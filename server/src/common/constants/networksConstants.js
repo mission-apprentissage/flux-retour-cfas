@@ -47,6 +47,11 @@ const RESEAUX_CFAS = {
     nomFichier: "cfas-mfr",
     encoding: "utf8",
   },
+  EXCELLENCE_PRO: {
+    nomReseau: "EXCELLENCE PRO",
+    nomFichier: "cfas-excellence-pro",
+    encoding: "utf8",
+  },
 };
 
 module.exports = { RESEAUX_CFAS };

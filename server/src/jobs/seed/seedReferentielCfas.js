@@ -32,6 +32,7 @@ runScript(async ({ cfas, ovhStorage }) => {
   await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CCI);
   await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CFA_EC);
   await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.GRETA);
+  await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.EXCELLENCE_PRO);
 
   await identifyUaiValidity();
 

@@ -22,6 +22,7 @@ runScript(async ({ ovhStorage }) => {
   await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.CFA_EC);
   await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.GRETA);
   await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.MFR);
+  await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.EXCELLENCE_PRO);
 
   logger.info("End identifying Network Referentiel Duplicates");
 }, JOB_NAMES.identifyNetworkDuplicates);
