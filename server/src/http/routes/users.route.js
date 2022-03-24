@@ -10,6 +10,7 @@ const mapUserToApiOutput = (user) => {
     email: user.email,
     permissions: user.permissions,
     network: user.network,
+    created_at: user.created_at,
   };
 };
 
