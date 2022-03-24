@@ -28,6 +28,7 @@ module.exports = ({ dossiersApprenants, userEvents }) => {
     // required fields
     nom_apprenant: Joi.string().required(),
     prenom_apprenant: Joi.string().required(),
+    date_de_naissance_apprenant: dateSchema.required(),
     uai_etablissement: Joi.string().regex(uaiRegex).required(),
     nom_etablissement: Joi.string().required(),
     id_formation: Joi.string().regex(cfdRegex).required(),
@@ -43,7 +44,6 @@ module.exports = ({ dossiersApprenants, userEvents }) => {
     email_contact: Joi.string().allow(null, ""),
     tel_apprenant: Joi.string().allow(null),
     code_commune_insee_apprenant: Joi.string().allow(null),
-    date_de_naissance_apprenant: dateSchema.allow(null),
 
     siret_etablissement: Joi.string().allow(null, ""),
     etablissement_formateur_geo_coordonnees: Joi.string().allow(null),

@@ -18,10 +18,23 @@ module.exports = () => ({
   getDossierApprenantsWithBadDate,
 });
 
-const getDossierApprenant = ({ nom_apprenant, prenom_apprenant, formation_cfd, uai_etablissement, annee_scolaire }) => {
+/**
+ * Find a dossier apprenant from unicity key params
+ * @param {*} unicityFields
+ * @returns
+ */
+const getDossierApprenant = ({
+  nom_apprenant,
+  prenom_apprenant,
+  date_de_naissance_apprenant,
+  formation_cfd,
+  uai_etablissement,
+  annee_scolaire,
+}) => {
   return DossierApprenantModel.findOne({
     nom_apprenant: { $regex: new RegExp(escapeRegExp(nom_apprenant), "i") },
     prenom_apprenant: { $regex: new RegExp(escapeRegExp(prenom_apprenant), "i") },
+    date_de_naissance_apprenant,
     formation_cfd,
     uai_etablissement,
     annee_scolaire,
@@ -38,9 +51,11 @@ const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
+    // Search dossier with unicity fields
     let foundItem = await getDossierApprenant({
       nom_apprenant: item.nom_apprenant,
       prenom_apprenant: item.prenom_apprenant,
+      date_de_naissance_apprenant: item.date_de_naissance_apprenant,
       formation_cfd: item.formation_cfd,
       uai_etablissement: item.uai_etablissement,
       annee_scolaire: item.annee_scolaire,
@@ -67,11 +82,12 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
   // strip unicity criteria because it does not make sense to update them
   const updatePayload = omit(
     toUpdate,
-    "prenom_apprenant",
     "nom_apprenant",
-    "annee_scolaire",
+    "prenom_apprenant",
+    "date_de_naissance_apprenant",
     "formation_cfd",
-    "uai_etablissement"
+    "uai_etablissement",
+    "annee_scolaire"
   );
   const existingItem = await DossierApprenantModel.findById(existingItemId);
 
@@ -190,6 +206,7 @@ const findDossiersApprenantsDuplicates = async (
         _id: {
           nom_apprenant: "$nom_apprenant",
           prenom_apprenant: "$prenom_apprenant",
+          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
           formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
           annee_scolaire: "$annee_scolaire",
@@ -244,6 +261,7 @@ const findDossiersApprenantsDuplicates = async (
       unicityQueryGroup = {
         _id: {
           nom_apprenant: "$nom_apprenant",
+          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
           formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
           annee_scolaire: "$annee_scolaire",
@@ -263,6 +281,7 @@ const findDossiersApprenantsDuplicates = async (
       unicityQueryGroup = {
         _id: {
           prenom_apprenant: "$prenom_apprenant",
+          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
           formation_cfd: "$formation_cfd",
           uai_etablissement: "$uai_etablissement",
           annee_scolaire: "$annee_scolaire",

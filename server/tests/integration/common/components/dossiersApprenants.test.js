@@ -15,7 +15,7 @@ const isApproximatelyNow = (date) => {
 
 describe(__filename, () => {
   describe("getDossierApprenant", () => {
-    it("Vérifie la récupération d'un statut sur nom, prenom, formation_cfd, uai_etablissement et annee_scolaire", async () => {
+    it("Vérifie la récupération d'un statut sur les champs d'unicité : nom, prenom, date_de_naissance, formation_cfd, uai_etablissement et annee_scolaire", async () => {
       const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
       const randomStatutProps = createRandomDossierApprenant();
@@ -24,6 +24,7 @@ describe(__filename, () => {
       const found = await getDossierApprenant({
         nom_apprenant: randomStatutProps.nom_apprenant,
         prenom_apprenant: randomStatutProps.prenom_apprenant,
+        date_de_naissance_apprenant: randomStatutProps.date_de_naissance_apprenant,
         formation_cfd: randomStatutProps.formation_cfd,
         uai_etablissement: randomStatutProps.uai_etablissement,
         annee_scolaire: randomStatutProps.annee_scolaire,
@@ -43,6 +44,7 @@ describe(__filename, () => {
       const found = await getDossierApprenant({
         nom_apprenant: "Smith",
         prenom_apprenant: randomStatutProps.prenom_apprenant,
+        date_de_naissance_apprenant: randomStatutProps.date_de_naissance_apprenant,
         formation_cfd: randomStatutProps.formation_cfd,
         uai_etablissement: randomStatutProps.uai_etablissement,
         annee_scolaire: randomStatutProps.annee_scolaire,
@@ -63,6 +65,7 @@ describe(__filename, () => {
       const found = await getDossierApprenant({
         nom_apprenant: "ABDILLAH (R)",
         prenom_apprenant: "*Paul",
+        date_de_naissance_apprenant: randomStatutProps.date_de_naissance_apprenant,
         formation_cfd: randomStatutProps.formation_cfd,
         uai_etablissement: randomStatutProps.uai_etablissement,
         annee_scolaire: randomStatutProps.annee_scolaire,
@@ -82,6 +85,7 @@ describe(__filename, () => {
       const found = await getDossierApprenant({
         nom_apprenant: randomStatutProps.nom_apprenant,
         prenom_apprenant: "jOhN AbDoUl-BÆSTOÏ*",
+        date_de_naissance_apprenant: randomStatutProps.date_de_naissance_apprenant,
         formation_cfd: randomStatutProps.formation_cfd,
         uai_etablissement: randomStatutProps.uai_etablissement,
         annee_scolaire: randomStatutProps.annee_scolaire,
@@ -91,15 +95,16 @@ describe(__filename, () => {
     });
 
     const unicityCriterion = [
-      "nom_apprenant",
-      "prenom_apprenant",
-      "uai_etablissement",
-      "formation_cfd",
-      "annee_scolaire",
+      { field: "nom_apprenant", changedValue: "changed" },
+      { field: "prenom_apprenant", changedValue: "changed" },
+      { field: "date_de_naissance_apprenant", changedValue: new Date("2020-01-10") },
+      { field: "uai_etablissement", changedValue: "changed" },
+      { field: "formation_cfd", changedValue: "changed" },
+      { field: "annee_scolaire", changedValue: "changed" },
     ];
 
     unicityCriterion.forEach((unicityCriteria) => {
-      it(`Vérifie qu'on ne trouve pas le statut créé quand ${unicityCriteria} a changé`, async () => {
+      it(`Vérifie qu'on ne trouve pas le statut créé quand ${unicityCriteria.field} a changé`, async () => {
         const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
         const randomStatutProps = createRandomDossierApprenant();
@@ -108,10 +113,11 @@ describe(__filename, () => {
         const found = await getDossierApprenant({
           nom_apprenant: randomStatutProps.nom_apprenant,
           prenom_apprenant: randomStatutProps.prenom_apprenant,
+          date_de_naissance_apprenant: randomStatutProps.date_de_naissance_apprenant,
           formation_cfd: randomStatutProps.formation_cfd,
           uai_etablissement: randomStatutProps.uai_etablissement,
           annee_scolaire: randomStatutProps.annee_scolaire,
-          [unicityCriteria]: "changed",
+          [unicityCriteria.field]: unicityCriteria.changedValue,
         });
         assert.equal(found, null);
       });
@@ -383,6 +389,48 @@ describe(__filename, () => {
       // check in db
       const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
       assert.equal(found.prenom_apprenant, samplePrenom.toUpperCase());
+      assert.equal(found.updated_at, null);
+    });
+
+    it("Vérifie que date_de_naissance_apprenant est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec une date_de_naissance_apprenant différente)", async () => {
+      const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
+
+      const sampleNom = "GRIEZMANN";
+      const samplePrenom = "Antoine";
+      const sampleDateDeNaissance = new Date("1990-09-20T00:00:00.000+0000");
+      const sampleDateDeNaissance2 = new Date("1990-10-20T00:00:00.000+0000");
+      const validCfd = "abcd1234";
+      const validUai = "0123456Z";
+
+      // Create 2 distinct items
+      const uniqueStatutToCreate = {
+        ...createRandomDossierApprenant(),
+        nom_apprenant: sampleNom,
+        prenom_apprenant: samplePrenom,
+        date_de_naissance_apprenant: sampleDateDeNaissance,
+        formation_cfd: validCfd,
+        uai_etablissement: validUai,
+      };
+      const firstCallResult = await addOrUpdateDossiersApprenants([uniqueStatutToCreate]);
+      assert.equal(firstCallResult.added.length, 1);
+      assert.equal(firstCallResult.updated.length, 0);
+
+      // send the same statut but with a different date_de_naissance
+      const sameStatutWithDifferentPrenom = {
+        ...uniqueStatutToCreate,
+        date_de_naissance_apprenant: sampleDateDeNaissance2,
+      };
+      const secondCallResult = await addOrUpdateDossiersApprenants([sameStatutWithDifferentPrenom]);
+
+      // a new statut should have been created
+      assert.equal(secondCallResult.added.length, 1);
+      assert.equal(secondCallResult.updated.length, 0);
+      const count = await DossierApprenantModel.countDocuments();
+      assert.equal(count, 2);
+
+      // check in db
+      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      assert.equal(found.date_de_naissance_apprenant.getTime(), sampleDateDeNaissance.getTime());
       assert.equal(found.updated_at, null);
     });
 
@@ -683,6 +731,25 @@ describe(__filename, () => {
 
       // First update
       await updateDossierApprenant(createdStatut._id, { nom_apprenant: "Philippe" });
+      // Check value in db
+      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      assert.equal(foundAfterUpdate.nom_apprenant, createdStatut.nom_apprenant);
+    });
+
+    it("Vérifie qu'on ne peut pas update le champ date_de_naissance_apprenant", async () => {
+      const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
+
+      const createdStatut = await createDossierApprenant(
+        createRandomDossierApprenant({
+          date_de_naissance_apprenant: new Date("1990-09-20T00:00:00.000+0000"),
+        })
+      );
+      assert.equal(createdStatut.updated_at, null);
+
+      // First update
+      await updateDossierApprenant(createdStatut._id, {
+        date_de_naissance_apprenant: new Date("1990-12-20T00:00:00.000+0000"),
+      });
       // Check value in db
       const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
       assert.equal(foundAfterUpdate.nom_apprenant, createdStatut.nom_apprenant);
@@ -1001,6 +1068,7 @@ describe(__filename, () => {
         prenom_apprenant: "JEAN",
         nom_apprenant: "DUPONT",
         annee_scolaire: "2022-2023",
+        date_de_naissance_apprenant: new Date("1990-09-20T00:00:00.000+0000"),
       };
       for (let index = 0; index < 3; index++) {
         await createDossierApprenant(createRandomDossierApprenant(commonData));
@@ -1029,6 +1097,7 @@ describe(__filename, () => {
         uai_etablissement: "0762518Z",
         nom_apprenant: "WACHOSKY",
         annee_scolaire: "2020-2021",
+        date_de_naissance_apprenant: new Date("1990-09-20T00:00:00.000+0000"),
       };
       for (let index = 0; index < 4; index++) {
         await createDossierApprenant(createRandomDossierApprenant(commonData));
@@ -1059,6 +1128,7 @@ describe(__filename, () => {
         prenom_apprenant: "JEAN",
         nom_apprenant: "DUPONT",
         annee_scolaire: "2022-2023",
+        date_de_naissance_apprenant: new Date("1990-09-20T00:00:00.000+0000"),
         statut_apprenant: 1,
       };
       await createDossierApprenant(createRandomDossierApprenant(firstDupUnicityKey));
@@ -1071,6 +1141,7 @@ describe(__filename, () => {
         prenom_apprenant: "John",
         nom_apprenant: "Doe",
         annee_scolaire: "2021-2022",
+        date_de_naissance_apprenant: new Date("1990-12-20T00:00:00.000+0000"),
         statut_apprenant: 2,
       };
       await createDossierApprenant(createRandomDossierApprenant(secondDup));
