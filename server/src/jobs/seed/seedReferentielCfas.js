@@ -22,7 +22,10 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
 runScript(async ({ cfas, ovhStorage }) => {
   logger.info("Seeding referentiel CFAs");
 
+  // Unplug all cfas
+  await CfaModel.updateMany({}, { $set: { branchement_tdb: false } });
   await seedCfasFromDossiersApprenantsUaisValid(cfas);
+
   await seedMetiersFromLbaApi();
 
   await seedCfasNetworkFromCsv(ovhStorage, RESEAUX_CFAS.CMA);
