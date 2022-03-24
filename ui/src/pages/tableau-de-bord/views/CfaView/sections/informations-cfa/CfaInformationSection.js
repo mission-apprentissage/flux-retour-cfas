@@ -8,6 +8,38 @@ import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
 
+const ReseauxAndAdresseText = ({ reseaux, adresse }) => {
+  const hasReseaux = reseaux?.length > 0;
+  if (hasReseaux) {
+    if (adresse) {
+      return (
+        <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
+          Cet organisme fait partie du réseau <b>{reseaux[0]}</b>. Sa domiciliation est {adresse}.
+        </Text>
+      );
+    }
+    return (
+      <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
+        Cet organisme fait partie du réseau <b>{reseaux[0]}</b>.
+      </Text>
+    );
+  } else {
+    if (adresse) {
+      return (
+        <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
+          La domiciliation de cet organisme est {adresse}
+        </Text>
+      );
+    }
+    return "";
+  }
+};
+
+ReseauxAndAdresseText.propTypes = {
+  reseaux: PropTypes.array,
+  adresse: PropTypes.string,
+};
+
 const CfaInformationSection = ({ infosCfa, loading, error }) => {
   if (loading) {
     return <CfaInformationSkeleton />;
@@ -52,20 +84,12 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
           )}
         </HStack>
 
-        <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
-          {reseaux?.length > 0 ? (
-            <div>
-              Cet organisme fait partie du réseau <b>{reseaux[0]}</b>. Sa domiciliation est {adresse}
-            </div>
-          ) : (
-            <div>La domiciliation de cet organisme est {adresse}</div>
-          )}
-          <b>
-            {multipleSirets && ` Il est identifié par une UAI qui utilise ${sousEtablissements.length} numéros SIRET.`}
-          </b>
-        </Text>
+        <ReseauxAndAdresseText reseaux={reseaux} adresse={adresse} />
+        {multipleSirets && (
+          <strong>Il est identifié par une UAI qui utilise ${sousEtablissements.length} numéros SIRET.</strong>
+        )}
 
-        {domainesMetiers && <DomainesMetiers domainesMetiers={domainesMetiers} />}
+        {domainesMetiers?.length > 0 && <DomainesMetiers domainesMetiers={domainesMetiers} />}
       </Section>
     );
   }
