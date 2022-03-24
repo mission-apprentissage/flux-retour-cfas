@@ -33,6 +33,9 @@ module.exports = async () => {
       return null;
     },
     getUser: (username) => UserModel.findOne({ username }),
+    getAll: async () => {
+      return await UserModel.find().lean();
+    },
     createUser: async (userProps) => {
       const username = userProps.username;
       const password = userProps.password || generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/

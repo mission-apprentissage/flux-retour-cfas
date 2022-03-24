@@ -56,4 +56,8 @@ export const NAVIGATION_PAGES = {
     path: "/modifier-mot-de-passe",
     title: "Modifiez votre mot de passe",
   },
+  GestionUtilisateurs: {
+    path: "/admin/gestion-utilisateurs",
+    title: "Gestion des utilisateurs",
+  },
 };

@@ -24,6 +24,7 @@ const demandeLienPriveRouter = require("./routes/demande-lien-prive.route");
 const demandeBranchementErpRouter = require("./routes/demande-branchement-erp.route");
 const cacheRouter = require("./routes/cache.route");
 const updatePasswordRouter = require("./routes/update-password.route");
+const usersRouter = require("./routes/users.route");
 
 module.exports = async (components) => {
   const app = express();
@@ -75,6 +76,7 @@ module.exports = async (components) => {
   app.use("/api/effectifs", requireJwtAuthentication, effectifsRouter(components));
 
   // admin routes
+  app.use("/api/users", requireJwtAuthentication, adminOnly, usersRouter(components));
   app.use("/api/cache", requireJwtAuthentication, adminOnly, cacheRouter(components));
   app.use("/api/config", requireJwtAuthentication, adminOnly, configRouter());
 
