@@ -151,19 +151,68 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const cfaInfos = await cfas.getFromUai(req.query.uai_etablissement);
 
       // Build headers
-      const headers = [
-        ["Liste nominative des effectifs"],
-        [`${cfaInfos.nom} - UAI : ${cfaInfos.uai} - SIRET : ${cfaInfos.sirets.join(",")}`],
-        [
-          "Si vous constatez une ou plusieurs anomalie(s), merci d'envoyer un mail à tableau-de-bord@apprentissage.beta.gouv.fr",
-        ],
-      ];
+      const headers = getXlsxHeadersFromEffectifIndicateur(effectifIndicateurFromParams, cfaInfos);
 
       // Build & return xlsx stream
       const xlsxStream = await toXlsxBuffer(headers, effectifsFormattedAtDate, "Données Tdb");
       return res.attachment("export-xlsx-data-lists.xlsx").send(xlsxStream);
     })
   );
+
+  /**
+   * Build xslx headers for current effectifIndicateur
+   * @param {*} effectifIndicateurFromParams
+   * @param {*} cfaInfos
+   * @returns
+   */
+  const getXlsxHeadersFromEffectifIndicateur = (effectifIndicateurFromParams, cfaInfos) => {
+    switch (effectifIndicateurFromParams) {
+      case EFFECTIF_INDICATOR_NAMES.apprentis:
+        return [
+          ["Liste nominative des effectifs : apprentis"],
+          [`${cfaInfos.nom} - UAI : ${cfaInfos.uai} - SIRET : ${cfaInfos.sirets.join(",")}`],
+          [
+            "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des apprentis ? Vérifiez que vous avez bien enregistré la rupture de contrat ou l'abandon dans votre logiciel de gestion.",
+          ],
+          [
+            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://cfas.apprentissage.beta.gouv.fr/support",
+          ],
+        ];
+
+      case EFFECTIF_INDICATOR_NAMES.inscritsSansContrats:
+        return [
+          ["Liste nominative des effectifs : inscrits sans contrats"],
+          [`${cfaInfos.nom} - UAI : ${cfaInfos.uai} - SIRET : ${cfaInfos.sirets.join(",")}`],
+          [
+            "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des inscrits sans contrats ? Vérifiez que vous avez bien paramétré votre logiciel de gestion : voir le tutoriel : https://cfas.apprentissage.beta.gouv.fr/transmettre-vos-donnees",
+          ],
+          [
+            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://cfas.apprentissage.beta.gouv.fr/support",
+          ],
+        ];
+
+      case EFFECTIF_INDICATOR_NAMES.rupturants:
+        return [
+          ["Liste nominative des effectifs : rupturants"],
+          [`${cfaInfos.nom} - UAI : ${cfaInfos.uai} - SIRET : ${cfaInfos.sirets.join(",")}`],
+          [
+            "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des rupturants ? Vérifiez que vous avez bien enregistré le nouveau contrat ou l'abandon dans votre logiciel de gestion.",
+          ],
+          [
+            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://cfas.apprentissage.beta.gouv.fr/support",
+          ],
+        ];
+
+      case EFFECTIF_INDICATOR_NAMES.abandons:
+        return [
+          ["Liste nominative des effectifs : abandons"],
+          [`${cfaInfos.nom} - UAI : ${cfaInfos.uai} - SIRET : ${cfaInfos.sirets.join(",")}`],
+          [
+            "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des abandons ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://cfas.apprentissage.beta.gouv.fr/support",
+          ],
+        ];
+    }
+  };
 
   /**
    * Build a list of effectif data well-formatted for specific indicator, date & filters
