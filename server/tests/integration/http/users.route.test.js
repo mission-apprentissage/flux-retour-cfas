@@ -1,8 +1,14 @@
 const assert = require("assert").strict;
+// eslint-disable-next-line node/no-unpublished-require
+const MockDate = require("mockdate");
 const { startServer } = require("../../utils/testUtils");
 const { apiRoles, tdbRoles } = require("../../../src/common/roles");
 
 describe(__filename, () => {
+  afterEach(() => {
+    MockDate.reset();
+  });
+
   describe("GET /users", () => {
     it("sends a 401 HTTP response when user is not authenticated", async () => {
       const { httpClient } = await startServer();
@@ -64,6 +70,8 @@ describe(__filename, () => {
     it("sends a 200 HTTP response with created pilot user", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const fakeNowDate = new Date();
+      MockDate.set(fakeNowDate);
 
       const response = await httpClient.post(
         "/api/users",
@@ -77,12 +85,15 @@ describe(__filename, () => {
         username: "test",
         permissions: [tdbRoles.pilot],
         network: null,
+        created_at: fakeNowDate.toISOString(),
       });
     });
 
     it("sends a 200 HTTP response with created network user", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const fakeNowDate = new Date();
+      MockDate.set(fakeNowDate);
 
       const response = await httpClient.post(
         "/api/users",
@@ -96,6 +107,7 @@ describe(__filename, () => {
         username: "test",
         permissions: [tdbRoles.network],
         network: "CMA",
+        created_at: fakeNowDate.toISOString(),
       });
     });
   });
