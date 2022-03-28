@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useMutation, useQueryClient } from "react-query";
 
-import { fetchCreateUser } from "../../common/api/tableauDeBord";
+import { postCreateUser } from "../../common/api/tableauDeBord";
 import ModalClosingButton from "../../common/components/ModalClosingButton/ModalClosingButton";
 import CreateUserForm from "./CreateUserForm";
 
@@ -11,10 +11,12 @@ const CreateUserModal = ({ isOpen, onClose }) => {
   const queryClient = useQueryClient();
   const createUser = useMutation(
     (newUser) => {
-      return fetchCreateUser(newUser);
+      return postCreateUser(newUser);
     },
     {
       onSuccess() {
+        // invalidate users query so react-query refetch the list for us
+        // see https://react-query.tanstack.com/guides/query-invalidation#query-matching-with-invalidatequeries
         queryClient.invalidateQueries(["users"]);
         onClose();
       },

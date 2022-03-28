@@ -108,6 +108,6 @@ export const fetchUsers = async () => {
 };
 
 /* Create user */
-export const fetchCreateUser = async (body) => {
+export const postCreateUser = async (body) => {
   return await _post("/api/users", body);
 };
