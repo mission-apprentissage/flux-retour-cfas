@@ -1,5 +1,4 @@
 const assert = require("assert").strict;
-const omit = require("lodash.omit");
 const { startServer } = require("../../utils/testUtils");
 const { createRandomDossierApprenant } = require("../../data/randomizedSample");
 const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
@@ -33,62 +32,6 @@ describe(__filename, () => {
       assert.equal(response.status, 200);
       assert.equal(response.data.length, 1);
       assert.deepEqual(response.data[0].uai, "0801302F");
-    });
-  });
-
-  describe("POST /cfas/data-feedback", () => {
-    const validBody = {
-      uai: "0762232N",
-      details: "blabla",
-      email: "mail@example.com",
-    };
-
-    it("sends a 400 HTTP response when no data provided", async () => {
-      const response = await httpClient.post("/api/cfas/data-feedback");
-
-      assert.equal(response.status, 400);
-    });
-
-    it("sends a 400 HTTP response when uai is missing in body", async () => {
-      const response = await httpClient.post("/api/cfas/data-feedback", omit(validBody, "uai"));
-
-      assert.equal(response.status, 400);
-    });
-
-    it("sends a 400 HTTP response when email is missing in body", async () => {
-      const response = await httpClient.post("/api/cfas/data-feedback", omit(validBody, "email"));
-
-      assert.equal(response.status, 400);
-    });
-
-    it("sends a 400 HTTP response when details is missing in body", async () => {
-      const response = await httpClient.post("/api/cfas/data-feedback", omit(validBody, "details"));
-
-      assert.equal(response.status, 400);
-    });
-
-    it("sends a 200 HTTP response when feedback was created", async () => {
-      const sampleRegion_nom = "Normandie";
-      const sampleRegion_num = "28";
-
-      // Add Cfa with region_num / region_nom for valid UAI
-      await new CfaModel({
-        uai: validBody.uai,
-        region_nom: sampleRegion_nom,
-        region_num: sampleRegion_num,
-      }).save();
-
-      // Call API
-      const response = await httpClient.post("/api/cfas/data-feedback", validBody);
-
-      assert.equal(response.status, 200);
-      assert.deepEqual(omit(response.data, "_id", "__v", "created_at"), {
-        uai: validBody.uai,
-        details: validBody.details,
-        email: validBody.email,
-        region_nom: sampleRegion_nom,
-        region_num: sampleRegion_num,
-      });
     });
   });
 

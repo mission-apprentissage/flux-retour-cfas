@@ -30,7 +30,6 @@ const JOB_NAMES = {
   clearDossiersApprenantsNetworks: "clear-statuts-candidats-networks",
   clearLogs: "clear-logs",
   clearAll: "clear-all",
-  cleanCfaDataFeedback: "clean-cfaDataFeedback",
   exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
   repostLastStatutsReceived: "repost-last-statuts-received",

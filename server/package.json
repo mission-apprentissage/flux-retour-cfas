@@ -32,7 +32,6 @@
     "clear:logs": "node -r dotenv/config src/jobs/remove-data/clear/clearLogs.js",
     "clear:users": "node -r dotenv/config src/jobs/remove-data/clear/clearUsers.js",
     "clear:cfas": "node -r dotenv/config src/jobs/remove-data/clear/clearCfas.js",
-    "clean:cfaDataFeedback": "node -r dotenv/config src/jobs/remove-data/clean/cleanCfaDataFeedback.js",
     "remove:inscritsSansContrats-nonRecus-depuis": "node -r dotenv/config src/jobs/remove-data/statuts-inscritsSsContrats-nonRecus-depuis/index.js",
     "remove:apprentis-nonRecus-depuis": "node -r dotenv/config src/jobs/remove-data/statuts-apprentis-nonRecus-depuis/index.js",
     "remove:statutsCandidats-nonRecus-forUai": "node -r dotenv/config src/jobs/remove-data/statuts-nonRecus-forUai/index.js",

@@ -6,7 +6,6 @@ import { Section } from "../../../../../../common/components";
 import useAuth from "../../../../../../common/hooks/useAuth";
 import { infosCfaPropType } from "../../propTypes";
 import CopyCfaPrivateLinkButton from "./CopyCfaPrivateLinkButton";
-import DataFeedbackSection from "./DataFeedbackSection/DataFeedbackSection";
 import SousEtablissementSelection from "./SousEtablissementSelection";
 
 const ActionsSection = ({ infosCfa }) => {
@@ -16,15 +15,14 @@ const ActionsSection = ({ infosCfa }) => {
   return (
     <Section>
       <Flex justifyContent="space-between">
-        <div>
-          {infosCfa?.sousEtablissements.length > 1 && (
-            <SousEtablissementSelection sousEtablissements={infosCfa.sousEtablissements} />
-          )}
-        </div>
-        <Box justifySelf="flex-end">
-          <DataFeedbackSection uai={infosCfa?.uai} />
-          {infosCfa?.url_tdb && isAdmin && <CopyCfaPrivateLinkButton link={infosCfa?.url_tdb} />}
-        </Box>
+        {infosCfa?.sousEtablissements.length > 1 && (
+          <SousEtablissementSelection sousEtablissements={infosCfa.sousEtablissements} />
+        )}
+        {isAdmin && infosCfa?.url_tdb && (
+          <Box justifySelf="flex-end">
+            <CopyCfaPrivateLinkButton link={infosCfa?.url_tdb} />
+          </Box>
+        )}
       </Flex>
     </Section>
   );

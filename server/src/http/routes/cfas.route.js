@@ -6,7 +6,7 @@ const pick = require("lodash.pick");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 
-module.exports = ({ cfas, cfaDataFeedback }) => {
+module.exports = ({ cfas }) => {
   const router = express.Router();
 
   /**
@@ -57,22 +57,6 @@ module.exports = ({ cfas, cfaDataFeedback }) => {
     tryCatch(async (req, res) => {
       const foundCfas = await cfas.searchCfas(req.body);
       return res.json(foundCfas);
-    })
-  );
-
-  router.post(
-    "/data-feedback",
-    validateRequestBody(
-      Joi.object({
-        uai: Joi.string().required(),
-        email: Joi.string().required(),
-        details: Joi.string().required(),
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const created = await cfaDataFeedback.createCfaDataFeedback(req.body);
-
-      return res.json(created);
     })
   );
 
