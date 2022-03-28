@@ -17,7 +17,6 @@
     "docker:start": "cd .. && docker-compose up -d --build --force-recreate",
     "docker:stop": "docker-compose down",
     "docker:clean": "docker-compose kill && docker system prune --force --volumes",
-    "seed:users": "node -r dotenv/config src/jobs/seed/seedUsers.js",
     "seed:sample": "node -r dotenv/config src/jobs/seed/seedSample.js",
     "seed:randomizedSample": "node -r dotenv/config src/jobs/seed/seedRandomizedSample.js",
     "seed:referentielCfas": "node -r dotenv/config src/jobs/seed/seedReferentielCfas.js",

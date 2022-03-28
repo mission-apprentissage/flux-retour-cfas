@@ -101,3 +101,13 @@ export const fetchEffectifsDataListXlsxExport = (filters, effectifIndicateur) =>
   const url = `/api/effectifs/export-xlsx-data-lists?${queryParameters}`;
   return _get(url, { jsonResponse: false });
 };
+
+/* Utilisateurs */
+export const fetchUsers = async () => {
+  return await _get("/api/users");
+};
+
+/* Create user */
+export const postCreateUser = async (body) => {
+  return await _post("/api/users", body);
+};

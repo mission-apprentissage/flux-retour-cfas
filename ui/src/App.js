@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Switch, useLocation } from "react-route
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
+import GestionUtilisateursPage from "./pages/gestion-utilisateurs/GestionUtilisateursPage";
 import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import LoginPage from "./pages/login/LoginPage";
 import { ModifierMotDePassePage } from "./pages/modifier-mot-de-passe";
@@ -60,6 +61,14 @@ const App = () => {
           exact
           component={TableauDeBordPage}
           authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
+        />
+
+        {/* ADMIN ONLY*/}
+        <ProtectedRoute
+          path={NAVIGATION_PAGES.GestionUtilisateurs.path}
+          exact
+          component={GestionUtilisateursPage}
+          authorizedRoles={[roles.administrator]}
         />
 
         {/* Change password */}

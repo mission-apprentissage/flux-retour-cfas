@@ -2,7 +2,6 @@
  * Nom des jobs
  */
 const JOB_NAMES = {
-  seedUsers: "seed-users",
   seedSample: "seed-sample",
   seedReferentielCfas: "seed-referentiel-cfas",
   seedAnnuaireCfas: "seed-annuaire-cfas",
