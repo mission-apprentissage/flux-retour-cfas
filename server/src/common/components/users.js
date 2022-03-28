@@ -50,6 +50,7 @@ module.exports = async () => {
         email,
         permissions,
         network,
+        created_at: new Date(),
       });
 
       await user.save();
