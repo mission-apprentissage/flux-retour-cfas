@@ -39,11 +39,6 @@ module.exports = new Schema({
     default: null,
     description: "Adresse de l'établissement",
   },
-  branchement_tdb: {
-    type: Boolean,
-    default: false,
-    description: "Indique si le flux vers ce CFA a été mis en place et les données récupérées depuis son ERP",
-  },
   erps: {
     type: [String],
     default: [],
@@ -63,11 +58,6 @@ module.exports = new Schema({
     type: String,
     default: null,
     description: "Numéro de la région du CFA",
-  },
-  source_seed_cfa: {
-    type: String,
-    default: null,
-    description: "Source du seed du cfa dans la collection (DossierApprenant ou fichier d'origine)",
   },
   first_transmission_date: {
     type: Date,
