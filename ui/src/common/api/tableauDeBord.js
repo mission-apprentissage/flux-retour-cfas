@@ -111,3 +111,7 @@ export const fetchUsers = async () => {
 export const postCreateUser = async (body) => {
   return await _post("/api/users", body);
 };
+
+export const postGetUserUpdatePasswordUrl = async (username) => {
+  return await _post(`/api/users/generate-update-password-url`, { username });
+};

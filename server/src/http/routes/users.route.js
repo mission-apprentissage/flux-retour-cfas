@@ -3,6 +3,7 @@ const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const { tdbRoles } = require("../../common/roles");
+const config = require("../../../config");
 
 const mapUserToApiOutput = (user) => {
   return {
@@ -46,6 +47,16 @@ module.exports = ({ users }) => {
         network: network || null,
       });
       return res.json(mapUserToApiOutput(createdUser));
+    })
+  );
+
+  router.post(
+    "/generate-update-password-url",
+    tryCatch(async (req, res) => {
+      const passwordUpdateToken = await users.generatePasswordUpdateToken(req.body.username);
+      const passwordUpdateUrl = `${config.publicUrl}/modifier-mot-de-passe?token=${passwordUpdateToken}`;
+
+      return res.json({ passwordUpdateUrl });
     })
   );
 
