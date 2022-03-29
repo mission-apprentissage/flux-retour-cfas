@@ -18,7 +18,7 @@ const RepartitionEffectifsTabs = ({ children }) => {
         </Tab>
         <Tab>
           <Box as="i" className="ri-book-mark-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
-          Niveaux de formation
+          Formations
         </Tab>
         <Flex justifyContent="flex-end" flex="1">
           {tabIndex === 0 ? <ExportRepartitionByOrganismeButton /> : <ExportRepartitionByFormationButton />}
