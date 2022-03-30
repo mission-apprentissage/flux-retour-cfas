@@ -18,7 +18,7 @@ const GestionUtilisateursPage = () => {
           {NAVIGATION_PAGES.GestionUtilisateurs.title}
         </Heading>
       </Section>
-      <Section paddingY="5w" backgroundColor="white">
+      <Section paddingY="5w" backgroundColor="white" overflowX="scroll">
         <Heading marginBottom="3w">
           Liste des utilisateurs{" "}
           <Button variant="primary" onClick={createUserModal.onOpen}>
