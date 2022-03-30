@@ -66,7 +66,8 @@ module.exports = async () => {
       const token = generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
 
       user.password_update_token = token;
-      user.password_update_token_expiry = addHours(new Date(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS); // token will only be valid for 48 hours
+      // token will only be valid for duration defined in PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS
+      user.password_update_token_expiry = addHours(new Date(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS);
       await user.save();
       return token;
     },
