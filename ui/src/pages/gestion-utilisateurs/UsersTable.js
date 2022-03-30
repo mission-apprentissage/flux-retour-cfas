@@ -5,6 +5,7 @@ import { useQuery } from "react-query";
 import { fetchUsers } from "../../common/api/tableauDeBord";
 import { Table } from "../../common/components";
 import { formatDate } from "../../common/utils/dateUtils";
+import GetUpdatePasswordUrlButton from "./GetUpdatePasswordUrlButton";
 
 const getUsersListSortedChronologically = (users) => {
   const usersWithoutCreationDate = users.filter((user) => !user.created_at);
@@ -23,7 +24,10 @@ const UsersTable = () => {
   const usersList = data && getUsersListSortedChronologically(data);
 
   return (
-    <Table headers={["Nom d'utilisateur", "Roles", "Email", "Réseau", "Date de création"]} loading={isLoading}>
+    <Table
+      headers={["Nom d'utilisateur", "Roles", "Email", "Réseau", "Date de création", "Modifier mot de passe"]}
+      loading={isLoading}
+    >
       <Tbody>
         {usersList?.map((user) => {
           return (
@@ -33,6 +37,9 @@ const UsersTable = () => {
               <Td color="grey.800">{user.email}</Td>
               <Td color="grey.800">{user.network}</Td>
               <Td color="grey.800">{user.created_at ? formatDate(new Date(user.created_at)) : "Inconnue"}</Td>
+              <Td color="grey.800">
+                <GetUpdatePasswordUrlButton username={user.username} />
+              </Td>
             </Tr>
           );
         })}

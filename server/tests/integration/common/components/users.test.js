@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const { differenceInMinutes, subMinutes } = require("date-fns");
+const { subMinutes, differenceInCalendarDays, differenceInHours } = require("date-fns");
 const users = require("../../../../src/common/components/users");
 const { UserModel } = require("../../../../src/common/model");
 const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
@@ -105,7 +105,7 @@ describe(__filename, () => {
   });
 
   describe("generatePasswordUpdateToken", () => {
-    it("génère un token avec expiration à +48", async () => {
+    it("génère un token avec expiration à +48h", async () => {
       const { createUser, generatePasswordUpdateToken } = await users();
 
       // create user
@@ -115,10 +115,9 @@ describe(__filename, () => {
       const userInDb = await UserModel.findOne({ _id: user._id });
 
       assert.equal(userInDb.password_update_token, token);
-      // a few milliseconds have passed since creation
-      // so we'll juste make sure expiry is in 47 hours 59 minutes
-      const twentyFourHoursInMinutesIsh = 48 * 60 - 1;
-      assert.equal(differenceInMinutes(userInDb.password_update_token_expiry, new Date()), twentyFourHoursInMinutesIsh);
+      // password token should expire in 48h
+      assert.equal(differenceInHours(userInDb.password_update_token_expiry, new Date()), 47);
+      assert.equal(differenceInCalendarDays(userInDb.password_update_token_expiry, new Date()), 2);
     });
 
     it("renvoie une erreur quand le user n'est pas trouvé", async () => {
