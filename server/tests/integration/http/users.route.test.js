@@ -4,6 +4,7 @@ const MockDate = require("mockdate");
 const { startServer } = require("../../utils/testUtils");
 const { apiRoles, tdbRoles } = require("../../../src/common/roles");
 const { differenceInCalendarDays } = require("date-fns");
+const config = require("../../../config");
 
 describe(__filename, () => {
   afterEach(() => {
@@ -149,6 +150,7 @@ describe(__filename, () => {
 
       assert.equal(response.status, 200);
       assert.ok(response.data.passwordUpdateUrl);
+      assert.equal(response.data.passwordUpdateUrl.startsWith(`${config.publicUrl}/modifier-mot-de-passe`), true);
 
       const updatedUser = await components.users.getUser(username);
       assert.ok(updatedUser.password_update_token);
