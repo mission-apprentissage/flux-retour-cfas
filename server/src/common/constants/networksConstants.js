@@ -47,6 +47,11 @@ const RESEAUX_CFAS = {
     nomFichier: "cfas-mfr",
     encoding: "utf8",
   },
+  AFTRAL: {
+    nomReseau: "AFTRAL",
+    nomFichier: "cfas-aftral",
+    encoding: "utf8",
+  },
 };
 
 module.exports = { RESEAUX_CFAS };
