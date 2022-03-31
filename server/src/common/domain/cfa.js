@@ -26,7 +26,7 @@ class Cfa {
         .required(),
       sirets: Joi.array().items(Joi.string()).allow(null),
       nom: Joi.string().allow("").required(),
-      adresse: Joi.string().allow(""),
+      adresse: Joi.string().allow("", null),
       erps: Joi.array().items(Joi.string()).allow(null),
       region_nom: Joi.string().allow(""),
       region_num: Joi.string().allow(""),

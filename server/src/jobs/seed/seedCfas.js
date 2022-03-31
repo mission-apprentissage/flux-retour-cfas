@@ -92,7 +92,9 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
 
   loadingBar.start(allUais.length, 0);
   let nbUpdate = 0;
+  let nbUpdateErrors = 0;
   let nbCreation = 0;
+  let nbCreationErrors = 0;
 
   await asyncForEach(allUais, async (currentUai) => {
     loadingBar.increment();
@@ -111,11 +113,22 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
     // Create or update CFA
     if (dossierForUai) {
       if (cfaExistant) {
-        await cfas.updateCfa(cfaExistant._id, dossierForUai, allSiretsForUai);
+        const updatedCfa = await cfas.updateCfa(cfaExistant._id, dossierForUai, allSiretsForUai);
+        if (updatedCfa !== null) {
+          nbUpdateErrors++;
+        } else {
+          logger.error(`Cfas with uai ${currentUai} not updated !`);
+          nbUpdateErrors++;
+        }
         nbUpdate++;
       } else {
-        await cfas.createCfa(dossierForUai, allSiretsForUai);
-        nbCreation++;
+        const createdCfa = await cfas.createCfa(dossierForUai, allSiretsForUai);
+        if (createdCfa !== null) {
+          nbCreation++;
+        } else {
+          logger.error(`Cfas with uai ${currentUai} not created !`);
+          nbCreationErrors++;
+        }
       }
     }
   });
@@ -123,7 +136,9 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
   loadingBar.stop();
 
   logger.info(`${nbUpdate} Cfas updated from DossierApprenants`);
+  logger.info(`${nbUpdateErrors} Cfas not updated because errors from DossierApprenants`);
   logger.info(`${nbCreation} Cfas created from DossierApprenants`);
+  logger.info(`${nbCreationErrors} Cfas not created because errors from DossierApprenants`);
 };
 
 /**
