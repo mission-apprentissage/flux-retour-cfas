@@ -7,9 +7,7 @@ const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 
 const { CfaModel, DossierApprenantModel } = require("../../common/model");
-const { generateRandomAlphanumericPhrase, sleep } = require("../../common/utils/miscUtils");
-const { Cfa } = require("../../common/domain/cfa");
-const config = require("../../../config");
+const { sleep } = require("../../common/utils/miscUtils");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { ERPS } = require("../../common/constants/erpsConstants");
 const { getMetiersBySirets, API_DELAY_QUOTA } = require("../../common/apis/apiLba");
@@ -113,10 +111,10 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
     // Create or update CFA
     if (dossierForUai) {
       if (cfaExistant) {
-        await updateCfaFromDossierApprenant(cfas, cfaExistant, dossierForUai, allSiretsForUai);
+        await cfas.updateCfa(cfaExistant._id, dossierForUai, allSiretsForUai);
         nbUpdate++;
       } else {
-        await createCfaFromDossierApprenant(cfas, dossierForUai, allSiretsForUai);
+        await cfas.create(dossierForUai, allSiretsForUai);
         nbCreation++;
       }
     }
@@ -126,51 +124,6 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
 
   logger.info(`${nbUpdate} Cfas updated from DossierApprenants`);
   logger.info(`${nbCreation} Cfas created from DossierApprenants`);
-};
-
-/**
- * Create cfa from dossier & generate an accessToken and privateUrl for this cfa
- * @param {*} dossierForCfa
- */
-const createCfaFromDossierApprenant = async (cfas, dossierForCfa, allSirets) => {
-  const accessToken = generateRandomAlphanumericPhrase();
-
-  await new CfaModel({
-    uai: dossierForCfa.uai_etablissement,
-    sirets: allSirets,
-    nom: dossierForCfa.nom_etablissement.trim() ?? null,
-    nom_tokenized: Cfa.createTokenizedNom(dossierForCfa.nom_etablissement),
-    adresse: dossierForCfa.etablissement_adresse,
-    erps: [dossierForCfa.source],
-    region_nom: dossierForCfa.etablissement_nom_region,
-    region_num: dossierForCfa.etablissement_num_region,
-    access_token: accessToken,
-    private_url: `${config.publicUrl}/cfas/${accessToken}`,
-    first_transmission_date: await cfas.getCfaFirstTransmissionDateFromUai(dossierForCfa.uai_etablissement),
-  }).save();
-};
-
-/**
- * Update cfa from statut
- * @param {*} dossierForCfa
- */
-const updateCfaFromDossierApprenant = async (cfas, cfaExistant, dossierForCfa, allSirets) => {
-  await CfaModel.findOneAndUpdate(
-    { _id: cfaExistant._id },
-    {
-      $set: {
-        uai: dossierForCfa.uai_etablissement,
-        nom: dossierForCfa.nom_etablissement.trim() ?? null,
-        nom_tokenized: Cfa.createTokenizedNom(dossierForCfa.nom_etablissement),
-        adresse: dossierForCfa.etablissement_adresse,
-        sirets: allSirets,
-        erps: [dossierForCfa.source],
-        region_nom: dossierForCfa.etablissement_nom_region,
-        region_num: dossierForCfa.etablissement_num_region,
-        first_transmission_date: await cfas.getCfaFirstTransmissionDateFromUai(dossierForCfa.uai_etablissement),
-      },
-    }
-  );
 };
 
 /**

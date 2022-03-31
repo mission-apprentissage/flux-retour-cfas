@@ -79,4 +79,14 @@ module.exports = new Schema({
     default: null,
     description: "L'url via laquelle le CFA peut accéder à sa propre page",
   },
+  updated_at: {
+    type: Date,
+    default: null,
+    description: "Date de mise à jour en base de données",
+  },
+  created_at: {
+    type: Date,
+    default: Date.now,
+    description: "Date d'ajout en base de données",
+  },
 });

@@ -4,8 +4,182 @@ const { DossierApprenantModel, CfaModel } = require("../../../../src/common/mode
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { addDays } = require("date-fns");
 const { Cfa } = require("../../../../src/common/domain/cfa");
+const pick = require("lodash.pick");
+var mongoose = require("mongoose");
 
 describe(__filename, () => {
+  describe("existsCfa", () => {
+    const { existsCfa } = cfasComponent();
+
+    it("returns false when cfa with cfa collection is empty", async () => {
+      const shouldBeFalse = await existsCfa("blabla");
+      assert.equal(shouldBeFalse, false);
+    });
+
+    it("returns false when cfa with given uai does not exist", async () => {
+      const newCfa = new CfaModel({ uai: "0802004U" });
+      await newCfa.save();
+
+      const shouldBeFalse = await existsCfa("blabla");
+      assert.equal(shouldBeFalse, false);
+    });
+
+    it("returns true when cfa with given uai exists", async () => {
+      const newCfa = new CfaModel({ cfd: "0802004U" });
+      await newCfa.save();
+
+      const shouldBeTrue = await existsCfa(newCfa.cfd);
+      assert.equal(shouldBeTrue, true);
+    });
+  });
+
+  describe("createCfa", () => {
+    const { createCfa } = cfasComponent();
+
+    it("throws when given dossier apprenants is null", async () => {
+      try {
+        await createCfa(null);
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("throws when cfa with given uai already exists", async () => {
+      const uai = "0802004U";
+      const cfa = new CfaModel({ uai });
+      await cfa.save();
+
+      try {
+        await createCfa({ uai_etablissement: uai });
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("returns created cfa when dossier apprenant is valid", async () => {
+      const uai = "0802004A";
+      const sirets = ["11111111100023"];
+
+      const dossierApprenant = {
+        uai_etablissement: uai,
+        nom_etablissement: "TestCfa",
+        etablissement_adresse: "10 rue de la paix 75016 Paris",
+        source: "MonErp",
+        etablissement_nom_region: "Ma région",
+        etablissement_num_region: "17",
+      };
+
+      const created = await createCfa(dossierApprenant, sirets);
+
+      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "erps", "region_nom", "region_num"]), {
+        uai,
+        sirets,
+        nom: dossierApprenant.nom_etablissement,
+        adresse: dossierApprenant.etablissement_adresse,
+        region_nom: dossierApprenant.etablissement_nom_region,
+        region_num: dossierApprenant.etablissement_num_region,
+        erps: [dossierApprenant.source],
+      });
+      assert.equal(created.nom_tokenized, Cfa.createTokenizedNom(dossierApprenant.nom_etablissement));
+      assert.equal(created.private_url !== null, true);
+      assert.equal(created.accessToken !== null, true);
+      assert.equal(created.created_at !== null, true);
+      assert.equal(created.updated_at, null);
+    });
+  });
+
+  describe("updateCfa", () => {
+    const { updateCfa } = cfasComponent();
+
+    it("throws when given dossier apprenants is null", async () => {
+      try {
+        await updateCfa("id", null);
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("throws when given id is null", async () => {
+      const uai = "0802004A";
+
+      const dossierApprenant = {
+        uai_etablissement: uai,
+        nom_etablissement: "TestCfa",
+        etablissement_adresse: "10 rue de la paix 75016 Paris",
+        source: "MonErp",
+        etablissement_nom_region: "Ma région",
+        etablissement_num_region: "17",
+      };
+
+      try {
+        await updateCfa(null, dossierApprenant);
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("throws when given id is not existant", async () => {
+      const uai = "0802004A";
+      const newCfa = new CfaModel({ uai });
+      await newCfa.save();
+
+      const dossierApprenant = {
+        uai_etablissement: uai,
+        nom_etablissement: "TestCfa",
+        etablissement_adresse: "10 rue de la paix 75016 Paris",
+        source: "MonErp",
+        etablissement_nom_region: "Ma région",
+        etablissement_num_region: "17",
+      };
+
+      try {
+        await updateCfa(mongoose.Types.ObjectId("ABC"), dossierApprenant);
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("returns update cfa when id and dossier apprenant are valid", async () => {
+      const uai = "0802004A";
+      const cfaToUpdate = await new CfaModel({
+        uai,
+        nom: "TestCfa",
+        adresse: "12 rue de la paix 75016 PARIS",
+        sirets: [],
+        erps: ["MonErp"],
+        region_nom: "Ma région",
+        region_num: "17",
+      }).save();
+
+      const sirets = ["11111111100023"];
+
+      const dossierApprenant = {
+        uai_etablissement: "9902004A",
+        nom_etablissement: "TestCfa Update",
+        etablissement_adresse: "10 rue de la paix 75016 Paris",
+        source: "MonErp2",
+        etablissement_nom_region: "Ma 2e région",
+        etablissement_num_region: "18",
+      };
+
+      await updateCfa(cfaToUpdate._id, dossierApprenant, sirets);
+      const updatedCfa = await CfaModel.findById(cfaToUpdate._id).lean();
+
+      assert.deepEqual(pick(updatedCfa, ["uai", "sirets", "nom", "adresse", "erps", "region_nom", "region_num"]), {
+        uai: dossierApprenant.uai_etablissement,
+        sirets,
+        nom: dossierApprenant.nom_etablissement,
+        adresse: dossierApprenant.etablissement_adresse,
+        region_nom: dossierApprenant.etablissement_nom_region,
+        region_num: dossierApprenant.etablissement_num_region,
+        erps: [dossierApprenant.source],
+      });
+      assert.equal(updatedCfa.nom_tokenized, Cfa.createTokenizedNom(dossierApprenant.nom_etablissement));
+      assert.equal(updatedCfa.created_at !== null, true);
+      assert.equal(updatedCfa.updated_at !== null, true);
+    });
+  });
+
   describe("searchCfas", () => {
     const { searchCfas } = cfasComponent();
 
@@ -293,6 +467,7 @@ describe(__filename, () => {
       assert.deepEqual(getCfaFirstTransmissionDateFromGoodSiret, firstDate);
     });
   });
+
   describe("getFromAccessToken", () => {
     const { getFromAccessToken } = cfasComponent();
 
@@ -314,6 +489,7 @@ describe(__filename, () => {
       assert.equal(cfaFound, null);
     });
   });
+
   describe("getFromUai", () => {
     const { getFromUai } = cfasComponent();
 
