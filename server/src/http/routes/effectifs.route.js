@@ -175,7 +175,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
             "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des apprentis ? Vérifiez que vous avez bien enregistré la rupture de contrat ou l'abandon dans votre logiciel de gestion.",
           ],
           [
-            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://cfas.apprentissage.beta.gouv.fr/support",
+            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://calendly.com/melanie-raphael-mission-apprentissage/support-tableau-de-bord-de-l-apprentissage",
           ],
         ];
 
@@ -187,7 +187,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
             "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des inscrits sans contrats ? Vérifiez que vous avez bien paramétré votre logiciel de gestion : voir le tutoriel : https://cfas.apprentissage.beta.gouv.fr/transmettre-vos-donnees",
           ],
           [
-            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://cfas.apprentissage.beta.gouv.fr/support",
+            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://calendly.com/melanie-raphael-mission-apprentissage/support-tableau-de-bord-de-l-apprentissage",
           ],
         ];
 
@@ -199,7 +199,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
             "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des rupturants ? Vérifiez que vous avez bien enregistré le nouveau contrat ou l'abandon dans votre logiciel de gestion.",
           ],
           [
-            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://cfas.apprentissage.beta.gouv.fr/support",
+            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://calendly.com/melanie-raphael-mission-apprentissage/support-tableau-de-bord-de-l-apprentissage",
           ],
         ];
 
@@ -208,7 +208,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
           ["Liste nominative des effectifs : abandons"],
           [`${cfaInfos.nom} - UAI : ${cfaInfos.uai} - SIRET : ${cfaInfos.sirets.join(",")}`],
           [
-            "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des abandons ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://cfas.apprentissage.beta.gouv.fr/support",
+            "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des abandons ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://calendly.com/melanie-raphael-mission-apprentissage/support-tableau-de-bord-de-l-apprentissage",
           ],
         ];
     }
