@@ -183,7 +183,7 @@ const updateCfasNetworksFromCsv = async (ovhStorage, { nomReseau, nomFichier, en
   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
-  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
+  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, { clearFile: true });
 
   const allCfasForNetworkFile = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
   loadingBar.start(allCfasForNetworkFile.length, 0);

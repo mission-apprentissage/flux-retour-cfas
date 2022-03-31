@@ -5,7 +5,9 @@ const logger = require("../logger");
 
 module.exports = () => {
   return {
-    downloadIfNeededFileTo: async (filePath, fileDestination, clearFile = false) => {
+    downloadIfNeededFileTo: async (filePath, fileDestination, options = {}) => {
+      const clearFile = options.clearFile || false;
+
       // Connection to OvhStorage
       const storage = new OvhStorage({
         username: config.ovhStorage.username,
