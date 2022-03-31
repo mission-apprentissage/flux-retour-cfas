@@ -114,7 +114,7 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
         await cfas.updateCfa(cfaExistant._id, dossierForUai, allSiretsForUai);
         nbUpdate++;
       } else {
-        await cfas.create(dossierForUai, allSiretsForUai);
+        await cfas.createCfa(dossierForUai, allSiretsForUai);
         nbCreation++;
       }
     }
