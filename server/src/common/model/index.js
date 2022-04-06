@@ -15,7 +15,6 @@ module.exports = {
   CfaModel: getModel("cfas", { enablePagination: true }),
   CfaAnnuaireModel: getModel("cfasAnnuaire"),
   CroisementCfasAnnuaireModel: getModel("croisementCfasAnnuaire"),
-  CfaDataFeedbackModel: getModel("cfaDataFeedback"),
   FormationModel: getModel("formations"),
   LogModel: getModel("logs"),
   CroisementVoeuxAffelnetModel: getModel("croisementVoeuxAffelnet"),

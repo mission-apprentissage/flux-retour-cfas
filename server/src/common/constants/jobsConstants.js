@@ -2,8 +2,8 @@
  * Nom des jobs
  */
 const JOB_NAMES = {
-  seedUsers: "seed-users",
   seedSample: "seed-sample",
+  seedCfas: "seed-cfas",
   seedReferentielCfas: "seed-referentiel-cfas",
   seedAnnuaireCfas: "seed-annuaire-cfas",
   clearSeedAssets: "clear-seed-assets",
@@ -31,7 +31,6 @@ const JOB_NAMES = {
   clearDossiersApprenantsNetworks: "clear-statuts-candidats-networks",
   clearLogs: "clear-logs",
   clearAll: "clear-all",
-  cleanCfaDataFeedback: "clean-cfaDataFeedback",
   exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   cfasRetrieveDataConnection: "cfas-retrieve-data-connection",
   repostLastStatutsReceived: "repost-last-statuts-received",

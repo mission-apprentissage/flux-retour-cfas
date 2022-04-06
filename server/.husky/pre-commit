@@ -3,4 +3,5 @@
 
 cd server
 bash scripts/preventSensibleFilesCommit.sh
+bash scripts/preventForcePush.sh
 node_modules/.bin/./lint-staged

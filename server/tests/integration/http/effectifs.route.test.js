@@ -242,7 +242,7 @@ describe(__filename, () => {
         headers: authHeader,
       });
 
-      const apprentisList = parseXlsxHeaderStreamToJson(response.data, 3);
+      const apprentisList = parseXlsxHeaderStreamToJson(response.data, 4);
 
       assert.equal(response.status, 200);
       assert.equal(apprentisList.length, 5);
@@ -266,7 +266,7 @@ describe(__filename, () => {
         headers: authHeader,
       });
 
-      const inscritsSansContratsList = parseXlsxHeaderStreamToJson(response.data, 3);
+      const inscritsSansContratsList = parseXlsxHeaderStreamToJson(response.data, 4);
 
       assert.equal(response.status, 200);
       assert.equal(inscritsSansContratsList.length, 15);
@@ -308,7 +308,7 @@ describe(__filename, () => {
         headers: authHeader,
       });
 
-      const rupturantsList = parseXlsxHeaderStreamToJson(response.data, 3);
+      const rupturantsList = parseXlsxHeaderStreamToJson(response.data, 4);
 
       assert.equal(response.status, 200);
       assert.equal(rupturantsList.length, 8);

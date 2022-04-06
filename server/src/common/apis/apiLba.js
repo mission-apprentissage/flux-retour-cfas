@@ -5,6 +5,7 @@ const config = require("../../../config");
 // Cf Documentation : https://labonnealternance.pole-emploi.fr/api-docs/
 
 const API_ENDPOINT = config.lbaApi.endpoint;
+const API_DELAY_QUOTA = 100;
 
 const getMetiersBySiret = async (siret) => {
   const url = `${API_ENDPOINT}/metiers/metiersParEtablissement/${siret}`;
@@ -43,4 +44,5 @@ module.exports = {
   getMetiersBySiret,
   getMetiersBySirets,
   getMetiersByCfd,
+  API_DELAY_QUOTA,
 };

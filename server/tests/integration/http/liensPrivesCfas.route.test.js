@@ -3,7 +3,6 @@ const { startServer } = require("../../utils/testUtils");
 const { apiRoles } = require("../../../src/common/roles");
 const { CfaModel } = require("../../../src/common/model");
 const users = require("../../../src/common/components/users");
-const pick = require("lodash.pick");
 
 const user = {
   name: "erpUser",
@@ -97,10 +96,18 @@ describe(__filename, () => {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
+    const expected = [
+      {
+        uai: "0451582A",
+        nom: "TEST CFA",
+        private_url: "http://test?source=ERP",
+      },
+    ];
+
     // Check Api Route data
     assert.deepEqual(response.status, 200);
     assert.deepEqual(response.data.cfasWithPrivateLink.length, 1);
-    assert.deepEqual(response.data.cfasWithPrivateLink, [pick(cfaToAdd, ["nom", "uai", "private_url"])]);
+    assert.deepEqual(response.data.cfasWithPrivateLink, expected);
     assert.deepEqual(response.data.pagination.nombre_de_page, 1);
     assert.deepEqual(response.data.pagination.page, 1);
     assert.deepEqual(response.data.pagination.resultats_par_page, 100);

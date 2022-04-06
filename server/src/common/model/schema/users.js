@@ -36,4 +36,7 @@ module.exports = new Schema({
     default: [],
     description: "Roles de l'utilisateur",
   },
+  created_at: {
+    type: Date,
+  },
 });

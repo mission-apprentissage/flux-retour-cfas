@@ -88,6 +88,7 @@ describe(__filename, () => {
   const requiredFields = [
     "prenom_apprenant",
     "nom_apprenant",
+    "date_de_naissance_apprenant",
     "id_formation",
     "uai_etablissement",
     "statut_apprenant",
