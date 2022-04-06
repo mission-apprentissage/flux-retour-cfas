@@ -16,7 +16,7 @@ const useSubmitDemandeBranchementErp = () => {
   const submitDemandeBranchementErp = async (formData) => {
     try {
       await _post("/api/demande-branchement-erp", {
-        erp: ERPS[formData.erpIndex].name,
+        erp: ERPS[formData.erpIndex - 1].name,
         nom_organisme: formData.nom_organisme,
         uai_organisme: formData.uai_organisme,
         email_demandeur: formData.email_demandeur,
