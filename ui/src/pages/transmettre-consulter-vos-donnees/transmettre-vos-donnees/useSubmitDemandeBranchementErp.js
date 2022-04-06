@@ -22,7 +22,7 @@ const useSubmitDemandeBranchementErp = () => {
         email_demandeur: formData.email_demandeur,
         nb_apprentis: formData.nb_apprentis,
       });
-      setErpState(ERPS[formData.erpIndex].state);
+      setErpState(ERPS[formData.erpIndex - 1].state);
       setSubmitState(SUBMIT_STATE.success);
     } catch (err) {
       setSubmitState(SUBMIT_STATE.fail);
