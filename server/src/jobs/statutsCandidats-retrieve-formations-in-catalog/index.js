@@ -4,7 +4,7 @@ const logger = require("../../common/logger");
 const { DossierApprenantModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
+const { getFormations } = require("../../common/apis/apiCatalogueMna");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -40,7 +40,7 @@ const retrieveFormationsInCatalog = async () => {
 
   await asyncForEach(allSiretCfdCouples, async (currentSiretCfdCouple) => {
     // Recherche dans l'API Catalogue sur CFD + etablissement_formateur_siret / etablissement_gestionnaire_siret
-    const formationsFoundInCatalog = await getFormations2021({
+    const formationsFoundInCatalog = await getFormations({
       query: {
         published: true,
         cfd: currentSiretCfdCouple.cfd,

@@ -6,8 +6,8 @@ const config = require("../../../config");
 
 const API_ENDPOINT = config.mnaCatalogApi.endpoint;
 
-const getFormations2021 = async (options) => {
-  const url = `${API_ENDPOINT}/entity/formations2021`;
+const getFormations = async (options) => {
+  const url = `${API_ENDPOINT}/entity/formations`;
   try {
     let { page, allFormations, limit, query, select } = { page: 1, allFormations: [], limit: 1050, ...options };
 
@@ -19,16 +19,16 @@ const getFormations2021 = async (options) => {
     allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
 
     if (page < pagination.nombre_de_page) {
-      return getFormations2021({ page: page + 1, allFormations, limit });
+      return getFormations({ page: page + 1, allFormations, limit });
     } else {
       return allFormations;
     }
   } catch (err) {
-    logger.error(`getFormations2021: something went wrong while requesting ${url}`, err);
+    logger.error(`getFormations: something went wrong while requesting ${url}`, err);
     return null;
   }
 };
 
 module.exports = {
-  getFormations2021,
+  getFormations,
 };
