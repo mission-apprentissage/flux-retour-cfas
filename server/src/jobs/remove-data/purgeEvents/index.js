@@ -1,6 +1,5 @@
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { purgeStatutsImportsUserEvents } = require("./purgeStatutsImportsUserEvents");
 const { purgeJobEvents } = require("./purgeJobEvents");
 
@@ -18,4 +17,4 @@ runScript(async () => {
   await purgeStatutsImportsUserEvents(lastDateToKeep);
   await purgeJobEvents(lastDateToKeep);
   logger.info("End Purging Job");
-}, JOB_NAMES.cfasRetrieveDataConnection);
+}, "purge-user-events");
