@@ -1,11 +1,16 @@
 const express = require("express");
 const stringify = require("json-stringify-deterministic");
 const { parseAsync } = require("json2csv");
-const { format } = require("date-fns");
+const { format, addMonths } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles, apiRoles } = require("../../common/roles");
+const {
+  SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS,
+  SEUIL_ALERTE_NB_MOIS_RUPTURANTS,
+} = require("../../common/domain/effectif");
+
 const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
 const {
   EFFECTIF_INDICATOR_NAMES,
@@ -288,6 +293,13 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
               statut: getStatutApprenantNameFromCode(item.valeur_statut),
             }))
           ),
+          dans_le_statut_depuis:
+            addMonths(
+              new Date(item.statut_apprenant_at_date.date_statut),
+              SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS
+            ) > Date.now()
+              ? `Moins de ${SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS} mois`
+              : `Plus de ${SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS} mois`,
         }));
         break;
 
@@ -302,6 +314,11 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
                 statut: getStatutApprenantNameFromCode(item.valeur_statut),
               }))
             ),
+            dans_le_statut_depuis:
+              addMonths(new Date(item.statut_apprenant_at_date.date_statut), SEUIL_ALERTE_NB_MOIS_RUPTURANTS) >
+              Date.now()
+                ? `Moins de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`
+                : `Plus de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`,
           })
         );
         break;
