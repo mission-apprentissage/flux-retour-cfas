@@ -547,6 +547,42 @@ describe(__filename, () => {
     });
   });
 
+  describe("/api/effectifs/siret route", () => {
+    it("Vérifie qu'on peut récupérer les effectifs répartis par siret via API", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const filterQuery = { etablissement_num_region: "84" };
+
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
+          siret_etablissement: "40239075100046",
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      const randomStatut = createRandomDossierApprenant({
+        ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
+        siret_etablissement: "40239075100099",
+      });
+      const toAdd = new DossierApprenantModel(randomStatut);
+      await toAdd.save();
+
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/siret?${searchParams}`, {
+        headers: bearerToken,
+      });
+
+      assert.equal(response.status, 200);
+      assert.equal(response.data.length, 2);
+    });
+  });
+
   describe("/api/effectifs/departement route", () => {
     it("Vérifie qu'on peut récupérer les effectifs répartis par departement via API", async () => {
       const { httpClient, createAndLogUser } = await startServer();

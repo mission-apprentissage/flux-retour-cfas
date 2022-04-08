@@ -468,6 +468,44 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   );
 
   /**
+   * Get effectifs details by siret
+   */
+  router.get(
+    "/siret",
+    applyUserRoleFilter,
+    validateRequestQuery(
+      Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      })
+    ),
+    tryCatch(async (req, res) => {
+      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromQuery);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: getAnneeScolaireFromDate(date),
+      };
+
+      // try to retrieve from cache
+      const cacheKey = getCacheKeyForRoute(req.path, {
+        date: format(date, "yyyy-MM-dd"),
+        filters,
+      });
+      const fromCache = await cache.get(cacheKey);
+
+      if (fromCache) {
+        return res.json(JSON.parse(fromCache));
+      } else {
+        const effectifsBySiretAtDate = await effectifs.getEffectifsCountBySiretAtDate(date, filters);
+        await cache.set(cacheKey, JSON.stringify(effectifsBySiretAtDate));
+
+        return res.json(effectifsBySiretAtDate);
+      }
+    })
+  );
+
+  /**
    * Get effectifs details by departement
    */
   router.get(

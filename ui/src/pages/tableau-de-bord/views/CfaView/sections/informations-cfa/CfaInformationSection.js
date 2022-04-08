@@ -86,7 +86,9 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
 
         <ReseauxAndAdresseText reseaux={reseaux} adresse={adresse} />
         {multipleSirets && (
-          <strong>Il est identifié par une UAI qui utilise {sousEtablissements.length} numéros SIRET.</strong>
+          <Text as="strong" color="black">
+            Il est identifié par une UAI qui utilise {sousEtablissements.length} numéros SIRET.
+          </Text>
         )}
 
         {domainesMetiers?.length > 0 && <DomainesMetiers domainesMetiers={domainesMetiers} />}

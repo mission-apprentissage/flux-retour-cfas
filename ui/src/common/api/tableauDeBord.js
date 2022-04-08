@@ -17,6 +17,12 @@ export const fetchEffectifsParCfa = (filters) => {
   return _get(url);
 };
 
+export const fetchEffectifsParSiret = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/effectifs/siret?${queryParameters}`;
+  return _get(url);
+};
+
 export const fetchEffectifsParFormation = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs/formation?${queryParameters}`;

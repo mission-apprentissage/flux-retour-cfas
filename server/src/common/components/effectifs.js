@@ -249,6 +249,54 @@ module.exports = () => {
   };
 
   /**
+   * Récupération des effectifs par siret_etablissement à une date donnée
+   * @param {Date} searchDate
+   * @param {*} filters
+   * @returns [{
+   *  siret_etablissement: string
+   *  nom_etablissement: string
+   *  effectifs: {
+   *    apprentis: number
+   *    inscritsSansContrat: number
+   *    rupturants: number
+   *    abandons: number
+   *  }
+   * }]
+   */
+  const getEffectifsCountBySiretAtDate = async (searchDate, filters = {}) => {
+    // we need to project these fields to give information about the CFAs
+    const projection = {
+      siret_etablissement: 1,
+      nom_etablissement: 1,
+    };
+    const groupedBy = {
+      _id: "$siret_etablissement",
+      // we will send information about the organisme along with the grouped effectifs so we project it
+      nom_etablissement: { $first: "$nom_etablissement" },
+    };
+    const effectifsCountByCfa = await getEffectifsCountAtDate(
+      searchDate,
+      // compute effectifs with a siret_etablissement
+      { ...filters, siret_etablissement: { $ne: null } },
+      { groupedBy, projection }
+    );
+
+    return effectifsCountByCfa.map((effectifForCfa) => {
+      const { _id, nom_etablissement, ...effectifs } = effectifForCfa;
+      return {
+        siret_etablissement: _id,
+        nom_etablissement,
+        effectifs: {
+          apprentis: effectifs.apprentis || 0,
+          inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+          rupturants: effectifs.rupturants || 0,
+          abandons: effectifs.abandons || 0,
+        },
+      };
+    });
+  };
+
+  /**
    * Récupération des effectifs par etablissement_num_departement à une date donnée
    * @param {Date} searchDate
    * @param {*} filters
@@ -301,5 +349,6 @@ module.exports = () => {
     getEffectifsCountByAnneeFormationAtDate,
     getEffectifsCountByDepartementAtDate,
     getEffectifsCountByFormationAndDepartementAtDate,
+    getEffectifsCountBySiretAtDate,
   };
 };
