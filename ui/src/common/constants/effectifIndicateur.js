@@ -3,4 +3,5 @@ export const EFFECTIF_INDICATEURS = {
   inscritsSansContrats: "inscritsSansContrats",
   rupturants: "rupturants",
   abandons: "abandons",
+  rupturantsNets: "rupturantsNets",
 };

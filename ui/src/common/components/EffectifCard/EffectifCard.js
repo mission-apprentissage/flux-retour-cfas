@@ -25,11 +25,10 @@ const EffectifCard = ({
       minHeight="136px"
       minWidth="16rem"
     >
-      <Box display="flex" justifyContent="space-between" fontSize="gamma">
-        <strong>{hideCount ? "_" : formatNumber(count)}</strong>
-        {warningText && <Box as="i" className="ri-alert-fill" color="warning" fontSize="24px" marginTop="-6px" />}
-      </Box>
       <Text fontSize="epsilon">
+        <Box as="strong" fontSize="gamma" marginRight="1v">
+          {hideCount ? "_" : formatNumber(count)}
+        </Box>
         {label}
         {hasTooltip && (
           <Tooltip

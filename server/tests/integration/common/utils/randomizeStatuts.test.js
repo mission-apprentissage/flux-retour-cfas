@@ -1,7 +1,6 @@
 const assert = require("assert").strict;
 const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const { historySequenceApprentiToAbandon } = require("../../../data/historySequenceSamples");
 const { DossierApprenantModel } = require("../../../../src/common/model");
 
 describe(__filename, () => {
@@ -49,7 +48,7 @@ describe(__filename, () => {
 
     it("Vérifie l'existence d'un DossierApprenant randomisé avec params", async () => {
       const randomStatut = createRandomDossierApprenant({
-        historique_statut_apprenant: historySequenceApprentiToAbandon,
+        etablissement_num_region: "83",
       });
 
       const toAdd = new DossierApprenantModel(randomStatut);
@@ -74,7 +73,6 @@ describe(__filename, () => {
       assert.deepEqual(result.source, randomStatut.source);
       assert.deepEqual(result.annee_formation, randomStatut.annee_formation);
       assert.deepEqual(result.periode_formation, randomStatut.periode_formation);
-      assert.deepEqual(result.historique_statut_apprenant, randomStatut.historique_statut_apprenant);
 
       // Checks exists method
       const found = await DossierApprenantModel.countDocuments({
@@ -85,7 +83,7 @@ describe(__filename, () => {
         email_contact: result.email_contact,
         formation_cfd: result.formation_cfd,
         uai_etablissement: result.uai_etablissement,
-        historique_statut_apprenant: historySequenceApprentiToAbandon,
+        etablissement_num_region: "83",
       });
       assert.equal(found, 1);
     });

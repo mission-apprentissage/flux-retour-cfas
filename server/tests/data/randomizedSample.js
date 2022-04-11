@@ -1,8 +1,9 @@
 const faker = require("faker/locale/fr");
 const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
-const { subYears, subMonths, addYears } = require("date-fns");
+const { subYears, subMonths, addYears, subDays, addDays } = require("date-fns");
 const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/dossierApprenantConstants");
+const { getAnneeScolaireFromDate } = require("../../src/common/utils/anneeScolaireUtils");
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -155,9 +156,105 @@ const createRandomDossierApprenantApiInputList = createRandomListOf(createRandom
 
 const createRandomDossierApprenantList = createRandomListOf(createRandomDossierApprenant);
 
+const createRandomDossierApprenantApprenti = (props) => {
+  const now = new Date();
+  // date contrat d'apprentissage to a few days back
+  const dateContrat = subDays(now, faker.random.arrayElement([2, 4, 8, 16, 32, 64]));
+  const anneeScolaire = getAnneeScolaireFromDate(now);
+  return createRandomDossierApprenant({
+    ...props,
+    contrat_date_debut: dateContrat,
+    contrat_date_rupture: null,
+    annee_scolaire: anneeScolaire,
+    historique_statut_apprenant: [
+      { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: dateContrat, date_reception: now },
+    ],
+  });
+};
+
+const createRandomDossierApprenantInscritSansContrat = (props) => {
+  const now = new Date();
+  // date inscription to a few days back
+  const dateInscription = subDays(now, faker.random.arrayElement([8, 16, 32, 64, 128]));
+  const anneeScolaire = getAnneeScolaireFromDate(now);
+  return createRandomDossierApprenant({
+    ...props,
+    contrat_date_debut: null,
+    contrat_date_rupture: null,
+    annee_scolaire: anneeScolaire,
+    historique_statut_apprenant: [
+      { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: dateInscription, date_reception: now },
+    ],
+  });
+};
+
+const createRandomDossierApprenantRupturant = (props) => {
+  const now = new Date();
+  // date contrat d'apprentissage to a few days back
+  const dateContrat = subDays(now, faker.random.arrayElement([16, 32, 64]));
+  // date rupture to a few days back
+  const dateRupture = subDays(now, faker.random.arrayElement([4, 8, 15]));
+  const anneeScolaire = getAnneeScolaireFromDate(now);
+  return createRandomDossierApprenant({
+    ...props,
+    contrat_date_debut: dateContrat,
+    contrat_date_rupture: dateRupture,
+    annee_scolaire: anneeScolaire,
+    historique_statut_apprenant: [
+      { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: dateContrat, date_reception: now },
+      { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: dateRupture, date_reception: now },
+    ],
+  });
+};
+
+const createRandomDossierApprenantAbandon = (props) => {
+  const now = new Date();
+  // randomly pick a past situation before abandon, apprenant could have been apprenti, inscrit sans contrat or nothing before
+  const dossierBeforeAbandon = faker.random.arrayElement([
+    createRandomDossierApprenantApprenti,
+    createRandomDossierApprenantInscritSansContrat,
+  ])(props);
+  // date abandon to yesterday
+  const dateAbandon = subDays(now, 1);
+  return {
+    ...dossierBeforeAbandon,
+    historique_statut_apprenant: [
+      ...dossierBeforeAbandon.historique_statut_apprenant,
+      { valeur_statut: CODES_STATUT_APPRENANT.abandon, date_statut: dateAbandon, date_reception: now },
+    ],
+  };
+};
+
+const createRandomDossierApprenantRupturantNet = (props) => {
+  const now = new Date();
+  // date contrat d'apprentissage to a few days back
+  const dateContrat = subDays(now, faker.random.arrayElement([32, 64]));
+  // date rupture to a few days back
+  const dateRupture = addDays(dateContrat, faker.random.arrayElement([4, 8, 16, 24]));
+  // date abandon to a few days
+  const dateAbandon = addDays(dateRupture, faker.random.arrayElement([1, 2, 4, 6, 8]));
+  const anneeScolaire = getAnneeScolaireFromDate(now);
+  return createRandomDossierApprenant({
+    ...props,
+    contrat_date_debut: dateContrat,
+    contrat_date_rupture: dateRupture,
+    annee_scolaire: anneeScolaire,
+    historique_statut_apprenant: [
+      { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: dateContrat, date_reception: now },
+      { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: dateRupture, date_reception: now },
+      { valeur_statut: CODES_STATUT_APPRENANT.abandon, date_statut: dateAbandon, date_reception: now },
+    ],
+  });
+};
+
 module.exports = {
   getRandomPeriodeFormation,
   createRandomDossierApprenant,
+  createRandomDossierApprenantApprenti,
+  createRandomDossierApprenantInscritSansContrat,
+  createRandomDossierApprenantRupturant,
+  createRandomDossierApprenantAbandon,
+  createRandomDossierApprenantRupturantNet,
   createRandomDossierApprenantApiInput,
   createRandomDossierApprenantList,
   createRandomDossierApprenantApiInputList,

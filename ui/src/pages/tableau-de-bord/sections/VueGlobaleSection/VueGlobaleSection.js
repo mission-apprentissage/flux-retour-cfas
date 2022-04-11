@@ -1,4 +1,4 @@
-import { Heading, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { Grid, Heading, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -17,26 +17,23 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
   let content = null;
   if (loading) {
     content = (
-      <HStack spacing="2w">
-        {showOrganismesCount && <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />}
-        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
-      </HStack>
+      <Grid gridGap="2w" gridTemplateColumns="repeat(3, 1fr)">
+        {showOrganismesCount && <Skeleton height="136px" startColor="grey.300" endColor="galt" />}
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+      </Grid>
     );
   }
 
   if (effectifs && !loading) {
     const shouldWarnAboutDateAvailability = isDateFuture(filtersContext.state.date);
-    const infoTextAboutDateAvailability = (
-      <span>
-        cet indice ne peut être calculé sur <br /> la période sélectionnée
-      </span>
-    );
+    const infoTextAboutDateAvailability = <span>cet indice ne peut être calculé sur la période sélectionnée</span>;
 
     content = (
-      <HStack spacing="2w" alignItems="stretch">
+      <Grid gridGap="2w" gridTemplateColumns="repeat(3, 1fr)">
         {showOrganismesCount && <OrganismesCountCard />}
         <EffectifCard
           count={effectifs.apprentis.count}
@@ -52,7 +49,7 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
         />
         <EffectifCard
           count={effectifs.rupturants.count}
-          label={pluralize("rupturant", effectifs.rupturants.count)}
+          label="en rupture de contrat"
           effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.rupturants : null}
           tooltipLabel="Nombre d’apprenants en recherche de contrat après une rupture et toujours dans cette situation à la date affichée . Cet indice est déduit des apprenants passant du statut apprenti au statut stagiaire de la formation professionnelle, selon les saisies effectuées par les CFA."
         />
@@ -60,11 +57,18 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
           count={effectifs.abandons.count}
           hideCount={shouldWarnAboutDateAvailability}
           effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.abandons : null}
-          label={pluralize("abandon", effectifs.abandons.count)}
+          label="en abandon de formation"
           tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation, à la date affichée. Cet indice est basé sur les dossiers cloturés, selon les saisies effectuées par les CFA."
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
         />
-      </HStack>
+        <EffectifCard
+          count={effectifs.rupturantsNets.count}
+          hideCount={shouldWarnAboutDateAvailability}
+          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.rupturantsNets : null}
+          label="en rupture et en abandon"
+          infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
+        />
+      </Grid>
     );
   }
 

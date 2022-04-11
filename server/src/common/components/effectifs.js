@@ -2,6 +2,7 @@ const { EffectifsApprentis } = require("./effectifs/apprentis");
 const { EffectifsAbandons } = require("./effectifs/abandons");
 const { EffectifsInscritsSansContrats } = require("./effectifs/inscrits-sans-contrats");
 const { EffectifsRupturants } = require("./effectifs/rupturants");
+const { EffectifsRupturantsNets } = require("./effectifs/rupturants-nets");
 const { mergeObjectsBy } = require("../utils/mergeObjectsBy");
 
 module.exports = () => {
@@ -9,6 +10,7 @@ module.exports = () => {
   const abandons = new EffectifsAbandons();
   const inscritsSansContrats = new EffectifsInscritsSansContrats();
   const rupturants = new EffectifsRupturants();
+  const rupturantsNets = new EffectifsRupturantsNets();
 
   /**
    * Récupération des effectifs pour tous les indicateurs du TdB
@@ -19,26 +21,30 @@ module.exports = () => {
    */
   const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, projection }) => {
     // compute number of apprentis, abandons, inscrits sans contrat and rupturants
-    const apprentisCountByCfa = await apprentis.getCountAtDate(searchDate, filters, {
+    const apprentisCount = await apprentis.getCountAtDate(searchDate, filters, {
       groupedBy: { ...groupedBy, apprentis: { $sum: 1 } },
       projection,
     });
-    const abandonsCountByCfa = await abandons.getCountAtDate(searchDate, filters, {
+    const abandonsCount = await abandons.getCountAtDate(searchDate, filters, {
       groupedBy: { ...groupedBy, abandons: { $sum: 1 } },
       projection,
     });
-    const inscritsSansContratCountByCfa = await inscritsSansContrats.getCountAtDate(searchDate, filters, {
+    const inscritsSansContratCount = await inscritsSansContrats.getCountAtDate(searchDate, filters, {
       groupedBy: { ...groupedBy, inscritsSansContrat: { $sum: 1 } },
       projection,
     });
-    const rupturantsCountByCfa = await rupturants.getCountAtDate(searchDate, filters, {
+    const rupturantsCount = await rupturants.getCountAtDate(searchDate, filters, {
       groupedBy: { ...groupedBy, rupturants: { $sum: 1 } },
+      projection,
+    });
+    const rupturantsNetCount = await rupturantsNets.getCountAtDate(searchDate, filters, {
+      groupedBy: { ...groupedBy, rupturantsNets: { $sum: 1 } },
       projection,
     });
 
     // merge apprentis, abandons, inscrits sans contrat and rupturants with same _id to have them grouped
     return mergeObjectsBy(
-      [...apprentisCountByCfa, ...abandonsCountByCfa, ...inscritsSansContratCountByCfa, ...rupturantsCountByCfa],
+      [...apprentisCount, ...abandonsCount, ...inscritsSansContratCount, ...rupturantsCount, ...rupturantsNetCount],
       "_id"
     );
   };
@@ -343,6 +349,7 @@ module.exports = () => {
     abandons,
     inscritsSansContrats,
     rupturants,
+    rupturantsNets,
     getEffectifsCountByCfaAtDate,
     getEffectifsCountByNiveauFormationAtDate,
     getEffectifsCountByFormationAtDate,
