@@ -1,10 +1,10 @@
 const { Schema } = require("mongoose");
 
 module.exports = new Schema({
-  statutCandidatId: {
+  dossierApprenantId: {
     type: String,
     default: null,
-    description: "Identifiant du statut d'origine",
+    description: "Identifiant du dossier apprenant d'origine",
   },
   uai_etablissement: {
     type: String,
@@ -78,7 +78,7 @@ module.exports = new Schema({
     default: null,
     description: "Code RNCP de la formation du candidat",
   },
-  statut_calcule: {
+  indicateur_effectif: {
     type: String,
     default: null,
     description: "Indicateur lié au statut candidat",

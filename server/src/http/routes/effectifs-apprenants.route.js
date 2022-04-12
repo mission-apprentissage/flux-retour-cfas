@@ -11,10 +11,10 @@ module.exports = ({ db, jobEvents }) => {
   const router = express.Router();
 
   /**
-   * Récupération des statuts pour RCO avec pagination
+   * Récupération des effectifs apprenants avec pagination
    */
   router.get(
-    "/statutsCandidats",
+    "/",
     validateRequestQuery(
       Joi.object({
         page: Joi.number(),
@@ -25,7 +25,7 @@ module.exports = ({ db, jobEvents }) => {
       const page = Number(req.query.page ?? 1);
       const limit = Number(req.query.limit ?? 1000);
 
-      if (!(await jobEvents.isJobInAction(JOB_NAMES.createRcoStatutsCollection, jobEventStatuts.ended))) {
+      if (!(await jobEvents.isJobInAction(JOB_NAMES.createEffectifsApprenantsCollection, jobEventStatuts.ended))) {
         // Job RCO not ended, no data should be get
         res.status(501).json({
           status: "ERROR",
@@ -33,7 +33,7 @@ module.exports = ({ db, jobEvents }) => {
         });
       } else {
         const { find, pagination } = await findAndPaginate(
-          db.collection("rcoStatutsCandidats"),
+          db.collection("effectifsApprenants"),
           {},
           { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
         );
@@ -42,7 +42,7 @@ module.exports = ({ db, jobEvents }) => {
           oleoduc(
             find.stream(),
             transformIntoJSON({
-              arrayPropertyName: "rcoStatutsCandidats",
+              arrayPropertyName: "effectifsApprenants",
               arrayWrapper: {
                 pagination,
               },
