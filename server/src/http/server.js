@@ -8,7 +8,7 @@ const errorMiddleware = require("./middlewares/errorMiddleware");
 const requireJwtAuthenticationMiddleware = require("./middlewares/requireJwtAuthentication");
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 
-const rcoRouter = require("./routes/rco.route");
+const effectifsApprenantsRouter = require("./routes/effectifs-apprenants.route");
 const dossierApprenantRouter = require("./routes/dossiers-apprenants.route");
 const lienPriveCfaRouter = require("./routes/lien-prive-cfa.route");
 const loginRouter = require("./routes/login.route");
@@ -68,10 +68,10 @@ module.exports = async (components) => {
     lienPriveCfaRouter(components)
   );
   app.use(
-    "/api/rco",
+    "/api/effectifs-apprenants",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
-    rcoRouter(components)
+    effectifsApprenantsRouter(components)
   );
   app.use("/api/effectifs", requireJwtAuthentication, effectifsRouter(components));
 

@@ -4,10 +4,10 @@ const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
 const { JOB_NAMES, jobEventStatuts } = require("../../../src/common/constants/jobsConstants");
 const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
-const { RcoDossierApprenantModel, JobEventModel } = require("../../../src/common/model");
-const { createRandomRcoDossierApprenant } = require("../../data/randomizedSample");
+const { EffectifApprenantModel, JobEventModel } = require("../../../src/common/model");
+const { createRandomEffectifApprenant } = require("../../data/randomizedSample");
 
-const user = { name: "rcoUser", password: "password" };
+const user = { name: "apiConsumerUser", password: "password" };
 
 const createApiUser = async () => {
   const { createUser } = await users();
@@ -28,14 +28,16 @@ const getJwtForUser = async (httpClient) => {
 };
 
 describe(__filename, () => {
-  describe("GET rco/test", () => {
-    it("Vérifie que la route rco/test fonctionne avec un jeton JWT", async () => {
+  describe("GET effectifs-apprenants/test", () => {
+    it("Vérifie que la route effectifs-apprenants/test fonctionne avec un jeton JWT", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
       // Call Api Route
-      const response = await httpClient.get("/api/rco/test", { headers: { Authorization: `Bearer ${accessToken}` } });
+      const response = await httpClient.get("/api/effectifs-apprenants/test", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
       // Check Api Route data
       assert.deepEqual(response.status, 200);
@@ -43,8 +45,8 @@ describe(__filename, () => {
     });
   });
 
-  describe("GET rco/statutsCandidats", () => {
-    it("Vérifie qu'on peut récupérer les statuts RCO si le Job RCO est terminé", async () => {
+  describe("GET effectifs-apprenants/", () => {
+    it("Vérifie qu'on peut récupérer les effectifs apprenants si le Job est terminé", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
@@ -53,31 +55,31 @@ describe(__filename, () => {
 
       // Add ended Job Event
       await new JobEventModel({
-        jobname: JOB_NAMES.createRcoStatutsCollection,
+        jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoDossierApprenantModel({
-          ...createRandomRcoDossierApprenant(),
+        await new EffectifApprenantModel({
+          ...createRandomEffectifApprenant(),
           uai_etablissement: uaiTest,
         }).save();
       }
 
       // Call Api Route
-      const response = await httpClient.get("/api/rco/statutsCandidats?limit=2", {
+      const response = await httpClient.get("/api/effectifs-apprenants?limit=2", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       // Check Api Route data
       assert.deepEqual(response.status, 200);
-      assert.equal(response.data.rcoStatutsCandidats.length, 2);
+      assert.equal(response.data.effectifsApprenants.length, 2);
       assert.equal(response.data.pagination.page, 1);
       assert.equal(response.data.pagination.nombre_de_page, 5);
       assert.equal(response.data.pagination.total, 10);
     });
 
-    it("Vérifie qu'on ne peut pas récupérer les statuts RCO lorsque le Job RCO n'est pas terminé", async () => {
+    it("Vérifie qu'on ne peut pas récupérer les effectifs apprenants lorsque le Job n'est pas terminé", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
@@ -86,19 +88,19 @@ describe(__filename, () => {
 
       // Add ended Job Event
       await new JobEventModel({
-        jobname: JOB_NAMES.createRcoStatutsCollection,
+        jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.started,
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoDossierApprenantModel({
-          ...createRandomRcoDossierApprenant(),
+        await new EffectifApprenantModel({
+          ...createRandomEffectifApprenant(),
           uai_etablissement: uaiTest,
         }).save();
       }
 
       // Call Api Route
-      const response = await httpClient.get("/api/rco/statutsCandidats?limit=2", {
+      const response = await httpClient.get("/api/effectifs-apprenants?limit=2", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
@@ -106,7 +108,7 @@ describe(__filename, () => {
       assert.deepEqual(response.status, 501);
     });
 
-    it("Vérifie qu'on peut récupérer les statuts RCO avec tous les champs optionnels remplis", async () => {
+    it("Vérifie qu'on peut récupérer les effectifs apprenants avec tous les champs optionnels remplis", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
@@ -123,13 +125,13 @@ describe(__filename, () => {
 
       // Add ended Job Event
       await new JobEventModel({
-        jobname: JOB_NAMES.createRcoStatutsCollection,
+        jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
       }).save();
 
       for (let index = 0; index < 10; index++) {
-        await new RcoDossierApprenantModel({
-          ...createRandomRcoDossierApprenant(),
+        await new EffectifApprenantModel({
+          ...createRandomEffectifApprenant(),
           etablissement_formateur_code_commune_insee: etablissement_formateur_code_commune_inseeTest,
           etablissement_code_postal: etablissement_code_postalTest,
           periode_formation: periode_formationTest,
@@ -143,80 +145,80 @@ describe(__filename, () => {
       }
 
       // Call Api Route
-      const response = await httpClient.get("/api/rco/statutsCandidats?limit=2", {
+      const response = await httpClient.get("/api/effectifs-apprenants?limit=2", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       // Check Api Route data
       assert.deepEqual(response.status, 200);
-      assert.equal(response.data.rcoStatutsCandidats.length, 2);
+      assert.equal(response.data.effectifsApprenants.length, 2);
       assert.equal(response.data.pagination.page, 1);
       assert.equal(response.data.pagination.nombre_de_page, 5);
       assert.equal(response.data.pagination.total, 10);
       assert.strictEqual(
-        response.data.rcoStatutsCandidats[0].etablissement_formateur_code_commune_insee,
+        response.data.effectifsApprenants[0].etablissement_formateur_code_commune_insee,
         etablissement_formateur_code_commune_inseeTest
       );
-      assert.strictEqual(response.data.rcoStatutsCandidats[0].etablissement_code_postal, etablissement_code_postalTest);
-      assert.strictEqual(response.data.rcoStatutsCandidats[0].periode_formation.join(), periode_formationTest.join());
+      assert.strictEqual(response.data.effectifsApprenants[0].etablissement_code_postal, etablissement_code_postalTest);
+      assert.strictEqual(response.data.effectifsApprenants[0].periode_formation.join(), periode_formationTest.join());
       assert.strictEqual(
-        response.data.rcoStatutsCandidats[0].code_commune_insee_apprenant,
+        response.data.effectifsApprenants[0].code_commune_insee_apprenant,
         code_commune_insee_apprenantTest
       );
       assert.strictEqual(
-        new Date(response.data.rcoStatutsCandidats[0].date_de_naissance_apprenant).getTime(),
+        new Date(response.data.effectifsApprenants[0].date_de_naissance_apprenant).getTime(),
         date_de_naissance_apprenantTest.getTime()
       );
       assert.strictEqual(
-        new Date(response.data.rcoStatutsCandidats[0].contrat_date_debut).getTime(),
+        new Date(response.data.effectifsApprenants[0].contrat_date_debut).getTime(),
         contrat_date_debutTest.getTime()
       );
       assert.strictEqual(
-        new Date(response.data.rcoStatutsCandidats[0].contrat_date_fin).getTime(),
+        new Date(response.data.effectifsApprenants[0].contrat_date_fin).getTime(),
         contrat_date_finTest.getTime()
       );
       assert.strictEqual(
-        new Date(response.data.rcoStatutsCandidats[0].contrat_date_rupture).getTime(),
+        new Date(response.data.effectifsApprenants[0].contrat_date_rupture).getTime(),
         contrat_date_ruptureTest.getTime()
       );
-      assert.strictEqual(response.data.rcoStatutsCandidats[0].formation_rncp, formation_rncpTest);
+      assert.strictEqual(response.data.effectifsApprenants[0].formation_rncp, formation_rncpTest);
     });
 
-    it("Vérifie qu'on peut récupérer les statuts RCO avec des champs statut_calcule différents", async () => {
+    it("Vérifie qu'on peut récupérer les effectifs apprenants avec des champs indicateur_effectif différents", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
       // Add ended Job Event
       await new JobEventModel({
-        jobname: JOB_NAMES.createRcoStatutsCollection,
+        jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
       }).save();
 
-      await new RcoDossierApprenantModel({
-        ...createRandomRcoDossierApprenant(),
-        statut_calcule: EFFECTIF_INDICATOR_NAMES.apprentis,
+      await new EffectifApprenantModel({
+        ...createRandomEffectifApprenant(),
+        indicateur_effectif: EFFECTIF_INDICATOR_NAMES.apprentis,
       }).save();
 
-      await new RcoDossierApprenantModel({
-        ...createRandomRcoDossierApprenant(),
-        statut_calcule: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
+      await new EffectifApprenantModel({
+        ...createRandomEffectifApprenant(),
+        indicateur_effectif: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
       }).save();
 
       // Call Api Route
-      const response = await httpClient.get("/api/rco/statutsCandidats?limit=10", {
+      const response = await httpClient.get("/api/effectifs-apprenants?limit=10", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       // Check Api Route data
       assert.deepEqual(response.status, 200);
-      assert.equal(response.data.rcoStatutsCandidats.length, 2);
+      assert.equal(response.data.effectifsApprenants.length, 2);
       assert.equal(response.data.pagination.page, 1);
       assert.equal(response.data.pagination.nombre_de_page, 1);
       assert.equal(response.data.pagination.total, 2);
-      assert.strictEqual(response.data.rcoStatutsCandidats[0].statut_calcule, EFFECTIF_INDICATOR_NAMES.apprentis);
+      assert.strictEqual(response.data.effectifsApprenants[0].indicateur_effectif, EFFECTIF_INDICATOR_NAMES.apprentis);
       assert.strictEqual(
-        response.data.rcoStatutsCandidats[1].statut_calcule,
+        response.data.effectifsApprenants[1].indicateur_effectif,
         EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
       );
     });

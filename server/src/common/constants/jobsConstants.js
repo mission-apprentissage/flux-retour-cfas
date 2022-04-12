@@ -21,7 +21,7 @@ const JOB_NAMES = {
   dossiersApprenantsBadHistoryIdentifyAntidated: "statutsCandidats-bad-history-identify-antidated",
   dossiersApprenantsBadHistoryCleanAntidated: "statutsCandidats-bad-history-clean-antidated",
   createIndexes: "create-indexes",
-  createRcoStatutsCollection: "create-rco-statuts-collection",
+  createEffectifsApprenantsCollection: "create-effectifs-apprenants-collection",
   clearUsers: "clear-users",
   clearCfas: "clear-cfas",
   clearDossiersApprenants: "clear-statuts-candidats",

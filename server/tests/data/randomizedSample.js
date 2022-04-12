@@ -72,12 +72,12 @@ const createRandomDossierApprenant = (params = {}) => {
   };
 };
 
-const createRandomRcoDossierApprenant = (params = {}) => {
+const createRandomEffectifApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
   return {
-    statutCandidatId: faker.datatype.uuid(),
+    dossierApprenantId: faker.datatype.uuid(),
     uai_etablissement: getRandomUaiEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
     etablissement_formateur_code_commune_insee: faker.datatype.boolean() ? faker.address.zipCode() : null,
@@ -260,5 +260,5 @@ module.exports = {
   createRandomDossierApprenantApiInputList,
   getRandomSiretEtablissement,
   getRandomUaiEtablissement,
-  createRandomRcoDossierApprenant,
+  createRandomEffectifApprenant,
 };
