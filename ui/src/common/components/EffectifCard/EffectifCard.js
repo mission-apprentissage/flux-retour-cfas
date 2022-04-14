@@ -11,6 +11,7 @@ const EffectifCard = ({
   effectifIndicateur = null,
   tooltipLabel,
   hideCount = false,
+  percentageCount = false,
   infoText,
   warningText,
 }) => {
@@ -22,12 +23,12 @@ const EffectifCard = ({
       paddingX="3w"
       paddingY="2w"
       color="grey.800"
-      minHeight="136px"
+      minHeight="104px"
       minWidth="16rem"
     >
       <Text fontSize="epsilon">
         <Box as="strong" fontSize="gamma" marginRight="1v">
-          {hideCount ? "_" : formatNumber(count)}
+          {hideCount ? "_" : percentageCount === true ? `${formatNumber(Math.round(count))}%` : formatNumber(count)}
         </Box>
         {label}
         {hasTooltip && (
@@ -68,6 +69,7 @@ EffectifCard.propTypes = {
   effectifIndicateur: PropTypes.string,
   tooltipLabel: PropTypes.string,
   hideCount: PropTypes.bool,
+  percentageCount: PropTypes.bool,
   infoText: PropTypes.node,
   warningText: PropTypes.string,
 };

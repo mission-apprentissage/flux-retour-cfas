@@ -4,6 +4,7 @@ import React from "react";
 
 import { EffectifCard, Section } from "../../../../common/components";
 import { EFFECTIF_INDICATEURS } from "../../../../common/constants/effectifIndicateur";
+import { getPercentage } from "../../../../common/utils/calculUtils";
 import { isDateFuture } from "../../../../common/utils/dateUtils";
 import { pluralize } from "../../../../common/utils/stringUtils";
 import { InfoLine } from "../../../../theme/components/icons";
@@ -62,8 +63,9 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
         />
         <EffectifCard
-          count={effectifs.rupturantsNets.count}
+          count={getPercentage(effectifs.rupturantsNets.count, effectifs.abandons.count)}
           hideCount={shouldWarnAboutDateAvailability}
+          percentageCount={true}
           effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.rupturantsNets : null}
           label="en rupture et en abandon"
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}

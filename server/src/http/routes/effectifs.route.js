@@ -285,7 +285,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
       case EFFECTIF_INDICATOR_NAMES.abandons:
         {
-          // Gets rupturants nets unicity fields for identifying rupturantsNets
+          // Récupération des champs de la clé d'unicité pour les rupturants nets
           const rupturantsNetsUnicityFields = getUnicityFieldsFromDossiersApprenantsList(
             await effectifs.rupturantsNets.getListAtDate(date, filters, { projection })
           );
@@ -301,11 +301,15 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
                   statut: getStatutApprenantNameFromCode(item.valeur_statut),
                 }))
               ),
-              // If unicityFields item found in unicityFields of rupturants nets then flag it
-              abandon_provenant_rupture_contrat: rupturantsNetsUnicityFields.some(
-                (rupturantNetItem) =>
-                  JSON.stringify(rupturantNetItem) === JSON.stringify(getUnicityFieldsFromDossierApprenant(item))
-              ),
+              // Identification des abandons provenant des ruptures de contrats
+              // Si les champs de la clé d'unicité est trouvé les champs de clés d'unicité des rupturants nets alors OUI / NON
+              abandon_provenant_rupture_contrat:
+                rupturantsNetsUnicityFields.some(
+                  (rupturantNetItem) =>
+                    JSON.stringify(rupturantNetItem) === JSON.stringify(getUnicityFieldsFromDossierApprenant(item))
+                ) === true
+                  ? "OUI"
+                  : "NON",
             })
           );
         }

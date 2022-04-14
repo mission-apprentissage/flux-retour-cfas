@@ -8,36 +8,43 @@ import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
 
-const ReseauxAndAdresseText = ({ reseaux, adresse }) => {
+const ReseauxAndAdresseText = ({ reseaux, adresse, multipleSirets, nbEtablissements }) => {
   const hasReseaux = reseaux?.length > 0;
-  if (hasReseaux) {
-    if (adresse) {
+  const getOrganismeReseauxAndAdresseText = () => {
+    if (hasReseaux) {
+      if (adresse) {
+        return (
+          <>
+            Cet organisme fait partie du réseau <strong>{reseaux[0]}</strong>. Sa domiciliation est {adresse}.
+          </>
+        );
+      }
       return (
-        <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
-          Cet organisme fait partie du réseau <b>{reseaux[0]}</b>. Sa domiciliation est {adresse}.
-        </Text>
+        <>
+          Cet organisme fait partie du réseau <b>{reseaux[0]}</b>.
+        </>
       );
+    } else {
+      if (adresse) {
+        return <>La domiciliation de cet organisme est {adresse}</>;
+      }
+      return null;
     }
-    return (
-      <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
-        Cet organisme fait partie du réseau <b>{reseaux[0]}</b>.
-      </Text>
-    );
-  } else {
-    if (adresse) {
-      return (
-        <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
-          La domiciliation de cet organisme est {adresse}
-        </Text>
-      );
-    }
-    return "";
-  }
+  };
+
+  return (
+    <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
+      {getOrganismeReseauxAndAdresseText()}
+      {multipleSirets && <strong> Il est identifié par une UAI qui utilise {nbEtablissements} numéros SIRET.</strong>}
+    </Text>
+  );
 };
 
 ReseauxAndAdresseText.propTypes = {
   reseaux: PropTypes.array,
   adresse: PropTypes.string,
+  multipleSirets: PropTypes.bool,
+  nbEtablissements: PropTypes.number,
 };
 
 const CfaInformationSection = ({ infosCfa, loading, error }) => {
@@ -84,12 +91,12 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
           )}
         </HStack>
 
-        <ReseauxAndAdresseText reseaux={reseaux} adresse={adresse} />
-        {multipleSirets && (
-          <Text as="strong" color="black">
-            Il est identifié par une UAI qui utilise {sousEtablissements.length} numéros SIRET.
-          </Text>
-        )}
+        <ReseauxAndAdresseText
+          reseaux={reseaux}
+          adresse={adresse}
+          multipleSirets={multipleSirets}
+          nbEtablissements={sousEtablissements.length}
+        />
 
         {domainesMetiers?.length > 0 && <DomainesMetiers domainesMetiers={domainesMetiers} />}
       </Section>
