@@ -4,6 +4,7 @@
 const JOB_NAMES = {
   seedSample: "seed-sample",
   seedCfas: "seed-cfas",
+  seedReseauxCfas: "seed-reseauxCfas",
   seedReferentielCfas: "seed-referentiel-cfas",
   seedAnnuaireCfas: "seed-annuaire-cfas",
   clearSeedAssets: "clear-seed-assets",

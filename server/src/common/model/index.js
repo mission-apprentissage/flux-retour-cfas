@@ -13,6 +13,7 @@ module.exports = {
   JobEventModel: getModel("jobEvents", { enablePagination: true }),
   DuplicateEventModel: getModel("duplicatesEvents"),
   CfaModel: getModel("cfas", { enablePagination: true }),
+  ReseauCfaModel: getModel("reseauxCfas"),
   CfaAnnuaireModel: getModel("cfasAnnuaire"),
   CroisementCfasAnnuaireModel: getModel("croisementCfasAnnuaire"),
   FormationModel: getModel("formations"),

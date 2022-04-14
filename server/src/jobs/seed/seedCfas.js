@@ -1,14 +1,12 @@
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const path = require("path");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 
-const { CfaModel, DossierApprenantModel } = require("../../common/model");
+const { CfaModel, DossierApprenantModel, ReseauCfaModel } = require("../../common/model");
 const { sleep } = require("../../common/utils/miscUtils");
-const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 const { ERPS } = require("../../common/constants/erpsConstants");
 const { getMetiersBySirets, API_DELAY_QUOTA } = require("../../common/apis/apiLba");
 
@@ -37,9 +35,9 @@ runScript(async ({ cfas, ovhStorage, db }) => {
   // Seed new CFAs from Dossiers
   await seedCfasFromDossiersApprenantsUaisValid(cfas);
 
-  // Set networks from CSV
+  // Set networks from reseauxCfas collection
   await asyncForEach(CFAS_NETWORKS, async (currentNetwork) => {
-    await updateCfasNetworksFromCsv(ovhStorage, currentNetwork);
+    await updateCfasNetworksFromReseauxCfas(ovhStorage, currentNetwork);
   });
 
   // Set metiers from LBA Api
@@ -146,14 +144,10 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
  * @param {*} ovhStorage
  * @param {*} param1
  */
-const updateCfasNetworksFromCsv = async (ovhStorage, { nomReseau, nomFichier, encoding }) => {
+const updateCfasNetworksFromReseauxCfas = async (ovhStorage, { nomReseau }) => {
   logger.info(`Updating CFAs network for ${nomReseau}`);
-  const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 
-  // Get Reference CSV File if needed
-  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, { clearFile: true });
-
-  const allCfasForNetworkFile = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
+  const allCfasForNetworkFile = await ReseauCfaModel.find({ nom_reseau: nomReseau }).lean();
   loadingBar.start(allCfasForNetworkFile.length, 0);
 
   // Parse all cfas in file
@@ -170,13 +164,13 @@ const updateCfasNetworksFromCsv = async (ovhStorage, { nomReseau, nomFichier, en
           return;
         }
         // Update cfa in collection
-        await updateCfaFromNetwork(cfaForUai, currentCfaInCsv, nomReseau, nomFichier);
+        await updateCfaFromNetwork(cfaForUai, currentCfaInCsv, nomReseau);
       }
     }
   });
 
   loadingBar.stop();
-  logger.info(`All cfas from ${nomFichier}.csv file were handled !`);
+  logger.info(`All cfas from ${nomReseau} network were handled !`);
 };
 
 /**
@@ -185,18 +179,16 @@ const updateCfasNetworksFromCsv = async (ovhStorage, { nomReseau, nomFichier, en
  * @param {*} nomReseau
  * @param {*} nomFichier
  */
-const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau, nomFichier) => {
+const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau) => {
   const cfaExistantWithoutCurrentNetwork =
-    !cfaInReferentiel?.reseaux ||
-    (!cfaInReferentiel?.reseaux?.some((item) => item === nomReseau) &&
-      !cfaInReferentiel?.fichiers_reference?.some((item) => item === `${nomFichier}.csv`));
+    !cfaInReferentiel?.reseaux || !cfaInReferentiel?.reseaux?.some((item) => item === nomReseau);
 
   // Update only if cfa in referentiel has not network or current network not included
   if (cfaExistantWithoutCurrentNetwork) {
     await CfaModel.findByIdAndUpdate(
       cfaInReferentiel._id,
       {
-        $addToSet: { noms_cfa: cfaInFile.nom.trim(), reseaux: nomReseau, fichiers_reference: `${nomFichier}.csv` },
+        $addToSet: { noms_cfa: cfaInFile.nom.trim(), reseaux: nomReseau },
       },
       { new: true }
     );
