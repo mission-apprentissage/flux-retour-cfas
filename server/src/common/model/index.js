@@ -16,6 +16,7 @@ module.exports = {
   ReseauCfaModel: getModel("reseauxCfas"),
   CfaAnnuaireModel: getModel("cfasAnnuaire"),
   CroisementCfasAnnuaireModel: getModel("croisementCfasAnnuaire"),
+  ContactCfaModel: getModel("contactsCfas"),
   FormationModel: getModel("formations"),
   LogModel: getModel("logs"),
   CroisementVoeuxAffelnetModel: getModel("croisementVoeuxAffelnet"),

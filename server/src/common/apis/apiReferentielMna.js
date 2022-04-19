@@ -1,0 +1,29 @@
+const axios = require("axios");
+const logger = require("../logger");
+const config = require("../../../config");
+
+// Cf Documentation : https://referentiel.apprentissage.beta.gouv.fr/api/v1/doc/#/
+
+const API_ENDPOINT = config.mnaReferentielApi.endpoint;
+
+const getOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", champs = "contacts,uai,siret") => {
+  const url = `${API_ENDPOINT}/organismes`;
+  try {
+    const { data } = await axios.post(url, {
+      sirets: sirets,
+      champs: champs,
+      items_par_page: itemsPerPage,
+    });
+    return data;
+  } catch (err) {
+    logger.error(
+      `API REFERENTIEL getOrganismesContacts: something went wrong while requesting ${url}`,
+      err.response.data
+    );
+    return null;
+  }
+};
+
+module.exports = {
+  getOrganismesContactsFromSirets,
+};

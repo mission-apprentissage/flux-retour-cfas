@@ -45,6 +45,9 @@ module.exports = {
   lbaApi: {
     endpoint: env.get("FLUX_RETOUR_CFAS_LBA_ENDPOINT_URL").required().asString(),
   },
+  mnaReferentielApi: {
+    endpoint: env.get("FLUX_RETOUR_CFAS_MNA_REFERENTIEL_ENDPOINT_URL").required().asString(),
+  },
   ovhStorage: {
     username: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_USERNAME").required().asString(),
     password: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_PASSWORD").required().asString(),

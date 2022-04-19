@@ -19,6 +19,7 @@
     "docker:clean": "docker-compose kill && docker system prune --force --volumes",
     "seed:cfas": "node -r dotenv/config src/jobs/seed/seedCfas.js",
     "seed:reseauxCfas": "node -r dotenv/config src/jobs/seed/seedReseauxCfas.js",
+    "seed:contactsCfas": "node -r dotenv/config src/jobs/seed/seedContactsCfas.js",
     "seed:sample": "node -r dotenv/config src/jobs/seed/seedSample.js",
     "seed:randomizedSample": "node -r dotenv/config src/jobs/seed/seedRandomizedSample.js",
     "seed:clearAssets": "node -r dotenv/config src/jobs/seed/clearAssets.js",
