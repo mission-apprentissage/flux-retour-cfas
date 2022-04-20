@@ -17,9 +17,6 @@ const mapEffectifsData = (effectifsData) => {
     abandons: {
       count: effectifsData.abandons,
     },
-    rupturantsNets: {
-      count: effectifsData.rupturantsNets,
-    },
   };
 };
 

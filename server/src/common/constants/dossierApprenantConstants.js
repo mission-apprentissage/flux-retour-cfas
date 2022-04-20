@@ -58,7 +58,6 @@ const EFFECTIF_INDICATOR_NAMES = {
   inscritsSansContrats: "inscritsSansContrats",
   rupturants: "rupturants",
   abandons: "abandons",
-  rupturantsNets: "rupturantsNets",
 };
 
 module.exports = {

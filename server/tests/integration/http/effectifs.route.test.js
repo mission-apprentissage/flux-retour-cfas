@@ -1,53 +1,17 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
-const {
-  createRandomDossierApprenant,
-  getRandomSiretEtablissement,
-  createRandomDossierApprenantAbandon,
-  createRandomDossierApprenantApprenti,
-  createRandomDossierApprenantInscritSansContrat,
-  createRandomDossierApprenantRupturant,
-  createRandomDossierApprenantRupturantNet,
-} = require("../../data/randomizedSample");
+const { createRandomDossierApprenant, getRandomSiretEtablissement } = require("../../data/randomizedSample");
 const { apiRoles } = require("../../../src/common/roles");
 const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
 
+const {
+  historySequenceInscritToApprentiToAbandon,
+  historySequenceApprenti,
+  historySequenceInscritToApprenti,
+  historySequenceApprentiToInscrit,
+} = require("../../data/historySequenceSamples");
 const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
 const { parseXlsxHeaderStreamToJson } = require("../../../src/common/utils/exporterUtils");
-
-const seedDossiersApprenants = async (effectifs, props = {}) => {
-  const apprentisCount = effectifs.apprentis || 0;
-  const inscritsSansContratCount = effectifs.inscritsSansContrat || 0;
-  const rupturantsCount = effectifs.rupturants || 0;
-  const rupturantsNetsCount = effectifs.rupturantsNets || 0;
-  const abandonsCount = effectifs.abandons || 0;
-
-  // create given number of random dossiers apprenants abandons
-  for (let index = 0; index < abandonsCount; index++) {
-    const randomStatut = createRandomDossierApprenantAbandon(props);
-    await new DossierApprenantModel(randomStatut).save();
-  }
-  // create given number of random dossiers apprenants apprentis
-  for (let index = 0; index < apprentisCount; index++) {
-    const randomStatut = createRandomDossierApprenantApprenti(props);
-    await new DossierApprenantModel(randomStatut).save();
-  }
-  // create given number of random dossiers apprenants inscrits sans contrat
-  for (let index = 0; index < inscritsSansContratCount; index++) {
-    const randomStatut = createRandomDossierApprenantInscritSansContrat(props);
-    await new DossierApprenantModel(randomStatut).save();
-  }
-  // create given number of random dossiers apprenants rupturants
-  for (let index = 0; index < rupturantsCount; index++) {
-    const randomStatut = createRandomDossierApprenantRupturant(props);
-    await new DossierApprenantModel(randomStatut).save();
-  }
-  // create given number of random dossiers apprenants rupturants
-  for (let index = 0; index < rupturantsNetsCount; index++) {
-    const randomStatut = createRandomDossierApprenantRupturantNet(props);
-    await new DossierApprenantModel(randomStatut).save();
-  }
-};
 
 describe(__filename, () => {
   describe("/api/effectifs route", () => {
@@ -55,7 +19,7 @@ describe(__filename, () => {
       const { httpClient } = await startServer();
 
       const response = await httpClient.get("/api/effectifs", {
-        params: { date: "${new Date().toISOString()}" },
+        params: { date: "2020-10-10T00:00:00.000Z" },
       });
 
       assert.equal(response.status, 401);
@@ -65,36 +29,62 @@ describe(__filename, () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
 
-      const effectifsToCreate = {
-        inscritsSansContrat: 5,
-        apprentis: 10,
-        abandons: 3,
-        rupturants: 2,
-        rupturantsNets: 2,
-      };
-      const expectedResults = {
-        ...effectifsToCreate,
-        abandons: 5, // abandons + rupturants nets created
-      };
-      await seedDossiersApprenants(effectifsToCreate);
-      // create random dossiers apprenants apprentis that should not be counted because of annee_scolaire
-      for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({ annee_scolaire: "2020-2021" });
-        await new DossierApprenantModel(randomStatut).save();
+      // Add 10 statuts for filter with history sequence - full
+      for (let index = 0; index < 10; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+          annee_scolaire: "2020-2021",
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
       }
 
-      const date = new Date();
+      // Add 5 statuts for filter with history sequence - simple apprenti
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 15 statuts for filter  with history sequence - inscritToApprenti
+      for (let index = 0; index < 15; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprenti,
+          annee_scolaire: "2020-2021",
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // this one should be ignored because of annee_scolaire
+      await new DossierApprenantModel(
+        createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprenti,
+          annee_scolaire: "2021-2022",
+        })
+      ).save();
+
+      // Expected results
+      const expectedResults = {
+        nbInscrits: 15,
+        nbApprentis: 5,
+        nbAbandons: 10,
+      };
+
+      // Check good api call
       const response = await httpClient.get("/api/effectifs", {
-        params: { date: date.toISOString() },
+        params: { date: "2020-10-10T00:00:00.000Z" },
         headers: bearerToken,
       });
 
       assert.equal(response.status, 200);
       const indices = response.data;
-      assert.deepEqual(indices, {
-        date: date.toISOString(),
-        ...expectedResults,
-      });
+      assert.deepEqual(indices.inscritsSansContrat + indices.rupturants, expectedResults.nbInscrits);
+      assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
+      assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
     });
 
     it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts avec filtres", async () => {
@@ -102,40 +92,117 @@ describe(__filename, () => {
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const filterQuery = { etablissement_num_region: "84" };
 
-      const effectifsToCreate = {
-        inscritsSansContrat: 4,
-        apprentis: 7,
-        abandons: 1,
-        rupturants: 5,
-        rupturantsNets: 1,
-      };
-      const expectedResults = {
-        ...effectifsToCreate,
-        abandons: 2, // abandons + rupturants nets created
-      };
-      await seedDossiersApprenants(effectifsToCreate, filterQuery);
-      // create random dossiers apprenants apprentis that should not be counted because of different
-      for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenantApprenti({ etablissement_num_region: "10" });
-        await new DossierApprenantModel(randomStatut).save();
+      // Add 10 statuts for filter with history sequence - full
+      for (let index = 0; index < 10; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+          annee_scolaire: "2020-2021",
+          ...filterQuery,
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
       }
 
-      const date = new Date();
+      // Add 5 statuts for filter with history sequence - simple apprenti
+      for (let index = 0; index < 5; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
+          ...filterQuery,
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 15 statuts for filter  with history sequence - inscritToApprenti
+      for (let index = 0; index < 15; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprenti,
+          annee_scolaire: "2020-2021",
+          ...filterQuery,
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Expected results
+      const expectedResults = {
+        nbInscrits: 15,
+        nbApprentis: 5,
+        nbAbandons: 10,
+      };
+
+      // Check good api call
       const response = await httpClient.get("/api/effectifs", {
-        params: { date: date.toISOString(), ...filterQuery },
+        params: { date: "2020-10-10T00:00:00.000Z", ...filterQuery },
         headers: bearerToken,
       });
 
-      assert.equal(response.status, 200);
       const indices = response.data;
-      assert.deepEqual(indices, {
-        date: date.toISOString(),
-        ...expectedResults,
+      assert.deepEqual(indices.inscritsSansContrat + indices.rupturants, expectedResults.nbInscrits);
+      assert.deepEqual(indices.apprentis, expectedResults.nbApprentis);
+      assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
+
+      // Check bad api call
+      const badResponse = await httpClient.get("/api/effectifs", {
+        params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_region: "99" },
+        headers: bearerToken,
       });
+
+      assert.deepStrictEqual(badResponse.status, 200);
+      assert.deepStrictEqual(badResponse.data.inscritsSansContrat, 0);
+      assert.deepStrictEqual(badResponse.data.rupturants, 0);
+      assert.deepStrictEqual(badResponse.data.apprentis, 0);
+      assert.deepStrictEqual(badResponse.data.abandons, 0);
     });
   });
 
   describe("/api/effectifs/export-xlsx-data-lists route", () => {
+    const seedDossiersApprenants = async (statutsProps) => {
+      const nbAbandons = 10;
+      const nbApprentis = 5;
+
+      // Add 10 statuts with history sequence - full
+      for (let index = 0; index < nbAbandons; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+          ...statutsProps,
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 5 statuts with history sequence - simple apprenti
+      for (let index = 0; index < nbApprentis; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceApprenti,
+          ...statutsProps,
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 15 statuts with history sequence - inscritToApprenti
+      for (let index = 0; index < 15; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprenti,
+          ...statutsProps,
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+
+      // Add 8 statuts with history sequence - inscritToApprentiToInscrit (rupturant)
+      for (let index = 0; index < 8; index++) {
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceApprentiToInscrit,
+          ...statutsProps,
+        });
+        const toAdd = new DossierApprenantModel(randomStatut);
+        await toAdd.save();
+      }
+    };
+
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();
 
@@ -153,7 +220,7 @@ describe(__filename, () => {
       const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: "${new Date().toISOString()}", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
         headers: authHeader,
       });
 
@@ -166,16 +233,11 @@ describe(__filename, () => {
       const cfaUai = "9994889A";
       await new CfaModel({ uai_etablissement: cfaUai }).save();
 
-      const effectifs = {
-        inscritsSansContrat: 4,
-        apprentis: 1,
-        abandons: 1,
-        rupturants: 1,
-      };
-      await seedDossiersApprenants(effectifs, { uai_etablissement: cfaUai });
+      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
+      // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: new Date().toISOString(), effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
         responseType: "arraybuffer",
         headers: authHeader,
       });
@@ -183,7 +245,7 @@ describe(__filename, () => {
       const apprentisList = parseXlsxHeaderStreamToJson(response.data, 4);
 
       assert.equal(response.status, 200);
-      assert.equal(apprentisList.length, effectifs.apprentis);
+      assert.equal(apprentisList.length, 5);
     });
 
     it("Vérifie qu'on peut récupérer des listes de données des inscrits sans contrats via API pour un admin", async () => {
@@ -192,17 +254,12 @@ describe(__filename, () => {
       const cfaUai = "9994889A";
       await new CfaModel({ uai_etablissement: cfaUai }).save();
 
-      const effectifs = {
-        inscritsSansContrat: 4,
-        apprentis: 1,
-        abandons: 1,
-        rupturants: 1,
-      };
-      await seedDossiersApprenants(effectifs, { uai_etablissement: cfaUai });
+      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
+      // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
         params: {
-          date: new Date().toISOString(),
+          date: "2020-10-10T00:00:00.000Z",
           effectif_indicateur: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
         },
         responseType: "arraybuffer",
@@ -212,7 +269,7 @@ describe(__filename, () => {
       const inscritsSansContratsList = parseXlsxHeaderStreamToJson(response.data, 4);
 
       assert.equal(response.status, 200);
-      assert.equal(inscritsSansContratsList.length, effectifs.inscritsSansContrat);
+      assert.equal(inscritsSansContratsList.length, 15);
     });
 
     it("Vérifie qu'on peut récupérer des listes de données des abandons via API pour un admin", async () => {
@@ -221,16 +278,11 @@ describe(__filename, () => {
       const cfaUai = "9994889A";
       await new CfaModel({ uai_etablissement: cfaUai }).save();
 
-      const effectifs = {
-        inscritsSansContrat: 1,
-        apprentis: 1,
-        abandons: 3,
-        rupturants: 1,
-      };
-      await seedDossiersApprenants(effectifs, { uai_etablissement: cfaUai });
+      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
+      // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: new Date().toISOString(), effectif_indicateur: EFFECTIF_INDICATOR_NAMES.abandons },
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.abandons },
         responseType: "arraybuffer",
         headers: authHeader,
       });
@@ -238,34 +290,7 @@ describe(__filename, () => {
       const abandonsList = parseXlsxHeaderStreamToJson(response.data, 3);
 
       assert.equal(response.status, 200);
-      assert.equal(abandonsList.length, effectifs.abandons);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des rupturants nets via API pour un admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      const effectifs = {
-        inscritsSansContrat: 1,
-        apprentis: 1,
-        abandons: 3,
-        rupturants: 1,
-        rupturantsNets: 2,
-      };
-      await seedDossiersApprenants(effectifs, { uai_etablissement: cfaUai });
-
-      const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: new Date().toISOString(), effectif_indicateur: EFFECTIF_INDICATOR_NAMES.rupturantsNets },
-        responseType: "arraybuffer",
-        headers: authHeader,
-      });
-
-      const rupturantsNetsList = parseXlsxHeaderStreamToJson(response.data, 4);
-
-      assert.equal(response.status, 200);
-      assert.equal(rupturantsNetsList.length, effectifs.rupturantsNets);
+      assert.equal(abandonsList.length, 10);
     });
 
     it("Vérifie qu'on peut récupérer des listes de données des rupturants via API pour un CFA", async () => {
@@ -274,16 +299,11 @@ describe(__filename, () => {
       const cfaUai = "9994889A";
       await new CfaModel({ uai_etablissement: cfaUai }).save();
 
-      const effectifs = {
-        inscritsSansContrat: 1,
-        apprentis: 1,
-        abandons: 1,
-        rupturants: 5,
-      };
-      await seedDossiersApprenants(effectifs, { uai_etablissement: cfaUai });
+      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
 
+      // Check good api call
       const response = await httpClient.get("/api/effectifs/export-xlsx-data-lists", {
-        params: { date: new Date().toISOString(), effectif_indicateur: EFFECTIF_INDICATOR_NAMES.rupturants },
+        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.rupturants },
         responseType: "arraybuffer",
         headers: authHeader,
       });
@@ -291,7 +311,7 @@ describe(__filename, () => {
       const rupturantsList = parseXlsxHeaderStreamToJson(response.data, 4);
 
       assert.equal(response.status, 200);
-      assert.equal(rupturantsList.length, effectifs.rupturants);
+      assert.equal(rupturantsList.length, 8);
     });
   });
 
@@ -302,8 +322,10 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenantApprenti({
+        const randomStatut = createRandomDossierApprenant({
           ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
           niveau_formation: "1",
           niveau_formation_libelle: "1 (blabla)",
         });
@@ -311,19 +333,18 @@ describe(__filename, () => {
         await toAdd.save();
       }
 
-      const randomStatut = createRandomDossierApprenantApprenti({
+      const randomStatut = createRandomDossierApprenant({
         ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
         niveau_formation: "2",
         niveau_formation_libelle: "2 (blabla)",
       });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
-      const response = await httpClient.get(`/api/effectifs/niveau-formation`, {
-        params: {
-          date: new Date().toISOString(),
-          etablissement_num_region: filterQuery.etablissement_num_region,
-        },
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/niveau-formation?${searchParams}`, {
         headers: bearerToken,
       });
 
@@ -419,8 +440,10 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenantApprenti({
+        const randomStatut = createRandomDossierApprenant({
           ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
           niveau_formation: "1",
           niveau_formation_libelle: "1 (blabla)",
           libelle_long_formation: "a",
@@ -430,8 +453,10 @@ describe(__filename, () => {
         await toAdd.save();
       }
 
-      const randomStatut = createRandomDossierApprenantApprenti({
+      const randomStatut = createRandomDossierApprenant({
         ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
         niveau_formation: "2",
         niveau_formation_libelle: "2 (blabla)",
         libelle_long_formation: "b",
@@ -440,11 +465,8 @@ describe(__filename, () => {
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
-      const response = await httpClient.get(`/api/effectifs/formation`, {
-        params: {
-          date: new Date().toISOString(),
-          etablissement_num_region: filterQuery.etablissement_num_region,
-        },
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/formation?${searchParams}`, {
         headers: bearerToken,
       });
 
@@ -460,26 +482,27 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenantApprenti({
+        const randomStatut = createRandomDossierApprenant({
           ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
           annee_formation: 1,
         });
         const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
-      const randomStatut = createRandomDossierApprenantApprenti({
+      const randomStatut = createRandomDossierApprenant({
         ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
         annee_formation: 2,
       });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
-      const response = await httpClient.get(`/api/effectifs/annee-formation`, {
-        params: {
-          date: new Date().toISOString(),
-          etablissement_num_region: filterQuery.etablissement_num_region,
-        },
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/annee-formation?${searchParams}`, {
         headers: bearerToken,
       });
 
@@ -495,26 +518,27 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenantApprenti({
+        const randomStatut = createRandomDossierApprenant({
           ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
           uai_etablissement: "0762232N",
         });
         const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
-      const randomStatut = createRandomDossierApprenantApprenti({
+      const randomStatut = createRandomDossierApprenant({
         ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
         uai_etablissement: "0762232X",
       });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
-      const response = await httpClient.get(`/api/effectifs/cfa`, {
-        params: {
-          date: new Date().toISOString(),
-          etablissement_num_region: filterQuery.etablissement_num_region,
-        },
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/cfa?${searchParams}`, {
         headers: bearerToken,
       });
 
@@ -530,26 +554,27 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenantApprenti({
+        const randomStatut = createRandomDossierApprenant({
           ...filterQuery,
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
           siret_etablissement: "40239075100046",
         });
         const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
       }
 
-      const randomStatut = createRandomDossierApprenantApprenti({
+      const randomStatut = createRandomDossierApprenant({
         ...filterQuery,
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
         siret_etablissement: "40239075100099",
       });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
-      const response = await httpClient.get(`/api/effectifs/siret`, {
-        params: {
-          date: new Date().toISOString(),
-          etablissement_num_region: filterQuery.etablissement_num_region,
-        },
+      const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
+      const response = await httpClient.get(`/api/effectifs/siret?${searchParams}`, {
         headers: bearerToken,
       });
 
@@ -564,7 +589,9 @@ describe(__filename, () => {
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenantApprenti({
+        const randomStatut = createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceApprenti,
+          annee_scolaire: "2020-2021",
           etablissement_num_departement: "01",
           etablissement_nom_departement: "Ain",
         });
@@ -572,17 +599,17 @@ describe(__filename, () => {
         await toAdd.save();
       }
 
-      const randomStatut = createRandomDossierApprenantApprenti({
+      const randomStatut = createRandomDossierApprenant({
+        historique_statut_apprenant: historySequenceApprenti,
+        annee_scolaire: "2020-2021",
         etablissement_num_departement: "91",
         etablissement_nom_departement: "Essonne",
       });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
 
-      const response = await httpClient.get(`/api/effectifs/departement`, {
-        params: {
-          date: new Date().toISOString(),
-        },
+      const searchParams = `date=2020-10-10T00:00:00.000Z`;
+      const response = await httpClient.get(`/api/effectifs/departement?${searchParams}`, {
         headers: bearerToken,
       });
 
@@ -611,7 +638,7 @@ describe(__filename, () => {
       });
 
       const response = await httpClient.get("/api/effectifs/export-csv-repartition-effectifs-par-organisme", {
-        params: { date: new Date().toISOString(), etablissement_num_departement: "01" },
+        params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_departement: "01" },
         headers: authHeader,
       });
 
@@ -639,7 +666,7 @@ describe(__filename, () => {
       });
 
       const response = await httpClient.get("/api/effectifs/export-csv-repartition-effectifs-par-formation", {
-        params: { date: new Date().toISOString(), etablissement_num_departement: "01" },
+        params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_departement: "01" },
         headers: authHeader,
       });
 

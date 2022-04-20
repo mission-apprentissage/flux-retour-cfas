@@ -1,9 +1,10 @@
 const assert = require("assert").strict;
+const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const {
-  createRandomDossierApprenantAbandon,
-  createRandomDossierApprenantApprenti,
-  createRandomDossierApprenantInscritSansContrat,
-} = require("../../../data/randomizedSample");
+  historySequenceInscritToApprentiToAbandon,
+  historySequenceApprenti,
+  historySequenceInscritToApprenti,
+} = require("../../../data/historySequenceSamples");
 const { DossierApprenantModel } = require("../../../../src/common/model");
 const { EffectifsAbandons } = require("../../../../src/common/components/effectifs/abandons");
 
@@ -11,21 +12,33 @@ describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {
     const abandonsStatuts = [];
 
+    // Add 10 statuts with history sequence - full
     for (let index = 0; index < 10; index++) {
-      const randomStatut = createRandomDossierApprenantAbandon(statutsProps);
+      const randomStatut = createRandomDossierApprenant({
+        historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+        ...statutsProps,
+      });
       const toAdd = new DossierApprenantModel(randomStatut);
       abandonsStatuts.push(toAdd);
       await toAdd.save();
     }
 
+    // Add 5 statuts with history sequence - simple apprenti
     for (let index = 0; index < 5; index++) {
-      const randomStatut = createRandomDossierApprenantApprenti(statutsProps);
+      const randomStatut = createRandomDossierApprenant({
+        historique_statut_apprenant: historySequenceApprenti,
+        ...statutsProps,
+      });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
     }
 
+    // Add 15 statuts with history sequence - inscritToApprenti
     for (let index = 0; index < 15; index++) {
-      const randomStatut = createRandomDossierApprenantInscritSansContrat(statutsProps);
+      const randomStatut = createRandomDossierApprenant({
+        historique_statut_apprenant: historySequenceInscritToApprenti,
+        ...statutsProps,
+      });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
     }
@@ -36,10 +49,19 @@ describe(__filename, () => {
   const abandons = new EffectifsAbandons();
 
   describe("Abandons - getCountAtDate", () => {
+    it("gets count of abandons at one date", async () => {
+      await seedDossiersApprenants();
+
+      const date = new Date("2020-09-15T00:00:00.000+0000");
+      const abandonsCount = await abandons.getCountAtDate(date);
+
+      assert.equal(abandonsCount, 0);
+    });
+
     it("gets count of abandons at yet another date", async () => {
       await seedDossiersApprenants();
 
-      const date = new Date();
+      const date = new Date("2020-10-10T00:00:00.000+0000");
       const abandonsCount = await abandons.getCountAtDate(date);
 
       assert.equal(abandonsCount, 10);
@@ -58,7 +80,7 @@ describe(__filename, () => {
       const filters = { etablissement_num_region: "28" };
       await seedDossiersApprenants(filters);
 
-      const date = new Date();
+      const date = new Date("2020-10-10T00:00:00.000+0000");
       const abandonsCountForRegion = await abandons.getCountAtDate(date, filters);
 
       assert.equal(abandonsCountForRegion, 10);
@@ -72,7 +94,7 @@ describe(__filename, () => {
     it("gets list of abandons at date with data", async () => {
       const abandonsStatuts = await seedDossiersApprenants();
 
-      const date = new Date();
+      const date = new Date("2020-10-10T00:00:00.000+0000");
       const abandonsList = await abandons.getListAtDate(date);
 
       assert.equal(abandonsList.length, abandonsStatuts.length);
@@ -81,7 +103,7 @@ describe(__filename, () => {
     it("gets list of abandons at date with data - checks projection fields", async () => {
       const abandonsStatuts = await seedDossiersApprenants();
 
-      const date = new Date();
+      const date = new Date("2020-10-10T00:00:00.000+0000");
       const projection = {
         uai_etablissement: 1,
         nom_etablissement: 1,
@@ -113,7 +135,7 @@ describe(__filename, () => {
       const filters = { etablissement_num_region: "28" };
       const abandonsStatuts = await seedDossiersApprenants(filters);
 
-      const date = new Date();
+      const date = new Date("2020-10-10T00:00:00.000+0000");
       const abandonsList = await abandons.getListAtDate(date, filters);
 
       assert.equal(abandonsList.length, abandonsStatuts.length);

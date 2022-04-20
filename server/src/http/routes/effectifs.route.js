@@ -20,10 +20,6 @@ const omit = require("lodash.omit");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { toXlsxBuffer } = require("../../common/utils/exporterUtils");
-const {
-  getUnicityFieldsFromDossiersApprenantsList,
-  getUnicityFieldsFromDossierApprenant,
-} = require("../../common/domain/dossiersApprenants");
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -117,7 +113,6 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
           rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
           inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
           abandons: await effectifs.abandons.getCountAtDate(date, filters),
-          rupturantsNets: await effectifs.rupturantsNets.getCountAtDate(date, filters),
         };
         // cache the result
         await cache.set(cacheKey, JSON.stringify(response));
@@ -136,9 +131,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
     validateRequestQuery(
       Joi.object({
         date: Joi.date().required(),
-        effectif_indicateur: Joi.string()
-          .valid(...Object.values(EFFECTIF_INDICATOR_NAMES))
-          .required(),
+        effectif_indicateur: Joi.string().required(),
         ...commonEffectifsFilters,
       })
     ),
@@ -223,18 +216,6 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
             "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des abandons ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://calendly.com/melanie-raphael-mission-apprentissage/support-tableau-de-bord-de-l-apprentissage",
           ],
         ];
-
-      case EFFECTIF_INDICATOR_NAMES.rupturantsNets:
-        return [
-          ["Liste nominative des effectifs : en rupture et en abandon"],
-          [`${cfaInfos.nom} - UAI : ${cfaInfos.uai} - SIRET : ${cfaInfos.sirets.join(",")}`],
-          [
-            "Vous avez identifié des apprenants qui ne devraient pas figurer dans la liste des rupturants nets (en rupture et en abandon) ? Vérifiez que vous avez bien enregistré le nouveau contrat ou l'abandon dans votre logiciel de gestion.",
-          ],
-          [
-            "Vous avez une autre question ou vous avez besoin de contacter l'équipe du Tableau de bord de l'apprentissage ? Prendre un rendez-vous : https://calendly.com/melanie-raphael-mission-apprentissage/support-tableau-de-bord-de-l-apprentissage",
-          ],
-        ];
     }
   };
 
@@ -284,35 +265,19 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
         break;
 
       case EFFECTIF_INDICATOR_NAMES.abandons:
-        {
-          // Récupération des champs de la clé d'unicité pour les rupturants nets
-          const rupturantsNetsUnicityFields = getUnicityFieldsFromDossiersApprenantsList(
-            await effectifs.rupturantsNets.getListAtDate(date, filters, { projection })
-          );
-
-          effectifsFormattedAtDate = (await effectifs.abandons.getListAtDate(date, filters, { projection })).map(
-            (item) => ({
-              ...item,
-              statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
-              date_abandon: item.statut_apprenant_at_date.date_statut, // Specific for abandons indicateur
-              historique_statut_apprenant: JSON.stringify(
-                item.historique_statut_apprenant.map((item) => ({
-                  date: item.date_statut,
-                  statut: getStatutApprenantNameFromCode(item.valeur_statut),
-                }))
-              ),
-              // Identification des abandons provenant des ruptures de contrats
-              // Si les champs de la clé d'unicité est trouvé les champs de clés d'unicité des rupturants nets alors OUI / NON
-              abandon_provenant_rupture_contrat:
-                rupturantsNetsUnicityFields.some(
-                  (rupturantNetItem) =>
-                    JSON.stringify(rupturantNetItem) === JSON.stringify(getUnicityFieldsFromDossierApprenant(item))
-                ) === true
-                  ? "OUI"
-                  : "NON",
-            })
-          );
-        }
+        effectifsFormattedAtDate = (await effectifs.abandons.getListAtDate(date, filters, { projection })).map(
+          (item) => ({
+            ...item,
+            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+            date_abandon: item.statut_apprenant_at_date.date_statut, // Specific for abandons indicateur
+            historique_statut_apprenant: JSON.stringify(
+              item.historique_statut_apprenant.map((item) => ({
+                date: item.date_statut,
+                statut: getStatutApprenantNameFromCode(item.valeur_statut),
+              }))
+            ),
+          })
+        );
         break;
 
       case EFFECTIF_INDICATOR_NAMES.inscritsSansContrats:
@@ -354,21 +319,6 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
               Date.now()
                 ? `Moins de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`
                 : `Plus de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`,
-          })
-        );
-        break;
-
-      case EFFECTIF_INDICATOR_NAMES.rupturantsNets:
-        effectifsFormattedAtDate = (await effectifs.rupturantsNets.getListAtDate(date, filters, { projection })).map(
-          (item) => ({
-            ...item,
-            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
-            historique_statut_apprenant: JSON.stringify(
-              item.historique_statut_apprenant.map((item) => ({
-                date: item.date_statut,
-                statut: getStatutApprenantNameFromCode(item.valeur_statut),
-              }))
-            ),
           })
         );
         break;
