@@ -40,7 +40,7 @@ class Cfa {
 
     return new Cfa({
       ...props,
-      accessToken,
+      access_token: accessToken,
       nom_tokenized: this.createTokenizedNom(props.nom),
       private_url: `${config.publicUrl}/cfas/${accessToken}`,
       created_at: new Date(),
