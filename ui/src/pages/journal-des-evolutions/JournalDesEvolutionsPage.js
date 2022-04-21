@@ -45,10 +45,10 @@ const JournalDesEvolutions = () => {
       <Section marginBottom="10w">
         <HStack spacing="12w">
           <Box flex="1">
-            {dataList.map((item) => {
+            {dataList.map((item, index) => {
               const date = format(new Date(item.date), "dd MMMM yyyy", { locale: fr });
               return (
-                <Box paddingY="3w" key={`${date}_${item.title}_${item.type}`}>
+                <Box paddingY="3w" key={index}>
                   <Heading as="h2" color="grey.600" fontSize="beta" id={item.date}>
                     Le {date}
                   </Heading>
