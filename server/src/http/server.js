@@ -25,6 +25,7 @@ const demandeBranchementErpRouter = require("./routes/demande-branchement-erp.ro
 const cacheRouter = require("./routes/cache.route");
 const updatePasswordRouter = require("./routes/update-password.route");
 const usersRouter = require("./routes/users.route");
+const reseauxCfasRouter = require("./routes/reseaux-cfas.route");
 
 module.exports = async (components) => {
   const app = express();
@@ -77,6 +78,7 @@ module.exports = async (components) => {
 
   // admin routes
   app.use("/api/users", requireJwtAuthentication, adminOnly, usersRouter(components));
+  app.use("/api/reseaux-cfas", requireJwtAuthentication, adminOnly, reseauxCfasRouter(components));
   app.use("/api/cache", requireJwtAuthentication, adminOnly, cacheRouter(components));
   app.use("/api/config", requireJwtAuthentication, adminOnly, configRouter());
 

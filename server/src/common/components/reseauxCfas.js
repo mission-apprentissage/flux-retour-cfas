@@ -13,5 +13,8 @@ const create = async ({ nom_reseau, nom_etablissement, uai, siret }) => {
 };
 
 module.exports = () => ({
+  getAll: async () => {
+    return await ReseauCfaModel.find().lean();
+  },
   create,
 });
