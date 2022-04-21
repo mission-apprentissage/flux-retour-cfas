@@ -1,6 +1,7 @@
 import { Box, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 const Logo = ({ scale = 1 }) => {
   let fontSize = "0.7875rem";
@@ -15,7 +16,7 @@ const Logo = ({ scale = 1 }) => {
   let afterPaddingTop = "1.65625rem";
 
   return (
-    <Box scale={scale} paddingY="3w">
+    <Box scale={scale} paddingY="3w" as={NavLink} to="/">
       <Text
         display="inline-block"
         color="grey.800"

@@ -1,10 +1,8 @@
 import { Flex, Heading, Link, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { productName } from "../../../common/constants/productName";
+import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../constants/product";
 import Section from "../Section/Section";
-
-const CONTACT_ADDRESS = "tableau-de-bord@apprentissage.beta.gouv.fr";
 
 const ContactSection = () => {
   return (
@@ -14,7 +12,7 @@ const ContactSection = () => {
       </Heading>
       <Flex marginTop="1w">
         <Text color="grey.800">
-          Le service {productName} est porté par la Mission interministérielle pour l’apprentissage. Vous avez besoin
+          Le service {PRODUCT_NAME} est porté par la Mission interministérielle pour l’apprentissage. Vous avez besoin
           d’en savoir plus sur les données collectées, les différents types d’accès aux données, etc... Contacter
           l’équipe&nbsp;:&nbsp;
           <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">

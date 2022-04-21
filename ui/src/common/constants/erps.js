@@ -2,6 +2,8 @@ export const ERP_STATE = {
   ready: "ready",
   ongoing: "ongoing",
   coming: "coming",
+  otherErp: "otherErp",
+  noErp: "noErp",
 };
 
 export const ERP_STATE_COLOR = {
@@ -29,4 +31,10 @@ export const ERPS = [
   { name: "FCA Manager", state: ERP_STATE.ongoing },
   { name: "Hyperplanning", state: ERP_STATE.coming },
   { name: "Valsoftware", state: ERP_STATE.coming },
+];
+
+export const ERPS_FORM_CASES = [
+  ...ERPS,
+  { name: "Autre ERP", state: ERP_STATE.otherErp },
+  { name: "Je n'ai pas d'ERP", state: ERP_STATE.noErp },
 ];

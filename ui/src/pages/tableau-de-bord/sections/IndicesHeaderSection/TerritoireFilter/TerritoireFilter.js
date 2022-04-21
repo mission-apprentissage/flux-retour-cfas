@@ -34,7 +34,7 @@ const TerritoireFilter = ({
 
   const tabLabels = [`Région (${regions.length})`, `Département (${departements.length})`];
 
-  const buttonLabel = filters.region?.nom || filters.departement?.nom || "Toute la France";
+  const buttonLabel = filters.region?.nom || filters.departement?.nom || "En France";
 
   return (
     <div>

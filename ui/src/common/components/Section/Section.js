@@ -1,16 +1,9 @@
-import { Box, chakra } from "@chakra-ui/react";
+import { Box, chakra, Container } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 
 const Section = ({ withShadow = false, children, ...otherProps }) => {
-  const style = {
-    width: "100%",
-    margin: "auto",
-    maxWidth: "1440px",
-    paddingX: "8w",
-    backgroundColor: "white",
-  };
   return (
-    <chakra.section position="relative" {...style} {...otherProps}>
+    <chakra.section position="relative" {...otherProps}>
       {withShadow && (
         <Box
           position="absolute"
@@ -19,9 +12,9 @@ const Section = ({ withShadow = false, children, ...otherProps }) => {
           width="100%"
           height="16px"
           background="linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0, 0, 0, 0) 100%)"
-        ></Box>
+        />
       )}
-      {children}
+      <Container maxWidth="1230px">{children}</Container>
     </chakra.section>
   );
 };

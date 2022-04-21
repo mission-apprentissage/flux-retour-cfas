@@ -12,10 +12,10 @@ const LoginBlock = ({ onSubmit }) => {
   return (
     <Box padding="4w" background="white" borderColor="bluefrance" border="1px solid" minWidth="420px">
       <LoginForm onSubmit={onSubmit} />
-      <Text marginTop="4w" color="grey.800">
+      <Text marginTop="6w" color="grey.800">
         Vous n&apos;avez pas reçu vos identifiants de connexion ?
       </Text>
-      <Button variant="secondary" marginTop="2w" onClick={onOpen}>
+      <Button variant="secondary" marginTop="1w" onClick={onOpen}>
         Demander mes identifiants
       </Button>
       <AskIdentifiantsModal isOpen={isOpen} onClose={onClose} />

@@ -31,7 +31,7 @@ describe("Domain CFA", () => {
       assert.deepEqual(initialPropsData, cfaProps);
       assert.equal(createdCfaEntity.nom_tokenized, Cfa.createTokenizedNom(cfaProps.nom));
       assert.equal(createdCfaEntity.private_url !== null, true);
-      assert.equal(createdCfaEntity.accessToken !== null, true);
+      assert.equal(createdCfaEntity.access_token !== null, true);
       assert.equal(createdCfaEntity.created_at !== null, true);
       assert.equal(createdCfaEntity.updated_at, null);
     });

@@ -41,12 +41,18 @@ NavItem.propTypes = {
 const NavBar = () => {
   const [auth] = useAuth();
   const isCfa = hasUserRoles(auth, roles.cfa);
-
+  const isLoggedIn = Boolean(auth?.sub);
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
-        {!isCfa && <NavItem to={NAVIGATION_PAGES.TableauDeBord.path}>Indices en temps réel</NavItem>}
+        {!isLoggedIn && <NavItem to={NAVIGATION_PAGES.Accueil.path}>Accueil</NavItem>}
+        {!isCfa && !isLoggedIn ? (
+          <NavItem to={NAVIGATION_PAGES.ExplorerLesIndicateurs.path}>Indicateurs en temps réel</NavItem>
+        ) : (
+          <NavItem to={NAVIGATION_PAGES.TableauDeBord.path}>Indicateurs en temps réel</NavItem>
+        )}
         <NavItem to={NAVIGATION_PAGES.ComprendreLesDonnees.path}>{NAVIGATION_PAGES.ComprendreLesDonnees.title}</NavItem>
+        <NavItem to={NAVIGATION_PAGES.JournalDesEvolutions.path}>{NAVIGATION_PAGES.JournalDesEvolutions.title}</NavItem>
       </HStack>
     </Section>
   );

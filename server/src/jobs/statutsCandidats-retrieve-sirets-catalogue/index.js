@@ -4,7 +4,7 @@ const cliProgress = require("cli-progress");
 const { DossierApprenantModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-const { getFormations2021 } = require("../../common/apis/apiCatalogueMna");
+const { getFormations } = require("../../common/apis/apiCatalogueMna");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -37,7 +37,7 @@ runScript(async () => {
     loadingBar.increment();
 
     // Récupère les sirets depuis le catalogue à partir du CFD + UAI étant dans l'un des 3 types d'uais des formations
-    const infoCatalog = await getFormations2021({
+    const infoCatalog = await getFormations({
       query: {
         published: true,
         cfd: currentUaiCfd.cfd,

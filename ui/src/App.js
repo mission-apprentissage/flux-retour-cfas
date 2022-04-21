@@ -4,20 +4,22 @@ import { BrowserRouter as Router, Route, Switch, useLocation } from "react-route
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
+import ComprendreLesDonneesPage from "./pages/comprendre-les-donnees/ComprendreLesDonneesPage";
+import ExplorerLesIndicateursPage from "./pages/explorer-les-indicateurs/ExplorerLesIndicateursPage";
 import GestionUtilisateursPage from "./pages/gestion-utilisateurs/GestionUtilisateursPage";
 import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
+import JournalDesEvolutionsPage from "./pages/journal-des-evolutions/JournalDesEvolutionsPage";
 import LoginPage from "./pages/login/LoginPage";
 import { ModifierMotDePassePage } from "./pages/modifier-mot-de-passe";
+import {
+  CommentConsulterEtVerifierLesDonneesPage,
+  CommentTransmettreVosDonneesPage,
+  OrganismeFormationPage,
+  SupportPage,
+} from "./pages/organisme-formation";
 import StatistiquesPage from "./pages/statistiques/StatistiquesPage";
-import SupportPage from "./pages/support/SupportPage";
-import ComprendreLesDonnees from "./pages/tableau-de-bord/ComprendreLesDonnees";
 import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import CfaPrivatePage from "./pages/tableau-de-bord/views/CfaPrivateView";
-import {
-  ConsulterVosDonneesPage,
-  TransmettreConsulterVosDonneesPage,
-  TransmettreVosDonneesPage,
-} from "./pages/transmettre-consulter-vos-donnees";
 
 const ScrollToTopOnRouteChange = () => {
   const location = useLocation();
@@ -37,17 +39,25 @@ const App = () => {
         {/* Public pages */}
         <Route exact path="/" component={HomePage} />
         <Route exact path={NAVIGATION_PAGES.Statistiques.path} component={StatistiquesPage} />
-        <Route exact path={NAVIGATION_PAGES.Support.path} component={SupportPage} />
         <Route exact path={NAVIGATION_PAGES.Login.path} component={LoginPage} />
+
+        {/* Organisme section & pages */}
+        <Route exact path={NAVIGATION_PAGES.OrganismeFormation.path} component={OrganismeFormationPage} />
         <Route
           exact
-          path={NAVIGATION_PAGES.TransmettreEtConsulterVosDonnees.path}
-          component={TransmettreConsulterVosDonneesPage}
+          path={NAVIGATION_PAGES.OrganismeFormation.transmettre.path}
+          component={CommentTransmettreVosDonneesPage}
         />
-        <Route path={NAVIGATION_PAGES.ConsulterVosDonnees.path} exact component={ConsulterVosDonneesPage} />
-        <Route path={NAVIGATION_PAGES.TransmettreVosDonnees.path} exact component={TransmettreVosDonneesPage} />
-        <Route path={NAVIGATION_PAGES.ComprendreLesDonnees.path} exact component={ComprendreLesDonnees} />
-        <Route path={NAVIGATION_PAGES.ConsulterVosDonnees.path} exact component={ConsulterVosDonneesPage} />
+        <Route
+          exact
+          path={NAVIGATION_PAGES.OrganismeFormation.consulter.path}
+          component={CommentConsulterEtVerifierLesDonneesPage}
+        />
+        <Route exact path={NAVIGATION_PAGES.OrganismeFormation.aide.path} component={SupportPage} />
+
+        <Route path={NAVIGATION_PAGES.ComprendreLesDonnees.path} exact component={ComprendreLesDonneesPage} />
+        <Route path={NAVIGATION_PAGES.ExplorerLesIndicateurs.path} exact component={ExplorerLesIndicateursPage} />
+        <Route path={NAVIGATION_PAGES.JournalDesEvolutions.path} exact component={JournalDesEvolutionsPage} />
 
         {/* Secured By Token Pages */}
         <Route exact path={`${NAVIGATION_PAGES.Cfa.path}/:accessToken`} component={CfaPrivatePage} />

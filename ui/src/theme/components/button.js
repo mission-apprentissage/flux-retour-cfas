@@ -90,6 +90,28 @@ export const Button = {
         background: "grey.100",
       },
     },
+    badge: {
+      ...baseStyle,
+      color: "bluefrance",
+      backgroundColor: "#E3E3FD",
+      height: "30px",
+      borderRadius: "40px",
+      fontSize: "zeta",
+      _hover: {
+        background: "#CCCCFF",
+      },
+    },
+    badgeSelected: {
+      ...baseStyle,
+      color: "white",
+      backgroundColor: "bluefrance",
+      height: "30px",
+      borderRadius: "40px",
+      fontSize: "zeta",
+      _hover: {
+        background: "bluefrance_hover",
+      },
+    },
   },
   defaultProps: {
     variant: "unstyled",

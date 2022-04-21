@@ -4,7 +4,7 @@ const { runScript } = require("../../scriptWrapper");
 const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DossierApprenantModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { getFormations2021 } = require("../../../common/apis/apiCatalogueMna");
+const { getFormations } = require("../../../common/apis/apiCatalogueMna");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -26,7 +26,7 @@ runScript(async () => {
     loadingBar.increment();
 
     // Call Catalog API By - uai_formation or etablissement_gestionnaire_uai or etablissement_formateur_uai
-    const formationsForUai = await getFormations2021({
+    const formationsForUai = await getFormations({
       query: {
         published: true,
         $or: [

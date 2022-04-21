@@ -2,9 +2,9 @@ import { Box, Divider, Flex, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Badge, Section } from "../../../common/components";
-import { ERP_STATE_COLOR, ERPS } from "../../../common/constants/erps";
-import { productName } from "../../../common/constants/productName";
+import { Section } from "../../../common/components";
+import { ERPS } from "../../../common/constants/erps";
+import { Checkbox } from "../../../theme/components/icons";
 
 const Count = ({ count, label }) => {
   return (
@@ -25,43 +25,70 @@ Count.propTypes = {
 const ApercuDesDonneesSection = () => {
   return (
     <Section background="galt" paddingY="4w">
-      <Heading as="h2">Aperçu des données</Heading>
-      <HStack marginTop="3w" spacing="8w" fontSize="gamma" color="grey.800">
-        <Count count="270 314" label="Apprentis" />
-        <Count count="10 250" label="Jeunes sans contrat" />
-        <Count count="7 183" label="Rupturants" />
-        <Count count="17 177" label="Abandons" />
-        <Count count="2 039" label="Organismes de formation" />
-      </HStack>
+      <Box>
+        <Heading as="h2">Aperçu des données</Heading>
+        <Text fontStyle="italic" color="grey.800">
+          Au national le 21 avril 2022
+        </Text>
+        <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
+          <Count count="2 787" label="Organisme de formation" />
+          <Count count="329 427" label="Apprentis" />
+          <Count count="5 863" label="Jeunes sans contrat" />
+          <Count count="1 189" label="Rupturants" />
+          <Count count="36 605" label="Abandons" />
+        </HStack>
 
-      <Divider marginY="3w" />
+        <Divider marginY="3w" />
 
-      <Text fontWeight="700" color="grey.800" fontSize="gamma">
-        Aujourd&apos;hui, le {productName} est interfaçable avec :
-      </Text>
-      <Flex justifyContent="space-between">
-        <HStack spacing="3w" paddingY="3v">
+        <Text fontWeight="700" color="grey.800" fontSize="gamma">
+          Aujourd&apos;hui, le tableau de bord est interfaçable avec :
+        </Text>
+        <HStack spacing="1w" paddingY="3v">
           {ERPS.map(({ name, state }) => {
             return (
-              <Flex key={name} fontSize="epsilon" color="grey.800" alignItems="center">
-                <Box
-                  background={ERP_STATE_COLOR[state]}
-                  height="12px"
-                  width="12px"
-                  borderRadius="50%"
-                  marginRight="1w"
-                />
-                <strong>{name}</strong>
-              </Flex>
+              <Box key={name}>
+                {state != "coming" && (
+                  <Box fontSize="epsilon" color="grey.800" alignItems="center">
+                    <Checkbox color="#03053D" />
+                    <Text marginLeft="1w" as="span">
+                      <strong>
+                        {name}
+                        {state === "ongoing" && <Text as="span"> (en cours)</Text>}
+                      </strong>
+                    </Text>
+                  </Box>
+                )}
+              </Box>
             );
           })}
+          <Flex>
+            <Text color="grey.600" fontWeight={700}>
+              À venir :
+            </Text>
+            {ERPS.map(({ name, state }) => {
+              return (
+                <Box key={name}>
+                  {state === "coming" && (
+                    <Box fontSize="epsilon" color="grey.800" marginTop="-2px" marginLeft="1w">
+                      <Checkbox
+                        marginLeft="1v"
+                        color="white"
+                        bg="white"
+                        border="2px solid"
+                        borderColor="#03053D"
+                        borderRadius="20px"
+                      />
+                      <Text as="span" marginLeft="1w">
+                        <strong>{name}</strong>
+                      </Text>
+                    </Box>
+                  )}
+                </Box>
+              );
+            })}
+          </Flex>
         </HStack>
-        <HStack spacing="2w">
-          <Badge backgroundColor={ERP_STATE_COLOR.ready}>opérationnel</Badge>
-          <Badge backgroundColor={ERP_STATE_COLOR.ongoing}>en cours</Badge>
-          <Badge backgroundColor={ERP_STATE_COLOR.coming}>à venir</Badge>
-        </HStack>
-      </Flex>
+      </Box>
     </Section>
   );
 };

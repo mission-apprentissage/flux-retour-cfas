@@ -30,6 +30,11 @@ module.exports = new Schema({
     default: null,
     description: "Nombre d'apprentis sur la dernière année",
   },
+  is_ready_co_construction: {
+    type: Boolean,
+    default: false,
+    description: "Indique si l'établissement souhaite participer à la construction du nouvel ERP",
+  },
   created_at: {
     type: Date,
     required: true,

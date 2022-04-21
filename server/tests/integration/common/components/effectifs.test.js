@@ -283,6 +283,53 @@ describe(__filename, () => {
     });
   });
 
+  describe("getEffectifsCountBySiretAtDate", () => {
+    it("Permet de récupérer les effectifs par Siret à une date donnée pour une formation", async () => {
+      const { getEffectifsCountBySiretAtDate } = await effectifs();
+
+      const filterQuery = { formation_cfd: "77929544300013" };
+      const cfa1 = {
+        siret_etablissement: "40239075100046",
+        nom_etablissement: "CFA 1",
+      };
+      const cfa2 = {
+        siret_etablissement: "40239075100099",
+        nom_etablissement: "CFA 2",
+      };
+      await seedDossiersApprenants({ ...filterQuery, ...cfa1 });
+      await seedDossiersApprenants({ formation_cfd: "12345", ...cfa1 });
+      await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
+      await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const expectedResult = [
+        {
+          ...cfa1,
+          effectifs: {
+            apprentis: 5,
+            inscritsSansContrat: 15,
+            rupturants: 0,
+            abandons: 10,
+          },
+        },
+        {
+          ...cfa2,
+          effectifs: {
+            apprentis: 10,
+            inscritsSansContrat: 30,
+            rupturants: 0,
+            abandons: 20,
+          },
+        },
+      ];
+
+      const effectifsByCfa = await getEffectifsCountBySiretAtDate(date, filterQuery);
+      // we will sort results because we don't care of the order in the test
+      const sortBySiret = (a, b) => (a.siret_etablissement > b.siret_etablissement ? 1 : -1);
+      assert.deepEqual(effectifsByCfa.sort(sortBySiret), expectedResult);
+    });
+  });
+
   describe("getEffectifsCountByDepartementAtDate", () => {
     it("Permet de récupérer les effectifs par departement à une date donnée", async () => {
       const { getEffectifsCountByDepartementAtDate } = await effectifs();

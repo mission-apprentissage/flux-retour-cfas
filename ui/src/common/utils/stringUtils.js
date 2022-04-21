@@ -20,3 +20,8 @@ export const formatNumber = (number) => {
 
 export const formatSiretSplitted = (siret) =>
   validateSiret(siret) ? `${siret.substr(0, 9)} ${siret.substr(9, siret.length)}` : "SIRET INVALIDE";
+
+export const capitalize = (str) => {
+  const firstLetter = str.charAt(0);
+  return `${firstLetter.toUpperCase()}${str.substr(1)}`;
+};
