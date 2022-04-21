@@ -31,26 +31,21 @@ describe(__filename, () => {
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
-      await components.reseauxCfas.create({
-        nom_reseau: "RESEAU_TEST_1",
-        nom_etablissement: "Etablissement de test 1",
-        uai: "0670141P",
-      });
-      await components.reseauxCfas.create({
-        nom_reseau: "RESEAU_TEST_2",
-        nom_etablissement: "Etablissement de test 2",
-        uai: "0670141U",
-      });
+      const reseauCfa1 = { nom_reseau: "RESEAU_TEST_1", nom_etablissement: "Etablissement de test 1", uai: "0670141P" };
+      const reseauCfa2 = { nom_reseau: "RESEAU_TEST_2", nom_etablissement: "Etablissement de test 2", uai: "0670141U" };
+      await components.reseauxCfas.create(reseauCfa1);
+      await components.reseauxCfas.create(reseauCfa2);
+
       const response = await httpClient.get("/api/reseaux-cfas", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       assert.equal(response.status, 200);
-      assert.equal(response.data[0].nom_reseau, "RESEAU_TEST_1");
-      assert.equal(response.data[0].nom_etablissement, "Etablissement de test 1");
-      assert.equal(response.data[0].uai, "0670141P");
-      assert.equal(response.data[1].nom_reseau, "RESEAU_TEST_2");
-      assert.equal(response.data[1].nom_etablissement, "Etablissement de test 2");
-      assert.equal(response.data[1].uai, "0670141U");
+      assert.equal(response.data[0].nom_reseau, reseauCfa1.nom_reseau);
+      assert.equal(response.data[0].nom_etablissement, reseauCfa1.nom_etablissement);
+      assert.equal(response.data[0].uai, reseauCfa1.uai);
+      assert.equal(response.data[1].nom_reseau, reseauCfa2.nom_reseau);
+      assert.equal(response.data[1].nom_etablissement, reseauCfa2.nom_etablissement);
+      assert.equal(response.data[1].uai, reseauCfa2.uai);
     });
   });
 });
