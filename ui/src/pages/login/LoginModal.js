@@ -3,9 +3,12 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import ModalClosingButton from "../../common/components/ModalClosingButton/ModalClosingButton";
+import useLogin from "../../common/hooks/useLogin";
 import LoginBlock from "./LoginBlock";
 
 const LoginModal = ({ isOpen, onClose }) => {
+  const [login] = useLogin();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalOverlay />
@@ -18,7 +21,7 @@ const LoginModal = ({ isOpen, onClose }) => {
         </ModalHeader>
         <ModalClosingButton />
         <ModalBody paddingX="8w" marginBottom="10w">
-          <LoginBlock />
+          <LoginBlock onSubmit={login} />
         </ModalBody>
       </ModalContent>
     </Modal>
@@ -28,6 +31,12 @@ const LoginModal = ({ isOpen, onClose }) => {
 LoginModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  history: PropTypes.shape({
+    location: PropTypes.shape({
+      search: PropTypes.string,
+    }).isRequired,
+    push: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 export default LoginModal;

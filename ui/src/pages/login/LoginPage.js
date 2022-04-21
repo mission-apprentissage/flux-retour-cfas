@@ -1,28 +1,13 @@
 import { Heading, HStack, Text } from "@chakra-ui/react";
-import PropTypes from "prop-types";
-import queryString from "query-string";
 import React from "react";
 
 import { BreadcrumbNav, Page, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import useAuth from "../../common/hooks/useAuth";
-import { _post } from "../../common/httpClient";
+import useLogin from "../../common/hooks/useLogin";
 import LoginBlock from "./LoginBlock";
 
-const LoginPage = ({ history }) => {
-  const [, setAuth] = useAuth();
-  const pathToRedirectTo = queryString.parse(history.location.search)?.redirect || "/";
-
-  const login = async (values, { setStatus }) => {
-    try {
-      const { access_token } = await _post("/api/login", values);
-      setAuth(access_token);
-      history.push(pathToRedirectTo);
-    } catch (e) {
-      console.error(e);
-      setStatus({ error: e.prettyMessage });
-    }
-  };
+const LoginPage = () => {
+  const [login] = useLogin();
 
   return (
     <Page>
@@ -44,15 +29,6 @@ const LoginPage = ({ history }) => {
       </Section>
     </Page>
   );
-};
-
-LoginPage.propTypes = {
-  history: PropTypes.shape({
-    location: PropTypes.shape({
-      search: PropTypes.string,
-    }).isRequired,
-    push: PropTypes.func.isRequired,
-  }).isRequired,
 };
 
 export default LoginPage;
