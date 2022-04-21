@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-import { ERP_STATE } from "../../../common/constants/erps";
+import { ERP_STATE } from "../../../../common/constants/erps";
 import DemandeBranchementErpForm from "./DemandeBranchementErpForm";
 import useSubmitDemandeBranchementErp, { SUBMIT_STATE } from "./useSubmitDemandeBranchementErp";
 
@@ -31,9 +31,8 @@ Message.propTypes = {
   message: PropTypes.string.isRequired,
 };
 
-const TransmettreVosDonneesFormBlock = () => {
+const DemandeBranchementErpFormBlock = () => {
   const { submitState, erpState, submitDemandeBranchementErp } = useSubmitDemandeBranchementErp();
-
   if (submitState === SUBMIT_STATE.success) {
     if (erpState === ERP_STATE.ongoing) {
       return (
@@ -44,12 +43,21 @@ const TransmettreVosDonneesFormBlock = () => {
         />
       );
     }
-    if (erpState === ERP_STATE.coming) {
+    if (erpState === ERP_STATE.coming || erpState === ERP_STATE.otherErp) {
       return (
         <Message
           iconClassName="ri-checkbox-circle-fill"
           title="Vos informations ont bien été envoyées"
           message="Vous serez tenu informé de l’évolution des travaux d’interfaçage avec votre ERP."
+        />
+      );
+    }
+    if (erpState === ERP_STATE.noErp) {
+      return (
+        <Message
+          iconClassName="ri-checkbox-circle-fill"
+          title="Vos informations ont bien été envoyées"
+          message="Vous serez tenu informé de l’ouverture du nouveau service."
         />
       );
     }
@@ -65,18 +73,16 @@ const TransmettreVosDonneesFormBlock = () => {
         />
       );
     }
-    if (erpState === ERP_STATE.coming) {
-      return (
-        <Message
-          iconClassName="ri-close-circle-fill"
-          title="Nous avons rencontré une erreur lors de la soumission de vos informations"
-          message="Merci de réessayer ultérieurement."
-        />
-      );
-    }
+    return (
+      <Message
+        iconClassName="ri-close-circle-fill"
+        title="Nous avons rencontré une erreur lors de la soumission de vos informations"
+        message="Merci de réessayer ultérieurement."
+      />
+    );
   }
 
   return <DemandeBranchementErpForm onSubmit={submitDemandeBranchementErp} />;
 };
 
-export default TransmettreVosDonneesFormBlock;
+export default DemandeBranchementErpFormBlock;

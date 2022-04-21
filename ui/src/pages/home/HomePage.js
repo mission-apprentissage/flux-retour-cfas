@@ -1,13 +1,11 @@
-import { Box, Flex, Heading, HStack, Tag, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, Image, Text } from "@chakra-ui/react";
 import React from "react";
 import { Redirect } from "react-router";
-import { NavLink } from "react-router-dom";
 
 import { hasUserRoles, roles } from "../../common/auth/roles";
-import { Footer, Header, LinkCard, Section } from "../../common/components";
-import ContactSection from "../../common/components/ContactSection/ContactSection";
+import { LinkCard, Page, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import { productName } from "../../common/constants/productName";
+import { PRODUCT_NAME } from "../../common/constants/product";
 import useAuth from "../../common/hooks/useAuth";
 import dashboardIllustration from "./dashboard-illustration.svg";
 import ApercuDesDonneesSection from "./sections/ApercuDesDonneesSection";
@@ -21,54 +19,43 @@ const HomePage = () => {
   }
 
   return (
-    <>
-      <Header withText={false} />
-      <Section paddingY="4w">
-        <Flex>
-          <div>
-            <Tag marginBottom="1w" backgroundColor="bluefrance" color="white">
-              beta
-            </Tag>
-            <Heading as="h1" fontSize="40px">
-              Le {productName}
-            </Heading>
-            <Text fontSize="beta" color="grey.800" marginTop="1w">
-              Mettre à disposition des <strong>différents acteurs</strong> les <strong>données clés</strong> de
-              l&apos;apprentissage en <strong>temps réel</strong>
-            </Text>
-          </div>
-          <img src={dashboardIllustration} alt="illustration tableau de bord" />
-        </Flex>
-        <HStack spacing="3w" marginTop="6w" alignItems="stretch">
-          <LinkCard linkText={`Accéder au ${productName}`} linkHref={NAVIGATION_PAGES.Login.path}>
-            Vous êtes une <strong>Institution ou une organisation professionnelle</strong> (OPCO, branche, etc...)
-          </LinkCard>
-          <LinkCard
-            linkText="Transmettre et consulter vos données"
-            linkHref={NAVIGATION_PAGES.TransmettreEtConsulterVosDonnees.path}
-          >
-            Vous êtes un{" "}
-            <strong>
-              organisme de formation en
-              <br />
-              apprentissage
-            </strong>
-          </LinkCard>
-        </HStack>
+    <Page>
+      <Section withShadow paddingY="4w">
+        <Box>
+          <Flex>
+            <Box flex="1">
+              <Heading as="h1" fontSize="40px">
+                Le {PRODUCT_NAME}
+              </Heading>
+              <Text fontSize="beta" color="grey.800" marginTop="4w">
+                Mettre à disposition des <strong>différents acteurs</strong> <br />
+                les <strong>données clés</strong> de l&apos;apprentissage en <strong>temps réel</strong>
+              </Text>
+            </Box>
+            <Image src={dashboardIllustration} alt="illustration tableau de bord" paddingBottom="3w" />
+          </Flex>
+          <HStack spacing="3w" _hover={{ cursor: "pointer" }}>
+            <LinkCard linkHref={NAVIGATION_PAGES.Login.path}>
+              Vous êtes une{" "}
+              <strong>
+                institution ou une organisation <br />
+                professionnelle{" "}
+              </strong>
+              (OPCO, branche, etc...)
+            </LinkCard>
+            <LinkCard linkHref={NAVIGATION_PAGES.OrganismeFormation.path}>
+              Vous êtes un{" "}
+              <strong>
+                organisme de formation <br />
+                en apprentissage
+              </strong>
+            </LinkCard>
+          </HStack>
+        </Box>
       </Section>
-
       <ApercuDesDonneesSection />
       <RgpdSection marginTop="6w" />
-
-      <Section paddingY="4w">
-        <Flex alignItems="center">
-          <Box as="i" paddingRight="1w" className="ri-arrow-right-line" />
-          <NavLink to={NAVIGATION_PAGES.DonneesPersonnelles.path}>en savoir plus</NavLink>
-        </Flex>
-      </Section>
-      <ContactSection />
-      <Footer />
-    </>
+    </Page>
   );
 };
 

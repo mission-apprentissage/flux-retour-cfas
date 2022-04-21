@@ -16,12 +16,12 @@ const Question = ({ question, answer }) => {
           paddingTop="2px"
           className={showAnswer ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
         />
-        <Text fontSize="beta" fontWeight="700">
+        <Text fontSize="gamma" fontWeight="700">
           {question}
         </Text>
       </Flex>
       {showAnswer && (
-        <Box paddingX="3w" paddingY="1w">
+        <Box paddingX="3w" fontSize="epsilon" paddingY="1w">
           {answer}
         </Box>
       )}
@@ -31,6 +31,6 @@ const Question = ({ question, answer }) => {
 
 Question.propTypes = {
   question: PropTypes.string.isRequired,
-  answer: PropTypes.string.isRequired,
+  answer: PropTypes.object.isRequired,
 };
 export default Question;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { ERPS } from "../../../common/constants/erps";
-import { _post } from "../../../common/httpClient";
+import { ERPS_FORM_CASES } from "../../../../common/constants/erps";
+import { _post } from "../../../../common/httpClient";
 
 export const SUBMIT_STATE = {
   waiting: "waiting",
@@ -11,18 +11,19 @@ export const SUBMIT_STATE = {
 
 const useSubmitDemandeBranchementErp = () => {
   const [submitState, setSubmitState] = useState(SUBMIT_STATE.waiting);
-  const [erpState, setErpState] = useState(ERPS[0].state);
+  const [erpState, setErpState] = useState(ERPS_FORM_CASES[0].state);
 
   const submitDemandeBranchementErp = async (formData) => {
     try {
       await _post("/api/demande-branchement-erp", {
-        erp: ERPS[formData.erpIndex - 1].name,
+        erp: formData.autre_erp_nom !== "" ? formData.autre_erp_nom : ERPS_FORM_CASES[formData.erpIndex - 1].name,
         nom_organisme: formData.nom_organisme,
         uai_organisme: formData.uai_organisme,
         email_demandeur: formData.email_demandeur,
-        nb_apprentis: formData.nb_apprentis,
+        nb_apprentis: `${formData.nb_apprentis}`,
+        is_ready_co_construction: formData.is_ready_co_construction ?? false,
       });
-      setErpState(ERPS[formData.erpIndex - 1].state);
+      setErpState(ERPS_FORM_CASES[formData.erpIndex - 1].state);
       setSubmitState(SUBMIT_STATE.success);
     } catch (err) {
       setSubmitState(SUBMIT_STATE.fail);

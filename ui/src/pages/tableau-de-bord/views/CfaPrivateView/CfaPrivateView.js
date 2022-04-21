@@ -16,7 +16,7 @@ const CfaPrivateView = ({ cfaUai }) => {
 
   return (
     <Page>
-      <Section backgroundColor="galt" paddingY="4w" withShadow>
+      <Section withShadow backgroundColor="galt" paddingY="4w">
         <Heading as="h1" variant="h1" marginBottom="1w">
           Visualiser les indices en temps réel
         </Heading>

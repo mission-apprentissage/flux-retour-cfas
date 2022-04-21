@@ -37,8 +37,8 @@ const LoginForm = ({ onSubmit }) => {
                 }}
               </Field>
             </Box>
-            <Button variant="primary" type="submit">
-              Connexion
+            <Button variant="primary" type="submit" width="full">
+              Se connecter au Tableau de Bord
             </Button>
             {status.error && <Text color="error">{status.error}</Text>}
           </Form>

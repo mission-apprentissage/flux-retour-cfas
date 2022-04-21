@@ -3,9 +3,8 @@ import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 
-import { BreadcrumbNav, Footer, Header, Section } from "../../common/components";
+import { BreadcrumbNav, Page, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import { productName } from "../../common/constants/productName";
 import useAuth from "../../common/hooks/useAuth";
 import { _post } from "../../common/httpClient";
 import LoginBlock from "./LoginBlock";
@@ -26,23 +25,24 @@ const LoginPage = ({ history }) => {
   };
 
   return (
-    <>
-      <Header />
-      <Section background="galt" withShadow paddingY="3w">
+    <Page>
+      <Section withShadow background="galt" paddingY="3w">
         <BreadcrumbNav links={[NAVIGATION_PAGES.Accueil, NAVIGATION_PAGES.Login]} />
         <HStack justifyContent="space-between" spacing="8w" marginTop="5w" alignItems="flex-start">
           <div>
-            <Heading as="h1">{NAVIGATION_PAGES.Login.title}</Heading>
+            <Heading as="h1" fontSize="alpha">
+              Vous êtes une institution <br /> ou une organisation professionnelle
+              <br /> (OPCO, branche, etc.)
+            </Heading>
             <Text color="grey.800" fontWeight="700" fontSize="gamma" marginTop="2w">
-              Vous êtes une institution ou une organisation professionnelle, connectez-vous au {productName} pour
-              consulter les effectifs sur votre territoire.
+              Connectez-vous au tableau de bord pour consulter
+              <br /> l’intégralité des données sur votre territoire
             </Text>
           </div>
           <LoginBlock onSubmit={login} />
         </HStack>
       </Section>
-      <Footer />
-    </>
+    </Page>
   );
 };
 

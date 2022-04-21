@@ -16,6 +16,7 @@ module.exports = ({ demandeBranchementErp }) => {
         uai_organisme: Joi.string().regex(uaiRegex).required(),
         email_demandeur: Joi.string().email().required(),
         nb_apprentis: Joi.string().allow(null, ""),
+        is_ready_co_construction: Joi.boolean(),
       })
     ),
     tryCatch(async (req, res) => {

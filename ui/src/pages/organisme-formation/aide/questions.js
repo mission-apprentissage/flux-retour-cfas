@@ -1,7 +1,7 @@
 import { Box, Link, Stack, Text } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
+import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 
 export const questions = [
   {
@@ -59,7 +59,7 @@ export const questions = [
           <strong>Vous la trouverez directement dans votre ERP (ou logiciel de gestion).</strong> Si toutefois,
           l&apos;URL n&apos;est pas encore intégrée dans votre interface de gestion, vous pouvez en faire la demande
           en&nbsp;
-          <Link to={NAVIGATION_PAGES.ConsulterVosDonnees.path} as={NavLink} color="bluefrance">
+          <Link to={NAVIGATION_PAGES.OrganismeFormation.consulter.path} as={NavLink} color="bluefrance">
             contactant l&apos;équipe du Tableau de bord
           </Link>
           .
@@ -77,7 +77,7 @@ export const questions = [
         </Text>
         <Text>
           Pour ce faire,&nbsp;
-          <Link to={NAVIGATION_PAGES.TransmettreVosDonnees.path} as={NavLink} color="bluefrance">
+          <Link to={NAVIGATION_PAGES.OrganismeFormation.transmettre.path} as={NavLink} color="bluefrance">
             sélectionnez l&apos;ERP que vous utilisez
           </Link>
           , téléchargez le pas à pas correspondant et suivez les étapes une à une.
@@ -215,7 +215,7 @@ export const questions = [
       <Stack>
         <Text>
           Cela provient d&apos;un mauvais paramétrage dans votre ERP, vous pouvez&nbsp;
-          <Link as={NavLink} color="bluefrance" to={NAVIGATION_PAGES.TransmettreVosDonnees.path}>
+          <Link as={NavLink} color="bluefrance" to={NAVIGATION_PAGES.OrganismeFormation.transmettre.path}>
             consulter les pas à pas
           </Link>
           &nbsp;pour le modifier.
