@@ -2,20 +2,19 @@ import { ResponsiveBar } from "@nivo/bar";
 import React from "react";
 
 const data = [
-  { month: "nov 2020", "Nombre d'organismes": 349 },
-  { month: "dec 2020", "Nombre d'organismes": 746 },
-  { month: "jan 2021", "Nombre d'organismes": 947 },
-  { month: "fev 2021", "Nombre d'organismes": 1010 },
-  { month: "mars 2021", "Nombre d'organismes": 1058 },
-  { month: "avr 2021", "Nombre d'organismes": 1090 },
-  { month: "mai 2021", "Nombre d'organismes": 1149 },
-  { month: "juin 2021", "Nombre d'organismes": 1216 },
-  { month: "juil 2021", "Nombre d'organismes": 1352 },
-  { month: "aout 2021", "Nombre d'organismes": 1431 },
-  { month: "sept 2021", "Nombre d'organismes": 1537 },
-  { month: "oct 2021", "Nombre d'organismes": 1642 },
-  { month: "nov 2021", "Nombre d'organismes": 1835 },
-  { month: "dec 2021", "Nombre d'organismes": 2039 },
+  { month: "mars 2021", "Nombre d'organismes": 1013 },
+  { month: "avr 2021", "Nombre d'organismes": 1047 },
+  { month: "mai 2021", "Nombre d'organismes": 1107 },
+  { month: "juin 2021", "Nombre d'organismes": 1173 },
+  { month: "juil 2021", "Nombre d'organismes": 1305 },
+  { month: "aout 2021", "Nombre d'organismes": 1372 },
+  { month: "sept 2021", "Nombre d'organismes": 1468 },
+  { month: "oct 2021", "Nombre d'organismes": 1568 },
+  { month: "nov 2021", "Nombre d'organismes": 1815 },
+  { month: "dec 2021", "Nombre d'organismes": 1935 },
+  { month: "jan 2022", "Nombre d'organismes": 2055 },
+  { month: "fev 2022", "Nombre d'organismes": 2199 },
+  { month: "mars 2022", "Nombre d'organismes": 2503 },
 ];
 
 const AcquisitionCfaBarGraph = () => {

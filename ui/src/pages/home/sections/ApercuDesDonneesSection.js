@@ -28,14 +28,14 @@ const ApercuDesDonneesSection = () => {
       <Box>
         <Heading as="h2">Aperçu des données</Heading>
         <Text fontStyle="italic" color="grey.800">
-          Au national le 12 décembre 2021
+          Au national le 21 avril 2022
         </Text>
         <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
-          <Count count="2 039" label="Organisme de formation" />
-          <Count count="270 314" label="Apprentis" />
-          <Count count="10 250" label="Jeunes sans contrat" />
-          <Count count="7 183" label="Rupturants" />
-          <Count count="17 177" label="Abandons" />
+          <Count count="2 787" label="Organisme de formation" />
+          <Count count="329 427" label="Apprentis" />
+          <Count count="5 863" label="Jeunes sans contrat" />
+          <Count count="1 189" label="Rupturants" />
+          <Count count="36 605" label="Abandons" />
         </HStack>
 
         <Divider marginY="3w" />
