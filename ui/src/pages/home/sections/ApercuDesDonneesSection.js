@@ -4,13 +4,14 @@ import React from "react";
 
 import { Section } from "../../../common/components";
 import { ERPS } from "../../../common/constants/erps";
+import { indicateursNational } from "../../../common/constants/indicateursNational";
 import { Checkbox } from "../../../theme/components/icons";
 
 const Count = ({ count, label }) => {
   return (
     <article>
       <Text as="strong" fontSize="beta">
-        {count}
+        {count.toLocaleString()}
       </Text>
       <Text fontSize="gamma">{label}</Text>
     </article>
@@ -28,14 +29,14 @@ const ApercuDesDonneesSection = () => {
       <Box>
         <Heading as="h2">Aperçu des données</Heading>
         <Text fontStyle="italic" color="grey.800">
-          Au national le 21 avril 2022
+          Au national le {indicateursNational.dateCalcul}
         </Text>
         <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
-          <Count count="2 787" label="Organisme de formation" />
-          <Count count="329 427" label="Apprentis" />
-          <Count count="5 863" label="Jeunes sans contrat" />
-          <Count count="1 189" label="Rupturants" />
-          <Count count="36 605" label="Abandons" />
+          <Count count={indicateursNational.nbOrganismeFormation.count} label="Organisme de formation" />
+          <Count count={indicateursNational.nbApprentis.count} label="Apprentis" />
+          <Count count={indicateursNational.nbInscritsSansContrats.count} label="Jeunes sans contrat" />
+          <Count count={indicateursNational.nbRupturants.count} label="Rupturants" />
+          <Count count={indicateursNational.nbAbandons.count} label="Abandons" />
         </HStack>
 
         <Divider marginY="3w" />
