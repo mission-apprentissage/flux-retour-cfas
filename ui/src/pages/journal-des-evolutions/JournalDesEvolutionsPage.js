@@ -48,7 +48,7 @@ const JournalDesEvolutions = () => {
             {dataList.map((item) => {
               const date = format(new Date(item.date), "dd MMMM yyyy", { locale: fr });
               return (
-                <Box paddingY="3w" key={date}>
+                <Box paddingY="3w" key={`${date}_${item.title}_${item.type}`}>
                   <Heading as="h2" color="grey.600" fontSize="beta" id={item.date}>
                     Le {date}
                   </Heading>
