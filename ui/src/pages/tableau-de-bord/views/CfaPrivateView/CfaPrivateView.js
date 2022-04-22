@@ -21,7 +21,7 @@ const CfaPrivateView = ({ cfaUai }) => {
           Visualiser les indices en temps réel
         </Heading>
       </Section>
-      <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
+      <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} isUserCfa={true} />
       {infosCfa && <ActionsSection infosCfa={infosCfa} />}
       {effectifs && <VueGlobaleSection effectifs={effectifs} loading={effectifsLoading} />}
       <RepartitionSection filters={filters} />
