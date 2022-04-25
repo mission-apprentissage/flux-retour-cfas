@@ -26,6 +26,7 @@ const cacheRouter = require("./routes/cache.route");
 const updatePasswordRouter = require("./routes/update-password.route");
 const usersRouter = require("./routes/users.route");
 const reseauxCfasRouter = require("./routes/reseaux-cfas.route");
+const listReseaux = require("./routes/list-reseaux.route");
 
 module.exports = async (components) => {
   const app = express();
@@ -38,6 +39,7 @@ module.exports = async (components) => {
 
   // open routes
   app.use("/api/login", loginRouter(components));
+  app.use("/api/list-reseaux", listReseaux(components));
   app.use("/api/login-cfa", loginCfaRouter(components));
   app.use("/api/formations", formationRouter(components));
   app.use("/api/cfas", cfasRouter(components));

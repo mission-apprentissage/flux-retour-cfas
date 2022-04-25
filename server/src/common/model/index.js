@@ -14,6 +14,7 @@ module.exports = {
   DuplicateEventModel: getModel("duplicatesEvents"),
   CfaModel: getModel("cfas", { enablePagination: true }),
   ReseauCfaModel: getModel("reseauxCfas"),
+  ListReseauxModel: getModel("listReseaux"),
   CfaAnnuaireModel: getModel("cfasAnnuaire"),
   CroisementCfasAnnuaireModel: getModel("croisementCfasAnnuaire"),
   ContactCfaModel: getModel("contactsCfas"),
