@@ -3,6 +3,7 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 
 const mapCfasToApiOutput = (reseauxCfas) => {
   return {
+    id: reseauxCfas._id,
     nom_reseau: reseauxCfas.nom_reseau,
     nom_etablissement: reseauxCfas.nom_etablissement,
     uai: reseauxCfas.uai,
@@ -20,6 +21,16 @@ module.exports = ({ reseauxCfas }) => {
       const allReseauxCfas = await reseauxCfas.getAll();
       const reseauxCfasMapped = allReseauxCfas.map(mapCfasToApiOutput);
       return res.json(reseauxCfasMapped);
+    })
+  );
+
+  router.delete(
+    "/delete/:id",
+    tryCatch(async (req, res) => {
+      const { reseauCfa } = req.params;
+      await reseauxCfas.removeReseauCfa(reseauCfa);
+
+      return res.json("deleted");
     })
   );
 
