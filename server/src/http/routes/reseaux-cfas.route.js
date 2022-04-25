@@ -24,6 +24,18 @@ module.exports = ({ reseauxCfas }) => {
     })
   );
 
+  router.post(
+    "/",
+    tryCatch(async (req, res) => {
+      const createReseauCfa = await reseauxCfas.create({
+        nom_reseau: req.body.nom_reseau,
+        nom_etablissement: req.body.nom_etablissement,
+        uai: req.body.uai,
+      });
+      return res.json(createReseauCfa);
+    })
+  );
+
   router.delete(
     "/delete/:id",
     tryCatch(async (req, res) => {
