@@ -21,6 +21,7 @@
     "seed:reseauxCfas": "node -r dotenv/config src/jobs/seed/seedReseauxCfas.js",
     "seed:contactsCfas": "node -r dotenv/config src/jobs/seed/seedContactsCfas.js",
     "seed:sample": "node -r dotenv/config src/jobs/seed/seedSample.js",
+    "seed:listReseaux": "node -r dotenv/config src/jobs/seed/seedListReseaux.js",
     "seed:randomizedSample": "node -r dotenv/config src/jobs/seed/seedRandomizedSample.js",
     "seed:clearAssets": "node -r dotenv/config src/jobs/seed/clearAssets.js",
     "seed:annuaireCfas": "node -r dotenv/config src/jobs/seed/seedAnnuaireCfas.js",
