@@ -6,6 +6,7 @@ import { roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
 import ComprendreLesDonneesPage from "./pages/comprendre-les-donnees/ComprendreLesDonneesPage";
 import ExplorerLesIndicateursPage from "./pages/explorer-les-indicateurs/ExplorerLesIndicateursPage";
+import GestionCfasPage from "./pages/gestion-cfas/GestionCfasPage";
 import GestionUtilisateursPage from "./pages/gestion-utilisateurs/GestionUtilisateursPage";
 import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import JournalDesEvolutionsPage from "./pages/journal-des-evolutions/JournalDesEvolutionsPage";
@@ -80,7 +81,12 @@ const App = () => {
           component={GestionUtilisateursPage}
           authorizedRoles={[roles.administrator]}
         />
-
+        <ProtectedRoute
+          path={NAVIGATION_PAGES.GestionCFAS.path}
+          exact
+          component={GestionCfasPage}
+          authorizedRoles={[roles.administrator]}
+        />
         {/* Change password */}
         <Route path={NAVIGATION_PAGES.ModifierMotDePasse.path} exact component={ModifierMotDePassePage} />
 
