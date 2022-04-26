@@ -89,6 +89,10 @@ export const fetchReseaux = () => {
 export const fetchRegions = () => {
   return _get("/api/referentiel/regions");
 };
+/* Departements */
+export const fetchDepartements = () => {
+  return _get("/api/referentiel/departements");
+};
 
 /* CSV export of effectifs repartition by organisme */
 export const fetchRepartitionByOrganismeCsvExport = (filters) => {
