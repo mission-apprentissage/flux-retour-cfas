@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
-const { REGIONS } = require("../../../src/common/constants/localisationConstants");
+const { REGIONS } = require("../../../src/common/constants/territoiresConstants");
 
 describe(__filename, () => {
   it("Vérifie qu'on peut récupérer les réseaux référentiels via API", async () => {
