@@ -48,4 +48,25 @@ describe(__filename, () => {
       assert.equal(response.data[1].uai, reseauCfa2.uai);
     });
   });
+  describe("DELETE /reseaux-cfas/delete/:id", () => {
+    it("Permet de supprimer un reseau de cfa", async () => {
+      const { httpClient, components } = await startServer();
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
+
+      const reseauCfa1 = {
+        id: "6266cd54a955765dd478f4e6",
+        nom_reseau: "RESEAU_TEST_1",
+        nom_etablissement: "Etablissement de test 1",
+        uai: "0670141P",
+      };
+
+      await components.reseauxCfas.create(reseauCfa1);
+
+      const response = await httpClient.delete(`/api/reseaux-cfas/delete/${reseauCfa1.id}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      assert.equal(response.status, 200);
+    });
+  });
 });

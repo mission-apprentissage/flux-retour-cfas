@@ -9,15 +9,9 @@ describe(__filename, () => {
       const { httpClient } = await startServer();
 
       const response = await httpClient.get("/api/list-reseaux");
+
+      assert.deepEqual(response.data, RESEAUX_CFAS);
       assert.equal(response.status, 200);
-      assert.equal(response.data[0].nomReseau, RESEAUX_CFAS.CMA.nomReseau);
-      assert.equal(response.data[1].nomReseau, RESEAUX_CFAS.UIMM.nomReseau);
-      assert.equal(response.data[2].nomReseau, RESEAUX_CFAS.AGRI.nomReseau);
-      assert.equal(response.data[3].nomReseau, RESEAUX_CFAS.MFR.nomReseau);
-      assert.equal(response.data[4].nomReseau, RESEAUX_CFAS.CCI.nomReseau);
-      assert.equal(response.data[5].nomReseau, RESEAUX_CFAS.CFA_EC.nomReseau);
-      assert.equal(response.data[6].nomReseau, RESEAUX_CFAS.GRETA.nomReseau);
-      assert.equal(response.data[7].nomReseau, RESEAUX_CFAS.AFTRAL.nomReseau);
     });
   });
 });
