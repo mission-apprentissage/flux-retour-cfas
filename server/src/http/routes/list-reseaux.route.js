@@ -19,8 +19,7 @@ module.exports = () => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      const listNetwork = CFAS_NETWORKS.map(({ nomReseau }) => nomReseau);
-      return res.json(listNetwork);
+      return res.json(CFAS_NETWORKS);
     })
   );
 
