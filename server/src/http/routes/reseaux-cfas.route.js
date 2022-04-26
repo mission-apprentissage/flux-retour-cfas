@@ -40,7 +40,7 @@ module.exports = ({ reseauxCfas }) => {
     "/delete/:id",
     tryCatch(async (req, res) => {
       const { reseauCfa } = req.params;
-      await reseauxCfas.removeReseauCfa(reseauCfa);
+      await reseauxCfas.delete(reseauCfa);
 
       return res.json("deleted");
     })

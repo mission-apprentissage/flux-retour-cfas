@@ -38,9 +38,9 @@ const CreateReseauCfaForm = ({ onSubmit, networkList }) => {
                     <FormControl isRequired isInvalid={meta.error && meta.touched}>
                       <FormLabel color="grey.800">Nom du reseau</FormLabel>
                       <Select marginTop="1w" {...field} id={field.name} placeholder="Sélectionnez un réseau">
-                        {networkList.map(({ nomReseau }) => (
-                          <option key={nomReseau} value={nomReseau}>
-                            {nomReseau}
+                        {Object.keys(networkList).map((network) => (
+                          <option key={network} value={network}>
+                            {network}
                           </option>
                         ))}
                       </Select>
@@ -83,7 +83,7 @@ const CreateReseauCfaForm = ({ onSubmit, networkList }) => {
 
 CreateReseauCfaForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
-  networkList: PropTypes.array,
+  networkList: PropTypes.object,
 };
 
 export default CreateReseauCfaForm;
