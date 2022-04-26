@@ -6,7 +6,7 @@ import { fetchReseauxCfas } from "../../common/api/tableauDeBord";
 import { Table } from "../../common/components";
 import { _delete } from "../../common/httpClient";
 
-const UsersTable = () => {
+const CfasTable = () => {
   const { data, isLoading } = useQuery(["reseauxCfas"], () => fetchReseauxCfas());
   const reseauxCfasList = data;
 
@@ -37,4 +37,4 @@ const UsersTable = () => {
   );
 };
 
-export default UsersTable;
+export default CfasTable;

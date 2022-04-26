@@ -3,10 +3,10 @@ import React from "react";
 
 import { Footer, Header, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import UsersTable from "./CfasTable";
+import CfasTable from "./CfasTable";
 import CreateCfaModal from "./CreateCfaModal";
 
-const GestionUtilisateursPage = () => {
+const GestionCfasPage = () => {
   const createCfaModal = useDisclosure();
 
   return (
@@ -25,11 +25,11 @@ const GestionUtilisateursPage = () => {
             + Ajouter un CFA
           </Button>
         </Heading>
-        <UsersTable />
+        <CfasTable />
       </Section>
       <Footer />
     </>
   );
 };
 
-export default GestionUtilisateursPage;
+export default GestionCfasPage;
