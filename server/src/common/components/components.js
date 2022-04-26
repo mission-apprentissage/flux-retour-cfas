@@ -5,7 +5,6 @@ const createJobEvents = require("./jobEvents");
 const createDossierApprenant = require("./dossiersApprenants");
 const cfasComponent = require("./cfas");
 const reseauxCfasComponent = require("./reseauxCfas");
-const listReseauxComponent = require("./listReseaux");
 const contactsCfasComponent = require("./contactsCfas");
 const formationsComponent = require("./formations");
 const createStats = require("./stats");
@@ -25,7 +24,6 @@ module.exports = async (options = {}) => {
   const formations = options.formations || formationsComponent();
   const cfas = options.cfas || cfasComponent();
   const reseauxCfas = options.reseauxCfas || reseauxCfasComponent();
-  const listReseaux = options.listReseaux || listReseauxComponent();
   const contactsCfas = options.contactsCfas || contactsCfasComponent();
   const stats = options.stats || createStats();
   const effectifs = options.effectifs || createEffectifs();
@@ -46,7 +44,6 @@ module.exports = async (options = {}) => {
     cfas,
     reseauxCfas,
     contactsCfas,
-    listReseaux,
     stats,
     effectifs,
     demandeIdentifiants,
