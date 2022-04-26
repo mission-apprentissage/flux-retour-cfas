@@ -28,7 +28,7 @@ const NoResults = () => {
 const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredTerritoires = searchTerm ? findTerritoire(data)(searchTerm) : data.regions;
+  const filteredTerritoires = searchTerm ? findTerritoire(data)(searchTerm) : [...data.regions, ...data.departements];
 
   return (
     <>
