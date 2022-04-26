@@ -11,12 +11,12 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
   const { data } = useTerritoiresData();
 
   const onTerritoireClick = (territoire) => {
-    if (territoire.type === "region") {
-      onRegionChange(territoire);
-    } else if (territoire.type === "departement") {
-      onDepartementChange(territoire);
-    } else {
+    if (!territoire) {
       onTerritoireReset();
+    } else if (territoire.type === "region") {
+      onRegionChange(territoire);
+    } else {
+      onDepartementChange(territoire);
     }
     setIsOpen(false);
   };
