@@ -8,7 +8,8 @@ module.exports = () => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      return res.json(RESEAUX_CFAS);
+      const networkList = Object.keys(RESEAUX_CFAS).map((network) => network);
+      return res.json(networkList);
     })
   );
 

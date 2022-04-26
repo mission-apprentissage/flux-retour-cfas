@@ -10,7 +10,7 @@ describe(__filename, () => {
 
       const response = await httpClient.get("/api/list-reseaux");
 
-      assert.deepEqual(response.data, RESEAUX_CFAS);
+      assert.deepEqual(response.data, Object.keys(RESEAUX_CFAS));
       assert.equal(response.status, 200);
     });
   });
