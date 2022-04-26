@@ -1,13 +1,11 @@
 const cliProgress = require("cli-progress");
-const axios = require("axios");
 const indexBy = require("lodash.indexby");
 
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const logger = require("../../common/logger");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
-
-const GEO_API_HOST = "https://geo.api.gouv.fr";
+const { DEPARTEMENTS } = require("../../common/constants/territoiresConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -15,8 +13,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * Ce script permet de créer un export contenant les CFAS sans SIRET
  */
 runScript(async ({ db }) => {
-  const { data } = await axios.get(`${GEO_API_HOST}/departements?fields=nom,code,codeRegion,codePostal,region`);
-  const infoMap = indexBy(data, "code");
+  const departementsMap = indexBy(DEPARTEMENTS, "code");
   const allUais = await db.collection("dossiersApprenants").distinct("uai_etablissement");
 
   logger.info(`${allUais.length} UAI found. Will update matching statuts candidats...`);
@@ -27,7 +24,7 @@ runScript(async ({ db }) => {
 
   await asyncForEach(allUais, async (uaiToUpdate) => {
     const infoCodeFromUai = getDepartementCodeFromUai(uaiToUpdate);
-    const info = infoMap[infoCodeFromUai];
+    const info = departementsMap[infoCodeFromUai];
 
     if (!info) return;
 
