@@ -1,4 +1,4 @@
-import { List } from "@chakra-ui/react";
+import { List, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
@@ -15,6 +15,14 @@ const findTerritoire = (data) => (searchTerm) => {
   });
 
   return [...regionMatches, ...departementMatches];
+};
+
+const NoResults = () => {
+  return (
+    <Text color="grey.800" fontWeight="700" paddingTop="1w" paddingLeft="1w">
+      Il n&apos;y a pas de département ou région correspondant à votre recherche
+    </Text>
+  );
 };
 
 const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
@@ -41,6 +49,7 @@ const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
           </FilterOption>
         ))}
       </List>
+      {searchTerm && filteredTerritoires?.length === 0 && <NoResults />}
     </>
   );
 };
