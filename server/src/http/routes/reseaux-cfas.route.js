@@ -27,10 +27,12 @@ module.exports = ({ reseauxCfas }) => {
   router.post(
     "/",
     tryCatch(async (req, res) => {
+      const { nom_reseau, nom_etablissement, uai } = req.body;
+
       const createReseauCfa = await reseauxCfas.create({
-        nom_reseau: req.body.nom_reseau,
-        nom_etablissement: req.body.nom_etablissement,
-        uai: req.body.uai,
+        nom_reseau: nom_reseau,
+        nom_etablissement: nom_etablissement,
+        uai: uai,
       });
       return res.json(createReseauCfa);
     })
