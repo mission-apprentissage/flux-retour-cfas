@@ -8,17 +8,21 @@ const { CODES_STATUT_APPRENANT } = require("../../common/constants/dossierAppren
 const { cfdRegex } = require("../../common/domain/cfd");
 const { uaiRegex } = require("../../common/domain/uai");
 const validateRequestBody = require("../middlewares/validateRequestBody");
+const validateRequestQuery = require("../middlewares/validateRequestQuery");
+const { findAndPaginate } = require("../../common/utils/dbUtils");
+const { sendJsonStream } = require("../../common/utils/httpUtils");
+const { oleoduc, transformIntoJSON } = require("oleoduc");
 
 const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
 
-module.exports = ({ dossiersApprenants, userEvents }) => {
+module.exports = ({ dossiersApprenants, userEvents, db }) => {
   const router = express.Router();
 
   /**
    * Schema for item validation
    */
   const dateSchema = Joi.string()
-    .regex(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/) // make sure the passed date containes at least YYYY-MM-DD
+    .regex(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/) // make sure the passed date contains at least YYYY-MM-DD
     .custom((val, helpers) => {
       const { value, error } = Joi.date().iso().validate(val);
       return error ? helpers.error("string.isoDate") : value;
@@ -60,6 +64,15 @@ module.exports = ({ dossiersApprenants, userEvents }) => {
     contrat_date_rupture: dateSchema.allow(null),
     date_entree_formation: dateSchema.allow(null),
   });
+
+  const commonDossiersApprenantsFilters = {
+    etablissement_num_region: Joi.string().allow(null, ""),
+    etablissement_num_departement: Joi.string().allow(null, ""),
+    formation_cfd: Joi.string().allow(null, ""),
+    uai_etablissement: Joi.string().allow(null, ""),
+    siret_etablissement: Joi.string().allow(null, ""),
+    annee_scolaire: Joi.string().allow(null, ""),
+  };
 
   /**
    * Route post for DossierApprenant
@@ -122,6 +135,62 @@ module.exports = ({ dossiersApprenants, userEvents }) => {
       } catch (err) {
         logger.error("POST StatutCandidat error : " + err);
         res.status(400).json({
+          status: "ERROR",
+          message: err.message,
+        });
+      }
+    })
+  );
+
+  /**
+   * Route get for DossierApprenant
+   */
+  router.get(
+    "/",
+    validateRequestQuery(
+      Joi.object({
+        page: Joi.number(),
+        limit: Joi.number(),
+        ...commonDossiersApprenantsFilters,
+      })
+    ),
+    tryCatch(async (req, res) => {
+      const { page: reqPage, limit: reqLimit, ...filtersFromBody } = req.query;
+      const page = Number(reqPage ?? 1);
+      const limit = Number(reqLimit ?? 1000);
+
+      try {
+        // Add user event
+        await userEvents.create({
+          username: req.user.username,
+          type: "GET",
+          action: "dossier-apprenants",
+          data: req.body,
+        });
+
+        // Gets paginated data filtered on source mapped to username
+        const { find, pagination } = await findAndPaginate(
+          db.collection("dossiersApprenants"),
+          { ...filtersFromBody, source: req.user.username },
+          { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
+        );
+
+        // Return JSON Stream
+        return sendJsonStream(
+          oleoduc(
+            find.stream(),
+            transformIntoJSON({
+              arrayPropertyName: "dossiersApprenants",
+              arrayWrapper: {
+                pagination,
+              },
+            })
+          ),
+          res
+        );
+      } catch (err) {
+        logger.error("GET DossierApprenants error : " + err);
+        res.status(500).json({
           status: "ERROR",
           message: err.message,
         });

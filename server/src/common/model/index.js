@@ -7,7 +7,7 @@ const getModel = (modelName, { enablePagination = false } = {}) => {
 };
 
 module.exports = {
-  DossierApprenantModel: getModel("dossiersApprenants"),
+  DossierApprenantModel: getModel("dossiersApprenants", { enablePagination: true }),
   UserModel: getModel("users"),
   UserEventModel: getModel("userEvents"),
   JobEventModel: getModel("jobEvents", { enablePagination: true }),
