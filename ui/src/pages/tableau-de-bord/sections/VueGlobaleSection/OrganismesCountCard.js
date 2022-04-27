@@ -24,7 +24,14 @@ const OrganismesCountCard = () => {
     return <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />;
   }
   if (data) {
-    return <EffectifCard count={data.nbOrganismes} label="organismes de formation" />;
+    return (
+      <EffectifCard
+        count={data.nbOrganismes}
+        label="organismes de formation"
+        iconClassName="ri-home-6-fill"
+        accentColor="#417DC4"
+      />
+    );
   }
 
   return null;

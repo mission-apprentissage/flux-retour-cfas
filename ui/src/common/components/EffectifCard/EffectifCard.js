@@ -1,4 +1,4 @@
-import { Box, Flex, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Flex, HStack, Text, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -13,6 +13,8 @@ const EffectifCard = ({
   hideCount = false,
   infoText,
   warningText,
+  iconClassName,
+  accentColor,
 }) => {
   const hasTooltip = Boolean(tooltipLabel);
   return (
@@ -24,10 +26,15 @@ const EffectifCard = ({
       color="grey.800"
       minHeight="104px"
       minWidth="15rem"
+      borderBottom="4px"
+      borderColor={accentColor}
     >
-      <Box as="strong" fontSize="gamma" marginRight="1v">
-        {hideCount ? "_" : formatNumber(count)}
-      </Box>
+      <HStack>
+        <Box as="i" color={accentColor} className={iconClassName}></Box>
+        <Box as="strong" fontSize="gamma" marginRight="1v">
+          {hideCount ? "_" : formatNumber(count)}
+        </Box>
+      </HStack>
       {label}
       {hasTooltip && (
         <Tooltip
@@ -68,6 +75,8 @@ EffectifCard.propTypes = {
   hideCount: PropTypes.bool,
   infoText: PropTypes.node,
   warningText: PropTypes.string,
+  iconClassName: PropTypes.string.isRequired,
+  accentColor: PropTypes.string.isRequired,
 };
 
 export default EffectifCard;

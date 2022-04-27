@@ -38,7 +38,7 @@ const CfasFilter = ({
   return (
     <div>
       <SecondarySelectButton
-        icon="ri-community-fill"
+        icon="ri-home-6-fill"
         onClick={() => setIsOpen(!isOpen)}
         isActive={isOpen}
         isClearable={hideSelectedReseauNom === true ? false : Boolean(filters.cfa || filters.reseau)}
