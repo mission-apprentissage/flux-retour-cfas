@@ -1,6 +1,6 @@
 import qs from "query-string";
 
-import { _get, _post } from "../httpClient";
+import { _delete, _get, _post } from "../httpClient";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 /* Effectifs */
@@ -70,6 +70,14 @@ export const fetchCfa = (cfaUai) => {
 /* Reseaux CFAS */
 export const fetchReseauxCfas = () => {
   return _get("/api/reseaux-cfas");
+};
+
+export const postCreateReseauCfa = (body) => {
+  return _post("/api/reseaux-cfas", body);
+};
+
+export const deleteReseauCfa = (body) => {
+  return _delete(`/api/reseaux-cfas/delete/${body}`);
 };
 
 /* Reseaux */

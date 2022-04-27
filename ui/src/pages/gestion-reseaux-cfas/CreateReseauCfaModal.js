@@ -1,17 +1,30 @@
 import { Box, Modal, ModalContent, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { fetchReseaux } from "../../common/api/tableauDeBord";
+import { fetchReseaux, postCreateReseauCfa } from "../../common/api/tableauDeBord";
 import ModalClosingButton from "../../common/components/ModalClosingButton/ModalClosingButton";
-import { _post } from "../../common/httpClient";
 import CreateReseauCfaForm from "./CreateReseauCfaForm";
 
 const CreateReseauCfaModal = ({ isOpen, onClose }) => {
   const { data } = useQuery(["reseaux"], () => fetchReseaux());
   const networkList = data;
 
+  const queryClient = useQueryClient();
+  const createReseauCfa = useMutation(
+    (newReseauCfa) => {
+      return postCreateReseauCfa(newReseauCfa);
+    },
+    {
+      onSuccess() {
+        // invalidate users query so react-query refetch the list for us
+        // see https://react-query.tanstack.com/guides/query-invalidation#query-matching-with-invalidatequeries
+        queryClient.invalidateQueries(["reseauxCfas"]);
+        onClose();
+      },
+    }
+  );
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalOverlay />
@@ -26,8 +39,7 @@ const CreateReseauCfaModal = ({ isOpen, onClose }) => {
         <CreateReseauCfaForm
           networkList={networkList}
           onSubmit={async (data) => {
-            await _post("/api/reseaux-cfas", data);
-            window.location.reload();
+            await createReseauCfa.mutateAsync(data);
           }}
         />
       </ModalContent>
