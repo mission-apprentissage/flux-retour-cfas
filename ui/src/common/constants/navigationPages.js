@@ -43,6 +43,14 @@ export const NAVIGATION_PAGES = {
     path: "/explorer-les-indicateurs",
     title: "Visualiser les indicateurs en temps réel",
   },
+  VisualiserLesIndicateurs: {
+    path: "/visualiser-les-indicateurs",
+    title: "Visualiser les indicateurs en temps réel",
+  },
+  VisualiserLesIndicateursParTerritoire: {
+    path: "/visualiser-les-indicateurs/par-territoire",
+    title: "Vue territoriale",
+  },
   Statistiques: {
     path: "/statistiques",
     title: "Statistiques",

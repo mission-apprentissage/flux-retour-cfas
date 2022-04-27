@@ -5,7 +5,7 @@ import { Page } from "../../../../common/components";
 import { filtersPropTypes } from "../../FiltersContext";
 import { effectifsPropType } from "../../propTypes";
 import { IndicesHeaderSection, VueGlobaleSection } from "../../sections";
-import RepartitionEffectifsTerritoire from "./RepartitionEffectifsTerritoire";
+import RepartitionEffectifsTerritoire from "./RepartitionEffectifsDepartement";
 
 const GenericView = ({ effectifs, loading, filters }) => {
   return (

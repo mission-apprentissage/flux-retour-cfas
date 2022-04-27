@@ -5,7 +5,7 @@ import React, { forwardRef } from "react";
 const PrimarySelectButton = forwardRef(({ children, onClick, isOpen }, ref) => {
   return (
     <Button variant="select-primary" onClick={onClick} ref={ref}>
-      <Box as="span" textDecoration="underline">
+      <Box as="span" textDecoration="underline" fontSize="gamma">
         {children}
       </Box>
       <Box

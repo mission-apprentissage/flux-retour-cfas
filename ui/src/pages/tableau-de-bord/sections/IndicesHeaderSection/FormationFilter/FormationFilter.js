@@ -12,7 +12,7 @@ const FormationFilter = ({ filters, onFormationChange }) => {
     onFormationChange(formation);
     setIsOpen(false);
   };
-  const buttonLabel = filters.formation?.libelle || "Sélectionner une formation";
+  const buttonLabel = filters.formation?.libelle || "par formations";
 
   return (
     <div>

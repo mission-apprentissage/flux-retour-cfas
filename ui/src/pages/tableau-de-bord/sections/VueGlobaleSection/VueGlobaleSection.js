@@ -1,4 +1,4 @@
-import { Heading, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { Grid, Heading, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -17,13 +17,13 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
   let content = null;
   if (loading) {
     content = (
-      <HStack spacing="2w">
-        {showOrganismesCount && <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />}
-        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />
-      </HStack>
+      <Grid gridGap="2w" gridTemplateColumns="repeat(3, 1fr)">
+        {showOrganismesCount && <Skeleton height="136px" startColor="grey.300" endColor="galt" />}
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+        <Skeleton height="136px" startColor="grey.300" endColor="galt" />
+      </Grid>
     );
   }
 
@@ -36,7 +36,8 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
     );
 
     content = (
-      <HStack spacing="2w" alignItems="stretch">
+      <Grid gridGap="2w" gridTemplateColumns="repeat(3, 1fr)">
+        {" "}
         {showOrganismesCount && <OrganismesCountCard />}
         <EffectifCard
           count={effectifs.apprentis.count}
@@ -95,14 +96,14 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
           iconClassName="ri-user-4-fill"
           accentColor="#F99389"
         />
-      </HStack>
+      </Grid>
     );
   }
 
   return (
-    <Section paddingY="4w">
+    <Section paddingY="3w">
       <HStack marginBottom="2w">
-        <Heading as="h2" variant="h2">
+        <Heading as="h2" variant="h2" fontSize="gamma">
           Vue globale
         </Heading>
 
