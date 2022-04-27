@@ -3,6 +3,7 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { apiRoles } = require("../../../src/common/roles");
 const users = require("../../../src/common/components/users");
+const { ReseauCfaModel } = require("../../../src/common/model");
 
 const user = { name: "apiConsumerUser", password: "password" };
 
@@ -63,10 +64,11 @@ describe(__filename, () => {
 
       await components.reseauxCfas.create(reseauCfa1);
 
-      const response = await httpClient.delete(`/api/reseaux-cfas/delete/${reseauCfa1.id}`, {
+      await httpClient.delete(`/api/reseaux-cfas/delete/${reseauCfa1.id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      assert.equal(response.status, 200);
+      const found = await ReseauCfaModel.findOne({ id: "6266cd54a955765dd478f4e6" });
+      assert.equal(found, null);
     });
   });
 });
