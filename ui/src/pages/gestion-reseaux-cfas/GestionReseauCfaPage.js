@@ -3,19 +3,19 @@ import React from "react";
 
 import { Footer, Header, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import CfasTable from "./CfasTable";
-import CreateCfaModal from "./CreateCfaModal";
+import CreateReseauCfaModal from "./CreateReseauCfaModal";
+import ReseauxCfasTable from "./ReseauxCfasTable";
 
-const GestionCfasPage = () => {
+const GestionReseauxCfasPage = () => {
   const createCfaModal = useDisclosure();
 
   return (
     <>
-      <CreateCfaModal isOpen={createCfaModal.isOpen} onClose={createCfaModal.onClose} />
+      <CreateReseauCfaModal isOpen={createCfaModal.isOpen} onClose={createCfaModal.onClose} />
       <Header />
       <Section backgroundColor="galt" paddingY="8w" withShadow>
         <Heading as="h1" variant="h1" marginBottom="1w">
-          {NAVIGATION_PAGES.GestionCFAS.title}
+          {NAVIGATION_PAGES.GestionReseauxCfas.title}
         </Heading>
       </Section>
       <Section paddingY="5w" backgroundColor="white" overflowX="scroll">
@@ -25,11 +25,11 @@ const GestionCfasPage = () => {
             + Ajouter un CFA
           </Button>
         </Heading>
-        <CfasTable />
+        <ReseauxCfasTable />
       </Section>
       <Footer />
     </>
   );
 };
 
-export default GestionCfasPage;
+export default GestionReseauxCfasPage;

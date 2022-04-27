@@ -3,13 +3,13 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useQuery } from "react-query";
 
-import { fetchListResaux } from "../../common/api/tableauDeBord";
+import { fetchReseaux } from "../../common/api/tableauDeBord";
 import ModalClosingButton from "../../common/components/ModalClosingButton/ModalClosingButton";
 import { _post } from "../../common/httpClient";
-import CreateReseauCfaForm from "./CreateCfaForm";
+import CreateReseauCfaForm from "./CreateReseauCfaForm";
 
 const CreateReseauCfaModal = ({ isOpen, onClose }) => {
-  const { data } = useQuery(["listReseaux"], () => fetchListResaux());
+  const { data } = useQuery(["reseaux"], () => fetchReseaux());
   const networkList = data;
 
   return (

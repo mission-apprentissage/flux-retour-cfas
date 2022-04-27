@@ -72,8 +72,8 @@ export const NAVIGATION_PAGES = {
     path: "/admin/gestion-utilisateurs",
     title: "Gestion des utilisateurs",
   },
-  GestionCFAS: {
+  GestionReseauxCfas: {
     path: "/admin/gestion-cfas",
-    title: "Gestion des CFAS",
+    title: "Gestion des reseaux CFAS",
   },
 };
