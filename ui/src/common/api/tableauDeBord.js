@@ -72,11 +72,6 @@ export const fetchReseauxCfas = () => {
   return _get("/api/reseaux-cfas");
 };
 
-/* List Réseaux */
-export const fetchListResaux = () => {
-  return _get("/api/list-reseaux");
-};
-
 /* Reseaux */
 export const fetchReseaux = () => {
   return _get("/api/referentiel/networks");
