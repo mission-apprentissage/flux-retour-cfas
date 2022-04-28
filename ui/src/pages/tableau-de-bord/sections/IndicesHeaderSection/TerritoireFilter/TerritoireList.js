@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 import { FilterOption, SearchInput } from "../../../../../common/components";
 import { stringContains, stringEqualsCaseInsensitive } from "../../../../../common/utils/stringUtils";
+import { TERRITOIRE_TYPE } from "./constants";
 import TouteLaFranceOption from "./TouteLaFranceOption";
 
 const findTerritoire = (data) => (searchTerm) => {
@@ -45,7 +46,9 @@ const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
             onClick={() => onTerritoireClick(territoire)}
             isSelected={currentFilter?.nom === territoire.nom}
           >
-            {territoire.nom}
+            {territoire.type === TERRITOIRE_TYPE.DEPARTEMENT
+              ? `${territoire.nom} (${territoire.code})`
+              : territoire.nom}
           </FilterOption>
         ))}
       </List>

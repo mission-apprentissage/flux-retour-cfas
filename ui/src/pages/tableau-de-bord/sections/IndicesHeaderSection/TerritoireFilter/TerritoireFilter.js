@@ -3,6 +3,7 @@ import React, { useState } from "react";
 
 import { OverlayMenu, PrimarySelectButton } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
+import { TERRITOIRE_TYPE } from "./constants";
 import TerritoiresList from "./TerritoireList";
 import useTerritoiresData from "./useTerritoiresData";
 
@@ -13,7 +14,7 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
   const onTerritoireClick = (territoire) => {
     if (!territoire) {
       onTerritoireReset();
-    } else if (territoire.type === "region") {
+    } else if (territoire.type === TERRITOIRE_TYPE.REGION) {
       onRegionChange(territoire);
     } else {
       onDepartementChange(territoire);
