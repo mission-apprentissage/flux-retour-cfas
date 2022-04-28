@@ -16,5 +16,8 @@ module.exports = () => ({
   getAll: async () => {
     return await ReseauCfaModel.find().lean();
   },
+  delete: async (id) => {
+    return await ReseauCfaModel.deleteOne({ id });
+  },
   create,
 });
