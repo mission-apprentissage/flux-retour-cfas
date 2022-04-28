@@ -1,56 +1,29 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { OverlayMenu, SecondarySelectButton } from "../../../../../common/components";
-import MenuTabs from "../../../../../common/components/OverlayMenu/MenuTabs";
+import { OverlayMenu, PrimarySelectButton } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
 import CfaPanel from "./CfasPanel";
-import ReseauxPanel from "./ReseauxPanel";
 
-const CfasFilter = ({ onCfaChange, onReseauChange, filters, displayReseauPanel = true, userNetworkMode = false }) => {
+const CfasFilter = ({ onCfaChange, filters }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const buttonLabelForUser = displayReseauPanel
-    ? "Sélectionner un organisme ou un réseau"
-    : "Sélectionner un organisme";
 
   const onCfaClick = (cfa) => {
     onCfaChange(cfa);
     setIsOpen(false);
   };
 
-  const onReseauClick = (reseau) => {
-    onReseauChange(reseau);
-    setIsOpen(false);
-  };
-
-  const buttonLabel =
-    userNetworkMode === true
-      ? filters.cfa?.nom_etablissement || buttonLabelForUser
-      : filters.cfa?.nom_etablissement || filters.reseau?.nom || buttonLabelForUser;
+  const buttonLabel = filters.cfa?.nom_etablissement || "Sélectionner un organisme";
 
   return (
     <div>
-      <SecondarySelectButton
-        icon="ri-home-6-fill"
-        onClick={() => setIsOpen(!isOpen)}
-        isActive={isOpen}
-        isClearable={userNetworkMode === true ? filters.cfa : Boolean(filters.cfa || filters.reseau)}
-        clearIconOnClick={() => {
-          onReseauChange(null);
-          onCfaChange(null);
-        }}
-      >
+      <PrimarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
         {buttonLabel}
-      </SecondarySelectButton>
+      </PrimarySelectButton>
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <MenuTabs
-            tabNames={displayReseauPanel ? ["Organismes de formation", "Réseaux"] : ["Organismes de formation"]}
-          >
-            <CfaPanel onCfaClick={onCfaClick} value={filters.cfa} filters={filters} />
-            {displayReseauPanel === true && <ReseauxPanel onReseauClick={onReseauClick} value={filters.reseau} />}
-          </MenuTabs>
+          <CfaPanel onCfaClick={onCfaClick} value={filters.cfa} filters={filters} />
         </OverlayMenu>
       )}
     </div>
@@ -59,10 +32,7 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters, displayReseauPanel =
 
 CfasFilter.propTypes = {
   onCfaChange: PropTypes.func.isRequired,
-  onReseauChange: PropTypes.func.isRequired,
   filters: filtersPropTypes.state,
-  displayReseauPanel: PropTypes.bool,
-  userNetworkMode: PropTypes.bool,
 };
 
 export default CfasFilter;

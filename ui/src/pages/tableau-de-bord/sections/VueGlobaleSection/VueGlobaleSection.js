@@ -37,7 +37,6 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
 
     content = (
       <Grid gridGap="2w" gridTemplateColumns="repeat(3, 1fr)">
-        {" "}
         {showOrganismesCount && <OrganismesCountCard />}
         <EffectifCard
           count={effectifs.apprentis.count}

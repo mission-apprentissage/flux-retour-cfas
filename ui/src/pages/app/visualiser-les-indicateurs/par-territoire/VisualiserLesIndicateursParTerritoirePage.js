@@ -20,7 +20,7 @@ const VisualiserLesIndicateursParTerritoirePage = () => {
         <BreadcrumbNav
           links={[NAVIGATION_PAGES.VisualiserLesIndicateurs, NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire]}
         />
-        <Heading as="h1" marginTop="4w">
+        <Heading as="h1" marginTop="4w" marginBottom="3v">
           {NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.title}
         </Heading>
         <HStack spacing="4w">

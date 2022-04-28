@@ -24,7 +24,7 @@ const setFormation = (state, formation) => {
 };
 
 const setCfa = (state, cfa) => {
-  return { ...state, reseau: null, formation: null, sousEtablissement: null, cfa };
+  return { ...state, departement: null, region: null, reseau: null, formation: null, sousEtablissement: null, cfa };
 };
 
 const setReseau = (state, reseau) => {

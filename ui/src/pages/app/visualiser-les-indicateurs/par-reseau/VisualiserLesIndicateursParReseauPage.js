@@ -21,7 +21,7 @@ const VisualiserLesIndicateursParReseauPage = () => {
         <BreadcrumbNav
           links={[NAVIGATION_PAGES.VisualiserLesIndicateurs, NAVIGATION_PAGES.VisualiserLesIndicateursParReseau]}
         />
-        <Heading as="h1" marginTop="4w">
+        <Heading as="h1" marginTop="4w" marginBottom="3v">
           {NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.title}
         </Heading>
         <HStack spacing="4w">
