@@ -4,10 +4,10 @@ import { BrowserRouter as Router, Route, Switch, useLocation } from "react-route
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
+import GestionReseauxCfasPage from "./pages/admin/gestion-reseaux-cfas/GestionReseauCfaPage";
+import GestionUtilisateursPage from "./pages/admin/gestion-utilisateurs/GestionUtilisateursPage";
 import ComprendreLesDonneesPage from "./pages/comprendre-les-donnees/ComprendreLesDonneesPage";
 import ExplorerLesIndicateursPage from "./pages/explorer-les-indicateurs/ExplorerLesIndicateursPage";
-import GestionReseauxCfasPage from "./pages/gestion-reseaux-cfas/GestionReseauCfaPage";
-import GestionUtilisateursPage from "./pages/gestion-utilisateurs/GestionUtilisateursPage";
 import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import JournalDesEvolutionsPage from "./pages/journal-des-evolutions/JournalDesEvolutionsPage";
 import LoginPage from "./pages/login/LoginPage";

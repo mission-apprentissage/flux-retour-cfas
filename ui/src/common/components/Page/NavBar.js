@@ -41,6 +41,7 @@ NavItem.propTypes = {
 const NavBar = () => {
   const [auth] = useAuth();
   const isCfa = hasUserRoles(auth, roles.cfa);
+  const isAdministrator = hasUserRoles(auth, roles.administrator);
   const isLoggedIn = Boolean(auth?.sub);
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
@@ -53,6 +54,14 @@ const NavBar = () => {
         )}
         <NavItem to={NAVIGATION_PAGES.ComprendreLesDonnees.path}>{NAVIGATION_PAGES.ComprendreLesDonnees.title}</NavItem>
         <NavItem to={NAVIGATION_PAGES.JournalDesEvolutions.path}>{NAVIGATION_PAGES.JournalDesEvolutions.title}</NavItem>
+        {isAdministrator && (
+          <>
+            <NavItem to={NAVIGATION_PAGES.GestionReseauxCfas.path}>{NAVIGATION_PAGES.GestionReseauxCfas.title}</NavItem>
+            <NavItem to={NAVIGATION_PAGES.GestionUtilisateurs.path}>
+              {NAVIGATION_PAGES.GestionUtilisateurs.title}
+            </NavItem>
+          </>
+        )}
       </HStack>
     </Section>
   );

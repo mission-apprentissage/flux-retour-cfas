@@ -2,9 +2,9 @@ import { Tbody, Td, Tr } from "@chakra-ui/react";
 import React from "react";
 import { useQuery } from "react-query";
 
-import { fetchUsers } from "../../common/api/tableauDeBord";
-import { Table } from "../../common/components";
-import { formatDate } from "../../common/utils/dateUtils";
+import { fetchUsers } from "../../../common/api/tableauDeBord";
+import { Table } from "../../../common/components";
+import { formatDate } from "../../../common/utils/dateUtils";
 import GetUpdatePasswordUrlButton from "./GetUpdatePasswordUrlButton";
 
 const getUsersListSortedChronologically = (users) => {

@@ -1,8 +1,8 @@
 import { Button, Heading, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 
-import { Footer, Header, Section } from "../../common/components";
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
+import { Page, Section } from "../../../common/components";
+import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import CreateUserModal from "./CreateUserModal";
 import UsersTable from "./UsersTable";
 
@@ -10,9 +10,8 @@ const GestionUtilisateursPage = () => {
   const createUserModal = useDisclosure();
 
   return (
-    <>
+    <Page>
       <CreateUserModal isOpen={createUserModal.isOpen} onClose={createUserModal.onClose} />
-      <Header />
       <Section backgroundColor="galt" paddingY="8w" withShadow>
         <Heading as="h1" variant="h1" marginBottom="1w">
           {NAVIGATION_PAGES.GestionUtilisateurs.title}
@@ -28,8 +27,7 @@ const GestionUtilisateursPage = () => {
 
         <UsersTable />
       </Section>
-      <Footer />
-    </>
+    </Page>
   );
 };
 
