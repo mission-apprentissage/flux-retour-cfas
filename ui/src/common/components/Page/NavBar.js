@@ -54,7 +54,7 @@ const NavBar = () => {
         )}
         <NavItem to={NAVIGATION_PAGES.ComprendreLesDonnees.path}>{NAVIGATION_PAGES.ComprendreLesDonnees.title}</NavItem>
         <NavItem to={NAVIGATION_PAGES.JournalDesEvolutions.path}>{NAVIGATION_PAGES.JournalDesEvolutions.title}</NavItem>
-        {isAdministrator && isLoggedIn && (
+        {isAdministrator && (
           <>
             <NavItem to={NAVIGATION_PAGES.GestionReseauxCfas.path}>{NAVIGATION_PAGES.GestionReseauxCfas.title}</NavItem>
             <NavItem to={NAVIGATION_PAGES.GestionUtilisateurs.path}>
