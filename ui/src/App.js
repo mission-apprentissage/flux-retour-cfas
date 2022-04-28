@@ -6,6 +6,7 @@ import { roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
 import GestionReseauxCfasPage from "./pages/admin/gestion-reseaux-cfas/GestionReseauCfaPage";
 import GestionUtilisateursPage from "./pages/admin/gestion-utilisateurs/GestionUtilisateursPage";
+import VisualiserLesIndicateursParReseauPage from "./pages/app/visualiser-les-indicateurs/par-reseau/VisualiserLesIndicateursParReseauPage";
 import VisualiserLesIndicateursParTerritoirePage from "./pages/app/visualiser-les-indicateurs/par-territoire/VisualiserLesIndicateursParTerritoirePage";
 import VisualiserLesIndicateursPage from "./pages/app/visualiser-les-indicateurs/VisualiserLesIndicateursPage";
 import ComprendreLesDonneesPage from "./pages/comprendre-les-donnees/ComprendreLesDonneesPage";
@@ -83,6 +84,12 @@ const App = () => {
           path={NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.path}
           exact
           component={VisualiserLesIndicateursParTerritoirePage}
+          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
+        />
+        <ProtectedRoute
+          path={NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path}
+          exact
+          component={VisualiserLesIndicateursParReseauPage}
           authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
         />
 

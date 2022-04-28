@@ -20,7 +20,7 @@ const setDepartement = (state, departement) => {
 };
 
 const setFormation = (state, formation) => {
-  return { ...state, cfa: null, reseau: null, sousEtablissement: null, formation };
+  return { ...state, formation };
 };
 
 const setCfa = (state, cfa) => {
@@ -28,7 +28,7 @@ const setCfa = (state, cfa) => {
 };
 
 const setReseau = (state, reseau) => {
-  return { ...state, cfa: null, formation: null, sousEtablissement: null, reseau };
+  return { ...state, cfa: null, sousEtablissement: null, reseau };
 };
 
 const setSousEtablissement = (state, sousEtablissement) => {

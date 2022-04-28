@@ -19,7 +19,7 @@ const VisualiserLesIndicateursPage = () => {
           <LinkCard variant="white" linkHref={NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.path}>
             Vue territoriale
           </LinkCard>
-          <LinkCard variant="white" linkHref="">
+          <LinkCard variant="white" linkHref={NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path}>
             Vue par réseau
           </LinkCard>
           <LinkCard variant="white" linkHref="">

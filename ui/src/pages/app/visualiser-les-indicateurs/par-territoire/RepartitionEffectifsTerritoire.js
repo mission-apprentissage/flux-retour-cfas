@@ -15,7 +15,7 @@ const RepartitionEffectifsTerritoire = ({ filters }) => {
 };
 
 RepartitionEffectifsTerritoire.propTypes = {
-  filters: filtersPropTypes,
+  filters: filtersPropTypes.state,
 };
 
 export default RepartitionEffectifsTerritoire;

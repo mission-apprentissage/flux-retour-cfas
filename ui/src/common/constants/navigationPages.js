@@ -51,6 +51,10 @@ export const NAVIGATION_PAGES = {
     path: "/visualiser-les-indicateurs/par-territoire",
     title: "Vue territoriale",
   },
+  VisualiserLesIndicateursParReseau: {
+    path: "/visualiser-les-indicateurs/par-reseau",
+    title: "Vue par réseau",
+  },
   Statistiques: {
     path: "/statistiques",
     title: "Statistiques",
