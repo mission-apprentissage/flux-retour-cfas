@@ -16,7 +16,7 @@ const IndicesHeaderSection = () => {
 
   const displayReseauPanel = hasUserRoles(auth, [roles.administrator, roles.pilot]);
   const hasUserNetworkRole = auth?.sub && hasUserRoles(auth, [roles.network]);
-  const hideSelectedReseauNom = hasUserRoles(auth, [roles.network]);
+  const userNetworkMode = hasUserRoles(auth, [roles.network]);
 
   return (
     <>
@@ -36,7 +36,7 @@ const IndicesHeaderSection = () => {
             onCfaChange={filtersContext.setters.setCfa}
             onReseauChange={filtersContext.setters.setReseau}
             displayReseauPanel={displayReseauPanel}
-            hideSelectedReseauNom={hideSelectedReseauNom}
+            userNetworkMode={userNetworkMode}
           />
           <Box as="span" color="grey.800">
             ou
