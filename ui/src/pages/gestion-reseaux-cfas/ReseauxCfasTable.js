@@ -35,7 +35,7 @@ const ReseauxCfasTable = () => {
                   variant="secondary"
                   onClick={() => {
                     toast({
-                      title: "Le réseau cfa a bien été supprimer",
+                      title: "Le réseau cfa a bien été supprimé",
                       status: "success",
                       duration: 9000,
                       isClosable: true,
