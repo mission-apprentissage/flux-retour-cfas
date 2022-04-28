@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useMutation, useQueryClient } from "react-query";
 
-import { postCreateUser } from "../../common/api/tableauDeBord";
-import ModalClosingButton from "../../common/components/ModalClosingButton/ModalClosingButton";
+import { postCreateUser } from "../../../common/api/tableauDeBord";
+import ModalClosingButton from "../../../common/components/ModalClosingButton/ModalClosingButton";
 import CreateUserForm from "./CreateUserForm";
 
 const CreateUserModal = ({ isOpen, onClose }) => {
