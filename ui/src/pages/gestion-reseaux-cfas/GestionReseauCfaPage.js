@@ -20,7 +20,7 @@ const GestionReseauxCfasPage = () => {
       </Section>
       <Section paddingY="5w" backgroundColor="white" overflowX="scroll">
         <Heading marginBottom="3w">
-          Liste des CFAS{" "}
+          Liste des reseaux CFAS{" "}
           <Button variant="primary" onClick={createCfaModal.onOpen}>
             + Ajouter un CFA
           </Button>

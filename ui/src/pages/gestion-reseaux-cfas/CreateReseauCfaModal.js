@@ -18,8 +18,6 @@ const CreateReseauCfaModal = ({ isOpen, onClose }) => {
     },
     {
       onSuccess() {
-        // invalidate users query so react-query refetch the list for us
-        // see https://react-query.tanstack.com/guides/query-invalidation#query-matching-with-invalidatequeries
         queryClient.invalidateQueries(["reseauxCfas"]);
         onClose();
       },
