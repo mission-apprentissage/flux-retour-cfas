@@ -6,6 +6,7 @@ import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import { FiltersProvider, useFiltersContext } from "../FiltersContext";
 import IndicateursGridSection from "../IndicateursGridSection";
+import SwitchViewButton from "../SwitchViewButton";
 import InfosFormationSection from "./InfosFormationSection";
 import RepartitionFormationParCfa from "./RepartitionFormationParCfa";
 
@@ -19,9 +20,10 @@ const VisualiserLesIndicateursParFormationPage = () => {
         <BreadcrumbNav
           links={[NAVIGATION_PAGES.VisualiserLesIndicateurs, NAVIGATION_PAGES.VisualiserLesIndicateursParFormation]}
         />
-        <Heading as="h1" marginTop="4w" marginBottom="3v">
-          {NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.title}
-        </Heading>
+        <HStack marginTop="4w" marginBottom="3v" spacing="2w">
+          <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.title}</Heading>
+          <SwitchViewButton />
+        </HStack>
         <HStack spacing="4w">
           <FormationFilter filters={filtersContext.state} onFormationChange={filtersContext.setters.setFormation} />
           <HStack spacing="3v">
