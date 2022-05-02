@@ -20,7 +20,6 @@ const VisualiserLesIndicateursParOrganismePage = () => {
           {NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.title}
         </Heading>
         <CfasFilter filters={filtersContext.state} onCfaChange={filtersContext.setters.setCfa} />
-        {/* <pre>{JSON.stringify(filtersContext.state, null, 2)}</pre> */}
       </Section>
       <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
       {Boolean(filtersContext.state.cfa) && (
