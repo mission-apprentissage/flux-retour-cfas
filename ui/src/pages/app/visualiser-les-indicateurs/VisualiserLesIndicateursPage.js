@@ -25,8 +25,8 @@ const VisualiserLesIndicateursPage = () => {
           <LinkCard variant="white" linkHref={NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path}>
             Vue par organismes de formation
           </LinkCard>
-          <LinkCard variant="white" linkHref="">
-            Vue par formation
+          <LinkCard variant="white" linkHref={NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.path}>
+            {NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.title}
           </LinkCard>
         </HStack>
       </Section>

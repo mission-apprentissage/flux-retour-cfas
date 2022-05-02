@@ -59,6 +59,10 @@ export const NAVIGATION_PAGES = {
     path: "/visualiser-les-indicateurs/par-organisme",
     title: "Vue par organisme de formation",
   },
+  VisualiserLesIndicateursParFormation: {
+    path: "/visualiser-les-indicateurs/par-formation",
+    title: "Vue par formation",
+  },
   Statistiques: {
     path: "/statistiques",
     title: "Statistiques",
