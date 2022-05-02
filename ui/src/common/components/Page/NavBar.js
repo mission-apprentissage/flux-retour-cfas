@@ -11,7 +11,7 @@ import Section from "../Section/Section";
 const NavItem = ({ to, children }) => {
   const isActive = useRouteMatch({
     path: to,
-    exact: true,
+    exact: false,
   });
 
   return (
