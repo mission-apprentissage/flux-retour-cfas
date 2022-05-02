@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Page, Section } from "../../../../common/components";
+import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
-import { useFiltersContext } from "../../FiltersContext";
-import { VueGlobaleSection } from "../../sections";
-import useEffectifs from "../../useEffectifs";
+import { useFiltersContext } from "../../../app/visualiser-les-indicateurs/FiltersContext";
+import IndicateursGridSection from "../../../app/visualiser-les-indicateurs/IndicateursGridSection";
 import { ActionsSection, CfaInformationSection, RepartitionSection } from "../CfaView/sections";
 
 const CfaPrivateView = ({ cfaUai }) => {
@@ -23,7 +23,7 @@ const CfaPrivateView = ({ cfaUai }) => {
       </Section>
       <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} isUserCfa={true} />
       {infosCfa && <ActionsSection infosCfa={infosCfa} />}
-      {effectifs && <VueGlobaleSection allowDownloadDataList={true} effectifs={effectifs} loading={effectifsLoading} />}
+      {effectifs && <IndicateursGridSection allowDownloadDataListeffectifs={effectifs} loading={effectifsLoading} />}
       <RepartitionSection filters={filters} />
     </Page>
   );

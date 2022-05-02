@@ -4,23 +4,22 @@ import React from "react";
 
 import { RepartitionEffectifsTabs, Section } from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
-import RepartitionEffectifsParFormation from "../../../../common/components/tables/RepartitionEffectifsParFormation";
+import RepartitionEffectifsParNiveauFormation from "../../../../common/components/tables/RepartitionEffectifsParNiveauFormation";
 import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
 import useFetchEffectifsParNiveauFormation from "../../../../common/hooks/useFetchEffectifsParNiveauFormation";
-import { filtersPropTypes } from "../../FiltersContext";
+import { filtersPropTypes } from "../FiltersContext";
 
-const RepartitionEffectifsReseau = ({ filters }) => {
-  const {
-    data: effectifsParCfa,
-    loading: isEffectifsParCfaLoading,
-    error: effectifsParCfaError,
-  } = useFetchEffectifsParCfa(filters);
-
+const RepartitionEffectifsDepartement = ({ filters }) => {
   const {
     data: effectifsParNiveauFormation,
     loading: isEffectifsParNiveauFormationLoading,
     error: effectifsParNiveauFormationError,
   } = useFetchEffectifsParNiveauFormation(filters);
+  const {
+    data: effectifsParCfa,
+    loading: isEffectifsParCfaLoading,
+    error: effectifsParCfaError,
+  } = useFetchEffectifsParCfa(filters);
 
   return (
     <Section paddingY="4w">
@@ -36,7 +35,7 @@ const RepartitionEffectifsReseau = ({ filters }) => {
           />
         </TabPanel>
         <TabPanel>
-          <RepartitionEffectifsParFormation
+          <RepartitionEffectifsParNiveauFormation
             repartitionEffectifs={effectifsParNiveauFormation}
             loading={isEffectifsParNiveauFormationLoading}
             error={effectifsParNiveauFormationError}
@@ -47,8 +46,8 @@ const RepartitionEffectifsReseau = ({ filters }) => {
   );
 };
 
-RepartitionEffectifsReseau.propTypes = {
+RepartitionEffectifsDepartement.propTypes = {
   filters: filtersPropTypes.state,
 };
 
-export default RepartitionEffectifsReseau;
+export default RepartitionEffectifsDepartement;

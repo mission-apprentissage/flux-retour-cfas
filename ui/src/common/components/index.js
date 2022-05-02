@@ -12,6 +12,10 @@ export { default as LinkCard } from "./LinkCard/LinkCard";
 export { default as InputLegend } from "./InputLegend/InputLegend";
 
 export { default as EffectifCard } from "./EffectifCard/EffectifCard";
+export { default as CfasFilter } from "./CfasFilter/CfasFilter";
+export { default as TerritoireFilter } from "./TerritoireFilter/TerritoireFilter";
+export { default as FormationFilter } from "./FormationFilter/FormationFilter";
+export { default as MonthSelect } from "./MonthSelect/MonthSelect";
 
 export { default as Page } from "./Page/Page";
 export { default as Header } from "./Page/Header";

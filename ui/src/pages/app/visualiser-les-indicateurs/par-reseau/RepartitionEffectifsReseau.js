@@ -4,22 +4,23 @@ import React from "react";
 
 import { RepartitionEffectifsTabs, Section } from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
-import RepartitionEffectifsParNiveauFormation from "../../../../common/components/tables/RepartitionEffectifsParNiveauFormation";
+import RepartitionEffectifsParFormation from "../../../../common/components/tables/RepartitionEffectifsParFormation";
 import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
 import useFetchEffectifsParNiveauFormation from "../../../../common/hooks/useFetchEffectifsParNiveauFormation";
-import { filtersPropTypes } from "../../FiltersContext";
+import { filtersPropTypes } from "../FiltersContext";
 
-const RepartitionEffectifsDepartement = ({ filters }) => {
-  const {
-    data: effectifsParNiveauFormation,
-    loading: isEffectifsParNiveauFormationLoading,
-    error: effectifsParNiveauFormationError,
-  } = useFetchEffectifsParNiveauFormation(filters);
+const RepartitionEffectifsReseau = ({ filters }) => {
   const {
     data: effectifsParCfa,
     loading: isEffectifsParCfaLoading,
     error: effectifsParCfaError,
   } = useFetchEffectifsParCfa(filters);
+
+  const {
+    data: effectifsParNiveauFormation,
+    loading: isEffectifsParNiveauFormationLoading,
+    error: effectifsParNiveauFormationError,
+  } = useFetchEffectifsParNiveauFormation(filters);
 
   return (
     <Section paddingY="4w">
@@ -35,7 +36,7 @@ const RepartitionEffectifsDepartement = ({ filters }) => {
           />
         </TabPanel>
         <TabPanel>
-          <RepartitionEffectifsParNiveauFormation
+          <RepartitionEffectifsParFormation
             repartitionEffectifs={effectifsParNiveauFormation}
             loading={isEffectifsParNiveauFormationLoading}
             error={effectifsParNiveauFormationError}
@@ -46,8 +47,8 @@ const RepartitionEffectifsDepartement = ({ filters }) => {
   );
 };
 
-RepartitionEffectifsDepartement.propTypes = {
+RepartitionEffectifsReseau.propTypes = {
   filters: filtersPropTypes.state,
 };
 
-export default RepartitionEffectifsDepartement;
+export default RepartitionEffectifsReseau;

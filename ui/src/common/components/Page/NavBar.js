@@ -50,7 +50,7 @@ const NavBar = () => {
         {!isCfa && !isLoggedIn ? (
           <NavItem to={NAVIGATION_PAGES.ExplorerLesIndicateurs.path}>Indicateurs en temps réel</NavItem>
         ) : (
-          <NavItem to={NAVIGATION_PAGES.TableauDeBord.path}>Indicateurs en temps réel</NavItem>
+          <NavItem to={NAVIGATION_PAGES.VisualiserLesIndicateurs.path}>Indicateurs en temps réel</NavItem>
         )}
         <NavItem to={NAVIGATION_PAGES.ComprendreLesDonnees.path}>{NAVIGATION_PAGES.ComprendreLesDonnees.title}</NavItem>
         <NavItem to={NAVIGATION_PAGES.JournalDesEvolutions.path}>{NAVIGATION_PAGES.JournalDesEvolutions.title}</NavItem>

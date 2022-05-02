@@ -24,7 +24,6 @@ import {
   SupportPage,
 } from "./pages/organisme-formation";
 import StatistiquesPage from "./pages/statistiques/StatistiquesPage";
-import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
 import CfaPrivatePage from "./pages/tableau-de-bord/views/CfaPrivateView";
 
 const ScrollToTopOnRouteChange = () => {
@@ -70,12 +69,6 @@ const App = () => {
         <Route path={NAVIGATION_PAGES.DonneesPersonnelles.path} exact component={ProtectionDonneesPersonnellesPage} />
 
         {/* Secured By Auth Pages */}
-        <ProtectedRoute
-          path={NAVIGATION_PAGES.TableauDeBord.path}
-          exact
-          component={TableauDeBordPage}
-          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
-        />
         <ProtectedRoute
           path={NAVIGATION_PAGES.VisualiserLesIndicateurs.path}
           exact

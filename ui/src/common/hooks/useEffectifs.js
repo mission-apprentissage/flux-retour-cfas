@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 
-import { fetchEffectifs } from "../../common/api/tableauDeBord";
-import { useFiltersContext } from "./FiltersContext";
+import { useFiltersContext } from "../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { fetchEffectifs } from "../api/tableauDeBord";
 
 const mapEffectifsData = (effectifsData) => {
   return {

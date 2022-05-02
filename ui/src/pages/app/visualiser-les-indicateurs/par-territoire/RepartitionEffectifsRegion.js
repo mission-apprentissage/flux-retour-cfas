@@ -7,7 +7,7 @@ import RepartitionEffectifsParDepartement from "../../../../common/components/ta
 import RepartitionEffectifsParNiveauFormation from "../../../../common/components/tables/RepartitionEffectifsParNiveauFormation";
 import useFetchEffectifsParDepartement from "../../../../common/hooks/useFetchEffectifsParDepartement";
 import useFetchEffectifsParNiveauFormation from "../../../../common/hooks/useFetchEffectifsParNiveauFormation";
-import { filtersPropTypes } from "../../FiltersContext";
+import { filtersPropTypes } from "../FiltersContext";
 
 const RepartitionEffectifsRegion = ({ filters }) => {
   const {

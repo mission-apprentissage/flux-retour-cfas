@@ -1,5 +1,5 @@
 import "react-datepicker/dist/react-datepicker.css";
-import "./DateFilter.css";
+import "./MonthSelect.css";
 
 import { endOfMonth, format, isThisMonth } from "date-fns";
 import fr from "date-fns/locale/fr";
@@ -7,11 +7,11 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 
-import PrimarySelectButton from "../../../../common/components/SelectButton/PrimarySelectButton";
+import PrimarySelectButton from "../SelectButton/PrimarySelectButton";
 
 registerLocale("fr", fr);
 
-const DateFilter = ({ value, onChange }) => {
+const MonthSelect = ({ value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const buttonLabel = format(value, "dd MMMM yyyy", { locale: fr });
 
@@ -44,9 +44,9 @@ const DateFilter = ({ value, onChange }) => {
   );
 };
 
-DateFilter.propTypes = {
+MonthSelect.propTypes = {
   value: PropTypes.instanceOf(Date).isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
-export default DateFilter;
+export default MonthSelect;

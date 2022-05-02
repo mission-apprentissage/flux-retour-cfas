@@ -1,14 +1,12 @@
 import { Box, Divider, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../../../common/components";
+import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
-import { FiltersProvider, useFiltersContext } from "../../../tableau-de-bord/FiltersContext";
-import { VueGlobaleSection } from "../../../tableau-de-bord/sections";
-import FormationFilter from "../../../tableau-de-bord/sections/IndicesHeaderSection/FormationFilter/FormationFilter";
-import TerritoireFilter from "../../../tableau-de-bord/sections/IndicesHeaderSection/TerritoireFilter/TerritoireFilter";
-import useEffectifs from "../../../tableau-de-bord/useEffectifs";
-import RepartitionEffectifsReseau from "../../../tableau-de-bord/views/ReseauView/RepartitionEffectifsReseau";
+import useEffectifs from "../../../../common/hooks/useEffectifs";
+import { FiltersProvider, useFiltersContext } from "../FiltersContext";
+import IndicateursGridSection from "../IndicateursGridSection";
+import RepartitionEffectifsReseau from "./RepartitionEffectifsReseau";
 import ReseauSelect from "./ReseauSelect/ReseauSelect";
 
 const VisualiserLesIndicateursParReseauPage = () => {
@@ -45,7 +43,7 @@ const VisualiserLesIndicateursParReseauPage = () => {
       <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
       {Boolean(filtersContext.state.reseau) && (
         <>
-          <VueGlobaleSection effectifs={effectifs} loading={loading} showOrganismesCount />
+          <IndicateursGridSection effectifs={effectifs} loading={loading} showOrganismesCount />
           <RepartitionEffectifsReseau filters={filtersContext.state} />
         </>
       )}

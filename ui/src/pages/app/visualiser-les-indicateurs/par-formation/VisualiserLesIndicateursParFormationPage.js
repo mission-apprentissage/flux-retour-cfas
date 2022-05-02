@@ -1,15 +1,13 @@
 import { Box, Divider, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../../../common/components";
+import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
-import { FiltersProvider, useFiltersContext } from "../../../tableau-de-bord/FiltersContext";
-import { VueGlobaleSection } from "../../../tableau-de-bord/sections";
-import FormationFilter from "../../../tableau-de-bord/sections/IndicesHeaderSection/FormationFilter/FormationFilter";
-import TerritoireFilter from "../../../tableau-de-bord/sections/IndicesHeaderSection/TerritoireFilter/TerritoireFilter";
-import useEffectifs from "../../../tableau-de-bord/useEffectifs";
-import InfosFormationSection from "../../../tableau-de-bord/views/FormationView/InfosFormationSection";
-import RepartitionFormationParCfa from "../../../tableau-de-bord/views/FormationView/RepartitionFormationParCfa";
+import useEffectifs from "../../../../common/hooks/useEffectifs";
+import { FiltersProvider, useFiltersContext } from "../FiltersContext";
+import IndicateursGridSection from "../IndicateursGridSection";
+import InfosFormationSection from "./InfosFormationSection";
+import RepartitionFormationParCfa from "./RepartitionFormationParCfa";
 
 const VisualiserLesIndicateursParFormationPage = () => {
   const filtersContext = useFiltersContext();
@@ -41,7 +39,7 @@ const VisualiserLesIndicateursParFormationPage = () => {
       {Boolean(filtersContext.state.formation) && (
         <>
           <InfosFormationSection formationCfd={filtersContext.state.formation.cfd} />
-          <VueGlobaleSection effectifs={effectifs} loading={loading} showOrganismesCount />
+          <IndicateursGridSection effectifs={effectifs} loading={loading} showOrganismesCount />
           <RepartitionFormationParCfa filters={filtersContext.state} />
         </>
       )}

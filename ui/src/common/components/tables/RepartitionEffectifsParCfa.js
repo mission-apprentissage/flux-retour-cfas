@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { getPercentage } from "../../../common/utils/calculUtils";
-import { useFiltersContext } from "../../../pages/tableau-de-bord/FiltersContext";
+import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../utils/dateUtils";
 import ProgressCell from "./ProgressCell";
 import Table from "./Table";

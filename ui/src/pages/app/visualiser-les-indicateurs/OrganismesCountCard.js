@@ -2,11 +2,11 @@ import { Skeleton } from "@chakra-ui/react";
 import React from "react";
 import { useQuery } from "react-query";
 
-import { fetchTotalOrganismes } from "../../../../common/api/tableauDeBord";
-import { EffectifCard } from "../../../../common/components";
-import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
-import { pick } from "../../../../common/utils/pick";
-import { useFiltersContext } from "../../FiltersContext";
+import { fetchTotalOrganismes } from "../../../common/api/tableauDeBord";
+import { EffectifCard } from "../../../common/components";
+import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
+import { pick } from "../../../common/utils/pick";
+import { useFiltersContext } from "./FiltersContext";
 
 const OrganismesCountCard = () => {
   const { state: filters } = useFiltersContext();

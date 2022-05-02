@@ -1,12 +1,11 @@
 import { Heading, HStack, Text, Tooltip } from "@chakra-ui/react";
 import React from "react";
 
-import { Section } from "../../../../../../common/components";
+import { MonthSelect, Section } from "../../../../../../common/components";
 import RepartitionEffectifsParSiret from "../../../../../../common/components/tables/RepartitionEffectifsParSiretAndDepartement";
 import useFetchEffectifsParSiret from "../../../../../../common/hooks/useFetchEffectifsParSiret";
 import { InfoLine } from "../../../../../../theme/components/icons";
-import { filtersPropTypes, useFiltersContext } from "../../../../FiltersContext";
-import DateFilter from "../../../../sections/VueGlobaleSection/DateFilter";
+import { filtersPropTypes, useFiltersContext } from "../../../../../app/visualiser-les-indicateurs/FiltersContext";
 
 const RepartitionEffectifsParSiretSection = ({ filters }) => {
   const { data, loading, error } = useFetchEffectifsParSiret(filters);
@@ -19,7 +18,7 @@ const RepartitionEffectifsParSiretSection = ({ filters }) => {
           Répartition des effectifs par SIRET
         </Heading>
 
-        <DateFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
+        <MonthSelect value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
         <Tooltip
           label={
             <Text>

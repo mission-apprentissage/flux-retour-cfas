@@ -2,17 +2,15 @@ import { Grid, Heading, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react
 import PropTypes from "prop-types";
 import React from "react";
 
-import { EffectifCard, Section } from "../../../../common/components";
-import { EFFECTIF_INDICATEURS } from "../../../../common/constants/effectifIndicateur";
-import { isDateFuture } from "../../../../common/utils/dateUtils";
-import { pluralize } from "../../../../common/utils/stringUtils";
-import { InfoLine } from "../../../../theme/components/icons";
-import { useFiltersContext } from "../../FiltersContext";
-import { effectifsPropType } from "../../propTypes";
-import DateFilter from "./DateFilter";
+import { EffectifCard, MonthSelect, Section } from "../../../common/components";
+import { EFFECTIF_INDICATEURS } from "../../../common/constants/effectifIndicateur";
+import { isDateFuture } from "../../../common/utils/dateUtils";
+import { pluralize } from "../../../common/utils/stringUtils";
+import { InfoLine } from "../../../theme/components/icons";
+import { useFiltersContext } from "./FiltersContext";
 import OrganismesCountCard from "./OrganismesCountCard";
 
-const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, showOrganismesCount = false }) => {
+const IndicateursGridSection = ({ effectifs, loading, allowDownloadDataList = false, showOrganismesCount = false }) => {
   const filtersContext = useFiltersContext();
   let content = null;
   if (loading) {
@@ -106,7 +104,7 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
           Vue globale
         </Heading>
 
-        <DateFilter value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
+        <MonthSelect value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
         <Tooltip
           label={
             <Text>
@@ -129,11 +127,24 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
   );
 };
 
-VueGlobaleSection.propTypes = {
+IndicateursGridSection.propTypes = {
   loading: PropTypes.bool.isRequired,
   allowDownloadDataList: PropTypes.bool,
   showOrganismesCount: PropTypes.bool,
-  effectifs: effectifsPropType,
+  effectifs: PropTypes.shape({
+    apprentis: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
+    inscritsSansContrat: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
+    abandons: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
+    rupturants: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
+  }),
 };
 
-export default VueGlobaleSection;
+export default IndicateursGridSection;

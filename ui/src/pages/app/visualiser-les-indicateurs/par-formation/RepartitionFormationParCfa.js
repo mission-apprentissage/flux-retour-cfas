@@ -4,7 +4,7 @@ import React from "react";
 import { ExportRepartitionByOrganismeButton, Section } from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
 import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
-import { filtersPropTypes } from "../../FiltersContext";
+import { filtersPropTypes } from "../FiltersContext";
 
 const RepartitionFormationParCfa = ({ filters }) => {
   const { data, isLoading, error } = useFetchEffectifsParCfa(filters);

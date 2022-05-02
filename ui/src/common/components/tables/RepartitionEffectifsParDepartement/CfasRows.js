@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useQuery } from "react-query";
 
-import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
+import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsParCfa } from "../../../api/tableauDeBord";
 import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";

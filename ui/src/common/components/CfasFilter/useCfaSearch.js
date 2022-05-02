@@ -1,8 +1,8 @@
 import { useQuery } from "react-query";
 
-import { fetchSearchCfas } from "../../../../../common/api/tableauDeBord";
-import useDebounce from "../../../../../common/hooks/useDebounce";
-import { omitNullishValues } from "../../../../../common/utils/omitNullishValues";
+import { fetchSearchCfas } from "../../api/tableauDeBord";
+import useDebounce from "../../hooks/useDebounce";
+import { omitNullishValues } from "../../utils/omitNullishValues";
 
 export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 4;
 const SEARCH_DEBOUNCE_TIME = 300;

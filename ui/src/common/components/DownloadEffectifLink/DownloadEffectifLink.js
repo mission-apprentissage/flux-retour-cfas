@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../pages/tableau-de-bord/FiltersContext";
+import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsDataListXlsxExport } from "../../api/tableauDeBord";
 import { mapFiltersToApiFormat } from "../../utils/mapFiltersToApiFormat";
 import DownloadLink from "../DownloadLink/DownloadLink";

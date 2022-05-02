@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { OverlayMenu, PrimarySelectButton } from "../../../../../common/components";
-import { filtersPropTypes } from "../../../FiltersContext";
+import { filtersPropTypes } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { OverlayMenu, PrimarySelectButton } from "../";
 import { TERRITOIRE_TYPE } from "./constants";
 import TerritoiresList from "./TerritoireList";
 import useTerritoiresData from "./useTerritoiresData";

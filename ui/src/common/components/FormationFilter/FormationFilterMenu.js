@@ -2,8 +2,9 @@ import { Box, Divider, Heading, Skeleton, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { InputLegend, SearchInput } from "../../../../../common/components";
-import { filtersPropTypes } from "../../../FiltersContext";
+import { filtersPropTypes } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import InputLegend from "../InputLegend/InputLegend";
+import SearchInput from "../SearchInput/SearchInput";
 import FormationsList from "./FormationsList";
 import useFormationSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useFormationSearch";
 

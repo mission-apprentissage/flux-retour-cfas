@@ -1,8 +1,9 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { OverlayMenu, SecondarySelectButton } from "../../../../../common/components";
-import { filtersPropTypes } from "../../../FiltersContext";
+import { filtersPropTypes } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import OverlayMenu from "../OverlayMenu/OverlayMenu";
+import SecondarySelectButton from "../SelectButton/SecondarySelectButton";
 import FormationFilterMenu from "./FormationFilterMenu";
 
 const FormationFilter = ({ filters, onFormationChange }) => {

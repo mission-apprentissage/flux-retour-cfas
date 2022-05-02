@@ -3,7 +3,7 @@ import qs from "query-string";
 import { createContext, useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 
-import { omitNullishValues } from "../../common/utils/omitNullishValues";
+import { omitNullishValues } from "../../../common/utils/omitNullishValues";
 
 const FiltersContext = createContext();
 

@@ -1,8 +1,8 @@
 import React from "react";
 
-import { filtersPropTypes } from "../../../tableau-de-bord/FiltersContext";
-import RepartitionEffectifsDepartement from "../../../tableau-de-bord/views/DepartementView/RepartitionEffectifsDepartement";
-import RepartitionEffectifsRegion from "../../../tableau-de-bord/views/RegionView/RepartitionEffectifsRegion";
+import { filtersPropTypes } from "../FiltersContext";
+import RepartitionEffectifsDepartement from "./RepartitionEffectifsDepartement";
+import RepartitionEffectifsRegion from "./RepartitionEffectifsRegion";
 
 const RepartitionEffectifsTerritoire = ({ filters }) => {
   if (filters.departement) {

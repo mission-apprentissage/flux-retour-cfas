@@ -1,10 +1,9 @@
 import { Divider, Heading } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../../../common/components";
+import { BreadcrumbNav, CfasFilter, Page, Section } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
-import { FiltersProvider, useFiltersContext } from "../../../tableau-de-bord/FiltersContext";
-import CfasFilter from "../../../tableau-de-bord/sections/IndicesHeaderSection/CfasFilter/CfasFilter";
+import { FiltersProvider, useFiltersContext } from "../FiltersContext";
 import OrganismeViewContent from "./OrganismeViewContent";
 
 const VisualiserLesIndicateursParOrganismePage = () => {

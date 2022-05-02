@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 
-import { fetchDepartements, fetchRegions } from "../../../../../common/api/tableauDeBord";
-import { sortAlphabeticallyBy } from "../../../../../common/utils/sortAlphabetically";
+import { fetchDepartements, fetchRegions } from "../../../common/api/tableauDeBord";
+import { sortAlphabeticallyBy } from "../../utils/sortAlphabetically";
 import { TERRITOIRE_TYPE } from "./constants";
 
 const useTerritoiresData = () => {

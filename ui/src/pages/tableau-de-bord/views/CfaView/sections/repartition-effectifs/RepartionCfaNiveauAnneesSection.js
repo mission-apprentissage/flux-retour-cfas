@@ -4,7 +4,7 @@ import React from "react";
 import { ExportRepartitionByFormationButton, Section } from "../../../../../../common/components";
 import RepartitionEffectifsParFormation from "../../../../../../common/components/tables/RepartitionEffectifsParFormation";
 import useFetchEffectifsParNiveauFormation from "../../../../../../common/hooks/useFetchEffectifsParNiveauFormation";
-import { filtersPropTypes } from "../../../../FiltersContext";
+import { filtersPropTypes } from "../../../../../app/visualiser-les-indicateurs/FiltersContext";
 
 const RepartionCfaNiveauAnneesSection = ({ filters }) => {
   const { data, loading, error } = useFetchEffectifsParNiveauFormation(filters);

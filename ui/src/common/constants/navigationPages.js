@@ -80,10 +80,6 @@ export const NAVIGATION_PAGES = {
     path: "/cfa",
     title: "Cfa",
   },
-  TableauDeBord: {
-    path: "/tableau-de-bord",
-    title: "Tableau de bord",
-  },
   ModifierMotDePasse: {
     path: "/modifier-mot-de-passe",
     title: "Modifiez votre mot de passe",

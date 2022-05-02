@@ -2,8 +2,9 @@ import { List, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { FilterOption, SearchInput } from "../../../../../common/components";
-import { stringContains, stringEqualsCaseInsensitive } from "../../../../../common/utils/stringUtils";
+import { stringContains, stringEqualsCaseInsensitive } from "../../utils/stringUtils";
+import FilterOption from "../FilterOption/FilterOption";
+import SearchInput from "../SearchInput/SearchInput";
 import { TERRITOIRE_TYPE } from "./constants";
 import TouteLaFranceOption from "./TouteLaFranceOption";
 
