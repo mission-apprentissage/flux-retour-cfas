@@ -1,38 +1,26 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { MenuTabs, OverlayMenu, PrimarySelectButton } from "../../../../../common/components";
+import { OverlayMenu, PrimarySelectButton } from "../../../../../common/components";
 import { filtersPropTypes } from "../../../FiltersContext";
-import DepartementOptions from "./DepartementOptions";
-import RegionOptions from "./RegionOptions";
-import withTerritoiresData from "./withTerritoireData";
+import { TERRITOIRE_TYPE } from "./constants";
+import TerritoiresList from "./TerritoireList";
+import useTerritoiresData from "./useTerritoiresData";
 
-const TerritoireFilter = ({
-  filters,
-  onRegionChange,
-  onDepartementChange,
-  onTerritoireReset,
-  regions,
-  departements,
-}) => {
+const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerritoireReset }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data } = useTerritoiresData();
 
-  const onDepartementClick = (departement) => {
-    onDepartementChange(departement);
+  const onTerritoireClick = (territoire) => {
+    if (!territoire) {
+      onTerritoireReset();
+    } else if (territoire.type === TERRITOIRE_TYPE.REGION) {
+      onRegionChange(territoire);
+    } else {
+      onDepartementChange(territoire);
+    }
     setIsOpen(false);
   };
-
-  const onRegionClick = (departement) => {
-    onRegionChange(departement);
-    setIsOpen(false);
-  };
-
-  const onTouteLaFranceClick = () => {
-    onTerritoireReset();
-    setIsOpen(false);
-  };
-
-  const tabLabels = [`Région (${regions.length})`, `Département (${departements.length})`];
 
   const buttonLabel = filters.region?.nom || filters.departement?.nom || "En France";
 
@@ -44,20 +32,7 @@ const TerritoireFilter = ({
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <MenuTabs tabNames={tabLabels}>
-            <RegionOptions
-              regions={regions}
-              onRegionClick={onRegionClick}
-              onTouteLaFranceClick={onTouteLaFranceClick}
-              currentFilter={filters.region}
-            />
-            <DepartementOptions
-              departements={departements}
-              onDepartementClick={onDepartementClick}
-              onTouteLaFranceClick={onTouteLaFranceClick}
-              currentFilter={filters.departement}
-            />
-          </MenuTabs>
+          <TerritoiresList data={data} onTerritoireClick={onTerritoireClick} currentFilter={filters.region} />
         </OverlayMenu>
       )}
     </div>
@@ -65,20 +40,10 @@ const TerritoireFilter = ({
 };
 
 TerritoireFilter.propTypes = {
-  onRegionChange: PropTypes.func.isRequired,
   onDepartementChange: PropTypes.func.isRequired,
+  onRegionChange: PropTypes.func.isRequired,
   onTerritoireReset: PropTypes.func.isRequired,
   filters: filtersPropTypes.state,
-  regions: PropTypes.arrayOf(
-    PropTypes.shape({
-      code: PropTypes.string.isRequired,
-    }).isRequired
-  ).isRequired,
-  departements: PropTypes.arrayOf(
-    PropTypes.shape({
-      code: PropTypes.string.isRequired,
-    }).isRequired
-  ).isRequired,
 };
 
-export default withTerritoiresData(TerritoireFilter);
+export default TerritoireFilter;
