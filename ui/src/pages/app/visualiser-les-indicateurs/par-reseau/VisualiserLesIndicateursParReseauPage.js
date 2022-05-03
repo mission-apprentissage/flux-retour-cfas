@@ -32,12 +32,17 @@ const VisualiserLesIndicateursParReseauPage = () => {
           />
           <HStack spacing="3v">
             <Box color="grey.800">Filtrer :</Box>
-            <FormationFilter filters={filtersContext.state} onFormationChange={filtersContext.setters.setFormation} />
+            <FormationFilter
+              filters={filtersContext.state}
+              onFormationChange={filtersContext.setters.setFormation}
+              variant="secondary"
+            />
             <TerritoireFilter
               onDepartementChange={filtersContext.setters.setDepartement}
               onRegionChange={filtersContext.setters.setRegion}
               onTerritoireReset={filtersContext.setters.resetTerritoire}
               filters={filtersContext.state}
+              variant="secondary"
             />
           </HStack>
         </HStack>

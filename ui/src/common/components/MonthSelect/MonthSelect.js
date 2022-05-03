@@ -35,7 +35,7 @@ const MonthSelect = ({ value, onChange }) => {
         onCalendarClose={() => setIsOpen(false)}
         onCalendarOpen={() => setIsOpen(true)}
         customInput={
-          <PrimarySelectButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
+          <PrimarySelectButton onClick={() => setIsOpen(!isOpen)} isActive={isOpen}>
             Le {buttonLabel}
           </PrimarySelectButton>
         }

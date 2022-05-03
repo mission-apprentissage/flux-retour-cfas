@@ -26,7 +26,7 @@ const SecondarySelectButton = ({
       <Box
         fontSize="epsilon"
         as="i"
-        className="ri-arrow-down-s-line"
+        className={isActive ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
         marginLeft="1v"
         paddingTop="2px"
         verticalAlign="middle"

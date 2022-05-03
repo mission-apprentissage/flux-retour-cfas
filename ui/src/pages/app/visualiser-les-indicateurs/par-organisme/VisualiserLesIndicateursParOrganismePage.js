@@ -20,7 +20,7 @@ const VisualiserLesIndicateursParOrganismePage = () => {
           <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.title}</Heading>
           <SwitchViewButton />
         </HStack>
-        <CfasFilter filters={filtersContext.state} onCfaChange={filtersContext.setters.setCfa} />
+        <CfasFilter filters={filtersContext.state} onCfaChange={filtersContext.setters.setCfa} defaultIsOpen />
       </Section>
       <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
       {Boolean(filtersContext.state.cfa) && (

@@ -25,7 +25,11 @@ const VisualiserLesIndicateursParFormationPage = () => {
           <SwitchViewButton />
         </HStack>
         <HStack spacing="4w">
-          <FormationFilter filters={filtersContext.state} onFormationChange={filtersContext.setters.setFormation} />
+          <FormationFilter
+            filters={filtersContext.state}
+            onFormationChange={filtersContext.setters.setFormation}
+            defaultIsOpen
+          />
           <HStack spacing="3v">
             <Box color="grey.800">Filtrer :</Box>
             <TerritoireFilter
@@ -33,6 +37,7 @@ const VisualiserLesIndicateursParFormationPage = () => {
               onRegionChange={filtersContext.setters.setRegion}
               onTerritoireReset={filtersContext.setters.resetTerritoire}
               filters={filtersContext.state}
+              variant="secondary"
             />
           </HStack>
         </HStack>

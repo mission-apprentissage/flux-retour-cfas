@@ -32,7 +32,11 @@ const VisualiserLesIndicateursParTerritoirePage = () => {
           />
           <HStack spacing="3v">
             <Box color="grey.800">Filtrer :</Box>
-            <FormationFilter filters={filtersContext.state} onFormationChange={filtersContext.setters.setFormation} />
+            <FormationFilter
+              filters={filtersContext.state}
+              onFormationChange={filtersContext.setters.setFormation}
+              variant="secondary"
+            />
           </HStack>
         </HStack>
       </Section>
