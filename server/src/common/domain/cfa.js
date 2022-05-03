@@ -42,7 +42,7 @@ class Cfa {
       ...props,
       access_token: accessToken,
       nom_tokenized: this.createTokenizedNom(props.nom),
-      private_url: `${config.publicUrl}/cfas/${accessToken}`,
+      private_url: `${config.publicUrl}/cfa/${accessToken}`,
       created_at: new Date(),
       updated_at: null,
     });

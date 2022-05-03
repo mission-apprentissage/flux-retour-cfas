@@ -62,8 +62,6 @@ const App = () => {
 
         {/* Secured By Token Pages */}
         <Route exact path={`${NAVIGATION_PAGES.Cfa.path}/:accessToken`} component={CfaPrivatePage} />
-        {/* Workaround because we sent some links with /cfas/xxx and others with /cfa/xxx */}
-        <Route exact path={`/cfa/:accessToken`} component={CfaPrivatePage} />
         <Route path={NAVIGATION_PAGES.DonneesPersonnelles.path} exact component={ProtectionDonneesPersonnellesPage} />
 
         {/* Secured By Auth Pages */}
