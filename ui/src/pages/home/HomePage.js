@@ -15,7 +15,7 @@ const HomePage = () => {
   const [auth] = useAuth();
 
   if (auth?.sub && hasUserRoles(auth, [roles.pilot, roles.administrator, roles.network])) {
-    return <Redirect to="/tableau-de-bord" />;
+    return <Redirect to="/visualiser-les-indicateurs" />;
   }
 
   return (
