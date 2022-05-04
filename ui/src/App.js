@@ -6,6 +6,7 @@ import { roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
 import GestionReseauxCfasPage from "./pages/admin/gestion-reseaux-cfas/GestionReseauCfaPage";
 import GestionUtilisateursPage from "./pages/admin/gestion-utilisateurs/GestionUtilisateursPage";
+import CfaPrivatePage from "./pages/app/visualiser-les-indicateurs/cfa-private";
 import VisualiserLesIndicateursParFormationPage from "./pages/app/visualiser-les-indicateurs/par-formation/VisualiserLesIndicateursParFormationPage";
 import VisualiserLesIndicateursParOrganismePage from "./pages/app/visualiser-les-indicateurs/par-organisme";
 import VisualiserLesIndicateursParReseauPage from "./pages/app/visualiser-les-indicateurs/par-reseau";
@@ -24,7 +25,6 @@ import {
   SupportPage,
 } from "./pages/organisme-formation";
 import StatistiquesPage from "./pages/statistiques/StatistiquesPage";
-import CfaPrivatePage from "./pages/tableau-de-bord/views/CfaPrivateView";
 
 const ScrollToTopOnRouteChange = () => {
   const location = useLocation();

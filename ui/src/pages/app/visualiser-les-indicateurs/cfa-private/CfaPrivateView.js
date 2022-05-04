@@ -5,9 +5,13 @@ import React from "react";
 import { Page, Section } from "../../../../common/components";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
-import { useFiltersContext } from "../../../app/visualiser-les-indicateurs/FiltersContext";
-import IndicateursGridSection from "../../../app/visualiser-les-indicateurs/IndicateursGridSection";
-import { ActionsSection, CfaInformationSection, RepartitionSection } from "../CfaView/sections";
+import {
+  ActionsSection,
+  CfaInformationSection,
+  RepartitionSection,
+} from "../../../tableau-de-bord/views/CfaView/sections";
+import { useFiltersContext } from "../FiltersContext";
+import IndicateursGridSection from "../IndicateursGridSection";
 
 const CfaPrivateView = ({ cfaUai }) => {
   const [effectifs, effectifsLoading] = useEffectifs();
