@@ -1,18 +1,22 @@
-import { Box, Divider, Heading, HStack } from "@chakra-ui/react";
+import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 import React from "react";
 
 import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
-import { FiltersProvider, useFiltersContext } from "../FiltersContext";
+import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridSection from "../IndicateursGridSection";
 import SwitchViewButton from "../SwitchViewButton";
 import RepartitionEffectifsReseau from "./RepartitionEffectifsReseau";
 import ReseauSelect from "./ReseauSelect/ReseauSelect";
+import ReseauUpdateContactSection from "./ReseauUpdateContactSection";
 
-const VisualiserLesIndicateursParReseauPage = () => {
+const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
   const [effectifs, loading] = useEffectifs();
+
+  const currentReseau = filtersContext.state.reseau;
 
   return (
     <Page>
@@ -25,11 +29,13 @@ const VisualiserLesIndicateursParReseauPage = () => {
           <SwitchViewButton />
         </HStack>
         <HStack spacing="4w">
-          <ReseauSelect
-            defaultIsOpen
-            value={filtersContext.state.reseau}
-            onReseauChange={filtersContext.setters.setReseau}
-          />
+          {userLoggedAsReseau ? (
+            <Text fontWeight="bold" fontSize="gamma">
+              Réseau {currentReseau.nom}
+            </Text>
+          ) : (
+            <ReseauSelect defaultIsOpen value={currentReseau} onReseauChange={filtersContext.setters.setReseau} />
+          )}
           <HStack spacing="3v">
             <Box color="grey.800">Filtrer :</Box>
             <FormationFilter
@@ -47,8 +53,9 @@ const VisualiserLesIndicateursParReseauPage = () => {
           </HStack>
         </HStack>
       </Section>
+      {userLoggedAsReseau && <ReseauUpdateContactSection />}
       <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
-      {Boolean(filtersContext.state.reseau) && (
+      {Boolean(currentReseau) && (
         <>
           <IndicateursGridSection effectifs={effectifs} loading={loading} showOrganismesCount />
           <RepartitionEffectifsReseau filters={filtersContext.state} />
@@ -58,12 +65,8 @@ const VisualiserLesIndicateursParReseauPage = () => {
   );
 };
 
-const T = () => {
-  return (
-    <FiltersProvider>
-      <VisualiserLesIndicateursParReseauPage />
-    </FiltersProvider>
-  );
+IndicateursVueReseauPage.propTypes = {
+  userLoggedAsReseau: PropTypes.bool,
 };
 
-export default T;
+export default IndicateursVueReseauPage;
