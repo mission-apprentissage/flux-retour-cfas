@@ -7,6 +7,10 @@ export const NAVIGATION_PAGES = {
     path: "/",
     title: "Accueil",
   },
+  NotFound404: {
+    path: "/404",
+    title: "Page non trouvée",
+  },
   DemandeAcces: {
     path: "/demande-acces",
     title: "Demande d'acces",

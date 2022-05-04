@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Switch, useLocation } from "react-route
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
+import Page404 from "./pages/404/Page404";
 import GestionReseauxCfasPage from "./pages/admin/gestion-reseaux-cfas/GestionReseauCfaPage";
 import GestionUtilisateursPage from "./pages/admin/gestion-utilisateurs/GestionUtilisateursPage";
 import CfaPrivatePage from "./pages/app/visualiser-les-indicateurs/cfa-private";
@@ -117,7 +118,7 @@ const App = () => {
         <Route path={NAVIGATION_PAGES.ModifierMotDePasse.path} exact component={ModifierMotDePassePage} />
 
         {/* Not found page */}
-        <Route component={() => <div>404 - Page not found</div>} />
+        <Route component={Page404} />
       </Switch>
     </Router>
   );
