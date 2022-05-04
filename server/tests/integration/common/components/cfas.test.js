@@ -60,14 +60,16 @@ describe(__filename, () => {
       const uai = "0802004A";
       const sirets = ["11111111100023"];
 
-      const dossierApprenant = {
+      const dossierApprenant = new DossierApprenantModel({
         uai_etablissement: uai,
         nom_etablissement: "TestCfa",
         etablissement_adresse: "10 rue de la paix 75016 Paris",
         source: "MonErp",
         etablissement_nom_region: "Ma région",
         etablissement_num_region: "17",
-      };
+        created_at: new Date("2021-06-10T00:00:00.000+0000"),
+      });
+      await dossierApprenant.save();
 
       const created = await createCfa(dossierApprenant, sirets);
 
@@ -80,6 +82,7 @@ describe(__filename, () => {
         region_num: dossierApprenant.etablissement_num_region,
         erps: [dossierApprenant.source],
       });
+      assert.equal(created.first_transmission_date.getTime(), dossierApprenant.created_at.getTime());
       assert.equal(created.nom_tokenized, Cfa.createTokenizedNom(dossierApprenant.nom_etablissement));
       assert.equal(created.private_url !== null, true);
       assert.equal(created.accessToken !== null, true);

@@ -51,6 +51,7 @@ const createCfa = async (dossierForCfa, sirets = []) => {
     erps: [dossierForCfa.source],
     region_nom: dossierForCfa.etablissement_nom_region,
     region_num: dossierForCfa.etablissement_num_region,
+    first_transmission_date: await getCfaFirstTransmissionDateFromUai(dossierForCfa.uai_etablissement),
   });
 
   if (cfaEntity) {
