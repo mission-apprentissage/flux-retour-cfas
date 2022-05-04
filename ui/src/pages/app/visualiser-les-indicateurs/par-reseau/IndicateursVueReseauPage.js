@@ -34,7 +34,11 @@ const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
               Réseau {currentReseau.nom}
             </Text>
           ) : (
-            <ReseauSelect defaultIsOpen value={currentReseau} onReseauChange={filtersContext.setters.setReseau} />
+            <ReseauSelect
+              defaultIsOpen={!currentReseau}
+              value={currentReseau}
+              onReseauChange={filtersContext.setters.setReseau}
+            />
           )}
           <HStack spacing="3v">
             <Box color="grey.800">Filtrer :</Box>

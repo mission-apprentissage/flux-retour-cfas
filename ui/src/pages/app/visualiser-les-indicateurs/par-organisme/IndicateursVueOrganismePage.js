@@ -11,6 +11,8 @@ import OrganismeViewContent from "./OrganismeViewContent";
 const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
 
+  const currentOrganisme = filtersContext.state.cfa;
+
   const organismeFilterLabel = userLoggedAsReseau
     ? `Sélectionner un organisme du réseau ${filtersContext.state.reseau.nom}`
     : "Sélectionner un organisme";
@@ -28,13 +30,13 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
         <CfasFilter
           filters={filtersContext.state}
           onCfaChange={filtersContext.setters.setCfa}
-          defaultIsOpen
+          defaultIsOpen={!currentOrganisme}
           defaultButtonLabel={organismeFilterLabel}
         />
       </Section>
       <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
-      {Boolean(filtersContext.state.cfa) && (
-        <OrganismeViewContent cfaUai={filtersContext.state.cfa.uai_etablissement} filters={filtersContext.state} />
+      {Boolean(currentOrganisme) && (
+        <OrganismeViewContent cfaUai={currentOrganisme.uai_etablissement} filters={filtersContext.state} />
       )}
     </Page>
   );

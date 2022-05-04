@@ -14,6 +14,8 @@ const VisualiserLesIndicateursParFormationPage = () => {
   const filtersContext = useFiltersContext();
   const [effectifs, loading] = useEffectifs();
 
+  const currentFormation = filtersContext.state.formation;
+
   return (
     <Page>
       <Section withShadow paddingY="3w">
@@ -28,7 +30,7 @@ const VisualiserLesIndicateursParFormationPage = () => {
           <FormationFilter
             filters={filtersContext.state}
             onFormationChange={filtersContext.setters.setFormation}
-            defaultIsOpen
+            defaultIsOpen={!currentFormation}
           />
           <HStack spacing="3v">
             <Box color="grey.800">Filtrer :</Box>
@@ -43,9 +45,9 @@ const VisualiserLesIndicateursParFormationPage = () => {
         </HStack>
       </Section>
       <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
-      {Boolean(filtersContext.state.formation) && (
+      {Boolean(currentFormation) && (
         <>
-          <InfosFormationSection formationCfd={filtersContext.state.formation.cfd} />
+          <InfosFormationSection formationCfd={currentFormation.cfd} />
           <IndicateursGridSection effectifs={effectifs} loading={loading} showOrganismesCount />
           <RepartitionFormationParCfa filters={filtersContext.state} />
         </>

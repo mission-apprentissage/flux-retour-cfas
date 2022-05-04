@@ -1,16 +1,19 @@
 import { Box, Link, Tbody, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
+import { useHistory } from "react-router-dom";
 
 import { getPercentage } from "../../../common/utils/calculUtils";
 import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../utils/dateUtils";
+import { navigateToOrganismePage } from "../../utils/routing";
 import ProgressCell from "./ProgressCell";
 import Table from "./Table";
 
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
   const filtersContext = useFiltersContext();
+  const history = useHistory();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
     ? ["Liste des organismes de formation", "apprentis", "inscrits sans contrat"]
@@ -26,7 +29,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
               <Td color="grey.800">
                 <Link
                   onClick={() => {
-                    filtersContext.setters.setCfa({ nom_etablissement, uai_etablissement });
+                    navigateToOrganismePage(history, { uai_etablissement, nom_etablissement });
                     window.scrollTo(0, 0);
                   }}
                   color="bluefrance"

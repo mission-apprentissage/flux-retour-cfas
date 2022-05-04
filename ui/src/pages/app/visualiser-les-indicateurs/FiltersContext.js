@@ -39,7 +39,7 @@ const resetTerritoire = (state) => {
   return { ...state, departement: null, region: null };
 };
 
-const stateToQueryString = (state) => {
+export const stateToQueryString = (state) => {
   return qs.stringify(
     omitNullishValues({
       departement: state.departement ? JSON.stringify(state.departement) : null,
