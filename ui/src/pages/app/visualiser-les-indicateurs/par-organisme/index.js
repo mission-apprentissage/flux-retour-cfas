@@ -5,7 +5,7 @@ import { roles } from "../../../../common/auth/roles";
 import { FiltersProvider, getDefaultState } from "../FiltersContext";
 import IndicateursVueOrganismePage from "./IndicateursVueOrganismePage";
 
-const OrganismeViewUserSwitch = () => {
+const IndicateursVueOrganismePageContainer = () => {
   if (getAuthUserRole() === roles.network) {
     const fixedFiltersState = { reseau: { nom: getAuthUserNetwork() } };
     const defaultFiltersState = { ...getDefaultState(), ...fixedFiltersState };
@@ -23,4 +23,4 @@ const OrganismeViewUserSwitch = () => {
   );
 };
 
-export default OrganismeViewUserSwitch;
+export default IndicateursVueOrganismePageContainer;

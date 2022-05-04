@@ -5,13 +5,9 @@ import React from "react";
 import { Page, Section } from "../../../../common/components";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
-import {
-  ActionsSection,
-  CfaInformationSection,
-  RepartitionSection,
-} from "../../../tableau-de-bord/views/CfaView/sections";
 import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridSection from "../IndicateursGridSection";
+import { ActionsSection, CfaInformationSection, RepartitionSection } from "../par-organisme/sections";
 
 const CfaPrivateView = ({ cfaUai }) => {
   const [effectifs, effectifsLoading] = useEffectifs();
@@ -25,7 +21,7 @@ const CfaPrivateView = ({ cfaUai }) => {
           Visualiser les indices en temps réel
         </Heading>
       </Section>
-      <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} isUserCfa={true} />
+      <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
       {infosCfa && <ActionsSection infosCfa={infosCfa} />}
       {effectifs && <IndicateursGridSection allowDownloadDataListeffectifs={effectifs} loading={effectifsLoading} />}
       <RepartitionSection filters={filters} />

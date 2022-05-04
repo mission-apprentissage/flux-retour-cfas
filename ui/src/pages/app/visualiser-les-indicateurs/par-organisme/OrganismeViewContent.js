@@ -5,14 +5,14 @@ import { hasUserRoles, roles } from "../../../../common/auth/roles";
 import useAuth from "../../../../common/hooks/useAuth";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
+import { filtersPropTypes } from "../FiltersContext";
+import IndicateursGridSection from "../IndicateursGridSection";
 import {
   ActionsSection,
   CfaInformationSection,
   RepartitionEffectifsParSiretSection,
   RepartitionSection,
-} from "../../../tableau-de-bord/views/CfaView/sections";
-import { filtersPropTypes } from "../FiltersContext";
-import IndicateursGridSection from "../IndicateursGridSection";
+} from "./sections";
 
 const OrganismeViewContent = ({ cfaUai, filters }) => {
   const [effectifs, effectifsLoading] = useEffectifs();

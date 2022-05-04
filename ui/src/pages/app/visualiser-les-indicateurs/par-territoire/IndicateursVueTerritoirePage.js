@@ -4,12 +4,12 @@ import React from "react";
 import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
-import { FiltersProvider, useFiltersContext } from "../FiltersContext";
+import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridSection from "../IndicateursGridSection";
 import SwitchViewButton from "../SwitchViewButton";
 import RepartitionEffectifsTerritoire from "./RepartitionEffectifsTerritoire";
 
-const VisualiserLesIndicateursParTerritoirePage = () => {
+const IndicateursVueTerritoirePage = () => {
   const filtersContext = useFiltersContext();
   const [effectifs, loading] = useEffectifs();
 
@@ -47,12 +47,4 @@ const VisualiserLesIndicateursParTerritoirePage = () => {
   );
 };
 
-const T = () => {
-  return (
-    <FiltersProvider>
-      <VisualiserLesIndicateursParTerritoirePage />
-    </FiltersProvider>
-  );
-};
-
-export default T;
+export default IndicateursVueTerritoirePage;

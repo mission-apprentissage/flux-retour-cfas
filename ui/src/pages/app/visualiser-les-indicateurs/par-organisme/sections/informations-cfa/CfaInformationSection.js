@@ -46,7 +46,7 @@ ReseauxAndAdresseText.propTypes = {
   nbEtablissements: PropTypes.number,
 };
 
-const CfaInformationSection = ({ infosCfa, loading, error, isUserCfa = false }) => {
+const CfaInformationSection = ({ infosCfa, loading, error }) => {
   if (loading) {
     return <CfaInformationSkeleton />;
   }
@@ -65,7 +65,7 @@ const CfaInformationSection = ({ infosCfa, loading, error, isUserCfa = false }) 
   }
 
   if (infosCfa) {
-    const { uai, sousEtablissements, reseaux, adresse, domainesMetiers, libelleLong } = infosCfa;
+    const { uai, sousEtablissements, reseaux, adresse, domainesMetiers } = infosCfa;
     const multipleSirets = sousEtablissements.length > 1;
     const siretToDisplay = sousEtablissements[0]?.siret_etablissement
       ? formatSiretSplitted(sousEtablissements[0]?.siret_etablissement)
@@ -75,22 +75,14 @@ const CfaInformationSection = ({ infosCfa, loading, error, isUserCfa = false }) 
       <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
         <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
           <HStack>
-            {isUserCfa && (
-              <>
-                <Text marginBottom="2px">Organisme :</Text>
-                <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
-                  {libelleLong}
-                </Badge>
-              </>
-            )}
-            <Text marginBottom="2px">UAI :</Text>
+            <Text>UAI :</Text>
             <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
               {uai}
             </Badge>
           </HStack>
           {!multipleSirets && (
             <HStack>
-              <Text marginBottom="2px">SIRET :</Text>
+              <Text>SIRET :</Text>
               <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
                 {siretToDisplay}
               </Badge>
@@ -117,7 +109,6 @@ CfaInformationSection.propTypes = {
   infosCfa: infosCfaPropType,
   loading: PropTypes.bool,
   error: PropTypes.object,
-  isUserCfa: PropTypes.bool,
 };
 
 export default CfaInformationSection;
