@@ -57,7 +57,7 @@ export const NAVIGATION_PAGES = {
     title: "Protection des données à caractère personnel",
   },
   Cfa: {
-    path: "/cfas",
+    path: "/cfa",
     title: "Cfa",
   },
   TableauDeBord: {

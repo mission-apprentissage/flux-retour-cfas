@@ -126,7 +126,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
    */
   router.get(
     "/export-xlsx-data-lists",
-    permissionsMiddleware([apiRoles.administrator]),
+    permissionsMiddleware([apiRoles.administrator, tdbRoles.cfa]),
     applyUserRoleFilter,
     validateRequestQuery(
       Joi.object({

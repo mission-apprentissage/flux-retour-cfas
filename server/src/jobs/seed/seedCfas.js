@@ -26,7 +26,7 @@ const CFAS_NETWORKS = [
 /**
  * Script qui initialise la collection CFAs
  */
-runScript(async ({ cfas, ovhStorage, db }) => {
+runScript(async ({ cfas, db }) => {
   logger.info("Seeding CFAs");
 
   // Delete all cfa in collection and not found in dossierApprenants (i.e Cfas from cleaned data)
@@ -37,7 +37,7 @@ runScript(async ({ cfas, ovhStorage, db }) => {
 
   // Set networks from reseauxCfas collection
   await asyncForEach(CFAS_NETWORKS, async (currentNetwork) => {
-    await updateCfasNetworksFromReseauxCfas(ovhStorage, currentNetwork);
+    await updateCfasNetworksFromReseauxCfas(currentNetwork);
   });
 
   // Set metiers from LBA Api
@@ -141,10 +141,9 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
 
 /**
  * Update cfas network informations in collection
- * @param {*} ovhStorage
  * @param {*} param1
  */
-const updateCfasNetworksFromReseauxCfas = async (ovhStorage, { nomReseau }) => {
+const updateCfasNetworksFromReseauxCfas = async ({ nomReseau }) => {
   logger.info(`Updating CFAs network for ${nomReseau}`);
 
   const allCfasForNetworkFile = await ReseauCfaModel.find({ nom_reseau: nomReseau }).lean();
@@ -188,7 +187,7 @@ const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau) => {
     await CfaModel.findByIdAndUpdate(
       cfaInReferentiel._id,
       {
-        $addToSet: { noms_cfa: cfaInFile.nom.trim(), reseaux: nomReseau },
+        $addToSet: { noms_cfa: cfaInFile.nom_etablissement?.trim(), reseaux: nomReseau },
       },
       { new: true }
     );
