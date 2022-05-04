@@ -41,10 +41,20 @@ module.exports = ({ reseauxCfas }) => {
   router.delete(
     "/delete/:id",
     tryCatch(async (req, res) => {
-      const { reseauCfa } = req.params;
-      await reseauxCfas.delete(reseauCfa);
+      const { id } = req.params;
 
-      return res.json("deleted");
+      if (id !== undefined) {
+        await reseauxCfas.delete(id);
+        return res.json({
+          status: "Success",
+          message: "Reseau cfa has been deleted",
+        });
+      } else {
+        return res.json({
+          status: "Error",
+          message: "ID Undefined",
+        });
+      }
     })
   );
 
