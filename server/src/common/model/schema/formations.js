@@ -22,6 +22,10 @@ module.exports = new Schema(
       type: String,
       description: "Libellé normalisé depuis Tables de Correspondances",
     },
+    rncp: {
+      type: String,
+      description: "Code RNCP de la formation récupéré depuis Tables de Correspondances",
+    },
     niveau: {
       type: String,
       description: "Niveau de formation récupéré via Tables de Correspondances",

@@ -65,6 +65,7 @@ const createFormation = async (cfd) => {
     cfd,
     cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
     cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
+    rncp: formationInfo?.rncp?.code_rncp, // RNCP Code is returned by TCO
     libelle: buildFormationLibelle(formationInfo),
     niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
     niveau_libelle: formationInfo?.niveau,
@@ -91,7 +92,11 @@ const searchFormations = async (searchCriteria) => {
 
   const matchStage = searchTerm
     ? {
-        $or: [{ $text: { $search: searchTerm } }, { cfd: new RegExp(escapeRegExp(searchTerm), "g") }],
+        $or: [
+          { $text: { $search: searchTerm } },
+          { cfd: new RegExp(escapeRegExp(searchTerm), "g") },
+          { rncp: new RegExp(escapeRegExp(searchTerm), "gi") },
+        ],
         cfd: { $in: eligibleCfds },
       }
     : { cfd: { $in: eligibleCfds } };
