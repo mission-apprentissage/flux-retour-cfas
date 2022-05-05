@@ -135,6 +135,7 @@ const searchCfas = async (searchCriteria) => {
   return found.map((cfa) => {
     return {
       uai: cfa.uai,
+      sirets: cfa.sirets,
       nom: cfa.nom,
       departement: getDepartementCodeFromUai(cfa.uai),
     };

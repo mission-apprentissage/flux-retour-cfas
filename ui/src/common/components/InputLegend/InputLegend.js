@@ -4,7 +4,7 @@ import React from "react";
 
 const InputLegend = ({ children }) => {
   return (
-    <Box as="legend" fontSize="omega" color="grey.600" marginBottom="1w">
+    <Box as="legend" fontSize="omega" fontStyle="italic" color="grey.600" marginBottom="1w">
       {children}
     </Box>
   );

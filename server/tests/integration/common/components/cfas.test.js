@@ -190,18 +190,22 @@ describe(__filename, () => {
       {
         nom: "AFTRAL Amiens",
         uai: "0802004U",
+        sirets: ["77554622900037"],
       },
       {
         nom: "AFTRAL Pau",
         uai: "0642119F",
+        sirets: ["77554622900038"],
       },
       {
         nom: "AFTRAL Nice",
         uai: "0061989E",
+        sirets: ["77554622900039"],
       },
       {
         nom: "BTP CFA Somme",
         uai: "0801302F",
+        sirets: ["77554622900030"],
       },
     ];
 
@@ -209,6 +213,7 @@ describe(__filename, () => {
       {
         ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[0].uai,
+        siret_etablissement: cfaSeed[0].sirets[0],
         etablissement_num_departement: "80",
         etablissement_num_region: "01",
         etablissement_reseaux: "AFTRAL",
@@ -216,6 +221,7 @@ describe(__filename, () => {
       {
         ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[1].uai,
+        siret_etablissement: cfaSeed[1].sirets[1],
         etablissement_num_departement: "64",
         etablissement_num_region: "02",
         etablissement_reseaux: "AFTRAL",
@@ -223,6 +229,7 @@ describe(__filename, () => {
       {
         ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[2].uai,
+        siret_etablissement: cfaSeed[2].sirets[2],
         etablissement_num_departement: "06",
         etablissement_num_region: "03",
         etablissement_reseaux: "AFTRAL",
@@ -230,6 +237,7 @@ describe(__filename, () => {
       {
         ...createRandomDossierApprenant(),
         uai_etablissement: cfaSeed[3].uai,
+        siret_etablissement: cfaSeed[3].sirets[3],
         etablissement_num_departement: "80",
         etablissement_num_region: "01",
         etablissement_reseaux: "BTP",
