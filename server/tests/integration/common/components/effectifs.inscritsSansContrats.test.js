@@ -86,6 +86,41 @@ describe(__filename, () => {
       const count = await inscritsSansContrats.getCountAtDate(date, { etablissement_num_region: "199" });
       assert.equal(count, 1);
     });
+
+    it("gets count of inscrits sans contrat at a date and for annee scolaire on same year and annee scolaire on two years", async () => {
+      const filters = { uai_etablissement: "0670141P" };
+
+      // Add 5 statuts inscrits sans contrat for annee_scolaire on same year
+      for (let index = 0; index < 5; index++) {
+        await new DossierApprenantModel(
+          createRandomDossierApprenant({
+            historique_statut_apprenant: [
+              { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
+            ],
+            annee_scolaire: "2020-2020",
+            ...filters,
+          })
+        ).save();
+      }
+
+      // Add 12 statuts inscrits sans contrat for annee_scolaire on two years
+      for (let index = 0; index < 12; index++) {
+        await new DossierApprenantModel(
+          createRandomDossierApprenant({
+            historique_statut_apprenant: [
+              { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
+            ],
+            annee_scolaire: "2021-2021",
+            ...filters,
+          })
+        ).save();
+      }
+
+      const date = new Date("2020-10-10T00:00:00");
+      const abandonsCountForAnneesScolaireList = await inscritsSansContrats.getCountAtDate(date, filters);
+
+      assert.equal(abandonsCountForAnneesScolaireList, 17);
+    });
   });
 
   describe("Inscrits sans contrats - getListAtDate", () => {

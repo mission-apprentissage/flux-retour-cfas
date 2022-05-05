@@ -88,6 +88,37 @@ describe(__filename, () => {
       const abandonsCountForAnotherRegion = await abandons.getCountAtDate(date, { etablissement_num_region: "100" });
       assert.equal(abandonsCountForAnotherRegion, 0);
     });
+
+    it("gets count of abandons at a date and for annee scolaire on same year and annee scolaire on two years", async () => {
+      const filters = { uai_etablissement: "0670141P" };
+
+      // Add 5 statuts abandon for annee_scolaire on same year
+      for (let index = 0; index < 5; index++) {
+        await new DossierApprenantModel(
+          createRandomDossierApprenant({
+            historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+            annee_scolaire: "2020-2020",
+            ...filters,
+          })
+        ).save();
+      }
+
+      // Add 12 statuts to abandon  for annee_scolaire on two years
+      for (let index = 0; index < 12; index++) {
+        await new DossierApprenantModel(
+          createRandomDossierApprenant({
+            historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+            annee_scolaire: "2021-2021",
+            ...filters,
+          })
+        ).save();
+      }
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const abandonsCountForAnneesScolaireList = await abandons.getCountAtDate(date, filters);
+
+      assert.equal(abandonsCountForAnneesScolaireList, 17);
+    });
   });
 
   describe("Abandons - getListAtDate", () => {

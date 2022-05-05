@@ -3,7 +3,7 @@ const logger = require("../../common/logger");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { EFFECTIF_INDICATOR_NAMES } = require("../../common/constants/dossierApprenantConstants");
 const { EffectifApprenantModel } = require("../../common/model");
-const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
+const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const cliProgress = require("cli-progress");
 
@@ -19,7 +19,7 @@ runScript(async ({ effectifs }) => {
   logger.info(`Clearing existing Effectifs Apprenants Collection ...`);
   await EffectifApprenantModel.deleteMany({});
 
-  const currentAnneeScolaireFilter = { annee_scolaire: getAnneeScolaireFromDate(new Date()) };
+  const currentAnneeScolaireFilter = { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } };
   const projection = {
     uai_etablissement: 1,
     nom_etablissement: 1,

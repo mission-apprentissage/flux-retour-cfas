@@ -153,6 +153,37 @@ describe(__filename, () => {
       });
       assert.equal(apprentisCountForAnotherReseau, 0);
     });
+
+    it("gets count of apprentis at a date and for annee scolaire on same year and annee scolaire on two years", async () => {
+      const filters = { uai_etablissement: "0670141P" };
+
+      // Add 5 statuts apprenti for annee_scolaire on same year
+      for (let index = 0; index < 5; index++) {
+        await new DossierApprenantModel(
+          createRandomDossierApprenant({
+            historique_statut_apprenant: historySequenceApprenti,
+            annee_scolaire: "2020-2020",
+            ...filters,
+          })
+        ).save();
+      }
+
+      // Add 12 statuts apprenti for annee_scolaire on two years
+      for (let index = 0; index < 12; index++) {
+        await new DossierApprenantModel(
+          createRandomDossierApprenant({
+            historique_statut_apprenant: historySequenceApprenti,
+            annee_scolaire: "2021-2021",
+            ...filters,
+          })
+        ).save();
+      }
+
+      const date = new Date("2020-09-30T00:00:00.000+0000");
+      const apprentisCountForAnneesScolaireList = await apprentis.getCountAtDate(date, filters);
+
+      assert.equal(apprentisCountForAnneesScolaireList, 17);
+    });
   });
 
   describe("Apprentis - getListAtDate", () => {

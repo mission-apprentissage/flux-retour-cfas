@@ -4,7 +4,7 @@ const { parseAsync } = require("json2csv");
 const { format, addMonths } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { getAnneeScolaireFromDate } = require("../../common/utils/anneeScolaireUtils");
+const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles, apiRoles } = require("../../common/roles");
 const {
   SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS,
@@ -94,7 +94,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // try to retrieve from cache
@@ -140,7 +140,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       // eslint-disable-next-line no-unused-vars
       const { date: dateFromParams, effectif_indicateur: effectifIndicateurFromParams, ...filtersFromBody } = req.query;
       const date = new Date(dateFromParams);
-      const filters = { ...filtersFromBody, annee_scolaire: getAnneeScolaireFromDate(date) };
+      const filters = { ...filtersFromBody, annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } };
 
       // create event
       await userEvents.create({
@@ -350,7 +350,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // try to retrieve from cache
@@ -388,7 +388,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // try to retrieve from cache
@@ -425,7 +425,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // try to retrieve from cache
@@ -463,7 +463,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // try to retrieve from cache
@@ -501,7 +501,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // try to retrieve from cache
@@ -539,7 +539,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // try to retrieve from cache
@@ -574,7 +574,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // create event
@@ -623,7 +623,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
-        annee_scolaire: getAnneeScolaireFromDate(date),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
       // create event
