@@ -47,7 +47,7 @@ const NavBar = () => {
     <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
         {!isLoggedIn && <NavItem to={NAVIGATION_PAGES.Accueil.path}>Accueil</NavItem>}
-        {!isCfa && !isLoggedIn ? (
+        {isCfa || !isLoggedIn ? (
           <NavItem to={NAVIGATION_PAGES.ExplorerLesIndicateurs.path}>Indicateurs en temps réel</NavItem>
         ) : (
           <NavItem to={NAVIGATION_PAGES.VisualiserLesIndicateurs.path}>Indicateurs en temps réel</NavItem>
