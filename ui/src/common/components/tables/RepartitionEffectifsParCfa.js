@@ -16,8 +16,8 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
   const history = useHistory();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
-    ? ["Liste des organismes de formation", "apprentis", "inscrits sans contrat"]
-    : ["Liste des organismes de formation", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
+    ? ["Nom de l'organisme de formation", "apprentis", "inscrits sans contrat"]
+    : ["Nom de l'organisme de formation", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (repartitionEffectifsParCfa) {
     content = (
       <Tbody>

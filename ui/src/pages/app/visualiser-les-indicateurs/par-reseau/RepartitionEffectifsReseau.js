@@ -1,8 +1,13 @@
-import { Heading } from "@chakra-ui/react";
+import { Flex, Heading } from "@chakra-ui/react";
 import { TabPanel } from "@chakra-ui/tabs";
 import React from "react";
 
-import { RepartitionEffectifsTabs, Section } from "../../../../common/components";
+import {
+  ExportRepartitionByFormationButton,
+  ExportRepartitionByOrganismeButton,
+  RepartitionEffectifsTabs,
+  Section,
+} from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
 import RepartitionEffectifsParFormation from "../../../../common/components/tables/RepartitionEffectifsParFormation";
 import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
@@ -24,18 +29,27 @@ const RepartitionEffectifsReseau = ({ filters }) => {
 
   return (
     <Section paddingY="4w">
-      <Heading as="h3" variant="h3">
-        Répartition des effectifs
-      </Heading>
       <RepartitionEffectifsTabs>
-        <TabPanel>
+        <TabPanel paddingTop="4w">
+          <Flex justifyContent="space-between">
+            <Heading as="h3" variant="h3" marginBottom="3w">
+              Liste des organismes de formation
+            </Heading>
+            <ExportRepartitionByOrganismeButton />
+          </Flex>
           <RepartitionEffectifsParCfa
             repartitionEffectifsParCfa={effectifsParCfa}
             loading={isEffectifsParCfaLoading}
             error={effectifsParCfaError}
           />
         </TabPanel>
-        <TabPanel>
+        <TabPanel paddingTop="4w">
+          <Flex justifyContent="space-between">
+            <Heading as="h3" variant="h3" marginBottom="3w">
+              Liste des formations par niveau
+            </Heading>
+            <ExportRepartitionByFormationButton />
+          </Flex>
           <RepartitionEffectifsParFormation
             repartitionEffectifs={effectifsParNiveauFormation}
             loading={isEffectifsParNiveauFormationLoading}

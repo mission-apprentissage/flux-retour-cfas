@@ -1,4 +1,4 @@
-import { Flex, Heading } from "@chakra-ui/react";
+import { Box, Flex, Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import React from "react";
 
 import { ExportRepartitionByOrganismeButton, Section } from "../../../../common/components";
@@ -11,13 +11,25 @@ const RepartitionFormationParCfa = ({ filters }) => {
 
   return (
     <Section paddingY="4w">
-      <Flex justifyContent="space-between">
-        <Heading as="h3" variant="h3">
-          Répartition des effectifs
-        </Heading>
-        <ExportRepartitionByOrganismeButton />
-      </Flex>
-      <RepartitionEffectifsParCfa repartitionEffectifsParCfa={data} loading={isLoading} error={error} />
+      <Tabs isLazy lazyBehavior="keepMounted">
+        <TabList>
+          <Tab>
+            <Box as="i" className="ri-book-mark-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
+            Répartition par organismes de formation
+          </Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel paddingTop="4w">
+            <Flex justifyContent="space-between" marginBottom="3w">
+              <Heading as="h3" variant="h3">
+                Liste des organismes de formation
+              </Heading>
+              <ExportRepartitionByOrganismeButton />
+            </Flex>
+            <RepartitionEffectifsParCfa repartitionEffectifsParCfa={data} loading={isLoading} error={error} />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Section>
   );
 };
