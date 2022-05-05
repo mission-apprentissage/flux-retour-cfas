@@ -17,7 +17,7 @@ const ExportRepartitionByFormationButton = () => {
       }}
       fileName={fileName}
     >
-      Exporter la liste des formations
+      Exporter la liste des formations (fichier csv)
     </DownloadButton>
   );
 };

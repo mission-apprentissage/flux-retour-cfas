@@ -17,7 +17,7 @@ const ExportRepartitionByOrganismeButton = () => {
       }}
       fileName={fileName}
     >
-      Exporter la liste des organismes
+      Exporter la liste des organismes (fichier csv)
     </DownloadButton>
   );
 };
