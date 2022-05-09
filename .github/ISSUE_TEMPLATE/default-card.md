@@ -13,5 +13,5 @@ Décrire ici l'objectif de la carte
 
 Definition of done : 
 
-- [  ] Cette étape est terminée
-- [  ] Cette autre étape est terminée
+- [ ] Cette étape est terminée
+- [ ] Cette autre étape est terminée
