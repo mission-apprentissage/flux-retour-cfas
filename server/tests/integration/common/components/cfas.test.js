@@ -25,10 +25,11 @@ describe(__filename, () => {
     });
 
     it("returns true when cfa with given uai exists", async () => {
-      const newCfa = new CfaModel({ cfd: "0802004U" });
+      const uai = "0802004U";
+      const newCfa = new CfaModel({ uai });
       await newCfa.save();
 
-      const shouldBeTrue = await existsCfa(newCfa.cfd);
+      const shouldBeTrue = await existsCfa(uai);
       assert.equal(shouldBeTrue, true);
     });
   });
