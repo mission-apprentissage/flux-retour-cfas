@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "2.70.0",
+  "version": "2.70.1",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
