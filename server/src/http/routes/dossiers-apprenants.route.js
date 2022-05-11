@@ -13,7 +13,7 @@ const { findAndPaginate } = require("../../common/utils/dbUtils");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
 
-const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
+const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
 module.exports = ({ dossiersApprenants, userEvents, db }) => {
   const router = express.Router();
@@ -79,7 +79,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
    */
   router.post(
     "/",
-    validateRequestBody(Joi.array().max(POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH)),
+    validateRequestBody(Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)),
     tryCatch(async (req, res) => {
       try {
         let nbItemsValid = 0;
@@ -133,7 +133,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
           validationErrors,
         });
       } catch (err) {
-        logger.error("POST StatutCandidat error : " + err);
+        logger.error("POST /dossiers-apprenants error : " + err);
         res.status(400).json({
           status: "ERROR",
           message: err.message,

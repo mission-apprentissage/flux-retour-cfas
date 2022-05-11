@@ -28,5 +28,5 @@ runScript(async () => {
     uai_etablissement: uai,
     updated_at: { $lte: date },
   });
-  logger.info(`${result.deletedCount} statuts candidats supprimés avec succès pour l'UAI ${uai}`);
-}, "suppression-statuts-candidats-apres-date");
+  logger.info(`${result.deletedCount} dossiersApprenants supprimés avec succès pour l'UAI ${uai}`);
+}, "suppression-dossiersApprenants-apres-date");

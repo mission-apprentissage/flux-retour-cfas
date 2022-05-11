@@ -9,7 +9,7 @@ const { getFormations } = require("../../../common/apis/apiCatalogueMna");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Ce script permet d'identifier les différents types d'UAIs des statuts candidats
+ * Ce script permet d'identifier les différents types d'UAIs des dossiersApprenants
  */
 runScript(async () => {
   logger.info(`Identifying UAIs types from Statuts`);

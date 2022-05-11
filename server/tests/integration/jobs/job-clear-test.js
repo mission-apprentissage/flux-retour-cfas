@@ -3,7 +3,7 @@ const { DossierApprenantModel, UserModel } = require("../../../src/common/model"
 const { clearDossiersApprenants, clearAll } = require("../../../src/jobs/remove-data/clear/utils/clearUtils");
 
 describe(__filename, () => {
-  it("Vérifie la suppression des statuts candidats depuis le job", async () => {
+  it("Vérifie la suppression des dossiersApprenants depuis le job", async () => {
     await clearDossiersApprenants();
     assert.deepEqual((await DossierApprenantModel.countDocuments({})) === 0, true);
   });

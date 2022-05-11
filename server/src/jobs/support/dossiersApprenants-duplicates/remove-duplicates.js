@@ -71,7 +71,7 @@ runScript(async ({ dossiersApprenants, db }) => {
       ...duplicate,
     }).save();
   });
-  logger.info(`Removed ${duplicatesRemoved.length} statuts candidats in db`);
+  logger.info(`Removed ${duplicatesRemoved.length} dossiersApprenants in db`);
 
   logger.info("Job Ended !");
 }, JOB_NAMES.removeDossiersApprenantsDuplicates);
@@ -95,7 +95,7 @@ const removeDuplicates = async (duplicatesGroup) => {
       await DossierApprenantModel.findByIdAndDelete(toRemove._id);
       // archive the deleted duplicate in dedicated collection
       await mongo
-        .collection("statutsCandidatsDuplicatesRemoved")
+        .collection("dossiersApprenantsDuplicatesRemoved")
         .insertOne({ ...omit(toRemove, "_id"), original_id: toRemove._id });
     } catch (err) {
       logger.error(`Could not delete DossierApprenant with _id ${toRemove._id}`);

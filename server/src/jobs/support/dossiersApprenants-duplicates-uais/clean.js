@@ -19,9 +19,9 @@ runScript(async ({ dossiersApprenants, db }) => {
 }, JOB_NAMES.dossiersApprenantsBadHistoryIdentifyAntidated);
 
 const cleanUaisDuplicates = async ({ dossiersApprenants, db }) => {
-  logger.info("Run clean statuts-candidats with duplicates uais...");
+  logger.info("Run clean dossiersApprenants with duplicates uais...");
 
-  const resultsCollection = db.collection(collectionNames.statutsCandidatsDoublonsUais);
+  const resultsCollection = db.collection(collectionNames.dossiersApprenantsDoublonsUais);
   await resultsCollection.deleteMany({});
 
   // Identify all uais duplicates

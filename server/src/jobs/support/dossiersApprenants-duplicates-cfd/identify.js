@@ -3,33 +3,32 @@ const cliProgress = require("cli-progress");
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DUPLICATE_TYPE_CODES } = require("../../../common/constants/dossierApprenantConstants");
 const { collectionNames } = require("../../constants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Job d'identification des doublons d'UAIs
- * Construit une collection statutsCandidatsDoublonsUais contenant les doublons
+ * Job d'identification des doublons de CFDs
+ * Construit une collection dossiersApprenantsDoublonsCfds contenant les doublons
  */
 runScript(async ({ dossiersApprenants, effectifs, db }) => {
-  await identifyUaisDuplicates({ dossiersApprenants, effectifs, db });
-}, JOB_NAMES.dossiersApprenantsBadHistoryIdentifyAntidated);
+  await identifyCfdDuplicates({ dossiersApprenants, effectifs, db });
+}, "dossiersApprenants-identify-cfd-duplicates");
 
-const identifyUaisDuplicates = async ({ dossiersApprenants, effectifs, db }) => {
-  logger.info("Run identification statuts-candidats with duplicates uais...");
+const identifyCfdDuplicates = async ({ dossiersApprenants, effectifs, db }) => {
+  logger.info("Run identification dossiresApprenants with duplicates cfd...");
 
-  const resultsCollection = db.collection(collectionNames.statutsCandidatsDoublonsUais);
+  const resultsCollection = db.collection(collectionNames.dossiersApprenantsDoublonsCfd);
   await resultsCollection.deleteMany({});
 
-  // Identify all uais duplicates
-  const uaisDuplicates = await dossiersApprenants.getDuplicatesList(
-    DUPLICATE_TYPE_CODES.uai_etablissement.code,
+  // Identify all duplicates
+  const duplicates = await dossiersApprenants.getDuplicatesList(
+    DUPLICATE_TYPE_CODES.formation_cfd.code,
     {},
     { allowDiskUse: true }
   );
-  loadingBar.start(uaisDuplicates.length, 0);
+  loadingBar.start(duplicates.length, 0);
 
   // Calcul for total statuts & for this current duplicate
   let total = {
@@ -40,7 +39,7 @@ const identifyUaisDuplicates = async ({ dossiersApprenants, effectifs, db }) => 
   };
 
   // Create entry for each duplicate
-  await asyncForEach(uaisDuplicates, async (currentDuplicate) => {
+  await asyncForEach(duplicates, async (currentDuplicate) => {
     loadingBar.increment();
 
     // Calcul de chaque effectif à la date du jour pour le groupe de doublons
@@ -63,10 +62,10 @@ const identifyUaisDuplicates = async ({ dossiersApprenants, effectifs, db }) => 
     total.nbApprentis += nbAbandons;
 
     await resultsCollection.insertOne({
-      type: "Doublons d'UAI",
+      type: "Doublons de CFD",
       champs_communs: currentDuplicate.commonData,
       nb_doublons: currentDuplicate.duplicatesCount,
-      uais: currentDuplicate.discriminants.uais,
+      cfds: currentDuplicate.discriminants.formation_cfds,
       ids_doublons: currentDuplicate.duplicatesIds,
       nb_apprentis_concernes: nbApprentis,
       nb_inscrits_sans_contrat_concerne: nbInscritsSansContrats,
@@ -85,5 +84,5 @@ const identifyUaisDuplicates = async ({ dossiersApprenants, effectifs, db }) => 
   });
 
   loadingBar.stop();
-  logger.info("End identification statuts-candidats with duplicates uais !");
+  logger.info("End identification DossierApprenant with duplicates cfd !");
 };

@@ -31,7 +31,7 @@ module.exports = new Schema({
   formation_cfd: {
     type: String,
     default: null,
-    description: "CFD de la formation du candidat",
+    description: "CFD de la formation du dossierApprenant",
     index: true,
   },
   periode_formation: {
@@ -46,7 +46,7 @@ module.exports = new Schema({
   },
   annee_scolaire: {
     type: String,
-    description: 'Année scolaire sur laquelle le statut candidat est enregistré (ex: "2020-2021")',
+    description: 'Année scolaire sur laquelle le dossierApprenant est enregistré (ex: "2020-2021")',
   },
   code_commune_insee_apprenant: {
     type: String,
@@ -76,12 +76,12 @@ module.exports = new Schema({
   formation_rncp: {
     type: String,
     default: null,
-    description: "Code RNCP de la formation du candidat",
+    description: "Code RNCP de la formation du dossierApprenant",
   },
   indicateur_effectif: {
     type: String,
     default: null,
-    description: "Indicateur lié au statut candidat",
+    description: "Indicateur lié au dossierApprenant",
   },
   updated_at: {
     type: Date,

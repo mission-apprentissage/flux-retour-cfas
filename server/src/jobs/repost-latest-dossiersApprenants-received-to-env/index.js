@@ -24,7 +24,7 @@ runScript(async () => {
   logger.info(`Run Post Last Received DossiersApprenants Job to ${destinationApiUrl}`);
   await repostLastReceivedDossiersApprenantsToEnv();
   logger.info(`End Post Last Received DossiersApprenants Job`);
-}, JOB_NAMES.repostLastStatutsReceived);
+}, JOB_NAMES.repostLatestDossiersApprenantsReceived);
 
 /**
  * Cette fonction envoi sur l'API souhaitée l'ensemble des derniers statuts recus la veille
