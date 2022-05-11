@@ -42,7 +42,13 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
           count={effectifs.apprentis.count}
           label={pluralize("apprenti", effectifs.apprentis.count)}
           effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.apprentis : null}
-          tooltipLabel="Nombre d’apprenants en contrat d'apprentissage au dernier jour du mois (ou J-1 si mois en cours). Cet indice est basé sur la date de début de contrat saisie par le CFA."
+          tooltipLabel={
+            <div>
+              <b>Nombre d&apos;apprenants en contrat d&apos;apprentissage</b> au dernier jour du mois (ou J-1 si mois en
+              cours). Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation. Il
+              est affiné par la prise en compte des dates de début de contrat saisie.
+            </div>
+          }
           iconClassName="ri-user-4-fill"
           accentColor="#56C8B6"
         />
@@ -50,7 +56,14 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
           count={effectifs.inscritsSansContrat.count}
           label={`${pluralize("inscrit", effectifs.inscritsSansContrat.count)} sans contrat`}
           effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.inscritsSansContrats : null}
-          tooltipLabel="Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir signé de contrat et toujours dans cette situation à la date affichée. Cet indice est basé sur la date d'enregistrement de l'inscription et l'absence de date de début de contrat."
+          tooltipLabel={
+            <div>
+              <b>Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir jamais signé de contrat</b>{" "}
+              et toujours dans cette situation au dernier jour du mois (ou J-1 si mois en cours). Cet indicateur est
+              déduit de plusieurs statuts transmis par les organismes de formation. Il est affiné par la prise en compte
+              des dates d’enregistrement des inscriptions et de l’absence de dates de début de contrat.
+            </div>
+          }
           iconClassName="ri-user-4-fill"
           accentColor="#F3DC58"
         />
@@ -58,7 +71,12 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
           count={effectifs.rupturants.count}
           label={pluralize("rupturant", effectifs.rupturants.count)}
           effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.rupturants : null}
-          tooltipLabel="Nombre d’apprenants en recherche de contrat après une rupture et toujours dans cette situation à la date affichée . Cet indice est déduit des apprenants passant du statut apprenti au statut stagiaire de la formation professionnelle, selon les saisies effectuées par les CFA."
+          tooltipLabel={
+            <div>
+              <b>Nombre d’apprenants en recherche de contrat après une rupture</b> et toujours dans cette situation à la
+              date affichée. Cet indicateur est déduit de plusieurs statuts transmis par les organismes de formation.
+            </div>
+          }
           iconClassName="ri-user-4-fill"
           accentColor="#FCC63A"
         />
@@ -67,7 +85,12 @@ const VueGlobaleSection = ({ effectifs, loading, allowDownloadDataList = false, 
           hideCount={shouldWarnAboutDateAvailability}
           effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.abandons : null}
           label={pluralize("abandon", effectifs.abandons.count)}
-          tooltipLabel="Nombre d’apprenants ou d’apprentis qui sont définitivement sortis de la formation, à la date affichée. Cet indice est basé sur les dossiers cloturés, selon les saisies effectuées par les CFA."
+          tooltipLabel={
+            <div>
+              <b>Nombre d’apprenants ou d’apprentis qui ont définitivement quitté le centre de formation</b> à la date
+              affichée. Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation.
+            </div>
+          }
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
           iconClassName="ri-user-4-fill"
           accentColor="#F99389"
