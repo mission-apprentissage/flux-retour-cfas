@@ -33,7 +33,7 @@ describe(__filename, () => {
     }).save();
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
-    assert.equal(isEnded, true);
+    assert.equal(isEnded, false);
   });
 
   it("Permet de vérifier si le job courant n'est pas dans l'action terminée", async () => {

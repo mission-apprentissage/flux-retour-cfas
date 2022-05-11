@@ -50,6 +50,7 @@ module.exports = new Schema(
     },
     created_at: {
       type: Date,
+      default: null,
       description: "Date d'ajout en base de données",
     },
   },
