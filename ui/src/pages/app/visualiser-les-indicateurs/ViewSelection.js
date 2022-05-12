@@ -10,7 +10,7 @@ import useAuth from "../../../common/hooks/useAuth";
 
 const ViewOptionCard = ({ navigationPageData }) => {
   return (
-    <LinkCard variant="white" linkHref={navigationPageData.path}>
+    <LinkCard variant="white" linkHref={navigationPageData.path} minHeight="145px">
       {navigationPageData.title}
     </LinkCard>
   );
