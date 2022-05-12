@@ -1,0 +1,9 @@
+**Objectif**
+
+_Donner l'accès au TdB à : _
+
+**Definition of done**
+
+- [x] _Vérifier si user et droits_
+- [x] _Créer user_
+- [x] _Envoyer mail new user_
