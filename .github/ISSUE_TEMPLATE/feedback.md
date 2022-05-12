@@ -2,7 +2,7 @@
 name: Feedback utilisateurice
 about: Template par défaut d'une carte
 title: ''
-labels: ''
+labels: feedback
 assignees: ''
 
 ---
