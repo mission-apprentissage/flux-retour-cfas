@@ -1,6 +1,7 @@
 const XLSX = require("xlsx");
 const path = require("path");
-const parse = require("csv-parse/lib/sync");
+// eslint-disable-next-line node/no-missing-require
+const parse = require("csv-parse/sync");
 const fs = require("fs");
 const iconvlite = require("iconv-lite");
 
