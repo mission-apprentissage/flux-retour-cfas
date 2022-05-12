@@ -8,10 +8,10 @@ import { NAVIGATION_PAGES } from "../../constants/navigationPages";
 import useAuth from "../../hooks/useAuth";
 import Section from "../Section/Section";
 
-const NavItem = ({ to, children }) => {
+const NavItem = ({ to, children, exactMatchActive = false }) => {
   const isActive = useRouteMatch({
     path: to,
-    exact: false,
+    exact: exactMatchActive,
   });
 
   return (
@@ -46,7 +46,11 @@ const NavBar = () => {
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
-        {!isLoggedIn && <NavItem to={NAVIGATION_PAGES.Accueil.path}>Accueil</NavItem>}
+        {!isLoggedIn && (
+          <NavItem to={NAVIGATION_PAGES.Accueil.path} exactMatchActive>
+            Accueil
+          </NavItem>
+        )}
         {isCfa || !isLoggedIn ? (
           <NavItem to={NAVIGATION_PAGES.ExplorerLesIndicateurs.path}>Indicateurs en temps réel</NavItem>
         ) : (
