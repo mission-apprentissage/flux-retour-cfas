@@ -13,7 +13,7 @@ const FilterOption = ({ isSelected = false, onClick, children }) => {
       role="button"
       paddingY="1w"
       display="flex"
-      _hover={{ color: "bluefrance", backgroundColor: "grey.100" }}
+      _hover={{ color: "bluefrance", backgroundColor: "grey.200" }}
     >
       <Box as="span" borderLeft={isSelected ? "solid 2px" : "none"} borderColor="bluefrance" paddingX="1w">
         {children}

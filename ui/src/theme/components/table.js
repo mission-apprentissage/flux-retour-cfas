@@ -14,11 +14,11 @@ export const Table = {
           color: "grey.800",
           borderColor: "bluefrance",
           "&:nth-of-type(odd)": {
-            backgroundColor: "#F8F8F8",
+            backgroundColor: "grey.100",
           },
           _hover: {
-            backgroundColor: "bluefrance",
-            color: "white",
+            color: "bluefrance",
+            backgroundColor: "grey.200",
             cursor: "pointer",
           },
         },
