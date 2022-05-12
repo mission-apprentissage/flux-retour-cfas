@@ -34,7 +34,7 @@ const IndicateursGridSection = ({ effectifs, loading, allowDownloadDataList = fa
     );
 
     content = (
-      <Grid gridGap="2w" gridTemplateColumns="repeat(3, 1fr)">
+      <Grid gridGap="2w" gridTemplateColumns={["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"]}>
         {showOrganismesCount && <OrganismesCountCard />}
         <EffectifCard
           count={effectifs.apprentis.count}
