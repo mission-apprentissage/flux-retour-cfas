@@ -92,6 +92,7 @@ describe(__filename, () => {
         cfd,
         cfd_start_date: new Date(dataForGetCfdInfo.withIntituleLong.date_ouverture),
         cfd_end_date: new Date(dataForGetCfdInfo.withIntituleLong.date_fermeture),
+        rncp: "RNCP34945",
         libelle: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
         niveau: "7",
         niveau_libelle: "7 (Master, titre ingénieur...)",
@@ -100,7 +101,7 @@ describe(__filename, () => {
       });
     });
 
-    it("returns created formation when cfd was found in Tables de Correspondaces without intitule_long", async () => {
+    it("returns created formation when cfd was found in Tables de Correspondances without intitule_long (no rncp found)", async () => {
       nock.cleanAll();
       nockGetMetiersByCfd();
       nockGetCfdInfo(dataForGetCfdInfo.withoutIntituleLong);

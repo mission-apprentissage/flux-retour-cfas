@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "2.70.1",
+  "version": "2.71.0",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -25,6 +25,7 @@
     "seed:clearAssets": "node -r dotenv/config src/jobs/seed/clearAssets.js",
     "seed:annuaireCfas": "node -r dotenv/config src/jobs/seed/seedAnnuaireCfas.js",
     "seed:croisementCfasAnnuaire": "node -r dotenv/config src/jobs/seed/seedCroisementCfasAnnuaire.js",
+    "seed:formations-rncp": "node -r dotenv/config src/jobs/seed/seedFormationsRncp.js",
     "users:create": "node -r dotenv/config src/jobs/users/create/index.js",
     "users:create-erp-user": "node -r dotenv/config src/jobs/users/create-erp-user/index.js",
     "users:generate-password-update-token": "node -r dotenv/config src/jobs/users/generate-password-update-token/index.js",

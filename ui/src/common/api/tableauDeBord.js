@@ -1,6 +1,6 @@
 import qs from "query-string";
 
-import { _get, _post } from "../httpClient";
+import { _delete, _get, _post } from "../httpClient";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 /* Effectifs */
@@ -67,6 +67,19 @@ export const fetchCfa = (cfaUai) => {
   return _get(url);
 };
 
+/* Reseaux CFAS */
+export const fetchReseauxCfas = () => {
+  return _get("/api/reseaux-cfas");
+};
+
+export const postCreateReseauCfa = (body) => {
+  return _post("/api/reseaux-cfas", body);
+};
+
+export const deleteReseauCfa = (body) => {
+  return _delete(`/api/reseaux-cfas/delete/${body}`);
+};
+
 /* Reseaux */
 export const fetchReseaux = () => {
   return _get("/api/referentiel/networks");
@@ -75,6 +88,10 @@ export const fetchReseaux = () => {
 /* Regions */
 export const fetchRegions = () => {
   return _get("/api/referentiel/regions");
+};
+/* Departements */
+export const fetchDepartements = () => {
+  return _get("/api/referentiel/departements");
 };
 
 /* CSV export of effectifs repartition by organisme */

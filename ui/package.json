@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas-ui",
-  "version": "2.70.1",
+  "version": "2.71.0",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -67,6 +67,9 @@
     "eslint-plugin-simple-import-sort": "7.0.0",
     "local-web-server": "5.1.0",
     "prettier": "2.3.2"
+  },
+  "resolutions": {
+    "react-error-overlay": "6.0.9"
   },
   "proxy": "http://localhost"
 }

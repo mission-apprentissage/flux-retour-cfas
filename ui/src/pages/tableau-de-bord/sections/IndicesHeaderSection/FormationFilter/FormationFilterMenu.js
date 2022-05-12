@@ -1,4 +1,4 @@
-import { Box, Divider, Skeleton, Stack, Text } from "@chakra-ui/react";
+import { Box, Divider, Heading, Skeleton, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
@@ -33,11 +33,10 @@ const FormationFilterMenu = ({ filters, onFormationClick }) => {
 
   return (
     <>
-      <SearchInput
-        value={searchTerm}
-        onChange={setSearchTerm}
-        placeholder="Rechercher un libellé de formation ou un CFD"
-      />
+      <Heading as="h3" variant="h3" marginBottom="3w">
+        Sélectionner une formation
+      </Heading>
+      <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Intitulé de la formation, CFD, RNCP" />
       {searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH && (
         <Box paddingLeft="1w" paddingTop="3v">
           <InputLegend>

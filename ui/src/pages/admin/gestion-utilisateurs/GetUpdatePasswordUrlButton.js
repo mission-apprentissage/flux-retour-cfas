@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useMutation } from "react-query";
 
-import { postGetUserUpdatePasswordUrl } from "../../common/api/tableauDeBord";
+import { postGetUserUpdatePasswordUrl } from "../../../common/api/tableauDeBord";
 
 const GetUpdatePasswordUrlButton = ({ username }) => {
   const toast = useToast();

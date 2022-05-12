@@ -3,6 +3,7 @@ const createFormationsCollectionIndexes = async (db) => {
 
   await collection.createIndex({ libelle: "text", tokenized_libelle: "text" }, { default_language: "french" });
   await collection.createIndex({ cfd: 1 }, { unique: true });
+  await collection.createIndex({ rncp: 1 });
 };
 
 const dropFormationsCollectionIndexes = async (db) => {

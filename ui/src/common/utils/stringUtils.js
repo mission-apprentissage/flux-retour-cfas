@@ -7,6 +7,15 @@ import { validateSiret } from "../domain/siret";
  */
 export const stringContains = (str, substr) => str.toLowerCase().indexOf(substr.toLowerCase()) > -1;
 
+/**
+ * Returns true if both strings are equal. Case insensitive.
+ * @param {string} str
+ * @param {string} substr
+ */
+export const stringEqualsCaseInsensitive = (str1 = "", str2 = "") => {
+  return str1.toLowerCase() === str2.toLowerCase();
+};
+
 export const toPrettyYearLabel = (year) => (year === 1 ? `${year}ère année` : `${year}ème année`);
 
 export const truncate = (string, size = 32) => (string.length > size ? string.substr(0, size - 1) + "..." : string);

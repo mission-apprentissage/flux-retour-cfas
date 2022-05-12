@@ -6,14 +6,14 @@ const getNewAnneeScolaireDateForYear = (year) => {
   return new Date(Date.UTC(year, AUGUST_MONTH_INDEX, 1));
 };
 
-const getAnneeScolaireFromDate = (date) => {
+const getAnneesScolaireListFromDate = (date) => {
   const dateYear = date.getFullYear();
   if (date.getTime() >= getNewAnneeScolaireDateForYear(dateYear).getTime()) {
-    return `${dateYear}-${dateYear + 1}`;
+    return [`${dateYear}-${dateYear}`, `${dateYear}-${dateYear + 1}`];
   }
-  return `${dateYear - 1}-${dateYear}`;
+  return [`${dateYear - 1}-${dateYear - 1}`, `${dateYear - 1}-${dateYear}`];
 };
 
 module.exports = {
-  getAnneeScolaireFromDate,
+  getAnneesScolaireListFromDate,
 };

@@ -24,7 +24,15 @@ const OrganismesCountCard = () => {
     return <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />;
   }
   if (data) {
-    return <EffectifCard count={data.nbOrganismes} label="organismes de formation" />;
+    return (
+      <EffectifCard
+        count={data.nbOrganismes}
+        label="organismes de formation"
+        tooltipLabel="Nombre d’organismes de formation qui transmettent leurs données au Tableau de bord de l’apprentissage. Un organisme est identifié par une UAI utilisant 1 ou plusieurs numéro(s) SIRET."
+        iconClassName="ri-home-6-fill"
+        accentColor="#417DC4"
+      />
+    );
   }
 
   return null;

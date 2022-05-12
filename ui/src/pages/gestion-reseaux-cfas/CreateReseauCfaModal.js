@@ -1,28 +1,28 @@
 import { Box, Modal, ModalContent, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { postCreateUser } from "../../common/api/tableauDeBord";
+import { fetchReseaux, postCreateReseauCfa } from "../../common/api/tableauDeBord";
 import ModalClosingButton from "../../common/components/ModalClosingButton/ModalClosingButton";
-import CreateUserForm from "./CreateUserForm";
+import CreateReseauCfaForm from "./CreateReseauCfaForm";
 
-const CreateUserModal = ({ isOpen, onClose }) => {
+const CreateReseauCfaModal = ({ isOpen, onClose }) => {
+  const { data } = useQuery(["reseaux"], () => fetchReseaux());
+  const networkList = data;
+
   const queryClient = useQueryClient();
-  const createUser = useMutation(
-    (newUser) => {
-      return postCreateUser(newUser);
+  const createReseauCfa = useMutation(
+    (newReseauCfa) => {
+      return postCreateReseauCfa(newReseauCfa);
     },
     {
       onSuccess() {
-        // invalidate users query so react-query refetch the list for us
-        // see https://react-query.tanstack.com/guides/query-invalidation#query-matching-with-invalidatequeries
-        queryClient.invalidateQueries(["users"]);
+        queryClient.invalidateQueries(["reseauxCfas"]);
         onClose();
       },
     }
   );
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalOverlay />
@@ -30,13 +30,14 @@ const CreateUserModal = ({ isOpen, onClose }) => {
         <ModalHeader marginTop="2w" paddingX="8w" fontWeight="700" color="grey.800" fontSize="alpha" textAlign="left">
           <Box as="i" className="ri-arrow-right-line" marginRight="3v" verticalAlign="middle" />
           <Box as="span" verticalAlign="middle">
-            Créer un utilisateur
+            Ajouter un CFA
           </Box>
         </ModalHeader>
         <ModalClosingButton />
-        <CreateUserForm
+        <CreateReseauCfaForm
+          networkList={networkList}
           onSubmit={async (data) => {
-            await createUser.mutateAsync(data);
+            await createReseauCfa.mutateAsync(data);
           }}
         />
       </ModalContent>
@@ -44,9 +45,9 @@ const CreateUserModal = ({ isOpen, onClose }) => {
   );
 };
 
-CreateUserModal.propTypes = {
+CreateReseauCfaModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
-export default CreateUserModal;
+export default CreateReseauCfaModal;

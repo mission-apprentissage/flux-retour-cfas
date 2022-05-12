@@ -7,9 +7,8 @@ import { filtersPropTypes } from "../../../FiltersContext";
 import CfaPanel from "./CfasPanel";
 import ReseauxPanel from "./ReseauxPanel";
 
-const CfasFilter = ({ onCfaChange, onReseauChange, filters, displayReseauPanel = true }) => {
+const CfasFilter = ({ onCfaChange, onReseauChange, filters, displayReseauPanel = true, userNetworkMode = false }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const buttonLabelForUser = displayReseauPanel
     ? "Sélectionner un organisme ou un réseau"
     : "Sélectionner un organisme";
@@ -24,15 +23,18 @@ const CfasFilter = ({ onCfaChange, onReseauChange, filters, displayReseauPanel =
     setIsOpen(false);
   };
 
-  const buttonLabel = filters.cfa?.nom_etablissement || filters.reseau?.nom || buttonLabelForUser;
+  const buttonLabel =
+    userNetworkMode === true
+      ? filters.cfa?.nom_etablissement || buttonLabelForUser
+      : filters.cfa?.nom_etablissement || filters.reseau?.nom || buttonLabelForUser;
 
   return (
     <div>
       <SecondarySelectButton
-        icon="ri-community-fill"
+        icon="ri-home-6-fill"
         onClick={() => setIsOpen(!isOpen)}
         isActive={isOpen}
-        isClearable={Boolean(filters.cfa || filters.reseau)}
+        isClearable={userNetworkMode === true ? filters.cfa : Boolean(filters.cfa || filters.reseau)}
         clearIconOnClick={() => {
           onReseauChange(null);
           onCfaChange(null);
@@ -60,6 +62,7 @@ CfasFilter.propTypes = {
   onReseauChange: PropTypes.func.isRequired,
   filters: filtersPropTypes.state,
   displayReseauPanel: PropTypes.bool,
+  userNetworkMode: PropTypes.bool,
 };
 
 export default CfasFilter;

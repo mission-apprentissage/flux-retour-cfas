@@ -1,4 +1,4 @@
-import { Box, Divider, Skeleton, Stack, Text } from "@chakra-ui/react";
+import { Box, Divider, Heading, Skeleton, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
@@ -33,6 +33,9 @@ const CfaPanel = ({ value, onCfaClick, filters }) => {
 
   return (
     <div>
+      <Heading as="h3" variant="h3" marginBottom="3w">
+        Sélectionner un organisme de formation
+      </Heading>
       <SearchInput
         value={searchTerm}
         onChange={setSearchTerm}

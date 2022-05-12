@@ -1,22 +1,49 @@
-import { List } from "@chakra-ui/react";
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { FilterOption } from "../../../../../common/components";
-
 const FormationsList = ({ formations, onFormationClick, selectedValue }) => {
   return (
-    <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="20rem" overflowY="scroll">
-      {formations?.map((formation) => (
-        <FilterOption
-          key={formation.cfd}
-          onClick={() => onFormationClick(formation)}
-          isSelected={formation.cfd === selectedValue?.cfd}
-        >
-          {formation.cfd} - {formation.libelle}
-        </FilterOption>
-      ))}
-    </List>
+    <TableContainer marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
+      <Table variant="primary">
+        <Thead>
+          <Tr>
+            <Th>Libellé de la formation</Th>
+            <Th>CFD</Th>
+            <Th>RNCP</Th>
+            <Th>Date de validité du CFD</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {formations?.map((formation) => {
+            const isRowSelected = formation.cfd === selectedValue?.cfd;
+            const cfdStartDate = formation.cfd_start_date
+              ? new Date(formation.cfd_start_date).toLocaleDateString()
+              : null;
+            const cfdEndDate = formation.cfd_end_date ? new Date(formation.cfd_end_date).toLocaleDateString() : null;
+
+            return (
+              <Tr
+                onClick={() => {
+                  onFormationClick(formation);
+                }}
+                borderLeft={isRowSelected ? "solid 2px" : "none"}
+                key={formation.cfd}
+              >
+                <Td>{formation.libelle}</Td>
+                <Td>{formation.cfd}</Td>
+                <Td>{formation.rncp}</Td>
+                {cfdStartDate && cfdEndDate ? (
+                  <Td>{`Du ${cfdStartDate} au ${cfdEndDate}`}</Td>
+                ) : (
+                  <Td fontStyle="italic">non-renseigné</Td>
+                )}
+              </Tr>
+            );
+          })}
+        </Tbody>
+      </Table>
+    </TableContainer>
   );
 };
 

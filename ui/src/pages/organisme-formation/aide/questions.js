@@ -1,4 +1,4 @@
-import { Box, Link, Stack, Text } from "@chakra-ui/react";
+import { Box, Img, Link, Stack, Text } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
@@ -12,6 +12,33 @@ export const questions = [
         transmettre vos données au Tableau de bord de l&apos;apprentissage. Ceci concerne les clients de SC Form, Ymag,
         Gestibase ou FCA Manager.
       </Text>
+    ),
+  },
+  {
+    question: "Comment accéder votre page organisme de formation sur le Tableau de bord ?",
+    answer: (
+      <Stack id="ConsulterDonneesCFA" spacing="2w">
+        <Text>
+          Si vous transmettez des données au Tableau de bord de l&apos;apprentissage, vous pouvez les consulter et les
+          vérifier directement sur le Tableau de bord de l&apos;apprentissage. Le lien vous permettant d&apos;accéder à
+          votre page organisme de formation, est disponible directement dans votre ERP.
+        </Text>
+        <Text as="em">
+          Ce lien ne doit pas être partagé en dehors des personnes habilitées de votre organisme de formation, car vous
+          pourrez y consulter des données personnelles.
+        </Text>
+        <Text>Si vous utilisez Ymag :</Text>
+        <Img
+          alt="Lien privé d'accès au Tableau de bord de l'apprentissage pour Yparéo"
+          src="https://files.tableau-de-bord.apprentissage.beta.gouv.fr/liens-prives/Ypareo.png"
+        ></Img>
+        <Text>Si vous utilisez Gesti :</Text>
+        <Img
+          alt="Lien privé d'accès au Tableau de bord de l'apprentissage pour Gesti"
+          src="https://files.tableau-de-bord.apprentissage.beta.gouv.fr/liens-prives/Gesti.png"
+        ></Img>
+        <Text>En attente des visuels pour FCA Manager et SC Form.</Text>
+      </Stack>
     ),
   },
   {
@@ -56,9 +83,11 @@ export const questions = [
           </strong>
         </Text>
         <Text>
-          <strong>Vous la trouverez directement dans votre ERP (ou logiciel de gestion).</strong> Si toutefois,
-          l&apos;URL n&apos;est pas encore intégrée dans votre interface de gestion, vous pouvez en faire la demande
-          en&nbsp;
+          <a href="#ConsulterDonneesCFA">
+            <strong>Vous la trouverez directement dans votre ERP (ou logiciel de gestion).</strong>
+          </a>
+          Si toutefois, l&apos;URL n&apos;est pas encore intégrée dans votre interface de gestion, vous pouvez en faire
+          la demande en&nbsp;
           <Link to={NAVIGATION_PAGES.OrganismeFormation.consulter.path} as={NavLink} color="bluefrance">
             contactant l&apos;équipe du Tableau de bord
           </Link>

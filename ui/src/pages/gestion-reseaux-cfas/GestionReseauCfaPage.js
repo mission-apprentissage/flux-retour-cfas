@@ -3,34 +3,33 @@ import React from "react";
 
 import { Footer, Header, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import CreateUserModal from "./CreateUserModal";
-import UsersTable from "./UsersTable";
+import CreateReseauCfaModal from "./CreateReseauCfaModal";
+import ReseauxCfasTable from "./ReseauxCfasTable";
 
-const GestionUtilisateursPage = () => {
-  const createUserModal = useDisclosure();
+const GestionReseauxCfasPage = () => {
+  const createCfaModal = useDisclosure();
 
   return (
     <>
-      <CreateUserModal isOpen={createUserModal.isOpen} onClose={createUserModal.onClose} />
+      <CreateReseauCfaModal isOpen={createCfaModal.isOpen} onClose={createCfaModal.onClose} />
       <Header />
       <Section backgroundColor="galt" paddingY="8w" withShadow>
         <Heading as="h1" variant="h1" marginBottom="1w">
-          {NAVIGATION_PAGES.GestionUtilisateurs.title}
+          {NAVIGATION_PAGES.GestionReseauxCfas.title}
         </Heading>
       </Section>
       <Section paddingY="5w" backgroundColor="white" overflowX="scroll">
         <Heading marginBottom="3w">
-          Liste des utilisateurs{" "}
-          <Button variant="primary" onClick={createUserModal.onOpen}>
-            + Créer un utilisateur
+          Liste des reseaux CFAS{" "}
+          <Button variant="primary" onClick={createCfaModal.onOpen}>
+            + Ajouter un CFA
           </Button>
         </Heading>
-
-        <UsersTable />
+        <ReseauxCfasTable />
       </Section>
       <Footer />
     </>
   );
 };
 
-export default GestionUtilisateursPage;
+export default GestionReseauxCfasPage;

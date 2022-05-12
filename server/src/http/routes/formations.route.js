@@ -19,7 +19,15 @@ module.exports = ({ formations }) => {
     tryCatch(async (req, res) => {
       const foundFormations = await formations.searchFormations(req.body);
 
-      return res.json(foundFormations.map(({ cfd, libelle }) => ({ cfd, libelle })));
+      return res.json(
+        foundFormations.map(({ cfd, rncp, libelle, cfd_start_date, cfd_end_date }) => ({
+          cfd,
+          rncp,
+          libelle,
+          cfd_start_date,
+          cfd_end_date,
+        }))
+      );
     })
   );
 
