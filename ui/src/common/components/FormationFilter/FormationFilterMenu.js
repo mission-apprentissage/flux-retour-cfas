@@ -19,11 +19,11 @@ const NoResults = () => {
 const Loading = () => {
   return (
     <Stack spacing="2w" paddingLeft="1w" marginTop="2w">
-      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
-      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
-      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
-      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
-      <Skeleton startColor="grey.200" endColor="grey.600" width="30rem" height="1rem" />;
+      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
+      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
     </Stack>
   );
 };
@@ -46,13 +46,15 @@ const FormationFilterMenu = ({ filters, onFormationClick }) => {
           <Divider marginTop="3v" borderBottomColor="grey.300" orientation="horizontal" />
         </Box>
       )}
-      {searchResults?.length === 0 && <NoResults />}
+      {searchTerm.length > 0 && searchResults?.length === 0 && <NoResults />}
       {loading && <Loading />}
-      <FormationsList
-        formations={searchResults}
-        onFormationClick={onFormationClick}
-        selectedValue={filters.formation}
-      />
+      {searchResults?.length > 0 && (
+        <FormationsList
+          formations={searchResults}
+          onFormationClick={onFormationClick}
+          selectedValue={filters.formation}
+        />
+      )}
     </>
   );
 };
