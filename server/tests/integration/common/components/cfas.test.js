@@ -191,7 +191,7 @@ describe(__filename, () => {
       {
         nom: "AFTRAL Amiens",
         uai: "0802004U",
-        sirets: ["77554622900037"],
+        sirets: ["77554622900037", "77554622900038"],
       },
       {
         nom: "AFTRAL Pau",
@@ -354,6 +354,21 @@ describe(__filename, () => {
         const expected = [cfaSeed[2]];
         assert.equal(actual.length, 1);
         assert.deepEqual(actual[0].nom, expected[0].nom);
+      });
+
+      it("returns list of CFA whose empty Sirets", async () => {
+        const actual = await searchCfas({ searchTerm: "77554622900031" });
+        assert.deepEqual(actual, []);
+      });
+
+      it("returns list of CFA whose several Sirets matches searchTerm", async () => {
+        cfaSeed[0].sirets.forEach(async (result) => {
+          await searchCfas({ searchTerm: result }).then((res) => {
+            const expected = [cfaSeed[0]];
+            assert.equal(res.length, 1);
+            assert.deepEqual(res[0].nom, expected[0].nom);
+          });
+        });
       });
 
       it("returns list of CFA matching searchTerm AND additional criteria (etablissement_num_departement)", async () => {
