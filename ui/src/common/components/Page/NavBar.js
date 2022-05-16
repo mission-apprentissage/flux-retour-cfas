@@ -35,6 +35,7 @@ const NavItem = ({ to, children, exactMatchActive = false }) => {
 
 NavItem.propTypes = {
   to: PropTypes.string.isRequired,
+  exactMatchActive: PropTypes.bool,
   children: PropTypes.node.isRequired,
 };
 
