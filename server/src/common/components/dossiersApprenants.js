@@ -180,6 +180,8 @@ const createDossierApprenant = async (itemToCreate) => {
 
     source: itemToCreate.source,
 
+    created_at: new Date(),
+
     // add network of etablissement if found in ReferentielCfa
     ...(etablissementInReferentielCfaFromUai
       ? { etablissement_reseaux: etablissementInReferentielCfaFromUai.reseaux }
