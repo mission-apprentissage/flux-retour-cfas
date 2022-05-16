@@ -356,11 +356,9 @@ describe(__filename, () => {
         assert.deepEqual(actual[0].nom, expected[0].nom);
       });
 
-      it("returns list of CFA whose Sirets matches searchTerm", async () => {
-        const actual = await searchCfas({ searchTerm: cfaSeed[2].sirets[0] });
-        const expected = [cfaSeed[2]];
-        assert.equal(actual.length, 1);
-        assert.deepEqual(actual[0].nom, expected[0].nom);
+      it("returns list of CFA whose empty Sirets", async () => {
+        const actual = await searchCfas({ searchTerm: "77554622900031" });
+        assert.deepEqual(actual, []);
       });
 
       it("returns list of CFA whose several Sirets matches searchTerm", async () => {
