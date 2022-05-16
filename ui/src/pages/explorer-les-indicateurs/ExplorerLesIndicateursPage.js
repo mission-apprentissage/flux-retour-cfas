@@ -26,9 +26,11 @@ const ExplorerLesIndicateursPage = () => {
           </Box>
           <Box color="bluefrance" flex="2">
             <Link variant="link" fontSize="epsilon" onClick={onOpen}>
-              Connexion
+              <Box as="span" verticalAlign="middle">
+                Connexion
+              </Box>
+              <Box as="i" className="ri-arrow-right-line" marginLeft="1w" verticalAlign="middle" />
             </Link>
-            <Box as="i" className="ri-arrow-right-line" />
             <LoginModal isOpen={isOpen} onClose={onClose} />
           </Box>
         </HStack>
