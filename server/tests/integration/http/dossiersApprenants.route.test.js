@@ -122,7 +122,7 @@ describe(__filename, () => {
       "date_metier_mise_a_jour_statut",
     ];
     requiredFields.forEach((requiredField) => {
-      it(`Vérifie qu'on ne crée pas de donnée et renvoie une 200 + ERROR lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
+      it(`Vérifie qu'on ne crée pas de donnée et renvoie une 200 + WARNING lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
         const { httpClient } = await startServer();
         await createApiUser();
         const accessToken = await getJwtForUser(httpClient);
@@ -137,14 +137,14 @@ describe(__filename, () => {
         });
         // check response
         assert.equal(response.status, 200);
-        assert.equal(response.data.status, "ERROR");
-        assert.equal(response.data.message.includes(`Error : 1 items not valid`), true);
+        assert.equal(response.data.status, "WARNING");
+        assert.equal(response.data.message.includes(`Warning : 1 items not valid`), true);
         assert.equal(response.data.ok, 0);
         assert.equal(response.data.ko, 1);
         assert.equal(response.data.validationErrors.length, 1);
-        assert.equal(response.data.validationErrors[0].details.length, 1);
+        assert.equal(response.data.validationErrors[0].errors.length, 1);
         assert.equal(
-          response.data.validationErrors[0].details[0].message.includes(`${requiredField}" is required`),
+          response.data.validationErrors[0].errors[0].message.includes(`${requiredField}" is required`),
           true
         );
 
@@ -167,10 +167,10 @@ describe(__filename, () => {
         },
       });
       // check response
-      assert.equal(response.data.status, "ERROR");
+      assert.equal(response.data.status, "WARNING");
       assert.equal(response.data.validationErrors.length, 1);
       assert.equal(
-        response.data.validationErrors[0].details[0].message.includes(
+        response.data.validationErrors[0].errors[0].message.includes(
           '"annee_scolaire" with value "2021,2022" fails to match the required pattern'
         ),
         true
@@ -192,10 +192,10 @@ describe(__filename, () => {
         },
       });
       // check response
-      assert.equal(response.data.status, "ERROR");
+      assert.equal(response.data.status, "WARNING");
       assert.equal(response.data.validationErrors.length, 1);
       assert.equal(
-        response.data.validationErrors[0].details[0].message.includes(
+        response.data.validationErrors[0].errors[0].message.includes(
           '"uai_etablissement" with value "invalide" fails to match the required pattern'
         ),
         true
@@ -224,10 +224,10 @@ describe(__filename, () => {
           },
         });
         // check response
-        assert.equal(response.data.status, "ERROR");
+        assert.equal(response.data.status, "WARNING");
         assert.equal(response.data.validationErrors.length, 1);
         assert.equal(
-          response.data.validationErrors[0].details[0].message.includes("date_metier_mise_a_jour_statut"),
+          response.data.validationErrors[0].errors[0].message.includes("date_metier_mise_a_jour_statut"),
           true
         );
         // check that no data was created
@@ -327,8 +327,8 @@ describe(__filename, () => {
 
       // Check Api Route data
       assert.deepEqual(response.status, 200);
-      assert.equal(response.data.status, "ERROR");
-      assert.equal(response.data.message.includes(`Error : 3 items not valid`), true);
+      assert.equal(response.data.status, "WARNING");
+      assert.equal(response.data.message.includes(`Warning : 3 items not valid`), true);
       assert.deepEqual(response.data.ok, 10);
       assert.deepEqual(response.data.ko, 3);
       assert.equal(response.data.validationErrors.length, 3);
@@ -406,10 +406,10 @@ describe(__filename, () => {
       });
 
       // check response & validation errors
-      assert.equal(response.data.status, "ERROR");
+      assert.equal(response.data.status, "WARNING");
       assert.equal(response.data.validationErrors.length, 1);
       assert.equal(
-        response.data.validationErrors[0].details[0].message.includes(
+        response.data.validationErrors[0].errors[0].message.includes(
           `"id_formation" with value "${badCfd}" fails to match the required pattern: ${cfdRegex}`
         ),
         true
