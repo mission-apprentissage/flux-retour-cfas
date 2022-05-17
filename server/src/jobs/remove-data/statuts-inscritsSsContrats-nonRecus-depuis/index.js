@@ -33,5 +33,5 @@ runScript(async () => {
     source: { $ne: "scform" },
   });
 
-  logger.info(result.deletedCount, "statuts candidats supprimés avec succès");
+  logger.info(result.deletedCount, "dossiersApprenants supprimés avec succès");
 }, "suppression-statuts-inscritsSansContrats-nonRecus-depuis");

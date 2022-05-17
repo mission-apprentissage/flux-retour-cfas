@@ -285,10 +285,10 @@ Il est possible de supprimer les données en base de plusieurs manières :
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:all'
 ```
 
-- Pour supprimer uniquement les statuts des candidats en base :
+- Pour supprimer uniquement les documents dossiersApprenants en base :
 
 ```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:statutsCandidats'
+docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:dossiersApprenants'
 ```
 
 - Pour supprimer uniquement les logs (+usersEvents) en base :
@@ -313,13 +313,13 @@ Il est possible d'alimenter la base de donneés avec des données de réferences
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn seed:users'
 ```
 
-- Pour ajouter des statuts candidats de test en base :
+- Pour ajouter des documents dossiersApprenants de test en base :
 
 ```bash
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn seed:sample'
 ```
 
-- Pour ajouter des statuts candidats randomisés en base :
+- Pour ajouter des dossiersApprenants randomisés en base :
 
 ```bash
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn seed:randomizedSample'
@@ -341,13 +341,13 @@ docker exec -t -i flux_retour_cfas_server bash -c 'yarn stats'
 
 ### Jobs de vérification et clean des données
 
-- Pour valider et marquer les SIRET des statuts candidats en base :
+- Pour valider et marquer les SIRET des dossiersApprenants en base :
 
 ```bash
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn siret:check-validity'
 ```
 
-- Pour valider et marquer les UAI des statuts candidats en base :
+- Pour valider et marquer les UAI des dossiersApprenants en base :
 
 ```bash
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn uai:check-validity'
@@ -365,7 +365,7 @@ docker exec -t -i flux_retour_cfas_server bash -c 'yarn siret:sanitize'
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn siret:retrieve-gesti'
 ```
 
-- Pour tenter de retrouver les SIRET manquants sur les statuts candidats provenant de Ymag grâce aux UAI déjà présents en base :
+- Pour tenter de retrouver les SIRET manquants sur les dossiersApprenants provenant de Ymag grâce aux UAI déjà présents en base :
 
 ```bash
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn siret:retrieve-ymag'
@@ -381,12 +381,6 @@ docker exec -t -i flux_retour_cfas_server bash -c 'yarn etablissements-location:
 
 ```bash
 docker exec -t -i flux_retour_cfas_server bash -c 'yarn etablissements-networks:retrieve'
-```
-
-- Pour tenter de retrouver niveau des formations grâce au CFA via la collection referentiel des Formations :
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn statutsCandidats:update-niveaux'
 ```
 
 ### Procédure à suivre au premier déploiement
@@ -432,16 +426,16 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
    docker exec -ti flux_retour_cfas_server bash -c 'yarn siret-uai:check-validity'
    ```
 
-   5.6 - Recherche des infos de localisation des établissements 'yarn statutsCandidats:retrieve-location'
+   5.6 - Recherche des infos de localisation des établissements 'yarn dossiersApprenants:retrieve-location'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn statutsCandidats:retrieve-location'
+   docker exec -ti flux_retour_cfas_server bash -c 'yarn dossiersApprenants:retrieve-location'
    ```
 
-   5.7 - Recherche des infos de réseaux des établissements 'yarn statutsCandidats:retrieve-networks'
+   5.7 - Recherche des infos de réseaux des établissements 'yarn dossiersApprenants:retrieve-networks'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn statutsCandidats:retrieve-networks'
+   docker exec -ti flux_retour_cfas_server bash -c 'yarn dossiersApprenants:retrieve-networks'
    ```
 
    5.8 - Recherche des codes CFD des formations 'yarn formation:retrieve-from-cfd'
@@ -450,10 +444,10 @@ Dès le premier déploiement de l'application est recommandé de suivre la proc�
    docker exec -ti flux_retour_cfas_server bash -c 'yarn formation:retrieve-from-cfd'
    ```
 
-   5.9 - Mise à jour des niveau des statutsCandidats - dépend des codes CFD des formations (5.8) 'yarn statutsCandidats:retrieve-niveaux'
+   5.9 - Mise à jour des niveau des dossiersApprenants - dépend des codes CFD des formations (5.8) 'yarn dossiersApprenants:retrieve-niveaux'
 
    ```bash
-   docker exec -ti flux_retour_cfas_server bash -c 'yarn statutsCandidats:retrieve-niveaux'
+   docker exec -ti flux_retour_cfas_server bash -c 'yarn dossiersApprenants:retrieve-niveaux'
    ```
 
    5.10 - Mise à jour des branchements des données des CFAs 'yarn cfas:retrieve-data-connection'
@@ -476,18 +470,18 @@ Ce script prend en arguments :
 Exemple, identifier les doublons de type 1 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement/formation_cfd) sur toute la base :
 
 ```bash
-docker exec -ti flux_retour_cfas_server bash -c 'yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forAll'
+docker exec -ti flux_retour_cfas_server bash -c 'yarn support:identify-dossiersApprenants-duplicates --duplicatesTypeCode 1 --mode forAll'
 ```
 
 Exemple, identifier les doublons de type 2 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement mais formation_cfd différent) sur l'UAI 1234X avec l'utilisation d'allowDiskUse :
 
 ```bash
-docker exec -ti flux_retour_cfas_server bash -c 'yarn support:identify-statutsCandidats-duplicates --duplicatesTypeCode 2 --mode forUai --uai 1234X --allowDiskUse'
+docker exec -ti flux_retour_cfas_server bash -c 'yarn support:identify-dossiersApprenants-duplicates --duplicatesTypeCode 2 --mode forUai --uai 1234X --allowDiskUse'
 ```
 
 ### Script de suppression des doublons
 
-Il est possible de lancer un script de suppression de différents types de doublons. Les statuts en doublons les moins récents seront supprimés et archivés dans la collection `statutsCandidatsDuplicatesRemoved`
+Il est possible de lancer un script de suppression de différents types de doublons. Les dossiersApprenants en doublons les moins récents seront supprimés et archivés dans la collection `dossiersApprenantsDuplicatesRemoved`
 
 Ce script prend les mêmes arguments que le script d'identification :
 
@@ -499,5 +493,5 @@ Ce script prend les mêmes arguments que le script d'identification :
 Exemple, supprimer les doublons de type 1 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement/formation_cfd) sur toute la base :
 
 ```bash
-docker exec -ti flux_retour_cfas_server bash -c 'yarn support:remove-statutsCandidats-duplicates --duplicatesTypeCode 1 --mode forAll'
+docker exec -ti flux_retour_cfas_server bash -c 'yarn support:remove-dossiersApprenants-duplicates --duplicatesTypeCode 1 --mode forAll'
 ```

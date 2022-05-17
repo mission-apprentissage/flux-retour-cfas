@@ -5,7 +5,7 @@ const clearAll = async () => {
   logger.info("Suppression en cours");
 
   await DossierApprenantModel.deleteMany({});
-  logger.info(`StatutsCandidats supprimés`);
+  logger.info(`Tous les documents de la collection dossiersApprenants ont été supprimés`);
 
   await UserModel.deleteMany({});
   logger.info(`Users supprimés`);
@@ -14,7 +14,7 @@ const clearAll = async () => {
 const clearDossiersApprenants = async () => {
   logger.info("Suppression en cours");
   await DossierApprenantModel.deleteMany({});
-  logger.info(`StatutsCandidats supprimés`);
+  logger.info(`Tous les documents de la collection dossiersApprenants ont été supprimés`);
 };
 
 const clearUsers = async () => {

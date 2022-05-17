@@ -16,7 +16,7 @@ runScript(async ({ db }) => {
   const departementsMap = indexBy(DEPARTEMENTS, "code");
   const allUais = await db.collection("dossiersApprenants").distinct("uai_etablissement");
 
-  logger.info(`${allUais.length} UAI found. Will update matching statuts candidats...`);
+  logger.info(`${allUais.length} UAI found. Will update matching dossiersApprenants...`);
   loadingBar.start(allUais.length, 0);
 
   let modifiedCount = 0;
@@ -44,6 +44,6 @@ runScript(async ({ db }) => {
     loadingBar.increment();
   });
   loadingBar.stop();
-  logger.info(`${matchedCount} statuts candidats matching valid UAIs`);
-  logger.info(`${modifiedCount} statuts candidats updated`);
+  logger.info(`${matchedCount} dossiersApprenants matching valid UAIs`);
+  logger.info(`${modifiedCount} dossiersApprenants updated`);
 }, "retrieve-location-from-uai");
