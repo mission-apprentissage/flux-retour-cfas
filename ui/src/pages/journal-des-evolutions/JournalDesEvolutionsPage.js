@@ -8,6 +8,7 @@ import Sommaire from "../../common/components/Sommaire/Sommaire";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { getUniquesMonthAndYearFromDatesList } from "../../common/utils/dateUtils";
 import { capitalize } from "../../common/utils/stringUtils";
+import { groupEvolutionsByDate } from "./groupEvolutionsByDate";
 import JournalDesEvolutionsTagFilter from "./JournalDesEvolutionsTagFilter";
 import { JOURNAL_DES_EVOLUTIONS_DATA, JOURNAL_DES_EVOLUTIONS_TAGS } from "./JournalEvolutionsData";
 
@@ -45,23 +46,29 @@ const JournalDesEvolutions = () => {
       <Section marginBottom="10w">
         <HStack spacing="12w">
           <Box flex="1">
-            {dataList.map((item, index) => {
+            {groupEvolutionsByDate(dataList).map((item, index) => {
               const date = format(new Date(item.date), "dd MMMM yyyy", { locale: fr });
               return (
                 <Box paddingY="3w" key={index}>
                   <Heading as="h2" color="grey.600" fontSize="beta" id={item.date}>
                     Le {date}
                   </Heading>
-                  <Text color="grey.800" fontWeight="bold" fontSize="gamma">
-                    {item.title}
-                  </Text>
-                  <Divider color="grey.850" orientation="horizontal" marginTop="2w" />
-                  <Text color="grey.700" marginTop="1w">
-                    {item.explication}
-                  </Text>
-                  <Badge variant="grey" fontSize="omega" marginTop="1w">
-                    {capitalize(item.type)}
-                  </Badge>
+                  {item.evolutions.map((evolution) => {
+                    return (
+                      <Box paddingY="2w" key={evolution.title}>
+                        <Text color="grey.800" fontWeight="bold" fontSize="gamma">
+                          {evolution.title}
+                        </Text>
+                        <Divider color="grey.850" orientation="horizontal" marginTop="2w" />
+                        <Text color="grey.700" marginTop="1w">
+                          {evolution.explication}
+                        </Text>
+                        <Badge variant="grey" fontSize="omega" marginTop="1w">
+                          {capitalize(evolution.type)}
+                        </Badge>
+                      </Box>
+                    );
+                  })}
                 </Box>
               );
             })}
