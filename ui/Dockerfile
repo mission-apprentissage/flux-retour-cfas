@@ -1,5 +1,5 @@
 # build stage
-FROM node:16.6.0-stretch as build
+FROM node:16.15-stretch as build
 
 ARG REACT_APP_ENV
 
@@ -12,7 +12,7 @@ RUN yarn install --frozen-lockfile
 COPY . ./
 RUN yarn build
 
-FROM node:16.6.0-alpine
+FROM node:16.15-alpine
 COPY --from=build /app/build ./build
 COPY --from=build /app/package.json ./
 RUN yarn global add local-web-server

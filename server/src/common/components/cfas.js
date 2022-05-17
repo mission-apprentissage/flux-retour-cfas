@@ -111,7 +111,11 @@ const searchCfas = async (searchCriteria) => {
 
   const matchStage = {};
   if (searchTerm) {
-    matchStage.$or = [{ $text: { $search: searchTerm } }, { uai: new RegExp(escapeRegExp(searchTerm), "g") }];
+    matchStage.$or = [
+      { $text: { $search: searchTerm } },
+      { uai: new RegExp(escapeRegExp(searchTerm), "g") },
+      { sirets: new RegExp(escapeRegExp(searchTerm), "g") },
+    ];
   }
   // if other criteria have been provided, find the list of uai matching those criteria in the DossierApprenant collection
   if (Object.keys(otherCriteria).length > 0) {

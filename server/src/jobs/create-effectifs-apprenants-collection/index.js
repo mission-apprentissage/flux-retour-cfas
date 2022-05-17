@@ -87,6 +87,7 @@ runScript(async ({ effectifs }) => {
       contrat_date_rupture: currentStatut.contrat_date_rupture,
       formation_rncp: currentStatut.formation_rncp,
       indicateur_effectif: currentStatut.indicateur_effectif,
+      created_at: new Date(),
     }).save();
     loadingBar.increment();
   });

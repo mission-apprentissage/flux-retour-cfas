@@ -9,7 +9,6 @@ module.exports = new Schema({
   },
   date: {
     type: Date,
-    default: () => new Date(),
     description: "La date de l'evenement",
   },
   action: {

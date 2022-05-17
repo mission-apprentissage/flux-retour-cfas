@@ -67,6 +67,7 @@ runScript(async ({ dossiersApprenants, db }) => {
       args,
       filters: filterQuery,
       jobTimestamp,
+      created_at: new Date(),
       ...duplicate,
     }).save();
   });

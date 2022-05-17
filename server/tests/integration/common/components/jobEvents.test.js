@@ -13,6 +13,7 @@ describe(__filename, () => {
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.started,
+      created_at: new Date(),
     }).save();
 
     // leave a tiny amount of time, otherwise the jobEvent date field will have the millisecond and test will result in a false-negative
@@ -22,6 +23,7 @@ describe(__filename, () => {
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.executed,
+      created_at: new Date(),
     }).save();
 
     await wait(1);
@@ -30,10 +32,11 @@ describe(__filename, () => {
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.ended,
+      created_at: new Date(),
     }).save();
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
-    assert.equal(isEnded, true);
+    assert.equal(isEnded, false);
   });
 
   it("Permet de vérifier si le job courant n'est pas dans l'action terminée", async () => {
@@ -44,12 +47,14 @@ describe(__filename, () => {
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.started,
+      created_at: new Date(),
     }).save();
 
     // Add executed event
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.executed,
+      created_at: new Date(),
     }).save();
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);

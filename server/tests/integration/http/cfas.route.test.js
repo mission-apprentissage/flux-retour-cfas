@@ -33,6 +33,21 @@ describe(__filename, () => {
       assert.equal(response.data.length, 1);
       assert.deepEqual(response.data[0].uai, "0801302F");
     });
+
+    it("sends a 200 HTTP response with results when match", async () => {
+      await new CfaModel({
+        nom: "BTP CFA Somme",
+        nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
+        uai: "0801302F",
+        sirets: ["34012780200015"],
+      }).save();
+
+      const response = await httpClient.post("/api/cfas/search", { searchTerm: "Somme" });
+
+      assert.equal(response.status, 200);
+      assert.equal(response.data.length, 1);
+      assert.deepEqual(response.data[0].sirets, ["34012780200015"]);
+    });
   });
 
   describe("GET /cfas/:uai", () => {

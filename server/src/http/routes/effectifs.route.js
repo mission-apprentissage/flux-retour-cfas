@@ -588,12 +588,19 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
       const formattedForCsv = await Promise.all(
         effectifsByCfaAtDate.map(async ({ uai_etablissement, nom_etablissement, effectifs }) => {
           const cfa = await cfas.getFromUai(uai_etablissement);
+
+          const cfaHasReseau = Boolean(cfa?.reseaux?.length > 0);
+          const reseauxCfa = cfaHasReseau ? JSON.stringify(cfa.reseaux) : "";
+
+          const cfaHasSirets = Boolean(cfa?.sirets?.length > 0);
+          const siretsCfa = cfaHasSirets ? JSON.stringify(cfa.sirets) : "";
+
           return {
             DEPARTEMENT: getDepartementCodeFromUai(uai_etablissement),
-            RESEAUX: cfa.reseaux?.length > 0 ? JSON.stringify(cfa.reseaux) : "",
+            RESEAUX: reseauxCfa,
             "NOM DE L'ÉTABLISSEMENT": nom_etablissement,
             UAI: uai_etablissement,
-            SIRET: cfa.sirets?.length > 0 ? JSON.stringify(cfa.sirets) : "",
+            SIRET: siretsCfa,
             APPRENTIS: effectifs.apprentis,
             "SANS CONTRAT": effectifs.inscritsSansContrat,
             RUPTURANTS: effectifs.rupturants,
