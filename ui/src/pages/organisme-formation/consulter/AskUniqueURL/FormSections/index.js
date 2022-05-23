@@ -1,4 +1,3 @@
-export { default as AskUniqueURLAskUaiSection } from "./AskUniqueURLAskUaiSection";
-export { default as AskUniqueURLUaiFound } from "./AskUniqueURLUaiFound";
-export { default as AskUniqueURLUaiNotFound } from "./AskUniqueURLUaiNotFound";
-export { default as AskUniqueURLBackToAskUaiSection } from "./AskUniqueURLBackToAskUaiSection";
+export { default as AskUniqueURLAskOrganismeSection } from "./AskUniqueURLAskOrganismeSection";
+export { default as AskUniqueURLOrganismeFound } from "./AskUniqueURLOrganismeFound";
+export { default as AskUniqueURLOrganismeNotFound } from "./AskUniqueURLOrganismeNotFound";
