@@ -52,6 +52,16 @@ const RESEAUX_CFAS = {
     nomFichier: "cfas-aftral",
     encoding: "utf8",
   },
+  GRETA_DU_VAUCLUSE: {
+    nomReseau: "GRETA du VAUCLUSE",
+    nomFichier: "",
+    encoding: "utf8",
+  },
+  SAT: {
+    nomReseau: "SAT",
+    nomFichier: "",
+    encoding: "utf8",
+  },
 };
 
 module.exports = { RESEAUX_CFAS };
