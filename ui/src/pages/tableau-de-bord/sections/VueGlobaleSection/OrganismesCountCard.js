@@ -28,7 +28,12 @@ const OrganismesCountCard = () => {
       <EffectifCard
         count={data.nbOrganismes}
         label="organismes de formation"
-        tooltipLabel="Nombre d’organismes de formation qui transmettent leurs données au Tableau de bord de l’apprentissage. Un organisme est identifié par une UAI utilisant 1 ou plusieurs numéro(s) SIRET."
+        tooltipLabel={
+          <div>
+            Nombre d’organismes de formation qui transmettent leurs données au Tableau de bord de l’apprentissage. Un
+            organisme est identifié par une UAI utilisant 1 ou plusieurs numéro(s) SIRET.
+          </div>
+        }
         iconClassName="ri-home-6-fill"
         accentColor="#417DC4"
       />
