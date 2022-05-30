@@ -1,10 +1,10 @@
 import { Box, Button } from "@chakra-ui/react";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { forwardRef } from "react";
 
-const PrimarySelectButton = ({ children, onClick, isOpen }) => {
+const PrimarySelectButton = forwardRef(({ children, onClick, isOpen }, ref) => {
   return (
-    <Button variant="select-primary" onClick={onClick}>
+    <Button variant="select-primary" onClick={onClick} ref={ref}>
       <Box as="span" textDecoration="underline">
         {children}
       </Box>
@@ -17,7 +17,9 @@ const PrimarySelectButton = ({ children, onClick, isOpen }) => {
       />
     </Button>
   );
-};
+});
+
+PrimarySelectButton.displayName = "PrimarySelectButton";
 
 PrimarySelectButton.propTypes = {
   children: PropTypes.node.isRequired,

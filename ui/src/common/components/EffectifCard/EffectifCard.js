@@ -71,7 +71,7 @@ EffectifCard.propTypes = {
   label: PropTypes.string.isRequired,
   count: PropTypes.number.isRequired,
   effectifIndicateur: PropTypes.string,
-  tooltipLabel: PropTypes.string,
+  tooltipLabel: PropTypes.object,
   hideCount: PropTypes.bool,
   infoText: PropTypes.node,
   warningText: PropTypes.string,

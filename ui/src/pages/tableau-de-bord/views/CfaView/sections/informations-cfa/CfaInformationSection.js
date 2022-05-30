@@ -118,7 +118,7 @@ CfaInformationSection.propTypes = {
   infosCfa: infosCfaPropType,
   loading: PropTypes.bool,
   error: PropTypes.object,
-  isUserCfa: PropTypes.bool.isRequired,
+  isUserCfa: PropTypes.bool,
 };
 
 export default CfaInformationSection;
