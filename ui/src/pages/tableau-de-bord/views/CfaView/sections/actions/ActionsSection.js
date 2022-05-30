@@ -12,7 +12,7 @@ const ActionsSection = ({ infosCfa }) => {
   const isAdmin = hasUserRoles(auth, roles.administrator);
 
   return (
-    <Section marginTop="2w" a>
+    <Section marginTop="2w">
       <Flex justifyContent="right">
         {infosCfa?.url_tdb && isAdmin && <CopyCfaPrivateLinkButton link={infosCfa?.url_tdb} />}
       </Flex>
