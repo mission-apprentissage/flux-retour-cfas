@@ -24,7 +24,7 @@ runScript(async () => {
 
   logger.info(`Suppression des données pour l'UAI ${uai} non recues depuis ${date.toISOString()}...`);
   const result = await DossierApprenantModel.deleteMany({
-    annee_scolaire: "2021-2022",
+    annee_scolaire: { $in: ["2021-2021", "2021-2022", "2022-2022"] },
     uai_etablissement: uai,
     updated_at: { $lte: date },
   });
