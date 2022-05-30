@@ -52,13 +52,13 @@ const RESEAUX_CFAS = {
     nomFichier: "cfas-aftral",
     encoding: "utf8",
   },
-  GRETA_DU_VAUCLUSE: {
-    nomReseau: "GRETA du VAUCLUSE",
+  GRETA_VAUCLUSE: {
+    nomReseau: "GRETA VAUCLUSE",
     nomFichier: "",
     encoding: "utf8",
   },
   CFA_SAT: {
-    nomReseau: "CFA_SAT",
+    nomReseau: "CFA SAT",
     nomFichier: "",
     encoding: "utf8",
   },
