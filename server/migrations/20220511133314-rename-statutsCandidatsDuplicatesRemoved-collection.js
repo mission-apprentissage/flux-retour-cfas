@@ -1,9 +1,13 @@
 module.exports = {
   async up(db) {
-    await db.collection("statutsCandidatsDuplicatesRemoved").rename("dossiersApprenantsDuplicatesRemoved");
+    if (db.collections.statutsCandidatsDuplicatesRemoved) {
+      await db.collection("statutsCandidatsDuplicatesRemoved").rename("dossiersApprenantsDuplicatesRemoved");
+    }
   },
 
   async down(db) {
-    await db.collection("dossiersApprenantsDuplicatesRemoved").rename("statutsCandidatsDuplicatesRemoved");
+    if (db.collections.dossiersApprenantsDuplicatesRemoved) {
+      await db.collection("dossiersApprenantsDuplicatesRemoved").rename("statutsCandidatsDuplicatesRemoved");
+    }
   },
 };
