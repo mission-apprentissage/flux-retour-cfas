@@ -54,14 +54,6 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
   },
   {
-    title: "Déploiement en région PACA",
-    explication:
-      "À l’initiative de la DREETS PACA, organisation d’un Webinaire à destination des centres de formation de la région, pour présenter le Tableau de bord de l’apprentissage.",
-    correctif: "Non",
-    date: "2022/03/10",
-    type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
-  },
-  {
     title: "API transmission des données avec un SI en propre",
     explication:
       "Amélioration de l’API pour permettre la transmission avec un SI en propre : mise en place pour un réseau",
