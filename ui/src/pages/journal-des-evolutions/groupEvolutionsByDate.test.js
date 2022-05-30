@@ -1,6 +1,6 @@
 import { groupEvolutionsByDate } from "./groupEvolutionsByDate";
 
-it("renvoie un d'éléments avec date et évolutions groupés par date", () => {
+it("renvoie un tableau d'éléments avec date et évolutions groupés par date", () => {
   const input = [
     {
       title: "Déploiement en Guadeloupe et à Mayotte",
