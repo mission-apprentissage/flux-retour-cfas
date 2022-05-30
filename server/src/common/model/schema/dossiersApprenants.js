@@ -130,6 +130,16 @@ module.exports = new Schema({
     default: null,
     description: "Numéro de l'académie du CFA",
   },
+  etablissement_gestionnaire_uai: {
+    type: String,
+    default: null,
+    description: "UAI du CFA gestionnaire - depuis le catalogue",
+  },
+  etablissement_formateur_uai: {
+    type: String,
+    default: null,
+    description: "UAI du CFA formateur - depuis le catalogue",
+  },
   etablissement_gestionnaire_siret: {
     type: String,
     default: null,

@@ -18,6 +18,7 @@ const JOB_NAMES = {
   dossiersApprenantsRetrieveNetworks: "dossiersApprenants-retrieve-networks",
   dossiersApprenantsRetrieveNiveaux: "dossiersApprenants-retrieve-niveaux",
   dossiersApprenantsRetrieveSiretCatalog: "dossiersApprenants-retrieve-siret-catalog",
+  dossiersApprenantsRetrieveFormateurGestionnairesCatalog: "dossiersApprenants-retrieve-formateur-gestionnaire-catalog",
   dossiersApprenantsRetrieveFormationsInCatalog: "dossiersApprenants-retrieve-formation-in-catalog",
   dossiersApprenantsBadHistoryIdentifyAntidated: "dossiersApprenants-bad-history-identify-antidated",
   dossiersApprenantsBadHistoryCleanAntidated: "dossiersApprenants-bad-history-clean-antidated",
