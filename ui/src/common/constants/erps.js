@@ -29,6 +29,7 @@ export const ERPS = [
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/scform.pdf",
   },
   { name: "FCA Manager", state: ERP_STATE.ongoing },
+  { name: "Auriga", state: ERP_STATE.ongoing },
   { name: "Hyperplanning", state: ERP_STATE.coming },
   { name: "Valsoftware", state: ERP_STATE.coming },
 ];
