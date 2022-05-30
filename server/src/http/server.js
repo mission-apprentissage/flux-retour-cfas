@@ -20,7 +20,6 @@ const cfasRouter = require("./routes/cfas.route");
 const formationRouter = require("./routes/formations.route");
 const healthcheckRouter = require("./routes/healthcheck.route");
 const demandeIdentifiantsRouter = require("./routes/demande-identifiants.route");
-const demandeLienPriveRouter = require("./routes/demande-lien-prive.route");
 const demandeBranchementErpRouter = require("./routes/demande-branchement-erp.route");
 const cacheRouter = require("./routes/cache.route");
 const updatePasswordRouter = require("./routes/update-password.route");
@@ -44,7 +43,6 @@ module.exports = async (components) => {
   app.use("/api/referentiel", referentielRouter());
   app.use("/api/healthcheck", healthcheckRouter(components));
   app.use("/api/demande-identifiants", demandeIdentifiantsRouter(components));
-  app.use("/api/demande-lien-prive", demandeLienPriveRouter(components));
   app.use("/api/demande-branchement-erp", demandeBranchementErpRouter(components));
   app.use("/api/update-password", updatePasswordRouter(components));
 

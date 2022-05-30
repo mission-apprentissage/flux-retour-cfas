@@ -10,7 +10,6 @@ const formationsComponent = require("./formations");
 const createStats = require("./stats");
 const createEffectifs = require("./effectifs");
 const demandeIdentifiantsComponent = require("./demandeIdentifiants");
-const demandeLienPriveComponent = require("./demandeLienPrive");
 const demandeBranchementErpComponent = require("./demandeBranchementErp");
 const createCacheComponent = require("./cache");
 const createOvhStorageComponent = require("./ovhStorage");
@@ -28,7 +27,6 @@ module.exports = async (options = {}) => {
   const stats = options.stats || createStats();
   const effectifs = options.effectifs || createEffectifs();
   const demandeIdentifiants = options.demandeIdentifiants || demandeIdentifiantsComponent();
-  const demandeLienPrive = options.demandeLienPrive || demandeLienPriveComponent();
   const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
   const cache = options.cache || createCacheComponent(options.redisClient);
 
@@ -48,6 +46,5 @@ module.exports = async (options = {}) => {
     effectifs,
     demandeIdentifiants,
     demandeBranchementErp,
-    demandeLienPrive,
   };
 };

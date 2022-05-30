@@ -22,6 +22,5 @@ module.exports = {
   CroisementVoeuxAffelnetModel: getModel("croisementVoeuxAffelnet"),
   EffectifApprenantModel: getModel("effectifsApprenants", { enablePagination: true }),
   DemandeIdentifiantsModel: getModel("demandesIdentifiants"),
-  DemandeLienPriveModel: getModel("demandesLienPrive"),
   DemandeBranchementErpModel: getModel("demandesBranchementErp"),
 };
