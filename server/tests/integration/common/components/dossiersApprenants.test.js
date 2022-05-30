@@ -8,7 +8,7 @@ const {
   DUPLICATE_TYPE_CODES,
 } = require("../../../../src/common/constants/dossierApprenantConstants");
 const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { Formation } = require("../../../../src/common/domain/formation");
+const { Formation } = require("../../../../src/common/factory/formation");
 
 const isApproximatelyNow = (date) => {
   return Math.abs(differenceInMilliseconds(date, new Date())) < 50;

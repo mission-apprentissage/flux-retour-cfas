@@ -3,7 +3,7 @@ const cfasComponent = require("../../../../src/common/components/cfas");
 const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { addDays } = require("date-fns");
-const { Cfa } = require("../../../../src/common/domain/cfa");
+const { Cfa } = require("../../../../src/common/factory/cfa");
 const pick = require("lodash.pick");
 var mongoose = require("mongoose");
 

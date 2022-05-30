@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
-const { Cfa } = require("../../../../src/common/domain/cfa");
+const { Cfa } = require("../../../../src/common/factory/cfa");
 const pick = require("lodash.pick");
 
-describe("Domain CFA", () => {
+describe("Factory CFA", () => {
   describe("createCfa", () => {
     it("Vérifie la création d'un CFA avec tous les champs", async () => {
       const cfaProps = {

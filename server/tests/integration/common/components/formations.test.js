@@ -8,7 +8,7 @@ const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances"
 const { dataForGetMetiersByCfd } = require("../../../data/apiLba");
 const formationsComponent = require("../../../../src/common/components/formations");
 const { FormationModel, DossierApprenantModel } = require("../../../../src/common/model");
-const { Formation } = require("../../../../src/common/domain/formation");
+const { Formation } = require("../../../../src/common/factory/formation");
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
 

@@ -1,12 +1,14 @@
 const Joi = require("joi");
-const { validateCfd } = require("./cfd");
+const { validateCfd } = require("../domain/cfd");
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
+const { BaseFactory } = require("./baseFactory");
 
-class Formation {
-  constructor(props) {
-    Object.entries(props).map(([key, value]) => (this[key] = value));
-  }
-
+class Formation extends BaseFactory {
+  /**
+   * Create a Formation Entry from props
+   * @param {*} props
+   * @returns
+   */
   static create(props) {
     const schema = Joi.object({
       cfd: Joi.string()

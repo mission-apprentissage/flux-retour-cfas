@@ -1,16 +1,13 @@
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const Joi = require("joi");
-const { validateUai } = require("./uai");
+const { validateUai } = require("../domain/uai");
 const config = require("../../../config");
 const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
+const { BaseFactory } = require("./baseFactory");
 
 const TOKENIZED_STRING_SIZE = 4;
 
-class Cfa {
-  constructor(props) {
-    Object.entries(props).map(([key, value]) => (this[key] = value));
-  }
-
+class Cfa extends BaseFactory {
   /**
    * Create a Cfa Entry from props
    * Generate a random accessToken and privateUrl
