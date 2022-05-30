@@ -57,8 +57,8 @@ const RESEAUX_CFAS = {
     nomFichier: "",
     encoding: "utf8",
   },
-  SAT: {
-    nomReseau: "SAT",
+  CFA_SAT: {
+    nomReseau: "CFA_SAT",
     nomFichier: "",
     encoding: "utf8",
   },
