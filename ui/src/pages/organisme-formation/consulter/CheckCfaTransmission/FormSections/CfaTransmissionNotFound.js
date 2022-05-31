@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import { NAVIGATION_PAGES } from "../../../../../common/constants/navigationPages";
 
-const AskUniqueURLOrganismeNotFound = () => {
+const CfaTransmissionNotFound = () => {
   return (
     <Stack>
       <HStack>
@@ -27,4 +27,4 @@ const AskUniqueURLOrganismeNotFound = () => {
   );
 };
 
-export default AskUniqueURLOrganismeNotFound;
+export default CfaTransmissionNotFound;

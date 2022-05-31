@@ -1,11 +1,7 @@
 import { Box } from "@chakra-ui/react";
 import React, { useState } from "react";
 
-import {
-  AskUniqueURLOrganismeFound,
-  AskUniqueURLOrganismeNotFound,
-  AskUniqueURLOrganismeSection,
-} from "./FormSections";
+import { CfaTransmissionFound, CfaTransmissionNotFound, CfaTransmissionSection } from "./FormSections";
 
 export const ASKURL_FORM_STATE = {
   askOrganisme: "askOrganisme",
@@ -13,20 +9,20 @@ export const ASKURL_FORM_STATE = {
   organismeNotFound: "organismeNotFound",
 };
 
-const AskUniqueURLContent = () => {
+const CheckCfaTransmissionContent = () => {
   const [formState, setFormState] = useState(ASKURL_FORM_STATE.askOrganisme);
   return (
     <Box>
       {formState === ASKURL_FORM_STATE.askOrganisme && (
-        <AskUniqueURLOrganismeSection
+        <CfaTransmissionSection
           setOrganismeFound={() => setFormState(ASKURL_FORM_STATE.organismeFound)}
           setOrganismeNotFound={() => setFormState(ASKURL_FORM_STATE.organismeNotFound)}
         />
       )}
-      {formState === ASKURL_FORM_STATE.organismeFound && <AskUniqueURLOrganismeFound />}
-      {formState === ASKURL_FORM_STATE.organismeNotFound && <AskUniqueURLOrganismeNotFound />}
+      {formState === ASKURL_FORM_STATE.organismeFound && <CfaTransmissionFound />}
+      {formState === ASKURL_FORM_STATE.organismeNotFound && <CfaTransmissionNotFound />}
     </Box>
   );
 };
 
-export default AskUniqueURLContent;
+export default CheckCfaTransmissionContent;

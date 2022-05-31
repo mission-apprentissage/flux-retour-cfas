@@ -6,7 +6,7 @@ import { validateSiret } from "../../../../../common/domain/siret";
 import { validateUai } from "../../../../../common/domain/uai";
 import useCfasSearch from "../../../../../common/hooks/useCfasSearch";
 
-const AskUniqueURLOrganismeSection = ({ setOrganismeFound, setOrganismeNotFound }) => {
+const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isValid, setIsValid] = useState(false);
   const { data: searchResults } = useCfasSearch(searchTerm);
@@ -32,7 +32,7 @@ const AskUniqueURLOrganismeSection = ({ setOrganismeFound, setOrganismeNotFound 
 
   return (
     <Stack marginTop="2w">
-      <Text>Rechercher l&apos;organisme par UAI ou par SIRET:</Text>
+      <Text>Rechercher l&apos;organisme par UAI ou par SIRET :</Text>
       <Input
         placeholder="Rechercher l'organisme par son UAI ou son SIRET"
         onChange={(e) => setSearchTerm(e.target.value)}
@@ -53,8 +53,8 @@ const AskUniqueURLOrganismeSection = ({ setOrganismeFound, setOrganismeNotFound 
   );
 };
 
-AskUniqueURLOrganismeSection.propTypes = {
+CfaTransmissionSection.propTypes = {
   setOrganismeFound: PropTypes.func.isRequired,
   setOrganismeNotFound: PropTypes.func.isRequired,
 };
-export default AskUniqueURLOrganismeSection;
+export default CfaTransmissionSection;

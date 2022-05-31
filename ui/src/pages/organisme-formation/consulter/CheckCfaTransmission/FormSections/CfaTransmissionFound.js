@@ -1,6 +1,6 @@
 import { Box, HStack, Stack, Text } from "@chakra-ui/react";
 
-const AskUniqueURLOrganismeFound = () => {
+const CfaTransmissionFound = () => {
   return (
     <Stack>
       <HStack>
@@ -18,4 +18,4 @@ const AskUniqueURLOrganismeFound = () => {
   );
 };
 
-export default AskUniqueURLOrganismeFound;
+export default CfaTransmissionFound;
