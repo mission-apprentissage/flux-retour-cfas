@@ -2,11 +2,10 @@ import { Box } from "@chakra-ui/react";
 import React, { useState } from "react";
 
 import {
-  AskUniqueURLAskOrganismeSection,
   AskUniqueURLOrganismeFound,
   AskUniqueURLOrganismeNotFound,
+  AskUniqueURLOrganismeSection,
 } from "./FormSections";
-import withSubmitAskUniqueURL from "./withSubmitAskUniqueURL";
 
 export const ASKURL_FORM_STATE = {
   askOrganisme: "askOrganisme",
@@ -14,12 +13,12 @@ export const ASKURL_FORM_STATE = {
   organismeNotFound: "organismeNotFound",
 };
 
-const AskUniqueURLModalContent = () => {
+const AskUniqueURLContent = () => {
   const [formState, setFormState] = useState(ASKURL_FORM_STATE.askOrganisme);
   return (
     <Box>
       {formState === ASKURL_FORM_STATE.askOrganisme && (
-        <AskUniqueURLAskOrganismeSection
+        <AskUniqueURLOrganismeSection
           setOrganismeFound={() => setFormState(ASKURL_FORM_STATE.organismeFound)}
           setOrganismeNotFound={() => setFormState(ASKURL_FORM_STATE.organismeNotFound)}
         />
@@ -30,4 +29,4 @@ const AskUniqueURLModalContent = () => {
   );
 };
 
-export default withSubmitAskUniqueURL(AskUniqueURLModalContent);
+export default AskUniqueURLContent;

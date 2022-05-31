@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { BreadcrumbNav, Page, Section } from "../../../common/components";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import OrganismeFormationPagesMenu from "../OrganismeFormationPagesMenu";
-import AskUniqueURLModalContent from "./AskUniqueURL/AskUniqueURLModalContent";
+import AskUniqueURLContent from "./AskUniqueURL/AskUniqueURLContent";
 const CommentConsulterEtVerifierLesDonneesPage = () => {
   return (
     <Page>
@@ -48,7 +48,7 @@ const CommentConsulterEtVerifierLesDonneesPage = () => {
               </Heading>
               <Text marginTop="2w">Renseigner les informations suivantes pour vérifier la transmission :</Text>
               <Box marginTop="2w" padding="4w" paddingBottom="15w" border="1px solid" borderColor="bluefrance">
-                <AskUniqueURLModalContent />
+                <AskUniqueURLContent />
               </Box>
             </Section>
           </Box>
