@@ -57,6 +57,7 @@ describe(__filename, () => {
       await new JobEventModel({
         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
+        date: new Date(),
       }).save();
 
       for (let index = 0; index < 10; index++) {
@@ -90,6 +91,7 @@ describe(__filename, () => {
       await new JobEventModel({
         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.started,
+        date: new Date(),
       }).save();
 
       for (let index = 0; index < 10; index++) {
@@ -127,6 +129,7 @@ describe(__filename, () => {
       await new JobEventModel({
         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
+        date: new Date(),
       }).save();
 
       for (let index = 0; index < 10; index++) {
@@ -193,6 +196,7 @@ describe(__filename, () => {
       await new JobEventModel({
         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
+        date: new Date(),
       }).save();
 
       await new EffectifApprenantModel({
