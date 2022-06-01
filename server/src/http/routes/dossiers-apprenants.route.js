@@ -7,6 +7,8 @@ const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolai
 const { CODES_STATUT_APPRENANT } = require("../../common/constants/dossierApprenantConstants");
 const { cfdRegex } = require("../../common/domain/cfd");
 const { uaiRegex } = require("../../common/domain/uai");
+const { siretRegex } = require("../../common/domain/siret");
+
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { findAndPaginate } = require("../../common/utils/dbUtils");
@@ -49,7 +51,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     tel_apprenant: Joi.string().allow(null),
     code_commune_insee_apprenant: Joi.string().allow(null),
 
-    siret_etablissement: Joi.string().allow(null, ""),
+    siret_etablissement: Joi.string().regex(siretRegex).allow(null, ""),
     etablissement_formateur_geo_coordonnees: Joi.string().allow(null),
     etablissement_formateur_code_commune_insee: Joi.string().allow(null),
 
