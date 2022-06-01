@@ -13,14 +13,6 @@ module.exports = {
       jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET").required().asString(),
       expiresIn: env.get("FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET_EXPIRES").default("24h").asString(),
     },
-    activation: {
-      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET").required().asString(),
-      expiresIn: env.get("FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET_EXPIRES").default("96h").asString(),
-    },
-    password: {
-      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET").required().asString(),
-      expiresIn: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET_EXPIRES").default("1h").asString(),
-    },
   },
   log: {
     type: env.get("FLUX_RETOUR_CFAS_LOG_TYPE").default("console").asString(),
@@ -28,7 +20,6 @@ module.exports = {
     streams: env.get("FLUX_RETOUR_CFAS_LOG_STREAMS").default([]).asArray(),
   },
   slackWebhookUrl: env.get("FLUX_RETOUR_CFAS_SLACK_WEBHOOK_URL").asString(),
-  outputDir: env.get("FLUX_RETOUR_CFAS_OUTPUT_DIR").required().asString(),
   users: {
     defaultAdmin: {
       name: env.get("FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME").required().asString(),
