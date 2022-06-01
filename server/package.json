@@ -42,6 +42,7 @@
     "purge:events": "node -r dotenv/config src/jobs/remove-data/purgeEvents/index.js",
     "formation:retrieve-from-cfd": "node -r dotenv/config src/jobs/formation-retrieve-from-cfd/index.js",
     "create:effectifsApprenants-collection": "node -r dotenv/config src/jobs/create-effectifs-apprenants-collection/index.js",
+    "dossiersApprenants:recompute-siret-validity": "node -r dotenv/config src/jobs/dossiersApprenants-recompute-sirets-validity/index.js",
     "dossiersApprenants:retrieve-formateurs-gestionnaires-in-catalog": "node -r dotenv/config src/jobs/dossiersApprenants-retrieve-formateurs-gestionnaires-in-catalog/index.js",
     "dossiersApprenants:retrieve-formations-in-catalog": "node -r dotenv/config src/jobs/dossiersApprenants-retrieve-formations-in-catalog/index.js",
     "dossiersApprenants:retrieve-networks": "node -r dotenv/config src/jobs/dossiersApprenants-retrieve-networks/index.js",
