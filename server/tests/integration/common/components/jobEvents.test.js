@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const jobEvents = require("../../../../src/common/components/jobEvents");
 const { JobEventModel } = require("../../../../src/common/model");
 const { jobEventStatuts } = require("../../../../src/common/constants/jobsConstants");
-const { wait } = require("../../../utils/testUtils");
+const { addMinutes } = require("date-fns");
 
 describe(__filename, () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
@@ -16,27 +16,22 @@ describe(__filename, () => {
       date: new Date(),
     }).save();
 
-    // leave a tiny amount of time, otherwise the jobEvent date field will have the millisecond and test will result in a false-negative
-    await wait(1);
-
     // Add executed event
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.executed,
-      date: new Date(),
+      date: addMinutes(new Date(), 5),
     }).save();
-
-    await wait(1);
 
     // Add ended event
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.ended,
-      date: new Date(),
+      date: addMinutes(new Date(), 6),
     }).save();
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
-    assert.equal(isEnded, false);
+    assert.equal(isEnded, true);
   });
 
   it("Permet de vérifier si le job courant n'est pas dans l'action terminée", async () => {
@@ -54,7 +49,7 @@ describe(__filename, () => {
     await new JobEventModel({
       jobname: testJobName,
       action: jobEventStatuts.executed,
-      date: new Date(),
+      date: addMinutes(new Date(), 5),
     }).save();
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
