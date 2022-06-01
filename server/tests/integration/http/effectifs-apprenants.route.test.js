@@ -107,7 +107,7 @@ describe(__filename, () => {
       });
 
       // Check Api Route data
-      assert.deepEqual(response.status, 501);
+      assert.deepEqual(response.status, 503);
     });
 
     it("Vérifie qu'on peut récupérer les effectifs apprenants avec tous les champs optionnels remplis", async () => {
