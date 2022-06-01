@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Link } from "@chakra-ui/react";
 import React, { useState } from "react";
 
 import { CfaTransmissionFound, CfaTransmissionNotFound, CfaTransmissionSection } from "./FormSections";
@@ -18,6 +18,21 @@ const CheckCfaTransmissionContent = () => {
           setOrganismeFound={() => setFormState(ASKURL_FORM_STATE.organismeFound)}
           setOrganismeNotFound={() => setFormState(ASKURL_FORM_STATE.organismeNotFound)}
         />
+      )}
+      {formState !== ASKURL_FORM_STATE.askOrganisme && (
+        <Link
+          _hover={{ textDecoration: "none", borderBottom: "2px" }}
+          color="bluefrance"
+          fontSize="epsilon"
+          borderBottom="1px solid"
+          borderColor="bluefrance"
+          width="23%"
+          marginTop="2w"
+          onClick={() => setFormState(ASKURL_FORM_STATE.askOrganisme)}
+        >
+          <Box as="i" className="ri-arrow-left-line" marginRight="3v" />
+          Retour
+        </Link>
       )}
       {formState === ASKURL_FORM_STATE.organismeFound && <CfaTransmissionFound />}
       {formState === ASKURL_FORM_STATE.organismeNotFound && <CfaTransmissionNotFound />}
