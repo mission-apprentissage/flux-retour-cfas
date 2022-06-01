@@ -1,7 +1,7 @@
 import React from "react";
 
 import { fetchRepartitionByOrganismeCsvExport } from "../../../common/api/tableauDeBord";
-import { useFiltersContext } from "../../../pages/tableau-de-bord/FiltersContext";
+import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import DownloadButton from "../../components/DownloadButton/DownloadButton";
 import { buildFileName } from "../../utils/buildFileNameFromFilters";
 import { mapFiltersToApiFormat } from "../../utils/mapFiltersToApiFormat";
@@ -17,7 +17,7 @@ const ExportRepartitionByOrganismeButton = () => {
       }}
       fileName={fileName}
     >
-      Exporter la liste des organismes
+      Exporter la liste des organismes (fichier csv)
     </DownloadButton>
   );
 };

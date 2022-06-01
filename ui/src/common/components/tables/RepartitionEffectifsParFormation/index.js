@@ -2,7 +2,7 @@ import { Tbody } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
+import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../../utils/dateUtils";
 import Table from "../Table";
 import NiveauFormationRow from "./NiveauFormationRow";
@@ -11,14 +11,8 @@ const RepartitionEffectifsParFormation = ({ repartitionEffectifs, loading, error
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
-    ? ["Liste des formations par niveaux et année de formation", "apprentis", "inscrits sans contrat"]
-    : [
-        "Liste des formations par niveaux et année de formation",
-        "apprentis",
-        "inscrits sans contrat",
-        "rupturants",
-        "abandons",
-      ];
+    ? ["Niveau et année de la formation", "apprentis", "inscrits sans contrat"]
+    : ["Niveau et année de la formation", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   return (
     <Table headers={tableHeader} loading={loading} error={error}>
       <Tbody>

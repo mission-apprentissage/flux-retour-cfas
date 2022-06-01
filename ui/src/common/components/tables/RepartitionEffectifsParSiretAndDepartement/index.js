@@ -2,7 +2,7 @@ import { Box, Skeleton, Tbody, Text, VStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../../pages/tableau-de-bord/FiltersContext";
+import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../../utils/dateUtils";
 import Table from "../Table";
 import EffectifBySiretRow from "./EffectifBySiretRow";

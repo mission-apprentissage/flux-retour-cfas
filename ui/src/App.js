@@ -4,8 +4,15 @@ import { BrowserRouter as Router, Route, Switch, useLocation } from "react-route
 import ProtectedRoute from "./common/auth/ProtectedRoute";
 import { roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
+import Page404 from "./pages/404/Page404";
 import GestionReseauxCfasPage from "./pages/admin/gestion-reseaux-cfas/GestionReseauCfaPage";
 import GestionUtilisateursPage from "./pages/admin/gestion-utilisateurs/GestionUtilisateursPage";
+import CfaPrivatePage from "./pages/app/visualiser-les-indicateurs/cfa-private";
+import VisualiserLesIndicateursParFormationPage from "./pages/app/visualiser-les-indicateurs/par-formation";
+import VisualiserLesIndicateursParOrganismePage from "./pages/app/visualiser-les-indicateurs/par-organisme";
+import VisualiserLesIndicateursParReseauPage from "./pages/app/visualiser-les-indicateurs/par-reseau";
+import VisualiserLesIndicateursParTerritoirePage from "./pages/app/visualiser-les-indicateurs/par-territoire";
+import VisualiserLesIndicateursPage from "./pages/app/visualiser-les-indicateurs/VisualiserLesIndicateursPage";
 import ComprendreLesDonneesPage from "./pages/comprendre-les-donnees/ComprendreLesDonneesPage";
 import ExplorerLesIndicateursPage from "./pages/explorer-les-indicateurs/ExplorerLesIndicateursPage";
 import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
@@ -19,8 +26,6 @@ import {
   SupportPage,
 } from "./pages/organisme-formation";
 import StatistiquesPage from "./pages/statistiques/StatistiquesPage";
-import TableauDeBordPage from "./pages/tableau-de-bord/TableauDeBordPage";
-import CfaPrivatePage from "./pages/tableau-de-bord/views/CfaPrivateView";
 
 const ScrollToTopOnRouteChange = () => {
   const location = useLocation();
@@ -66,9 +71,33 @@ const App = () => {
 
         {/* Secured By Auth Pages */}
         <ProtectedRoute
-          path={NAVIGATION_PAGES.TableauDeBord.path}
+          path={NAVIGATION_PAGES.VisualiserLesIndicateurs.path}
           exact
-          component={TableauDeBordPage}
+          component={VisualiserLesIndicateursPage}
+          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
+        />
+        <ProtectedRoute
+          path={NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.path}
+          exact
+          component={VisualiserLesIndicateursParTerritoirePage}
+          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
+        />
+        <ProtectedRoute
+          path={NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path}
+          exact
+          component={VisualiserLesIndicateursParReseauPage}
+          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
+        />
+        <ProtectedRoute
+          path={NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path}
+          exact
+          component={VisualiserLesIndicateursParOrganismePage}
+          authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
+        />
+        <ProtectedRoute
+          path={NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.path}
+          exact
+          component={VisualiserLesIndicateursParFormationPage}
           authorizedRoles={[roles.administrator, roles.pilot, roles.network]}
         />
 
@@ -89,7 +118,7 @@ const App = () => {
         <Route path={NAVIGATION_PAGES.ModifierMotDePasse.path} exact component={ModifierMotDePassePage} />
 
         {/* Not found page */}
-        <Route component={() => <div>404 - Page not found</div>} />
+        <Route component={Page404} />
       </Switch>
     </Router>
   );

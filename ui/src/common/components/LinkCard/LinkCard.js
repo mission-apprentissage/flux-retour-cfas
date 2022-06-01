@@ -29,7 +29,7 @@ const cardVariants = {
   },
 };
 
-const LinkCard = ({ children, linkHref, variant = "blue" }) => {
+const LinkCard = ({ children, linkHref, variant = "blue", ...styleProps }) => {
   return (
     <Flex
       background={cardVariants[variant].backgroundColor}
@@ -44,6 +44,7 @@ const LinkCard = ({ children, linkHref, variant = "blue" }) => {
       flex="1"
       as={NavLink}
       to={linkHref}
+      {...styleProps}
     >
       <Text color={cardVariants[variant].textColor} marginBottom="4w" flex="1">
         {children}

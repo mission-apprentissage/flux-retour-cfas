@@ -8,10 +8,10 @@ import { NAVIGATION_PAGES } from "../../constants/navigationPages";
 import useAuth from "../../hooks/useAuth";
 import Section from "../Section/Section";
 
-const NavItem = ({ to, children }) => {
+const NavItem = ({ to, children, exactMatchActive = false }) => {
   const isActive = useRouteMatch({
     path: to,
-    exact: true,
+    exact: exactMatchActive,
   });
 
   return (
@@ -35,6 +35,7 @@ const NavItem = ({ to, children }) => {
 
 NavItem.propTypes = {
   to: PropTypes.string.isRequired,
+  exactMatchActive: PropTypes.bool,
   children: PropTypes.node.isRequired,
 };
 
@@ -46,11 +47,15 @@ const NavBar = () => {
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">
-        {!isLoggedIn && <NavItem to={NAVIGATION_PAGES.Accueil.path}>Accueil</NavItem>}
-        {!isCfa && !isLoggedIn ? (
+        {!isLoggedIn && (
+          <NavItem to={NAVIGATION_PAGES.Accueil.path} exactMatchActive>
+            Accueil
+          </NavItem>
+        )}
+        {isCfa || !isLoggedIn ? (
           <NavItem to={NAVIGATION_PAGES.ExplorerLesIndicateurs.path}>Indicateurs en temps réel</NavItem>
         ) : (
-          <NavItem to={NAVIGATION_PAGES.TableauDeBord.path}>Indicateurs en temps réel</NavItem>
+          <NavItem to={NAVIGATION_PAGES.VisualiserLesIndicateurs.path}>Indicateurs en temps réel</NavItem>
         )}
         <NavItem to={NAVIGATION_PAGES.ComprendreLesDonnees.path}>{NAVIGATION_PAGES.ComprendreLesDonnees.title}</NavItem>
         <NavItem to={NAVIGATION_PAGES.JournalDesEvolutions.path}>{NAVIGATION_PAGES.JournalDesEvolutions.title}</NavItem>
