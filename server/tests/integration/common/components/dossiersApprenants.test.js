@@ -8,7 +8,7 @@ const {
   DUPLICATE_TYPE_CODES,
 } = require("../../../../src/common/constants/dossierApprenantConstants");
 const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { Formation } = require("../../../../src/common/domain/formation");
+const { Formation } = require("../../../../src/common/factory/formation");
 
 const isApproximatelyNow = (date) => {
   return Math.abs(differenceInMilliseconds(date, new Date())) < 50;
@@ -341,7 +341,7 @@ describe(__filename, () => {
       assert.notEqual(found.updated_at, null);
     });
 
-    it("Vérifie que nom_apprenant est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un nom_apprenant différent)", async () => {
+    it("Vérifie que nom_apprenant est un critère d'unicité (on crée un nouveau dossierApprenant quand un ajoute un autre statut identique mais avec un nom_apprenant différent)", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "SMITH";
@@ -378,7 +378,7 @@ describe(__filename, () => {
       assert.equal(found.updated_at, null);
     });
 
-    it("Vérifie que prenom_apprenant est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un prenom_apprenant différent)", async () => {
+    it("Vérifie que prenom_apprenant est un critère d'unicité (on crée un nouveau dossierApprenant quand un ajoute un autre statut identique mais avec un prenom_apprenant différent)", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "SMITH";
@@ -415,7 +415,7 @@ describe(__filename, () => {
       assert.equal(found.updated_at, null);
     });
 
-    it("Vérifie que date_de_naissance_apprenant est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec une date_de_naissance_apprenant différente)", async () => {
+    it("Vérifie que date_de_naissance_apprenant est un critère d'unicité (on crée un nouveau dossierApprenant quand un ajoute un autre statut identique mais avec une date_de_naissance_apprenant différente)", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "GRIEZMANN";
@@ -457,7 +457,7 @@ describe(__filename, () => {
       assert.equal(found.updated_at, null);
     });
 
-    it("Vérifie que formation_cfd est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un formation_cfd différent)", async () => {
+    it("Vérifie que formation_cfd est un critère d'unicité (on crée un nouveau dossierApprenant quand un ajoute un autre statut identique mais avec un formation_cfd différent)", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "SMITH";
@@ -494,7 +494,7 @@ describe(__filename, () => {
       assert.equal(found.updated_at, null);
     });
 
-    it("Vérifie que annee_scolaire est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un annee_scolaire différent)", async () => {
+    it("Vérifie que annee_scolaire est un critère d'unicité (on crée un nouveau dossierApprenant quand un ajoute un autre statut identique mais avec un annee_scolaire différent)", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "SMITH";
@@ -532,7 +532,7 @@ describe(__filename, () => {
       assert.equal(found.updated_at, null);
     });
 
-    it("Vérifie que uai_etablissement est un critère d'unicité (on crée un nouveau statut candidat quand un ajoute un autre statut identique mais avec un uai_etablissement différent)", async () => {
+    it("Vérifie que uai_etablissement est un critère d'unicité (on crée un nouveau dossierApprenant quand un ajoute un autre statut identique mais avec un uai_etablissement différent)", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "SMITH";
@@ -569,7 +569,7 @@ describe(__filename, () => {
       assert.equal(found.updated_at, null);
     });
 
-    it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une période différente", async () => {
+    it("Vérifie qu'on ne crée pas mais MAJ un dossierApprenant quand un ajoute un autre statut identique mais avec une période différente", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const samplePeriode = [2019, 2020];
@@ -604,7 +604,7 @@ describe(__filename, () => {
       assert.notEqual(found.updated_at, null);
     });
 
-    it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une année différente", async () => {
+    it("Vérifie qu'on ne crée pas mais MAJ un dossierApprenant quand un ajoute un autre statut identique mais avec une année différente", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "SMITH";
@@ -643,7 +643,7 @@ describe(__filename, () => {
       assert.notEqual(found.updated_at, null);
     });
 
-    it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec un siret_etablissement différent", async () => {
+    it("Vérifie qu'on ne crée pas mais MAJ un dossierApprenant quand un ajoute un autre statut identique mais avec un siret_etablissement différent", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "SMITH";
@@ -680,7 +680,7 @@ describe(__filename, () => {
       assert.equal(found.siret_etablissement, siret_etablissement2);
     });
 
-    it("Vérifie qu'on ne crée pas mais MAJ un statut candidat quand un ajoute un autre statut identique mais avec une différence sur les prénoms 2-3 / email", async () => {
+    it("Vérifie qu'on ne crée pas mais MAJ un dossierApprenant quand un ajoute un autre statut identique mais avec une différence sur les prénoms 2-3 / email", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       const sampleNom = "SMITH";
@@ -724,7 +724,7 @@ describe(__filename, () => {
     });
   });
 
-  describe("updateDossierApprenantCandidat", () => {
+  describe("updateDossierApprenant", () => {
     it("Vérifie qu'on ne peut pas update le champ prenom_apprenant", async () => {
       const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
@@ -832,11 +832,11 @@ describe(__filename, () => {
     it("Vérifie que historique_statut_apprenant reste inchangé lorsque le statut_apprenant et date_metier_mise_a_jour_statut fournis existent déjà", async () => {
       const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
-      const randomStatutCandidatProps = createRandomDossierApprenant({
+      const randomDossierApprenantProps = createRandomDossierApprenant({
         date_metier_mise_a_jour_statut: new Date("2022-04-01"),
         statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
       });
-      const createdStatut = await createDossierApprenant(randomStatutCandidatProps);
+      const createdStatut = await createDossierApprenant(randomDossierApprenantProps);
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, CODES_STATUT_APPRENANT.apprenti);
@@ -844,7 +844,7 @@ describe(__filename, () => {
 
       // Mise à jour du statut avec le même statut_apprenant
       await updateDossierApprenant(createdStatut._id, {
-        statut_apprenant: randomStatutCandidatProps.statut_apprenant,
+        statut_apprenant: randomDossierApprenantProps.statut_apprenant,
         date_metier_mise_a_jour_statut: new Date("2022-04-01"),
       });
 
@@ -856,11 +856,11 @@ describe(__filename, () => {
     it("Vérifie qu'on ajoute un élément à historique_statut_apprenant lorsque le statut_apprenant et date_metier_mise_a_jour_statut fournis n'existent pas", async () => {
       const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
-      const randomStatutCandidatProps = createRandomDossierApprenant({
+      const randomDossierApprenantProps = createRandomDossierApprenant({
         date_metier_mise_a_jour_statut: new Date("2022-04-01"),
         statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
       });
-      const createdStatut = await createDossierApprenant(randomStatutCandidatProps);
+      const createdStatut = await createDossierApprenant(randomDossierApprenantProps);
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, CODES_STATUT_APPRENANT.inscrit);
@@ -890,14 +890,14 @@ describe(__filename, () => {
     it("Vérifie qu'on update historique_statut_apprenant en supprimant les éléments d'historique postérieurs à la date_metier_mise_a_jour_statut envoyée", async () => {
       const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
-      const randomStatutCandidatProps = createRandomDossierApprenant({
+      const randomDossierApprenantProps = createRandomDossierApprenant({
         date_metier_mise_a_jour_statut: new Date(),
         statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
       });
-      const createdStatut = await createDossierApprenant(randomStatutCandidatProps);
+      const createdStatut = await createDossierApprenant(randomDossierApprenantProps);
       // update created statut to add an element with date_statut 90 days after now date
       await updateDossierApprenant(createdStatut._id, {
-        ...randomStatutCandidatProps,
+        ...randomDossierApprenantProps,
         date_metier_mise_a_jour_statut: addDays(new Date(), 90),
         statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
       });
@@ -912,7 +912,7 @@ describe(__filename, () => {
         statut_apprenant: CODES_STATUT_APPRENANT.abandon,
         date_metier_mise_a_jour_statut: new Date(),
       };
-      await updateDossierApprenant(createdStatut._id, { ...randomStatutCandidatProps, ...updatePayload });
+      await updateDossierApprenant(createdStatut._id, { ...randomDossierApprenantProps, ...updatePayload });
 
       // historique should contain the new element and the one date with a later date should be removed
       const found2 = await DossierApprenantModel.findById(createdStatut._id);
@@ -947,7 +947,7 @@ describe(__filename, () => {
   });
 
   describe("createDossierApprenant", () => {
-    it("Vérifie la création d'un statut candidat randomisé", async () => {
+    it("Vérifie la création d'un dossierApprenant randomisé", async () => {
       const { createDossierApprenant } = await dossiersApprenants();
 
       const randomStatut = createRandomDossierApprenant();
@@ -1087,7 +1087,7 @@ describe(__filename, () => {
   });
 
   describe("getDuplicatesList", () => {
-    it("Vérifie la récupération des doublons de statuts candidats", async () => {
+    it("Vérifie la récupération des doublons de dossiersApprenants", async () => {
       const { createDossierApprenant, getDuplicatesList } = await dossiersApprenants();
 
       // Create 10 random statuts
@@ -1117,7 +1117,7 @@ describe(__filename, () => {
       assert.deepEqual(duplicatesListFound[0].commonData, commonData);
     });
 
-    it("Vérifie la récupération de statuts candidats ayant le même nom_apprenant, uai_etablissement, formation_cfd", async () => {
+    it("Vérifie la récupération de dossiersApprenants ayant le même nom_apprenant, uai_etablissement, formation_cfd", async () => {
       const { createDossierApprenant, getDuplicatesList } = await dossiersApprenants();
 
       // Create 10 random statuts
@@ -1147,7 +1147,7 @@ describe(__filename, () => {
       assert.deepEqual(duplicatesListFound[0].discriminants.prenom_apprenants.length, 4);
     });
 
-    it("Vérifie la récupération des doublons de statuts candidats n'ayant jamais eu d'update", async () => {
+    it("Vérifie la récupération des doublons de dossiersApprenants n'ayant jamais eu d'update", async () => {
       const { createDossierApprenant, addOrUpdateDossiersApprenants, getDuplicatesList } = await dossiersApprenants();
 
       // Create 10 random statuts

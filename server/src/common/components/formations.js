@@ -3,7 +3,7 @@ const { validateCfd } = require("../domain/cfd");
 const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
 const { getMetiersByCfd } = require("../apis/apiLba");
 
-const { Formation } = require("../domain/formation");
+const { Formation } = require("../factory/formation");
 const { escapeRegExp } = require("../utils/regexUtils");
 
 const SEARCH_RESULTS_LIMIT = 50;

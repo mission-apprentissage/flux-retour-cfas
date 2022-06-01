@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
 const { FormationModel, DossierApprenantModel } = require("../../../src/common/model");
-const { Formation } = require("../../../src/common/domain/formation");
+const { Formation } = require("../../../src/common/factory/formation");
 const { createRandomDossierApprenant } = require("../../data/randomizedSample");
 
 describe(__filename, () => {

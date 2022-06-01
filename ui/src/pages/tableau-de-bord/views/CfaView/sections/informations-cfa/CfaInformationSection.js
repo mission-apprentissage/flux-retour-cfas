@@ -12,16 +12,15 @@ const ReseauxAndAdresseText = ({ reseaux, adresse, multipleSirets, nbEtablisseme
   const hasReseaux = reseaux?.length > 0;
   const getOrganismeReseauxAndAdresseText = () => {
     if (hasReseaux) {
-      if (adresse) {
-        return (
-          <>
-            Cet organisme fait partie du réseau <strong>{reseaux[0]}</strong>. Sa domiciliation est {adresse}.
-          </>
-        );
-      }
       return (
         <>
-          Cet organisme fait partie du réseau <b>{reseaux[0]}</b>.
+          Cet organisme fait partie du réseau <strong>{reseaux[0]}</strong>{" "}
+          {reseaux.slice(1, reseaux.length)?.map((item) => (
+            <>
+              et du réseau <strong>{item}</strong>
+            </>
+          ))}
+          . {adresse ? `Sa domiciliation est ${adresse}.` : ""}
         </>
       );
     } else {
@@ -118,7 +117,7 @@ CfaInformationSection.propTypes = {
   infosCfa: infosCfaPropType,
   loading: PropTypes.bool,
   error: PropTypes.object,
-  isUserCfa: PropTypes.bool.isRequired,
+  isUserCfa: PropTypes.bool,
 };
 
 export default CfaInformationSection;

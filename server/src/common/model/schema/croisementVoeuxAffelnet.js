@@ -39,6 +39,6 @@ module.exports = new Schema({
   },
   annee_scolaire: {
     type: String,
-    description: 'Année scolaire sur laquelle le statut candidat est enregistré (ex: "2020-2021")',
+    description: 'Année scolaire sur laquelle le dossierApprenant est enregistré (ex: "2020-2021")',
   },
 });

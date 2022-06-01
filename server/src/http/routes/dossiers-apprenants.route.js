@@ -13,7 +13,7 @@ const { findAndPaginate } = require("../../common/utils/dbUtils");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
 
-const POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH = 100;
+const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
 module.exports = ({ dossiersApprenants, userEvents, db }) => {
   const router = express.Router();
@@ -74,12 +74,28 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     annee_scolaire: Joi.string().allow(null, ""),
   };
 
+  const buildPrettyValidationError = (joiError) => {
+    return {
+      dossierApprenantId: {
+        nom_apprenant: joiError._original.nom_apprenant,
+        prenom_apprenant: joiError._original.prenom_apprenant,
+        date_de_naissance_apprenant: joiError._original.date_de_naissance_apprenant,
+        formation_cfd: joiError._original.id_formation,
+        uai_etablissement: joiError._original.uai_etablissement,
+        annee_scolaire: joiError._original.annee_scolaire,
+      },
+      errors: joiError.details.map(({ message, path }) => {
+        return { message, path: JSON.stringify(path) };
+      }),
+    };
+  };
+
   /**
    * Route post for DossierApprenant
    */
   router.post(
     "/",
-    validateRequestBody(Joi.array().max(POST_STATUTS_CANDIDATS_MAX_INPUT_LENGTH)),
+    validateRequestBody(Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)),
     tryCatch(async (req, res) => {
       try {
         let nbItemsValid = 0;
@@ -95,18 +111,21 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
         });
 
         // Validate items one by one
-        await asyncForEach(req.body, (currentDossierApprenant, index) => {
+        await asyncForEach(req.body, async (currentDossierApprenant, index) => {
           const dossierApprenantValidation = dossierApprenantItemSchema.validate(currentDossierApprenant, {
             stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
             abortEarly: false, // make sure every invalid field will be communicated to the caller
           });
 
           if (dossierApprenantValidation.error) {
-            validationErrors.push(dossierApprenantValidation.error);
-            logger.warn(
-              `Could not validate item from ${req.user.username} at index ${index}`,
-              dossierApprenantValidation.error
-            );
+            const prettyValidationError = buildPrettyValidationError(dossierApprenantValidation.error);
+            validationErrors.push(prettyValidationError);
+            await db.collection("dossiersApprenantsApiErrors").insert({
+              erp: req.user.username,
+              created_at: new Date(),
+              ...prettyValidationError,
+            });
+            logger.warn(`Could not validate item from ${req.user.username} at index ${index}`, prettyValidationError);
           } else {
             nbItemsValid++;
             // Build toAddOrUpdateList list
@@ -126,14 +145,14 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
         await dossiersApprenants.addOrUpdateDossiersApprenants(validDossiersApprenantToAddOrUpdate);
 
         res.json({
-          status: validationErrors.length > 0 ? `ERROR` : "OK",
-          message: validationErrors.length > 0 ? `Error : ${validationErrors.length} items not valid` : "Success",
+          status: validationErrors.length > 0 ? `WARNING` : "OK",
+          message: validationErrors.length > 0 ? `Warning : ${validationErrors.length} items not valid` : "Success",
           ok: nbItemsValid,
           ko: validationErrors.length,
           validationErrors,
         });
       } catch (err) {
-        logger.error("POST StatutCandidat error : " + err);
+        logger.error("POST /dossiers-apprenants error : " + err);
         res.status(400).json({
           status: "ERROR",
           message: err.message,

@@ -19,7 +19,7 @@ const Count = ({ count, label }) => {
 };
 
 Count.propTypes = {
-  count: PropTypes.string.isRequired,
+  count: PropTypes.number.isRequired,
   label: PropTypes.string.isRequired,
 };
 

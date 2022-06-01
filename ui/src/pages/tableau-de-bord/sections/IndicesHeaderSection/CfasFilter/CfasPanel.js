@@ -39,7 +39,7 @@ const CfaPanel = ({ value, onCfaClick, filters }) => {
       <SearchInput
         value={searchTerm}
         onChange={setSearchTerm}
-        placeholder="Rechercher le nom d'un organisme de formation ou son UAI"
+        placeholder="Rechercher le nom d'un organisme de formation, son UAI ou son SIRET"
       />
       {searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH && (
         <Box paddingLeft="1w" paddingTop="3v">

@@ -31,12 +31,6 @@ const LoginModal = ({ isOpen, onClose }) => {
 LoginModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  history: PropTypes.shape({
-    location: PropTypes.shape({
-      search: PropTypes.string,
-    }).isRequired,
-    push: PropTypes.func.isRequired,
-  }).isRequired,
 };
 
 export default LoginModal;

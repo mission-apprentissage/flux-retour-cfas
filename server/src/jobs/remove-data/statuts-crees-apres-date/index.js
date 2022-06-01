@@ -15,5 +15,5 @@ runScript(async () => {
 
   logger.info("Suppression des données créées après", date.toISOString(), "...");
   const result = await DossierApprenantModel.deleteMany({ created_at: { $gte: date } });
-  logger.info(result.deletedCount, "statuts candidats supprimés avec succès");
-}, "suppression-statuts-candidats-apres-date");
+  logger.info(result.deletedCount, "dossiersApprenants supprimés avec succès");
+}, "suppression-dossiersApprenants-apres-date");

@@ -1,7 +1,7 @@
 const { getDepartementCodeFromUai, validateUai } = require("../domain/uai");
 const { DossierApprenantModel, CfaAnnuaireModel, CfaModel } = require("../model");
 const { escapeRegExp } = require("../utils/regexUtils");
-const { Cfa } = require("../domain/cfa");
+const { Cfa } = require("../factory/cfa");
 
 module.exports = () => ({
   createCfa,

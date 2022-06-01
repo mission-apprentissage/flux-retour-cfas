@@ -9,14 +9,16 @@ const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Ce script permet de récupérer les RNCP pour les statuts n'en ayant pas ; le code RNCP est retrouvé via le CFD dans les TCO
+ * Ce script permet de récupérer les RNCP pour les dossiersApprenants n'en ayant pas ; le code RNCP est retrouvé via le CFD dans les TCO
  */
 runScript(async ({ db }) => {
   const allValidCfds = await db.collection("dossiersApprenants").distinct("formation_cfd", {
     formation_rncp: null,
   });
 
-  logger.info(`${allValidCfds.length} valid CFD found for statuts without RNCP. Will search for RNCP in TCO...`);
+  logger.info(
+    `${allValidCfds.length} valid CFD found for dossiersApprenants without RNCP. Will search for RNCP in TCO...`
+  );
   loadingBar.start(allValidCfds.length, 0);
 
   let matchedCfdCount = 0;
@@ -45,5 +47,5 @@ runScript(async ({ db }) => {
   });
   loadingBar.stop();
   logger.info(`${matchedCfdCount} RNCP found for ${allValidCfds.length} valid CFDs`);
-  logger.info(`${updatedDossiersApprenantsCount} statuts candidats updated with RNCP found in TCO`);
+  logger.info(`${updatedDossiersApprenantsCount} dossiersApprenants updated with RNCP found in TCO`);
 }, JOB_NAMES.retrieveRncp);

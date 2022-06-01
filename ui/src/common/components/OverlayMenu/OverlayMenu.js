@@ -32,6 +32,7 @@ const OverlayMenu = ({ onClose, children }) => {
       <Box
         position="absolute"
         background="white"
+        overflow="auto"
         left="15w"
         right="15w"
         marginTop="2w"

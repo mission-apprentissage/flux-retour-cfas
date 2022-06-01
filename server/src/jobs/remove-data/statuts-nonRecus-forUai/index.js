@@ -24,9 +24,9 @@ runScript(async () => {
 
   logger.info(`Suppression des données pour l'UAI ${uai} non recues depuis ${date.toISOString()}...`);
   const result = await DossierApprenantModel.deleteMany({
-    annee_scolaire: "2021-2022",
+    annee_scolaire: { $in: ["2021-2021", "2021-2022", "2022-2022"] },
     uai_etablissement: uai,
     updated_at: { $lte: date },
   });
-  logger.info(`${result.deletedCount} statuts candidats supprimés avec succès pour l'UAI ${uai}`);
-}, "suppression-statuts-candidats-apres-date");
+  logger.info(`${result.deletedCount} dossiersApprenants supprimés avec succès pour l'UAI ${uai}`);
+}, "suppression-dossiersApprenants-apres-date");

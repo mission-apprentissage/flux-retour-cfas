@@ -1,4 +1,4 @@
-import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Divider, Flex, Heading, Text } from "@chakra-ui/react";
 import React from "react";
 
 import { BreadcrumbNav, Page, Section } from "../../../common/components";
@@ -19,12 +19,12 @@ const CommentTransmettreVosDonneesPage = () => {
         />
       </Section>
       <Section paddingTop="5w" marginBottom="10w">
-        <HStack spacing="10w">
-          <Box width="25%">
+        <Flex>
+          <Box width="25%" marginRight="5w">
             <OrganismeFormationPagesMenu />
           </Box>
-          <Divider height="250px" orientation="vertical" marginLeft="5w" />
-          <Box>
+          <Divider height="250px" orientation="vertical" marginX="5w" />
+          <Box marginLeft="5w">
             <Section color="grey.800" fontSize="gamma">
               <Heading as="h1" fontSize="alpha">
                 {NAVIGATION_PAGES.OrganismeFormation.transmettre.title}
@@ -37,7 +37,7 @@ const CommentTransmettreVosDonneesPage = () => {
               </Box>
             </Section>
           </Box>
-        </HStack>
+        </Flex>
       </Section>
     </Page>
   );

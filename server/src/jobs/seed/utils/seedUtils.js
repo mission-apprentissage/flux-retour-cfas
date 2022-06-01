@@ -6,8 +6,8 @@ const seedSample = async (dossiersApprenants) => {
   await dossiersApprenants.addOrUpdateDossiersApprenants(fullSampleWithUpdates);
 };
 
-const seedRandomizedSample = async (dossiersApprenants) => {
-  await dossiersApprenants.addOrUpdateDossiersApprenants(createRandomDossierApprenantList());
+const seedRandomizedSample = async (dossiersApprenants, nbStatuts = 10) => {
+  await dossiersApprenants.addOrUpdateDossiersApprenants(createRandomDossierApprenantList(nbStatuts));
 };
 
 const seedRandomizedSampleWithStatut = async (dossiersApprenants, nbStatuts, statutValue) => {
