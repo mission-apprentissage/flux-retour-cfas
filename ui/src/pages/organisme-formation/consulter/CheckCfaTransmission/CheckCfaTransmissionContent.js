@@ -20,16 +20,7 @@ const CheckCfaTransmissionContent = () => {
         />
       )}
       {formState !== ASKURL_FORM_STATE.askOrganisme && (
-        <Link
-          _hover={{ textDecoration: "none", borderBottom: "2px" }}
-          color="bluefrance"
-          fontSize="epsilon"
-          borderBottom="1px solid"
-          borderColor="bluefrance"
-          width="23%"
-          marginTop="2w"
-          onClick={() => setFormState(ASKURL_FORM_STATE.askOrganisme)}
-        >
+        <Link variant="underline" marginTop="2w" onClick={() => setFormState(ASKURL_FORM_STATE.askOrganisme)}>
           <Box as="i" className="ri-arrow-left-line" marginRight="3v" />
           Retour
         </Link>
