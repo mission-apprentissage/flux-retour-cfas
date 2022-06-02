@@ -27,7 +27,7 @@ module.exports = ({ db, jobEvents }) => {
 
       if (!(await jobEvents.isJobInAction(JOB_NAMES.createEffectifsApprenantsCollection, jobEventStatuts.ended))) {
         // Job RCO not ended, no data should be get
-        res.status(501).json({
+        res.status(503).json({
           status: "ERROR",
           message: "Les données ne sont pas disponibles, merci de renvoyer une requête dans quelques instants",
         });

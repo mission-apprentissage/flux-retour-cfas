@@ -6,7 +6,6 @@ const noop = () => {};
 
 const SecondarySelectButton = ({
   children,
-  icon,
   onClick,
   isActive = false,
   isClearable = false,
@@ -21,16 +20,13 @@ const SecondarySelectButton = ({
     : {};
   return (
     <Button variant="select-secondary" onClick={onClick} isActive={isActive} {...style}>
-      {icon && (
-        <Box fontSize="epsilon" as="i" className={icon} marginRight="1v" paddingTop="2px" verticalAlign="middle" />
-      )}
       <Box as="span" verticalAlign="middle" textOverflow="ellipsis" maxWidth="600px" overflow="hidden">
         {children}
       </Box>
       <Box
         fontSize="epsilon"
         as="i"
-        className="ri-arrow-down-s-line"
+        className={isActive ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}
         marginLeft="1v"
         paddingTop="2px"
         verticalAlign="middle"
@@ -70,7 +66,6 @@ SecondarySelectButton.propTypes = {
   children: PropTypes.node.isRequired,
   isClearable: PropTypes.bool,
   isActive: PropTypes.bool,
-  icon: PropTypes.string,
   onClick: PropTypes.func.isRequired,
   clearIconOnClick: PropTypes.func,
 };

@@ -48,7 +48,7 @@ module.exports = {
 
       await ensureOutputDirExists();
       const components = await createComponents();
-      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.started, created_at: new Date() }).save();
+      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.started, date: new Date() }).save();
       await job(components);
 
       const endDate = new Date();
@@ -65,7 +65,7 @@ module.exports = {
     } catch (e) {
       await exit(e);
     } finally {
-      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.ended, created_at: new Date() }).save();
+      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() }).save();
     }
   },
 };

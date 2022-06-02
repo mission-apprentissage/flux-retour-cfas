@@ -7,6 +7,10 @@ export const NAVIGATION_PAGES = {
     path: "/",
     title: "Accueil",
   },
+  NotFound404: {
+    path: "/404",
+    title: "Page non trouvée",
+  },
   DemandeAcces: {
     path: "/demande-acces",
     title: "Demande d'acces",
@@ -43,6 +47,26 @@ export const NAVIGATION_PAGES = {
     path: "/explorer-les-indicateurs",
     title: "Visualiser les indicateurs en temps réel",
   },
+  VisualiserLesIndicateurs: {
+    path: "/visualiser-les-indicateurs",
+    title: "Visualiser les indicateurs en temps réel",
+  },
+  VisualiserLesIndicateursParTerritoire: {
+    path: "/visualiser-les-indicateurs/par-territoire",
+    title: "Vue territoriale",
+  },
+  VisualiserLesIndicateursParReseau: {
+    path: "/visualiser-les-indicateurs/par-reseau",
+    title: "Vue par réseau",
+  },
+  VisualiserLesIndicateursParOrganisme: {
+    path: "/visualiser-les-indicateurs/par-organisme",
+    title: "Vue par organisme de formation",
+  },
+  VisualiserLesIndicateursParFormation: {
+    path: "/visualiser-les-indicateurs/par-formation",
+    title: "Vue par formation",
+  },
   Statistiques: {
     path: "/statistiques",
     title: "Statistiques",
@@ -59,10 +83,6 @@ export const NAVIGATION_PAGES = {
   Cfa: {
     path: "/cfa",
     title: "Cfa",
-  },
-  TableauDeBord: {
-    path: "/tableau-de-bord",
-    title: "Tableau de bord",
   },
   ModifierMotDePasse: {
     path: "/modifier-mot-de-passe",

@@ -10,6 +10,7 @@ const {
 } = require("../../data/randomizedSample");
 const { cfdRegex } = require("../../../src/common/domain/cfd");
 const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
+const { siretRegex } = require("../../../src/common/domain/siret");
 
 const user = {
   name: "userApi",
@@ -411,6 +412,34 @@ describe(__filename, () => {
       assert.equal(
         response.data.validationErrors[0].errors[0].message.includes(
           `"id_formation" with value "${badCfd}" fails to match the required pattern: ${cfdRegex}`
+        ),
+        true
+      );
+      assert.equal(await DossierApprenantModel.countDocuments({}), 0);
+    });
+
+    it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec mauvais siret", async () => {
+      const { httpClient } = await startServer();
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
+
+      const badSiret = "abc123456";
+
+      // Generate random data with bad siret
+      const simpleStatutWithBadSiret = { ...createRandomDossierApprenantApiInput(), siret_etablissement: badSiret };
+
+      const response = await httpClient.post("/api/dossiers-apprenants", [simpleStatutWithBadSiret], {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // check response & validation errors
+      assert.equal(response.data.status, "WARNING");
+      assert.equal(response.data.validationErrors.length, 1);
+      assert.equal(
+        response.data.validationErrors[0].errors[0].message.includes(
+          `"siret_etablissement" with value "${badSiret}" fails to match the required pattern: ${siretRegex}`
         ),
         true
       );

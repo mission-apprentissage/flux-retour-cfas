@@ -31,7 +31,7 @@ const DownloadButton = ({ children, getFile, fileName }) => {
       {!isLoading && (
         <Box
           fontSize="delta"
-          marginLeft="1v"
+          marginLeft="1w"
           as="i"
           className="ri-download-line"
           verticalAlign="middle"

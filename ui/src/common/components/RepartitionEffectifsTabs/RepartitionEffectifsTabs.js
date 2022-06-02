@@ -1,28 +1,20 @@
-import { Box, Flex } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { Tab, TabList, TabPanels, Tabs } from "@chakra-ui/tabs";
 import PropTypes from "prop-types";
-import React, { useState } from "react";
-
-import ExportRepartitionByFormationButton from "../ExportRepartitionByFormationButton/ExportRepartitionByFormationButton";
-import ExportRepartitionByOrganismeButton from "../ExportRepartitionByOrganismeButton/ExportRepartitionByOrganismeButton";
+import React from "react";
 
 const RepartitionEffectifsTabs = ({ children }) => {
-  const [tabIndex, setTabIndex] = useState(0);
-
   return (
-    <Tabs isLazy lazyBehavior="keepMounted" onChange={setTabIndex}>
+    <Tabs isLazy lazyBehavior="keepMounted">
       <TabList>
         <Tab>
           <Box as="i" className="ri-community-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
-          Organismes de formation
+          Répartition par organismes de formation
         </Tab>
         <Tab>
           <Box as="i" className="ri-book-mark-fill" marginRight="1v" paddingTop="2px" verticalAlign="middle" />
-          Formations
+          Répartition par formations
         </Tab>
-        <Flex justifyContent="flex-end" flex="1">
-          {tabIndex === 0 ? <ExportRepartitionByOrganismeButton /> : <ExportRepartitionByFormationButton />}
-        </Flex>
       </TabList>
       <TabPanels>{children}</TabPanels>
     </Tabs>
