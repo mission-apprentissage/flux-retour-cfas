@@ -30,13 +30,15 @@ const FormationsList = ({ formations, onFormationClick, selectedValue }) => {
                 borderLeft={isRowSelected ? "solid 2px" : "none"}
                 key={formation.cfd}
               >
-                <Td>{formation.libelle}</Td>
+                <Td maxWidth="550px" overflow="scroll">
+                  {formation.libelle || "N/A"}
+                </Td>
                 <Td>{formation.cfd}</Td>
                 <Td>{formation.rncp}</Td>
                 {cfdStartDate && cfdEndDate ? (
                   <Td>{`Du ${cfdStartDate} au ${cfdEndDate}`}</Td>
                 ) : (
-                  <Td fontStyle="italic">non-renseigné</Td>
+                  <Td fontStyle="italic">N/A</Td>
                 )}
               </Tr>
             );
