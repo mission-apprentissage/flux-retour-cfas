@@ -1,16 +1,10 @@
 const XLSX = require("xlsx");
 const path = require("path");
-// eslint-disable-next-line node/no-missing-require
-const parse = require("csv-parse/sync");
-const fs = require("fs");
-const iconvlite = require("iconv-lite");
+const csvToJson = require("convert-csv-to-json");
 
-const readFile = (fileInputName, encoding) => {
-  const content = fs.readFileSync(fileInputName);
-  return iconvlite.decode(content, encoding).toString();
-};
-const readJsonFromCsvFile = (fileInputName, encoding = "utf8", delimiter = ";") => {
-  return parse(readFile(fileInputName, encoding), { columns: true, delimiter, relax: true });
+const readJsonFromCsvFile = (fileInputName, delimiter = ";") => {
+  csvToJson.fieldDelimiter(delimiter);
+  return csvToJson.getJsonFromCsv(fileInputName);
 };
 
 module.exports.readJsonFromCsvFile = readJsonFromCsvFile;

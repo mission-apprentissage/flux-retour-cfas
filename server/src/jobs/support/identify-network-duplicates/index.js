@@ -37,7 +37,7 @@ const identifyDuplicatesForNetwork = async (ovhStorage, { nomReseau, nomFichier 
   await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
 
   // Read data from CSV
-  const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath, "latin1");
+  const allCfasForNetwork = readJsonFromCsvFile(cfasReferenceFilePath);
 
   // Gets the group with same siret
   const cfasMultiSiret = getCfasWithSameSiret(allCfasForNetwork);
