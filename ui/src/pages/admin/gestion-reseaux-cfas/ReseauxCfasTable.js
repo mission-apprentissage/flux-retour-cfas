@@ -1,15 +1,14 @@
 import { Button, Tbody, Td, Tr, useToast } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 import React from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 
-import { deleteReseauCfa, fetchReseauxCfas } from "../../../common/api/tableauDeBord";
+import { deleteReseauCfa } from "../../../common/api/tableauDeBord";
 import { Table } from "../../../common/components";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 
-const ReseauxCfasTable = () => {
+const ReseauxCfasTable = ({ reseauxCfas }) => {
   const toast = useToast();
-  const { data, isLoading } = useQuery([QUERY_KEYS.RESEAUX_CFAS], () => fetchReseauxCfas());
-  const reseauxCfasList = data;
 
   const queryClient = useQueryClient();
   const deleteReseauxCfas = useMutation(
@@ -22,15 +21,16 @@ const ReseauxCfasTable = () => {
       },
     }
   );
+
   return (
-    <Table headers={["Réseau", "Nom du CFA", "UAI", ""]} loading={isLoading}>
+    <Table headers={["Réseau", "Nom du CFA", "UAI", ""]}>
       <Tbody>
-        {reseauxCfasList?.map(({ id, nom_reseau, nom_etablissement, uai }) => {
+        {reseauxCfas?.map(({ id, nom_reseau, nom_etablissement, uai_etablissement }) => {
           return (
             <Tr key={id}>
               <Td color="bluefrance">{nom_reseau}</Td>
               <Td color="grey.800">{nom_etablissement}</Td>
-              <Td color="grey.800">{uai}</Td>
+              <Td color="grey.800">{uai_etablissement}</Td>
               <Td color="grey.800">
                 <Button
                   variant="secondary"
@@ -53,6 +53,10 @@ const ReseauxCfasTable = () => {
       </Tbody>
     </Table>
   );
+};
+
+ReseauxCfasTable.propTypes = {
+  reseauxCfas: PropTypes.array,
 };
 
 export default ReseauxCfasTable;
