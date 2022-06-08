@@ -1,9 +1,10 @@
-import { Box, Skeleton, Tbody, Text, VStack } from "@chakra-ui/react";
+import { Box, Tbody, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../../utils/dateUtils";
+import Loading from "../../Loading/Loading";
 import Table from "../Table";
 import EffectifBySiretRow from "./EffectifBySiretRow";
 
@@ -15,16 +16,7 @@ const RepartitionEffectifsParSiret = ({ effectifs, loading, error }) => {
     ? ["Nom de l'organisme", "apprentis", "inscrits sans contrat"]
     : ["Nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
 
-  if (loading) {
-    return (
-      <VStack spacing="2w">
-        <Skeleton width="100%" height="50px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="100%" height="50px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="100%" height="50px" startColor="grey.300" endColor="galt" />
-        <Skeleton width="100%" height="50px" startColor="grey.300" endColor="galt" />{" "}
-      </VStack>
-    );
-  }
+  if (loading) return <Loading />;
 
   if (error) {
     return (

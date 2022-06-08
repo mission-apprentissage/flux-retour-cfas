@@ -1,31 +1,13 @@
-import { Box, Button, Divider, Heading, Input, Skeleton, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Divider, Heading, Input, useDisclosure } from "@chakra-ui/react";
 import React, { useState } from "react";
 
 import { InputLegend, Page, Section } from "../../../common/components";
+import Loading from "../../../common/components/Loading/Loading";
+import NoResults from "../../../common/components/NoResults/NoResults";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import CreateReseauCfaModal from "./CreateReseauCfaModal";
 import ReseauxCfasTable from "./ReseauxCfasTable";
 import useReseauCfaSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useReseauCfaSearch";
-
-const Loading = () => {
-  return (
-    <Stack spacing="2w" paddingLeft="1w" marginTop="2w">
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-    </Stack>
-  );
-};
-
-const NoResults = () => {
-  return (
-    <Text color="grey.800" fontWeight="700" paddingTop="2w" paddingLeft="1w">
-      Il n&apos;y a aucun résultat pour votre recherche sur les reseaux CFAS
-    </Text>
-  );
-};
 
 const GestionReseauxCfasPage = () => {
   const createCfaModal = useDisclosure();
@@ -63,7 +45,9 @@ const GestionReseauxCfasPage = () => {
           </Box>
         )}
         {loading && <Loading />}
-        {searchTerm.length > 0 && searchResults?.length === 0 && <NoResults />}
+        {searchTerm.length > 0 && searchResults?.length === 0 && (
+          <NoResults title="Il n'y a aucun résultat pour votre recherche sur les reseaux CFAS" />
+        )}
         <ReseauxCfasTable reseauxCfas={searchResults} />
       </Section>
     </Page>

@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "@chakra-ui/react": "1.8.8",
+    "@choc-ui/paginator": "3.4.0",
     "@emotion/react": "11.9.0",
     "@emotion/styled": "11.8.1",
     "@nivo/bar": "0.74.0",
