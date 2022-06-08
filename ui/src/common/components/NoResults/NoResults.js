@@ -1,4 +1,5 @@
 import { Text } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 
 const NoResults = ({ title }) => {
   return (
@@ -6,6 +7,10 @@ const NoResults = ({ title }) => {
       {title}
     </Text>
   );
+};
+
+NoResults.propTypes = {
+  title: PropTypes.string.isRequired,
 };
 
 export default NoResults;
