@@ -4,12 +4,12 @@ const { startServer } = require("../../utils/testUtils");
 const { apiRoles } = require("../../../src/common/roles");
 const users = require("../../../src/common/components/users");
 const { ReseauCfaModel } = require("../../../src/common/model");
+const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
 const user = { name: "apiConsumerUser", password: "password" };
 
 const createApiUser = async () => {
   const { createUser } = await users();
-
   return await createUser({
     username: user.name,
     password: user.password,
@@ -49,6 +49,59 @@ describe(__filename, () => {
       assert.equal(response.data[1].uai, reseauCfa2.uai);
     });
   });
+
+  describe("POST /reseaux-cfas/search", () => {
+    it("sends a 200 HTTP empty response when no match", async () => {
+      const { httpClient } = await startServer();
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
+
+      const response = await httpClient.post(
+        "/api/reseaux-cfas/search",
+        {
+          searchTerm: "blabla",
+        },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, []);
+    });
+
+    it("sends a 200 HTTP response with results when match", async () => {
+      const { httpClient } = await startServer();
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
+
+      await new ReseauCfaModel({
+        nom_etablissement: "BTP CFA Somme",
+        nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
+        uai: "0801302F",
+        nom_reseau: "AGRI",
+      }).save();
+
+      const responseUai = await httpClient.post(
+        "/api/reseaux-cfas/search",
+        { searchTerm: "0801302F" },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      const responseNomEtablissement = await httpClient.post(
+        "/api/reseaux-cfas/search",
+        { searchTerm: "Somme" },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      assert.strictEqual(responseUai.status, 200);
+      assert.strictEqual(responseUai.data.length, 1);
+      assert.deepEqual(responseUai.data[0].nom_etablissement, "BTP CFA Somme");
+
+      assert.strictEqual(responseNomEtablissement.status, 200);
+      assert.strictEqual(responseNomEtablissement.data.length, 1);
+      assert.deepEqual(responseNomEtablissement.data[0].uai, "0801302F");
+    });
+  });
+
   describe("DELETE /reseaux-cfas/delete/:id", () => {
     it("Permet de supprimer un reseau de cfa", async () => {
       const { httpClient, components } = await startServer();
