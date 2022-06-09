@@ -1,7 +1,7 @@
-const faker = require("faker/locale/fr");
+const { faker } = require("@faker-js/faker/locale/fr");
 const RandExp = require("randexp");
 const sampleLibelles = require("./sampleLibelles.json");
-const { subYears, subMonths, addYears } = require("date-fns");
+const { subMonths, addYears } = require("date-fns");
 const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/dossierApprenantConstants");
 
 const isPresent = () => Math.random() < 0.66;
@@ -10,17 +10,17 @@ const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase()
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
 const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
 const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
-const getRandomStatutApprenant = () => faker.random.arrayElement(Object.values(CODES_STATUT_APPRENANT));
+const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
 const getRandomPeriodeFormation = (anneeScolaire) => {
   const yearToInclude = Number(anneeScolaire.slice(0, 4));
-  const startYear = faker.random.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
-  const endYear = startYear + faker.random.arrayElement([1, 2]);
+  const startYear = faker.helpers.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
+  const endYear = startYear + faker.helpers.arrayElement([1, 2]);
   return [startYear, endYear];
 };
-const getRandomAnneeFormation = () => faker.random.arrayElement([0, 1, 2, 3]);
+const getRandomAnneeFormation = () => faker.helpers.arrayElement([0, 1, 2, 3]);
 const getRandomAnneeScolaire = () => {
   const currentYear = new Date().getFullYear();
-  const anneeScolaire = faker.random.arrayElement([
+  const anneeScolaire = faker.helpers.arrayElement([
     [currentYear - 1, currentYear], // [2020, 2021]
     [currentYear, currentYear + 1], // [2021, 2022]
     [currentYear + 1, currentYear + 2], // [2022, 2023]
@@ -31,7 +31,7 @@ const getRandomDateDebutContrat = () => faker.date.between(subMonths(new Date(),
 const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
 const getRandomCoordonnates = () => `${faker.address.latitude()},${faker.address.longitude()}`;
-const getRandomDateNaissance = () => faker.date.between(subYears(new Date(), 18), subYears(new Date(), 25));
+const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
 const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
@@ -44,8 +44,10 @@ const createRandomDossierApprenant = (params = {}) => {
     email_contact: faker.internet.email(),
 
     formation_cfd: getRandomIdFormation(),
-    libelle_court_formation: faker.datatype.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
-    libelle_long_formation: faker.datatype.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
+    libelle_court_formation: faker.datatype.boolean()
+      ? faker.helpers.arrayElement(sampleLibelles).intitule_court
+      : null,
+    libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : null,
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
@@ -111,8 +113,10 @@ const createRandomDossierApprenantApiInput = (params = {}) => {
     email_contact: faker.internet.email(),
 
     id_formation: getRandomIdFormation(),
-    libelle_court_formation: faker.datatype.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_court : null,
-    libelle_long_formation: faker.datatype.boolean() ? faker.random.arrayElement(sampleLibelles).intitule_long : null,
+    libelle_court_formation: faker.datatype.boolean()
+      ? faker.helpers.arrayElement(sampleLibelles).intitule_court
+      : null,
+    libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : "",
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
