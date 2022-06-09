@@ -2,6 +2,7 @@ import { Box, Divider, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
 import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
+import FormationFilterMenu from "../../../../common/components/FormationFilter/FormationFilterMenu";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import { useFiltersContext } from "../FiltersContext";
@@ -26,23 +27,28 @@ const IndicateursVueFormationPage = () => {
           <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.title}</Heading>
           <SwitchViewButton />
         </HStack>
-        <HStack spacing="4w">
-          <FormationFilter
-            filters={filtersContext.state}
-            onFormationChange={filtersContext.setters.setFormation}
-            defaultIsOpen={!currentFormation}
-          />
-          <HStack spacing="3v">
-            <Box color="grey.800">Filtrer :</Box>
-            <TerritoireFilter
-              onDepartementChange={filtersContext.setters.setDepartement}
-              onRegionChange={filtersContext.setters.setRegion}
-              onTerritoireReset={filtersContext.setters.resetTerritoire}
-              filters={filtersContext.state}
-              variant="secondary"
-            />
+        {currentFormation ? (
+          <HStack spacing="4w">
+            <FormationFilter filters={filtersContext.state} onFormationChange={filtersContext.setters.setFormation} />
+            <HStack spacing="3v">
+              <Box color="grey.800">Filtrer :</Box>
+              <TerritoireFilter
+                onDepartementChange={filtersContext.setters.setDepartement}
+                onRegionChange={filtersContext.setters.setRegion}
+                onTerritoireReset={filtersContext.setters.resetTerritoire}
+                filters={filtersContext.state}
+                variant="secondary"
+              />
+            </HStack>
           </HStack>
-        </HStack>
+        ) : (
+          <Box marginY="3w" paddingX="8w" paddingY="6w" border="1px solid" borderColor="#E5E5E5">
+            <FormationFilterMenu
+              filters={filtersContext.state}
+              onFormationClick={filtersContext.setters.setFormation}
+            />
+          </Box>
+        )}
       </Section>
       <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
       {Boolean(currentFormation) && (

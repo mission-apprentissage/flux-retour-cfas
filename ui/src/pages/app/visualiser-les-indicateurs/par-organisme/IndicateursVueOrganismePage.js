@@ -1,8 +1,9 @@
-import { Divider, Heading, HStack } from "@chakra-ui/react";
+import { Box, Divider, Heading, HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { BreadcrumbNav, CfasFilter, Page, Section } from "../../../../common/components";
+import CfaPanel from "../../../../common/components/CfasFilter/CfasPanel";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
@@ -27,12 +28,17 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
           <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.title}</Heading>
           <SwitchViewButton />
         </HStack>
-        <CfasFilter
-          filters={filtersContext.state}
-          onCfaChange={filtersContext.setters.setCfa}
-          defaultIsOpen={!currentOrganisme}
-          defaultButtonLabel={organismeFilterLabel}
-        />
+        {currentOrganisme ? (
+          <CfasFilter
+            filters={filtersContext.state}
+            onCfaChange={filtersContext.setters.setCfa}
+            defaultButtonLabel={organismeFilterLabel}
+          />
+        ) : (
+          <Box marginY="3w" paddingX="8w" paddingY="6w" border="1px solid" borderColor="#E5E5E5">
+            <CfaPanel filters={filtersContext.state} onCfaClick={filtersContext.setters.setCfa} value={null} />
+          </Box>
+        )}
       </Section>
       <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
       {Boolean(currentOrganisme) && (

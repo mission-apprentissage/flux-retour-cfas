@@ -7,8 +7,8 @@ import PrimarySelectButton from "../SelectButton/PrimarySelectButton";
 import SecondarySelectButton from "../SelectButton/SecondarySelectButton";
 import FormationFilterMenu from "./FormationFilterMenu";
 
-const FormationFilter = ({ filters, onFormationChange, defaultIsOpen = false, variant = "primary" }) => {
-  const [isOpen, setIsOpen] = useState(defaultIsOpen);
+const FormationFilter = ({ filters, onFormationChange, variant = "primary" }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
   const onFormationClick = (formation) => {
     onFormationChange(formation);
@@ -46,7 +46,6 @@ const FormationFilter = ({ filters, onFormationChange, defaultIsOpen = false, va
 FormationFilter.propTypes = {
   onFormationChange: PropTypes.func.isRequired,
   filters: filtersPropTypes.state,
-  defaultIsOpen: PropTypes.bool,
   variant: PropTypes.oneOf(["primary", "secondary"]),
 };
 
