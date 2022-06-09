@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import { fetchCfa } from "../../../common/api/tableauDeBord";
 import { uaiRegex, validateUai } from "../../../common/domain/uai";
 
-const CreateReseauCfaForm = ({ onSubmit, networkList }) => {
+const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
   const { values, handleChange, setFieldValue, errors, handleSubmit } = useFormik({
     initialValues: {
       nom_reseau: "",
@@ -21,7 +21,7 @@ const CreateReseauCfaForm = ({ onSubmit, networkList }) => {
       uai: Yup.string().matches(uaiRegex, "UAI invalide").required("Requis"),
     }),
     onSubmit: ({ nom_reseau, nom_etablissement, uai }) => {
-      onSubmit({ nom_reseau: nom_reseau, nom_etablissement: nom_etablissement, uai: uai });
+      createReseauCfa({ nom_reseau, nom_etablissement, uai });
     },
   });
 
@@ -78,7 +78,7 @@ const CreateReseauCfaForm = ({ onSubmit, networkList }) => {
 
 CreateReseauCfaForm.propTypes = {
   networkList: PropTypes.array,
-  onSubmit: PropTypes.func.isRequired,
+  createReseauCfa: PropTypes.func.isRequired,
 };
 
 export default CreateReseauCfaForm;
