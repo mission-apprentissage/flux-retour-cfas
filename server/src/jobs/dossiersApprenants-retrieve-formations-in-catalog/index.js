@@ -5,6 +5,9 @@ const { DossierApprenantModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { getFormations } = require("../../common/apis/apiCatalogueMna");
+const { sleep } = require("../../common/utils/miscUtils");
+
+const CATALOGUE_API_REQUEST_DELAY = 150;
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -59,6 +62,7 @@ const retrieveFormationsInCatalog = async () => {
       );
     }
 
+    await sleep(CATALOGUE_API_REQUEST_DELAY);
     loadingBar.increment();
   });
 
