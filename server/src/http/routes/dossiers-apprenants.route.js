@@ -48,7 +48,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     ine_apprenant: Joi.string().allow(null, ""),
     id_erp_apprenant: Joi.string().allow(null),
     email_contact: Joi.string().allow(null, ""),
-    tel_apprenant: Joi.string().allow(null),
+    tel_apprenant: Joi.string().allow(null, ""),
     code_commune_insee_apprenant: Joi.string().allow(null),
 
     siret_etablissement: Joi.string().regex(siretRegex).allow(null, ""),

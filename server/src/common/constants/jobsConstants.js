@@ -15,6 +15,7 @@ const JOB_NAMES = {
   identifyUaisSiretsDuplicates: "identify-uais-sirets-duplicates",
   identifyNetworkDuplicates: "identify-network-duplicates",
   formationRetrieveFromCfd: "formation-retrieve-from-cfd",
+  dossiersApprenantsRecomputeSiretValidity: "dossiersApprenants-recompute-siret-validity",
   dossiersApprenantsRetrieveNetworks: "dossiersApprenants-retrieve-networks",
   dossiersApprenantsRetrieveNiveaux: "dossiersApprenants-retrieve-niveaux",
   dossiersApprenantsRetrieveSiretCatalog: "dossiersApprenants-retrieve-siret-catalog",

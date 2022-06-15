@@ -944,6 +944,56 @@ describe(__filename, () => {
       assert.notEqual(foundAfterSecondUpdate.periode_formation, createdStatut.periode_formation);
       assert.notEqual(foundAfterSecondUpdate.updated_at, foundAfterFirstUpdate.updated_at);
     });
+
+    it("Vérifie qu'une mise à jour de dossier avec un siret au mauvais format identifie bien le siret invalide", async () => {
+      const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
+
+      const goodSiret = "19251202800015";
+      const badSiret = "BADSIRET";
+
+      const createdStatut = await createDossierApprenant(
+        createRandomDossierApprenant({
+          siret_etablissement: goodSiret,
+        })
+      );
+      assert.equal(createdStatut.updated_at, null);
+      assert.equal(createdStatut.siret_etablissement, goodSiret);
+      assert.equal(createdStatut.siret_etablissement_valid, true);
+
+      // Update siret
+      await updateDossierApprenant(createdStatut._id, { siret_etablissement: badSiret });
+
+      // Check value in db
+      const foundAfterFirstUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      assert.equal(foundAfterFirstUpdate.siret_etablissement, badSiret);
+      assert.equal(foundAfterFirstUpdate.siret_etablissement_valid, false);
+      assert.notEqual(foundAfterFirstUpdate.updated_at, null);
+    });
+
+    it("Vérifie qu'une mise à jour de dossier avec un siret vide identifie bien le siret invalide", async () => {
+      const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
+
+      const goodSiret = "19251202800015";
+      const emptySiret = "";
+
+      const createdStatut = await createDossierApprenant(
+        createRandomDossierApprenant({
+          siret_etablissement: goodSiret,
+        })
+      );
+      assert.equal(createdStatut.updated_at, null);
+      assert.equal(createdStatut.siret_etablissement, goodSiret);
+      assert.equal(createdStatut.siret_etablissement_valid, true);
+
+      // Update siret
+      await updateDossierApprenant(createdStatut._id, { siret_etablissement: emptySiret });
+
+      // Check value in db
+      const foundAfterFirstUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      assert.equal(foundAfterFirstUpdate.siret_etablissement, emptySiret);
+      assert.equal(foundAfterFirstUpdate.siret_etablissement_valid, false);
+      assert.notEqual(foundAfterFirstUpdate.updated_at, null);
+    });
   });
 
   describe("createDossierApprenant", () => {

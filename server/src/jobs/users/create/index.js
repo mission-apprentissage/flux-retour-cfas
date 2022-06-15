@@ -1,6 +1,6 @@
 const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
-const { jobNames } = require("../../../common/constants/jobsConstants");
+const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const arg = require("arg");
 const { apiRoles, tdbRoles } = require("../../../common/roles");
 
@@ -36,7 +36,7 @@ runScript(async ({ users }) => {
   await users.createUser({ username, email, network, permissions: permissions });
 
   logger.info(`User ${username} successfully created with permissions ${JSON.stringify(permissions)}`);
-}, jobNames.createUser);
+}, JOB_NAMES.createUser);
 
 /**
  * Check if permission string is in api or tdb roles

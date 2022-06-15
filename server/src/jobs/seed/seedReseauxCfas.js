@@ -45,14 +45,14 @@ runScript(async ({ reseauxCfas, ovhStorage }) => {
  * @param {*} ovhStorage
  * @param {*} currentNetwork
  */
-const seedReseauxCfasFromNetwork = async (reseauxCfas, ovhStorage, { nomReseau, nomFichier, encoding }) => {
+const seedReseauxCfasFromNetwork = async (reseauxCfas, ovhStorage, { nomReseau, nomFichier }) => {
   logger.info(`Seeding reseauxCfas network for ${nomReseau}`);
   const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
   await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, { clearFile: true });
 
-  const allCfasForNetworkFile = readJsonFromCsvFile(cfasReferenceFilePath, encoding);
+  const allCfasForNetworkFile = readJsonFromCsvFile(cfasReferenceFilePath);
   loadingBar.start(allCfasForNetworkFile.length, 0);
 
   // Parse all cfas in file & create entry in collection

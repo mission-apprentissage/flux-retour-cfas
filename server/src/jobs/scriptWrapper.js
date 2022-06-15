@@ -1,26 +1,12 @@
 const { closeMongoConnection } = require("../common/mongodb");
 const createComponents = require("../common/components/components");
 const logger = require("../common/logger");
-const config = require("../../config");
-const { access, mkdir } = require("fs").promises;
 const { JobEventModel } = require("../common/model");
 const { formatDuration, intervalToDuration } = require("date-fns");
 const { jobEventStatuts } = require("../common/constants/jobsConstants");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
-
-const ensureOutputDirExists = async () => {
-  const outputDir = config.outputDir;
-  try {
-    await access(outputDir);
-  } catch (e) {
-    if (e.code !== "EEXIST") {
-      await mkdir(outputDir, { recursive: true });
-    }
-  }
-  return outputDir;
-};
 
 const exit = async (rawError) => {
   let error = rawError;
@@ -46,7 +32,6 @@ module.exports = {
     try {
       const startDate = new Date();
 
-      await ensureOutputDirExists();
       const components = await createComponents();
       await new JobEventModel({ jobname: jobName, action: jobEventStatuts.started, date: new Date() }).save();
       await job(components);

@@ -81,7 +81,7 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
 
   // strip unicity criteria because it does not make sense to update them
-  const updatePayload = omit(
+  let updatePayload = omit(
     toUpdate,
     "nom_apprenant",
     "prenom_apprenant",
@@ -91,6 +91,11 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
     "annee_scolaire"
   );
   const existingItem = await DossierApprenantModel.findById(existingItemId);
+
+  // handle siret update & siret_etablissement_valid update value
+  if (toUpdate?.siret_etablissement !== undefined) {
+    updatePayload = { ...updatePayload, siret_etablissement_valid: validateSiret(toUpdate.siret_etablissement) };
+  }
 
   // new statut_apprenant to add ?
   const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {

@@ -31,13 +31,21 @@ const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => 
   };
 
   return (
-    <Stack marginTop="2w">
-      <Text>Rechercher l&apos;organisme par UAI ou par SIRET :</Text>
+    <Stack>
+      <Text fontSize="epsilon">Rechercher l&apos;organisme par UAI ou par SIRET :</Text>
+      <Text fontSize="omega" color="grey.600">
+        Format valide d’une UAI : 7 chiffres et 1 lettre, et d’un SIRET : 14 chiffres
+      </Text>
       <Input
-        placeholder="Rechercher l'organisme par son UAI ou son SIRET"
+        marginTop="1w"
+        width="65%"
+        placeholder="Ex : 1234567A ou 34012780200000"
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+      <br />
       <Button
+        marginTop="4w"
+        width="15%"
         onClick={() => (validateUai(searchTerm) || validateSiret(searchTerm) ? checkOrganisme() : setIsValid(true))}
         variant="primary"
       >

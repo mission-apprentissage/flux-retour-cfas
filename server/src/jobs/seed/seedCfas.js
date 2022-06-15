@@ -12,17 +12,6 @@ const { getMetiersBySirets, API_DELAY_QUOTA } = require("../../common/apis/apiLb
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
-const CFAS_NETWORKS = [
-  RESEAUX_CFAS.CMA,
-  RESEAUX_CFAS.UIMM,
-  RESEAUX_CFAS.AGRI,
-  RESEAUX_CFAS.MFR,
-  RESEAUX_CFAS.CCI,
-  RESEAUX_CFAS.CFA_EC,
-  RESEAUX_CFAS.GRETA,
-  RESEAUX_CFAS.AFTRAL,
-];
-
 /**
  * Script qui initialise la collection CFAs
  */
@@ -36,8 +25,9 @@ runScript(async ({ cfas, db }) => {
   await seedCfasFromDossiersApprenantsUaisValid(cfas);
 
   // Set networks from reseauxCfas collection
-  await asyncForEach(CFAS_NETWORKS, async (currentNetwork) => {
-    await updateCfasNetworksFromReseauxCfas(currentNetwork);
+  const networksNames = Object.keys(RESEAUX_CFAS).map((id) => RESEAUX_CFAS[id].nomReseau);
+  await asyncForEach(networksNames, async (currentNetworkName) => {
+    await updateCfasNetworksFromReseauxCfas(currentNetworkName);
   });
 
   // Set metiers from LBA Api
@@ -143,19 +133,19 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
  * Update cfas network informations in collection
  * @param {*} param1
  */
-const updateCfasNetworksFromReseauxCfas = async ({ nomReseau }) => {
+const updateCfasNetworksFromReseauxCfas = async (nomReseau) => {
   logger.info(`Updating CFAs network for ${nomReseau}`);
 
   const allCfasForNetworkFile = await ReseauCfaModel.find({ nom_reseau: nomReseau }).lean();
   loadingBar.start(allCfasForNetworkFile.length, 0);
 
   // Parse all cfas in file
-  await asyncForEach(allCfasForNetworkFile, async (currentCfaInCsv) => {
+  await asyncForEach(allCfasForNetworkFile, async (currentCfa) => {
     loadingBar.increment();
 
-    if (currentCfaInCsv.uai) {
+    if (currentCfa.uai) {
       // Gets cfas for UAI in collection
-      const cfaForUai = await CfaModel.findOne({ uai: `${currentCfaInCsv.uai}` }).lean();
+      const cfaForUai = await CfaModel.findOne({ uai: `${currentCfa.uai}` }).lean();
 
       if (cfaForUai) {
         // Do not handle cfa in network AGRI and having GESTI as ERP
@@ -163,7 +153,7 @@ const updateCfasNetworksFromReseauxCfas = async ({ nomReseau }) => {
           return;
         }
         // Update cfa in collection
-        await updateCfaFromNetwork(cfaForUai, currentCfaInCsv, nomReseau);
+        await updateCfaFromNetwork(cfaForUai, currentCfa, nomReseau);
       }
     }
   });
