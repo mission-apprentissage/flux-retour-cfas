@@ -6,13 +6,8 @@ import OverlayMenu from "../OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "../SelectButton/PrimarySelectButton";
 import CfaPanel from "./CfasPanel";
 
-const CfasFilter = ({
-  onCfaChange,
-  filters,
-  defaultIsOpen = false,
-  defaultButtonLabel = "Sélectionner un organisme",
-}) => {
-  const [isOpen, setIsOpen] = useState(defaultIsOpen);
+const CfasFilter = ({ onCfaChange, filters, defaultButtonLabel = "Sélectionner un organisme" }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
   const onCfaClick = (cfa) => {
     onCfaChange(cfa);
@@ -39,7 +34,6 @@ const CfasFilter = ({
 CfasFilter.propTypes = {
   onCfaChange: PropTypes.func.isRequired,
   filters: filtersPropTypes.state,
-  defaultIsOpen: PropTypes.bool,
   defaultButtonLabel: PropTypes.string,
 };
 

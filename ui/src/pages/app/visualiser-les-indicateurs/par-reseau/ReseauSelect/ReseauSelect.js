@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { PrimarySelectButton } from "../../../../../common/components";
-import ReseauSelectOverlay from "./ReseauSelectOverlay";
+import { OverlayMenu, PrimarySelectButton } from "../../../../../common/components";
+import ReseauSelectPanel from "./ReseauSelectPanel";
 
-const ReseauSelect = ({ defaultIsOpen = false, onReseauChange, value }) => {
-  const [isOpen, setIsOpen] = useState(defaultIsOpen);
+const ReseauSelect = ({ onReseauChange, value }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
   const onReseauClick = (reseau) => {
     onReseauChange(reseau);
@@ -20,7 +20,11 @@ const ReseauSelect = ({ defaultIsOpen = false, onReseauChange, value }) => {
         {buttonLabel}
       </PrimarySelectButton>
 
-      {isOpen && <ReseauSelectOverlay value={value} onReseauClick={onReseauClick} onClose={() => setIsOpen(false)} />}
+      {isOpen && (
+        <OverlayMenu onClose={() => setIsOpen(false)}>
+          <ReseauSelectPanel value={value} onReseauClick={onReseauClick} onClose={() => setIsOpen(false)} />
+        </OverlayMenu>
+      )}
     </div>
   );
 };
@@ -31,7 +35,6 @@ ReseauSelect.propTypes = {
     nom: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
   }),
-  defaultIsOpen: PropTypes.bool,
 };
 
 export default ReseauSelect;

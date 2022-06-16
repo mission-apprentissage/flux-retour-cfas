@@ -34,7 +34,7 @@ const CfaPanel = ({ value, onCfaClick, filters }) => {
 
   return (
     <div>
-      <Heading as="h3" variant="h3" marginBottom="3w">
+      <Heading as="h3" variant="h3" marginBottom="3w" marginTop="2w">
         Sélectionner un organisme de formation
       </Heading>
       <SearchInput

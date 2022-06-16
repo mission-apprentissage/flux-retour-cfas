@@ -32,16 +32,16 @@ const SwitchViewButton = () => {
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
           <List spacing="2w" marginTop="1w" textAlign="left">
-            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.path}>
+            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.path} onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par territoire</FilterOption>
             </NavLink>
-            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path}>
+            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path} onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par réseau</FilterOption>
             </NavLink>
-            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path}>
+            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path} onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par organisme de formation</FilterOption>
             </NavLink>
-            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.path}>
+            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.path} onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par formation</FilterOption>
             </NavLink>
           </List>

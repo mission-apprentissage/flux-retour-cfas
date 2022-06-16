@@ -1,15 +1,18 @@
-import { List } from "@chakra-ui/react";
+import { Heading, List } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { FilterOption, OverlayMenu } from "../../../../../common/components";
+import { FilterOption } from "../../../../../common/components";
 import useReseauxData from "./useReseauxData";
 
-const ReseauSelectOverlay = ({ onClose, onReseauClick, value }) => {
+const ReseauSelectPanel = ({ onReseauClick, value }) => {
   const { data: reseaux } = useReseauxData();
 
   return (
-    <OverlayMenu onClose={onClose}>
+    <div>
+      <Heading as="h3" variant="h3" marginBottom="3w" marginTop="2w">
+        Sélectionner un réseau
+      </Heading>
       <List spacing="1v" marginTop="1w" textAlign="left" maxHeight="18rem" overflowY="scroll">
         {reseaux &&
           reseaux.map((reseau) => (
@@ -24,17 +27,16 @@ const ReseauSelectOverlay = ({ onClose, onReseauClick, value }) => {
             </FilterOption>
           ))}
       </List>
-    </OverlayMenu>
+    </div>
   );
 };
 
-ReseauSelectOverlay.propTypes = {
+ReseauSelectPanel.propTypes = {
   onReseauClick: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
   value: PropTypes.shape({
     id: PropTypes.string.isRequired,
     nom: PropTypes.string.isRequired,
   }),
 };
 
-export default ReseauSelectOverlay;
+export default ReseauSelectPanel;
