@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 
 import { fetchSearchCfas } from "../api/tableauDeBord";
+import { QUERY_KEYS } from "../constants/queryKeys";
 import { omitNullishValues } from "../utils/omitNullishValues";
 import useDebounce from "./useDebounce";
 
@@ -14,7 +15,11 @@ const useCfasSearch = (searchTerm) => {
     searchTerm: debouncedSearchTerm || null,
   });
 
-  const { data, isLoading } = useQuery(["search-cfas", requestFilters], () => fetchSearchCfas(requestFilters), {});
+  const { data, isLoading } = useQuery(
+    [QUERY_KEYS.SEARCH_CFAS, requestFilters],
+    () => fetchSearchCfas(requestFilters),
+    {}
+  );
 
   return { data, loading: isLoading };
 };

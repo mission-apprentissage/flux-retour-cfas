@@ -4,6 +4,7 @@ import { useQuery } from "react-query";
 
 import { fetchTotalOrganismes } from "../../../common/api/tableauDeBord";
 import { EffectifCard } from "../../../common/components";
+import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
 import { pick } from "../../../common/utils/pick";
 import { useFiltersContext } from "./FiltersContext";
@@ -16,7 +17,7 @@ const OrganismesCountCard = () => {
     "etablissement_reseaux",
     "formation_cfd",
   ]);
-  const { data, isLoading } = useQuery(["total-organismes", requestFilters], () =>
+  const { data, isLoading } = useQuery([QUERY_KEYS.TOTAL_ORGANISMES, requestFilters], () =>
     fetchTotalOrganismes(requestFilters)
   );
 

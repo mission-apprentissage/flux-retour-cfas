@@ -4,6 +4,7 @@ import { useQuery } from "react-query";
 
 import { fetchUsers } from "../../../common/api/tableauDeBord";
 import { Table } from "../../../common/components";
+import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 import { formatDate } from "../../../common/utils/dateUtils";
 import GetUpdatePasswordUrlButton from "./GetUpdatePasswordUrlButton";
 
@@ -20,7 +21,7 @@ const getUsersListSortedChronologically = (users) => {
 };
 
 const UsersTable = () => {
-  const { data, isLoading } = useQuery(["users"], () => fetchUsers());
+  const { data, isLoading } = useQuery([QUERY_KEYS.USERS], () => fetchUsers());
   const usersList = data && getUsersListSortedChronologically(data);
 
   return (
