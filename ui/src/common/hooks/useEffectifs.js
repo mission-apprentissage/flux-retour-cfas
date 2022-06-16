@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 
 import { useFiltersContext } from "../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifs } from "../api/tableauDeBord";
+import { QUERY_KEY } from "../constants/queryKey";
 
 const mapEffectifsData = (effectifsData) => {
   return {
@@ -23,7 +24,7 @@ const mapEffectifsData = (effectifsData) => {
 const useEffectifs = () => {
   const filtersContext = useFiltersContext();
 
-  const { status, data, error } = useQuery(["effectifs", filtersContext.state], () =>
+  const { status, data, error } = useQuery([QUERY_KEY.effectifs, filtersContext.state], () =>
     fetchEffectifs(filtersContext.state)
   );
 

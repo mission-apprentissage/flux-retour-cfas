@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 import { postCreateUser } from "../../../common/api/tableauDeBord";
 import ModalClosingButton from "../../../common/components/ModalClosingButton/ModalClosingButton";
+import { QUERY_KEY } from "../../../common/constants/queryKey";
 import CreateUserForm from "./CreateUserForm";
 
 const CreateUserModal = ({ isOpen, onClose }) => {
@@ -17,7 +18,7 @@ const CreateUserModal = ({ isOpen, onClose }) => {
       onSuccess() {
         // invalidate users query so react-query refetch the list for us
         // see https://react-query.tanstack.com/guides/query-invalidation#query-matching-with-invalidatequeries
-        queryClient.invalidateQueries(["users"]);
+        queryClient.invalidateQueries([QUERY_KEY.users]);
         onClose();
       },
     }

@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 
 import { fetchSearchFormations } from "../../api/tableauDeBord";
+import { QUERY_KEY } from "../../constants/queryKey";
 import useDebounce from "../../hooks/useDebounce";
 import { omitNullishValues } from "../../utils/omitNullishValues";
 
@@ -23,7 +24,7 @@ const useFormationSearch = (searchTerm, filters) => {
   });
 
   const { data, isLoading } = useQuery(
-    ["search-formations", requestFilters],
+    [QUERY_KEY.searchFormations, requestFilters],
     () => fetchSearchFormations(requestFilters),
     {
       enabled: searchEnabled,

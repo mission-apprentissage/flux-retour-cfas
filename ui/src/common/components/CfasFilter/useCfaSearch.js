@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 
 import { fetchSearchCfas } from "../../api/tableauDeBord";
+import { QUERY_KEY } from "../../constants/queryKey";
 import useDebounce from "../../hooks/useDebounce";
 import { omitNullishValues } from "../../utils/omitNullishValues";
 
@@ -22,7 +23,7 @@ const useCfaSearch = (searchTerm, filters) => {
     etablissement_reseaux: filters.reseau?.nom ?? null,
   });
 
-  const { data, isLoading } = useQuery(["search-cfas", requestFilters], () => fetchSearchCfas(requestFilters), {
+  const { data, isLoading } = useQuery([QUERY_KEY.searchCfas, requestFilters], () => fetchSearchCfas(requestFilters), {
     enabled: searchEnabled,
   });
 

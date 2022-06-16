@@ -4,6 +4,7 @@ import { useQuery } from "react-query";
 
 import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsParFormation } from "../../../api/tableauDeBord";
+import { QUERY_KEY } from "../../../constants/queryKey";
 import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
 import { pick } from "../../../utils/pick";
 import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
@@ -23,7 +24,7 @@ const FormationRows = ({ niveauFormation }) => {
       "etablissement_num_departement",
     ]),
   };
-  const { data, isLoading } = useQuery(["effectifs-par-formation", requestFilters], () =>
+  const { data, isLoading } = useQuery([QUERY_KEY.effectifsPar.formation, requestFilters], () =>
     fetchEffectifsParFormation(requestFilters)
   );
 

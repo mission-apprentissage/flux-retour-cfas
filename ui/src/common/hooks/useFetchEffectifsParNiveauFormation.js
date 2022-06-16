@@ -1,11 +1,12 @@
 import { useQuery } from "react-query";
 
 import { fetchEffectifsParNiveauFormation } from "../../common/api/tableauDeBord";
+import { QUERY_KEY } from "../constants/queryKey";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 const useFetchEffectifsParNiveauFormation = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);
-  const { data, isLoading, error } = useQuery(["effectifs-par-niveau-formation", requestFilters], () =>
+  const { data, isLoading, error } = useQuery([QUERY_KEY.effectifsPar.niveauFormation, requestFilters], () =>
     fetchEffectifsParNiveauFormation(requestFilters)
   );
 

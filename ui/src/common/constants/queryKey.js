@@ -1,0 +1,21 @@
+export const QUERY_KEY = {
+  searchCfas: "search-cfas",
+  searchFormations: "search-formations",
+  effectifs: "effectifs",
+  cfas: "cfas",
+  departement: "departement",
+  regions: "regions",
+  reseaux: "reseaux",
+  reseauxCfas: "reseauxCfas",
+  users: "users",
+  totalOrganismes: "total-organismes",
+  formation: "formation",
+  effectifsPar: {
+    cfa: "effectifs-par-cfa",
+    anneeFormation: "effectifs-par-annee-formation",
+    departement: "effectifs-par-departement",
+    formation: "effectifs-par-formation",
+    niveauFormation: "effectifs-par-niveau-formation",
+    siret: "effectifs-par-siret",
+  },
+};
