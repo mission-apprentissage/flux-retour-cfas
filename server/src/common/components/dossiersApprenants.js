@@ -8,6 +8,7 @@ const { escapeRegExp } = require("../utils/regexUtils");
 const { isEqual } = require("date-fns");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 const { DossierApprenant } = require("../factory/dossierApprenant");
+const { faker } = require("@faker-js/faker/locale/fr");
 
 module.exports = () => ({
   getDossierApprenant,
@@ -15,6 +16,8 @@ module.exports = () => ({
   createDossierApprenant,
   updateDossierApprenant,
   getDuplicatesList,
+  anonymize,
+  ANONYMOUS_PREFIX,
 });
 
 /**
@@ -360,4 +363,26 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
       discriminants,
     };
   });
+};
+
+const ANONYMOUS_PREFIX = "ANONYME";
+
+/**
+ * Anonymisation des champs nominatifs d'un dossier apprenant
+ * ajoute un prefix ANONYME_ devant chaque champ mis à jour
+ * @param {*} dossierApprenantId
+ * @returns
+ */
+const anonymize = async (dossierApprenantId) => {
+  const anonymizeQuery = {
+    nom_apprenant: `${ANONYMOUS_PREFIX}_${faker.name.lastName().toUpperCase()}`,
+    prenom_apprenant: `${ANONYMOUS_PREFIX}_${faker.name.firstName()}`,
+    email_contact: `${ANONYMOUS_PREFIX}_${faker.internet.email()}`,
+    tel_apprenant: `${ANONYMOUS_PREFIX}_${faker.phone.phoneNumber()}`,
+    code_commune_insee_apprenant: `${ANONYMOUS_PREFIX}_${faker.address.zipCode()}`,
+    date_de_naissance_apprenant: faker.date.birthdate({ min: 15, max: 25, mode: "age" }),
+    updated_at: new Date(),
+  };
+  const updated = await DossierApprenantModel.findByIdAndUpdate(dossierApprenantId, anonymizeQuery, { new: true });
+  return updated;
 };

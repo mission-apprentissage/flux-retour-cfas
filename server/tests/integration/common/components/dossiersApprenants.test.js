@@ -1271,4 +1271,47 @@ describe(__filename, () => {
       assert.equal(duplicatesListFound[0].discriminants.duplicatesCreatedDatesAndIds.length, 4);
     });
   });
+
+  describe("anonymize", () => {
+    it("Vérifie qu'on peut anonymiser un dossierApprenant", async () => {
+      const { anonymize, createDossierApprenant, ANONYMOUS_PREFIX } = await dossiersApprenants();
+
+      const createdStatut = await createDossierApprenant(
+        createRandomDossierApprenant({
+          prenom_apprenant: "Aurélien ",
+          nom_apprenant: "Tchouaméni",
+          email_contact: "atchouameni@realdemadrid.es",
+          tel_apprenant: "067777777777",
+          code_commune_insee_apprenant: "59122",
+          date_de_naissance_apprenant: new Date("2000-01-27T00:00:00.000+0000"),
+        })
+      );
+
+      assert.notEqual(createdStatut, null);
+      assert.equal(createdStatut.updated_at, null);
+
+      // Anonymisation
+      await anonymize(createdStatut._id);
+
+      // Check value in db
+      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      assert.notEqual(foundAfterUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
+      assert.equal(foundAfterUpdate.prenom_apprenant.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.nom_apprenant, createdStatut.nom_apprenant);
+      assert.equal(foundAfterUpdate.nom_apprenant.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.email_contact, createdStatut.email_contact);
+      assert.equal(foundAfterUpdate.email_contact.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.tel_apprenant, createdStatut.tel_apprenant);
+      assert.equal(foundAfterUpdate.tel_apprenant.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.code_commune_insee_apprenant, createdStatut.code_commune_insee_apprenant);
+      assert.equal(foundAfterUpdate.code_commune_insee_apprenant.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.date_de_naissance_apprenant, createdStatut.date_de_naissance_apprenant);
+      assert.notEqual(foundAfterUpdate.updated_at, null);
+    });
+  });
 });

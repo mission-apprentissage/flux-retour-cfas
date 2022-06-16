@@ -35,6 +35,7 @@
     "clear:logs": "node -r dotenv/config src/jobs/remove-data/clear/clearLogs.js",
     "clear:users": "node -r dotenv/config src/jobs/remove-data/clear/clearUsers.js",
     "clear:cfas": "node -r dotenv/config src/jobs/remove-data/clear/clearCfas.js",
+    "anonymize:dossiersApprenants-nonMaj-depuis": "node -r dotenv/config src/jobs/anonymize-dossiersApprenants-nonMaj-depuis/index.js",
     "remove:cfas-non-branches": "node -r dotenv/config src/jobs/remove-data/cfas-non-branches/index.js",
     "remove:inscritsSansContrats-nonRecus-depuis": "node -r dotenv/config src/jobs/remove-data/statuts-inscritsSsContrats-nonRecus-depuis/index.js",
     "remove:apprentis-nonRecus-depuis": "node -r dotenv/config src/jobs/remove-data/statuts-apprentis-nonRecus-depuis/index.js",
