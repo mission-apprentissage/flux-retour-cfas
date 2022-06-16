@@ -4,11 +4,11 @@ const Joi = require("joi");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { CODES_STATUT_APPRENANT } = require("../../common/constants/dossierApprenantConstants");
-const { cfdRegex } = require("../../common/domain/cfd");
-const { uaiRegex } = require("../../common/domain/uai");
+const { schema: dateSchema } = require("../../common/domain/date");
+const { schema: statutApprenantSchema } = require("../../common/domain/statutApprenant");
+const { schema: uaiSchema } = require("../../common/domain/uai");
+const { schema: cfdSchema } = require("../../common/domain/cfd");
 const { siretRegex } = require("../../common/domain/siret");
-
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { findAndPaginate } = require("../../common/utils/dbUtils");
@@ -23,25 +23,17 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
   /**
    * Schema for item validation
    */
-  const dateSchema = Joi.string()
-    .regex(/^([0-9]{4})-([0-9]{2})-([0-9]{2})/) // make sure the passed date contains at least YYYY-MM-DD
-    .custom((val, helpers) => {
-      const { value, error } = Joi.date().iso().validate(val);
-      return error ? helpers.error("string.isoDate") : value;
-    });
 
   const dossierApprenantItemSchema = Joi.object({
     // required fields
     nom_apprenant: Joi.string().required(),
     prenom_apprenant: Joi.string().required(),
     date_de_naissance_apprenant: dateSchema.required(),
-    uai_etablissement: Joi.string().regex(uaiRegex).required(),
+    uai_etablissement: uaiSchema.required(),
     nom_etablissement: Joi.string().required(),
-    id_formation: Joi.string().regex(cfdRegex).required(),
+    id_formation: cfdSchema.required(),
     annee_scolaire: anneeScolaireSchema.required(),
-    statut_apprenant: Joi.number()
-      .valid(CODES_STATUT_APPRENANT.apprenti, CODES_STATUT_APPRENANT.inscrit, CODES_STATUT_APPRENANT.abandon)
-      .required(),
+    statut_apprenant: statutApprenantSchema.required(),
     date_metier_mise_a_jour_statut: dateSchema.required(),
 
     // optional

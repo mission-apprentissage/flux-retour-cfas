@@ -7,6 +7,7 @@ const { validateSiret } = require("../domain/siret");
 const { escapeRegExp } = require("../utils/regexUtils");
 const { isEqual } = require("date-fns");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
+const { DossierApprenant } = require("../factory/dossierApprenant");
 
 module.exports = () => ({
   getDossierApprenant,
@@ -147,7 +148,7 @@ const createDossierApprenant = async (itemToCreate) => {
 
   const formationInfo = await getFormationWithCfd(itemToCreate.formation_cfd);
 
-  const toAdd = new DossierApprenantModel({
+  const dossierApprenantEntity = DossierApprenant.create({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant.toUpperCase(),
     prenom_apprenant: itemToCreate.prenom_apprenant.toUpperCase(),
@@ -182,17 +183,19 @@ const createDossierApprenant = async (itemToCreate) => {
     contrat_date_rupture: itemToCreate.contrat_date_rupture,
     date_entree_formation: itemToCreate.date_entree_formation,
     formation_rncp: itemToCreate.formation_rncp,
-
     source: itemToCreate.source,
-
-    created_at: new Date(),
-
     // add network of etablissement if found in ReferentielCfa
     ...(etablissementInReferentielCfaFromUai
       ? { etablissement_reseaux: etablissementInReferentielCfaFromUai.reseaux }
       : {}),
   });
-  return toAdd.save();
+
+  if (dossierApprenantEntity) {
+    const dossierApprenantToAdd = new DossierApprenantModel(dossierApprenantEntity);
+    return dossierApprenantToAdd.save();
+  }
+
+  return null;
 };
 
 /**

@@ -243,17 +243,6 @@ describe(__filename, () => {
       assert.equal(isApproximatelyNow(thirdUpdated.updated_at), true);
     });
 
-    it("Vérifie qu'on peut créer un statut sans annee_scolaire", async () => {
-      const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
-      const randomStatut = createRandomDossierApprenant();
-      delete randomStatut.annee_scolaire;
-
-      const result = await addOrUpdateDossiersApprenants([randomStatut]);
-      assert.equal(result.added.length, 1);
-      assert.equal(result.updated.length, 0);
-      assert.equal(await DossierApprenantModel.countDocuments(), 1);
-    });
-
     it("Vérifie qu'on peut créer un statut avec une période formation sur une même année", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
       const samplePeriodSameYear = [2021, 2021];
@@ -1213,7 +1202,7 @@ describe(__filename, () => {
         nom_apprenant: "DUPONT",
         annee_scolaire: "2022-2023",
         date_de_naissance_apprenant: new Date("1990-09-20T00:00:00.000+0000"),
-        statut_apprenant: 1,
+        statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
       };
       await createDossierApprenant(createRandomDossierApprenant(firstDupUnicityKey));
       await createDossierApprenant(createRandomDossierApprenant(firstDupUnicityKey));
@@ -1226,12 +1215,16 @@ describe(__filename, () => {
         nom_apprenant: "Doe",
         annee_scolaire: "2021-2022",
         date_de_naissance_apprenant: new Date("1990-12-20T00:00:00.000+0000"),
-        statut_apprenant: 2,
+        statut_apprenant: CODES_STATUT_APPRENANT.abandon,
       };
       await createDossierApprenant(createRandomDossierApprenant(secondDup));
       await createDossierApprenant(createRandomDossierApprenant(secondDup));
       await addOrUpdateDossiersApprenants([
-        createRandomDossierApprenant({ ...secondDup, statut_apprenant: 3, date_metier_mise_a_jour_statut: new Date() }),
+        createRandomDossierApprenant({
+          ...secondDup,
+          statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
+          date_metier_mise_a_jour_statut: new Date(),
+        }),
       ]);
 
       const duplicatesListFound = await getDuplicatesList(
