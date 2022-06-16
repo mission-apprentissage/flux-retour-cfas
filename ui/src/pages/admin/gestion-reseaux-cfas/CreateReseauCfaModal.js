@@ -5,11 +5,11 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { fetchReseaux, postCreateReseauCfa } from "../../../common/api/tableauDeBord";
 import ModalClosingButton from "../../../common/components/ModalClosingButton/ModalClosingButton";
-import { QUERY_KEY } from "../../../common/constants/queryKey";
+import { QUERY_KEYS } from "../../../common/constants/queryKey";
 import CreateReseauCfaForm from "./CreateReseauCfaForm";
 
 const CreateReseauCfaModal = ({ isOpen, onClose }) => {
-  const { data } = useQuery([QUERY_KEY.reseaux], () => fetchReseaux());
+  const { data } = useQuery([QUERY_KEYS.reseaux], () => fetchReseaux());
   const networkList = data;
 
   const queryClient = useQueryClient();
@@ -19,7 +19,7 @@ const CreateReseauCfaModal = ({ isOpen, onClose }) => {
     },
     {
       onSuccess() {
-        queryClient.invalidateQueries([QUERY_KEY.reseauxCfas]);
+        queryClient.invalidateQueries([QUERY_KEYS.reseauxCfas]);
         onClose();
       },
     }

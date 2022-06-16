@@ -1,4 +1,4 @@
-export const QUERY_KEY = {
+export const QUERY_KEYS = {
   searchCfas: "search-cfas",
   searchFormations: "search-formations",
   effectifs: "effectifs",
