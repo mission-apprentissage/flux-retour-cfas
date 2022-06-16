@@ -80,12 +80,12 @@ const ReseauxCfasTable = ({ reseauxCfas }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {reseauxCfasSliced?.map(({ id, nom_reseau, nom_etablissement, uai_etablissement }) => {
+        {reseauxCfasSliced?.map(({ id, nom_reseau, nom_etablissement, uai }) => {
           return (
             <Tr key={id}>
               <Td color="bluefrance">{nom_reseau}</Td>
               <Td color="grey.800">{nom_etablissement}</Td>
-              <Td color="grey.800">{uai_etablissement}</Td>
+              <Td color="grey.800">{uai}</Td>
               <Td color="grey.800">
                 <Button
                   variant="secondary"

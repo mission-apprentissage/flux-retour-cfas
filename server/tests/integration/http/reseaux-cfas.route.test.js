@@ -4,7 +4,6 @@ const { startServer } = require("../../utils/testUtils");
 const { apiRoles } = require("../../../src/common/roles");
 const users = require("../../../src/common/components/users");
 const { ReseauCfaModel } = require("../../../src/common/model");
-const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 
 const user = { name: "apiConsumerUser", password: "password" };
 
@@ -75,7 +74,6 @@ describe(__filename, () => {
 
       await new ReseauCfaModel({
         nom_etablissement: "BTP CFA Somme",
-        nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
         uai: "0801302F",
         nom_reseau: "AGRI",
       }).save();

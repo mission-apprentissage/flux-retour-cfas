@@ -5,9 +5,9 @@ import { InputLegend, Page, Section } from "../../../common/components";
 import Loading from "../../../common/components/Loading/Loading";
 import NoResults from "../../../common/components/NoResults/NoResults";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
+import useReseauCfaSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "../../../common/hooks/useReseauCfaSearch";
 import CreateReseauCfaModal from "./CreateReseauCfaModal";
 import ReseauxCfasTable from "./ReseauxCfasTable";
-import useReseauCfaSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useReseauCfaSearch";
 
 const GestionReseauxCfasPage = () => {
   const createCfaModal = useDisclosure();
@@ -48,7 +48,7 @@ const GestionReseauxCfasPage = () => {
         {searchTerm.length > 0 && searchResults?.length === 0 && (
           <NoResults title="Il n'y a aucun résultat pour votre recherche sur les reseaux CFAS" />
         )}
-        <ReseauxCfasTable reseauxCfas={searchResults} />
+        {!loading && <ReseauxCfasTable reseauxCfas={searchResults} />}
       </Section>
     </Page>
   );

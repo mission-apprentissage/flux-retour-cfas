@@ -11,10 +11,6 @@ module.exports = new Schema({
     default: null,
     description: "Nom de l'établissement",
   },
-  nom_tokenized: {
-    type: String,
-    description: "Nom de l'établissement tokenized pour la recherche textuelle",
-  },
   uai: {
     type: String,
     default: null,
