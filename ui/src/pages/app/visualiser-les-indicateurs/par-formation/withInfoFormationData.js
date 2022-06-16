@@ -3,11 +3,11 @@ import React from "react";
 import { useQuery } from "react-query";
 
 import { fetchFormation } from "../../../../common/api/tableauDeBord";
-import { QUERY_KEYS } from "../../../../common/constants/queryKey";
+import { QUERY_KEYS } from "../../../../common/constants/queryKeys";
 
 const withInfosFormationData = (Component) => {
   const WithInfosFormationData = ({ formationCfd, ...props }) => {
-    const { data, isLoading, error } = useQuery([QUERY_KEYS.formation, formationCfd], () =>
+    const { data, isLoading, error } = useQuery([QUERY_KEYS.FORMATION, formationCfd], () =>
       fetchFormation(formationCfd)
     );
 

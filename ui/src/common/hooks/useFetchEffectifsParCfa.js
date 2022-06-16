@@ -1,14 +1,14 @@
 import { useQuery } from "react-query";
 
 import { fetchEffectifsParCfa } from "../../common/api/tableauDeBord";
-import { QUERY_KEYS } from "../constants/queryKey";
+import { QUERY_KEYS } from "../constants/queryKeys";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
 
 const useFetchEffectifsParCfa = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);
 
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.effectifsPar.cfa, requestFilters], () =>
+  const { data, isLoading, error } = useQuery([QUERY_KEYS.EFFECTIF_PAR.CFA, requestFilters], () =>
     fetchEffectifsParCfa(requestFilters)
   );
 

@@ -4,7 +4,7 @@ import { useQuery } from "react-query";
 
 import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsParAnneeFormation } from "../../../api/tableauDeBord";
-import { QUERY_KEYS } from "../../../constants/queryKey";
+import { QUERY_KEYS } from "../../../constants/queryKeys";
 import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
 import { pick } from "../../../utils/pick";
 import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
@@ -23,7 +23,7 @@ const AnneeFormationRows = ({ formationCfd }) => {
       "etablissement_reseaux",
     ]),
   };
-  const { data } = useQuery([QUERY_KEYS.effectifsPar.anneeFormation, requestFilters], () =>
+  const { data } = useQuery([QUERY_KEYS.EFFECTIF_PAR.ANNEE_FORMATION, requestFilters], () =>
     fetchEffectifsParAnneeFormation(requestFilters)
   );
   if (!data) return null;

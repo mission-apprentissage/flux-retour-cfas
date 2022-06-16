@@ -1,20 +1,20 @@
 import { useQuery } from "react-query";
 
 import { fetchDepartements, fetchRegions } from "../../../common/api/tableauDeBord";
-import { QUERY_KEYS } from "../../constants/queryKey";
+import { QUERY_KEYS } from "../../constants/queryKeys";
 import { sortAlphabeticallyBy } from "../../utils/sortAlphabetically";
 import { TERRITOIRE_TYPE } from "./constants";
 
 const useTerritoiresData = () => {
   // departements and regions are very unlikely to change, thus the infinite stale time
   const { data: departements, isLoading: departementsLoading } = useQuery(
-    QUERY_KEYS.departement,
+    QUERY_KEYS.DEPARTEMENT,
     () => fetchDepartements(),
     {
       staleTime: Infinity,
     }
   );
-  const { data: regions, isLoading: regionsLoading } = useQuery(QUERY_KEYS.regions, () => fetchRegions(), {
+  const { data: regions, isLoading: regionsLoading } = useQuery(QUERY_KEYS.REGIONS, () => fetchRegions(), {
     staleTime: Infinity,
   });
 
