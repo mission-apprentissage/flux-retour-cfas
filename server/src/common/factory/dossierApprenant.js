@@ -30,7 +30,6 @@ class DossierApprenant extends BaseFactory {
       code_commune_insee_apprenant: Joi.string().allow(null),
       siret_etablissement: Joi.string().allow(null, ""),
       siret_etablissement_valid: Joi.boolean(),
-      etablissement_formateur_geo_coordonnees: Joi.string().allow(null),
 
       libelle_long_formation: Joi.string().allow(null, ""),
       niveau_formation: Joi.string().allow(null, ""),

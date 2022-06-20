@@ -30,7 +30,6 @@ const getRandomAnneeScolaire = () => {
 const getRandomDateDebutContrat = () => faker.date.between(subMonths(new Date(), 6), subMonths(new Date(), 1));
 const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
-const getRandomCoordonnates = () => `${faker.address.latitude()},${faker.address.longitude()}`;
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
 const createRandomDossierApprenant = (params = {}) => {
@@ -58,7 +57,6 @@ const createRandomDossierApprenant = (params = {}) => {
     tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
     date_de_naissance_apprenant: getRandomDateNaissance(),
-    etablissement_formateur_geo_coordonnees: faker.datatype.boolean() ? getRandomCoordonnates() : null,
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
@@ -122,7 +120,6 @@ const createRandomDossierApprenantApiInput = (params = {}) => {
     tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
 
-    etablissement_formateur_geo_coordonnees: faker.datatype.boolean() ? getRandomCoordonnates() : null,
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat().toISOString() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat().toISOString() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat().toISOString() : null,

@@ -203,12 +203,6 @@ module.exports = new Schema({
     default: null,
     description: "Date de naissance de l'apprenant",
   },
-  etablissement_formateur_geo_coordonnees: {
-    type: String,
-    implicit_type: "geo_point",
-    default: null,
-    description: "Latitude et longitude de l'établissement formateur",
-  },
   etablissement_formateur_ville: {
     type: String,
     default: null,
