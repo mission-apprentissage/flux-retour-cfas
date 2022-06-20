@@ -1,5 +1,5 @@
 const { getDepartementCodeFromUai, validateUai } = require("../domain/uai");
-const { DossierApprenantModel, CfaAnnuaireModel, CfaModel } = require("../model");
+const { DossierApprenantModel, CfaModel } = require("../model");
 const { escapeRegExp } = require("../utils/regexUtils");
 const { Cfa } = require("../factory/cfa");
 
@@ -10,7 +10,6 @@ module.exports = () => ({
   searchCfas,
   getCfaFirstTransmissionDateFromUai,
   getCfaFirstTransmissionDateFromSiret,
-  getSiretNatureFromAnnuaire,
   getSousEtablissementsForUai,
   getFromAccessToken,
   getFromUai,
@@ -196,10 +195,6 @@ const getSousEtablissementsForUai = (uai) => {
  * @param {string} siret
  * @returns
  */
-const getSiretNatureFromAnnuaire = async (siret) => {
-  const cfaInAnnuaireFromSiret = await CfaAnnuaireModel.findOne({ siret: siret }).lean();
-  return { responsable: cfaInAnnuaireFromSiret?.responsable, formateur: cfaInAnnuaireFromSiret?.formateur };
-};
 
 const getFromAccessToken = async (accessToken) => {
   return CfaModel.findOne({ access_token: accessToken }).lean();

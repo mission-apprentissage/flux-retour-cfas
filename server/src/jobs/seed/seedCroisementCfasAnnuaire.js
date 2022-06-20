@@ -3,7 +3,7 @@ const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-const { CfaAnnuaireModel, CroisementCfasAnnuaireModel, CfaModel } = require("../../common/model");
+const { CroisementCfasAnnuaireModel, CfaModel } = require("../../common/model");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -24,12 +24,7 @@ const seedCroisementCfasAnnuaire = async () => {
   logger.info(`Clearing existing CroisementCfasAnnuaireTdb collection ...`);
   await CroisementCfasAnnuaireModel.deleteMany({});
 
-  const cfasAnnuaire = await CfaAnnuaireModel.find({}).lean();
-  logger.info(`Seeding Croisement CFAs Annuaire from ${cfasAnnuaire.length} CFAs in annuaire`);
-
-  loadingBar.start(cfasAnnuaire.length, 0);
-
-  await asyncForEach(cfasAnnuaire, async (currentCfaAnnuaire) => {
+  await asyncForEach(async (currentCfaAnnuaire) => {
     loadingBar.increment();
 
     if (currentCfaAnnuaire.gestionnaire) {
