@@ -157,7 +157,6 @@ const createDossierApprenant = async (itemToCreate) => {
     prenom_apprenant: itemToCreate.prenom_apprenant.toUpperCase(),
     email_contact: itemToCreate.email_contact,
     formation_cfd: itemToCreate.formation_cfd,
-    libelle_court_formation: itemToCreate.libelle_court_formation,
     libelle_long_formation: itemToCreate.libelle_long_formation,
     niveau_formation: formationInfo?.niveau,
     niveau_formation_libelle: formationInfo?.niveau_libelle,

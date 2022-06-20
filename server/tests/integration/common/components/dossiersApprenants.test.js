@@ -999,7 +999,6 @@ describe(__filename, () => {
       assert.equal(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant.toUpperCase());
       assert.equal(createdStatutJson.email_contact, randomStatut.email_contact);
       assert.equal(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
-      assert.equal(createdStatutJson.libelle_court_formation, randomStatut.libelle_court_formation);
       assert.equal(createdStatutJson.libelle_long_formation, randomStatut.libelle_long_formation);
       assert.equal(createdStatutJson.uai_etablissement, randomStatut.uai_etablissement);
       assert.equal(createdStatutJson.siret_etablissement, randomStatut.siret_etablissement);

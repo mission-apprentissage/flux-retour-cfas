@@ -28,11 +28,6 @@ module.exports = new Schema({
     description: "CFD de la formation à laquelle l'apprenant est inscrit",
     index: true,
   },
-  libelle_court_formation: {
-    type: String,
-    default: null,
-    description: "Libellé court de la formation visée",
-  },
   libelle_long_formation: {
     type: String,
     default: null,

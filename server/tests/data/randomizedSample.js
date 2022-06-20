@@ -44,9 +44,6 @@ const createRandomDossierApprenant = (params = {}) => {
     email_contact: faker.internet.email(),
 
     formation_cfd: getRandomIdFormation(),
-    libelle_court_formation: faker.datatype.boolean()
-      ? faker.helpers.arrayElement(sampleLibelles).intitule_court
-      : null,
     libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : null,
@@ -113,9 +110,6 @@ const createRandomDossierApprenantApiInput = (params = {}) => {
     email_contact: faker.internet.email(),
 
     id_formation: getRandomIdFormation(),
-    libelle_court_formation: faker.datatype.boolean()
-      ? faker.helpers.arrayElement(sampleLibelles).intitule_court
-      : null,
     libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : "",
