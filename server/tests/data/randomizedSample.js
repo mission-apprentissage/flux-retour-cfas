@@ -59,7 +59,6 @@ const createRandomDossierApprenant = (params = {}) => {
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
     date_de_naissance_apprenant: getRandomDateNaissance(),
     etablissement_formateur_geo_coordonnees: faker.datatype.boolean() ? getRandomCoordonnates() : null,
-    etablissement_formateur_code_commune_insee: faker.datatype.boolean() ? faker.address.zipCode() : null,
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
@@ -78,7 +77,6 @@ const createRandomEffectifApprenant = (params = {}) => {
     dossierApprenantId: faker.datatype.uuid(),
     uai_etablissement: getRandomUaiEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-    etablissement_formateur_code_commune_insee: faker.datatype.boolean() ? faker.address.zipCode() : null,
     etablissement_code_postal: faker.datatype.boolean() ? faker.address.zipCode() : null,
     statut_apprenant: getRandomStatutApprenant(),
     formation_cfd: getRandomIdFormation(),
@@ -125,7 +123,6 @@ const createRandomDossierApprenantApiInput = (params = {}) => {
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
 
     etablissement_formateur_geo_coordonnees: faker.datatype.boolean() ? getRandomCoordonnates() : null,
-    etablissement_formateur_code_commune_insee: faker.datatype.boolean() ? faker.address.zipCode() : null,
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat().toISOString() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat().toISOString() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat().toISOString() : null,

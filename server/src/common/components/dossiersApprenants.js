@@ -179,7 +179,6 @@ const createDossierApprenant = async (itemToCreate) => {
     code_commune_insee_apprenant: itemToCreate.code_commune_insee_apprenant,
     date_de_naissance_apprenant: itemToCreate.date_de_naissance_apprenant,
     etablissement_formateur_geo_coordonnees: itemToCreate.etablissement_formateur_geo_coordonnees,
-    etablissement_formateur_code_commune_insee: itemToCreate.etablissement_formateur_code_commune_insee,
     contrat_date_debut: itemToCreate.contrat_date_debut,
     contrat_date_fin: itemToCreate.contrat_date_fin,
     contrat_date_rupture: itemToCreate.contrat_date_rupture,

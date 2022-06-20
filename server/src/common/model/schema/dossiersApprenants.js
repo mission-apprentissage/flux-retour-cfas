@@ -209,11 +209,6 @@ module.exports = new Schema({
     default: null,
     description: "Latitude et longitude de l'établissement formateur",
   },
-  etablissement_formateur_code_commune_insee: {
-    type: String,
-    default: null,
-    description: "Code commune de l'établissement formateur",
-  },
   etablissement_formateur_ville: {
     type: String,
     default: null,
