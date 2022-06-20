@@ -7,7 +7,6 @@ const JOB_NAMES = {
   seedReseauxCfas: "seed-reseauxCfas",
   seedReferentielCfas: "seed-referentiel-cfas",
   clearSeedAssets: "clear-seed-assets",
-  seedCroisementCfasAnnuaire: "seed-croisement-cfas-annuaire",
   seedRandomizedSample: "seed-randomized-sample",
   identifyUaisInCatalog: "identify-uais-types-catalog",
   identifyUaisSiretsCouples: "identify-uais-sirets-couples",
