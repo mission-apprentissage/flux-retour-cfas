@@ -17,7 +17,6 @@ module.exports = {
   ContactCfaModel: getModel("contactsCfas"),
   FormationModel: getModel("formations"),
   LogModel: getModel("logs"),
-  CroisementVoeuxAffelnetModel: getModel("croisementVoeuxAffelnet"),
   EffectifApprenantModel: getModel("effectifsApprenants", { enablePagination: true }),
   DemandeIdentifiantsModel: getModel("demandesIdentifiants"),
   DemandeBranchementErpModel: getModel("demandesBranchementErp"),
