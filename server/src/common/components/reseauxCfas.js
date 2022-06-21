@@ -1,12 +1,12 @@
 const { ReseauCfaModel } = require("../model");
 const { escapeRegExp } = require("../utils/regexUtils");
 
-const create = async ({ nom_reseau, nom_etablissement, uai, siret }) => {
+const create = async ({ nom_reseau, nom_etablissement, uai, sirets = [] }) => {
   const saved = await new ReseauCfaModel({
     nom_reseau,
     nom_etablissement,
     uai,
-    siret,
+    sirets,
     created_at: new Date(),
   }).save();
 
@@ -16,7 +16,7 @@ const create = async ({ nom_reseau, nom_etablissement, uai, siret }) => {
 /**
  * Returns list of RESEAU CFA information matching passed criteria
  * @param {{}} searchCriteria
- * @return {Array<{uai: string, nom_reseau: string, nom_etablissement: string}>} Array of RESEAU CFA information
+ * @return {Array<{uai: string, nom_reseau: string, nom_etablissement: string, sirets: [string]}>} Array of RESEAU CFA information
  */
 const searchReseauxCfas = async (searchCriteria) => {
   const { searchTerm } = searchCriteria;
@@ -24,7 +24,11 @@ const searchReseauxCfas = async (searchCriteria) => {
 
   const matchStage = {};
   if (searchTerm) {
-    matchStage.$or = [{ $text: { $search: searchTerm } }, { uai: new RegExp(escapeRegExp(searchTerm), "g") }];
+    matchStage.$or = [
+      { $text: { $search: searchTerm } },
+      { uai: new RegExp(escapeRegExp(searchTerm), "g") },
+      { sirets: new RegExp(escapeRegExp(searchTerm), "g") },
+    ];
   }
 
   const sortStage = searchTerm
@@ -44,6 +48,7 @@ const searchReseauxCfas = async (searchCriteria) => {
     return {
       id: reseauCfa._id,
       uai: reseauCfa.uai,
+      sirets: reseauCfa.sirets,
       nom_reseau: reseauCfa.nom_reseau,
       nom_etablissement: reseauCfa.nom_etablissement,
     };

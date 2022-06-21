@@ -5,6 +5,7 @@ const { CfaModel } = require("../../common/model");
 const pick = require("lodash.pick");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
+const { validateUai } = require("../../common/domain/uai");
 
 module.exports = ({ cfas }) => {
   const router = express.Router();
@@ -64,16 +65,18 @@ module.exports = ({ cfas }) => {
    * Gets the dashboard data for cfa
    */
   router.get(
-    "/:uai",
+    "/:uaiSiret",
     tryCatch(async (req, res) => {
-      const { uai } = req.params;
+      const { uaiSiret } = req.params;
 
-      const cfaFound = await cfas.getFromUai(uai);
+      const uai = validateUai(uaiSiret);
+
+      const cfaFound = uai ? await cfas.getFromUai(uaiSiret) : await cfas.getFromSiret(uaiSiret);
 
       if (!cfaFound) {
-        return res.status(404).json({ message: `No cfa found for uai ${uai}` });
+        return res.status(404).json({ message: `No cfa found for uai ${uaiSiret}` });
       } else {
-        const sousEtablissements = await cfas.getSousEtablissementsForUai(uai);
+        const sousEtablissements = await cfas.getSousEtablissementsForUai(uaiSiret);
 
         // Build response
         return res.json({

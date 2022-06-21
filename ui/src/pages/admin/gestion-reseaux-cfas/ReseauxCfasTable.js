@@ -5,6 +5,7 @@ import React, { forwardRef } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { deleteReseauCfa } from "../../../common/api/tableauDeBord";
+import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 
 const ReseauxCfasTable = ({ reseauxCfas }) => {
   const toast = useToast();
@@ -76,16 +77,18 @@ const ReseauxCfasTable = ({ reseauxCfas }) => {
           <Th>Réseau</Th>
           <Th>Nom du CFA</Th>
           <Th>UAI</Th>
+          <Th>Sirets</Th>
           <Th>Supprimer un reseau CFA</Th>
         </Tr>
       </Thead>
       <Tbody>
-        {reseauxCfasSliced?.map(({ id, nom_reseau, nom_etablissement, uai }) => {
+        {reseauxCfasSliced?.map(({ id, nom_reseau, nom_etablissement, uai, sirets }) => {
           return (
             <Tr key={id}>
               <Td color="bluefrance">{nom_reseau}</Td>
               <Td color="grey.800">{nom_etablissement}</Td>
               <Td color="grey.800">{uai}</Td>
+              <Td color="grey.800">{sirets}</Td>
               <Td color="grey.800">
                 <Button
                   variant="secondary"

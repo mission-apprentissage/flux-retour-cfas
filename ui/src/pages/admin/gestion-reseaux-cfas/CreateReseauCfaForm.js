@@ -6,6 +6,7 @@ import { useQuery } from "react-query";
 import * as Yup from "yup";
 
 import { fetchCfa } from "../../../common/api/tableauDeBord";
+import { siretRegex, validateSiret } from "../../../common/domain/siret";
 import { uaiRegex, validateUai } from "../../../common/domain/uai";
 
 const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
@@ -14,23 +15,28 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
       nom_reseau: "",
       nom_etablissement: "",
       uai: "",
+      sirets: "",
     },
     validationSchema: Yup.object().shape({
       nom_reseau: Yup.string().required("Requis"),
       nom_etablissement: Yup.string().required("Requis"),
       uai: Yup.string().matches(uaiRegex, "UAI invalide").required("Requis"),
+      sirets: Yup.string().matches(siretRegex, "Siret invalide").required("Requis"),
     }),
-    onSubmit: ({ nom_reseau, nom_etablissement, uai }) => {
-      createReseauCfa({ nom_reseau, nom_etablissement, uai });
+    onSubmit: ({ nom_reseau, nom_etablissement, uai, sirets }) => {
+      createReseauCfa({ nom_reseau, nom_etablissement, uai, sirets });
     },
   });
 
-  const searchEnabled = validateUai(values.uai);
+  const searchEnabled = validateUai(values.uai) || validateSiret(values.sirets);
+  const uaiOrSiret = validateUai(values.uai) ? values.uai : values.sirets;
 
-  useQuery(["cfa", values.uai], () => fetchCfa(values.uai), {
+  useQuery(["cfa", uaiOrSiret], () => fetchCfa(uaiOrSiret), {
     enabled: searchEnabled,
     onSuccess: (data) => {
       setFieldValue("nom_etablissement", data?.libelleLong);
+      setFieldValue("uai", data?.uai);
+      setFieldValue("sirets", data?.sousEtablissements[0]?.siret_etablissement);
     },
     onError: () => {
       setFieldValue("nom_etablissement", "");
@@ -64,6 +70,10 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
           <FormControl isRequired isInvalid={errors.uai}>
             <FormLabel color="grey.800">UAI</FormLabel>
             <Input name="uai" value={values.uai} onChange={handleChange} />
+          </FormControl>
+          <FormControl isRequired isInvalid={errors.sirets}>
+            <FormLabel color="grey.800">Siret</FormLabel>
+            <Input name="sirets" value={values.sirets} onChange={handleChange} />
           </FormControl>
         </Stack>
       </ModalBody>

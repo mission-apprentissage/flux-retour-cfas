@@ -62,8 +62,8 @@ export const fetchFormation = (formationCfd) => {
 };
 
 /* CFAs */
-export const fetchCfa = (cfaUai) => {
-  const url = `/api/cfas/${cfaUai}`;
+export const fetchCfa = (cfaUaiSiret) => {
+  const url = `/api/cfas/${cfaUaiSiret}`;
   return _get(url);
 };
 
