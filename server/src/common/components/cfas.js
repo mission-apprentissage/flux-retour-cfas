@@ -2,6 +2,8 @@ const { getDepartementCodeFromUai, validateUai } = require("../domain/uai");
 const { DossierApprenantModel, CfaAnnuaireModel, CfaModel } = require("../model");
 const { escapeRegExp } = require("../utils/regexUtils");
 const { Cfa } = require("../factory/cfa");
+const { getMetiersBySirets } = require("../../common/apis/apiLba");
+const logger = require("../../common/logger");
 
 module.exports = () => ({
   createCfa,
@@ -43,6 +45,16 @@ const createCfa = async (dossierForCfa, sirets = []) => {
     throw new Error(`No dossierApprenant found`);
   }
 
+  let metiersFromSirets = [];
+
+  try {
+    metiersFromSirets = await getMetiersBySirets(sirets);
+  } catch {
+    logger.error(
+      `createCfa / getMetiersBySirets: something went wrong while requesting for cfa with uai ${dossierForCfa.uai_etablissement}`
+    );
+  }
+
   const cfaEntity = Cfa.create({
     uai: dossierForCfa.uai_etablissement,
     sirets,
@@ -51,6 +63,7 @@ const createCfa = async (dossierForCfa, sirets = []) => {
     erps: [dossierForCfa.source],
     region_nom: dossierForCfa.etablissement_nom_region,
     region_num: dossierForCfa.etablissement_num_region,
+    metiers: metiersFromSirets?.metiers,
     first_transmission_date: await getCfaFirstTransmissionDateFromUai(dossierForCfa.uai_etablissement),
   });
 
