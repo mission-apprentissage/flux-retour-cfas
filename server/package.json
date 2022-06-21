@@ -39,7 +39,7 @@
     "remove:cfas-non-branches": "node -r dotenv/config src/jobs/remove-data/cfas-non-branches/index.js",
     "remove:inscritsSansContrats-nonRecus-depuis": "node -r dotenv/config src/jobs/remove-data/statuts-inscritsSsContrats-nonRecus-depuis/index.js",
     "remove:apprentis-nonRecus-depuis": "node -r dotenv/config src/jobs/remove-data/statuts-apprentis-nonRecus-depuis/index.js",
-    "remove:dossiersApprenants-nonRecus-forUai": "node -r dotenv/config src/jobs/remove-data/statuts-nonRecus-forUai/index.js",
+    "remove:dossiersApprenants-nonRecus-depuis": "node -r dotenv/config src/jobs/remove-data/dossiers-apprenants-nonRecus-depuis/index.js",
     "purge:events": "node -r dotenv/config src/jobs/remove-data/purgeEvents/index.js",
     "formation:retrieve-from-cfd": "node -r dotenv/config src/jobs/formation-retrieve-from-cfd/index.js",
     "create:effectifsApprenants-collection": "node -r dotenv/config src/jobs/create-effectifs-apprenants-collection/index.js",
