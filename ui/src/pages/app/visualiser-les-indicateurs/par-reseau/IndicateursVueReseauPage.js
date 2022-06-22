@@ -1,20 +1,17 @@
-import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
-import useEffectifs from "../../../../common/hooks/useEffectifs";
 import { useFiltersContext } from "../FiltersContext";
-import IndicateursGridSection from "../IndicateursGridSection";
 import SwitchViewButton from "../SwitchViewButton";
-import RepartitionEffectifsReseau from "./RepartitionEffectifsReseau";
 import ReseauSelect from "./ReseauSelect/ReseauSelect";
-import ReseauUpdateContactSection from "./ReseauUpdateContactSection";
+import ReseauSelectPanel from "./ReseauSelect/ReseauSelectPanel";
+import ReseauViewContent from "./ReseauViewContent";
 
 const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
-  const [effectifs, loading] = useEffectifs();
 
   const currentReseau = filtersContext.state.reseau;
 
@@ -28,43 +25,38 @@ const IndicateursVueReseauPage = ({ userLoggedAsReseau = false }) => {
           <Heading as="h1">{NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.title}</Heading>
           <SwitchViewButton />
         </HStack>
-        <HStack spacing="4w">
-          {userLoggedAsReseau ? (
-            <Text fontWeight="bold" fontSize="gamma">
-              Réseau {currentReseau.nom}
-            </Text>
-          ) : (
-            <ReseauSelect
-              defaultIsOpen={!currentReseau}
-              value={currentReseau}
-              onReseauChange={filtersContext.setters.setReseau}
-            />
-          )}
-          <HStack spacing="3v">
-            <Box color="grey.800">Filtrer :</Box>
-            <FormationFilter
-              filters={filtersContext.state}
-              onFormationChange={filtersContext.setters.setFormation}
-              variant="secondary"
-            />
-            <TerritoireFilter
-              onDepartementChange={filtersContext.setters.setDepartement}
-              onRegionChange={filtersContext.setters.setRegion}
-              onTerritoireReset={filtersContext.setters.resetTerritoire}
-              filters={filtersContext.state}
-              variant="secondary"
-            />
+        {currentReseau ? (
+          <HStack spacing="4w">
+            {userLoggedAsReseau ? (
+              <Text fontWeight="bold" fontSize="gamma">
+                Réseau {currentReseau.nom}
+              </Text>
+            ) : (
+              <ReseauSelect value={currentReseau} onReseauChange={filtersContext.setters.setReseau} />
+            )}
+            <HStack spacing="3v">
+              <Box color="grey.800">Filtrer :</Box>
+              <FormationFilter
+                filters={filtersContext.state}
+                onFormationChange={filtersContext.setters.setFormation}
+                variant="secondary"
+              />
+              <TerritoireFilter
+                onDepartementChange={filtersContext.setters.setDepartement}
+                onRegionChange={filtersContext.setters.setRegion}
+                onTerritoireReset={filtersContext.setters.resetTerritoire}
+                filters={filtersContext.state}
+                variant="secondary"
+              />
+            </HStack>
           </HStack>
-        </HStack>
+        ) : (
+          <Box marginY="3w" paddingX="8w" paddingY="6w" border="1px solid" borderColor="#E5E5E5">
+            <ReseauSelectPanel onReseauClick={filtersContext.setters.setReseau} />
+          </Box>
+        )}
       </Section>
-      {userLoggedAsReseau && <ReseauUpdateContactSection />}
-      <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
-      {Boolean(currentReseau) && (
-        <>
-          <IndicateursGridSection effectifs={effectifs} loading={loading} showOrganismesCount />
-          <RepartitionEffectifsReseau filters={filtersContext.state} />
-        </>
-      )}
+      {Boolean(currentReseau) && <ReseauViewContent userLoggedAsReseau={userLoggedAsReseau} />}
     </Page>
   );
 };

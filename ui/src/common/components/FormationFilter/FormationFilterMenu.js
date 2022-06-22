@@ -34,7 +34,7 @@ const FormationFilterMenu = ({ filters, onFormationClick }) => {
 
   return (
     <>
-      <Heading as="h3" variant="h3" marginBottom="3w">
+      <Heading as="h3" variant="h3" marginBottom="3w" marginTop="2w">
         Sélectionner une formation
       </Heading>
       <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Intitulé de la formation, CFD, RNCP" />

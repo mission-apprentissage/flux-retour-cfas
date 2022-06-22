@@ -6,16 +6,14 @@ const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 
 const { CfaModel, DossierApprenantModel, ReseauCfaModel } = require("../../common/model");
-const { sleep } = require("../../common/utils/miscUtils");
 const { ERPS } = require("../../common/constants/erpsConstants");
-const { getMetiersBySirets, API_DELAY_QUOTA } = require("../../common/apis/apiLba");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
  * Script qui initialise la collection CFAs
  */
-runScript(async ({ cfas, db }) => {
+runScript(async ({ cfas }) => {
   logger.info("Seeding CFAs");
 
   // Delete all cfa in collection and not found in dossierApprenants (i.e Cfas from cleaned data)
@@ -29,9 +27,6 @@ runScript(async ({ cfas, db }) => {
   await asyncForEach(networksNames, async (currentNetworkName) => {
     await updateCfasNetworksFromReseauxCfas(currentNetworkName);
   });
-
-  // Set metiers from LBA Api
-  await seedMetiersFromLbaApi(db);
 
   logger.info("End seeding CFAs !");
 }, JOB_NAMES.seedCfas);
@@ -182,45 +177,4 @@ const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau) => {
       { new: true }
     );
   }
-};
-
-/**
- * Seed metiers from LBA Api
- */
-const seedMetiersFromLbaApi = async (db) => {
-  const allCfasWithSirets = await CfaModel.find({ sirets: { $nin: [null, ""] } });
-
-  logger.info(`Seeding Metiers to CFAs from ${allCfasWithSirets.length} cfas found with siret`);
-
-  loadingBar.start(allCfasWithSirets.length, 0);
-
-  await asyncForEach(allCfasWithSirets, async (currentCfaWithSiret) => {
-    loadingBar.increment();
-
-    // Build metiers list for all sirets for currentCfa
-    if (currentCfaWithSiret.sirets.length > 0) {
-      const metiersFromSirets = await getMetiersBySirets(currentCfaWithSiret.sirets);
-      await sleep(API_DELAY_QUOTA); // Delay for LBA Api quota
-
-      // Handle no metiers found
-      if (!metiersFromSirets) {
-        db.collection("lbaApiNoMetiersFound").insertOne({
-          apiCall: "getMetiersBySirets",
-          sirets: currentCfaWithSiret.sirets,
-        });
-      }
-
-      // Update metiers list
-      await CfaModel.findOneAndUpdate(
-        { _id: currentCfaWithSiret._id },
-        {
-          $set: {
-            metiers: metiersFromSirets?.metiers,
-          },
-        }
-      );
-    }
-  });
-
-  loadingBar.stop();
 };

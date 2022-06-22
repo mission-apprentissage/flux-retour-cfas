@@ -7,12 +7,21 @@ import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridSection from "../IndicateursGridSection";
-import { ActionsSection, CfaInformationSection, RepartitionSection } from "../par-organisme/sections";
+import {
+  ActionsSection,
+  CfaInformationSection,
+  MultiSiretDetailInformationSection,
+  RepartitionEffectifsParSiretSection,
+  RepartitionSection,
+} from "../par-organisme/sections";
 
 const CfaPrivateView = ({ cfaUai }) => {
   const [effectifs, effectifsLoading] = useEffectifs();
   const { data: infosCfa, loading: infosCfaLoading, error: infosCfaError } = useFetchCfaInfo(cfaUai);
   const { state: filters } = useFiltersContext();
+  const hasMultipleSirets = infosCfa?.sousEtablissements?.length > 1;
+  const sirets = infosCfa?.sousEtablissements?.map((item) => item.siret_etablissement);
+  const displaySousEtablissementDetail = filters?.sousEtablissement !== null;
 
   return (
     <Page>
@@ -23,8 +32,22 @@ const CfaPrivateView = ({ cfaUai }) => {
       </Section>
       <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
       {infosCfa && <ActionsSection infosCfa={infosCfa} />}
-      {effectifs && <IndicateursGridSection allowDownloadDataListeffectifs={effectifs} loading={effectifsLoading} />}
-      <RepartitionSection filters={filters} />
+
+      {/* Filtre sur le siret pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs sirets */}
+      {displaySousEtablissementDetail && <MultiSiretDetailInformationSection sirets={sirets} />}
+
+      {/* Répartition par Siret pour un établissement multi-siret */}
+      {!displaySousEtablissementDetail && hasMultipleSirets && (
+        <RepartitionEffectifsParSiretSection filters={filters} />
+      )}
+
+      {/* Vue Globale & Repartition pour un établissement sans sirets multiple ou dans la vue détail d'un sous établissement */}
+      {(displaySousEtablissementDetail || !hasMultipleSirets) && (
+        <>
+          <IndicateursGridSection allowDownloadDataList={true} effectifs={effectifs} loading={effectifsLoading} />
+          <RepartitionSection filters={filters} />
+        </>
+      )}
     </Page>
   );
 };

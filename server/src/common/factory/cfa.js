@@ -27,6 +27,7 @@ class Cfa extends BaseFactory {
       erps: Joi.array().items(Joi.string()).allow(null),
       region_nom: Joi.string().allow(""),
       region_num: Joi.string().allow(""),
+      metiers: Joi.array().items(Joi.string()).allow(null),
       first_transmission_date: Joi.date(),
     });
 

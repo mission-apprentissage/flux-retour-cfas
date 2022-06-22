@@ -6,6 +6,10 @@ const { addDays } = require("date-fns");
 const { Cfa } = require("../../../../src/common/factory/cfa");
 const pick = require("lodash.pick");
 var mongoose = require("mongoose");
+// eslint-disable-next-line node/no-unpublished-require
+const nock = require("nock");
+const { dataForGetMetiersBySiret } = require("../../../data/apiLba");
+const { nockGetMetiersBySiret } = require("../../../utils/nockApis/nock-Lba");
 
 describe(__filename, () => {
   describe("existsCfa", () => {
@@ -58,6 +62,9 @@ describe(__filename, () => {
     });
 
     it("returns created cfa when dossier apprenant is valid", async () => {
+      nock.cleanAll();
+      nockGetMetiersBySiret();
+
       const uai = "0802004A";
       const sirets = ["11111111100023"];
 
@@ -74,15 +81,19 @@ describe(__filename, () => {
 
       const created = await createCfa(dossierApprenant, sirets);
 
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "erps", "region_nom", "region_num"]), {
-        uai,
-        sirets,
-        nom: dossierApprenant.nom_etablissement,
-        adresse: dossierApprenant.etablissement_adresse,
-        region_nom: dossierApprenant.etablissement_nom_region,
-        region_num: dossierApprenant.etablissement_num_region,
-        erps: [dossierApprenant.source],
-      });
+      assert.deepEqual(
+        pick(created, ["uai", "sirets", "nom", "adresse", "erps", "region_nom", "region_num", "metiers"]),
+        {
+          uai,
+          sirets,
+          nom: dossierApprenant.nom_etablissement,
+          adresse: dossierApprenant.etablissement_adresse,
+          region_nom: dossierApprenant.etablissement_nom_region,
+          region_num: dossierApprenant.etablissement_num_region,
+          metiers: dataForGetMetiersBySiret.metiers,
+          erps: [dossierApprenant.source],
+        }
+      );
       assert.equal(created.first_transmission_date.getTime(), dossierApprenant.created_at.getTime());
       assert.equal(created.nom_tokenized, Cfa.createTokenizedNom(dossierApprenant.nom_etablissement));
       assert.equal(created.private_url !== null, true);

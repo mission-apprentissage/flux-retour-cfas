@@ -243,17 +243,6 @@ describe(__filename, () => {
       assert.equal(isApproximatelyNow(thirdUpdated.updated_at), true);
     });
 
-    it("Vérifie qu'on peut créer un statut sans annee_scolaire", async () => {
-      const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
-      const randomStatut = createRandomDossierApprenant();
-      delete randomStatut.annee_scolaire;
-
-      const result = await addOrUpdateDossiersApprenants([randomStatut]);
-      assert.equal(result.added.length, 1);
-      assert.equal(result.updated.length, 0);
-      assert.equal(await DossierApprenantModel.countDocuments(), 1);
-    });
-
     it("Vérifie qu'on peut créer un statut avec une période formation sur une même année", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
       const samplePeriodSameYear = [2021, 2021];
@@ -1213,7 +1202,7 @@ describe(__filename, () => {
         nom_apprenant: "DUPONT",
         annee_scolaire: "2022-2023",
         date_de_naissance_apprenant: new Date("1990-09-20T00:00:00.000+0000"),
-        statut_apprenant: 1,
+        statut_apprenant: CODES_STATUT_APPRENANT.apprenti,
       };
       await createDossierApprenant(createRandomDossierApprenant(firstDupUnicityKey));
       await createDossierApprenant(createRandomDossierApprenant(firstDupUnicityKey));
@@ -1226,12 +1215,16 @@ describe(__filename, () => {
         nom_apprenant: "Doe",
         annee_scolaire: "2021-2022",
         date_de_naissance_apprenant: new Date("1990-12-20T00:00:00.000+0000"),
-        statut_apprenant: 2,
+        statut_apprenant: CODES_STATUT_APPRENANT.abandon,
       };
       await createDossierApprenant(createRandomDossierApprenant(secondDup));
       await createDossierApprenant(createRandomDossierApprenant(secondDup));
       await addOrUpdateDossiersApprenants([
-        createRandomDossierApprenant({ ...secondDup, statut_apprenant: 3, date_metier_mise_a_jour_statut: new Date() }),
+        createRandomDossierApprenant({
+          ...secondDup,
+          statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
+          date_metier_mise_a_jour_statut: new Date(),
+        }),
       ]);
 
       const duplicatesListFound = await getDuplicatesList(
@@ -1276,6 +1269,49 @@ describe(__filename, () => {
       assert.equal(duplicatesListFound.length, 1);
       assert.equal(duplicatesListFound[0].duplicatesCount, 4);
       assert.equal(duplicatesListFound[0].discriminants.duplicatesCreatedDatesAndIds.length, 4);
+    });
+  });
+
+  describe("anonymize", () => {
+    it("Vérifie qu'on peut anonymiser un dossierApprenant", async () => {
+      const { anonymize, createDossierApprenant, ANONYMOUS_PREFIX } = await dossiersApprenants();
+
+      const createdStatut = await createDossierApprenant(
+        createRandomDossierApprenant({
+          prenom_apprenant: "Aurélien ",
+          nom_apprenant: "Tchouaméni",
+          email_contact: "atchouameni@realdemadrid.es",
+          tel_apprenant: "067777777777",
+          code_commune_insee_apprenant: "59122",
+          date_de_naissance_apprenant: new Date("2000-01-27T00:00:00.000+0000"),
+        })
+      );
+
+      assert.notEqual(createdStatut, null);
+      assert.equal(createdStatut.updated_at, null);
+
+      // Anonymisation
+      await anonymize(createdStatut._id);
+
+      // Check value in db
+      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      assert.notEqual(foundAfterUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
+      assert.equal(foundAfterUpdate.prenom_apprenant.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.nom_apprenant, createdStatut.nom_apprenant);
+      assert.equal(foundAfterUpdate.nom_apprenant.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.email_contact, createdStatut.email_contact);
+      assert.equal(foundAfterUpdate.email_contact.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.tel_apprenant, createdStatut.tel_apprenant);
+      assert.equal(foundAfterUpdate.tel_apprenant.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.code_commune_insee_apprenant, createdStatut.code_commune_insee_apprenant);
+      assert.equal(foundAfterUpdate.code_commune_insee_apprenant.startsWith(ANONYMOUS_PREFIX), true);
+
+      assert.notEqual(foundAfterUpdate.date_de_naissance_apprenant, createdStatut.date_de_naissance_apprenant);
+      assert.notEqual(foundAfterUpdate.updated_at, null);
     });
   });
 });

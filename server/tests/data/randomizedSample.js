@@ -68,7 +68,7 @@ const createRandomDossierApprenant = (params = {}) => {
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
     date_entree_formation: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
     formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
-
+    source: faker.random.word(),
     ...params,
   };
 };

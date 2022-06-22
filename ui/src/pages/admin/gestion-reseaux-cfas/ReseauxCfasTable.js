@@ -4,10 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { deleteReseauCfa, fetchReseauxCfas } from "../../../common/api/tableauDeBord";
 import { Table } from "../../../common/components";
+import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 
 const ReseauxCfasTable = () => {
   const toast = useToast();
-  const { data, isLoading } = useQuery(["reseauxCfas"], () => fetchReseauxCfas());
+  const { data, isLoading } = useQuery([QUERY_KEYS.RESEAUX_CFAS], () => fetchReseauxCfas());
   const reseauxCfasList = data;
 
   const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ const ReseauxCfasTable = () => {
     },
     {
       onSuccess() {
-        queryClient.invalidateQueries(["reseauxCfas"]);
+        queryClient.invalidateQueries([QUERY_KEYS.RESEAUX_CFAS]);
       },
     }
   );
