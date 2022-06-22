@@ -47,7 +47,6 @@
     "dossiersApprenants:retrieve-networks": "node -r dotenv/config src/jobs/dossiersApprenants-retrieve-networks/index.js",
     "dossiersApprenants:retrieve-niveaux": "node -r dotenv/config src/jobs/dossiersApprenants-retrieve-niveaux/index.js",
     "dossiersApprenants:retrieve-sirets-catalogue": "node -r dotenv/config src/jobs/dossiersApprenants-retrieve-sirets-catalogue/index.js",
-    "support:export-voeuxAffelnet": "node -r dotenv/config src/jobs/support/export-data-for-voeuxAffelnet/index.js",
     "support:identify-network-duplicates": "node -r dotenv/config src/jobs/support/identify-network-duplicates/index.js",
     "support:remove-dossiersApprenants-duplicates": "node -r dotenv/config src/jobs/support/dossiersApprenants-duplicates/remove-duplicates.js",
     "support:identify-uais-sirets-duplicates": "node -r dotenv/config src/jobs/support/identify-uais-sirets-duplicates/index.js",
