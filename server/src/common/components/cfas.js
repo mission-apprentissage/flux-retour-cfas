@@ -223,6 +223,6 @@ const getFromUai = async (uai) => {
   return CfaModel.findOne({ uai }).lean();
 };
 
-const getFromSiret = async (sirets) => {
-  return CfaModel.findOne({ sirets }).lean();
+const getFromSiret = async (siret) => {
+  return CfaModel.findOne({ sirets: siret }).lean();
 };

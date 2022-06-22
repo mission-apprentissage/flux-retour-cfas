@@ -28,8 +28,8 @@ const useReseauCfaSearch = (searchTerm) => {
   );
 
   return {
-    data: data?.map(({ id, uai, nom_etablissement, nom_reseau, sirets }) => {
-      return { id, uai, nom_etablissement, nom_reseau, sirets };
+    data: data?.map(({ id, uai, nom_etablissement, nom_reseau, siret }) => {
+      return { id, uai, nom_etablissement, nom_reseau, siret };
     }),
     loading: isLoading,
   };

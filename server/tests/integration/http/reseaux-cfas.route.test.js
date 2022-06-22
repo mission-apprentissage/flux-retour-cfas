@@ -31,8 +31,18 @@ describe(__filename, () => {
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
-      const reseauCfa1 = { nom_reseau: "RESEAU_TEST_1", nom_etablissement: "Etablissement de test 1", uai: "0670141P" };
-      const reseauCfa2 = { nom_reseau: "RESEAU_TEST_2", nom_etablissement: "Etablissement de test 2", uai: "0670141U" };
+      const reseauCfa1 = {
+        nom_reseau: "RESEAU_TEST_1",
+        nom_etablissement: "Etablissement de test 1",
+        uai: "0670141P",
+        siret: "34012780200015",
+      };
+      const reseauCfa2 = {
+        nom_reseau: "RESEAU_TEST_2",
+        nom_etablissement: "Etablissement de test 2",
+        uai: "0670141U",
+        siret: "34012780200010",
+      };
       await components.reseauxCfas.create(reseauCfa1);
       await components.reseauxCfas.create(reseauCfa2);
 
@@ -43,9 +53,11 @@ describe(__filename, () => {
       assert.equal(response.data[0].nom_reseau, reseauCfa1.nom_reseau);
       assert.equal(response.data[0].nom_etablissement, reseauCfa1.nom_etablissement);
       assert.equal(response.data[0].uai, reseauCfa1.uai);
+      assert.equal(response.data[0].siret, reseauCfa1.siret);
       assert.equal(response.data[1].nom_reseau, reseauCfa2.nom_reseau);
       assert.equal(response.data[1].nom_etablissement, reseauCfa2.nom_etablissement);
       assert.equal(response.data[1].uai, reseauCfa2.uai);
+      assert.equal(response.data[1].siret, reseauCfa2.siret);
     });
   });
 
@@ -76,11 +88,18 @@ describe(__filename, () => {
         nom_etablissement: "BTP CFA Somme",
         uai: "0801302F",
         nom_reseau: "AGRI",
+        siret: "34012780200015",
       }).save();
 
       const responseUai = await httpClient.post(
         "/api/reseaux-cfas/search",
         { searchTerm: "0801302F" },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      const responseSiret = await httpClient.post(
+        "/api/reseaux-cfas/search",
+        { searchTerm: "34012780200015" },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
@@ -97,6 +116,10 @@ describe(__filename, () => {
       assert.strictEqual(responseNomEtablissement.status, 200);
       assert.strictEqual(responseNomEtablissement.data.length, 1);
       assert.deepEqual(responseNomEtablissement.data[0].uai, "0801302F");
+
+      assert.strictEqual(responseSiret.status, 200);
+      assert.strictEqual(responseSiret.data.length, 1);
+      assert.deepEqual(responseSiret.data[0].siret, "34012780200015");
     });
   });
 

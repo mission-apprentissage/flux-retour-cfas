@@ -65,18 +65,18 @@ module.exports = ({ cfas }) => {
    * Gets the dashboard data for cfa
    */
   router.get(
-    "/:uaiSiret",
+    "/:uaiOrSiret",
     tryCatch(async (req, res) => {
-      const { uaiSiret } = req.params;
+      const { uaiOrSiret } = req.params;
 
-      const uai = validateUai(uaiSiret);
+      const uai = validateUai(uaiOrSiret);
 
-      const cfaFound = uai ? await cfas.getFromUai(uaiSiret) : await cfas.getFromSiret(uaiSiret);
+      const cfaFound = uai ? await cfas.getFromUai(uaiOrSiret) : await cfas.getFromSiret(uaiOrSiret);
 
       if (!cfaFound) {
-        return res.status(404).json({ message: `No cfa found for uai ${uaiSiret}` });
+        return res.status(404).json({ message: `No cfa found for uai ${uaiOrSiret}` });
       } else {
-        const sousEtablissements = await cfas.getSousEtablissementsForUai(uaiSiret);
+        const sousEtablissements = await cfas.getSousEtablissementsForUai(uaiOrSiret);
 
         // Build response
         return res.json({
