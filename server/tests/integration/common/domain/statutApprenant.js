@@ -27,7 +27,7 @@ describe("Domain statut apprenant", () => {
       assert.equal(validateStatutApprenant(input), expectedOutput);
     });
 
-    it("Vérifie qu'un statut apprenant de valeur 3 est invalide", async () => {
+    it("Vérifie qu'un statut apprenant de valeur 3 est valide", async () => {
       const input = 3;
       const expectedOutput = true;
       assert.equal(validateStatutApprenant(input), expectedOutput);
