@@ -32,10 +32,10 @@ module.exports = ({ reseauxCfas }) => {
       const { nom_reseau, nom_etablissement, uai, siret } = req.body;
 
       const createReseauCfa = await reseauxCfas.create({
-        nom_reseau: nom_reseau,
-        nom_etablissement: nom_etablissement,
-        uai: uai,
-        siret: siret,
+        nom_reseau,
+        nom_etablissement,
+        uai,
+        siret,
       });
       return res.json(createReseauCfa);
     })
