@@ -16,7 +16,6 @@ module.exports = () => ({
   getSousEtablissementsForUai,
   getFromAccessToken,
   getFromUai,
-  getFromSiret,
 });
 
 const SEARCH_RESULTS_LIMIT = 50;
@@ -221,8 +220,4 @@ const getFromAccessToken = async (accessToken) => {
 
 const getFromUai = async (uai) => {
   return CfaModel.findOne({ uai }).lean();
-};
-
-const getFromSiret = async (siret) => {
-  return CfaModel.findOne({ sirets: siret }).lean();
 };

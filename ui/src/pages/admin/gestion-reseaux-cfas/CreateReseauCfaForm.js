@@ -4,11 +4,13 @@ import {
   FormControl,
   FormLabel,
   Input,
+  ListItem,
   ModalBody,
   ModalFooter,
   Select,
   Stack,
   Text,
+  UnorderedList,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import PropTypes from "prop-types";
@@ -16,13 +18,15 @@ import React, { useState } from "react";
 import { useQuery } from "react-query";
 import * as Yup from "yup";
 
-import { fetchCfa } from "../../../common/api/tableauDeBord";
+import { fetchSearchCfas } from "../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 import { siretRegex, validateSiret } from "../../../common/domain/siret";
 import { uaiRegex, validateUai } from "../../../common/domain/uai";
 
 const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
-  const [multiSirets, setMultiSirets] = useState(0);
+  const [checkSeveralSirets, setCheckSeveralSirets] = useState(0);
+  const [listSirets, setListSirets] = useState([]);
+
   const { values, handleChange, setFieldValue, errors, handleSubmit } = useFormik({
     initialValues: {
       nom_reseau: "",
@@ -44,16 +48,18 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
   const searchEnabled = validateUai(values.uai) || validateSiret(values.siret);
   const uaiOrSiret = validateUai(values.uai) ? values.uai : values.siret;
 
-  useQuery([QUERY_KEYS.CFAS, uaiOrSiret], () => fetchCfa(uaiOrSiret), {
+  useQuery([QUERY_KEYS.CFAS, uaiOrSiret], () => fetchSearchCfas({ searchTerm: uaiOrSiret }), {
     enabled: searchEnabled,
     onSuccess: (data) => {
-      setFieldValue("nom_etablissement", data?.libelleLong);
-      setFieldValue("uai", data?.uai);
-      if (data?.sousEtablissements.length === 1 && multiSirets === 0) {
-        setFieldValue("siret", data?.sousEtablissements[0].siret);
-        setMultiSirets(0);
+      setFieldValue("nom_etablissement", data[0]?.nom);
+      setFieldValue("uai", data[0]?.uai);
+      if (data[0]?.sirets.length === 1 && checkSeveralSirets === 0) {
+        setFieldValue("siret", data[0]?.sirets[0]);
+        setCheckSeveralSirets(0);
       } else {
-        setMultiSirets(1);
+        setFieldValue("siret", "");
+        setListSirets(data[0]?.sirets);
+        setCheckSeveralSirets(1);
       }
     },
     onError: () => {
@@ -84,17 +90,24 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
           <FormControl isRequired isInvalid={errors.nom_etablissement}>
             <FormLabel color="grey.800">Nom du CFA</FormLabel>
             <Input name="nom_etablissement" value={values.nom_etablissement} onChange={handleChange} />
-            {errors.nom_etablissement && <Text color="redmarianne">{errors.nom_etablissement}</Text>}
           </FormControl>
           <FormControl isRequired isInvalid={errors.uai}>
             <FormLabel color="grey.800">UAI</FormLabel>
             <Input name="uai" value={values.uai} onChange={handleChange} />
-            {errors.uai && <Text color="redmarianne">{errors.uai}</Text>}
           </FormControl>
           <FormControl isRequired isInvalid={errors.siret}>
             <FormLabel color="grey.800">Siret</FormLabel>
             <Input name="siret" value={values.siret} onChange={handleChange} />
-            {multiSirets === 1 && <Text color="redmarianne">Plusieurs sirets ont été trouvés</Text>}
+            {checkSeveralSirets === 1 && (
+              <Box color="redmarianne">
+                <Text>Plusieurs sirets ont été trouvés</Text>
+                <UnorderedList>
+                  {listSirets?.map((siret) => (
+                    <ListItem key={siret}>{siret}</ListItem>
+                  ))}
+                </UnorderedList>
+              </Box>
+            )}
           </FormControl>
         </Stack>
       </ModalBody>
