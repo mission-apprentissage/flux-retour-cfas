@@ -3,9 +3,11 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../../common/components";
-import withInfoFormationData from "./withInfoFormationData";
+import useFetchInfoFormation from "../../../../common/hooks/useFetchInfoFormation";
 
-const InfosFormationSection = ({ infosFormation, loading, error }) => {
+const InfosFormationSection = ({ infosFormation }) => {
+  const { data: formation, loading, error } = useFetchInfoFormation(infosFormation);
+
   if (loading) {
     return (
       <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
@@ -27,13 +29,13 @@ const InfosFormationSection = ({ infosFormation, loading, error }) => {
     );
   }
 
-  if (infosFormation) {
+  if (formation) {
     return (
       <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
         <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
           <Text marginBottom="2px">CFD :</Text>
           <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
-            {infosFormation.cfd}
+            {formation.cfd}
           </Badge>
         </HStack>
       </Section>
@@ -45,11 +47,8 @@ const InfosFormationSection = ({ infosFormation, loading, error }) => {
 
 InfosFormationSection.propTypes = {
   infosFormation: PropTypes.shape({
-    libelle: PropTypes.string.isRequired,
     cfd: PropTypes.string.isRequired,
   }),
-  loading: PropTypes.bool,
-  error: PropTypes.object,
 };
 
-export default withInfoFormationData(InfosFormationSection);
+export default InfosFormationSection;
