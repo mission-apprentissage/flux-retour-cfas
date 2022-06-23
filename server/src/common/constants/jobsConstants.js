@@ -29,7 +29,6 @@ const JOB_NAMES = {
   clearDossiersApprenantsNetworks: "clear-dossiersApprenants-networks",
   clearLogs: "clear-logs",
   clearAll: "clear-all",
-  exportDataForVoeuxAffelnet: "export-data-for-voeuxAffelnet",
   repostLatestDossiersApprenantsReceived: "repost-latest-dossiersApprenants-received",
   warmUpCache: "warm-up-cache",
   retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
