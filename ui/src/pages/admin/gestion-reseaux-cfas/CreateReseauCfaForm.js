@@ -24,7 +24,6 @@ import { siretRegex, validateSiret } from "../../../common/domain/siret";
 import { uaiRegex, validateUai } from "../../../common/domain/uai";
 
 const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
-  const [checkSeveralSirets, setCheckSeveralSirets] = useState(0);
   const [listSirets, setListSirets] = useState([]);
 
   const { values, handleChange, setFieldValue, errors, handleSubmit } = useFormik({
@@ -53,13 +52,11 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
     onSuccess: (data) => {
       setFieldValue("nom_etablissement", data[0]?.nom);
       setFieldValue("uai", data[0]?.uai);
-      if (data[0]?.sirets.length === 1 && checkSeveralSirets === 0) {
+      if (data[0]?.sirets.length === 1) {
         setFieldValue("siret", data[0]?.sirets[0]);
-        setCheckSeveralSirets(0);
       } else {
         setFieldValue("siret", "");
         setListSirets(data[0]?.sirets);
-        setCheckSeveralSirets(1);
       }
     },
     onError: () => {
@@ -98,7 +95,7 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
           <FormControl isRequired isInvalid={errors.siret}>
             <FormLabel color="grey.800">Siret</FormLabel>
             <Input name="siret" value={values.siret} onChange={handleChange} />
-            {checkSeveralSirets === 1 && (
+            {listSirets.length > 1 && (
               <Box color="redmarianne">
                 <Text>Plusieurs sirets ont été trouvés</Text>
                 <UnorderedList>
