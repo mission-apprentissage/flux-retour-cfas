@@ -60,7 +60,6 @@ const createRandomDossierApprenant = (params = {}) => {
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
-    date_entree_formation: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
     formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
     source: faker.random.word(),
     ...params,
@@ -123,7 +122,6 @@ const createRandomDossierApprenantApiInput = (params = {}) => {
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat().toISOString() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat().toISOString() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat().toISOString() : null,
-    date_entree_formation: faker.datatype.boolean() ? getRandomDateRuptureContrat().toISOString() : null,
     formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
 
     ...params,

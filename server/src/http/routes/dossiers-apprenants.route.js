@@ -53,7 +53,6 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     contrat_date_debut: dateSchema.allow(null),
     contrat_date_fin: dateSchema.allow(null),
     contrat_date_rupture: dateSchema.allow(null),
-    date_entree_formation: dateSchema.allow(null),
   });
 
   const commonDossiersApprenantsFilters = {
