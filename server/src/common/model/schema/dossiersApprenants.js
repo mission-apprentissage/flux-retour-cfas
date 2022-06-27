@@ -28,11 +28,6 @@ module.exports = new Schema({
     description: "CFD de la formation à laquelle l'apprenant est inscrit",
     index: true,
   },
-  libelle_court_formation: {
-    type: String,
-    default: null,
-    description: "Libellé court de la formation visée",
-  },
   libelle_long_formation: {
     type: String,
     default: null,
@@ -208,17 +203,6 @@ module.exports = new Schema({
     default: null,
     description: "Date de naissance de l'apprenant",
   },
-  etablissement_formateur_geo_coordonnees: {
-    type: String,
-    implicit_type: "geo_point",
-    default: null,
-    description: "Latitude et longitude de l'établissement formateur",
-  },
-  etablissement_formateur_code_commune_insee: {
-    type: String,
-    default: null,
-    description: "Code commune de l'établissement formateur",
-  },
   etablissement_formateur_ville: {
     type: String,
     default: null,
@@ -238,11 +222,6 @@ module.exports = new Schema({
     type: Date,
     default: null,
     description: "Date de rupture du contrat",
-  },
-  date_entree_formation: {
-    type: Date,
-    default: null,
-    description: "Date d'entrée dans la formation",
   },
   formation_rncp: {
     type: String,

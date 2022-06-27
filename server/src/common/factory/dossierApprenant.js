@@ -30,10 +30,7 @@ class DossierApprenant extends BaseFactory {
       code_commune_insee_apprenant: Joi.string().allow(null),
       siret_etablissement: Joi.string().allow(null, ""),
       siret_etablissement_valid: Joi.boolean(),
-      etablissement_formateur_geo_coordonnees: Joi.string().allow(null),
-      etablissement_formateur_code_commune_insee: Joi.string().allow(null),
 
-      libelle_court_formation: Joi.string().allow(null, ""),
       libelle_long_formation: Joi.string().allow(null, ""),
       niveau_formation: Joi.string().allow(null, ""),
       niveau_formation_libelle: Joi.string().allow(null, ""),
@@ -45,7 +42,6 @@ class DossierApprenant extends BaseFactory {
       contrat_date_debut: Joi.date().allow(null),
       contrat_date_fin: Joi.date().allow(null),
       contrat_date_rupture: Joi.date().allow(null),
-      date_entree_formation: Joi.date().allow(null),
       source: Joi.string().required(),
       etablissement_reseaux: Joi.array().items(Joi.string()).allow(null, ""),
     });

@@ -30,7 +30,6 @@ const getRandomAnneeScolaire = () => {
 const getRandomDateDebutContrat = () => faker.date.between(subMonths(new Date(), 6), subMonths(new Date(), 1));
 const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
-const getRandomCoordonnates = () => `${faker.address.latitude()},${faker.address.longitude()}`;
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
 const createRandomDossierApprenant = (params = {}) => {
@@ -44,9 +43,6 @@ const createRandomDossierApprenant = (params = {}) => {
     email_contact: faker.internet.email(),
 
     formation_cfd: getRandomIdFormation(),
-    libelle_court_formation: faker.datatype.boolean()
-      ? faker.helpers.arrayElement(sampleLibelles).intitule_court
-      : null,
     libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : null,
@@ -61,12 +57,9 @@ const createRandomDossierApprenant = (params = {}) => {
     tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
     date_de_naissance_apprenant: getRandomDateNaissance(),
-    etablissement_formateur_geo_coordonnees: faker.datatype.boolean() ? getRandomCoordonnates() : null,
-    etablissement_formateur_code_commune_insee: faker.datatype.boolean() ? faker.address.zipCode() : null,
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
-    date_entree_formation: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
     formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
     source: faker.random.word(),
     ...params,
@@ -81,7 +74,6 @@ const createRandomEffectifApprenant = (params = {}) => {
     dossierApprenantId: faker.datatype.uuid(),
     uai_etablissement: getRandomUaiEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-    etablissement_formateur_code_commune_insee: faker.datatype.boolean() ? faker.address.zipCode() : null,
     etablissement_code_postal: faker.datatype.boolean() ? faker.address.zipCode() : null,
     statut_apprenant: getRandomStatutApprenant(),
     formation_cfd: getRandomIdFormation(),
@@ -113,9 +105,6 @@ const createRandomDossierApprenantApiInput = (params = {}) => {
     email_contact: faker.internet.email(),
 
     id_formation: getRandomIdFormation(),
-    libelle_court_formation: faker.datatype.boolean()
-      ? faker.helpers.arrayElement(sampleLibelles).intitule_court
-      : null,
     libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : "",
@@ -130,12 +119,9 @@ const createRandomDossierApprenantApiInput = (params = {}) => {
     tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
 
-    etablissement_formateur_geo_coordonnees: faker.datatype.boolean() ? getRandomCoordonnates() : null,
-    etablissement_formateur_code_commune_insee: faker.datatype.boolean() ? faker.address.zipCode() : null,
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat().toISOString() : null,
     contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat().toISOString() : null,
     contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat().toISOString() : null,
-    date_entree_formation: faker.datatype.boolean() ? getRandomDateRuptureContrat().toISOString() : null,
     formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
 
     ...params,
