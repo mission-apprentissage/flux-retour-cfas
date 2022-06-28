@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../../common/components";
-import useFetchInfoFormation from "../../../../common/hooks/useFetchInfoFormation";
+import useFetchFormationInfo from "../../../../common/hooks/useFetchFormationInfo";
 
 const InfosFormationSection = ({ infosFormation }) => {
-  const { data: formation, loading, error } = useFetchInfoFormation(infosFormation);
+  const { data: formation, loading, error } = useFetchFormationInfo(infosFormation);
 
   if (loading) {
     return (
