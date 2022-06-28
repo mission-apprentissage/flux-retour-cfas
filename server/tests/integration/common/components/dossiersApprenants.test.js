@@ -13,6 +13,12 @@ const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConst
 const { Formation } = require("../../../../src/common/factory/formation");
 
 describe(__filename, () => {
+  let fakeNowDate;
+  beforeEach(() => {
+    fakeNowDate = new Date();
+    MockDate.set(fakeNowDate);
+  });
+
   afterEach(() => {
     MockDate.reset();
   });
@@ -152,8 +158,6 @@ describe(__filename, () => {
   describe("addOrUpdateDossiersApprenants", () => {
     it("Vérifie l'ajout ou la mise à jour d'un statut'", async () => {
       const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
-      const fakeNowDate = new Date();
-      MockDate.set(fakeNowDate);
 
       const seed1 = [
         createRandomDossierApprenant({
@@ -824,8 +828,6 @@ describe(__filename, () => {
 
     it("Vérifie que historique_statut_apprenant reste inchangé lorsque le statut_apprenant et date_metier_mise_a_jour_statut fournis existent déjà", async () => {
       const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
-      const fakeNowDate = new Date();
-      MockDate.set(fakeNowDate);
 
       const randomDossierApprenantProps = createRandomDossierApprenant({
         date_metier_mise_a_jour_statut: new Date("2022-04-01"),
@@ -850,8 +852,6 @@ describe(__filename, () => {
 
     it("Vérifie qu'on ajoute un élément à historique_statut_apprenant lorsque le statut_apprenant et date_metier_mise_a_jour_statut fournis n'existent pas", async () => {
       const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
-      const fakeNowDate = new Date();
-      MockDate.set(fakeNowDate);
 
       const randomDossierApprenantProps = createRandomDossierApprenant({
         date_metier_mise_a_jour_statut: new Date("2022-04-01"),
@@ -889,8 +889,6 @@ describe(__filename, () => {
 
     it("Vérifie qu'on update historique_statut_apprenant en supprimant les éléments d'historique postérieurs à la date_metier_mise_a_jour_statut envoyée", async () => {
       const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
-      const fakeNowDate = new Date();
-      MockDate.set(fakeNowDate);
 
       const randomDossierApprenantProps = createRandomDossierApprenant({
         date_metier_mise_a_jour_statut: new Date(),
@@ -1000,8 +998,6 @@ describe(__filename, () => {
   describe("createDossierApprenant", () => {
     it("Vérifie la création d'un dossierApprenant randomisé", async () => {
       const { createDossierApprenant } = await dossiersApprenants();
-      const fakeNowDate = new Date();
-      MockDate.set(fakeNowDate);
 
       const randomStatut = createRandomDossierApprenant();
 
