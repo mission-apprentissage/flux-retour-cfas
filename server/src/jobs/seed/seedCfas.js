@@ -98,7 +98,7 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
       if (cfaExistant) {
         const updatedCfa = await cfas.updateCfa(cfaExistant._id, dossierForUai, allSiretsForUai);
         if (updatedCfa !== null) {
-          nbUpdateErrors++;
+          nbUpdate++;
         } else {
           logger.error(`Cfas with uai ${currentUai} not updated !`);
           nbUpdateErrors++;
