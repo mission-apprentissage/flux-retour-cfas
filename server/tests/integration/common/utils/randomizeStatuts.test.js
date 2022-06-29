@@ -23,7 +23,6 @@ describe(__filename, () => {
 
       assert.equal(result.email_contact, randomDossierApprenantProps.email_contact);
       assert.equal(result.formation_cfd, randomDossierApprenantProps.formation_cfd);
-      assert.equal(result.libelle_court_formation, randomDossierApprenantProps.libelle_court_formation);
       assert.equal(result.libelle_long_formation, randomDossierApprenantProps.libelle_long_formation);
       assert.equal(result.uai_etablissement, randomDossierApprenantProps.uai_etablissement);
       assert.equal(result.siret_etablissement, randomDossierApprenantProps.siret_etablissement);
@@ -66,7 +65,6 @@ describe(__filename, () => {
       );
       assert.deepEqual(result.email_contact, randomStatut.email_contact);
       assert.deepEqual(result.formation_cfd, randomStatut.formation_cfd);
-      assert.deepEqual(result.libelle_court_formation, randomStatut.libelle_court_formation);
       assert.deepEqual(result.libelle_long_formation, randomStatut.libelle_long_formation);
       assert.deepEqual(result.uai_etablissement, randomStatut.uai_etablissement);
       assert.deepEqual(result.siret_etablissement, randomStatut.siret_etablissement);

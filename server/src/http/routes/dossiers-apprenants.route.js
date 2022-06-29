@@ -44,10 +44,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     code_commune_insee_apprenant: Joi.string().allow(null),
 
     siret_etablissement: Joi.string().regex(siretRegex).allow(null, ""),
-    etablissement_formateur_geo_coordonnees: Joi.string().allow(null),
-    etablissement_formateur_code_commune_insee: Joi.string().allow(null),
 
-    libelle_court_formation: Joi.string().allow(null, ""),
     libelle_long_formation: Joi.string().allow(null, ""),
     periode_formation: Joi.string().allow(null, ""),
     annee_formation: Joi.number().allow(null),
@@ -56,7 +53,6 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     contrat_date_debut: dateSchema.allow(null),
     contrat_date_fin: dateSchema.allow(null),
     contrat_date_rupture: dateSchema.allow(null),
-    date_entree_formation: dateSchema.allow(null),
   });
 
   const commonDossiersApprenantsFilters = {

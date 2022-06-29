@@ -22,31 +22,30 @@ runScript(async () => {
  * MAJ les DossierApprenant pour ce CFA
  */
 const retrieveNetworks = async () => {
-  // Parse tous les CFAs du référentiel avec un réseau
-  const cfasWithReseaux = await CfaModel.find({
-    reseaux: { $exists: true },
-  }).lean();
+  // Parse tous les CFAs avec au moins un réseau
+  const cfasWithReseaux = await CfaModel.find({ reseaux: { $exists: true, $ne: [] } }).lean();
 
-  logger.info(`Searching for ${cfasWithReseaux.length} CFAs in référentiel`);
+  logger.info(`Récupération des réseaux pour ${cfasWithReseaux.length} CFAs avec au moins un réseau`);
   loadingBar.start(cfasWithReseaux.length, 0);
 
-  await asyncForEach(cfasWithReseaux, async (cfaReferentiel) => {
-    // Si siret fourni on update les statuts pour ce siret
-    if (cfaReferentiel.sirets) {
-      // Recupération des DossierApprenant pour ces sirets
-      const statutsForSirets = await DossierApprenantModel.find({
-        siret_etablissement: { $in: cfaReferentiel.sirets },
+  await asyncForEach(cfasWithReseaux, async (currentCfaWithReseau) => {
+    // Si liste de sirets on update les dossiers apprenants pour ces sirets
+    if (currentCfaWithReseau.sirets?.length > 0) {
+      // Récupération des DossierApprenant pour ces sirets
+      const dossiersForSirets = await DossierApprenantModel.find({
+        siret_etablissement: { $in: currentCfaWithReseau.sirets },
       }).lean();
-      if (statutsForSirets) {
-        await updateNetworksForStatuts(statutsForSirets, cfaReferentiel);
+
+      if (dossiersForSirets) {
+        await updateNetworksForDossiersApprenants(dossiersForSirets, currentCfaWithReseau);
       }
     } else {
-      // Sinon si uai fourni on update les statuts pour cet uai
-      if (cfaReferentiel.uai) {
+      // Sinon si uai fourni on update les dossiers apprenants pour cet uai
+      if (currentCfaWithReseau.uai) {
         // Recupération des DossierApprenant pour cet uai
-        const statutsForUai = await DossierApprenantModel.find({ uai_etablissement: cfaReferentiel.uai }).lean();
-        if (statutsForUai) {
-          await updateNetworksForStatuts(statutsForUai, cfaReferentiel);
+        const dossiersForUai = await DossierApprenantModel.find({ uai_etablissement: currentCfaWithReseau.uai }).lean();
+        if (dossiersForUai) {
+          await updateNetworksForDossiersApprenants(dossiersForUai, currentCfaWithReseau);
         }
       }
     }
@@ -59,20 +58,20 @@ const retrieveNetworks = async () => {
 
 /**
  * Méthode de MAJ d'une liste de DossierApprenant à partir d'un CFA du référentiel
- * @param {*} statutsToUpdate
+ * @param {*} dossiersToUpdate
  * @param {*} cfaReferentiel
  * @returns
  */
-const updateNetworksForStatuts = async (statutsToUpdate, cfaReferentiel) => {
-  await asyncForEach(statutsToUpdate, async (currentStatut) => {
-    // Update du statut s'il n'a pas de réseau
-    if (!currentStatut.etablissement_reseaux) {
-      await addReseauxToDossierApprenant(currentStatut, cfaReferentiel.reseaux);
+const updateNetworksForDossiersApprenants = async (dossiersToUpdate, cfaReferentiel) => {
+  await asyncForEach(dossiersToUpdate, async (currentDossier) => {
+    // Update du dossier apprenant s'il n'a pas de réseau
+    if (!currentDossier.etablissement_reseaux) {
+      await addReseauxToDossierApprenant(currentDossier, cfaReferentiel.reseaux);
     } else {
-      // Identification des réseaux manquants dans le statut, et update si nécessaire
-      const missingNetworks = cfaReferentiel.reseaux.filter((x) => !currentStatut.etablissement_reseaux.includes(x));
+      // Identification des réseaux manquants dans le dossier apprenant, et update si nécessaire
+      const missingNetworks = cfaReferentiel.reseaux.filter((x) => !currentDossier.etablissement_reseaux.includes(x));
       if (missingNetworks.length > 0) {
-        await addReseauxToDossierApprenant(currentStatut, missingNetworks);
+        await addReseauxToDossierApprenant(currentDossier, missingNetworks);
       }
     }
   });
@@ -80,12 +79,12 @@ const updateNetworksForStatuts = async (statutsToUpdate, cfaReferentiel) => {
 
 /**
  * Ajout de réseaux à un DossierApprenant
- * @param {*} currentStatutForSiret
+ * @param {*} currentDossierForSiret
  * @param {*} reseauxToAdd
  */
-const addReseauxToDossierApprenant = async (currentStatutForSiret, reseauxToAdd) => {
+const addReseauxToDossierApprenant = async (currentDossierForSiret, reseauxToAdd) => {
   await DossierApprenantModel.findByIdAndUpdate(
-    currentStatutForSiret._id,
+    currentDossierForSiret._id,
     {
       $addToSet: {
         etablissement_reseaux: reseauxToAdd,

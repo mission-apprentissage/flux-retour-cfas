@@ -1,5 +1,7 @@
 const assert = require("assert").strict;
-const { addDays, differenceInMilliseconds, isEqual } = require("date-fns");
+// eslint-disable-next-line node/no-unpublished-require
+const MockDate = require("mockdate");
+const { addDays, isEqual } = require("date-fns");
 const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
 const { DossierApprenantModel, CfaModel, FormationModel } = require("../../../../src/common/model");
 const { createRandomDossierApprenant, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
@@ -10,11 +12,17 @@ const {
 const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
 const { Formation } = require("../../../../src/common/factory/formation");
 
-const isApproximatelyNow = (date) => {
-  return Math.abs(differenceInMilliseconds(date, new Date())) < 50;
-};
-
 describe(__filename, () => {
+  let fakeNowDate;
+  beforeEach(() => {
+    fakeNowDate = new Date();
+    MockDate.set(fakeNowDate);
+  });
+
+  afterEach(() => {
+    MockDate.reset();
+  });
+
   describe("getDossierApprenant", () => {
     it("Vérifie la récupération d'un statut sur les champs d'unicité : nom, prenom, date_de_naissance, formation_cfd, uai_etablissement et annee_scolaire", async () => {
       const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
@@ -212,7 +220,7 @@ describe(__filename, () => {
         firstUpdated.historique_statut_apprenant[0].date_statut.getTime(),
         seed1[0].date_metier_mise_a_jour_statut.getTime()
       );
-      assert.equal(isApproximatelyNow(firstUpdated.updated_at), true);
+      assert.equal(firstUpdated.updated_at.getTime(), fakeNowDate.getTime());
 
       const secondUpdated = await DossierApprenantModel.findById(updated[1]._id).lean();
       assert.equal(secondUpdated.nom_apprenant.toUpperCase(), seed1[1].nom_apprenant.toUpperCase());
@@ -226,7 +234,7 @@ describe(__filename, () => {
         secondUpdated.historique_statut_apprenant[1].date_statut.getTime(),
         seed2[1].date_metier_mise_a_jour_statut.getTime()
       );
-      assert.equal(isApproximatelyNow(secondUpdated.updated_at), true);
+      assert.equal(secondUpdated.updated_at.getTime(), fakeNowDate.getTime());
 
       const thirdUpdated = await DossierApprenantModel.findById(updated[2]._id).lean();
       assert.equal(thirdUpdated.nom_apprenant.toUpperCase(), seed1[2].nom_apprenant.toUpperCase());
@@ -240,7 +248,7 @@ describe(__filename, () => {
         thirdUpdated.historique_statut_apprenant[0].date_statut.getTime(),
         seed1[2].date_metier_mise_a_jour_statut.getTime()
       );
-      assert.equal(isApproximatelyNow(thirdUpdated.updated_at), true);
+      assert.equal(thirdUpdated.updated_at.getTime(), fakeNowDate.getTime());
     });
 
     it("Vérifie qu'on peut créer un statut avec une période formation sur une même année", async () => {
@@ -829,7 +837,7 @@ describe(__filename, () => {
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, CODES_STATUT_APPRENANT.apprenti);
-      assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
+      assert.equal(createdStatut.historique_statut_apprenant[0].date_reception.getTime(), fakeNowDate.getTime());
 
       // Mise à jour du statut avec le même statut_apprenant
       await updateDossierApprenant(createdStatut._id, {
@@ -853,13 +861,16 @@ describe(__filename, () => {
 
       assert.equal(createdStatut.historique_statut_apprenant.length, 1);
       assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, CODES_STATUT_APPRENANT.inscrit);
-      assert.equal(isApproximatelyNow(createdStatut.historique_statut_apprenant[0].date_reception), true);
+      assert.equal(createdStatut.historique_statut_apprenant[0].date_reception.getTime(), fakeNowDate.getTime());
 
       // Mise à jour du statut avec nouveau statut_apprenant
       const updatePayload = {
         statut_apprenant: CODES_STATUT_APPRENANT.abandon,
         date_metier_mise_a_jour_statut: "2022-05-13",
       };
+      MockDate.reset();
+      const fakeNowDate2 = new Date();
+      MockDate.set(fakeNowDate2);
       await updateDossierApprenant(createdStatut._id, updatePayload);
 
       // Check value in db
@@ -872,7 +883,7 @@ describe(__filename, () => {
         updatedHistorique[1].date_statut.getTime(),
         new Date(updatePayload.date_metier_mise_a_jour_statut).getTime()
       );
-      assert.equal(isApproximatelyNow(updatedHistorique[1].date_reception), true);
+      assert.equal(updatedHistorique[1].date_reception.getTime(), fakeNowDate2.getTime());
       assert.equal(isEqual(updatedHistorique[1].date_reception, updatedHistorique[0].date_reception), false);
     });
 
@@ -894,7 +905,7 @@ describe(__filename, () => {
       const found1 = await DossierApprenantModel.findById(createdStatut._id);
       assert.equal(found1.historique_statut_apprenant.length, 2);
       assert.equal(found1.historique_statut_apprenant[1].valeur_statut, CODES_STATUT_APPRENANT.inscrit);
-      assert.equal(isApproximatelyNow(found1.historique_statut_apprenant[1].date_reception), true);
+      assert.equal(found1.historique_statut_apprenant[0].date_reception.getTime(), fakeNowDate.getTime());
 
       // update du statut avec une date antérieur au dernier élément de historique_statut_apprenant
       const updatePayload = {
@@ -911,7 +922,6 @@ describe(__filename, () => {
         found2.historique_statut_apprenant[1].date_statut.getTime(),
         updatePayload.date_metier_mise_a_jour_statut.getTime()
       );
-      assert.equal(isApproximatelyNow(found2.historique_statut_apprenant[1].date_reception), true);
     });
 
     it("Vérifie qu'on met à jour updated_at après un update", async () => {
@@ -999,7 +1009,6 @@ describe(__filename, () => {
       assert.equal(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant.toUpperCase());
       assert.equal(createdStatutJson.email_contact, randomStatut.email_contact);
       assert.equal(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
-      assert.equal(createdStatutJson.libelle_court_formation, randomStatut.libelle_court_formation);
       assert.equal(createdStatutJson.libelle_long_formation, randomStatut.libelle_long_formation);
       assert.equal(createdStatutJson.uai_etablissement, randomStatut.uai_etablissement);
       assert.equal(createdStatutJson.siret_etablissement, randomStatut.siret_etablissement);
@@ -1014,7 +1023,8 @@ describe(__filename, () => {
         createdStatutJson.historique_statut_apprenant[0].date_statut.getTime(),
         randomStatut.date_metier_mise_a_jour_statut.getTime()
       );
-      assert.equal(isApproximatelyNow(createdStatutJson.historique_statut_apprenant[0].date_reception), true);
+      assert.equal(createdStatutJson.historique_statut_apprenant[0].date_reception.getTime(), fakeNowDate.getTime());
+
       assert.equal(createdStatutJson.updated_at, null);
     });
 

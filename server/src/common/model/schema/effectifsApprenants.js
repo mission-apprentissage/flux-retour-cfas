@@ -18,11 +18,6 @@ module.exports = new Schema({
     default: null,
     description: "Nom de l'établissement d'origine",
   },
-  etablissement_formateur_code_commune_insee: {
-    type: String,
-    default: null,
-    description: "Code commune de l'établissement formateur",
-  },
   etablissement_code_postal: {
     type: String,
     default: null,

@@ -44,51 +44,49 @@ const ApercuDesDonneesSection = () => {
         <Text fontWeight="700" color="grey.800" fontSize="gamma">
           Aujourd&apos;hui, le tableau de bord est interfaçable avec :
         </Text>
-        <HStack spacing="1w" paddingY="3v">
-          {ERPS.map(({ name, state }) => {
+        <HStack marginTop="3v">
+          {ERPS.filter((erp) => erp.state !== "coming").map(({ name, state }) => {
             return (
               <Box key={name}>
-                {state != "coming" && (
-                  <Box fontSize="epsilon" color="grey.800" alignItems="center">
-                    <Checkbox color="#03053D" />
-                    <Text marginLeft="1w" as="span">
-                      <strong>
-                        {name}
-                        {state === "ongoing" && <Text as="span"> (en cours)</Text>}
-                      </strong>
-                    </Text>
-                  </Box>
-                )}
+                <Box fontSize="epsilon" color="grey.800" alignItems="center">
+                  <Checkbox color="#03053D" />
+                  <Text marginLeft="1w" as="span">
+                    <strong>
+                      {name}
+                      {state === "ongoing" && <Text as="span"> (en cours)</Text>}
+                    </strong>
+                  </Text>
+                </Box>
               </Box>
             );
           })}
-          <Flex>
-            <Text color="grey.600" fontWeight={700}>
-              À venir :
-            </Text>
-            {ERPS.map(({ name, state }) => {
+        </HStack>
+        <Flex marginTop="3v">
+          <Text color="grey.600" fontWeight={700}>
+            À venir :
+          </Text>
+          <HStack spacing="1w" marginLeft="2w">
+            {ERPS.filter((erp) => erp.state === "coming").map(({ name }) => {
               return (
                 <Box key={name}>
-                  {state === "coming" && (
-                    <Box fontSize="epsilon" color="grey.800" marginTop="-2px" marginLeft="1w">
-                      <Checkbox
-                        marginLeft="1v"
-                        color="white"
-                        bg="white"
-                        border="2px solid"
-                        borderColor="#03053D"
-                        borderRadius="20px"
-                      />
-                      <Text as="span" marginLeft="1w">
-                        <strong>{name}</strong>
-                      </Text>
-                    </Box>
-                  )}
+                  <Box fontSize="epsilon" color="grey.800" marginTop="-2px">
+                    <Checkbox
+                      marginLeft="1v"
+                      color="white"
+                      bg="white"
+                      border="2px solid"
+                      borderColor="#03053D"
+                      borderRadius="20px"
+                    />
+                    <Text as="span" marginLeft="1w">
+                      <strong>{name}</strong>
+                    </Text>
+                  </Box>
                 </Box>
               );
             })}
-          </Flex>
-        </HStack>
+          </HStack>
+        </Flex>
       </Box>
     </Section>
   );

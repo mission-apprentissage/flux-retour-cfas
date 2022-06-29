@@ -5,7 +5,9 @@ const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DossierApprenantModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const { getFormations } = require("../../../common/apis/apiCatalogueMna");
+const { sleep } = require("../../../common/utils/miscUtils");
 
+const CATALOGUE_API_REQUEST_DELAY = 150;
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
@@ -45,6 +47,11 @@ runScript(async () => {
       },
     });
 
+    // if an error occured while requesting catalogue API, function will return null
+    if (formationsForUai === null) {
+      return;
+    }
+
     // Build lists depending results
     if (formationsForUai.length === 0) {
       uaisNotFoundCatalog.push({ uai: currentUai });
@@ -73,6 +80,7 @@ runScript(async () => {
         etablissement_formateur_siret: formationsForUai[0].etablissement_formateur_siret,
       });
     }
+    await sleep(CATALOGUE_API_REQUEST_DELAY);
   });
 
   loadingBar.stop();
