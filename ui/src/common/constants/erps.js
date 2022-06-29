@@ -28,10 +28,17 @@ export const ERPS = [
     state: ERP_STATE.ready,
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/scform.pdf",
   },
+  {
+    name: "Formasup",
+    state: ERP_STATE.ready,
+  },
   { name: "FCA Manager", state: ERP_STATE.ongoing },
   { name: "Auriga", state: ERP_STATE.ongoing },
+  { name: "CNAM (Gessic@)", state: ERP_STATE.coming },
+  { name: "SI2G", state: ERP_STATE.coming },
   { name: "Hyperplanning", state: ERP_STATE.coming },
   { name: "Valsoftware", state: ERP_STATE.coming },
+  { name: "Agate", state: ERP_STATE.coming },
 ];
 
 export const ERPS_FORM_CASES = [
