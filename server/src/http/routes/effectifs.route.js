@@ -20,6 +20,7 @@ const omit = require("lodash.omit");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { toXlsxBuffer } = require("../../common/utils/exporterUtils");
+const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -144,7 +145,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
       // create event
       await userEvents.create({
-        action: "export-xlsx-data-lists",
+        action: USER_EVENTS_ACTIONS.EXPORT.XLSX_DATA_LISTS,
         username: req.user.username,
         data: req.query,
       });
@@ -579,7 +580,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
       // create event
       await userEvents.create({
-        action: "export-csv-repartition-effectifs-par-organisme",
+        action: USER_EVENTS_ACTIONS.EXPORT.CSV_REPARTITION_ORGANISME,
         username: req.user.username,
         data: req.query,
       });
@@ -635,7 +636,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
       // create event
       await userEvents.create({
-        action: "export-csv-repartition-effectifs-par-formation",
+        action: USER_EVENTS_ACTIONS.EXPORT.CSV_REPARTITION_FORMATION,
         username: req.user.username,
         data: req.query,
       });

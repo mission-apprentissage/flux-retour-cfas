@@ -1,5 +1,6 @@
 const express = require("express");
 const Joi = require("joi");
+const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 
@@ -20,7 +21,7 @@ module.exports = ({ users, userEvents }) => {
 
         await userEvents.create({
           username: updatedUser.username,
-          action: "update-password",
+          action: USER_EVENTS_ACTIONS.UPDATE_PASSWORD,
         });
         return res.json({ message: "success" });
       } catch (err) {
