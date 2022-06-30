@@ -37,7 +37,7 @@ const CreateReseauCfaModal = ({ isOpen, onClose }) => {
         <ModalClosingButton />
         <CreateReseauCfaForm
           networkList={networkList}
-          onSubmit={async (data) => {
+          createReseauCfa={async (data) => {
             await createReseauCfa.mutateAsync(data);
           }}
         />
