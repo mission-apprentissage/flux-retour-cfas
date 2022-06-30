@@ -35,7 +35,7 @@ export const ERPS = [
   { name: "FCA Manager", state: ERP_STATE.ongoing },
   { name: "Auriga", state: ERP_STATE.ongoing },
   { name: "CNAM (Gessic@)", state: ERP_STATE.coming },
-  { name: "SI2G", state: ERP_STATE.coming },
+  { name: "Alcuin Software", state: ERP_STATE.coming },
   { name: "Hyperplanning", state: ERP_STATE.coming },
   { name: "Valsoftware", state: ERP_STATE.coming },
   { name: "Agate", state: ERP_STATE.coming },
