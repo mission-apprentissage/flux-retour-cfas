@@ -1,15 +1,19 @@
-import { Button, Tbody, Td, Tr, useToast } from "@chakra-ui/react";
-import React from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { Box, Button, Table, TableCaption, Tbody, Td, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+import Pagination from "@choc-ui/paginator";
+import PropTypes from "prop-types";
+import React, { forwardRef } from "react";
+import { useMutation, useQueryClient } from "react-query";
 
-import { deleteReseauCfa, fetchReseauxCfas } from "../../../common/api/tableauDeBord";
-import { Table } from "../../../common/components";
+import { deleteReseauCfa } from "../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 
-const ReseauxCfasTable = () => {
+const ReseauxCfasTable = ({ reseauxCfas }) => {
   const toast = useToast();
-  const { data, isLoading } = useQuery([QUERY_KEYS.RESEAUX_CFAS], () => fetchReseauxCfas());
-  const reseauxCfasList = data;
+  const [current, setCurrent] = React.useState(1);
+
+  const pageSize = 10;
+  const offset = (current - 1) * pageSize;
+  const reseauxCfasSliced = reseauxCfas?.slice(offset, offset + pageSize);
 
   const queryClient = useQueryClient();
   const deleteReseauxCfas = useMutation(
@@ -22,15 +26,69 @@ const ReseauxCfasTable = () => {
       },
     }
   );
+
+  const Prev = forwardRef((props, ref) => (
+    <Button ref={ref} {...props}>
+      <Box as="i" className="ri-arrow-left-s-line" />
+    </Button>
+  ));
+  const Next = forwardRef((props, ref) => (
+    <Button ref={ref} {...props}>
+      <Box as="i" className="ri-arrow-right-s-line" />
+    </Button>
+  ));
+
+  const itemRender = (_, type) => {
+    if (type === "prev") {
+      return Prev;
+    }
+    if (type === "next") {
+      return Next;
+    }
+  };
+
+  Prev.displayName = "prev";
+  Next.displayName = "next";
+
   return (
-    <Table headers={["Réseau", "Nom du CFA", "UAI", ""]} loading={isLoading}>
+    <Table variant="secondary">
+      <TableCaption>
+        <Pagination
+          current={current}
+          onChange={(page) => {
+            setCurrent(page);
+          }}
+          pageSize={pageSize}
+          total={reseauxCfas?.length}
+          itemRender={itemRender}
+          paginationProps={{
+            display: "flex",
+            pos: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+          baseStyles={{ bg: "white" }}
+          activeStyles={{ bg: "bluefrance", color: "white", pointerEvents: "none" }}
+          hoverStyles={{ bg: "galt", color: "grey.800" }}
+        />
+      </TableCaption>
+      <Thead>
+        <Tr background="galt">
+          <Th>Réseau</Th>
+          <Th>Nom du CFA</Th>
+          <Th>UAI</Th>
+          <Th>Siret</Th>
+          <Th>Supprimer un reseau CFA</Th>
+        </Tr>
+      </Thead>
       <Tbody>
-        {reseauxCfasList?.map(({ id, nom_reseau, nom_etablissement, uai }) => {
+        {reseauxCfasSliced?.map(({ id, nom_reseau, nom_etablissement, uai, siret }) => {
           return (
             <Tr key={id}>
               <Td color="bluefrance">{nom_reseau}</Td>
               <Td color="grey.800">{nom_etablissement}</Td>
               <Td color="grey.800">{uai}</Td>
+              <Td color="grey.800">{siret}</Td>
               <Td color="grey.800">
                 <Button
                   variant="secondary"
@@ -53,6 +111,10 @@ const ReseauxCfasTable = () => {
       </Tbody>
     </Table>
   );
+};
+
+ReseauxCfasTable.propTypes = {
+  reseauxCfas: PropTypes.array,
 };
 
 export default ReseauxCfasTable;

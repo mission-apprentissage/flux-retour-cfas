@@ -1,32 +1,14 @@
-import { Box, Divider, Heading, Skeleton, Stack, Text } from "@chakra-ui/react";
+import { Box, Divider, Heading } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { filtersPropTypes } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import InputLegend from "../InputLegend/InputLegend";
+import Loading from "../Loading/Loading";
+import NoResults from "../NoResults/NoResults";
 import SearchInput from "../SearchInput/SearchInput";
 import FormationsList from "./FormationsList";
 import useFormationSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "./useFormationSearch";
-
-const NoResults = () => {
-  return (
-    <Text color="grey.800" fontWeight="700" paddingTop="2w" paddingLeft="1w">
-      Il n&apos;y a aucun résultat pour votre recherche sur le territoire sélectionné
-    </Text>
-  );
-};
-
-const Loading = () => {
-  return (
-    <Stack spacing="2w" paddingLeft="1w" marginTop="2w">
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-      <Skeleton startColor="grey.300" endColor="grey.500" width="100%" height="1.5rem" />;
-    </Stack>
-  );
-};
 
 const FormationFilterMenu = ({ filters, onFormationClick }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,7 +28,9 @@ const FormationFilterMenu = ({ filters, onFormationClick }) => {
           <Divider marginTop="3v" borderBottomColor="grey.300" orientation="horizontal" />
         </Box>
       )}
-      {searchTerm.length > 0 && searchResults?.length === 0 && <NoResults />}
+      {searchTerm.length > 0 && searchResults?.length === 0 && (
+        <NoResults title="Il n'y a aucun résultat pour votre recherche sur le territoire sélectionné" />
+      )}
       {loading && <Loading />}
       {searchResults?.length > 0 && (
         <FormationsList

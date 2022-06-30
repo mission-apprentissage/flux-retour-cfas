@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas-ui",
-  "version": "2.76.0",
+  "version": "2.76.1",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "@chakra-ui/react": "1.8.8",
+    "@choc-ui/paginator": "3.4.0",
     "@emotion/react": "11.9.0",
     "@emotion/styled": "11.8.1",
     "@nivo/bar": "0.74.0",

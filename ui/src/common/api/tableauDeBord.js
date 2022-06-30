@@ -108,6 +108,11 @@ export const fetchRepartitionByFormationCsvExport = (filters) => {
   return _get(url, { jsonResponse: false });
 };
 
+/* Reseaux CFAS Search */
+export const fetchSearchReseauxCfas = async (filters) => {
+  return await _post("/api/reseaux-cfas/search", filters);
+};
+
 /* CFA Search */
 export const fetchSearchCfas = async (filters) => {
   return await _post("/api/cfas/search", filters);

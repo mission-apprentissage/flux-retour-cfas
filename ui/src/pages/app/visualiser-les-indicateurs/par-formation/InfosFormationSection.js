@@ -5,8 +5,8 @@ import React from "react";
 import { Section } from "../../../../common/components";
 import useFetchFormationInfo from "../../../../common/hooks/useFetchFormationInfo";
 
-const InfosFormationSection = ({ infosFormation }) => {
-  const { data: formation, loading, error } = useFetchFormationInfo(infosFormation);
+const InfosFormationSection = ({ formationCfd }) => {
+  const { data: formation, loading, error } = useFetchFormationInfo(formationCfd);
 
   if (loading) {
     return (
@@ -46,9 +46,7 @@ const InfosFormationSection = ({ infosFormation }) => {
 };
 
 InfosFormationSection.propTypes = {
-  infosFormation: PropTypes.shape({
-    cfd: PropTypes.string.isRequired,
-  }),
+  formationCfd: PropTypes.string.isRequired,
 };
 
 export default InfosFormationSection;

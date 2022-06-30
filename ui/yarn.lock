@@ -1996,6 +1996,11 @@
   dependencies:
     "@chakra-ui/utils" "1.10.4"
 
+"@choc-ui/paginator@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@choc-ui/paginator/-/paginator-3.4.0.tgz#3e542f995dfb13461825221f46d00b8d05e1b324"
+  integrity sha512-JZ9Ep5m2W5r9I9J2NKuKvNevKh8wyxieX/o8NdcOxiQUzcaiEHZh0I/+R3H+k6W7nu2v4ti72xHJb1PeiZFZNw==
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"

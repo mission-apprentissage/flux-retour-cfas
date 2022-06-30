@@ -1,4 +1,5 @@
 const { createCfasCollectionIndexes, dropCfasCollectionIndexes } = require("./cfas.indexes");
+const { createReseauxCfasCollectionIndexes, dropReseauxCfasCollectionIndexes } = require("./reseauxCfas.indexes");
 const { createFormationsCollectionIndexes, dropFormationsCollectionIndexes } = require("./formations.indexes");
 const {
   createDossiersApprenantsCollectionIndexes,
@@ -11,6 +12,7 @@ const createIndexes = async (db) => {
   await createDossiersApprenantsCollectionIndexes(db);
   await createFormationsCollectionIndexes(db);
   await createCfasCollectionIndexes(db);
+  await createReseauxCfasCollectionIndexes(db);
 };
 
 const dropIndexes = async (db) => {
@@ -18,6 +20,7 @@ const dropIndexes = async (db) => {
   await dropFormationsCollectionIndexes(db);
   await dropUserEventsCollectionIndexes(db);
   await dropCfasCollectionIndexes(db);
+  await dropReseauxCfasCollectionIndexes(db);
 };
 
 module.exports = { createIndexes, dropIndexes };
