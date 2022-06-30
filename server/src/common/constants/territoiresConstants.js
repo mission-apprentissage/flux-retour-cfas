@@ -368,7 +368,7 @@ const DEPARTEMENTS = [
   {
     nom: "Corse-du-Sud",
     code: "2A",
-    uaiCode: "2A",
+    uaiCode: "620",
     codeRegion: "94",
     region: {
       code: "94",
@@ -378,7 +378,7 @@ const DEPARTEMENTS = [
   {
     nom: "Haute-Corse",
     code: "2B",
-    uaiCode: "2B",
+    uaiCode: "720",
     codeRegion: "94",
     region: {
       code: "94",
@@ -1093,26 +1093,6 @@ const DEPARTEMENTS = [
     region: {
       code: "06",
       nom: "Mayotte",
-    },
-  },
-  {
-    nom: "Corse-du-Sud",
-    code: "620",
-    uaiCode: "620",
-    codeRegion: "94",
-    region: {
-      code: "94",
-      nom: "Corse",
-    },
-  },
-  {
-    nom: "Haute-Corse",
-    code: "720",
-    uaiCode: "720",
-    codeRegion: "94",
-    region: {
-      code: "94",
-      nom: "Corse",
     },
   },
 ];
