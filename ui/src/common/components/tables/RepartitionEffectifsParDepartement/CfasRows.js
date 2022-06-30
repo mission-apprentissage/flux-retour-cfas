@@ -6,6 +6,7 @@ import { useHistory } from "react-router-dom";
 import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsParCfa } from "../../../api/tableauDeBord";
 import { QUERY_KEYS } from "../../../constants/queryKeys";
+import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
 import { navigateToOrganismePage } from "../../../utils/routing";
 import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
@@ -15,7 +16,7 @@ const CfasRows = ({ departementCode }) => {
   const filtersContext = useFiltersContext();
   const history = useHistory();
   const requestFilters = {
-    date: filtersContext.state.date.toISOString(),
+    ...mapFiltersToApiFormat(filtersContext.state),
     etablissement_num_departement: departementCode,
   };
   const { data, isLoading } = useQuery([QUERY_KEYS.EFFECTIF_PAR.CFA, requestFilters], () =>
