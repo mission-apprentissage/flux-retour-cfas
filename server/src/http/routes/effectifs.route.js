@@ -1,6 +1,5 @@
 const express = require("express");
 const stringify = require("json-stringify-deterministic");
-const { parseAsync } = require("json2csv");
 const { format } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
@@ -10,7 +9,6 @@ const { tdbRoles, apiRoles } = require("../../common/roles");
 const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
 const { EFFECTIF_INDICATOR_NAMES } = require("../../common/constants/dossierApprenantConstants");
 const omit = require("lodash.omit");
-const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { toXlsxBuffer } = require("../../common/utils/exporterUtils");
 const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
@@ -51,7 +49,7 @@ const getCacheKeyForRoute = (route, filters) => {
   return `${route}:${stringify(filters)}`;
 };
 
-module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => {
+module.exports = ({ stats, effectifs, cfas, userEvents, cache }) => {
   const router = express.Router();
 
   /**
@@ -474,111 +472,6 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
         await cache.set(cacheKey, JSON.stringify(effectifsByDepartementAtDate));
         return res.json(effectifsByDepartementAtDate);
       }
-    })
-  );
-
-  router.get(
-    "/export-csv-repartition-effectifs-par-organisme",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
-        date: Joi.date().required(),
-        ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      // build filters from req.query
-      const { date: dateFromQuery, ...filtersFromBody } = req.query;
-      const date = new Date(dateFromQuery);
-      const filters = {
-        ...filtersFromBody,
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-      };
-
-      // create event
-      await userEvents.create({
-        action: USER_EVENTS_ACTIONS.EXPORT.CSV_REPARTITION_ORGANISME,
-        username: req.user.username,
-        data: req.query,
-      });
-
-      const effectifsByCfaAtDate = await effectifs.getEffectifsCountByCfaAtDate(date, filters);
-      const formattedForCsv = await Promise.all(
-        effectifsByCfaAtDate.map(async ({ uai_etablissement, nom_etablissement, effectifs }) => {
-          const cfa = await cfas.getFromUai(uai_etablissement);
-
-          const cfaHasReseau = Boolean(cfa?.reseaux?.length > 0);
-          const reseauxCfa = cfaHasReseau ? JSON.stringify(cfa.reseaux) : "";
-
-          const cfaHasSirets = Boolean(cfa?.sirets?.length > 0);
-          const siretsCfa = cfaHasSirets ? JSON.stringify(cfa.sirets) : "";
-
-          return {
-            DEPARTEMENT: getDepartementCodeFromUai(uai_etablissement),
-            RESEAUX: reseauxCfa,
-            "NOM DE L'ÉTABLISSEMENT": nom_etablissement,
-            UAI: uai_etablissement,
-            SIRET: siretsCfa,
-            APPRENTIS: effectifs.apprentis,
-            "SANS CONTRAT": effectifs.inscritsSansContrat,
-            RUPTURANTS: effectifs.rupturants,
-            ABANDONS: effectifs.abandons,
-          };
-        })
-      );
-
-      const csv = await parseAsync(formattedForCsv);
-
-      return res.attachment("export-csv-repartition-effectifs-par-organisme.csv").send(csv);
-    })
-  );
-
-  router.get(
-    "/export-csv-repartition-effectifs-par-formation",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
-        date: Joi.date().required(),
-        ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      // build filters from req.query
-      const { date: dateFromQuery, ...filtersFromBody } = req.query;
-      const date = new Date(dateFromQuery);
-      const filters = {
-        ...filtersFromBody,
-        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
-      };
-
-      // create event
-      await userEvents.create({
-        action: USER_EVENTS_ACTIONS.EXPORT.CSV_REPARTITION_FORMATION,
-        username: req.user.username,
-        data: req.query,
-      });
-
-      const effectifsParFormation = await effectifs.getEffectifsCountByFormationAndDepartementAtDate(date, filters);
-      const formattedForCsv = await Promise.all(
-        effectifsParFormation.map(async ({ formation_cfd, departement, intitule, effectifs }) => {
-          const formation = await formations.getFormationWithCfd(formation_cfd);
-          return {
-            DEPARTEMENT: departement,
-            NIVEAU: formation?.niveau,
-            "INTITULE NIVEAU": formation?.niveau_libelle,
-            "INTITULE DE LA FORMATION": intitule,
-            CFD: formation_cfd,
-            APPRENTIS: effectifs.apprentis,
-            "SANS CONTRAT": effectifs.inscritsSansContrat,
-            RUPTURANTS: effectifs.rupturants,
-            ABANDONS: effectifs.abandons,
-          };
-        })
-      );
-
-      const csv = await parseAsync(formattedForCsv);
-
-      return res.attachment("export-csv-repartition-effectifs-par-formation.csv").send(csv);
     })
   );
 
