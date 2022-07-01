@@ -1,5 +1,6 @@
 const express = require("express");
 const stringify = require("json-stringify-deterministic");
+const { parseAsync } = require("json2csv");
 const { format } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
@@ -110,6 +111,39 @@ module.exports = ({ stats, effectifs, cfas, userEvents, cache }) => {
         await cache.set(cacheKey, JSON.stringify(response));
         return res.json(response);
       }
+    })
+  );
+
+  /**
+   * Export the anonymized effectifs lists for input period & query
+   */
+  router.get(
+    "/export-csv-anonymized-list",
+    applyUserRoleFilter,
+    validateRequestQuery(
+      Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      })
+    ),
+    tryCatch(async (req, res) => {
+      // Gets & format params
+      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromParams);
+      const filters = { ...filtersFromBody, annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } };
+
+      // create user event
+      await userEvents.create({
+        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_DATA_LISTS,
+        username: req.user.username,
+        data: req.query,
+      });
+
+      const anonymizedList = await effectifs.getAnonymousEffectifsAtDate(date, filters);
+
+      // Parse to french localized CSV (; as delimiter and UTF8 using withBOM)
+      const csv = await parseAsync(anonymizedList, { delimiter: ";", withBOM: true });
+      return res.attachment("export-csv-anonymized-list.csv").send(csv);
     })
   );
 

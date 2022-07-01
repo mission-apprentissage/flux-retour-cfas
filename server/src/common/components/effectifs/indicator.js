@@ -1,5 +1,7 @@
 const { DossierApprenantModel } = require("../../model");
 
+const ANONYMOUS_LABEL = "_ANONYME_";
+
 class Indicator {
   /**
    * Constructeur avec définition d'une projection d'export par défaut
@@ -117,6 +119,22 @@ class Indicator {
         },
       },
     ];
+  }
+
+  /**
+   * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
+   * @param {*} searchDate
+   * @param {*} filters
+   * @returns
+   */
+  async getAnonymousExportFormattedListAtDate(searchDate, filters = {}, indicateur) {
+    return (await this.getExportFormattedListAtDate(searchDate, filters, indicateur)).map((item) => ({
+      ...item,
+      indicateur,
+      nom_apprenant: ANONYMOUS_LABEL,
+      prenom_apprenant: ANONYMOUS_LABEL,
+      date_de_naissance_apprenant: ANONYMOUS_LABEL,
+    }));
   }
 }
 
