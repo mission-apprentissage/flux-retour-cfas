@@ -2,6 +2,29 @@ const { DossierApprenantModel } = require("../../model");
 
 class Indicator {
   /**
+   * Constructeur avec définition d'une projection d'export par défaut
+   */
+  constructor() {
+    this.exportProjection = {
+      uai_etablissement: 1,
+      siret_etablissement: 1,
+      nom_etablissement: 1,
+      nom_apprenant: 1,
+      prenom_apprenant: 1,
+      date_de_naissance_apprenant: 1,
+      formation_cfd: 1,
+      formation_rncp: 1,
+      libelle_long_formation: 1,
+      annee_formation: 1,
+      annee_scolaire: 1,
+      contrat_date_debut: 1,
+      contrat_date_rupture: 1,
+      historique_statut_apprenant: 1,
+      statut_apprenant_at_date: 1,
+    };
+  }
+
+  /**
    * Décompte du nombre de jeunes correspondant à cet indicateur à la date donnée
    * @param {*} searchDate Date de recherche
    * @param {*} filters Filtres optionnels

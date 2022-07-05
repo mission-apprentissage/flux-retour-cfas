@@ -1,5 +1,7 @@
-const { CODES_STATUT_APPRENANT } = require("../../constants/dossierApprenantConstants");
+const { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } = require("../../constants/dossierApprenantConstants");
+const { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } = require("../../domain/effectif");
 const { Indicator } = require("./indicator");
+const { addMonths } = require("date-fns");
 
 class EffectifsRupturants extends Indicator {
   /**
@@ -44,6 +46,30 @@ class EffectifsRupturants extends Indicator {
       },
       { $match: { "previousStatutAtDate.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
     ];
+  }
+
+  /**
+   * Function de récupération de la liste des rupturants formatée pour un export à une date donnée
+   * @param {*} searchDate
+   * @param {*} filters
+   * @returns
+   */
+  async getExportFormattedListAtDate(searchDate, filters = {}) {
+    const projection = this.exportProjection;
+    return (await this.getListAtDate(searchDate, filters, { projection })).map((item) => ({
+      ...item,
+      statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
+      historique_statut_apprenant: JSON.stringify(
+        item.historique_statut_apprenant.map((item) => ({
+          date: item.date_statut,
+          statut: getStatutApprenantNameFromCode(item.valeur_statut),
+        }))
+      ),
+      dans_le_statut_depuis:
+        addMonths(new Date(item.statut_apprenant_at_date.date_statut), SEUIL_ALERTE_NB_MOIS_RUPTURANTS) > Date.now()
+          ? `Moins de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`
+          : `Plus de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`,
+    }));
   }
 }
 
