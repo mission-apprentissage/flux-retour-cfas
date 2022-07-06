@@ -55,6 +55,7 @@
     "support:identify-uais-duplicates": "node -r dotenv/config src/jobs/support/dossiersApprenants-duplicates-uais/identify.js",
     "support:identify-cfd-duplicates": "node -r dotenv/config src/jobs/support/dossiersApprenants-duplicates-cfd/identify.js",
     "support:clean-uais-duplicates": "node -r dotenv/config src/jobs/support/dossiersApprenants-duplicates-uais/clean.js",
+    "support:clean-nom-prenom-emptySpace-duplicates": "node -r dotenv/config src/jobs/support/dossiersApprenants-duplicates-nom-prenom-emptySpace/index.js",
     "retrieve-formation-rncp-in-tco": "node -r dotenv/config src/jobs/retrieve-formation-rncp-in-tco/index.js",
     "retrieve-location-from-uai": "node -r dotenv/config src/jobs/retrieve-location-from-uai/index.js",
     "cache:warmup": "node -r dotenv/config src/jobs/warm-effectifs-cache/index.js",

@@ -21,6 +21,7 @@ const JOB_NAMES = {
   dossiersApprenantsRetrieveFormationsInCatalog: "dossiersApprenants-retrieve-formation-in-catalog",
   dossiersApprenantsBadHistoryIdentifyAntidated: "dossiersApprenants-bad-history-identify-antidated",
   dossiersApprenantsBadHistoryCleanAntidated: "dossiersApprenants-bad-history-clean-antidated",
+  dossiersApprenantsCleanDuplicatesNomPrenomSpaces: "dossiersApprenants-clean-duplicates-nomPrenom-spaces",
   createIndexes: "create-indexes",
   createEffectifsApprenantsCollection: "create-effectifs-apprenants-collection",
   clearUsers: "clear-users",
