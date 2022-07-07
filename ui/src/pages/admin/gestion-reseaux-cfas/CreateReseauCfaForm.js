@@ -92,7 +92,7 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
             <FormLabel color="grey.800">UAI</FormLabel>
             <Input name="uai" value={values.uai} onChange={handleChange} />
           </FormControl>
-          <FormControl isRequired isInvalid={errors.siret}>
+          <FormControl isInvalid={errors.siret}>
             <FormLabel color="grey.800">Siret</FormLabel>
             <Input name="siret" value={values.siret} onChange={handleChange} />
             {listSirets.length > 1 && (
