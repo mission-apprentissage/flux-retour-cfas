@@ -6,13 +6,12 @@ import useAuth from "../../../../common/hooks/useAuth";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { filtersPropTypes } from "../FiltersContext";
-import IndicateursGridSection from "../IndicateursGridSection";
 import {
   ActionsSection,
   CfaInformationSection,
+  IndicateursAndRepartionCfaNiveauAnneesSection,
   MultiSiretDetailInformationSection,
   RepartitionEffectifsParSiretSection,
-  RepartitionSection,
 } from "./sections";
 
 const OrganismeViewContent = ({ cfaUai, filters }) => {
@@ -41,10 +40,13 @@ const OrganismeViewContent = ({ cfaUai, filters }) => {
 
       {/* Vue Globale & Repartition pour un établissement sans sirets multiple ou dans la vue détail d'un sous établissement */}
       {(displaySousEtablissementDetail || !hasMultipleSirets) && (
-        <>
-          <IndicateursGridSection allowDownloadDataList={isAdmin} effectifs={effectifs} loading={effectifsLoading} />
-          <RepartitionSection filters={filters} />
-        </>
+        <IndicateursAndRepartionCfaNiveauAnneesSection
+          filters={filters}
+          allowDownloadDataList={isAdmin}
+          effectifs={effectifs}
+          loading={effectifsLoading}
+          showOrganismesCount={false}
+        />
       )}
     </>
   );

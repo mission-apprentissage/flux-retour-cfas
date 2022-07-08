@@ -1,21 +1,21 @@
-import { Grid, Heading, HStack, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { Grid, Skeleton, Stack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { EffectifCard, MonthSelect, Section } from "../../../common/components";
+import { EffectifCard } from "../../../common/components";
 import { EFFECTIF_INDICATEURS } from "../../../common/constants/effectifIndicateur";
 import { isDateFuture } from "../../../common/utils/dateUtils";
 import { pluralize } from "../../../common/utils/stringUtils";
-import { InfoLine } from "../../../theme/components/icons";
+import DateWithTooltipSelector from "./DateWithTooltipSelector";
 import { useFiltersContext } from "./FiltersContext";
 import OrganismesCountCard from "./OrganismesCountCard";
 
-const IndicateursGridSection = ({ effectifs, loading, allowDownloadDataList = false, showOrganismesCount = false }) => {
+const IndicateursGridStack = ({ effectifs, loading, allowDownloadDataList = false, showOrganismesCount = true }) => {
   const filtersContext = useFiltersContext();
   let content = null;
   if (loading) {
     content = (
-      <Grid gridGap="2w" gridTemplateColumns="repeat(3, 1fr)">
+      <Grid gridGap="2w" gridTemplateColumns={["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"]}>
         {showOrganismesCount && <Skeleton height="136px" startColor="grey.300" endColor="galt" />}
         <Skeleton height="136px" startColor="grey.300" endColor="galt" />
         <Skeleton height="136px" startColor="grey.300" endColor="galt" />
@@ -100,36 +100,14 @@ const IndicateursGridSection = ({ effectifs, loading, allowDownloadDataList = fa
   }
 
   return (
-    <Section paddingY="3w">
-      <HStack marginBottom="2w">
-        <Heading as="h2" variant="h2" fontSize="gamma">
-          Vue globale
-        </Heading>
-
-        <MonthSelect value={filtersContext.state.date} onChange={filtersContext.setters.setDate} />
-        <Tooltip
-          label={
-            <Text>
-              La sélection du mois permet d&apos;afficher les effectifs au dernier jour du mois. <br />
-              <br /> A noter : la période de référence pour l&apos;année scolaire court du 1er août au 31 juillet
-            </Text>
-          }
-          aria-label="A tooltip"
-          background="bluefrance"
-          color="white"
-          padding={5}
-        >
-          <Text as="span">
-            <InfoLine h="14px" w="14px" color="grey.500" ml={1} mb={1} />
-          </Text>
-        </Tooltip>
-      </HStack>
+    <Stack>
+      <DateWithTooltipSelector />
       {content}
-    </Section>
+    </Stack>
   );
 };
 
-IndicateursGridSection.propTypes = {
+IndicateursGridStack.propTypes = {
   loading: PropTypes.bool.isRequired,
   allowDownloadDataList: PropTypes.bool,
   showOrganismesCount: PropTypes.bool,
@@ -149,4 +127,4 @@ IndicateursGridSection.propTypes = {
   }),
 };
 
-export default IndicateursGridSection;
+export default IndicateursGridStack;

@@ -47,3 +47,7 @@
 .react-datepicker__navigation--next {
   border-left-color: white;
 }
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}

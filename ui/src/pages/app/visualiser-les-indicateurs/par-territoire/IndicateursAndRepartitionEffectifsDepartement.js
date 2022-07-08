@@ -1,20 +1,17 @@
-import { Flex, Heading } from "@chakra-ui/react";
 import { TabPanel } from "@chakra-ui/tabs";
+import PropTypes from "prop-types";
 import React from "react";
 
-import {
-  ExportRepartitionByFormationButton,
-  ExportRepartitionByOrganismeButton,
-  RepartitionEffectifsTabs,
-  Section,
-} from "../../../../common/components";
+import { RepartitionEffectifsTabs, Section } from "../../../../common/components";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
 import RepartitionEffectifsParNiveauFormation from "../../../../common/components/tables/RepartitionEffectifsParNiveauFormation";
 import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
 import useFetchEffectifsParNiveauFormation from "../../../../common/hooks/useFetchEffectifsParNiveauFormation";
+import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { filtersPropTypes } from "../FiltersContext";
+import IndicateursGridStack from "../IndicateursGridStack";
 
-const RepartitionEffectifsDepartement = ({ filters }) => {
+const IndicateursAndRepartitionEffectifsDepartement = ({ filters, effectifs, loading, showOrganismesCount = true }) => {
   const {
     data: effectifsParNiveauFormation,
     loading: isEffectifsParNiveauFormationLoading,
@@ -30,12 +27,10 @@ const RepartitionEffectifsDepartement = ({ filters }) => {
     <Section paddingY="4w">
       <RepartitionEffectifsTabs>
         <TabPanel paddingTop="4w">
-          <Flex justifyContent="space-between">
-            <Heading as="h3" variant="h3" marginBottom="3w">
-              Liste des organismes de formation
-            </Heading>
-            <ExportRepartitionByOrganismeButton />
-          </Flex>
+          <IndicateursGridStack effectifs={effectifs} loading={loading} showOrganismesCount={showOrganismesCount} />
+        </TabPanel>
+        <TabPanel paddingTop="4w">
+          <DateWithTooltipSelector marginBottom="1w" />
           <RepartitionEffectifsParCfa
             repartitionEffectifsParCfa={effectifsParCfa}
             loading={isEffectifsParCfaLoading}
@@ -43,12 +38,7 @@ const RepartitionEffectifsDepartement = ({ filters }) => {
           />
         </TabPanel>
         <TabPanel paddingTop="4w">
-          <Flex justifyContent="space-between">
-            <Heading as="h3" variant="h3" marginBottom="3w">
-              Liste des niveaux de formation
-            </Heading>
-            <ExportRepartitionByFormationButton />
-          </Flex>
+          <DateWithTooltipSelector marginBottom="1w" />
           <RepartitionEffectifsParNiveauFormation
             repartitionEffectifs={effectifsParNiveauFormation}
             loading={isEffectifsParNiveauFormationLoading}
@@ -60,8 +50,24 @@ const RepartitionEffectifsDepartement = ({ filters }) => {
   );
 };
 
-RepartitionEffectifsDepartement.propTypes = {
+IndicateursAndRepartitionEffectifsDepartement.propTypes = {
   filters: filtersPropTypes.state,
+  loading: PropTypes.bool.isRequired,
+  showOrganismesCount: PropTypes.bool,
+  effectifs: PropTypes.shape({
+    apprentis: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
+    inscritsSansContrat: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
+    abandons: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
+    rupturants: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
+  }),
 };
 
-export default RepartitionEffectifsDepartement;
+export default IndicateursAndRepartitionEffectifsDepartement;
