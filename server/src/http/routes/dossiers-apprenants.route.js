@@ -14,6 +14,7 @@ const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { findAndPaginate } = require("../../common/utils/dbUtils");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
+const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
@@ -96,7 +97,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
         await userEvents.create({
           username: req.user.username,
           type: "POST",
-          action: "statut-candidats",
+          action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
           data: req.body,
         });
 
@@ -173,7 +174,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
         await userEvents.create({
           username: req.user.username,
           type: "GET",
-          action: "dossier-apprenants",
+          action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
           data: req.body,
         });
 

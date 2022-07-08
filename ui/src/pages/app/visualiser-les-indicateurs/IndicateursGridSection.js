@@ -77,10 +77,13 @@ const IndicateursGridSection = ({ effectifs, loading, allowDownloadDataList = fa
           }
           iconClassName="ri-user-4-fill"
           accentColor="#FCC63A"
+          hideCount={shouldWarnAboutDateAvailability}
+          infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
         />
         <EffectifCard
           count={effectifs.abandons.count}
           hideCount={shouldWarnAboutDateAvailability}
+          infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
           effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.abandons : null}
           label={pluralize("abandon", effectifs.abandons.count)}
           tooltipLabel={
@@ -89,7 +92,6 @@ const IndicateursGridSection = ({ effectifs, loading, allowDownloadDataList = fa
               affichée. Cet indicateur est basé sur la réception d’un statut transmis par les organismes de formation.
             </div>
           }
-          infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
           iconClassName="ri-user-4-fill"
           accentColor="#F99389"
         />

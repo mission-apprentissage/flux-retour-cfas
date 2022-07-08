@@ -13,7 +13,7 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * Ce script permet de créer un export contenant les CFAS sans SIRET
  */
 runScript(async ({ db }) => {
-  const departementsMap = indexBy(DEPARTEMENTS, "code");
+  const departementsMap = indexBy(DEPARTEMENTS, "uaiCode");
   const allUais = await db.collection("dossiersApprenants").distinct("uai_etablissement");
 
   logger.info(`${allUais.length} UAI found. Will update matching dossiersApprenants...`);
@@ -32,7 +32,7 @@ runScript(async ({ db }) => {
       { uai_etablissement: uaiToUpdate },
       {
         $set: {
-          etablissement_num_departement: info.code,
+          etablissement_num_departement: info.uaiCode,
           etablissement_nom_departement: info.nom,
           etablissement_num_region: info.codeRegion,
           etablissement_nom_region: info.region?.nom,

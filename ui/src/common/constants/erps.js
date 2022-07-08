@@ -32,8 +32,16 @@ export const ERPS = [
     name: "Formasup",
     state: ERP_STATE.ready,
   },
-  { name: "FCA Manager", state: ERP_STATE.ongoing },
-  { name: "Auriga", state: ERP_STATE.ongoing },
+  {
+    name: "FCA Manager",
+    state: ERP_STATE.ready,
+    helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/fcamanager.pdf",
+  },
+  {
+    name: "Auriga",
+    state: ERP_STATE.ready,
+    helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/auriga.pdf",
+  },
   { name: "CNAM (Gessic@)", state: ERP_STATE.coming },
   { name: "Alcuin Software", state: ERP_STATE.coming },
   { name: "Hyperplanning", state: ERP_STATE.coming },

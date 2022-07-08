@@ -1,4 +1,5 @@
 const express = require("express");
+const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 const { createUserToken } = require("../../common/utils/jwtUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
@@ -15,7 +16,7 @@ module.exports = ({ users, userEvents }) => {
 
       const token = createUserToken(authenticatedUser);
 
-      await userEvents.create({ username, action: "login" });
+      await userEvents.create({ username, action: USER_EVENTS_ACTIONS.LOGIN });
       return res.json({ access_token: token });
     })
   );

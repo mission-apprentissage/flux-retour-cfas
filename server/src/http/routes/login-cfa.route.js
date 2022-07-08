@@ -1,4 +1,5 @@
 const express = require("express");
+const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 const { tdbRoles } = require("../../common/roles");
 const { createUserToken } = require("../../common/utils/jwtUtils");
 
@@ -17,7 +18,7 @@ module.exports = ({ cfas, userEvents }) => {
       const token = createUserToken(syntheticCfaUser);
       await userEvents.create({
         username: syntheticCfaUser.username,
-        action: "login-cfa",
+        action: USER_EVENTS_ACTIONS.LOGIN_CFA,
       });
       return res.json({ access_token: token });
     }

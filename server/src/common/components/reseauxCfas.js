@@ -20,7 +20,6 @@ const create = async ({ nom_reseau, nom_etablissement, uai, siret }) => {
  */
 const searchReseauxCfas = async (searchCriteria) => {
   const { searchTerm } = searchCriteria;
-  const SEARCH_RESULTS_LIMIT = 50;
 
   const matchStage = {};
   if (searchTerm) {
@@ -38,11 +37,7 @@ const searchReseauxCfas = async (searchCriteria) => {
       }
     : { nom_etablissement: 1 };
 
-  const found = await ReseauCfaModel.aggregate([
-    { $match: matchStage },
-    { $sort: sortStage },
-    { $limit: SEARCH_RESULTS_LIMIT },
-  ]);
+  const found = await ReseauCfaModel.aggregate([{ $match: matchStage }, { $sort: sortStage }]);
 
   return found.map((reseauCfa) => {
     return {

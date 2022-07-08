@@ -37,7 +37,7 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
       nom_reseau: Yup.string().required("Requis"),
       nom_etablissement: Yup.string().required("Requis"),
       uai: Yup.string().matches(uaiRegex, "UAI invalide").required("Requis"),
-      siret: Yup.string().matches(siretRegex, "Siret invalide").required("Requis"),
+      siret: Yup.string().matches(siretRegex, "Siret invalide"),
     }),
     onSubmit: ({ nom_reseau, nom_etablissement, uai, siret }) => {
       createReseauCfa({ nom_reseau, nom_etablissement, uai, siret });
@@ -92,7 +92,7 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
             <FormLabel color="grey.800">UAI</FormLabel>
             <Input name="uai" value={values.uai} onChange={handleChange} />
           </FormControl>
-          <FormControl isRequired isInvalid={errors.siret}>
+          <FormControl isInvalid={errors.siret}>
             <FormLabel color="grey.800">Siret</FormLabel>
             <Input name="siret" value={values.siret} onChange={handleChange} />
             {listSirets.length > 1 && (

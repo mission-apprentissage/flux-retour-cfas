@@ -1,25 +1,19 @@
 const express = require("express");
 const stringify = require("json-stringify-deterministic");
 const { parseAsync } = require("json2csv");
-const { format, addMonths } = require("date-fns");
+const { format } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
 const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { tdbRoles, apiRoles } = require("../../common/roles");
-const {
-  SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS,
-  SEUIL_ALERTE_NB_MOIS_RUPTURANTS,
-} = require("../../common/domain/effectif");
 
 const permissionsMiddleware = require("../middlewares/permissionsMiddleware");
-const {
-  EFFECTIF_INDICATOR_NAMES,
-  getStatutApprenantNameFromCode,
-} = require("../../common/constants/dossierApprenantConstants");
+const { EFFECTIF_INDICATOR_NAMES } = require("../../common/constants/dossierApprenantConstants");
 const omit = require("lodash.omit");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { toXlsxBuffer } = require("../../common/utils/exporterUtils");
+const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -144,7 +138,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
       // create event
       await userEvents.create({
-        action: "export-xlsx-data-lists",
+        action: USER_EVENTS_ACTIONS.EXPORT.XLSX_DATA_LISTS,
         username: req.user.username,
         data: req.query,
       });
@@ -229,98 +223,22 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
   const buildEffectifsFormattedAtDate = async (effectifIndicateurFromParams, date, filters) => {
     let effectifsFormattedAtDate;
 
-    const projection = {
-      uai_etablissement: 1,
-      siret_etablissement: 1,
-      nom_etablissement: 1,
-      nom_apprenant: 1,
-      prenom_apprenant: 1,
-      date_de_naissance_apprenant: 1,
-      formation_cfd: 1,
-      formation_rncp: 1,
-      libelle_long_formation: 1,
-      annee_formation: 1,
-      annee_scolaire: 1,
-      contrat_date_debut: 1,
-      contrat_date_rupture: 1,
-      historique_statut_apprenant: 1,
-      statut_apprenant_at_date: 1,
-    };
-
     // Build data list for indicator
     switch (effectifIndicateurFromParams) {
       case EFFECTIF_INDICATOR_NAMES.apprentis:
-        effectifsFormattedAtDate = (await effectifs.apprentis.getListAtDate(date, filters, { projection })).map(
-          (item) => ({
-            ...item,
-            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
-            historique_statut_apprenant: JSON.stringify(
-              item.historique_statut_apprenant.map((item) => ({
-                date: item.date_statut,
-                statut: getStatutApprenantNameFromCode(item.valeur_statut),
-              }))
-            ),
-          })
-        );
+        effectifsFormattedAtDate = await effectifs.apprentis.getExportFormattedListAtDate(date, filters);
         break;
 
       case EFFECTIF_INDICATOR_NAMES.abandons:
-        effectifsFormattedAtDate = (await effectifs.abandons.getListAtDate(date, filters, { projection })).map(
-          (item) => ({
-            ...item,
-            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
-            date_abandon: item.statut_apprenant_at_date.date_statut, // Specific for abandons indicateur
-            historique_statut_apprenant: JSON.stringify(
-              item.historique_statut_apprenant.map((item) => ({
-                date: item.date_statut,
-                statut: getStatutApprenantNameFromCode(item.valeur_statut),
-              }))
-            ),
-          })
-        );
+        effectifsFormattedAtDate = await effectifs.abandons.getExportFormattedListAtDate(date, filters);
         break;
 
       case EFFECTIF_INDICATOR_NAMES.inscritsSansContrats:
-        effectifsFormattedAtDate = (
-          await effectifs.inscritsSansContrats.getListAtDate(date, filters, { projection })
-        ).map((item) => ({
-          ...item,
-          statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
-          date_inscription: item.statut_apprenant_at_date.date_statut, // Specific for inscrits sans contrats indicateur
-          historique_statut_apprenant: JSON.stringify(
-            item.historique_statut_apprenant.map((item) => ({
-              date: item.date_statut,
-              statut: getStatutApprenantNameFromCode(item.valeur_statut),
-            }))
-          ),
-          dans_le_statut_depuis:
-            addMonths(
-              new Date(item.statut_apprenant_at_date.date_statut),
-              SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS
-            ) > Date.now()
-              ? `Moins de ${SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS} mois`
-              : `Plus de ${SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS} mois`,
-        }));
+        effectifsFormattedAtDate = await effectifs.inscritsSansContrats.getExportFormattedListAtDate(date, filters);
         break;
 
       case EFFECTIF_INDICATOR_NAMES.rupturants:
-        effectifsFormattedAtDate = (await effectifs.rupturants.getListAtDate(date, filters, { projection })).map(
-          (item) => ({
-            ...item,
-            statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
-            historique_statut_apprenant: JSON.stringify(
-              item.historique_statut_apprenant.map((item) => ({
-                date: item.date_statut,
-                statut: getStatutApprenantNameFromCode(item.valeur_statut),
-              }))
-            ),
-            dans_le_statut_depuis:
-              addMonths(new Date(item.statut_apprenant_at_date.date_statut), SEUIL_ALERTE_NB_MOIS_RUPTURANTS) >
-              Date.now()
-                ? `Moins de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`
-                : `Plus de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`,
-          })
-        );
+        effectifsFormattedAtDate = await effectifs.rupturants.getExportFormattedListAtDate(date, filters);
         break;
 
       default:
@@ -579,7 +497,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
       // create event
       await userEvents.create({
-        action: "export-csv-repartition-effectifs-par-organisme",
+        action: USER_EVENTS_ACTIONS.EXPORT.CSV_REPARTITION_ORGANISME,
         username: req.user.username,
         data: req.query,
       });
@@ -635,7 +553,7 @@ module.exports = ({ stats, effectifs, cfas, formations, userEvents, cache }) => 
 
       // create event
       await userEvents.create({
-        action: "export-csv-repartition-effectifs-par-formation",
+        action: USER_EVENTS_ACTIONS.EXPORT.CSV_REPARTITION_FORMATION,
         username: req.user.username,
         data: req.query,
       });
