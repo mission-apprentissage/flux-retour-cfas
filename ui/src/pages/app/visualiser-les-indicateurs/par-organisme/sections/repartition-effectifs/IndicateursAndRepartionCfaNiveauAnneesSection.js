@@ -1,10 +1,13 @@
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import { Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { fetchEffectifsAnonymizedDataListCsvExport } from "../../../../../../common/api/tableauDeBord";
 import { Section } from "../../../../../../common/components";
+import DownloadBlock from "../../../../../../common/components/DownloadBlock/DownloadBlock";
 import RepartitionEffectifsParFormation from "../../../../../../common/components/tables/RepartitionEffectifsParFormation";
 import useFetchEffectifsParNiveauFormation from "../../../../../../common/hooks/useFetchEffectifsParNiveauFormation";
+import { mapFiltersToApiFormat } from "../../../../../../common/utils/mapFiltersToApiFormat";
 import { filtersPropTypes } from "../../../FiltersContext";
 import IndicateursGridStack from "../../../IndicateursGridStack";
 
@@ -16,6 +19,7 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
   showOrganismesCount = true,
 }) => {
   const { data, loading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
+  const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
 
   return (
     <Section paddingY="4w">
@@ -30,12 +34,20 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
         </TabList>
         <TabPanels>
           <TabPanel paddingTop="4w">
-            <IndicateursGridStack
-              effectifs={effectifs}
-              loading={loading}
-              showOrganismesCount={showOrganismesCount}
-              allowDownloadDataList={allowDownloadDataList}
-            />
+            <Stack spacing="4w">
+              <IndicateursGridStack
+                effectifs={effectifs}
+                loading={loading}
+                showOrganismesCount={showOrganismesCount}
+                allowDownloadDataList={allowDownloadDataList}
+              />
+              <DownloadBlock
+                title="Télécharger les données de l’organisme sélectionné"
+                description="Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste anonymisé des apprenants par organisme et formation."
+                fileName={exportFilename}
+                getFile={() => fetchEffectifsAnonymizedDataListCsvExport(mapFiltersToApiFormat(filters))}
+              />
+            </Stack>
           </TabPanel>
           <TabPanel paddingTop="4w">
             <RepartitionEffectifsParFormation repartitionEffectifs={data} loading={repartitionLoading} error={error} />
