@@ -1,10 +1,12 @@
 import { useState } from "react";
 
 const useDownloadClick = (getFile, fileName) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [, setError] = useState();
 
   const onClick = async () => {
     try {
+      setIsLoading(true);
       const fileResponse = await getFile();
       const fileBlob = await fileResponse.blob();
 
@@ -14,10 +16,12 @@ const useDownloadClick = (getFile, fileName) => {
       link.click();
     } catch (err) {
       setError(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return onClick;
+  return [onClick, isLoading];
 };
 
 export default useDownloadClick;
