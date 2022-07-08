@@ -12,7 +12,10 @@ const { EFFECTIF_INDICATOR_NAMES } = require("../../common/constants/dossierAppr
 const omit = require("lodash.omit");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { toXlsxBuffer } = require("../../common/utils/exporterUtils");
-const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
+const {
+  USER_EVENTS_ACTIONS,
+  getExportAnonymizedEventNameFromFilters,
+} = require("../../common/constants/userEventsConstants");
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -134,7 +137,7 @@ module.exports = ({ stats, effectifs, cfas, userEvents, cache }) => {
 
       // create user event
       await userEvents.create({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS,
+        action: getExportAnonymizedEventNameFromFilters(filters),
         username: req.user.username,
         data: req.query,
       });

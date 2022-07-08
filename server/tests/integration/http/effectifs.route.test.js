@@ -10,9 +10,10 @@ const {
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
 } = require("../../data/historySequenceSamples");
-const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
+const { DossierApprenantModel, CfaModel, UserEventModel } = require("../../../src/common/model");
 const { parseXlsxHeaderStreamToJson } = require("../../../src/common/utils/exporterUtils");
 const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
+const { USER_EVENTS_ACTIONS } = require("../../../src/common/constants/userEventsConstants");
 
 describe(__filename, () => {
   describe("/api/effectifs route", () => {
@@ -232,6 +233,31 @@ describe(__filename, () => {
       assert.ok(response.data);
     });
 
+    it("Vérifie qu'on peut récupérer des listes de données anonymisées au national via API en étant authentifié", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const authHeader = await createAndLogUser("user", "password", {
+        permissions: [tdbRoles.pilot],
+      });
+
+      // Seed sample data
+      await seedDossiersApprenants({ annee_scolaire: "2021-2022" });
+
+      // Check good api call
+      const response = await httpClient.get(API_ROUTE, {
+        params: { date: "2022-06-10T00:00:00.000Z" },
+        headers: authHeader,
+      });
+
+      // Check good user event in db
+      const userEventInDb = await UserEventModel.findOne({
+        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_DATA_LISTS.TERRITOIRE_NATIONAL,
+      });
+
+      assert.equal(response.status, 200);
+      assert.ok(response.data);
+      assert.ok(userEventInDb);
+    });
+
     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un département via API en étant authentifié", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const authHeader = await createAndLogUser("user", "password", {
@@ -248,8 +274,14 @@ describe(__filename, () => {
         headers: authHeader,
       });
 
+      // Check good user event in db
+      const userEventInDb = await UserEventModel.findOne({
+        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_DATA_LISTS.TERRITOIRE_DEPARTEMENT,
+      });
+
       assert.equal(response.status, 200);
       assert.ok(response.data);
+      assert.ok(userEventInDb);
     });
 
     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour une région via API en étant authentifié", async () => {
@@ -268,8 +300,14 @@ describe(__filename, () => {
         headers: authHeader,
       });
 
+      // Check good user event in db
+      const userEventInDb = await UserEventModel.findOne({
+        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_DATA_LISTS.TERRITOIRE_REGION,
+      });
+
       assert.equal(response.status, 200);
       assert.ok(response.data);
+      assert.ok(userEventInDb);
     });
 
     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un réseau via API en étant authentifié", async () => {
@@ -288,8 +326,14 @@ describe(__filename, () => {
         headers: authHeader,
       });
 
+      // Check good user event in db
+      const userEventInDb = await UserEventModel.findOne({
+        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_DATA_LISTS.RESEAU,
+      });
+
       assert.equal(response.status, 200);
       assert.ok(response.data);
+      assert.ok(userEventInDb);
     });
 
     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour une formation via API en étant authentifié", async () => {
@@ -308,8 +352,14 @@ describe(__filename, () => {
         headers: authHeader,
       });
 
+      // Check good user event in db
+      const userEventInDb = await UserEventModel.findOne({
+        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_DATA_LISTS.FORMATION,
+      });
+
       assert.equal(response.status, 200);
       assert.ok(response.data);
+      assert.ok(userEventInDb);
     });
 
     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un CFA via API en étant authentifié", async () => {
@@ -328,8 +378,14 @@ describe(__filename, () => {
         headers: authHeader,
       });
 
+      // Check good user event in db
+      const userEventInDb = await UserEventModel.findOne({
+        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_DATA_LISTS.CFA,
+      });
+
       assert.equal(response.status, 200);
       assert.ok(response.data);
+      assert.ok(userEventInDb);
     });
   });
 
