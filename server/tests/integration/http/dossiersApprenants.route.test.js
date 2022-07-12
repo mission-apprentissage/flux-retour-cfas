@@ -390,6 +390,45 @@ describe(__filename, () => {
       assert.deepEqual(await DossierApprenantModel.countDocuments({}), 1);
     });
 
+    it("Vérifie si le nom_apprenant ou le prenom_apprenant contient un espace.", async () => {
+      const { httpClient } = await startServer();
+      await createApiUser();
+      const accessToken = await getJwtForUser(httpClient);
+
+      // Generate random data with good cfd
+      const simpleStatutWithGoodCfd = {
+        ...createRandomDossierApprenantApiInput(),
+        nom_apprenant: "Test    ",
+        prenom_apprenant: "     Test",
+      };
+
+      const responsePost = await httpClient.post("/api/dossiers-apprenants", [simpleStatutWithGoodCfd], {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const responseGet = await httpClient.get(
+        `/api/dossiers-apprenants?limit=1&uai_etablissement=${simpleStatutWithGoodCfd.uai_etablissement}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      // Check data added
+      assert.deepEqual(responsePost.status, 200);
+      assert.ok(responsePost.data.status);
+      assert.ok(responsePost.data.message);
+      assert.deepEqual(responsePost.data.status, "OK");
+      assert.deepEqual(responseGet.data.dossiersApprenants[0].nom_apprenant, "TEST");
+      assert.deepEqual(responseGet.data.dossiersApprenants[0].prenom_apprenant, "TEST");
+
+      // Check Nb Items added
+      assert.deepEqual(await DossierApprenantModel.countDocuments({}), 1);
+    });
+
     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec mauvais code CFD (id_formation)", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
