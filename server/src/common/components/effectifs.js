@@ -346,26 +346,28 @@ module.exports = () => {
    * @returns
    */
   const getAnonymousEffectifsAtDate = async (searchDate, filters = {}) => {
-    const anonymizedList = [
-      ...(await apprentis.getAnonymousExportFormattedListAtDate(
-        searchDate,
-        filters,
-        EFFECTIF_INDICATOR_NAMES.apprentis
-      )),
-      ...(await abandons.getAnonymousExportFormattedListAtDate(searchDate, filters, EFFECTIF_INDICATOR_NAMES.abandons)),
-      ...(await inscritsSansContrats.getAnonymousExportFormattedListAtDate(
-        searchDate,
-        filters,
-        EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
-      )),
-      ...(await rupturants.getAnonymousExportFormattedListAtDate(
-        searchDate,
-        filters,
-        EFFECTIF_INDICATOR_NAMES.rupturants
-      )),
-    ];
+    const apprentisAnonymous = await apprentis.getAnonymousExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.apprentis
+    );
+    const inscritsSansContratAnonymous = await inscritsSansContrats.getAnonymousExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
+    );
+    const rupturantsAnonymous = await rupturants.getAnonymousExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.rupturants
+    );
+    const abandonsAnonymous = await abandons.getAnonymousExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.abandons
+    );
 
-    return anonymizedList;
+    return [...apprentisAnonymous, ...inscritsSansContratAnonymous, ...rupturantsAnonymous, ...abandonsAnonymous];
   };
 
   return {
