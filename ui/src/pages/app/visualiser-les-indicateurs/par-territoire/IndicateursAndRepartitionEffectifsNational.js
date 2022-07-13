@@ -1,11 +1,19 @@
+import { Stack } from "@chakra-ui/react";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { fetchEffectifsAnonymizedDataListCsvExport } from "../../../../common/api/tableauDeBord";
 import { Section } from "../../../../common/components";
+import DownloadBlock from "../../../../common/components/DownloadBlock/DownloadBlock";
+import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
 const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading, showOrganismesCount = true }) => {
+  const { state: filters } = useFiltersContext();
+  const exportFilename = `tdb-données-territoire-national-${new Date().toLocaleDateString()}.csv`;
+
   return (
     <Section paddingY="4w">
       <Tabs isLazy lazyBehavior="keepMounted">
@@ -16,7 +24,15 @@ const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading, showOr
         </TabList>
         <TabPanels>
           <TabPanel paddingTop="4w">
-            <IndicateursGridStack effectifs={effectifs} loading={loading} showOrganismesCount={showOrganismesCount} />
+            <Stack spacing="4w">
+              <IndicateursGridStack effectifs={effectifs} loading={loading} showOrganismesCount={showOrganismesCount} />
+              <DownloadBlock
+                title="Télécharger les données du territoire sélectionné"
+                description="Le fichier est généré à date du jour, en fonction du territoire sélectionné et comprend la liste anonymisée des apprenants par organisme et formation."
+                fileName={exportFilename}
+                getFile={() => fetchEffectifsAnonymizedDataListCsvExport(mapFiltersToApiFormat(filters))}
+              />
+            </Stack>
           </TabPanel>
         </TabPanels>
       </Tabs>
