@@ -134,7 +134,7 @@ module.exports = ({ stats, effectifs, cfas, userEvents, cache }) => {
 
       // create user event
       await userEvents.create({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_DATA_LISTS,
+        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS,
         username: req.user.username,
         data: req.query,
       });
@@ -143,7 +143,7 @@ module.exports = ({ stats, effectifs, cfas, userEvents, cache }) => {
 
       // Parse to french localized CSV (; as delimiter and UTF8 using withBOM)
       const csv = await parseAsync(anonymizedList, { delimiter: ";", withBOM: true });
-      return res.attachment("export-csv-anonymized-list.csv").send(csv);
+      return res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
     })
   );
 

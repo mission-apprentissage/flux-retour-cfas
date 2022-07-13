@@ -4,7 +4,7 @@
 const USER_EVENTS_ACTIONS = {
   DOSSIER_APPRENANT: "dossier-apprenants",
   EXPORT: {
-    ANONYMIZED_DATA_LISTS: "export-anonymized-data-lists",
+    ANONYMIZED_EFFECTIFS_LISTS: "export-anonymized-effectifs-lists",
     XLSX_DATA_LISTS: "export-xlsx-data-lists",
     CSV_REPARTITION_ORGANISME: "export-csv-repartition-effectifs-par-organisme",
     CSV_REPARTITION_FORMATION: "export-csv-repartition-effectifs-par-formation",
