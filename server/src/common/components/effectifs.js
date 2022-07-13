@@ -3,6 +3,7 @@ const { EffectifsAbandons } = require("./effectifs/abandons");
 const { EffectifsInscritsSansContrats } = require("./effectifs/inscrits-sans-contrats");
 const { EffectifsRupturants } = require("./effectifs/rupturants");
 const { mergeObjectsBy } = require("../utils/mergeObjectsBy");
+const { EFFECTIF_INDICATOR_NAMES } = require("../constants/dossierApprenantConstants");
 
 module.exports = () => {
   const apprentis = new EffectifsApprentis();
@@ -338,6 +339,37 @@ module.exports = () => {
     });
   };
 
+  /**
+   * Récupération des effectifs anonymisés à une date donnée
+   * @param {*} searchDate
+   * @param {*} filters
+   * @returns
+   */
+  const getAnonymousEffectifsAtDate = async (searchDate, filters = {}) => {
+    const apprentisAnonymous = await apprentis.getAnonymousExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.apprentis
+    );
+    const inscritsSansContratAnonymous = await inscritsSansContrats.getAnonymousExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
+    );
+    const rupturantsAnonymous = await rupturants.getAnonymousExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.rupturants
+    );
+    const abandonsAnonymous = await abandons.getAnonymousExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.abandons
+    );
+
+    return [...apprentisAnonymous, ...inscritsSansContratAnonymous, ...rupturantsAnonymous, ...abandonsAnonymous];
+  };
+
   return {
     apprentis,
     abandons,
@@ -350,5 +382,6 @@ module.exports = () => {
     getEffectifsCountByDepartementAtDate,
     getEffectifsCountByFormationAndDepartementAtDate,
     getEffectifsCountBySiretAtDate,
+    getAnonymousEffectifsAtDate,
   };
 };
