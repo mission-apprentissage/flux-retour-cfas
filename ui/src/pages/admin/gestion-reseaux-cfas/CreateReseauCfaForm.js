@@ -95,7 +95,7 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
           <FormControl isInvalid={errors.siret}>
             <FormLabel color="grey.800">Siret</FormLabel>
             <Input name="siret" value={values.siret} onChange={handleChange} />
-            {listSirets.length > 1 && (
+            {listSirets?.length > 1 && (
               <Box color="redmarianne">
                 <Text>Plusieurs sirets ont été trouvés</Text>
                 <UnorderedList>
