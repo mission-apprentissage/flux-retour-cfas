@@ -390,7 +390,7 @@ describe(__filename, () => {
       assert.deepEqual(await DossierApprenantModel.countDocuments({}), 1);
     });
 
-    it("Vérifie si le nom_apprenant ou le prenom_apprenant contient un espace.", async () => {
+    it("Vérifie qu'on ne peut créer un dossier apprenant avec des espaces en début/fin de prenom_apprenant et nom_apprenant", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);

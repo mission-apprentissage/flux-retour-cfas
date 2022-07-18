@@ -153,8 +153,8 @@ const createDossierApprenant = async (itemToCreate) => {
 
   const dossierApprenantEntity = DossierApprenant.create({
     ine_apprenant: itemToCreate.ine_apprenant,
-    nom_apprenant: itemToCreate.nom_apprenant.toUpperCase().replace(/\s/g, ""),
-    prenom_apprenant: itemToCreate.prenom_apprenant.toUpperCase().replace(/\s/g, ""),
+    nom_apprenant: itemToCreate.nom_apprenant.toUpperCase(),
+    prenom_apprenant: itemToCreate.prenom_apprenant.toUpperCase(),
     email_contact: itemToCreate.email_contact,
     formation_cfd: itemToCreate.formation_cfd,
     libelle_long_formation: itemToCreate.libelle_long_formation,
