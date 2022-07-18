@@ -17,7 +17,7 @@ const DemandeBranchementErpFormErpReadySection = ({ helpFilePath }) => {
       </Stack>
       <Link target="_blank" href={helpFilePath}>
         <Button leftIcon={<Box as="i" className="ri-download-line" />} variant="primary">
-          Télécharger le pas à pas
+          Consulter le pas à pas
         </Button>
       </Link>
       <HStack marginTop="10w" spacing="1w">
