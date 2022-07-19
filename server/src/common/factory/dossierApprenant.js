@@ -50,8 +50,8 @@ class DossierApprenant extends BaseFactory {
 
     return new DossierApprenant({
       ...props,
-      nom_apprenant: props.nom_apprenant.toUpperCase(),
-      prenom_apprenant: props.prenom_apprenant.toUpperCase(),
+      nom_apprenant: props.nom_apprenant.toUpperCase().trim(),
+      prenom_apprenant: props.prenom_apprenant.toUpperCase().trim(),
       siret_etablissement_valid: validateSiret(props.siret_etablissement),
       created_at: new Date(),
       updated_at: null,
