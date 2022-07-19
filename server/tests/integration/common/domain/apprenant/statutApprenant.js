@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const { validateStatutApprenant } = require("../../../../src/common/domain/statutApprenant");
+const { validateStatutApprenant } = require("../../../../../src/common/domain/apprenant/statutApprenant");
 
 describe("Domain statut apprenant", () => {
   describe("validateStatutApprenant", () => {
