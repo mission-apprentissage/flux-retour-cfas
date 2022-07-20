@@ -72,32 +72,41 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
       : "N/A";
 
     return (
-      <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
-        <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
-          <HStack>
-            <Text>UAI :</Text>
-            <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
-              {uai}
-            </Badge>
-          </HStack>
-          {!multipleSirets && (
+      <Section
+        borderTop="solid 1px"
+        borderTopColor="grey.300"
+        borderBottom="solid 1px"
+        borderBottomColor="grey.300"
+        backgroundColor="galt"
+        paddingY="2w"
+      >
+        <Box marginBottom={!multipleSirets ? "85px" : ""}>
+          <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
             <HStack>
-              <Text>SIRET :</Text>
+              <Text>UAI :</Text>
               <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
-                {siretToDisplay}
+                {uai}
               </Badge>
             </HStack>
-          )}
-        </HStack>
+            {!multipleSirets && (
+              <HStack>
+                <Text>SIRET :</Text>
+                <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
+                  {siretToDisplay}
+                </Badge>
+              </HStack>
+            )}
+          </HStack>
 
-        <ReseauxAndAdresseText
-          reseaux={reseaux}
-          adresse={adresse}
-          multipleSirets={multipleSirets}
-          nbEtablissements={sousEtablissements.length}
-        />
+          <ReseauxAndAdresseText
+            reseaux={reseaux}
+            adresse={adresse}
+            multipleSirets={multipleSirets}
+            nbEtablissements={sousEtablissements.length}
+          />
 
-        {domainesMetiers?.length > 0 && <DomainesMetiers domainesMetiers={domainesMetiers} />}
+          {domainesMetiers?.length > 0 && <DomainesMetiers domainesMetiers={domainesMetiers} />}
+        </Box>
       </Section>
     );
   }

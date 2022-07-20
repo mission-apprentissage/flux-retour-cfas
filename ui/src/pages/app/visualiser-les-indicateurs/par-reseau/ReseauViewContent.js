@@ -1,4 +1,3 @@
-import { Divider } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -14,7 +13,6 @@ const ReseauViewContent = ({ userLoggedAsReseau = false }) => {
   return (
     <>
       {userLoggedAsReseau && <ReseauUpdateContactSection />}
-      <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
       <IndicateursAndRepartitionEffectifsReseau
         filters={filtersContext.state}
         effectifs={effectifs}

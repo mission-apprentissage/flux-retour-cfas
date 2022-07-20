@@ -7,7 +7,6 @@ import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { useFiltersContext } from "../FiltersContext";
 import {
-  ActionsSection,
   CfaInformationSection,
   IndicateursAndRepartionCfaNiveauAnneesSection,
   MultiSiretDetailInformationSection,
@@ -30,7 +29,6 @@ const CfaPrivateView = ({ cfaUai }) => {
         </Heading>
       </Section>
       <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
-      {infosCfa && <ActionsSection infosCfa={infosCfa} />}
 
       {/* Filtre sur le siret pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs sirets */}
       {displaySousEtablissementDetail && <MultiSiretDetailInformationSection sirets={sirets} />}
@@ -48,6 +46,7 @@ const CfaPrivateView = ({ cfaUai }) => {
           effectifs={effectifs}
           loading={effectifsLoading}
           showOrganismesCount={false}
+          hasMultipleSirets={hasMultipleSirets}
         />
       )}
     </Page>

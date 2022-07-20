@@ -1,4 +1,4 @@
-import { Box, Divider, Heading, HStack } from "@chakra-ui/react";
+import { Box, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
 import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
@@ -39,7 +39,6 @@ const IndicateursVueTerritoirePage = () => {
           </HStack>
         </HStack>
       </Section>
-      <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
       <IndicateursAndRepartitionEffectifsTerritoire
         filters={filtersContext.state}
         effectifs={effectifs}

@@ -23,9 +23,9 @@ const IndicateursAndRepartitionFormationParCfa = ({
   const exportFilename = `tdb-données-formation-${filters.formation?.cfd}-${new Date().toLocaleDateString()}.csv`;
 
   return (
-    <Section paddingY="4w">
+    <Section paddingY="4w" marginTop="-85px">
       <Tabs isLazy lazyBehavior="keepMounted">
-        <TabList>
+        <TabList borderBottom="0px">
           <Tab fontWeight="bold" fontSize="delta">
             Vue globale
           </Tab>

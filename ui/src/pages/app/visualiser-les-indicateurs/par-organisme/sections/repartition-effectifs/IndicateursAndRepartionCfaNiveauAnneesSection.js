@@ -17,14 +17,15 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
   loading,
   allowDownloadDataList = false,
   showOrganismesCount = true,
+  hasMultipleSirets = false,
 }) => {
   const { data, loading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
 
   return (
-    <Section paddingY="4w">
+    <Section paddingY="4w" marginTop={hasMultipleSirets == false ? "-85px" : ""}>
       <Tabs isLazy lazyBehavior="keepMounted">
-        <TabList>
+        <TabList borderBottom={hasMultipleSirets == false ? "0px" : "1px solid"}>
           <Tab fontWeight="bold" fontSize="delta">
             Vue globale
           </Tab>
@@ -63,6 +64,7 @@ IndicateursAndRepartionCfaNiveauAnneesSection.propTypes = {
   loading: PropTypes.bool.isRequired,
   allowDownloadDataList: PropTypes.bool,
   showOrganismesCount: PropTypes.bool,
+  hasMultipleSirets: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({
       count: PropTypes.number.isRequired,

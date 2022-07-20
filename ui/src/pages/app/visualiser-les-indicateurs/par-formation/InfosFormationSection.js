@@ -31,8 +31,15 @@ const InfosFormationSection = ({ formationCfd }) => {
 
   if (formation) {
     return (
-      <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">
-        <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
+      <Section
+        borderTop="solid 1px"
+        borderBottom="solid 1px"
+        borderBottomColor="grey.300"
+        borderTopColor="grey.300"
+        backgroundColor="galt"
+        paddingY="2w"
+      >
+        <HStack fontSize="epsilon" textColor="grey.800" spacing="2w" marginBottom="85px">
           <Text marginBottom="2px">CFD :</Text>
           <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
             {formation.cfd}

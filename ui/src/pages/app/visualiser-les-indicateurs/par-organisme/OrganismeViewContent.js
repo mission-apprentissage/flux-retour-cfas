@@ -4,19 +4,17 @@ import React from "react";
 import { hasUserRoles, roles } from "../../../../common/auth/roles";
 import useAuth from "../../../../common/hooks/useAuth";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
-import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { filtersPropTypes } from "../FiltersContext";
+import { infosCfaPropType } from "./propTypes";
 import {
-  ActionsSection,
   CfaInformationSection,
   IndicateursAndRepartionCfaNiveauAnneesSection,
   MultiSiretDetailInformationSection,
   RepartitionEffectifsParSiretSection,
 } from "./sections";
 
-const OrganismeViewContent = ({ cfaUai, filters }) => {
+const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
   const [effectifs, effectifsLoading] = useEffectifs();
-  const { data: infosCfa, loading: infosCfaLoading, error: infosCfaError } = useFetchCfaInfo(cfaUai);
   const [auth] = useAuth();
   const isAdmin = hasUserRoles(auth, roles.administrator);
   const hasMultipleSirets = infosCfa?.sousEtablissements?.length > 1;
@@ -25,10 +23,7 @@ const OrganismeViewContent = ({ cfaUai, filters }) => {
 
   return (
     <>
-      <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
-
-      {/* Section de copie du lien privé */}
-      {!displaySousEtablissementDetail && infosCfa && <ActionsSection infosCfa={infosCfa} />}
+      <CfaInformationSection infosCfa={infosCfa} loading={loading} error={error} />
 
       {/* Filtre sur le siret pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs sirets */}
       {displaySousEtablissementDetail && <MultiSiretDetailInformationSection sirets={sirets} />}
@@ -46,6 +41,7 @@ const OrganismeViewContent = ({ cfaUai, filters }) => {
           effectifs={effectifs}
           loading={effectifsLoading}
           showOrganismesCount={false}
+          hasMultipleSirets={hasMultipleSirets}
         />
       )}
     </>
@@ -53,7 +49,9 @@ const OrganismeViewContent = ({ cfaUai, filters }) => {
 };
 
 OrganismeViewContent.propTypes = {
-  cfaUai: PropTypes.string.isRequired,
+  infosCfa: infosCfaPropType,
+  loading: PropTypes.bool,
+  error: PropTypes.object,
   filters: filtersPropTypes.state,
 };
 
