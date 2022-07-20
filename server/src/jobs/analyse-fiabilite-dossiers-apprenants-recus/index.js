@@ -9,6 +9,7 @@ const {
   DossierApprenantApiInputFiabiliteReport,
 } = require("../../common/factory/dossierApprenantApiInputFiabiliteReport");
 const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
+const { validateIneApprenant } = require("../../common/domain/apprenant/ineApprenant");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
@@ -40,6 +41,8 @@ runScript(async ({ db }) => {
     nomApprenantFormatValide: 0,
     prenomApprenantPresent: 0,
     prenomApprenantFormatValide: 0,
+    ineApprenantPresent: 0,
+    ineApprenantFormatValide: 0,
   };
   // iterate over data and create an entry for each dossier apprenant sent with fiabilisation metadata
   await asyncForEach(latestReceivedDossiersApprenants, async (dossierApprenantSentEvent) => {
@@ -55,6 +58,8 @@ runScript(async ({ db }) => {
       nomApprenantFormatValide: !validateNomApprenant(data.nom_apprenant).error,
       prenomApprenantPresent: isSet(data.prenom_apprenant),
       prenomApprenantFormatValide: !validatePrenomApprenant(data.prenom_apprenant).error,
+      ineApprenantPresent: isSet(data.ine_apprenant),
+      ineApprenantFormatValide: !validateIneApprenant(data.ine_apprenant).error,
     });
     await db.collection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
 
@@ -74,6 +79,8 @@ runScript(async ({ db }) => {
       totalNomApprenantFormatValide: fiabiliteCounts.nomApprenantFormatValide,
       totalPrenomApprenantPresent: fiabiliteCounts.prenomApprenantPresent,
       totalPrenomApprenantFormatValide: fiabiliteCounts.prenomApprenantFormatValide,
+      totalIneApprenantPresent: fiabiliteCounts.ineApprenantPresent,
+      totalIneApprenantFormatValide: fiabiliteCounts.ineApprenantFormatValide,
     })
   );
 }, "analyse-fiabilite-dossiers-apprenants-dernieres-24h");
