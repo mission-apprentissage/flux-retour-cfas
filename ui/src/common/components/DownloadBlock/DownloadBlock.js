@@ -1,4 +1,4 @@
-import { Box, Center, Flex, Spacer, Spinner, Text } from "@chakra-ui/react";
+import { Box, Center, Flex, Spinner, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -6,7 +6,6 @@ import useDownloadClick from "../../hooks/useDownloadClick";
 
 const DownloadBlock = ({ title, description, fileName, getFile }) => {
   const [onClick, isLoading] = useDownloadClick(getFile, fileName);
-  const fileFormatOrName = fileName?.split(".").pop().toUpperCase();
 
   return (
     <Box
@@ -30,11 +29,7 @@ const DownloadBlock = ({ title, description, fileName, getFile }) => {
           <Text color="#3A3A3A" fontWeight="400" marginBottom="2w" fontSize="zeta">
             {description}
           </Text>
-          <Flex>
-            <Text color="#666666" fontWeight="400" marginBottom="2w" fontSize="omega">
-              {fileFormatOrName}
-            </Text>
-            <Spacer />
+          <Flex justifyContent="flex-end">
             <Box as="i" className="ri-download-line" fontWeight="400" />
           </Flex>
         </Box>
