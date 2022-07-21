@@ -10,6 +10,10 @@ class Indicator {
     this.exportProjection = {
       uai_etablissement: 1,
       siret_etablissement: 1,
+      etablissement_code_postal: 1,
+      etablissement_nom_departement: 1,
+      etablissement_nom_region: 1,
+      etablissement_reseaux: 1,
       nom_etablissement: 1,
       nom_apprenant: 1,
       prenom_apprenant: 1,
@@ -18,8 +22,10 @@ class Indicator {
       formation_rncp: 1,
       libelle_long_formation: 1,
       annee_formation: 1,
+      periode_formation: 1,
       annee_scolaire: 1,
       contrat_date_debut: 1,
+      contrat_date_fin: 1,
       contrat_date_rupture: 1,
       historique_statut_apprenant: 1,
       statut_apprenant_at_date: 1,
@@ -134,6 +140,8 @@ class Indicator {
       nom_apprenant: ANONYMOUS_LABEL,
       prenom_apprenant: ANONYMOUS_LABEL,
       date_de_naissance_apprenant: ANONYMOUS_LABEL,
+      date_debut_formation: item.periode_formation ? item.periode_formation[0] : null,
+      date_fin_formation: item.periode_formation ? item.periode_formation[1] : null,
     }));
   }
 }
