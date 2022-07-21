@@ -28,6 +28,8 @@ describe("Factory DossierApprenantApiInputFiabilite", () => {
         nomApprenantFormatValide: false,
         prenomApprenantPresent: true,
         prenomApprenantFormatValide: true,
+        ineApprenantPresent: true,
+        ineApprenantFormatValide: false,
       };
 
       const entity = DossierApprenantApiInputFiabilite.create(props);

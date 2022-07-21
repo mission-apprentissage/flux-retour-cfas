@@ -22,10 +22,12 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
       totalNomApprenantFormatValide: Joi.number().required(),
       totalPrenomApprenantPresent: Joi.number().required(),
       totalPrenomApprenantFormatValide: Joi.number().required(),
+      totalIneApprenantPresent: Joi.number().required(),
+      totalIneApprenantFormatValide: Joi.number().required(),
     });
 
     const { error } = schema.validate(props);
-    if (error) return null;
+    if (error) throw new Error(error.message);
 
     return new DossierApprenantApiInputFiabiliteReport({
       ...props,
@@ -37,6 +39,8 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
         props.totalPrenomApprenantFormatValide,
         props.totalDossiersApprenants
       ),
+      ratioIneApprenantPresent: getPercentage(props.totalIneApprenantPresent, props.totalDossiersApprenants),
+      ratioIneApprenantFormatValide: getPercentage(props.totalIneApprenantFormatValide, props.totalDossiersApprenants),
     });
   }
 }
