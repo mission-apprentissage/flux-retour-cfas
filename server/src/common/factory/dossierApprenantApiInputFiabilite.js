@@ -11,7 +11,7 @@ class DossierApprenantApiInputFiabilite extends BaseFactory {
     const schema = Joi.object({
       // analysis information
       analysisId: Joi.string().required(),
-      analysisTimestamp: Joi.number().required(),
+      analysisDate: Joi.date().iso().required(),
       // original data
       originalData: Joi.object().required(),
       erp: Joi.string().required(),

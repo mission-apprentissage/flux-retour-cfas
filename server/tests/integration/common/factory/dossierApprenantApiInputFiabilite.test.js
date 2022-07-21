@@ -12,11 +12,12 @@ describe("Factory DossierApprenantApiInputFiabilite", () => {
   });
   describe("create", () => {
     it("Vérifie la création d'un DossierApprenantApiInputFiabilite", async () => {
+      const analysisDate = new Date();
       const fakeNow = new Date();
       MockDate.set(fakeNow);
       const props = {
         analysisId: "abc-123-xxx",
-        analysisTimestamp: 123456,
+        analysisDate,
         originalData: {
           prenom_apprenant: "John",
           nom_apprenant: "Doe",

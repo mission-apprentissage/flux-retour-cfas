@@ -33,7 +33,7 @@ runScript(async ({ db }) => {
   await db.collection("dossiersApprenantsApiInputFiabilite").deleteMany();
 
   const analysisId = uuid();
-  const analysisTimestamp = new Date().getTime();
+  const analysisDate = new Date();
 
   const fiabiliteCounts = {
     nomApprenantPresent: 0,
@@ -47,7 +47,7 @@ runScript(async ({ db }) => {
 
     const newDossierApprenantApiInputFiabiliteEntry = DossierApprenantApiInputFiabilite.create({
       analysisId,
-      analysisTimestamp,
+      analysisDate,
       originalData: data,
       sentOnDate: date,
       erp: username,
@@ -68,7 +68,7 @@ runScript(async ({ db }) => {
   await db.collection("dossiersApprenantsApiInputFiabiliteReport").insertOne(
     DossierApprenantApiInputFiabiliteReport.create({
       analysisId,
-      analysisTimestamp,
+      analysisDate,
       totalDossiersApprenants: latestReceivedDossiersApprenants.length,
       totalNomApprenantPresent: fiabiliteCounts.nomApprenantPresent,
       totalNomApprenantFormatValide: fiabiliteCounts.nomApprenantFormatValide,
