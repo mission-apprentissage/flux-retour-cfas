@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const { BaseFactory } = require("./baseFactory");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { historiqueSchema: historiqueStatutsSchema } = require("../../common/domain/statutApprenant");
+const { historiqueSchema: historiqueStatutsSchema } = require("../../common/domain/apprenant/statutApprenant");
 const { schema: uaiSchema } = require("../../common/domain/uai");
 const { schema: cfdSchema } = require("../../common/domain/cfd");
 const { validateSiret } = require("../domain/siret");
@@ -50,8 +50,8 @@ class DossierApprenant extends BaseFactory {
 
     return new DossierApprenant({
       ...props,
-      nom_apprenant: props.nom_apprenant.toUpperCase(),
-      prenom_apprenant: props.prenom_apprenant.toUpperCase(),
+      nom_apprenant: props.nom_apprenant.toUpperCase().trim(),
+      prenom_apprenant: props.prenom_apprenant.toUpperCase().trim(),
       siret_etablissement_valid: validateSiret(props.siret_etablissement),
       created_at: new Date(),
       updated_at: null,

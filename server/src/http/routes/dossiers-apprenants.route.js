@@ -5,9 +5,11 @@ const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
 const { schema: dateSchema } = require("../../common/domain/date");
-const { schema: statutApprenantSchema } = require("../../common/domain/statutApprenant");
+const { schema: statutApprenantSchema } = require("../../common/domain/apprenant/statutApprenant");
 const { schema: uaiSchema } = require("../../common/domain/uai");
 const { schema: cfdSchema } = require("../../common/domain/cfd");
+const { schema: nomApprenantSchema } = require("../../common/domain/apprenant/nomApprenant");
+const { schema: prenomApprenantSchema } = require("../../common/domain/apprenant/prenomApprenant");
 const { siretRegex } = require("../../common/domain/siret");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
@@ -27,8 +29,8 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
 
   const dossierApprenantItemSchema = Joi.object({
     // required fields
-    nom_apprenant: Joi.string().required(),
-    prenom_apprenant: Joi.string().required(),
+    nom_apprenant: nomApprenantSchema.required(),
+    prenom_apprenant: prenomApprenantSchema.required(),
     date_de_naissance_apprenant: dateSchema.required(),
     uai_etablissement: uaiSchema.required(),
     nom_etablissement: Joi.string().required(),

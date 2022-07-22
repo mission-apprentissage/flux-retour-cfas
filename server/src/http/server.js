@@ -16,6 +16,7 @@ const loginCfaRouter = require("./routes/login-cfa.route");
 const configRouter = require("./routes/config.route");
 const referentielRouter = require("./routes/referentiel.route");
 const effectifsRouter = require("./routes/effectifs.route");
+const effecitfsExportRouter = require("./routes/effectifs-export.route");
 const cfasRouter = require("./routes/cfas.route");
 const formationRouter = require("./routes/formations.route");
 const healthcheckRouter = require("./routes/healthcheck.route");
@@ -73,6 +74,7 @@ module.exports = async (components) => {
     effectifsApprenantsRouter(components)
   );
   app.use("/api/effectifs", requireJwtAuthentication, effectifsRouter(components));
+  app.use("/api/effectifs-export", requireJwtAuthentication, effecitfsExportRouter(components));
 
   // admin routes
   app.use("/api/users", requireJwtAuthentication, adminOnly, usersRouter(components));

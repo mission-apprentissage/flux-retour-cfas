@@ -1,13 +1,12 @@
-import { Box, Divider, Heading, HStack } from "@chakra-ui/react";
+import { Box, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
 import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import { useFiltersContext } from "../FiltersContext";
-import IndicateursGridSection from "../IndicateursGridSection";
 import SwitchViewButton from "../SwitchViewButton";
-import RepartitionEffectifsTerritoire from "./RepartitionEffectifsTerritoire";
+import IndicateursAndRepartitionEffectifsTerritoire from "./IndicateursAndRepartitionEffectifsTerritoire";
 
 const IndicateursVueTerritoirePage = () => {
   const filtersContext = useFiltersContext();
@@ -40,9 +39,11 @@ const IndicateursVueTerritoirePage = () => {
           </HStack>
         </HStack>
       </Section>
-      <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
-      <IndicateursGridSection effectifs={effectifs} loading={loading} showOrganismesCount />
-      <RepartitionEffectifsTerritoire filters={filtersContext.state} />
+      <IndicateursAndRepartitionEffectifsTerritoire
+        filters={filtersContext.state}
+        effectifs={effectifs}
+        loading={loading}
+      />
     </Page>
   );
 };

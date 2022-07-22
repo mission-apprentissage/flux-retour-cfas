@@ -6,13 +6,11 @@ import { Page, Section } from "../../../../common/components";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { useFiltersContext } from "../FiltersContext";
-import IndicateursGridSection from "../IndicateursGridSection";
 import {
-  ActionsSection,
   CfaInformationSection,
+  IndicateursAndRepartionCfaNiveauAnneesSection,
   MultiSiretDetailInformationSection,
   RepartitionEffectifsParSiretSection,
-  RepartitionSection,
 } from "../par-organisme/sections";
 
 const CfaPrivateView = ({ cfaUai }) => {
@@ -31,7 +29,6 @@ const CfaPrivateView = ({ cfaUai }) => {
         </Heading>
       </Section>
       <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
-      {infosCfa && <ActionsSection infosCfa={infosCfa} />}
 
       {/* Filtre sur le siret pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs sirets */}
       {displaySousEtablissementDetail && <MultiSiretDetailInformationSection sirets={sirets} />}
@@ -43,10 +40,14 @@ const CfaPrivateView = ({ cfaUai }) => {
 
       {/* Vue Globale & Repartition pour un établissement sans sirets multiple ou dans la vue détail d'un sous établissement */}
       {(displaySousEtablissementDetail || !hasMultipleSirets) && (
-        <>
-          <IndicateursGridSection allowDownloadDataList={true} effectifs={effectifs} loading={effectifsLoading} />
-          <RepartitionSection filters={filters} />
-        </>
+        <IndicateursAndRepartionCfaNiveauAnneesSection
+          filters={filters}
+          allowDownloadDataList={true}
+          effectifs={effectifs}
+          loading={effectifsLoading}
+          showOrganismesCount={false}
+          hasMultipleSirets={hasMultipleSirets}
+        />
       )}
     </Page>
   );

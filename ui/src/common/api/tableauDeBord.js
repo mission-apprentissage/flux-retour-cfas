@@ -94,20 +94,6 @@ export const fetchDepartements = () => {
   return _get("/api/referentiel/departements");
 };
 
-/* CSV export of effectifs repartition by organisme */
-export const fetchRepartitionByOrganismeCsvExport = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs/export-csv-repartition-effectifs-par-organisme?${queryParameters}`;
-  return _get(url, { jsonResponse: false });
-};
-
-/* CSV export of effectifs repartition by formation */
-export const fetchRepartitionByFormationCsvExport = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs/export-csv-repartition-effectifs-par-formation?${queryParameters}`;
-  return _get(url, { jsonResponse: false });
-};
-
 /* Reseaux CFAS Search */
 export const fetchSearchReseauxCfas = async (filters) => {
   return await _post("/api/reseaux-cfas/search", filters);
@@ -123,10 +109,17 @@ export const fetchSearchFormations = async (filters) => {
   return await _post("/api/formations/search", filters);
 };
 
-/* CSV export of effectifs data list for indicateur */
+/* XLSX export of effectifs data list for indicateur */
 export const fetchEffectifsDataListXlsxExport = (filters, effectifIndicateur) => {
   const queryParameters = qs.stringify({ ...filters, effectif_indicateur: effectifIndicateur });
-  const url = `/api/effectifs/export-xlsx-data-lists?${queryParameters}`;
+  const url = `/api/effectifs-export/export-xlsx-lists?${queryParameters}`;
+  return _get(url, { jsonResponse: false });
+};
+
+/* CSV export of effectifs anonymized data list  */
+export const fetchEffectifsAnonymizedDataListCsvExport = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/effectifs-export/export-csv-anonymized-list?${queryParameters}`;
   return _get(url, { jsonResponse: false });
 };
 

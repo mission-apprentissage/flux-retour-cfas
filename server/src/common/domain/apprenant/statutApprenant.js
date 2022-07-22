@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { CODES_STATUT_APPRENANT } = require("../constants/dossierApprenantConstants");
+const { CODES_STATUT_APPRENANT } = require("../../constants/dossierApprenantConstants");
 
 const schema = Joi.number()
   .strict()

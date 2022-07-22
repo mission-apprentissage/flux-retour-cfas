@@ -40,7 +40,7 @@ export const ERPS = [
   {
     name: "Auriga",
     state: ERP_STATE.ready,
-    helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/auriga.pdf",
+    helpFilePath: "https://wiki.auriga.fr/index.php?title=Connecteur_Tableau_de_bord_de_l%27apprentissage",
   },
   { name: "CNAM (Gessic@)", state: ERP_STATE.coming },
   { name: "Alcuin Software", state: ERP_STATE.coming },

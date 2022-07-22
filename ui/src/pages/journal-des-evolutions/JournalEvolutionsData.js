@@ -6,6 +6,171 @@ export const JOURNAL_DES_EVOLUTIONS_TAGS = {
 
 export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
+    title: "Fichier en téléchargement",
+    explication: "Modifications : exhaustivité des données non nominatives et simplification du bloc de téléchargement",
+    correctif: "Oui",
+    date: "2022/07/18",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Ajout des codes INSEE de la Corse",
+    explication:
+      "Afin de corriger les bug d’affichage et de localisation des organismes Corses : résolution de bug en lien avec l’API INSEE. A présent les organismes corses transmettant au Tableau de bord sont visibles sur la vue territoriale.",
+    correctif: "Oui",
+    date: "2022/07/04",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
+  },
+  {
+    title: "Réflexion menée pour rapprocher notre schema de donnés avec celui de l’enquête SIFA",
+    explication:
+      "Réflexion sur la manière dont nous pourrions mettre à leur disposition des données du tableau de bord nécessaires à la complétude de SIFA, pour faciliter la déclaration des organismes de formation. Pour nous partager votre expérience : https://tally.so/r/3Ek0z4",
+    correctif: "Non",
+    date: "2022/06/27",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title:
+      "Ateliers de recherche utilisateurs pour la solution de déclaration au Tableau de bord des organismes n’utilisant pas d’ERP",
+    explication:
+      "Recherche préalable afin de développer une solution pour les organismes de formation n’utilisant pas un ERP sur le marché. Pour être informé de la suite de ces travaux, vous pouvez vous inscrire ici : https://cfas.apprentissage.beta.gouv.fr/organisme-formation/transmettre",
+    correctif: "Non",
+    date: "2022/06/20",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Recherche par RNCP",
+    explication: "La recherche de formations peut s’effectuer par CFD ou RNCP.",
+    correctif: "Non",
+    date: "2022/05/17",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Déploiement en Corse",
+    explication: "Présentation du Tableau de Bord au CREFOP et aux organismes du territoire.",
+    correctif: "Non",
+    date: "2022/05/18",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
+  },
+  {
+    title: "Vue multi SIRET",
+    explication:
+      "Possibilité de rechercher par SIRET ou de visualiser les différents SIRET liés à une UAI. Pour le cas où les établissements n’auraient pas transmis leur UAI mais l’UAI responsable uniquement.",
+    correctif: "Non",
+    date: "2022/06/13",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Évolution de la charte graphique : Pictogrammes + couleurs",
+    explication: "Pour faciliter la compréhension : ajout de pictogramme et de couleur (travail sur l’accessibilité).",
+    correctif: "Oui",
+    date: "2022/05/17",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Nouvelles vues des indicateurs “Territoire, Réseau, par organisme, par formation”",
+    explication:
+      "Pour faciliter la navigation et la compréhension, la visualisation des indicateurs a été repensée après une phase de recherche auprès des utilisateurs pilotes.",
+    correctif: "Oui",
+    date: "2022/06/02",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Déploiement du Tableau de bord en Martinique",
+    explication: "Présentation au CREFOP puis au organismes de formation",
+    correctif: "Non",
+    date: "2022/07/11",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
+  },
+  {
+    title: "Avancée des travaux de collecte de données via Auriga",
+    explication:
+      "Les organismes de formation de l’apprentissage demandent le branchement d’Auriga avec le Tableau de bord.",
+    correctif: "Non",
+    date: "2022/06/27",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
+  },
+  {
+    title: "Avancée des travaux de collecte de données via FCA Manager",
+    explication:
+      "Les organismes de formation de l’enseignement supérieur demandent région par région le branchement de FCA Manager avec le Tableau de bord.",
+    correctif: "Non",
+    date: "2022/07/11",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
+  },
+  {
+    title: "Documentation API",
+    explication:
+      "Mise à jour de la documentation API pour les expérimentations de partage de données nominatives en vue de repérer et d’accompagner les apprenants en situation de rupture ou de décrochage.",
+    correctif: "Non",
+    date: "2022/05/30",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Création automatisée des réseaux",
+    explication:
+      "Dans le but de faciliter les usages des utilisateurs réseaux : création d’une fonctionnalité interne, afin de créer des accès et vue réseaux, création et modification des réseaux possibles par les membres de l’équipe du Tableau de bord sans nécessité de nouveaux développement. ",
+    correctif: "Non",
+    date: "2022/04/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Aide à l’identification des décrocheurs en Pays de la Loire",
+    explication:
+      "Une expérimentation avec le Conseil Régional Pays de la Loire est lancée afin de permettre l’identification des décrocheurs et de les accompagner. Le Tableau de bord, dans le strict respect des règles RGPD, met à disposition des référents départementaux en charge de l’aide aux décrocheurs, les informations utiles.",
+    correctif: "Non",
+    date: "2022/04/26",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title:
+      "Pour répondre aux retours des utilisateurs organismes de formation, des ateliers ont été réalisés, afin de proposer une expérience de navigation plus fluide et compréhensible.",
+    explication:
+      "Pour répondre aux retours des utilisateurs organismes de formation, des ateliers ont été réalisés, afin de proposer une expérience de navigation plus fluide et compréhensible.",
+    correctif: "Oui",
+    date: "2022/04/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Mise en ligne d’une page d’aide",
+    explication:
+      "L’équipe du Tableau de bord a listé  les questions récurrentes auxquelles vous trouverez plus facilement des réponses. ",
+    correctif: "Non",
+    date: "2022/04/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Newsletter à destination des utilisateurs pilotes",
+    explication:
+      "Pour accompagner et informer sur le déploiement et des nouvelles fonctionnalités du Tableau de bord, mise en place d’une lettre d’information à destination des utilisateurs pilotes.",
+    correctif: "Non",
+    date: "2022/04/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Refonte des pages publiques",
+    explication:
+      "Pour faciliter la navigation l’équipe a modifier les pages publiques avec une harmonisation des header, mise en place de picto et de couleurs pour une meilleure identification. Travail de mise en accessibilité sur les couleurs et les contrastes.",
+    correctif: "Oui",
+    date: "2022/04/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Révision du workflow de contact",
+    explication:
+      "Modification du parcours pour contacter l’équipe du Tableau de bord, en améliorant la qualification des demandes avec des formulaires, pour obtenir une réponse plus rapidement. ",
+    correctif: "Non",
+    date: "2022/04/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Inscription pour être informé de la transmission sans ERP",
+    explication:
+      "Afin de rendre la transmission des données au Tableau de bord accessible à tous les organismes de formation, l’équipe du Tableau de bord lance des ateliers de recherches des usages actuels. Mise en place d’un formulaire pour être informé lorsque la fonctionnalité sera mise en ligne et également pour participer aux ateliers préalables.",
+    correctif: "Non",
+    date: "2022/04/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
     title: "Déploiement en Guadeloupe et à Mayotte",
     explication:
       "En coordination avec les référents apprentissages des DREETS ou DDETS, déploiement du Tableau de bord sur les territoires : Guadeloupe, Mayotte. Webinaire Guadeloupe le 06/04/2022, Webinaire Mayotte le 22/04/2022.",

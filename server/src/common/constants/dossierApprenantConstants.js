@@ -54,10 +54,10 @@ const DUPLICATE_TYPE_CODES = {
  * Liste des nom des indicateurs
  */
 const EFFECTIF_INDICATOR_NAMES = {
-  apprentis: "apprentis",
-  inscritsSansContrats: "inscritsSansContrats",
-  rupturants: "rupturants",
-  abandons: "abandons",
+  apprentis: "apprenti",
+  inscritsSansContrats: "inscrit sans contrat",
+  rupturants: "rupturant",
+  abandons: "abandon",
 };
 
 module.exports = {

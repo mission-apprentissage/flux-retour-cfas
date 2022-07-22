@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Link, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { NavLink } from "react-router-dom";
 
@@ -15,11 +15,11 @@ const DemandeBranchementErpFormErpReadySection = ({ helpFilePath }) => {
           </Text>
         </Box>
       </Stack>
-      <Link target="_blank" href={helpFilePath}>
-        <Button leftIcon={<Box as="i" className="ri-download-line" />} variant="primary">
-          Télécharger le pas à pas
+      <a target="_blank" rel="noopener noreferrer" href={helpFilePath}>
+        <Button rightIcon={<Box as="i" className="ri-external-link-line" />} variant="primary">
+          Consulter le pas à pas
         </Button>
-      </Link>
+      </a>
       <HStack marginTop="10w" spacing="1w">
         <Box as="i" className="ri-arrow-left-line"></Box>
         <NavLink to="/">Retourner à la page d&apos;accueil</NavLink>

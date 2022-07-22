@@ -12,8 +12,8 @@ const RepartitionEffectifsParDepartement = ({ effectifs, loading, error }) => {
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
-    ? ["Département et nom de l'organisme", "apprentis", "inscrits sans contrat"]
-    : ["Département et nom de l'organisme", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
+    ? ["Liste des organismes par département", "apprentis", "inscrits sans contrat"]
+    : ["Liste des organismes par département", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (effectifs) {
     content = (
       <Tbody>

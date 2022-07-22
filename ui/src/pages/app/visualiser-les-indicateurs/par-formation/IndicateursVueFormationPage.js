@@ -1,4 +1,4 @@
-import { Box, Divider, Heading, HStack } from "@chakra-ui/react";
+import { Box, Heading, HStack } from "@chakra-ui/react";
 import React from "react";
 
 import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
@@ -6,10 +6,9 @@ import FormationFilterMenu from "../../../../common/components/FormationFilter/F
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import { useFiltersContext } from "../FiltersContext";
-import IndicateursGridSection from "../IndicateursGridSection";
 import SwitchViewButton from "../SwitchViewButton";
+import IndicateursAndRepartitionFormationParCfa from "./IndicateursAndRepartitionFormationParCfa";
 import InfosFormationSection from "./InfosFormationSection";
-import RepartitionFormationParCfa from "./RepartitionFormationParCfa";
 
 const IndicateursVueFormationPage = () => {
   const filtersContext = useFiltersContext();
@@ -50,12 +49,15 @@ const IndicateursVueFormationPage = () => {
           </Box>
         )}
       </Section>
-      <Divider color="#E7E7E7" orientation="horizontal" maxWidth="1230px" margin="auto" />
       {Boolean(currentFormation) && (
         <>
           <InfosFormationSection formationCfd={currentFormation.cfd} />
-          <IndicateursGridSection effectifs={effectifs} loading={loading} showOrganismesCount />
-          <RepartitionFormationParCfa filters={filtersContext.state} />
+          <IndicateursAndRepartitionFormationParCfa
+            filters={filtersContext.state}
+            effectifs={effectifs}
+            loading={loading}
+            showOrganismesCount={true}
+          />
         </>
       )}
     </Page>
