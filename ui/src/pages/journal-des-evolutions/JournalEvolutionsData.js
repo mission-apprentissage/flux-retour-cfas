@@ -6,6 +6,22 @@ export const JOURNAL_DES_EVOLUTIONS_TAGS = {
 
 export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
+    title: "Nouveau format du téléchargement",
+    explication:
+      "Possibilité pour les pilotes de télécharger un fichier complet et anonymisé par territoire, formation ou organisme de formation.",
+    correctif: "Non",
+    date: "2022/07/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Nouveaux onglets pour la navigation par vue",
+    explication:
+      "Navigation par onglets, permettant d’accéder via une vue précise (territoriale, par formation, par organisme) : au téléchargement, aux données agrégées, au détail",
+    correctif: "Non",
+    date: "2022/07/25",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
     title: "Fichier en téléchargement",
     explication: "Modifications : exhaustivité des données non nominatives et simplification du bloc de téléchargement",
     correctif: "Oui",
