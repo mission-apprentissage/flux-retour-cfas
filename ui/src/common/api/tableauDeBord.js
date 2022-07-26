@@ -105,6 +105,11 @@ export const fetchSearchReseauxCfas = async (filters) => {
   return await _post("/api/reseaux-cfas/search", filters);
 };
 
+/* Users Search */
+export const fetchSearchUsers = async (filters) => {
+  return await _post("/api/users/search", filters);
+};
+
 /* CFA Search */
 export const fetchSearchCfas = async (filters) => {
   return await _post("/api/cfas/search", filters);

@@ -1,4 +1,6 @@
 export const QUERY_KEYS = {
+  SEARCH_RESEAUX_CFA: "search-reseaux-cfas",
+  SEARCH_USERS: "search-users",
   SEARCH_CFAS: "search-cfas",
   SEARCH_FORMATIONS: "search-formations",
   EFFECTIFS: "effectifs",

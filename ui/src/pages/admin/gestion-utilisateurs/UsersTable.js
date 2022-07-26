@@ -13,58 +13,42 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import Pagination from "@choc-ui/paginator";
+import PropTypes from "prop-types";
 import React, { forwardRef } from "react";
-import { useQuery } from "react-query";
 
-import { fetchUsers } from "../../../common/api/tableauDeBord";
-import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 import { formatDate } from "../../../common/utils/dateUtils";
 import GetUpdatePasswordUrlMenuItem from "./menuItems/GetUpdatePasswordUrlMenuItem";
 import RemoveUserMenuItem from "./menuItems/RemoveUserMenuItem";
 
-const getUsersListSortedChronologically = (users) => {
-  const usersWithoutCreationDate = users.filter((user) => !user.created_at);
-  const usersWithCreationDateSorted = users
-    .filter((user) => Boolean(user.created_at))
-    .sort((a, b) => {
-      const date1 = a.created_at ? new Date(a.created_at) : 0;
-      const date2 = b.created_at ? new Date(b.created_at) : 0;
-      return date2 - date1;
-    });
-  return [...usersWithCreationDateSorted, ...usersWithoutCreationDate];
-};
-
-const Prev = forwardRef((props, ref) => (
-  <Button ref={ref} {...props}>
-    <Box as="i" className="ri-arrow-left-s-line" />
-  </Button>
-));
-const Next = forwardRef((props, ref) => (
-  <Button ref={ref} {...props}>
-    <Box as="i" className="ri-arrow-right-s-line" />
-  </Button>
-));
-
-const itemRender = (_, type) => {
-  if (type === "prev") {
-    return Prev;
-  }
-  if (type === "next") {
-    return Next;
-  }
-};
-
-Prev.displayName = "prev";
-Next.displayName = "next";
-
-const UsersTable = () => {
-  const { data } = useQuery([QUERY_KEYS.USERS], () => fetchUsers());
-  const usersList = data && getUsersListSortedChronologically(data);
+const UsersTable = ({ users }) => {
   const [current, setCurrent] = React.useState(1);
 
   const pageSize = 10;
   const offset = (current - 1) * pageSize;
-  const dataSliced = usersList?.slice(offset, offset + pageSize);
+  const usersSliced = users?.slice(offset, offset + pageSize);
+
+  const Prev = forwardRef((props, ref) => (
+    <Button ref={ref} {...props}>
+      <Box as="i" className="ri-arrow-left-s-line" />
+    </Button>
+  ));
+  const Next = forwardRef((props, ref) => (
+    <Button ref={ref} {...props}>
+      <Box as="i" className="ri-arrow-right-s-line" />
+    </Button>
+  ));
+
+  const itemRender = (_, type) => {
+    if (type === "prev") {
+      return Prev;
+    }
+    if (type === "next") {
+      return Next;
+    }
+  };
+
+  Prev.displayName = "prev";
+  Next.displayName = "next";
 
   return (
     <Table variant="secondary">
@@ -75,7 +59,7 @@ const UsersTable = () => {
             setCurrent(page);
           }}
           pageSize={pageSize}
-          total={usersList?.length}
+          total={users?.length}
           itemRender={itemRender}
           paginationProps={{
             display: "flex",
@@ -101,7 +85,7 @@ const UsersTable = () => {
         </Tr>
       </Thead>
       <Tbody>
-        {dataSliced?.map((user) => {
+        {usersSliced?.map((user) => {
           return (
             <Tr key={user.username}>
               <Td color="bluefrance">{user.username}</Td>
@@ -134,4 +118,7 @@ const UsersTable = () => {
   );
 };
 
+UsersTable.propTypes = {
+  users: PropTypes.array,
+};
 export default UsersTable;

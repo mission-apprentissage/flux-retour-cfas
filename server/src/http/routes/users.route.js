@@ -31,6 +31,19 @@ module.exports = ({ users }) => {
   );
 
   router.post(
+    "/search",
+    validateRequestBody(
+      Joi.object({
+        searchTerm: Joi.string().min(3),
+      })
+    ),
+    tryCatch(async (req, res) => {
+      const foundUsers = await users.searchUsers(req.body);
+      return res.json(foundUsers);
+    })
+  );
+
+  router.post(
     "/",
     validateRequestBody(
       Joi.object({

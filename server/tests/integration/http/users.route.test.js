@@ -6,6 +6,7 @@ const { apiRoles, tdbRoles } = require("../../../src/common/roles");
 const { differenceInCalendarDays } = require("date-fns");
 const config = require("../../../config");
 const { UserModel } = require("../../../src/common/model");
+const { ORGANISMES_APPARTENANCE } = require("../../../src/common/constants/usersConstants");
 
 describe(__filename, () => {
   afterEach(() => {
@@ -235,6 +236,120 @@ describe(__filename, () => {
       assert.equal(response.status, 500);
       const checkAfterDelete = await UserModel.count({ username });
       assert.equal(checkAfterDelete, 1);
+    });
+  });
+
+  describe("POST /users/search", () => {
+    it("sends a 200 HTTP empty response when no match", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const response = await httpClient.post("/api/users/search", { searchTerm: "blabla" }, { headers: bearerToken });
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, []);
+    });
+
+    it("sends a 200 HTTP response with results when match on username", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user1", "password", { permissions: [apiRoles.administrator] });
+
+      await components.users.createUser({
+        email: "test3@mail.com",
+        username: "user2",
+        permissions: [apiRoles.administrator],
+        network: "NETWORK",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      await components.users.createUser({
+        email: "test3@mail.com",
+        username: "user3",
+        permissions: [apiRoles.apiStatutsSeeder],
+        network: "NETWORK",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const response = await httpClient.post("/api/users/search", { searchTerm: "user" }, { headers: bearerToken });
+
+      assert.strictEqual(response.status, 200);
+      assert.strictEqual(response.data.length, 3);
+      assert.deepEqual(response.data[0].username, "user1");
+      assert.deepEqual(response.data[1].username, "user2");
+      assert.deepEqual(response.data[2].username, "user3");
+    });
+
+    it("sends a 200 HTTP response with results when match on email", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user1", "password", {
+        email: "test1@mail.com",
+        permissions: [apiRoles.administrator],
+      });
+
+      await components.users.createUser({
+        email: "test2@mail.com",
+        username: "user2",
+        permissions: [apiRoles.administrator],
+        network: "NETWORK",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      await components.users.createUser({
+        email: "test3@mail.com",
+        username: "user3",
+        permissions: [apiRoles.apiStatutsSeeder],
+        network: "NETWORK",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const response = await httpClient.post("/api/users/search", { searchTerm: "mail.com" }, { headers: bearerToken });
+
+      assert.strictEqual(response.status, 200);
+      assert.strictEqual(response.data.length, 3);
+      assert.deepEqual(response.data[0].email, "test1@mail.com");
+      assert.deepEqual(response.data[1].email, "test2@mail.com");
+      assert.deepEqual(response.data[2].email, "test3@mail.com");
+    });
+
+    it("sends a 200 HTTP response with results when match on organisme", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user1", "password", {
+        organisme: ORGANISMES_APPARTENANCE.ACADEMIE,
+        permissions: [apiRoles.administrator],
+      });
+
+      await components.users.createUser({
+        email: "test2@mail.com",
+        username: "user2",
+        permissions: [apiRoles.administrator],
+        network: "NETWORK",
+        region: "REGION",
+        organisme: ORGANISMES_APPARTENANCE.ACADEMIE,
+      });
+
+      await components.users.createUser({
+        email: "test3@mail.com",
+        username: "user3",
+        permissions: [apiRoles.apiStatutsSeeder],
+        network: "NETWORK",
+        region: "REGION",
+        organisme: ORGANISMES_APPARTENANCE.ACADEMIE,
+      });
+
+      const response = await httpClient.post(
+        "/api/users/search",
+        { searchTerm: ORGANISMES_APPARTENANCE.ACADEMIE },
+        { headers: bearerToken }
+      );
+
+      assert.strictEqual(response.status, 200);
+      assert.strictEqual(response.data.length, 3);
+      assert.deepEqual(response.data[0].organisme, ORGANISMES_APPARTENANCE.ACADEMIE);
+      assert.deepEqual(response.data[1].organisme, ORGANISMES_APPARTENANCE.ACADEMIE);
+      assert.deepEqual(response.data[2].organisme, ORGANISMES_APPARTENANCE.ACADEMIE);
     });
   });
 });

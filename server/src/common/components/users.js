@@ -3,6 +3,7 @@ const { UserModel } = require("../model");
 const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
 const sha512Utils = require("../utils/sha512Utils");
 const { validatePassword } = require("../domain/password");
+const { escapeRegExp } = require("../utils/regexUtils");
 
 const rehashPassword = (user, password) => {
   user.password = sha512Utils.hash(password);
@@ -108,6 +109,35 @@ module.exports = async () => {
       }
 
       return await user.deleteOne({ username });
+    },
+    searchUsers: async (searchCriteria) => {
+      const { searchTerm } = searchCriteria;
+
+      const matchStage = {};
+      if (searchTerm) {
+        matchStage.$or = [
+          { username: new RegExp(escapeRegExp(searchTerm), "g") },
+          { email: new RegExp(escapeRegExp(searchTerm), "g") },
+          { organisme: new RegExp(escapeRegExp(searchTerm), "g") },
+        ];
+      }
+
+      const sortStage = { username: 1 };
+
+      const found = await UserModel.aggregate([{ $match: matchStage }, { $sort: sortStage }]);
+
+      return found.map((user) => {
+        return {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          permissions: user.permissions,
+          network: user.network,
+          region: user.region,
+          organisme: user.organisme,
+          created_at: user.created_at,
+        };
+      });
     },
   };
 };
