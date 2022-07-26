@@ -1,4 +1,17 @@
-import { Box, Button, Table, TableCaption, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Menu,
+  MenuButton,
+  MenuList,
+  Table,
+  TableCaption,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react";
 import Pagination from "@choc-ui/paginator";
 import React, { forwardRef } from "react";
 import { useQuery } from "react-query";
@@ -6,7 +19,8 @@ import { useQuery } from "react-query";
 import { fetchUsers } from "../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 import { formatDate } from "../../../common/utils/dateUtils";
-import GetUpdatePasswordUrlButton from "./GetUpdatePasswordUrlButton";
+import GetUpdatePasswordUrlMenuItem from "./menuItems/GetUpdatePasswordUrlMenuItem";
+import RemoveUserMenuItem from "./menuItems/RemoveUserMenuItem";
 
 const getUsersListSortedChronologically = (users) => {
   const usersWithoutCreationDate = users.filter((user) => !user.created_at);
@@ -77,11 +91,12 @@ const UsersTable = () => {
       <Thead>
         <Tr background="galt">
           <Th>Nom d&apos;utilisateur</Th>
-          <Th>Roles</Th>
           <Th>Email</Th>
+          <Th>Roles</Th>
+
           <Th>Réseau</Th>
           <Th>Date de création</Th>
-          <Th>Modifier mot de passe</Th>
+          <Th></Th>
         </Tr>
       </Thead>
       <Tbody>
@@ -89,12 +104,24 @@ const UsersTable = () => {
           return (
             <Tr key={user.username}>
               <Td color="bluefrance">{user.username}</Td>
-              <Td color="grey.800">{user.permissions.join(", ")}</Td>
               <Td color="grey.800">{user.email}</Td>
+              <Td color="grey.800">{user.permissions.join(", ")}</Td>
               <Td color="grey.800">{user.network}</Td>
               <Td color="grey.800">{user.created_at ? formatDate(new Date(user.created_at)) : "Inconnue"}</Td>
               <Td color="grey.800">
-                <GetUpdatePasswordUrlButton username={user.username} />
+                <Menu>
+                  <MenuButton
+                    variant="secondary"
+                    as={Button}
+                    rightIcon={<Box as="i" className="ri-arrow-down-s-fill" />}
+                  >
+                    Action
+                  </MenuButton>
+                  <MenuList>
+                    <GetUpdatePasswordUrlMenuItem username={user.username} />
+                    <RemoveUserMenuItem username={user.username} />
+                  </MenuList>
+                </Menu>
               </Td>
             </Tr>
           );

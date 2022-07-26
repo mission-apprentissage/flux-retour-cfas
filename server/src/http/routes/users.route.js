@@ -60,5 +60,33 @@ module.exports = ({ users }) => {
     })
   );
 
+  router.delete(
+    "/:username",
+    tryCatch(async (req, res) => {
+      const { username } = req.params;
+
+      if (username) {
+        const found = await users.getUser(username);
+
+        if (!found)
+          return res.status(500).json({
+            status: "Error",
+            message: "Username not found",
+          });
+
+        await users.removeUser(username);
+        return res.json({
+          status: "Success",
+          message: `User ${username} has been deleted `,
+        });
+      } else {
+        return res.status(500).json({
+          status: "Error",
+          message: "Username null or undefined",
+        });
+      }
+    })
+  );
+
   return router;
 };

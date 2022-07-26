@@ -5,6 +5,7 @@ const { startServer } = require("../../utils/testUtils");
 const { apiRoles, tdbRoles } = require("../../../src/common/roles");
 const { differenceInCalendarDays } = require("date-fns");
 const config = require("../../../config");
+const { UserModel } = require("../../../src/common/model");
 
 describe(__filename, () => {
   afterEach(() => {
@@ -157,6 +158,56 @@ describe(__filename, () => {
       // password token should expire in 48h
       const expiryDate = updatedUser.password_update_token_expiry;
       assert.equal(differenceInCalendarDays(expiryDate, new Date()), 2);
+    });
+  });
+
+  describe("DELETE /users/delete/:username", () => {
+    it("Permet de vérifier qu'on peut supprimer un utilisateur depuis son username en étant connecté en tant qu'administrateur", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const username = "john-doe";
+      await components.users.createUser({ username });
+
+      const checkUserBeforeDelete = await UserModel.count({ username });
+      assert.equal(checkUserBeforeDelete, 1);
+
+      const response = await httpClient.delete(`/api/users/${username}`, { headers: bearerToken });
+      assert.equal(response.status, 200);
+      const checkAfterDelete = await UserModel.count({ username });
+      assert.equal(checkAfterDelete, 0);
+    });
+
+    it("Permet de vérifier qu'on ne peut supprimer un utilisateur depuis son username en étant connecté en tant que non administrateur", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [tdbRoles.pilot] });
+      const username = "john-doe";
+      await components.users.createUser({ username });
+
+      const checkUserBeforeDelete = await UserModel.count({ username });
+      assert.equal(checkUserBeforeDelete, 1);
+
+      const response = await httpClient.delete(`/api/users/${username}`, { headers: bearerToken });
+
+      assert.equal(response.status, 403);
+      const checkAfterDelete = await UserModel.count({ username });
+      assert.equal(checkAfterDelete, 1);
+    });
+
+    it("Permet de vérifier qu'on ne peut supprimer un utilisateur si on fournit un username inexistant en étant connecté en tant qu'administrateur", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const username = "john-doe";
+      const badUsername = "john-smith";
+      await components.users.createUser({ username });
+
+      const checkUserBeforeDelete = await UserModel.count({ username });
+      assert.equal(checkUserBeforeDelete, 1);
+
+      const response = await httpClient.delete(`/api/users/${badUsername}`, { headers: bearerToken });
+
+      assert.equal(response.status, 500);
+      const checkAfterDelete = await UserModel.count({ username });
+      assert.equal(checkAfterDelete, 1);
     });
   });
 });

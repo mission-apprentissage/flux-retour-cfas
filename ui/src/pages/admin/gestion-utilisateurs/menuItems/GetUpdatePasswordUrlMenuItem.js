@@ -1,11 +1,11 @@
-import { Button, Input, useToast } from "@chakra-ui/react";
+import { Box, Input, MenuItem, useToast } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 import { useMutation } from "react-query";
 
-import { postGetUserUpdatePasswordUrl } from "../../../common/api/tableauDeBord";
+import { postGetUserUpdatePasswordUrl } from "../../../../common/api/tableauDeBord";
 
-const GetUpdatePasswordUrlButton = ({ username }) => {
+const GetUpdatePasswordUrlMenuItem = ({ username }) => {
   const toast = useToast();
   const { data, isLoading, mutate } = useMutation(
     () => {
@@ -29,14 +29,15 @@ const GetUpdatePasswordUrlButton = ({ username }) => {
   return data ? (
     <Input isDisabled value={data.passwordUpdateUrl} />
   ) : (
-    <Button size="sm" variant="secondary" isLoading={isLoading} onClick={mutate}>
+    <MenuItem size="sm" variant="secondary" isLoading={isLoading} onClick={mutate}>
+      <Box as="i" className="ri-link" marginRight="1w" />
       Générer lien de modification de mot de passe
-    </Button>
+    </MenuItem>
   );
 };
 
-GetUpdatePasswordUrlButton.propTypes = {
+GetUpdatePasswordUrlMenuItem.propTypes = {
   username: PropTypes.string.isRequired,
 };
 
-export default GetUpdatePasswordUrlButton;
+export default GetUpdatePasswordUrlMenuItem;

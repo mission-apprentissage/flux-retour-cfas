@@ -136,3 +136,7 @@ export const postCreateUser = async (body) => {
 export const postGetUserUpdatePasswordUrl = async (username) => {
   return await _post(`/api/users/generate-update-password-url`, { username });
 };
+
+export const deleteUser = (body) => {
+  return _delete(`/api/users/${body}`);
+};
