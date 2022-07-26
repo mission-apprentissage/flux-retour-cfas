@@ -24,7 +24,7 @@ const RemoveUserMenuItem = ({ username }) => {
   const cancelRef = React.useRef();
   const queryClient = useQueryClient();
 
-  const { isLoading, mutate } = useMutation(
+  const { mutate } = useMutation(
     () => {
       return deleteUser(username);
     },
@@ -47,7 +47,7 @@ const RemoveUserMenuItem = ({ username }) => {
 
   return (
     <>
-      <MenuItem size="sm" variant="secondary" isLoading={isLoading} onClick={onOpen}>
+      <MenuItem size="sm" variant="secondary" onClick={onOpen}>
         <Box as="i" className="ri-delete-bin-2-line" marginRight="1w" />
         Supprimer l&apos;utilisateur
       </MenuItem>

@@ -7,7 +7,7 @@ import { postGetUserUpdatePasswordUrl } from "../../../../common/api/tableauDeBo
 
 const GetUpdatePasswordUrlMenuItem = ({ username }) => {
   const toast = useToast();
-  const { data, isLoading, mutate } = useMutation(
+  const { data, mutate } = useMutation(
     () => {
       return postGetUserUpdatePasswordUrl(username);
     },
@@ -29,7 +29,7 @@ const GetUpdatePasswordUrlMenuItem = ({ username }) => {
   return data ? (
     <Input isDisabled value={data.passwordUpdateUrl} />
   ) : (
-    <MenuItem size="sm" variant="secondary" isLoading={isLoading} onClick={mutate}>
+    <MenuItem size="sm" variant="secondary" onClick={mutate}>
       <Box as="i" className="ri-link" marginRight="1w" />
       Générer lien de modification de mot de passe
     </MenuItem>
