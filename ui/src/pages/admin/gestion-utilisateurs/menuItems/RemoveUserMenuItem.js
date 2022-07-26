@@ -37,7 +37,7 @@ const RemoveUserMenuItem = ({ username }) => {
           isClosable: true,
           position: "top-right",
         });
-        queryClient.invalidateQueries([QUERY_KEYS.USERS]);
+        queryClient.invalidateQueries([QUERY_KEYS.SEARCH_USERS]);
       },
       onSettled() {
         onClose();
