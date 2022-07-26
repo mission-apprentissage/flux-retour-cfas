@@ -80,6 +80,11 @@ export const deleteReseauCfa = (body) => {
   return _delete(`/api/reseaux-cfas/delete/${body}`);
 };
 
+/* Organismes appartenance */
+export const fetchOrganismesAppartenance = () => {
+  return _get("/api/referentiel/organismes-appartenance");
+};
+
 /* Reseaux */
 export const fetchReseaux = () => {
   return _get("/api/referentiel/networks");
@@ -89,6 +94,7 @@ export const fetchReseaux = () => {
 export const fetchRegions = () => {
   return _get("/api/referentiel/regions");
 };
+
 /* Departements */
 export const fetchDepartements = () => {
   return _get("/api/referentiel/departements");

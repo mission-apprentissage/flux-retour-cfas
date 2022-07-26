@@ -66,6 +66,31 @@ describe(__filename, () => {
     assert.equal(found.email === "email@test.fr", true);
   });
 
+  it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau, une région et un organisme", async () => {
+    const { createUser } = await users();
+
+    const user = await createUser({
+      username: "userAdmin",
+      password: "password",
+      permissions: [tdbRoles.network],
+      email: "email@test.fr",
+      network: "test",
+      region: "REGION",
+      organisme: "ORGANISME",
+    });
+    const found = await UserModel.findOne({ username: "userAdmin" });
+
+    assert.equal(user.permissions.includes(tdbRoles.network), true);
+    assert.equal(user.network === "test", true);
+    assert.equal(user.email === "email@test.fr", true);
+
+    assert.equal(found.permissions.includes(tdbRoles.network), true);
+    assert.equal(found.network === "test", true);
+    assert.equal(found.region === "REGION", true);
+    assert.equal(found.organisme === "ORGANISME", true);
+    assert.equal(found.email === "email@test.fr", true);
+  });
+
   it("Permet de supprimer un utilisateur", async () => {
     const { createUser, removeUser } = await users();
 

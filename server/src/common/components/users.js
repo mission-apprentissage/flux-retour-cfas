@@ -42,6 +42,8 @@ module.exports = async () => {
       const passwordHash = sha512Utils.hash(password);
       const permissions = userProps.permissions || [];
       const network = userProps.network || null;
+      const region = userProps.region || null;
+      const organisme = userProps.organisme || null;
       const email = userProps.email || null;
 
       const user = new UserModel({
@@ -50,6 +52,8 @@ module.exports = async () => {
         email,
         permissions,
         network,
+        region,
+        organisme,
         created_at: new Date(),
       });
 

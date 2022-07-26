@@ -93,8 +93,9 @@ const UsersTable = () => {
           <Th>Nom d&apos;utilisateur</Th>
           <Th>Email</Th>
           <Th>Roles</Th>
-
           <Th>Réseau</Th>
+          <Th>Région</Th>
+          <Th>Organisme d&apos;appartenance</Th>
           <Th>Date de création</Th>
           <Th></Th>
         </Tr>
@@ -107,6 +108,8 @@ const UsersTable = () => {
               <Td color="grey.800">{user.email}</Td>
               <Td color="grey.800">{user.permissions.join(", ")}</Td>
               <Td color="grey.800">{user.network}</Td>
+              <Td color="grey.800">{user.region}</Td>
+              <Td color="grey.800">{user.organisme}</Td>
               <Td color="grey.800">{user.created_at ? formatDate(new Date(user.created_at)) : "Inconnue"}</Td>
               <Td color="grey.800">
                 <Menu>

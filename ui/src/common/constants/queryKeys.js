@@ -5,6 +5,7 @@ export const QUERY_KEYS = {
   CFAS: "cfas",
   DEPARTEMENT: "departement",
   REGIONS: "regions",
+  ORGANISMES_APPARTENANCE: "organismes-appartenance",
   RESEAUX: "reseaux",
   RESEAUX_CFAS: "reseaux-cfas",
   USERS: "users",

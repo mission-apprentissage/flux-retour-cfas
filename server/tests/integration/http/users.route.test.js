@@ -37,19 +37,35 @@ describe(__filename, () => {
         email: "test1@mail.com",
         username: "test1",
         permissions: [apiRoles.administrator],
+        network: "NETWORK",
+        region: "REGION",
+        organisme: "ORGANISME",
       });
+
       await components.users.createUser({
         email: "test2@mail.com",
         username: "test2",
         permissions: [apiRoles.apiStatutsSeeder],
+        network: "NETWORK",
+        region: "REGION",
+        organisme: "ORGANISME",
       });
       const response = await httpClient.get("/api/users", { headers: bearerToken });
 
       assert.equal(response.status, 200);
       assert.equal(response.data.length, 3);
+
       assert.equal(response.data[0].password, undefined);
+
       assert.equal(response.data[1].password, undefined);
+      assert.equal(response.data[1].network, "NETWORK");
+      assert.equal(response.data[1].region, "REGION");
+      assert.equal(response.data[1].organisme, "ORGANISME");
+
       assert.equal(response.data[2].password, undefined);
+      assert.equal(response.data[2].network, "NETWORK");
+      assert.equal(response.data[2].region, "REGION");
+      assert.equal(response.data[2].organisme, "ORGANISME");
     });
   });
 
@@ -88,11 +104,13 @@ describe(__filename, () => {
         username: "test",
         permissions: [tdbRoles.pilot],
         network: null,
+        organisme: null,
+        region: null,
         created_at: fakeNowDate.toISOString(),
       });
     });
 
-    it("sends a 200 HTTP response with created network user", async () => {
+    it("sends a 200 HTTP response with created network and organisme and region user", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const fakeNowDate = new Date();
@@ -100,7 +118,14 @@ describe(__filename, () => {
 
       const response = await httpClient.post(
         "/api/users",
-        { email: "test@mail.com", username: "test", role: tdbRoles.network, network: "CMA" },
+        {
+          email: "test@mail.com",
+          username: "test",
+          role: tdbRoles.network,
+          network: "CMA",
+          region: "CENTRE VAL DE LOIRE",
+          organisme: "DREETS",
+        },
         { headers: bearerToken }
       );
 
@@ -110,6 +135,8 @@ describe(__filename, () => {
         username: "test",
         permissions: [tdbRoles.network],
         network: "CMA",
+        organisme: "DREETS",
+        region: "CENTRE VAL DE LOIRE",
         created_at: fakeNowDate.toISOString(),
       });
     });

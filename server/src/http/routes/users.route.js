@@ -11,6 +11,8 @@ const mapUserToApiOutput = (user) => {
     email: user.email,
     permissions: user.permissions,
     network: user.network,
+    region: user.region,
+    organisme: user.organisme,
     created_at: user.created_at,
   };
 };
@@ -36,15 +38,19 @@ module.exports = ({ users }) => {
         email: Joi.string().required(),
         role: Joi.string().valid(tdbRoles.pilot, tdbRoles.network).required(),
         network: Joi.string(),
+        region: Joi.string(),
+        organisme: Joi.string(),
       })
     ),
     tryCatch(async (req, res) => {
-      const { username, email, role, network } = req.body;
+      const { username, email, role, network, region, organisme } = req.body;
       const createdUser = await users.createUser({
         username,
         email,
         permissions: [role],
         network: network || null,
+        region: region || null,
+        organisme: organisme || null,
       });
       return res.json(mapUserToApiOutput(createdUser));
     })
