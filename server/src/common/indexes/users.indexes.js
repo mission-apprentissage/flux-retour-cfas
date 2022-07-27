@@ -1,15 +1,21 @@
-const createUsersCollectionIndexes = async (db) => {
-  const collection = db.collection("users");
+const { doesCollectionExistInDb } = require("../utils/dbUtils");
 
-  await collection.createIndex({ username: 1 });
-  await collection.createIndex({ email: 1 });
-  await collection.createIndex({ organisme: 1 });
+const collectionName = "users";
+
+const createUsersCollectionIndexes = async (db) => {
+  if (await doesCollectionExistInDb(db, collectionName)) {
+    const collection = db.collection(collectionName);
+
+    await collection.createIndex({ username: 1 });
+    await collection.createIndex({ email: 1 });
+    await collection.createIndex({ organisme: 1 });
+  }
 };
 
 const dropUsersCollectionIndexes = async (db) => {
-  const collection = db.collection("users");
-
-  await collection.dropIndexes();
+  if (await doesCollectionExistInDb(db, collectionName)) {
+    db.collection(collectionName).dropIndexes();
+  }
 };
 
 module.exports = { createUsersCollectionIndexes, dropUsersCollectionIndexes };

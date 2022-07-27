@@ -4,8 +4,9 @@ const { createIndexes, dropIndexes } = require("../../common/indexes");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 runScript(async ({ db }) => {
-  logger.info("RUN Create all indexes");
+  logger.info("Drop all existing indexes...");
   await dropIndexes(db);
+  logger.info("Create all indexes...");
   await createIndexes(db);
-  logger.info("END Create all indexes");
+  logger.info("All indexes successfully created !");
 }, JOB_NAMES.createIndexes);
