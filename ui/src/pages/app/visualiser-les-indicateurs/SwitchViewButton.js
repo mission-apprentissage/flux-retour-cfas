@@ -30,7 +30,7 @@ const SwitchViewButton = () => {
         />
       </Button>
       {isOpen && (
-        <OverlayMenu onClose={() => setIsOpen(false)}>
+        <OverlayMenu width="558px" fixedHorizon={true} onClose={() => setIsOpen(false)}>
           <List spacing="2w" marginTop="1w" textAlign="left">
             <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.path} onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par territoire</FilterOption>

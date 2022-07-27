@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 
-const OverlayMenu = ({ onClose, children }) => {
+const OverlayMenu = ({ onClose, children, width, fixedHorizon = false }) => {
   const menuRef = useRef();
   const [menuMaxHeight, setMenuMaxHeight] = useState("100%");
 
@@ -33,8 +33,8 @@ const OverlayMenu = ({ onClose, children }) => {
         position="absolute"
         background="white"
         overflow="auto"
-        left="15w"
-        right="15w"
+        left={fixedHorizon ? {} : "15w"}
+        right={fixedHorizon ? {} : "15w"}
         marginTop="2w"
         paddingX="8w"
         paddingY="3w"
@@ -43,6 +43,7 @@ const OverlayMenu = ({ onClose, children }) => {
         zIndex="100"
         ref={menuRef}
         maxHeight={menuMaxHeight}
+        width={width ?? {}}
       >
         {children}
       </Box>
@@ -53,6 +54,8 @@ const OverlayMenu = ({ onClose, children }) => {
 OverlayMenu.propTypes = {
   onClose: PropTypes.func.isRequired,
   children: PropTypes.node.isRequired,
+  width: PropTypes.string,
+  fixedHorizon: PropTypes.bool,
 };
 
 export default OverlayMenu;
