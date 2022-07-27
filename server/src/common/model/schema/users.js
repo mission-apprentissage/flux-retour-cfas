@@ -31,6 +31,16 @@ module.exports = new Schema({
     default: null,
     description: "Le réseau de l'utilisateur s'il est précisé",
   },
+  region: {
+    type: String,
+    default: null,
+    description: "La région de l'utilisateur si elle est précisé",
+  },
+  organisme: {
+    type: String,
+    default: null,
+    description: "L'organisme d'appartenance de l'utilisateur si précisé",
+  },
   permissions: {
     type: [String],
     default: [],

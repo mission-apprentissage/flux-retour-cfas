@@ -66,6 +66,31 @@ describe(__filename, () => {
     assert.equal(found.email === "email@test.fr", true);
   });
 
+  it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau, une région et un organisme", async () => {
+    const { createUser } = await users();
+
+    const user = await createUser({
+      username: "userAdmin",
+      password: "password",
+      permissions: [tdbRoles.network],
+      email: "email@test.fr",
+      network: "test",
+      region: "REGION",
+      organisme: "ORGANISME",
+    });
+    const found = await UserModel.findOne({ username: "userAdmin" });
+
+    assert.equal(user.permissions.includes(tdbRoles.network), true);
+    assert.equal(user.network === "test", true);
+    assert.equal(user.email === "email@test.fr", true);
+
+    assert.equal(found.permissions.includes(tdbRoles.network), true);
+    assert.equal(found.network === "test", true);
+    assert.equal(found.region === "REGION", true);
+    assert.equal(found.organisme === "ORGANISME", true);
+    assert.equal(found.email === "email@test.fr", true);
+  });
+
   it("Permet de supprimer un utilisateur", async () => {
     const { createUser, removeUser } = await users();
 
@@ -245,6 +270,318 @@ describe(__filename, () => {
           return true;
         }
       );
+    });
+  });
+
+  describe("searchUsers", async () => {
+    const { searchUsers, createUser } = await users();
+
+    it("returns results matching username", async () => {
+      const searchTerm = "haver";
+
+      const user = await createUser({
+        username: "havertz",
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: "havertz" });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].network, user.network);
+    });
+
+    it("returns results matching username", async () => {
+      const searchTerm = "haver";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, user.username);
+    });
+
+    it("returns results matching username case insensitive", async () => {
+      const searchTerm = "HaVEr";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, user.username);
+    });
+
+    it("does not returns results without match on username", async () => {
+      const searchTerm = "benzema";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 0);
+    });
+
+    it("returns results matching email", async () => {
+      const searchTerm = "rma";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, user.username);
+    });
+
+    it("returns results matching email case insensitive", async () => {
+      const searchTerm = "RMa";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, user.username);
+    });
+
+    it("does not returns results without match on email", async () => {
+      const searchTerm = "fcbarcelona";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 0);
+    });
+
+    it("returns results matching organisme", async () => {
+      const searchTerm = "ORGAN";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, user.username);
+    });
+
+    it("returns results matching organisme case insensitive", async () => {
+      const searchTerm = "organ";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, user.username);
+    });
+
+    it("does not returns results without match on organisme", async () => {
+      const searchTerm = "BAD";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 0);
+    });
+
+    it("returns results matching region", async () => {
+      const searchTerm = "REGI";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, user.username);
+    });
+
+    it("returns results matching region case insensitive", async () => {
+      const searchTerm = "regi";
+      const usernameTest = "havertz";
+
+      const user = await createUser({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await UserModel.findOne({ username: usernameTest });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === user.network, true);
+      assert.equal(found.email === user.email, true);
+
+      const results = await searchUsers({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, user.username);
     });
   });
 });

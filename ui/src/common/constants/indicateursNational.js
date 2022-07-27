@@ -1,18 +1,18 @@
 export const indicateursNational = {
-  dateCalcul: "28 juin 2022",
+  dateCalcul: "25 juillet 2022",
   nbOrganismeFormation: {
-    count: 2981,
+    count: 3031,
   },
   nbApprentis: {
-    count: 354318,
+    count: 362089,
   },
   nbInscritsSansContrats: {
-    count: 68811,
+    count: 7485,
   },
   nbRupturants: {
-    count: 1882,
+    count: 2359,
   },
   nbAbandons: {
-    count: 46253,
+    count: 52484,
   },
 };

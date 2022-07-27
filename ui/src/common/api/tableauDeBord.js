@@ -80,6 +80,11 @@ export const deleteReseauCfa = (body) => {
   return _delete(`/api/reseaux-cfas/delete/${body}`);
 };
 
+/* Organismes appartenance */
+export const fetchOrganismesAppartenance = () => {
+  return _get("/api/referentiel/organismes-appartenance");
+};
+
 /* Reseaux */
 export const fetchReseaux = () => {
   return _get("/api/referentiel/networks");
@@ -89,6 +94,7 @@ export const fetchReseaux = () => {
 export const fetchRegions = () => {
   return _get("/api/referentiel/regions");
 };
+
 /* Departements */
 export const fetchDepartements = () => {
   return _get("/api/referentiel/departements");
@@ -97,6 +103,11 @@ export const fetchDepartements = () => {
 /* Reseaux CFAS Search */
 export const fetchSearchReseauxCfas = async (filters) => {
   return await _post("/api/reseaux-cfas/search", filters);
+};
+
+/* Users Search */
+export const fetchSearchUsers = async (filters) => {
+  return await _post("/api/users/search", filters);
 };
 
 /* CFA Search */
@@ -135,4 +146,8 @@ export const postCreateUser = async (body) => {
 
 export const postGetUserUpdatePasswordUrl = async (username) => {
   return await _post(`/api/users/generate-update-password-url`, { username });
+};
+
+export const deleteUser = (body) => {
+  return _delete(`/api/users/${body}`);
 };

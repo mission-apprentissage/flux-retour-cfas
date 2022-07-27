@@ -1,0 +1,17 @@
+/**
+ * Noms des types d'organismes d'appartenance des utilisateurs possibles
+ */
+const ORGANISMES_APPARTENANCE = {
+  TETE_DE_RESEAU: "TÊTE DE RÉSEAU",
+  ACADEMIE: "ACADÉMIE",
+  CARIF_OREF: "CARIF OREF",
+  DREETS: "DREETS",
+  CONSEIL_REGIONAL: "CONSEIL RÉGIONAL",
+  ERP: "ERP",
+  AUTRE: "AUTRE",
+  POLE_EMPLOI: "PÔLE EMPLOI",
+  MISSION_LOCALE: "MISSION LOCALE",
+  CELLULE_APPRENTISSAGE: "CELLULE APPRENTISSAGE",
+};
+
+module.exports = { ORGANISMES_APPARTENANCE };

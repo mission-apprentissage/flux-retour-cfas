@@ -2,6 +2,7 @@ const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 const { REGIONS, DEPARTEMENTS } = require("../../common/constants/territoiresConstants");
+const { ORGANISMES_APPARTENANCE } = require("../../common/constants/usersConstants");
 
 module.exports = () => {
   const router = express.Router();
@@ -25,6 +26,14 @@ module.exports = () => {
     "/departements",
     tryCatch(async (req, res) => {
       return res.json(DEPARTEMENTS);
+    })
+  );
+
+  router.get(
+    "/organismes-appartenance",
+    tryCatch(async (req, res) => {
+      const organismes = Object.keys(ORGANISMES_APPARTENANCE).map((id) => ({ id, nom: ORGANISMES_APPARTENANCE[id] }));
+      return res.json(organismes);
     })
   );
 

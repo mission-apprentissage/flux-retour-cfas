@@ -13,7 +13,11 @@ import {
 import { Field, Form, Formik } from "formik";
 import PropTypes from "prop-types";
 import React from "react";
+import { useQuery } from "react-query";
 import * as Yup from "yup";
+
+import { fetchOrganismesAppartenance, fetchRegions } from "../../../common/api/tableauDeBord";
+import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 
 const formValidationSchema = Yup.object().shape({
   username: Yup.string().required("Requis"),
@@ -29,6 +33,10 @@ const USER_ROLE = [
 ];
 
 const CreateUserForm = ({ onSubmit }) => {
+  const { data: REGIONS } = useQuery([QUERY_KEYS.REGIONS], () => fetchRegions());
+  const { data: ORGANISMES_APPARTENANCE } = useQuery([QUERY_KEYS.ORGANISMES_APPARTENANCE], () =>
+    fetchOrganismesAppartenance()
+  );
   return (
     <Formik initialValues={initialValues} validationSchema={formValidationSchema} onSubmit={onSubmit}>
       {({ status = {}, isSubmitting, values }) => {
@@ -45,6 +53,7 @@ const CreateUserForm = ({ onSubmit }) => {
                     </FormControl>
                   )}
                 </Field>
+
                 <Field name="email">
                   {({ field, meta }) => (
                     <FormControl isRequired isInvalid={meta.error && meta.touched}>
@@ -54,6 +63,39 @@ const CreateUserForm = ({ onSubmit }) => {
                     </FormControl>
                   )}
                 </Field>
+
+                <Field name="organisme">
+                  {({ field, meta }) => (
+                    <FormControl isInvalid={meta.error && meta.touched}>
+                      <FormLabel color="grey.800">organisme de l&apos;utilisateur</FormLabel>
+                      <Select marginTop="1w" {...field} id={field.name} placeholder="Sélectionnez un organisme">
+                        {ORGANISMES_APPARTENANCE?.map(({ id, nom }) => (
+                          <option key={id} value={nom}>
+                            {nom}
+                          </option>
+                        ))}
+                      </Select>
+                      <FormErrorMessage>{meta.error}</FormErrorMessage>
+                    </FormControl>
+                  )}
+                </Field>
+
+                <Field name="region">
+                  {({ field, meta }) => (
+                    <FormControl isInvalid={meta.error && meta.touched}>
+                      <FormLabel color="grey.800">région de l&apos;utilisateur</FormLabel>
+                      <Select marginTop="1w" {...field} id={field.name} placeholder="Sélectionnez une région">
+                        {REGIONS?.map(({ nom, code }) => (
+                          <option key={code} value={nom}>
+                            {nom}
+                          </option>
+                        ))}
+                      </Select>
+                      <FormErrorMessage>{meta.error}</FormErrorMessage>
+                    </FormControl>
+                  )}
+                </Field>
+
                 <Field name="role">
                   {({ field, meta }) => (
                     <FormControl isRequired isInvalid={meta.error && meta.touched}>
@@ -69,6 +111,7 @@ const CreateUserForm = ({ onSubmit }) => {
                     </FormControl>
                   )}
                 </Field>
+
                 {values.role === USER_ROLE[1].value && (
                   <Field name="network">
                     {({ field, meta }) => (

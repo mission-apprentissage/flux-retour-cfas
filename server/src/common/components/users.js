@@ -3,6 +3,7 @@ const { UserModel } = require("../model");
 const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
 const sha512Utils = require("../utils/sha512Utils");
 const { validatePassword } = require("../domain/password");
+const { escapeRegExp } = require("../utils/regexUtils");
 
 const rehashPassword = (user, password) => {
   user.password = sha512Utils.hash(password);
@@ -42,6 +43,8 @@ module.exports = async () => {
       const passwordHash = sha512Utils.hash(password);
       const permissions = userProps.permissions || [];
       const network = userProps.network || null;
+      const region = userProps.region || null;
+      const organisme = userProps.organisme || null;
       const email = userProps.email || null;
 
       const user = new UserModel({
@@ -50,6 +53,8 @@ module.exports = async () => {
         email,
         permissions,
         network,
+        region,
+        organisme,
         created_at: new Date(),
       });
 
@@ -104,6 +109,36 @@ module.exports = async () => {
       }
 
       return await user.deleteOne({ username });
+    },
+    searchUsers: async (searchCriteria) => {
+      const { searchTerm } = searchCriteria;
+
+      const matchStage = {};
+      if (searchTerm) {
+        matchStage.$or = [
+          { username: new RegExp(escapeRegExp(searchTerm), "i") },
+          { email: new RegExp(escapeRegExp(searchTerm), "i") },
+          { organisme: new RegExp(escapeRegExp(searchTerm), "i") },
+          { region: new RegExp(escapeRegExp(searchTerm), "i") },
+        ];
+      }
+
+      const sortStage = { username: 1 };
+
+      const found = await UserModel.aggregate([{ $match: matchStage }, { $sort: sortStage }]);
+
+      return found.map((user) => {
+        return {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          permissions: user.permissions,
+          network: user.network,
+          region: user.region,
+          organisme: user.organisme,
+          created_at: user.created_at,
+        };
+      });
     },
   };
 };
