@@ -116,9 +116,10 @@ module.exports = async () => {
       const matchStage = {};
       if (searchTerm) {
         matchStage.$or = [
-          { username: new RegExp(escapeRegExp(searchTerm), "g") },
-          { email: new RegExp(escapeRegExp(searchTerm), "g") },
-          { organisme: new RegExp(escapeRegExp(searchTerm), "g") },
+          { username: new RegExp(escapeRegExp(searchTerm), "i") },
+          { email: new RegExp(escapeRegExp(searchTerm), "i") },
+          { organisme: new RegExp(escapeRegExp(searchTerm), "i") },
+          { region: new RegExp(escapeRegExp(searchTerm), "i") },
         ];
       }
 
