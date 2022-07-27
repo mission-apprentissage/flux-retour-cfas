@@ -1,7 +1,5 @@
 const { DossierApprenantModel } = require("../../model");
 
-const ANONYMOUS_LABEL = "_ANONYME_";
-
 class Indicator {
   /**
    * Constructeur avec définition d'une projection d'export par défaut
@@ -133,13 +131,13 @@ class Indicator {
    * @param {*} filters
    * @returns
    */
-  async getAnonymousExportFormattedListAtDate(searchDate, filters = {}, indicateur) {
+  async getFullExportFormattedListAtDate(searchDate, filters = {}, indicateur, namedDataMode = false) {
     return (await this.getExportFormattedListAtDate(searchDate, filters, indicateur)).map((item) => ({
       ...item,
       indicateur,
-      nom_apprenant: ANONYMOUS_LABEL,
-      prenom_apprenant: ANONYMOUS_LABEL,
-      date_de_naissance_apprenant: ANONYMOUS_LABEL,
+      nom_apprenant: namedDataMode === true ? item.nom_apprenant : undefined,
+      prenom_apprenant: namedDataMode === true ? item.prenom_apprenant : undefined,
+      date_de_naissance_apprenant: namedDataMode === true ? item.date_de_naissance_apprenant : undefined,
       date_debut_formation: item.periode_formation ? item.periode_formation[0] : null,
       date_fin_formation: item.periode_formation ? item.periode_formation[1] : null,
     }));

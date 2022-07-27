@@ -3,7 +3,7 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { fetchEffectifsAnonymizedDataListCsvExport } from "../../../../common/api/tableauDeBord";
+import { fetchEffectifsDataListCsvExport } from "../../../../common/api/tableauDeBord";
 import { Section } from "../../../../common/components";
 import DownloadBlock from "../../../../common/components/DownloadBlock/DownloadBlock";
 import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
@@ -30,7 +30,7 @@ const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading, showOr
                 title="Télécharger les données du territoire sélectionné"
                 description="Le fichier est généré à date du jour, en fonction du territoire sélectionné et comprend la liste anonymisée des apprenants par organisme et formation."
                 fileName={exportFilename}
-                getFile={() => fetchEffectifsAnonymizedDataListCsvExport(mapFiltersToApiFormat(filters))}
+                getFile={() => fetchEffectifsDataListCsvExport(mapFiltersToApiFormat(filters))}
               />
             </Stack>
           </TabPanel>

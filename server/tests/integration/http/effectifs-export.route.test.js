@@ -1,8 +1,7 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { createRandomDossierApprenant } = require("../../data/randomizedSample");
-const { apiRoles, tdbRoles } = require("../../../src/common/roles");
-const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
+const { tdbRoles } = require("../../../src/common/roles");
 
 const {
   historySequenceInscritToApprentiToAbandon,
@@ -10,8 +9,7 @@ const {
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
 } = require("../../data/historySequenceSamples");
-const { DossierApprenantModel, CfaModel, UserEventModel } = require("../../../src/common/model");
-const { parseXlsxHeaderStreamToJson } = require("../../../src/common/utils/exporterUtils");
+const { DossierApprenantModel, UserEventModel } = require("../../../src/common/model");
 const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
 const { USER_EVENTS_ACTIONS } = require("../../../src/common/constants/userEventsConstants");
 
@@ -242,119 +240,6 @@ describe(__filename, () => {
       assert.equal(response.status, 200);
       assert.ok(response.data);
       assert.ok(userEventInDb);
-    });
-  });
-
-  describe("/api/effectifs-export/export-xlsx-lists route", () => {
-    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
-      const { httpClient } = await startServer();
-
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        headers: {
-          Authorization: "",
-        },
-      });
-
-      assert.equal(response.status, 401);
-    });
-
-    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié en tant qu'admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
-
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
-        headers: authHeader,
-      });
-
-      assert.equal(response.status, 403);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des apprentis via API pour un admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
-
-      // Check good api call
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
-        responseType: "arraybuffer",
-        headers: authHeader,
-      });
-
-      const apprentisList = parseXlsxHeaderStreamToJson(response.data, 4);
-
-      assert.equal(response.status, 200);
-      assert.equal(apprentisList.length, 5);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des inscrits sans contrats via API pour un admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
-
-      // Check good api call
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: {
-          date: "2020-10-10T00:00:00.000Z",
-          effectif_indicateur: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
-        },
-        responseType: "arraybuffer",
-        headers: authHeader,
-      });
-
-      const inscritsSansContratsList = parseXlsxHeaderStreamToJson(response.data, 4);
-
-      assert.equal(response.status, 200);
-      assert.equal(inscritsSansContratsList.length, 15);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des abandons via API pour un admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
-
-      // Check good api call
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.abandons },
-        responseType: "arraybuffer",
-        headers: authHeader,
-      });
-
-      const abandonsList = parseXlsxHeaderStreamToJson(response.data, 3);
-
-      assert.equal(response.status, 200);
-      assert.equal(abandonsList.length, 10);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des rupturants via API pour un CFA", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
-
-      // Check good api call
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.rupturants },
-        responseType: "arraybuffer",
-        headers: authHeader,
-      });
-
-      const rupturantsList = parseXlsxHeaderStreamToJson(response.data, 4);
-
-      assert.equal(response.status, 200);
-      assert.equal(rupturantsList.length, 8);
     });
   });
 });

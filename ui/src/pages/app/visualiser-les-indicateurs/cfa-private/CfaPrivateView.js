@@ -42,11 +42,11 @@ const CfaPrivateView = ({ cfaUai }) => {
       {(displaySousEtablissementDetail || !hasMultipleSirets) && (
         <IndicateursAndRepartionCfaNiveauAnneesSection
           filters={filters}
-          allowDownloadDataList={true}
           effectifs={effectifs}
           loading={effectifsLoading}
           showOrganismesCount={false}
           hasMultipleSirets={hasMultipleSirets}
+          namedDataDownloadMode={true}
         />
       )}
     </Page>

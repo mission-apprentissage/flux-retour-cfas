@@ -120,15 +120,8 @@ export const fetchSearchFormations = async (filters) => {
   return await _post("/api/formations/search", filters);
 };
 
-/* XLSX export of effectifs data list for indicateur */
-export const fetchEffectifsDataListXlsxExport = (filters, effectifIndicateur) => {
-  const queryParameters = qs.stringify({ ...filters, effectif_indicateur: effectifIndicateur });
-  const url = `/api/effectifs-export/export-xlsx-lists?${queryParameters}`;
-  return _get(url, { jsonResponse: false });
-};
-
 /* CSV export of effectifs anonymized data list  */
-export const fetchEffectifsAnonymizedDataListCsvExport = (filters) => {
+export const fetchEffectifsDataListCsvExport = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs-export/export-csv-anonymized-list?${queryParameters}`;
   return _get(url, { jsonResponse: false });

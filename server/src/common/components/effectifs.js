@@ -345,26 +345,30 @@ module.exports = () => {
    * @param {*} filters
    * @returns
    */
-  const getAnonymousEffectifsAtDate = async (searchDate, filters = {}) => {
-    const apprentisAnonymous = await apprentis.getAnonymousExportFormattedListAtDate(
+  const getDataListEffectifsAtDate = async (searchDate, filters = {}, namedDataMode = false) => {
+    const apprentisAnonymous = await apprentis.getFullExportFormattedListAtDate(
       searchDate,
       filters,
-      EFFECTIF_INDICATOR_NAMES.apprentis
+      EFFECTIF_INDICATOR_NAMES.apprentis,
+      namedDataMode
     );
-    const inscritsSansContratAnonymous = await inscritsSansContrats.getAnonymousExportFormattedListAtDate(
+    const inscritsSansContratAnonymous = await inscritsSansContrats.getFullExportFormattedListAtDate(
       searchDate,
       filters,
-      EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
+      EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
+      namedDataMode
     );
-    const rupturantsAnonymous = await rupturants.getAnonymousExportFormattedListAtDate(
+    const rupturantsAnonymous = await rupturants.getFullExportFormattedListAtDate(
       searchDate,
       filters,
-      EFFECTIF_INDICATOR_NAMES.rupturants
+      EFFECTIF_INDICATOR_NAMES.rupturants,
+      namedDataMode
     );
-    const abandonsAnonymous = await abandons.getAnonymousExportFormattedListAtDate(
+    const abandonsAnonymous = await abandons.getFullExportFormattedListAtDate(
       searchDate,
       filters,
-      EFFECTIF_INDICATOR_NAMES.abandons
+      EFFECTIF_INDICATOR_NAMES.abandons,
+      namedDataMode
     );
 
     return [...apprentisAnonymous, ...inscritsSansContratAnonymous, ...rupturantsAnonymous, ...abandonsAnonymous];
@@ -382,6 +386,6 @@ module.exports = () => {
     getEffectifsCountByDepartementAtDate,
     getEffectifsCountByFormationAndDepartementAtDate,
     getEffectifsCountBySiretAtDate,
-    getAnonymousEffectifsAtDate,
+    getDataListEffectifsAtDate,
   };
 };
