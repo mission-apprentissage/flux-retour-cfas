@@ -2,6 +2,8 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { createRandomDossierApprenant } = require("../../data/randomizedSample");
 const { tdbRoles } = require("../../../src/common/roles");
+const config = require("../../../config");
+const jwt = require("jsonwebtoken");
 
 const {
   historySequenceInscritToApprentiToAbandon,
@@ -9,7 +11,7 @@ const {
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
 } = require("../../data/historySequenceSamples");
-const { DossierApprenantModel, UserEventModel } = require("../../../src/common/model");
+const { DossierApprenantModel, UserEventModel, CfaModel } = require("../../../src/common/model");
 const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
 const { USER_EVENTS_ACTIONS } = require("../../../src/common/constants/userEventsConstants");
 
@@ -58,6 +60,7 @@ describe(__filename, () => {
       await toAdd.save();
     }
   };
+
   describe("/api/effectifs-export/export-csv-list route", () => {
     const API_ROUTE = "/api/effectifs-export/export-csv-list";
 
@@ -104,7 +107,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.TERRITOIRE_NATIONAL,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_NATIONAL,
       });
 
       assert.equal(response.status, 200);
@@ -130,7 +133,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.TERRITOIRE_DEPARTEMENT,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_DEPARTEMENT,
       });
 
       assert.equal(response.status, 200);
@@ -156,7 +159,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.TERRITOIRE_REGION,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_REGION,
       });
 
       assert.equal(response.status, 200);
@@ -182,7 +185,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.RESEAU,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.RESEAU,
       });
 
       assert.equal(response.status, 200);
@@ -208,7 +211,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.FORMATION,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.FORMATION,
       });
 
       assert.equal(response.status, 200);
@@ -216,7 +219,7 @@ describe(__filename, () => {
       assert.ok(userEventInDb);
     });
 
-    it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un CFA via API en étant authentifié", async () => {
+    it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un CFA via API en étant authentifié en tant que pilot", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const authHeader = await createAndLogUser("user", "password", {
         permissions: [tdbRoles.pilot],
@@ -234,7 +237,51 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.CFA,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_ANONYMOUS,
+      });
+
+      assert.equal(response.status, 200);
+      assert.ok(response.data);
+      assert.ok(userEventInDb);
+    });
+
+    it("Vérifie qu'on peut récupérer des listes de données nominatives pour un CFA via API en étant authentifié en tant que cfa", async () => {
+      const { httpClient } = await startServer();
+
+      // create cfa in db
+      const token = "eyP33IyEAisoErO";
+      const uai_etablissement = "0762232N";
+      await new CfaModel({
+        uai: uai_etablissement,
+        access_token: token,
+      }).save();
+
+      // Authent cfa
+      const authentResponse = await httpClient.post("/api/login-cfa", {
+        cfaAccessToken: token,
+      });
+
+      // Check cfa authent
+      assert.equal(authentResponse.status, 200);
+      const decoded = jwt.verify(authentResponse.data.access_token, config.auth.user.jwtSecret);
+      assert.ok(decoded.iat);
+      assert.ok(decoded.exp);
+      assert.equal(decoded.sub, uai_etablissement);
+      assert.equal(decoded.iss, config.appName);
+      assert.deepStrictEqual(decoded.permissions, [tdbRoles.cfa]);
+
+      // Seed sample data
+      await seedDossiersApprenants({ annee_scolaire: "2021-2022", uai_etablissement });
+
+      // Check get named data
+      const response = await httpClient.get(API_ROUTE, {
+        params: { date: "2022-06-10T00:00:00.000Z", uai_etablissement, namedDataMode: true },
+        headers: { Authorization: `Bearer ${authentResponse.data.access_token}` },
+      });
+
+      // Check good user event in db
+      const userEventInDb = await UserEventModel.findOne({
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_NAMED_DATA,
       });
 
       assert.equal(response.status, 200);

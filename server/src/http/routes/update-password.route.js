@@ -1,6 +1,6 @@
 const express = require("express");
 const Joi = require("joi");
-const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
+const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 
@@ -20,6 +20,7 @@ module.exports = ({ users, userEvents }) => {
         const updatedUser = await users.updatePassword(req.body.token, req.body.newPassword);
 
         await userEvents.create({
+          type: USER_EVENTS_TYPES.POST,
           username: updatedUser.username,
           action: USER_EVENTS_ACTIONS.UPDATE_PASSWORD,
         });

@@ -7,7 +7,7 @@ const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { subDays, startOfDay } = require("date-fns");
 const axios = require("axios").default;
 const env = require("env-var");
-const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
+const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const destinationApiUrl = env.get("FLUX_RETOUR_CFAS_REPOST_JOB_DEST_API_URL").asString();
@@ -35,7 +35,7 @@ const repostLastReceivedDossiersApprenantsToEnv = async () => {
   const lastUserEventsReceived = await UserEventModel.find({
     date: { $gte: startOfDay(subDays(new Date(), 1)), $lt: startOfDay(new Date()) },
     action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
-    type: "POST",
+    type: USER_EVENTS_TYPES.POST,
   });
 
   if (lastUserEventsReceived.length > 0) {

@@ -6,7 +6,10 @@ const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScola
 const { tdbRoles } = require("../../common/roles");
 
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
-const { getExportAnonymizedEventNameFromFilters } = require("../../common/constants/userEventsConstants");
+const {
+  getExportAnonymizedEventNameFromFilters,
+  USER_EVENTS_TYPES,
+} = require("../../common/constants/userEventsConstants");
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -64,7 +67,8 @@ module.exports = ({ effectifs, userEvents }) => {
 
       // create user event
       await userEvents.create({
-        action: getExportAnonymizedEventNameFromFilters(filters),
+        type: USER_EVENTS_TYPES.EXPORT_CSV,
+        action: getExportAnonymizedEventNameFromFilters(filters, namedDataListMode),
         username: req.user.username,
         data: req.query,
       });

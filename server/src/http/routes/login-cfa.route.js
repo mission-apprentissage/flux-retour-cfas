@@ -1,5 +1,5 @@
 const express = require("express");
-const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
+const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
 const { tdbRoles } = require("../../common/roles");
 const { createUserToken } = require("../../common/utils/jwtUtils");
 
@@ -17,6 +17,7 @@ module.exports = ({ cfas, userEvents }) => {
       };
       const token = createUserToken(syntheticCfaUser);
       await userEvents.create({
+        type: USER_EVENTS_TYPES.POST,
         username: syntheticCfaUser.username,
         action: USER_EVENTS_ACTIONS.LOGIN_CFA,
       });
