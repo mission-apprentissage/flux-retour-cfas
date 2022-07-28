@@ -50,7 +50,9 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
               <IndicateursGridStack effectifs={effectifs} loading={loading} showOrganismesCount={showOrganismesCount} />
               <DownloadBlock
                 title="Télécharger les données de l’organisme sélectionné"
-                description="Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste anonymisé des apprenants par organisme et formation."
+                description={`Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste ${
+                  allowDownloadNamedData === false ? "anonymisée" : " "
+                } des apprenants par organisme et formation.`}
                 fileName={exportFilename}
                 getFile={() => fetchEffectifsDataListCsvExport(fetchEffectifsDataListQueryParams)}
               />

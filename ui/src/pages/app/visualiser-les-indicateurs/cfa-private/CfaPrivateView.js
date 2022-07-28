@@ -35,7 +35,7 @@ const CfaPrivateView = ({ cfaUai }) => {
 
       {/* Répartition par Siret pour un établissement multi-siret */}
       {!displaySousEtablissementDetail && hasMultipleSirets && (
-        <RepartitionEffectifsParSiretSection filters={filters} />
+        <RepartitionEffectifsParSiretSection namedDataDownloadMode={true} filters={filters} />
       )}
 
       {/* Vue Globale & Repartition pour un établissement sans sirets multiple ou dans la vue détail d'un sous établissement */}
