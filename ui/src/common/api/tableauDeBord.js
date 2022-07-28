@@ -1,6 +1,6 @@
 import qs from "query-string";
 
-import { _delete, _get, _post } from "../httpClient";
+import { _delete, _get, _post, _put } from "../httpClient";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 /* Effectifs */
@@ -120,10 +120,10 @@ export const fetchSearchFormations = async (filters) => {
   return await _post("/api/formations/search", filters);
 };
 
-/* XLSX export of effectifs data list for indicateur */
-export const fetchEffectifsDataListXlsxExport = (filters, effectifIndicateur) => {
-  const queryParameters = qs.stringify({ ...filters, effectif_indicateur: effectifIndicateur });
-  const url = `/api/effectifs-export/export-xlsx-lists?${queryParameters}`;
+/* CSV export of effectifs anonymized data list  */
+export const fetchEffectifsDataListCsvExport = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/effectifs-export/export-csv-list?${queryParameters}`;
   return _get(url, { jsonResponse: false });
 };
 
@@ -137,6 +137,18 @@ export const fetchEffectifsAnonymizedDataListCsvExport = (filters) => {
 /* Utilisateurs */
 export const fetchUsers = async () => {
   return await _get("/api/users");
+};
+
+/* Utilisateur by id */
+export const fetchUserById = (userId) => {
+  const url = `/api/users/${userId}`;
+  return _get(url);
+};
+
+/* Update user for id */
+export const putUser = (userId, body) => {
+  const url = `/api/users/${userId}`;
+  return _put(url, body);
 };
 
 /* Create user */

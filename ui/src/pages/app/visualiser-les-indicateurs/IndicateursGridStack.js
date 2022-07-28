@@ -3,14 +3,13 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { EffectifCard } from "../../../common/components";
-import { EFFECTIF_INDICATEURS } from "../../../common/constants/effectifIndicateur";
 import { isDateFuture } from "../../../common/utils/dateUtils";
 import { pluralize } from "../../../common/utils/stringUtils";
 import DateWithTooltipSelector from "./DateWithTooltipSelector";
 import { useFiltersContext } from "./FiltersContext";
 import OrganismesCountCard from "./OrganismesCountCard";
 
-const IndicateursGridStack = ({ effectifs, loading, allowDownloadDataList = false, showOrganismesCount = true }) => {
+const IndicateursGridStack = ({ effectifs, loading, showOrganismesCount = true }) => {
   const filtersContext = useFiltersContext();
   let content = null;
   if (loading) {
@@ -39,7 +38,6 @@ const IndicateursGridStack = ({ effectifs, loading, allowDownloadDataList = fals
         <EffectifCard
           count={effectifs.apprentis.count}
           label={pluralize("apprenti", effectifs.apprentis.count)}
-          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.apprentis : null}
           tooltipLabel={
             <div>
               <b>Nombre d&apos;apprenants en contrat d&apos;apprentissage</b> au dernier jour du mois (ou J-1 si mois en
@@ -53,7 +51,6 @@ const IndicateursGridStack = ({ effectifs, loading, allowDownloadDataList = fals
         <EffectifCard
           count={effectifs.inscritsSansContrat.count}
           label={`${pluralize("inscrit", effectifs.inscritsSansContrat.count)} sans contrat`}
-          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.inscritsSansContrats : null}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir jamais signé de contrat</b>{" "}
@@ -68,7 +65,6 @@ const IndicateursGridStack = ({ effectifs, loading, allowDownloadDataList = fals
         <EffectifCard
           count={effectifs.rupturants.count}
           label={pluralize("rupturant", effectifs.rupturants.count)}
-          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.rupturants : null}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants en recherche de contrat après une rupture</b> et toujours dans cette situation à la
@@ -84,7 +80,6 @@ const IndicateursGridStack = ({ effectifs, loading, allowDownloadDataList = fals
           count={effectifs.abandons.count}
           hideCount={shouldWarnAboutDateAvailability}
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
-          effectifIndicateur={allowDownloadDataList === true ? EFFECTIF_INDICATEURS.abandons : null}
           label={pluralize("abandon", effectifs.abandons.count)}
           tooltipLabel={
             <div>
@@ -109,7 +104,6 @@ const IndicateursGridStack = ({ effectifs, loading, allowDownloadDataList = fals
 
 IndicateursGridStack.propTypes = {
   loading: PropTypes.bool.isRequired,
-  allowDownloadDataList: PropTypes.bool,
   showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({

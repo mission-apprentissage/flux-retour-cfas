@@ -16,30 +16,41 @@ import React from "react";
 import { useQuery } from "react-query";
 import * as Yup from "yup";
 
-import { fetchOrganismesAppartenance, fetchRegions } from "../../../common/api/tableauDeBord";
-import { QUERY_KEYS } from "../../../common/constants/queryKeys";
+import {
+  fetchOrganismesAppartenance,
+  fetchRegions,
+  fetchReseaux,
+  fetchUserById,
+} from "../../../../common/api/tableauDeBord";
+import { QUERY_KEYS } from "../../../../common/constants/queryKeys";
 
 const formValidationSchema = Yup.object().shape({
   username: Yup.string().required("Requis"),
   email: Yup.string().email("Format d'email invalide").required("Requis"),
-  role: Yup.string().required("Requis"),
 });
 
-const initialValues = { username: "", email: "", role: "" };
-
-const USER_ROLE = [
-  { label: "Pilote", value: "pilot" },
-  { label: "Réseau", value: "network" },
-];
-
-const CreateUserForm = ({ onSubmit }) => {
+const UpdateUserForm = ({ userId, onSubmit }) => {
+  const { data: userFetched } = useQuery([QUERY_KEYS.GET_USER], () => fetchUserById(userId));
+  const { data: RESEAUX } = useQuery([QUERY_KEYS.RESEAUX], () => fetchReseaux());
   const { data: REGIONS } = useQuery([QUERY_KEYS.REGIONS], () => fetchRegions());
   const { data: ORGANISMES_APPARTENANCE } = useQuery([QUERY_KEYS.ORGANISMES_APPARTENANCE], () =>
     fetchOrganismesAppartenance()
   );
+
   return (
-    <Formik initialValues={initialValues} validationSchema={formValidationSchema} onSubmit={onSubmit}>
-      {({ status = {}, isSubmitting, values }) => {
+    <Formik
+      initialValues={{
+        username: userFetched?.username ?? "",
+        email: userFetched?.email ?? "",
+        organisme: userFetched?.organisme ?? "",
+        region: userFetched?.region ?? "",
+        network: userFetched?.network ?? "",
+      }}
+      enableReinitialize={true}
+      validationSchema={formValidationSchema}
+      onSubmit={onSubmit}
+    >
+      {({ status = {}, isSubmitting, initialValues }) => {
         return (
           <Form>
             <ModalBody paddingX="8w">
@@ -96,28 +107,18 @@ const CreateUserForm = ({ onSubmit }) => {
                   )}
                 </Field>
 
-                <Field name="role">
-                  {({ field, meta }) => (
-                    <FormControl isRequired isInvalid={meta.error && meta.touched}>
-                      <FormLabel color="grey.800">rôle de l&apos;utilisateur</FormLabel>
-                      <Select marginTop="1w" {...field} id={field.name} placeholder="Sélectionnez un role">
-                        {USER_ROLE.map(({ value, label }) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </Select>
-                      <FormErrorMessage>{meta.error}</FormErrorMessage>
-                    </FormControl>
-                  )}
-                </Field>
-
-                {values.role === USER_ROLE[1].value && (
+                {initialValues.network !== "" && (
                   <Field name="network">
                     {({ field, meta }) => (
                       <FormControl isRequired isInvalid={meta.error && meta.touched}>
                         <FormLabel color="grey.800">réseau</FormLabel>
-                        <Input {...field} id={field.name} />
+                        <Select marginTop="1w" {...field} id={field.name} placeholder="Sélectionnez un réseau">
+                          {RESEAUX?.map(({ id, nom }) => (
+                            <option key={id} value={nom}>
+                              {nom}
+                            </option>
+                          ))}
+                        </Select>
                         <FormErrorMessage>{meta.error}</FormErrorMessage>
                       </FormControl>
                     )}
@@ -138,8 +139,9 @@ const CreateUserForm = ({ onSubmit }) => {
   );
 };
 
-CreateUserForm.propTypes = {
+UpdateUserForm.propTypes = {
+  userId: PropTypes.string.isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
 
-export default CreateUserForm;
+export default UpdateUserForm;

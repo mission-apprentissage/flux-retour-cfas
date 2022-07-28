@@ -1,8 +1,9 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { createRandomDossierApprenant } = require("../../data/randomizedSample");
-const { apiRoles, tdbRoles } = require("../../../src/common/roles");
-const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
+const { tdbRoles } = require("../../../src/common/roles");
+const config = require("../../../config");
+const jwt = require("jsonwebtoken");
 
 const {
   historySequenceInscritToApprentiToAbandon,
@@ -10,8 +11,7 @@ const {
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
 } = require("../../data/historySequenceSamples");
-const { DossierApprenantModel, CfaModel, UserEventModel } = require("../../../src/common/model");
-const { parseXlsxHeaderStreamToJson } = require("../../../src/common/utils/exporterUtils");
+const { DossierApprenantModel, UserEventModel, CfaModel } = require("../../../src/common/model");
 const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
 const { USER_EVENTS_ACTIONS } = require("../../../src/common/constants/userEventsConstants");
 
@@ -60,8 +60,9 @@ describe(__filename, () => {
       await toAdd.save();
     }
   };
-  describe("/api/effectifs-export/export-csv-anonymized-list route", () => {
-    const API_ROUTE = "/api/effectifs-export/export-csv-anonymized-list";
+
+  describe("/api/effectifs-export/export-csv-list route", () => {
+    const API_ROUTE = "/api/effectifs-export/export-csv-list";
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();
@@ -106,7 +107,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.TERRITOIRE_NATIONAL,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_NATIONAL,
       });
 
       assert.equal(response.status, 200);
@@ -132,7 +133,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.TERRITOIRE_DEPARTEMENT,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_DEPARTEMENT,
       });
 
       assert.equal(response.status, 200);
@@ -158,7 +159,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.TERRITOIRE_REGION,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_REGION,
       });
 
       assert.equal(response.status, 200);
@@ -184,7 +185,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.RESEAU,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.RESEAU,
       });
 
       assert.equal(response.status, 200);
@@ -210,7 +211,7 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.FORMATION,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.FORMATION,
       });
 
       assert.equal(response.status, 200);
@@ -218,7 +219,7 @@ describe(__filename, () => {
       assert.ok(userEventInDb);
     });
 
-    it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un CFA via API en étant authentifié", async () => {
+    it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un CFA via API en étant authentifié en tant que pilot", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const authHeader = await createAndLogUser("user", "password", {
         permissions: [tdbRoles.pilot],
@@ -236,125 +237,56 @@ describe(__filename, () => {
 
       // Check good user event in db
       const userEventInDb = await UserEventModel.findOne({
-        action: USER_EVENTS_ACTIONS.EXPORT.ANONYMIZED_EFFECTIFS_LISTS.CFA,
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_ANONYMOUS,
       });
 
       assert.equal(response.status, 200);
       assert.ok(response.data);
       assert.ok(userEventInDb);
     });
-  });
 
-  describe("/api/effectifs-export/export-xlsx-lists route", () => {
-    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+    it("Vérifie qu'on peut récupérer des listes de données nominatives pour un CFA via API en étant authentifié en tant que cfa", async () => {
       const { httpClient } = await startServer();
 
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        headers: {
-          Authorization: "",
-        },
+      // create cfa in db
+      const token = "eyP33IyEAisoErO";
+      const uai_etablissement = "0762232N";
+      await new CfaModel({
+        uai: uai_etablissement,
+        access_token: token,
+      }).save();
+
+      // Authent cfa
+      const authentResponse = await httpClient.post("/api/login-cfa", {
+        cfaAccessToken: token,
       });
 
-      assert.equal(response.status, 401);
-    });
+      // Check cfa authent
+      assert.equal(authentResponse.status, 200);
+      const decoded = jwt.verify(authentResponse.data.access_token, config.auth.user.jwtSecret);
+      assert.ok(decoded.iat);
+      assert.ok(decoded.exp);
+      assert.equal(decoded.sub, uai_etablissement);
+      assert.equal(decoded.iss, config.appName);
+      assert.deepStrictEqual(decoded.permissions, [tdbRoles.cfa]);
 
-    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié en tant qu'admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+      // Seed sample data
+      await seedDossiersApprenants({ annee_scolaire: "2021-2022", uai_etablissement });
 
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
-        headers: authHeader,
+      // Check get named data
+      const response = await httpClient.get(API_ROUTE, {
+        params: { date: "2022-06-10T00:00:00.000Z", uai_etablissement, namedDataMode: true },
+        headers: { Authorization: `Bearer ${authentResponse.data.access_token}` },
       });
 
-      assert.equal(response.status, 403);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des apprentis via API pour un admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
-
-      // Check good api call
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.apprentis },
-        responseType: "arraybuffer",
-        headers: authHeader,
+      // Check good user event in db
+      const userEventInDb = await UserEventModel.findOne({
+        action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_NAMED_DATA,
       });
-
-      const apprentisList = parseXlsxHeaderStreamToJson(response.data, 4);
 
       assert.equal(response.status, 200);
-      assert.equal(apprentisList.length, 5);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des inscrits sans contrats via API pour un admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
-
-      // Check good api call
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: {
-          date: "2020-10-10T00:00:00.000Z",
-          effectif_indicateur: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
-        },
-        responseType: "arraybuffer",
-        headers: authHeader,
-      });
-
-      const inscritsSansContratsList = parseXlsxHeaderStreamToJson(response.data, 4);
-
-      assert.equal(response.status, 200);
-      assert.equal(inscritsSansContratsList.length, 15);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des abandons via API pour un admin", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
-
-      // Check good api call
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.abandons },
-        responseType: "arraybuffer",
-        headers: authHeader,
-      });
-
-      const abandonsList = parseXlsxHeaderStreamToJson(response.data, 3);
-
-      assert.equal(response.status, 200);
-      assert.equal(abandonsList.length, 10);
-    });
-
-    it("Vérifie qu'on peut récupérer des listes de données des rupturants via API pour un CFA", async () => {
-      const { httpClient, createAndLogUser } = await startServer();
-      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const cfaUai = "9994889A";
-      await new CfaModel({ uai_etablissement: cfaUai }).save();
-
-      await seedDossiersApprenants({ annee_scolaire: "2020-2021", uai_etablissement: cfaUai });
-
-      // Check good api call
-      const response = await httpClient.get("/api/effectifs-export/export-xlsx-lists", {
-        params: { date: "2020-10-10T00:00:00.000Z", effectif_indicateur: EFFECTIF_INDICATOR_NAMES.rupturants },
-        responseType: "arraybuffer",
-        headers: authHeader,
-      });
-
-      const rupturantsList = parseXlsxHeaderStreamToJson(response.data, 4);
-
-      assert.equal(response.status, 200);
-      assert.equal(rupturantsList.length, 8);
+      assert.ok(response.data);
+      assert.ok(userEventInDb);
     });
   });
 });

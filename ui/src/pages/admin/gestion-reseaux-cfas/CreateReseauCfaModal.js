@@ -19,7 +19,7 @@ const CreateReseauCfaModal = ({ isOpen, onClose }) => {
     },
     {
       onSuccess() {
-        queryClient.invalidateQueries([QUERY_KEYS.RESEAUX_CFAS]);
+        queryClient.invalidateQueries([QUERY_KEYS.SEARCH_RESEAUX_CFA]);
         onClose();
       },
     }
@@ -31,7 +31,7 @@ const CreateReseauCfaModal = ({ isOpen, onClose }) => {
         <ModalHeader marginTop="2w" paddingX="8w" fontWeight="700" color="grey.800" fontSize="alpha" textAlign="left">
           <Box as="i" className="ri-arrow-right-line" marginRight="3v" verticalAlign="middle" />
           <Box as="span" verticalAlign="middle">
-            Ajouter un CFA
+            Ajouter un CFA à un réseau
           </Box>
         </ModalHeader>
         <ModalClosingButton />

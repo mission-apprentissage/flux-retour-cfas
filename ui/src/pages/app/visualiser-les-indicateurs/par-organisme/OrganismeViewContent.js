@@ -1,8 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { hasUserRoles, roles } from "../../../../common/auth/roles";
-import useAuth from "../../../../common/hooks/useAuth";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import { filtersPropTypes } from "../FiltersContext";
 import { infosCfaPropType } from "./propTypes";
@@ -15,8 +13,6 @@ import {
 
 const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
   const [effectifs, effectifsLoading] = useEffectifs();
-  const [auth] = useAuth();
-  const isAdmin = hasUserRoles(auth, roles.administrator);
   const hasMultipleSirets = infosCfa?.sousEtablissements?.length > 1;
   const sirets = infosCfa?.sousEtablissements?.map((item) => item.siret_etablissement);
   const displaySousEtablissementDetail = filters?.sousEtablissement !== null;
@@ -37,7 +33,6 @@ const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
       {(displaySousEtablissementDetail || !hasMultipleSirets) && (
         <IndicateursAndRepartionCfaNiveauAnneesSection
           filters={filters}
-          allowDownloadDataList={isAdmin}
           effectifs={effectifs}
           loading={effectifsLoading}
           showOrganismesCount={false}

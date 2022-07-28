@@ -7,6 +7,8 @@ const { differenceInCalendarDays } = require("date-fns");
 const config = require("../../../config");
 const { UserModel } = require("../../../src/common/model");
 const { ORGANISMES_APPARTENANCE } = require("../../../src/common/constants/usersConstants");
+const omit = require("lodash.omit");
+const mongoose = require("mongoose");
 
 describe(__filename, () => {
   afterEach(() => {
@@ -70,6 +72,47 @@ describe(__filename, () => {
     });
   });
 
+  describe("GET /users/:id", () => {
+    it("sends a 401 HTTP response when user is not authenticated", async () => {
+      const { httpClient } = await startServer();
+      const testObjectId = new mongoose.Types.ObjectId();
+      const response = await httpClient.get(`/api/users/${testObjectId}`, {});
+
+      assert.equal(response.status, 401);
+    });
+
+    it("sends a 403 HTTP response when user is not admin", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+
+      const testObjectId = new mongoose.Types.ObjectId();
+      const response = await httpClient.get(`/api/users/${testObjectId}`, { headers: bearerToken });
+
+      assert.equal(response.status, 403);
+    });
+
+    it("sends a 200 HTTP response with the users with good id", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+
+      const username = "john-doe";
+      await components.users.createUser({ username });
+
+      // Find user
+      const found = await UserModel.findOne({ username });
+      assert.equal(found.username === username, true);
+      assert.equal(found._id !== null, true);
+
+      // Get by id
+      const response = await httpClient.get(`/api/users/${found._id}`, { headers: bearerToken });
+
+      // Check response & data returner
+      assert.equal(response.status, 200);
+      assert.notStrictEqual(new mongoose.Types.ObjectId(response.data.id), found._id);
+      assert.equal(response.data.username, found.username);
+    });
+  });
+
   describe("POST /users", () => {
     it("sends a 401 HTTP response when user is not authenticated", async () => {
       const { httpClient } = await startServer();
@@ -100,7 +143,7 @@ describe(__filename, () => {
       );
 
       assert.equal(response.status, 200);
-      assert.deepEqual(response.data, {
+      assert.deepEqual(omit(response.data, ["id"]), {
         email: "test@mail.com",
         username: "test",
         permissions: [tdbRoles.pilot],
@@ -131,7 +174,7 @@ describe(__filename, () => {
       );
 
       assert.equal(response.status, 200);
-      assert.deepEqual(response.data, {
+      assert.deepEqual(omit(response.data, ["id"]), {
         email: "test@mail.com",
         username: "test",
         permissions: [tdbRoles.network],
@@ -350,6 +393,56 @@ describe(__filename, () => {
       assert.deepEqual(response.data[0].organisme, ORGANISMES_APPARTENANCE.ACADEMIE);
       assert.deepEqual(response.data[1].organisme, ORGANISMES_APPARTENANCE.ACADEMIE);
       assert.deepEqual(response.data[2].organisme, ORGANISMES_APPARTENANCE.ACADEMIE);
+    });
+  });
+
+  describe("PUT /users/:id", () => {
+    it("Permet de vérifier qu'on peut mettre à jour un utilisateur depuis son id en étant connecté en tant qu'administrateur", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const username = "john-doe";
+      await components.users.createUser({ username });
+
+      // Find user
+      const found = await UserModel.findOne({ username });
+      assert.equal(found.username === username, true);
+      assert.equal(found._id !== null, true);
+
+      // Update
+      const response = await httpClient.put(
+        `/api/users/${found._id}`,
+        { username: "UPDATED" },
+        { headers: bearerToken }
+      );
+
+      // Check response & updated value
+      assert.equal(response.status, 200);
+      const checkAfterUpdate = await UserModel.findById(found._id);
+      assert.equal(checkAfterUpdate.username === "UPDATED", true);
+    });
+
+    it("Permet de vérifier qu'on ne peut mettre à jour un utilisateur depuis son id en étant connecté en tant que non administrateur", async () => {
+      const { httpClient, components, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [tdbRoles.pilot] });
+      const username = "john-doe";
+      await components.users.createUser({ username });
+
+      // Find user
+      const found = await UserModel.findOne({ username });
+      assert.equal(found.username === username, true);
+      assert.equal(found._id !== null, true);
+
+      // Update
+      const response = await httpClient.put(
+        `/api/users/${found._id}`,
+        { username: "UPDATED" },
+        { headers: bearerToken }
+      );
+
+      // Check response & updated value
+      assert.equal(response.status, 403);
+      const checkAfterUpdate = await UserModel.count({ username: "UPDATED" });
+      assert.equal(checkAfterUpdate, 0);
     });
   });
 });

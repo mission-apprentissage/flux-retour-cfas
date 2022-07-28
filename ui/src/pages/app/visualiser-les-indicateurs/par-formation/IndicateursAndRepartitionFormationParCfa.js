@@ -2,7 +2,7 @@ import { Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react
 import PropTypes from "prop-types";
 import React from "react";
 
-import { fetchEffectifsAnonymizedDataListCsvExport } from "../../../../common/api/tableauDeBord";
+import { fetchEffectifsDataListCsvExport } from "../../../../common/api/tableauDeBord";
 import { Section } from "../../../../common/components";
 import DownloadBlock from "../../../../common/components/DownloadBlock/DownloadBlock";
 import RepartitionEffectifsParCfa from "../../../../common/components/tables/RepartitionEffectifsParCfa";
@@ -11,13 +11,7 @@ import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiF
 import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
-const IndicateursAndRepartitionFormationParCfa = ({
-  filters,
-  effectifs,
-  loading,
-  allowDownloadDataList = false,
-  showOrganismesCount = true,
-}) => {
+const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading, showOrganismesCount = true }) => {
   const { data, isLoading, error } = useFetchEffectifsParCfa(filters);
 
   const exportFilename = `tdb-données-formation-${filters.formation?.cfd}-${new Date().toLocaleDateString()}.csv`;
@@ -36,17 +30,12 @@ const IndicateursAndRepartitionFormationParCfa = ({
         <TabPanels>
           <TabPanel paddingTop="4w">
             <Stack spacing="4w">
-              <IndicateursGridStack
-                effectifs={effectifs}
-                loading={loading}
-                showOrganismesCount={showOrganismesCount}
-                allowDownloadDataList={allowDownloadDataList}
-              />
+              <IndicateursGridStack effectifs={effectifs} loading={loading} showOrganismesCount={showOrganismesCount} />
               <DownloadBlock
                 title="Télécharger les données de la formation sélectionnée"
                 description="Le fichier est généré à date du jour, en fonction de la formation sélectionnée et comprend la liste anonymisée des apprenants par organisme et formation."
                 fileName={exportFilename}
-                getFile={() => fetchEffectifsAnonymizedDataListCsvExport(mapFiltersToApiFormat(filters))}
+                getFile={() => fetchEffectifsDataListCsvExport(mapFiltersToApiFormat(filters))}
               />
             </Stack>
           </TabPanel>
@@ -62,7 +51,6 @@ const IndicateursAndRepartitionFormationParCfa = ({
 IndicateursAndRepartitionFormationParCfa.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  allowDownloadDataList: PropTypes.bool,
   showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({

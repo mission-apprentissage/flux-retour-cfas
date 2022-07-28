@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Divider,
   Menu,
   MenuButton,
   MenuList,
@@ -12,64 +13,29 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import Pagination from "@choc-ui/paginator";
 import PropTypes from "prop-types";
-import React, { forwardRef } from "react";
+import React from "react";
 
+import { BasePagination } from "../../../common/components/Pagination/Pagination";
+import usePaginatedItems from "../../../common/hooks/usePaginatedItems";
 import { formatDate } from "../../../common/utils/dateUtils";
 import GetUpdatePasswordUrlMenuItem from "./menuItems/GetUpdatePasswordUrlMenuItem";
 import RemoveUserMenuItem from "./menuItems/RemoveUserMenuItem";
+import UpdateUserMenuItem from "./menuItems/UpdateUserMenuItem";
 
 const UsersTable = ({ users }) => {
-  const [current, setCurrent] = React.useState(1);
-
-  const pageSize = 10;
-  const offset = (current - 1) * pageSize;
-  const usersSliced = users?.slice(offset, offset + pageSize);
-
-  const Prev = forwardRef((props, ref) => (
-    <Button ref={ref} {...props}>
-      <Box as="i" className="ri-arrow-left-s-line" />
-    </Button>
-  ));
-  const Next = forwardRef((props, ref) => (
-    <Button ref={ref} {...props}>
-      <Box as="i" className="ri-arrow-right-s-line" />
-    </Button>
-  ));
-
-  const itemRender = (_, type) => {
-    if (type === "prev") {
-      return Prev;
-    }
-    if (type === "next") {
-      return Next;
-    }
-  };
-
-  Prev.displayName = "prev";
-  Next.displayName = "next";
+  // Pagination hook
+  const [current, setCurrent, itemsSliced] = usePaginatedItems(users);
 
   return (
     <Table variant="secondary">
       <TableCaption>
-        <Pagination
+        <BasePagination
           current={current}
           onChange={(page) => {
             setCurrent(page);
           }}
-          pageSize={pageSize}
           total={users?.length}
-          itemRender={itemRender}
-          paginationProps={{
-            display: "flex",
-            pos: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-          baseStyles={{ bg: "white" }}
-          activeStyles={{ bg: "bluefrance", color: "white", pointerEvents: "none" }}
-          hoverStyles={{ bg: "galt", color: "grey.800" }}
         />
       </TableCaption>
       <Thead>
@@ -85,12 +51,12 @@ const UsersTable = ({ users }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {usersSliced?.map((user) => {
+        {itemsSliced?.map((user) => {
           return (
-            <Tr key={user.username}>
+            <Tr key={user.id}>
               <Td color="bluefrance">{user.username}</Td>
               <Td color="grey.800">{user.email}</Td>
-              <Td color="grey.800">{user.permissions.join(", ")}</Td>
+              <Td color="grey.800">{user?.permissions?.join(", ")}</Td>
               <Td color="grey.800">{user.network}</Td>
               <Td color="grey.800">{user.region}</Td>
               <Td color="grey.800">{user.organisme}</Td>
@@ -105,7 +71,9 @@ const UsersTable = ({ users }) => {
                     Action
                   </MenuButton>
                   <MenuList>
+                    <UpdateUserMenuItem userId={user.id} />
                     <GetUpdatePasswordUrlMenuItem username={user.username} />
+                    <Divider />
                     <RemoveUserMenuItem username={user.username} />
                   </MenuList>
                 </Menu>

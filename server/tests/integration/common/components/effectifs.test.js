@@ -451,7 +451,7 @@ describe(__filename, () => {
     });
   });
 
-  describe("getAnonymousEffectifsAtDate", () => {
+  describe("getDataListEffectifsAtDate", () => {
     const createApprentisForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts apprenti
       for (let index = 0; index < nbDossiersToCreate; index++) {
@@ -521,7 +521,7 @@ describe(__filename, () => {
     };
 
     it("Permet de récupérer les effectifs anonymisés à une date donnée", async () => {
-      const { getAnonymousEffectifsAtDate } = await effectifs();
+      const { getDataListEffectifsAtDate } = await effectifs();
 
       // Seed data for each indicator with specific query & other queyr
       const nbApprentis = 18;
@@ -536,7 +536,7 @@ describe(__filename, () => {
       await createAbandonsForQuery(nbAbandons, {});
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const effectifsByDepartementAndFormation = await getAnonymousEffectifsAtDate(date, {});
+      const effectifsByDepartementAndFormation = await getDataListEffectifsAtDate(date, {});
 
       // Check effectifs anonymized total length & for each indicator
       assert.equal(
@@ -564,10 +564,22 @@ describe(__filename, () => {
           .length,
         nbAbandons
       );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.nom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.prenom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.date_de_naissance_apprenant !== undefined),
+        false
+      );
     });
 
     it("Permet de récupérer les effectifs anonymisés pour un département à une date donnée", async () => {
-      const { getAnonymousEffectifsAtDate } = await effectifs();
+      const { getDataListEffectifsAtDate } = await effectifs();
 
       const filterQuery = { etablissement_num_departement: "75" };
       const otherQuery = { etablissement_num_departement: "91" };
@@ -591,7 +603,7 @@ describe(__filename, () => {
       await createAbandonsForQuery(5, otherQuery);
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const effectifsByDepartementAndFormation = await getAnonymousEffectifsAtDate(date, filterQuery);
+      const effectifsByDepartementAndFormation = await getDataListEffectifsAtDate(date, filterQuery);
 
       // Check effectifs anonymized total length & for each indicator
       assert.equal(
@@ -619,10 +631,22 @@ describe(__filename, () => {
           .length,
         nbAbandons
       );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.nom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.prenom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.date_de_naissance_apprenant !== undefined),
+        false
+      );
     });
 
     it("Permet de récupérer les effectifs anonymisés pour une région à une date donnée", async () => {
-      const { getAnonymousEffectifsAtDate } = await effectifs();
+      const { getDataListEffectifsAtDate } = await effectifs();
 
       const filterQuery = { etablissement_num_region: "28" };
       const otherQuery = { etablissement_num_departement: "52" };
@@ -646,7 +670,7 @@ describe(__filename, () => {
       await createAbandonsForQuery(5, otherQuery);
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const effectifsByDepartementAndFormation = await getAnonymousEffectifsAtDate(date, filterQuery);
+      const effectifsByDepartementAndFormation = await getDataListEffectifsAtDate(date, filterQuery);
 
       // Check effectifs anonymized total length & for each indicator
       assert.equal(
@@ -674,10 +698,22 @@ describe(__filename, () => {
           .length,
         nbAbandons
       );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.nom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.prenom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.date_de_naissance_apprenant !== undefined),
+        false
+      );
     });
 
     it("Permet de récupérer les effectifs anonymisés pour un réseau à une date donnée", async () => {
-      const { getAnonymousEffectifsAtDate } = await effectifs();
+      const { getDataListEffectifsAtDate } = await effectifs();
 
       const filterQuery = { etablissement_reseaux: RESEAUX_CFAS.BTP_CFA.nomReseau };
       const otherQuery = { etablissement_reseaux: RESEAUX_CFAS.AFTRAL.nomReseau };
@@ -701,7 +737,7 @@ describe(__filename, () => {
       await createAbandonsForQuery(5, otherQuery);
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const effectifsByDepartementAndFormation = await getAnonymousEffectifsAtDate(date, filterQuery);
+      const effectifsByDepartementAndFormation = await getDataListEffectifsAtDate(date, filterQuery);
 
       // Check effectifs anonymized total length & for each indicator
       assert.equal(
@@ -729,10 +765,22 @@ describe(__filename, () => {
           .length,
         nbAbandons
       );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.nom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.prenom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.date_de_naissance_apprenant !== undefined),
+        false
+      );
     });
 
     it("Permet de récupérer les effectifs anonymisés pour une formation à une date donnée", async () => {
-      const { getAnonymousEffectifsAtDate } = await effectifs();
+      const { getDataListEffectifsAtDate } = await effectifs();
 
       const filterQuery = { formation_cfd: "50033610" };
       const otherQuery = { formation_cfd: "99999999" };
@@ -756,7 +804,7 @@ describe(__filename, () => {
       await createAbandonsForQuery(5, otherQuery);
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const effectifsByDepartementAndFormation = await getAnonymousEffectifsAtDate(date, filterQuery);
+      const effectifsByDepartementAndFormation = await getDataListEffectifsAtDate(date, filterQuery);
 
       // Check effectifs anonymized total length & for each indicator
       assert.equal(
@@ -784,10 +832,22 @@ describe(__filename, () => {
           .length,
         nbAbandons
       );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.nom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.prenom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.date_de_naissance_apprenant !== undefined),
+        false
+      );
     });
 
     it("Permet de récupérer les effectifs anonymisés pour un CFA à une date donnée", async () => {
-      const { getAnonymousEffectifsAtDate } = await effectifs();
+      const { getDataListEffectifsAtDate } = await effectifs();
 
       const filterQuery = { uai_etablissement: "0762232N" };
       const otherQuery = { uai_etablissement: "9992232X" };
@@ -811,7 +871,7 @@ describe(__filename, () => {
       await createAbandonsForQuery(5, otherQuery);
 
       const date = new Date("2020-10-10T00:00:00.000+0000");
-      const effectifsByDepartementAndFormation = await getAnonymousEffectifsAtDate(date, filterQuery);
+      const effectifsByDepartementAndFormation = await getDataListEffectifsAtDate(date, filterQuery);
 
       // Check effectifs anonymized total length & for each indicator
       assert.equal(
@@ -838,6 +898,77 @@ describe(__filename, () => {
         effectifsByDepartementAndFormation.filter((item) => item.indicateur === EFFECTIF_INDICATOR_NAMES.abandons)
           .length,
         nbAbandons
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.nom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.prenom_apprenant !== undefined),
+        false
+      );
+      assert.equal(
+        effectifsByDepartementAndFormation.some((item) => item.date_de_naissance_apprenant !== undefined),
+        false
+      );
+    });
+
+    it("Permet de récupérer les effectifs avec données nominatives pour un CFA à une date donnée", async () => {
+      const { getDataListEffectifsAtDate } = await effectifs();
+
+      const filterQuery = { uai_etablissement: "0762232N" };
+      const otherQuery = { uai_etablissement: "9992232X" };
+
+      // Seed data for each indicator with specific query & other queyr
+      const nbApprentis = 18;
+      const nbInscritsSansContrat = 8;
+      const nbRupturants = 6;
+      const nbAbandons = 5;
+
+      // Seed for filterQuery
+      await createApprentisForQuery(nbApprentis, filterQuery);
+      await createInscritsSansContratsForQuery(nbInscritsSansContrat, filterQuery);
+      await createRupturantsForQuery(nbRupturants, filterQuery);
+      await createAbandonsForQuery(nbAbandons, filterQuery);
+
+      // Seed for otherQuery
+      await createApprentisForQuery(5, otherQuery);
+      await createInscritsSansContratsForQuery(5, otherQuery);
+      await createRupturantsForQuery(5, otherQuery);
+      await createAbandonsForQuery(5, otherQuery);
+
+      const date = new Date("2020-10-10T00:00:00.000+0000");
+      const effectifsTests = await getDataListEffectifsAtDate(date, filterQuery, true);
+
+      // Check effectifs anonymized total length & for each indicator
+      assert.equal(effectifsTests.length, nbApprentis + nbInscritsSansContrat + nbRupturants + nbAbandons);
+      assert.equal(
+        effectifsTests.filter((item) => item.indicateur === EFFECTIF_INDICATOR_NAMES.apprentis).length,
+        nbApprentis
+      );
+      assert.equal(
+        effectifsTests.filter((item) => item.indicateur === EFFECTIF_INDICATOR_NAMES.inscritsSansContrats).length,
+        nbInscritsSansContrat
+      );
+      assert.equal(
+        effectifsTests.filter((item) => item.indicateur === EFFECTIF_INDICATOR_NAMES.rupturants).length,
+        nbRupturants
+      );
+      assert.equal(
+        effectifsTests.filter((item) => item.indicateur === EFFECTIF_INDICATOR_NAMES.abandons).length,
+        nbAbandons
+      );
+      assert.equal(
+        effectifsTests.some((item) => item.nom_apprenant !== undefined),
+        true
+      );
+      assert.equal(
+        effectifsTests.some((item) => item.prenom_apprenant !== undefined),
+        true
+      );
+      assert.equal(
+        effectifsTests.some((item) => item.date_de_naissance_apprenant !== undefined),
+        true
       );
     });
   });

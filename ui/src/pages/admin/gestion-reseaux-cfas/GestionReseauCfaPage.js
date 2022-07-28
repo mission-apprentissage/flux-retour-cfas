@@ -24,9 +24,9 @@ const GestionReseauxCfasPage = () => {
       </Section>
       <Section paddingY="5w" backgroundColor="white" overflowX="scroll">
         <Heading marginBottom="3w">
-          Liste des reseaux CFAS{" "}
-          <Button variant="primary" onClick={createCfaModal.onOpen}>
-            + Ajouter un CFA
+          Liste des reseaux CFAS
+          <Button variant="primary" onClick={createCfaModal.onOpen} marginLeft="2w">
+            + Ajouter un CFA à un réseau
           </Button>
         </Heading>
         <Input

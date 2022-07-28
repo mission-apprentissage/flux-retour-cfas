@@ -22,21 +22,17 @@ const searchReseauxCfas = async (searchCriteria) => {
   const { searchTerm } = searchCriteria;
 
   const matchStage = {};
+
   if (searchTerm) {
     matchStage.$or = [
       { $text: { $search: searchTerm } },
-      { uai: new RegExp(escapeRegExp(searchTerm), "g") },
-      { siret: new RegExp(escapeRegExp(searchTerm), "g") },
+      { uai: new RegExp(escapeRegExp(searchTerm), "i") },
+      { siret: new RegExp(escapeRegExp(searchTerm), "i") },
+      { nom_reseau: new RegExp(escapeRegExp(searchTerm), "i") },
     ];
   }
 
-  const sortStage = searchTerm
-    ? {
-        score: { $meta: "textScore" },
-        nom_etablissement: 1,
-      }
-    : { nom_etablissement: 1 };
-
+  const sortStage = searchTerm ? { score: { $meta: "textScore" }, nom_etablissement: 1 } : { nom_etablissement: 1 };
   const found = await ReseauCfaModel.aggregate([{ $match: matchStage }, { $sort: sortStage }]);
 
   return found.map((reseauCfa) => {

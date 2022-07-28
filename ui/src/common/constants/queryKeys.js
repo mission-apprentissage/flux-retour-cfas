@@ -9,8 +9,7 @@ export const QUERY_KEYS = {
   REGIONS: "regions",
   ORGANISMES_APPARTENANCE: "organismes-appartenance",
   RESEAUX: "reseaux",
-  RESEAUX_CFAS: "reseaux-cfas",
-  USERS: "users",
+  GET_USER: "user-by-id",
   TOTAL_ORGANISMES: "total-organismes",
   FORMATION: "formation",
   EFFECTIF_PAR: {

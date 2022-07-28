@@ -7,6 +7,7 @@ const config = require("../../../config");
 
 const mapUserToApiOutput = (user) => {
   return {
+    id: user._id,
     username: user.username,
     email: user.email,
     permissions: user.permissions,
@@ -27,6 +28,30 @@ module.exports = ({ users }) => {
 
       const usersMapped = allUsers.map(mapUserToApiOutput);
       return res.json(usersMapped);
+    })
+  );
+
+  router.get(
+    "/:id",
+    tryCatch(async (req, res) => {
+      const { id } = req.params;
+
+      if (id) {
+        const found = await users.getUserById(id);
+
+        if (!found)
+          return res.status(500).json({
+            status: "Error",
+            message: "User not found",
+          });
+
+        return res.json(mapUserToApiOutput(found));
+      } else {
+        return res.status(500).json({
+          status: "Error",
+          message: "User id null or undefined",
+        });
+      }
     })
   );
 
@@ -107,5 +132,33 @@ module.exports = ({ users }) => {
     })
   );
 
+  router.put(
+    "/:id",
+    tryCatch(async (req, res) => {
+      const { id } = req.params;
+      const { username, email, role, network, region, organisme } = req.body;
+
+      if (id) {
+        const found = await users.getUserById(id);
+
+        if (!found)
+          return res.status(500).json({
+            status: "Error",
+            message: `User not found for id ${id}`,
+          });
+
+        await users.updateUser(id, { username, email, role, network, region, organisme });
+        return res.json({
+          status: "Success",
+          message: `User ${username} has been updated `,
+        });
+      } else {
+        return res.status(500).json({
+          status: "Error",
+          message: "Id is missing, can't find a user",
+        });
+      }
+    })
+  );
   return router;
 };
