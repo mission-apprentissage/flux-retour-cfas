@@ -19,7 +19,7 @@ const CreateReseauCfaModal = ({ isOpen, onClose }) => {
     },
     {
       onSuccess() {
-        queryClient.invalidateQueries([QUERY_KEYS.RESEAUX_CFAS]);
+        queryClient.invalidateQueries([QUERY_KEYS.SEARCH_RESEAUX_CFA]);
         onClose();
       },
     }

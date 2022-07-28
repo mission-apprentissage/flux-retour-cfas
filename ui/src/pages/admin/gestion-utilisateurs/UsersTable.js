@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Divider,
   Menu,
   MenuButton,
   MenuList,
@@ -19,6 +20,7 @@ import React, { forwardRef } from "react";
 import { formatDate } from "../../../common/utils/dateUtils";
 import GetUpdatePasswordUrlMenuItem from "./menuItems/GetUpdatePasswordUrlMenuItem";
 import RemoveUserMenuItem from "./menuItems/RemoveUserMenuItem";
+import UpdateUserMenuItem from "./menuItems/UpdateUserMenuItem";
 
 const UsersTable = ({ users }) => {
   const [current, setCurrent] = React.useState(1);
@@ -87,10 +89,10 @@ const UsersTable = ({ users }) => {
       <Tbody>
         {usersSliced?.map((user) => {
           return (
-            <Tr key={user.username}>
+            <Tr key={user.id}>
               <Td color="bluefrance">{user.username}</Td>
               <Td color="grey.800">{user.email}</Td>
-              <Td color="grey.800">{user.permissions.join(", ")}</Td>
+              <Td color="grey.800">{user?.permissions?.join(", ")}</Td>
               <Td color="grey.800">{user.network}</Td>
               <Td color="grey.800">{user.region}</Td>
               <Td color="grey.800">{user.organisme}</Td>
@@ -105,7 +107,9 @@ const UsersTable = ({ users }) => {
                     Action
                   </MenuButton>
                   <MenuList>
+                    <UpdateUserMenuItem userId={user.id} />
                     <GetUpdatePasswordUrlMenuItem username={user.username} />
+                    <Divider />
                     <RemoveUserMenuItem username={user.username} />
                   </MenuList>
                 </Menu>

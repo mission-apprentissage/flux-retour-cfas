@@ -6,7 +6,7 @@ import Loading from "../../../common/components/Loading/Loading";
 import NoResults from "../../../common/components/NoResults/NoResults";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import useUsersSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "../../../common/hooks/useUsersSearch";
-import CreateUserModal from "./CreateUserModal";
+import CreateUserModal from "./createUser/CreateUserModal";
 import UsersTable from "./UsersTable";
 
 const GestionUtilisateursPage = () => {

@@ -1,6 +1,6 @@
 import qs from "query-string";
 
-import { _delete, _get, _post } from "../httpClient";
+import { _delete, _get, _post, _put } from "../httpClient";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 /* Effectifs */
@@ -130,6 +130,18 @@ export const fetchEffectifsDataListCsvExport = (filters) => {
 /* Utilisateurs */
 export const fetchUsers = async () => {
   return await _get("/api/users");
+};
+
+/* Utilisateur by id */
+export const fetchUserById = (userId) => {
+  const url = `/api/users/${userId}`;
+  return _get(url);
+};
+
+/* Update user for id */
+export const putUser = (userId, body) => {
+  const url = `/api/users/${userId}`;
+  return _put(url, body);
 };
 
 /* Create user */

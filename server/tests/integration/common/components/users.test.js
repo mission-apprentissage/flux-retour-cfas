@@ -1,5 +1,6 @@
 const assert = require("assert").strict;
 const { subMinutes, differenceInCalendarDays, differenceInHours } = require("date-fns");
+const mongoose = require("mongoose");
 const users = require("../../../../src/common/components/users");
 const { UserModel } = require("../../../../src/common/model");
 const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
@@ -582,6 +583,199 @@ describe(__filename, () => {
 
       assert.equal(results.length, 1);
       assert.ok(results[0].username, user.username);
+    });
+  });
+
+  describe("updateUser", () => {
+    it("renvoie une erreur quand l'id passé pour la maj d'un utilisateur n'est pas valide", async () => {
+      const { createUser, updateUser } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found.username === usernameTest, true);
+      assert.equal(found._id !== null, true);
+
+      // update user with bad id
+      const objectId = new mongoose.Types.ObjectId();
+      await assert.rejects(updateUser(objectId, { username: "UPDATED" }), { message: "Unable to find user" });
+    });
+
+    it("Permets la MAJ d'un utilisateur pour son username", async () => {
+      const { createUser, updateUser } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found.username === usernameTest, true);
+      assert.equal(found._id !== null, true);
+
+      // update user
+      const updatedUserName = "UPDATED";
+      await updateUser(found._id, { username: updatedUserName });
+
+      // Check update
+      const foundAfterUpdate = await UserModel.findById(found._id);
+      assert.equal(foundAfterUpdate.username === updatedUserName, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour son email", async () => {
+      const { createUser, updateUser } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest, email: "test@test.fr" });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found.email === "test@test.fr", true);
+      assert.equal(found._id !== null, true);
+
+      // update user
+      const updateValue = "UPDATED@test.fr";
+      await updateUser(found._id, { email: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await UserModel.findById(found._id);
+      assert.equal(foundAfterUpdate.email === updateValue, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour ses permissions", async () => {
+      const { createUser, updateUser } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest, permissions: [tdbRoles.network] });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found.permissions.length === 1, true);
+      assert.equal(found.permissions[0] === tdbRoles.network, true);
+      assert.equal(found._id !== null, true);
+
+      // update user
+      const updateValue = [tdbRoles.cfa, tdbRoles.pilot];
+      await updateUser(found._id, { permissions: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await UserModel.findById(found._id);
+      assert.equal(foundAfterUpdate.permissions.length === 2, true);
+      assert.equal(foundAfterUpdate.permissions[0] === tdbRoles.cfa, true);
+      assert.equal(foundAfterUpdate.permissions[1] === tdbRoles.pilot, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour son réseau", async () => {
+      const { createUser, updateUser } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest, network: "TEST_RESEAU" });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found._id !== null, true);
+      assert.equal(found.network === "TEST_RESEAU", true);
+
+      // update user
+      const updateValue = "UPDATED_NETWORK";
+      await updateUser(found._id, { network: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await UserModel.findById(found._id);
+      assert.equal(foundAfterUpdate.network === updateValue, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour sa région", async () => {
+      const { createUser, updateUser } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest, region: "TEST_REGION" });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found._id !== null, true);
+      assert.equal(found.region === "TEST_REGION", true);
+
+      // update user
+      const updateValue = "UPDATED_REGION";
+      await updateUser(found._id, { region: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await UserModel.findById(found._id);
+      assert.equal(foundAfterUpdate.region === updateValue, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour son organisme", async () => {
+      const { createUser, updateUser } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest, organisme: "TEST_ORGANISME" });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found._id !== null, true);
+      assert.equal(found.organisme === "TEST_ORGANISME", true);
+
+      // update user
+      const updateValue = "UPDATED_ORGANISME";
+      await updateUser(found._id, { organisme: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await UserModel.findById(found._id);
+      assert.equal(foundAfterUpdate.organisme === updateValue, true);
+    });
+  });
+
+  describe("getUserById", () => {
+    it("renvoie une erreur quand l'id passé pour le getUserById n'est pas valide", async () => {
+      const { createUser, getUserById } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found.username === usernameTest, true);
+      assert.equal(found._id !== null, true);
+
+      // get user with bad id
+      const objectId = new mongoose.Types.ObjectId();
+      await assert.rejects(getUserById(objectId), { message: "Unable to find user" });
+    });
+
+    it("renvoie le bon utilisateur quand l'id passé pour le getUserById est pas valide", async () => {
+      const { createUser, getUserById } = await users();
+
+      const usernameTest = "userTest";
+
+      // create user
+      await createUser({ username: usernameTest });
+
+      // find user
+      const found = await UserModel.findOne({ username: usernameTest });
+      assert.equal(found.username === usernameTest, true);
+      assert.equal(found._id !== null, true);
+
+      // get user with id
+      const gettedUser = await getUserById(found._id);
+      assert.equal(gettedUser.username === found.username, true);
     });
   });
 });

@@ -34,6 +34,15 @@ module.exports = async () => {
       return null;
     },
     getUser: (username) => UserModel.findOne({ username }),
+    getUserById: async (_id) => {
+      const user = await UserModel.findById(_id).lean();
+
+      if (!user) {
+        throw new Error(`Unable to find user`);
+      }
+
+      return user;
+    },
     getAll: async () => {
       return await UserModel.find().lean();
     },
@@ -139,6 +148,28 @@ module.exports = async () => {
           created_at: user.created_at,
         };
       });
+    },
+    updateUser: async (_id, { username, email, permissions, network, region, organisme }) => {
+      const user = await UserModel.findById(_id);
+
+      if (!user) {
+        throw new Error(`Unable to find user`);
+      }
+
+      const updated = await UserModel.findByIdAndUpdate(
+        _id,
+        {
+          username,
+          email,
+          permissions,
+          network,
+          region,
+          organisme,
+        },
+        { new: true }
+      );
+
+      return updated;
     },
   };
 };
