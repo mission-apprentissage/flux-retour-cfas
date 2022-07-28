@@ -9,6 +9,7 @@ const createReseauxCfasCollectionIndexes = async (db) => {
     await collection.createIndex({ nom_etablissement: "text", nom_tokenized: "text" }, { default_language: "french" });
     await collection.createIndex({ uai: 1 });
     await collection.createIndex({ siret: 1 });
+    await collection.createIndex({ nom_reseau: 1 });
   }
 };
 

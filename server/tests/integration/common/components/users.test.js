@@ -279,31 +279,6 @@ describe(__filename, () => {
 
     it("returns results matching username", async () => {
       const searchTerm = "haver";
-
-      const user = await createUser({
-        username: "havertz",
-        password: "password",
-        permissions: [tdbRoles.network],
-        email: "havertz@rma.es",
-        network: "test",
-        region: "REGION",
-        organisme: "ORGANISME",
-      });
-
-      const found = await UserModel.findOne({ username: "havertz" });
-
-      assert.equal(found.permissions.includes(tdbRoles.network), true);
-      assert.equal(found.network === user.network, true);
-      assert.equal(found.email === user.email, true);
-
-      const results = await searchUsers({ searchTerm });
-
-      assert.equal(results.length, 1);
-      assert.ok(results[0].network, user.network);
-    });
-
-    it("returns results matching username", async () => {
-      const searchTerm = "haver";
       const usernameTest = "havertz";
 
       const user = await createUser({

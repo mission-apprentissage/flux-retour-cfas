@@ -5,7 +5,7 @@ import { QUERY_KEYS } from "../constants/queryKeys";
 import { omitNullishValues } from "../utils/omitNullishValues";
 import useDebounce from "./useDebounce";
 
-export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 4;
+export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;
 const SEARCH_DEBOUNCE_TIME = 300;
 
 const useReseauCfaSearch = (searchTerm) => {
