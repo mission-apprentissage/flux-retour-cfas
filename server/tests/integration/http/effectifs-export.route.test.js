@@ -58,8 +58,8 @@ describe(__filename, () => {
       await toAdd.save();
     }
   };
-  describe("/api/effectifs-export/export-csv-anonymized-list route", () => {
-    const API_ROUTE = "/api/effectifs-export/export-csv-anonymized-list";
+  describe("/api/effectifs-export/export-csv-list route", () => {
+    const API_ROUTE = "/api/effectifs-export/export-csv-list";
 
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();

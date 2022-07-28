@@ -46,7 +46,7 @@ module.exports = ({ effectifs, userEvents }) => {
    * Export the anonymized effectifs lists for input period & query
    */
   router.get(
-    "/export-csv-anonymized-list",
+    "/export-csv-list",
     applyUserRoleFilter,
     validateRequestQuery(
       Joi.object({

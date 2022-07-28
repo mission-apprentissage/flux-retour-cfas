@@ -123,7 +123,7 @@ export const fetchSearchFormations = async (filters) => {
 /* CSV export of effectifs anonymized data list  */
 export const fetchEffectifsDataListCsvExport = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs-export/export-csv-anonymized-list?${queryParameters}`;
+  const url = `/api/effectifs-export/export-csv-list?${queryParameters}`;
   return _get(url, { jsonResponse: false });
 };
 
