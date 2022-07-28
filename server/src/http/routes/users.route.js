@@ -150,7 +150,7 @@ module.exports = ({ users }) => {
         await users.updateUser(id, { username, email, role, network, region, organisme });
         return res.json({
           status: "Success",
-          message: `User ${username} has been deleted `,
+          message: `User ${username} has been updated `,
         });
       } else {
         return res.status(500).json({

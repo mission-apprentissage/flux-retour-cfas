@@ -624,31 +624,6 @@ describe(__filename, () => {
       assert.equal(foundAfterUpdate.email === updateValue, true);
     });
 
-    it("Permets la MAJ d'un utilisateur pour ses permissions", async () => {
-      const { createUser, updateUser } = await users();
-
-      const usernameTest = "userTest";
-
-      // create user
-      await createUser({ username: usernameTest, permissions: [tdbRoles.network] });
-
-      // find user
-      const found = await UserModel.findOne({ username: usernameTest });
-      assert.equal(found.permissions.length === 1, true);
-      assert.equal(found.permissions[0] === tdbRoles.network, true);
-      assert.equal(found._id !== null, true);
-
-      // update user
-      const updateValue = [tdbRoles.cfa, tdbRoles.pilot];
-      await updateUser(found._id, { permissions: updateValue });
-
-      // Check update
-      const foundAfterUpdate = await UserModel.findById(found._id);
-      assert.equal(foundAfterUpdate.permissions.length === 2, true);
-      assert.equal(foundAfterUpdate.permissions[0] === tdbRoles.cfa, true);
-      assert.equal(foundAfterUpdate.permissions[1] === tdbRoles.pilot, true);
-    });
-
     it("Permets la MAJ d'un utilisateur pour son réseau", async () => {
       const { createUser, updateUser } = await users();
 

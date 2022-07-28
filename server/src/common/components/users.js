@@ -149,7 +149,7 @@ module.exports = async () => {
         };
       });
     },
-    updateUser: async (_id, { username, email, permissions, network, region, organisme }) => {
+    updateUser: async (_id, { username, email, network, region, organisme }) => {
       const user = await UserModel.findById(_id);
 
       if (!user) {
@@ -161,7 +161,6 @@ module.exports = async () => {
         {
           username,
           email,
-          permissions,
           network,
           region,
           organisme,
