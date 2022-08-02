@@ -127,13 +127,6 @@ export const fetchEffectifsDataListCsvExport = (filters) => {
   return _get(url, { jsonResponse: false });
 };
 
-/* CSV export of effectifs anonymized data list  */
-export const fetchEffectifsAnonymizedDataListCsvExport = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs-export/export-csv-anonymized-list?${queryParameters}`;
-  return _get(url, { jsonResponse: false });
-};
-
 /* Utilisateurs */
 export const fetchUsers = async () => {
   return await _get("/api/users");
