@@ -4,7 +4,7 @@ const Joi = require("joi");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { schema: dateSchema } = require("../../common/domain/date");
+const { schema: ISO8601DateSchema } = require("../../common/domain/date");
 const { schema: statutApprenantSchema } = require("../../common/domain/apprenant/statutApprenant");
 const { schema: uaiSchema } = require("../../common/domain/uai");
 const { schema: cfdSchema } = require("../../common/domain/cfd");
@@ -31,13 +31,13 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     // required fields
     nom_apprenant: nomApprenantSchema.required(),
     prenom_apprenant: prenomApprenantSchema.required(),
-    date_de_naissance_apprenant: dateSchema.required(),
+    date_de_naissance_apprenant: ISO8601DateSchema.required(),
     uai_etablissement: uaiSchema.required(),
     nom_etablissement: Joi.string().required(),
     id_formation: cfdSchema.required(),
     annee_scolaire: anneeScolaireSchema.required(),
     statut_apprenant: statutApprenantSchema.required(),
-    date_metier_mise_a_jour_statut: dateSchema.required(),
+    date_metier_mise_a_jour_statut: ISO8601DateSchema.required(),
 
     // optional
     ine_apprenant: Joi.string().allow(null, ""),
@@ -53,9 +53,9 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     annee_formation: Joi.number().allow(null),
     formation_rncp: Joi.string().allow(null, ""),
 
-    contrat_date_debut: dateSchema.allow(null),
-    contrat_date_fin: dateSchema.allow(null),
-    contrat_date_rupture: dateSchema.allow(null),
+    contrat_date_debut: ISO8601DateSchema.allow(null),
+    contrat_date_fin: ISO8601DateSchema.allow(null),
+    contrat_date_rupture: ISO8601DateSchema.allow(null),
   });
 
   const commonDossiersApprenantsFilters = {
