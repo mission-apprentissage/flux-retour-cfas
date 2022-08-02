@@ -1,5 +1,6 @@
 const { runScript } = require("../scriptWrapper");
 const { v4: uuid } = require("uuid");
+const cliProgress = require("cli-progress");
 const { UserEventModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateNomApprenant } = require("../../common/domain/apprenant/nomApprenant");
@@ -10,6 +11,7 @@ const {
 } = require("../../common/factory/dossierApprenantApiInputFiabiliteReport");
 const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 const { validateIneApprenant } = require("../../common/domain/apprenant/ineApprenant");
+const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
@@ -45,6 +47,7 @@ runScript(async ({ db }) => {
     ineApprenantFormatValide: 0,
   };
   // iterate over data and create an entry for each dossier apprenant sent with fiabilisation metadata
+  loadingBar.start(latestReceivedDossiersApprenants.length, 0);
   await asyncForEach(latestReceivedDossiersApprenants, async (dossierApprenantSentEvent) => {
     const { data, username, date } = dossierApprenantSentEvent;
 
@@ -68,6 +71,7 @@ runScript(async ({ db }) => {
         fiabiliteCounts[key]++;
       }
     });
+    loadingBar.increment();
   });
 
   await db.collection("dossiersApprenantsApiInputFiabiliteReport").insertOne(
@@ -83,4 +87,5 @@ runScript(async ({ db }) => {
       totalIneApprenantFormatValide: fiabiliteCounts.ineApprenantFormatValide,
     })
   );
+  loadingBar.stop();
 }, "analyse-fiabilite-dossiers-apprenants-dernieres-24h");
