@@ -11,6 +11,7 @@ const {
 } = require("../../common/factory/dossierApprenantApiInputFiabiliteReport");
 const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 const { validateIneApprenant } = require("../../common/domain/apprenant/ineApprenant");
+const { validateDateDeNaissanceApprenant } = require("../../common/domain/apprenant/dateDeNaissanceApprenant");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 const isSet = (value) => {
@@ -45,6 +46,8 @@ runScript(async ({ db }) => {
     prenomApprenantFormatValide: 0,
     ineApprenantPresent: 0,
     ineApprenantFormatValide: 0,
+    dateDeNaissanceApprenantPresent: 0,
+    dateDeNaissanceFormatValide: 0,
   };
   // iterate over data and create an entry for each dossier apprenant sent with fiabilisation metadata
   loadingBar.start(latestReceivedDossiersApprenants.length, 0);
@@ -63,6 +66,8 @@ runScript(async ({ db }) => {
       prenomApprenantFormatValide: !validatePrenomApprenant(data.prenom_apprenant).error,
       ineApprenantPresent: isSet(data.ine_apprenant),
       ineApprenantFormatValide: !validateIneApprenant(data.ine_apprenant).error,
+      dateDeNaissanceApprenantPresent: isSet(data.date_de_naissance_apprenant),
+      dateDeNaissanceFormatValide: !validateDateDeNaissanceApprenant(data.date_de_naissance_apprenant),
     });
     await db.collection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
 
@@ -85,6 +90,8 @@ runScript(async ({ db }) => {
       totalPrenomApprenantFormatValide: fiabiliteCounts.prenomApprenantFormatValide,
       totalIneApprenantPresent: fiabiliteCounts.ineApprenantPresent,
       totalIneApprenantFormatValide: fiabiliteCounts.ineApprenantFormatValide,
+      totalDateDeNaissanceApprenantPresent: fiabiliteCounts.dateDeNaissanceApprenantPresent,
+      totalDateDeNaissanceApprenantFormatValide: fiabiliteCounts.dateDeNaissanceFormatValide,
     })
   );
   loadingBar.stop();
