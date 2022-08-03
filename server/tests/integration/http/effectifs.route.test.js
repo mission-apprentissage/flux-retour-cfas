@@ -362,6 +362,7 @@ describe(__filename, () => {
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
           uai_etablissement: "0762232N",
+          siret_etablissement: "83737827300023",
         });
         const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
@@ -372,6 +373,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceApprenti,
         annee_scolaire: "2020-2021",
         uai_etablissement: "0762232X",
+        siret_etablissement: "83737827300093",
       });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();

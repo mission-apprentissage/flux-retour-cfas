@@ -9,6 +9,16 @@ import { navigateToOrganismePage } from "../../utils/routing";
 import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";
 
+const getSiretText = (sirets) => {
+  if (!sirets || sirets.length === 0) {
+    return "N/A";
+  }
+  if (sirets.length === 1) {
+    return sirets[0];
+  }
+  return `${sirets.length} SIRET transmis`;
+};
+
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
   const filtersContext = useFiltersContext();
@@ -21,7 +31,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
     content = (
       <Tbody>
         {repartitionEffectifsParCfa.map((item, index) => {
-          const { uai_etablissement, nom_etablissement, effectifs } = item;
+          const { uai_etablissement, nom_etablissement, siret_etablissement, effectifs } = item;
           return (
             <Tr key={"headerRow_" + index}>
               <Td color="grey.800">
@@ -35,7 +45,9 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 >
                   {nom_etablissement}
                 </Link>
-                <Box fontSize="omega">UAI : {uai_etablissement}</Box>
+                <Box fontSize="omega">
+                  UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
+                </Box>
               </Td>
               <NumberValueCell value={effectifs.apprentis} />
               <NumberValueCell value={effectifs.inscritsSansContrat} />
