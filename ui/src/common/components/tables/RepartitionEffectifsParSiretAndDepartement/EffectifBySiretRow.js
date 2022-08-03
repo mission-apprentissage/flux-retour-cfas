@@ -3,12 +3,10 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
-import { getPercentage } from "../../../utils/calculUtils";
-import ProgressCell from "../ProgressCell";
+import NumberValueCell from "../NumberValueCell";
 
 const EffectifBySiretRow = ({ siret_etablissement, nom_etablissement, effectifs, isPeriodInvalid }) => {
   const filtersContext = useFiltersContext();
-  const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <Tr>
       <Td color="grey.800">
@@ -24,12 +22,12 @@ const EffectifBySiretRow = ({ siret_etablissement, nom_etablissement, effectifs,
         </Link>
         <Box fontSize="omega">SIRET : {siret_etablissement}</Box>
       </Td>
-      <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-      <ProgressCell label={effectifs.inscritsSansContrat} value={getPercentage(effectifs.inscritsSansContrat, total)} />
+      <NumberValueCell value={effectifs.apprentis} />
+      <NumberValueCell value={effectifs.inscritsSansContrat} />
       {!isPeriodInvalid && (
         <>
-          <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-          <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+          <NumberValueCell value={effectifs.rupturants} />
+          <NumberValueCell value={effectifs.abandons} />
         </>
       )}
     </Tr>

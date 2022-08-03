@@ -3,11 +3,10 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-import { getPercentage } from "../../../common/utils/calculUtils";
 import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../utils/dateUtils";
 import { navigateToOrganismePage } from "../../utils/routing";
-import ProgressCell from "./ProgressCell";
+import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";
 
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
@@ -23,7 +22,6 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
       <Tbody>
         {repartitionEffectifsParCfa.map((item, index) => {
           const { uai_etablissement, nom_etablissement, effectifs } = item;
-          const total = effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
           return (
             <Tr key={"headerRow_" + index}>
               <Td color="grey.800">
@@ -39,15 +37,12 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 </Link>
                 <Box fontSize="omega">UAI : {uai_etablissement}</Box>
               </Td>
-              <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-              <ProgressCell
-                label={effectifs.inscritsSansContrat}
-                value={getPercentage(effectifs.inscritsSansContrat, total)}
-              />
+              <NumberValueCell value={effectifs.apprentis} />
+              <NumberValueCell value={effectifs.inscritsSansContrat} />
               {!isPeriodInvalid && (
                 <>
-                  <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-                  <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+                  <NumberValueCell value={effectifs.rupturants} />
+                  <NumberValueCell value={effectifs.abandons} />
                 </>
               )}
             </Tr>
