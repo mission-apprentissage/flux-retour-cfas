@@ -229,12 +229,7 @@ module.exports = () => {
       nom_etablissement: { $first: "$nom_etablissement" },
       siret_etablissement: { $addToSet: "$siret_etablissement" },
     };
-    const effectifsCountByCfa = await getEffectifsCountAtDate(
-      searchDate,
-      // compute effectifs with a uai_etablissement
-      { ...filters, uai_etablissement: { $ne: null } },
-      { groupedBy, projection }
-    );
+    const effectifsCountByCfa = await getEffectifsCountAtDate(searchDate, filters, { groupedBy, projection });
 
     return effectifsCountByCfa.map((effectifForCfa) => {
       const { _id, nom_etablissement, siret_etablissement, ...effectifs } = effectifForCfa;
