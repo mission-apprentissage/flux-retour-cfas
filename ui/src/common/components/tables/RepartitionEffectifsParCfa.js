@@ -3,12 +3,17 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-import { getPercentage } from "../../../common/utils/calculUtils";
 import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { isDateFuture } from "../../utils/dateUtils";
 import { navigateToOrganismePage } from "../../utils/routing";
-import ProgressCell from "./ProgressCell";
+import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";
+
+const getSiretText = (sirets) => {
+  if (!sirets || sirets.length === 0) return "N/A";
+  if (sirets.length === 1) return sirets[0];
+  return `${sirets.length} SIRET transmis`;
+};
 
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
@@ -22,8 +27,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
     content = (
       <Tbody>
         {repartitionEffectifsParCfa.map((item, index) => {
-          const { uai_etablissement, nom_etablissement, effectifs } = item;
-          const total = effectifs.abandons + effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants;
+          const { uai_etablissement, nom_etablissement, siret_etablissement, effectifs } = item;
           return (
             <Tr key={"headerRow_" + index}>
               <Td color="grey.800">
@@ -37,17 +41,16 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 >
                   {nom_etablissement}
                 </Link>
-                <Box fontSize="omega">UAI : {uai_etablissement}</Box>
+                <Box fontSize="omega">
+                  UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
+                </Box>
               </Td>
-              <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-              <ProgressCell
-                label={effectifs.inscritsSansContrat}
-                value={getPercentage(effectifs.inscritsSansContrat, total)}
-              />
+              <NumberValueCell value={effectifs.apprentis} />
+              <NumberValueCell value={effectifs.inscritsSansContrat} />
               {!isPeriodInvalid && (
                 <>
-                  <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-                  <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+                  <NumberValueCell value={effectifs.rupturants} />
+                  <NumberValueCell value={effectifs.abandons} />
                 </>
               )}
             </Tr>

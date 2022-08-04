@@ -3,16 +3,14 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
-import { getPercentage } from "../../../utils/calculUtils";
 import { isDateFuture } from "../../../utils/dateUtils";
-import ProgressCell from "../ProgressCell";
+import NumberValueCell from "../NumberValueCell";
 import AnneeFormationRows from "./AnneeFormationRows";
 
 const FormationRow = ({ formationCfd, intitule, effectifs }) => {
   const [isOpen, setIsOpen] = useState();
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
-  const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
       <Tr color="grey.800" _hover={{ background: "grey.100" }} onClick={() => setIsOpen(!isOpen)} cursor="pointer">
@@ -31,15 +29,12 @@ const FormationRow = ({ formationCfd, intitule, effectifs }) => {
             </Box>
           </Flex>
         </Td>
-        <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-        <ProgressCell
-          label={effectifs.inscritsSansContrat}
-          value={getPercentage(effectifs.inscritsSansContrat, total)}
-        />
+        <NumberValueCell value={effectifs.apprentis} />
+        <NumberValueCell value={effectifs.inscritsSansContrat} />
         {!isPeriodInvalid && (
           <>
-            <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-            <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+            <NumberValueCell value={effectifs.rupturants} />
+            <NumberValueCell value={effectifs.abandons} />
           </>
         )}
       </Tr>

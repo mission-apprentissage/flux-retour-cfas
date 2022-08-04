@@ -248,10 +248,12 @@ describe(__filename, () => {
       const cfa1 = {
         uai_etablissement: "0123456T",
         nom_etablissement: "CFA 1",
+        siret_etablissement: "12345678900011",
       };
       const cfa2 = {
         uai_etablissement: "012345Z",
         nom_etablissement: "CFA 2",
+        siret_etablissement: "12345678900099",
       };
       await seedDossiersApprenants({ ...filterQuery, ...cfa1 });
       await seedDossiersApprenants({ formation_cfd: "12345", ...cfa1 });
@@ -262,6 +264,7 @@ describe(__filename, () => {
       const expectedResult = [
         {
           ...cfa1,
+          siret_etablissement: [cfa1.siret_etablissement],
           effectifs: {
             apprentis: 5,
             inscritsSansContrat: 15,
@@ -271,6 +274,7 @@ describe(__filename, () => {
         },
         {
           ...cfa2,
+          siret_etablissement: [cfa2.siret_etablissement],
           effectifs: {
             apprentis: 10,
             inscritsSansContrat: 30,
