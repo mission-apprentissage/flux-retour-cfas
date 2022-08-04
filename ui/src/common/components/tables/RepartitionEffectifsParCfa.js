@@ -10,12 +10,8 @@ import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";
 
 const getSiretText = (sirets) => {
-  if (!sirets || sirets.length === 0) {
-    return "N/A";
-  }
-  if (sirets.length === 1) {
-    return sirets[0];
-  }
+  if (!sirets || sirets.length === 0) return "N/A";
+  if (sirets.length === 1) return sirets[0];
   return `${sirets.length} SIRET transmis`;
 };
 
