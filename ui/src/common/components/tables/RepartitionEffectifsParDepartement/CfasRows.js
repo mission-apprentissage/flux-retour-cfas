@@ -31,20 +31,23 @@ const CfasRows = ({ departementCode }) => {
 
   return (
     <>
-      {sortAlphabeticallyBy("nom_etablissement", data).map(({ uai_etablissement, nom_etablissement, effectifs }) => {
-        return (
-          <CfaRow
-            uai_etablissement={uai_etablissement}
-            nom_etablissement={nom_etablissement}
-            effectifs={effectifs}
-            key={uai_etablissement}
-            onCfaClick={() => {
-              navigateToOrganismePage(history, { uai_etablissement, nom_etablissement });
-              window.scrollTo(0, 0);
-            }}
-          />
-        );
-      })}
+      {sortAlphabeticallyBy("nom_etablissement", data).map(
+        ({ uai_etablissement, siret_etablissement, nom_etablissement, effectifs }) => {
+          return (
+            <CfaRow
+              uai_etablissement={uai_etablissement}
+              nom_etablissement={nom_etablissement}
+              siret_etablissement={siret_etablissement}
+              effectifs={effectifs}
+              key={uai_etablissement}
+              onCfaClick={() => {
+                navigateToOrganismePage(history, { uai_etablissement, nom_etablissement });
+                window.scrollTo(0, 0);
+              }}
+            />
+          );
+        }
+      )}
     </>
   );
 };
