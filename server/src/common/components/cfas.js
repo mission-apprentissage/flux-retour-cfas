@@ -177,6 +177,7 @@ const searchCfas = async (searchCriteria) => {
       uai: cfa.uai,
       sirets: cfa.sirets,
       nom: cfa.nom,
+      nature: cfa.nature,
       departement: getDepartementCodeFromUai(cfa.uai),
     };
   });
