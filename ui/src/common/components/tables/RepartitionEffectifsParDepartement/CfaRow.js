@@ -6,7 +6,13 @@ import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicate
 import { isDateFuture } from "../../../utils/dateUtils";
 import NumberValueCell from "../NumberValueCell";
 
-const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs, onCfaClick }) => {
+const getSiretText = (sirets) => {
+  if (!sirets || sirets.length === 0) return "N/A";
+  if (sirets.length === 1) return sirets[0];
+  return `${sirets.length} SIRET transmis`;
+};
+
+const CfaRow = ({ uai_etablissement, siret_etablissement, nom_etablissement, effectifs, onCfaClick }) => {
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
 
@@ -18,7 +24,9 @@ const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs, onCfaClick })
             {nom_etablissement}
           </Link>
         </div>
-        <Box fontSize="omega">UAI : {uai_etablissement}</Box>
+        <Box fontSize="omega">
+          UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
+        </Box>
       </Td>
       <NumberValueCell value={effectifs.apprentis} />
       <NumberValueCell value={effectifs.inscritsSansContrat} />
@@ -35,6 +43,7 @@ const CfaRow = ({ uai_etablissement, nom_etablissement, effectifs, onCfaClick })
 CfaRow.propTypes = {
   uai_etablissement: PropTypes.string,
   nom_etablissement: PropTypes.string.isRequired,
+  siret_etablissement: PropTypes.arrayOf(PropTypes.string).isRequired,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     inscritsSansContrat: PropTypes.number.isRequired,
