@@ -29,7 +29,17 @@ module.exports = ({ cfas }) => {
       const jsonQuery = JSON.parse(query);
       const allData = await CfaModel.paginate(jsonQuery, { page, limit });
       const omittedData = allData.docs.map((item) =>
-        pick(item._doc, ["uai", "sirets", "nom", "reseaux", "region_nom", "region_num", "metiers"])
+        pick(item._doc, [
+          "uai",
+          "sirets",
+          "nom",
+          "nature",
+          "nature_validity_warning",
+          "reseaux",
+          "region_nom",
+          "region_num",
+          "metiers",
+        ])
       );
 
       return res.json({
@@ -81,6 +91,8 @@ module.exports = ({ cfas }) => {
           reseaux: cfaFound.reseaux,
           domainesMetiers: cfaFound.metiers,
           uai: cfaFound.uai,
+          nature: cfaFound.nature,
+          natureValidityWarning: cfaFound.nature_validity_warning,
           sousEtablissements,
           adresse: cfaFound.adresse,
           url_tdb: cfaFound.private_url,

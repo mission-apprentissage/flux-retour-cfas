@@ -24,6 +24,33 @@ const getOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", cham
   }
 };
 
+const getOrganisme = async (siret) => {
+  const url = `${API_ENDPOINT}/organismes/${siret}`;
+  try {
+    const { data } = await axios.get(url);
+    return data;
+  } catch (err) {
+    logger.error(`API REFERENTIEL getOrganisme: something went wrong while requesting ${url}`, err.response.data);
+    return null;
+  }
+};
+
+const getOrganismesWithUai = async (uai) => {
+  const url = `${API_ENDPOINT}/organismes`;
+  try {
+    const { data } = await axios.get(url, { params: { uais: uai } });
+    return data;
+  } catch (err) {
+    logger.error(
+      `API REFERENTIEL getOrganismesWithUai: something went wrong while requesting ${url}`,
+      err.response.data
+    );
+    return null;
+  }
+};
+
 module.exports = {
+  getOrganisme,
+  getOrganismesWithUai,
   getOrganismesContactsFromSirets,
 };

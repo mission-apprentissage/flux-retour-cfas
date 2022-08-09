@@ -4,11 +4,13 @@ const { escapeRegExp } = require("../utils/regexUtils");
 const { Cfa } = require("../factory/cfa");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
 const logger = require("../../common/logger");
+const { validateNatureOrganismeDeFormation } = require("../domain/organisme-de-formation/nature");
 
 module.exports = () => ({
   createCfa,
   existsCfa,
   updateCfa,
+  updateCfaNature,
   searchCfas,
   getCfaFirstTransmissionDateFromUai,
   getCfaFirstTransmissionDateFromSiret,
@@ -107,6 +109,28 @@ const updateCfa = async (cfaId, dossierForCfa, sirets = []) => {
         region_nom: dossierForCfa.etablissement_nom_region,
         region_num: dossierForCfa.etablissement_num_region,
         first_transmission_date: await getCfaFirstTransmissionDateFromUai(dossierForCfa.uai_etablissement),
+        updated_at: new Date(),
+      },
+    }
+  );
+};
+
+const updateCfaNature = async (uai, { nature, natureValidityWarning }) => {
+  if (validateNatureOrganismeDeFormation(nature).error) {
+    throw new Error(`Can't update cfa with uai ${uai} : nature of value ${nature} is invalid`);
+  }
+
+  const cfaToUpdate = await CfaModel.findOne({ uai });
+  if (!cfaToUpdate) {
+    throw new Error(`Can't update cfa with uai ${uai} : not found`);
+  }
+
+  await CfaModel.findOneAndUpdate(
+    { uai },
+    {
+      $set: {
+        nature,
+        nature_validity_warning: natureValidityWarning,
         updated_at: new Date(),
       },
     }
