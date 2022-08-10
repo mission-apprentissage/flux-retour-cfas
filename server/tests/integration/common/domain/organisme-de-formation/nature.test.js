@@ -20,7 +20,7 @@ describe("Domain Organisme de formation nature", () => {
       const result = validateNatureOrganismeDeFormation(input);
       assert.ok(result.error);
     });
-    it("Vérifie qu'une nature de valeur responsable_formateur est invalide", async () => {
+    it("Vérifie qu'une nature de valeur responsable_formateur est valide", async () => {
       const input = "responsable_formateur";
       const result = validateNatureOrganismeDeFormation(input);
       assert.equal(result.error, undefined);
