@@ -3,6 +3,7 @@ const { startServer } = require("../../utils/testUtils");
 const { createRandomDossierApprenant } = require("../../data/randomizedSample");
 const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
+const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/organisme-de-formation/nature");
 
 describe(__filename, () => {
   let httpClient;
@@ -63,6 +64,8 @@ describe(__filename, () => {
       const cfaProps = {
         nom: nomTest,
         uai: uaiTest,
+        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
+        nature_validity_warning: true,
         reseaux: reseauxTest,
         sirets: [siretTest],
         adresse: adresseTest,
@@ -87,6 +90,8 @@ describe(__filename, () => {
         sousEtablissements: [{ nom_etablissement: nomTest, siret_etablissement: siretTest }],
         adresse: adresseTest,
         reseaux: reseauxTest,
+        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
+        natureValidityWarning: true,
         domainesMetiers: [],
         url_tdb: "http://hello.world",
       });
