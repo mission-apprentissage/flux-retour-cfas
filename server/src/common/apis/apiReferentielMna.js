@@ -24,7 +24,7 @@ const getOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", cham
   }
 };
 
-const getOrganisme = async (siret) => {
+const getOrganismeWithSiret = async (siret) => {
   const url = `${API_ENDPOINT}/organismes/${siret}`;
   try {
     const { data } = await axios.get(url);
@@ -50,7 +50,7 @@ const getOrganismesWithUai = async (uai) => {
 };
 
 module.exports = {
-  getOrganisme,
+  getOrganismeWithSiret,
   getOrganismesWithUai,
   getOrganismesContactsFromSirets,
 };
