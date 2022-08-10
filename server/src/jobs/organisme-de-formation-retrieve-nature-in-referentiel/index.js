@@ -5,6 +5,9 @@ const { getOrganismesWithUai } = require("../../common/apis/apiReferentielMna");
 const { sleep } = require("../../common/utils/miscUtils");
 const { logger } = require("env-var");
 
+// the Referentiel API allows 400 requests per minute
+const SLEEP_TIME_BETWEEN_REFERENTIEL_API_REQUESTS = 150;
+
 /**
  * Ce script tente de récupérer pour chaque UAI présent dans la collection Cfa la nature de l'organisme de formation
  */
@@ -13,7 +16,7 @@ runScript(async ({ cfas }) => {
   const allCfa = await CfaModel.find().lean();
 
   await asyncForEach(allCfa, async (cfa) => {
-    await sleep(150);
+    await sleep(SLEEP_TIME_BETWEEN_REFERENTIEL_API_REQUESTS);
     try {
       const { pagination, organismes } = await getOrganismesWithUai(cfa.uai);
       // skip if no result or more than one found in Referentiel
