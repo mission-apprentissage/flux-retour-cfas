@@ -59,6 +59,7 @@
     "support:clean-nom-prenom-emptySpace-duplicates": "node -r dotenv/config src/jobs/support/dossiersApprenants-duplicates-nom-prenom-emptySpace/index.js",
     "retrieve-formation-rncp-in-tco": "node -r dotenv/config src/jobs/retrieve-formation-rncp-in-tco/index.js",
     "retrieve-location-from-uai": "node -r dotenv/config src/jobs/retrieve-location-from-uai/index.js",
+    "retrieve-nature-organismes-de-formation": "node -r dotenv/config src/jobs/organisme-de-formation-retrieve-nature-in-referentiel/index.js",
     "cache:warmup": "node -r dotenv/config src/jobs/warm-effectifs-cache/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
     "repost:latest-dossiersApprenants-to-env": "node -r dotenv/config src/jobs/repost-latest-dossiersApprenants-received-to-env/index.js",

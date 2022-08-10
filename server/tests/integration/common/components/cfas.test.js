@@ -10,6 +10,7 @@ var mongoose = require("mongoose");
 const nock = require("nock");
 const { dataForGetMetiersBySiret } = require("../../../data/apiLba");
 const { nockGetMetiersBySiret } = require("../../../utils/nockApis/nock-Lba");
+const { NATURE_ORGANISME_DE_FORMATION } = require("../../../../src/common/domain/organisme-de-formation/nature");
 
 describe(__filename, () => {
   describe("existsCfa", () => {
@@ -192,6 +193,54 @@ describe(__filename, () => {
       assert.equal(updatedCfa.nom_tokenized, Cfa.createTokenizedNom(dossierApprenant.nom_etablissement));
       assert.equal(updatedCfa.created_at !== null, true);
       assert.equal(updatedCfa.updated_at !== null, true);
+    });
+  });
+
+  describe("updateCfaNature", () => {
+    const { updateCfaNature } = cfasComponent();
+
+    it("throws when given nature is invalid", async () => {
+      const uai = "0802004A";
+      await new CfaModel({
+        uai,
+        nom: "TestCfa",
+        adresse: "12 rue de la paix 75016 PARIS",
+        sirets: [],
+        erps: ["MonErp"],
+        region_nom: "Ma région",
+        region_num: "17",
+      }).save();
+
+      await assert.rejects(() => updateCfaNature(uai, { nature: "blabla", natureValidityWarning: true }));
+    });
+
+    it("throws when Cfa with given UAI not found in DB", async () => {
+      const uai = "0802004A";
+      await assert.rejects(() =>
+        updateCfaNature(uai, { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, natureValidityWarning: true })
+      );
+    });
+
+    it("updates Cfa with given nature and natureValidityWarning", async () => {
+      const uai = "0802004A";
+      await new CfaModel({
+        uai,
+        nom: "TestCfa",
+        adresse: "12 rue de la paix 75016 PARIS",
+        sirets: [],
+        erps: ["MonErp"],
+        region_nom: "Ma région",
+        region_num: "17",
+      }).save();
+
+      await updateCfaNature(uai, {
+        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
+        natureValidityWarning: true,
+      });
+
+      const updatedCfa = await CfaModel.findOne({ uai });
+      assert.equal(updatedCfa.nature, NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR);
+      assert.equal(updatedCfa.nature_validity_warning, true);
     });
   });
 

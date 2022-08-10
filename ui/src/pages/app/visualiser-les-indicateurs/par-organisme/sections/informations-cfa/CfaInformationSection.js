@@ -3,47 +3,24 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../../../../common/components";
+import NatureOrganismeDeFormationWarning from "../../../../../../common/components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import { formatSiretSplitted } from "../../../../../../common/utils/stringUtils";
 import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
+import OrganismeDeFormationReseauAndAdresse from "./OrganismeDeFormationReseauAndAdresse";
 
-const ReseauxAndAdresseText = ({ reseaux, adresse, multipleSirets, nbEtablissements }) => {
-  const hasReseaux = reseaux?.length > 0;
-  const getOrganismeReseauxAndAdresseText = () => {
-    if (hasReseaux) {
-      return (
-        <>
-          Cet organisme fait partie du réseau <strong>{reseaux[0]}</strong>{" "}
-          {reseaux.slice(1, reseaux.length)?.map((item) => (
-            <>
-              et du réseau <strong>{item}</strong>
-            </>
-          ))}
-          . {adresse ? `Sa domiciliation est ${adresse}.` : ""}
-        </>
-      );
-    } else {
-      if (adresse) {
-        return <>La domiciliation de cet organisme est {adresse}</>;
-      }
-      return null;
-    }
-  };
-
-  return (
-    <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
-      {getOrganismeReseauxAndAdresseText()}
-      {multipleSirets && <strong> Il est identifié par une UAI qui utilise {nbEtablissements} numéros SIRET.</strong>}
-    </Text>
-  );
-};
-
-ReseauxAndAdresseText.propTypes = {
-  reseaux: PropTypes.array,
-  adresse: PropTypes.string,
-  multipleSirets: PropTypes.bool,
-  nbEtablissements: PropTypes.number,
+export const mapNatureOrganismeDeFormation = (nature) => {
+  switch (nature) {
+    case "responsable":
+      return "Responsable";
+    case "formateur":
+      return "Formateur";
+    case "responsable_formateur":
+      return "Responsable et formateur";
+    default:
+      return "Inconnue";
+  }
 };
 
 const CfaInformationSection = ({ infosCfa, loading, error }) => {
@@ -65,7 +42,7 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
   }
 
   if (infosCfa) {
-    const { uai, sousEtablissements, reseaux, adresse, domainesMetiers } = infosCfa;
+    const { uai, sousEtablissements, nature, natureValidityWarning, reseaux, adresse, domainesMetiers } = infosCfa;
     const multipleSirets = sousEtablissements.length > 1;
     const siretToDisplay = sousEtablissements[0]?.siret_etablissement
       ? formatSiretSplitted(sousEtablissements[0]?.siret_etablissement)
@@ -84,21 +61,34 @@ const CfaInformationSection = ({ infosCfa, loading, error }) => {
           <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
             <HStack>
               <Text>UAI :</Text>
-              <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
+              <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
                 {uai}
               </Badge>
             </HStack>
             {!multipleSirets && (
               <HStack>
                 <Text>SIRET :</Text>
-                <Badge fontSize="epsilon" textColor="grey.800" paddingX="1v" paddingY="2px" backgroundColor="#ECEAE3">
+                <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
                   {siretToDisplay}
                 </Badge>
               </HStack>
             )}
+            <HStack>
+              <Text>Nature :</Text>
+              <Badge
+                fontSize="epsilon"
+                textTransform="none"
+                textColor="grey.800"
+                paddingX="1w"
+                paddingY="2px"
+                backgroundColor="#ECEAE3"
+              >
+                {mapNatureOrganismeDeFormation(nature)}
+              </Badge>
+              {natureValidityWarning && <NatureOrganismeDeFormationWarning />}
+            </HStack>
           </HStack>
-
-          <ReseauxAndAdresseText
+          <OrganismeDeFormationReseauAndAdresse
             reseaux={reseaux}
             adresse={adresse}
             multipleSirets={multipleSirets}
