@@ -53,9 +53,21 @@ module.exports = ({ stats, effectifs, cache }) => {
   router.get(
     "/total-organismes",
     applyUserRoleFilter,
-    validateRequestQuery(Joi.object(commonEffectifsFilters)),
+    validateRequestQuery(
+      Joi.object({
+        date: Joi.date().required(),
+        ...commonEffectifsFilters,
+      })
+    ),
     tryCatch(async (req, res) => {
-      const nbOrganismes = await stats.getNbDistinctCfasByUai(req.query);
+      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      const date = new Date(dateFromQuery);
+      const filters = {
+        ...filtersFromBody,
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
+      };
+
+      const nbOrganismes = await stats.getNbDistinctCfasByUai(filters);
 
       return res.json({
         nbOrganismes,

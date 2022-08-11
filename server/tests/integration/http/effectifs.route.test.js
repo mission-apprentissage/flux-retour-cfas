@@ -215,6 +215,7 @@ describe(__filename, () => {
       await new DossierApprenantModel(
         createRandomDossierApprenant({
           nom_etablissement: "TEST CFA",
+          annee_scolaire: "2020-2021",
           siret_etablissement: "77929544300013",
           uai_etablissement: "0762232N",
           etablissement_num_region: regionNumTest,
@@ -225,6 +226,7 @@ describe(__filename, () => {
       const response = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           etablissement_num_region: regionNumTest,
+          date: "2020-10-10T00:00:00.000Z",
         },
         headers: bearerToken,
       });
@@ -235,6 +237,7 @@ describe(__filename, () => {
       const badRegionResponse = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           etablissement_num_region: "01",
+          date: "2020-10-10T00:00:00.000Z",
         },
         headers: bearerToken,
       });
@@ -252,6 +255,7 @@ describe(__filename, () => {
       await new DossierApprenantModel(
         createRandomDossierApprenant({
           nom_etablissement: "TEST CFA",
+          annee_scolaire: "2020-2021",
           siret_etablissement: getRandomSiretEtablissement(),
           siret_etablissement_valid: true,
           uai_etablissement: "0762232N",
@@ -263,12 +267,43 @@ describe(__filename, () => {
       const response = await httpClient.get("/api/effectifs/total-organismes", {
         params: {
           formation_cfd: formationCfd,
+          date: "2020-10-10T00:00:00.000Z",
         },
         headers: bearerToken,
       });
 
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, { nbOrganismes: 1 });
+    });
+
+    it("Vérifie qu'on ne peut pas récupérer le bon nombre d'organismes transmettant de la donnée sur une formation pour une mauvaise année scolaire", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+      const formationCfd = "abcd1234";
+
+      // Add 1 statut for formation
+      await new DossierApprenantModel(
+        createRandomDossierApprenant({
+          nom_etablissement: "TEST CFA",
+          annee_scolaire: "2022-2023",
+          siret_etablissement: getRandomSiretEtablissement(),
+          siret_etablissement_valid: true,
+          uai_etablissement: "0762232N",
+          formation_cfd: formationCfd,
+        })
+      ).save();
+
+      // Check good api call
+      const response = await httpClient.get("/api/effectifs/total-organismes", {
+        params: {
+          formation_cfd: formationCfd,
+          date: "2020-10-10T00:00:00.000Z",
+        },
+        headers: bearerToken,
+      });
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.data, { nbOrganismes: 0 });
     });
   });
 
