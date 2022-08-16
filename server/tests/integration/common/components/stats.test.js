@@ -20,25 +20,4 @@ describe(__filename, () => {
     // Check stats value
     assert.equal(nbStatuts, 3);
   });
-
-  it("Permet de récupérer le nb d'etablissements distincts par siret", async () => {
-    // Seed with sample data
-    const { addOrUpdateDossiersApprenants } = await dossiersApprenants();
-    await addOrUpdateDossiersApprenants([
-      createRandomDossierApprenant({ siret_etablissement: "80070060000010" }),
-      createRandomDossierApprenant({ siret_etablissement: "80070060000011" }),
-      createRandomDossierApprenant({ siret_etablissement: "80070060000011" }),
-      createRandomDossierApprenant({ siret_etablissement: "80070060000012" }),
-      createRandomDossierApprenant({ siret_etablissement: "80070060000012" }),
-      createRandomDossierApprenant({ siret_etablissement: "80070060000012" }),
-      createRandomDossierApprenant({ siret_etablissement: "80070060000012" }),
-    ]);
-
-    // Calcul stats
-    const statsModule = await stats();
-    const nbCfas = await statsModule.getNbDistinctCfasBySiret();
-
-    // Check stats value
-    assert.equal(nbCfas, 3);
-  });
 });
