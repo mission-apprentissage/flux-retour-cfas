@@ -29,10 +29,12 @@ const ApercuDesDonneesSection = () => {
       <Box>
         <Heading as="h2">Aperçu des données</Heading>
         <Text fontStyle="italic" color="grey.800">
-          Au national le {indicateursNational.dateCalcul}
+          Au national le {indicateursNational.dateCalcul}. <br />
+          Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
+          En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
         </Text>
         <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
-          <Count count={indicateursNational.nbOrganismeFormation.count} label="Organisme de formation" />
+          <Count count={indicateursNational.nbOrganismeFormation.count} label="Organismes de formation" />
           <Count count={indicateursNational.nbApprentis.count} label="Apprentis" />
           <Count count={indicateursNational.nbInscritsSansContrats.count} label="Jeunes sans contrat" />
           <Count count={indicateursNational.nbRupturants.count} label="Rupturants" />

@@ -220,24 +220,22 @@ module.exports = () => {
     // we need to project these fields to give information about the CFAs
     const projection = {
       uai_etablissement: 1,
+      siret_etablissement: 1,
       nom_etablissement: 1,
     };
     const groupedBy = {
       _id: "$uai_etablissement",
       // we will send information about the organisme along with the grouped effectifs so we project it
       nom_etablissement: { $first: "$nom_etablissement" },
+      siret_etablissement: { $addToSet: "$siret_etablissement" },
     };
-    const effectifsCountByCfa = await getEffectifsCountAtDate(
-      searchDate,
-      // compute effectifs with a uai_etablissement
-      { ...filters, uai_etablissement: { $ne: null } },
-      { groupedBy, projection }
-    );
+    const effectifsCountByCfa = await getEffectifsCountAtDate(searchDate, filters, { groupedBy, projection });
 
     return effectifsCountByCfa.map((effectifForCfa) => {
-      const { _id, nom_etablissement, ...effectifs } = effectifForCfa;
+      const { _id, nom_etablissement, siret_etablissement, ...effectifs } = effectifForCfa;
       return {
         uai_etablissement: _id,
+        siret_etablissement,
         nom_etablissement,
         effectifs: {
           apprentis: effectifs.apprentis || 0,

@@ -6,6 +6,8 @@ const getPercentage = (count, total) => {
   return (count * 100) / total;
 };
 
+const FIABILITE_FIELDS = ["NomApprenant", "PrenomApprenant", "IneApprenant", "DateDeNaissanceApprenant"];
+
 class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
   /**
    * Create a DossierApprenantApiInputFiabiliteReport object from props
@@ -18,12 +20,13 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
       analysisDate: Joi.date().iso().required(),
 
       totalDossiersApprenants: Joi.number().required(),
-      totalNomApprenantPresent: Joi.number().required(),
-      totalNomApprenantFormatValide: Joi.number().required(),
-      totalPrenomApprenantPresent: Joi.number().required(),
-      totalPrenomApprenantFormatValide: Joi.number().required(),
-      totalIneApprenantPresent: Joi.number().required(),
-      totalIneApprenantFormatValide: Joi.number().required(),
+      ...FIABILITE_FIELDS.reduce((acc, fieldName) => {
+        return {
+          ...acc,
+          [`total${fieldName}Present`]: Joi.number().required(),
+          [`total${fieldName}FormatValide`]: Joi.number().required(),
+        };
+      }, {}),
     });
 
     const { error } = schema.validate(props);
@@ -31,16 +34,17 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
 
     return new DossierApprenantApiInputFiabiliteReport({
       ...props,
+      ...FIABILITE_FIELDS.reduce((acc, fieldName) => {
+        return {
+          ...acc,
+          [`ratio${fieldName}Present`]: getPercentage(props[`total${fieldName}Present`], props.totalDossiersApprenants),
+          [`ratio${fieldName}FormatValide`]: getPercentage(
+            props[`total${fieldName}FormatValide`],
+            props.totalDossiersApprenants
+          ),
+        };
+      }, {}),
       created_at: new Date(),
-      ratioNomApprenantPresent: getPercentage(props.totalNomApprenantPresent, props.totalDossiersApprenants),
-      ratioNomApprenantFormatValide: getPercentage(props.totalNomApprenantFormatValide, props.totalDossiersApprenants),
-      ratioPrenomApprenantPresent: getPercentage(props.totalPrenomApprenantPresent, props.totalDossiersApprenants),
-      ratioPrenomApprenantFormatValide: getPercentage(
-        props.totalPrenomApprenantFormatValide,
-        props.totalDossiersApprenants
-      ),
-      ratioIneApprenantPresent: getPercentage(props.totalIneApprenantPresent, props.totalDossiersApprenants),
-      ratioIneApprenantFormatValide: getPercentage(props.totalIneApprenantFormatValide, props.totalDossiersApprenants),
     });
   }
 }

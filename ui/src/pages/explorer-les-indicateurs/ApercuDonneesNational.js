@@ -1,4 +1,4 @@
-import { Heading, HStack } from "@chakra-ui/react";
+import { Heading, HStack, Text } from "@chakra-ui/react";
 import React from "react";
 
 import { EffectifCard, Section } from "../../common/components";
@@ -11,6 +11,10 @@ const ApercuDonneesNational = () => {
       <Heading as="h2" fontSize="gamma">
         Aperçu des données au national le {indicateursNational.dateCalcul}
       </Heading>
+      <Text marginTop="1w" fontStyle="italic" color="grey.800">
+        Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
+        En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
+      </Text>
       <HStack spacing="1w" paddingY="2w">
         <EffectifCard
           count={indicateursNational.nbOrganismeFormation.count}

@@ -2,6 +2,7 @@ import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/reac
 import PropTypes from "prop-types";
 import React from "react";
 
+import { mapNatureOrganismeDeFormation } from "../../../pages/app/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
 import useTerritoiresData from "../TerritoireFilter/useTerritoiresData";
 
 const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
@@ -13,6 +14,7 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
         <Thead>
           <Tr>
             <Th>Nom de l&apos;organisme</Th>
+            <Th>Nature</Th>
             <Th>UAI</Th>
             <Th>SIRET(S)</Th>
             <Th>Département</Th>
@@ -35,6 +37,7 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
                   key={`${cfa.uai_etablissement}_${index}`}
                 >
                   <Td fontWeight="bold">{cfa.nom_etablissement}</Td>
+                  <Td>{mapNatureOrganismeDeFormation(cfa.nature)}</Td>
                   <Td>{cfa.uai_etablissement}</Td>
                   {cfa.sirets_etablissement?.length > 0 ? (
                     <Td>{cfa.sirets_etablissement.join(", ")}</Td>
@@ -57,6 +60,7 @@ CfasList.propTypes = {
     PropTypes.shape({
       uai_etablissement: PropTypes.string.isRequired,
       nom_etablissement: PropTypes.string.isRequired,
+      nature: PropTypes.string,
       departement: PropTypes.string.isRequired,
     }).isRequired
   ),

@@ -8,6 +8,8 @@ export const infosCfaPropType = PropTypes.shape({
       nom_etablissement: PropTypes.string,
     }).isRequired
   ).isRequired,
+  nature: PropTypes.string,
+  natureValidityWarning: PropTypes.bool,
   libelleLong: PropTypes.string.isRequired,
   reseaux: PropTypes.arrayOf(PropTypes.string).isRequired,
   domainesMetiers: PropTypes.arrayOf(PropTypes.string),

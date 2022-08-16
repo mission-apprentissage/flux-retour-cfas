@@ -15,6 +15,14 @@ module.exports = new Schema({
     default: [],
     description: "Liste des sirets reliés à l'établissement",
   },
+  nature: {
+    type: String,
+    description: "Nature de l'organisme de formation",
+  },
+  nature_validity_warning: {
+    type: Boolean,
+    description: "Y a-t-il un doute sur la validié de la nature",
+  },
   siret_formateur: {
     type: Boolean,
     default: null,

@@ -1,8 +1,5 @@
 const { runScript } = require("../scriptWrapper");
 const { v4: uuid } = require("uuid");
-const cliProgress = require("cli-progress");
-const { UserEventModel } = require("../../common/model");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateNomApprenant } = require("../../common/domain/apprenant/nomApprenant");
 const { validatePrenomApprenant } = require("../../common/domain/apprenant/prenomApprenant");
 const { DossierApprenantApiInputFiabilite } = require("../../common/factory/dossierApprenantApiInputFiabilite");
@@ -11,15 +8,30 @@ const {
 } = require("../../common/factory/dossierApprenantApiInputFiabiliteReport");
 const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 const { validateIneApprenant } = require("../../common/domain/apprenant/ineApprenant");
-const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+const { validateDateDeNaissanceApprenant } = require("../../common/domain/apprenant/dateDeNaissanceApprenant");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
 };
 
 runScript(async ({ db }) => {
+  const analysisId = uuid();
+  const analysisDate = new Date();
+
+  let latestReceivedDossiersApprenantsCount = 0;
+  const fiabiliteCounts = {
+    nomApprenantPresent: 0,
+    nomApprenantFormatValide: 0,
+    prenomApprenantPresent: 0,
+    prenomApprenantFormatValide: 0,
+    ineApprenantPresent: 0,
+    ineApprenantFormatValide: 0,
+    dateDeNaissanceApprenantPresent: 0,
+    dateDeNaissanceApprenantFormatValide: 0,
+  };
+
   // find all dossiers apprenants sent in the last 24 hours
-  const latestReceivedDossiersApprenants = await UserEventModel.aggregate([
+  const latestReceivedDossiersApprenantsCursor = db.collection("userEvents").aggregate([
     {
       $match: {
         action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
@@ -35,21 +47,10 @@ runScript(async ({ db }) => {
 
   await db.collection("dossiersApprenantsApiInputFiabilite").deleteMany();
 
-  const analysisId = uuid();
-  const analysisDate = new Date();
-
-  const fiabiliteCounts = {
-    nomApprenantPresent: 0,
-    nomApprenantFormatValide: 0,
-    prenomApprenantPresent: 0,
-    prenomApprenantFormatValide: 0,
-    ineApprenantPresent: 0,
-    ineApprenantFormatValide: 0,
-  };
   // iterate over data and create an entry for each dossier apprenant sent with fiabilisation metadata
-  loadingBar.start(latestReceivedDossiersApprenants.length, 0);
-  await asyncForEach(latestReceivedDossiersApprenants, async (dossierApprenantSentEvent) => {
-    const { data, username, date } = dossierApprenantSentEvent;
+  while (await latestReceivedDossiersApprenantsCursor.hasNext()) {
+    const { data, username, date } = await latestReceivedDossiersApprenantsCursor.next();
+    latestReceivedDossiersApprenantsCount++;
 
     const newDossierApprenantApiInputFiabiliteEntry = DossierApprenantApiInputFiabilite.create({
       analysisId,
@@ -63,6 +64,8 @@ runScript(async ({ db }) => {
       prenomApprenantFormatValide: !validatePrenomApprenant(data.prenom_apprenant).error,
       ineApprenantPresent: isSet(data.ine_apprenant),
       ineApprenantFormatValide: !validateIneApprenant(data.ine_apprenant).error,
+      dateDeNaissanceApprenantPresent: isSet(data.date_de_naissance_apprenant),
+      dateDeNaissanceApprenantFormatValide: !validateDateDeNaissanceApprenant(data.date_de_naissance_apprenant),
     });
     await db.collection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
 
@@ -71,21 +74,21 @@ runScript(async ({ db }) => {
         fiabiliteCounts[key]++;
       }
     });
-    loadingBar.increment();
-  });
+  }
 
   await db.collection("dossiersApprenantsApiInputFiabiliteReport").insertOne(
     DossierApprenantApiInputFiabiliteReport.create({
       analysisId,
       analysisDate,
-      totalDossiersApprenants: latestReceivedDossiersApprenants.length,
+      totalDossiersApprenants: latestReceivedDossiersApprenantsCount,
       totalNomApprenantPresent: fiabiliteCounts.nomApprenantPresent,
       totalNomApprenantFormatValide: fiabiliteCounts.nomApprenantFormatValide,
       totalPrenomApprenantPresent: fiabiliteCounts.prenomApprenantPresent,
       totalPrenomApprenantFormatValide: fiabiliteCounts.prenomApprenantFormatValide,
       totalIneApprenantPresent: fiabiliteCounts.ineApprenantPresent,
       totalIneApprenantFormatValide: fiabiliteCounts.ineApprenantFormatValide,
+      totalDateDeNaissanceApprenantPresent: fiabiliteCounts.dateDeNaissanceApprenantPresent,
+      totalDateDeNaissanceApprenantFormatValide: fiabiliteCounts.dateDeNaissanceApprenantFormatValide,
     })
   );
-  loadingBar.stop();
 }, "analyse-fiabilite-dossiers-apprenants-dernieres-24h");

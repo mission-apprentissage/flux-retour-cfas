@@ -2,13 +2,11 @@ import { Box, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { getPercentage } from "../../../utils/calculUtils";
-import ProgressCell from "../ProgressCell";
+import NumberValueCell from "../NumberValueCell";
 import CfasRows from "./CfasRows";
 
 const DepartementRow = ({ departementCode, departementNom, effectifs, isPeriodInvalid }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const total = effectifs.apprentis + effectifs.inscritsSansContrat + effectifs.rupturants + effectifs.abandons;
   return (
     <>
       <Tr background="galt" onClick={() => setIsOpen(!isOpen)} cursor="pointer" _hover={{ background: "galt_hover" }}>
@@ -23,15 +21,12 @@ const DepartementRow = ({ departementCode, departementNom, effectifs, isPeriodIn
             {departementNom} ({departementCode})
           </Box>
         </Td>
-        <ProgressCell label={effectifs.apprentis} value={getPercentage(effectifs.apprentis, total)} />
-        <ProgressCell
-          label={effectifs.inscritsSansContrat}
-          value={getPercentage(effectifs.inscritsSansContrat, total)}
-        />
+        <NumberValueCell value={effectifs.apprentis} />
+        <NumberValueCell value={effectifs.inscritsSansContrat} />
         {!isPeriodInvalid && (
           <>
-            <ProgressCell label={effectifs.rupturants} value={getPercentage(effectifs.rupturants, total)} />
-            <ProgressCell label={effectifs.abandons} value={getPercentage(effectifs.abandons, total)} />
+            <NumberValueCell value={effectifs.rupturants} />
+            <NumberValueCell value={effectifs.abandons} />
           </>
         )}
       </Tr>

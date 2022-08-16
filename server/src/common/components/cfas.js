@@ -4,11 +4,13 @@ const { escapeRegExp } = require("../utils/regexUtils");
 const { Cfa } = require("../factory/cfa");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
 const logger = require("../../common/logger");
+const { validateNatureOrganismeDeFormation } = require("../domain/organisme-de-formation/nature");
 
 module.exports = () => ({
   createCfa,
   existsCfa,
   updateCfa,
+  updateCfaNature,
   searchCfas,
   getCfaFirstTransmissionDateFromUai,
   getCfaFirstTransmissionDateFromSiret,
@@ -113,6 +115,28 @@ const updateCfa = async (cfaId, dossierForCfa, sirets = []) => {
   );
 };
 
+const updateCfaNature = async (uai, { nature, natureValidityWarning }) => {
+  if (validateNatureOrganismeDeFormation(nature).error) {
+    throw new Error(`Can't update cfa with uai ${uai} : nature of value ${nature} is invalid`);
+  }
+
+  const cfaToUpdate = await CfaModel.findOne({ uai });
+  if (!cfaToUpdate) {
+    throw new Error(`Can't update cfa with uai ${uai} : not found`);
+  }
+
+  await CfaModel.findOneAndUpdate(
+    { uai },
+    {
+      $set: {
+        nature,
+        nature_validity_warning: natureValidityWarning,
+        updated_at: new Date(),
+      },
+    }
+  );
+};
+
 /**
  * Returns list of CFA information matching passed criteria
  * @param {{}} searchCriteria
@@ -153,6 +177,7 @@ const searchCfas = async (searchCriteria) => {
       uai: cfa.uai,
       sirets: cfa.sirets,
       nom: cfa.nom,
+      nature: cfa.nature,
       departement: getDepartementCodeFromUai(cfa.uai),
     };
   });

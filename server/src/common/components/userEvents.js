@@ -6,18 +6,18 @@ module.exports = () => ({
 
 const create = async ({ username, type, action, data }) => {
   const user = await UserModel.findOne({ username }).lean();
+  const UNKNOWN_DEFAULT_VALUE = "NC";
 
-  const event = new UserEventModel({
+  await new UserEventModel({
     username,
-    user_organisme: user?.organisme ?? null,
-    user_region: user?.region ?? null,
-    user_network: user?.network ?? null,
+    user_organisme: user?.organisme ?? UNKNOWN_DEFAULT_VALUE,
+    user_region: user?.region ?? UNKNOWN_DEFAULT_VALUE,
+    user_network: user?.network ?? UNKNOWN_DEFAULT_VALUE,
     type,
     action,
     data,
     date: new Date(),
-  });
-  await event.save();
+  }).save();
 
   return;
 };

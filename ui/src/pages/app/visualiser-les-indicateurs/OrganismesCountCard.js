@@ -12,6 +12,7 @@ import { useFiltersContext } from "./FiltersContext";
 const OrganismesCountCard = () => {
   const { state: filters } = useFiltersContext();
   const requestFilters = pick(mapFiltersToApiFormat(filters), [
+    "date",
     "etablissement_num_region",
     "etablissement_num_departement",
     "etablissement_reseaux",
