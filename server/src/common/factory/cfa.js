@@ -1,6 +1,6 @@
 const { buildTokenizedString } = require("../utils/buildTokenizedString");
 const Joi = require("joi");
-const { validateUai } = require("../domain/uai");
+const { schema: uaiSchema } = require("../domain/uai");
 const { schema: natureSchema } = require("../domain/organisme-de-formation/nature");
 const config = require("../../../config");
 const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
@@ -17,15 +17,11 @@ class Cfa extends BaseFactory {
    */
   static create(props) {
     const schema = Joi.object({
-      uai: Joi.string()
-        .custom((value, helpers) => {
-          return validateUai(value) ? value : helpers.error("invalid uai");
-        })
-        .required(),
+      uai: uaiSchema.required(),
       sirets: Joi.array().items(Joi.string()).allow(null),
       nom: Joi.string().allow("").required(),
       nature: natureSchema,
-      natureValidity: Joi.boolean(),
+      natureValidityWarning: Joi.boolean(),
       adresse: Joi.string().allow("", null),
       erps: Joi.array().items(Joi.string()).allow(null),
       region_nom: Joi.string().allow(""),

@@ -2,7 +2,9 @@ const { EffectifsApprentis } = require("./effectifs/apprentis");
 const { EffectifsAbandons } = require("./effectifs/abandons");
 const { EffectifsInscritsSansContrats } = require("./effectifs/inscrits-sans-contrats");
 const { EffectifsRupturants } = require("./effectifs/rupturants");
+const cfas = require("./cfas")();
 const { mergeObjectsBy } = require("../utils/mergeObjectsBy");
+const { asyncForEach } = require("../utils/asyncUtils");
 const { EFFECTIF_INDICATOR_NAMES } = require("../constants/dossierApprenantConstants");
 
 module.exports = () => {
@@ -231,20 +233,30 @@ module.exports = () => {
     };
     const effectifsCountByCfa = await getEffectifsCountAtDate(searchDate, filters, { groupedBy, projection });
 
-    return effectifsCountByCfa.map((effectifForCfa) => {
-      const { _id, nom_etablissement, siret_etablissement, ...effectifs } = effectifForCfa;
-      return {
-        uai_etablissement: _id,
-        siret_etablissement,
-        nom_etablissement,
-        effectifs: {
-          apprentis: effectifs.apprentis || 0,
-          inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-          rupturants: effectifs.rupturants || 0,
-          abandons: effectifs.abandons || 0,
-        },
-      };
-    });
+    const result = [];
+
+    await asyncForEach(
+      effectifsCountByCfa,
+      async ({ _id: uai, nom_etablissement, siret_etablissement, ...effectifs }) => {
+        const cfa = await cfas.getFromUai(uai);
+
+        result.push({
+          uai_etablissement: uai,
+          siret_etablissement,
+          nom_etablissement,
+          nature: cfa.nature,
+          natureValidityWarning: cfa.nature_validity_warning,
+          effectifs: {
+            apprentis: effectifs.apprentis || 0,
+            inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+            rupturants: effectifs.rupturants || 0,
+            abandons: effectifs.abandons || 0,
+          },
+        });
+      }
+    );
+
+    return result;
   };
 
   /**

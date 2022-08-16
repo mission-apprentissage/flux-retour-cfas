@@ -1,12 +1,13 @@
 const assert = require("assert").strict;
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const { DossierApprenantModel } = require("../../../../src/common/model");
+const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
 const effectifs = require("../../../../src/common/components/effectifs");
 const {
   CODES_STATUT_APPRENANT,
   EFFECTIF_INDICATOR_NAMES,
 } = require("../../../../src/common/constants/dossierApprenantConstants");
 const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
+const { NATURE_ORGANISME_DE_FORMATION } = require("../../../../src/common/domain/organisme-de-formation/nature");
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -249,12 +250,16 @@ describe(__filename, () => {
         uai_etablissement: "0123456T",
         nom_etablissement: "CFA 1",
         siret_etablissement: "12345678900011",
+        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
       };
       const cfa2 = {
         uai_etablissement: "012345Z",
         nom_etablissement: "CFA 2",
         siret_etablissement: "12345678900099",
+        nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
       };
+      await new CfaModel({ uai: cfa1.uai_etablissement, nature: cfa1.nature, nature_validity_warning: true }).save();
+      await new CfaModel({ uai: cfa2.uai_etablissement, nature: cfa2.nature, nature_validity_warning: true }).save();
       await seedDossiersApprenants({ ...filterQuery, ...cfa1 });
       await seedDossiersApprenants({ formation_cfd: "12345", ...cfa1 });
       await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
@@ -265,6 +270,8 @@ describe(__filename, () => {
         {
           ...cfa1,
           siret_etablissement: [cfa1.siret_etablissement],
+          nature: cfa1.nature,
+          natureValidityWarning: true,
           effectifs: {
             apprentis: 5,
             inscritsSansContrat: 15,
@@ -275,6 +282,8 @@ describe(__filename, () => {
         {
           ...cfa2,
           siret_etablissement: [cfa2.siret_etablissement],
+          nature: cfa2.nature,
+          natureValidityWarning: true,
           effectifs: {
             apprentis: 10,
             inscritsSansContrat: 30,

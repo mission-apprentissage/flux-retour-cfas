@@ -21,6 +21,7 @@ const DepartementRow = ({ departementCode, departementNom, effectifs, isPeriodIn
             {departementNom} ({departementCode})
           </Box>
         </Td>
+        <Td></Td>
         <NumberValueCell value={effectifs.apprentis} />
         <NumberValueCell value={effectifs.inscritsSansContrat} />
         {!isPeriodInvalid && (
