@@ -1,11 +1,11 @@
 import { Box, Divider, Flex, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
-import { format } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../common/components";
 import { ERPS } from "../../../common/constants/erps";
 import useFetchEffectifsPublics from "../../../common/hooks/useFetchEffectifsPublics";
+import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
 import { Checkbox } from "../../../theme/components/icons";
 
 const Count = ({ count, label }) => {
@@ -33,7 +33,7 @@ const ApercuDesDonneesSection = () => {
       <Box>
         <Heading as="h2">Aperçu des données</Heading>
         <Text fontStyle="italic" color="grey.800">
-          Au national le {format(new Date(date), "MM LLLL yyyy")}. <br />
+          Au national le {formatDateDayMonthYear(date)}. <br />
           Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
           En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
         </Text>

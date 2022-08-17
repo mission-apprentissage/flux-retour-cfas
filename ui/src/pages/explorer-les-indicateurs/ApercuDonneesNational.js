@@ -1,9 +1,9 @@
 import { Heading, HStack, Spinner, Text } from "@chakra-ui/react";
-import { format } from "date-fns";
 import React from "react";
 
 import { EffectifCard, Section } from "../../common/components";
 import useFetchEffectifsPublics from "../../common/hooks/useFetchEffectifsPublics";
+import { formatDateDayMonthYear } from "../../common/utils/dateUtils";
 import { pluralize } from "../../common/utils/stringUtils";
 
 const ApercuDonneesNational = () => {
@@ -13,7 +13,7 @@ const ApercuDonneesNational = () => {
   return (
     <Section paddingY="4w" color="grey.800" marginBottom="15w">
       <Heading as="h2" fontSize="gamma">
-        Aperçu des données au national le {format(new Date(date), "MM LLLL yyyy")}
+        Aperçu des données au national le {formatDateDayMonthYear(date)}
       </Heading>
       <Text marginTop="1w" fontStyle="italic" color="grey.800">
         Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
