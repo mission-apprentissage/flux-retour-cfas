@@ -40,7 +40,7 @@ const Footer = () => (
         <Link href="#">Plan du site</Link>
         <Link href={NAVIGATION_PAGES.Statistiques.path}>{NAVIGATION_PAGES.Statistiques.title}</Link>
         <Link href="#">Accessibilité : Non conforme</Link>
-        <Link href="#">Mentions légales</Link>
+        <Link href={NAVIGATION_PAGES.MentionsLegales.path}>{NAVIGATION_PAGES.MentionsLegales.title}</Link>
         <Link href={NAVIGATION_PAGES.DonneesPersonnelles.path}>Données personnelles</Link>
         <Link href="#">Gestion des cookies</Link>
       </HStack>
