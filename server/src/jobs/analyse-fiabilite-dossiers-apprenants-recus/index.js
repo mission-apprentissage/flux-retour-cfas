@@ -65,7 +65,7 @@ runScript(async ({ db }) => {
       ineApprenantPresent: isSet(data.ine_apprenant),
       ineApprenantFormatValide: !validateIneApprenant(data.ine_apprenant).error,
       dateDeNaissanceApprenantPresent: isSet(data.date_de_naissance_apprenant),
-      dateDeNaissanceApprenantFormatValide: !validateDateDeNaissanceApprenant(data.date_de_naissance_apprenant),
+      dateDeNaissanceApprenantFormatValide: !validateDateDeNaissanceApprenant(data.date_de_naissance_apprenant).error,
     });
     await db.collection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
 
