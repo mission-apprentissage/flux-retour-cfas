@@ -27,6 +27,10 @@ export const NAVIGATION_PAGES = {
     path: "/journal-des-evolutions",
     title: "Journal des évolutions",
   },
+  MentionsLegales: {
+    path: "/mentions-legales",
+    title: "Mentions légales",
+  },
   OrganismeFormation: {
     path: "/organisme-formation",
     title: "Vous êtes un organisme de formation",
