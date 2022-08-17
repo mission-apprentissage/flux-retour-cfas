@@ -1,10 +1,11 @@
-import { Box, Divider, Flex, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Divider, Flex, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
+import { format } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../common/components";
 import { ERPS } from "../../../common/constants/erps";
-import { indicateursNational } from "../../../common/constants/indicateursNational";
+import useFetchEffectifsPublics from "../../../common/hooks/useFetchEffectifsPublics";
 import { Checkbox } from "../../../theme/components/icons";
 
 const Count = ({ count, label }) => {
@@ -24,21 +25,24 @@ Count.propTypes = {
 };
 
 const ApercuDesDonneesSection = () => {
+  const { data: effectifsPublics, loading: isEffectifsPublicsLoading } = useFetchEffectifsPublics();
+  if (isEffectifsPublicsLoading) return <Spinner />;
+  const { date, totalOrganismes, apprentis, inscritsSansContrat, rupturants, abandons } = effectifsPublics;
   return (
     <Section background="galt" paddingY="4w">
       <Box>
         <Heading as="h2">Aperçu des données</Heading>
         <Text fontStyle="italic" color="grey.800">
-          Au national le {indicateursNational.dateCalcul}. <br />
+          Au national le {format(new Date(date), "MM LLLL yyyy")}. <br />
           Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
           En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
         </Text>
         <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
-          <Count count={indicateursNational.nbOrganismeFormation.count} label="Organismes de formation" />
-          <Count count={indicateursNational.nbApprentis.count} label="Apprentis" />
-          <Count count={indicateursNational.nbInscritsSansContrats.count} label="Jeunes sans contrat" />
-          <Count count={indicateursNational.nbRupturants.count} label="Rupturants" />
-          <Count count={indicateursNational.nbAbandons.count} label="Abandons" />
+          <Count count={totalOrganismes} label="Organismes de formation" />
+          <Count count={apprentis} label="Apprentis" />
+          <Count count={inscritsSansContrat} label="Jeunes sans contrat" />
+          <Count count={rupturants} label="Rupturants" />
+          <Count count={abandons} label="Abandons" />
         </HStack>
 
         <Divider marginY="3w" />
