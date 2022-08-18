@@ -4,7 +4,7 @@ import React from "react";
 
 import { Section } from "../../../common/components";
 import { ERPS } from "../../../common/constants/erps";
-import useFetchEffectifsPublics from "../../../common/hooks/useFetchEffectifsPublics";
+import useFetchEffectifsNational from "../../../common/hooks/useFetchEffectifsNational";
 import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
 import { Checkbox } from "../../../theme/components/icons";
 
@@ -25,9 +25,9 @@ Count.propTypes = {
 };
 
 const ApercuDesDonneesSection = () => {
-  const { data: effectifsPublics, loading: isEffectifsPublicsLoading } = useFetchEffectifsPublics();
-  if (isEffectifsPublicsLoading) return <Spinner />;
-  const { date, totalOrganismes, apprentis, inscritsSansContrat, rupturants, abandons } = effectifsPublics;
+  const { data: effectifsNational, loading: isEffectifsNationalLoading } = useFetchEffectifsNational();
+  if (isEffectifsNationalLoading) return <Spinner />;
+  const { date, totalOrganismes, apprentis, inscritsSansContrat, rupturants, abandons } = effectifsNational;
   return (
     <Section background="galt" paddingY="4w">
       <Box>

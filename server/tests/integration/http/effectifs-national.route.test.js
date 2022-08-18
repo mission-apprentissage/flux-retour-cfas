@@ -2,9 +2,9 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 
 describe(__filename, () => {
-  it("Verifie si on la route fonctionne et verifie que l'objet renvoyé correct", async () => {
+  it.only("Verifie si la route fonctionne et verifie si l'objet renvoyé est correct", async () => {
     const { httpClient } = await startServer();
-    const response = await httpClient.get("/api/effectifs-publics");
+    const response = await httpClient.get("/api/effectifs-national");
 
     assert.equal(response.status, 200);
     assert.notEqual(response.data.date, null);

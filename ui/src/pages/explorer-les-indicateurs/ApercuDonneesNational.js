@@ -2,14 +2,15 @@ import { Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import React from "react";
 
 import { EffectifCard, Section } from "../../common/components";
-import useFetchEffectifsPublics from "../../common/hooks/useFetchEffectifsPublics";
+import useFetchEffectifsNational from "../../common/hooks/useFetchEffectifsNational";
 import { formatDateDayMonthYear } from "../../common/utils/dateUtils";
 import { pluralize } from "../../common/utils/stringUtils";
 
 const ApercuDonneesNational = () => {
-  const { data: effectifsPublics, loading: isEffectifsPublicsLoading } = useFetchEffectifsPublics();
-  if (isEffectifsPublicsLoading) return <Spinner />;
-  const { date, totalOrganismes, apprentis, inscritsSansContrat, rupturants, abandons } = effectifsPublics;
+  const { data: effectifsNational, loading: isEffectifsNationalLoading } = useFetchEffectifsNational();
+  if (isEffectifsNationalLoading) return <Spinner />;
+  const { date, totalOrganismes, apprentis, inscritsSansContrat, rupturants, abandons } = effectifsNational;
+  console.log(effectifsNational);
   return (
     <Section paddingY="4w" color="grey.800" marginBottom="15w">
       <Heading as="h2" fontSize="gamma">

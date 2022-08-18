@@ -26,7 +26,7 @@ const cacheRouter = require("./routes/cache.route");
 const updatePasswordRouter = require("./routes/update-password.route");
 const usersRouter = require("./routes/users.route");
 const reseauxCfasRouter = require("./routes/reseaux-cfas.route");
-const effectifsPublicsRouter = require("./routes/effectifs-publics.route");
+const effectifsNationalRouter = require("./routes/effectifs-national.route");
 
 module.exports = async (components) => {
   const app = express();
@@ -47,7 +47,7 @@ module.exports = async (components) => {
   app.use("/api/demande-identifiants", demandeIdentifiantsRouter(components));
   app.use("/api/demande-branchement-erp", demandeBranchementErpRouter(components));
   app.use("/api/update-password", updatePasswordRouter(components));
-  app.use("/api/effectifs-publics", effectifsPublicsRouter(components));
+  app.use("/api/effectifs-national", effectifsNationalRouter(components));
 
   // requires JWT auth
   // @deprecated to /dossiers-apprenants

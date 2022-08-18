@@ -47,8 +47,8 @@ export const fetchEffectifsParDepartement = (filters) => {
   return _get(url);
 };
 
-export const fetchEffectifsPublics = () => {
-  const url = `/api/effectifs-publics`;
+export const fetchEffectifsNational = () => {
+  const url = `/api/effectifs-national`;
   return _get(url);
 };
 

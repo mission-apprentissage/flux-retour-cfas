@@ -21,7 +21,7 @@ module.exports = ({ stats, effectifs, cache }) => {
 
       const response = {
         date,
-        totalOrganismes: await stats.getNbDistinctCfasByUai(req.query),
+        totalOrganismes: await stats.getNbDistinctCfasByUai(filters),
         apprentis: await effectifs.apprentis.getCountAtDate(date, filters),
         rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
         inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
