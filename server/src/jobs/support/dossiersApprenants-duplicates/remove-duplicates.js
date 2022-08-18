@@ -1,7 +1,6 @@
 const logger = require("../../../common/logger");
 const arg = require("arg");
 const { runScript } = require("../../scriptWrapper");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DossierApprenantModel, DuplicateEventModel } = require("../../../common/model");
 const { asyncForEach } = require("../../../common/utils/asyncUtils");
 const sortBy = require("lodash.sortby");
@@ -74,7 +73,7 @@ runScript(async ({ dossiersApprenants, db }) => {
   logger.info(`Removed ${duplicatesRemoved.length} dossiersApprenants in db`);
 
   logger.info("Job Ended !");
-}, JOB_NAMES.removeDossiersApprenantsDuplicates);
+}, "remove-duplicates");
 
 /* Will keep the oldest statut in duplicates group, delete the others and store them in a specific collection */
 const removeDuplicates = async (duplicatesGroup) => {
