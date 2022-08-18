@@ -6,7 +6,12 @@ const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { REGIONS } = require("../../common/constants/territoiresConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 
-const ROUTES_TO_WARM_UP = ["/api/effectifs", "/api/effectifs/niveau-formation", "/api/effectifs/departement"];
+const ROUTES_TO_WARM_UP = [
+  "/api/effectifs",
+  "/api/effectifs/niveau-formation",
+  "/api/effectifs/departement",
+  "/api/effectifs-national",
+];
 
 /*
     This job will perform expensive requests made by the UI to warm up the cache
