@@ -33,8 +33,8 @@ const getDossierApprenant = ({
   uai_etablissement,
   annee_scolaire,
 }) => {
-  const nomApprenantRegexp = new RegExp("^" + escapeRegExp(nom_apprenant) + "$", "i");
-  const prenomApprenantRegexp = new RegExp("^" + escapeRegExp(prenom_apprenant) + "$", "i");
+  const nomApprenantRegexp = new RegExp("^" + escapeRegExp(nom_apprenant.trim()) + "$", "i");
+  const prenomApprenantRegexp = new RegExp("^" + escapeRegExp(prenom_apprenant.trim()) + "$", "i");
 
   return DossierApprenantModel.findOne({
     nom_apprenant: { $regex: nomApprenantRegexp },
