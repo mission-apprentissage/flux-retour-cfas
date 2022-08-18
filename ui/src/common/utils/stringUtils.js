@@ -18,8 +18,6 @@ export const stringEqualsCaseInsensitive = (str1 = "", str2 = "") => {
 
 export const toPrettyYearLabel = (year) => (year === 1 ? `${year}ère année` : `${year}ème année`);
 
-export const truncate = (string, size = 32) => (string.length > size ? string.substr(0, size - 1) + "..." : string);
-
 export const pluralize = (text, value, pluralCharacter = "s") => (value > 1 ? `${text}${pluralCharacter}` : `${text}`);
 
 export const formatNumber = (number) => {

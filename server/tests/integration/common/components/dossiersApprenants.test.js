@@ -125,6 +125,29 @@ describe(__filename, () => {
       assert.equal(found, null);
     });
 
+    it("Vérifie que la récupération d'un dossier apprenant match quand prenom et nom de l'apprenant contiennent des espaces", async () => {
+      const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
+
+      const randomStatutProps = createRandomDossierApprenant({
+        prenom_apprenant: "Jeanne",
+        nom_apprenant: "Martinez",
+      });
+
+      const createdStatut = await createDossierApprenant(randomStatutProps);
+
+      const found = await getDossierApprenant({
+        prenom_apprenant: "  Jeanne",
+        nom_apprenant: "Martinez ",
+        formation_cfd: randomStatutProps.formation_cfd,
+        uai_etablissement: randomStatutProps.uai_etablissement,
+        annee_scolaire: randomStatutProps.annee_scolaire,
+        date_de_naissance_apprenant: randomStatutProps.date_de_naissance_apprenant,
+      });
+
+      assert.notEqual(found, null);
+      assert.equal(found._id.equals(createdStatut._id.toString()), true);
+    });
+
     const unicityCriterion = [
       { field: "nom_apprenant", changedValue: "changed" },
       { field: "prenom_apprenant", changedValue: "changed" },

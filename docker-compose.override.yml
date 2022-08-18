@@ -11,7 +11,7 @@ services:
       context: ui
       dockerfile: Dockerfile.dev
       args:
-        - REACT_APP_FLUX_RETOUR_CFAS_ENV=local
+        - REACT_APP_ENV=local
     volumes:
       - ./ui:/app #Allows source folders to be watched
       - ./ui/.env:/app/.env
