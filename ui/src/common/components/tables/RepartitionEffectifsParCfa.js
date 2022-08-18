@@ -4,8 +4,10 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 
 import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { mapNatureOrganismeDeFormation } from "../../../pages/app/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
 import { isDateFuture } from "../../utils/dateUtils";
 import { navigateToOrganismePage } from "../../utils/routing";
+import NatureOrganismeDeFormationWarning from "../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import NumberValueCell from "./NumberValueCell";
 import Table from "./Table";
 
@@ -21,13 +23,20 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
   const history = useHistory();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
-    ? ["Nom de l'organisme de formation", "apprentis", "inscrits sans contrat"]
-    : ["Nom de l'organisme de formation", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
+    ? ["Nom de l'organisme de formation", "Nature", "apprentis", "inscrits sans contrat"]
+    : ["Nom de l'organisme de formation", "Nature", "apprentis", "inscrits sans contrat", "rupturants", "abandons"];
   if (repartitionEffectifsParCfa) {
     content = (
       <Tbody>
         {repartitionEffectifsParCfa.map((item, index) => {
-          const { uai_etablissement, nom_etablissement, siret_etablissement, effectifs } = item;
+          const {
+            uai_etablissement,
+            nom_etablissement,
+            siret_etablissement,
+            nature,
+            natureValidityWarning,
+            effectifs,
+          } = item;
           return (
             <Tr key={"headerRow_" + index}>
               <Td color="grey.800">
@@ -44,6 +53,14 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
                 <Box fontSize="omega">
                   UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
                 </Box>
+              </Td>
+              <Td color="grey.800">
+                {mapNatureOrganismeDeFormation(nature)}{" "}
+                {natureValidityWarning && (
+                  <span style={{ verticalAlign: "middle" }}>
+                    <NatureOrganismeDeFormationWarning />
+                  </span>
+                )}
               </Td>
               <NumberValueCell value={effectifs.apprentis} />
               <NumberValueCell value={effectifs.inscritsSansContrat} />

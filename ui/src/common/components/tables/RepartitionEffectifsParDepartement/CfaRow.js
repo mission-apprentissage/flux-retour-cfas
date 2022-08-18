@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { mapNatureOrganismeDeFormation } from "../../../../pages/app/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
 import { isDateFuture } from "../../../utils/dateUtils";
+import NatureOrganismeDeFormationWarning from "../../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import NumberValueCell from "../NumberValueCell";
 
 const getSiretText = (sirets) => {
@@ -12,7 +14,15 @@ const getSiretText = (sirets) => {
   return `${sirets.length} SIRET transmis`;
 };
 
-const CfaRow = ({ uai_etablissement, siret_etablissement, nom_etablissement, effectifs, onCfaClick }) => {
+const CfaRow = ({
+  uai_etablissement,
+  siret_etablissement,
+  nom_etablissement,
+  nature,
+  natureValidityWarning,
+  effectifs,
+  onCfaClick,
+}) => {
   const filtersContext = useFiltersContext();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
 
@@ -27,6 +37,14 @@ const CfaRow = ({ uai_etablissement, siret_etablissement, nom_etablissement, eff
         <Box fontSize="omega">
           UAI : {uai_etablissement} - SIRET : {getSiretText(siret_etablissement)}
         </Box>
+      </Td>
+      <Td color="grey.800" whiteSpace="nowrap">
+        {mapNatureOrganismeDeFormation(nature)}{" "}
+        {natureValidityWarning && (
+          <span style={{ verticalAlign: "middle" }}>
+            <NatureOrganismeDeFormationWarning />
+          </span>
+        )}
       </Td>
       <NumberValueCell value={effectifs.apprentis} />
       <NumberValueCell value={effectifs.inscritsSansContrat} />
@@ -44,6 +62,8 @@ CfaRow.propTypes = {
   uai_etablissement: PropTypes.string,
   nom_etablissement: PropTypes.string.isRequired,
   siret_etablissement: PropTypes.arrayOf(PropTypes.string).isRequired,
+  nature: PropTypes.string.isRequired,
+  natureValidityWarning: PropTypes.bool.isRequired,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.number.isRequired,
     inscritsSansContrat: PropTypes.number.isRequired,

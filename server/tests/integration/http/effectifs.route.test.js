@@ -8,7 +8,8 @@ const {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
-const { DossierApprenantModel } = require("../../../src/common/model");
+const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
+const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/organisme-de-formation/nature");
 
 describe(__filename, () => {
   describe("/api/effectifs route", () => {
@@ -391,13 +392,37 @@ describe(__filename, () => {
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
       const filterQuery = { etablissement_num_region: "84" };
 
+      const cfaData1 = {
+        uai_etablissement: "0762232N",
+        siret_etablissement: "83737827300023",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        nature_validity_warning: true,
+      };
+      await new CfaModel({
+        uai: cfaData1.uai_etablissement,
+        nature: cfaData1.nature,
+        nature_validity_warning: cfaData1.nature_validity_warning,
+      }).save();
+
+      const cfaData2 = {
+        uai_etablissement: "0762232X",
+        siret_etablissement: "83737827300093",
+        nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
+        nature_validity_warning: false,
+      };
+      await new CfaModel({
+        uai: cfaData2.uai_etablissement,
+        nature: cfaData2.nature,
+        nature_validity_warning: cfaData2.nature_validity_warning,
+      }).save();
+
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomDossierApprenant({
           ...filterQuery,
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
-          uai_etablissement: "0762232N",
-          siret_etablissement: "83737827300023",
+          uai_etablissement: cfaData1.uai_etablissement,
+          siret_etablissement: cfaData1.siret_etablissement,
         });
         const toAdd = new DossierApprenantModel(randomStatut);
         await toAdd.save();
@@ -407,8 +432,8 @@ describe(__filename, () => {
         ...filterQuery,
         historique_statut_apprenant: historySequenceApprenti,
         annee_scolaire: "2020-2021",
-        uai_etablissement: "0762232X",
-        siret_etablissement: "83737827300093",
+        uai_etablissement: cfaData2.uai_etablissement,
+        siret_etablissement: cfaData2.siret_etablissement,
       });
       const toAdd = new DossierApprenantModel(randomStatut);
       await toAdd.save();
