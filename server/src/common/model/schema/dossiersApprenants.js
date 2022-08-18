@@ -79,11 +79,6 @@ module.exports = new Schema({
     default: null,
     description: "Adresse complète du CFA",
   },
-  etablissement_code_postal: {
-    type: String,
-    default: null,
-    description: "Code postal du CFA",
-  },
   etablissement_localite: {
     type: String,
     default: null,

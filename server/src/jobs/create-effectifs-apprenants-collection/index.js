@@ -23,7 +23,6 @@ runScript(async ({ effectifs }) => {
   const projection = {
     uai_etablissement: 1,
     nom_etablissement: 1,
-    etablissement_code_postal: 1,
     formation_cfd: 1,
     periode_formation: 1,
     annee_formation: 1,
@@ -73,7 +72,6 @@ runScript(async ({ effectifs }) => {
       dossierApprenantId: currentStatut.dossierApprenantId,
       uai_etablissement: currentStatut.uai_etablissement,
       nom_etablissement: currentStatut.nom_etablissement,
-      etablissement_code_postal: currentStatut.etablissement_code_postal,
       formation_cfd: currentStatut.formation_cfd,
       periode_formation: currentStatut.periode_formation,
       annee_formation: currentStatut.annee_formation,

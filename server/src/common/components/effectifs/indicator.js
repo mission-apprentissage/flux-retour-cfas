@@ -8,7 +8,6 @@ class Indicator {
     this.exportProjection = {
       uai_etablissement: 1,
       siret_etablissement: 1,
-      etablissement_code_postal: 1,
       etablissement_nom_departement: 1,
       etablissement_nom_region: 1,
       etablissement_reseaux: 1,
