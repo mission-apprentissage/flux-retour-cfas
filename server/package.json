@@ -23,7 +23,7 @@
     "seed:sample": "node -r dotenv/config src/jobs/seed/seedSample.js",
     "seed:randomizedSample": "node -r dotenv/config src/jobs/seed/seedRandomizedSample.js",
     "seed:clearAssets": "node -r dotenv/config src/jobs/seed/clearAssets.js",
-    "seed:formations-rncp": "node -r dotenv/config src/jobs/seed/seedFormationsRncp.js",
+    "seed:formations-rncp": "node -r dotenv/config src/jobs/seed/seedFormationsRncps.js",
     "users:create": "node -r dotenv/config src/jobs/users/create/index.js",
     "users:create-erp-user": "node -r dotenv/config src/jobs/users/create-erp-user/index.js",
     "users:generate-password-update-token": "node -r dotenv/config src/jobs/users/generate-password-update-token/index.js",

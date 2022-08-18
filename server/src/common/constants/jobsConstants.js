@@ -32,7 +32,7 @@ const JOB_NAMES = {
   clearAll: "clear-all",
   repostLatestDossiersApprenantsReceived: "repost-latest-dossiersApprenants-received",
   warmUpCache: "warm-up-cache",
-  retrieveRncp: "retrieve-rncp-in-tco-for-cfds",
+  retrieveRncps: "retrieve-rncps-in-tco-for-cfds",
   createErpUser: "users:create-erp-user",
   createUser: "users:create-user",
   generatePasswordUpdateToken: "users:generate-password-update-token",

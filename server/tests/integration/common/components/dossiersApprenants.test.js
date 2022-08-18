@@ -1134,7 +1134,7 @@ describe(__filename, () => {
       // Create Formation
       const formationSeed = {
         cfd: "01022103",
-        rncp: "RNCP31811",
+        rncps: ["RNCP31811"],
         libelle: "EMPLOYE TRAITEUR (CAP)",
         cfd_start_date: new Date("2021-08-31").toISOString(),
         cfd_end_date: new Date("2022-08-31").toISOString(),

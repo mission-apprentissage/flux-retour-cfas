@@ -19,7 +19,7 @@ const FormationFilterMenu = ({ filters, onFormationClick }) => {
       <Heading as="h3" variant="h3" marginBottom="3w" marginTop="2w">
         Sélectionner une formation
       </Heading>
-      <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Intitulé de la formation, CFD, RNCP" />
+      <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Intitulé de la formation, CFD, RNCP(s)" />
       {searchTerm.length < MINIMUM_CHARS_TO_PERFORM_SEARCH && (
         <Box paddingLeft="1w" paddingTop="3v">
           <InputLegend>

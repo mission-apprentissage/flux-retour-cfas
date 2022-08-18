@@ -18,7 +18,7 @@ class Formation extends BaseFactory {
         .required(),
       cfd_start_date: Joi.date(),
       cfd_end_date: Joi.date(),
-      rncp: Joi.string().allow(null),
+      rncps: Joi.array().items(Joi.string()),
       libelle: Joi.string().allow(""),
       niveau: Joi.string().allow(null),
       niveau_libelle: Joi.string().allow(null, ""),

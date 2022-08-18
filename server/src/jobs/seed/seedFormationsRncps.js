@@ -8,7 +8,7 @@ const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Script qui seed les RNCP vides de formations
+ * Script qui seed les RNCPs vides de formations
  */
 runScript(async () => {
   logger.info("Start seeding empty formations RNCP");
@@ -18,34 +18,34 @@ runScript(async () => {
 }, "seed empty rncp formations");
 
 /**
- * Empty all rncp in formations collection
+ * Empty all rncps in formations collection
  */
 const emptyFormationRncp = async () => {
-  await FormationModel.updateMany({}, { $set: { rncp: "" } });
-  logger.info("All RNCP cleared in formations !");
+  await FormationModel.updateMany({}, { $set: { rncps: [] } });
+  logger.info("All RNCPs cleared in formations !");
 };
 
 /**
- * Seed all empty rncp field in formation collection
+ * Seed all empty rncps in formation collection
  */
 const seedEmptyFormationsRncp = async () => {
-  // Find all formations with empty rncp but cfd present
-  const formationWithEmptyRncp = await FormationModel.find({ rncp: "", cfd: { $nin: [null, ""] } });
-  logger.info(`Found ${formationWithEmptyRncp.length} Formations with empty RNCP, seeding them...`);
+  // Find all formations with empty rncps but cfd present
+  const formationWithEmptyRncps = await FormationModel.find({ rncps: [], cfd: { $nin: [null, ""] } });
+  logger.info(`Found ${formationWithEmptyRncps.length} Formations with empty RNCPs, seeding them...`);
 
-  loadingBar.start(formationWithEmptyRncp.length, 0);
+  loadingBar.start(formationWithEmptyRncps.length, 0);
 
-  await asyncForEach(formationWithEmptyRncp, async (currentFormationWithEmptyRncp) => {
+  await asyncForEach(formationWithEmptyRncps, async (currentFormationWithEmptyRncps) => {
     loadingBar.increment();
 
     // Find formationInfo from API TCO
-    const formationInfo = await getCfdInfo(currentFormationWithEmptyRncp.cfd);
+    const formationInfo = await getCfdInfo(currentFormationWithEmptyRncps.cfd);
 
     if (formationInfo !== null) {
-      // Update current formation with this current formation rncp
+      // Update current formation with these current formation rncps
       await FormationModel.findOneAndUpdate(
-        { _id: currentFormationWithEmptyRncp._id },
-        { $set: { rncp: formationInfo?.rncp?.code_rncp } }
+        { _id: currentFormationWithEmptyRncps._id },
+        { $set: { rncps: formationInfo?.rncps?.map((item) => item.code_rncp) } }
       );
     }
   });
