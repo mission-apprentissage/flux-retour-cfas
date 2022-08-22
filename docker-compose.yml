@@ -49,6 +49,8 @@ services:
 
   redis:
     image: 'redis:7.0.4-alpine'
+    # Redis will save the dataset to disk every 60 seconds if at least 1 change occured
+    # https://redis.io/docs/manual/persistence/#snapshotting
     command: redis-server --save 60 1 --loglevel warning
     container_name: flux_retour_cfas_redis
     networks:
