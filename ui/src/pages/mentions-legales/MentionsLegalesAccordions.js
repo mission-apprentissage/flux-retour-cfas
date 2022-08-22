@@ -5,33 +5,15 @@ import {
   AccordionItem,
   AccordionPanel,
   Box,
-  // Button,
   Heading,
   Link,
   Text,
 } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
-// import { useState } from "react";
 
 const MentionsLegalesAccordions = () => {
-  // const [value, setValue] = useState([]);
-  // let awijudhawiud = [];
-  // const check = (checkValue) => {
-  //   if (awijudhawiud.indexOf(checkValue) === -1) {
-  //     awijudhawiud.push(checkValue);
-  //     console.log(awijudhawiud);
-  //   } else {
-  //     awijudhawiud.splice(awijudhawiud.indexOf(checkValue), 1);
-  //   }
-  // };
-  // console.log(awijudhawiud);
-
   return (
     <Box marginTop="2w">
-      <Box>
-        {/* <Button onClick={() => setValue([0, 1, 2, 3, 4, 5])}>Tout déplier</Button>
-        <Button onClick={() => setValue([])}>dwiajwd</Button> */}
-      </Box>
       <Accordion allowMultiple fontSize="zeta" color="#000000" marginTop="8w">
         <AccordionItem on>
           <h2>
