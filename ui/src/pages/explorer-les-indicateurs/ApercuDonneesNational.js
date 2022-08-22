@@ -10,7 +10,6 @@ const ApercuDonneesNational = () => {
   const { data: effectifsNational, loading: isEffectifsNationalLoading } = useFetchEffectifsNational();
   if (isEffectifsNationalLoading) return <Spinner />;
   const { date, totalOrganismes, apprentis, inscritsSansContrat, rupturants, abandons } = effectifsNational;
-  console.log(effectifsNational);
   return (
     <Section paddingY="4w" color="grey.800" marginBottom="15w">
       <Heading as="h2" fontSize="gamma">
