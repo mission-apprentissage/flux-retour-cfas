@@ -48,7 +48,8 @@ services:
       - flux_retour_cfas_network
 
   redis:
-    image: 'bitnami/redis:latest'
+    image: 'redis:7.0.4-alpine'
+    command: redis-server --save 60 1 --loglevel warning
     container_name: flux_retour_cfas_redis
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
