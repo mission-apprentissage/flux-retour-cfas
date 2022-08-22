@@ -67,6 +67,10 @@ services:
     volumes:
       - flux_retour_cfas_mongodb_data:/data
 
+  redis:
+    volumes:
+      - flux_retour_cfas_redis_data:/data
+
 volumes:
   flux_retour_cfas_mongodb_data:
     driver: local
@@ -77,3 +81,6 @@ volumes:
   flux_retour_cfas_server_data:
     driver: local
     name: flux_retour_cfas_server_data
+  flux_retour_cfas_redis_data:
+    driver: local
+    name: flux_retour_cfas_redis_data
