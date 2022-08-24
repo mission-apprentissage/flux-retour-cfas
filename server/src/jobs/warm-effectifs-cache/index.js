@@ -6,12 +6,7 @@ const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { REGIONS } = require("../../common/constants/territoiresConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 
-const ROUTES_TO_WARM_UP = [
-  "/api/effectifs",
-  "/api/effectifs/niveau-formation",
-  "/api/effectifs/departement",
-  "/api/effectifs-national",
-];
+const ROUTES_TO_WARM_UP = ["/api/effectifs", "/api/effectifs/niveau-formation", "/api/effectifs/departement"];
 
 /*
     This job will perform expensive requests made by the UI to warm up the cache
@@ -42,6 +37,7 @@ runScript(async () => {
   logger.info(`Warming up cache for national effectifs`);
   await performRequest(ROUTES_TO_WARM_UP[0], commonParams);
   await performRequest(ROUTES_TO_WARM_UP[1], commonParams);
+  await performRequest("/api/effectifs-national", commonParams);
 
   await asyncForEach(ROUTES_TO_WARM_UP, async (route) => {
     // warm up cache with effectifs for every regions
