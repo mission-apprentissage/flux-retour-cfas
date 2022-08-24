@@ -11,7 +11,7 @@ describe("Factory DossierApprenantApiInputFiabilite", () => {
     MockDate.reset();
   });
   describe("create", () => {
-    it("Vérifie la création d'un DossierApprenantApiInputFiabilite", async () => {
+    it("Vérifie la création d'un DossierApprenantApiInputFiabilite", () => {
       const analysisDate = new Date();
       const fakeNow = new Date();
       MockDate.set(fakeNow);

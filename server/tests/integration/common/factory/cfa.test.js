@@ -4,7 +4,7 @@ const pick = require("lodash.pick");
 
 describe("Factory CFA", () => {
   describe("createCfa", () => {
-    it("Vérifie la création d'un CFA avec tous les champs", async () => {
+    it("Vérifie la création d'un CFA avec tous les champs", () => {
       const cfaProps = {
         uai: "0802004U",
         sirets: ["11111111100023"],
@@ -36,7 +36,7 @@ describe("Factory CFA", () => {
       assert.equal(createdCfaEntity.updated_at, null);
     });
 
-    it("Vérifie la création d'un CFA avec tous les champs obligatoires", async () => {
+    it("Vérifie la création d'un CFA avec tous les champs obligatoires", () => {
       const cfaProps = {
         uai: "0802004U",
         nom: "testCfa",
@@ -53,7 +53,7 @@ describe("Factory CFA", () => {
       assert.equal(createdCfaEntity.updated_at, null);
     });
 
-    it("Vérifie la non création d'un CFA sans uai", async () => {
+    it("Vérifie la non création d'un CFA sans uai", () => {
       const cfaProps = {
         sirets: ["11111111100023"],
         nom: "testCfa",
@@ -67,7 +67,7 @@ describe("Factory CFA", () => {
       assert.equal(Cfa.create(cfaProps), null);
     });
 
-    it("Vérifie la non création d'un CFA avec uai invalide", async () => {
+    it("Vérifie la non création d'un CFA avec uai invalide", () => {
       const cfaProps = {
         uai: "AAAA",
         sirets: ["11111111100023"],
