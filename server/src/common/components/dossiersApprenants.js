@@ -98,7 +98,7 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
 
   // handle siret update & siret_etablissement_valid update value
   if (toUpdate?.siret_etablissement !== undefined) {
-    updatePayload = { ...updatePayload, siret_etablissement_valid: validateSiret(toUpdate.siret_etablissement) };
+    updatePayload = { ...updatePayload, siret_etablissement_valid: !validateSiret(toUpdate.siret_etablissement).error };
   }
 
   // new statut_apprenant to add ?
@@ -162,7 +162,6 @@ const createDossierApprenant = async (itemToCreate) => {
     niveau_formation_libelle: formationInfo?.niveau_libelle,
     uai_etablissement: itemToCreate.uai_etablissement,
     siret_etablissement: itemToCreate.siret_etablissement,
-    siret_etablissement_valid: validateSiret(itemToCreate.siret_etablissement),
     nom_etablissement: itemToCreate.nom_etablissement,
     historique_statut_apprenant: [
       {

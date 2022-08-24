@@ -52,7 +52,7 @@ class DossierApprenant extends BaseFactory {
       ...props,
       nom_apprenant: props.nom_apprenant.toUpperCase().trim(),
       prenom_apprenant: props.prenom_apprenant.toUpperCase().trim(),
-      siret_etablissement_valid: validateSiret(props.siret_etablissement),
+      siret_etablissement_valid: !validateSiret(props.siret_etablissement).error,
       created_at: new Date(),
       updated_at: null,
     });

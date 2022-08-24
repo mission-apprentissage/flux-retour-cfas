@@ -1,6 +1,6 @@
 const express = require("express");
 const Joi = require("joi");
-const { uaiRegex } = require("../../common/domain/uai");
+const { schema: uaiSchema } = require("../../common/domain/uai");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 
@@ -13,7 +13,7 @@ module.exports = ({ demandeBranchementErp }) => {
       Joi.object({
         erp: Joi.string().required(),
         nom_organisme: Joi.string().required(),
-        uai_organisme: Joi.string().regex(uaiRegex).required(),
+        uai_organisme: uaiSchema.required(),
         email_demandeur: Joi.string().email().required(),
         nb_apprentis: Joi.string().allow(null, ""),
         is_ready_co_construction: Joi.boolean(),
