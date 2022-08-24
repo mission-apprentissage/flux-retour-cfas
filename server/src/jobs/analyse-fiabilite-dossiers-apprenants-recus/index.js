@@ -9,6 +9,9 @@ const {
 const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 const { validateIneApprenant } = require("../../common/domain/apprenant/ineApprenant");
 const { validateDateDeNaissanceApprenant } = require("../../common/domain/apprenant/dateDeNaissanceApprenant");
+const { validateCodeCommune } = require("../../common/domain/codeCommune");
+const { validateFrenchTelephoneNumber } = require("../../common/domain/frenchTelephoneNumber");
+const { validateEmail } = require("../../common/domain/email");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
@@ -28,6 +31,12 @@ runScript(async ({ db }) => {
     ineApprenantFormatValide: 0,
     dateDeNaissanceApprenantPresent: 0,
     dateDeNaissanceApprenantFormatValide: 0,
+    codeCommuneInseeApprenantPresent: 0,
+    codeCommuneInseeApprenantFormatValide: 0,
+    telephoneApprenantPresent: 0,
+    telephoneApprenantFormatValide: 0,
+    emailApprenantPresent: 0,
+    emailApprenantFormatValide: 0,
   };
 
   // find all dossiers apprenants sent in the last 24 hours
@@ -58,6 +67,7 @@ runScript(async ({ db }) => {
       originalData: data,
       sentOnDate: date,
       erp: username,
+      // Apprenant identification information
       nomApprenantPresent: isSet(data.nom_apprenant),
       nomApprenantFormatValide: !validateNomApprenant(data.nom_apprenant).error,
       prenomApprenantPresent: isSet(data.prenom_apprenant),
@@ -66,6 +76,13 @@ runScript(async ({ db }) => {
       ineApprenantFormatValide: !validateIneApprenant(data.ine_apprenant).error,
       dateDeNaissanceApprenantPresent: isSet(data.date_de_naissance_apprenant),
       dateDeNaissanceApprenantFormatValide: !validateDateDeNaissanceApprenant(data.date_de_naissance_apprenant).error,
+      // Apprenant contact information
+      codeCommuneInseeApprenantPresent: isSet(data.code_commune_insee_apprenant),
+      codeCommuneInseeApprenantFormatValide: !validateCodeCommune(data.code_commune_insee_apprenant).error,
+      telephoneApprenantPresent: isSet(data.tel_apprenant),
+      telephoneApprenantFormatValide: !validateFrenchTelephoneNumber(data.tel_apprenant).error,
+      emailApprenantPresent: isSet(data.email_contact),
+      emailApprenantFormatValide: !validateEmail(data.email_contact).error,
     });
     await db.collection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
 
@@ -89,6 +106,12 @@ runScript(async ({ db }) => {
       totalIneApprenantFormatValide: fiabiliteCounts.ineApprenantFormatValide,
       totalDateDeNaissanceApprenantPresent: fiabiliteCounts.dateDeNaissanceApprenantPresent,
       totalDateDeNaissanceApprenantFormatValide: fiabiliteCounts.dateDeNaissanceApprenantFormatValide,
+      totalCodeCommuneInseeApprenantPresent: fiabiliteCounts.codeCommuneInseeApprenantPresent,
+      totalCodeCommuneInseeApprenantFormatValide: fiabiliteCounts.codeCommuneInseeApprenantFormatValide,
+      totalTelephoneApprenantPresent: fiabiliteCounts.telephoneApprenantPresent,
+      totalTelephoneApprenantFormatValide: fiabiliteCounts.telephoneApprenantFormatValide,
+      totalEmailApprenantPresent: fiabiliteCounts.emailApprenantPresent,
+      totalEmailApprenantFormatValide: fiabiliteCounts.emailApprenantFormatValide,
     })
   );
 }, "analyse-fiabilite-dossiers-apprenants-dernieres-24h");
