@@ -20,9 +20,9 @@ module.exports = ({ formations }) => {
       const foundFormations = await formations.searchFormations(req.body);
 
       return res.json(
-        foundFormations.map(({ cfd, rncp, libelle, cfd_start_date, cfd_end_date }) => ({
+        foundFormations.map(({ cfd, rncps, libelle, cfd_start_date, cfd_end_date }) => ({
           cfd,
-          rncp,
+          rncps,
           libelle,
           cfd_start_date,
           cfd_end_date,

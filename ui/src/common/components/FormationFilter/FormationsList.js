@@ -10,7 +10,7 @@ const FormationsList = ({ formations, onFormationClick, selectedValue }) => {
           <Tr>
             <Th>Libellé de la formation</Th>
             <Th>CFD</Th>
-            <Th>RNCP</Th>
+            <Th>RNCP(s)</Th>
             <Th>Date de validité du CFD</Th>
           </Tr>
         </Thead>
@@ -34,7 +34,7 @@ const FormationsList = ({ formations, onFormationClick, selectedValue }) => {
                   {formation.libelle || "N/A"}
                 </Td>
                 <Td>{formation.cfd}</Td>
-                <Td>{formation.rncp}</Td>
+                <Td>{formation.rncps?.join(", ") || "N/A"}</Td>
                 {cfdStartDate && cfdEndDate ? (
                   <Td>{`Du ${cfdStartDate} au ${cfdEndDate}`}</Td>
                 ) : (

@@ -18,11 +18,6 @@ module.exports = new Schema({
     default: null,
     description: "Nom de l'établissement d'origine",
   },
-  etablissement_code_postal: {
-    type: String,
-    default: null,
-    description: "Code postal établissement",
-  },
   formation_cfd: {
     type: String,
     default: null,

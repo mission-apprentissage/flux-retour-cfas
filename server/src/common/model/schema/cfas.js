@@ -23,16 +23,6 @@ module.exports = new Schema({
     type: Boolean,
     description: "Y a-t-il un doute sur la validié de la nature",
   },
-  siret_formateur: {
-    type: Boolean,
-    default: null,
-    description: "Indique si le siret de l'établissement a été identifié comme un siret formateur",
-  },
-  siret_responsable: {
-    type: Boolean,
-    default: null,
-    description: "Indique si le siret de l'établissement a été identifié comme un siret responsable",
-  },
   nom: {
     type: String,
     default: null,

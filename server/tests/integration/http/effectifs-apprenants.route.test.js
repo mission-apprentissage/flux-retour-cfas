@@ -115,7 +115,6 @@ describe(__filename, () => {
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
-      const etablissement_code_postalTest = "75013";
       const periode_formationTest = [2019, 2021];
       const code_commune_insee_apprenantTest = "77144";
       const date_de_naissance_apprenantTest = new Date("2000-01-13");
@@ -134,7 +133,6 @@ describe(__filename, () => {
       for (let index = 0; index < 10; index++) {
         await new EffectifApprenantModel({
           ...createRandomEffectifApprenant(),
-          etablissement_code_postal: etablissement_code_postalTest,
           periode_formation: periode_formationTest,
           code_commune_insee_apprenant: code_commune_insee_apprenantTest,
           date_de_naissance_apprenant: date_de_naissance_apprenantTest,
@@ -156,7 +154,6 @@ describe(__filename, () => {
       assert.equal(response.data.pagination.page, 1);
       assert.equal(response.data.pagination.nombre_de_page, 5);
       assert.equal(response.data.pagination.total, 10);
-      assert.strictEqual(response.data.effectifsApprenants[0].etablissement_code_postal, etablissement_code_postalTest);
       assert.strictEqual(response.data.effectifsApprenants[0].periode_formation.join(), periode_formationTest.join());
       assert.strictEqual(
         response.data.effectifsApprenants[0].code_commune_insee_apprenant,

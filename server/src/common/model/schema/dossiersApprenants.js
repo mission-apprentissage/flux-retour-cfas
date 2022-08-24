@@ -79,11 +79,6 @@ module.exports = new Schema({
     default: null,
     description: "Adresse complète du CFA",
   },
-  etablissement_code_postal: {
-    type: String,
-    default: null,
-    description: "Code postal du CFA",
-  },
   etablissement_localite: {
     type: String,
     default: null,
@@ -135,16 +130,6 @@ module.exports = new Schema({
     default: null,
     description: "UAI du CFA formateur - depuis le catalogue",
   },
-  etablissement_gestionnaire_siret: {
-    type: String,
-    default: null,
-    description: "Siret du CFA gestionnaire - depuis le catalogue",
-  },
-  etablissement_formateur_siret: {
-    type: String,
-    default: null,
-    description: "Siret du CFA formateur - depuis le catalogue",
-  },
   historique_statut_apprenant: {
     type: [Object],
     default: [],
@@ -177,11 +162,6 @@ module.exports = new Schema({
     type: String,
     description: "Source du dossier apprenant (Ymag, Gesti...)",
     index: true,
-  },
-  match_formation_mnaCatalog_cfd_siret: {
-    type: Boolean,
-    default: false,
-    description: "Flag d'identification de la formation dans le Catalogue MNA sur la base du CFD + SIRET",
   },
   id_erp_apprenant: {
     type: String,

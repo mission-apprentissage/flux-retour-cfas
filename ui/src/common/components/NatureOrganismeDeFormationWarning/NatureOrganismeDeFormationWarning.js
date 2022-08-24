@@ -9,7 +9,7 @@ const NatureOrganismeDeFormationWarning = () => {
           <Text fontWeight="700">Attention !</Text>
           <Text marginTop="1w">
             La nature de l&apos;organisme est déduite du couple UAI-SIRET. Or ce couple n&apos;a pas été retrouvé à
-            l&apos;identifique dans le Référentiel.
+            l&apos;identique dans le Référentiel.
           </Text>
           <Text marginTop="1w">
             Afin de nous aider à fiabiliser les données, vous pouvez contacter l&apos;organisme concerné pour lui

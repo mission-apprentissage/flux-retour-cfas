@@ -97,7 +97,7 @@ module.exports = ({ stats, effectifs, cache }) => {
       };
 
       // try to retrieve from cache
-      const cacheKey = getCacheKeyForRoute(req.path, {
+      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
         date: format(date, "yyyy-MM-dd"),
         filters,
       });
@@ -141,7 +141,7 @@ module.exports = ({ stats, effectifs, cache }) => {
       };
 
       // try to retrieve from cache
-      const cacheKey = getCacheKeyForRoute(req.path, {
+      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
         date: format(date, "yyyy-MM-dd"),
         filters,
       });
@@ -179,7 +179,7 @@ module.exports = ({ stats, effectifs, cache }) => {
       };
 
       // try to retrieve from cache
-      const cacheKey = getCacheKeyForRoute(req.path, {
+      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
         date: format(date, "yyyy-MM-dd"),
         filters,
       });
@@ -216,7 +216,7 @@ module.exports = ({ stats, effectifs, cache }) => {
       };
 
       // try to retrieve from cache
-      const cacheKey = getCacheKeyForRoute(req.path, {
+      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
         date: format(date, "yyyy-MM-dd"),
         filters,
       });
@@ -254,7 +254,7 @@ module.exports = ({ stats, effectifs, cache }) => {
       };
 
       // try to retrieve from cache
-      const cacheKey = getCacheKeyForRoute(req.path, {
+      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
         date: format(date, "yyyy-MM-dd"),
         filters,
       });
@@ -292,7 +292,7 @@ module.exports = ({ stats, effectifs, cache }) => {
       };
 
       // try to retrieve from cache
-      const cacheKey = getCacheKeyForRoute(req.path, {
+      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
         date: format(date, "yyyy-MM-dd"),
         filters,
       });
@@ -330,7 +330,7 @@ module.exports = ({ stats, effectifs, cache }) => {
       };
 
       // try to retrieve from cache
-      const cacheKey = getCacheKeyForRoute(req.path, {
+      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
         date: format(date, "yyyy-MM-dd"),
         filters,
       });

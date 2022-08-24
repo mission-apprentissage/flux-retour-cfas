@@ -122,10 +122,6 @@ module.exports = ({ effectifs, userEvents }) => {
           value: "etablissement_reseaux",
         },
         {
-          label: "Code postal de l'organisme",
-          value: "etablissement_code_postal",
-        },
-        {
           label: "Région de l'organisme",
           value: "etablissement_nom_region",
         },
