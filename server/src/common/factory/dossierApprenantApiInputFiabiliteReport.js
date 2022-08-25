@@ -6,7 +6,15 @@ const getPercentage = (count, total) => {
   return (count * 100) / total;
 };
 
-const FIABILITE_FIELDS = ["NomApprenant", "PrenomApprenant", "IneApprenant", "DateDeNaissanceApprenant"];
+const FIABILITE_FIELDS = [
+  "NomApprenant",
+  "PrenomApprenant",
+  "IneApprenant",
+  "DateDeNaissanceApprenant",
+  "CodeCommuneInseeApprenant",
+  "TelephoneApprenant",
+  "EmailApprenant",
+];
 
 class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
   /**
