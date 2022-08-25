@@ -32,6 +32,10 @@ class DossierApprenantApiInputFiabilite extends BaseFactory {
       telephoneApprenantFormatValide: Joi.boolean().required(),
       emailApprenantPresent: Joi.boolean().required(),
       emailApprenantFormatValide: Joi.boolean().required(),
+      uaiEtablissementPresent: Joi.boolean().required(),
+      uaiEtablissementFormatValide: Joi.boolean().required(),
+      siretEtablissementPresent: Joi.boolean().required(),
+      siretEtablissementFormatValide: Joi.boolean().required(),
     });
 
     const { error } = schema.validate(props);

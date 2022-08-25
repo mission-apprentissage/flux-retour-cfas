@@ -12,6 +12,8 @@ const { validateDateDeNaissanceApprenant } = require("../../common/domain/appren
 const { validateCodeCommune } = require("../../common/domain/codeCommune");
 const { validateFrenchTelephoneNumber } = require("../../common/domain/frenchTelephoneNumber");
 const { validateEmail } = require("../../common/domain/email");
+const { validateUai } = require("../../common/domain/uai");
+const { validateSiret } = require("../../common/domain/siret");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
@@ -37,6 +39,10 @@ runScript(async ({ db }) => {
     telephoneApprenantFormatValide: 0,
     emailApprenantPresent: 0,
     emailApprenantFormatValide: 0,
+    uaiEtablissementPresent: 0,
+    uaiEtablissementFormatValide: 0,
+    siretEtablissementPresent: 0,
+    siretEtablissementFormatValide: 0,
   };
 
   // find all dossiers apprenants sent in the last 24 hours
@@ -54,6 +60,7 @@ runScript(async ({ db }) => {
     },
   ]);
 
+  // delete existing dossiers apprenant analysis results
   await db.collection("dossiersApprenantsApiInputFiabilite").deleteMany();
 
   // iterate over data and create an entry for each dossier apprenant sent with fiabilisation metadata
@@ -83,6 +90,11 @@ runScript(async ({ db }) => {
       telephoneApprenantFormatValide: !validateFrenchTelephoneNumber(data.tel_apprenant).error,
       emailApprenantPresent: isSet(data.email_contact),
       emailApprenantFormatValide: !validateEmail(data.email_contact).error,
+      // Etablissement information
+      uaiEtablissementPresent: isSet(data.uai_etablissement),
+      uaiEtablissementFormatValide: !validateUai(data.uai_etablissement).error,
+      siretEtablissementPresent: isSet(data.siret_etablissement),
+      siretEtablissementFormatValide: !validateSiret(data.siret_etablissement).error,
     });
     await db.collection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
 
@@ -112,6 +124,10 @@ runScript(async ({ db }) => {
       totalTelephoneApprenantFormatValide: fiabiliteCounts.telephoneApprenantFormatValide,
       totalEmailApprenantPresent: fiabiliteCounts.emailApprenantPresent,
       totalEmailApprenantFormatValide: fiabiliteCounts.emailApprenantFormatValide,
+      totalUaiEtablissementPresent: fiabiliteCounts.uaiEtablissementPresent,
+      totalUaiEtablissementFormatValide: fiabiliteCounts.uaiEtablissementFormatValide,
+      totalSiretEtablissementPresent: fiabiliteCounts.siretEtablissementPresent,
+      totalSiretEtablissementFormatValide: fiabiliteCounts.siretEtablissementFormatValide,
     })
   );
 }, "analyse-fiabilite-dossiers-apprenants-dernieres-24h");
