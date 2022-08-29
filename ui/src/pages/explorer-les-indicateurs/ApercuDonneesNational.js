@@ -1,15 +1,19 @@
-import { Heading, HStack, Text } from "@chakra-ui/react";
+import { Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import React from "react";
 
 import { EffectifCard, Section } from "../../common/components";
-import { indicateursNational } from "../../common/constants/indicateursNational";
+import useFetchEffectifsNational from "../../common/hooks/useFetchEffectifsNational";
+import { formatDateDayMonthYear } from "../../common/utils/dateUtils";
 import { pluralize } from "../../common/utils/stringUtils";
 
 const ApercuDonneesNational = () => {
+  const { data: effectifsNational, loading: isEffectifsNationalLoading } = useFetchEffectifsNational();
+  if (isEffectifsNationalLoading) return <Spinner />;
+  const { date, totalOrganismes, apprentis, inscritsSansContrat, rupturants, abandons } = effectifsNational;
   return (
     <Section paddingY="4w" color="grey.800" marginBottom="15w">
       <Heading as="h2" fontSize="gamma">
-        Aperçu des données au national le {indicateursNational.dateCalcul}
+        Aperçu des données au national le {formatDateDayMonthYear(date)}
       </Heading>
       <Text marginTop="1w" fontStyle="italic" color="grey.800">
         Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
@@ -17,8 +21,8 @@ const ApercuDonneesNational = () => {
       </Text>
       <HStack spacing="1w" paddingY="2w">
         <EffectifCard
-          count={indicateursNational.nbOrganismeFormation.count}
-          label={pluralize("organismes de formation", indicateursNational.nbOrganismeFormation.count)}
+          count={totalOrganismes}
+          label={pluralize("organismes de formation", totalOrganismes)}
           tooltipLabel={
             <div>
               Nombre d’organismes de formation qui transmettent leurs données au Tableau de bord de l’apprentissage. Un
@@ -29,8 +33,8 @@ const ApercuDonneesNational = () => {
           accentColor="#417DC4"
         />
         <EffectifCard
-          count={indicateursNational.nbApprentis.count}
-          label={`${pluralize("apprenti", indicateursNational.nbApprentis.count)}`}
+          count={apprentis}
+          label={`${pluralize("apprenti", apprentis)}`}
           tooltipLabel={
             <div>
               <b>Nombre d&apos;apprenants en contrat d&apos;apprentissage</b> au dernier jour du mois (ou J-1 si mois en
@@ -42,8 +46,8 @@ const ApercuDonneesNational = () => {
           accentColor="#56C8B6"
         />
         <EffectifCard
-          count={indicateursNational.nbInscritsSansContrats.count}
-          label={`${pluralize("inscrit", indicateursNational.nbInscritsSansContrats.count)} sans contrat`}
+          count={inscritsSansContrat}
+          label={`${pluralize("inscrit", inscritsSansContrat)} sans contrat`}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir jamais signé de contrat</b>{" "}
@@ -56,8 +60,8 @@ const ApercuDonneesNational = () => {
           accentColor="#F3DC58"
         />
         <EffectifCard
-          count={indicateursNational.nbRupturants.count}
-          label={pluralize("rupturant", indicateursNational.nbRupturants.count)}
+          count={rupturants}
+          label={pluralize("rupturant", rupturants)}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants en recherche de contrat après une rupture</b> et toujours dans cette situation à la
@@ -68,8 +72,8 @@ const ApercuDonneesNational = () => {
           accentColor="#FCC63A"
         />
         <EffectifCard
-          count={indicateursNational.nbAbandons.count}
-          label={pluralize("abandon", indicateursNational.nbAbandons.count)}
+          count={abandons}
+          label={pluralize("abandon", abandons)}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants ou d’apprentis qui ont définitivement quitté le centre de formation</b> à la date

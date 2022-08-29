@@ -47,6 +47,11 @@ export const fetchEffectifsParDepartement = (filters) => {
   return _get(url);
 };
 
+export const fetchEffectifsNational = () => {
+  const url = `/api/effectifs-national`;
+  return _get(url);
+};
+
 /* Total organismes */
 
 export const fetchTotalOrganismes = (filters) => {

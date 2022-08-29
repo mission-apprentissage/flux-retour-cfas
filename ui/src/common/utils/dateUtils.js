@@ -11,6 +11,10 @@ export const formatDate = (date) => (date ? format(date, DATE_FORMAT) : "");
 // Elle vérifie si la date est aprés le dernier jour du mois
 export const isDateFuture = (date) => date > endOfMonth(new Date());
 
+export const formatDateDayMonthYear = (date) => {
+  return new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+};
+
 export const getUniquesMonthAndYearFromDatesList = (input) => {
   const output = [];
 

@@ -1,5 +1,4 @@
 const express = require("express");
-const stringify = require("json-stringify-deterministic");
 const { format } = require("date-fns");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
@@ -7,6 +6,7 @@ const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScola
 const { tdbRoles } = require("../../common/roles");
 
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
+const { getCacheKeyForRoute } = require("../../common/utils/cacheUtils");
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -37,11 +37,6 @@ const commonEffectifsFilters = {
   uai_etablissement: Joi.string().allow(null, ""),
   siret_etablissement: Joi.string().allow(null, ""),
   etablissement_reseaux: Joi.string().allow(null, ""),
-};
-
-const getCacheKeyForRoute = (route, filters) => {
-  // we use json-stringify-deterministic to make sure that {a: 1, b: 2} stringified is the same as {b: 2, a: 1}
-  return `${route}:${stringify(filters)}`;
 };
 
 module.exports = ({ stats, effectifs, cache }) => {
