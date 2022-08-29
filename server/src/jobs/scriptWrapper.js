@@ -2,11 +2,15 @@ const { closeMongoConnection } = require("../common/mongodb");
 const createComponents = require("../common/components/components");
 const logger = require("../common/logger");
 const { JobEventModel } = require("../common/model");
+const { initRedis } = require("../common/infra/redis");
 const { formatDuration, intervalToDuration } = require("date-fns");
 const { jobEventStatuts } = require("../common/constants/jobsConstants");
+const config = require("../../config");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
+
+let redisClient;
 
 const exit = async (rawError) => {
   let error = rawError;
@@ -24,6 +28,8 @@ const exit = async (rawError) => {
       });
   }, 500);
 
+  await redisClient.quit();
+
   process.exitCode = error ? 1 : 0;
 };
 
@@ -32,7 +38,13 @@ module.exports = {
     try {
       const startDate = new Date();
 
-      const components = await createComponents();
+      redisClient = await initRedis({
+        uri: config.redis.uri,
+        onError: (err) => logger.error("Redis client error", err),
+        onReady: () => logger.info("Redis client ready!"),
+      });
+
+      const components = await createComponents({ redisClient });
       await new JobEventModel({ jobname: jobName, action: jobEventStatuts.started, date: new Date() }).save();
       await job(components);
 

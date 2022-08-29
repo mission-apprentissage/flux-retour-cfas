@@ -3,8 +3,12 @@ module.exports = (redisClient) => {
     get: (cacheKey) => {
       return redisClient.get(cacheKey);
     },
-    set: (cacheKey, value) => {
-      return redisClient.set(cacheKey, value);
+    set: async (cacheKey, value, options = {}) => {
+      await redisClient.set(cacheKey, value);
+
+      if (options.expiresIn) {
+        await redisClient.expire(cacheKey, options.expiresIn);
+      }
     },
     clear: () => {
       return redisClient.flushAll();
