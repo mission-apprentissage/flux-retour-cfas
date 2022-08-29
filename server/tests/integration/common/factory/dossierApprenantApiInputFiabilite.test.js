@@ -38,6 +38,10 @@ describe("Factory DossierApprenantApiInputFiabilite", () => {
         telephoneApprenantFormatValide: true,
         emailApprenantPresent: true,
         emailApprenantFormatValide: false,
+        uaiEtablissementPresent: true,
+        uaiEtablissementFormatValide: false,
+        siretEtablissementPresent: false,
+        siretEtablissementFormatValide: true,
       };
 
       const entity = DossierApprenantApiInputFiabilite.create(props);

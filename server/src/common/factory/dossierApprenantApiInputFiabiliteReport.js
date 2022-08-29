@@ -14,6 +14,10 @@ const FIABILITE_FIELDS = [
   "CodeCommuneInseeApprenant",
   "TelephoneApprenant",
   "EmailApprenant",
+  "UaiEtablissementPresent",
+  "UaiEtablissementFormatValide",
+  "SiretEtablissementPresent",
+  "SiretEtablissementFormatValide",
 ];
 
 class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
