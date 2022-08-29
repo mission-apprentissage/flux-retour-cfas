@@ -55,11 +55,9 @@ const getOrganismeWithSiret =
     const skipCache = options.skipCache === true;
     const cacheKey = `${CACHE_KEY_PREFIX}:siret:${siret}`;
 
-    if (skipCache === false) {
+    if (!skipCache) {
       const fromCache = await cache.get(cacheKey);
-      if (fromCache) {
-        return fromCache === CACHE_NULL_VALUE ? null : JSON.parse(fromCache);
-      }
+      if (fromCache) return fromCache === CACHE_NULL_VALUE ? null : JSON.parse(fromCache);
     }
 
     let result;
@@ -77,7 +75,7 @@ const getOrganismeWithSiret =
       }
     }
 
-    if (skipCache === false) {
+    if (!skipCache) {
       const valueToCache = result === CACHE_NULL_VALUE ? CACHE_NULL_VALUE : JSON.stringify(result);
       await cache.set(cacheKey, valueToCache, { expiresIn: DEFAULT_CACHE_EXPIRES_IN });
     }
@@ -107,17 +105,15 @@ const getOrganismesWithUai =
     const skipCache = options.skipCache === true;
     const cacheKey = `${CACHE_KEY_PREFIX}:uai:${uai}`;
 
-    if (skipCache === false) {
+    if (!skipCache) {
       const fromCache = await cache.get(cacheKey);
-      if (fromCache) {
-        return JSON.parse(fromCache);
-      }
+      if (fromCache) return JSON.parse(fromCache);
     }
 
     try {
       const response = await fetchOrganismesWithUai(uai);
 
-      if (skipCache === false) {
+      if (!skipCache) {
         await cache.set(cacheKey, JSON.stringify(response), { expiresIn: DEFAULT_CACHE_EXPIRES_IN });
       }
 
