@@ -87,7 +87,7 @@ const updateCfa = async (cfaId, dossierForCfa, sirets = []) => {
     throw Error("Id not found");
   }
 
-  if (!validateUai(dossierForCfa.uai_etablissement)) {
+  if (validateUai(dossierForCfa.uai_etablissement).error) {
     throw Error("Invalid Uai");
   }
 

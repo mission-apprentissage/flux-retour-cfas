@@ -10,7 +10,7 @@ const { schema: uaiSchema } = require("../../common/domain/uai");
 const { schema: cfdSchema } = require("../../common/domain/cfd");
 const { schema: nomApprenantSchema } = require("../../common/domain/apprenant/nomApprenant");
 const { schema: prenomApprenantSchema } = require("../../common/domain/apprenant/prenomApprenant");
-const { siretRegex } = require("../../common/domain/siret");
+const { schema: siretSchema } = require("../../common/domain/siret");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 const { findAndPaginate } = require("../../common/utils/dbUtils");
@@ -46,7 +46,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
     tel_apprenant: Joi.string().allow(null, ""),
     code_commune_insee_apprenant: Joi.string().allow(null),
 
-    siret_etablissement: Joi.string().regex(siretRegex).allow(null, ""),
+    siret_etablissement: siretSchema.allow(null, ""),
 
     libelle_long_formation: Joi.string().allow(null, ""),
     periode_formation: Joi.string().allow(null, ""),

@@ -28,7 +28,7 @@ const seedContactsCfas = async (contactsCfas) => {
     .lean();
 
   // Filter on valid siret only
-  const validSirets = allDistinctSiretsFromCfa.filter((item) => validateSiret(item) === true);
+  const validSirets = allDistinctSiretsFromCfa.filter((item) => !validateSiret(item).error);
   const siretJoinedList = validSirets.join(",");
 
   // Call referentiel api

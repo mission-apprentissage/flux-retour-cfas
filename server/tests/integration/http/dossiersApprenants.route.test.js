@@ -10,7 +10,6 @@ const {
 } = require("../../data/randomizedSample");
 const { cfdRegex } = require("../../../src/common/domain/cfd");
 const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
-const { siretRegex } = require("../../../src/common/domain/siret");
 
 const user = {
   name: "userApi",
@@ -476,12 +475,6 @@ describe(__filename, () => {
       // check response & validation errors
       assert.equal(response.data.status, "WARNING");
       assert.equal(response.data.validationErrors.length, 1);
-      assert.equal(
-        response.data.validationErrors[0].errors[0].message.includes(
-          `"siret_etablissement" with value "${badSiret}" fails to match the required pattern: ${siretRegex}`
-        ),
-        true
-      );
       assert.equal(await DossierApprenantModel.countDocuments({}), 0);
     });
   });
