@@ -32,6 +32,7 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
       totalDossiersApprenants: Joi.number().required(),
       totalUaiEtablissementUniqueFoundInReferentiel: Joi.number().required(),
       totalSiretEtablissementFoundInReferentiel: Joi.number().required(),
+      totalUniqueApprenant: Joi.number().required(),
       ...FIABILITE_FIELDS.reduce((acc, fieldName) => {
         return {
           ...acc,
@@ -64,6 +65,7 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
         props.totalSiretEtablissementFoundInReferentiel,
         props.totalDossiersApprenants
       ),
+      ratioUniqueApprenant: getPercentage(props.totalUniqueApprenant, props.totalDossiersApprenants),
       created_at: new Date(),
     });
   }
