@@ -44,6 +44,7 @@ describe("Factory DossierApprenantApiInputFiabilite", () => {
         siretEtablissementFormatValide: true,
         uaiEtablissementUniqueFoundInReferentiel: true,
         siretEtablissementFoundInReferentiel: false,
+        uniqueApprenant: true,
       };
 
       const entity = DossierApprenantApiInputFiabilite.create(props);
