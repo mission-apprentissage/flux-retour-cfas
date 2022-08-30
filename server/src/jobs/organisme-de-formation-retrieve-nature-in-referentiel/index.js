@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { CfaModel } = require("../../common/model");
-const { getOrganismesWithUai } = require("../../common/apis/apiReferentielMna");
+const { fetchOrganismesWithUai } = require("../../common/apis/apiReferentielMna");
 const { sleep } = require("../../common/utils/miscUtils");
 const { logger } = require("env-var");
 
@@ -18,7 +18,7 @@ runScript(async ({ cfas }) => {
   await asyncForEach(allCfa, async (cfa) => {
     await sleep(SLEEP_TIME_BETWEEN_REFERENTIEL_API_REQUESTS);
     try {
-      const { pagination, organismes } = await getOrganismesWithUai(cfa.uai);
+      const { pagination, organismes } = await fetchOrganismesWithUai(cfa.uai);
       // skip if no result or more than one found in Referentiel
       const foundResults = pagination.total > 0;
       const moreThanOneResult = pagination.total > 1;

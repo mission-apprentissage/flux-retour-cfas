@@ -14,10 +14,8 @@ const FIABILITE_FIELDS = [
   "CodeCommuneInseeApprenant",
   "TelephoneApprenant",
   "EmailApprenant",
-  "UaiEtablissementPresent",
-  "UaiEtablissementFormatValide",
-  "SiretEtablissementPresent",
-  "SiretEtablissementFormatValide",
+  "UaiEtablissement",
+  "SiretEtablissement",
 ];
 
 class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
@@ -32,6 +30,8 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
       analysisDate: Joi.date().iso().required(),
 
       totalDossiersApprenants: Joi.number().required(),
+      totalUaiEtablissementUniqueFoundInReferentiel: Joi.number().required(),
+      totalSiretEtablissementFoundInReferentiel: Joi.number().required(),
       ...FIABILITE_FIELDS.reduce((acc, fieldName) => {
         return {
           ...acc,
@@ -56,6 +56,14 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
           ),
         };
       }, {}),
+      ratioUaiUniqueFoundInReferentiel: getPercentage(
+        props.totalUaiEtablissementUniqueFoundInReferentiel,
+        props.totalDossiersApprenants
+      ),
+      ratioSiretEtablissementFoundInReferentiel: getPercentage(
+        props.totalSiretEtablissementFoundInReferentiel,
+        props.totalDossiersApprenants
+      ),
       created_at: new Date(),
     });
   }

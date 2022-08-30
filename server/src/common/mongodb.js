@@ -34,6 +34,8 @@ module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
   });
 };
 
-module.exports.closeMongoConnection = (mongooseInst = mongoose) => mongooseInst.disconnect();
+module.exports.closeMongoConnection = async () => {
+  return await mongoose.disconnect();
+};
 
 module.exports.mongooseInstance = mongooseInstance;

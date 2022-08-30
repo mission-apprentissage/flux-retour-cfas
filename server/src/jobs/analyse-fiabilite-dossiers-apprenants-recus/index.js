@@ -14,12 +14,14 @@ const { validateFrenchTelephoneNumber } = require("../../common/domain/frenchTel
 const { validateEmail } = require("../../common/domain/email");
 const { validateUai } = require("../../common/domain/uai");
 const { validateSiret } = require("../../common/domain/siret");
+const { asyncForEach } = require("../../common/utils/asyncUtils");
+const { getOrganismeWithSiret, getOrganismesWithUai } = require("../../common/apis/apiReferentielMna");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
 };
 
-runScript(async ({ db }) => {
+runScript(async ({ db, cache }) => {
   const analysisId = uuid();
   const analysisDate = new Date();
 
@@ -43,6 +45,8 @@ runScript(async ({ db }) => {
     uaiEtablissementFormatValide: 0,
     siretEtablissementPresent: 0,
     siretEtablissementFormatValide: 0,
+    uaiEtablissementUniqueFoundInReferentiel: 0,
+    siretEtablissementFoundInReferentiel: 0,
   };
 
   // find all dossiers apprenants sent in the last 24 hours
@@ -62,6 +66,39 @@ runScript(async ({ db }) => {
 
   // delete existing dossiers apprenant analysis results
   await db.collection("dossiersApprenantsApiInputFiabilite").deleteMany();
+
+  // warm cache for Referentiel UAI/SIRET API with valid SIRET already in dossiersApprenants collection
+  const allSiretsInDossiersApprenants = await db.collection("dossiersApprenants").distinct("siret_etablissement");
+  const getOrganismeWithSiretCached = getOrganismeWithSiret(cache);
+
+  await asyncForEach(allSiretsInDossiersApprenants, async (siret) => {
+    if (validateSiret(siret).error) return;
+    await getOrganismeWithSiretCached(siret);
+  });
+
+  // warm cache for Referentiel UAI/SIRET API with valid UAI already in dossiersApprenants collection
+  const allUaiInDossiersApprenants = await db.collection("dossiersApprenants").distinct("uai_etablissement");
+  const getOrganismesWithUaiCached = getOrganismesWithUai(cache);
+
+  await asyncForEach(allUaiInDossiersApprenants, async (uai) => {
+    if (validateUai(uai).error) return;
+    await getOrganismesWithUaiCached(uai);
+  });
+
+  const isSiretFoundInReferentielUaiSiret = async (siret) => {
+    if (validateSiret(siret).error) return false;
+
+    const organisme = await getOrganismeWithSiretCached(siret);
+    if (organisme) return true;
+    return false;
+  };
+
+  const isUaiFoundUniqueInReferentielUaiSiret = async (uai) => {
+    if (validateUai(uai).error) return false;
+
+    const result = await getOrganismesWithUaiCached(uai);
+    return result?.pagination.total === 1;
+  };
 
   // iterate over data and create an entry for each dossier apprenant sent with fiabilisation metadata
   while (await latestReceivedDossiersApprenantsCursor.hasNext()) {
@@ -93,8 +130,10 @@ runScript(async ({ db }) => {
       // Etablissement information
       uaiEtablissementPresent: isSet(data.uai_etablissement),
       uaiEtablissementFormatValide: !validateUai(data.uai_etablissement).error,
+      uaiEtablissementUniqueFoundInReferentiel: await isUaiFoundUniqueInReferentielUaiSiret(data.uai_etablissement),
       siretEtablissementPresent: isSet(data.siret_etablissement),
       siretEtablissementFormatValide: !validateSiret(data.siret_etablissement).error,
+      siretEtablissementFoundInReferentiel: await isSiretFoundInReferentielUaiSiret(data.siret_etablissement),
     });
     await db.collection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
 
@@ -128,6 +167,8 @@ runScript(async ({ db }) => {
       totalUaiEtablissementFormatValide: fiabiliteCounts.uaiEtablissementFormatValide,
       totalSiretEtablissementPresent: fiabiliteCounts.siretEtablissementPresent,
       totalSiretEtablissementFormatValide: fiabiliteCounts.siretEtablissementFormatValide,
+      totalUaiEtablissementUniqueFoundInReferentiel: fiabiliteCounts.uaiEtablissementUniqueFoundInReferentiel,
+      totalSiretEtablissementFoundInReferentiel: fiabiliteCounts.siretEtablissementFoundInReferentiel,
     })
   );
 }, "analyse-fiabilite-dossiers-apprenants-dernieres-24h");
