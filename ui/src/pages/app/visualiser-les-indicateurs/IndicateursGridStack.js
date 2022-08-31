@@ -1,20 +1,18 @@
-import { Grid, Skeleton, Stack } from "@chakra-ui/react";
+import { Grid, Skeleton } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { EffectifCard } from "../../../common/components";
 import { isDateFuture } from "../../../common/utils/dateUtils";
 import { pluralize } from "../../../common/utils/stringUtils";
-import DateWithTooltipSelector from "./DateWithTooltipSelector";
-import { useFiltersContext } from "./FiltersContext";
 import OrganismesCountCard from "./OrganismesCountCard";
 
-const IndicateursGridStack = ({ effectifs, loading, showOrganismesCount = true }) => {
-  const filtersContext = useFiltersContext();
-  let content = null;
+const GRID_TEMPLATE_COLUMNS = ["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"];
+
+const IndicateursGridStack = ({ effectifs, effectifsDate, organismesCount, loading, showOrganismesCount = true }) => {
   if (loading) {
-    content = (
-      <Grid gridGap="2w" gridTemplateColumns={["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"]}>
+    return (
+      <Grid gridGap="2w" gridTemplateColumns={GRID_TEMPLATE_COLUMNS}>
         {showOrganismesCount && <Skeleton height="136px" startColor="grey.300" endColor="galt" />}
         <Skeleton height="136px" startColor="grey.300" endColor="galt" />
         <Skeleton height="136px" startColor="grey.300" endColor="galt" />
@@ -25,19 +23,19 @@ const IndicateursGridStack = ({ effectifs, loading, showOrganismesCount = true }
   }
 
   if (effectifs && !loading) {
-    const shouldWarnAboutDateAvailability = isDateFuture(filtersContext.state.date);
+    const shouldWarnAboutDateAvailability = isDateFuture(effectifsDate);
     const infoTextAboutDateAvailability = (
       <span>
         cet indice ne peut être calculé sur <br /> la période sélectionnée
       </span>
     );
 
-    content = (
-      <Grid gridGap="2w" gridTemplateColumns={["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"]}>
-        {showOrganismesCount && <OrganismesCountCard />}
+    return (
+      <Grid gridGap="2w" gridTemplateColumns={GRID_TEMPLATE_COLUMNS}>
+        {showOrganismesCount && <OrganismesCountCard count={organismesCount} />}
         <EffectifCard
-          count={effectifs.apprentis.count}
-          label={pluralize("apprenti", effectifs.apprentis.count)}
+          count={effectifs.apprentis}
+          label={pluralize("apprenti", effectifs.apprentis)}
           tooltipLabel={
             <div>
               <b>Nombre d&apos;apprenants en contrat d&apos;apprentissage</b> au dernier jour du mois (ou J-1 si mois en
@@ -49,8 +47,8 @@ const IndicateursGridStack = ({ effectifs, loading, showOrganismesCount = true }
           accentColor="#56C8B6"
         />
         <EffectifCard
-          count={effectifs.inscritsSansContrat.count}
-          label={`${pluralize("inscrit", effectifs.inscritsSansContrat.count)} sans contrat`}
+          count={effectifs.inscritsSansContrat}
+          label={`${pluralize("inscrit", effectifs.inscritsSansContrat)} sans contrat`}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants ayant démarré une formation en apprentissage sans avoir jamais signé de contrat</b>{" "}
@@ -63,8 +61,8 @@ const IndicateursGridStack = ({ effectifs, loading, showOrganismesCount = true }
           accentColor="#F3DC58"
         />
         <EffectifCard
-          count={effectifs.rupturants.count}
-          label={pluralize("rupturant", effectifs.rupturants.count)}
+          count={effectifs.rupturants}
+          label={pluralize("rupturant", effectifs.rupturants)}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants en recherche de contrat après une rupture</b> et toujours dans cette situation à la
@@ -77,10 +75,10 @@ const IndicateursGridStack = ({ effectifs, loading, showOrganismesCount = true }
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
         />
         <EffectifCard
-          count={effectifs.abandons.count}
+          count={effectifs.abandons}
           hideCount={shouldWarnAboutDateAvailability}
           infoText={shouldWarnAboutDateAvailability ? infoTextAboutDateAvailability : ""}
-          label={pluralize("abandon", effectifs.abandons.count)}
+          label={pluralize("abandon", effectifs.abandons)}
           tooltipLabel={
             <div>
               <b>Nombre d’apprenants ou d’apprentis qui ont définitivement quitté le centre de formation</b> à la date
@@ -93,32 +91,19 @@ const IndicateursGridStack = ({ effectifs, loading, showOrganismesCount = true }
       </Grid>
     );
   }
-
-  return (
-    <Stack>
-      <DateWithTooltipSelector />
-      {content}
-    </Stack>
-  );
 };
 
 IndicateursGridStack.propTypes = {
   loading: PropTypes.bool.isRequired,
   showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
-    apprentis: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    inscritsSansContrat: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    abandons: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    rupturants: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
+    apprentis: PropTypes.number.isRequired,
+    inscritsSansContrat: PropTypes.number.isRequired,
+    abandons: PropTypes.number.isRequired,
+    rupturants: PropTypes.number.isRequired,
   }),
+  effectifsDate: PropTypes.instanceOf(Date),
+  organismesCount: PropTypes.number,
 };
 
 export default IndicateursGridStack;
