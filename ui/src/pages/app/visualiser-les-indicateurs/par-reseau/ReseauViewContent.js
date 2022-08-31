@@ -17,7 +17,6 @@ const ReseauViewContent = ({ userLoggedAsReseau = false }) => {
         filters={filtersContext.state}
         effectifs={effectifs}
         loading={loading}
-        showOrganismesCount
       />
     </>
   );

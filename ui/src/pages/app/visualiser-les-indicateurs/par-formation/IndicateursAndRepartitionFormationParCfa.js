@@ -13,7 +13,7 @@ import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
-const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading, showOrganismesCount = true }) => {
+const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading }) => {
   const { data, isLoading, error } = useFetchEffectifsParCfa(filters);
   const { data: organismesCount } = useFetchOrganismesCount(filters);
 
@@ -39,7 +39,6 @@ const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading,
                   effectifs={effectifs}
                   loading={loading}
                   organismesCount={organismesCount}
-                  showOrganismesCount={showOrganismesCount}
                   effectifsDate={filters.date}
                 />
               </Stack>
@@ -63,7 +62,6 @@ const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading,
 IndicateursAndRepartitionFormationParCfa.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({
       count: PropTypes.number.isRequired,

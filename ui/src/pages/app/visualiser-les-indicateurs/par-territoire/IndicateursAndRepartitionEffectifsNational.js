@@ -12,7 +12,7 @@ import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
-const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading, showOrganismesCount = true }) => {
+const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading }) => {
   const { state: filters } = useFiltersContext();
   const { data: organismesCount } = useFetchOrganismesCount(filters);
 
@@ -35,7 +35,7 @@ const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading, showOr
                   effectifs={effectifs}
                   loading={loading}
                   organismesCount={organismesCount}
-                  showOrganismesCount={showOrganismesCount}
+                  showOrganismesCount
                   effectifsDate={filters.date}
                 />
               </Stack>
@@ -55,7 +55,6 @@ const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading, showOr
 
 IndicateursAndRepartitionEffectifsNational.propTypes = {
   loading: PropTypes.bool.isRequired,
-  showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({
       count: PropTypes.number.isRequired,

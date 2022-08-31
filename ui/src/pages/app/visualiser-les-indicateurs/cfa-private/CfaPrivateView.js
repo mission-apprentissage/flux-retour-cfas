@@ -44,7 +44,6 @@ const CfaPrivateView = ({ cfaUai }) => {
           filters={filters}
           effectifs={effectifs}
           loading={effectifsLoading}
-          showOrganismesCount={false}
           hasMultipleSirets={hasMultipleSirets}
           namedDataDownloadMode={true}
         />

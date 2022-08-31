@@ -9,7 +9,6 @@ import DownloadBlock from "../../../../../../common/components/DownloadBlock/Dow
 import RepartitionEffectifsParFormation from "../../../../../../common/components/tables/RepartitionEffectifsParFormation";
 import useAuth from "../../../../../../common/hooks/useAuth";
 import useFetchEffectifsParNiveauFormation from "../../../../../../common/hooks/useFetchEffectifsParNiveauFormation";
-import useFetchOrganismesCount from "../../../../../../common/hooks/useFetchOrganismesCount";
 import { mapFiltersToApiFormat } from "../../../../../../common/utils/mapFiltersToApiFormat";
 import DateWithTooltipSelector from "../../../DateWithTooltipSelector";
 import { filtersPropTypes } from "../../../FiltersContext";
@@ -19,12 +18,10 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
   filters,
   effectifs,
   loading,
-  showOrganismesCount = true,
   hasMultipleSirets = false,
   namedDataDownloadMode = false,
 }) => {
   const { data, loading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
-  const { data: organismesCount } = useFetchOrganismesCount(filters);
 
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
 
@@ -56,8 +53,7 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
                 <IndicateursGridStack
                   effectifs={effectifs}
                   loading={loading}
-                  organismesCount={organismesCount}
-                  showOrganismesCount={showOrganismesCount}
+                  showOrganismesCount={false}
                   effectifsDate={filters.date}
                 />
               </Stack>
@@ -83,7 +79,6 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
 IndicateursAndRepartionCfaNiveauAnneesSection.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  showOrganismesCount: PropTypes.bool,
   hasMultipleSirets: PropTypes.bool,
   namedDataDownloadMode: PropTypes.bool,
   effectifs: PropTypes.shape({
