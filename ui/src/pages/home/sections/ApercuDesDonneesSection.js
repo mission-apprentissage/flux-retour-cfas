@@ -1,4 +1,5 @@
-import { Box, Divider, Flex, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
+import { Box, Divider, Flex, Heading, HStack, Skeleton, Text } from "@chakra-ui/react";
+import { startOfHour } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -25,9 +26,9 @@ Count.propTypes = {
 };
 
 const ApercuDesDonneesSection = () => {
-  const { data: effectifsNational, loading: isEffectifsNationalLoading } = useFetchEffectifsNational();
-  if (isEffectifsNationalLoading) return <Spinner />;
-  const { date, totalOrganismes, apprentis, inscritsSansContrat, rupturants, abandons } = effectifsNational;
+  const date = startOfHour(new Date());
+  const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
+
   return (
     <Section background="galt" paddingY="4w">
       <Box>
@@ -37,13 +38,24 @@ const ApercuDesDonneesSection = () => {
           Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
           En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
         </Text>
-        <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
-          <Count count={totalOrganismes} label="Organismes de formation" />
-          <Count count={apprentis} label="Apprentis" />
-          <Count count={inscritsSansContrat} label="Jeunes sans contrat" />
-          <Count count={rupturants} label="Rupturants" />
-          <Count count={abandons} label="Abandons" />
-        </HStack>
+
+        {isEffectifsNationalLoading && (
+          <Skeleton marginTop="3w" width="100%" height="4rem" startColor="grey.300" endColor="galt" />
+        )}
+        {effectifsNational && (
+          <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
+            <Count count={effectifsNational.totalOrganismes} label="Organismes de formation" />
+            <Count count={effectifsNational.apprentis} label="Apprentis" />
+            <Count count={effectifsNational.inscritsSansContrat} label="Jeunes sans contrat" />
+            <Count count={effectifsNational.rupturants} label="Rupturants" />
+            <Count count={effectifsNational.abandons} label="Abandons" />
+          </HStack>
+        )}
+        {error && (
+          <Text color="error" marginTop="3w">
+            Impossible de charger les effectifs au national
+          </Text>
+        )}
 
         <Divider marginY="3w" />
 
