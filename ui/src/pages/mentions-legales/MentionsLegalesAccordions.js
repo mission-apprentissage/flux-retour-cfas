@@ -11,6 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 
+import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../common/constants/product";
+
 const MentionsLegalesAccordions = () => {
   return (
     <Box marginTop="2w">
@@ -159,7 +161,7 @@ const MentionsLegalesAccordions = () => {
               <br />
               informations diffusées sur service-public.fr. En revanche, les pages du portail ne doivent pas être
               <br />
-              imbriquées à l&apos;intérieur des pages d&apos;un autre site et le Tableau de bord de l’apprentissage ne
+              imbriquées à l&apos;intérieur des pages d&apos;un autre site et le {PRODUCT_NAME} ne
               <br />
               peut être utilisé à des fins commerciales.
             </Text>
@@ -266,7 +268,10 @@ const MentionsLegalesAccordions = () => {
           </h2>
           <AccordionPanel paddingBottom={4}>
             <Text>
-              L’équipe du tableau de bord peut être contactée directement à : tableau-de-bord@apprentissage.beta.gouv.fr
+              L’équipe du tableau de bord peut être contactée directement à :{" "}
+              <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
+                {CONTACT_ADDRESS}
+              </Link>
             </Text>
           </AccordionPanel>
         </AccordionItem>
