@@ -18,6 +18,7 @@ import ExplorerLesIndicateursPage from "./pages/explorer-les-indicateurs/Explore
 import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
 import JournalDesEvolutionsPage from "./pages/journal-des-evolutions/JournalDesEvolutionsPage";
 import LoginPage from "./pages/login/LoginPage";
+import MentionsLegalesPage from "./pages/mentions-legales/MentionsLegalesPage";
 import { ModifierMotDePassePage } from "./pages/modifier-mot-de-passe";
 import {
   CommentConsulterEtVerifierLesDonneesPage,
@@ -64,6 +65,7 @@ const App = () => {
         <Route path={NAVIGATION_PAGES.ComprendreLesDonnees.path} exact component={ComprendreLesDonneesPage} />
         <Route path={NAVIGATION_PAGES.ExplorerLesIndicateurs.path} exact component={ExplorerLesIndicateursPage} />
         <Route path={NAVIGATION_PAGES.JournalDesEvolutions.path} exact component={JournalDesEvolutionsPage} />
+        <Route path={NAVIGATION_PAGES.MentionsLegales.path} exact component={MentionsLegalesPage} />
 
         {/* Secured By Token Pages */}
         <Route exact path={`${NAVIGATION_PAGES.Cfa.path}/:accessToken`} component={CfaPrivatePage} />
