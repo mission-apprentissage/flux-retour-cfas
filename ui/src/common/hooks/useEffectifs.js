@@ -6,18 +6,10 @@ import { QUERY_KEYS } from "../constants/queryKeys";
 
 const mapEffectifsData = (effectifsData) => {
   return {
-    apprentis: {
-      count: effectifsData.apprentis,
-    },
-    inscritsSansContrat: {
-      count: effectifsData.inscritsSansContrat,
-    },
-    rupturants: {
-      count: effectifsData.rupturants,
-    },
-    abandons: {
-      count: effectifsData.abandons,
-    },
+    apprentis: effectifsData.apprentis,
+    inscritsSansContrat: effectifsData.inscritsSansContrat,
+    rupturants: effectifsData.rupturants,
+    abandons: effectifsData.abandons,
   };
 };
 
