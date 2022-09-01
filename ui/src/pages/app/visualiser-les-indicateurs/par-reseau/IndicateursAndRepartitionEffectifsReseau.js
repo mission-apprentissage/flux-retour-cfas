@@ -16,7 +16,7 @@ import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
-const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading, showOrganismesCount = true }) => {
+const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading }) => {
   const {
     data: effectifsParCfa,
     loading: isEffectifsParCfaLoading,
@@ -44,7 +44,7 @@ const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading,
                 effectifs={effectifs}
                 loading={loading}
                 organismesCount={organismesCount}
-                showOrganismesCount={showOrganismesCount}
+                showOrganismesCount
                 effectifsDate={filters.date}
               />
             </Stack>
@@ -80,7 +80,6 @@ const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading,
 IndicateursAndRepartitionEffectifsReseau.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({
       count: PropTypes.number.isRequired,

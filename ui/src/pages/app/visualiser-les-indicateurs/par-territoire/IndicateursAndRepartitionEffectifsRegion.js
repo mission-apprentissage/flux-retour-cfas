@@ -16,7 +16,7 @@ import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
-const IndicateursAndRepartitionEffectifsRegion = ({ filters, effectifs, loading, showOrganismesCount = true }) => {
+const IndicateursAndRepartitionEffectifsRegion = ({ filters, effectifs, loading }) => {
   const {
     data: effectifsParDepartement,
     loading: isEffectifsParDepartementLoading,
@@ -43,7 +43,7 @@ const IndicateursAndRepartitionEffectifsRegion = ({ filters, effectifs, loading,
                 effectifs={effectifs}
                 loading={loading}
                 organismesCount={organismesCount}
-                showOrganismesCount={showOrganismesCount}
+                showOrganismesCount
                 effectifsDate={filters.date}
               />
             </Stack>
@@ -79,7 +79,6 @@ const IndicateursAndRepartitionEffectifsRegion = ({ filters, effectifs, loading,
 IndicateursAndRepartitionEffectifsRegion.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({
       count: PropTypes.number.isRequired,
