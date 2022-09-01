@@ -24,6 +24,7 @@ class DossierApprenantApiInputFiabilite extends BaseFactory {
       prenomApprenantFormatValide: Joi.boolean().required(),
       ineApprenantPresent: Joi.boolean().required(),
       ineApprenantFormatValide: Joi.boolean().required(),
+      uniqueApprenant: Joi.boolean().required(),
       dateDeNaissanceApprenantPresent: Joi.boolean().required(),
       dateDeNaissanceApprenantFormatValide: Joi.boolean().required(),
       codeCommuneInseeApprenantPresent: Joi.boolean().required(),
