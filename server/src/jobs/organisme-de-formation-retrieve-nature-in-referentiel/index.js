@@ -1,7 +1,7 @@
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { CfaModel } = require("../../common/model");
-const { fetchOrganismesWithUai } = require("../../common/apis/apiReferentielMna");
+const { getOrganismesWithUai } = require("../../common/apis/apiReferentielMna");
 const { sleep } = require("../../common/utils/miscUtils");
 const { logger } = require("env-var");
 
@@ -11,14 +11,16 @@ const SLEEP_TIME_BETWEEN_REFERENTIEL_API_REQUESTS = 150;
 /**
  * Ce script tente de récupérer pour chaque UAI présent dans la collection Cfa la nature de l'organisme de formation
  */
-runScript(async ({ cfas }) => {
+runScript(async ({ cfas, cache }) => {
   // Gets all cfa
   const allCfa = await CfaModel.find().lean();
+
+  const getOrganismesWithUaiCached = getOrganismesWithUai(cache);
 
   await asyncForEach(allCfa, async (cfa) => {
     await sleep(SLEEP_TIME_BETWEEN_REFERENTIEL_API_REQUESTS);
     try {
-      const { pagination, organismes } = await fetchOrganismesWithUai(cfa.uai);
+      const { pagination, organismes } = await getOrganismesWithUaiCached(cfa.uai);
       // skip if no result or more than one found in Referentiel
       const foundResults = pagination.total > 0;
       const moreThanOneResult = pagination.total > 1;
