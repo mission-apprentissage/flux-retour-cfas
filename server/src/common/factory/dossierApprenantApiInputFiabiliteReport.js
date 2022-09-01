@@ -6,7 +6,17 @@ const getPercentage = (count, total) => {
   return (count * 100) / total;
 };
 
-const FIABILITE_FIELDS = ["NomApprenant", "PrenomApprenant", "IneApprenant", "DateDeNaissanceApprenant"];
+const FIABILITE_FIELDS = [
+  "NomApprenant",
+  "PrenomApprenant",
+  "IneApprenant",
+  "DateDeNaissanceApprenant",
+  "CodeCommuneInseeApprenant",
+  "TelephoneApprenant",
+  "EmailApprenant",
+  "UaiEtablissement",
+  "SiretEtablissement",
+];
 
 class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
   /**
@@ -20,6 +30,9 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
       analysisDate: Joi.date().iso().required(),
 
       totalDossiersApprenants: Joi.number().required(),
+      totalUaiEtablissementUniqueFoundInReferentiel: Joi.number().required(),
+      totalSiretEtablissementFoundInReferentiel: Joi.number().required(),
+      totalUniqueApprenant: Joi.number().required(),
       ...FIABILITE_FIELDS.reduce((acc, fieldName) => {
         return {
           ...acc,
@@ -44,6 +57,15 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
           ),
         };
       }, {}),
+      ratioUaiUniqueFoundInReferentiel: getPercentage(
+        props.totalUaiEtablissementUniqueFoundInReferentiel,
+        props.totalDossiersApprenants
+      ),
+      ratioSiretEtablissementFoundInReferentiel: getPercentage(
+        props.totalSiretEtablissementFoundInReferentiel,
+        props.totalDossiersApprenants
+      ),
+      ratioUniqueApprenant: getPercentage(props.totalUniqueApprenant, props.totalDossiersApprenants),
       created_at: new Date(),
     });
   }

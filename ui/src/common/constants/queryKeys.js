@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   GET_USER: "user-by-id",
   TOTAL_ORGANISMES: "total-organismes",
   FORMATION: "formation",
+  EFFECTIFS_NATIONAL: "effectifs-national",
   EFFECTIF_PAR: {
     CFA: "effectifs-par-cfa",
     ANNEE_FORMATION: "effectifs-par-annee-formation",

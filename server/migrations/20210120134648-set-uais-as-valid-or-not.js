@@ -7,7 +7,7 @@ module.exports = {
     while (await cursor.hasNext()) {
       const document = await cursor.next();
 
-      const isUaiValid = validateUai(document.uai_etablissement);
+      const isUaiValid = !validateUai(document.uai_etablissement).error;
       await collection.findOneAndUpdate({ _id: document._id }, { $set: { uai_etablissement_valid: isUaiValid } });
     }
   },

@@ -1,10 +1,12 @@
-import { Box, Divider, Flex, Heading, HStack, Text } from "@chakra-ui/react";
+import { Box, Divider, Flex, Heading, HStack, Skeleton, Text } from "@chakra-ui/react";
+import { startOfHour } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../common/components";
 import { ERPS } from "../../../common/constants/erps";
-import { indicateursNational } from "../../../common/constants/indicateursNational";
+import useFetchEffectifsNational from "../../../common/hooks/useFetchEffectifsNational";
+import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
 import { Checkbox } from "../../../theme/components/icons";
 
 const Count = ({ count, label }) => {
@@ -24,22 +26,36 @@ Count.propTypes = {
 };
 
 const ApercuDesDonneesSection = () => {
+  const date = startOfHour(new Date());
+  const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
+
   return (
     <Section background="galt" paddingY="4w">
       <Box>
         <Heading as="h2">Aperçu des données</Heading>
         <Text fontStyle="italic" color="grey.800">
-          Au national le {indicateursNational.dateCalcul}. <br />
+          Au national le {formatDateDayMonthYear(date)}. <br />
           Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
           En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
         </Text>
-        <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
-          <Count count={indicateursNational.nbOrganismeFormation.count} label="Organismes de formation" />
-          <Count count={indicateursNational.nbApprentis.count} label="Apprentis" />
-          <Count count={indicateursNational.nbInscritsSansContrats.count} label="Jeunes sans contrat" />
-          <Count count={indicateursNational.nbRupturants.count} label="Rupturants" />
-          <Count count={indicateursNational.nbAbandons.count} label="Abandons" />
-        </HStack>
+
+        {isEffectifsNationalLoading && (
+          <Skeleton marginTop="3w" width="100%" height="4rem" startColor="grey.300" endColor="galt" />
+        )}
+        {effectifsNational && (
+          <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
+            <Count count={effectifsNational.totalOrganismes} label="Organismes de formation" />
+            <Count count={effectifsNational.apprentis} label="Apprentis" />
+            <Count count={effectifsNational.inscritsSansContrat} label="Jeunes sans contrat" />
+            <Count count={effectifsNational.rupturants} label="Rupturants" />
+            <Count count={effectifsNational.abandons} label="Abandons" />
+          </HStack>
+        )}
+        {error && (
+          <Text color="error" marginTop="3w">
+            Impossible de charger les effectifs au national
+          </Text>
+        )}
 
         <Divider marginY="3w" />
 

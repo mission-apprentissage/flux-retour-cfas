@@ -6,40 +6,19 @@ import IndicateursAndRepartitionEffectifsDepartement from "./IndicateursAndRepar
 import IndicateursAndRepartitionEffectifsNational from "./IndicateursAndRepartitionEffectifsNational";
 import IndicateursAndRepartitionEffectifsRegion from "./IndicateursAndRepartitionEffectifsRegion";
 
-const IndicateursAndRepartitionEffectifsTerritoire = ({ filters, effectifs, loading, showOrganismesCount = true }) => {
+const IndicateursAndRepartitionEffectifsTerritoire = ({ filters, effectifs, loading }) => {
   if (filters.departement) {
-    return (
-      <IndicateursAndRepartitionEffectifsDepartement
-        filters={filters}
-        effectifs={effectifs}
-        loading={loading}
-        showOrganismesCount={showOrganismesCount}
-      />
-    );
+    return <IndicateursAndRepartitionEffectifsDepartement filters={filters} effectifs={effectifs} loading={loading} />;
   }
   if (filters.region) {
-    return (
-      <IndicateursAndRepartitionEffectifsRegion
-        filters={filters}
-        effectifs={effectifs}
-        loading={loading}
-        showOrganismesCount={showOrganismesCount}
-      />
-    );
+    return <IndicateursAndRepartitionEffectifsRegion filters={filters} effectifs={effectifs} loading={loading} />;
   }
-  return (
-    <IndicateursAndRepartitionEffectifsNational
-      effectifs={effectifs}
-      loading={loading}
-      showOrganismesCount={showOrganismesCount}
-    />
-  );
+  return <IndicateursAndRepartitionEffectifsNational effectifs={effectifs} loading={loading} />;
 };
 
 IndicateursAndRepartitionEffectifsTerritoire.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({
       count: PropTypes.number.isRequired,

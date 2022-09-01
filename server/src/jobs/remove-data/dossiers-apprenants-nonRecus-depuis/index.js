@@ -66,11 +66,11 @@ const handleSiretAndUaiArgs = (args) => {
     throw new Error("Aucun --uai ou --siret n'est fourni");
   }
 
-  if (uai && !validateUai(uai)) {
+  if (uai && validateUai(uai).error) {
     throw new Error("Invalid --uai format passed");
   }
 
-  if (siret && !validateSiret(siret)) {
+  if (siret && validateSiret(siret).error) {
     throw new Error("Invalid --siret format passed");
   }
 

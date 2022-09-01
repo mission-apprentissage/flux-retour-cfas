@@ -1,48 +1,27 @@
-import { Skeleton } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 import React from "react";
-import { useQuery } from "react-query";
 
-import { fetchTotalOrganismes } from "../../../common/api/tableauDeBord";
 import { EffectifCard } from "../../../common/components";
-import { QUERY_KEYS } from "../../../common/constants/queryKeys";
-import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
-import { pick } from "../../../common/utils/pick";
-import { useFiltersContext } from "./FiltersContext";
 
-const OrganismesCountCard = () => {
-  const { state: filters } = useFiltersContext();
-  const requestFilters = pick(mapFiltersToApiFormat(filters), [
-    "date",
-    "etablissement_num_region",
-    "etablissement_num_departement",
-    "etablissement_reseaux",
-    "formation_cfd",
-  ]);
-  const { data, isLoading } = useQuery([QUERY_KEYS.TOTAL_ORGANISMES, requestFilters], () =>
-    fetchTotalOrganismes(requestFilters)
+const OrganismesCountCard = ({ count }) => {
+  return (
+    <EffectifCard
+      count={count}
+      label="organismes de formation"
+      tooltipLabel={
+        <div>
+          Nombre d’organismes de formation qui transmettent leurs données au Tableau de bord de l’apprentissage. Un
+          organisme est identifié par une UAI utilisant 1 ou plusieurs numéro(s) SIRET.
+        </div>
+      }
+      iconClassName="ri-home-6-fill"
+      accentColor="#417DC4"
+    />
   );
+};
 
-  if (isLoading) {
-    return <Skeleton width="16rem" height="136px" startColor="grey.300" endColor="galt" />;
-  }
-  if (data) {
-    return (
-      <EffectifCard
-        count={data.nbOrganismes}
-        label="organismes de formation"
-        tooltipLabel={
-          <div>
-            Nombre d’organismes de formation qui transmettent leurs données au Tableau de bord de l’apprentissage. Un
-            organisme est identifié par une UAI utilisant 1 ou plusieurs numéro(s) SIRET.
-          </div>
-        }
-        iconClassName="ri-home-6-fill"
-        accentColor="#417DC4"
-      />
-    );
-  }
-
-  return null;
+OrganismesCountCard.propTypes = {
+  count: PropTypes.number.isRequired,
 };
 
 export default OrganismesCountCard;

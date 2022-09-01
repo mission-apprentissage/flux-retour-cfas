@@ -5,7 +5,7 @@ const { addMonths } = require("date-fns");
 
 describe("Factory Formation", () => {
   describe("create formation", () => {
-    it("Vérifie la création d'une formation avec tous les champs", async () => {
+    it("Vérifie la création d'une formation avec tous les champs", () => {
       const props = {
         cfd: "50033610",
         cfd_start_date: new Date(),
@@ -34,7 +34,7 @@ describe("Factory Formation", () => {
       assert.equal(createdCfaEntity.updated_at, null);
     });
 
-    it("Vérifie la création d'une formation avec tous les champs obligatoires", async () => {
+    it("Vérifie la création d'une formation avec tous les champs obligatoires", () => {
       const props = {
         cfd: "50033610",
       };
@@ -47,7 +47,7 @@ describe("Factory Formation", () => {
       assert.equal(createdCfaEntity.updated_at, null);
     });
 
-    it("Vérifie la non création d'une formation sans cfd", async () => {
+    it("Vérifie la non création d'une formation sans cfd", () => {
       const props = {
         cfd_start_date: new Date(),
         cfd_end_date: addMonths(new Date(), 6),
@@ -61,7 +61,7 @@ describe("Factory Formation", () => {
       assert.equal(Formation.create(props), null);
     });
 
-    it("Vérifie la non création d'une formation avec cfd invalide", async () => {
+    it("Vérifie la non création d'une formation avec cfd invalide", () => {
       const props = {
         cfd: "AZ",
         cfd_start_date: new Date(),

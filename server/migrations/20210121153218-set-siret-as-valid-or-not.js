@@ -7,7 +7,7 @@ module.exports = {
     while (await cursor.hasNext()) {
       const document = await cursor.next();
 
-      const isSiretValid = validateSiret(document.siret_etablissement);
+      const isSiretValid = !validateSiret(document.siret_etablissement).error;
       await collection.findOneAndUpdate({ _id: document._id }, { $set: { siret_etablissement_valid: isSiretValid } });
     }
   },

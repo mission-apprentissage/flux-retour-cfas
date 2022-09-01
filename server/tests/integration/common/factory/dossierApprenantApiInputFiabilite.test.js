@@ -11,7 +11,7 @@ describe("Factory DossierApprenantApiInputFiabilite", () => {
     MockDate.reset();
   });
   describe("create", () => {
-    it("Vérifie la création d'un DossierApprenantApiInputFiabilite", async () => {
+    it("Vérifie la création d'un DossierApprenantApiInputFiabilite", () => {
       const analysisDate = new Date();
       const fakeNow = new Date();
       MockDate.set(fakeNow);
@@ -32,6 +32,19 @@ describe("Factory DossierApprenantApiInputFiabilite", () => {
         ineApprenantFormatValide: false,
         dateDeNaissanceApprenantPresent: true,
         dateDeNaissanceApprenantFormatValide: false,
+        codeCommuneInseeApprenantPresent: true,
+        codeCommuneInseeApprenantFormatValide: true,
+        telephoneApprenantPresent: true,
+        telephoneApprenantFormatValide: true,
+        emailApprenantPresent: true,
+        emailApprenantFormatValide: false,
+        uaiEtablissementPresent: true,
+        uaiEtablissementFormatValide: false,
+        siretEtablissementPresent: false,
+        siretEtablissementFormatValide: true,
+        uaiEtablissementUniqueFoundInReferentiel: true,
+        siretEtablissementFoundInReferentiel: false,
+        uniqueApprenant: true,
       };
 
       const entity = DossierApprenantApiInputFiabilite.create(props);

@@ -3,7 +3,7 @@ const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { CfaModel, ContactCfaModel } = require("../../common/model");
-const { getOrganismesContactsFromSirets } = require("../../common/apis/apiReferentielMna");
+const { fetchOrganismesContactsFromSirets } = require("../../common/apis/apiReferentielMna");
 const { validateSiret } = require("../../common/domain/siret");
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -28,11 +28,11 @@ const seedContactsCfas = async (contactsCfas) => {
     .lean();
 
   // Filter on valid siret only
-  const validSirets = allDistinctSiretsFromCfa.filter((item) => validateSiret(item) === true);
+  const validSirets = allDistinctSiretsFromCfa.filter((item) => !validateSiret(item).error);
   const siretJoinedList = validSirets.join(",");
 
   // Call referentiel api
-  const { organismes } = await getOrganismesContactsFromSirets(siretJoinedList, validSirets.length);
+  const { organismes } = await fetchOrganismesContactsFromSirets(siretJoinedList, validSirets.length);
 
   loadingBar.start(organismes.length, 0);
 

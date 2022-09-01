@@ -10,6 +10,7 @@ import RepartitionEffectifsParFormation from "../../../../../../common/component
 import useAuth from "../../../../../../common/hooks/useAuth";
 import useFetchEffectifsParNiveauFormation from "../../../../../../common/hooks/useFetchEffectifsParNiveauFormation";
 import { mapFiltersToApiFormat } from "../../../../../../common/utils/mapFiltersToApiFormat";
+import DateWithTooltipSelector from "../../../DateWithTooltipSelector";
 import { filtersPropTypes } from "../../../FiltersContext";
 import IndicateursGridStack from "../../../IndicateursGridStack";
 
@@ -17,11 +18,11 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
   filters,
   effectifs,
   loading,
-  showOrganismesCount = true,
   hasMultipleSirets = false,
   namedDataDownloadMode = false,
 }) => {
   const { data, loading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
+
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
 
   const [auth] = useAuth();
@@ -47,7 +48,15 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
         <TabPanels>
           <TabPanel paddingTop="4w">
             <Stack spacing="4w">
-              <IndicateursGridStack effectifs={effectifs} loading={loading} showOrganismesCount={showOrganismesCount} />
+              <Stack>
+                <DateWithTooltipSelector />
+                <IndicateursGridStack
+                  effectifs={effectifs}
+                  loading={loading}
+                  showOrganismesCount={false}
+                  effectifsDate={filters.date}
+                />
+              </Stack>
               <DownloadBlock
                 title="Télécharger les données de l’organisme sélectionné"
                 description={`Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste ${
@@ -70,7 +79,6 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
 IndicateursAndRepartionCfaNiveauAnneesSection.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  showOrganismesCount: PropTypes.bool,
   hasMultipleSirets: PropTypes.bool,
   namedDataDownloadMode: PropTypes.bool,
   effectifs: PropTypes.shape({

@@ -56,7 +56,6 @@ const IndicateursVueFormationPage = () => {
             filters={filtersContext.state}
             effectifs={effectifs}
             loading={loading}
-            showOrganismesCount={true}
           />
         </>
       )}

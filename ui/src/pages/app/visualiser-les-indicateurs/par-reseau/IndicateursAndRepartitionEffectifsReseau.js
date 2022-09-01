@@ -10,12 +10,13 @@ import RepartitionEffectifsParCfa from "../../../../common/components/tables/Rep
 import RepartitionEffectifsParFormation from "../../../../common/components/tables/RepartitionEffectifsParFormation";
 import useFetchEffectifsParCfa from "../../../../common/hooks/useFetchEffectifsParCfa";
 import useFetchEffectifsParNiveauFormation from "../../../../common/hooks/useFetchEffectifsParNiveauFormation";
+import useFetchOrganismesCount from "../../../../common/hooks/useFetchOrganismesCount";
 import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
 import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
-const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading, showOrganismesCount = true }) => {
+const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading }) => {
   const {
     data: effectifsParCfa,
     loading: isEffectifsParCfaLoading,
@@ -28,6 +29,8 @@ const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading,
     error: effectifsParNiveauFormationError,
   } = useFetchEffectifsParNiveauFormation(filters);
 
+  const { data: organismesCount } = useFetchOrganismesCount(filters);
+
   const exportFilename = `tdb-données-réseau-${filters.reseau?.nom}-${new Date().toLocaleDateString()}.csv`;
 
   return (
@@ -35,7 +38,16 @@ const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading,
       <RepartitionEffectifsTabs>
         <TabPanel paddingTop="4w">
           <Stack spacing="4w">
-            <IndicateursGridStack effectifs={effectifs} loading={loading} showOrganismesCount={showOrganismesCount} />
+            <Stack>
+              <DateWithTooltipSelector />
+              <IndicateursGridStack
+                effectifs={effectifs}
+                loading={loading}
+                organismesCount={organismesCount}
+                showOrganismesCount
+                effectifsDate={filters.date}
+              />
+            </Stack>
             <DownloadBlock
               title="Télécharger les données du réseau sélectionné"
               description="Le fichier est généré à date du jour, en fonction du réseau sélectionné et comprend la liste anonymisée des apprenants par organisme et formation."
@@ -68,7 +80,6 @@ const IndicateursAndRepartitionEffectifsReseau = ({ filters, effectifs, loading,
 IndicateursAndRepartitionEffectifsReseau.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  showOrganismesCount: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.shape({
       count: PropTypes.number.isRequired,
