@@ -60,7 +60,7 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
                   showOrganismesCount={showOrganismesCount}
                   effectifsDate={filters.date}
                 />
-              </Stack>{" "}
+              </Stack>
               <DownloadBlock
                 title="Télécharger les données de l’organisme sélectionné"
                 description={`Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste ${
