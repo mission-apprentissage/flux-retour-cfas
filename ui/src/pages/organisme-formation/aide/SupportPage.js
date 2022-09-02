@@ -13,11 +13,7 @@ const SupportPage = () => {
     <Page>
       <Section withShadow paddingTop="3w">
         <BreadcrumbNav
-          links={[
-            NAVIGATION_PAGES.Accueil,
-            NAVIGATION_PAGES.OrganismeFormation,
-            NAVIGATION_PAGES.OrganismeFormation.aide,
-          ]}
+          links={[NAVIGATION_PAGES.Accueil, NAVIGATION_PAGES.OrganismeFormation, NAVIGATION_PAGES.QuestionsReponses]}
         />
       </Section>
       <Section paddingTop="5w" marginBottom="10w">

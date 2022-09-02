@@ -43,6 +43,7 @@ const Footer = () => (
         <Link href={NAVIGATION_PAGES.MentionsLegales.path}>{NAVIGATION_PAGES.MentionsLegales.title}</Link>
         <Link href={NAVIGATION_PAGES.DonneesPersonnelles.path}>Données personnelles</Link>
         <Link href="#">Gestion des cookies</Link>
+        <Link href={NAVIGATION_PAGES.QuestionsReponses.path}>Page d&apos;aide</Link>
       </HStack>
       <Text marginTop="3w">
         Sauf mention contraire, tous les contenus de ce site sont sous &nbsp;

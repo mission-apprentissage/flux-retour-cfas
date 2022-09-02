@@ -1,0 +1,379 @@
+import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
+  Heading,
+  Link,
+  ListItem,
+  Text,
+  UnorderedList,
+} from "@chakra-ui/react";
+import React from "react";
+import { NavLink } from "react-router-dom";
+
+import { BreadcrumbNav, Page, Section } from "../../../common/components";
+import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
+import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../../common/constants/product";
+
+const QuestCeQueLeTdbPage = () => {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <Page>
+      <Section paddingY="4w" withShadow>
+        <BreadcrumbNav
+          links={[
+            NAVIGATION_PAGES.Accueil,
+            NAVIGATION_PAGES.QuestionsReponses,
+            NAVIGATION_PAGES.QuestionsReponses.QuestCeQueLeTdb,
+          ]}
+        />
+      </Section>
+
+      <Section>
+        <Heading as="h1" fontSize="alpha">
+          Une question ? Quelques éléments de réponse.
+        </Heading>
+        <Box marginTop="2w">
+          <Link
+            as={NavLink}
+            to={NAVIGATION_PAGES.QuestionsReponses.path}
+            borderBottom="1px solid"
+            _hover={{ textDecoration: "none" }}
+          >
+            <Box as="i" className="ri-arrow-left-line" /> Revenir à la page principale
+          </Link>
+        </Box>
+      </Section>
+
+      <Section paddingY="4w">
+        <Heading as="h2" fontSize="28px">
+          Qu’est-ce que le {PRODUCT_NAME} ?
+        </Heading>
+        <Accordion allowMultiple fontSize="zeta" color="#3A3A3A" marginTop="2w">
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Qu’est-ce que l’outil le {PRODUCT_NAME} ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                Le {PRODUCT_NAME} est un produit créé par la Mission Interministérielle pour l’Apprentissage. <br />
+                Il permet de visualiser en temps réel les effectifs d’apprentis dans les centres de formation et les
+                organismes de formation, permettant aux pouvoirs publics de piloter au mieux la politique de
+                l’apprentissage nationalement et localement. <br />
+                Il est hébergé sur{" "}
+                <Link href="https://cfas.apprentissage.beta.gouv.fr" color="bluefrance" textDecoration="underLine">
+                  https://cfas.apprentissage.beta.gouv.fr <Box as="i" className="ri--link-line" />
+                </Link>
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Qu’est-ce que la mission interministérielle pour l’apprentissage ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Box>
+                La mission pour l’apprentissage a pour but de :
+                <UnorderedList marginLeft="3w">
+                  <ListItem>Rendre visibles les offres de formation et de contrats d’apprentissage ;</ListItem>
+                  <ListItem>Sécuriser et fluidifier les inscriptions en apprentissage ;</ListItem>
+                  <ListItem>Aider les jeunes à s’orienter ;</ListItem>
+                  <ListItem>Aider les jeunes et les entreprises à se comprendre ;</ListItem>
+                  <ListItem>Diminuer les ruptures des contrats d’apprentissage.</ListItem>
+                </UnorderedList>
+                <br />
+                Pour en savoir plus et connaître les autres produits et services de la mission,{" "}
+                <Link
+                  href="https://mission-apprentissage.gitbook.io/general/la-mission-apprentissage/les-services-attendus-de-la-mission-apprentissage"
+                  color="bluefrance"
+                  textDecoration="underLine"
+                >
+                  consulter le Gitbook de la mission. <Box as="i" className="ri--link-line" />
+                </Link>
+              </Box>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Pour quels usages et quels utilisateurs a été conçu le Tableau de bord ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                Le {PRODUCT_NAME} a été conçu pour répondre aux besoins du ministère du Travail et du ministère de
+                l’Éducation Nationale, de l’Enseignement supérieur et de la Transformation publique, en terme de
+                visibilité sur les chiffres clés de l’apprentissage. <br />
+                Pour en savoir plus sur les utilisateurs du le {PRODUCT_NAME} , <br />
+                consultez{" "}
+                <Link to="/organisme-formation/aide" as={NavLink} color="bluefrance" textDecoration="underLine">
+                  Qui peut consulter les données de votre organisme ? <Box as="i" className="ri--link-line" />
+                </Link>
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Quel est l’objectif du Tableau de bord ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                Le Tableau de bord doit permettre aux pouvoir publics locaux et nationaux de piloter la politique de
+                l’apprentissage au plus juste de la réalité du terrain. Pour cela il doit fournir des chiffres-clés de
+                l’apprentissage exhaustifs, fiables et en temps réel pour représenter au mieux la situation des
+                organismes de formation, ainsi que celle des apprenantes et apprenants.
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Que recouvrent les chiffres clefs de l’apprentissage ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                L’équipe du Tableau de bord récolte des données permettant d’identifier, de fiabiliser et de contrôler
+                les données concernant les apprenantes et apprenants, les formations, les contrats et les organismes de
+                formation.
+                <br />
+                <br />
+                Aucune donnée n’est modifiée ou retraitée. Elles permettent d’identifier le nombre d’ “apprentis” (avec
+                formation et contrat), de stagiaires de la formation professionnelle ou “inscrits sans contrat”
+                (inscrits en formation mais sans aucun contrat pour cette formation), de “rupturants” (inscrits en
+                formation avec un contrat rompu en attente d’un nouveau contrat), “abandons” (ayant quitté la formation
+                et l’employeur).
+                <br />
+                <br />
+                Pour en savoir plus, consulter la rubrique{" "}
+                <Link to="/comprendre-les-donnees" as={NavLink} color="bluefrance" textDecoration="underLine">
+                  Comprendre les données <Box as="i" className="ri--link-line" />
+                </Link>
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Comment se construit le Tableau de bord ? Puis-je y participer ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                Le Tableau de bord est un produit de la Mission Nationale pour le développement de l’Apprentissage, qui
+                est incubée au sein de beta.gouv.
+                <br />
+                <br />
+                L’équipe du Tableau de bord est organisée selon les principes de l’Agilité, elle fait évoluer le produit
+                Tableau de bord en fonction des besoins des utilisateurs par cycles courts, elle délivre de la valeur ou
+                de nouvelles fonctionnalités à chaque itération. Cela permet de rester aligné avec les besoins réels de
+                visibilité sur les chiffres clés de l’apprentissage, des usages des organismes de formation et la
+                capacité de développement.
+                <br />
+                <br />
+                Cette méthodologie permet aussi d’inclure tout au long du processus celles et ceux qui sont concernés,
+                que ce soit les organismes de formation ou les institutions (DREETS, DRAAF, Conseils Régionaux,
+                Académies, Carif Oref, etc). Aussi si vous avez des retours à faire concernant le {PRODUCT_NAME} ,
+                l’équipe est à votre écoute,
+                <br />
+                n’hésitez pas à nous contacter :{" "}
+                <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
+                  {CONTACT_ADDRESS}
+                </Link>
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+        <Heading marginTop="4w" as="h3" fontSize="beta" color="#000091">
+          Si vous êtes organisme de formation (CFA ou UFA) :
+        </Heading>
+        <Accordion allowMultiple fontSize="zeta" color="#3A3A3A" marginTop="2w">
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Pourquoi transmettre les données de votre organisme au Tableau de bord ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                Différentes institutions (Conseil Régional, DREETS, DRAAF, Carif Oref, Académie, DGEFP) consultent le{" "}
+                {PRODUCT_NAME} quotidiennement pour suivre l’évolution des effectifs. Ces données les éclairent
+                notamment pour attribuer des subventions, pour mettre en place des plans d’actions d’accompagnement des
+                jeunes sans contrat ou pour définir les politiques publiques d’aide à l’apprentissage.
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  La transmission des données au Tableau de bord est-elle obligatoire ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Box>
+                <Text>
+                  En tant qu’opérateur d’une mission de service public, c’est une obligation légale au sens du premier
+                  article de la loi pour une République numérique.
+                  <br />
+                  <br />
+                  Le {PRODUCT_NAME} va devenir l’outil de référence des pouvoirs publics. À ce titre, certaines régions
+                  utilisent déjà cet outil pour attribuer les aides aux centres de formation. Il est porté par la DGEFP
+                  comme le futur outil de pilotage des politiques publiques de l’apprentissage. En ne transmettant pas
+                  vos données, vous ne donnerez donc aucune visibilité sur votre réalité et sur vos besoins en tant
+                  qu’organisme de formation.
+                </Text>
+              </Box>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  La transmission des données au Tableau de bord remplace-t-elle l’enquête SIFA ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                À ce jour, transmettre vos données au Tableau de bord ne vous dispense pas de remplir l’enquête SIFA.
+                <br />
+                <br />
+                Une fois que les objectifs d’acquisition et de qualité des données seront atteints, de nouveaux usages
+                des données collectées pourront être étudiés.
+                <br />
+                Nous travaillons en collaboration avec l’ensemble des services publics, dont la DEPP qui administre
+                l’enquête SIFA.
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+        <Heading marginTop="4w" as="h3" fontSize="beta" color="#000091">
+          Si vous êtes une institution :
+        </Heading>
+        <Accordion allowMultiple fontSize="zeta" color="#3A3A3A" marginTop="2w">
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Quelles institutions ont accès aux données du Tableau de bord ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                Des institutions qui pilotent l’Apprentissage nationalement ou territorialement comme la DREETS, la
+                DRAAF, le Conseil Régional, l’Académie et le Carif Oref par exemple.
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Comment demander un accès ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Box>
+                <Text>
+                  Vous pouvez effectuer une demande via le{" "}
+                  <Link to="/login" as={NavLink} color="bluefrance" textDecoration="underLine">
+                    formulaire dédié <Box as="i" className="ri--link-line" />
+                  </Link>{" "}
+                  ou envoyer un courriel à{" "}
+                  <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
+                    {CONTACT_ADDRESS}
+                  </Link>
+                  <br />
+                  <br />
+                  Si vous êtes un organisme de formation,{" "}
+                  <Link to="/organisme-formation" as={NavLink} color="bluefrance" textDecoration="underLine">
+                    consultez la page dédiée <Box as="i" className="ri--link-line" />
+                  </Link>
+                </Text>
+              </Box>
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box flex="1" textAlign="left" fontSize="delta">
+                  Pourquoi consulter le {PRODUCT_NAME} ?
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel paddingBottom={4}>
+              <Text>
+                Le {PRODUCT_NAME} vous donne de la visibilité sur les chiffres clés des organismes de formation de
+                l’apprentissage de votre région en temps réel, sans avoir besoin de solliciter ces établissements.{" "}
+                <br />
+                Si vous avez des besoins spécifiques liés par exemple à la cellule apprentissage locale, vous pouvez
+                nous contacter par courriel :{" "}
+                <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
+                  {CONTACT_ADDRESS}
+                </Link>
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+
+        <Box marginTop="4w" marginBottom="4w">
+          <Link
+            fontSize="delta"
+            borderBottom="1px solid"
+            _hover={{ textDecoration: "none" }}
+            onClick={() => scrollToTop()}
+          >
+            <Box as="i" className="ri-arrow-up-fill" /> Haut de page
+          </Link>
+        </Box>
+      </Section>
+    </Page>
+  );
+};
+
+export default QuestCeQueLeTdbPage;

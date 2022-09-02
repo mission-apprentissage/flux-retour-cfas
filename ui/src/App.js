@@ -26,6 +26,12 @@ import {
   OrganismeFormationPage,
   SupportPage,
 } from "./pages/organisme-formation";
+import {
+  CommentFonctionneLeTdbPage,
+  ContacterLequipeDuTdbPage,
+  QuestCeQueLeTdbPage,
+  QuestionsReponsesPage,
+} from "./pages/questions-reponses/index";
 import StatistiquesPage from "./pages/statistiques/StatistiquesPage";
 
 const ScrollToTopOnRouteChange = () => {
@@ -66,6 +72,19 @@ const App = () => {
         <Route path={NAVIGATION_PAGES.ExplorerLesIndicateurs.path} exact component={ExplorerLesIndicateursPage} />
         <Route path={NAVIGATION_PAGES.JournalDesEvolutions.path} exact component={JournalDesEvolutionsPage} />
         <Route path={NAVIGATION_PAGES.MentionsLegales.path} exact component={MentionsLegalesPage} />
+
+        <Route path={NAVIGATION_PAGES.QuestionsReponses.path} exact component={QuestionsReponsesPage} />
+        <Route path={NAVIGATION_PAGES.QuestionsReponses.QuestCeQueLeTdb.path} exact component={QuestCeQueLeTdbPage} />
+        <Route
+          path={NAVIGATION_PAGES.QuestionsReponses.CommentFonctionneLeTdb.path}
+          exact
+          component={CommentFonctionneLeTdbPage}
+        />
+        <Route
+          path={NAVIGATION_PAGES.QuestionsReponses.ContacterLequipeDuTdb.path}
+          exact
+          component={ContacterLequipeDuTdbPage}
+        />
 
         {/* Secured By Token Pages */}
         <Route exact path={`${NAVIGATION_PAGES.Cfa.path}/:accessToken`} component={CfaPrivatePage} />
