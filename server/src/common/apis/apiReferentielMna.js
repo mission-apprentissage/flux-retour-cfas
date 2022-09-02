@@ -29,7 +29,7 @@ const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", ch
     return data;
   } catch (err) {
     const errorMessage = err.response?.data || err.code;
-    logger.error(`API REFERENTIEL getOrganismesContacts something went wrong:`, errorMessage);
+    logger.error(`API REFERENTIEL fetchOrganismesContactsFromSirets something went wrong:`, errorMessage);
     return null;
   }
 };
