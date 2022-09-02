@@ -6,6 +6,36 @@ export const JOURNAL_DES_EVOLUTIONS_TAGS = {
 
 export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
+    title: "Affichage de la nature d’un établissement",
+    explication:
+      "Les utilisateurs connectés en tant que pilotes du Tableau de bord (DREETS, Administration centrale, DRAAF, Académie, Carif Oref, Conseil Régional), accèdent à l’information de la nature de l’établissement consulté : “formateur”, “responsable”, “responsable et formateur”, “inconnue”. Ces natures sont collectées via l’API référentiel de l’apprentissage.",
+    correctif: "Oui",
+    date: "2022/09/01",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Affichage des chiffres publics",
+    explication:
+      "Les données clefs globales de l’apprentissage sont mise à jour tous les 1er du mois sur la page publique du Tableau de bord",
+    correctif: "Oui",
+    date: "2022/09/01",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Mise en ligne de la FAQ",
+    explication: "Nouvelle page d’aide, avec plus d’informations et avec une navigation plus fluide",
+    correctif: "Non",
+    date: "2022/09/02",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
+    title: "Mise en ligne des Mentions Légales",
+    explication: "Mentions Légales mise à jour et disponibles sur le Site du Tableau de bord de l’apprentissage",
+    correctif: "Non",
+    date: "2022/09/02",
+    type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,
+  },
+  {
     title: "Nouveau format du téléchargement",
     explication:
       "Possibilité pour les pilotes de télécharger un fichier complet et anonymisé par territoire, formation ou organisme de formation.",
