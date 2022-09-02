@@ -11,6 +11,9 @@ const DEFAULT_CACHE_EXPIRES_IN = 60 * 60 * 24 * 7;
 
 const CACHE_KEY_PREFIX = "referentiel_uai_siret";
 
+// Referentiel API has a 400 requests/min quota which makes on request every 150ms
+const SLEEP_TIME_BETWEEN_API_REQUESTS = 150;
+
 // Redis stores null and undefined as strings "null" and "undefined" so we need to come up with our own null-value
 // to siginify there is a cached result but it's null
 const CACHE_NULL_VALUE = "NO_DATA";
@@ -25,10 +28,8 @@ const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", ch
     });
     return data;
   } catch (err) {
-    logger.error(
-      `API REFERENTIEL getOrganismesContacts: something went wrong while requesting ${url}`,
-      err.response.data
-    );
+    const errorMessage = err.response?.data || err.code;
+    logger.error(`API REFERENTIEL getOrganismesContacts something went wrong:`, errorMessage);
     return null;
   }
 };
@@ -47,7 +48,7 @@ const getOrganismeWithSiret =
    * @param  {string} siret
    * @param  {Object} [options]
    * @param {boolean} options.skipCache
-   * @returns {Object|null}
+   * @returns {{data: Object|null, meta: {fromCache: boolean}}}
    */
   async (siret, options = {}) => {
     if (!siret) throw new Error("SIRET not provided");
@@ -57,7 +58,12 @@ const getOrganismeWithSiret =
 
     if (!skipCache) {
       const fromCache = await cache.get(cacheKey);
-      if (fromCache) return fromCache === CACHE_NULL_VALUE ? null : JSON.parse(fromCache);
+      if (fromCache) {
+        return {
+          data: fromCache === CACHE_NULL_VALUE ? null : JSON.parse(fromCache),
+          meta: { fromCache: true },
+        };
+      }
     }
 
     let result;
@@ -66,11 +72,12 @@ const getOrganismeWithSiret =
       result = await fetchOrganismeWithSiret(siret);
     } catch (err) {
       // 404 on this route means SIRET was not found
-      if (err.response.status === 404) {
+      if (err.response?.status === 404) {
         // if organisme is not found, we'll store a null value in the cache
         result = CACHE_NULL_VALUE;
       } else {
-        logger.error(`API REFERENTIEL getOrganismeWithSiret something went wrong`, err.response.data);
+        const errorMessage = err.response?.data || err.code;
+        logger.error(`API REFERENTIEL getOrganismeWithSiret something went wrong:`, errorMessage);
         throw new Error(`An error occured while fetching SIRET ${siret}`);
       }
     }
@@ -80,7 +87,7 @@ const getOrganismeWithSiret =
       await cache.set(cacheKey, valueToCache, { expiresIn: DEFAULT_CACHE_EXPIRES_IN });
     }
 
-    return result;
+    return { data: result, meta: { fromCache: false } };
   };
 
 const fetchOrganismesWithUai = async (uai) => {
@@ -97,7 +104,7 @@ const getOrganismesWithUai =
    * @param  {string} uai
    * @param  {Object} [options]
    * @param {boolean} options.skipCache
-   * @returns {{pagination:Object, organismes: [Object]}|null}
+   * @returns {{data: {pagination: Object, organismes: [Object]}|null, meta: {fromCache: boolean}}}
    */
   async (uai, options = {}) => {
     if (!uai) throw new Error("UAI not provided");
@@ -107,7 +114,7 @@ const getOrganismesWithUai =
 
     if (!skipCache) {
       const fromCache = await cache.get(cacheKey);
-      if (fromCache) return JSON.parse(fromCache);
+      if (fromCache) return { data: JSON.parse(fromCache), meta: { fromCache: true } };
     }
 
     try {
@@ -117,9 +124,10 @@ const getOrganismesWithUai =
         await cache.set(cacheKey, JSON.stringify(response), { expiresIn: DEFAULT_CACHE_EXPIRES_IN });
       }
 
-      return response;
+      return { data: response, meta: { fromCache: false } };
     } catch (err) {
-      logger.error(`API REFERENTIEL getOrganismesWithUai something went wrong`, err.response.data);
+      const errorMessage = err.response?.data || err.code;
+      logger.error(`API REFERENTIEL getOrganismesWithUai something went wrong:`, errorMessage);
       throw new Error(`An error occured while fetching UAI ${uai}`);
     }
   };
@@ -130,4 +138,5 @@ module.exports = {
   fetchOrganismeWithSiret,
   fetchOrganismesWithUai,
   fetchOrganismesContactsFromSirets,
+  SLEEP_TIME_BETWEEN_API_REQUESTS,
 };
