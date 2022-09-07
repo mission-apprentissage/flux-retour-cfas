@@ -1,37 +1,21 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Heading,
-  Link,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Heading, Link, Text } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 
+import { BaseAccordion } from "../../common/components/BaseAccordion/BaseAccordion";
 import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../common/constants/product";
 
-const MentionsLegalesAccordions = () => {
-  return (
-    <Box marginTop="2w">
-      <Accordion allowMultiple fontSize="zeta" color="#000000" marginTop="8w">
-        <AccordionItem on>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="#000091" fontSize="delta">
-                Mentions légales obligatoires
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel paddingBottom={4}>
+const MentionsLegalesAccordions = () => (
+  <BaseAccordion
+    AccordionItemsDetailList={[
+      {
+        title: "Mentions légales obligatoires",
+        content: (
+          <Box>
             <Box>
               <Heading as="h2" fontSize="22px">
                 Identification de l’éditeur
               </Heading>
-              <Text>
+              <Text marginTop="1v">
                 Ce site est édité par la Mission interministérielle de l’apprentissage <br />
                 Située à l’adresse chez beta.gouv <br />
                 Adresse : 20, avenue de Ségur - 75007 Paris.
@@ -41,7 +25,7 @@ const MentionsLegalesAccordions = () => {
               <Heading as="h2" fontSize="22px">
                 Directeur de la publication
               </Heading>
-              <Text>
+              <Text marginTop="1v">
                 Guillaume Houzel, Chargé de mission nationale interministérielle pour faciliter les entrées en
                 apprentissage
               </Text>
@@ -50,7 +34,7 @@ const MentionsLegalesAccordions = () => {
               <Heading as="h2" fontSize="22px">
                 Prestataire d’hébergement
               </Heading>
-              <Text>
+              <Text marginTop="1v">
                 L’hébergement est assuré par OVH, situé à l’adresse suivante : <br />
                 2 rue Kellermann
                 <br />
@@ -72,7 +56,7 @@ const MentionsLegalesAccordions = () => {
               <Heading as="h2" fontSize="22px">
                 Traitement des données à caractère personnel
               </Heading>
-              <Text>
+              <Text marginTop="1v">
                 Le traitement concourt à la coordination des acteurs de l’apprentissage par la mise en visibilité <br />
                 des évolutions des effectifs sur les formations en apprentissage. Ainsi, tous les acteurs de
                 <br />
@@ -92,71 +76,54 @@ const MentionsLegalesAccordions = () => {
                 La licéité du traitement est donc celle de l’article 6-1 e): la mission d’intérêt public.
                 <br />
                 <br />
-                <Link as={NavLink} to="/donnees-personnelles" color="bluefrance" textDecoration="underLine" external>
-                  Pour en savoir plus <Box as="i" className="ri-external-link-line" />
+                <Link as={NavLink} to="/donnees-personnelles" color="bluefrance" textDecoration="underLine">
+                  Pour en savoir plus <Box as="i" className="ri--link-line" />
                 </Link>
               </Text>
             </Box>
-          </AccordionPanel>
-        </AccordionItem>
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="#000091" fontSize="delta">
-                Logiciels utilisés
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel paddingBottom={4}>
+          </Box>
+        ),
+      },
+      {
+        title: "Logiciels utilisés",
+        content: (
+          <Box>
             <Heading as="h2" fontSize="22px">
               Messagerie du support
             </Heading>
-            <Text>
+            <Text marginTop="1v">
               La gestion du chat du support est réalisée avec le logiciel Crisp de la société Crisp
               <br />
               <br />
               Le suivi et l’analyse est effectué avec le logiciel SAAS Plausible, de la société Plausible Analytics.
             </Text>
-          </AccordionPanel>
-        </AccordionItem>
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="#000091" fontSize="delta">
-                Liens hypertextes (responsabilité)
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel paddingBottom={4}>
-            <Text>
-              Cfas.Apprentissage.beta.gouv.fr propose des liens vers d&apos;autres sites officiels (gouvernement,
-              <br />
-              institutions, organismes publics, etc.). Nous indiquons systématiquement vers quel site nous
-              <br />
-              vous proposons d&apos;aller. Cependant, ces pages web dont les adresses sont régulièrement
-              <br />
-              vérifiées ne font pas partie du portail : elles n&apos;engagent pas la responsabilité de la Mission
-              <br />
-              Nationale pour l’Apprentissage.
-            </Text>
-          </AccordionPanel>
-        </AccordionItem>
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="#000091" fontSize="delta">
-                Propriété intellectuelle
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel paddingBottom={4}>
+          </Box>
+        ),
+      },
+      {
+        title: "Liens hypertextes (responsabilité)",
+        content: (
+          <Text>
+            Cfas.Apprentissage.beta.gouv.fr propose des liens vers d&apos;autres sites officiels (gouvernement,
+            <br />
+            institutions, organismes publics, etc.). Nous indiquons systématiquement vers quel site nous
+            <br />
+            vous proposons d&apos;aller. Cependant, ces pages web dont les adresses sont régulièrement
+            <br />
+            vérifiées ne font pas partie du portail : elles n&apos;engagent pas la responsabilité de la Mission
+            <br />
+            Nationale pour l’Apprentissage.
+          </Text>
+        ),
+      },
+      {
+        title: "Propriété intellectuelle",
+        content: (
+          <Box>
             <Heading as="h2" fontSize="22px">
               Établir un lien
             </Heading>
-            <Text>
+            <Text marginTop="1v">
               Tout site public ou privé est autorisé à établir, sans autorisation préalable, un lien vers les
               <br />
               informations diffusées sur service-public.fr. En revanche, les pages du portail ne doivent pas être
@@ -168,21 +135,20 @@ const MentionsLegalesAccordions = () => {
             <Heading as="h2" fontSize="22px" marginTop="1w">
               Illustrations
             </Heading>
-            <Text>
+            <Text marginTop="1v">
               Pour en savoir plus, se référer au{" "}
               <Link
                 href="https://gouvfr.atlassian.net/wiki/spaces/DB/overview"
                 color="bluefrance"
                 textDecoration="underLine"
-                external
               >
-                Design System de l’État <Box as="i" className="ri-external-link-line" />
+                Design System de l’État <Box as="i" className="ri--link-line" />
               </Link>
             </Text>
             <Heading as="h2" fontSize="22px" marginTop="1w">
               Accessibilité
             </Heading>
-            <Text>
+            <Text marginTop="1v">
               L&apos;initiative internationale pour l&apos;accessibilité du Web (Web Accessiblility Initiative) définit
               <br />
               l&apos;accessibilité du Web comme suit :
@@ -218,29 +184,23 @@ const MentionsLegalesAccordions = () => {
                 href="https://www.numerique.gouv.fr/publications/rgaa-accessibilite"
                 color="bluefrance"
                 textDecoration="underLine"
-                external
               >
-                RGAA v3 <Box as="i" className="ri-external-link-line" />
+                RGAA v3 <Box as="i" className="ri--link-line" />
               </Link>
               .
               <br /> La déclaration de conformité sera publiée ultérieurement.
             </Text>
-          </AccordionPanel>
-        </AccordionItem>
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="#000091" fontSize="delta">
-                Plus d’infos ?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel paddingBottom={4}>
+          </Box>
+        ),
+      },
+      {
+        title: "Plus d’infos ?",
+        content: (
+          <Box>
             <Heading as="h2" fontSize="22px">
               Conception et gestion
             </Heading>
-            <Text>
+            <Text marginTop="1v">
               Ce site est développé en méthode agile, avec le principe d’amélioration continue.
               <br />
               De nouvelles fonctionnalités seront ajoutées prochainement
@@ -248,36 +208,33 @@ const MentionsLegalesAccordions = () => {
             <Heading as="h2" fontSize="22px" marginTop="1w">
               Sécurité
             </Heading>
-            <Text>
+            <Text marginTop="1v">
               Le site est protégé par un certificat électronique, matérialisé pour la grande majorité des navigateurs
               <br />
               par un cadenas. Cette protection participe à la confidentialité des échanges. En aucun cas les services
               <br />
               associés ne seront à l’origine d’envoi de courriels pour demander la saisie d’informations personnelles
             </Text>
-          </AccordionPanel>
-        </AccordionItem>
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left" color="#000091" fontSize="delta">
-                Contact
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel paddingBottom={4}>
+          </Box>
+        ),
+      },
+      {
+        title: "Contact",
+        content: (
+          <Box>
+            {" "}
             <Text>
               L’équipe du tableau de bord peut être contactée directement à :{" "}
               <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
                 {CONTACT_ADDRESS}
               </Link>
             </Text>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-    </Box>
-  );
-};
+          </Box>
+        ),
+      },
+    ]}
+    TextColor="bluefrance"
+  />
+);
 
 export default MentionsLegalesAccordions;
