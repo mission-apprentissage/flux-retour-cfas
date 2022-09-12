@@ -3,7 +3,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 import { BreadcrumbNav, Page, Section } from "../../../common/components";
-import { BaseAccordion } from "../../../common/components/BaseAccordion/BaseAccordion";
+import { BaseAccordionGroup } from "../../../common/components/BaseAccordionGroup/BaseAccordionGroup";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../../common/constants/product";
 
@@ -46,7 +46,7 @@ const CommentFonctionneLeTdbPage = () => {
         <Heading as="h2" fontSize="28px">
           Comment fonctionne le {PRODUCT_NAME} ?
         </Heading>
-        <BaseAccordion
+        <BaseAccordionGroup
           AccordionItemsDetailList={[
             {
               title: "Fonctionnement général du Tableau de bord de l’apprentissage",
@@ -208,7 +208,7 @@ const CommentFonctionneLeTdbPage = () => {
         <Heading marginTop="4w" as="h3" fontSize="beta" color="#000091">
           Si vous êtes organisme de formation (CFA ou UFA) :
         </Heading>
-        <BaseAccordion
+        <BaseAccordionGroup
           AccordionItemsDetailList={[
             {
               title: "Comment transmettre les données de mon organisme au Tableau de bord de l’apprentissage ?",
@@ -478,7 +478,7 @@ const CommentFonctionneLeTdbPage = () => {
         <Heading marginTop="4w" as="h3" fontSize="beta" color="#000091">
           Si vous êtes une institution :
         </Heading>
-        <BaseAccordion
+        <BaseAccordionGroup
           AccordionItemsDetailList={[
             {
               title: "Quelles sont les données affichées dans le Tableau de bord ?",

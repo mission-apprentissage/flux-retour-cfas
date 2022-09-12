@@ -3,7 +3,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 import { BreadcrumbNav, Page, Section } from "../../../common/components";
-import { BaseAccordion } from "../../../common/components/BaseAccordion/BaseAccordion";
+import { BaseAccordionGroup } from "../../../common/components/BaseAccordionGroup/BaseAccordionGroup";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { CONTACT_ADDRESS } from "../../../common/constants/product";
 
@@ -19,7 +19,6 @@ const ContacterLequipeDuTdbPage = () => {
           ]}
         />
       </Section>
-
       <Section>
         <Heading as="h1" fontSize="alpha">
           Une question ? Quelques éléments de réponse.
@@ -40,7 +39,7 @@ const ContacterLequipeDuTdbPage = () => {
         <Heading as="h2" fontSize="28px">
           Contacter l’équipe
         </Heading>
-        <BaseAccordion
+        <BaseAccordionGroup
           AccordionItemsDetailList={[
             {
               title:

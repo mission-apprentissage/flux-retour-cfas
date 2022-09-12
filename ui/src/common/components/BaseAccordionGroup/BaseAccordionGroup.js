@@ -11,7 +11,7 @@ import {
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-export const BaseAccordion = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" }) => {
+export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" }) => {
   const [indexArray, setIndexArray] = useState();
   const [isUnfold, setIsUnfold] = useState(false);
   const indexItemArray = AccordionItemsDetailList.map((item) => AccordionItemsDetailList.indexOf(item));
@@ -58,7 +58,7 @@ export const BaseAccordion = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" 
   );
 };
 
-BaseAccordion.propTypes = {
+BaseAccordionGroup.propTypes = {
   AccordionItemsDetailList: PropTypes.arrayOf(
     PropTypes.shape({
       title: PropTypes.string.isRequired,
