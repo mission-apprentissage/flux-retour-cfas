@@ -7,4 +7,7 @@ export * from "./Checkbox";
 export * from "./DataVisualisation";
 export * from "./TechnicalError";
 export * from "./Notification";
+export * from "./GraphsAndStatistics";
+export * from "./School";
+export * from "./CityHall";
 export * from "./NotFound";
