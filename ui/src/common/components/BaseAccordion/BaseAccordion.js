@@ -14,11 +14,7 @@ import { useState } from "react";
 export const BaseAccordion = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" }) => {
   const [indexArray, setIndexArray] = useState();
   const [isUnfold, setIsUnfold] = useState(false);
-  const indexItemArray = [];
-
-  AccordionItemsDetailList.forEach((item, index) => {
-    return indexItemArray.push(index);
-  });
+  const indexItemArray = AccordionItemsDetailList.map((item) => AccordionItemsDetailList.indexOf(item));
 
   const unfoldAll = () => {
     setIndexArray(indexItemArray);
