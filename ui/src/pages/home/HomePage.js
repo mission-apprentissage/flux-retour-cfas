@@ -20,7 +20,7 @@ const HomePage = () => {
 
   return (
     <Page>
-      <Section withShadow paddingY="4w" color="#000000" background="#F6F6F6">
+      <Section withShadow paddingY="4w" color="grey.800" background="#F6F6F6">
         <Box>
           <Flex>
             <Box flex="1" alignSelf="center">
@@ -28,9 +28,13 @@ const HomePage = () => {
                 Le {PRODUCT_NAME}
               </Heading>
               <Text fontSize="gamma" color="grey.800" marginTop="4w">
-                Le service public pour visualiser en <strong>temps réel</strong> les effectifs d’apprentis dans les
-                centres et organismes de formation. Il permet aux pouvoirs publics de <strong>piloter</strong> la
-                politique de l’apprentissage nationalement et dans les territoires.
+                Service public pour visualiser <strong>les effectifs d’apprentis en temps réel</strong> dans les centres
+                et organismes de formation. Il permet ainsi aux pouvoirs publics de{" "}
+                <strong>
+                  piloter <br />
+                  la politique de l’apprentissage
+                </strong>{" "}
+                nationalement et dans les territoires.
               </Text>
             </Box>
             <GraphsAndStatistics />
@@ -57,8 +61,8 @@ const HomePage = () => {
                 </Box>
               </Flex>
               <Text marginTop="2w">
-                Permettez le <strong>pilotage</strong> de la politique de l&apos;apprentissage en temps réel en donnant
-                de la <strong>visibilité</strong> sur vos effectifs d&apos;apprentis.
+                Permettez le pilotage de la politique de l&apos;apprentissage en temps réel en donnant de la visibilité
+                sur vos effectifs d&apos;apprentis.
               </Text>
               <Box marginTop="4w">
                 <Link color="bluefrance" borderBottom="1px solid">
@@ -67,14 +71,7 @@ const HomePage = () => {
                 </Link>
               </Box>
             </Box>
-            <Box
-              as={NavLink}
-              to={"/consulter-vos-donnees"}
-              border="1px solid"
-              borderColor="bluefrance"
-              padding="4w"
-              width="50%"
-            >
+            <Box as={NavLink} to={"/login"} border="1px solid" borderColor="bluefrance" padding="4w" width="50%">
               <Flex>
                 <CityHall />
                 <Box alignSelf="center" marginLeft="2w">
@@ -93,7 +90,7 @@ const HomePage = () => {
               <Box marginTop="4w">
                 <Link color="bluefrance" borderBottom="1px solid">
                   <Box as="i" className="ri-arrow-right-line" marginRight="3v" verticalAlign="middle" />
-                  Consulter les données
+                  Se connecter
                 </Link>
               </Box>
             </Box>
