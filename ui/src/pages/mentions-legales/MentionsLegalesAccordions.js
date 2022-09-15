@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { BaseAccordionGroup } from "../../common/components/BaseAccordionGroup/BaseAccordionGroup";
 import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../common/constants/product";
 
+// prettier-ignore
 const MentionsLegalesAccordions = () => (
   <BaseAccordionGroup
     AccordionItemsDetailList={[
@@ -56,20 +57,15 @@ const MentionsLegalesAccordions = () => (
                 Traitement des données à caractère personnel
               </Heading>
               <Text marginTop="1v">
-                Le traitement concourt à la coordination des acteurs de l’apprentissage par la mise en visibilité <br />
+                Le traitement concourt à la coordination des acteurs de l’apprentissage par la mise en visibilité
                 des évolutions des effectifs sur les formations en apprentissage. Ainsi, tous les acteurs de
-                <br />
                 l’apprentissage réunis au sein du Service Public de l’Emploi et/ou de l’Orientation, les participants
-                <br />
                 au CREFOP disposent de données actualisées qui leur permettent de construire des plans
-                <br /> d’action visant à développer le nombre de jeunes en formation en apprentissage.
-                <br /> Le traitement de collecte des données relatives aux candidats à l’apprentissage et aux apprentis
-                <br />
+                d’action visant à développer le nombre de jeunes en formation en apprentissage.<br /> 
+                Le traitement de collecte des données relatives aux candidats à l’apprentissage et aux apprentis
                 s’inscrit dans une mission d’intérêt public (article 6, alinéa e/ du Règlement général sur la
-                <br />
                 protection des données), décrite dans le cadre de la mission Houzel. Cette mission Houzel fait
-                <br /> l’objet de deux lettres en date du 10 septembre 2019 puis du 25 février 2020, mais aussi de deux
-                <br />
+                l’objet de deux lettres en date du 10 septembre 2019 puis du 25 février 2020, mais aussi de deux
                 décisions du gouvernement en date du 26 novembre 2019 et du 15 octobre 2020.
                 <br />
                 La licéité du traitement est donc celle de l’article 6-1 e): la mission d’intérêt public.
@@ -104,13 +100,9 @@ const MentionsLegalesAccordions = () => (
         content: (
           <Text>
             Cfas.Apprentissage.beta.gouv.fr propose des liens vers d&apos;autres sites officiels (gouvernement,
-            <br />
             institutions, organismes publics, etc.). Nous indiquons systématiquement vers quel site nous
-            <br />
             vous proposons d&apos;aller. Cependant, ces pages web dont les adresses sont régulièrement
-            <br />
             vérifiées ne font pas partie du portail : elles n&apos;engagent pas la responsabilité de la Mission
-            <br />
             Nationale pour l’Apprentissage.
           </Text>
         ),
@@ -124,11 +116,8 @@ const MentionsLegalesAccordions = () => (
             </Heading>
             <Text marginTop="1v">
               Tout site public ou privé est autorisé à établir, sans autorisation préalable, un lien vers les
-              <br />
               informations diffusées sur service-public.fr. En revanche, les pages du portail ne doivent pas être
-              <br />
               imbriquées à l&apos;intérieur des pages d&apos;un autre site et le {PRODUCT_NAME} ne
-              <br />
               peut être utilisé à des fins commerciales.
             </Text>
             <Heading as="h2" fontSize="22px" marginTop="1w">
@@ -149,39 +138,29 @@ const MentionsLegalesAccordions = () => (
             </Heading>
             <Text marginTop="1v">
               L&apos;initiative internationale pour l&apos;accessibilité du Web (Web Accessiblility Initiative) définit
-              <br />
               l&apos;accessibilité du Web comme suit :
               <br />
               <br />
               L&apos;accessibilité du Web signifie que les personnes en situation de handicap peuvent utiliser le Web.
               <br />
               Plus précisément, qu&apos;elles peuvent percevoir, comprendre, naviguer
-              <br />
               et interagir avec le Web, et qu&apos;elles peuvent contribuer sur le Web.
               <br />
               L&apos;accessibilité du Web bénéficie aussi à d&apos;autres, notamment les
-              <br />
               personnes âgées dont les capacités changent avec l&apos;âge.
               <br />
               L&apos;accessibilité du Web comprend tous les handicaps qui affectent l&apos;accès au Web, ce qui inclut
-              <br />
               les handicaps visuels, auditifs, physiques, de paroles, cognitives et neurologiques.
               <br />
               <br />
               L&apos;article 47 de la loi n° 2005-102 du 11 février 2005 pour l&apos;égalité des droits et des chances,
-              la participation et
-              <br />
-              la citoyenneté des personnes handicapées fait de l&apos;accessibilité une exigence pour tous les services
-              <br />
+              la participation et la citoyenneté des personnes handicapées fait de l&apos;accessibilité une exigence pour tous les services
               de communication publique en ligne de l&apos;État, les collectivités territoriales et les établissements
-              <br />
               publics qui en dépendent.
               <br />
               <br />
               Il stipule que les informations diffusées par ces services doivent être
-              <br />
               accessibles à tous. Le référentiel général d&apos;accessibilité pour les administrations (RGAA) rendra
-              <br />
               progressivement accessible l&apos;ensemble des informations fournies par ces services.
               <br />
               <br />
@@ -217,9 +196,7 @@ const MentionsLegalesAccordions = () => (
             </Heading>
             <Text marginTop="1v">
               Le site est protégé par un certificat électronique, matérialisé pour la grande majorité des navigateurs
-              <br />
               par un cadenas. Cette protection participe à la confidentialité des échanges. En aucun cas les services
-              <br />
               associés ne seront à l’origine d’envoi de courriels pour demander la saisie d’informations personnelles
             </Text>
           </Box>

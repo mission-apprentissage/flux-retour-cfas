@@ -4,6 +4,7 @@ import { BreadcrumbNav, Page, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import MentionsLegalesAccordions from "./MentionsLegalesAccordions";
 
+// prettier-ignore
 const MentionsLegales = () => {
   const dateUpdated = "28 juillet";
   return (
@@ -19,7 +20,7 @@ const MentionsLegales = () => {
           </Text>
           <Text marginTop="2w" color="#3A3A3A">
             Les mentions légales obligatoires concernant le Tableau de bord de l’apprentissage sont indiquées sur cette
-            page conformément à la loi <br />
+            page conformément à la loi
             pour la confiance dans l&apos;économie numérique (LCEN) de juin 2004.
           </Text>
         </Box>
