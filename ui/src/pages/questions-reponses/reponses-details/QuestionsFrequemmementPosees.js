@@ -83,7 +83,7 @@ const QuestionsFrequemmementPosees = () => (
         ),
       },
       {
-        title: "Pour quels usages et quels utilisateurs a été conçu le Tableau de bord ?",
+        title: "La transmission des données au Tableau de bord remplace-t-elle l'enquête SIFA ?",
         content: (
           <Box>
             <Text>

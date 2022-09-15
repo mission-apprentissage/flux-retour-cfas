@@ -42,7 +42,6 @@ const MentionsLegalesAccordions = () => (
                 <br />
                 Standard : 09.72.10.07 <br />
                 <br />
-                <br />
                 La conception et la réalisation du site sont effectuée par La Mission Interministérielle pour
                 l’Apprentissage, située à l’adresse suivante : <br />
                 Beta.gouv
@@ -156,36 +155,44 @@ const MentionsLegalesAccordions = () => (
               <br />
               L&apos;accessibilité du Web signifie que les personnes en situation de handicap peuvent utiliser le Web.
               <br />
-              Plus précisément, qu&apos;elles peuvent percevoir, comprendre, naviguer et interagir avec le Web, et
+              Plus précisément, qu&apos;elles peuvent percevoir, comprendre, naviguer
               <br />
-              qu&apos;elles peuvent contribuer sur le Web. L&apos;accessibilité du Web bénéficie aussi à
+              et interagir avec le Web, et qu&apos;elles peuvent contribuer sur le Web.
               <br />
-              d&apos;autres, notamment les personnes âgées dont les capacités changent avec l&apos;âge.
+              L&apos;accessibilité du Web bénéficie aussi à d&apos;autres, notamment les
+              <br />
+              personnes âgées dont les capacités changent avec l&apos;âge.
               <br />
               L&apos;accessibilité du Web comprend tous les handicaps qui affectent l&apos;accès au Web, ce qui inclut
               <br />
-              les handicaps visuels, auditifs, physiques, de paroles, cognitives et neurologiques. L&apos;article 47 de
+              les handicaps visuels, auditifs, physiques, de paroles, cognitives et neurologiques.
               <br />
-              la loi n° 2005-102 du 11 février 2005 pour l&apos;égalité des droits et des chances, la participation et
+              <br />
+              L&apos;article 47 de la loi n° 2005-102 du 11 février 2005 pour l&apos;égalité des droits et des chances,
+              la participation et
               <br />
               la citoyenneté des personnes handicapées fait de l&apos;accessibilité une exigence pour tous les services
               <br />
               de communication publique en ligne de l&apos;État, les collectivités territoriales et les établissements
               <br />
-              publics qui en dépendent. Il stipule que les informations diffusées par ces services doivent être
+              publics qui en dépendent.
+              <br />
+              <br />
+              Il stipule que les informations diffusées par ces services doivent être
               <br />
               accessibles à tous. Le référentiel général d&apos;accessibilité pour les administrations (RGAA) rendra
               <br />
-              progressivement accessible l&apos;ensemble des informations fournies par ces services. Le site du Tableau
+              progressivement accessible l&apos;ensemble des informations fournies par ces services.
               <br />
-              de bord est en cours d&apos;optimisation afin de le rendre conforme au
               <br />
+              Le site du Tableau de bord est en cours d&apos;optimisation afin de le rendre conforme au{" "}
               <Link
                 href="https://www.numerique.gouv.fr/publications/rgaa-accessibilite"
                 color="bluefrance"
                 textDecoration="underLine"
               >
-                RGAA v3 <Box as="i" className="ri--link-line" />
+                RGAA
+                <Box as="i" className="ri--link-line" />
               </Link>
               .
               <br /> La déclaration de conformité sera publiée ultérieurement.
