@@ -27,6 +27,26 @@ export const NAVIGATION_PAGES = {
     path: "/journal-des-evolutions",
     title: "Journal des évolutions",
   },
+  MentionsLegales: {
+    path: "/mentions-legales",
+    title: "Mentions légales",
+  },
+  QuestionsReponses: {
+    path: "/questions-reponses",
+    title: "Questions & réponses",
+    QuestCeQueLeTdb: {
+      path: "/questions-reponses/qu-est-ce-que-le-tableau-de-bord",
+      title: "Qu'est-ce-que le tableau de bord ?",
+    },
+    CommentFonctionneLeTdb: {
+      path: "/questions-reponses/comment-fonctionne-le-tableau-de-bord",
+      title: "Comment fonctionne le tableau de bord ?",
+    },
+    ContacterLequipeDuTdb: {
+      path: "/questions-reponses/contacter-l-equipe",
+      title: "Contacter l'équipe du tableau de bord",
+    },
+  },
   OrganismeFormation: {
     path: "/organisme-formation",
     title: "Vous êtes un organisme de formation",

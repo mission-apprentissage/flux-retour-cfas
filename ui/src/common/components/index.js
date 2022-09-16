@@ -8,6 +8,7 @@ export { default as FilterOption } from "./FilterOption/FilterOption";
 export { default as Tag } from "./Tag/Tag";
 export { default as LinkCard } from "./LinkCard/LinkCard";
 export { default as InputLegend } from "./InputLegend/InputLegend";
+export { default as Tuile } from "./Tuile/Tuile";
 
 export { default as EffectifCard } from "./EffectifCard/EffectifCard";
 export { default as CfasFilter } from "./CfasFilter/CfasFilter";

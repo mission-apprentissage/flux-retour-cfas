@@ -51,7 +51,7 @@ const NavLinks = () => {
         Comment consulter et vérifier les données que vous transmettez ?
       </NavItem>
       <br />
-      <NavItem to={NAVIGATION_PAGES.OrganismeFormation.aide.path}>
+      <NavItem to={NAVIGATION_PAGES.QuestionsReponses.path}>
         Une question ? Besoin d’aide ? Consulter la page d’aide
       </NavItem>
     </Flex>
