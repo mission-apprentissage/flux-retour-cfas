@@ -21,7 +21,7 @@ const CfaTransmissionFound = () => {
         <Text marginTop="4w" color="#000000" fontSize="epsilon">
           Utiliser votre URL unique disponible dans votre ERP pour consulter votre page
         </Text>
-        <Link variant="underline" to={NAVIGATION_PAGES.OrganismeFormation.aide.path} marginTop="2w" as={NavLink}>
+        <Link variant="underline" to={NAVIGATION_PAGES.QuestionsReponses.path} marginTop="2w" as={NavLink}>
           En savoir plus
           <Box as="i" className="ri-arrow-right-line" marginLeft="3v" />
         </Link>

@@ -1,3 +1,4 @@
+import { Accordion } from "./accordion";
 import { Badge } from "./badge";
 import { Breadcrumb } from "./breadcrumb";
 import { Button } from "./button";
@@ -13,6 +14,7 @@ export default {
   Button,
   Badge,
   Link,
+  Accordion,
   Input,
   Select,
   Textarea,

@@ -35,7 +35,7 @@ const OrganismeFormationPage = () => {
           <LinkCard variant="white" linkHref={NAVIGATION_PAGES.OrganismeFormation.consulter.path}>
             Comment consulter et vérifier les données que vous transmettez ?
           </LinkCard>
-          <LinkCard variant="white" linkHref={NAVIGATION_PAGES.OrganismeFormation.aide.path}>
+          <LinkCard variant="white" linkHref={NAVIGATION_PAGES.QuestionsReponses.path}>
             Une question ? Besoin d’aide ? <br />
             Consulter la page d’aide
           </LinkCard>
