@@ -4,6 +4,7 @@ export * from "./Error";
 export * from "./Padlock";
 export * from "./RightLine";
 export * from "./Checkbox";
+export * from "./CheckBoxWhite";
 export * from "./DataVisualisation";
 export * from "./TechnicalError";
 export * from "./Notification";
