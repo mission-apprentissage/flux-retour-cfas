@@ -11,6 +11,7 @@ export * from "./Notification";
 export * from "./GraphsAndStatistics";
 export * from "./School";
 export * from "./CityHall";
+export * from "./QuestcequeLeTableauDeBordSVG";
 export * from "./InProgress";
 export * from "./Search";
 export * from "./SystemSvg";

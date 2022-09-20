@@ -11,7 +11,7 @@ const FonctionnementTableauDeBordCard = ({ Logo, content, ...otherProps }) => (
 );
 
 FonctionnementTableauDeBordCard.propTypes = {
-  Logo: PropTypes.string,
-  content: PropTypes.string,
+  Logo: PropTypes.string.isRequired,
+  content: PropTypes.string.isRequired,
 };
 export default FonctionnementTableauDeBordCard;

@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import React from "react";
 import { Redirect } from "react-router";
 import { NavLink } from "react-router-dom";
@@ -7,7 +7,8 @@ import { hasUserRoles, roles } from "../../common/auth/roles";
 import { Page, Section } from "../../common/components";
 import { PRODUCT_NAME } from "../../common/constants/product";
 import useAuth from "../../common/hooks/useAuth";
-import { CityHall, GraphsAndStatistics, School } from "../../theme/components/icons";
+import { CityHall, GraphsAndStatistics, QuestcequeLeTableauDeBordSVG, School } from "../../theme/components/icons";
+import ApercuDonneesNational from "../explorer-les-indicateurs/ApercuDonneesNational";
 import QuestionsFrequemmementPosees from "../questions-reponses/reponses-details/QuestionsFrequemmementPosees.js";
 import AmeliorerLesPratiques from "./sections/ameliorer-les-pratiques/AmeliorerLesPratiques";
 import CommentFonctionneLeTableauDeBord from "./sections/comment-fonctionne-le-tableau-de-bord/CommentFonctionneLeTableauDeBord";
@@ -97,6 +98,47 @@ const HomePage = () => {
             </Box>
           </HStack>
         </Box>
+      </Section>
+      <Section marginTop="8w" color="#000000">
+        <Heading as="h1" fontSize="40px">
+          Qu’est-ce que le Tableau de bord ?
+        </Heading>
+        <Flex>
+          <Box paddingY="4w" fontSize="gamma">
+            <Text>Le Tableau de bord de l’apprentissage, c’est : </Text>
+            <UnorderedList paddingY="2w" marginLeft="4w">
+              <ListItem>
+                une <strong>visibilité</strong> sur le déroulement de l’apprentissage en France en temps réel
+              </ListItem>
+              <ListItem>
+                un <strong>pilotage</strong> de l’activité au niveau national et dans les territoires
+              </ListItem>
+              <ListItem>
+                une <strong>fine connaissance</strong> des répartitions par filière, type de formation, etc...
+              </ListItem>
+              <ListItem>
+                un <strong>outil</strong> en constante amélioration pour coller au plus près de la réalité
+              </ListItem>
+              <ListItem>
+                une <strong>collaboration</strong> avec des éditeurs d’ERP
+              </ListItem>
+              <ListItem>
+                un <strong>service</strong> dédié aux organismes de formation
+              </ListItem>
+            </UnorderedList>
+            <Text>
+              Le Tableau de Bord de l’Apprentissage est construit dans le{" "}
+              <strong>
+                respect de la vie <br />
+                privée des personnes et applique les standards de sécurité de l&apos;Etat.
+              </strong>
+            </Text>
+          </Box>
+          <Box flex="1" textAlign="center">
+            <QuestcequeLeTableauDeBordSVG />
+          </Box>
+        </Flex>
+        <ApercuDonneesNational />
       </Section>
       <CommentFonctionneLeTableauDeBord />
       <VosDonneesNourrissentLeTableauDeBord />

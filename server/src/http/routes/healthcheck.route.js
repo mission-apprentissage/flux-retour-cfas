@@ -26,6 +26,7 @@ module.exports = ({ db }) => {
         name: `Serveur MNA - ${config.appName}`,
         version: packageJson.version,
         env: config.env,
+        redisPort: config.redis.uri,
         healthcheck: {
           mongodb: mongodbStatus,
         },

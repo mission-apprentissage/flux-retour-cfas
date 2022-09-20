@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 
 export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A", isHomePage = false }) => {
   const [indexArray, setIndexArray] = useState();
@@ -56,6 +57,12 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
           </AccordionItem>
         ))}
       </Accordion>
+      {isHomePage && (
+        <Link as={NavLink} to="/questions-reponses" color="bluefrance" borderBottom="1px solid" width="21%">
+          <Box as="i" className="ri-arrow-right-line" marginRight="1w" />
+          Voir davantage de questions
+        </Link>
+      )}
     </Flex>
   );
 };
