@@ -11,7 +11,7 @@ const AmeliorerLesPratiquesCard = ({ Logo, content }) => (
 );
 
 AmeliorerLesPratiquesCard.propTypes = {
-  Logo: PropTypes.string,
-  content: PropTypes.string,
+  Logo: PropTypes.string.isRequired,
+  content: PropTypes.string.isRequired,
 };
 export default AmeliorerLesPratiquesCard;
