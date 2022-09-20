@@ -8,7 +8,7 @@ import { Checkbox, CheckBoxWhite } from "../../../theme/components/icons";
 
 const VosDonneesNourrissentLeTableauDeBord = () => {
   return (
-    <Section paddingY="4w" color="grey.800">
+    <Section paddingY="8w" color="grey.800">
       <Heading as="h2" fontSize="28px">
         Vos données nourrissent le Tableau de bord
       </Heading>

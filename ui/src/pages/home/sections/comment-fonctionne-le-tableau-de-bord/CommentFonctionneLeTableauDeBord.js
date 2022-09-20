@@ -16,11 +16,11 @@ import {
   SystemSvg,
   TechnicalError,
 } from "../../../../theme/components/icons";
-import CardFonctionnementTableauDeBord from "./CardFonctionnementTableauDeBord";
+import FonctionnementTableauDeBordCard from "./FonctionnementTableauDeBordCard";
 
 const CommentFonctionneLeTableauDeBord = () => {
   return (
-    <Section paddingY="4w" bg="grey.100">
+    <Section paddingY="8w" bg="grey.100">
       <Heading as="h1" fontSize="alpha">
         Le fonctionnement du Tableau de bord
       </Heading>
@@ -33,7 +33,7 @@ const CommentFonctionneLeTableauDeBord = () => {
           <TabPanel>
             <Box marginX="4w" fontSize="zeta">
               <HStack>
-                <CardFonctionnementTableauDeBord
+                <FonctionnementTableauDeBordCard
                   Logo={InProgress}
                   content={
                     <>
@@ -44,7 +44,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                   }
                 />
                 <RightArrow alignSelf="center" />
-                <CardFonctionnementTableauDeBord
+                <FonctionnementTableauDeBordCard
                   Logo={Search}
                   content={
                     <>
@@ -55,7 +55,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                 <Flex flexDirection="column">
                   <Flex flexDirection="row">
                     <RightSideUpArrow marginTop="8w" marginRight="1w" />
-                    <CardFonctionnementTableauDeBord
+                    <FonctionnementTableauDeBordCard
                       Logo={SystemSvg}
                       content={
                         <>
@@ -69,7 +69,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                   <Box marginTop="1v">
                     <Flex flexDirection="row">
                       <RightSideDownArrow marginTop="6w" marginRight="1w" />
-                      <CardFonctionnementTableauDeBord
+                      <FonctionnementTableauDeBordCard
                         width="40px"
                         height="40px"
                         Logo={DataVisualisation}
@@ -84,7 +84,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                     </Flex>
                   </Box>
                 </Flex>
-                <CardFonctionnementTableauDeBord
+                <FonctionnementTableauDeBordCard
                   width="40px"
                   height="40px"
                   Logo={TechnicalError}
@@ -101,7 +101,7 @@ const CommentFonctionneLeTableauDeBord = () => {
           <TabPanel>
             <Box marginX="4w" fontSize="zeta">
               <HStack spacing="2w">
-                <CardFonctionnementTableauDeBord
+                <FonctionnementTableauDeBordCard
                   Logo={Search}
                   content={
                     <>
@@ -110,7 +110,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                   }
                 />
                 <RightArrow alignSelf="center" />
-                <CardFonctionnementTableauDeBord
+                <FonctionnementTableauDeBordCard
                   Logo={Search}
                   content={
                     <>
@@ -124,7 +124,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                   }
                 />
                 <RightArrow alignSelf="center" />
-                <CardFonctionnementTableauDeBord
+                <FonctionnementTableauDeBordCard
                   Logo={SendMail}
                   content={
                     <>
@@ -138,7 +138,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                   }
                 />
                 <RightArrow alignSelf="center" />
-                <CardFonctionnementTableauDeBord
+                <FonctionnementTableauDeBordCard
                   Logo={FranceLocalization}
                   content={
                     <>
