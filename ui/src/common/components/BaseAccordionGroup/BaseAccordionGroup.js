@@ -7,11 +7,12 @@ import {
   Box,
   Flex,
   Link,
+  Text,
 } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" }) => {
+export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A", isHomePage = false }) => {
   const [indexArray, setIndexArray] = useState();
   const [isUnfold, setIsUnfold] = useState(false);
   const indexItemArray = AccordionItemsDetailList.map((item) => AccordionItemsDetailList.indexOf(item));
@@ -35,12 +36,13 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
       return setIndexArray(newIndexArray);
     } else return setIndexArray([...indexArray, indexNumber]);
   };
-
+  console.log(isHomePage);
   return (
     <Flex flexDirection="column" marginTop="2w">
       <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => (!isUnfold ? unfoldAll() : foldAll())}>
         {!isUnfold ? "Tout déplier" : "Tout replier"}
       </Link>
+      {isHomePage && <Text>Consultez les questions fréquemment posées :</Text>}
       <Accordion marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
         {AccordionItemsDetailList.map((item, index) => (
           <AccordionItem key={index} onClick={() => updateIndex(index)}>
@@ -66,4 +68,5 @@ BaseAccordionGroup.propTypes = {
     }).isRequired
   ).isRequired,
   TextColor: PropTypes.string,
+  isHomePage: PropTypes.bool,
 };

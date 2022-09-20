@@ -8,6 +8,7 @@ import { Page, Section } from "../../common/components";
 import { PRODUCT_NAME } from "../../common/constants/product";
 import useAuth from "../../common/hooks/useAuth";
 import { CityHall, GraphsAndStatistics, School } from "../../theme/components/icons";
+import QuestionsFrequemmementPosees from "../questions-reponses/reponses-details/QuestionsFrequemmementPosees.js";
 import AmeliorerLesPratiques from "./sections/ameliorer-les-pratiques/AmeliorerLesPratiques";
 import CommentFonctionneLeTableauDeBord from "./sections/comment-fonctionne-le-tableau-de-bord/CommentFonctionneLeTableauDeBord";
 import VosDonneesNourrissentLeTableauDeBord from "./sections/VosDonneesNourrissentLeTableauDeBord";
@@ -100,6 +101,10 @@ const HomePage = () => {
       <CommentFonctionneLeTableauDeBord />
       <VosDonneesNourrissentLeTableauDeBord />
       <AmeliorerLesPratiques />
+      <Section paddingY="8w" color="grey.800">
+        <Heading as="h1"> Une question ? </Heading>
+        <QuestionsFrequemmementPosees isHomePage={true} />
+      </Section>
     </Page>
   );
 };
