@@ -1,11 +1,13 @@
 import { Box, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 import { NavLink } from "react-router-dom";
 
 import { BaseAccordionGroup } from "../../../common/components/BaseAccordionGroup/BaseAccordionGroup";
 import { CONTACT_ADDRESS } from "../../../common/constants/product";
 
-const QuestionsFrequemmementPosees = () => (
+const QuestionsFrequemmementPosees = ({ isHomePage }) => (
   <BaseAccordionGroup
+    isHomePage={isHomePage}
     AccordionItemsDetailList={[
       {
         title: "Pourquoi transmettre les données de votre organisme au Tableau de bord ?",
@@ -101,4 +103,7 @@ const QuestionsFrequemmementPosees = () => (
   />
 );
 
+QuestionsFrequemmementPosees.propTypes = {
+  isHomePage: PropTypes.bool,
+};
 export default QuestionsFrequemmementPosees;
