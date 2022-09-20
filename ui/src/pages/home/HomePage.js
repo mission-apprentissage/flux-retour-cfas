@@ -8,9 +8,9 @@ import { Page, Section } from "../../common/components";
 import { PRODUCT_NAME } from "../../common/constants/product";
 import useAuth from "../../common/hooks/useAuth";
 import { CityHall, GraphsAndStatistics, School } from "../../theme/components/icons";
-import ApercuDesDonneesSection from "./sections/ApercuDesDonneesSection";
 import CommentFonctionneLeTableauDeBord from "./sections/comment-fonctionne-le-tableau-de-bord/CommentFonctionneLeTableauDeBord";
 import RgpdSection from "./sections/RgpdSection";
+import VosDonneesNourrissentLeTableauDeBord from "./sections/VosDonneesNourrissentLeTableauDeBord";
 
 const HomePage = () => {
   const [auth] = useAuth();
@@ -92,7 +92,7 @@ const HomePage = () => {
         </Box>
       </Section>
       <CommentFonctionneLeTableauDeBord />
-      <ApercuDesDonneesSection />
+      <VosDonneesNourrissentLeTableauDeBord />
       <RgpdSection marginTop="6w" />
     </Page>
   );
