@@ -8,10 +8,9 @@ import { Page, Section } from "../../common/components";
 import { PRODUCT_NAME } from "../../common/constants/product";
 import useAuth from "../../common/hooks/useAuth";
 import { CityHall, GraphsAndStatistics, School } from "../../theme/components/icons";
+import AmeliorerLesPratiques from "./sections/ameliorer-les-pratiques/AmeliorerLesPratiques";
 import CommentFonctionneLeTableauDeBord from "./sections/comment-fonctionne-le-tableau-de-bord/CommentFonctionneLeTableauDeBord";
-import RgpdSection from "./sections/RgpdSection";
 import VosDonneesNourrissentLeTableauDeBord from "./sections/VosDonneesNourrissentLeTableauDeBord";
-
 const HomePage = () => {
   const [auth] = useAuth();
 
@@ -41,7 +40,14 @@ const HomePage = () => {
             <GraphsAndStatistics />
           </Flex>
           <HStack marginTop="4w" spacing="3w" _hover={{ cursor: "pointer" }}>
-            <Box as={NavLink} to={"/organisme-formation"} border="1px solid" borderColor="bluefrance" padding="4w">
+            <Box
+              as={NavLink}
+              to={"/organisme-formation"}
+              border="1px solid"
+              borderColor="bluefrance"
+              padding="4w"
+              width="50%"
+            >
               <Flex>
                 <School />
                 <Box alignSelf="center" marginLeft="2w">
@@ -65,7 +71,7 @@ const HomePage = () => {
                 </Link>
               </Box>
             </Box>
-            <Box as={NavLink} to={"/login"} border="1px solid" borderColor="bluefrance" padding="4w">
+            <Box width="50%" as={NavLink} to={"/login"} border="1px solid" borderColor="bluefrance" padding="4w">
               <Flex>
                 <CityHall />
                 <Box alignSelf="center" marginLeft="2w">
@@ -93,7 +99,7 @@ const HomePage = () => {
       </Section>
       <CommentFonctionneLeTableauDeBord />
       <VosDonneesNourrissentLeTableauDeBord />
-      <RgpdSection marginTop="6w" />
+      <AmeliorerLesPratiques />
     </Page>
   );
 };
