@@ -258,7 +258,6 @@ describe(__filename, () => {
           nom_etablissement: "TEST CFA",
           annee_scolaire: "2020-2021",
           siret_etablissement: getRandomSiretEtablissement(),
-          siret_etablissement_valid: true,
           uai_etablissement: "0762232N",
           formation_cfd: formationCfd,
         })
@@ -288,7 +287,6 @@ describe(__filename, () => {
           nom_etablissement: "TEST CFA",
           annee_scolaire: "2022-2023",
           siret_etablissement: getRandomSiretEtablissement(),
-          siret_etablissement_valid: true,
           uai_etablissement: "0762232N",
           formation_cfd: formationCfd,
         })

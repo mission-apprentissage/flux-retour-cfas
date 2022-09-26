@@ -966,56 +966,6 @@ describe(__filename, () => {
       assert.notEqual(foundAfterSecondUpdate.periode_formation, createdStatut.periode_formation);
       assert.notEqual(foundAfterSecondUpdate.updated_at, foundAfterFirstUpdate.updated_at);
     });
-
-    it("Vérifie qu'une mise à jour de dossier avec un siret au mauvais format identifie bien le siret invalide", async () => {
-      const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
-
-      const goodSiret = "19251202800015";
-      const badSiret = "BADSIRET";
-
-      const createdStatut = await createDossierApprenant(
-        createRandomDossierApprenant({
-          siret_etablissement: goodSiret,
-        })
-      );
-      assert.equal(createdStatut.updated_at, null);
-      assert.equal(createdStatut.siret_etablissement, goodSiret);
-      assert.equal(createdStatut.siret_etablissement_valid, true);
-
-      // Update siret
-      await updateDossierApprenant(createdStatut._id, { siret_etablissement: badSiret });
-
-      // Check value in db
-      const foundAfterFirstUpdate = await DossierApprenantModel.findById(createdStatut._id);
-      assert.equal(foundAfterFirstUpdate.siret_etablissement, badSiret);
-      assert.equal(foundAfterFirstUpdate.siret_etablissement_valid, false);
-      assert.notEqual(foundAfterFirstUpdate.updated_at, null);
-    });
-
-    it("Vérifie qu'une mise à jour de dossier avec un siret vide identifie bien le siret invalide", async () => {
-      const { updateDossierApprenant, createDossierApprenant } = await dossiersApprenants();
-
-      const goodSiret = "19251202800015";
-      const emptySiret = "";
-
-      const createdStatut = await createDossierApprenant(
-        createRandomDossierApprenant({
-          siret_etablissement: goodSiret,
-        })
-      );
-      assert.equal(createdStatut.updated_at, null);
-      assert.equal(createdStatut.siret_etablissement, goodSiret);
-      assert.equal(createdStatut.siret_etablissement_valid, true);
-
-      // Update siret
-      await updateDossierApprenant(createdStatut._id, { siret_etablissement: emptySiret });
-
-      // Check value in db
-      const foundAfterFirstUpdate = await DossierApprenantModel.findById(createdStatut._id);
-      assert.equal(foundAfterFirstUpdate.siret_etablissement, emptySiret);
-      assert.equal(foundAfterFirstUpdate.siret_etablissement_valid, false);
-      assert.notEqual(foundAfterFirstUpdate.updated_at, null);
-    });
   });
 
   describe("createDossierApprenant", () => {
@@ -1049,46 +999,6 @@ describe(__filename, () => {
       assert.equal(createdStatutJson.historique_statut_apprenant[0].date_reception.getTime(), fakeNowDate.getTime());
 
       assert.equal(createdStatutJson.updated_at, null);
-    });
-
-    it("Vérifie qu'à la création d'un statut avec un siret invalide on set le champ siret_etablissement_valid", async () => {
-      const { createDossierApprenant } = await dossiersApprenants();
-
-      const statutWithInvalidSiret = { ...createRandomDossierApprenant(), siret_etablissement: "invalid-siret" };
-      const createdStatut = await createDossierApprenant(statutWithInvalidSiret);
-
-      assert.equal(createdStatut.siret_etablissement_valid, false);
-    });
-
-    it("Vérifie qu'à la création d'un statut avec un siret valid on set le champ siret_etablissement_valid", async () => {
-      const { createDossierApprenant } = await dossiersApprenants();
-
-      const validSiret = "12312312300099";
-      const statutWithValidSiret = { ...createRandomDossierApprenant(), siret_etablissement: validSiret };
-      const createdStatut = await createDossierApprenant(statutWithValidSiret);
-
-      assert.equal(createdStatut.siret_etablissement_valid, true);
-    });
-
-    it("Vérifie qu'à la création d'un statut avec un siret invalide on ne set pas le champ etablissement_reseaux", async () => {
-      const { createDossierApprenant } = await dossiersApprenants();
-      const invalidSiret = "invalid";
-
-      // Create sample cfa in referentiel
-      const referenceCfa = new CfaModel({
-        sirets: [invalidSiret],
-        reseaux: [RESEAUX_CFAS.ANASUP.nomReseau, RESEAUX_CFAS.BTP_CFA.nomReseau],
-      });
-      await referenceCfa.save();
-
-      // Create statut
-      const statutWithInvalidSiret = { ...createRandomDossierApprenant(), siret_etablissement: invalidSiret };
-      const createdStatut = await createDossierApprenant(statutWithInvalidSiret);
-
-      // Check uai & reseaux in created statut
-      const { siret_etablissement_valid, etablissement_reseaux } = createdStatut;
-      assert.equal(siret_etablissement_valid, false);
-      assert.equal(etablissement_reseaux.length, 0);
     });
 
     it("Vérifie qu'à la création d'un statut on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {

@@ -5,6 +5,7 @@ const { DossierApprenantModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { getFormations } = require("../../common/apis/apiCatalogueMna");
+const { validateSiret } = require("../../common/domain/siret");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -18,10 +19,14 @@ runScript(async () => {
   // Récupère tous les triplets UAI / SIRET / CFD existants pour les dossiersApprenants avec sirets valides
   const uaiSiretCfdTriplets = (
     await DossierApprenantModel.aggregate([
-      { $match: { siret_etablissement_valid: true } },
       { $group: { _id: { uai: "$uai_etablissement", siret: "$siret_etablissement", cfd: "$formation_cfd" } } },
     ])
-  ).map((item) => ({ uai: item._id.uai, siret: item._id.siret, cfd: item._id.cfd }));
+  )
+    .filter((item) => {
+      const isSiretValid = !validateSiret(item._id.siret).error;
+      return isSiretValid;
+    })
+    .map((item) => ({ uai: item._id.uai, siret: item._id.siret, cfd: item._id.cfd }));
 
   loadingBar.start(uaiSiretCfdTriplets.length, 0);
 
@@ -50,12 +55,11 @@ runScript(async () => {
     });
 
     if (infoCatalog?.length > 0) {
-      // Récupère tous les statuts ayant ce triplet UAI / SIRET / CFD et un siret valide
+      // Récupère tous les statuts ayant ce triplet UAI / SIRET / CFD
       const statutsForUaiSiretCfdTriplet = await DossierApprenantModel.find({
         uai_etablissement: currentUaiSiretCfd.uai,
         siret_etablissement: currentUaiSiretCfd.siret,
         formation_cfd: currentUaiSiretCfd.cfd,
-        siret_etablissement_valid: true,
       });
 
       await asyncForEach(statutsForUaiSiretCfdTriplet, async (currentStatutToUpdate) => {
