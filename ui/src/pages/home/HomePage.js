@@ -5,12 +5,13 @@ import { NavLink } from "react-router-dom";
 
 import { hasUserRoles, roles } from "../../common/auth/roles";
 import { Page, Section } from "../../common/components";
+import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../common/constants/product";
 import useAuth from "../../common/hooks/useAuth";
 import { CityHall, GraphsAndStatistics, QuestcequeLeTableauDeBordSVG, School } from "../../theme/components/icons";
-import ApercuDonneesNational from "../explorer-les-indicateurs/ApercuDonneesNational";
 import QuestionsFrequemmementPosees from "../questions-reponses/reponses-details/QuestionsFrequemmementPosees.js";
 import AmeliorerLesPratiques from "./sections/ameliorer-les-pratiques/AmeliorerLesPratiques";
+import ApercuDonneesNationalHomePage from "./sections/apercu-donnees-national-homePage/ApercuDonneesNationalHomePage";
 import CommentFonctionneLeTableauDeBord from "./sections/comment-fonctionne-le-tableau-de-bord/CommentFonctionneLeTableauDeBord";
 import VosDonneesNourrissentLeTableauDeBord from "./sections/VosDonneesNourrissentLeTableauDeBord";
 const HomePage = () => {
@@ -44,7 +45,7 @@ const HomePage = () => {
           <HStack marginTop="4w" spacing="3w" _hover={{ cursor: "pointer" }}>
             <Box
               as={NavLink}
-              to={"/organisme-formation"}
+              to={NAVIGATION_PAGES.OrganismeFormation.path}
               border="1px solid"
               borderColor="bluefrance"
               padding="4w"
@@ -99,7 +100,7 @@ const HomePage = () => {
           </HStack>
         </Box>
       </Section>
-      <Section marginTop="8w" color="#000000">
+      <Section paddingY="4w" color="#000000">
         <Heading as="h1" fontSize="40px">
           Qu’est-ce que le Tableau de bord ?
         </Heading>
@@ -138,13 +139,13 @@ const HomePage = () => {
             <QuestcequeLeTableauDeBordSVG />
           </Box>
         </Flex>
-        <ApercuDonneesNational />
+        <ApercuDonneesNationalHomePage />
       </Section>
       <CommentFonctionneLeTableauDeBord />
       <VosDonneesNourrissentLeTableauDeBord />
       <AmeliorerLesPratiques />
-      <Section paddingY="8w" color="grey.800">
-        <Heading as="h1"> Une question ? </Heading>
+      <Section paddingY="4w" color="grey.800">
+        <Heading as="h1">Des questions ?</Heading>
         <QuestionsFrequemmementPosees isHomePage={true} />
       </Section>
     </Page>

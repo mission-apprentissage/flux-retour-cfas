@@ -13,6 +13,8 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
+import { NAVIGATION_PAGES } from "../../constants/navigationPages";
+
 export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A", isHomePage = false }) => {
   const [indexArray, setIndexArray] = useState();
   const [isUnfold, setIsUnfold] = useState(false);
@@ -37,7 +39,7 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
       return setIndexArray(newIndexArray);
     } else return setIndexArray([...indexArray, indexNumber]);
   };
-  console.log(isHomePage);
+
   return (
     <Flex flexDirection="column" marginTop="2w">
       <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => (!isUnfold ? unfoldAll() : foldAll())}>
@@ -58,10 +60,12 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
         ))}
       </Accordion>
       {isHomePage && (
-        <Link as={NavLink} to="/questions-reponses" color="bluefrance" borderBottom="1px solid" width="21%">
-          <Box as="i" className="ri-arrow-right-line" marginRight="1w" />
-          Voir davantage de questions
-        </Link>
+        <Box marginTop="2w">
+          <Link as={NavLink} to={NAVIGATION_PAGES.QuestionsReponses.path} variant="underline">
+            <Box as="i" className="ri-arrow-right-line" marginRight="1w" />
+            Voir davantage de questions
+          </Link>
+        </Box>
       )}
     </Flex>
   );
