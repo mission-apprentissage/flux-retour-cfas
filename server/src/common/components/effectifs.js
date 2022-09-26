@@ -244,8 +244,8 @@ module.exports = () => {
           uai_etablissement: uai,
           siret_etablissement,
           nom_etablissement,
-          nature: cfa.nature,
-          natureValidityWarning: cfa.nature_validity_warning,
+          nature: cfa?.nature,
+          natureValidityWarning: cfa?.nature_validity_warning,
           effectifs: {
             apprentis: effectifs.apprentis || 0,
             inscritsSansContrat: effectifs.inscritsSansContrat || 0,
