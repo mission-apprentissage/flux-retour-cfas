@@ -15,7 +15,7 @@ import AmeliorerLesPratiquesCard from "./AmeliorerLesPratiquesCard";
 import AmeliorerLesPratiquesCitation from "./AmeliorerLesPratiquesCitation";
 
 const AmeliorerLesPratiques = () => (
-  <Section paddingY="8w" color="grey.800" background="galt">
+  <Section paddingY="4w" color="grey.800" background="galt">
     <Heading as="h1" fontSize="alpha">
       Améliorer les pratiques grâce aux données
     </Heading>
@@ -62,7 +62,7 @@ const AmeliorerLesPratiques = () => (
     </HStack>
     <Box border="1px solid" borderColor="bluefrance" marginTop="10w" width="75%" mx="auto" display="block">
       <Flex padding="4w" alignItems="center" flexDirection="column">
-        <Heading as="h2" fontSize="gamma">
+        <Heading as="h2" fontWeight="400" fontSize="20px">
           Vous souhaitez contribuer à l’évolution du {PRODUCT_NAME} ?
         </Heading>
         <Text marginTop="2w">

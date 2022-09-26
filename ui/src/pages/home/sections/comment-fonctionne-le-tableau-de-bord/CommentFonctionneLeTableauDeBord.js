@@ -20,7 +20,7 @@ import FonctionnementTableauDeBordCard from "./FonctionnementTableauDeBordCard";
 
 const CommentFonctionneLeTableauDeBord = () => {
   return (
-    <Section paddingY="8w" bg="grey.100">
+    <Section paddingY="4w" bg="grey.100">
       <Heading as="h1" fontSize="alpha">
         Le fonctionnement du Tableau de bord
       </Heading>

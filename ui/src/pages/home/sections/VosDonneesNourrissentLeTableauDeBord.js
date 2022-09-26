@@ -4,11 +4,12 @@ import { NavLink } from "react-router-dom";
 
 import { Section } from "../../../common/components";
 import { ERPS } from "../../../common/constants/erps";
+import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { Checkbox, CheckBoxWhite } from "../../../theme/components/icons";
 
 const VosDonneesNourrissentLeTableauDeBord = () => {
   return (
-    <Section paddingY="8w" color="grey.800">
+    <Section paddingY="4w" color="grey.800">
       <Heading as="h2" fontSize="28px">
         Vos données nourrissent le Tableau de bord
       </Heading>
@@ -68,14 +69,26 @@ const VosDonneesNourrissentLeTableauDeBord = () => {
       <HStack marginTop="2w" spacing="10w">
         <Box>
           <Text marginBottom="2w">Vous utilisez un autre outil ?</Text>
-          <Link as={NavLink} to="/donnees-personnelles" color="bluefrance" borderBottom="1px solid">
+          <Link
+            as={NavLink}
+            to={NAVIGATION_PAGES.DonneesPersonnelles.path}
+            color="bluefrance"
+            borderBottom="1px solid"
+            variant="underline"
+          >
             <Box as="i" className="ri-arrow-right-line" marginRight="1w" />
             Laissez-vous guider
           </Link>
         </Box>
         <Box>
           <Text marginBottom="2w">Vous souhaitez plus d’informations ?</Text>
-          <Link as={NavLink} to="/questions-reponses" color="bluefrance" borderBottom="1px solid">
+          <Link
+            as={NavLink}
+            to={NAVIGATION_PAGES.QuestionsReponses.path}
+            color="bluefrance"
+            borderBottom="1px solid"
+            variant="underline"
+          >
             <Box as="i" className="ri-arrow-right-line" marginRight="1w" />
             Consultez la page d’aide
           </Link>
