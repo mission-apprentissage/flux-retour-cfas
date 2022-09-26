@@ -21,4 +21,22 @@ describe("Factory DossierApprenant", () => {
       assert.equal(createdDossierApprenantEntity.nom_apprenant, "DUPOND");
     });
   });
+
+  it("Vérifie qu'on ne peut créer un dossier apprenant avec un SIRET invalide", () => {
+    const dossierApprenantProps = {
+      prenom_apprenant: " DUPOND ",
+      nom_apprenant: " DUPOND      ",
+      date_de_naissance_apprenant: new Date(),
+      uai_etablissement: "1234567D",
+      nom_etablissement: "Etablissement",
+      formation_cfd: "11111111",
+      annee_scolaire: "2022-2023",
+      historique_statut_apprenant: [],
+      source: "test",
+      siret_etablissement: "invalide",
+    };
+
+    const createdDossierApprenantEntity = DossierApprenant.create(dossierApprenantProps);
+    assert.equal(createdDossierApprenantEntity, null);
+  });
 });
