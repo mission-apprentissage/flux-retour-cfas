@@ -7,6 +7,7 @@ const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 
 const { CfaModel, DossierApprenantModel, ReseauCfaModel } = require("../../common/model");
 const { ERPS } = require("../../common/constants/erpsConstants");
+const { validateSiret } = require("../../common/domain/siret");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -88,15 +89,15 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
     });
     const allSiretsForUai = await DossierApprenantModel.distinct("siret_etablissement", {
       uai_etablissement: currentUai,
-      siret_etablissement_valid: true,
     });
+    const allValidSiretsForUai = allSiretsForUai.filter((siret) => !validateSiret(siret).error);
 
     const cfaExistant = await CfaModel.findOne({ uai: currentUai }).lean();
 
     // Create or update CFA
     if (dossierForUai) {
       if (cfaExistant) {
-        const updatedCfa = await cfas.updateCfa(cfaExistant._id, dossierForUai, allSiretsForUai);
+        const updatedCfa = await cfas.updateCfa(cfaExistant._id, dossierForUai, allValidSiretsForUai);
         if (updatedCfa !== null) {
           nbUpdate++;
         } else {
@@ -105,7 +106,7 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
         }
         nbUpdate++;
       } else {
-        const createdCfa = await cfas.createCfa(dossierForUai, allSiretsForUai);
+        const createdCfa = await cfas.createCfa(dossierForUai, allValidSiretsForUai);
         if (createdCfa !== null) {
           nbCreation++;
         } else {
