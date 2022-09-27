@@ -9,7 +9,13 @@ import OrganismesCountCard from "./OrganismesCountCard";
 
 const GRID_TEMPLATE_COLUMNS = ["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"];
 
-const IndicateursGridStack = ({ effectifs, effectifsDate, organismesCount, loading, showOrganismesCount = true }) => {
+const IndicateursGridStack = ({
+  effectifs,
+  effectifsDate,
+  organismesCount = 0,
+  loading,
+  showOrganismesCount = true,
+}) => {
   if (loading) {
     return (
       <Grid gridGap="2w" gridTemplateColumns={GRID_TEMPLATE_COLUMNS}>

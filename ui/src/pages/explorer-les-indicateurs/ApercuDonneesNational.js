@@ -22,7 +22,7 @@ const ApercuDonneesNational = () => {
       </Text>
       <IndicateursGridStack
         effectifs={effectifsNational}
-        organismesCount={effectifsNational.totalOrganismes}
+        organismesCount={effectifsNational?.totalOrganismes}
         loading={loading}
       />
     </Section>
