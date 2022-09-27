@@ -55,10 +55,6 @@ module.exports = new Schema({
     default: null,
     description: "Siret de l'établissement d'origine",
   },
-  siret_etablissement_valid: {
-    type: Boolean,
-    description: "Le champ siret_etablissement est-il valide ?",
-  },
   siret_catalogue: {
     type: String,
     default: null,

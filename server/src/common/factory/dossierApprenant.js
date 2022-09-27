@@ -4,7 +4,7 @@ const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolai
 const { historiqueSchema: historiqueStatutsSchema } = require("../../common/domain/apprenant/statutApprenant");
 const { schema: uaiSchema } = require("../../common/domain/uai");
 const { schema: cfdSchema } = require("../../common/domain/cfd");
-const { validateSiret } = require("../domain/siret");
+const { schema: siretSchema } = require("../../common/domain/siret");
 
 class DossierApprenant extends BaseFactory {
   /**
@@ -28,8 +28,7 @@ class DossierApprenant extends BaseFactory {
       email_contact: Joi.string().allow(null, ""),
       tel_apprenant: Joi.string().allow(null, ""),
       code_commune_insee_apprenant: Joi.string().allow(null),
-      siret_etablissement: Joi.string().allow(null, ""),
-      siret_etablissement_valid: Joi.boolean(),
+      siret_etablissement: siretSchema.allow(null, ""),
       libelle_long_formation: Joi.string().allow(null, ""),
       niveau_formation: Joi.string().allow(null, ""),
       niveau_formation_libelle: Joi.string().allow(null, ""),
@@ -52,7 +51,6 @@ class DossierApprenant extends BaseFactory {
       ...props,
       nom_apprenant: props.nom_apprenant.toUpperCase().trim(),
       prenom_apprenant: props.prenom_apprenant.toUpperCase().trim(),
-      siret_etablissement_valid: !validateSiret(props.siret_etablissement).error,
       created_at: new Date(),
       updated_at: null,
     });
