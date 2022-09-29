@@ -13,8 +13,11 @@ const demandeIdentifiantsComponent = require("./demandeIdentifiants");
 const demandeBranchementErpComponent = require("./demandeBranchementErp");
 const createCacheComponent = require("./cache");
 const createOvhStorageComponent = require("./ovhStorage");
+const createArchiveDossiersApprenantsComponent = require("./archiveDossiersApprenants");
 
 module.exports = async (options = {}) => {
+  const db = options.db || (await connectToMongo()).db;
+
   const users = options.users || (await createUsers());
   const ovhStorage = options.ovhStorage || createOvhStorageComponent();
   const userEvents = options.userEvents || createUserEvents();
@@ -29,6 +32,8 @@ module.exports = async (options = {}) => {
   const demandeIdentifiants = options.demandeIdentifiants || demandeIdentifiantsComponent();
   const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
   const cache = options.cache || createCacheComponent(options.redisClient);
+  const archiveDossiersApprenants =
+    options.archiveDossiersApprenants || createArchiveDossiersApprenantsComponent({ db });
 
   return {
     users,
@@ -36,7 +41,7 @@ module.exports = async (options = {}) => {
     userEvents,
     jobEvents,
     cache,
-    db: options.db || (await connectToMongo()).db,
+    db,
     dossiersApprenants,
     formations,
     cfas,
@@ -46,5 +51,6 @@ module.exports = async (options = {}) => {
     effectifs,
     demandeIdentifiants,
     demandeBranchementErp,
+    archiveDossiersApprenants,
   };
 };
