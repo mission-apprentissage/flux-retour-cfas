@@ -3,7 +3,6 @@ const omit = require("lodash.omit");
 const { DUPLICATE_TYPE_CODES } = require("../constants/dossierApprenantConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { validateCfd } = require("../domain/cfd");
-const { validateSiret } = require("../domain/siret");
 const { escapeRegExp } = require("../utils/regexUtils");
 const { isEqual } = require("date-fns");
 const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
@@ -95,11 +94,6 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
     "annee_scolaire"
   );
   const existingItem = await DossierApprenantModel.findById(existingItemId);
-
-  // handle siret update & siret_etablissement_valid update value
-  if (toUpdate?.siret_etablissement !== undefined) {
-    updatePayload = { ...updatePayload, siret_etablissement_valid: !validateSiret(toUpdate.siret_etablissement).error };
-  }
 
   // new statut_apprenant to add ?
   const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {

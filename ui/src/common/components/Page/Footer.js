@@ -39,7 +39,9 @@ const Footer = () => (
       <HStack divider={<StackDivider borderColor="grey.200" />} spacing="3w">
         <Link href="#">Plan du site</Link>
         <Link href={NAVIGATION_PAGES.Statistiques.path}>{NAVIGATION_PAGES.Statistiques.title}</Link>
-        <Link href="#">Accessibilité : Non conforme</Link>
+        <Link href="https://dashlord.incubateur.net/url/cfas-apprentissage-beta-gouv-fr/" target="_blank">
+          Accessibilité : Non conforme <Box as="i" marginBottom="2w" className="ri-external-link-line" />
+        </Link>
         <Link href={NAVIGATION_PAGES.MentionsLegales.path}>{NAVIGATION_PAGES.MentionsLegales.title}</Link>
         <Link href={NAVIGATION_PAGES.DonneesPersonnelles.path}>Données personnelles</Link>
         <Link href="#">Gestion des cookies</Link>
@@ -51,7 +53,7 @@ const Footer = () => (
           textDecoration="underline"
           href="https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
         >
-          license etalab-2.0 <Box as="i" marginBottom="2w" className="ri-external-link-line"></Box>
+          license etalab-2.0 <Box as="i" marginBottom="2w" className="ri-external-link-line" />
         </Link>
       </Text>
     </Section>
