@@ -37,7 +37,7 @@ const IndicateursGridStack = ({
     );
 
     return (
-      <Grid gridGap="2w" gridTemplateColumns={GRID_TEMPLATE_COLUMNS}>
+      <Grid gridGap="1w" gridTemplateColumns={GRID_TEMPLATE_COLUMNS}>
         {showOrganismesCount && <OrganismesCountCard count={organismesCount} />}
         <EffectifCard
           count={effectifs.apprentis}
