@@ -56,6 +56,7 @@ const getOrganismeWithSiret =
     const skipCache = options.skipCache === true;
     const cacheKey = `${CACHE_KEY_PREFIX}:siret:${siret}`;
 
+    // retrieve data from cache if not skipped
     if (!skipCache) {
       const fromCache = await cache.get(cacheKey);
       if (fromCache) {
@@ -73,8 +74,7 @@ const getOrganismeWithSiret =
     } catch (err) {
       // 404 on this route means SIRET was not found
       if (err.response?.status === 404) {
-        // if organisme is not found, we'll store a null value in the cache
-        result = CACHE_NULL_VALUE;
+        result = null;
       } else {
         const errorMessage = err.response?.data || err.code;
         logger.error(`API REFERENTIEL getOrganismeWithSiret something went wrong:`, errorMessage);
@@ -82,8 +82,9 @@ const getOrganismeWithSiret =
       }
     }
 
+    // store response in cache if not skipped
     if (!skipCache) {
-      const valueToCache = result === CACHE_NULL_VALUE ? CACHE_NULL_VALUE : JSON.stringify(result);
+      const valueToCache = result === null ? CACHE_NULL_VALUE : JSON.stringify(result);
       await cache.set(cacheKey, valueToCache, { expiresIn: DEFAULT_CACHE_EXPIRES_IN });
     }
 
