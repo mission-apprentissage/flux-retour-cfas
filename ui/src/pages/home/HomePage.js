@@ -12,9 +12,9 @@ import ApercuDesDonneesSection from "./sections/ApercuDesDonneesSection";
 import RgpdSection from "./sections/RgpdSection";
 
 const HomePage = () => {
-  const [auth] = useAuth();
+  const { auth, isAuthTokenValid } = useAuth();
 
-  if (auth?.sub && hasUserRoles(auth, [roles.pilot, roles.administrator, roles.network])) {
+  if (isAuthTokenValid() && hasUserRoles(auth, [roles.pilot, roles.administrator, roles.network])) {
     return <Redirect to="/visualiser-les-indicateurs" />;
   }
 

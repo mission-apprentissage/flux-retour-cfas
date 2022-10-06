@@ -6,11 +6,11 @@ import { NAVIGATION_PAGES } from "../../constants/navigationPages";
 import useAuth from "../../hooks/useAuth";
 
 const LogoutButton = () => {
-  const [, setAuth] = useAuth();
+  const { setAuthFromToken } = useAuth();
   const history = useHistory();
 
   const logout = () => {
-    setAuth(null);
+    setAuthFromToken(null);
     history.push(NAVIGATION_PAGES.Accueil.path);
   };
 

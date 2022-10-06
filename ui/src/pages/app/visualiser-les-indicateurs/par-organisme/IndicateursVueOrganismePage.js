@@ -17,7 +17,7 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
 
   const { data: infosCfa, loading, error } = useFetchCfaInfo(filtersContext?.state?.cfa?.uai_etablissement);
-  const [auth] = useAuth();
+  const { auth } = useAuth();
   const isAdmin = hasUserRoles(auth, roles.administrator);
 
   const currentOrganisme = filtersContext.state.cfa;

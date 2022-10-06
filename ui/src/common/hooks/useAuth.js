@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 import { useAuthState } from "../auth/auth";
 import {
   LOCAL_STORAGE_ACCESS_TOKEN,
@@ -7,7 +9,7 @@ import {
 import decodeJWT from "../utils/decodeJWT";
 
 export default function useAuth() {
-  const [auth, setAuth] = useAuthState();
+  const [decodedAuthToken, setAuth] = useAuthState();
 
   const setAuthFromToken = (access_token) => {
     if (!access_token) {
@@ -22,5 +24,12 @@ export default function useAuth() {
     }
   };
 
-  return [auth, setAuthFromToken];
+  const isAuthTokenValid = useCallback(() => {
+    if (!decodedAuthToken) return false;
+
+    const expiryDate = new Date(decodedAuthToken.exp * 1000); // jwt expiry timestamp is in seconds, we need it in ms
+    return expiryDate > new Date();
+  }, [decodedAuthToken]);
+
+  return { auth: decodedAuthToken, isAuthTokenValid, setAuthFromToken };
 }
