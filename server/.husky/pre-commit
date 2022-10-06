@@ -1,7 +1,0 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-cd server
-bash scripts/preventSensibleFilesCommit.sh
-bash scripts/preventForcePush.sh
-node_modules/.bin/./lint-staged
