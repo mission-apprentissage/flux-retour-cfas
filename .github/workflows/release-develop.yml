@@ -5,6 +5,7 @@ on:
 
 jobs:
   release:
+    # avoids buggy Github Actions behaviour triggering infinite loop of release commits
     if: "!startsWith(github.event.head_commit.message, 'chore(release')"
     runs-on: ubuntu-latest
     steps:
