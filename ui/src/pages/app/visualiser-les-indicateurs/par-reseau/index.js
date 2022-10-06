@@ -1,13 +1,15 @@
 import React from "react";
 
-import { getAuthUserNetwork, getAuthUserRole } from "../../../../common/auth/auth";
-import { roles } from "../../../../common/auth/roles";
+import { hasUserRoles, roles } from "../../../../common/auth/roles";
+import useAuth from "../../../../common/hooks/useAuth";
 import { FiltersProvider, getDefaultState } from "../FiltersContext";
 import IndicateursVueReseauPage from "./IndicateursVueReseauPage";
 
 const IndicateursVueReseauPageContainer = () => {
-  if (getAuthUserRole() === roles.network) {
-    const fixedFiltersState = { reseau: { nom: getAuthUserNetwork() } };
+  const { auth } = useAuth();
+
+  if (hasUserRoles(auth, roles.network)) {
+    const fixedFiltersState = { reseau: { nom: auth.network } };
     const defaultFiltersState = { ...getDefaultState(), ...fixedFiltersState };
     return (
       <FiltersProvider defaultState={defaultFiltersState} fixedState={fixedFiltersState}>

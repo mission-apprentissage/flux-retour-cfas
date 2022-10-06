@@ -2,7 +2,6 @@ import { HStack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { getAuthUserNetwork } from "../../../common/auth/auth";
 import { hasUserRoles, roles } from "../../../common/auth/roles";
 import { LinkCard } from "../../../common/components";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
@@ -30,7 +29,7 @@ const ViewSelection = () => {
     ? [
         {
           path: NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path,
-          title: `Vue du réseau ${getAuthUserNetwork()}`,
+          title: `Vue du réseau ${auth.network}`,
         },
         {
           path: NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path,
