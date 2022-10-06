@@ -81,18 +81,10 @@ IndicateursAndRepartitionEffectifsReseau.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
   effectifs: PropTypes.shape({
-    apprentis: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    inscritsSansContrat: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    abandons: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    rupturants: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
+    apprentis: PropTypes.PropTypes.number.isRequired,
+    inscritsSansContrat: PropTypes.PropTypes.number.isRequired,
+    abandons: PropTypes.PropTypes.number.isRequired,
+    rupturants: PropTypes.PropTypes.number.isRequired,
   }),
 };
 
