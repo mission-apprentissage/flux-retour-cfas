@@ -14,14 +14,14 @@ const PAGE_STATES = {
 };
 
 const CfaPrivateViewPage = ({ match }) => {
-  const { auth, setAuthFromToken } = useAuth();
+  const { auth, setAuthFromToken, resetAuthState } = useAuth();
   const [pageState, setPageState] = useState(PAGE_STATES.loading);
   const cfaAccessToken = match.params.accessToken;
 
   useEffect(() => {
     const effect = async () => {
       try {
-        setAuthFromToken(null);
+        resetAuthState();
         const { access_token } = await _post("/api/login-cfa", { cfaAccessToken });
         setAuthFromToken(access_token);
         setPageState(PAGE_STATES.ready);

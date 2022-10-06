@@ -12,17 +12,19 @@ export default function useAuth() {
   const [decodedAuthToken, setAuth] = useAuthState();
 
   const setAuthFromToken = (access_token) => {
-    if (!access_token) {
-      localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
-      setAuth(null);
-    } else {
-      localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN, access_token);
-      const decodedAccessToken = decodeJWT(access_token);
-      localStorage.setItem(LOCAL_STORAGE_USER_PERMISSIONS, decodedAccessToken.permissions);
-      localStorage.setItem(LOCAL_STORAGE_USER_NETWORK, decodedAccessToken.network);
-      setAuth(decodedAccessToken);
-    }
+    const decodedAccessToken = decodeJWT(access_token);
+    localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN, access_token);
+    localStorage.setItem(LOCAL_STORAGE_USER_PERMISSIONS, decodedAccessToken.permissions);
+    localStorage.setItem(LOCAL_STORAGE_USER_NETWORK, decodedAccessToken.network);
+    setAuth(decodedAccessToken);
   };
+
+  const resetAuthState = useCallback(() => {
+    localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
+    localStorage.removeItem(LOCAL_STORAGE_USER_PERMISSIONS);
+    localStorage.removeItem(LOCAL_STORAGE_USER_NETWORK);
+    setAuth(null);
+  }, [setAuth]);
 
   const isAuthTokenValid = useCallback(() => {
     if (!decodedAuthToken) return false;
@@ -31,5 +33,5 @@ export default function useAuth() {
     return expiryDate > new Date();
   }, [decodedAuthToken]);
 
-  return { auth: decodedAuthToken, isAuthTokenValid, setAuthFromToken };
+  return { auth: decodedAuthToken, isAuthTokenValid, resetAuthState, setAuthFromToken };
 }
