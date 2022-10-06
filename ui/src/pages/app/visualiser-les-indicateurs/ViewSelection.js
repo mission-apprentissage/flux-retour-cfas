@@ -24,7 +24,7 @@ ViewOptionCard.propTypes = {
 };
 
 const ViewSelection = () => {
-  const [auth] = useAuth();
+  const { auth } = useAuth();
   const isUserANetwork = hasUserRoles(auth, roles.network);
   const userViewOptions = isUserANetwork
     ? [

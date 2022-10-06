@@ -18,7 +18,7 @@ const RepartitionEffectifsParSiretSection = ({ filters, namedDataDownloadMode = 
   const filtersContext = useFiltersContext();
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
 
-  const [auth] = useAuth();
+  const { auth } = useAuth();
   const allowDownloadNamedData = hasUserRoles(auth, roles.administrator) || namedDataDownloadMode === true;
 
   // enable namedDataMode if needed
