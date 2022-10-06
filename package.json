@@ -52,7 +52,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "./scripts/preventSensibleFilesCommit.sh && ./scripts/preventForcePush.sh && lint-staged",
+      "pre-commit": "./scripts/preventSensibleFilesCommit.sh && lint-staged",
       "commit-msg": "[[ -n $HUSKY_BYPASS ]] || commitlint --config ./config/commitlint.config.js -E HUSKY_GIT_PARAMS"
     }
   },
