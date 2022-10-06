@@ -80,17 +80,17 @@ jobs:
       - name: Run Lint
         run: yarn lint
 
-      # Run mocha tests
-      - name: Run Tests
-        run: |
-          yarn --cwd server test:coverage
-        env:
-          CERFA_API_KEY: ${{ secrets.CERFA_API_KEY }}
-          CERFA_AUTH_PASSWORD_HASH_ROUNDS: ${{ secrets.CERFA_AUTH_PASSWORD_HASH_ROUNDS }}
-          CERFA_AUTH_USER_JWT_SECRET: ${{ secrets.CERFA_AUTH_USER_JWT_SECRET }}
-          CERFA_AUTH_PDS_JWT_SECRET: ${{ secrets.CERFA_AUTH_PDS_JWT_SECRET }}
-          CERFA_AUTH_ACTIVATION_JWT_SECRET: ${{ secrets.CERFA_AUTH_ACTIVATION_JWT_SECRET }}
-          CERFA_AUTH_PASSWORD_JWT_SECRET: ${{ secrets.CERFA_AUTH_PASSWORD_JWT_SECRET }}
+      # # Run mocha tests
+      # - name: Run Tests
+      #   run: |
+      #     yarn --cwd server test:coverage
+      #   env:
+      #     FLUX_RETOUR_CFAS_API_KEY: ${{ secrets.FLUX_RETOUR_CFAS_API_KEY }}
+      #     FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS }}
+      #     FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET }}
+      #     FLUX_RETOUR_CFAS_AUTH_PDS_JWT_SECRET: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_PDS_JWT_SECRET }}
+      #     FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET }}
+      #     FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET }}
 
       # # codecov
       # - name: Upload coverage to Codecov
