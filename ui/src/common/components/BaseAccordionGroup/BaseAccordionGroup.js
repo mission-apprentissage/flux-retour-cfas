@@ -14,6 +14,7 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import { NAVIGATION_PAGES } from "../../constants/navigationPages";
+import ArrowLink from "../ArrowLink/ArrowLink";
 
 export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A", isHomePage = false }) => {
   const [indexArray, setIndexArray] = useState();
@@ -61,10 +62,7 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
       </Accordion>
       {isHomePage && (
         <Box marginTop="2w">
-          <Link as={NavLink} to={NAVIGATION_PAGES.QuestionsReponses.path} variant="underline">
-            <Box as="i" className="ri-arrow-right-line" marginRight="1w" />
-            Voir davantage de questions
-          </Link>
+          <ArrowLink as={NavLink} to={NAVIGATION_PAGES.QuestionsReponses.path} title="Voir davantage de questions" />
         </Box>
       )}
     </Flex>

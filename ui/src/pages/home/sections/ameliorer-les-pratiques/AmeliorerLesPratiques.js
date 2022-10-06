@@ -75,6 +75,7 @@ const AmeliorerLesPratiques = () => (
         </Link>
       </Flex>
     </Box>
+    <Box marginBottom="2w" />
   </Section>
 );
 

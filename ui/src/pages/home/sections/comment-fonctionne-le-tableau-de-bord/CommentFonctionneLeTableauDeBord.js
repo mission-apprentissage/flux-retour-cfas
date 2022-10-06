@@ -64,7 +64,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                         </>
                       }
                     />
-                    <RightSideUpTiltArrow marginTop="6w" marginRight="1w" />
+                    <RightSideUpTiltArrow marginTop="6w" marginLeft="1w" />
                   </Flex>
                   <Box marginTop="1v">
                     <Flex flexDirection="row">
@@ -80,7 +80,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                           </>
                         }
                       />
-                      <RightSideDownTiltArrow marginTop="6w" marginRight="1w" />
+                      <RightSideDownTiltArrow marginTop="6w" marginLeft="1w" />
                     </Flex>
                   </Box>
                 </Flex>
