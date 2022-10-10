@@ -1,37 +1,37 @@
-import { Box, Button, HStack, Input, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, HStack, Input, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
+import { fetchSearchCfas } from "../../../../../common/api/tableauDeBord";
+import { QUERY_KEYS } from "../../../../../common/constants/queryKeys";
 import { validateSiret } from "../../../../../common/domain/siret";
 import { validateUai } from "../../../../../common/domain/uai";
-import useCfasSearch from "../../../../../common/hooks/useCfasSearch";
+import { queryClient } from "../../../../../queryClient";
 
 const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isValid, setIsValid] = useState(false);
-  const { data: searchResults } = useCfasSearch(searchTerm);
+  const [isInputValid, setIsInputValid] = useState();
 
-  /**
-   * Checks uai existance in API and set form state
-   * @param {*} uai
-   * @param {*} sirets
-  //  */
+  const submit = async () => {
+    // check that input is a valid SIRET or valid UAI
+    const shouldFetch = validateUai(searchTerm) || validateSiret(searchTerm);
 
-  const checkOrganisme = async () => {
-    if (searchTerm !== "")
-      try {
-        if ((searchResults[0]?.uai || searchResults[0]?.sirets[0]) !== undefined) {
-          setOrganismeFound();
-        } else {
-          setOrganismeNotFound();
-        }
-      } catch (error) {
-        setOrganismeNotFound();
-      }
+    setIsInputValid(shouldFetch);
+    if (!shouldFetch) {
+      return;
+    }
+
+    const data = await queryClient.fetchQuery(QUERY_KEYS.SEARCH_CFAS, () => fetchSearchCfas({ searchTerm }));
+
+    if (data && data[0]) {
+      setOrganismeFound();
+    } else {
+      setOrganismeNotFound();
+    }
   };
 
   return (
-    <Stack>
+    <div>
       <Text fontSize="epsilon">Rechercher l&apos;organisme par UAI ou par SIRET :</Text>
       <Text fontSize="omega" color="grey.600">
         Format valide d’une UAI : 7 chiffres et 1 lettre, et d’un SIRET : 14 chiffres
@@ -43,21 +43,16 @@ const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => 
         onChange={(e) => setSearchTerm(e.target.value)}
       />
       <br />
-      <Button
-        marginTop="4w"
-        width="15%"
-        onClick={() => (validateUai(searchTerm) || validateSiret(searchTerm) ? checkOrganisme() : setIsValid(true))}
-        variant="primary"
-      >
+      <Button marginTop="4w" width="15%" onClick={submit} variant="primary">
         Verifier
       </Button>
-      {isValid && (
-        <HStack color="error" fontSize="zeta">
+      {isInputValid === false && (
+        <HStack color="error" fontSize="zeta" marginTop="1w">
           <Box as="i" className="ri-alert-line" fontSize="delta" />
           <Text>Le format du SIRET ou de l&apos;UAI n&apos;est pas valide</Text>
         </HStack>
       )}
-    </Stack>
+    </div>
   );
 };
 
