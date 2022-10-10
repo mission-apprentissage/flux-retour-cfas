@@ -1,3 +1,10 @@
+# [2.50.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0-beta.3...v2.50.0-beta.4) (2022-10-10)
+
+
+### Bug Fixes
+
+* **ui:** vérifie que le token d'auth n'est pas expiré pour déterminer si l'utilisateur doit se login ([cdb67fb](https://github.com/mission-apprentissage/flux-retour-cfas/commit/cdb67fb6242267223c42c9656cd52009f08305a3))
+
 # [2.50.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0-beta.2...v2.50.0-beta.3) (2022-10-10)
 
 
