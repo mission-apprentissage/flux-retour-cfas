@@ -1,3 +1,10 @@
+# [2.50.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0-beta.4...v2.50.0-beta.5) (2022-10-10)
+
+
+### Bug Fixes
+
+* getOrganismeWithSiret renvoie null plutôt que la NULL value du cache lorsqu'aucun organisme n'est trouvé dans le référentiel ([62e9e1a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/62e9e1a8a2e74c300359b81514b393b49c750b32))
+
 # [2.50.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0-beta.3...v2.50.0-beta.4) (2022-10-10)
 
 
