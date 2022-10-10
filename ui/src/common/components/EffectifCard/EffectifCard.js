@@ -23,7 +23,7 @@ const EffectifCard = ({
       paddingY="2w"
       color="grey.800"
       minHeight="120px"
-      minWidth="15rem"
+      minWidth="14.5rem"
       borderBottom="4px"
       borderColor={accentColor}
     >

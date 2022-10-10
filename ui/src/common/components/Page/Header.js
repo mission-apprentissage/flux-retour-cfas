@@ -11,8 +11,8 @@ import LogoutButton from "../LogoutButton/LogoutButton";
 import Section from "../Section/Section";
 
 const Header = () => {
-  const [auth] = useAuth();
-  const isLoggedIn = Boolean(auth?.sub);
+  const { isAuthTokenValid } = useAuth();
+  const displayLogoutButton = isAuthTokenValid();
 
   return (
     <Section as="header">
@@ -33,7 +33,7 @@ const Header = () => {
             Organisme de formation
           </Link>
           <Divider height="22px" width="1px" orientation="vertical" backgroundColor="#EFEFEF" />
-          {isLoggedIn === true ? <LogoutButton /> : <LoginButton />}
+          {displayLogoutButton ? <LogoutButton /> : <LoginButton />}
         </HStack>
       </Flex>
     </Section>

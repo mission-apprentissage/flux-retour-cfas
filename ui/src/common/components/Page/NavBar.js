@@ -40,10 +40,10 @@ NavItem.propTypes = {
 };
 
 const NavBar = () => {
-  const [auth] = useAuth();
+  const { auth, isAuthTokenValid } = useAuth();
   const isCfa = hasUserRoles(auth, roles.cfa);
   const isAdministrator = hasUserRoles(auth, roles.administrator);
-  const isLoggedIn = Boolean(auth?.sub);
+  const isLoggedIn = isAuthTokenValid();
   return (
     <Section borderTop="solid 1px" borderTopColor="grey.400">
       <HStack as="nav" spacing="2w" alignItems="center" height="4rem">

@@ -25,7 +25,7 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
 
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
 
-  const [auth] = useAuth();
+  const { auth } = useAuth();
   const allowDownloadNamedData = hasUserRoles(auth, roles.administrator) || namedDataDownloadMode === true;
 
   // enable namedDataMode if needed
@@ -82,18 +82,10 @@ IndicateursAndRepartionCfaNiveauAnneesSection.propTypes = {
   hasMultipleSirets: PropTypes.bool,
   namedDataDownloadMode: PropTypes.bool,
   effectifs: PropTypes.shape({
-    apprentis: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    inscritsSansContrat: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    abandons: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    rupturants: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
+    apprentis: PropTypes.PropTypes.number.isRequired,
+    inscritsSansContrat: PropTypes.PropTypes.number.isRequired,
+    abandons: PropTypes.PropTypes.number.isRequired,
+    rupturants: PropTypes.PropTypes.number.isRequired,
   }),
 };
 
