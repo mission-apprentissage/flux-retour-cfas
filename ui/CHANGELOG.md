@@ -1,3 +1,10 @@
+# [2.50.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0-beta.1...v2.50.0-beta.2) (2022-10-10)
+
+
+### Bug Fixes
+
+* **ui:** vue organisme pour un utilisateur réseau ([8ca3921](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8ca3921d1c2a6c62b0c29c37f4ce98d199874d8b))
+
 # [2.50.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.49.1...v2.50.0-beta.1) (2022-10-06)
 
 
