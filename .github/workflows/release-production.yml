@@ -1,7 +1,7 @@
 name: Release version production
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   release:
@@ -15,7 +15,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16.6.0
       - uses: actions/cache@v2
         with:
           path: "**/node_modules"
@@ -58,7 +58,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16.6.0
       - uses: actions/cache@v2
         with:
           path: "**/node_modules"
@@ -77,7 +77,7 @@ jobs:
       # Install yarn dependencies
       - name: Run yarn Install server
         run: yarn --cwd server install --frozen-lockfile
-      
+
       # Lint
       - name: Run Lint
         run: yarn lint
@@ -102,7 +102,7 @@ jobs:
       #     directory: ./server/coverage
       #     name: codecov-server
       #     verbose: true
-      
+
   ciui:
     needs: release
     # avoids buggy Github Actions behaviour triggering infinite loop of release commits
@@ -130,4 +130,3 @@ jobs:
       #     directory: ./ui/coverage
       #     name: codecov-ui
       #     verbose: true
- 
