@@ -1,3 +1,10 @@
+# [2.50.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0-beta.2...v2.50.0-beta.3) (2022-10-10)
+
+
+### Bug Fixes
+
+* **ui:** envoie une requête pour vérifier l'existence d'un SIRET ou d'un UAI uniquement quand l'utilisateur clique sur vérifier ([eeb8961](https://github.com/mission-apprentissage/flux-retour-cfas/commit/eeb89614978992400fd398273c280415c4b10d3f))
+
 # [2.50.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0-beta.1...v2.50.0-beta.2) (2022-10-10)
 
 
