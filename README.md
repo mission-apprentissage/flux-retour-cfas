@@ -115,7 +115,7 @@ Redis est utilisé pour cacher certaines réponses de l'API. Utilise le port par
 
 L'interface web est une application React crée à partir du cli `create-react-app` (cf: https://create-react-app.dev/)
 
-L'application implémente le design system de l'État Français https://gouvfr.atlassian.net/wiki/spaces/DB/overview?homepageId=145359476 grâce à un theme propagé par ChakraUI (https://chakra-ui.com/docs/theming/customize-theme).
+L'application implémente le design system de l'État Français https://www.systeme-de-design.gouv.fr/ grâce à un theme propagé par ChakraUI (https://chakra-ui.com/docs/theming/customize-theme).
 
 ### Démarrage de la stack
 

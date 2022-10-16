@@ -126,7 +126,7 @@ const MentionsLegalesAccordions = () => (
             <Text marginTop="1v">
               Pour en savoir plus, se référer au{" "}
               <Link
-                href="https://gouvfr.atlassian.net/wiki/spaces/DB/overview"
+                href="https://www.systeme-de-design.gouv.fr/"
                 color="bluefrance"
                 textDecoration="underLine"
               >
