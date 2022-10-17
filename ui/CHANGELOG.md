@@ -1,3 +1,10 @@
+# [2.51.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0...v2.51.0-beta.1) (2022-10-17)
+
+
+### Features
+
+* create referentiel siret-uai collection ([8663989](https://github.com/mission-apprentissage/flux-retour-cfas/commit/86639896098e18322aca25b1afa6aa017a6dc59f))
+
 # [2.50.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.49.1...v2.50.0) (2022-10-10)
 
 
