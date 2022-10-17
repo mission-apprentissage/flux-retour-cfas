@@ -7,11 +7,16 @@ import {
   Box,
   Flex,
   Link,
+  Text,
 } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 
-export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A" }) => {
+import { NAVIGATION_PAGES } from "../../constants/navigationPages";
+import ArrowLink from "../ArrowLink/ArrowLink";
+
+export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3A3A", isHomePage = false }) => {
   const [indexArray, setIndexArray] = useState();
   const [isUnfold, setIsUnfold] = useState(false);
   const indexItemArray = AccordionItemsDetailList.map((item) => AccordionItemsDetailList.indexOf(item));
@@ -41,6 +46,7 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
       <Link textAlign="end" color="bluefrance" fontSize="omega" onClick={() => (!isUnfold ? unfoldAll() : foldAll())}>
         {!isUnfold ? "Tout déplier" : "Tout replier"}
       </Link>
+      {isHomePage && <Text>Consultez les questions fréquemment posées :</Text>}
       <Accordion marginTop="2w" index={indexArray} allowMultiple fontSize="zeta" color="#000000">
         {AccordionItemsDetailList.map((item, index) => (
           <AccordionItem key={index} onClick={() => updateIndex(index)}>
@@ -54,6 +60,11 @@ export const BaseAccordionGroup = ({ AccordionItemsDetailList, TextColor = "#3A3
           </AccordionItem>
         ))}
       </Accordion>
+      {isHomePage && (
+        <Box marginTop="2w">
+          <ArrowLink as={NavLink} to={NAVIGATION_PAGES.QuestionsReponses.path} title="Voir davantage de questions" />
+        </Box>
+      )}
     </Flex>
   );
 };
@@ -66,4 +77,5 @@ BaseAccordionGroup.propTypes = {
     }).isRequired
   ).isRequired,
   TextColor: PropTypes.string,
+  isHomePage: PropTypes.bool,
 };
