@@ -1,3 +1,10 @@
+# [2.51.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0-beta.2...v2.51.0-beta.3) (2022-10-17)
+
+
+### Features
+
+* **server:** add draaf organisme type ([#1877](https://github.com/mission-apprentissage/flux-retour-cfas/issues/1877)) ([78a6043](https://github.com/mission-apprentissage/flux-retour-cfas/commit/78a604300ccb24089fa68cfc7689db3445580d08))
+
 # [2.51.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0-beta.1...v2.51.0-beta.2) (2022-10-17)
 
 
