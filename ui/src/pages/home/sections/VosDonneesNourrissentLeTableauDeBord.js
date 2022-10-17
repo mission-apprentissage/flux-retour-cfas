@@ -61,7 +61,7 @@ const VosDonneesNourrissentLeTableauDeBord = () => {
               <strong>Partage Simplifié</strong>
               <br />
               La plateforme Partage Simplifié vous permettra bientôt de transmettre vos effectifs sans logiciel
-              supplémentaire. Actuellement en développement, elle sera disponible fin Septembre.
+              supplémentaire. Actuellement en développement, elle sera disponible fin Octobre.
             </Text>
           </Box>
         </Box>

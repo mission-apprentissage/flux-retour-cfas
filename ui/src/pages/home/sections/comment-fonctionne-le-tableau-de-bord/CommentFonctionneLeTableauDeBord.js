@@ -27,7 +27,7 @@ const CommentFonctionneLeTableauDeBord = () => {
       <Tabs variant="primary" marginTop="4w">
         <TabList marginLeft="2w">
           <Tab fontWeight="700">Organismes de formation</Tab>
-          <Tab fontWeight="700">Institutuons</Tab>
+          <Tab fontWeight="700">Institutions</Tab>
         </TabList>
         <TabPanels background="white" color="grey.800">
           <TabPanel>
@@ -39,7 +39,7 @@ const CommentFonctionneLeTableauDeBord = () => {
                     <>
                       Je réponds à mon obligation
                       <br /> de <strong>donner de la visibilité</strong> aux pouvoirs publics{" "}
-                      <strong>sur mes effectifs</strong> d&apos;apprentissage.
+                      <strong>sur mes effectifs d&apos;apprentissage.</strong>
                     </>
                   }
                 />

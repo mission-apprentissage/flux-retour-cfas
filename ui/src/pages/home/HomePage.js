@@ -71,7 +71,14 @@ const HomePage = () => {
               <ArrowLink title="Découvrir" />
             </Box>
           </Box>
-          <Box width="50%" as={NavLink} to={"/login"} border="1px solid" borderColor="bluefrance" padding="4w">
+          <Box
+            width="50%"
+            as={NavLink}
+            to={NAVIGATION_PAGES.Login.path}
+            border="1px solid"
+            borderColor="bluefrance"
+            padding="4w"
+          >
             <Flex>
               <CityHall />
               <Box alignSelf="center" marginLeft="2w">
