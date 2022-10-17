@@ -1,3 +1,10 @@
+# [2.51.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0-beta.1...v2.51.0-beta.2) (2022-10-17)
+
+
+### Features
+
+* mise à jour de la source d'import du réseau Excellence Pro (CFA EC) ([4091bc5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/4091bc5af95976ee3dab136aac551fabec2d6d59))
+
 # [2.51.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0...v2.51.0-beta.1) (2022-10-17)
 
 

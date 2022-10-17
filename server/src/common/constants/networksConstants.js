@@ -20,7 +20,7 @@ const RESEAUX_CFAS = {
   },
   CFA_EC: {
     nomReseau: "CFA EC",
-    nomFichier: "cfas-cfa-ec",
+    nomFichier: "",
   },
   GRETA: {
     nomReseau: "GRETA",

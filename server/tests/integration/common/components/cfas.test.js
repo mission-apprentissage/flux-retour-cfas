@@ -244,6 +244,35 @@ describe(__filename, () => {
     });
   });
 
+  describe("updateCfaReseauxFromUai", () => {
+    const { updateCfaReseauxFromUai } = cfasComponent();
+
+    it("throws when Cfa with given UAI not found in DB", async () => {
+      const uai = "0802004A";
+      await assert.rejects(() => updateCfaReseauxFromUai(uai, []));
+    });
+
+    it("updates Cfa with given list of reseaux", async () => {
+      const uai = "0802004A";
+      await new CfaModel({
+        uai,
+        nom: "TestCfa",
+        adresse: "12 rue de la paix 75016 PARIS",
+        sirets: [],
+        erps: ["MonErp"],
+        reseaux: ["Reseau1"],
+        region_nom: "Ma région",
+        region_num: "17",
+      }).save();
+
+      const newReseaux = ["Reseau2", "Reseau3"];
+      await updateCfaReseauxFromUai(uai, newReseaux);
+
+      const updatedCfa = await CfaModel.findOne({ uai }).lean();
+      assert.deepEqual(updatedCfa.reseaux, newReseaux);
+    });
+  });
+
   describe("searchCfas", () => {
     const { searchCfas } = cfasComponent();
 
