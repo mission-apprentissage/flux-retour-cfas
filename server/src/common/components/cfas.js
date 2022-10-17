@@ -12,6 +12,7 @@ module.exports = () => ({
   updateCfa,
   updateCfaNature,
   updateCfaReseauxFromUai,
+  getFromSiret,
   searchCfas,
   getCfaFirstTransmissionDateFromUai,
   getCfaFirstTransmissionDateFromSiret,
@@ -19,10 +20,15 @@ module.exports = () => ({
   getFromAccessToken,
   getFromUai,
   getFromUaiAndSiret,
-  getFromSiret,
 });
 
 const SEARCH_RESULTS_LIMIT = 50;
+
+const getFromSiret = async (siret) => {
+  return await CfaModel.find({
+    sirets: siret,
+  }).lean();
+};
 
 /**
  * Checks if cfa with given UAI exists
@@ -271,12 +277,6 @@ const getFromUai = async (uai) => {
 const getFromUaiAndSiret = async (uai, siret) => {
   return await CfaModel.find({
     uai,
-    sirets: siret,
-  }).lean();
-};
-
-const getFromSiret = async (siret) => {
-  return await CfaModel.find({
     sirets: siret,
   }).lean();
 };
