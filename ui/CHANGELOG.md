@@ -1,3 +1,10 @@
+# [2.51.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0-beta.3...v2.51.0-beta.4) (2022-10-18)
+
+
+### Features
+
+* **server:** ajoute une route exposant les organismes du référentiel SIRET/UAI enrichi avec les réseaux du tdb ([cbd561f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/cbd561f16ba8e068aae2fd5ca0c96607f03ccf24))
+
 # [2.51.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0-beta.2...v2.51.0-beta.3) (2022-10-17)
 
 
