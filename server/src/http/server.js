@@ -42,7 +42,7 @@ module.exports = async (components) => {
   app.use("/api/login-cfa", loginCfaRouter(components));
   app.use("/api/formations", formationRouter(components));
   app.use("/api/cfas", cfasRouter(components));
-  app.use("/api/referentiel", referentielRouter());
+  app.use("/api/referentiel", referentielRouter(components));
   app.use("/api/healthcheck", healthcheckRouter(components));
   app.use("/api/demande-identifiants", demandeIdentifiantsRouter(components));
   app.use("/api/demande-branchement-erp", demandeBranchementErpRouter(components));

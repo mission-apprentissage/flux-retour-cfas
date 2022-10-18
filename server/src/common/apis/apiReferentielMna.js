@@ -18,6 +18,21 @@ const SLEEP_TIME_BETWEEN_API_REQUESTS = 150;
 // to siginify there is a cached result but it's null
 const CACHE_NULL_VALUE = "NO_DATA";
 
+const fetchOrganismes = async (options = {}) => {
+  const { itemsPerPage = 100, champs } = options;
+
+  const { data } = await axios({
+    method: "GET",
+    baseURL: API_ENDPOINT,
+    url: "/organismes",
+    params: {
+      items_par_page: itemsPerPage,
+      champs,
+    },
+  });
+  return data;
+};
+
 const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", champs = "contacts,uai,siret") => {
   const url = `${API_ENDPOINT}/organismes`;
   try {
@@ -134,6 +149,7 @@ const getOrganismesWithUai =
   };
 
 module.exports = {
+  fetchOrganismes,
   getOrganismeWithSiret,
   getOrganismesWithUai,
   fetchOrganismeWithSiret,

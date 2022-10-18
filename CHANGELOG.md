@@ -1,3 +1,31 @@
+# [2.51.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0-beta.3...v2.51.0-beta.4) (2022-10-18)
+
+
+### Features
+
+* **server:** ajoute une route exposant les organismes du référentiel SIRET/UAI enrichi avec les réseaux du tdb ([cbd561f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/cbd561f16ba8e068aae2fd5ca0c96607f03ccf24))
+
+# [2.51.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0-beta.2...v2.51.0-beta.3) (2022-10-17)
+
+
+### Features
+
+* **server:** add draaf organisme type ([#1877](https://github.com/mission-apprentissage/flux-retour-cfas/issues/1877)) ([78a6043](https://github.com/mission-apprentissage/flux-retour-cfas/commit/78a604300ccb24089fa68cfc7689db3445580d08))
+
+# [2.51.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0-beta.1...v2.51.0-beta.2) (2022-10-17)
+
+
+### Features
+
+* mise à jour de la source d'import du réseau Excellence Pro (CFA EC) ([4091bc5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/4091bc5af95976ee3dab136aac551fabec2d6d59))
+
+# [2.51.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0...v2.51.0-beta.1) (2022-10-17)
+
+
+### Features
+
+* create referentiel siret-uai collection ([8663989](https://github.com/mission-apprentissage/flux-retour-cfas/commit/86639896098e18322aca25b1afa6aa017a6dc59f))
+
 # [2.50.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.49.1...v2.50.0) (2022-10-10)
 
 

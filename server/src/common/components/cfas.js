@@ -11,15 +11,24 @@ module.exports = () => ({
   existsCfa,
   updateCfa,
   updateCfaNature,
+  updateCfaReseauxFromUai,
+  getFromSiret,
   searchCfas,
   getCfaFirstTransmissionDateFromUai,
   getCfaFirstTransmissionDateFromSiret,
   getSousEtablissementsForUai,
   getFromAccessToken,
   getFromUai,
+  getFromUaiAndSiret,
 });
 
 const SEARCH_RESULTS_LIMIT = 50;
+
+const getFromSiret = async (siret) => {
+  return await CfaModel.find({
+    sirets: siret,
+  }).lean();
+};
 
 /**
  * Checks if cfa with given UAI exists
@@ -139,6 +148,29 @@ const updateCfaNature = async (uai, { nature, natureValidityWarning }) => {
 
 /**
  * Returns list of CFA information matching passed criteria
+ * @param {string} uai of the organisme de formation
+ * @param {[string]} reseaux new list of reseaux
+ * @return void
+ */
+const updateCfaReseauxFromUai = async (uai, reseaux = []) => {
+  const cfaToUpdate = await CfaModel.findOne({ uai });
+  if (!cfaToUpdate) {
+    throw new Error(`Can't update cfa with uai ${uai} : not found`);
+  }
+
+  await CfaModel.findOneAndUpdate(
+    { uai },
+    {
+      $set: {
+        reseaux,
+        updated_at: new Date(),
+      },
+    }
+  );
+};
+
+/**
+ * Returns list of CFA information matching passed criteria
  * @param {{}} searchCriteria
  * @return {Array<{uai: string, nom: string}>} Array of CFA information
  */
@@ -235,9 +267,16 @@ const getSousEtablissementsForUai = (uai) => {
  */
 
 const getFromAccessToken = async (accessToken) => {
-  return CfaModel.findOne({ access_token: accessToken }).lean();
+  return await CfaModel.findOne({ access_token: accessToken }).lean();
 };
 
 const getFromUai = async (uai) => {
-  return CfaModel.findOne({ uai }).lean();
+  return await CfaModel.findOne({ uai }).lean();
+};
+
+const getFromUaiAndSiret = async (uai, siret) => {
+  return await CfaModel.find({
+    uai,
+    sirets: siret,
+  }).lean();
 };
