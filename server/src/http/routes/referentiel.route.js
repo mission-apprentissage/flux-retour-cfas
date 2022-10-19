@@ -4,7 +4,7 @@ const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 const { REGIONS, DEPARTEMENTS } = require("../../common/constants/territoiresConstants");
 const { ORGANISMES_APPARTENANCE } = require("../../common/constants/usersConstants");
 
-module.exports = ({ db, cfas }) => {
+module.exports = ({ db }) => {
   const router = express.Router();
 
   router.get(
@@ -25,14 +25,10 @@ module.exports = ({ db, cfas }) => {
 
       while (await referentielSiretUaiCursor.hasNext()) {
         const organismeReferentiel = await referentielSiretUaiCursor.next();
-
-        const organismesTdb = await cfas.getFromSiret(organismeReferentiel.siret);
-        const reseaux = organismesTdb.map((organisme) => organisme.reseaux).flat();
-
         mappingResult.push({
           siret: organismeReferentiel.siret,
           uai: organismeReferentiel.uai,
-          reseaux,
+          reseaux: organismeReferentiel.reseaux,
         });
       }
 
