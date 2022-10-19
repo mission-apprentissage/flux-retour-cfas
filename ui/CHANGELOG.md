@@ -1,3 +1,10 @@
+# [2.52.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.51.0...v2.52.0-beta.1) (2022-10-19)
+
+
+### Features
+
+* ajoute les reseaux dans la collection referentielSiretUai depuis TDB et fichier Excellence Pro ([7013517](https://github.com/mission-apprentissage/flux-retour-cfas/commit/70135172f72578d24b9242f938ba0fb74aaa1efa))
+
 # [2.51.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.50.0...v2.51.0) (2022-10-18)
 
 
