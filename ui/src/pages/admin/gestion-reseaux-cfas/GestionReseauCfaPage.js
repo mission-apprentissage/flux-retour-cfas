@@ -1,7 +1,7 @@
 import { Box, Button, Divider, Heading, Input, useDisclosure } from "@chakra-ui/react";
 import React, { useState } from "react";
 
-import { InputLegend, Page, Section } from "../../../common/components";
+import { BreadcrumbNav, InputLegend, Page, Section } from "../../../common/components";
 import Loading from "../../../common/components/Loading/Loading";
 import NoResults from "../../../common/components/NoResults/NoResults";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
@@ -17,8 +17,9 @@ const GestionReseauxCfasPage = () => {
   return (
     <Page>
       <CreateReseauCfaModal isOpen={createCfaModal.isOpen} onClose={createCfaModal.onClose} />
-      <Section backgroundColor="galt" paddingY="8w" withShadow>
-        <Heading as="h1" variant="h1" marginBottom="1w">
+      <Section backgroundColor="galt" paddingY="3w" withShadow>
+        <BreadcrumbNav links={[NAVIGATION_PAGES.Accueil, NAVIGATION_PAGES.GestionReseauxCfas]} />
+        <Heading as="h1" variant="h1" marginBottom="1w" marginTop="4w">
           {NAVIGATION_PAGES.GestionReseauxCfas.title}
         </Heading>
       </Section>

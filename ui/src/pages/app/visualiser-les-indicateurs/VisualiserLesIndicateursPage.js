@@ -9,7 +9,7 @@ const VisualiserLesIndicateursPage = () => {
   return (
     <Page>
       <Section withShadow paddingY="3w">
-        <BreadcrumbNav links={[NAVIGATION_PAGES.VisualiserLesIndicateurs]} />
+        <BreadcrumbNav links={[NAVIGATION_PAGES.Accueil, NAVIGATION_PAGES.VisualiserLesIndicateurs]} />
         <Heading as="h1" marginTop="4w">
           {NAVIGATION_PAGES.VisualiserLesIndicateurs.title}
         </Heading>
