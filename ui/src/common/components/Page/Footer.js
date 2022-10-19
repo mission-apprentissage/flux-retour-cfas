@@ -53,7 +53,7 @@ const Footer = () => (
           textDecoration="underline"
           href="https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
         >
-          license etalab-2.0 <Box as="i" marginBottom="2w" className="ri-external-link-line" />
+          licence etalab-2.0 <Box as="i" marginBottom="2w" className="ri-external-link-line" />
         </Link>
       </Text>
     </Section>

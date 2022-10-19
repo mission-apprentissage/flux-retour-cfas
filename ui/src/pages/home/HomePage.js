@@ -10,11 +10,8 @@ import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../common/constants/product";
 import useAuth from "../../common/hooks/useAuth";
 import { CityHall, GraphsAndStatistics, QuestcequeLeTableauDeBordSVG, School } from "../../theme/components/icons";
-import QuestionsFrequemmementPosees from "../questions-reponses/reponses-details/QuestionsFrequemmementPosees.js";
 import AmeliorerLesPratiques from "./sections/ameliorer-les-pratiques/AmeliorerLesPratiques";
 import ApercuDonneesNationalHomePage from "./sections/apercu-donnees-national-homePage/ApercuDonneesNationalHomePage";
-import CommentFonctionneLeTableauDeBord from "./sections/comment-fonctionne-le-tableau-de-bord/CommentFonctionneLeTableauDeBord";
-import VosDonneesNourrissentLeTableauDeBord from "./sections/VosDonneesNourrissentLeTableauDeBord";
 const HomePage = () => {
   const { auth, isAuthTokenValid } = useAuth();
 
@@ -31,13 +28,7 @@ const HomePage = () => {
               Le {PRODUCT_NAME}
             </Heading>
             <Text fontSize="gamma" color="grey.800" marginTop="4w">
-              Service public pour visualiser <strong>les effectifs d’apprentis en temps réel</strong> dans les centres
-              et organismes de formation. Il permet ainsi aux pouvoirs publics de{" "}
-              <strong>
-                piloter <br />
-                la politique de l’apprentissage
-              </strong>{" "}
-              nationalement et dans les territoires.
+              Visualisez <strong>les effectifs d’apprentis en temps réel</strong>, au national et dans les territoires
             </Text>
           </Box>
           <GraphsAndStatistics />
@@ -63,12 +54,9 @@ const HomePage = () => {
                 </Text>
               </Box>
             </Flex>
-            <Text marginTop="2w">
-              Permettez le pilotage de la politique de l&apos;apprentissage en temps réel en donnant de la visibilité
-              sur vos effectifs d&apos;apprentis.
-            </Text>
+            <Text marginTop="2w">Transmettez facilement les informations sur vos effectifs d’apprentis</Text>
             <Box marginTop="4w">
-              <ArrowLink title="Découvrir" />
+              <ArrowLink title="Se connecter" />
             </Box>
           </Box>
           <Box
@@ -91,9 +79,7 @@ const HomePage = () => {
                 </Text>
               </Box>
             </Flex>
-            <Text marginTop="2w">
-              Connectez-vous pour consulter les données de l’apprentissage sur votre territoire.
-            </Text>
+            <Text marginY="3w">Consultez les données de l’apprentissage sur votre territoire</Text>
             <Box marginTop="4w">
               <ArrowLink title="Se connecter" />
             </Box>
@@ -108,32 +94,13 @@ const HomePage = () => {
           <Box paddingY="4w" fontSize="gamma">
             <Text>Le Tableau de bord de l’apprentissage, c’est : </Text>
             <UnorderedList paddingY="2w" marginLeft="4w">
+              <ListItem>faciliter le pilotage des politiques publiques</ListItem>
               <ListItem>
-                une <strong>visibilité</strong> sur le déroulement de l’apprentissage en France en temps réel
+                accompagner les jeunes en situation de décrochage (et donc d&apos;influencer leur.s parcours scolaires
+                et professionnels)
               </ListItem>
-              <ListItem>
-                un <strong>pilotage</strong> de l’activité au niveau national et dans les territoires
-              </ListItem>
-              <ListItem>
-                une <strong>fine connaissance</strong> des répartitions par filière, type de formation, etc...
-              </ListItem>
-              <ListItem>
-                un <strong>outil</strong> en constante amélioration pour coller au plus près de la réalité
-              </ListItem>
-              <ListItem>
-                une <strong>collaboration</strong> avec des éditeurs d’ERP
-              </ListItem>
-              <ListItem>
-                un <strong>service</strong> dédié aux organismes de formation
-              </ListItem>
+              <ListItem>simplifier les déclarations des organismes de formation auprès des pouvoirs publics.</ListItem>
             </UnorderedList>
-            <Text>
-              Le Tableau de Bord de l’Apprentissage est construit dans le{" "}
-              <strong>
-                respect de la vie <br />
-                privée des personnes et applique les standards de sécurité de l&apos;Etat.
-              </strong>
-            </Text>
           </Box>
           <Box flex="1" textAlign="center">
             <QuestcequeLeTableauDeBordSVG />
@@ -141,13 +108,7 @@ const HomePage = () => {
         </Flex>
         <ApercuDonneesNationalHomePage />
       </Section>
-      <CommentFonctionneLeTableauDeBord />
-      <VosDonneesNourrissentLeTableauDeBord />
       <AmeliorerLesPratiques />
-      <Section paddingY="4w" color="grey.800">
-        <Heading as="h1">Des questions ?</Heading>
-        <QuestionsFrequemmementPosees isHomePage={true} />
-      </Section>
     </Page>
   );
 };
