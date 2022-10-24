@@ -9,8 +9,7 @@ describe("Factory JobEvents", () => {
       assert.equal(entity.jobname === "testJob", true);
       assert.equal(entity.action === "any", true);
       assert.deepEqual(entity.data, { hello: "world" });
-      assert.equal(entity.created_at !== null, true);
-      assert.equal(entity.updated_at === null, true);
+      assert.equal(entity.date !== null, true);
     });
 
     it("Vérifie la non création de jobEvents via sa factory avec jobname au mauvais format", async () => {

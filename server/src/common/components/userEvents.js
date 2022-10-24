@@ -1,7 +1,9 @@
 const { UserEventModel, UserModel } = require("../model");
+const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
 
 module.exports = () => ({
   create,
+  getUploadHistoryList,
 });
 
 const create = async ({ username, type, action, data }) => {
@@ -20,4 +22,28 @@ const create = async ({ username, type, action, data }) => {
   }).save();
 
   return;
+};
+
+/**
+ * Récupération de l'historique des téléversements pour un mail utilisateur
+ * @param {*} param0
+ * @returns
+ */
+const getUploadHistoryList = async ({ username }) => {
+  const userEventsUploadSuccessForUserMail = await UserEventModel.aggregate([
+    {
+      $match: {
+        username: username,
+        action: USER_EVENTS_ACTIONS.UPLOAD.SUCCESS,
+        "data.originalname": { $exists: true },
+      },
+    },
+    { $project: { "data.originalname": 1, date: 1 } },
+    { $sort: { date: -1 } },
+  ]);
+
+  return userEventsUploadSuccessForUserMail.map((item) => ({
+    nom_fichier: item.data.originalname,
+    date_creation: item.date,
+  }));
 };

@@ -19,8 +19,7 @@ class JobEventsFactory extends BaseFactory {
 
     return {
       ...props,
-      created_at: new Date(),
-      updated_at: null,
+      date: new Date(),
     };
   }
 }
