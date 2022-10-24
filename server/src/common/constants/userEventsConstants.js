@@ -21,8 +21,22 @@ const USER_EVENTS_ACTIONS = {
     CFA_NAMED_DATA: "export-csv-effectifs-nominatifs-cfa",
   },
   LOGIN: "login",
+  LOGIN_EVENT: {
+    SUCCESS: "login-success",
+    FAIL: "login-failed",
+  }, // TODO Merge Login & LoginEvent
   LOGIN_CFA: "login-cfa",
   UPDATE_PASSWORD: "update-password",
+  REGISTER: "register",
+  USERS: {
+    GET_ALL: "get-all",
+  },
+  UPLOAD: {
+    INIT: "upload-init",
+    SUCCESS: "upload-success",
+    ERROR: "upload-error",
+    IMPORT: "upload-import-data",
+  },
 };
 
 const getExportAnonymizedEventNameFromFilters = (filters, namedMode = false) => {
