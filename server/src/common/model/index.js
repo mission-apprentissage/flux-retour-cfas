@@ -20,4 +20,8 @@ module.exports = {
   EffectifApprenantModel: getModel("effectifsApprenants", { enablePagination: true }),
   DemandeIdentifiantsModel: getModel("demandesIdentifiants"),
   DemandeBranchementErpModel: getModel("demandesBranchementErp"),
+  PartageSimplifieUsers: getModel("partageSimplifieUsers"),
+  PartageSimplifieDonneesApprenants: getModel("partageSimplifieDonneesApprenants"),
+  PartageSimplifieSignalementAnomalie: getModel("partageSimplifieSignalementAnomalie"),
+  PartageSimplifieDemandeActivationCompte: getModel("partageSimplifieDemandeActivationCompte"),
 };
