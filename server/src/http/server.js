@@ -40,6 +40,7 @@ const organismesRouter = require("./routes/partage-simplifie/organismes.route.js
 const signalementAnomaliePsRouter = require("./routes/partage-simplifie/signalementAnomalie.route.js");
 const ofRouter = require("./routes/partage-simplifie/of.route.js");
 const usersPsRouter = require("./routes/partage-simplifie/users.route.js");
+const donneesApprenantsPsRouter = require("./routes/partage-simplifie/donneesApprenants.route.js");
 
 module.exports = async (components) => {
   const app = express();
@@ -76,6 +77,12 @@ module.exports = async (components) => {
     requirePsJwtAuthentication(components),
     rolesMiddleware(PARTAGE_SIMPLIFIE_ROLES.OF),
     ofRouter(components)
+  );
+  app.use(
+    "/api/partage-simplifie/donnees-apprenants",
+    requirePsJwtAuthentication(components),
+    rolesMiddleware(PARTAGE_SIMPLIFIE_ROLES.OF),
+    donneesApprenantsPsRouter(components)
   );
 
   // Partage Simplifie admin routes using requirePsJwtAuthentication (custom jwt authentication using psUsers)

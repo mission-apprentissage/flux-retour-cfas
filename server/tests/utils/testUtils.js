@@ -4,6 +4,8 @@ const createComponents = require("../../src/common/components/components");
 const server = require("../../src/http/server");
 const { mongooseInstance } = require("../../src/common/mongodb");
 const redisFakeClient = require("./redisClientMock");
+// eslint-disable-next-line node/no-unpublished-require
+const request = require("supertest");
 
 const startServer = async () => {
   const components = await createComponents({
@@ -13,9 +15,11 @@ const startServer = async () => {
   });
   const app = await server(components);
   const httpClient = axiosist(app);
+  const superTestHttpClient = request(app);
 
   return {
     httpClient,
+    superTestHttpClient,
     components,
     createAndLogUser: async (username, password, options) => {
       await components.users.createUser({ username, password, ...options });
