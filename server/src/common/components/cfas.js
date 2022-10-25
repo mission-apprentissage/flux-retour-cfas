@@ -55,14 +55,17 @@ const createCfa = async (dossierForCfa, sirets = []) => {
     throw new Error(`No dossierApprenant found`);
   }
 
-  let metiersFromSirets = [];
+  let metiersFromSirets = null;
 
-  try {
-    metiersFromSirets = await getMetiersBySirets(sirets);
-  } catch {
-    logger.error(
-      `createCfa / getMetiersBySirets: something went wrong while requesting for cfa with uai ${dossierForCfa.uai_etablissement}`
-    );
+  if (Array.isArray(sirets) && sirets.length !== 0) {
+    try {
+      const { data } = await getMetiersBySirets(sirets);
+      metiersFromSirets = data?.metiers;
+    } catch {
+      logger.error(
+        `createCfa / getMetiersBySirets: something went wrong while requesting for cfa with uai ${dossierForCfa.uai_etablissement}`
+      );
+    }
   }
 
   const cfaEntity = Cfa.create({
@@ -73,7 +76,7 @@ const createCfa = async (dossierForCfa, sirets = []) => {
     erps: [dossierForCfa.source],
     region_nom: dossierForCfa.etablissement_nom_region,
     region_num: dossierForCfa.etablissement_num_region,
-    metiers: metiersFromSirets?.metiers,
+    metiers: metiersFromSirets,
     first_transmission_date: await getCfaFirstTransmissionDateFromUai(dossierForCfa.uai_etablissement),
   });
 
