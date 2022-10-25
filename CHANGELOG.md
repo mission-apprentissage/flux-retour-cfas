@@ -1,3 +1,10 @@
+# [2.53.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.52.0...v2.53.0) (2022-10-25)
+
+
+### Features
+
+* la création de formations  et de cfas n'echoue plus lorsque les domaines metiers liés ne sont pas trouvés ou que l'API LBA retourne une erreur ([dae3cec](https://github.com/mission-apprentissage/flux-retour-cfas/commit/dae3cecdd581da29d73efd0aae52826ffe9473ec))
+
 # [2.53.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.52.0...v2.53.0-beta.1) (2022-10-24)
 
 
