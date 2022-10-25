@@ -15,6 +15,9 @@ const createCacheComponent = require("./cache");
 const createOvhStorageComponent = require("./ovhStorage");
 const createArchiveDossiersApprenantsComponent = require("./archiveDossiersApprenants");
 const createDemandesActivationComptePartageSimplifie = require("./demandesActivationComptePartageSimplifie.js");
+const createDonneesApprenantsPartageSimplifie = require("./donneesApprenantsPartageSimplifie.js");
+const createOrganismes = require("./organismes.js");
+const createSignalementAnomaliePartageSimplifie = require("./signalementAnomaliePartageSimplifie.js");
 
 module.exports = async (options = {}) => {
   const db = options.db || (await connectToMongo()).db;
@@ -35,8 +38,14 @@ module.exports = async (options = {}) => {
   const cache = options.cache || createCacheComponent(options.redisClient);
   const archiveDossiersApprenants =
     options.archiveDossiersApprenants || createArchiveDossiersApprenantsComponent({ db });
+
   const demandesActivationComptePartageSimplifie =
     options.demandesActivationComptePartageSimplifie || createDemandesActivationComptePartageSimplifie();
+  const donneesApprenantsPartageSimplifie =
+    options.donneesApprenantsPartageSimplifie || createDonneesApprenantsPartageSimplifie();
+  const organismes = options.organismes || createOrganismes();
+  const signalementAnomaliePartageSimplifie =
+    options.signalementAnomaliePartageSimplifie || createSignalementAnomaliePartageSimplifie();
 
   return {
     users,
@@ -56,5 +65,8 @@ module.exports = async (options = {}) => {
     demandeBranchementErp,
     archiveDossiersApprenants,
     demandesActivationComptePartageSimplifie,
+    donneesApprenantsPartageSimplifie,
+    organismes,
+    signalementAnomaliePartageSimplifie,
   };
 };
