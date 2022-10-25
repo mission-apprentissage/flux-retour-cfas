@@ -47,6 +47,7 @@ module.exports = async (options = {}) => {
   const organismes = options.organismes || createOrganismes();
   const signalementAnomaliePartageSimplifie =
     options.signalementAnomaliePartageSimplifie || createSignalementAnomaliePartageSimplifie();
+  const partageSimplifieUsers = options.partageSimplifieUsers || createPartageSimplifieUsers();
 
   const demandesActivationComptePartageSimplifie =
     options.demandesActivationComptePartageSimplifie || createDemandesActivationComptePartageSimplifie();
