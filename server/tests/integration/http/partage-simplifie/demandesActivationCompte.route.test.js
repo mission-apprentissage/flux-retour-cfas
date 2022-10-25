@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { COLLECTIONS_NAMES } = require("../../../src/common/model/collections.js");
-const { dbCollection } = require("../../../src/common/mongodb.js");
+const { startServer } = require("../../../utils/testUtils");
+const { COLLECTIONS_NAMES } = require("../../../../src/common/model/collections.js");
+const { dbCollection } = require("../../../../src/common/mongodb.js");
 
 describe("API Route DemandesActivationCompte", () => {
   describe("POST /demandes-activation-compte/", () => {

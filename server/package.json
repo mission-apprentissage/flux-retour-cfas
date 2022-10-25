@@ -93,6 +93,7 @@
     "migrate-mongo": "9.0.0",
     "mongoose": "5.13.6",
     "mongoose-paginate": "5.0.3",
+    "multer": "1.4.5-lts.1",
     "node-ovh-objectstorage": "2.0.5",
     "oleoduc": "0.6.0",
     "passport": "0.5.2",
