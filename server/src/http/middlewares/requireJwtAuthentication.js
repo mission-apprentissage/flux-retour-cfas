@@ -3,7 +3,7 @@ const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const config = require("../../../config");
 const { tdbRoles } = require("../../common/roles");
 
-module.exports = ({ users, cfas }) => {
+module.exports = ({ users, partageSimplifieUsers, cfas }) => {
   const findUserOrCfa = async (usernameOrUai) => {
     const foundUser = await users.getUser(usernameOrUai);
 
@@ -13,6 +13,12 @@ module.exports = ({ users, cfas }) => {
 
     if (foundCfa) return { username: usernameOrUai, permissions: [tdbRoles.cfa] };
 
+    return null;
+  };
+
+  const findPsUser = async (email) => {
+    const foundUser = await partageSimplifieUsers.getUser(email);
+    if (foundUser) return foundUser;
     return null;
   };
 
@@ -27,7 +33,13 @@ module.exports = ({ users, cfas }) => {
       try {
         const foundUser = await findUserOrCfa(jwt_payload.sub);
         if (!foundUser) {
-          return done(null, false);
+          const foundPsUser = await findPsUser(jwt_payload.sub);
+
+          if (!foundPsUser) {
+            return done(null, false);
+          }
+
+          return done(null, foundPsUser);
         }
         return done(null, foundUser);
       } catch (err) {

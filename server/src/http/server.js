@@ -6,7 +6,6 @@ const { apiRoles, PARTAGE_SIMPLIFIE_ROLES } = require("../common/roles");
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 const requireJwtAuthenticationMiddleware = require("./middlewares/requireJwtAuthentication");
-const requirePsJwtAuthentication = require("./middlewares/requirePsJwtAuthentication.js");
 
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
 const rolesMiddleware = require("./middlewares/rolesMiddleware.js");
@@ -74,13 +73,13 @@ module.exports = async (components) => {
   // Partage Simplifie user OF routes using requirePsJwtAuthentication (custom jwt authentication using psUsers)
   app.use(
     "/api/partage-simplifie/of",
-    requirePsJwtAuthentication(components),
+    requireJwtAuthentication,
     rolesMiddleware(PARTAGE_SIMPLIFIE_ROLES.OF),
     ofRouter(components)
   );
   app.use(
     "/api/partage-simplifie/donnees-apprenants",
-    requirePsJwtAuthentication(components),
+    requireJwtAuthentication,
     rolesMiddleware(PARTAGE_SIMPLIFIE_ROLES.OF),
     donneesApprenantsPsRouter(components)
   );
@@ -88,7 +87,7 @@ module.exports = async (components) => {
   // Partage Simplifie admin routes using requirePsJwtAuthentication (custom jwt authentication using psUsers)
   app.use(
     "/api/partage-simplifie/users",
-    requirePsJwtAuthentication(components),
+    requireJwtAuthentication,
     rolesMiddleware(PARTAGE_SIMPLIFIE_ROLES.ADMINISTRATOR),
     usersPsRouter(components)
   );
