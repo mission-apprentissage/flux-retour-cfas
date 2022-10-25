@@ -34,6 +34,7 @@ const loginPsRouter = require("./routes/partage-simplifie/login.route.js");
 const registerPsRouter = require("./routes/partage-simplifie/register.route.js");
 const userPsRouter = require("./routes/partage-simplifie/user.route.js");
 const organismesRouter = require("./routes/partage-simplifie/organismes.route.js");
+const signalementAnomaliePsRouter = require("./routes/partage-simplifie/signalementAnomalie.route.js");
 
 module.exports = async (components) => {
   const app = express();
@@ -62,6 +63,7 @@ module.exports = async (components) => {
   app.use("/api/partage-simplifie/register", registerPsRouter(components));
   app.use("/api/partage-simplifie/user", userPsRouter(components));
   app.use("/api/partage-simplifie/organismes", organismesRouter(components));
+  app.use("/api/partage-simplifie/signalementAnomalie", signalementAnomaliePsRouter(components));
 
   // requires JWT auth
   // @deprecated to /dossiers-apprenants
