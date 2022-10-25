@@ -27,6 +27,7 @@ const updatePasswordRouter = require("./routes/update-password.route");
 const usersRouter = require("./routes/users.route");
 const reseauxCfasRouter = require("./routes/reseaux-cfas.route");
 const effectifsNationalRouter = require("./routes/effectifs-national.route");
+const demandesActivationCompteRouter = require("./routes/partage-simplifie/demandesActivationCompte.route.js");
 
 module.exports = async (components) => {
   const app = express();
@@ -48,6 +49,9 @@ module.exports = async (components) => {
   app.use("/api/demande-branchement-erp", demandeBranchementErpRouter(components));
   app.use("/api/update-password", updatePasswordRouter(components));
   app.use("/api/effectifs-national", effectifsNationalRouter(components));
+
+  // open routes Partage Simplifie
+  app.use("/api/partage-simplifie/demandes-activation-compte", demandesActivationCompteRouter(components));
 
   // requires JWT auth
   // @deprecated to /dossiers-apprenants
