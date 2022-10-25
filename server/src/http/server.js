@@ -29,6 +29,7 @@ const reseauxCfasRouter = require("./routes/reseaux-cfas.route");
 const effectifsNationalRouter = require("./routes/effectifs-national.route");
 const demandesActivationCompteRouter = require("./routes/partage-simplifie/demandesActivationCompte.route.js");
 const loginPsRouter = require("./routes/partage-simplifie/login.route.js");
+const registerPsRouter = require("./routes/partage-simplifie/register.route.js");
 
 module.exports = async (components) => {
   const app = express();
@@ -54,6 +55,7 @@ module.exports = async (components) => {
   // open routes Partage Simplifie
   app.use("/api/partage-simplifie/demandes-activation-compte", demandesActivationCompteRouter(components));
   app.use("/api/partage-simplifie/login", loginPsRouter(components));
+  app.use("/api/partage-simplifie/register", registerPsRouter(components));
 
   // requires JWT auth
   // @deprecated to /dossiers-apprenants
