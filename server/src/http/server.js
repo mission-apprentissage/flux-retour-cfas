@@ -39,6 +39,7 @@ const userPsRouter = require("./routes/partage-simplifie/user.route.js");
 const organismesRouter = require("./routes/partage-simplifie/organismes.route.js");
 const signalementAnomaliePsRouter = require("./routes/partage-simplifie/signalementAnomalie.route.js");
 const ofRouter = require("./routes/partage-simplifie/of.route.js");
+const usersPsRouter = require("./routes/partage-simplifie/users.route.js");
 
 module.exports = async (components) => {
   const app = express();
@@ -61,7 +62,7 @@ module.exports = async (components) => {
   app.use("/api/update-password", updatePasswordRouter(components));
   app.use("/api/effectifs-national", effectifsNationalRouter(components));
 
-  // open routes Partage Simplifie
+  // Partage Simplifie open routes
   app.use("/api/partage-simplifie/demandes-activation-compte", demandesActivationCompteRouter(components));
   app.use("/api/partage-simplifie/login", loginPsRouter(components));
   app.use("/api/partage-simplifie/register", registerPsRouter(components));
@@ -69,12 +70,20 @@ module.exports = async (components) => {
   app.use("/api/partage-simplifie/organismes", organismesRouter(components));
   app.use("/api/partage-simplifie/signalementAnomalie", signalementAnomaliePsRouter(components));
 
-  // user OF Partage Simplifie routes using requirePsJwtAuthentication (custom jwt authentication using psUsers)
+  // Partage Simplifie user OF routes using requirePsJwtAuthentication (custom jwt authentication using psUsers)
   app.use(
     "/api/partage-simplifie/of",
     requirePsJwtAuthentication(components),
     rolesMiddleware(PARTAGE_SIMPLIFIE_ROLES.OF),
     ofRouter(components)
+  );
+
+  // Partage Simplifie admin routes using requirePsJwtAuthentication (custom jwt authentication using psUsers)
+  app.use(
+    "/api/partage-simplifie/users",
+    requirePsJwtAuthentication(components),
+    rolesMiddleware(PARTAGE_SIMPLIFIE_ROLES.ADMINISTRATOR),
+    usersPsRouter(components)
   );
 
   // requires JWT auth
