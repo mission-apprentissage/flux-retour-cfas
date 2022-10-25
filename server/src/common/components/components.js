@@ -18,6 +18,7 @@ const createDemandesActivationComptePartageSimplifie = require("./demandesActiva
 const createDonneesApprenantsPartageSimplifie = require("./donneesApprenantsPartageSimplifie.js");
 const createOrganismes = require("./organismes.js");
 const createSignalementAnomaliePartageSimplifie = require("./signalementAnomaliePartageSimplifie.js");
+const createPartageSimplifieUsers = require("./partageSimplifieUsers.js");
 
 module.exports = async (options = {}) => {
   const db = options.db || (await connectToMongo()).db;
@@ -46,6 +47,7 @@ module.exports = async (options = {}) => {
   const organismes = options.organismes || createOrganismes();
   const signalementAnomaliePartageSimplifie =
     options.signalementAnomaliePartageSimplifie || createSignalementAnomaliePartageSimplifie();
+  const partageSimplifieUsers = options.partageSimplifieUsers || createPartageSimplifieUsers();
 
   return {
     users,
@@ -68,5 +70,6 @@ module.exports = async (options = {}) => {
     donneesApprenantsPartageSimplifie,
     organismes,
     signalementAnomaliePartageSimplifie,
+    partageSimplifieUsers,
   };
 };

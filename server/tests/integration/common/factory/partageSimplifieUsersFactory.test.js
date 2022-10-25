@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const { PARTAGE_SIMPLIFIE_ROLES } = require("../../../../src/common/constants/partageSimplifieRoles.js");
+const { PARTAGE_SIMPLIFIE_ROLES } = require("../../../../src/common/roles.js");
 const { PartageSimplifieUsersFactory } = require("../../../../src/common/factory/partageSimplifieUsersFactory.js");
 const { generateRandomAlphanumericPhrase } = require("../../../../src/common/utils/miscUtils.js");
 

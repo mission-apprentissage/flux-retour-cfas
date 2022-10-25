@@ -1,6 +1,6 @@
 const Joi = require("joi");
 const { BaseFactory } = require("./baseFactory");
-const { PARTAGE_SIMPLIFIE_ROLES } = require("../../common/constants/partageSimplifieRoles.js");
+const { PARTAGE_SIMPLIFIE_ROLES } = require("../../common/roles.js");
 const { schema: uaiSchema } = require("../../common/domain/uai");
 const { schema: siretSchema } = require("../../common/domain/siret");
 const { schema: passwordSchema } = require("../../common/domain/password.js");
