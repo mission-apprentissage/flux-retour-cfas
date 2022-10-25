@@ -1,12 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const { apiRoles } = require("../common/roles");
+const { apiRoles, PARTAGE_SIMPLIFIE_ROLES } = require("../common/roles");
 
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 const requireJwtAuthenticationMiddleware = require("./middlewares/requireJwtAuthentication");
+const requirePsJwtAuthentication = require("./middlewares/requirePsJwtAuthentication.js");
+
 const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
+const rolesMiddleware = require("./middlewares/rolesMiddleware.js");
 
 const effectifsApprenantsRouter = require("./routes/effectifs-apprenants.route");
 const dossierApprenantRouter = require("./routes/dossiers-apprenants.route");
@@ -35,6 +38,7 @@ const registerPsRouter = require("./routes/partage-simplifie/register.route.js")
 const userPsRouter = require("./routes/partage-simplifie/user.route.js");
 const organismesRouter = require("./routes/partage-simplifie/organismes.route.js");
 const signalementAnomaliePsRouter = require("./routes/partage-simplifie/signalementAnomalie.route.js");
+const ofRouter = require("./routes/partage-simplifie/of.route.js");
 
 module.exports = async (components) => {
   const app = express();
@@ -64,6 +68,14 @@ module.exports = async (components) => {
   app.use("/api/partage-simplifie/user", userPsRouter(components));
   app.use("/api/partage-simplifie/organismes", organismesRouter(components));
   app.use("/api/partage-simplifie/signalementAnomalie", signalementAnomaliePsRouter(components));
+
+  // user OF Partage Simplifie routes using requirePsJwtAuthentication (custom jwt authentication using psUsers)
+  app.use(
+    "/api/partage-simplifie/of",
+    requirePsJwtAuthentication(components),
+    rolesMiddleware(PARTAGE_SIMPLIFIE_ROLES.OF),
+    ofRouter(components)
+  );
 
   // requires JWT auth
   // @deprecated to /dossiers-apprenants

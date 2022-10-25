@@ -29,6 +29,15 @@ const startServer = async () => {
         Authorization: "Bearer " + response.data.access_token,
       };
     },
+    createAndLogPsUser: async (email, password, role, options) => {
+      await components.partageSimplifieUsers.createUser({ email, password, role, ...options });
+
+      const response = await httpClient.post("/api/partage-simplifie/login", { email, password });
+
+      return {
+        Authorization: "Bearer " + response.data.access_token,
+      };
+    },
   };
 };
 
