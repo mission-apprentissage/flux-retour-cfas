@@ -183,7 +183,7 @@ describe("Service partageSimplifieUsers", () => {
       assert.equal(found.password_updated_token_at !== null, true);
 
       // password token should expire in 48h
-      assert.equal(differenceInHours(found.password_update_token_expiry, new Date()), 48);
+      assert.equal(differenceInHours(found.password_update_token_expiry, new Date()) >= 47, true);
       assert.equal(differenceInCalendarDays(found.password_update_token_expiry, new Date()), 2);
     });
 
