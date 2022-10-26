@@ -3,6 +3,7 @@ const config = require("../../../config/index.js");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants.js");
 const { PARTAGE_SIMPLIFIE_ROLES } = require("../../common/roles.js");
 const { runScript } = require("../scriptWrapper.js");
+const { runSendDossiersApprenantsToTdb } = require("./send-dossiersApprenants/index.js");
 const { runCreateUser } = require("./users/create/index.js");
 const { runGeneratePasswordUpdateToken } = require("./users/generate-password-update-token/index.js");
 
@@ -45,6 +46,18 @@ cli
       console.log(config.publicUrl);
       return runGeneratePasswordUpdateToken(partageSimplifieUsers, { email });
     }, JOB_NAMES.generatePsPasswordUpdateToken);
+  });
+
+/**
+ * Job d'envoi des données apprenants à l'API du TDB
+ */
+cli
+  .command("send-dossiersApprenants")
+  .description("Job d'envoi des données apprenants sous forme de dossiersApprenants à l'API du Tdb")
+  .action(() => {
+    runScript(async ({ jobEvents }) => {
+      return runSendDossiersApprenantsToTdb(jobEvents);
+    }, JOB_NAMES.sendDossiersApprenants);
   });
 
 cli.parse(process.argv);
