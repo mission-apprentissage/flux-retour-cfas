@@ -17,6 +17,7 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:react/recommended",
+    "plugin:jest/recommended",
     "plugin:prettier/recommended" // Make sure this is always the last element in the array.
   ],
   "rules": {
@@ -36,17 +37,17 @@
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     /* CHAKRA */
-    "chakra-ui/props-shorthand": ["error", {"noShorthand": true}],
+    "chakra-ui/props-shorthand": ["error", { "noShorthand": true }],
     /* IMPORT ORDER */
     "import/order": "off",
     "simple-import-sort/imports": "error"
   },
   "plugins": ["simple-import-sort", "import", "react", "react-hooks", "chakra-ui", "jest", "prettier"],
   "parserOptions": {
-    "ecmaVersion": 2020, 
+    "ecmaVersion": 2020,
     "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true
-      }
     }
+  }
 }

@@ -11,3 +11,8 @@ export const roles = {
   network: "network",
   cfa: "cfa",
 };
+
+export const PARTAGE_SIMPLIFIE_ROLES = {
+  ADMINISTRATOR: "administrator",
+  OF: "of",
+};
