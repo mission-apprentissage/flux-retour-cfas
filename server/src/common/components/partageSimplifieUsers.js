@@ -5,7 +5,7 @@ const { hash, compare, isTooWeak } = require("../utils/sha512Utils");
 const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
 
 const { validatePassword } = require("../domain/password.js");
-const { config } = require("../../../config/index.js");
+const config = require("../../../config/index.js");
 const { escapeRegExp } = require("../../common/utils/regexUtils.js");
 const Joi = require("joi");
 const { PartageSimplifieUsersModel } = require("../model/index.js");
@@ -242,7 +242,8 @@ const getAllUsers = async () => await PartageSimplifieUsersModel.find().lean();
  * @param {*} token
  * @returns
  */
-const getUpdatePasswordLink = (token) => `${config.publicUrl}/modifier-mot-de-passe?token=${token}`;
+const getTestLink = () => `${JSON.stringify(config?.publicUrl)}`;
+const getUpdatePasswordLink = (token) => `${config.publicUrl}/partage-simplifie/modifier-mot-de-passe?token=${token}`;
 
 /**
  * Méthode de recherche d'utilisateurs selon plusieurs critères
@@ -277,5 +278,6 @@ module.exports = () => ({
   getUserFromUaiSiret,
   getAllUsers,
   getUpdatePasswordLink,
+  getTestLink,
   searchUsers,
 });
