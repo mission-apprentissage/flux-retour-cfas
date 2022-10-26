@@ -21,4 +21,6 @@ export const QUERY_KEYS = {
     NIVEAU_FORMATION: "effectifs-par-niveau-formation",
     SIRET: "effectifs-par-siret",
   },
+  SIGNALEMENT_ANOMALIE: "signalement anomalie",
+  UPLOAD_HISTORY: "upload-history",
 };
