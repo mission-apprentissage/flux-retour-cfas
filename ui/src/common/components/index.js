@@ -29,3 +29,13 @@ export { default as Table } from "./tables/Table";
 export { default as TableSkeleton } from "./skeletons/TableSkeleton";
 
 export { default as RepartitionEffectifsTabs } from "./RepartitionEffectifsTabs/RepartitionEffectifsTabs";
+
+export { default as PagePartageSimplifie } from "./Page/PagePartageSimplifie.js";
+export { default as HeaderPartageSimplifie } from "./Page/HeaderPartageSimplifie.js";
+export { default as ContactSectionPartageSimplifie } from "./ContactSectionPartageSimplifie/ContactSectionPartageSimplifie.js";
+export { default as DownloadTemplateFile } from "./DownloadTemplateFile/DownloadTemplateFile.js";
+export { default as DownloadExplanationFile } from "./DownloadExplanationFile/DownloadExplanationFile.js";
+export { default as SituationOrganisme } from "./SituationOrganisme/SituationOrganisme.js";
+export { default as Highlight } from "./Highlight/Highlight.js";
+export { default as ProductHeader } from "./ProductHeader/ProductHeader.js";
+export { default as AlertErrorBlock } from "./AlertErrorBlock/AlertErrorBlock.js";
