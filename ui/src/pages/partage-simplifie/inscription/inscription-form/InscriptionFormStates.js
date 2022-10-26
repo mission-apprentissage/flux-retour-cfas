@@ -1,0 +1,5 @@
+export const INSCRIPTION_FORM_STATE = {
+  INITIAL: "INITIAL",
+  SUCCESS: "SUCCESS",
+  ERROR: "ERROR",
+};
