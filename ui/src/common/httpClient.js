@@ -60,6 +60,18 @@ export const _post = (path, body) => {
   }).then((res) => handleResponse(path, res));
 };
 
+export const _postFormData = (path, formData) => {
+  // Remove contentType from headers for sending form-data
+  const headers = getHeaders();
+  const formDataHeaders = { ...(delete headers["Content-Type"] && headers) };
+
+  return fetch(`${path}`, {
+    method: "POST",
+    headers: formDataHeaders,
+    body: formData,
+  }).then((res) => handleResponse(path, res));
+};
+
 export const _put = (path, body = {}) => {
   return fetch(`${path}`, {
     method: "PUT",
