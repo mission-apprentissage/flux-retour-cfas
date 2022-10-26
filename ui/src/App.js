@@ -2,8 +2,9 @@ import * as React from "react";
 import { BrowserRouter as Router, Route, Switch, useLocation } from "react-router-dom";
 
 import ProtectedRoute from "./common/auth/ProtectedRoute";
-import { roles } from "./common/auth/roles";
+import { PARTAGE_SIMPLIFIE_ROLES, roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
+import { NAVIGATION_PAGES_PARTAGE_SIMPLIFIE } from "./common/constants/navigationPagesPartageSimplifie.js";
 import Page404 from "./pages/404/Page404";
 import GestionReseauxCfasPage from "./pages/admin/gestion-reseaux-cfas/GestionReseauCfaPage";
 import GestionUtilisateursPage from "./pages/admin/gestion-utilisateurs/GestionUtilisateursPage";
@@ -26,6 +27,11 @@ import {
   OrganismeFormationPage,
   SupportPage,
 } from "./pages/organisme-formation";
+import GestionUtilisateursPagePartageSimplifie from "./pages/partage-simplifie/admin/gestion-utilisateurs/GestionUtilisateursPage.js";
+import EspaceOrganismePage from "./pages/partage-simplifie/espace-organisme/EspaceOrganismePage.js";
+import { HomePagePartageSimplifie } from "./pages/partage-simplifie/home";
+import InscriptionPage from "./pages/partage-simplifie/inscription/InscriptionPage.js";
+import { ModifierMotDePassePagePartageSimplifie } from "./pages/partage-simplifie/modifier-mot-de-passe/index.js";
 import {
   CommentFonctionneLeTdbPage,
   ContacterLequipeDuTdbPage,
@@ -137,6 +143,31 @@ const App = () => {
         />
         {/* Change password */}
         <Route path={NAVIGATION_PAGES.ModifierMotDePasse.path} exact component={ModifierMotDePassePage} />
+
+        {/* Partage Simplifie pages */}
+        {/* Public pages */}
+        <Route exact path={NAVIGATION_PAGES_PARTAGE_SIMPLIFIE.Accueil.path} component={HomePagePartageSimplifie} />
+
+        {/* Change password */}
+        <Route
+          path={NAVIGATION_PAGES_PARTAGE_SIMPLIFIE.ModifierMotDePasse.path}
+          exact
+          component={ModifierMotDePassePagePartageSimplifie}
+        />
+
+        {/* Espace Organisme */}
+        <Route exact path={NAVIGATION_PAGES_PARTAGE_SIMPLIFIE.EspaceOrganisme.path} component={EspaceOrganismePage} />
+
+        {/* Page d'inscription */}
+        <Route exact path={NAVIGATION_PAGES_PARTAGE_SIMPLIFIE.Inscription.path} component={InscriptionPage} />
+
+        {/* Admin Pages */}
+        <ProtectedRoute
+          path={NAVIGATION_PAGES_PARTAGE_SIMPLIFIE.GestionUtilisateurs.path}
+          exact
+          component={GestionUtilisateursPagePartageSimplifie}
+          authorizedRole={PARTAGE_SIMPLIFIE_ROLES.ADMINISTRATOR}
+        />
 
         {/* Not found page */}
         <Route component={Page404} />

@@ -10,7 +10,7 @@ import useUsersSearchPartageSimplifie, {
 } from "../../../../common/hooks/useUsersSearchPartageSimplifie.js";
 import UsersTable from "./UsersTable";
 
-const GestionUtilisateursPage = () => {
+const GestionUtilisateursPagePartageSimplifie = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { data: searchResults, loading } = useUsersSearchPartageSimplifie(searchTerm);
 
@@ -48,4 +48,4 @@ const GestionUtilisateursPage = () => {
   );
 };
 
-export default GestionUtilisateursPage;
+export default GestionUtilisateursPagePartageSimplifie;

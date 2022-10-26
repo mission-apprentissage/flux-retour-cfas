@@ -1,1 +1,1 @@
-export { default as ModifierMotDePassePage } from "./ModifierMotDePassePage";
+export { default as ModifierMotDePassePagePartageSimplifie } from "./ModifierMotDePassePage";

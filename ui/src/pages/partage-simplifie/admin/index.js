@@ -1,1 +1,1 @@
-export { default as AdminHomePage } from "./AdminHomePage";
+export { default as AdminHomePagePartageSimplifie } from "./AdminHomePage";

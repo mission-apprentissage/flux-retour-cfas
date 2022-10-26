@@ -8,7 +8,7 @@ import { NAVIGATION_PAGES_PARTAGE_SIMPLIFIE } from "../../../common/constants/na
 import useAuth from "../../../common/hooks/useAuth.js";
 import RechercherOrganismeParUai from "./identifier-organisme/RechercherOrganismeParUai.js";
 
-const HomePage = () => {
+const HomePagePartageSimplifie = () => {
   const { auth } = useAuth();
 
   if (auth?.sub && auth?.role === PARTAGE_SIMPLIFIE_ROLES.ADMINISTRATOR)
@@ -29,4 +29,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default HomePagePartageSimplifie;

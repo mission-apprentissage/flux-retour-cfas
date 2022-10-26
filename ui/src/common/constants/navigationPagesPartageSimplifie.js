@@ -1,22 +1,22 @@
 export const NAVIGATION_PAGES_PARTAGE_SIMPLIFIE = {
   Accueil: {
-    path: "/",
+    path: "/partage-simplifie",
     title: "Accueil",
   },
   EspaceOrganisme: {
-    path: "/mon-espace",
+    path: "/partage-simplifie/mon-espace",
     title: "Mon espace",
   },
   Inscription: {
-    path: "/inscription",
+    path: "/partage-simplifie/inscription",
     title: "Inscription",
   },
   GestionUtilisateurs: {
-    path: "/admin/gestion-utilisateurs",
+    path: "/partage-simplifie/admin/gestion-utilisateurs",
     title: "Gestion des utilisateurs",
   },
   ModifierMotDePasse: {
-    path: "/modifier-mot-de-passe",
+    path: "/partage-simplifie/modifier-mot-de-passe",
     title: "Modifiez votre mot de passe",
   },
   NotFound404: {

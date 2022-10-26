@@ -6,7 +6,7 @@ import { PARTAGE_SIMPLIFIE_ROLES } from "../../auth/roles.js";
 import useAuth from "../../hooks/useAuth.js";
 import { Footer } from "..";
 import ContactSection from "../ContactSection/ContactSection";
-import Header from "./Header";
+import HeaderPartageSimplifie from "./HeaderPartageSimplifie.js";
 import NavBar from "./NavBar.js";
 
 const PagePartageSimplifie = ({ children }) => {
@@ -21,7 +21,7 @@ const PagePartageSimplifie = ({ children }) => {
           Environnement de recette
         </Alert>
       )}
-      <Header />
+      <HeaderPartageSimplifie />
       {isAdministrator === true && <NavBar />}
       {children}
       <ContactSection />

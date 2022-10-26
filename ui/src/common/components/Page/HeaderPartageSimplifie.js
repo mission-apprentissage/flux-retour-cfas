@@ -3,7 +3,7 @@ import React from "react";
 
 import { PRODUCT_FULL_NAME } from "../../constants/productPartageSimplifie.js";
 import useAuth from "../../hooks/useAuth.js";
-import LoginButton from "../LoginButton/LoginButton";
+import LoginButtonPartageSimplifie from "../LoginButtonPartageSimplifie/LoginButtonPartageSimplifie.js";
 import Logo from "../Logo/Logo";
 import LogoutButton from "../LogoutButton/LogoutButton";
 import Section from "../Section/Section";
@@ -37,7 +37,9 @@ const HeaderPartageSimplifie = () => {
             </Text>
           </Box>
         </Flex>
-        <HStack justifyContent="space-between">{displayLogoutButton ? <LogoutButton /> : <LoginButton />}</HStack>
+        <HStack justifyContent="space-between">
+          {displayLogoutButton ? <LogoutButton /> : <LoginButtonPartageSimplifie />}
+        </HStack>
       </Flex>
     </Section>
   );
