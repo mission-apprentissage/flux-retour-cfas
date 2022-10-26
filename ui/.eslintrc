@@ -17,7 +17,6 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:react/recommended",
-    "plugin:jest/recommended",
     "plugin:prettier/recommended" // Make sure this is always the last element in the array.
   ],
   "rules": {
