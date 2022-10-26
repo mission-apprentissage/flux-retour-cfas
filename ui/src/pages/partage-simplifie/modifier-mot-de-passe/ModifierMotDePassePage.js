@@ -2,7 +2,7 @@ import { Box, Heading, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Footer, Header, Section } from "../../../common/components";
+import { Footer, HeaderPartageSimplifie, Section } from "../../../common/components";
 import ContactSectionPartageSimplifie from "../../../common/components/ContactSectionPartageSimplifie/ContactSectionPartageSimplifie.js";
 import { NAVIGATION_PAGES_PARTAGE_SIMPLIFIE } from "../../../common/constants/navigationPagesPartageSimplifie.js";
 import ModifierMotPasseForm from "./ModifierMotDePasseForm";
@@ -13,7 +13,7 @@ const ModifierMotDePassePage = () => {
 
   return (
     <>
-      <Header />
+      <HeaderPartageSimplifie />
       <Section background="galt" withShadow paddingY="8w">
         <Heading as="h1" marginBottom="4w">
           {NAVIGATION_PAGES_PARTAGE_SIMPLIFIE.ModifierMotDePasse.title}

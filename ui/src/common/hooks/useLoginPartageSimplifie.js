@@ -7,7 +7,7 @@ import useAuth from "./useAuth";
 export default function useLoginPartageSimplifie() {
   const { setAuthFromToken } = useAuth();
   const history = useHistory();
-  const pathToRedirectTo = queryString.parse(history.location.search)?.redirect || "/";
+  const pathToRedirectTo = queryString.parse(history.location.search)?.redirect || "/partage-simplifie";
 
   const login = async (values, { setStatus }) => {
     try {

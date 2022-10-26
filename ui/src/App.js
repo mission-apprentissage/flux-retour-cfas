@@ -2,6 +2,7 @@ import * as React from "react";
 import { BrowserRouter as Router, Route, Switch, useLocation } from "react-router-dom";
 
 import ProtectedRoute from "./common/auth/ProtectedRoute";
+import ProtectedRoutePartageSimplifie from "./common/auth/ProtectedRoutePartageSimplifie.js";
 import { PARTAGE_SIMPLIFIE_ROLES, roles } from "./common/auth/roles";
 import { NAVIGATION_PAGES } from "./common/constants/navigationPages";
 import { NAVIGATION_PAGES_PARTAGE_SIMPLIFIE } from "./common/constants/navigationPagesPartageSimplifie.js";
@@ -162,7 +163,7 @@ const App = () => {
         <Route exact path={NAVIGATION_PAGES_PARTAGE_SIMPLIFIE.Inscription.path} component={InscriptionPage} />
 
         {/* Admin Pages */}
-        <ProtectedRoute
+        <ProtectedRoutePartageSimplifie
           path={NAVIGATION_PAGES_PARTAGE_SIMPLIFIE.GestionUtilisateurs.path}
           exact
           component={GestionUtilisateursPagePartageSimplifie}

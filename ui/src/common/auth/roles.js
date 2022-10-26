@@ -5,6 +5,8 @@ export const hasUserRoles = (auth, roles = []) => {
   return rolesToCheck.some((item) => auth.permissions.includes(item));
 };
 
+export const hasUserPartageSimplifieRole = (auth, authorizedRole) => auth.role === authorizedRole;
+
 export const roles = {
   administrator: "administrator",
   pilot: "pilot",
