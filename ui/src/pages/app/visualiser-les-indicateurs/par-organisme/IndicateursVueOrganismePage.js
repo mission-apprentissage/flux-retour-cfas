@@ -2,7 +2,6 @@ import { Box, Flex, Heading, HStack, Spacer } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { hasUserRoles, roles } from "../../../../common/auth/roles";
 import { BreadcrumbNav, CfasFilter, Page, Section } from "../../../../common/components";
 import CfaPanel from "../../../../common/components/CfasFilter/CfasPanel";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
@@ -11,17 +10,14 @@ import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import OrganismeViewContent from "./OrganismeViewContent";
-import CopyCfaPrivateLinkButton from "./sections/actions/CopyCfaPrivateLinkButton";
 
 const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
   const filtersContext = useFiltersContext();
 
   const { data: infosCfa, loading, error } = useFetchCfaInfo(filtersContext?.state?.cfa?.uai_etablissement);
   const { auth } = useAuth();
-  const isAdmin = hasUserRoles(auth, roles.administrator);
 
   const currentOrganisme = filtersContext.state.cfa;
-  const displaySousEtablissementDetail = filtersContext.state?.sousEtablissement !== null;
   const organismeFilterLabel = userLoggedAsReseau
     ? `Sélectionner un organisme du réseau ${auth.network}`
     : "Sélectionner un organisme";
@@ -44,10 +40,6 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
               defaultButtonLabel={organismeFilterLabel}
             />
             <Spacer />
-            {/* Copie du lien privé si administrateur et pas dans la vue détail d'un sous établissement */}
-            {infosCfa?.url_tdb && !displaySousEtablissementDetail && isAdmin && (
-              <CopyCfaPrivateLinkButton link={infosCfa?.url_tdb} />
-            )}
           </Flex>
         ) : (
           <Box marginY="3w" paddingX="8w" paddingY="6w" border="1px solid" borderColor="#E5E5E5">
