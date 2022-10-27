@@ -32,6 +32,9 @@
     "react/no-unused-prop-types": "error",
     "react/no-unused-state": "error",
     "react/jsx-no-useless-fragment": "error",
+    // Disabling no-unknown-property for custom props (plausible & iframe)
+    // Cf : https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-unknown-property.md
+    "react/no-unknown-property": ["error", { "ignore": ["plausible-embed", "allowtransparency"] }],
     /* REACT HOOKS */
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
