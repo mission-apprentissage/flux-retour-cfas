@@ -95,7 +95,6 @@ module.exports = ({ cfas }) => {
           natureValidityWarning: cfaFound.nature_validity_warning,
           sousEtablissements,
           adresse: cfaFound.adresse,
-          url_tdb: cfaFound.private_url,
         });
       }
     })
