@@ -69,7 +69,6 @@ describe(__filename, () => {
         reseaux: reseauxTest,
         sirets: [siretTest],
         adresse: adresseTest,
-        private_url: "http://hello.world",
       };
 
       await new CfaModel(cfaProps).save();
@@ -93,7 +92,6 @@ describe(__filename, () => {
         nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
         natureValidityWarning: true,
         domainesMetiers: [],
-        url_tdb: "http://hello.world",
       });
     });
 

@@ -1,3 +1,10 @@
+# [2.54.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.53.0...v2.54.0-beta.1) (2022-10-27)
+
+
+### Features
+
+* **server:** remove url from cfa route ([#2151](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2151)) ([fc51bb6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fc51bb61c57f2cc42cdfa1c9e4984c6a9050ca79))
+
 # [2.53.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.52.0...v2.53.0) (2022-10-25)
 
 
