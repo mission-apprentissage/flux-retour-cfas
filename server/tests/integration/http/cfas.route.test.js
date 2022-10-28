@@ -7,10 +7,12 @@ const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/or
 
 describe(__filename, () => {
   let httpClient;
+  let components;
 
   beforeEach(async () => {
-    const { httpClient: _httpClient } = await startServer();
+    const { httpClient: _httpClient, components: _components } = await startServer();
     httpClient = _httpClient;
+    components = _components;
   });
 
   describe("POST /cfas/search", () => {
@@ -60,6 +62,7 @@ describe(__filename, () => {
       const uaiTest = "0762232N";
       const adresseTest = "TEST ADRESSE";
       const reseauxTest = ["Reseau1", "Reseau2"];
+      const testReferentielAdresse = "Référentiel test adresse";
 
       const cfaProps = {
         nom: nomTest,
@@ -71,6 +74,10 @@ describe(__filename, () => {
         adresse: adresseTest,
       };
 
+      // Add of in referentiel via dbCollection
+      await components.db
+        .collection("referentielSiret")
+        .insertOne({ uai: uaiTest, adresse: { label: testReferentielAdresse } });
       await new CfaModel(cfaProps).save();
       await new DossierApprenantModel(
         createRandomDossierApprenant({
@@ -88,6 +95,7 @@ describe(__filename, () => {
         uai: uaiTest,
         sousEtablissements: [{ nom_etablissement: nomTest, siret_etablissement: siretTest }],
         adresse: adresseTest,
+        referentielAdresse: testReferentielAdresse,
         reseaux: reseauxTest,
         nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
         natureValidityWarning: true,

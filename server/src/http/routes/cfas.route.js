@@ -6,7 +6,7 @@ const pick = require("lodash.pick");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
 
-module.exports = ({ cfas }) => {
+module.exports = ({ cfas, db }) => {
   const router = express.Router();
 
   /**
@@ -79,6 +79,7 @@ module.exports = ({ cfas }) => {
       const { uai } = req.params;
 
       const cfaFound = await cfas.getFromUai(uai);
+      const ofReferentielFound = await db.collection("referentielSiret").findOne({ uai });
 
       if (!cfaFound) {
         return res.status(404).json({ message: `No cfa found for uai ${uai}` });
@@ -95,6 +96,7 @@ module.exports = ({ cfas }) => {
           natureValidityWarning: cfaFound.nature_validity_warning,
           sousEtablissements,
           adresse: cfaFound.adresse,
+          referentielAdresse: ofReferentielFound?.adresse?.label,
         });
       }
     })
