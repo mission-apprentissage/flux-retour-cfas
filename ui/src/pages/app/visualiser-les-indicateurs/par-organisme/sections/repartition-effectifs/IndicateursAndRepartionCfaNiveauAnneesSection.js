@@ -3,11 +3,9 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { fetchEffectifsDataListCsvExport } from "../../../../../../common/api/tableauDeBord";
-import { hasUserRoles, roles } from "../../../../../../common/auth/roles";
 import { Section } from "../../../../../../common/components";
 import DownloadBlock from "../../../../../../common/components/DownloadBlock/DownloadBlock";
 import RepartitionEffectifsParFormation from "../../../../../../common/components/tables/RepartitionEffectifsParFormation";
-import useAuth from "../../../../../../common/hooks/useAuth";
 import useFetchEffectifsParNiveauFormation from "../../../../../../common/hooks/useFetchEffectifsParNiveauFormation";
 import { mapFiltersToApiFormat } from "../../../../../../common/utils/mapFiltersToApiFormat";
 import DateWithTooltipSelector from "../../../DateWithTooltipSelector";
@@ -19,20 +17,10 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
   effectifs,
   loading,
   hasMultipleSirets = false,
-  namedDataDownloadMode = false,
+  dataDownloadMode = false,
 }) => {
   const { data, loading: repartitionLoading, error } = useFetchEffectifsParNiveauFormation(filters);
-
   const exportFilename = `tdb-données-cfa-${filters.cfa?.uai_etablissement}-${new Date().toLocaleDateString()}.csv`;
-
-  const { auth } = useAuth();
-  const allowDownloadNamedData = hasUserRoles(auth, roles.administrator) || namedDataDownloadMode === true;
-
-  // enable namedDataMode if needed
-  const fetchEffectifsDataListQueryParams =
-    allowDownloadNamedData === true
-      ? { ...mapFiltersToApiFormat(filters), namedDataMode: true }
-      : mapFiltersToApiFormat(filters);
 
   return (
     <Section paddingY="4w" marginTop={hasMultipleSirets == false ? "-85px" : ""}>
@@ -57,14 +45,14 @@ const IndicateursAndRepartionCfaNiveauAnneesSection = ({
                   effectifsDate={filters.date}
                 />
               </Stack>
-              <DownloadBlock
-                title="Télécharger les données de l’organisme sélectionné"
-                description={`Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste ${
-                  allowDownloadNamedData === false ? "anonymisée" : " "
-                } des apprenants par organisme et formation.`}
-                fileName={exportFilename}
-                getFile={() => fetchEffectifsDataListCsvExport(fetchEffectifsDataListQueryParams)}
-              />
+              {dataDownloadMode && (
+                <DownloadBlock
+                  title="Télécharger les données de l’organisme sélectionné"
+                  description={`Le fichier est généré à date du jour, en fonction de l’organisme sélectionnée et comprend la liste anonymisée des apprenants par organisme et formation.`}
+                  fileName={exportFilename}
+                  getFile={() => fetchEffectifsDataListCsvExport(mapFiltersToApiFormat(filters))}
+                />
+              )}
             </Stack>
           </TabPanel>
           <TabPanel paddingTop="4w">
@@ -80,7 +68,7 @@ IndicateursAndRepartionCfaNiveauAnneesSection.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
   hasMultipleSirets: PropTypes.bool,
-  namedDataDownloadMode: PropTypes.bool,
+  dataDownloadMode: PropTypes.bool,
   effectifs: PropTypes.shape({
     apprentis: PropTypes.PropTypes.number.isRequired,
     inscritsSansContrat: PropTypes.PropTypes.number.isRequired,

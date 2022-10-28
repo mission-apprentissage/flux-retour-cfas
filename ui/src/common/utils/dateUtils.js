@@ -15,6 +15,10 @@ export const formatDateDayMonthYear = (date) => {
   return new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 };
 
+export const formatDateMonthYear = (date) => {
+  return new Date(date).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+};
+
 export const getUniquesMonthAndYearFromDatesList = (input) => {
   const output = [];
 

@@ -36,6 +36,7 @@ const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
           effectifs={effectifs}
           loading={effectifsLoading}
           hasMultipleSirets={hasMultipleSirets}
+          dataDownloadMode={true}
         />
       )}
     </>

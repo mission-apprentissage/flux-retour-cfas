@@ -1,4 +1,5 @@
-import { Box, Flex, Stack } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, Stack, Text } from "@chakra-ui/react";
+import { startOfHour } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -6,11 +7,12 @@ import { BreadcrumbNav, Page, Section } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages.js";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
+import { formatDateMonthYear } from "../../../../common/utils/dateUtils.js";
 import { FranceLocalization } from "../../../../theme/components/icons/FranceLocalization.js";
 import { useFiltersContext } from "../FiltersContext";
+import IndicateursGridStack from "../IndicateursGridStack.js";
 import {
   CfaInformationSection,
-  IndicateursAndRepartionCfaNiveauAnneesSection,
   MultiSiretDetailInformationSection,
   RepartitionEffectifsParSiretSection,
 } from "../par-organisme/sections";
@@ -22,6 +24,7 @@ const CfaPrivateView = ({ cfaUai }) => {
   const hasMultipleSirets = infosCfa?.sousEtablissements?.length > 1;
   const sirets = infosCfa?.sousEtablissements?.map((item) => item.siret_etablissement);
   const displaySousEtablissementDetail = filters?.sousEtablissement !== null;
+  const date = startOfHour(new Date());
 
   return (
     <Page>
@@ -49,18 +52,30 @@ const CfaPrivateView = ({ cfaUai }) => {
 
       {/* Répartition par Siret pour un établissement multi-siret */}
       {!displaySousEtablissementDetail && hasMultipleSirets && (
-        <RepartitionEffectifsParSiretSection namedDataDownloadMode={true} filters={filters} />
+        <RepartitionEffectifsParSiretSection filters={filters} />
       )}
 
       {/* Vue Globale & Repartition pour un établissement sans sirets multiple ou dans la vue détail d'un sous établissement */}
       {(displaySousEtablissementDetail || !hasMultipleSirets) && (
-        <IndicateursAndRepartionCfaNiveauAnneesSection
-          filters={filters}
-          effectifs={effectifs}
-          loading={effectifsLoading}
-          hasMultipleSirets={hasMultipleSirets}
-          namedDataDownloadMode={true}
-        />
+        <Section paddingY="4w" marginBottom="4w">
+          <Stack spacing="3w">
+            <HStack alignItems="flex-end">
+              <Heading as="h2" fontSize="alpha">
+                Aperçu des données
+              </Heading>
+              <Text color="grey.800" fontSize="zeta">
+                (Vos données en {formatDateMonthYear(date)})
+              </Text>
+            </HStack>
+
+            <IndicateursGridStack
+              effectifs={effectifs}
+              loading={effectifsLoading}
+              showOrganismesCount={false}
+              effectifsDate={filters.date}
+            />
+          </Stack>
+        </Section>
       )}
     </Page>
   );
