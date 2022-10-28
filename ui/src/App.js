@@ -8,6 +8,7 @@ import Page404 from "./pages/404/Page404";
 import GestionReseauxCfasPage from "./pages/admin/gestion-reseaux-cfas/GestionReseauCfaPage";
 import GestionUtilisateursPage from "./pages/admin/gestion-utilisateurs/GestionUtilisateursPage";
 import CfaPrivatePage from "./pages/app/visualiser-les-indicateurs/cfa-private";
+import CfaSifaView from "./pages/app/visualiser-les-indicateurs/cfa-private/sifa/CfaSifaView.js";
 import VisualiserLesIndicateursParFormationPage from "./pages/app/visualiser-les-indicateurs/par-formation";
 import VisualiserLesIndicateursParOrganismePage from "./pages/app/visualiser-les-indicateurs/par-organisme";
 import VisualiserLesIndicateursParReseauPage from "./pages/app/visualiser-les-indicateurs/par-reseau";
@@ -87,6 +88,12 @@ const App = () => {
         />
 
         {/* Secured By Token Pages */}
+        <ProtectedRoute
+          exact
+          path={`${NAVIGATION_PAGES.Cfa.sifa.path}`}
+          component={CfaSifaView}
+          authorizedRoles={[roles.administrator, roles.cfa]}
+        />
         <Route exact path={`${NAVIGATION_PAGES.Cfa.path}/:accessToken`} component={CfaPrivatePage} />
         <Route path={NAVIGATION_PAGES.DonneesPersonnelles.path} exact component={ProtectionDonneesPersonnellesPage} />
 

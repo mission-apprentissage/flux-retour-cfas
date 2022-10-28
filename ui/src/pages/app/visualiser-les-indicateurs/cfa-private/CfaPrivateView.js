@@ -96,7 +96,7 @@ const CfaPrivateView = ({ cfaUai }) => {
           >
             <Box as="i" className="ri-eye-line" fontSize="gamma" />
           </Circle>
-          <Box as={NavLink} to="#" padding="4w" borderColor="#DDDDDD" borderWidth="1px">
+          <Box as={NavLink} to={NAVIGATION_PAGES.Cfa.sifa.path} padding="4w" borderColor="#DDDDDD" borderWidth="1px">
             <Stack spacing="2w">
               <Heading color="black" fontSize="gamma" flex="1">
                 Visualiser mes données SIFA

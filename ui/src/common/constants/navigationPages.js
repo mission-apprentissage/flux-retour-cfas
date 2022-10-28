@@ -103,6 +103,10 @@ export const NAVIGATION_PAGES = {
   Cfa: {
     path: "/cfa",
     title: "Cfa",
+    sifa: {
+      path: "/cfa/mes-donnees-sifa",
+      title: "Mes données SIFA",
+    },
   },
   ModifierMotDePasse: {
     path: "/modifier-mot-de-passe",
