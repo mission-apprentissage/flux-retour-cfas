@@ -8,3 +8,4 @@ export * from "./DataVisualisation";
 export * from "./TechnicalError";
 export * from "./Notification";
 export * from "./NotFound";
+export * from "./FranceLocalization.js";

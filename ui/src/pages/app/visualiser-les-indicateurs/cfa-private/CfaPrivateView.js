@@ -1,10 +1,12 @@
-import { Heading } from "@chakra-ui/layout";
+import { Box, Flex, Stack } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Page, Section } from "../../../../common/components";
+import { BreadcrumbNav, Page, Section } from "../../../../common/components";
+import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages.js";
 import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
+import { FranceLocalization } from "../../../../theme/components/icons/FranceLocalization.js";
 import { useFiltersContext } from "../FiltersContext";
 import {
   CfaInformationSection,
@@ -23,12 +25,24 @@ const CfaPrivateView = ({ cfaUai }) => {
 
   return (
     <Page>
-      <Section withShadow backgroundColor="galt" paddingY="4w">
-        <Heading as="h1" variant="h1" marginBottom="1w">
-          Visualiser les indices en temps réel
-        </Heading>
+      <Section withShadow backgroundColor="galt" paddingY="4w" marginBottom="4w">
+        <Flex alignItems="center" gap="2">
+          <Box>
+            <Stack spacing="3w">
+              <BreadcrumbNav links={[NAVIGATION_PAGES.Accueil, NAVIGATION_PAGES.Cfa]} />
+              <CfaInformationSection
+                marginTop="4w"
+                infosCfa={infosCfa}
+                loading={infosCfaLoading}
+                error={infosCfaError}
+              />
+            </Stack>
+          </Box>
+          <Box padding="20">
+            <FranceLocalization width="140px" height="140px" marginX="auto" marginY="auto" />
+          </Box>
+        </Flex>
       </Section>
-      <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
 
       {/* Filtre sur le siret pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs sirets */}
       {displaySousEtablissementDetail && <MultiSiretDetailInformationSection sirets={sirets} />}
