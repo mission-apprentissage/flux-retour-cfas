@@ -1,7 +1,8 @@
-import { Box, Flex, Heading, HStack, Stack, Text } from "@chakra-ui/react";
+import { Box, Circle, Flex, Heading, HStack, Stack, Text } from "@chakra-ui/react";
 import { startOfHour } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 import { BreadcrumbNav, Page, Section } from "../../../../common/components";
 import SituationOrganisme from "../../../../common/components/SituationOrganisme/SituationOrganisme.js";
@@ -10,6 +11,7 @@ import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
 import { formatDateMonthYear } from "../../../../common/utils/dateUtils.js";
 import { FranceLocalization } from "../../../../theme/components/icons/FranceLocalization.js";
+import { RightLine } from "../../../../theme/components/icons/RightLine.js";
 import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack.js";
 import {
@@ -49,10 +51,12 @@ const CfaPrivateView = ({ cfaUai }) => {
       </Section>
       {/* Filtre sur le siret pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs sirets */}
       {displaySousEtablissementDetail && <MultiSiretDetailInformationSection sirets={sirets} />}
+
       {/* Répartition par Siret pour un établissement multi-siret */}
       {!displaySousEtablissementDetail && hasMultipleSirets && (
         <RepartitionEffectifsParSiretSection filters={filters} />
       )}
+
       {/* Vue Globale & Repartition pour un établissement sans sirets multiple ou dans la vue détail d'un sous établissement */}
       {(displaySousEtablissementDetail || !hasMultipleSirets) && (
         <Section paddingY="2w">
@@ -77,13 +81,32 @@ const CfaPrivateView = ({ cfaUai }) => {
       )}
 
       {/* Situation organisme & bouton visualiser SIFA  */}
-      <Section marginBottom="4w">
-        <Flex alignItems="center" gap="2">
-          <Box width="75%">
-            <SituationOrganisme uai={infosCfa?.uai} adresse={infosCfa?.referentielAdresse} />
+      <Section marginBottom="4w" marginTop="4w">
+        <HStack spacing="0.5w" alignItems="flex-start">
+          <SituationOrganisme uai={infosCfa?.uai} adresse={infosCfa?.referentielAdresse} />
+          <Circle
+            size="40px"
+            left="25px"
+            bottom="20px"
+            position="relative"
+            borderColor="#DDDDDD"
+            backgroundColor="white"
+            borderWidth="1px"
+            color="black"
+          >
+            <Box as="i" className="ri-eye-line" fontSize="gamma" />
+          </Circle>
+          <Box as={NavLink} to="#" padding="4w" borderColor="#DDDDDD" borderWidth="1px">
+            <Stack spacing="2w">
+              <Heading color="black" fontSize="gamma" flex="1">
+                Visualiser mes données SIFA
+              </Heading>
+              <Flex justifyContent="right">
+                <RightLine color="bluefrance" marginBottom="1w" />
+              </Flex>
+            </Stack>
           </Box>
-          <Box></Box>
-        </Flex>
+        </HStack>
       </Section>
     </Page>
   );

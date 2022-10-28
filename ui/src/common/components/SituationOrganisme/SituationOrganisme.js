@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 const SituationOrganisme = ({ uai, adresse }) => {
   return (
-    <Box width="70%" border="1px solid" borderColor="bluefrance" padding="4w" marginTop="6w">
+    <Box border="1px solid" borderColor="bluefrance" padding="4w">
       <Stack spacing="2w">
         <Heading color="bluefrance" fontSize="gamma">
           La situation de votre organisme de formation :
@@ -11,7 +11,7 @@ const SituationOrganisme = ({ uai, adresse }) => {
         <HStack>
           <Box as="i" color="bluefrance" fontSize="alpha" className="ri-account-circle-fill" marginRight="2w" />
           <Text fontSize="beta" color="grey.800" fontWeight="bold" marginTop="2w">
-            N° UAI responsable : {uai}
+            N° UAI responsable : {uai || "NC"}
           </Text>
         </HStack>
 
@@ -30,8 +30,8 @@ const SituationOrganisme = ({ uai, adresse }) => {
 };
 
 SituationOrganisme.propTypes = {
-  uai: PropTypes.string.isRequired,
-  adresse: PropTypes.string.isRequired,
+  uai: PropTypes.string,
+  adresse: PropTypes.string,
 };
 
 export default SituationOrganisme;
