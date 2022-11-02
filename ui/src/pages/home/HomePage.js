@@ -88,7 +88,7 @@ const HomePage = () => {
       </Section>
       <Section paddingY="4w" color="#000000">
         <Heading as="h1" fontSize="40px">
-          Qu’est-ce que le Tableau de bord ?
+          A quoi sert le tableau de bord ?
         </Heading>
         <Flex>
           <Box paddingY="4w" fontSize="gamma">

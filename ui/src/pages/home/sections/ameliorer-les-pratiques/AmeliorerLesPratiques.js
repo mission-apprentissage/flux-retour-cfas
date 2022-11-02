@@ -43,7 +43,7 @@ const AmeliorerLesPratiques = () => (
         </Heading>
         <Text marginTop="2w">
           Vos contributions nous permettent de faire évoluer le tableau de bord de l’apprentissage au plus près de vos
-          besoins
+          besoins.
         </Text>
         <Link href={`mailto:${CONTACT_ADDRESS}`}>
           <Button marginTop="4w" variant="primary">
