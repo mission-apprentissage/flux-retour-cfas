@@ -338,6 +338,7 @@ describe("Factory DonnéesSifa", () => {
     it("Vérifie la création d'une donnée SIFA non valide avec tel_apprenant au mauvais format", () => {
       const donneesSifaProps = { ...mandatoryProps, tel_apprenant: new Int16Array() };
       const createdCfaEntity = DonneeSifaFactory.create(donneesSifaProps);
+
       assert.deepEqual(createdCfaEntity.dossierApprenant_id, new mongoose.Types.ObjectId("685aa89e32da58070798a6e7"));
       assert.deepEqual(createdCfaEntity.uai_etablissement, testUai);
       assert.deepEqual(createdCfaEntity.etablissement_formateur_uai, testEtablissement_formateur_uai);
@@ -352,6 +353,7 @@ describe("Factory DonnéesSifa", () => {
     it("Vérifie la création d'une donnée SIFA non valide avec email_contact au mauvais format", () => {
       const donneesSifaProps = { ...mandatoryProps, email_contact: new Int16Array() };
       const createdCfaEntity = DonneeSifaFactory.create(donneesSifaProps);
+
       assert.deepEqual(createdCfaEntity.dossierApprenant_id, new mongoose.Types.ObjectId("685aa89e32da58070798a6e7"));
       assert.deepEqual(createdCfaEntity.uai_etablissement, testUai);
       assert.deepEqual(createdCfaEntity.etablissement_formateur_uai, testEtablissement_formateur_uai);
@@ -366,6 +368,7 @@ describe("Factory DonnéesSifa", () => {
     it("Vérifie la création d'une donnée SIFA non valide avec date_entree_formation au mauvais format", () => {
       const donneesSifaProps = { ...mandatoryProps, date_entree_formation: new Int16Array() };
       const createdCfaEntity = DonneeSifaFactory.create(donneesSifaProps);
+
       assert.deepEqual(createdCfaEntity.dossierApprenant_id, new mongoose.Types.ObjectId("685aa89e32da58070798a6e7"));
       assert.deepEqual(createdCfaEntity.uai_etablissement, testUai);
       assert.deepEqual(createdCfaEntity.etablissement_formateur_uai, testEtablissement_formateur_uai);
@@ -380,6 +383,7 @@ describe("Factory DonnéesSifa", () => {
     it("Vérifie la création d'une donnée SIFA non valide avec contrat_date_debut au mauvais format", () => {
       const donneesSifaProps = { ...mandatoryProps, contrat_date_debut: new Int16Array() };
       const createdCfaEntity = DonneeSifaFactory.create(donneesSifaProps);
+
       assert.deepEqual(createdCfaEntity.dossierApprenant_id, new mongoose.Types.ObjectId("685aa89e32da58070798a6e7"));
       assert.deepEqual(createdCfaEntity.uai_etablissement, testUai);
       assert.deepEqual(createdCfaEntity.etablissement_formateur_uai, testEtablissement_formateur_uai);
@@ -394,6 +398,7 @@ describe("Factory DonnéesSifa", () => {
     it("Vérifie la création d'une donnée SIFA non valide avec contrat_date_rupture au mauvais format", () => {
       const donneesSifaProps = { ...mandatoryProps, contrat_date_rupture: new Int16Array() };
       const createdCfaEntity = DonneeSifaFactory.create(donneesSifaProps);
+
       assert.deepEqual(createdCfaEntity.dossierApprenant_id, new mongoose.Types.ObjectId("685aa89e32da58070798a6e7"));
       assert.deepEqual(createdCfaEntity.uai_etablissement, testUai);
       assert.deepEqual(createdCfaEntity.etablissement_formateur_uai, testEtablissement_formateur_uai);

@@ -1,6 +1,22 @@
 const Joi = require("joi");
-
+const pick = require("lodash.pick");
 const { schema: uaiSchema } = require("../domain/uai");
+
+const SIFA_FIELDS = [
+  "uai_etablissement",
+  // "etablissement_formateur_uai", // Todo Check avec raphaelle
+  // "statut_apprenant", // Todo Check avec raphaelle
+  "nom_apprenant",
+  "prenom_apprenant",
+  "date_de_naissance_apprenant",
+  "formation_rncp",
+  "code_commune_insee_apprenant",
+  "tel_apprenant",
+  "email_contact",
+  "date_entree_formation",
+  "contrat_date_debut",
+  "contrat_date_rupture",
+];
 
 // TODO Vérifier les règles métiers des champs avec Raphaelle
 const schema = Joi.object({
@@ -8,8 +24,8 @@ const schema = Joi.object({
     .regex(/^[0-9a-fA-F]{24}$/) // Object id regex
     .required(),
   uai_etablissement: uaiSchema.required(),
-  etablissement_formateur_uai: uaiSchema.required(),
-  statut_apprenant: Joi.string().required(),
+  // etablissement_formateur_uai: uaiSchema.required(), // Todo Check avec raphaelle
+  // statut_apprenant: Joi.string().required(), // Todo Check avec raphaelle
   nom_apprenant: Joi.string().required(),
   prenom_apprenant: Joi.string().required(),
   date_de_naissance_apprenant: Joi.date().required(),
@@ -23,4 +39,8 @@ const schema = Joi.object({
   contrat_date_rupture: Joi.date().allow(null),
 });
 
-module.exports = { schema };
+const dossiersApprenantSifaProjection = SIFA_FIELDS.reduce((acc, item) => ({ ...acc, [item]: 1 }), {});
+
+const mapToDonneeSifa = (props) => pick(props, SIFA_FIELDS);
+
+module.exports = { schema, dossiersApprenantSifaProjection, mapToDonneeSifa };
