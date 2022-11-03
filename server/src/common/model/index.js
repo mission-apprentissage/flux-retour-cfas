@@ -20,4 +20,5 @@ module.exports = {
   EffectifApprenantModel: getModel("effectifsApprenants", { enablePagination: true }),
   DemandeIdentifiantsModel: getModel("demandesIdentifiants"),
   DemandeBranchementErpModel: getModel("demandesBranchementErp"),
+  DonneesSifaModel: getModel("donneesSifa"),
 };

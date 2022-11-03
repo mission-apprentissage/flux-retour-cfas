@@ -14,6 +14,7 @@ const demandeBranchementErpComponent = require("./demandeBranchementErp");
 const createCacheComponent = require("./cache");
 const createOvhStorageComponent = require("./ovhStorage");
 const createArchiveDossiersApprenantsComponent = require("./archiveDossiersApprenants");
+const createDonneesSifa = require("./donneesSifa.js");
 
 module.exports = async (options = {}) => {
   const db = options.db || (await connectToMongo()).db;
@@ -34,6 +35,7 @@ module.exports = async (options = {}) => {
   const cache = options.cache || createCacheComponent(options.redisClient);
   const archiveDossiersApprenants =
     options.archiveDossiersApprenants || createArchiveDossiersApprenantsComponent({ db });
+  const donneesSifa = options.donneesSifa || createDonneesSifa();
 
   return {
     users,
@@ -52,5 +54,6 @@ module.exports = async (options = {}) => {
     demandeIdentifiants,
     demandeBranchementErp,
     archiveDossiersApprenants,
+    donneesSifa,
   };
 };

@@ -17,7 +17,12 @@ const validateIneApprenant = (value) => {
   return schema.validate(value);
 };
 
+const RandExp = require("randexp");
+
+const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
+
 module.exports = {
   schema,
   validateIneApprenant,
+  getRandomIne,
 };
