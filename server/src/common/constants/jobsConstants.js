@@ -9,7 +9,6 @@ const JOB_NAMES = {
   seedRandomizedSample: "seed-randomized-sample",
   identifyUaisInCatalog: "identify-uais-types-catalog",
   identifyNetworkDuplicates: "identify-network-duplicates",
-  formationRetrieveFromCfd: "formation-retrieve-from-cfd",
   dossiersApprenantsRetrieveNetworks: "dossiersApprenants-retrieve-networks",
   dossiersApprenantsRetrieveNiveaux: "dossiersApprenants-retrieve-niveaux",
   dossiersApprenantsRetrieveFormateurGestionnairesCatalog: "dossiersApprenants-retrieve-formateur-gestionnaire-catalog",
