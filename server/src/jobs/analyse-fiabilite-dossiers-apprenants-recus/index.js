@@ -14,19 +14,13 @@ const { validateFrenchTelephoneNumber } = require("../../common/domain/frenchTel
 const { validateEmail } = require("../../common/domain/email");
 const { validateUai } = require("../../common/domain/uai");
 const { validateSiret } = require("../../common/domain/siret");
-const {
-  getOrganismeWithSiret,
-  getOrganismesWithUai,
-  SLEEP_TIME_BETWEEN_API_REQUESTS,
-} = require("../../common/apis/apiReferentielMna");
 const logger = require("../../common/logger");
-const { sleep } = require("../../common/utils/miscUtils");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
 };
 
-runScript(async ({ db, cache }) => {
+runScript(async ({ db }) => {
   const analysisId = uuid();
   const analysisDate = new Date();
 
@@ -37,48 +31,6 @@ runScript(async ({ db, cache }) => {
 
   // delete existing dossiers apprenant analysis results
   await db.collection("dossiersApprenantsApiInputFiabilite").deleteMany();
-
-  // search for every valid SIRET received in the last 24h in Referentiel UAI/SIRET API
-  // and keep the result so it can be used in further analysis
-  const siretsFoundInReferentiel = new Map();
-  // we'll leverage cache for the Referentiel API
-  const getOrganismeWithSiretCached = getOrganismeWithSiret(cache);
-  const allSiretsInLast24hoursCursor = getReceivedUniqueSiretsInLast24hCursor(db);
-
-  logger.info(`Fetching all valid SIRET sent in the last 24h in Referentiel UAI/SIRET API`);
-  while (await allSiretsInLast24hoursCursor.hasNext()) {
-    const { siret } = await allSiretsInLast24hoursCursor.next();
-    // find out if an organisme is found for this SIRET, only if valid
-    const isSiretValid = !validateSiret(siret).error;
-    if (isSiretValid) {
-      const { data: organisme, meta } = await getOrganismeWithSiretCached(siret);
-      // if organisme was found, store it in siretsFoundInReferentiel
-      if (organisme) siretsFoundInReferentiel.set(siret, true);
-      // if organisme was not retrieved from cache but from Referentiel, sleep to avoid exceeding their API quota
-      if (!meta.fromCache) await sleep(SLEEP_TIME_BETWEEN_API_REQUESTS);
-    }
-  }
-
-  // search for every valid UAI received in the last 24h in Referentiel UAI/SIRET API to check if it is unique
-  // and keep the result so it can be used in further analysis
-  const uniqueUaisFoundInReferentiel = new Map();
-  // we'll leverage cache for the Referentiel API
-  const getOrganismesWithUaiCached = getOrganismesWithUai(cache);
-  const allUaisInLast24hoursCursor = getReceivedUniqueUaisInLast24hCursor(db);
-
-  logger.info(`Fetching all valid UAI sent in the last 24h in Referentiel UAI/SIRET API`);
-  while (await allUaisInLast24hoursCursor.hasNext()) {
-    const { uai } = await allUaisInLast24hoursCursor.next();
-    // find out if a unique organisme is found for this UAI, only if valid
-    const isUaiValid = !validateUai(uai).error;
-    if (isUaiValid) {
-      const { data: result, meta } = await getOrganismesWithUaiCached(uai);
-      // if organisme was found and unique, store it in uniqueUaisFoundInReferentiel
-      if (result?.pagination.total === 1) uniqueUaisFoundInReferentiel.set(uai, true);
-      // if organismes were not retrieved from cache but from Referentiel, sleep to avoid exceeding their API quota
-      if (!meta.fromCache) await sleep(SLEEP_TIME_BETWEEN_API_REQUESTS);
-    }
-  }
 
   // build map of non unique apprenants to mark them as such in fiabilité analysis
   logger.info(`Building Map of unique apprenants received in the last 24h`);
@@ -143,10 +95,10 @@ runScript(async ({ db, cache }) => {
       // Etablissement information
       uaiEtablissementPresent: isSet(data.uai_etablissement),
       uaiEtablissementFormatValide: !validateUai(data.uai_etablissement).error,
-      uaiEtablissementUniqueFoundInReferentiel: uniqueUaisFoundInReferentiel.has(data.uai_etablissement),
+      uaiEtablissementUniqueFoundInReferentiel: await isUaiFoundUniqueInReferentiel(db)(data.uai_etablissement),
       siretEtablissementPresent: isSet(data.siret_etablissement),
       siretEtablissementFormatValide: !validateSiret(data.siret_etablissement).error,
-      siretEtablissementFoundInReferentiel: siretsFoundInReferentiel.has(data.siret_etablissement),
+      siretEtablissementFoundInReferentiel: await isSiretFoundInReferentiel(db)(data.siret_etablissement),
       uniqueApprenant: !nonUniqueApprenants.get(buildApprenantNormalizedId(data)),
     });
 
@@ -208,36 +160,14 @@ const getReceivedDossiersApprenantsInLast24hCursor = (db) => {
   ]);
 };
 
-const getReceivedUniqueSiretsInLast24hCursor = (db) => {
-  return db.collection("userEvents").aggregate([
-    {
-      $match: {
-        action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
-        $expr: {
-          $gte: ["$date", { $dateSubtract: { startDate: "$$NOW", unit: "hour", amount: 24 } }],
-        },
-      },
-    },
-    { $unwind: "$data" },
-    { $group: { _id: "$data.siret_etablissement" } },
-    { $project: { siret: "$_id", _id: 0 } },
-  ]);
+const isUaiFoundUniqueInReferentiel = (db) => async (uai) => {
+  const organismesInReferentiel = await db.collection("referentielSiret").find({ uai }).toArray();
+  return organismesInReferentiel?.length === 1;
 };
 
-const getReceivedUniqueUaisInLast24hCursor = (db) => {
-  return db.collection("userEvents").aggregate([
-    {
-      $match: {
-        action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
-        $expr: {
-          $gte: ["$date", { $dateSubtract: { startDate: "$$NOW", unit: "hour", amount: 24 } }],
-        },
-      },
-    },
-    { $unwind: "$data" },
-    { $group: { _id: "$data.uai_etablissement" } },
-    { $project: { uai: "$_id", _id: 0 } },
-  ]);
+const isSiretFoundInReferentiel = (db) => async (siret) => {
+  const organismesInReferentiel = await db.collection("referentielSiret").find({ siret }).toArray();
+  return organismesInReferentiel?.length > 0;
 };
 
 const buildApprenantNormalizedId = (apprenant) => {
