@@ -63,11 +63,7 @@ describe(__filename, () => {
     const { createFormation } = formationsComponent();
 
     it("throws when given cfd is invalid", async () => {
-      try {
-        await createFormation("invalid");
-      } catch (err) {
-        assert.notEqual(err, undefined);
-      }
+      await assert.rejects(() => createFormation("invalid"), new Error("Invalid CFD"));
     });
 
     it("throws when formation with given cfd already exists", async () => {
@@ -76,11 +72,18 @@ describe(__filename, () => {
       const formation = new FormationModel({ cfd });
       await formation.save();
 
-      try {
-        await createFormation(cfd);
-      } catch (err) {
-        assert.notEqual(err, undefined);
-      }
+      await assert.rejects(() => createFormation(cfd), new Error("A Formation with CFD 2502000D already exists"));
+    });
+
+    it("throws when formation data is not valid", async () => {
+      nock.cleanAll();
+      nockGetCfdInfo({
+        ...dataForGetCfdInfo.withIntituleLong,
+        date_ouverture: "invalid",
+      });
+
+      const cfd = "2502000D";
+      await assert.rejects(() => createFormation(cfd));
     });
 
     it("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {

@@ -34,15 +34,19 @@ describe("Factory Formation", () => {
       assert.equal(createdCfaEntity.updated_at, null);
     });
 
-    it("Vérifie la création d'une formation avec tous les champs obligatoires", () => {
+    it("Vérifie la création d'une formation avec uniquement les champs obligatoires", () => {
       const props = {
         cfd: "50033610",
+        cfd_start_date: null,
+        cfd_end_date: null,
+        libelle: null,
+        niveau: null,
+        niveau_libelle: null,
+        metiers: null,
       };
 
       const createdCfaEntity = Formation.create(props);
-      const initialPropsData = pick(createdCfaEntity, ["cfd"]);
 
-      assert.deepEqual(initialPropsData, props);
       assert.equal(createdCfaEntity.created_at !== null, true);
       assert.equal(createdCfaEntity.updated_at, null);
     });
@@ -58,7 +62,7 @@ describe("Factory Formation", () => {
         metiers: ["Industrie Agroalimentaire"],
       };
 
-      assert.equal(Formation.create(props), null);
+      assert.throws(() => Formation.create(props));
     });
 
     it("Vérifie la non création d'une formation avec cfd invalide", () => {
@@ -73,7 +77,7 @@ describe("Factory Formation", () => {
         metiers: ["Industrie Agroalimentaire"],
       };
 
-      assert.equal(Formation.create(props), null);
+      assert.throws(() => Formation.create(props));
     });
   });
 });
