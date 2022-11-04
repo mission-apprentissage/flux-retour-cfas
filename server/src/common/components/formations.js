@@ -81,12 +81,9 @@ const createFormation = async (cfd) => {
     metiers: metiersFromCfd,
   });
 
-  if (formationEntity) {
-    const newFormationDocument = new FormationModel(formationEntity);
-    const saved = await newFormationDocument.save();
-    return saved.toObject();
-  }
-  return null;
+  const newFormationDocument = new FormationModel(formationEntity);
+  const saved = await newFormationDocument.save();
+  return saved.toObject();
 };
 
 /**
