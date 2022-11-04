@@ -39,6 +39,10 @@ module.exports = {
   mnaReferentielApi: {
     endpoint: env.get("FLUX_RETOUR_CFAS_MNA_REFERENTIEL_ENDPOINT_URL").required().asString(),
   },
+  mnaTdb: {
+    userName: env.get("FLUX_RETOUR_CFAS_MNA_TDB_USER_NAME").default("").asString(),
+    userPassword: env.get("FLUX_RETOUR_CFAS_MNA_TDB_USER_PASSWORD").default("").asString(),
+  },
   ovhStorage: {
     username: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_USERNAME").required().asString(),
     password: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_PASSWORD").required().asString(),
