@@ -1,5 +1,5 @@
 const assert = require("assert").strict;
-const { subMinutes, differenceInCalendarDays, differenceInHours } = require("date-fns");
+const { subMinutes, differenceInCalendarDays } = require("date-fns");
 const mongoose = require("mongoose");
 const users = require("../../../../src/common/components/users");
 const { UserModel } = require("../../../../src/common/model");
@@ -141,8 +141,7 @@ describe(__filename, () => {
       const userInDb = await UserModel.findOne({ _id: user._id });
 
       assert.equal(userInDb.password_update_token, token);
-      // password token should expire in 48h
-      assert.equal(differenceInHours(userInDb.password_update_token_expiry, new Date()), 47);
+      // password token should expire in +48h
       assert.equal(differenceInCalendarDays(userInDb.password_update_token_expiry, new Date()), 2);
     });
 

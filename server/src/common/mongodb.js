@@ -39,3 +39,8 @@ module.exports.closeMongoConnection = async () => {
 };
 
 module.exports.mongooseInstance = mongooseInstance;
+
+module.exports.dbCollection = (name) => {
+  const db = mongooseInstance.connection;
+  return db.collection(name);
+};

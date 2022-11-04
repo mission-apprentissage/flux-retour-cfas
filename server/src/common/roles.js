@@ -11,7 +11,13 @@ const tdbRoles = {
   cfa: "cfa",
 };
 
+const PARTAGE_SIMPLIFIE_ROLES = {
+  ADMINISTRATOR: "administrator",
+  OF: "of",
+};
+
 module.exports = {
   apiRoles,
   tdbRoles,
+  PARTAGE_SIMPLIFIE_ROLES,
 };
