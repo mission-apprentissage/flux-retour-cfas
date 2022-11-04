@@ -93,6 +93,7 @@
     "migrate-mongo": "9.0.0",
     "mongoose": "5.13.6",
     "mongoose-paginate": "5.0.3",
+    "multer": "1.4.5-lts.1",
     "node-ovh-objectstorage": "2.0.5",
     "oleoduc": "0.6.0",
     "passport": "0.5.2",
@@ -123,6 +124,7 @@
     "mongodb-memory-server": "8.5.2",
     "nock": "13.2.4",
     "nodemon": "2.0.16",
-    "prettier": "2.6.2"
+    "prettier": "2.6.2",
+    "supertest": "6.3.1"
   }
 }
