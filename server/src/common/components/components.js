@@ -49,15 +49,6 @@ module.exports = async (options = {}) => {
     options.signalementAnomaliePartageSimplifie || createSignalementAnomaliePartageSimplifie();
   const partageSimplifieUsers = options.partageSimplifieUsers || createPartageSimplifieUsers();
 
-  const demandesActivationComptePartageSimplifie =
-    options.demandesActivationComptePartageSimplifie || createDemandesActivationComptePartageSimplifie();
-  const donneesApprenantsPartageSimplifie =
-    options.donneesApprenantsPartageSimplifie || createDonneesApprenantsPartageSimplifie();
-  const organismes = options.organismes || createOrganismes();
-  const signalementAnomaliePartageSimplifie =
-    options.signalementAnomaliePartageSimplifie || createSignalementAnomaliePartageSimplifie();
-  const partageSimplifieUsers = options.partageSimplifieUsers || createPartageSimplifieUsers();
-
   return {
     users,
     ovhStorage,
