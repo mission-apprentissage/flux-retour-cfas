@@ -27,7 +27,9 @@ const JOB_NAMES = {
   retrieveRncps: "retrieve-rncps-in-tco-for-cfds",
   createErpUser: "users:create-erp-user",
   createUser: "users:create-user",
+  createAdmin: "users:create-admin",
   generatePasswordUpdateToken: "users:generate-password-update-token",
+  sendDossiersApprenants: "donneesApprenants:send-dossiersApprenants",
 };
 
 /**
