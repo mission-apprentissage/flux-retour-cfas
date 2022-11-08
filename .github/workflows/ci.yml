@@ -8,3 +8,7 @@ jobs:
       - uses: actions/setup-node@v2
 
       - run: make ci
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required"'
