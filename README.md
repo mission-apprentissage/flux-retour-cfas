@@ -275,34 +275,6 @@ Le workflow principal est définie dans `/.github/workflows/yarn-ci.yml` et se c
 
 Pour executer un job, que ce soit en local ou sur un des environnement (production / recette) il est recommandé d'executer les commandes **dans le conteneur docker `flux_retour_cfas_server`.**
 
-### Jobs de suppression des données
-
-Il est possible de supprimer les données en base de plusieurs manières :
-
-- Pour supprimer toutes les données en base :
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:all'
-```
-
-- Pour supprimer uniquement les documents dossiersApprenants en base :
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:dossiersApprenants'
-```
-
-- Pour supprimer uniquement les logs (+usersEvents) en base :
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:logs'
-```
-
-- Pour supprimer uniquement les users (+ usersEvents) en base :
-
-```bash
-docker exec -t -i flux_retour_cfas_server bash -c 'yarn clear:users'
-```
-
 ### Jobs d'alimentation des données
 
 Il est possible d'alimenter la base de donneés avec des données de réferences / test :
