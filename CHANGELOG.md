@@ -1,3 +1,15 @@
+# [2.55.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.54.0...v2.55.0-beta.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* la création de formation n'échoue plus quand cfd_start_date ou cfd_end_date ne sont pas présents ([77b7028](https://github.com/mission-apprentissage/flux-retour-cfas/commit/77b702815f9e699b43d9ca80dbe918dce7e3ca88))
+
+
+### Features
+
+* la création de dossier apprenant ne dépend plus de la création de formation, faite dans un job à part ([bf59ca5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/bf59ca56cc38b7c2f5495d6ccd4cad8667c9a816))
+
 # [2.54.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.53.0...v2.54.0) (2022-10-27)
 
 
