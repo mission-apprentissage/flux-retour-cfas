@@ -51,7 +51,6 @@
     "retrieve-nature-organismes-de-formation": "node -r dotenv/config src/jobs/organisme-de-formation-retrieve-nature-in-referentiel/index.js",
     "cache:warmup": "node -r dotenv/config src/jobs/warm-effectifs-cache/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
-    "repost:latest-dossiersApprenants-to-env": "node -r dotenv/config src/jobs/repost-latest-dossiersApprenants-received-to-env/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
     "migration:down": "migrate-mongo down"
