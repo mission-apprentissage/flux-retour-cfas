@@ -28,38 +28,8 @@ services:
       - ./server/config:/app/config
       - ./server/.env:/app/.env
       - flux_retour_cfas_server_data:/data
-    environment:
-      - FLUX_RETOUR_CFAS_ENV=local
-      - FLUX_RETOUR_CFAS_APP_NAME=Flux Retour Cfas
-      # logs
-      - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
-      - FLUX_RETOUR_CFAS_LOG_STREAMS=slack
-      - FLUX_RETOUR_CFAS_OUTPUT_DIR=.local/output
-      - FLUX_RETOUR_CFAS_PUBLIC_URL=http://localhost
-      # auth
-      - FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET=1234
-      - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=456
-      - FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET=789
-      # users
-      ## admin
-      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_NAME=mna-admin
-      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PASSWORD=password
-      - FLUX_RETOUR_CFAS_USERS_DEFAULT_ADMIN_PERMISSIONS=administrator
-      # Tables Correspondance
-      - FLUX_RETOUR_CFAS_TABLES_CORRESPONDANCES_ENDPOINT_URL=https://tables-correspondances.apprentissage.beta.gouv.fr/api
-      # Mna Catalog
-      - FLUX_RETOUR_CFAS_MNA_CATALOG_ENDPOINT_URL=https://catalogue.apprentissage.beta.gouv.fr/api
-      # LBA
-      - FLUX_RETOUR_CFAS_LBA_ENDPOINT_URL=http://labonnealternance.apprentissage.beta.gouv.fr/api
-      # Référentiel
-      - FLUX_RETOUR_CFAS_MNA_REFERENTIEL_ENDPOINT_URL=https://referentiel.apprentissage.beta.gouv.fr/api/v1
-      # OVH Storage
-      - FLUX_RETOUR_CFAS_OVH_STORAGE_USERNAME=user-OvhStorage
-      - FLUX_RETOUR_CFAS_OVH_STORAGE_PASSWORD=ovhStoragePass
-      - FLUX_RETOUR_CFAS_OVH_STORAGE_AUTH_URL=https://auth.cloud.ovh.net/v3/auth
-      - FLUX_RETOUR_CFAS_OVH_STORAGE_TENANT_ID=12345
-      - FLUX_RETOUR_CFAS_OVH_STORAGE_REGION=XXX
-      - FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME=container-name
+    env_file:
+      - ./server/.env
 
   mongodb:
     ports:
