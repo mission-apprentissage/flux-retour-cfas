@@ -2,10 +2,8 @@ const { DossierApprenantModel, CfaModel } = require("../model");
 const omit = require("lodash.omit");
 const { DUPLICATE_TYPE_CODES } = require("../constants/dossierApprenantConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { validateCfd } = require("../domain/cfd");
 const { escapeRegExp } = require("../utils/regexUtils");
 const { isEqual } = require("date-fns");
-const { existsFormation, createFormation, getFormationWithCfd } = require("./formations")();
 const { DossierApprenant } = require("../factory/dossierApprenant");
 const { faker } = require("@faker-js/faker/locale/fr");
 
@@ -138,13 +136,6 @@ const createDossierApprenant = async (itemToCreate) => {
   // if dossier apprenant établissement has a VALID uai try to retrieve information in Referentiel CFAs
   const etablissementInReferentielCfaFromUai = await CfaModel.findOne({ uai: itemToCreate.uai_etablissement });
 
-  // if dossier apprenant has a valid cfd, check if it exists in db and create it otherwise
-  if (validateCfd(itemToCreate.formation_cfd) && !(await existsFormation(itemToCreate.formation_cfd))) {
-    await createFormation(itemToCreate.formation_cfd);
-  }
-
-  const formationInfo = await getFormationWithCfd(itemToCreate.formation_cfd);
-
   const dossierApprenantEntity = DossierApprenant.create({
     ine_apprenant: itemToCreate.ine_apprenant,
     nom_apprenant: itemToCreate.nom_apprenant.toUpperCase(),
@@ -152,8 +143,6 @@ const createDossierApprenant = async (itemToCreate) => {
     email_contact: itemToCreate.email_contact,
     formation_cfd: itemToCreate.formation_cfd,
     libelle_long_formation: itemToCreate.libelle_long_formation,
-    niveau_formation: formationInfo?.niveau,
-    niveau_formation_libelle: formationInfo?.niveau_libelle,
     uai_etablissement: itemToCreate.uai_etablissement,
     siret_etablissement: itemToCreate.siret_etablissement,
     nom_etablissement: itemToCreate.nom_etablissement,

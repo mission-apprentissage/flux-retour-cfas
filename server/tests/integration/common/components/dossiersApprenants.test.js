@@ -3,14 +3,13 @@ const assert = require("assert").strict;
 const MockDate = require("mockdate");
 const { addDays, isEqual } = require("date-fns");
 const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
-const { DossierApprenantModel, CfaModel, FormationModel } = require("../../../../src/common/model");
+const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
 const { createRandomDossierApprenant, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
 const {
   CODES_STATUT_APPRENANT,
   DUPLICATE_TYPE_CODES,
 } = require("../../../../src/common/constants/dossierApprenantConstants");
 const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { Formation } = require("../../../../src/common/factory/formation");
 
 describe(__filename, () => {
   let fakeNowDate;
@@ -1021,50 +1020,6 @@ describe(__filename, () => {
       assert.equal(etablissement_reseaux.length, 2);
       assert.equal(etablissement_reseaux[0], RESEAUX_CFAS.ANASUP.nomReseau);
       assert.equal(etablissement_reseaux[1], RESEAUX_CFAS.BTP_CFA.nomReseau);
-    });
-
-    it("Vérifie qu'à la création d'un statut avec un CFD valide on crée la formation correspondante si elle n'existe pas", async () => {
-      const { createDossierApprenant } = await dossiersApprenants();
-
-      // Create statut
-      const cfd = "01022104";
-      const statutWithValidCfd = { ...createRandomDossierApprenant(), formation_cfd: cfd };
-      const createdStatut = await createDossierApprenant(statutWithValidCfd);
-
-      assert.ok(createdStatut);
-      // Check that formation was created
-      const foundFormations = await FormationModel.find();
-      assert.equal(foundFormations.length, 1);
-      assert.equal(foundFormations[0].cfd, cfd);
-    });
-
-    it("Vérifie qu'à la création d'un statut avec un CFD valide on ne crée pas de formation si elle existe", async () => {
-      const { createDossierApprenant } = await dossiersApprenants();
-
-      // Create Formation
-      const formationSeed = {
-        cfd: "01022103",
-        rncps: ["RNCP31811"],
-        libelle: "EMPLOYE TRAITEUR (CAP)",
-        cfd_start_date: new Date("2021-08-31").toISOString(),
-        cfd_end_date: new Date("2022-08-31").toISOString(),
-      };
-      const formation = Formation.create(formationSeed);
-      await new FormationModel(formation).save();
-
-      // Create statut
-      const statutWithValidCfd = {
-        ...createRandomDossierApprenant(),
-        formation_cfd: formationSeed.cfd,
-      };
-      const createdStatut = await createDossierApprenant(statutWithValidCfd);
-      assert.ok(createdStatut);
-
-      // Find formations
-      const foundFormations = await FormationModel.find();
-
-      assert.equal(foundFormations.length, 1);
-      assert.equal(foundFormations[0].cfd, createdStatut.formation_cfd);
     });
   });
 

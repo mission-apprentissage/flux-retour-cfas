@@ -118,9 +118,9 @@ jobs:
           yarn --cwd ui install
 
       # Run tests
-      - name: Run Tests
-        run: |
-          yarn --cwd ui test:coverage
+      # - name: Run Tests
+      #   run: |
+      #     yarn --cwd ui test:coverage
 
       # codecov
       # - name: Upload coverage to Codecov
