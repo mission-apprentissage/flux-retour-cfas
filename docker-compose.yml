@@ -36,9 +36,11 @@ services:
     depends_on:
       - mongodb
       - redis
+      - clamav
     environment:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
       - FLUX_RETOUR_CFAS_REDIS_URI=redis://redis:6379
+      - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
 
   mongodb:
     image: mongo:6.0.2-focal
@@ -46,6 +48,19 @@ services:
     restart: unless-stopped
     networks:
       - flux_retour_cfas_network
+
+  clamav:
+    image: clamav/clamav:0.105.1
+    container_name: flux_retour_cfas_clamav
+    mem_limit: 3g
+    restart: unless-stopped
+    networks:
+      - flux_retour_cfas_network
+    healthcheck:
+      test: [ "CMD", "/usr/local/bin/clamdcheck.sh" ]
+      interval: 60s
+      retries: 3
+      start_period: 120s
 
   redis:
     image: redis:7.0.4-alpine
