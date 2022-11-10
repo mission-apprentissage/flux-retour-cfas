@@ -2,8 +2,8 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { CfaModel } = require("../../common/model");
 const config = require("../../../config");
+const { cfasDb } = require("../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -17,7 +17,9 @@ runScript(async () => {
 }, "seed private urls");
 
 const seedCfaPrivateUrls = async () => {
-  const cfasWithoutPrivateUrls = await CfaModel.find({ access_token: { $ne: null }, private_url: null }).lean();
+  const cfasWithoutPrivateUrls = await cfasDb()
+    .find({ access_token: { $ne: null }, private_url: null })
+    .toArray();
   loadingBar.start(cfasWithoutPrivateUrls.length, 0);
 
   await asyncForEach(cfasWithoutPrivateUrls, async (cfaWithoutAccessToken) => {
@@ -25,7 +27,7 @@ const seedCfaPrivateUrls = async () => {
 
     const privateUrl = config.publicUrl + "/cfa/" + cfaWithoutAccessToken.access_token;
 
-    await CfaModel.findOneAndUpdate({ _id: cfaWithoutAccessToken._id }, { $set: { private_url: privateUrl } });
+    await cfasDb().updateOne({ _id: cfaWithoutAccessToken._id }, { $set: { private_url: privateUrl } });
   });
 
   loadingBar.stop();

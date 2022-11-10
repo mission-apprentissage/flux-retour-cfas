@@ -2,18 +2,18 @@ const assert = require("assert").strict;
 const config = require("../../../config");
 const jwt = require("jsonwebtoken");
 const { startServer } = require("../../utils/testUtils");
-const { CfaModel } = require("../../../src/common/model");
 const { tdbRoles } = require("../../../src/common/roles");
+const { cfasDb } = require("../../../src/common/model/collections");
 
 describe(__filename, () => {
   it("Vérifie qu'on peut se connecter avec un access token cfa", async () => {
     const { httpClient } = await startServer();
     // create cfa in db
     const token = "eyP33IyEAisoErO";
-    await new CfaModel({
+    await cfasDb().insertOne({
       uai: "0594889A",
       access_token: token,
-    }).save();
+    });
 
     const response = await httpClient.post("/api/login-cfa", {
       cfaAccessToken: token,
@@ -32,10 +32,7 @@ describe(__filename, () => {
     const { httpClient } = await startServer();
     // create cfa in db
     const token = "eyP33IyEAisoErO";
-    await new CfaModel({
-      uai: "0594889A",
-      access_token: token,
-    }).save();
+    await cfasDb().insertOne({ uai: "0594889A", access_token: token });
 
     const response = await httpClient.post("/api/login-cfa", {
       cfaAccessToken: token.slice(0, -1),
@@ -48,10 +45,10 @@ describe(__filename, () => {
     const { httpClient } = await startServer();
     // create cfa in db
     const token = "eyP33IyEAisoErO";
-    await new CfaModel({
+    await cfasDb().insertOne({
       uai: "0594889A",
       access_token: token,
-    }).save();
+    });
 
     const response = await httpClient.post("/api/login-cfa");
 

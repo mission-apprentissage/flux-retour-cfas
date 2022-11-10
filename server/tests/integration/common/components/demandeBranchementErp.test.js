@@ -1,6 +1,6 @@
 const assert = require("assert").strict;
 const demandeBranchementErp = require("../../../../src/common/components/demandeBranchementErp");
-const { DemandeBranchementErpModel } = require("../../../../src/common/model");
+const { demandesBranchementErpDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   it("Permet de vérifier la création d'une demande de branchement ERP en cours d'interfacage", async () => {
@@ -15,7 +15,7 @@ describe(__filename, () => {
 
     await create(testDemande);
 
-    const foundDemand = await DemandeBranchementErpModel.findOne({ erp: testDemande.erp }).lean();
+    const foundDemand = await demandesBranchementErpDb().findOne({ erp: testDemande.erp });
     assert.equal(foundDemand.erp, testDemande.erp);
     assert.equal(foundDemand.nom_organisme, testDemande.nom_organisme);
     assert.equal(foundDemand.uai_organisme, testDemande.uai_organisme);
@@ -36,7 +36,7 @@ describe(__filename, () => {
 
     await create(testDemande);
 
-    const foundDemand = await DemandeBranchementErpModel.findOne({ erp: testDemande.erp }).lean();
+    const foundDemand = await demandesBranchementErpDb().findOne({ erp: testDemande.erp });
     assert.equal(foundDemand.erp, testDemande.erp);
     assert.equal(foundDemand.nom_organisme, testDemande.nom_organisme);
     assert.equal(foundDemand.uai_organisme, testDemande.uai_organisme);
@@ -59,7 +59,7 @@ describe(__filename, () => {
 
     await create(testDemande);
 
-    const foundDemand = await DemandeBranchementErpModel.findOne({ erp: testDemande.erp }).lean();
+    const foundDemand = await demandesBranchementErpDb().findOne({ erp: testDemande.erp });
     assert.equal(foundDemand.erp, testDemande.erp);
     assert.equal(foundDemand.nom_organisme, testDemande.nom_organisme);
     assert.equal(foundDemand.uai_organisme, testDemande.uai_organisme);

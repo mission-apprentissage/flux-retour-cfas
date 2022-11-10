@@ -4,8 +4,8 @@ const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
 const { JOB_NAMES, jobEventStatuts } = require("../../../src/common/constants/jobsConstants");
 const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
-const { EffectifApprenantModel, JobEventModel } = require("../../../src/common/model");
 const { createRandomEffectifApprenant } = require("../../data/randomizedSample");
+const { jobEventsDb, effectifsApprenantsDb } = require("../../../src/common/model/collections");
 
 const user = { name: "apiConsumerUser", password: "password" };
 
@@ -54,17 +54,17 @@ describe(__filename, () => {
       const uaiTest = "0152290X";
 
       // Add ended Job Event
-      await new JobEventModel({
+      await jobEventsDb().insertOne({
         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
         date: new Date(),
-      }).save();
+      });
 
       for (let index = 0; index < 10; index++) {
-        await new EffectifApprenantModel({
+        await effectifsApprenantsDb().insertOne({
           ...createRandomEffectifApprenant(),
           uai_etablissement: uaiTest,
-        }).save();
+        });
       }
 
       // Call Api Route
@@ -88,17 +88,17 @@ describe(__filename, () => {
       const uaiTest = "0152290X";
 
       // Add ended Job Event
-      await new JobEventModel({
+      await jobEventsDb().insertOne({
         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.started,
         date: new Date(),
-      }).save();
+      });
 
       for (let index = 0; index < 10; index++) {
-        await new EffectifApprenantModel({
+        await effectifsApprenantsDb().insertOne({
           ...createRandomEffectifApprenant(),
           uai_etablissement: uaiTest,
-        }).save();
+        });
       }
 
       // Call Api Route
@@ -124,14 +124,14 @@ describe(__filename, () => {
       const formation_rncpTest = "RNCP34945";
 
       // Add ended Job Event
-      await new JobEventModel({
+      await jobEventsDb().insertOne({
         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
         date: new Date(),
-      }).save();
+      });
 
       for (let index = 0; index < 10; index++) {
-        await new EffectifApprenantModel({
+        await effectifsApprenantsDb().insertOne({
           ...createRandomEffectifApprenant(),
           periode_formation: periode_formationTest,
           code_commune_insee_apprenant: code_commune_insee_apprenantTest,
@@ -140,7 +140,7 @@ describe(__filename, () => {
           contrat_date_fin: contrat_date_finTest,
           contrat_date_rupture: contrat_date_ruptureTest,
           formation_rncp: formation_rncpTest,
-        }).save();
+        });
       }
 
       // Call Api Route
@@ -184,21 +184,21 @@ describe(__filename, () => {
       const accessToken = await getJwtForUser(httpClient);
 
       // Add ended Job Event
-      await new JobEventModel({
+      await jobEventsDb().insertOne({
         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
         action: jobEventStatuts.ended,
         date: new Date(),
-      }).save();
+      });
 
-      await new EffectifApprenantModel({
+      await effectifsApprenantsDb().insertOne({
         ...createRandomEffectifApprenant(),
         indicateur_effectif: EFFECTIF_INDICATOR_NAMES.apprentis,
-      }).save();
+      });
 
-      await new EffectifApprenantModel({
+      await effectifsApprenantsDb().insertOne({
         ...createRandomEffectifApprenant(),
         indicateur_effectif: EFFECTIF_INDICATOR_NAMES.inscritsSansContrats,
-      }).save();
+      });
 
       // Call Api Route
       const response = await httpClient.get("/api/effectifs-apprenants?limit=10", {

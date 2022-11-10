@@ -1,3 +1,5 @@
+const { getDatabase } = require("../mongodb");
+
 /**
  * Find data in mongoCollection and return paginated list
  * @param {*} collection
@@ -36,6 +38,9 @@ const findAndPaginate = async (collection, query, options = {}) => {
  * @param collectionName the name of the collection to search for
  * @returns {Promise<boolean>}
  */
-const doesCollectionExistInDb = async (db, collectionName) => collectionName in db.collections;
+const doesCollectionExistInDb = async (collectionName) => {
+  const collection = await getDatabase().collection(collectionName);
+  return !!collection;
+};
 
 module.exports = { findAndPaginate, doesCollectionExistInDb };

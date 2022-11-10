@@ -1,6 +1,5 @@
 const assert = require("assert").strict;
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
 const effectifs = require("../../../../src/common/components/effectifs");
 const {
   CODES_STATUT_APPRENANT,
@@ -8,6 +7,7 @@ const {
 } = require("../../../../src/common/constants/dossierApprenantConstants");
 const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
 const { NATURE_ORGANISME_DE_FORMATION } = require("../../../../src/common/domain/organisme-de-formation/nature");
+const { dossiersApprenantsDb, cfasDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -33,8 +33,7 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     // Add 5 statuts with simple apprenti sequence
@@ -48,8 +47,7 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     // Add 15 statuts with inscrit -> apprenti sequence
@@ -67,8 +65,7 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
   };
 
@@ -258,8 +255,8 @@ describe(__filename, () => {
         siret_etablissement: "12345678900099",
         nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
       };
-      await new CfaModel({ uai: cfa1.uai_etablissement, nature: cfa1.nature, nature_validity_warning: true }).save();
-      await new CfaModel({ uai: cfa2.uai_etablissement, nature: cfa2.nature, nature_validity_warning: true }).save();
+      await cfasDb().insertOne({ uai: cfa1.uai_etablissement, nature: cfa1.nature, nature_validity_warning: true });
+      await cfasDb().insertOne({ uai: cfa2.uai_etablissement, nature: cfa2.nature, nature_validity_warning: true });
       await seedDossiersApprenants({ ...filterQuery, ...cfa1 });
       await seedDossiersApprenants({ formation_cfd: "12345", ...cfa1 });
       await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
@@ -468,35 +465,35 @@ describe(__filename, () => {
     const createApprentisForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts apprenti
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-08-30T00:00:00.000+0000") },
             ],
             ...filterQuery,
           })
-        ).save();
+        );
       }
     };
 
     const createInscritsSansContratsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts inscrits sans contrat
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
             ],
             ...filterQuery,
           })
-        ).save();
+        );
       }
     };
 
     const createRupturantsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts rupturant
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -504,14 +501,14 @@ describe(__filename, () => {
             ],
             ...filterQuery,
           })
-        ).save();
+        );
       }
     };
 
     const createAbandonsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts abandon
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               {
@@ -529,7 +526,7 @@ describe(__filename, () => {
             ],
             ...filterQuery,
           })
-        ).save();
+        );
       }
     };
 

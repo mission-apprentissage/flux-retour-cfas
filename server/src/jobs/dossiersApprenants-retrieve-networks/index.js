@@ -1,9 +1,9 @@
 const { runScript } = require("../scriptWrapper");
 const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
-const { DossierApprenantModel, CfaModel } = require("../../common/model");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
+const { cfasDb, dossiersApprenantsDb } = require("../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -23,7 +23,9 @@ runScript(async () => {
  */
 const retrieveNetworks = async () => {
   // Parse tous les CFAs avec au moins un réseau
-  const cfasWithReseaux = await CfaModel.find({ reseaux: { $exists: true, $ne: [] } }).lean();
+  const cfasWithReseaux = await cfasDb()
+    .find({ reseaux: { $exists: true, $ne: [] } })
+    .toArray();
 
   logger.info(`Récupération des réseaux pour ${cfasWithReseaux.length} CFAs avec au moins un réseau`);
   loadingBar.start(cfasWithReseaux.length, 0);
@@ -32,9 +34,11 @@ const retrieveNetworks = async () => {
     // Si liste de sirets on update les dossiers apprenants pour ces sirets
     if (currentCfaWithReseau.sirets?.length > 0) {
       // Récupération des DossierApprenant pour ces sirets
-      const dossiersForSirets = await DossierApprenantModel.find({
-        siret_etablissement: { $in: currentCfaWithReseau.sirets },
-      }).lean();
+      const dossiersForSirets = await dossiersApprenantsDb()
+        .find({
+          siret_etablissement: { $in: currentCfaWithReseau.sirets },
+        })
+        .toArray();
 
       if (dossiersForSirets) {
         await updateNetworksForDossiersApprenants(dossiersForSirets, currentCfaWithReseau);
@@ -43,7 +47,9 @@ const retrieveNetworks = async () => {
       // Sinon si uai fourni on update les dossiers apprenants pour cet uai
       if (currentCfaWithReseau.uai) {
         // Recupération des DossierApprenant pour cet uai
-        const dossiersForUai = await DossierApprenantModel.find({ uai_etablissement: currentCfaWithReseau.uai }).lean();
+        const dossiersForUai = await dossiersApprenantsDb()
+          .find({ uai_etablissement: currentCfaWithReseau.uai })
+          .toArray();
         if (dossiersForUai) {
           await updateNetworksForDossiersApprenants(dossiersForUai, currentCfaWithReseau);
         }
@@ -83,13 +89,12 @@ const updateNetworksForDossiersApprenants = async (dossiersToUpdate, cfaReferent
  * @param {*} reseauxToAdd
  */
 const addReseauxToDossierApprenant = async (currentDossierForSiret, reseauxToAdd) => {
-  await DossierApprenantModel.findByIdAndUpdate(
-    currentDossierForSiret._id,
+  await dossiersApprenantsDb().updateOne(
+    { _id: currentDossierForSiret._id },
     {
       $addToSet: {
         etablissement_reseaux: reseauxToAdd,
       },
-    },
-    { new: true }
+    }
   );
 };

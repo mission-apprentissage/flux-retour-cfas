@@ -2,7 +2,7 @@ const assert = require("assert").strict;
 const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { historySequenceApprentiToAbandon } = require("../../../data/historySequenceSamples");
-const { DossierApprenantModel } = require("../../../../src/common/model");
+const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   describe("createRandomDossierApprenant", () => {
@@ -10,7 +10,7 @@ describe(__filename, () => {
       const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
       const randomDossierApprenantProps = createRandomDossierApprenant();
-      const result = await (await createDossierApprenant(randomDossierApprenantProps)).toJSON();
+      const result = await createDossierApprenant(randomDossierApprenantProps);
 
       // Checks creation
       assert.equal(result.ine_apprenant, randomDossierApprenantProps.ine_apprenant);
@@ -51,9 +51,8 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceApprentiToAbandon,
       });
 
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
-      const result = toAdd.toJSON();
+      const { insertedId } = await dossiersApprenantsDb().insertOne(randomStatut);
+      const result = await dossiersApprenantsDb().findOne({ _id: insertedId });
 
       // Checks creation
       assert.deepEqual(result.ine_apprenant, randomStatut.ine_apprenant);
@@ -75,7 +74,7 @@ describe(__filename, () => {
       assert.deepEqual(result.historique_statut_apprenant, randomStatut.historique_statut_apprenant);
 
       // Checks exists method
-      const found = await DossierApprenantModel.countDocuments({
+      const found = await dossiersApprenantsDb().countDocuments({
         ine_apprenant: result.ine_apprenant,
         nom_apprenant: result.nom_apprenant,
         prenom_apprenant: result.prenom_apprenant,

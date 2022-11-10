@@ -1,11 +1,11 @@
-const { DossierApprenantModel, CfaModel } = require("../model");
+const { ObjectId } = require("mongodb");
 const omit = require("lodash.omit");
 const { DUPLICATE_TYPE_CODES } = require("../constants/dossierApprenantConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { escapeRegExp } = require("../utils/regexUtils");
 const { isEqual } = require("date-fns");
 const { DossierApprenant } = require("../factory/dossierApprenant");
-const { faker } = require("@faker-js/faker/locale/fr");
+const { cfasDb, dossiersApprenantsDb } = require("../model/collections");
 
 module.exports = () => ({
   getDossierApprenant,
@@ -13,8 +13,6 @@ module.exports = () => ({
   createDossierApprenant,
   updateDossierApprenant,
   getDuplicatesList,
-  anonymize,
-  ANONYMOUS_PREFIX,
 });
 
 /**
@@ -33,14 +31,14 @@ const getDossierApprenant = ({
   const nomApprenantRegexp = new RegExp("^" + escapeRegExp(nom_apprenant.trim()) + "$", "i");
   const prenomApprenantRegexp = new RegExp("^" + escapeRegExp(prenom_apprenant.trim()) + "$", "i");
 
-  return DossierApprenantModel.findOne({
+  return dossiersApprenantsDb().findOne({
     nom_apprenant: { $regex: nomApprenantRegexp },
     prenom_apprenant: { $regex: prenomApprenantRegexp },
     date_de_naissance_apprenant,
     formation_cfd,
     uai_etablissement,
     annee_scolaire,
-  }).lean();
+  });
 };
 
 /**
@@ -91,7 +89,9 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
     "uai_etablissement",
     "annee_scolaire"
   );
-  const existingItem = await DossierApprenantModel.findById(existingItemId);
+  const _id = new ObjectId(existingItemId);
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+  const existingItem = await dossiersApprenantsDb().findOne({ _id });
 
   // new statut_apprenant to add ?
   const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {
@@ -128,13 +128,14 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
     ...updatePayload,
     updated_at: new Date(),
   };
-  const updated = await DossierApprenantModel.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
-  return updated;
+  await dossiersApprenantsDb().updateOne({ _id }, { $set: updateQuery });
+  // TODO return nothing (single responsibility)
+  return await dossiersApprenantsDb().findOne({ _id });
 };
 
 const createDossierApprenant = async (itemToCreate) => {
   // if dossier apprenant établissement has a VALID uai try to retrieve information in Referentiel CFAs
-  const etablissementInReferentielCfaFromUai = await CfaModel.findOne({ uai: itemToCreate.uai_etablissement });
+  const etablissementInReferentielCfaFromUai = await cfasDb().findOne({ uai: itemToCreate.uai_etablissement });
 
   const dossierApprenantEntity = DossierApprenant.create({
     ine_apprenant: itemToCreate.ine_apprenant,
@@ -172,13 +173,16 @@ const createDossierApprenant = async (itemToCreate) => {
   });
 
   if (dossierApprenantEntity) {
-    const dossierApprenantToAdd = new DossierApprenantModel(dossierApprenantEntity);
-    return dossierApprenantToAdd.save();
+    const { insertedId } = await dossiersApprenantsDb().insertOne(dossierApprenantEntity);
+    // TODO return only the insertedId (single responsiblity)
+    return await dossiersApprenantsDb().findOne({ _id: insertedId });
   }
 
+  // TODO throw error if factory validation didn't pass
   return null;
 };
 
+// TODO not used anymore, to remove?
 /**
  * Récupération de la liste des DossierApprenant en doublons stricts pour les filtres passés en paramètres
  * @param {*} duplicatesTypesCode
@@ -188,7 +192,7 @@ const createDossierApprenant = async (itemToCreate) => {
 const findDossiersApprenantsDuplicates = async (
   duplicatesTypesCode,
   filters = {},
-  { allowDiskUse = false, duplicatesWithNoUpdate = false } = {}
+  { duplicatesWithNoUpdate = false } = {}
 ) => {
   let unicityQueryGroup = {};
 
@@ -313,9 +317,7 @@ const findDossiersApprenantsDuplicates = async (
     },
   ];
 
-  const dossiersApprenantsFound = allowDiskUse
-    ? await DossierApprenantModel.aggregate(aggregateQuery).allowDiskUse(true).exec()
-    : await DossierApprenantModel.aggregate(aggregateQuery);
+  const dossiersApprenantsFound = await dossiersApprenantsDb().aggregate(aggregateQuery).toArray();
 
   return dossiersApprenantsFound;
 };
@@ -341,26 +343,4 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
       discriminants,
     };
   });
-};
-
-const ANONYMOUS_PREFIX = "ANONYME";
-
-/**
- * Anonymisation des champs nominatifs d'un dossier apprenant
- * ajoute un prefix ANONYME_ devant chaque champ mis à jour
- * @param {*} dossierApprenantId
- * @returns
- */
-const anonymize = async (dossierApprenantId) => {
-  const anonymizeQuery = {
-    nom_apprenant: `${ANONYMOUS_PREFIX}_${faker.name.lastName().toUpperCase()}`,
-    prenom_apprenant: `${ANONYMOUS_PREFIX}_${faker.name.firstName()}`,
-    email_contact: `${ANONYMOUS_PREFIX}_${faker.internet.email()}`,
-    tel_apprenant: `${ANONYMOUS_PREFIX}_${faker.phone.phoneNumber()}`,
-    code_commune_insee_apprenant: `${ANONYMOUS_PREFIX}_${faker.address.zipCode()}`,
-    date_de_naissance_apprenant: faker.date.birthdate({ min: 15, max: 25, mode: "age" }),
-    updated_at: new Date(),
-  };
-  const updated = await DossierApprenantModel.findByIdAndUpdate(dossierApprenantId, anonymizeQuery, { new: true });
-  return updated;
 };

@@ -7,10 +7,10 @@ const { asyncForEach } = require("../../../../src/common/utils/asyncUtils");
 const { dataForGetCfdInfo } = require("../../../data/apiTablesDeCorrespondances");
 const { dataForGetMetiersByCfd } = require("../../../data/apiLba");
 const formationsComponent = require("../../../../src/common/components/formations");
-const { FormationModel, DossierApprenantModel } = require("../../../../src/common/model");
 const { Formation } = require("../../../../src/common/factory/formation");
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { nockGetMetiersByCfd } = require("../../../utils/nockApis/nock-Lba");
+const { formationsDb, dossiersApprenantsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   describe("existsFormation", () => {
@@ -23,8 +23,7 @@ describe(__filename, () => {
 
     it("returns false when formation with given cfd does not exist", async () => {
       // create a formation
-      const newFormation = new FormationModel({ cfd: "0123456G" });
-      await newFormation.save();
+      await formationsDb().insertOne({ cfd: "0123456G" });
 
       const shouldBeFalse = await existsFormation("blabla");
       assert.equal(shouldBeFalse, false);
@@ -32,10 +31,10 @@ describe(__filename, () => {
 
     it("returns true when formation with given cfd exists", async () => {
       // create a formation
-      const newFormation = new FormationModel({ cfd: "0123456G" });
-      await newFormation.save();
+      const cfd = "0123456G";
+      await formationsDb().insertOne({ cfd });
 
-      const shouldBeTrue = await existsFormation(newFormation.cfd);
+      const shouldBeTrue = await existsFormation(cfd);
       assert.equal(shouldBeTrue, true);
     });
   });
@@ -51,11 +50,10 @@ describe(__filename, () => {
     it("returns formation with given cfd when it exists", async () => {
       // create a formation
       const cfd = "2502000D";
-      const newFormation = new FormationModel({ cfd });
-      const createdFormation = await newFormation.save();
+      const { insertedId } = await formationsDb().insertOne({ cfd });
 
       const found = await getFormationWithCfd(cfd);
-      assert.deepEqual(createdFormation.toObject(), found);
+      assert.equal(insertedId.equals(found._id), true);
     });
   });
 
@@ -69,8 +67,7 @@ describe(__filename, () => {
     it("throws when formation with given cfd already exists", async () => {
       const cfd = "2502000D";
       // create formation in db
-      const formation = new FormationModel({ cfd });
-      await formation.save();
+      await formationsDb().insertOne({ cfd });
 
       await assert.rejects(() => createFormation(cfd), new Error("A Formation with CFD 2502000D already exists"));
     });
@@ -140,12 +137,12 @@ describe(__filename, () => {
     beforeEach(async () => {
       await asyncForEach(formationsSeed, async (formationSeed) => {
         const formation = Formation.create(formationSeed);
-        await new FormationModel(formation).save();
+        await formationsDb().insertOne(formation);
 
-        await new DossierApprenantModel({
+        await dossiersApprenantsDb().insertOne({
           ...createRandomDossierApprenant(),
           formation_cfd: formation.cfd,
-        }).save();
+        });
       });
     });
 
@@ -222,11 +219,11 @@ describe(__filename, () => {
       const searchTerm = "decoration";
       const etablissement_num_region = "28";
 
-      await new DossierApprenantModel({
+      await dossiersApprenantsDb().insertOne({
         ...createRandomDossierApprenant(),
         etablissement_num_region,
         formation_cfd: formationsSeed[2].cfd,
-      }).save();
+      });
 
       const results = await searchFormations({ searchTerm, etablissement_num_region });
 
@@ -238,11 +235,11 @@ describe(__filename, () => {
       const searchTerm = "decoration";
       const etablissement_num_departement = "77";
 
-      await new DossierApprenantModel({
+      await dossiersApprenantsDb().insertOne({
         ...createRandomDossierApprenant(),
         etablissement_num_departement,
         formation_cfd: formationsSeed[2].cfd,
-      }).save();
+      });
 
       const results = await searchFormations({ searchTerm, etablissement_num_departement });
 
@@ -254,11 +251,11 @@ describe(__filename, () => {
       const searchTerm = "decoration";
       const etablissement_reseaux = "RESEAU_TEST";
 
-      await new DossierApprenantModel({
+      await dossiersApprenantsDb().insertOne({
         ...createRandomDossierApprenant(),
         etablissement_reseaux: [etablissement_reseaux],
         formation_cfd: formationsSeed[2].cfd,
-      }).save();
+      });
 
       const results = await searchFormations({ searchTerm, etablissement_reseaux });
 
@@ -270,11 +267,11 @@ describe(__filename, () => {
       const searchTerm = "decoration";
       const uai_etablissement = "0762232N";
 
-      await new DossierApprenantModel({
+      await dossiersApprenantsDb().insertOne({
         ...createRandomDossierApprenant(),
         uai_etablissement,
         formation_cfd: formationsSeed[2].cfd,
-      }).save();
+      });
 
       const results = await searchFormations({ searchTerm, uai_etablissement });
 

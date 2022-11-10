@@ -1,9 +1,9 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { createRandomDossierApprenant } = require("../../data/randomizedSample");
-const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
 const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
 const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/organisme-de-formation/nature");
+const { cfasDb, dossiersApprenantsDb } = require("../../../src/common/model/collections");
 
 describe(__filename, () => {
   let httpClient;
@@ -22,11 +22,11 @@ describe(__filename, () => {
     });
 
     it("sends a 200 HTTP response with results when match", async () => {
-      await new CfaModel({
+      await cfasDb().insertOne({
         nom: "BTP CFA Somme",
         nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
         uai: "0801302F",
-      }).save();
+      });
 
       const response = await httpClient.post("/api/cfas/search", { searchTerm: "Somme" });
 
@@ -36,12 +36,12 @@ describe(__filename, () => {
     });
 
     it("sends a 200 HTTP response with results when match", async () => {
-      await new CfaModel({
+      await cfasDb().insertOne({
         nom: "BTP CFA Somme",
         nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
         uai: "0801302F",
         sirets: ["34012780200015"],
-      }).save();
+      });
 
       const response = await httpClient.post("/api/cfas/search", { searchTerm: "Somme" });
 
@@ -71,14 +71,14 @@ describe(__filename, () => {
         adresse: adresseTest,
       };
 
-      await new CfaModel(cfaProps).save();
-      await new DossierApprenantModel(
+      await cfasDb().insertOne(cfaProps);
+      await dossiersApprenantsDb().insertOne(
         createRandomDossierApprenant({
           siret_etablissement: siretTest,
           uai_etablissement: uaiTest,
           nom_etablissement: nomTest,
         })
-      ).save();
+      );
 
       const response = await httpClient.get(`/api/cfas/${uaiTest}`);
 
@@ -91,7 +91,6 @@ describe(__filename, () => {
         reseaux: reseauxTest,
         nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
         natureValidityWarning: true,
-        domainesMetiers: [],
       });
     });
 
@@ -122,18 +121,17 @@ describe(__filename, () => {
       };
 
       const randomStatut = createRandomDossierApprenant(cfaInfos);
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
 
       // Add Cfa in referentiel
-      const cfaReferenceToAdd = new CfaModel({
+      const cfaReferenceToAdd = cfasDb().insertOne({
         sirets: [siretTest],
         nom: nomTest,
         uai: uaiTest,
         reseaux: reseauxTest,
         access_token: tokenTest,
       });
-      await cfaReferenceToAdd.save();
+      await cfaReferenceToAdd;
 
       const response = await httpClient.get(`/api/cfas/url-access-token/${tokenTest}`);
 
@@ -155,15 +153,16 @@ describe(__filename, () => {
         nom: "Centre-Val de Loire",
       };
 
-      await new CfaModel({
+      await cfasDb().insertOne({
         uai: "0451582A",
         siret: "31521327200067",
         nom: "TEST CFA",
         region_nom: regionToTest.nom,
         region_num: regionToTest.code,
-      }).save();
+      });
 
-      const response = await httpClient.get(`/api/cfas?query={"region_num":${regionToTest.code}}`);
+      const queryStringified = JSON.stringify({ region_num: regionToTest.code });
+      const response = await httpClient.get(`/api/cfas?query=${queryStringified}`);
 
       assert.equal(response.status, 200);
       assert.equal(response.data.cfas.length, 1);

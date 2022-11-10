@@ -1,14 +1,10 @@
+const { ObjectId } = require("mongodb");
 const { addHours, isBefore } = require("date-fns");
-const { UserModel } = require("../model");
+const { usersDb } = require("../model/collections");
 const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
 const sha512Utils = require("../utils/sha512Utils");
 const { validatePassword } = require("../domain/password");
 const { escapeRegExp } = require("../utils/regexUtils");
-
-const rehashPassword = (user, password) => {
-  user.password = sha512Utils.hash(password);
-  return user.save();
-};
 
 const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
 
@@ -16,10 +12,10 @@ const isUserPasswordUpdatedTokenValid = (user) => {
   return Boolean(user.password_update_token_expiry) && isBefore(new Date(), user.password_update_token_expiry);
 };
 
-module.exports = async () => {
+module.exports = () => {
   return {
     authenticate: async (username, password) => {
-      const user = await UserModel.findOne({ username });
+      const user = await usersDb().findOne({ username });
       if (!user) {
         return null;
       }
@@ -27,15 +23,20 @@ module.exports = async () => {
       const current = user.password;
       if (sha512Utils.compare(password, current)) {
         if (sha512Utils.isTooWeak(current)) {
-          await rehashPassword(user, password);
+          await usersDb().updateOne({ _id: user._id }, { password: sha512Utils.hash(password) });
         }
-        return user.toObject();
+        return user;
       }
       return null;
     },
-    getUser: (username) => UserModel.findOne({ username }),
-    getUserById: async (_id) => {
-      const user = await UserModel.findById(_id).lean();
+    // TODO à tester
+    getUser: async (username) => {
+      return await usersDb().findOne({ username });
+    },
+    getUserById: async (id) => {
+      const _id = new ObjectId(id);
+      if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+      const user = await usersDb().findOne({ _id });
 
       if (!user) {
         throw new Error(`Unable to find user`);
@@ -43,8 +44,9 @@ module.exports = async () => {
 
       return user;
     },
+    // TODO à tester
     getAll: async () => {
-      return await UserModel.find().lean();
+      return await usersDb().find().toArray();
     },
     createUser: async (userProps) => {
       const username = userProps.username;
@@ -56,7 +58,11 @@ module.exports = async () => {
       const organisme = userProps.organisme || null;
       const email = userProps.email || null;
 
-      const user = new UserModel({
+      // check if username is not taken
+      const user = await usersDb().findOne({ username });
+      if (user) throw new Error("User with this username already exists");
+
+      const { insertedId } = await usersDb().insertOne({
         username,
         password: passwordHash,
         email,
@@ -67,57 +73,70 @@ module.exports = async () => {
         created_at: new Date(),
       });
 
-      await user.save();
-      return user.toObject();
+      // TODO return only the id instead of the created object (single responsibility)
+      return await usersDb().findOne({ _id: insertedId });
     },
     generatePasswordUpdateToken: async (username) => {
-      const user = await UserModel.findOne({ username });
+      const user = await usersDb().findOne({ username });
 
       if (!user) {
         throw new Error("User not found");
       }
 
-      const token = generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
-
-      user.password_update_token = token;
+      // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
+      const token = generateRandomAlphanumericPhrase(80);
       // token will only be valid for duration defined in PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS
-      user.password_update_token_expiry = addHours(new Date(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS);
-      await user.save();
+      const tokenExpiry = addHours(new Date(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS);
+
+      await usersDb().updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            password_update_token: token,
+            password_update_token_expiry: tokenExpiry,
+          },
+        }
+      );
+
       return token;
     },
     updatePassword: async (updateToken, password) => {
       if (!validatePassword(password)) throw new Error("Password must be valid (at least 16 characters)");
       // find user with password_update_token and ensures it exists
-      const user = await UserModel.findOne({
+      const user = await usersDb().findOne({
         password_update_token: updateToken,
         password_update_token_expiry: { $ne: null },
       });
-
       // throw if user is not found
       if (!user) throw new Error("User not found");
-
       // token must be valid
       if (!isUserPasswordUpdatedTokenValid(user)) {
         throw new Error("Password update token has expired");
       }
-
       // we store password hashes only
       const passwordHash = sha512Utils.hash(password);
-      user.password = passwordHash;
-      user.password_update_token = null;
-      user.password_update_token_expiry = null;
 
-      await user.save();
+      await usersDb().updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            password: passwordHash,
+            password_update_token: null,
+            password_update_token_expiry: null,
+          },
+        }
+      );
 
-      return user.toObject();
+      // TODO return nothing (single responsibility)
+      return user.username;
     },
     removeUser: async (username) => {
-      const user = await UserModel.findOne({ username });
+      const user = await usersDb().findOne({ username });
       if (!user) {
         throw new Error(`Unable to find user ${username}`);
       }
 
-      return await user.deleteOne({ username });
+      await usersDb().deleteOne({ username });
     },
     searchUsers: async (searchCriteria) => {
       const { searchTerm } = searchCriteria;
@@ -134,7 +153,9 @@ module.exports = async () => {
 
       const sortStage = { username: 1 };
 
-      const found = await UserModel.aggregate([{ $match: matchStage }, { $sort: sortStage }]);
+      const found = await usersDb()
+        .aggregate([{ $match: matchStage }, { $sort: sortStage }])
+        .toArray();
 
       return found.map((user) => {
         return {
@@ -149,26 +170,28 @@ module.exports = async () => {
         };
       });
     },
-    updateUser: async (_id, { username, email, network, region, organisme }) => {
-      const user = await UserModel.findById(_id);
+    updateUser: async (id, { username, email, network, region, organisme }) => {
+      const _id = new ObjectId(id);
+      if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+
+      const user = await usersDb().findOne({ _id });
 
       if (!user) {
         throw new Error(`Unable to find user`);
       }
 
-      const updated = await UserModel.findByIdAndUpdate(
-        _id,
+      await usersDb().updateOne(
+        { _id },
         {
-          username,
-          email,
-          network,
-          region,
-          organisme,
-        },
-        { new: true }
+          $set: {
+            username,
+            email,
+            network,
+            region,
+            organisme,
+          },
+        }
       );
-
-      return updated;
     },
   };
 };

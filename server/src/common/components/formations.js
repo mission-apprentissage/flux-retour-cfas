@@ -1,4 +1,3 @@
-const { FormationModel, DossierApprenantModel } = require("../model");
 const { validateCfd } = require("../domain/cfd");
 const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
 const { getMetiersByCfd } = require("../apis/apiLba");
@@ -6,6 +5,7 @@ const { getMetiersByCfd } = require("../apis/apiLba");
 const { Formation } = require("../factory/formation");
 const { escapeRegExp } = require("../utils/regexUtils");
 const logger = require("../logger");
+const { formationsDb, dossiersApprenantsDb } = require("../model/collections");
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -23,7 +23,7 @@ module.exports = () => ({
  * @return {boolean} Does it exist
  */
 const existsFormation = async (cfd) => {
-  const count = await FormationModel.countDocuments({ cfd });
+  const count = await formationsDb().countDocuments({ cfd });
   return count !== 0;
 };
 
@@ -32,7 +32,9 @@ const existsFormation = async (cfd) => {
  * @param {string} cfd
  * @return {Formation | null} Found formation
  */
-const getFormationWithCfd = (cfd) => FormationModel.findOne({ cfd }).lean();
+const getFormationWithCfd = async (cfd) => {
+  return await formationsDb().findOne({ cfd });
+};
 
 const buildFormationLibelle = (formationFromTCO) => {
   return formationFromTCO.intitule_long || "";
@@ -74,16 +76,16 @@ const createFormation = async (cfd) => {
     cfd,
     cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
     cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
-    rncps: formationInfo?.rncps?.map((item) => item.code_rncp), // Returned by TCO
+    rncps: formationInfo?.rncps?.map((item) => item.code_rncp) || [], // Returned by TCO
     libelle: buildFormationLibelle(formationInfo),
     niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
     niveau_libelle: formationInfo?.niveau,
     metiers: metiersFromCfd,
   });
 
-  const newFormationDocument = new FormationModel(formationEntity);
-  const saved = await newFormationDocument.save();
-  return saved.toObject();
+  const { insertedId } = await formationsDb().insertOne(formationEntity);
+  // TODO return only the id (single responsibility)
+  return await formationsDb().findOne({ _id: insertedId });
 };
 
 /**
@@ -94,7 +96,7 @@ const createFormation = async (cfd) => {
 const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
 
-  const eligibleCfds = await DossierApprenantModel.distinct("formation_cfd", otherFilters);
+  const eligibleCfds = await dossiersApprenantsDb().distinct("formation_cfd", otherFilters);
 
   const matchStage = searchTerm
     ? {
@@ -114,5 +116,7 @@ const searchFormations = async (searchCriteria) => {
       }
     : { libelle: 1 };
 
-  return FormationModel.aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }]);
+  return await formationsDb()
+    .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
+    .toArray();
 };

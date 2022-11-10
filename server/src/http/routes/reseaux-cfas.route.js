@@ -59,6 +59,7 @@ module.exports = ({ reseauxCfas }) => {
     tryCatch(async (req, res) => {
       const { id } = req.params;
 
+      // TODO use Joi schema to handle missing id
       if (id !== undefined) {
         await reseauxCfas.delete(id);
         return res.json({

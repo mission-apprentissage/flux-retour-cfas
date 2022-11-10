@@ -1,144 +1,146 @@
 const assert = require("assert").strict;
 const { subMinutes, differenceInCalendarDays, differenceInHours } = require("date-fns");
-const mongoose = require("mongoose");
+const mongodb = require("mongodb");
 const users = require("../../../../src/common/components/users");
-const { UserModel } = require("../../../../src/common/model");
+const { usersDb } = require("../../../../src/common/model/collections");
 const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
 
 describe(__filename, () => {
-  it("Permet de créer un utilisateur avec mot de passe", async () => {
-    const { createUser } = await users();
+  describe("createUser", () => {
+    const { createUser } = users();
+    it("Permet de créer un utilisateur avec mot de passe", async () => {
+      const created = await createUser({ username: "user", password: "password" });
+      assert.equal(created.username, "user");
+      assert.equal(created.permissions.length, 0);
+      assert.equal(created.password.startsWith("$6$rounds="), true);
 
-    const created = await createUser({ username: "user", password: "password" });
-    assert.equal(created.username, "user");
-    assert.equal(created.permissions.length, 0);
-    assert.equal(created.password.startsWith("$6$rounds="), true);
-
-    const found = await UserModel.findOne({ username: "user" });
-    assert.equal(found.username, "user");
-    assert.equal(found.permissions.length, 0);
-    assert.equal(found.password.startsWith("$6$rounds="), true);
-  });
-
-  it("Crée un utilisateur avec mot de passe random quand pas de mot de passe fourni", async () => {
-    const { createUser } = await users();
-
-    const created = await createUser({ username: "user" });
-    assert.equal(created.username, "user");
-    assert.equal(created.permissions.length, 0);
-    assert.equal(created.password.startsWith("$6$rounds="), true);
-
-    const found = await UserModel.findOne({ username: "user" });
-    assert.equal(found.username, "user");
-  });
-
-  it("Permet de créer un utilisateur avec les droits d'admin", async () => {
-    const { createUser } = await users();
-
-    const user = await createUser({
-      username: "userAdmin",
-      password: "password",
-      permissions: [apiRoles.administrator],
+      const found = await usersDb().findOne({ username: "user" });
+      assert.equal(found.username, "user");
+      assert.equal(found.permissions.length, 0);
+      assert.equal(found.password.startsWith("$6$rounds="), true);
     });
-    const found = await UserModel.findOne({ username: "userAdmin" });
 
-    assert.equal(user.permissions.includes(apiRoles.administrator), true);
-    assert.equal(found.permissions.includes(apiRoles.administrator), true);
+    it("Renvoie une erreur lorsqu'un utilisateur avec le même username existe en base", async () => {
+      const username = "user1";
+
+      // first creation
+      await createUser({ username });
+      // second creation
+      await assert.rejects(() => createUser({ username }));
+    });
+
+    it("Crée un utilisateur avec mot de passe random quand pas de mot de passe fourni", async () => {
+      const created = await createUser({ username: "user" });
+      assert.equal(created.username, "user");
+      assert.equal(created.permissions.length, 0);
+      assert.equal(created.password.startsWith("$6$rounds="), true);
+
+      const found = await usersDb().findOne({ username: "user" });
+      assert.equal(found.username, "user");
+    });
+
+    it("Permet de créer un utilisateur avec les droits d'admin", async () => {
+      const user = await createUser({
+        username: "userAdmin",
+        password: "password",
+        permissions: [apiRoles.administrator],
+      });
+      const found = await usersDb().findOne({ username: "userAdmin" });
+
+      assert.equal(user.permissions.includes(apiRoles.administrator), true);
+      assert.equal(found.permissions.includes(apiRoles.administrator), true);
+    });
+
+    it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
+      const user = await createUser({
+        username: "userAdmin",
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "email@test.fr",
+        network: "test",
+      });
+      const found = await usersDb().findOne({ username: "userAdmin" });
+
+      assert.equal(user.permissions.includes(tdbRoles.network), true);
+      assert.equal(user.network === "test", true);
+      assert.equal(user.email === "email@test.fr", true);
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "email@test.fr", true);
+    });
+
+    it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau, une région et un organisme", async () => {
+      const user = await createUser({
+        username: "userAdmin",
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "email@test.fr",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+      const found = await usersDb().findOne({ username: "userAdmin" });
+
+      assert.equal(user.permissions.includes(tdbRoles.network), true);
+      assert.equal(user.network === "test", true);
+      assert.equal(user.email === "email@test.fr", true);
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.region === "REGION", true);
+      assert.equal(found.organisme === "ORGANISME", true);
+      assert.equal(found.email === "email@test.fr", true);
+    });
   });
 
-  it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau", async () => {
-    const { createUser } = await users();
+  describe("removeUser", () => {
+    const { createUser, removeUser } = users();
 
-    const user = await createUser({
-      username: "userAdmin",
-      password: "password",
-      permissions: [tdbRoles.network],
-      email: "email@test.fr",
-      network: "test",
+    it("Permet de supprimer un utilisateur via son username", async () => {
+      await createUser({
+        username: "userToDelete",
+        password: "password",
+        permissions: [apiRoles.administrator],
+      });
+      await removeUser("userToDelete");
+
+      const found = await usersDb().findOne({ username: "userToDelete" });
+      assert.equal(found, null);
     });
-    const found = await UserModel.findOne({ username: "userAdmin" });
-
-    assert.equal(user.permissions.includes(tdbRoles.network), true);
-    assert.equal(user.network === "test", true);
-    assert.equal(user.email === "email@test.fr", true);
-
-    assert.equal(found.permissions.includes(tdbRoles.network), true);
-    assert.equal(found.network === "test", true);
-    assert.equal(found.email === "email@test.fr", true);
   });
 
-  it("Permet de créer un utilisateur avec un email, les droits de réseau et un réseau, une région et un organisme", async () => {
-    const { createUser } = await users();
+  describe("autenticate", () => {
+    const { createUser, authenticate } = users();
+    it("Vérifie que le mot de passe est valide", async () => {
+      await createUser({
+        username: "user",
+        password: "password",
+      });
+      const user = await authenticate("user", "password");
 
-    const user = await createUser({
-      username: "userAdmin",
-      password: "password",
-      permissions: [tdbRoles.network],
-      email: "email@test.fr",
-      network: "test",
-      region: "REGION",
-      organisme: "ORGANISME",
+      assert.equal(user.username, "user");
     });
-    const found = await UserModel.findOne({ username: "userAdmin" });
 
-    assert.equal(user.permissions.includes(tdbRoles.network), true);
-    assert.equal(user.network === "test", true);
-    assert.equal(user.email === "email@test.fr", true);
+    it("Vérifie que le mot de passe est invalide", async () => {
+      await createUser({
+        username: "user",
+        password: "password",
+      });
+      const user = await authenticate("user", "INVALID");
 
-    assert.equal(found.permissions.includes(tdbRoles.network), true);
-    assert.equal(found.network === "test", true);
-    assert.equal(found.region === "REGION", true);
-    assert.equal(found.organisme === "ORGANISME", true);
-    assert.equal(found.email === "email@test.fr", true);
-  });
-
-  it("Permet de supprimer un utilisateur", async () => {
-    const { createUser, removeUser } = await users();
-
-    await createUser({
-      username: "userToDelete",
-      password: "password",
-      permissions: [apiRoles.administrator],
+      assert.equal(user, null);
     });
-    await removeUser("userToDelete");
-
-    const found = await UserModel.findOne({ username: "userToDelete" });
-    assert.equal(found, null);
-  });
-
-  it("Vérifie que le mot de passe est valide", async () => {
-    const { createUser, authenticate } = await users();
-
-    await createUser({
-      username: "user",
-      password: "password",
-    });
-    const user = await authenticate("user", "password");
-
-    assert.equal(user.username, "user");
-  });
-
-  it("Vérifie que le mot de passe est invalide", async () => {
-    const { createUser, authenticate } = await users();
-
-    await createUser({
-      username: "user",
-      password: "password",
-    });
-    const user = await authenticate("user", "INVALID");
-
-    assert.equal(user, null);
   });
 
   describe("generatePasswordUpdateToken", () => {
+    const { createUser, generatePasswordUpdateToken } = users();
     it("génère un token avec expiration à +48h", async () => {
-      const { createUser, generatePasswordUpdateToken } = await users();
-
       // create user
       const user = await createUser({ username: "user" });
 
       const token = await generatePasswordUpdateToken("user");
-      const userInDb = await UserModel.findOne({ _id: user._id });
+      const userInDb = await usersDb().findOne({ _id: user._id });
 
       assert.equal(userInDb.password_update_token, token);
       // password token should expire in 48h
@@ -147,8 +149,6 @@ describe(__filename, () => {
     });
 
     it("renvoie une erreur quand le user n'est pas trouvé", async () => {
-      const { createUser, generatePasswordUpdateToken } = await users();
-
       // create user
       await createUser({ username: "nope" });
 
@@ -163,16 +163,16 @@ describe(__filename, () => {
   });
 
   describe("updatePassword", () => {
-    it("modifie le mot de passe d'un user et invalide le token d'update", async () => {
-      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
+    const { createUser, updatePassword, generatePasswordUpdateToken } = users();
 
+    it("modifie le mot de passe d'un user et invalide le token d'update", async () => {
       // create user
       const user = await createUser({ username: "user" });
       // generate update token
       const token = await generatePasswordUpdateToken("user");
 
       await updatePassword(token, "new-password-strong");
-      const foundAfterUpdate = await UserModel.findOne({ _id: user._id });
+      const foundAfterUpdate = await usersDb().findOne({ _id: user._id });
 
       assert.notEqual(foundAfterUpdate.password, user.password);
       assert.equal(foundAfterUpdate.password_update_token, null);
@@ -180,8 +180,6 @@ describe(__filename, () => {
     });
 
     it("renvoie une erreur quand le token passé ne permet pas de retrouver le user", async () => {
-      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
-
       // create user
       await createUser({ username: "user" });
       // generate update token
@@ -197,8 +195,6 @@ describe(__filename, () => {
     });
 
     it("renvoie une erreur lorsque le nouveau mot de passe est trop court", async () => {
-      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
-
       // create user
       await createUser({ username: "user" });
       // generate update token
@@ -216,16 +212,16 @@ describe(__filename, () => {
     });
 
     it("renvoie une erreur lorsque l'update est fait plus de 24h après la création du token", async () => {
-      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
-
       // create user
       await createUser({ username: "user" });
       // generate update token
       const token = await generatePasswordUpdateToken("user");
       // force password_update_token_expiry to 10 minutes ago
-      const user = await UserModel.findOne({ username: "user" });
-      user.password_update_token_expiry = subMinutes(new Date(), 10);
-      await user.save();
+      const user = await usersDb().findOne({ username: "user" });
+      await usersDb().updateOne(
+        { _id: user._id },
+        { $set: { password_update_token_expiry: subMinutes(new Date(), 10) } }
+      );
 
       await assert.rejects(
         () => updatePassword(token, "super-long-strong-password"),
@@ -237,8 +233,6 @@ describe(__filename, () => {
     });
 
     it("renvoie une erreur lorsque l'update est tenté avec un token null", async () => {
-      const { createUser, updatePassword } = await users();
-
       // create user
       await createUser({ username: "user" });
 
@@ -252,8 +246,6 @@ describe(__filename, () => {
     });
 
     it("renvoie une erreur lorsque l'update a déjà été fait", async () => {
-      const { createUser, updatePassword, generatePasswordUpdateToken } = await users();
-
       // create user
       await createUser({ username: "user" });
 
@@ -274,14 +266,14 @@ describe(__filename, () => {
     });
   });
 
-  describe("searchUsers", async () => {
-    const { searchUsers, createUser } = await users();
+  describe("searchUsers", () => {
+    const { searchUsers, createUser } = users();
 
     it("returns results matching username", async () => {
       const searchTerm = "haver";
       const usernameTest = "havertz";
 
-      const user = await createUser({
+      const userProps = {
         username: usernameTest,
         password: "password",
         permissions: [tdbRoles.network],
@@ -289,9 +281,11 @@ describe(__filename, () => {
         network: "test",
         region: "REGION",
         organisme: "ORGANISME",
-      });
+      };
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const user = await createUser(userProps);
+
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -317,7 +311,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -343,7 +337,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -368,7 +362,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -394,7 +388,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -420,7 +414,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -445,7 +439,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -471,7 +465,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -497,7 +491,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -522,7 +516,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -548,7 +542,7 @@ describe(__filename, () => {
         organisme: "ORGANISME",
       });
 
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
 
       assert.equal(found.permissions.includes(tdbRoles.network), true);
       assert.equal(found.network === user.network, true);
@@ -562,34 +556,31 @@ describe(__filename, () => {
   });
 
   describe("updateUser", () => {
+    const { createUser, updateUser } = users();
     it("renvoie une erreur quand l'id passé pour la maj d'un utilisateur n'est pas valide", async () => {
-      const { createUser, updateUser } = await users();
-
       const usernameTest = "userTest";
 
       // create user
       await createUser({ username: usernameTest });
 
       // find user
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found.username === usernameTest, true);
       assert.equal(found._id !== null, true);
 
       // update user with bad id
-      const objectId = new mongoose.Types.ObjectId();
+      const objectId = new mongodb.ObjectId();
       await assert.rejects(updateUser(objectId, { username: "UPDATED" }), { message: "Unable to find user" });
     });
 
     it("Permets la MAJ d'un utilisateur pour son username", async () => {
-      const { createUser, updateUser } = await users();
-
       const usernameTest = "userTest";
 
       // create user
       await createUser({ username: usernameTest });
 
       // find user
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found.username === usernameTest, true);
       assert.equal(found._id !== null, true);
 
@@ -598,20 +589,18 @@ describe(__filename, () => {
       await updateUser(found._id, { username: updatedUserName });
 
       // Check update
-      const foundAfterUpdate = await UserModel.findById(found._id);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
       assert.equal(foundAfterUpdate.username === updatedUserName, true);
     });
 
     it("Permets la MAJ d'un utilisateur pour son email", async () => {
-      const { createUser, updateUser } = await users();
-
       const usernameTest = "userTest";
 
       // create user
       await createUser({ username: usernameTest, email: "test@test.fr" });
 
       // find user
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found.email === "test@test.fr", true);
       assert.equal(found._id !== null, true);
 
@@ -620,20 +609,18 @@ describe(__filename, () => {
       await updateUser(found._id, { email: updateValue });
 
       // Check update
-      const foundAfterUpdate = await UserModel.findById(found._id);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
       assert.equal(foundAfterUpdate.email === updateValue, true);
     });
 
     it("Permets la MAJ d'un utilisateur pour son réseau", async () => {
-      const { createUser, updateUser } = await users();
-
       const usernameTest = "userTest";
 
       // create user
       await createUser({ username: usernameTest, network: "TEST_RESEAU" });
 
       // find user
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found._id !== null, true);
       assert.equal(found.network === "TEST_RESEAU", true);
 
@@ -642,20 +629,18 @@ describe(__filename, () => {
       await updateUser(found._id, { network: updateValue });
 
       // Check update
-      const foundAfterUpdate = await UserModel.findById(found._id);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
       assert.equal(foundAfterUpdate.network === updateValue, true);
     });
 
     it("Permets la MAJ d'un utilisateur pour sa région", async () => {
-      const { createUser, updateUser } = await users();
-
       const usernameTest = "userTest";
 
       // create user
       await createUser({ username: usernameTest, region: "TEST_REGION" });
 
       // find user
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found._id !== null, true);
       assert.equal(found.region === "TEST_REGION", true);
 
@@ -664,7 +649,7 @@ describe(__filename, () => {
       await updateUser(found._id, { region: updateValue });
 
       // Check update
-      const foundAfterUpdate = await UserModel.findById(found._id);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
       assert.equal(foundAfterUpdate.region === updateValue, true);
     });
 
@@ -677,7 +662,7 @@ describe(__filename, () => {
       await createUser({ username: usernameTest, organisme: "TEST_ORGANISME" });
 
       // find user
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found._id !== null, true);
       assert.equal(found.organisme === "TEST_ORGANISME", true);
 
@@ -686,42 +671,39 @@ describe(__filename, () => {
       await updateUser(found._id, { organisme: updateValue });
 
       // Check update
-      const foundAfterUpdate = await UserModel.findById(found._id);
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
       assert.equal(foundAfterUpdate.organisme === updateValue, true);
     });
   });
 
   describe("getUserById", () => {
-    it("renvoie une erreur quand l'id passé pour le getUserById n'est pas valide", async () => {
-      const { createUser, getUserById } = await users();
+    const { createUser, getUserById } = users();
 
+    it("renvoie une erreur quand l'id passé pour le getUserById n'est pas valide", async () => {
       const usernameTest = "userTest";
 
       // create user
       await createUser({ username: usernameTest });
 
       // find user
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found.username === usernameTest, true);
       assert.equal(found._id !== null, true);
 
       // get user with bad id
-      const objectId = new mongoose.Types.ObjectId();
+      const objectId = "^pkazd^pkazd";
       await assert.rejects(getUserById(objectId), { message: "Unable to find user" });
     });
 
-    it("renvoie le bon utilisateur quand l'id passé pour le getUserById est pas valide", async () => {
-      const { createUser, getUserById } = await users();
-
+    it("renvoie le bon utilisateur quand l'id passé pour le getUserById est valide", async () => {
       const usernameTest = "userTest";
 
       // create user
       await createUser({ username: usernameTest });
 
       // find user
-      const found = await UserModel.findOne({ username: usernameTest });
+      const found = await usersDb().findOne({ username: usernameTest });
       assert.equal(found.username === usernameTest, true);
-      assert.equal(found._id !== null, true);
 
       // get user with id
       const gettedUser = await getUserById(found._id);

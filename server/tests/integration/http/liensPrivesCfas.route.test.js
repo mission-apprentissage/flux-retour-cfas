@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { apiRoles } = require("../../../src/common/roles");
-const { CfaModel } = require("../../../src/common/model");
 const users = require("../../../src/common/components/users");
+const { cfasDb } = require("../../../src/common/model/collections");
 
 const user = {
   name: "erpUser",
@@ -81,15 +81,13 @@ describe(__filename, () => {
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
 
-    const cfaToAdd = new CfaModel({
+    await cfasDb().insertOne({
       uai: "0451582A",
       siret: "31521327200067",
       nom: "TEST CFA",
       erps: [user.name],
       private_url: "http://test",
     });
-
-    await cfaToAdd.save();
 
     // Call api route
     const response = await httpClient.get("/api/liens-prives-cfas", {
@@ -120,46 +118,40 @@ describe(__filename, () => {
     const accessToken = await getJwtForUser(httpClient);
 
     // Add 4 cfas for this ERP - 1 Cfa for other erp
-    const cfasToAdd = [
-      new CfaModel({
-        uai: "0451582A",
-        siret: "31521327200061",
-        nom: "TEST CFA",
-        erps: [user.name],
-        private_url: "http://test",
-      }),
-      new CfaModel({
-        uai: "0451582B",
-        siret: "99921327200062",
-        nom: "TEST CFA 2",
-        erps: [user.name],
-        private_url: "http://test2",
-      }),
-      new CfaModel({
-        uai: "0451582C",
-        siret: "99921327200063",
-        nom: "TEST CFA 3",
-        erps: [user.name],
-        private_url: "http://test3",
-      }),
-      new CfaModel({
-        uai: "0451582D",
-        siret: "99921327200064",
-        nom: "TEST CFA 4",
-        erps: [user.name],
-        private_url: "http://test4",
-      }),
-      new CfaModel({
-        uai: "0451582E",
-        siret: "11121327200065",
-        nom: "TEST CFA 5",
-        erps: ["BAD_ERP"],
-        private_url: "http://test5",
-      }),
-    ];
-
-    cfasToAdd.forEach((item) => {
-      item.save();
+    await cfasDb().insertOne({
+      uai: "0451582A",
+      siret: "31521327200061",
+      nom: "TEST CFA",
+      erps: [user.name],
+      private_url: "http://test",
+    });
+    await cfasDb().insertOne({
+      uai: "0451582B",
+      siret: "99921327200062",
+      nom: "TEST CFA 2",
+      erps: [user.name],
+      private_url: "http://test2",
+    });
+    await cfasDb().insertOne({
+      uai: "0451582C",
+      siret: "99921327200063",
+      nom: "TEST CFA 3",
+      erps: [user.name],
+      private_url: "http://test3",
+    });
+    await cfasDb().insertOne({
+      uai: "0451582D",
+      siret: "99921327200064",
+      nom: "TEST CFA 4",
+      erps: [user.name],
+      private_url: "http://test4",
+    });
+    await cfasDb().insertOne({
+      uai: "0451582E",
+      siret: "11121327200065",
+      nom: "TEST CFA 5",
+      erps: ["BAD_ERP"],
+      private_url: "http://test5",
     });
 
     // Call api route with 1 page & 2 elements max per page
@@ -185,39 +177,33 @@ describe(__filename, () => {
     const uaiTest2 = "0451582B";
 
     // Add 4 Cfas - only 2 with test UAI to search
-    const cfasToAdd = [
-      new CfaModel({
-        uai: uaiTest1,
-        siret: "31521327200061",
-        nom: "TEST CFA",
-        erps: [user.name],
-        private_url: "http://test",
-      }),
-      new CfaModel({
-        uai: uaiTest2,
-        siret: "99921327200062",
-        nom: "TEST CFA 2",
-        erps: [user.name],
-        private_url: "http://test2",
-      }),
-      new CfaModel({
-        uai: "0451582C",
-        siret: "99921327200063",
-        nom: "TEST CFA 3",
-        erps: [user.name],
-        private_url: "http://test3",
-      }),
-      new CfaModel({
-        uai: "0451582D",
-        siret: "99921327200064",
-        nom: "TEST CFA 4",
-        erps: [user.name],
-        private_url: "http://test4",
-      }),
-    ];
-
-    cfasToAdd.forEach((item) => {
-      item.save();
+    await cfasDb().insertOne({
+      uai: uaiTest1,
+      siret: "31521327200061",
+      nom: "TEST CFA",
+      erps: [user.name],
+      private_url: "http://test",
+    });
+    await cfasDb().insertOne({
+      uai: uaiTest2,
+      siret: "99921327200062",
+      nom: "TEST CFA 2",
+      erps: [user.name],
+      private_url: "http://test2",
+    });
+    await cfasDb().insertOne({
+      uai: "0451582C",
+      siret: "99921327200063",
+      nom: "TEST CFA 3",
+      erps: [user.name],
+      private_url: "http://test3",
+    });
+    await cfasDb().insertOne({
+      uai: "0451582D",
+      siret: "99921327200064",
+      nom: "TEST CFA 4",
+      erps: [user.name],
+      private_url: "http://test4",
     });
 
     // Call api route with uaiTest1 & uaiTest2 filters
@@ -242,15 +228,13 @@ describe(__filename, () => {
     await createApiUser();
     const accessToken = await getJwtForUser(httpClient);
 
-    const cfaToAdd = new CfaModel({
+    await cfasDb().insertOne({
       uai: "0451582A",
       siret: "31521327200067",
       nom: "TEST CFA",
       erps: ["BAD_ERP"],
       private_url: "http://test",
     });
-
-    await cfaToAdd.save();
 
     // Call api route
     const response = await httpClient.get("/api/liens-prives-cfas", {

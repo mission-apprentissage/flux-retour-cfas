@@ -1,16 +1,18 @@
-const { ReseauCfaModel } = require("../model");
+const { ObjectId } = require("mongodb");
+const { reseauxCfasDb } = require("../model/collections");
 const { escapeRegExp } = require("../utils/regexUtils");
 
 const create = async ({ nom_reseau, nom_etablissement, uai, siret }) => {
-  const saved = await new ReseauCfaModel({
+  const { insertedId } = await reseauxCfasDb().insertOne({
     nom_reseau,
     nom_etablissement,
     uai,
     siret,
     created_at: new Date(),
-  }).save();
+  });
 
-  return saved.toObject();
+  // TODO return only inserted id (single responsibility)
+  return await reseauxCfasDb().findOne({ _id: insertedId });
 };
 
 /**
@@ -33,7 +35,9 @@ const searchReseauxCfas = async (searchCriteria) => {
   }
 
   const sortStage = searchTerm ? { score: { $meta: "textScore" }, nom_etablissement: 1 } : { nom_etablissement: 1 };
-  const found = await ReseauCfaModel.aggregate([{ $match: matchStage }, { $sort: sortStage }]);
+  const found = await reseauxCfasDb()
+    .aggregate([{ $match: matchStage }, { $sort: sortStage }])
+    .toArray();
 
   return found.map((reseauCfa) => {
     return {
@@ -48,10 +52,14 @@ const searchReseauxCfas = async (searchCriteria) => {
 
 module.exports = () => ({
   getAll: async () => {
-    return await ReseauCfaModel.find().lean();
+    return await reseauxCfasDb().find().toArray();
   },
   delete: async (id) => {
-    return await ReseauCfaModel.deleteOne({ _id: id });
+    const _id = new ObjectId(id);
+
+    if (!ObjectId.isValid(_id)) throw new Error("Wrong reseauxCfas _id passed");
+
+    await reseauxCfasDb().deleteOne({ _id });
   },
   create,
   searchReseauxCfas,

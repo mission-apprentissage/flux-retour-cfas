@@ -15,8 +15,8 @@ nock.enableNetConnect((host) => {
 
 // connect to mongodb and create indexes before running tests
 exports.mochaGlobalSetup = async () => {
-  const db = await startAndConnectMongodb();
-  await createIndexes(db);
+  await startAndConnectMongodb();
+  await createIndexes();
 };
 
 // hooks that will be used in every test suite

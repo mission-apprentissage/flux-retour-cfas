@@ -6,8 +6,8 @@ const {
   historySequenceInscritToApprenti,
 } = require("../../../data/historySequenceSamples");
 const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { DossierApprenantModel } = require("../../../../src/common/model");
 const { EffectifsApprentis } = require("../../../../src/common/components/effectifs/apprentis");
+const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -17,8 +17,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     // Add 5 statuts with history sequence - simple apprenti
@@ -27,8 +26,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceApprenti,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     // Add 15 statuts with history sequence - inscritToApprenti
@@ -37,8 +35,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprenti,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
   };
 
@@ -159,24 +156,24 @@ describe(__filename, () => {
 
       // Add 5 statuts apprenti for annee_scolaire on same year
       for (let index = 0; index < 5; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: historySequenceApprenti,
             annee_scolaire: "2020-2020",
             ...filters,
           })
-        ).save();
+        );
       }
 
       // Add 12 statuts apprenti for annee_scolaire on two years
       for (let index = 0; index < 12; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: historySequenceApprenti,
             annee_scolaire: "2021-2021",
             ...filters,
           })
-        ).save();
+        );
       }
 
       const date = new Date("2020-09-30T00:00:00.000+0000");

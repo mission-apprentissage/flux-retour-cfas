@@ -8,22 +8,22 @@ const {
 const { createUserEventsCollectionIndexes, dropUserEventsCollectionIndexes } = require("./userEvents.indexes");
 const { createUsersCollectionIndexes, dropUsersCollectionIndexes } = require("./users.indexes");
 
-const createIndexes = async (db) => {
-  await createUserEventsCollectionIndexes(db);
-  await createDossiersApprenantsCollectionIndexes(db);
-  await createFormationsCollectionIndexes(db);
-  await createCfasCollectionIndexes(db);
-  await createReseauxCfasCollectionIndexes(db);
-  await createUsersCollectionIndexes(db);
+const createIndexes = async () => {
+  await createUserEventsCollectionIndexes();
+  await createDossiersApprenantsCollectionIndexes();
+  await createFormationsCollectionIndexes();
+  await createCfasCollectionIndexes();
+  await createReseauxCfasCollectionIndexes();
+  await createUsersCollectionIndexes();
 };
 
-const dropIndexes = async (db) => {
-  await dropDossiersApprenantsCollectionIndexes(db);
-  await dropFormationsCollectionIndexes(db);
-  await dropUserEventsCollectionIndexes(db);
-  await dropCfasCollectionIndexes(db);
-  await dropReseauxCfasCollectionIndexes(db);
-  await dropUsersCollectionIndexes(db);
+const dropIndexes = async () => {
+  await dropDossiersApprenantsCollectionIndexes();
+  await dropFormationsCollectionIndexes();
+  await dropUserEventsCollectionIndexes();
+  await dropCfasCollectionIndexes();
+  await dropReseauxCfasCollectionIndexes();
+  await dropUsersCollectionIndexes();
 };
 
 module.exports = { createIndexes, dropIndexes };

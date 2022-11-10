@@ -8,8 +8,8 @@ const {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
-const { DossierApprenantModel, CfaModel } = require("../../../src/common/model");
 const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/organisme-de-formation/nature");
+const { dossiersApprenantsDb, cfasDb } = require("../../../src/common/model/collections");
 
 describe(__filename, () => {
   describe("/api/effectifs route", () => {
@@ -33,8 +33,7 @@ describe(__filename, () => {
           historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Add 5 statuts for filter with history sequence - simple apprenti
@@ -43,8 +42,7 @@ describe(__filename, () => {
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
@@ -53,17 +51,16 @@ describe(__filename, () => {
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2020-2021",
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // this one should be ignored because of annee_scolaire
-      await new DossierApprenantModel(
+      await dossiersApprenantsDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2021-2022",
         })
-      ).save();
+      );
 
       // Expected results
       const expectedResults = {
@@ -97,8 +94,7 @@ describe(__filename, () => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Add 5 statuts for filter with history sequence - simple apprenti
@@ -108,8 +104,7 @@ describe(__filename, () => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
@@ -119,8 +114,7 @@ describe(__filename, () => {
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Expected results
@@ -169,8 +163,7 @@ describe(__filename, () => {
           niveau_formation: "1",
           niveau_formation_libelle: "1 (blabla)",
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       const randomStatut = createRandomDossierApprenant({
@@ -180,8 +173,7 @@ describe(__filename, () => {
         niveau_formation: "2",
         niveau_formation_libelle: "2 (blabla)",
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/niveau-formation?${searchParams}`, {
@@ -213,7 +205,7 @@ describe(__filename, () => {
       const regionNumTest = "28";
 
       // Add 1 statut for region
-      await new DossierApprenantModel(
+      await dossiersApprenantsDb().insertOne(
         createRandomDossierApprenant({
           nom_etablissement: "TEST CFA",
           annee_scolaire: "2020-2021",
@@ -221,7 +213,7 @@ describe(__filename, () => {
           uai_etablissement: "0762232N",
           etablissement_num_region: regionNumTest,
         })
-      ).save();
+      );
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/total-organismes", {
@@ -253,7 +245,7 @@ describe(__filename, () => {
       const formationCfd = "abcd1234";
 
       // Add 1 statut for formation
-      await new DossierApprenantModel(
+      await dossiersApprenantsDb().insertOne(
         createRandomDossierApprenant({
           nom_etablissement: "TEST CFA",
           annee_scolaire: "2020-2021",
@@ -261,7 +253,7 @@ describe(__filename, () => {
           uai_etablissement: "0762232N",
           formation_cfd: formationCfd,
         })
-      ).save();
+      );
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/total-organismes", {
@@ -282,7 +274,7 @@ describe(__filename, () => {
       const formationCfd = "abcd1234";
 
       // Add 1 statut for formation
-      await new DossierApprenantModel(
+      await dossiersApprenantsDb().insertOne(
         createRandomDossierApprenant({
           nom_etablissement: "TEST CFA",
           annee_scolaire: "2022-2023",
@@ -290,7 +282,7 @@ describe(__filename, () => {
           uai_etablissement: "0762232N",
           formation_cfd: formationCfd,
         })
-      ).save();
+      );
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/total-organismes", {
@@ -322,8 +314,7 @@ describe(__filename, () => {
           libelle_long_formation: "a",
           formation_cfd: "77929544300013",
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       const randomStatut = createRandomDossierApprenant({
@@ -335,8 +326,7 @@ describe(__filename, () => {
         libelle_long_formation: "b",
         formation_cfd: "77929544300014",
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/formation?${searchParams}`, {
@@ -361,8 +351,7 @@ describe(__filename, () => {
           annee_scolaire: "2020-2021",
           annee_formation: 1,
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       const randomStatut = createRandomDossierApprenant({
@@ -371,8 +360,7 @@ describe(__filename, () => {
         annee_scolaire: "2020-2021",
         annee_formation: 2,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/annee-formation?${searchParams}`, {
@@ -396,11 +384,11 @@ describe(__filename, () => {
         nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
         nature_validity_warning: true,
       };
-      await new CfaModel({
+      await cfasDb().insertOne({
         uai: cfaData1.uai_etablissement,
         nature: cfaData1.nature,
         nature_validity_warning: cfaData1.nature_validity_warning,
-      }).save();
+      });
 
       const cfaData2 = {
         uai_etablissement: "0762232X",
@@ -408,11 +396,11 @@ describe(__filename, () => {
         nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
         nature_validity_warning: false,
       };
-      await new CfaModel({
+      await cfasDb().insertOne({
         uai: cfaData2.uai_etablissement,
         nature: cfaData2.nature,
         nature_validity_warning: cfaData2.nature_validity_warning,
-      }).save();
+      });
 
       for (let index = 0; index < 5; index++) {
         const randomStatut = createRandomDossierApprenant({
@@ -422,8 +410,7 @@ describe(__filename, () => {
           uai_etablissement: cfaData1.uai_etablissement,
           siret_etablissement: cfaData1.siret_etablissement,
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       const randomStatut = createRandomDossierApprenant({
@@ -433,8 +420,7 @@ describe(__filename, () => {
         uai_etablissement: cfaData2.uai_etablissement,
         siret_etablissement: cfaData2.siret_etablissement,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/cfa?${searchParams}`, {
@@ -459,8 +445,7 @@ describe(__filename, () => {
           annee_scolaire: "2020-2021",
           siret_etablissement: "40239075100046",
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       const randomStatut = createRandomDossierApprenant({
@@ -469,8 +454,7 @@ describe(__filename, () => {
         annee_scolaire: "2020-2021",
         siret_etablissement: "40239075100099",
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/siret?${searchParams}`, {
@@ -494,8 +478,7 @@ describe(__filename, () => {
           etablissement_num_departement: "01",
           etablissement_nom_departement: "Ain",
         });
-        const toAdd = new DossierApprenantModel(randomStatut);
-        await toAdd.save();
+        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       const randomStatut = createRandomDossierApprenant({
@@ -504,8 +487,7 @@ describe(__filename, () => {
         etablissement_num_departement: "91",
         etablissement_nom_departement: "Essonne",
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z`;
       const response = await httpClient.get(`/api/effectifs/departement?${searchParams}`, {

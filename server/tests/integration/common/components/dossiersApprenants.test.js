@@ -3,13 +3,13 @@ const assert = require("assert").strict;
 const MockDate = require("mockdate");
 const { addDays, isEqual } = require("date-fns");
 const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
-const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
 const { createRandomDossierApprenant, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
 const {
   CODES_STATUT_APPRENANT,
   DUPLICATE_TYPE_CODES,
 } = require("../../../../src/common/constants/dossierApprenantConstants");
 const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
+const { cfasDb, dossiersApprenantsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   let fakeNowDate;
@@ -201,7 +201,7 @@ describe(__filename, () => {
 
       // Add statuts test
       await addOrUpdateDossiersApprenants(seed1);
-      assert.equal(await DossierApprenantModel.countDocuments(), 3);
+      assert.equal(await dossiersApprenantsDb().countDocuments(), 3);
 
       const seed2 = [
         seed1[0],
@@ -213,7 +213,7 @@ describe(__filename, () => {
 
       // Check added
       assert.equal(added.length, 1);
-      const foundAdded = await DossierApprenantModel.findById(added[0]._id).lean();
+      const foundAdded = await dossiersApprenantsDb().findOne({ _id: added[0]._id });
       assert.equal(foundAdded.nom_apprenant.toUpperCase(), seed2[3].nom_apprenant.toUpperCase());
       assert.equal(foundAdded.prenom_apprenant.toUpperCase(), seed2[3].prenom_apprenant.toUpperCase());
       assert.equal(foundAdded.email_contact, seed2[3].email_contact);
@@ -230,7 +230,7 @@ describe(__filename, () => {
       // Check updated
       assert.equal(updated.length, 3);
 
-      const firstUpdated = await DossierApprenantModel.findById(updated[0]._id).lean();
+      const firstUpdated = await dossiersApprenantsDb().findOne({ _id: updated[0]._id });
       assert.equal(firstUpdated.nom_apprenant.toUpperCase(), seed1[0].nom_apprenant.toUpperCase());
       assert.equal(firstUpdated.prenom_apprenant.toUpperCase(), seed1[0].prenom_apprenant.toUpperCase());
       assert.equal(firstUpdated.uai_etablissement, seed1[0].uai_etablissement);
@@ -244,7 +244,7 @@ describe(__filename, () => {
       );
       assert.equal(firstUpdated.updated_at.getTime(), fakeNowDate.getTime());
 
-      const secondUpdated = await DossierApprenantModel.findById(updated[1]._id).lean();
+      const secondUpdated = await dossiersApprenantsDb().findOne({ _id: updated[1]._id });
       assert.equal(secondUpdated.nom_apprenant.toUpperCase(), seed1[1].nom_apprenant.toUpperCase());
       assert.equal(secondUpdated.prenom_apprenant.toUpperCase(), seed1[1].prenom_apprenant.toUpperCase());
       assert.equal(secondUpdated.uai_etablissement, seed1[1].uai_etablissement);
@@ -258,7 +258,7 @@ describe(__filename, () => {
       );
       assert.equal(secondUpdated.updated_at.getTime(), fakeNowDate.getTime());
 
-      const thirdUpdated = await DossierApprenantModel.findById(updated[2]._id).lean();
+      const thirdUpdated = await dossiersApprenantsDb().findOne({ _id: updated[2]._id });
       assert.equal(thirdUpdated.nom_apprenant.toUpperCase(), seed1[2].nom_apprenant.toUpperCase());
       assert.equal(thirdUpdated.prenom_apprenant.toUpperCase(), seed1[2].prenom_apprenant.toUpperCase());
       assert.equal(thirdUpdated.uai_etablissement, seed1[2].uai_etablissement);
@@ -285,7 +285,7 @@ describe(__filename, () => {
       const result = await addOrUpdateDossiersApprenants([statutWithPeriodeFormationOnSameYear]);
       assert.equal(result.added.length, 1);
       assert.equal(result.updated.length, 0);
-      assert.equal(await DossierApprenantModel.countDocuments(), 1);
+      assert.equal(await dossiersApprenantsDb().countDocuments(), 1);
     });
 
     it("Vérifie qu'on update le siret_etablissement d'un statut existant qui n'en a pas avec le SIRET de l'élément passé si le reste des infos est identique", async () => {
@@ -303,11 +303,11 @@ describe(__filename, () => {
       // statut should have been updated
       assert.equal(added.length, 0, "added problem");
       assert.equal(updated.length, 1);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await DossierApprenantModel.findById(result.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: result.added[0]._id });
       assert.equal(found.siret_etablissement, "12312312300099");
       assert.notEqual(found.updated_at, null);
     });
@@ -327,11 +327,11 @@ describe(__filename, () => {
       // statut should have been updated
       assert.equal(added.length, 0);
       assert.equal(updated.length, 1);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await DossierApprenantModel.findById(result.added[0]._id).lean();
+      const found = await dossiersApprenantsDb().findOne({ _id: result.added[0]._id });
       assert.deepEqual(found.periode_formation, [2021, 2022]);
       assert.notEqual(found.updated_at, null);
     });
@@ -351,11 +351,11 @@ describe(__filename, () => {
       // statut should have been updated
       assert.equal(added.length, 0);
       assert.equal(updated.length, 1);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await DossierApprenantModel.findById(result.added[0]._id).lean();
+      const found = await dossiersApprenantsDb().findOne({ _id: result.added[0]._id });
       assert.equal(found.annee_formation, 2020);
       assert.notEqual(found.updated_at, null);
     });
@@ -388,11 +388,11 @@ describe(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.nom_apprenant, sampleNom);
       assert.equal(found.updated_at, null);
     });
@@ -425,11 +425,11 @@ describe(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.prenom_apprenant, samplePrenom.toUpperCase());
       assert.equal(found.updated_at, null);
     });
@@ -467,11 +467,11 @@ describe(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.date_de_naissance_apprenant.getTime(), sampleDateDeNaissance.getTime());
       assert.equal(found.updated_at, null);
     });
@@ -504,11 +504,11 @@ describe(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.formation_cfd, validCfd);
       assert.equal(found.updated_at, null);
     });
@@ -542,11 +542,11 @@ describe(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 2);
 
       // check in db that first created element was not updated
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.annee_scolaire, anneeScolaire);
       assert.equal(found.updated_at, null);
     });
@@ -579,11 +579,11 @@ describe(__filename, () => {
       // a new statut should have been created
       assert.equal(secondCallResult.added.length, 1);
       assert.equal(secondCallResult.updated.length, 0);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 2);
 
       // check in db
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.uai_etablissement, validUai);
       assert.equal(found.updated_at, null);
     });
@@ -614,11 +614,11 @@ describe(__filename, () => {
       // no new statut should have been created
       assert.equal(secondCallResult.added.length, 0);
       assert.equal(secondCallResult.updated.length, 1);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.deepEqual(found.periode_formation.join(), samplePeriode2.join());
       assert.notEqual(found.updated_at, null);
     });
@@ -653,11 +653,11 @@ describe(__filename, () => {
       // no new statut should have been created
       assert.equal(secondCallResult.added.length, 0);
       assert.equal(secondCallResult.updated.length, 1);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.annee_formation, sampleAnnee2);
       assert.notEqual(found.updated_at, null);
     });
@@ -692,10 +692,10 @@ describe(__filename, () => {
       // no new statut should have been created
       assert.equal(secondCallResult.added.length, 0);
       assert.equal(secondCallResult.updated.length, 1);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 1);
 
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.siret_etablissement, siret_etablissement2);
     });
 
@@ -733,11 +733,11 @@ describe(__filename, () => {
       // no new statut should have been created but update only
       assert.equal(secondCallResult.added.length, 0);
       assert.equal(secondCallResult.updated.length, 1);
-      const count = await DossierApprenantModel.countDocuments();
+      const count = await dossiersApprenantsDb().countDocuments();
       assert.equal(count, 1);
 
       // check in db
-      const found = await DossierApprenantModel.findById(firstCallResult.added[0]._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: firstCallResult.added[0]._id });
       assert.equal(found.email_contact, updatedEmail);
       assert.notEqual(found.updated_at, null);
     });
@@ -757,7 +757,7 @@ describe(__filename, () => {
       // First update
       await updateDossierApprenant(createdStatut._id, { prenom_apprenant: "André-Pierre" });
       // Check value in db
-      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      const foundAfterUpdate = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(foundAfterUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
     });
 
@@ -774,7 +774,7 @@ describe(__filename, () => {
       // First update
       await updateDossierApprenant(createdStatut._id, { nom_apprenant: "Philippe" });
       // Check value in db
-      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      const foundAfterUpdate = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(foundAfterUpdate.nom_apprenant, createdStatut.nom_apprenant);
     });
 
@@ -793,7 +793,7 @@ describe(__filename, () => {
         date_de_naissance_apprenant: new Date("1990-12-20T00:00:00.000+0000"),
       });
       // Check value in db
-      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      const foundAfterUpdate = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(foundAfterUpdate.nom_apprenant, createdStatut.nom_apprenant);
     });
 
@@ -810,7 +810,7 @@ describe(__filename, () => {
       // First update
       await updateDossierApprenant(createdStatut._id, { annee_scolaire: "2022-2023" });
       // Check value in db
-      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      const foundAfterUpdate = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(foundAfterUpdate.annee_scolaire, createdStatut.annee_scolaire);
     });
 
@@ -827,7 +827,7 @@ describe(__filename, () => {
       // First update
       await updateDossierApprenant(createdStatut._id, { uai_etablissement: "0123499X" });
       // Check value in db
-      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      const foundAfterUpdate = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(foundAfterUpdate.uai_etablissement, createdStatut.uai_etablissement);
     });
 
@@ -844,7 +844,7 @@ describe(__filename, () => {
       // First update
       await updateDossierApprenant(createdStatut._id, { formation_cfd: "abcd9999" });
       // Check value in db
-      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      const foundAfterUpdate = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(foundAfterUpdate.formation_cfd, createdStatut.formation_cfd);
     });
 
@@ -868,7 +868,7 @@ describe(__filename, () => {
       });
 
       // Check value in db
-      const found = await DossierApprenantModel.findById(createdStatut._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(found.historique_statut_apprenant.length, 1);
     });
 
@@ -896,7 +896,7 @@ describe(__filename, () => {
       await updateDossierApprenant(createdStatut._id, updatePayload);
 
       // Check value in db
-      const found = await DossierApprenantModel.findById(createdStatut._id);
+      const found = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       const updatedHistorique = found.historique_statut_apprenant;
       assert.equal(updatedHistorique.length, 2);
       assert.equal(updatedHistorique[0].valeur_statut, CODES_STATUT_APPRENANT.inscrit);
@@ -924,7 +924,7 @@ describe(__filename, () => {
         statut_apprenant: CODES_STATUT_APPRENANT.inscrit,
       });
 
-      const found1 = await DossierApprenantModel.findById(createdStatut._id);
+      const found1 = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(found1.historique_statut_apprenant.length, 2);
       assert.equal(found1.historique_statut_apprenant[1].valeur_statut, CODES_STATUT_APPRENANT.inscrit);
       assert.equal(found1.historique_statut_apprenant[0].date_reception.getTime(), fakeNowDate.getTime());
@@ -937,7 +937,7 @@ describe(__filename, () => {
       await updateDossierApprenant(createdStatut._id, { ...randomDossierApprenantProps, ...updatePayload });
 
       // historique should contain the new element and the one date with a later date should be removed
-      const found2 = await DossierApprenantModel.findById(createdStatut._id);
+      const found2 = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.equal(found2.historique_statut_apprenant.length, 2);
       assert.equal(found2.historique_statut_apprenant[1].valeur_statut, updatePayload.statut_apprenant);
       assert.equal(
@@ -955,13 +955,13 @@ describe(__filename, () => {
       // First update
       await updateDossierApprenant(createdStatut._id, { email_contact: "mail@example.com" });
       // Check value in db
-      const foundAfterFirstUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      const foundAfterFirstUpdate = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.notEqual(foundAfterFirstUpdate.email_contact, createdStatut.email_contact);
       assert.notEqual(foundAfterFirstUpdate.updated_at, null);
 
       // Second update
       await updateDossierApprenant(createdStatut._id, { periode_formation: [2030, 2033] });
-      const foundAfterSecondUpdate = await DossierApprenantModel.findById(createdStatut._id);
+      const foundAfterSecondUpdate = await dossiersApprenantsDb().findOne({ _id: createdStatut._id });
       assert.notEqual(foundAfterSecondUpdate.periode_formation, createdStatut.periode_formation);
       assert.notEqual(foundAfterSecondUpdate.updated_at, foundAfterFirstUpdate.updated_at);
     });
@@ -974,42 +974,41 @@ describe(__filename, () => {
       const randomStatut = createRandomDossierApprenant();
 
       const createdStatut = await createDossierApprenant(randomStatut);
-      const createdStatutJson = createdStatut.toJSON();
 
-      assert.equal(createdStatutJson.ine_apprenant, randomStatut.ine_apprenant);
-      assert.equal(createdStatutJson.nom_apprenant, randomStatut.nom_apprenant.toUpperCase());
-      assert.equal(createdStatutJson.prenom_apprenant, randomStatut.prenom_apprenant.toUpperCase());
-      assert.equal(createdStatutJson.email_contact, randomStatut.email_contact);
-      assert.equal(createdStatutJson.formation_cfd, randomStatut.formation_cfd);
-      assert.equal(createdStatutJson.libelle_long_formation, randomStatut.libelle_long_formation);
-      assert.equal(createdStatutJson.uai_etablissement, randomStatut.uai_etablissement);
-      assert.equal(createdStatutJson.siret_etablissement, randomStatut.siret_etablissement);
-      assert.equal(createdStatutJson.nom_etablissement, randomStatut.nom_etablissement);
-      assert.equal(createdStatutJson.source, randomStatut.source);
-      assert.equal(createdStatutJson.annee_formation, randomStatut.annee_formation);
-      assert.deepEqual(createdStatutJson.periode_formation, randomStatut.periode_formation);
-      assert.deepEqual(createdStatutJson.annee_scolaire, randomStatut.annee_scolaire);
-      assert.equal(createdStatutJson.historique_statut_apprenant.length, 1);
-      assert.equal(createdStatutJson.historique_statut_apprenant[0].valeur_statut, randomStatut.statut_apprenant);
+      assert.equal(createdStatut.ine_apprenant, randomStatut.ine_apprenant);
+      assert.equal(createdStatut.nom_apprenant, randomStatut.nom_apprenant.toUpperCase());
+      assert.equal(createdStatut.prenom_apprenant, randomStatut.prenom_apprenant.toUpperCase());
+      assert.equal(createdStatut.email_contact, randomStatut.email_contact);
+      assert.equal(createdStatut.formation_cfd, randomStatut.formation_cfd);
+      assert.equal(createdStatut.libelle_long_formation, randomStatut.libelle_long_formation);
+      assert.equal(createdStatut.uai_etablissement, randomStatut.uai_etablissement);
+      assert.equal(createdStatut.siret_etablissement, randomStatut.siret_etablissement);
+      assert.equal(createdStatut.nom_etablissement, randomStatut.nom_etablissement);
+      assert.equal(createdStatut.source, randomStatut.source);
+      assert.equal(createdStatut.annee_formation, randomStatut.annee_formation);
+      assert.deepEqual(createdStatut.periode_formation, randomStatut.periode_formation);
+      assert.deepEqual(createdStatut.annee_scolaire, randomStatut.annee_scolaire);
+      assert.equal(createdStatut.historique_statut_apprenant.length, 1);
+      assert.equal(createdStatut.historique_statut_apprenant[0].valeur_statut, randomStatut.statut_apprenant);
       assert.equal(
-        createdStatutJson.historique_statut_apprenant[0].date_statut.getTime(),
+        createdStatut.historique_statut_apprenant[0].date_statut.getTime(),
         randomStatut.date_metier_mise_a_jour_statut.getTime()
       );
-      assert.equal(createdStatutJson.historique_statut_apprenant[0].date_reception.getTime(), fakeNowDate.getTime());
+      assert.equal(createdStatut.historique_statut_apprenant[0].date_reception.getTime(), fakeNowDate.getTime());
 
-      assert.equal(createdStatutJson.updated_at, null);
+      assert.equal(createdStatut.updated_at, null);
     });
 
     it("Vérifie qu'à la création d'un statut on set le champ etablissement_reseaux et qu'on récupère le réseau depuis le referentiel CFA ", async () => {
       const { createDossierApprenant } = await dossiersApprenants();
       const validUai = "0631450J";
+      const reseaux = [RESEAUX_CFAS.ANASUP.nomReseau, RESEAUX_CFAS.BTP_CFA.nomReseau];
 
-      // Create sample cfa in referentiel
-      const referenceCfa = new CfaModel({
+      // insert Cfa in DB
+      await cfasDb().insertOne({
         uai: validUai,
-        reseaux: [RESEAUX_CFAS.ANASUP.nomReseau, RESEAUX_CFAS.BTP_CFA.nomReseau],
+        reseaux,
       });
-      await referenceCfa.save();
 
       // Create statut
       const statutWithValidUai = { ...createRandomDossierApprenant(), uai_etablissement: validUai };
@@ -1018,8 +1017,7 @@ describe(__filename, () => {
       // Check uai & reseaux in created statut
       const { etablissement_reseaux } = createdStatut;
       assert.equal(etablissement_reseaux.length, 2);
-      assert.equal(etablissement_reseaux[0], RESEAUX_CFAS.ANASUP.nomReseau);
-      assert.equal(etablissement_reseaux[1], RESEAUX_CFAS.BTP_CFA.nomReseau);
+      assert.deepEqual(etablissement_reseaux, reseaux);
     });
   });
 
@@ -1167,49 +1165,6 @@ describe(__filename, () => {
       assert.equal(duplicatesListFound.length, 1);
       assert.equal(duplicatesListFound[0].duplicatesCount, 4);
       assert.equal(duplicatesListFound[0].discriminants.duplicatesCreatedDatesAndIds.length, 4);
-    });
-  });
-
-  describe("anonymize", () => {
-    it("Vérifie qu'on peut anonymiser un dossierApprenant", async () => {
-      const { anonymize, createDossierApprenant, ANONYMOUS_PREFIX } = await dossiersApprenants();
-
-      const createdStatut = await createDossierApprenant(
-        createRandomDossierApprenant({
-          prenom_apprenant: "Aurélien ",
-          nom_apprenant: "Tchouaméni",
-          email_contact: "atchouameni@realdemadrid.es",
-          tel_apprenant: "067777777777",
-          code_commune_insee_apprenant: "59122",
-          date_de_naissance_apprenant: new Date("2000-01-27T00:00:00.000+0000"),
-        })
-      );
-
-      assert.notEqual(createdStatut, null);
-      assert.equal(createdStatut.updated_at, null);
-
-      // Anonymisation
-      await anonymize(createdStatut._id);
-
-      // Check value in db
-      const foundAfterUpdate = await DossierApprenantModel.findById(createdStatut._id);
-      assert.notEqual(foundAfterUpdate.prenom_apprenant, createdStatut.prenom_apprenant);
-      assert.equal(foundAfterUpdate.prenom_apprenant.startsWith(ANONYMOUS_PREFIX), true);
-
-      assert.notEqual(foundAfterUpdate.nom_apprenant, createdStatut.nom_apprenant);
-      assert.equal(foundAfterUpdate.nom_apprenant.startsWith(ANONYMOUS_PREFIX), true);
-
-      assert.notEqual(foundAfterUpdate.email_contact, createdStatut.email_contact);
-      assert.equal(foundAfterUpdate.email_contact.startsWith(ANONYMOUS_PREFIX), true);
-
-      assert.notEqual(foundAfterUpdate.tel_apprenant, createdStatut.tel_apprenant);
-      assert.equal(foundAfterUpdate.tel_apprenant.startsWith(ANONYMOUS_PREFIX), true);
-
-      assert.notEqual(foundAfterUpdate.code_commune_insee_apprenant, createdStatut.code_commune_insee_apprenant);
-      assert.equal(foundAfterUpdate.code_commune_insee_apprenant.startsWith(ANONYMOUS_PREFIX), true);
-
-      assert.notEqual(foundAfterUpdate.date_de_naissance_apprenant, createdStatut.date_de_naissance_apprenant);
-      assert.notEqual(foundAfterUpdate.updated_at, null);
     });
   });
 });

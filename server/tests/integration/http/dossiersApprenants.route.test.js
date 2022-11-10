@@ -2,7 +2,6 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const users = require("../../../src/common/components/users");
 const { apiRoles } = require("../../../src/common/roles");
-const { DossierApprenantModel } = require("../../../src/common/model");
 const {
   createRandomDossierApprenantApiInputList,
   createRandomDossierApprenantApiInput,
@@ -10,6 +9,7 @@ const {
 } = require("../../data/randomizedSample");
 const { cfdRegex } = require("../../../src/common/domain/cfd");
 const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
+const { dossiersApprenantsDb } = require("../../../src/common/model/collections");
 
 const user = {
   name: "userApi",
@@ -149,7 +149,7 @@ describe(__filename, () => {
         );
 
         // check that no data was created
-        assert.equal(await DossierApprenantModel.countDocuments({}), 0);
+        assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
       });
     });
 
@@ -176,7 +176,7 @@ describe(__filename, () => {
         true
       );
       // check that no data was created
-      assert.equal(await DossierApprenantModel.countDocuments({}), 0);
+      assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
     });
 
     it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ uai_etablissement ne respecte pas le format", async () => {
@@ -201,7 +201,7 @@ describe(__filename, () => {
         true
       );
       // check that no data was created
-      assert.equal(await DossierApprenantModel.countDocuments({}), 0);
+      assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
     });
 
     const invalidDates = ["2020", "2020-10", "2020-10-", "2020-10-1", "13/11/2020", "abc", true];
@@ -231,7 +231,7 @@ describe(__filename, () => {
           true
         );
         // check that no data was created
-        assert.equal(await DossierApprenantModel.countDocuments({}), 0);
+        assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
       });
     });
 
@@ -278,7 +278,7 @@ describe(__filename, () => {
       assert.deepEqual(response.data.status, "OK");
 
       // Check Nb Items added
-      assert.deepEqual(await DossierApprenantModel.countDocuments({}), nbItemsToTest);
+      assert.deepEqual(await dossiersApprenantsDb().countDocuments({}), nbItemsToTest);
     });
 
     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un trop grande nb de données randomisées (>100)", async () => {
@@ -299,7 +299,7 @@ describe(__filename, () => {
 
       // Check Api Route data & Data not added
       assert.deepEqual(response.status, 413);
-      assert.equal(await DossierApprenantModel.countDocuments({}), 0);
+      assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
     });
 
     it("Vérifie l'ajout via route /dossiers-apprenants de 10 statuts valides et 3 statuts invalides", async () => {
@@ -334,7 +334,7 @@ describe(__filename, () => {
       assert.equal(response.data.validationErrors.length, 3);
 
       // Check Nb Items added
-      assert.deepEqual(await DossierApprenantModel.countDocuments({}), nbValidItems);
+      assert.deepEqual(await dossiersApprenantsDb().countDocuments({}), nbValidItems);
     });
 
     it("Vérifie l'ajout via route /dossiers-apprenants d'un statut avec champs non renseignés dans le schéma mais ignorés en base", async () => {
@@ -358,7 +358,7 @@ describe(__filename, () => {
       assert.equal(response.data.status, "OK");
       assert.equal(response.data.ok, 1);
 
-      const allStatuts = await DossierApprenantModel.find().lean();
+      const allStatuts = await dossiersApprenantsDb().find().toArray();
       const createdStatut = allStatuts[0];
       assert.equal(createdStatut[unknownKeyName], undefined);
     });
@@ -386,7 +386,7 @@ describe(__filename, () => {
       assert.deepEqual(response.data.status, "OK");
 
       // Check Nb Items added
-      assert.deepEqual(await DossierApprenantModel.countDocuments({}), 1);
+      assert.deepEqual(await dossiersApprenantsDb().countDocuments({}), 1);
     });
 
     it("Vérifie qu'on ne peut créer un dossier apprenant avec des espaces en début/fin de prenom_apprenant et nom_apprenant", async () => {
@@ -425,7 +425,7 @@ describe(__filename, () => {
       assert.deepEqual(responseGet.data.dossiersApprenants[0].prenom_apprenant, "TEST");
 
       // Check Nb Items added
-      assert.deepEqual(await DossierApprenantModel.countDocuments({}), 1);
+      assert.deepEqual(await dossiersApprenantsDb().countDocuments({}), 1);
     });
 
     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec mauvais code CFD (id_formation)", async () => {
@@ -453,7 +453,7 @@ describe(__filename, () => {
         ),
         true
       );
-      assert.equal(await DossierApprenantModel.countDocuments({}), 0);
+      assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
     });
 
     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec mauvais siret", async () => {
@@ -475,7 +475,7 @@ describe(__filename, () => {
       // check response & validation errors
       assert.equal(response.data.status, "WARNING");
       assert.equal(response.data.validationErrors.length, 1);
-      assert.equal(await DossierApprenantModel.countDocuments({}), 0);
+      assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
     });
   });
 

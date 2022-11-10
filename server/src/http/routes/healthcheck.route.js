@@ -10,17 +10,14 @@ module.exports = ({ db }) => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      let mongodbStatus;
-      await db
-        .collection("dossiersApprenants")
-        .stats()
-        .then(() => {
-          mongodbStatus = true;
-        })
-        .catch((e) => {
-          mongodbStatus = false;
-          logger.error("Healthcheck failed", e);
-        });
+      let mongodbStatus = false;
+
+      try {
+        await db.stats();
+        mongodbStatus = true;
+      } catch (e) {
+        logger.error("Healthcheck failed", e);
+      }
 
       return res.json({
         name: `Serveur MNA - ${config.appName}`,

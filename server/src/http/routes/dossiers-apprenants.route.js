@@ -17,6 +17,7 @@ const { findAndPaginate } = require("../../common/utils/dbUtils");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
 const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
+const { dossiersApprenantsDb } = require("../../common/model/collections");
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
@@ -182,7 +183,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
 
         // Gets paginated data filtered on source mapped to username
         const { find, pagination } = await findAndPaginate(
-          db.collection("dossiersApprenants"),
+          dossiersApprenantsDb(),
           { ...filtersFromBody, source: req.user.username },
           { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
         );

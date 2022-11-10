@@ -3,10 +3,10 @@ const logger = require("../../common/logger");
 const { createIndexes, dropIndexes } = require("../../common/indexes");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
-runScript(async ({ db }) => {
+runScript(async () => {
   logger.info("Drop all existing indexes...");
-  await dropIndexes(db);
+  await dropIndexes();
   logger.info("Create all indexes...");
-  await createIndexes(db);
+  await createIndexes();
   logger.info("All indexes successfully created !");
 }, JOB_NAMES.createIndexes);

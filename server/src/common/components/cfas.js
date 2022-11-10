@@ -1,10 +1,11 @@
+const { ObjectId } = require("mongodb");
 const { getDepartementCodeFromUai, validateUai } = require("../domain/uai");
-const { DossierApprenantModel, CfaModel } = require("../model");
 const { escapeRegExp } = require("../utils/regexUtils");
 const { Cfa } = require("../factory/cfa");
 const { getMetiersBySirets } = require("../../common/apis/apiLba");
 const logger = require("../../common/logger");
 const { validateNatureOrganismeDeFormation } = require("../domain/organisme-de-formation/nature");
+const { cfasDb, dossiersApprenantsDb } = require("../model/collections");
 
 module.exports = () => ({
   createCfa,
@@ -25,9 +26,11 @@ module.exports = () => ({
 const SEARCH_RESULTS_LIMIT = 50;
 
 const getFromSiret = async (siret) => {
-  return await CfaModel.find({
-    sirets: siret,
-  }).lean();
+  return await cfasDb()
+    .find({
+      sirets: siret,
+    })
+    .toArray();
 };
 
 /**
@@ -36,7 +39,7 @@ const getFromSiret = async (siret) => {
  * @return {boolean} Does it exist
  */
 const existsCfa = async (uai) => {
-  const count = await CfaModel.countDocuments({ uai });
+  const count = await cfasDb().countDocuments({ uai });
   return count !== 0;
 };
 
@@ -81,10 +84,12 @@ const createCfa = async (dossierForCfa, sirets = []) => {
   });
 
   if (cfaEntity) {
-    const saved = await new CfaModel(cfaEntity).save();
-    return saved.toObject();
+    const { insertedId } = await cfasDb().insertOne(cfaEntity);
+    // TODO return only the id instead of the created object (single responsibility)
+    return await cfasDb().findOne({ _id: insertedId });
   }
 
+  // retourner une erreur lorsque la création a échoué
   return null;
 };
 
@@ -95,21 +100,20 @@ const createCfa = async (dossierForCfa, sirets = []) => {
  * @param {*} sirets
  */
 const updateCfa = async (cfaId, dossierForCfa, sirets = []) => {
-  if (!cfaId) {
-    throw Error("Id not found");
-  }
+  const _id = new ObjectId(cfaId);
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   if (validateUai(dossierForCfa.uai_etablissement).error) {
     throw Error("Invalid Uai");
   }
 
-  const cfaToUpdate = await CfaModel.findById(cfaId);
+  const cfaToUpdate = await cfasDb().findOne({ _id });
   if (!cfaToUpdate) {
     throw new Error(`Can't update cfa with id ${cfaId} it does not exists`);
   }
 
-  await CfaModel.findOneAndUpdate(
-    { _id: cfaId },
+  await cfasDb().updateOne(
+    { _id },
     {
       $set: {
         uai: dossierForCfa.uai_etablissement,
@@ -132,12 +136,12 @@ const updateCfaNature = async (uai, { nature, natureValidityWarning }) => {
     throw new Error(`Can't update cfa with uai ${uai} : nature of value ${nature} is invalid`);
   }
 
-  const cfaToUpdate = await CfaModel.findOne({ uai });
+  const cfaToUpdate = await cfasDb().findOne({ uai });
   if (!cfaToUpdate) {
     throw new Error(`Can't update cfa with uai ${uai} : not found`);
   }
 
-  await CfaModel.findOneAndUpdate(
+  await cfasDb().updateOne(
     { uai },
     {
       $set: {
@@ -150,18 +154,17 @@ const updateCfaNature = async (uai, { nature, natureValidityWarning }) => {
 };
 
 /**
- * Returns list of CFA information matching passed criteria
  * @param {string} uai of the organisme de formation
  * @param {[string]} reseaux new list of reseaux
  * @return void
  */
 const updateCfaReseauxFromUai = async (uai, reseaux = []) => {
-  const cfaToUpdate = await CfaModel.findOne({ uai });
+  const cfaToUpdate = await cfasDb().findOne({ uai });
   if (!cfaToUpdate) {
     throw new Error(`Can't update cfa with uai ${uai} : not found`);
   }
 
-  await CfaModel.findOneAndUpdate(
+  await cfasDb().updateOne(
     { uai },
     {
       $set: {
@@ -190,7 +193,7 @@ const searchCfas = async (searchCriteria) => {
   }
   // if other criteria have been provided, find the list of uai matching those criteria in the DossierApprenant collection
   if (Object.keys(otherCriteria).length > 0) {
-    const eligibleUais = await DossierApprenantModel.distinct("uai_etablissement", otherCriteria);
+    const eligibleUais = await dossiersApprenantsDb().distinct("uai_etablissement", otherCriteria);
     matchStage.uai = { $in: eligibleUais };
   }
 
@@ -201,11 +204,9 @@ const searchCfas = async (searchCriteria) => {
       }
     : { nom_etablissement: 1 };
 
-  const found = await CfaModel.aggregate([
-    { $match: matchStage },
-    { $sort: sortStage },
-    { $limit: SEARCH_RESULTS_LIMIT },
-  ]);
+  const found = await cfasDb()
+    .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
+    .toArray();
 
   return found.map((cfa) => {
     return {
@@ -224,10 +225,11 @@ const searchCfas = async (searchCriteria) => {
  * @returns
  */
 const getCfaFirstTransmissionDateFromUai = async (uai) => {
-  const historiqueDatesDossierApprenantWithUai = await DossierApprenantModel.find({ uai_etablissement: uai })
+  const historiqueDatesDossierApprenantWithUai = await dossiersApprenantsDb()
+    .find({ uai_etablissement: uai })
     .sort("created_at")
     .limit(1)
-    .lean();
+    .toArray();
 
   return historiqueDatesDossierApprenantWithUai.length > 0
     ? historiqueDatesDossierApprenantWithUai[0].created_at
@@ -240,10 +242,11 @@ const getCfaFirstTransmissionDateFromUai = async (uai) => {
  * @returns {Date|null}
  */
 const getCfaFirstTransmissionDateFromSiret = async (siret) => {
-  const historiqueDatesDossiersApprenantsWithSiret = await DossierApprenantModel.find({ siret_etablissement: siret })
+  const historiqueDatesDossiersApprenantsWithSiret = await dossiersApprenantsDb()
+    .find({ siret_etablissement: siret })
     .sort("created_at")
     .limit(1)
-    .lean();
+    .toArray();
 
   return historiqueDatesDossiersApprenantsWithSiret.length > 0
     ? historiqueDatesDossiersApprenantsWithSiret[0].created_at
@@ -255,12 +258,14 @@ const getCfaFirstTransmissionDateFromSiret = async (siret) => {
  * @param {string} uai_etablissement
  * @returns {Array<{siret_etablissement: string, nom_etablissement: string}>}
  */
-const getSousEtablissementsForUai = (uai) => {
-  return DossierApprenantModel.aggregate([
-    { $match: { uai_etablissement: uai, siret_etablissement: { $ne: null } } },
-    { $group: { _id: "$siret_etablissement", nom_etablissement: { $first: "$nom_etablissement" } } },
-    { $project: { _id: 0, siret_etablissement: "$_id", nom_etablissement: "$nom_etablissement" } },
-  ]);
+const getSousEtablissementsForUai = async (uai) => {
+  return await dossiersApprenantsDb()
+    .aggregate([
+      { $match: { uai_etablissement: uai, siret_etablissement: { $ne: null } } },
+      { $group: { _id: "$siret_etablissement", nom_etablissement: { $first: "$nom_etablissement" } } },
+      { $project: { _id: 0, siret_etablissement: "$_id", nom_etablissement: "$nom_etablissement" } },
+    ])
+    .toArray();
 };
 
 /**
@@ -270,16 +275,19 @@ const getSousEtablissementsForUai = (uai) => {
  */
 
 const getFromAccessToken = async (accessToken) => {
-  return await CfaModel.findOne({ access_token: accessToken }).lean();
+  return await cfasDb().findOne({ access_token: accessToken });
 };
 
 const getFromUai = async (uai) => {
-  return await CfaModel.findOne({ uai }).lean();
+  return await cfasDb().findOne({ uai });
 };
 
+// TODO à tester
 const getFromUaiAndSiret = async (uai, siret) => {
-  return await CfaModel.find({
-    uai,
-    sirets: siret,
-  }).lean();
+  return await cfasDb()
+    .find({
+      uai,
+      sirets: siret,
+    })
+    .toArray();
 };

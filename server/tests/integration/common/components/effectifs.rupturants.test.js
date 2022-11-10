@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 
-const { DossierApprenantModel } = require("../../../../src/common/model");
 const { EffectifsRupturants } = require("../../../../src/common/components/effectifs/rupturants");
+const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   beforeEach(async () => {
@@ -62,8 +62,7 @@ describe(__filename, () => {
       }),
     ];
     for (let index = 0; index < statuts.length; index++) {
-      const toAdd = new DossierApprenantModel(statuts[index]);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(statuts[index]);
     }
   });
 
@@ -93,7 +92,7 @@ describe(__filename, () => {
 
       // Add 5 statuts rupturant for annee_scolaire on same year
       for (let index = 0; index < 5; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -102,12 +101,12 @@ describe(__filename, () => {
             annee_scolaire: "2020-2020",
             ...filters,
           })
-        ).save();
+        );
       }
 
       // Add 12 statuts rupturant for annee_scolaire on two years
       for (let index = 0; index < 12; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -116,7 +115,7 @@ describe(__filename, () => {
             annee_scolaire: "2021-2021",
             ...filters,
           })
-        ).save();
+        );
       }
 
       const date = new Date("2020-10-12T00:00:00");

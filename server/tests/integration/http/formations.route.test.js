@@ -1,9 +1,9 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
-const { FormationModel, DossierApprenantModel } = require("../../../src/common/model");
 const { Formation } = require("../../../src/common/factory/formation");
 const { createRandomDossierApprenant } = require("../../data/randomizedSample");
+const { formationsDb, dossiersApprenantsDb } = require("../../../src/common/model/collections");
 
 describe(__filename, () => {
   const formationsSeed = [
@@ -19,11 +19,11 @@ describe(__filename, () => {
   const seedFormations = async () => {
     await asyncForEach(formationsSeed, async (formationSeed) => {
       const formation = Formation.create(formationSeed);
-      await new FormationModel(formation).save();
-      await new DossierApprenantModel({
+      await formationsDb().insertOne(formation);
+      await dossiersApprenantsDb().insertOne({
         ...createRandomDossierApprenant(),
         formation_cfd: formation.cfd,
-      }).save();
+      });
     });
   };
 

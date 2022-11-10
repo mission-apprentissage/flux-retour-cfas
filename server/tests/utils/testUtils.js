@@ -2,12 +2,12 @@
 const axiosist = require("axiosist");
 const createComponents = require("../../src/common/components/components");
 const server = require("../../src/http/server");
-const { mongooseInstance } = require("../../src/common/mongodb");
+const { getDatabase } = require("../../src/common/mongodb");
 const redisFakeClient = require("./redisClientMock");
 
 const startServer = async () => {
   const components = await createComponents({
-    db: mongooseInstance.connection,
+    db: getDatabase(),
     redisClient: redisFakeClient,
     ovhStorage: {},
   });
