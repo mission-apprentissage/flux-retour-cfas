@@ -1,0 +1,57 @@
+- name: Mise à jour des packages
+  apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: Remove unused package
+  apt:
+    name: ["tcpdump", "gdb", "libX11", "telnet", "gcc"]
+    state: absent
+
+- include_role:
+    name: geerlingguy.docker
+
+- name: Vérification binaires ctop déja installés
+  stat: path=/usr/local/bin/ctop
+  register: ctop
+
+- name: Installation ctop
+  when: ctop.stat.exists == False
+  shell: "wget https://github.com/bcicen/ctop/releases/download/v0.7.1/ctop-0.7.1-linux-amd64 -O /usr/local/bin/ctop && chmod +x /usr/local/bin/ctop"
+
+- name: Installation des packages apt
+  apt:
+    name: ["vim", "htop", "jq", "git"]
+
+- name: Set timezone to Europe/Paris
+  community.general.timezone:
+    name: Europe/Paris
+
+- name: Definition clavier francais
+  lineinfile:
+    path: /etc/default/keyboard
+    regexp: '^XKBLAYOUT=\"\w*\"$'
+    line: 'XKBLAYOUT="fr"'
+
+- name: Définition de l'environnement
+  lineinfile:
+    path: /env
+    create: yes
+    regexp: "^{{env_type}}$"
+    line: "{{env_type}}"
+
+#See https://unix.stackexchange.com/questions/186859/understand-hostname-and-etc-hosts
+- name: Définition du nom de l'hôte
+  hostname:
+    name: "{{ host_name }}"
+
+#Works only with OVH instance
+- name: Ajout de l'hôte en tant qu'alias dans /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    backup: true
+    backrefs: true
+    state: present
+    regexp: '^(127\.0\.1\.1\tvps-[a-z0-9]+.vps.ovh.net(?:\.novalocal)?\tvps-[a-z0-9]+)( {{host_name}})?$'
+    line: '\1 {{ host_name }}'

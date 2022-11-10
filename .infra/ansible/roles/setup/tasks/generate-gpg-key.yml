@@ -1,0 +1,3 @@
+- name: Generate GPG key
+  shell: "bash /opt/flux-retour-cfas/tools/gpg/generate-gpg-key.sh"
+  register: output
