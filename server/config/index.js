@@ -39,6 +39,9 @@ export const config = {
   mnaReferentielApi: {
     endpoint: env.get("FLUX_RETOUR_CFAS_MNA_REFERENTIEL_ENDPOINT_URL").required().asString(),
   },
+  clamav: {
+    uri: env.get("FLUX_RETOUR_CFAS_CLAMAV_URI").default("127.0.0.1:3310").asString(),
+  },
   ovhStorage: {
     username: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_USERNAME").required().asString(),
     password: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_PASSWORD").required().asString(),

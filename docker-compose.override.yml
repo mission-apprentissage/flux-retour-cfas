@@ -37,6 +37,11 @@ services:
     volumes:
       - flux_retour_cfas_mongodb_data:/data
 
+  clamav:
+    image: clamav/clamav
+    ports:
+      - 3310:3310
+
   redis:
     volumes:
       - flux_retour_cfas_redis_data:/data
