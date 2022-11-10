@@ -1,6 +1,7 @@
 // eslint-disable-next-line node/no-unpublished-require
 const { MongoMemoryServer } = require("mongodb-memory-server");
-const { mongooseInstance, closeMongoConnection, connectToMongo } = require("../../src/common/mongodb");
+const { connectToMongodb, closeMongodbConnection, getDatabase, getDbCollection } = require("../../src/common/mongodb");
+const { asyncForEach } = require("../../src/common/utils/asyncUtils");
 
 let mongoInMemory;
 
@@ -11,23 +12,20 @@ const startAndConnectMongodb = async () => {
     },
   });
   const uri = mongoInMemory.getUri();
-  const { db } = await connectToMongo(uri);
-  return db;
+  await connectToMongodb(uri);
 };
 
 const stopMongodb = async () => {
-  await closeMongoConnection();
+  await closeMongodbConnection();
   await mongoInMemory.stop();
 };
 
 const clearAllCollections = async () => {
-  const collections = mongooseInstance.connection.collections;
+  const collections = await getDatabase().listCollections({}, { nameOnly: true }).toArray();
 
-  await Promise.all(
-    Object.values(collections).map(async (collection) => {
-      await collection.deleteMany({});
-    })
-  );
+  await asyncForEach(collections, async (collection) => {
+    await getDbCollection(collection.name).deleteMany({});
+  });
 };
 
 module.exports = {

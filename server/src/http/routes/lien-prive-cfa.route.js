@@ -1,8 +1,8 @@
 const express = require("express");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const Joi = require("joi");
-const { CfaModel } = require("../../common/model");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
+const { cfasDb } = require("../../common/model/collections");
 
 module.exports = () => {
   const router = express.Router();
@@ -20,25 +20,27 @@ module.exports = () => {
       const uais = req.query.uais ?? null;
       const page = Number(req.query.page ?? 1);
       const limit = Number(req.query.limit ?? 100);
+      const skip = (page - 1) * limit;
 
       const query = uais
         ? { uai: { $in: uais }, erps: req.user.username, private_url: { $nin: [null, ""] } }
         : { erps: req.user.username, private_url: { $nin: [null, ""] } };
 
-      const allCfas = await CfaModel.paginate(query, { page, limit });
-      const cfaDataWithPrivateLinkFormatted = allCfas.docs.map((item) => ({
-        nom: item._doc.nom,
-        uai: item._doc.uai,
-        private_url: `${item._doc.private_url}?source=ERP`,
+      const allData = await cfasDb().find(query).skip(skip).limit(limit).toArray();
+      const count = await cfasDb().countDocuments(query);
+      const cfaDataWithPrivateLinkFormatted = allData.map((item) => ({
+        nom: item.nom,
+        uai: item.uai,
+        private_url: `${item.private_url}?source=ERP`,
       }));
 
       return res.json({
         cfasWithPrivateLink: cfaDataWithPrivateLinkFormatted,
         pagination: {
-          page: allCfas.page,
+          page: page,
           resultats_par_page: limit,
-          nombre_de_page: allCfas.pages,
-          total: allCfas.total,
+          nombre_de_page: Math.ceil(count / limit) || 1,
+          total: count,
         },
       });
     })

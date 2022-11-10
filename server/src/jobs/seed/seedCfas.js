@@ -5,9 +5,9 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 
-const { CfaModel, DossierApprenantModel, ReseauCfaModel } = require("../../common/model");
 const { ERPS } = require("../../common/constants/erpsConstants");
 const { validateSiret } = require("../../common/domain/siret");
+const { dossiersApprenantsDb, cfasDb, reseauxCfasDb } = require("../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -42,7 +42,7 @@ const clearCfasNotInDossierApprenants = async () => {
 
   await asyncForEach(cfasIdsToDelete, async (idToDelete) => {
     loadingBar.increment();
-    await CfaModel.findByIdAndDelete(idToDelete);
+    await cfasDb().deleteOne({ _id: idToDelete });
   });
 
   loadingBar.stop();
@@ -56,8 +56,8 @@ const clearCfasNotInDossierApprenants = async () => {
 const getCfasIdsNotInDossierApprenants = async () => {
   const cfasIdsNotInDossierApprenants = new Set();
 
-  await asyncForEach(await CfaModel.find({}).lean(), async (currentCfa) => {
-    if ((await DossierApprenantModel.countDocuments({ uai_etablissement: currentCfa.uai })) == 0) {
+  await asyncForEach(await cfasDb().find({}).toArray(), async (currentCfa) => {
+    if ((await dossiersApprenantsDb().countDocuments({ uai_etablissement: currentCfa.uai })) == 0) {
       cfasIdsNotInDossierApprenants.add(currentCfa._id);
     }
   });
@@ -70,7 +70,7 @@ const getCfasIdsNotInDossierApprenants = async () => {
  */
 const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
   // All distinct valid uais
-  const allUais = await DossierApprenantModel.distinct("uai_etablissement");
+  const allUais = await dossiersApprenantsDb().distinct("uai_etablissement");
 
   logger.info(`Seeding Referentiel CFAs from ${allUais.length} distincts UAIs found in DossierApprenant`);
 
@@ -84,15 +84,15 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
     loadingBar.increment();
 
     // Gets dossiers & sirets for UAI
-    const dossierForUai = await DossierApprenantModel.findOne({
+    const dossierForUai = await dossiersApprenantsDb().findOne({
       uai_etablissement: currentUai,
     });
-    const allSiretsForUai = await DossierApprenantModel.distinct("siret_etablissement", {
+    const allSiretsForUai = await dossiersApprenantsDb().distinct("siret_etablissement", {
       uai_etablissement: currentUai,
     });
     const allValidSiretsForUai = allSiretsForUai.filter((siret) => !validateSiret(siret).error);
 
-    const cfaExistant = await CfaModel.findOne({ uai: currentUai }).lean();
+    const cfaExistant = await cfasDb().findOne({ uai: currentUai });
 
     // Create or update CFA
     if (dossierForUai) {
@@ -132,7 +132,7 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
 const updateCfasNetworksFromReseauxCfas = async (nomReseau) => {
   logger.info(`Updating CFAs network for ${nomReseau}`);
 
-  const allCfasForNetworkFile = await ReseauCfaModel.find({ nom_reseau: nomReseau }).lean();
+  const allCfasForNetworkFile = await reseauxCfasDb().find({ nom_reseau: nomReseau }).toArray();
   loadingBar.start(allCfasForNetworkFile.length, 0);
 
   // Parse all cfas in file
@@ -141,7 +141,7 @@ const updateCfasNetworksFromReseauxCfas = async (nomReseau) => {
 
     if (currentCfa.uai) {
       // Gets cfas for UAI in collection
-      const cfaForUai = await CfaModel.findOne({ uai: `${currentCfa.uai}` }).lean();
+      const cfaForUai = await cfasDb().findOne({ uai: `${currentCfa.uai}` });
 
       if (cfaForUai) {
         // Do not handle cfa in network AGRI and having GESTI as ERP
@@ -170,12 +170,11 @@ const updateCfaFromNetwork = async (cfaInReferentiel, cfaInFile, nomReseau) => {
 
   // Update only if cfa in referentiel has not network or current network not included
   if (cfaExistantWithoutCurrentNetwork) {
-    await CfaModel.findByIdAndUpdate(
-      cfaInReferentiel._id,
+    await cfasDb().updateOne(
+      { _id: cfaInReferentiel._id },
       {
         $addToSet: { noms_cfa: cfaInFile.nom_etablissement?.trim(), reseaux: nomReseau },
-      },
-      { new: true }
+      }
     );
   }
 };

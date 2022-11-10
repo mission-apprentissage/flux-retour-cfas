@@ -5,8 +5,8 @@ const {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
 } = require("../../../data/historySequenceSamples");
-const { DossierApprenantModel } = require("../../../../src/common/model");
 const { EffectifsAbandons } = require("../../../../src/common/components/effectifs/abandons");
+const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -18,9 +18,8 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      abandonsStatuts.push(toAdd);
-      await toAdd.save();
+      const { insertedId } = await dossiersApprenantsDb().insertOne(randomStatut);
+      abandonsStatuts.push(await dossiersApprenantsDb().findOne({ _id: insertedId }));
     }
 
     // Add 5 statuts with history sequence - simple apprenti
@@ -29,8 +28,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceApprenti,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     // Add 15 statuts with history sequence - inscritToApprenti
@@ -39,8 +37,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprenti,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     return abandonsStatuts;
@@ -94,24 +91,24 @@ describe(__filename, () => {
 
       // Add 5 statuts abandon for annee_scolaire on same year
       for (let index = 0; index < 5; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
             annee_scolaire: "2020-2020",
             ...filters,
           })
-        ).save();
+        );
       }
 
       // Add 12 statuts to abandon  for annee_scolaire on two years
       for (let index = 0; index < 12; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
             annee_scolaire: "2021-2021",
             ...filters,
           })
-        ).save();
+        );
       }
 
       const date = new Date("2020-10-10T00:00:00.000+0000");

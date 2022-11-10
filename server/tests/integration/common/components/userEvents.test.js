@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const userEvents = require("../../../../src/common/components/userEvents");
-const { UserEventModel, UserModel } = require("../../../../src/common/model");
 const users = require("../../../../src/common/components/users");
+const { userEventsDb, usersDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   describe("createUserEvent", () => {
@@ -9,7 +9,7 @@ describe(__filename, () => {
       const { create } = userEvents();
 
       await create({ username: "admin", type: "any", action: "test", data: { hello: "world" }, date: new Date() });
-      const foundInDb = await UserEventModel.findOne({ username: "admin" });
+      const foundInDb = await userEventsDb().findOne({ username: "admin" });
       assert.ok(foundInDb);
     });
 
@@ -27,11 +27,11 @@ describe(__filename, () => {
         region: regionTest,
       });
 
-      const foundUser = await UserModel.findOne({ username: usernameTest });
+      const foundUser = await usersDb().findOne({ username: usernameTest });
       assert.equal(foundUser.region === regionTest, true);
 
       await create({ username: usernameTest, type: "any", action: "test", data: { hello: "world" }, date: new Date() });
-      const foundUserEvent = await UserEventModel.findOne({ username: usernameTest });
+      const foundUserEvent = await userEventsDb().findOne({ username: usernameTest });
       assert.ok(foundUserEvent);
       assert.equal(foundUserEvent.username === usernameTest, true);
       assert.equal(foundUserEvent.user_region === regionTest, true);
@@ -51,11 +51,11 @@ describe(__filename, () => {
         organisme: organismeTest,
       });
 
-      const foundUser = await UserModel.findOne({ username: usernameTest });
+      const foundUser = await usersDb().findOne({ username: usernameTest });
       assert.equal(foundUser.organisme === organismeTest, true);
 
       await create({ username: usernameTest, type: "any", action: "test", data: { hello: "world" }, date: new Date() });
-      const foundUserEvent = await UserEventModel.findOne({ username: usernameTest });
+      const foundUserEvent = await userEventsDb().findOne({ username: usernameTest });
       assert.ok(foundUserEvent);
       assert.equal(foundUserEvent.username === usernameTest, true);
       assert.equal(foundUserEvent.user_organisme === organismeTest, true);
@@ -75,11 +75,11 @@ describe(__filename, () => {
         network: networkTest,
       });
 
-      const foundUser = await UserModel.findOne({ username: usernameTest });
+      const foundUser = await usersDb().findOne({ username: usernameTest });
       assert.equal(foundUser.network === networkTest, true);
 
       await create({ username: usernameTest, type: "any", action: "test", data: { hello: "world" }, date: new Date() });
-      const foundUserEvent = await UserEventModel.findOne({ username: usernameTest });
+      const foundUserEvent = await userEventsDb().findOne({ username: usernameTest });
       assert.ok(foundUserEvent);
       assert.equal(foundUserEvent.username === usernameTest, true);
       assert.equal(foundUserEvent.user_network === networkTest, true);

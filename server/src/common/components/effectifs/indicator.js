@@ -1,4 +1,4 @@
-const { DossierApprenantModel } = require("../../model");
+const { dossiersApprenantsDb } = require("../../model/collections");
 
 class Indicator {
   /**
@@ -40,7 +40,7 @@ class Indicator {
     const groupedBy = options.groupedBy ?? { _id: null, count: { $sum: 1 } };
     const aggregationPipeline = this.getAtDateAggregationPipeline(searchDate, filters, options);
     const groupedAggregationPipeline = [...aggregationPipeline, { $group: groupedBy }];
-    const result = await DossierApprenantModel.aggregate(groupedAggregationPipeline);
+    const result = await dossiersApprenantsDb().aggregate(groupedAggregationPipeline).toArray();
 
     if (!options.groupedBy) {
       return result.length === 1 ? result[0].count : 0;
@@ -57,7 +57,7 @@ class Indicator {
    */
   async getListAtDate(searchDate, filters = {}, options = {}) {
     const aggregationPipeline = await this.getAtDateAggregationPipeline(searchDate, filters, options);
-    const result = await DossierApprenantModel.aggregate(aggregationPipeline);
+    const result = await dossiersApprenantsDb().aggregate(aggregationPipeline).toArray();
     return result ?? [];
   }
 

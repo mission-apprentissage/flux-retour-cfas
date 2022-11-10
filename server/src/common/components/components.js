@@ -1,11 +1,9 @@
-const { connectToMongo } = require("../mongodb");
 const createUsers = require("./users");
 const createUserEvents = require("./userEvents");
 const createJobEvents = require("./jobEvents");
 const createDossierApprenant = require("./dossiersApprenants");
 const cfasComponent = require("./cfas");
 const reseauxCfasComponent = require("./reseauxCfas");
-const contactsCfasComponent = require("./contactsCfas");
 const formationsComponent = require("./formations");
 const createStats = require("./stats");
 const createEffectifs = require("./effectifs");
@@ -16,7 +14,7 @@ const createOvhStorageComponent = require("./ovhStorage");
 const createArchiveDossiersApprenantsComponent = require("./archiveDossiersApprenants");
 
 module.exports = async (options = {}) => {
-  const db = options.db || (await connectToMongo()).db;
+  const db = options.db;
 
   const users = options.users || (await createUsers());
   const ovhStorage = options.ovhStorage || createOvhStorageComponent();
@@ -26,7 +24,6 @@ module.exports = async (options = {}) => {
   const formations = options.formations || formationsComponent();
   const cfas = options.cfas || cfasComponent();
   const reseauxCfas = options.reseauxCfas || reseauxCfasComponent();
-  const contactsCfas = options.contactsCfas || contactsCfasComponent();
   const stats = options.stats || createStats();
   const effectifs = options.effectifs || createEffectifs();
   const demandeIdentifiants = options.demandeIdentifiants || demandeIdentifiantsComponent();
@@ -46,7 +43,6 @@ module.exports = async (options = {}) => {
     formations,
     cfas,
     reseauxCfas,
-    contactsCfas,
     stats,
     effectifs,
     demandeIdentifiants,

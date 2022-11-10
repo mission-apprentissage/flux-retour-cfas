@@ -1,10 +1,11 @@
+const { getDbCollection } = require("../mongodb");
 const { doesCollectionExistInDb } = require("../utils/dbUtils");
 
 const collectionName = "reseauxCfas";
 
-const createReseauxCfasCollectionIndexes = async (db) => {
-  if (await doesCollectionExistInDb(db, collectionName)) {
-    const collection = db.collection(collectionName);
+const createReseauxCfasCollectionIndexes = async () => {
+  if (await doesCollectionExistInDb(collectionName)) {
+    const collection = getDbCollection(collectionName);
 
     await collection.createIndex({ nom_etablissement: "text", nom_tokenized: "text" }, { default_language: "french" });
     await collection.createIndex({ uai: 1 });
@@ -13,9 +14,9 @@ const createReseauxCfasCollectionIndexes = async (db) => {
   }
 };
 
-const dropReseauxCfasCollectionIndexes = async (db) => {
-  if (await doesCollectionExistInDb(db, collectionName)) {
-    db.collection(collectionName).dropIndexes();
+const dropReseauxCfasCollectionIndexes = async () => {
+  if (await doesCollectionExistInDb(collectionName)) {
+    getDbCollection(collectionName).dropIndexes();
   }
 };
 

@@ -5,10 +5,9 @@ const { startServer } = require("../../utils/testUtils");
 const { apiRoles, tdbRoles } = require("../../../src/common/roles");
 const { differenceInCalendarDays } = require("date-fns");
 const config = require("../../../config");
-const { UserModel } = require("../../../src/common/model");
 const { ORGANISMES_APPARTENANCE } = require("../../../src/common/constants/usersConstants");
 const omit = require("lodash.omit");
-const mongoose = require("mongoose");
+const { usersDb } = require("../../../src/common/model/collections");
 
 describe(__filename, () => {
   afterEach(() => {
@@ -75,7 +74,7 @@ describe(__filename, () => {
   describe("GET /users/:id", () => {
     it("sends a 401 HTTP response when user is not authenticated", async () => {
       const { httpClient } = await startServer();
-      const testObjectId = new mongoose.Types.ObjectId();
+      const testObjectId = "an-id-&9393";
       const response = await httpClient.get(`/api/users/${testObjectId}`, {});
 
       assert.equal(response.status, 401);
@@ -85,7 +84,7 @@ describe(__filename, () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
-      const testObjectId = new mongoose.Types.ObjectId();
+      const testObjectId = "random-id-39393";
       const response = await httpClient.get(`/api/users/${testObjectId}`, { headers: bearerToken });
 
       assert.equal(response.status, 403);
@@ -99,7 +98,7 @@ describe(__filename, () => {
       await components.users.createUser({ username });
 
       // Find user
-      const found = await UserModel.findOne({ username });
+      const found = await usersDb().findOne({ username });
       assert.equal(found.username === username, true);
       assert.equal(found._id !== null, true);
 
@@ -108,7 +107,6 @@ describe(__filename, () => {
 
       // Check response & data returner
       assert.equal(response.status, 200);
-      assert.notStrictEqual(new mongoose.Types.ObjectId(response.data.id), found._id);
       assert.equal(response.data.username, found.username);
     });
   });
@@ -239,12 +237,12 @@ describe(__filename, () => {
       const username = "john-doe";
       await components.users.createUser({ username });
 
-      const checkUserBeforeDelete = await UserModel.count({ username });
+      const checkUserBeforeDelete = await usersDb().count({ username });
       assert.equal(checkUserBeforeDelete, 1);
 
       const response = await httpClient.delete(`/api/users/${username}`, { headers: bearerToken });
       assert.equal(response.status, 200);
-      const checkAfterDelete = await UserModel.count({ username });
+      const checkAfterDelete = await usersDb().count({ username });
       assert.equal(checkAfterDelete, 0);
     });
 
@@ -254,13 +252,13 @@ describe(__filename, () => {
       const username = "john-doe";
       await components.users.createUser({ username });
 
-      const checkUserBeforeDelete = await UserModel.count({ username });
+      const checkUserBeforeDelete = await usersDb().count({ username });
       assert.equal(checkUserBeforeDelete, 1);
 
       const response = await httpClient.delete(`/api/users/${username}`, { headers: bearerToken });
 
       assert.equal(response.status, 403);
-      const checkAfterDelete = await UserModel.count({ username });
+      const checkAfterDelete = await usersDb().count({ username });
       assert.equal(checkAfterDelete, 1);
     });
 
@@ -271,13 +269,13 @@ describe(__filename, () => {
       const badUsername = "john-smith";
       await components.users.createUser({ username });
 
-      const checkUserBeforeDelete = await UserModel.count({ username });
+      const checkUserBeforeDelete = await usersDb().count({ username });
       assert.equal(checkUserBeforeDelete, 1);
 
       const response = await httpClient.delete(`/api/users/${badUsername}`, { headers: bearerToken });
 
       assert.equal(response.status, 500);
-      const checkAfterDelete = await UserModel.count({ username });
+      const checkAfterDelete = await usersDb().count({ username });
       assert.equal(checkAfterDelete, 1);
     });
   });
@@ -404,7 +402,7 @@ describe(__filename, () => {
       await components.users.createUser({ username });
 
       // Find user
-      const found = await UserModel.findOne({ username });
+      const found = await usersDb().findOne({ username });
       assert.equal(found.username === username, true);
       assert.equal(found._id !== null, true);
 
@@ -417,7 +415,7 @@ describe(__filename, () => {
 
       // Check response & updated value
       assert.equal(response.status, 200);
-      const checkAfterUpdate = await UserModel.findById(found._id);
+      const checkAfterUpdate = await usersDb().findOne({ _id: found._id });
       assert.equal(checkAfterUpdate.username === "UPDATED", true);
     });
 
@@ -428,7 +426,7 @@ describe(__filename, () => {
       await components.users.createUser({ username });
 
       // Find user
-      const found = await UserModel.findOne({ username });
+      const found = await usersDb().findOne({ username });
       assert.equal(found.username === username, true);
       assert.equal(found._id !== null, true);
 
@@ -441,7 +439,7 @@ describe(__filename, () => {
 
       // Check response & updated value
       assert.equal(response.status, 403);
-      const checkAfterUpdate = await UserModel.count({ username: "UPDATED" });
+      const checkAfterUpdate = await usersDb().count({ username: "UPDATED" });
       assert.equal(checkAfterUpdate, 0);
     });
   });

@@ -1,8 +1,10 @@
-const { JobEventModel } = require("../model");
+const { jobEventsDb } = require("../model/collections");
 
 module.exports = () => ({ isJobInAction });
 
 const isJobInAction = async (jobname, action) => {
-  const lastJobEvent = await JobEventModel.findOne({ jobname: jobname }).sort({ date: "desc" });
-  return lastJobEvent?.action === action ?? false;
+  const [lastJobEvent] = await jobEventsDb().find({ jobname }).limit(1).sort({ date: "desc" }).toArray();
+
+  if (!lastJobEvent) return false;
+  return lastJobEvent.action === action;
 };

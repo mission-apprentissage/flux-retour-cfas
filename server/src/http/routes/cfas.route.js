@@ -1,10 +1,10 @@
 const express = require("express");
 const Joi = require("joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { CfaModel } = require("../../common/model");
 const pick = require("lodash.pick");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
+const { cfasDb } = require("../../common/model/collections");
 
 module.exports = ({ cfas }) => {
   const router = express.Router();
@@ -25,11 +25,13 @@ module.exports = ({ cfas }) => {
       const query = req.query.query ?? "{}";
       const page = Number(req.query.page ?? 1);
       const limit = Number(req.query.limit ?? 50);
+      const skip = (page - 1) * limit;
 
       const jsonQuery = JSON.parse(query);
-      const allData = await CfaModel.paginate(jsonQuery, { page, limit });
-      const omittedData = allData.docs.map((item) =>
-        pick(item._doc, [
+      const allData = await cfasDb().find(jsonQuery).skip(skip).limit(limit).toArray();
+      const count = await cfasDb().countDocuments(jsonQuery);
+      const omittedData = allData.map((item) =>
+        pick(item, [
           "uai",
           "sirets",
           "nom",
@@ -45,10 +47,10 @@ module.exports = ({ cfas }) => {
       return res.json({
         cfas: omittedData,
         pagination: {
-          page: allData.page,
+          page,
           resultats_par_page: limit,
-          nombre_de_page: allData.pages,
-          total: allData.total,
+          nombre_de_page: Math.ceil(count / limit) || 1,
+          total: count,
         },
       });
     })

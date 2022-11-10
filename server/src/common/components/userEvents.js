@@ -1,14 +1,14 @@
-const { UserEventModel, UserModel } = require("../model");
+const { userEventsDb, usersDb } = require("../model/collections");
 
 module.exports = () => ({
   create,
 });
 
 const create = async ({ username, type, action, data }) => {
-  const user = await UserModel.findOne({ username }).lean();
+  const user = await usersDb().findOne({ username });
   const UNKNOWN_DEFAULT_VALUE = "NC";
 
-  await new UserEventModel({
+  await userEventsDb().insertOne({
     username,
     user_organisme: user?.organisme ?? UNKNOWN_DEFAULT_VALUE,
     user_region: user?.region ?? UNKNOWN_DEFAULT_VALUE,
@@ -17,7 +17,7 @@ const create = async ({ username, type, action, data }) => {
     action,
     data,
     date: new Date(),
-  }).save();
+  });
 
   return;
 };

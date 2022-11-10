@@ -2,10 +2,10 @@ const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { EFFECTIF_INDICATOR_NAMES } = require("../../common/constants/dossierApprenantConstants");
-const { EffectifApprenantModel } = require("../../common/model");
 const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScolaireUtils");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const cliProgress = require("cli-progress");
+const { effectifsApprenantsDb } = require("../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -17,7 +17,7 @@ runScript(async ({ effectifs }) => {
 
   // Supprime les données précédentes
   logger.info(`Clearing existing Effectifs Apprenants Collection ...`);
-  await EffectifApprenantModel.deleteMany({});
+  await effectifsApprenantsDb().deleteMany({});
 
   const currentAnneeScolaireFilter = { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } };
   const projection = {
@@ -68,7 +68,7 @@ runScript(async ({ effectifs }) => {
 
   // Ajout en base pour chaque élément de la liste
   await asyncForEach(allStatutsByIndicators, async (currentStatut) => {
-    await new EffectifApprenantModel({
+    await effectifsApprenantsDb().insertOne({
       dossierApprenantId: currentStatut.dossierApprenantId,
       uai_etablissement: currentStatut.uai_etablissement,
       nom_etablissement: currentStatut.nom_etablissement,
@@ -84,7 +84,7 @@ runScript(async ({ effectifs }) => {
       formation_rncp: currentStatut.formation_rncp,
       indicateur_effectif: currentStatut.indicateur_effectif,
       created_at: new Date(),
-    }).save();
+    });
     loadingBar.increment();
   });
 

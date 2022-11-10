@@ -1,14 +1,14 @@
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { CfaModel } = require("../../common/model");
 const logger = require("../../common/logger");
+const { cfasDb } = require("../../common/model/collections");
 
 /**
  * Ce script tente de récupérer pour chaque UAI présent dans la collection Cfa la nature de l'organisme de formation
  */
 runScript(async ({ cfas, db }) => {
   // Gets all cfa
-  const allCfa = await CfaModel.find().lean();
+  const allCfa = await cfasDb().find().toArray();
 
   let organismesNatureFound = 0;
 

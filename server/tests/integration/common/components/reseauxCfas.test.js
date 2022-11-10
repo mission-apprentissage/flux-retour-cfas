@@ -1,6 +1,6 @@
 const assert = require("assert").strict;
 const reseauxCfas = require("../../../../src/common/components/reseauxCfas");
-const { ReseauCfaModel } = require("../../../../src/common/model");
+const { reseauxCfasDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   it("Permet de vérifier la création d'un cfa de réseau", async () => {
@@ -15,7 +15,7 @@ describe(__filename, () => {
 
     await create(testCfaReseau);
 
-    const found = await ReseauCfaModel.findOne({ uai: testCfaReseau.uai }).lean();
+    const found = await reseauxCfasDb().findOne({ uai: testCfaReseau.uai });
     assert.equal(found.nom_reseau, testCfaReseau.nom_reseau);
     assert.equal(found.nom_etablissement, testCfaReseau.nom_etablissement);
     assert.equal(found.siret, testCfaReseau.siret);
@@ -39,7 +39,7 @@ describe(__filename, () => {
       await create(testCfaReseau);
 
       // Check created
-      const found = await ReseauCfaModel.findOne({ uai: testCfaReseau.uai }).lean();
+      const found = await reseauxCfasDb().findOne({ uai: testCfaReseau.uai });
       assert.equal(found.nom_reseau, testCfaReseau.nom_reseau);
       assert.equal(found.nom_etablissement, testCfaReseau.nom_etablissement);
       assert.equal(found.siret, testCfaReseau.siret);
@@ -70,7 +70,7 @@ describe(__filename, () => {
       await create(testCfaReseau);
 
       // Check created
-      const found = await ReseauCfaModel.findOne({ uai: testCfaReseau.uai }).lean();
+      const found = await reseauxCfasDb().findOne({ uai: testCfaReseau.uai });
       assert.equal(found.nom_reseau, testCfaReseau.nom_reseau);
       assert.equal(found.nom_etablissement, testCfaReseau.nom_etablissement);
       assert.equal(found.siret, testCfaReseau.siret);
@@ -101,7 +101,7 @@ describe(__filename, () => {
       await create(testCfaReseau);
 
       // Check created
-      const found = await ReseauCfaModel.findOne({ uai: testCfaReseau.uai }).lean();
+      const found = await reseauxCfasDb().findOne({ uai: testCfaReseau.uai });
       assert.equal(found.nom_reseau, testCfaReseau.nom_reseau);
       assert.equal(found.nom_etablissement, testCfaReseau.nom_etablissement);
       assert.equal(found.siret, testCfaReseau.siret);
@@ -126,7 +126,7 @@ describe(__filename, () => {
       await create(testCfaReseau);
 
       // Check created
-      const found = await ReseauCfaModel.findOne({ uai: testCfaReseau.uai }).lean();
+      const found = await reseauxCfasDb().findOne({ uai: testCfaReseau.uai });
       assert.equal(found.nom_reseau, testCfaReseau.nom_reseau);
       assert.equal(found.nom_etablissement, testCfaReseau.nom_etablissement);
       assert.equal(found.siret, testCfaReseau.siret);
@@ -157,7 +157,7 @@ describe(__filename, () => {
       await create(testCfaReseau);
 
       // Check created
-      const found = await ReseauCfaModel.findOne({ uai: testCfaReseau.uai }).lean();
+      const found = await reseauxCfasDb().findOne({ uai: testCfaReseau.uai });
       assert.equal(found.nom_reseau, testCfaReseau.nom_reseau);
       assert.equal(found.nom_etablissement, testCfaReseau.nom_etablissement);
       assert.equal(found.siret, testCfaReseau.siret);

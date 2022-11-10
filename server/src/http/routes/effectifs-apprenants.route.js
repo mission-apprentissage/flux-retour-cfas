@@ -6,8 +6,9 @@ const { oleoduc, transformIntoJSON } = require("oleoduc");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { findAndPaginate } = require("../../common/utils/dbUtils");
 const validateRequestQuery = require("../middlewares/validateRequestQuery");
+const { effectifsApprenantsDb } = require("../../common/model/collections");
 
-module.exports = ({ db, jobEvents }) => {
+module.exports = ({ jobEvents }) => {
   const router = express.Router();
 
   /**
@@ -33,7 +34,7 @@ module.exports = ({ db, jobEvents }) => {
         });
       } else {
         const { find, pagination } = await findAndPaginate(
-          db.collection("effectifsApprenants"),
+          effectifsApprenantsDb(),
           {},
           { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
         );

@@ -1,8 +1,8 @@
 const assert = require("assert").strict;
 const jobEvents = require("../../../../src/common/components/jobEvents");
-const { JobEventModel } = require("../../../../src/common/model");
 const { jobEventStatuts } = require("../../../../src/common/constants/jobsConstants");
 const { addMinutes } = require("date-fns");
+const { jobEventsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
@@ -10,25 +10,25 @@ describe(__filename, () => {
 
     const testJobName = "TEST-JOB";
     // Add started event
-    await new JobEventModel({
+    await jobEventsDb().insertOne({
       jobname: testJobName,
       action: jobEventStatuts.started,
       date: new Date(),
-    }).save();
+    });
 
     // Add executed event
-    await new JobEventModel({
+    await jobEventsDb().insertOne({
       jobname: testJobName,
       action: jobEventStatuts.executed,
       date: addMinutes(new Date(), 5),
-    }).save();
+    });
 
     // Add ended event
-    await new JobEventModel({
+    await jobEventsDb().insertOne({
       jobname: testJobName,
       action: jobEventStatuts.ended,
       date: addMinutes(new Date(), 6),
-    }).save();
+    });
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
     assert.equal(isEnded, true);
@@ -39,18 +39,18 @@ describe(__filename, () => {
 
     const testJobName = "TEST-JOB";
     // Add started event
-    await new JobEventModel({
+    await jobEventsDb().insertOne({
       jobname: testJobName,
       action: jobEventStatuts.started,
       date: new Date(),
-    }).save();
+    });
 
     // Add executed event
-    await new JobEventModel({
+    await jobEventsDb().insertOne({
       jobname: testJobName,
       action: jobEventStatuts.executed,
       date: addMinutes(new Date(), 5),
-    }).save();
+    });
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
     assert.equal(isEnded, false);

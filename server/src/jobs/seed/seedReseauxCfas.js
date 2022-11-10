@@ -6,8 +6,8 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 
-const { ReseauCfaModel } = require("../../common/model");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
+const { reseauxCfasDb } = require("../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -28,7 +28,7 @@ runScript(async ({ reseauxCfas, ovhStorage }) => {
   logger.info("Seeding ReseauxCfas");
 
   // Clear reseauxCfas collection
-  await ReseauCfaModel.deleteMany({});
+  await reseauxCfasDb().deleteMany({});
 
   // Set networks from CSV
   await asyncForEach(CFAS_NETWORKS, async (currentNetwork) => {

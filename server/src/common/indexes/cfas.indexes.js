@@ -1,10 +1,11 @@
+const { getDbCollection } = require("../mongodb");
 const { doesCollectionExistInDb } = require("../utils/dbUtils");
 
 const collectionName = "cfas";
 
-const createCfasCollectionIndexes = async (db) => {
-  if (await doesCollectionExistInDb(db, collectionName)) {
-    const collection = db.collection(collectionName);
+const createCfasCollectionIndexes = async () => {
+  if (await doesCollectionExistInDb(collectionName)) {
+    const collection = getDbCollection(collectionName);
 
     await collection.createIndex({ nom: "text", nom_tokenized: "text" }, { default_language: "french" });
     await collection.createIndex({ uai: 1 });
@@ -12,9 +13,9 @@ const createCfasCollectionIndexes = async (db) => {
   }
 };
 
-const dropCfasCollectionIndexes = async (db) => {
-  if (await doesCollectionExistInDb(db, collectionName)) {
-    db.collection(collectionName).dropIndexes();
+const dropCfasCollectionIndexes = async () => {
+  if (await doesCollectionExistInDb(collectionName)) {
+    getDbCollection(collectionName).dropIndexes();
   }
 };
 

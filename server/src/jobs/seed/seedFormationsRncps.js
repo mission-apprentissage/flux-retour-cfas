@@ -2,8 +2,8 @@ const cliProgress = require("cli-progress");
 const logger = require("../../common/logger");
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { FormationModel } = require("../../common/model");
 const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
+const { formationsDb } = require("../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -21,7 +21,7 @@ runScript(async () => {
  * Empty all rncps in formations collection
  */
 const emptyFormationRncp = async () => {
-  await FormationModel.updateMany({}, { $set: { rncps: [] } });
+  await formationsDb().updateMany({}, { $set: { rncps: [] } });
   logger.info("All RNCPs cleared in formations !");
 };
 
@@ -30,7 +30,9 @@ const emptyFormationRncp = async () => {
  */
 const seedEmptyFormationsRncp = async () => {
   // Find all formations with empty rncps but cfd present
-  const formationWithEmptyRncps = await FormationModel.find({ rncps: [], cfd: { $nin: [null, ""] } });
+  const formationWithEmptyRncps = await formationsDb()
+    .find({ rncps: [], cfd: { $nin: [null, ""] } })
+    .toArray();
   logger.info(`Found ${formationWithEmptyRncps.length} Formations with empty RNCPs, seeding them...`);
 
   loadingBar.start(formationWithEmptyRncps.length, 0);
@@ -43,7 +45,7 @@ const seedEmptyFormationsRncp = async () => {
 
     if (formationInfo !== null) {
       // Update current formation with these current formation rncps
-      await FormationModel.findOneAndUpdate(
+      await formationsDb().updateOne(
         { _id: currentFormationWithEmptyRncps._id },
         { $set: { rncps: formationInfo?.rncps?.map((item) => item.code_rncp) } }
       );

@@ -3,7 +3,7 @@ const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const { apiRoles } = require("../../../src/common/roles");
 const users = require("../../../src/common/components/users");
-const { ReseauCfaModel } = require("../../../src/common/model");
+const { reseauxCfasDb } = require("../../../src/common/model/collections");
 
 const user = { name: "apiConsumerUser", password: "password" };
 
@@ -84,12 +84,12 @@ describe(__filename, () => {
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
-      await new ReseauCfaModel({
+      await reseauxCfasDb().insertOne({
         nom_etablissement: "BTP CFA Somme",
         uai: "0801302F",
         nom_reseau: "AGRI",
         siret: "34012780200015",
-      }).save();
+      });
 
       const responseUai = await httpClient.post(
         "/api/reseaux-cfas/search",
@@ -130,19 +130,18 @@ describe(__filename, () => {
       const accessToken = await getJwtForUser(httpClient);
 
       const reseauCfa1 = {
-        id: "6266cd54a955765dd478f4e6",
         nom_reseau: "RESEAU_TEST_1",
         nom_etablissement: "Etablissement de test 1",
         uai: "0670141P",
       };
 
-      await components.reseauxCfas.create(reseauCfa1);
+      const { _id } = await components.reseauxCfas.create(reseauCfa1);
 
-      await httpClient.delete(`/api/reseaux-cfas/delete/${reseauCfa1.id}`, {
+      await httpClient.delete(`/api/reseaux-cfas/delete/${_id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      const found = await ReseauCfaModel.findOne({ id: "6266cd54a955765dd478f4e6" });
-      assert.equal(found, null);
+      const found = await reseauxCfasDb().find().toArray();
+      assert.deepEqual(found, []);
     });
   });
 });

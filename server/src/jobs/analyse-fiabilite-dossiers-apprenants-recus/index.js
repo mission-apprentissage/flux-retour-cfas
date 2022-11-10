@@ -15,6 +15,7 @@ const { validateEmail } = require("../../common/domain/email");
 const { validateUai } = require("../../common/domain/uai");
 const { validateSiret } = require("../../common/domain/siret");
 const logger = require("../../common/logger");
+const { userEventsDb } = require("../../common/model/collections");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
@@ -144,8 +145,8 @@ runScript(async ({ db }) => {
   );
 }, "analyse-fiabilite-dossiers-apprenants-dernieres-24h");
 
-const getReceivedDossiersApprenantsInLast24hCursor = (db) => {
-  return db.collection("userEvents").aggregate([
+const getReceivedDossiersApprenantsInLast24hCursor = () => {
+  return userEventsDb().aggregate([
     {
       $match: {
         action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,

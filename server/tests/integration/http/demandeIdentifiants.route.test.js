@@ -1,6 +1,6 @@
 const assert = require("assert").strict;
+const { demandesIdentifiantsDb } = require("../../../src/common/model/collections");
 const { startServer } = require("../../utils/testUtils");
-const { DemandeIdentifiantsModel } = require("../../../src/common/model");
 
 describe(__filename, () => {
   let httpClient;
@@ -15,7 +15,7 @@ describe(__filename, () => {
       const response = await httpClient.post("/api/demande-identifiants", {});
 
       assert.equal(response.status, 400);
-      const found = await DemandeIdentifiantsModel.countDocuments();
+      const found = await demandesIdentifiantsDb().countDocuments();
       assert.equal(found, 0);
     });
 
@@ -27,7 +27,7 @@ describe(__filename, () => {
       });
 
       assert.equal(response.status, 200);
-      const found = await DemandeIdentifiantsModel.find().lean();
+      const found = await demandesIdentifiantsDb().find().toArray();
       assert.equal(found.length, 1);
     });
   });

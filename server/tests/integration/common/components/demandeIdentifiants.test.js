@@ -1,6 +1,6 @@
 const assert = require("assert").strict;
 const demandeIdentifiants = require("../../../../src/common/components/demandeIdentifiants");
-const { DemandeIdentifiantsModel } = require("../../../../src/common/model");
+const { demandesIdentifiantsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   it("Permet de vérifier la création d'une demande d'identifiants", async () => {
@@ -14,7 +14,7 @@ describe(__filename, () => {
 
     await create(testDemande);
 
-    const foundDemand = await DemandeIdentifiantsModel.findOne({ email: testDemande.email }).lean();
+    const foundDemand = await demandesIdentifiantsDb().findOne({ email: testDemande.email });
     assert.equal(foundDemand.profil, testDemande.profil);
     assert.equal(foundDemand.region, testDemande.region);
     assert.equal(foundDemand.email, testDemande.email);

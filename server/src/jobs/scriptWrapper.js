@@ -1,11 +1,11 @@
-const { closeMongoConnection } = require("../common/mongodb");
+const { connectToMongodb, closeMongodbConnection } = require("../common/mongodb");
 const createComponents = require("../common/components/components");
 const logger = require("../common/logger");
-const { JobEventModel } = require("../common/model");
 const { initRedis } = require("../common/infra/redis");
 const { formatDuration, intervalToDuration } = require("date-fns");
 const { jobEventStatuts } = require("../common/constants/jobsConstants");
 const config = require("../../config");
+const { jobEventsDb } = require("../common/model/collections");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -20,7 +20,7 @@ const exit = async (rawError) => {
 
   setTimeout(() => {
     //Waiting logger to flush all logs (MongoDB)
-    closeMongoConnection()
+    closeMongodbConnection()
       .then(() => {})
       .catch((closeError) => {
         error = closeError;
@@ -44,25 +44,27 @@ module.exports = {
         onReady: () => logger.info("Redis client ready!"),
       });
 
-      const components = await createComponents({ redisClient });
-      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.started, date: new Date() }).save();
+      const mongodbClient = await connectToMongodb(config.mongodb.uri);
+
+      const components = await createComponents({ redisClient, db: mongodbClient });
+      await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
       await job(components);
 
       const endDate = new Date();
       const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
 
-      await new JobEventModel({
+      await jobEventsDb().insertOne({
         jobname: jobName,
         created_at: new Date(),
         action: jobEventStatuts.executed,
         data: { startDate, endDate, duration },
-      }).save();
+      });
 
       await exit();
     } catch (e) {
       await exit(e);
     } finally {
-      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() }).save();
+      await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() });
     }
   },
 };

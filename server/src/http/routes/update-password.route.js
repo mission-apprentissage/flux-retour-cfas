@@ -1,6 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
+const logger = require("../../common/logger");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const validateRequestBody = require("../middlewares/validateRequestBody");
 
@@ -17,15 +18,16 @@ module.exports = ({ users, userEvents }) => {
     ),
     tryCatch(async (req, res) => {
       try {
-        const updatedUser = await users.updatePassword(req.body.token, req.body.newPassword);
+        const username = await users.updatePassword(req.body.token, req.body.newPassword);
 
         await userEvents.create({
           type: USER_EVENTS_TYPES.POST,
-          username: updatedUser.username,
+          username: username,
           action: USER_EVENTS_ACTIONS.UPDATE_PASSWORD,
         });
         return res.json({ message: "success" });
       } catch (err) {
+        logger.error(err);
         return res.status(500).json({ message: "Could not update password" });
       }
     })

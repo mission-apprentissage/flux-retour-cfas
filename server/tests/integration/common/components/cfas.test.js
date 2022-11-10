@@ -1,16 +1,15 @@
 const assert = require("assert").strict;
 const cfasComponent = require("../../../../src/common/components/cfas");
-const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
 const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
 const { addDays } = require("date-fns");
 const { Cfa } = require("../../../../src/common/factory/cfa");
 const pick = require("lodash.pick");
-var mongoose = require("mongoose");
 // eslint-disable-next-line node/no-unpublished-require
 const nock = require("nock");
 const { dataForGetMetiersBySiret } = require("../../../data/apiLba");
 const { nockGetMetiersBySiret } = require("../../../utils/nockApis/nock-Lba");
 const { NATURE_ORGANISME_DE_FORMATION } = require("../../../../src/common/domain/organisme-de-formation/nature");
+const { cfasDb, dossiersApprenantsDb } = require("../../../../src/common/model/collections");
 
 describe(__filename, () => {
   describe("existsCfa", () => {
@@ -22,8 +21,7 @@ describe(__filename, () => {
     });
 
     it("returns false when cfa with given uai does not exist", async () => {
-      const newCfa = new CfaModel({ uai: "0802004U" });
-      await newCfa.save();
+      await cfasDb().insertOne({ uai: "0802004U" });
 
       const shouldBeFalse = await existsCfa("blabla");
       assert.equal(shouldBeFalse, false);
@@ -31,8 +29,7 @@ describe(__filename, () => {
 
     it("returns true when cfa with given uai exists", async () => {
       const uai = "0802004U";
-      const newCfa = new CfaModel({ uai });
-      await newCfa.save();
+      await cfasDb().insertOne({ uai });
 
       const shouldBeTrue = await existsCfa(uai);
       assert.equal(shouldBeTrue, true);
@@ -52,9 +49,9 @@ describe(__filename, () => {
 
     it("throws when cfa with given uai already exists", async () => {
       const uai = "0802004U";
-      const cfa = new CfaModel({ uai });
-      await cfa.save();
+      await cfasDb().insertOne({ uai });
 
+      // TODO use assert.rejects
       try {
         await createCfa({ uai_etablissement: uai });
       } catch (err) {
@@ -69,7 +66,7 @@ describe(__filename, () => {
       const uai = "0802004A";
       const sirets = ["11111111100023"];
 
-      const dossierApprenant = new DossierApprenantModel({
+      const { insertedId } = await dossiersApprenantsDb().insertOne({
         uai_etablissement: uai,
         nom_etablissement: "TestCfa",
         etablissement_adresse: "10 rue de la paix 75016 Paris",
@@ -78,8 +75,7 @@ describe(__filename, () => {
         etablissement_num_region: "17",
         created_at: new Date("2021-06-10T00:00:00.000+0000"),
       });
-      await dossierApprenant.save();
-
+      const dossierApprenant = await dossiersApprenantsDb().findOne({ _id: insertedId });
       const created = await createCfa(dossierApprenant, sirets);
 
       assert.deepEqual(
@@ -108,6 +104,7 @@ describe(__filename, () => {
     const { updateCfa } = cfasComponent();
 
     it("throws when given dossier apprenants is null", async () => {
+      // TODO use assert.rejects
       try {
         await updateCfa("id", null);
       } catch (err) {
@@ -127,6 +124,7 @@ describe(__filename, () => {
         etablissement_num_region: "17",
       };
 
+      // TODO use assert.rejects
       try {
         await updateCfa(null, dossierApprenant);
       } catch (err) {
@@ -136,8 +134,7 @@ describe(__filename, () => {
 
     it("throws when given id is not existant", async () => {
       const uai = "0802004A";
-      const newCfa = new CfaModel({ uai });
-      await newCfa.save();
+      await cfasDb().insertOne({ uai });
 
       const dossierApprenant = {
         uai_etablissement: uai,
@@ -148,8 +145,9 @@ describe(__filename, () => {
         etablissement_num_region: "17",
       };
 
+      // TODO use assert.rejects
       try {
-        await updateCfa(mongoose.Types.ObjectId("ABC"), dossierApprenant);
+        await updateCfa("random-id", dossierApprenant);
       } catch (err) {
         assert.notEqual(err, undefined);
       }
@@ -157,7 +155,7 @@ describe(__filename, () => {
 
     it("returns update cfa when id and dossier apprenant are valid", async () => {
       const uai = "0802004A";
-      const cfaToUpdate = await new CfaModel({
+      const { insertedId: cfaIdToUpdate } = await cfasDb().insertOne({
         uai,
         nom: "TestCfa",
         adresse: "12 rue de la paix 75016 PARIS",
@@ -165,7 +163,7 @@ describe(__filename, () => {
         erps: ["MonErp"],
         region_nom: "Ma région",
         region_num: "17",
-      }).save();
+      });
 
       const sirets = ["11111111100023"];
 
@@ -178,8 +176,8 @@ describe(__filename, () => {
         etablissement_num_region: "18",
       };
 
-      await updateCfa(cfaToUpdate._id, dossierApprenant, sirets);
-      const updatedCfa = await CfaModel.findById(cfaToUpdate._id).lean();
+      await updateCfa(cfaIdToUpdate, dossierApprenant, sirets);
+      const updatedCfa = await cfasDb().findOne({ _id: cfaIdToUpdate });
 
       assert.deepEqual(pick(updatedCfa, ["uai", "sirets", "nom", "adresse", "erps", "region_nom", "region_num"]), {
         uai: dossierApprenant.uai_etablissement,
@@ -201,7 +199,7 @@ describe(__filename, () => {
 
     it("throws when given nature is invalid", async () => {
       const uai = "0802004A";
-      await new CfaModel({
+      await cfasDb().insertOne({
         uai,
         nom: "TestCfa",
         adresse: "12 rue de la paix 75016 PARIS",
@@ -209,7 +207,7 @@ describe(__filename, () => {
         erps: ["MonErp"],
         region_nom: "Ma région",
         region_num: "17",
-      }).save();
+      });
 
       await assert.rejects(() => updateCfaNature(uai, { nature: "blabla", natureValidityWarning: true }));
     });
@@ -223,7 +221,7 @@ describe(__filename, () => {
 
     it("updates Cfa with given nature and natureValidityWarning", async () => {
       const uai = "0802004A";
-      await new CfaModel({
+      await cfasDb().insertOne({
         uai,
         nom: "TestCfa",
         adresse: "12 rue de la paix 75016 PARIS",
@@ -231,14 +229,14 @@ describe(__filename, () => {
         erps: ["MonErp"],
         region_nom: "Ma région",
         region_num: "17",
-      }).save();
+      });
 
       await updateCfaNature(uai, {
         nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
         natureValidityWarning: true,
       });
 
-      const updatedCfa = await CfaModel.findOne({ uai });
+      const updatedCfa = await cfasDb().findOne({ uai });
       assert.equal(updatedCfa.nature, NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR);
       assert.equal(updatedCfa.nature_validity_warning, true);
     });
@@ -254,7 +252,7 @@ describe(__filename, () => {
 
     it("updates Cfa with given list of reseaux", async () => {
       const uai = "0802004A";
-      await new CfaModel({
+      await cfasDb().insertOne({
         uai,
         nom: "TestCfa",
         adresse: "12 rue de la paix 75016 PARIS",
@@ -263,12 +261,12 @@ describe(__filename, () => {
         reseaux: ["Reseau1"],
         region_nom: "Ma région",
         region_num: "17",
-      }).save();
+      });
 
       const newReseaux = ["Reseau2", "Reseau3"];
       await updateCfaReseauxFromUai(uai, newReseaux);
 
-      const updatedCfa = await CfaModel.findOne({ uai }).lean();
+      const updatedCfa = await cfasDb().findOne({ uai });
       assert.deepEqual(updatedCfa.reseaux, newReseaux);
     });
   });
@@ -336,17 +334,17 @@ describe(__filename, () => {
 
     beforeEach(async () => {
       for (let i = 0; i < cfaSeed.length; i++) {
-        const newCfa = new CfaModel({ ...cfaSeed[i], nom_tokenized: Cfa.createTokenizedNom(cfaSeed[i].nom) });
-        await newCfa.save();
+        await cfasDb().insertOne({ ...cfaSeed[i], nom_tokenized: Cfa.createTokenizedNom(cfaSeed[i].nom) });
       }
 
       for (let i = 0; i < dossierApprenantSeed.length; i++) {
         const dossierApprenant = dossierApprenantSeed[i];
-        await new DossierApprenantModel(dossierApprenant).save();
+        await dossiersApprenantsDb().insertOne(dossierApprenant);
       }
     });
 
     it("throws error when no parameter passed", async () => {
+      // TODO use assert.rejects
       try {
         await searchCfas();
       } catch (err) {
@@ -513,7 +511,7 @@ describe(__filename, () => {
     beforeEach(async () => {
       for (let i = 0; i < dossierApprenantSeed.length; i++) {
         const dossierApprenant = dossierApprenantSeed[i];
-        await new DossierApprenantModel(dossierApprenant).save();
+        await dossiersApprenantsDb().insertOne(dossierApprenant);
       }
     });
 
@@ -564,7 +562,7 @@ describe(__filename, () => {
     beforeEach(async () => {
       for (let i = 0; i < dossierApprenantSeed.length; i++) {
         const dossierApprenant = dossierApprenantSeed[i];
-        await new DossierApprenantModel(dossierApprenant).save();
+        await dossiersApprenantsDb().insertOne(dossierApprenant);
       }
     });
 
@@ -589,14 +587,14 @@ describe(__filename, () => {
 
     it("returns Cfa found with access token", async () => {
       const token = "token";
-      const cfaInDb = await new CfaModel({
+      const { insertedId } = await cfasDb().insertOne({
         uai: "0762290X",
         sirets: [],
         nom: "hello",
         access_token: "token",
-      }).save();
+      });
       const cfaFound = await getFromAccessToken(token);
-      assert.equal(cfaFound.uai, cfaInDb.uai);
+      assert.equal(insertedId.equals(cfaFound._id), true);
     });
 
     it("returns nothing when cfa not found", async () => {
@@ -611,13 +609,13 @@ describe(__filename, () => {
 
     it("returns CFA found with UAI", async () => {
       const uai = "0802004U";
-      const cfaInDb = await new CfaModel({
+      const { insertedId } = await cfasDb().insertOne({
         uai,
         sirets: ["40949392900012"],
         nom: "hello",
-      }).save();
+      });
       const cfaFound = await getFromUai(uai);
-      assert.equal(cfaFound.uai, cfaInDb.uai);
+      assert.equal(insertedId.equals(cfaFound._id), true);
     });
 
     it("returns nothing when cfa not found", async () => {

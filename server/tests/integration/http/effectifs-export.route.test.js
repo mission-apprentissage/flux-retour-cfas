@@ -11,9 +11,9 @@ const {
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
 } = require("../../data/historySequenceSamples");
-const { DossierApprenantModel, UserEventModel, CfaModel } = require("../../../src/common/model");
 const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
 const { USER_EVENTS_ACTIONS } = require("../../../src/common/constants/userEventsConstants");
+const { userEventsDb, dossiersApprenantsDb, cfasDb } = require("../../../src/common/model/collections");
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -26,8 +26,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     // Add 5 statuts with history sequence - simple apprenti
@@ -36,8 +35,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceApprenti,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     // Add 15 statuts with history sequence - inscritToApprenti
@@ -46,8 +44,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprenti,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
 
     // Add 8 statuts with history sequence - inscritToApprentiToInscrit (rupturant)
@@ -56,8 +53,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceApprentiToInscrit,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsDb().insertOne(randomStatut);
     }
   };
 
@@ -106,7 +102,7 @@ describe(__filename, () => {
       });
 
       // Check good user event in db
-      const userEventInDb = await UserEventModel.findOne({
+      const userEventInDb = await userEventsDb().findOne({
         action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_NATIONAL,
       });
 
@@ -132,7 +128,7 @@ describe(__filename, () => {
       });
 
       // Check good user event in db
-      const userEventInDb = await UserEventModel.findOne({
+      const userEventInDb = await userEventsDb().findOne({
         action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_DEPARTEMENT,
       });
 
@@ -158,7 +154,7 @@ describe(__filename, () => {
       });
 
       // Check good user event in db
-      const userEventInDb = await UserEventModel.findOne({
+      const userEventInDb = await userEventsDb().findOne({
         action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_REGION,
       });
 
@@ -184,7 +180,7 @@ describe(__filename, () => {
       });
 
       // Check good user event in db
-      const userEventInDb = await UserEventModel.findOne({
+      const userEventInDb = await userEventsDb().findOne({
         action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.RESEAU,
       });
 
@@ -210,7 +206,7 @@ describe(__filename, () => {
       });
 
       // Check good user event in db
-      const userEventInDb = await UserEventModel.findOne({
+      const userEventInDb = await userEventsDb().findOne({
         action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.FORMATION,
       });
 
@@ -236,7 +232,7 @@ describe(__filename, () => {
       });
 
       // Check good user event in db
-      const userEventInDb = await UserEventModel.findOne({
+      const userEventInDb = await userEventsDb().findOne({
         action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_ANONYMOUS,
       });
 
@@ -251,10 +247,10 @@ describe(__filename, () => {
       // create cfa in db
       const token = "eyP33IyEAisoErO";
       const uai_etablissement = "0762232N";
-      await new CfaModel({
+      await cfasDb().insertOne({
         uai: uai_etablissement,
         access_token: token,
-      }).save();
+      });
 
       // Authent cfa
       const authentResponse = await httpClient.post("/api/login-cfa", {
@@ -280,7 +276,7 @@ describe(__filename, () => {
       });
 
       // Check good user event in db
-      const userEventInDb = await UserEventModel.findOne({
+      const userEventInDb = await userEventsDb().findOne({
         action: USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_NAMED_DATA,
       });
 

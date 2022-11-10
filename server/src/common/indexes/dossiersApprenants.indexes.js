@@ -1,10 +1,11 @@
+const { getDbCollection } = require("../mongodb");
 const { doesCollectionExistInDb } = require("../utils/dbUtils");
 
 const collectionName = "dossiersApprenants";
 
-const createDossiersApprenantsCollectionIndexes = async (db) => {
-  if (await doesCollectionExistInDb(db, collectionName)) {
-    const collection = db.collection(collectionName);
+const createDossiersApprenantsCollectionIndexes = async () => {
+  if (await doesCollectionExistInDb(collectionName)) {
+    const collection = getDbCollection(collectionName);
 
     await collection.createIndex({ uai_etablissement: 1 }, { name: "uai_etablissement" });
     await collection.createIndex({ siret_etablissement: 1 }, { name: "siret_etablissement" });
@@ -16,9 +17,9 @@ const createDossiersApprenantsCollectionIndexes = async (db) => {
   }
 };
 
-const dropDossiersApprenantsCollectionIndexes = async (db) => {
-  if (await doesCollectionExistInDb(db, collectionName)) {
-    db.collection(collectionName).dropIndexes();
+const dropDossiersApprenantsCollectionIndexes = async () => {
+  if (await doesCollectionExistInDb(collectionName)) {
+    getDbCollection(collectionName).dropIndexes();
   }
 };
 
