@@ -1,6 +1,6 @@
 const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
-const { createIndexes, dropIndexes } = require("../../common/indexes");
+const { createIndexes, dropIndexes } = require("../../common/model/indexes/index");
 const { JOB_NAMES } = require("../../common/constants/jobsConstants");
 
 runScript(async () => {
