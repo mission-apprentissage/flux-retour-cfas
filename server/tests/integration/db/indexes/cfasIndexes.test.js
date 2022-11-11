@@ -4,6 +4,7 @@ const { createIndexes, dropIndexes } = require("../../../../src/common/model/ind
 const { getDbCollectionIndexes } = require("../../../../src/common/mongodb");
 const cfasModelDescriptor = require("./../../../../src/common/model/cfas.model");
 
+// TODO : Boucler sur la liste des index names pour les tests
 describe("Cfas Indexes", () => {
   let cfasIndexes = [];
 
