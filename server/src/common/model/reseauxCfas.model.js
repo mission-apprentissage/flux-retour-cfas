@@ -4,10 +4,13 @@ const collectionName = "reseauxCfas";
 
 const indexes = () => {
   return [
-    [{ nom_etablissement: "text", nom_tokenized: "text" }, { default_language: "french" }],
-    [{ uai: 1 }],
-    [{ siret: 1 }],
-    [{ nom_reseau: 1 }],
+    [
+      { nom_etablissement: "text", nom_tokenized: "text" },
+      { name: "nom_etablissement_tokenized_text", default_language: "french" },
+    ],
+    [{ uai: 1 }, { name: "uai" }],
+    [{ siret: 1 }, { name: "siret" }],
+    [{ nom_reseau: 1 }, { name: "nom_reseau" }],
   ];
 };
 

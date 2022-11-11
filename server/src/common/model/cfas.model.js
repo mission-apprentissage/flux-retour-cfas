@@ -4,7 +4,10 @@ const collectionName = "cfas";
 
 const indexes = () => {
   return [
-    [{ nom: "text", nom_tokenized: "text" }, { default_language: "french" }, { name: "nom_text_nom_tokenized_text" }],
+    [
+      { nom: "text", nom_tokenized: "text" },
+      { name: "nom_tokenized_text", default_language: "french" },
+    ],
     [{ uai: 1 }, { name: "uai" }],
     [{ sirets: 1 }, { name: "sirets" }],
   ];
