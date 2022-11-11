@@ -4,9 +4,13 @@ const collectionName = "formations";
 
 const indexes = () => {
   return [
-    [{ libelle: "text", tokenized_libelle: "text" }, { default_language: "french" }],
-    [{ cfd: 1 }, { unique: true }],
-    [{ rncps: 1 }],
+    [
+      { libelle: "text", tokenized_libelle: "text" },
+      { default_language: "french" },
+      { name: "libelle_text_tokenized_libelle_text" },
+    ],
+    [{ cfd: 1 }, { name: "cfd", unique: true }],
+    [{ rncps: 1 }, { name: "rncps" }],
   ];
 };
 
