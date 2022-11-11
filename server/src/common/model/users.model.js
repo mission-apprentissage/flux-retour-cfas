@@ -3,7 +3,11 @@ const { object, objectId, string, date, arrayOf } = require("./json-schema/jsonS
 const collectionName = "users";
 
 const indexes = () => {
-  return [[{ username: 1 }], [{ email: 1 }], [{ organisme: 1 }]];
+  return [
+    [{ username: 1 }, { name: "username" }],
+    [{ email: 1 }, { name: "email" }],
+    [{ organisme: 1 }, { name: "organisme" }],
+  ];
 };
 
 const schema = () => {
