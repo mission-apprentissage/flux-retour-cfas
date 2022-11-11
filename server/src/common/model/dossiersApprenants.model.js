@@ -2,6 +2,18 @@ const { object, string, objectId, date, integer, arrayOf } = require("./json-sch
 
 const collectionName = "dossiersApprenants";
 
+const indexes = () => {
+  return [
+    [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
+    [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
+    [{ formation_cfd: 1 }, { name: "formation_cfd" }],
+    [{ etablissement_num_region: 1 }, { name: "etablissement_num_region" }],
+    [{ etablissement_num_departement: 1 }, { name: "etablissement_num_departement" }],
+    [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
+    [{ etablissement_reseaux: 1 }, { name: "etablissement_reseaux" }],
+  ];
+};
+
 const schema = object({
   _id: objectId(),
   ine_apprenant: string({ description: "N° INE de l'apprenant" }),
@@ -50,4 +62,5 @@ const schema = object({
 module.exports = {
   schema,
   collectionName,
+  indexes,
 };
