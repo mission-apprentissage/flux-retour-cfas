@@ -41,6 +41,11 @@ const getDbCollection = (name) => {
   return mongodbClient.db().collection(name);
 };
 
+const getDbCollectionIndexes = async (name) => {
+  ensureInitialization();
+  return await mongodbClient.db().collection(name).indexes();
+};
+
 // const configureValidation = async () => {
 //   await ensureInitialization();
 //   await Promise.all(
@@ -70,4 +75,5 @@ module.exports = {
   closeMongodbConnection,
   getDbCollection,
   getDatabase,
+  getDbCollectionIndexes,
 };
