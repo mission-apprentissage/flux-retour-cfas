@@ -19,9 +19,9 @@ describe("Cfas Indexes", () => {
     cfasIndexes = await getDbCollectionIndexes(cfasModelDescriptor.collectionName);
   });
 
-  it("Vérifie l'existence d'un index sur le champ nom", async () => {
+  it("Vérifie l'existence d'un index nom_tokenized_text", async () => {
     assert.equal(
-      cfasIndexes.some((item) => item.name === "nom_text_nom_tokenized_text"),
+      cfasIndexes.some((item) => item.name === "nom_tokenized_text"),
       true
     );
   });
