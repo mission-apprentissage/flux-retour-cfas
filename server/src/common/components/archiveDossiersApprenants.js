@@ -1,6 +1,6 @@
 const COLLECTION_NAME = "archiveDossiersApprenants";
 
-module.exports = ({ db }) => ({
+export default ({ db }) => ({
   async create(dossierApprenantData) {
     const anonymousValue = `XXXXX`;
     const anonymizedData = {

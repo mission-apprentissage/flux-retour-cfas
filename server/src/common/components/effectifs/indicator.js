@@ -1,6 +1,6 @@
-const { dossiersApprenantsDb } = require("../../model/collections");
+import { dossiersApprenantsDb } from "../../model/collections";
 
-class Indicator {
+export class Indicator {
   /**
    * Constructeur avec définition d'une projection d'export par défaut
    */
@@ -142,5 +142,3 @@ class Indicator {
     }));
   }
 }
-
-module.exports = { Indicator };

@@ -1,27 +1,11 @@
-const { ObjectId } = require("mongodb");
-const { getDepartementCodeFromUai, validateUai } = require("../domain/uai");
-const { escapeRegExp } = require("../utils/regexUtils");
-const { Cfa } = require("../factory/cfa");
-const { getMetiersBySirets } = require("../../common/apis/apiLba");
-const logger = require("../../common/logger");
-const { validateNatureOrganismeDeFormation } = require("../domain/organisme-de-formation/nature");
-const { cfasDb, dossiersApprenantsDb } = require("../model/collections");
-
-module.exports = () => ({
-  createCfa,
-  existsCfa,
-  updateCfa,
-  updateCfaNature,
-  updateCfaReseauxFromUai,
-  getFromSiret,
-  searchCfas,
-  getCfaFirstTransmissionDateFromUai,
-  getCfaFirstTransmissionDateFromSiret,
-  getSousEtablissementsForUai,
-  getFromAccessToken,
-  getFromUai,
-  getFromUaiAndSiret,
-});
+import { ObjectId } from "mongodb";
+import { getDepartementCodeFromUai, validateUai } from "../domain/uai";
+import { escapeRegExp } from "../utils/regexUtils";
+import { Cfa } from "../factory/cfa";
+import { getMetiersBySirets } from "../../common/apis/apiLba";
+import logger from "../../common/logger";
+import { validateNatureOrganismeDeFormation } from "../domain/organisme-de-formation/nature";
+import { cfasDb, dossiersApprenantsDb } from "../model/collections";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -291,3 +275,19 @@ const getFromUaiAndSiret = async (uai, siret) => {
     })
     .toArray();
 };
+
+export default () => ({
+  createCfa,
+  existsCfa,
+  updateCfa,
+  updateCfaNature,
+  updateCfaReseauxFromUai,
+  getFromSiret,
+  searchCfas,
+  getCfaFirstTransmissionDateFromUai,
+  getCfaFirstTransmissionDateFromSiret,
+  getSousEtablissementsForUai,
+  getFromAccessToken,
+  getFromUai,
+  getFromUaiAndSiret,
+});

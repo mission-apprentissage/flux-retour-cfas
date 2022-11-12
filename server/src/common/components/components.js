@@ -1,19 +1,19 @@
-const createUsers = require("./users");
-const createUserEvents = require("./userEvents");
-const createJobEvents = require("./jobEvents");
-const createDossierApprenant = require("./dossiersApprenants");
-const cfasComponent = require("./cfas");
-const reseauxCfasComponent = require("./reseauxCfas");
-const formationsComponent = require("./formations");
-const createStats = require("./stats");
-const createEffectifs = require("./effectifs");
-const demandeIdentifiantsComponent = require("./demandeIdentifiants");
-const demandeBranchementErpComponent = require("./demandeBranchementErp");
-const createCacheComponent = require("./cache");
-const createOvhStorageComponent = require("./ovhStorage");
-const createArchiveDossiersApprenantsComponent = require("./archiveDossiersApprenants");
+import createUsers from './users';
+import createUserEvents from './userEvents';
+import createJobEvents from './jobEvents';
+import createDossierApprenant from './dossiersApprenants';
+import cfasComponent from './cfas';
+import reseauxCfasComponent from './reseauxCfas';
+import formationsComponent from './formations';
+import createStats from './stats';
+import createEffectifs from './effectifs';
+import demandeIdentifiantsComponent from './demandeIdentifiants';
+import demandeBranchementErpComponent from './demandeBranchementErp';
+import createCacheComponent from './cache';
+import createOvhStorageComponent from './ovhStorage';
+import createArchiveDossiersApprenantsComponent from './archiveDossiersApprenants';
 
-module.exports = async (options = {}) => {
+export default async (options = {}) => {
   const db = options.db;
 
   const users = options.users || (await createUsers());

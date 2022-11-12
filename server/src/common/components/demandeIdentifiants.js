@@ -1,5 +1,10 @@
-const { demandesIdentifiantsDb } = require("../model/collections");
+import { demandesIdentifiantsDb } from "../model/collections";
 
+/**
+ * Création d'une demande d'identifiants
+ * TODO : Mutualiser avec la demande d'identifiants
+ * @param {*} props
+ */
 const create = async (props) => {
   const { profil, region, email } = props;
 
@@ -11,6 +16,6 @@ const create = async (props) => {
   });
 };
 
-module.exports = () => ({
+export default () => ({
   create,
 });

@@ -1,5 +1,11 @@
-const { demandesBranchementErpDb } = require("../model/collections");
+import { demandesBranchementErpDb } from "../model/collections";
 
+/**
+ * Création d'une demande de branchement
+ * TODO : Mutualiser avec la demande d'identifiants
+ * @param {C} props
+ * @returns
+ */
 const create = async (props) => {
   const { erp, nom_organisme, uai_organisme, email_demandeur, nb_apprentis, is_ready_co_construction = false } = props;
 
@@ -16,6 +22,6 @@ const create = async (props) => {
   return await demandesBranchementErpDb().findOne({ _id: insertedId });
 };
 
-module.exports = () => ({
+export default () => ({
   create,
 });

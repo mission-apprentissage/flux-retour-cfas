@@ -1,9 +1,9 @@
-const { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } = require("../../constants/dossierApprenantConstants");
-const { SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS } = require("../../domain/effectif");
-const { Indicator } = require("./indicator");
-const { addMonths } = require("date-fns");
+import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants";
+import { SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS } from "../../domain/effectif";
+import { Indicator } from "./indicator";
+import { addMonths } from "date-fns";
 
-class EffectifsInscritsSansContrats extends Indicator {
+export class EffectifsInscritsSansContrats extends Indicator {
   /**
    * Pipeline de récupération des inscrits sans contrats à une date donnée
    * @param {*} searchDate
@@ -50,5 +50,3 @@ class EffectifsInscritsSansContrats extends Indicator {
     }));
   }
 }
-
-module.exports = { EffectifsInscritsSansContrats };
