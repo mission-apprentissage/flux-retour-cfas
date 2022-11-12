@@ -1,9 +1,8 @@
-const cliProgress = require("cli-progress");
-
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
-const logger = require("../../common/logger");
+import cliProgress from 'cli-progress';
+import { runScript } from '../scriptWrapper';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import { getCfdInfo } from '../../common/apis/apiTablesCorrespondances';
+import logger from '../../common/logger';
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

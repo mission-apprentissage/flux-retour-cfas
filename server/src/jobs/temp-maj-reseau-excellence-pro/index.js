@@ -1,8 +1,8 @@
-const logger = require("../../common/logger");
-const path = require("path");
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
+import logger from '../../common/logger';
+import path from 'path';
+import { runScript } from '../scriptWrapper';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import { readJsonFromCsvFile } from '../../common/utils/fileUtils';
 
 /**
  * @param  {string} reseauText

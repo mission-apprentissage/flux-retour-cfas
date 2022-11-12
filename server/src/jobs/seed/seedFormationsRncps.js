@@ -1,9 +1,9 @@
-const cliProgress = require("cli-progress");
-const logger = require("../../common/logger");
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
-const { formationsDb } = require("../../common/model/collections");
+import cliProgress from 'cli-progress';
+import logger from '../../common/logger';
+import { runScript } from '../scriptWrapper';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import { getCfdInfo } from '../../common/apis/apiTablesCorrespondances';
+import { formationsDb } from '../../common/model/collections';
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

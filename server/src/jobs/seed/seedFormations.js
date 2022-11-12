@@ -1,7 +1,7 @@
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { sleep } = require("../../common/utils/miscUtils");
+import { runScript } from '../scriptWrapper';
+import logger from '../../common/logger';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import { sleep } from '../../common/utils/miscUtils';
 
 const SLEEP_TIME_BETWEEN_CREATION = 100; // 100ms to avoid flooding TCO and LBA APIs
 

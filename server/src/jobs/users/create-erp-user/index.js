@@ -1,8 +1,8 @@
-const { runScript } = require("../../scriptWrapper");
-const logger = require("../../../common/logger");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
-const arg = require("arg");
-const { apiRoles, tdbRoles } = require("../../../common/roles");
+import { runScript } from '../../scriptWrapper';
+import logger from '../../../common/logger';
+import { JOB_NAMES } from '../../../common/constants/jobsConstants';
+import arg from 'arg';
+import { apiRoles, tdbRoles } from '../../../common/roles';
 
 let args = [];
 

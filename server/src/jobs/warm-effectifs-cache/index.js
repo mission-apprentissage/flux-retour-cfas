@@ -1,10 +1,10 @@
-const axios = require("axios");
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const config = require("../../../config");
-const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-const { REGIONS } = require("../../common/constants/territoiresConstants");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
+import axios from 'axios';
+import { runScript } from '../scriptWrapper';
+import logger from '../../common/logger';
+import config from '../../../config';
+import { JOB_NAMES } from '../../common/constants/jobsConstants';
+import { REGIONS } from '../../common/constants/territoiresConstants';
+import { asyncForEach } from '../../common/utils/asyncUtils';
 
 const ROUTES_TO_WARM_UP = ["/api/effectifs", "/api/effectifs/niveau-formation", "/api/effectifs/departement"];
 

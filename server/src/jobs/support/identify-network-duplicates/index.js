@@ -1,11 +1,11 @@
-const path = require("path");
-const groupBy = require("lodash.groupby");
-const logger = require("../../../common/logger");
-const { runScript } = require("../../scriptWrapper");
-const { readJsonFromCsvFile } = require("../../../common/utils/fileUtils");
-const { RESEAUX_CFAS } = require("../../../common/constants/networksConstants");
-const { toXlsx } = require("../../../common/utils/exporterUtils");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
+import path from 'path';
+import groupBy from 'lodash.groupby';
+import logger from '../../../common/logger';
+import { runScript } from '../../scriptWrapper';
+import { readJsonFromCsvFile } from '../../../common/utils/fileUtils';
+import { RESEAUX_CFAS } from '../../../common/constants/networksConstants';
+import { toXlsx } from '../../../common/utils/exporterUtils';
+import { JOB_NAMES } from '../../../common/constants/jobsConstants';
 
 /**
  * Ce script permet d'identifier les doublons dans les fichiers de référence des réseaux
