@@ -6,6 +6,7 @@ import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
 import { RESEAUX_CFAS } from "../../../common/constants/networksConstants.js";
 import { toXlsx } from "../../../common/utils/exporterUtils.js";
 import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
+import { getDirname } from "../../../common/utils/esmUtils.js";
 
 /**
  * Ce script permet d'identifier les doublons dans les fichiers de référence des réseaux
@@ -31,7 +32,7 @@ runScript(async ({ ovhStorage }) => {
  */
 const identifyDuplicatesForNetwork = async (ovhStorage, { nomReseau, nomFichier }) => {
   logger.info(`Identifying duplicates for network ${nomReseau}`);
-  const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
+  const cfasReferenceFilePath = path.join(getDirname(import.meta.url), `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
   await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
@@ -45,7 +46,7 @@ const identifyDuplicatesForNetwork = async (ovhStorage, { nomReseau, nomFichier 
   if (cfasMultiSiret.length > 0) {
     // Build export XLSX
     const fileToBuild = `doublons_reseau_${nomReseau}_${Date.now()}.xlsx`;
-    await toXlsx(cfasMultiSiret, path.join(__dirname, `/output/${fileToBuild}`));
+    await toXlsx(cfasMultiSiret, path.join(getDirname(import.meta.url), `/output/${fileToBuild}`));
     logger.info(`Export duplicate identification file ${fileToBuild} created.`);
   }
 };
