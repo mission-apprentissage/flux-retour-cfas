@@ -1,27 +1,27 @@
-const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/dossierApprenantConstants");
+import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants";
 
-const historySequenceApprenti = [
+export const historySequenceApprenti = [
   {
     valeur_statut: CODES_STATUT_APPRENANT.apprenti,
     date_statut: new Date("2020-08-30T00:00:00.000+0000"),
   },
 ];
 
-const historySequenceInscrit = [
+export const historySequenceInscrit = [
   {
     valeur_statut: CODES_STATUT_APPRENANT.inscrit,
     date_statut: new Date("2020-09-20T00:00:00.000+0000"),
   },
 ];
 
-const historySequenceAbandon = [
+export const historySequenceAbandon = [
   {
     valeur_statut: CODES_STATUT_APPRENANT.abandon,
     date_statut: new Date("2020-09-20T00:00:00.000+0000"),
   },
 ];
 
-const historySequenceApprentiToAbandon = [
+export const historySequenceApprentiToAbandon = [
   {
     valeur_statut: CODES_STATUT_APPRENANT.apprenti,
     date_statut: new Date("2020-11-15T00:00:00.000+0000"),
@@ -32,7 +32,7 @@ const historySequenceApprentiToAbandon = [
   },
 ];
 
-const historySequenceApprentiToInscrit = [
+export const historySequenceApprentiToInscrit = [
   {
     valeur_statut: CODES_STATUT_APPRENANT.apprenti,
     date_statut: new Date("2020-09-15T00:00:00.000+0000"),
@@ -43,7 +43,7 @@ const historySequenceApprentiToInscrit = [
   },
 ];
 
-const historySequenceInscritToApprenti = [
+export const historySequenceInscritToApprenti = [
   {
     valeur_statut: CODES_STATUT_APPRENANT.inscrit,
     date_statut: new Date("2020-09-29T00:00:00.000+0000"),
@@ -54,7 +54,7 @@ const historySequenceInscritToApprenti = [
   },
 ];
 
-const historySequenceInscritToApprentiToAbandon = [
+export const historySequenceInscritToApprentiToAbandon = [
   {
     valeur_statut: CODES_STATUT_APPRENANT.inscrit,
     date_statut: new Date("2020-09-12T00:00:00.000+0000"),
@@ -68,13 +68,3 @@ const historySequenceInscritToApprentiToAbandon = [
     date_statut: new Date("2020-10-02T00:00:00.000+0000"),
   },
 ];
-
-module.exports = {
-  historySequenceApprenti,
-  historySequenceApprentiToAbandon,
-  historySequenceInscrit,
-  historySequenceInscritToApprenti,
-  historySequenceInscritToApprentiToAbandon,
-  historySequenceAbandon,
-  historySequenceApprentiToInscrit,
-};
