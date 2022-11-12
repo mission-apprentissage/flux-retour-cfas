@@ -1,8 +1,6 @@
-const { oleoduc } = require("oleoduc");
+import { oleoduc } from "oleoduc";
 
-module.exports = {
-  sendJsonStream: (stream, res) => {
-    res.setHeader("Content-Type", "application/json");
-    oleoduc(stream, res);
-  },
+export const sendJsonStream = (stream, res) => {
+  res.setHeader("Content-Type", "application/json");
+  oleoduc(stream, res);
 };

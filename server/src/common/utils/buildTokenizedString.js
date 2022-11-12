@@ -1,4 +1,4 @@
-const buildTokenizedString = (string = "", minGram = 1) => {
+export const buildTokenizedString = (string = "", minGram = 1) => {
   const separator = " ";
 
   return string
@@ -11,5 +11,3 @@ const buildTokenizedString = (string = "", minGram = 1) => {
     }, [])
     .join(separator);
 };
-
-module.exports = { buildTokenizedString };
