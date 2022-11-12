@@ -1,12 +1,12 @@
-const axios = require("axios");
-const logger = require("../../common/logger");
-const config = require("../../../config");
+import axios from "axios";
+import logger from "../../common/logger";
+import config from "../../../config";
 
 // Cf Documentation : https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
 
 const API_ENDPOINT = config.tablesCorrespondances.endpoint;
 
-const getCfdInfo = async (cfd) => {
+export const getCfdInfo = async (cfd) => {
   const url = `${API_ENDPOINT}/cfd`;
   try {
     const { data } = await axios.post(url, {
@@ -17,8 +17,4 @@ const getCfdInfo = async (cfd) => {
     logger.error(`getCfdInfo: something went wrong while requesting ${url}`, error.response.data);
     return null;
   }
-};
-
-module.exports = {
-  getCfdInfo,
 };

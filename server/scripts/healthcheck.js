@@ -1,5 +1,5 @@
 /* eslint-disable no-process-exit */
-const axios = require("axios");
+import axios from 'axios';
 
 const isTrue = (v) => v === true;
 
