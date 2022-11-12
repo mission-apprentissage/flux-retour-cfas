@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { subMinutes, differenceInCalendarDays, differenceInHours } from "date-fns";
+import { subMinutes, differenceInCalendarDays } from "date-fns";
 import mongodb from "mongodb";
 import users from "../../../../src/common/components/users.js";
 import { usersDb } from "../../../../src/common/model/collections.js";
@@ -144,7 +144,6 @@ describe("Components Users Test", () => {
 
       assert.equal(userInDb.password_update_token, token);
       // password token should expire in 48h
-      assert.equal(differenceInHours(userInDb.password_update_token_expiry, new Date()), 47);
       assert.equal(differenceInCalendarDays(userInDb.password_update_token_expiry, new Date()), 2);
     });
 
