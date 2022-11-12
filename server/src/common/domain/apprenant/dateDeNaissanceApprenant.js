@@ -1,9 +1,5 @@
-const { schema: ISO8601DateSchema } = require("../date");
+import { schema as ISO8601DateSchema } from "../date";
 
-const validateDateDeNaissanceApprenant = (value) => {
+export const validateDateDeNaissanceApprenant = (value) => {
   return ISO8601DateSchema.validate(value);
-};
-
-module.exports = {
-  validateDateDeNaissanceApprenant,
 };

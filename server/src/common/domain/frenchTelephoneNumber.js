@@ -1,4 +1,4 @@
-const Joi = require("joi");
+import Joi from "joi";
 
 /*
     (?:(?:\+|00)33|0) handles the dialing : +33, 0033 and 0 are valid values
@@ -7,13 +7,8 @@ const Joi = require("joi");
 */
 const FRENCH_TELEPHONE_NUMBER_REGEX = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
 
-const schema = Joi.string().pattern(FRENCH_TELEPHONE_NUMBER_REGEX);
+export const schema = Joi.string().pattern(FRENCH_TELEPHONE_NUMBER_REGEX);
 
-const validateFrenchTelephoneNumber = (value) => {
+export const validateFrenchTelephoneNumber = (value) => {
   return schema.validate(value);
-};
-
-module.exports = {
-  schema,
-  validateFrenchTelephoneNumber,
 };
