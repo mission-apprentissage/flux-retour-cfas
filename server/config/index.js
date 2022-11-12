@@ -51,3 +51,5 @@ export const config = {
     uri: env.get("FLUX_RETOUR_CFAS_REDIS_URI").required().asString(),
   },
 };
+
+export default config;

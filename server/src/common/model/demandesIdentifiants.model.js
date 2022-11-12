@@ -9,3 +9,5 @@ export const schema = object({
   email: string(),
   created_at: date(),
 });
+
+export default { schema, collectionName };

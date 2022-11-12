@@ -14,3 +14,5 @@ export const schema = object(
   },
   { strict: false }
 );
+
+export default { schema, collectionName };

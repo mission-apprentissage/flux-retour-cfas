@@ -27,3 +27,5 @@ export const schema = () => {
     }
   );
 };
+
+export default { schema, indexes, collectionName };

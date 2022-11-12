@@ -58,3 +58,5 @@ export const schema = object({
   contrat_date_rupture: date({ description: "Date de rupture du contrat" }),
   formation_rncp: string({ description: "Code RNCP de la formation à laquelle l'apprenant est inscrit" }),
 });
+
+export default { schema, indexes, collectionName };

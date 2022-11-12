@@ -12,3 +12,5 @@ export const schema = object(
   },
   { required: ["jobname", "action"] }
 );
+
+export default { schema, collectionName };

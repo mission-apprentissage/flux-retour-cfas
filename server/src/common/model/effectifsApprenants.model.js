@@ -23,3 +23,5 @@ export const schema = object({
   updated_at: date({ description: "Date d'ajout en base de données" }),
   created_at: date({ description: "Date d'ajout en base de données" }),
 });
+
+export default { schema, collectionName };
