@@ -1,11 +1,12 @@
 /* eslint-disable node/no-unpublished-require */
-const nock = require("nock");
-const config = require("../../../config");
-const { dataForGetMetiersByCfd, dataForGetMetiersBySiret } = require("../../data/apiLba");
+import nock from "nock";
+
+import config from "../../../config";
+import { dataForGetMetiersByCfd, dataForGetMetiersBySiret } from "../../data/apiLba";
 
 const API_ENDPOINT = config.lbaApi.endpoint;
 
-const nockGetMetiersByCfd = (data = dataForGetMetiersByCfd) => {
+export const nockGetMetiersByCfd = (data = dataForGetMetiersByCfd) => {
   nock(`${API_ENDPOINT}/metiers/`)
     .persist()
     .get(/metiersParFormation.*$/)
@@ -14,16 +15,11 @@ const nockGetMetiersByCfd = (data = dataForGetMetiersByCfd) => {
     });
 };
 
-const nockGetMetiersBySiret = (data = dataForGetMetiersBySiret) => {
+export const nockGetMetiersBySiret = (data = dataForGetMetiersBySiret) => {
   nock(`${API_ENDPOINT}/metiers/`)
     .persist()
     .get(/metiersParEtablissement.*$/)
     .reply(200, {
       metiers: data.metiers,
     });
-};
-
-module.exports = {
-  nockGetMetiersByCfd,
-  nockGetMetiersBySiret,
 };
