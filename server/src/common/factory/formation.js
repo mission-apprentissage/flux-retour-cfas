@@ -1,9 +1,9 @@
-const Joi = require("joi");
-const { schema: cfdSchema } = require("../domain/cfd");
-const { buildTokenizedString } = require("../utils/buildTokenizedString");
-const { BaseFactory } = require("./baseFactory");
+import Joi from "joi";
+import { schema as cfdSchema } from "../domain/cfd";
+import { buildTokenizedString } from "../utils/buildTokenizedString";
+import { BaseFactory } from "./baseFactory";
 
-class Formation extends BaseFactory {
+export class Formation extends BaseFactory {
   /**
    * Create a Formation Entry from props
    * @param {*} props
@@ -34,5 +34,3 @@ class Formation extends BaseFactory {
     });
   }
 }
-
-module.exports = { Formation };

@@ -1,12 +1,12 @@
-const Joi = require("joi");
-const { BaseFactory } = require("./baseFactory");
-const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { historiqueSchema: historiqueStatutsSchema } = require("../../common/domain/apprenant/statutApprenant");
-const { schema: uaiSchema } = require("../../common/domain/uai");
-const { schema: cfdSchema } = require("../../common/domain/cfd");
-const { schema: siretSchema } = require("../../common/domain/siret");
+import Joi from "joi";
+import { BaseFactory } from "./baseFactory";
+import { schema as anneeScolaireSchema } from "../../common/domain/anneeScolaire";
+import { historiqueSchema as historiqueStatutsSchema } from "../../common/domain/apprenant/statutApprenant";
+import { schema as uaiSchema } from "../../common/domain/uai";
+import { schema as cfdSchema } from "../../common/domain/cfd";
+import { schema as siretSchema } from "../../common/domain/siret";
 
-class DossierApprenant extends BaseFactory {
+export class DossierApprenant extends BaseFactory {
   /**
    * Create a DossierApprenant Entry from props
    * @param {*} props
@@ -56,5 +56,3 @@ class DossierApprenant extends BaseFactory {
     });
   }
 }
-
-module.exports = { DossierApprenant };
