@@ -1,7 +1,7 @@
-const Joi = require("joi");
-const { BaseFactory } = require("./baseFactory");
+import Joi from "joi";
+import { BaseFactory } from "./baseFactory";
 
-class DossierApprenantApiInputFiabilite extends BaseFactory {
+export class DossierApprenantApiInputFiabilite extends BaseFactory {
   /**
    * Create a DossierApprenantApiInputFiabilite object from props
    * @param {*} props
@@ -50,5 +50,3 @@ class DossierApprenantApiInputFiabilite extends BaseFactory {
     });
   }
 }
-
-module.exports = { DossierApprenantApiInputFiabilite };

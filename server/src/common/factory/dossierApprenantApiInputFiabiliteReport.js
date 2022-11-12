@@ -1,5 +1,5 @@
-const Joi = require("joi");
-const { BaseFactory } = require("./baseFactory");
+import Joi from "joi";
+import { BaseFactory } from "./baseFactory";
 
 const getPercentage = (count, total) => {
   if (total === 0) return 0;
@@ -18,7 +18,7 @@ const FIABILITE_FIELDS = [
   "SiretEtablissement",
 ];
 
-class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
+export class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
   /**
    * Create a DossierApprenantApiInputFiabiliteReport object from props
    * @param {*} props
@@ -70,5 +70,3 @@ class DossierApprenantApiInputFiabiliteReport extends BaseFactory {
     });
   }
 }
-
-module.exports = { DossierApprenantApiInputFiabiliteReport };
