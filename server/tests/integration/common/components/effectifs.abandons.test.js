@@ -10,7 +10,7 @@ import {
 import { EffectifsAbandons } from "../../../../src/common/components/effectifs/abandons.js";
 import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Effectifs Abandons Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     const abandonsStatuts = [];
 

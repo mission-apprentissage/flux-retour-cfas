@@ -13,7 +13,7 @@ import { nockGetMetiersBySiret } from "../../../utils/nockApis/nock-Lba.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/domain/organisme-de-formation/nature.js";
 import { cfasDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Cfa Test", () => {
   describe("existsCfa", () => {
     const { existsCfa } = cfasComponent();
 

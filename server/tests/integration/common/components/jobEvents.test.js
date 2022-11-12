@@ -4,7 +4,7 @@ import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.
 import { addMinutes } from "date-fns";
 import { jobEventsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components JobEvents Test", () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
     const { isJobInAction } = await jobEvents();
 

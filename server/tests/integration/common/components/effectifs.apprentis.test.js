@@ -11,7 +11,7 @@ import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants
 import { EffectifsApprentis } from "../../../../src/common/components/effectifs/apprentis.js";
 import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Effectifs apprentis Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     // Add 10 statuts with history sequence - full
     for (let index = 0; index < 10; index++) {
