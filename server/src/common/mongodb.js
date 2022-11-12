@@ -1,19 +1,19 @@
-const { MongoClient } = require("mongodb");
-const logger = require("./logger");
+import { MongoClient } from "mongodb";
+import logger from "./logger";
 
 let mongodbClient;
 
-function ensureInitialization() {
+const ensureInitialization = () => {
   if (!mongodbClient) {
     throw new Error("Database connection does not exist. Please call connectToMongodb before.");
   }
-}
+};
 
 /**
  * @param  {string} uri
  * @returns client
  */
-const connectToMongodb = async (uri) => {
+export const connectToMongodb = async (uri) => {
   logger.info("Connecting to MongoDB at", uri);
   const client = new MongoClient(uri, {
     useNewUrlParser: true,
@@ -26,27 +26,27 @@ const connectToMongodb = async (uri) => {
   return client;
 };
 
-const closeMongodbConnection = () => {
+export const closeMongodbConnection = () => {
   ensureInitialization();
   return mongodbClient.close();
 };
 
-const getDatabase = () => {
+export const getDatabase = () => {
   ensureInitialization();
   return mongodbClient.db();
 };
 
-const getDbCollection = (name) => {
+export const getDbCollection = (name) => {
   ensureInitialization();
   return mongodbClient.db().collection(name);
 };
 
-const getDbCollectionIndexes = async (name) => {
+export const getDbCollectionIndexes = async (name) => {
   ensureInitialization();
   return await mongodbClient.db().collection(name).indexes();
 };
 
-// const configureValidation = async () => {
+// export const configureValidation = async () => {
 //   await ensureInitialization();
 //   await Promise.all(
 //     getCollectionDescriptors().map(async ({ name, schema }) => {
@@ -69,11 +69,3 @@ const getDbCollectionIndexes = async (name) => {
 //     })
 //   );
 // };
-
-module.exports = {
-  connectToMongodb,
-  closeMongodbConnection,
-  getDbCollection,
-  getDatabase,
-  getDbCollectionIndexes,
-};

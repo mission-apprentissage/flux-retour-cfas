@@ -1,9 +1,9 @@
-const server = require("./http/server");
-const logger = require("./common/logger");
-const config = require("../config");
-const { initRedis } = require("./common/infra/redis");
-const createComponents = require("./common/components/components");
-const { connectToMongodb, getDatabase } = require("./common/mongodb");
+import server from "./http/server";
+import logger from "./common/logger";
+import config from "../config";
+import { initRedis } from "./common/infra/redis";
+import createComponents from "./common/components/components";
+import { connectToMongodb, getDatabase } from "./common/mongodb";
 
 process.on("unhandledRejection", (e) => logger.error("An unexpected error occurred", e));
 process.on("uncaughtException", (e) => logger.error("An unexpected error occurred", e));
