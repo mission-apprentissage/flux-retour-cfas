@@ -4,20 +4,25 @@ services:
   reverse_proxy:
     volumes:
       - flux_retour_cfas_nginx_data:/data
+      - ./reverse_proxy/dev/includes:/etc/nginx/templates/includes/env
 
   ui:
+    mem_limit: 1g
     stdin_open: true
+    volumes:
+      - ./ui:/app:z
+      - /app/.next
+      - /app/node_modules
     build:
       context: ui
       dockerfile: Dockerfile.dev
       args:
-        - REACT_APP_ENV=local
-    volumes:
-      - ./ui:/app #Allows source folders to be watched
-      - ./ui/.env:/app/.env
-      - "/app/node_modules"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+        - NEXT_PUBLIC_ENV=dev
+        - NEXT_PUBLIC_BASE_URL=http://localhost
+        - NEXT_PUBLIC_BASE_HOST=localhost
+        - NEXT_PUBLIC_METABASE_URL=https://localhost/metabase
+        - NEXT_PUBLIC_METABASE_SECRET_KEY=
+        - SKIP_PREFLIGHT_CHECK=true
 
   server:
     command: [ "yarn", "debug" ]

@@ -1,0 +1,16 @@
+FROM node:16.15.0-stretch
+
+ARG REACT_APP_ENV
+
+ENV REACT_APP_ENV=$REACT_APP_ENV
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+
+RUN yarn install --frozen-lockfile
+
+COPY ./ /app
+
+EXPOSE 3000
+CMD ["yarn", "start"]
