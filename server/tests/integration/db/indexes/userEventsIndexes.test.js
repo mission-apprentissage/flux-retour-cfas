@@ -1,8 +1,8 @@
-const assert = require("assert").strict;
-const { createIndexes, dropIndexes } = require("../../../../src/common/model/indexes/index");
-const { getDbCollectionIndexes } = require("../../../../src/common/mongodb");
-const userEventsModelDescriptor = require("../../../../src/common/model/userEvents.model");
-const userEvents = require("../../../../src/common/components/userEvents");
+import { strict as assert } from 'assert';
+import { createIndexes, dropIndexes } from '../../../../src/common/model/indexes/index';
+import { getDbCollectionIndexes } from '../../../../src/common/mongodb';
+import userEventsModelDescriptor from '../../../../src/common/model/userEvents.model';
+import userEvents from '../../../../src/common/components/userEvents';
 
 // TODO : Boucler sur la liste des index names pour les tests
 describe("UserEvents Indexes", () => {

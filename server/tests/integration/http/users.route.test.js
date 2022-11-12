@@ -1,13 +1,15 @@
-const assert = require("assert").strict;
+import { strict as assert } from 'assert';
+
 // eslint-disable-next-line node/no-unpublished-require
-const MockDate = require("mockdate");
-const { startServer } = require("../../utils/testUtils");
-const { apiRoles, tdbRoles } = require("../../../src/common/roles");
-const { differenceInCalendarDays } = require("date-fns");
-const config = require("../../../config");
-const { ORGANISMES_APPARTENANCE } = require("../../../src/common/constants/usersConstants");
-const omit = require("lodash.omit");
-const { usersDb } = require("../../../src/common/model/collections");
+import MockDate from 'mockdate';
+
+import { startServer } from '../../utils/testUtils';
+import { apiRoles, tdbRoles } from '../../../src/common/roles';
+import { differenceInCalendarDays } from 'date-fns';
+import config from '../../../config';
+import { ORGANISMES_APPARTENANCE } from '../../../src/common/constants/usersConstants';
+import omit from 'lodash.omit';
+import { usersDb } from '../../../src/common/model/collections';
 
 describe(__filename, () => {
   afterEach(() => {

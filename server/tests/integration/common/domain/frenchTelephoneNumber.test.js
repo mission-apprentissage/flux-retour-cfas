@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { validateFrenchTelephoneNumber } = require("../../../../src/common/domain/frenchTelephoneNumber");
+import { strict as assert } from 'assert';
+import { validateFrenchTelephoneNumber } from '../../../../src/common/domain/frenchTelephoneNumber';
 
 describe("Domain French Telephone Number", () => {
   describe("validateFrenchTelephoneNumber", () => {

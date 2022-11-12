@@ -1,13 +1,10 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const effectifs = require("../../../../src/common/components/effectifs");
-const {
-  CODES_STATUT_APPRENANT,
-  EFFECTIF_INDICATOR_NAMES,
-} = require("../../../../src/common/constants/dossierApprenantConstants");
-const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { NATURE_ORGANISME_DE_FORMATION } = require("../../../../src/common/domain/organisme-de-formation/nature");
-const { dossiersApprenantsDb, cfasDb } = require("../../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import { createRandomDossierApprenant } from '../../../data/randomizedSample';
+import effectifs from '../../../../src/common/components/effectifs';
+import { CODES_STATUT_APPRENANT, EFFECTIF_INDICATOR_NAMES } from '../../../../src/common/constants/dossierApprenantConstants';
+import { RESEAUX_CFAS } from '../../../../src/common/constants/networksConstants';
+import { NATURE_ORGANISME_DE_FORMATION } from '../../../../src/common/domain/organisme-de-formation/nature';
+import { dossiersApprenantsDb, cfasDb } from '../../../../src/common/model/collections';
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {

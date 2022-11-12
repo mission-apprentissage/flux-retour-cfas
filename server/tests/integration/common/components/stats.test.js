@@ -1,7 +1,7 @@
-const assert = require("assert").strict;
-const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
-const stats = require("../../../../src/common/components/stats");
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
+import { strict as assert } from 'assert';
+import dossiersApprenants from '../../../../src/common/components/dossiersApprenants';
+import stats from '../../../../src/common/components/stats';
+import { createRandomDossierApprenant } from '../../../data/randomizedSample';
 
 describe(__filename, () => {
   it("Permet de récupérer le nb d'etablissements distincts par uai", async () => {

@@ -1,9 +1,9 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { createRandomDossierApprenant } = require("../../data/randomizedSample");
-const { buildTokenizedString } = require("../../../src/common/utils/buildTokenizedString");
-const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/organisme-de-formation/nature");
-const { cfasDb, dossiersApprenantsDb } = require("../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import { startServer } from '../../utils/testUtils';
+import { createRandomDossierApprenant } from '../../data/randomizedSample';
+import { buildTokenizedString } from '../../../src/common/utils/buildTokenizedString';
+import { NATURE_ORGANISME_DE_FORMATION } from '../../../src/common/domain/organisme-de-formation/nature';
+import { cfasDb, dossiersApprenantsDb } from '../../../src/common/model/collections';
 
 describe(__filename, () => {
   let httpClient;

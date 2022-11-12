@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { DossierApprenant } = require("../../../../src/common/factory/dossierApprenant");
+import { strict as assert } from 'assert';
+import { DossierApprenant } from '../../../../src/common/factory/dossierApprenant';
 
 describe("Factory DossierApprenant", () => {
   describe("createDossierApprenant", () => {

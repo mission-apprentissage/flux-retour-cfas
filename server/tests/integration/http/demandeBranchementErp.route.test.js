@@ -1,6 +1,6 @@
-const assert = require("assert").strict;
-const { demandesBranchementErpDb } = require("../../../src/common/model/collections");
-const { startServer } = require("../../utils/testUtils");
+import { strict as assert } from 'assert';
+import { demandesBranchementErpDb } from '../../../src/common/model/collections';
+import { startServer } from '../../utils/testUtils';
 
 describe(__filename, () => {
   let httpClient;

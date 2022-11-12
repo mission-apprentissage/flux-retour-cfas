@@ -1,13 +1,15 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const {
+import { strict as assert } from 'assert';
+import { createRandomDossierApprenant } from '../../../data/randomizedSample';
+
+import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
-} = require("../../../data/historySequenceSamples");
-const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { EffectifsApprentis } = require("../../../../src/common/components/effectifs/apprentis");
-const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
+} from '../../../data/historySequenceSamples';
+
+import { RESEAUX_CFAS } from '../../../../src/common/constants/networksConstants';
+import { EffectifsApprentis } from '../../../../src/common/components/effectifs/apprentis';
+import { dossiersApprenantsDb } from '../../../../src/common/model/collections';
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {

@@ -1,9 +1,11 @@
-const assert = require("assert").strict;
+import { strict as assert } from 'assert';
+
 // eslint-disable-next-line node/no-unpublished-require
-const { startServer } = require("../../utils/testUtils");
-const { apiRoles } = require("../../../src/common/roles");
-const users = require("../../../src/common/components/users");
-const { reseauxCfasDb } = require("../../../src/common/model/collections");
+import { startServer } from '../../utils/testUtils';
+
+import { apiRoles } from '../../../src/common/roles';
+import users from '../../../src/common/components/users';
+import { reseauxCfasDb } from '../../../src/common/model/collections';
 
 const user = { name: "apiConsumerUser", password: "password" };
 

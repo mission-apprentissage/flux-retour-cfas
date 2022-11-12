@@ -1,9 +1,9 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
-const { Formation } = require("../../../src/common/factory/formation");
-const { createRandomDossierApprenant } = require("../../data/randomizedSample");
-const { formationsDb, dossiersApprenantsDb } = require("../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import { startServer } from '../../utils/testUtils';
+import { asyncForEach } from '../../../src/common/utils/asyncUtils';
+import { Formation } from '../../../src/common/factory/formation';
+import { createRandomDossierApprenant } from '../../data/randomizedSample';
+import { formationsDb, dossiersApprenantsDb } from '../../../src/common/model/collections';
 
 describe(__filename, () => {
   const formationsSeed = [

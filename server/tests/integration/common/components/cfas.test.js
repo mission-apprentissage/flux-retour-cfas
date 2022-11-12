@@ -1,15 +1,17 @@
-const assert = require("assert").strict;
-const cfasComponent = require("../../../../src/common/components/cfas");
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const { addDays } = require("date-fns");
-const { Cfa } = require("../../../../src/common/factory/cfa");
-const pick = require("lodash.pick");
+import { strict as assert } from 'assert';
+import cfasComponent from '../../../../src/common/components/cfas';
+import { createRandomDossierApprenant } from '../../../data/randomizedSample';
+import { addDays } from 'date-fns';
+import { Cfa } from '../../../../src/common/factory/cfa';
+import pick from 'lodash.pick';
+
 // eslint-disable-next-line node/no-unpublished-require
-const nock = require("nock");
-const { dataForGetMetiersBySiret } = require("../../../data/apiLba");
-const { nockGetMetiersBySiret } = require("../../../utils/nockApis/nock-Lba");
-const { NATURE_ORGANISME_DE_FORMATION } = require("../../../../src/common/domain/organisme-de-formation/nature");
-const { cfasDb, dossiersApprenantsDb } = require("../../../../src/common/model/collections");
+import nock from 'nock';
+
+import { dataForGetMetiersBySiret } from '../../../data/apiLba';
+import { nockGetMetiersBySiret } from '../../../utils/nockApis/nock-Lba';
+import { NATURE_ORGANISME_DE_FORMATION } from '../../../../src/common/domain/organisme-de-formation/nature';
+import { cfasDb, dossiersApprenantsDb } from '../../../../src/common/model/collections';
 
 describe(__filename, () => {
   describe("existsCfa", () => {

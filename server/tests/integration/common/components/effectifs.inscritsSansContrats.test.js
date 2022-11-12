@@ -1,9 +1,8 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-
-const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/dossierApprenantConstants");
-const { EffectifsInscritsSansContrats } = require("../../../../src/common/components/effectifs/inscrits-sans-contrats");
-const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import { createRandomDossierApprenant } from '../../../data/randomizedSample';
+import { CODES_STATUT_APPRENANT } from '../../../../src/common/constants/dossierApprenantConstants';
+import { EffectifsInscritsSansContrats } from '../../../../src/common/components/effectifs/inscrits-sans-contrats';
+import { dossiersApprenantsDb } from '../../../../src/common/model/collections';
 
 describe(__filename, () => {
   const inscritsSansContrats = new EffectifsInscritsSansContrats();

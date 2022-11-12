@@ -1,7 +1,7 @@
-const assert = require("assert").strict;
-const { Formation } = require("../../../../src/common/factory/formation");
-const pick = require("lodash.pick");
-const { addMonths } = require("date-fns");
+import { strict as assert } from 'assert';
+import { Formation } from '../../../../src/common/factory/formation';
+import pick from 'lodash.pick';
+import { addMonths } from 'date-fns';
 
 describe("Factory Formation", () => {
   describe("create formation", () => {

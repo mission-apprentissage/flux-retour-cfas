@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
+import { strict as assert } from 'assert';
+import { startServer } from '../../utils/testUtils';
 
 describe(__filename, () => {
   describe("POST /update-password", () => {
