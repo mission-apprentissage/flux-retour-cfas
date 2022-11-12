@@ -63,7 +63,7 @@ const createStreams = () => {
   return streams;
 };
 
-export const logger = bunyan.createLogger({
+export default bunyan.createLogger({
   name: config.appName,
   serializers: bunyan.stdSerializers,
   streams: createStreams(),
