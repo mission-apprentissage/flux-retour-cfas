@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
-import effectifs from "../../../../src/common/components/effectifs";
+import effectifs from "../../../../src/common/components/effectifs.js";
 import {
   CODES_STATUT_APPRENANT,
   EFFECTIF_INDICATOR_NAMES,
@@ -9,7 +9,7 @@ import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/domain/organisme-de-formation/nature.js";
 import { dossiersApprenantsDb, cfasDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Effectifs Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     const nbAbandons = 10;
     const nbApprentis = 5;

@@ -4,7 +4,7 @@ import { createRandomDossierApprenant } from "../../../data/randomizedSample.js"
 import { historySequenceApprentiToAbandon } from "../../../data/historySequenceSamples.js";
 import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Randomize Statuts test", () => {
   describe("createRandomDossierApprenant", () => {
     it("Vérifie l'existence d'un DossierApprenant randomisé", async () => {
       const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();

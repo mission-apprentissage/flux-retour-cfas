@@ -3,7 +3,7 @@ import { createRandomDossierApprenant } from "../../../data/randomizedSample.js"
 import { EffectifsRupturants } from "../../../../src/common/components/effectifs/rupturants.js";
 import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Effectifs Rupturants Test", () => {
   beforeEach(async () => {
     const statuts = [
       // following statuts are potential rupturants (depends on date)

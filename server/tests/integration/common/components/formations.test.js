@@ -14,7 +14,7 @@ import { createRandomDossierApprenant } from "../../../data/randomizedSample.js"
 import { nockGetMetiersByCfd } from "../../../utils/nockApis/nock-Lba.js";
 import { formationsDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Formations Test", () => {
   describe("existsFormation", () => {
     const { existsFormation } = formationsComponent();
 

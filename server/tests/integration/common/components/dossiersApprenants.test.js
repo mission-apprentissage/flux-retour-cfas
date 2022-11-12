@@ -13,7 +13,7 @@ import {
 import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
 import { cfasDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Dossiers Apprenants Test", () => {
   let fakeNowDate;
   beforeEach(() => {
     fakeNowDate = new Date();

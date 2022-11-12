@@ -3,7 +3,7 @@ import dossiersApprenants from "../../../../src/common/components/dossiersAppren
 import stats from "../../../../src/common/components/stats.js";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 
-describe(__filename, () => {
+describe("Components Stats Test", () => {
   it("Permet de récupérer le nb d'etablissements distincts par uai", async () => {
     // Seed with sample data
     const { addOrUpdateDossiersApprenants } = await dossiersApprenants();

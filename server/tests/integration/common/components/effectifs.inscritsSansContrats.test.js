@@ -4,7 +4,7 @@ import { CODES_STATUT_APPRENANT } from "../../../../src/common/constants/dossier
 import { EffectifsInscritsSansContrats } from "../../../../src/common/components/effectifs/inscrits-sans-contrats.js";
 import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Effectifs Inscrits sans contrats Test", () => {
   const inscritsSansContrats = new EffectifsInscritsSansContrats();
 
   beforeEach(async () => {
