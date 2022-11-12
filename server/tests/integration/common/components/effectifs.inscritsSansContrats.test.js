@@ -1,8 +1,8 @@
-import { strict as assert } from 'assert';
-import { createRandomDossierApprenant } from '../../../data/randomizedSample';
-import { CODES_STATUT_APPRENANT } from '../../../../src/common/constants/dossierApprenantConstants';
-import { EffectifsInscritsSansContrats } from '../../../../src/common/components/effectifs/inscrits-sans-contrats';
-import { dossiersApprenantsDb } from '../../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { CODES_STATUT_APPRENANT } from "../../../../src/common/constants/dossierApprenantConstants.js";
+import { EffectifsInscritsSansContrats } from "../../../../src/common/components/effectifs/inscrits-sans-contrats.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   const inscritsSansContrats = new EffectifsInscritsSansContrats();

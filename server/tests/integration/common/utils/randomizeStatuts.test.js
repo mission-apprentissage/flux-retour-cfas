@@ -1,8 +1,8 @@
-import { strict as assert } from 'assert';
-import dossiersApprenants from '../../../../src/common/components/dossiersApprenants';
-import { createRandomDossierApprenant } from '../../../data/randomizedSample';
-import { historySequenceApprentiToAbandon } from '../../../data/historySequenceSamples';
-import { dossiersApprenantsDb } from '../../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import dossiersApprenants from "../../../../src/common/components/dossiersApprenants.js";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { historySequenceApprentiToAbandon } from "../../../data/historySequenceSamples.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   describe("createRandomDossierApprenant", () => {

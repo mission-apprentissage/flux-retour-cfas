@@ -1,4 +1,4 @@
-import { stringify } from "json-stringify-deterministic/lib/defaults";
+import { stringify } from "json-stringify-deterministic/lib/defaults.js";
 
 /**
  * It takes a route and a set of filters and returns a string that uniquely identifies the route and

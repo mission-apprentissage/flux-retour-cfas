@@ -1,6 +1,6 @@
-import { strict as assert } from 'assert';
-import { Cfa } from '../../../../src/common/factory/cfa';
-import pick from 'lodash.pick';
+import { strict as assert } from "assert";
+import { Cfa } from "../../../../src/common/factory/cfa.js";
+import pick from "lodash.pick";
 
 describe("Factory CFA", () => {
   describe("createCfa", () => {

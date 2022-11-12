@@ -1,8 +1,8 @@
-import path from 'path';
-import { runScript } from '../scriptWrapper';
-import { fetchOrganismes } from '../../common/apis/apiReferentielMna';
-import { asyncForEach } from '../../common/utils/asyncUtils';
-import { readJsonFromCsvFile } from '../../common/utils/fileUtils';
+import path from "path";
+import { runScript } from "../scriptWrapper.js";
+import { fetchOrganismes } from "../../common/apis/apiReferentielMna.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
 
 const REFERENTIEL_FIELDS_TO_FETCH = [
   "siret",

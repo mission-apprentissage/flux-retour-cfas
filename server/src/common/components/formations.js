@@ -1,10 +1,10 @@
-import { validateCfd } from "../domain/cfd";
-import { getCfdInfo } from "../apis/apiTablesCorrespondances";
-import { getMetiersByCfd } from "../apis/apiLba";
-import { Formation } from "../factory/formation";
-import { escapeRegExp } from "../utils/regexUtils";
-import logger from "../logger";
-import { formationsDb, dossiersApprenantsDb } from "../model/collections";
+import { validateCfd } from "../domain/cfd.js";
+import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
+import { getMetiersByCfd } from "../apis/apiLba.js";
+import { Formation } from "../factory/formation.js";
+import { escapeRegExp } from "../utils/regexUtils.js";
+import logger from "../logger.js";
+import { formationsDb, dossiersApprenantsDb } from "../model/collections.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 

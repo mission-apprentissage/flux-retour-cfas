@@ -1,4 +1,4 @@
-import { object, objectId, string, date, arrayOf, boolean } from "./json-schema/jsonSchemaTypes";
+import { object, objectId, string, date, arrayOf, boolean } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "cfas";
 

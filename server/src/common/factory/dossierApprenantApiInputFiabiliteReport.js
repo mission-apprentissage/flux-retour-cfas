@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { BaseFactory } from "./baseFactory";
+import { BaseFactory } from "./baseFactory.js";
 
 const getPercentage = (count, total) => {
   if (total === 0) return 0;

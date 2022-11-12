@@ -1,4 +1,4 @@
-import { getDatabase } from "../mongodb";
+import { getDatabase } from "../mongodb.js";
 
 /**
  * Find data in mongoCollection and return paginated list

@@ -1,4 +1,4 @@
-import { dossiersApprenantsDb } from "../model/collections";
+import { dossiersApprenantsDb } from "../model/collections.js";
 
 /**
  * Récupération du nb distinct de cfas via leurs UAI

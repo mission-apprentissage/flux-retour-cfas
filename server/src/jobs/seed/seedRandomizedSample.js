@@ -1,7 +1,7 @@
-import { runScript } from '../scriptWrapper';
-import logger from '../../common/logger';
-import { seedRandomizedSample } from './utils/seedUtils';
-import { JOB_NAMES } from '../../common/constants/jobsConstants';
+import { runScript } from "../scriptWrapper.js";
+import logger from "../../common/logger.js";
+import { seedRandomizedSample } from "./utils/seedUtils.js";
+import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
 
 runScript(async ({ dossiersApprenants }) => {
   logger.info("Seeding data with Randomized sample...");

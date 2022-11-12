@@ -1,11 +1,11 @@
 import { ObjectId } from "mongodb";
 import omit from "lodash.omit";
-import { DUPLICATE_TYPE_CODES } from "../constants/dossierApprenantConstants";
-import { asyncForEach } from "../../common/utils/asyncUtils";
-import { escapeRegExp } from "../utils/regexUtils";
+import { DUPLICATE_TYPE_CODES } from "../constants/dossierApprenantConstants.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { escapeRegExp } from "../utils/regexUtils.js";
 import { isEqual } from "date-fns";
-import { DossierApprenant } from "../factory/dossierApprenant";
-import { cfasDb, dossiersApprenantsDb } from "../model/collections";
+import { DossierApprenant } from "../factory/dossierApprenant.js";
+import { cfasDb, dossiersApprenantsDb } from "../model/collections.js";
 
 /**
  * Find a dossier apprenant from unicity key params

@@ -1,7 +1,7 @@
-import { strict as assert } from 'assert';
-import { createRandomDossierApprenant } from '../../../data/randomizedSample';
-import { EffectifsRupturants } from '../../../../src/common/components/effectifs/rupturants';
-import { dossiersApprenantsDb } from '../../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { EffectifsRupturants } from "../../../../src/common/components/effectifs/rupturants.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   beforeEach(async () => {

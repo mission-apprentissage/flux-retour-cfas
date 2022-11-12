@@ -1,5 +1,5 @@
-import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants";
-import { Indicator } from "./indicator";
+import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { Indicator } from "./indicator.js";
 
 export class EffectifsAbandons extends Indicator {
   /**

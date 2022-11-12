@@ -1,4 +1,4 @@
-import { demandesBranchementErpDb } from "../model/collections";
+import { demandesBranchementErpDb } from "../model/collections.js";
 
 /**
  * Création d'une demande de branchement

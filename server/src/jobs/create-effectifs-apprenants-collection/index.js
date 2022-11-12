@@ -1,11 +1,11 @@
-import { runScript } from '../scriptWrapper';
-import logger from '../../common/logger';
-import { JOB_NAMES } from '../../common/constants/jobsConstants';
-import { EFFECTIF_INDICATOR_NAMES } from '../../common/constants/dossierApprenantConstants';
-import { getAnneesScolaireListFromDate } from '../../common/utils/anneeScolaireUtils';
-import { asyncForEach } from '../../common/utils/asyncUtils';
-import cliProgress from 'cli-progress';
-import { effectifsApprenantsDb } from '../../common/model/collections';
+import { runScript } from "../scriptWrapper.js";
+import logger from "../../common/logger.js";
+import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
+import { EFFECTIF_INDICATOR_NAMES } from "../../common/constants/dossierApprenantConstants.js";
+import { getAnneesScolaireListFromDate } from "../../common/utils/anneeScolaireUtils.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import cliProgress from "cli-progress";
+import { effectifsApprenantsDb } from "../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

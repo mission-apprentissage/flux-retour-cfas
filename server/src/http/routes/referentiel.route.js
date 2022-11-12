@@ -1,8 +1,8 @@
-import express from 'express';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import { RESEAUX_CFAS } from '../../common/constants/networksConstants';
-import { REGIONS, DEPARTEMENTS } from '../../common/constants/territoiresConstants';
-import { ORGANISMES_APPARTENANCE } from '../../common/constants/usersConstants';
+import express from "express";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import { RESEAUX_CFAS } from "../../common/constants/networksConstants.js";
+import { REGIONS, DEPARTEMENTS } from "../../common/constants/territoiresConstants.js";
+import { ORGANISMES_APPARTENANCE } from "../../common/constants/usersConstants.js";
 
 export default ({ db }) => {
   const router = express.Router();

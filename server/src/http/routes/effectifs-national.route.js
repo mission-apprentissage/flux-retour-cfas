@@ -1,10 +1,10 @@
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import express from 'express';
-import { getAnneesScolaireListFromDate } from '../../common/utils/anneeScolaireUtils';
-import { format } from 'date-fns';
-import { getCacheKeyForRoute } from '../../common/utils/cacheUtils';
-import validateRequestQuery from '../middlewares/validateRequestQuery';
-import Joi from 'joi';
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import express from "express";
+import { getAnneesScolaireListFromDate } from "../../common/utils/anneeScolaireUtils.js";
+import { format } from "date-fns";
+import { getCacheKeyForRoute } from "../../common/utils/cacheUtils.js";
+import validateRequestQuery from "../middlewares/validateRequestQuery.js";
+import Joi from "joi";
 
 export default ({ stats, effectifs, cache }) => {
   const router = express.Router();

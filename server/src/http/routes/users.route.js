@@ -1,9 +1,9 @@
-import Joi from 'joi';
-import express from 'express';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import validateRequestBody from '../middlewares/validateRequestBody';
-import { tdbRoles } from '../../common/roles';
-import config from '../../../config';
+import Joi from "joi";
+import express from "express";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import validateRequestBody from "../middlewares/validateRequestBody.js";
+import { tdbRoles } from "../../common/roles.js";
+import config from "../../../config.js";
 
 const mapUserToApiOutput = (user) => {
   return {

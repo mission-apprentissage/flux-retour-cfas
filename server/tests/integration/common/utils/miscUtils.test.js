@@ -1,5 +1,5 @@
-import { strict as assert } from 'assert';
-import { generateRandomAlphanumericPhrase } from '../../../../src/common/utils/miscUtils';
+import { strict as assert } from "assert";
+import { generateRandomAlphanumericPhrase } from "../../../../src/common/utils/miscUtils.js";
 
 describe("generateRandomAlphanumericPhrase", () => {
   it("crée une chaîne de caractère aléatoire de longueur demandée", () => {

@@ -1,5 +1,5 @@
-import { fullSampleWithUpdates } from '../../../../tests/data/sample';
-import { createRandomDossierApprenantList } from '../../../../tests/data/randomizedSample';
+import { fullSampleWithUpdates } from "../../../../tests/data/sample.js";
+import { createRandomDossierApprenantList } from "../../../../tests/data/randomizedSample.js";
 
 const seedSample = async (dossiersApprenants) => {
   await dossiersApprenants.addOrUpdateDossiersApprenants(fullSampleWithUpdates);

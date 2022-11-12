@@ -1,7 +1,7 @@
-import express from 'express';
-import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from '../../common/constants/userEventsConstants';
-import { createUserToken } from '../../common/utils/jwtUtils';
-import tryCatch from '../middlewares/tryCatchMiddleware';
+import express from "express";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
+import { createUserToken } from "../../common/utils/jwtUtils.js";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
 
 export default ({ users, userEvents }) => {
   const router = express.Router(); // eslint-disable-line new-cap

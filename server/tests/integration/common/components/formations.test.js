@@ -1,18 +1,18 @@
-import { strict as assert } from 'assert';
-import omit from 'lodash.omit';
+import { strict as assert } from "assert";
+import omit from "lodash.omit";
 
 // eslint-disable-next-line node/no-unpublished-require
-import nock from 'nock';
+import nock from "nock";
 
-import { nockGetCfdInfo } from '../../../utils/nockApis/nock-tablesCorrespondances';
-import { asyncForEach } from '../../../../src/common/utils/asyncUtils';
-import { dataForGetCfdInfo } from '../../../data/apiTablesDeCorrespondances';
-import { dataForGetMetiersByCfd } from '../../../data/apiLba';
-import formationsComponent from '../../../../src/common/components/formations';
-import { Formation } from '../../../../src/common/factory/formation';
-import { createRandomDossierApprenant } from '../../../data/randomizedSample';
-import { nockGetMetiersByCfd } from '../../../utils/nockApis/nock-Lba';
-import { formationsDb, dossiersApprenantsDb } from '../../../../src/common/model/collections';
+import { nockGetCfdInfo } from "../../../utils/nockApis/nock-tablesCorrespondances.js";
+import { asyncForEach } from "../../../../src/common/utils/asyncUtils.js";
+import { dataForGetCfdInfo } from "../../../data/apiTablesDeCorrespondances.js";
+import { dataForGetMetiersByCfd } from "../../../data/apiLba.js";
+import formationsComponent from "../../../../src/common/components/formations.js";
+import { Formation } from "../../../../src/common/factory/formation.js";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { nockGetMetiersByCfd } from "../../../utils/nockApis/nock-Lba.js";
+import { formationsDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   describe("existsFormation", () => {

@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb";
-import logger from "./logger";
+import logger from "./logger.js";
 
 let mongodbClient;
 

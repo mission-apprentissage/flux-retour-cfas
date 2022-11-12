@@ -1,5 +1,5 @@
-import logger from '../../../common/logger';
-import { jobEventsDb } from '../../../common/model/collections';
+import logger from "../../../common/logger.js";
+import { jobEventsDb } from "../../../common/model/collections.js";
 
 const purgeJobEvents = async (lastDateToKeep) => {
   logger.info(`... Purging JobEvent data ...`);

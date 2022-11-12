@@ -1,7 +1,7 @@
-import { strict as assert } from 'assert';
-import { Formation } from '../../../../src/common/factory/formation';
-import pick from 'lodash.pick';
-import { addMonths } from 'date-fns';
+import { strict as assert } from "assert";
+import { Formation } from "../../../../src/common/factory/formation.js";
+import pick from "lodash.pick";
+import { addMonths } from "date-fns";
 
 describe("Factory Formation", () => {
   describe("create formation", () => {

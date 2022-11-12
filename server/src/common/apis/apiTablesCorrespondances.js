@@ -1,6 +1,6 @@
 import axios from "axios";
-import logger from "../../common/logger";
-import config from "../../../config";
+import logger from "../../common/logger.js";
+import config from "../../../config.js";
 
 // Cf Documentation : https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
 

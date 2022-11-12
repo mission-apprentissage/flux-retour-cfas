@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
-import { reseauxCfasDb } from "../model/collections";
-import { escapeRegExp } from "../utils/regexUtils";
+import { reseauxCfasDb } from "../model/collections.js";
+import { escapeRegExp } from "../utils/regexUtils.js";
 
 const create = async ({ nom_reseau, nom_etablissement, uai, siret }) => {
   const { insertedId } = await reseauxCfasDb().insertOne({

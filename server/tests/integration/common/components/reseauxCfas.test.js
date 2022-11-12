@@ -1,6 +1,6 @@
-import { strict as assert } from 'assert';
-import reseauxCfas from '../../../../src/common/components/reseauxCfas';
-import { reseauxCfasDb } from '../../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import reseauxCfas from "../../../../src/common/components/reseauxCfas.js";
+import { reseauxCfasDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   it("Permet de vérifier la création d'un cfa de réseau", async () => {

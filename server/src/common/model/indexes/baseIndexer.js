@@ -1,5 +1,5 @@
-import { getDbCollection } from "../../mongodb";
-import { doesCollectionExistInDb } from "../../utils/dbUtils";
+import { getDbCollection } from "../../mongodb.js";
+import { doesCollectionExistInDb } from "../../utils/dbUtils.js";
 
 /**
  * Classe BaseIndexer de base

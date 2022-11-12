@@ -1,4 +1,4 @@
-import Boom from 'boom';
+import Boom from "boom";
 
 export default () => {
   // eslint-disable-next-line no-unused-vars

@@ -1,5 +1,5 @@
-import { strict as assert } from 'assert';
-import { validateCfd } from '../../../../src/common/domain/cfd';
+import { strict as assert } from "assert";
+import { validateCfd } from "../../../../src/common/domain/cfd.js";
 
 describe("Domain CFD", () => {
   describe("validateCfd", () => {

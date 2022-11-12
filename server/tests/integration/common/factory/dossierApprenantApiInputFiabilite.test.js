@@ -1,10 +1,10 @@
-import { strict as assert } from 'assert';
+import { strict as assert } from "assert";
 
 // eslint-disable-next-line node/no-unpublished-require
-import MockDate from 'mockdate';
+import MockDate from "mockdate";
 
-import { DossierApprenantApiInputFiabilite } from '../../../../src/common/factory/dossierApprenantApiInputFiabilite';
-import omit from 'lodash.omit';
+import { DossierApprenantApiInputFiabilite } from "../../../../src/common/factory/dossierApprenantApiInputFiabilite.js";
+import omit from "lodash.omit";
 
 describe("Factory DossierApprenantApiInputFiabilite", () => {
   beforeEach(() => {

@@ -1,8 +1,8 @@
-import { strict as assert } from 'assert';
-import { createIndexes, dropIndexes } from '../../../../src/common/model/indexes/index';
-import { getDbCollectionIndexes } from '../../../../src/common/mongodb';
-import reseauxCfasModelDescriptor from '../../../../src/common/model/reseauxCfas.model';
-import reseauxCfas from '../../../../src/common/components/reseauxCfas';
+import { strict as assert } from "assert";
+import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
+import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
+import reseauxCfasModelDescriptor from "../../../../src/common/model/reseauxCfas.model.js";
+import reseauxCfas from "../../../../src/common/components/reseauxCfas.js";
 
 // TODO : Boucler sur la liste des index names pour les tests
 describe("ReseauxCfa Indexes", () => {

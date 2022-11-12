@@ -1,4 +1,4 @@
-import { object, string, date, boolean, objectId } from "./json-schema/jsonSchemaTypes";
+import { object, string, date, boolean, objectId } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "demandesBranchementErp";
 

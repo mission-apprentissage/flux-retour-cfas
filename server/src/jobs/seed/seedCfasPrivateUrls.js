@@ -1,9 +1,9 @@
-import cliProgress from 'cli-progress';
-import logger from '../../common/logger';
-import { runScript } from '../scriptWrapper';
-import { asyncForEach } from '../../common/utils/asyncUtils';
-import config from '../../../config';
-import { cfasDb } from '../../common/model/collections';
+import cliProgress from "cli-progress";
+import logger from "../../common/logger.js";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import config from "../../../config.js";
+import { cfasDb } from "../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

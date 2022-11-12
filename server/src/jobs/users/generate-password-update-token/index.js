@@ -1,8 +1,8 @@
-import { runScript } from '../../scriptWrapper';
-import logger from '../../../common/logger';
-import { JOB_NAMES } from '../../../common/constants/jobsConstants';
-import arg from 'arg';
-import config from '../../../../config';
+import { runScript } from "../../scriptWrapper.js";
+import logger from "../../../common/logger.js";
+import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
+import arg from "arg";
+import config from "../../../../config.js";
 
 let args = [];
 

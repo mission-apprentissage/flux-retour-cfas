@@ -1,7 +1,7 @@
-import express from 'express';
-import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from '../../common/constants/userEventsConstants';
-import { tdbRoles } from '../../common/roles';
-import { createUserToken } from '../../common/utils/jwtUtils';
+import express from "express";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
+import { tdbRoles } from "../../common/roles.js";
+import { createUserToken } from "../../common/utils/jwtUtils.js";
 
 export default ({ cfas, userEvents }) => {
   const router = express.Router(); // eslint-disable-line new-cap

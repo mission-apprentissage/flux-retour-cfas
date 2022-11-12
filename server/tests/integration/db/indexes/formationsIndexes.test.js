@@ -1,8 +1,8 @@
-import { strict as assert } from 'assert';
-import { createIndexes, dropIndexes } from '../../../../src/common/model/indexes/index';
-import { getDbCollectionIndexes } from '../../../../src/common/mongodb';
-import formationsModelDescriptor from '../../../../src/common/model/formations.model';
-import { formationsDb } from '../../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
+import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
+import formationsModelDescriptor from "../../../../src/common/model/formations.model.js";
+import { formationsDb } from "../../../../src/common/model/collections.js";
 
 // TODO : Boucler sur la liste des index names pour les tests
 describe("Formations Indexes", () => {

@@ -1,6 +1,6 @@
-import { strict as assert } from 'assert';
-import demandeBranchementErp from '../../../../src/common/components/demandeBranchementErp';
-import { demandesBranchementErpDb } from '../../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import demandeBranchementErp from "../../../../src/common/components/demandeBranchementErp.js";
+import { demandesBranchementErpDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   it("Permet de vérifier la création d'une demande de branchement ERP en cours d'interfacage", async () => {

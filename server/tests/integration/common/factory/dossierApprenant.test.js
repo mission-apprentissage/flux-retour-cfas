@@ -1,5 +1,5 @@
-import { strict as assert } from 'assert';
-import { DossierApprenant } from '../../../../src/common/factory/dossierApprenant';
+import { strict as assert } from "assert";
+import { DossierApprenant } from "../../../../src/common/factory/dossierApprenant.js";
 
 describe("Factory DossierApprenant", () => {
   describe("createDossierApprenant", () => {

@@ -1,17 +1,17 @@
-import { strict as assert } from 'assert';
-import cfasComponent from '../../../../src/common/components/cfas';
-import { createRandomDossierApprenant } from '../../../data/randomizedSample';
-import { addDays } from 'date-fns';
-import { Cfa } from '../../../../src/common/factory/cfa';
-import pick from 'lodash.pick';
+import { strict as assert } from "assert";
+import cfasComponent from "../../../../src/common/components/cfas.js";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { addDays } from "date-fns";
+import { Cfa } from "../../../../src/common/factory/cfa.js";
+import pick from "lodash.pick";
 
 // eslint-disable-next-line node/no-unpublished-require
-import nock from 'nock';
+import nock from "nock";
 
-import { dataForGetMetiersBySiret } from '../../../data/apiLba';
-import { nockGetMetiersBySiret } from '../../../utils/nockApis/nock-Lba';
-import { NATURE_ORGANISME_DE_FORMATION } from '../../../../src/common/domain/organisme-de-formation/nature';
-import { cfasDb, dossiersApprenantsDb } from '../../../../src/common/model/collections';
+import { dataForGetMetiersBySiret } from "../../../data/apiLba.js";
+import { nockGetMetiersBySiret } from "../../../utils/nockApis/nock-Lba.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/domain/organisme-de-formation/nature.js";
+import { cfasDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   describe("existsCfa", () => {

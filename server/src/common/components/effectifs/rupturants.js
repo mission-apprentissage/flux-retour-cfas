@@ -1,6 +1,6 @@
-import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants";
-import { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } from "../../domain/effectif";
-import { Indicator } from "./indicator";
+import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } from "../../domain/effectif.js";
+import { Indicator } from "./indicator.js";
 import { addMonths } from "date-fns";
 
 export class EffectifsRupturants extends Indicator {

@@ -1,6 +1,6 @@
-import { runScript } from '../scriptWrapper';
-import logger from '../../common/logger';
-import { validateAnneeScolaire } from '../../common/domain/anneeScolaire';
+import { runScript } from "../scriptWrapper.js";
+import logger from "../../common/logger.js";
+import { validateAnneeScolaire } from "../../common/domain/anneeScolaire.js";
 
 const ANNEE_SCOLAIRE_START_LIMIT = 2021;
 
