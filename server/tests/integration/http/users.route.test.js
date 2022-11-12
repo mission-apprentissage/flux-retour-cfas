@@ -1,17 +1,17 @@
-import { strict as assert } from 'assert';
+import { strict as assert } from "assert";
 
 // eslint-disable-next-line node/no-unpublished-require
-import MockDate from 'mockdate';
+import MockDate from "mockdate";
 
-import { startServer } from '../../utils/testUtils';
-import { apiRoles, tdbRoles } from '../../../src/common/roles';
-import { differenceInCalendarDays } from 'date-fns';
-import config from '../../../config';
-import { ORGANISMES_APPARTENANCE } from '../../../src/common/constants/usersConstants';
-import omit from 'lodash.omit';
-import { usersDb } from '../../../src/common/model/collections';
+import { startServer } from "../../utils/testUtils.js";
+import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
+import { differenceInCalendarDays } from "date-fns";
+import config from "../../../config/index.js";
+import { ORGANISMES_APPARTENANCE } from "../../../src/common/constants/usersConstants.js";
+import omit from "lodash.omit";
+import { usersDb } from "../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Users Route", () => {
   afterEach(() => {
     MockDate.reset();
   });

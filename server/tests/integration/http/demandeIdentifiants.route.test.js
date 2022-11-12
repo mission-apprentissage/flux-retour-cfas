@@ -1,8 +1,8 @@
-import { strict as assert } from 'assert';
-import { demandesIdentifiantsDb } from '../../../src/common/model/collections';
-import { startServer } from '../../utils/testUtils';
+import { strict as assert } from "assert";
+import { demandesIdentifiantsDb } from "../../../src/common/model/collections.js";
+import { startServer } from "../../utils/testUtils.js";
 
-describe(__filename, () => {
+describe("Demande Identifiants Route", () => {
   let httpClient;
 
   beforeEach(async () => {

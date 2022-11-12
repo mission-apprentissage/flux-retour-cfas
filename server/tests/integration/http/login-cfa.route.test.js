@@ -1,11 +1,11 @@
-import { strict as assert } from 'assert';
-import config from '../../../config';
-import jwt from 'jsonwebtoken';
-import { startServer } from '../../utils/testUtils';
-import { tdbRoles } from '../../../src/common/roles';
-import { cfasDb } from '../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import config from "../../../config/index.js";
+import jwt from "jsonwebtoken";
+import { startServer } from "../../utils/testUtils.js";
+import { tdbRoles } from "../../../src/common/roles.js";
+import { cfasDb } from "../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("LoginCFA Route", () => {
   it("Vérifie qu'on peut se connecter avec un access token cfa", async () => {
     const { httpClient } = await startServer();
     // create cfa in db

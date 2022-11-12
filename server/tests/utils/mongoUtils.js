@@ -1,8 +1,8 @@
 // eslint-disable-next-line node/no-unpublished-require
 import { MongoMemoryServer } from "mongodb-memory-server";
 
-import { connectToMongodb, closeMongodbConnection, getDatabase, getDbCollection } from "../../src/common/mongodb";
-import { asyncForEach } from "../../src/common/utils/asyncUtils";
+import { connectToMongodb, closeMongodbConnection, getDatabase, getDbCollection } from "../../src/common/mongodb.js";
+import { asyncForEach } from "../../src/common/utils/asyncUtils.js";
 
 let mongoInMemory;
 

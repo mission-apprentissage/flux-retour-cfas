@@ -1,11 +1,11 @@
-import { strict as assert } from 'assert';
-import { startServer } from '../../utils/testUtils';
-import { createRandomDossierApprenant } from '../../data/randomizedSample';
-import { buildTokenizedString } from '../../../src/common/utils/buildTokenizedString';
-import { NATURE_ORGANISME_DE_FORMATION } from '../../../src/common/domain/organisme-de-formation/nature';
-import { cfasDb, dossiersApprenantsDb } from '../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
+import { buildTokenizedString } from "../../../src/common/utils/buildTokenizedString.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../src/common/domain/organisme-de-formation/nature.js";
+import { cfasDb, dossiersApprenantsDb } from "../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Cfa Route", () => {
   let httpClient;
 
   beforeEach(async () => {

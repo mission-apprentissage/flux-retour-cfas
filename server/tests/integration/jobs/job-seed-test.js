@@ -1,9 +1,9 @@
-import { strict as assert } from 'assert';
-import dossiersApprenants from '../../../src/common/components/dossiersApprenants';
-import { dossiersApprenantsDb } from '../../../src/common/model/collections';
-import { seedRandomizedSample } from '../../../src/jobs/seed/utils/seedUtils';
+import { strict as assert } from "assert";
+import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
+import { dossiersApprenantsDb } from "../../../src/common/model/collections.js";
+import { seedRandomizedSample } from "../../../src/jobs/seed/utils/seedUtils.js";
 
-describe(__filename, () => {
+describe("Job Seed Test", () => {
   it("Vérifie la création de données de test depuis le job", async () => {
     const createDossiersApprenant = await dossiersApprenants();
     await seedRandomizedSample(createDossiersApprenant);

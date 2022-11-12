@@ -1,7 +1,7 @@
-import { strict as assert } from 'assert';
-import { startServer } from '../../utils/testUtils';
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
 
-describe(__filename, () => {
+describe("Cache Route", () => {
   describe("POST /cache/clear", () => {
     it("sends a 403 HTTP response when caller is not admin", async () => {
       const { httpClient, createAndLogUser } = await startServer();
