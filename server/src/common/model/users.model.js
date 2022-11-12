@@ -1,8 +1,8 @@
-const { object, objectId, string, date, arrayOf } = require("./json-schema/jsonSchemaTypes");
+import { object, objectId, string, date, arrayOf } from "./json-schema/jsonSchemaTypes";
 
-const collectionName = "users";
+export const collectionName = "users";
 
-const indexes = () => {
+export const indexes = () => {
   return [
     [{ username: 1 }, { name: "username" }],
     [{ email: 1 }, { name: "email" }],
@@ -10,7 +10,7 @@ const indexes = () => {
   ];
 };
 
-const schema = () => {
+export const schema = () => {
   return object(
     {
       _id: objectId(),
@@ -31,10 +31,4 @@ const schema = () => {
       required: ["username", "created_at"],
     }
   );
-};
-
-module.exports = {
-  collectionName,
-  schema,
-  indexes,
 };
