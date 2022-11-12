@@ -1,6 +1,6 @@
-const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/dossierApprenantConstants");
+import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants";
 
-const simpleStatutBadUpdate = {
+export const simpleStatutBadUpdate = {
   ine_apprenant: "12345",
   nom_apprenant: "testNom",
   prenom_apprenant: "testPrenom",
@@ -16,7 +16,7 @@ const simpleStatutBadUpdate = {
   annee_formation: 1,
 };
 
-const fullSampleWithUpdates = [
+export const fullSampleWithUpdates = [
   {
     ine_apprenant: "111111111AA",
     annee_scolaire: "2021-2022",
@@ -266,7 +266,7 @@ const fullSampleWithUpdates = [
   },
 ];
 
-const fullSample = [
+export const fullSample = [
   {
     ine_apprenant: "111111111AA",
     annee_scolaire: "2021-2022",
@@ -401,9 +401,3 @@ const fullSample = [
     annee_formation: 2021,
   },
 ];
-
-module.exports = {
-  simpleStatutBadUpdate,
-  fullSample,
-  fullSampleWithUpdates,
-};

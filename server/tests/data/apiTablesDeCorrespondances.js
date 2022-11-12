@@ -1,4 +1,4 @@
-const dataForGetSiretInfo = {
+export const dataForGetSiretInfo = {
   adresse: "ADRESSE DE TEST - TOULOUSE FRANCE",
   code_postal: "31500",
   code_commune_insee: "31555",
@@ -12,7 +12,7 @@ const dataForGetSiretInfo = {
   num_academie: "16",
 };
 
-const dataForGetCfdInfo = {
+export const dataForGetCfdInfo = {
   withIntituleLong: {
     cfd: "1463430A",
     cfd_outdated: true,
@@ -75,9 +75,4 @@ const dataForGetCfdInfo = {
     },
     opcos: [],
   },
-};
-
-module.exports = {
-  dataForGetSiretInfo,
-  dataForGetCfdInfo,
 };
