@@ -1,4 +1,5 @@
-const { flattenHistoriqueStatutApprenant } = require("../src/common/utils/flattenHistoriqueStatutApprenant");
+import { flattenHistoriqueStatutApprenant } from "../src/common/utils/flattenHistoriqueStatutApprenant";
+
 /* will flatten the historique_statut_apprenant in documents from collection statutsCandidats so we only keep history of changes */
 /*
   Un historique ayant pour valeur :
@@ -35,23 +36,21 @@ const { flattenHistoriqueStatutApprenant } = require("../src/common/utils/flatte
     ]
 */
 
-module.exports = {
-  async up(db) {
-    // find statuts with an historique_statut_apprenant of size > 1
-    const collection = db.collection("statutsCandidats");
-    const cursor = collection.find(
-      { "historique_statut_apprenant.1": { $exists: true } },
-      { _id: 1, historique_statut_apprenant: 1 }
+export const up = async (db) => {
+  // find statuts with an historique_statut_apprenant of size > 1
+  const collection = db.collection("statutsCandidats");
+  const cursor = collection.find(
+    { "historique_statut_apprenant.1": { $exists: true } },
+    { _id: 1, historique_statut_apprenant: 1 }
+  );
+  while (await cursor.hasNext()) {
+    const document = await cursor.next();
+    const flattendHistorique = flattenHistoriqueStatutApprenant(document.historique_statut_apprenant);
+    await collection.findOneAndUpdate(
+      { _id: document._id },
+      { $set: { historique_statut_apprenant: flattendHistorique } }
     );
-    while (await cursor.hasNext()) {
-      const document = await cursor.next();
-      const flattendHistorique = flattenHistoriqueStatutApprenant(document.historique_statut_apprenant);
-      await collection.findOneAndUpdate(
-        { _id: document._id },
-        { $set: { historique_statut_apprenant: flattendHistorique } }
-      );
-    }
-  },
-
-  async down() {},
+  }
 };
+
+export const down = async () => {};

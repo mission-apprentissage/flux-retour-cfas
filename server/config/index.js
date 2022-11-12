@@ -1,6 +1,6 @@
-const env = require("env-var");
+import env from "env-var";
 
-module.exports = {
+export const config = {
   appName: env.get("FLUX_RETOUR_CFAS_NAME").default("Flux Retour Cfas").asString(),
   env: env.get("FLUX_RETOUR_CFAS_ENV").required().asString(),
   publicUrl: env.get("FLUX_RETOUR_CFAS_PUBLIC_URL").required().asString(),
