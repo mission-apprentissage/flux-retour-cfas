@@ -2,7 +2,7 @@ import express from "express";
 import logger from "../../common/logger.js";
 import config from "../../../config/index.js";
 import tryCatch from "../middlewares/tryCatchMiddleware.js";
-import packageJson from "../../../package.json";
+import { packageJson } from "../../common/utils/esmUtils.js";
 
 export default ({ db }) => {
   const router = express.Router();

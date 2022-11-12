@@ -51,7 +51,6 @@
     "migration:down": "migrate-mongo down"
   },
   "dependencies": {
-    "@faker-js/faker": "7.2.0",
     "arg": "5.0.1",
     "async": "3.2.3",
     "axios": "0.27.2",
@@ -81,7 +80,7 @@
     "migrate-mongo": "9.0.0",
     "mongodb": "4.11.0",
     "node-ovh-objectstorage": "2.0.5",
-    "oleoduc": "0.6.0",
+    "oleoduc": "0.7.0",
     "passport": "0.5.2",
     "passport-jwt": "4.0.0",
     "randexp": "0.5.3",
@@ -99,6 +98,7 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
+    "@faker-js/faker": "7.6.0",
     "axiosist": "0.10.0",
     "dotenv": "16.0.1",
     "eslint": "7.32.0",

@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import { addHours, isBefore } from "date-fns";
 import { usersDb } from "../model/collections.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
-import sha512Utils from "../utils/sha512Utils.js";
+import { compare, isTooWeak, hash } from "../utils/sha512Utils.js";
 import { validatePassword } from "../domain/password.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 
@@ -30,9 +30,9 @@ const authenticate = async (username, password) => {
   }
 
   const current = user.password;
-  if (sha512Utils.compare(password, current)) {
-    if (sha512Utils.isTooWeak(current)) {
-      await usersDb().updateOne({ _id: user._id }, { password: sha512Utils.hash(password) });
+  if (compare(password, current)) {
+    if (isTooWeak(current)) {
+      await usersDb().updateOne({ _id: user._id }, { password: hash(password) });
     }
     return user;
   }
@@ -81,7 +81,7 @@ const getAll = async () => {
 const createUser = async (userProps) => {
   const username = userProps.username;
   const password = userProps.password || generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
-  const passwordHash = sha512Utils.hash(password);
+  const passwordHash = hash(password);
   const permissions = userProps.permissions || [];
   const network = userProps.network || null;
   const region = userProps.region || null;
@@ -157,7 +157,7 @@ const updatePassword = async (updateToken, password) => {
     throw new Error("Password update token has expired");
   }
   // we store password hashes only
-  const passwordHash = sha512Utils.hash(password);
+  const passwordHash = hash(password);
 
   await usersDb().updateOne(
     { _id: user._id },

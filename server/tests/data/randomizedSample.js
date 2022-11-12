@@ -1,6 +1,6 @@
-import { faker } from "@faker-js/faker/locale/fr.js";
+import { faker } from "@faker-js/faker/locale/fr";
 import RandExp from "randexp";
-import sampleLibelles from "./sampleLibelles.json";
+import { sampleLibelles } from "./sampleLibelles.js";
 import { subMonths, addYears } from "date-fns";
 import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
 
@@ -54,7 +54,7 @@ export const createRandomDossierApprenant = (params = {}) => {
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
     id_erp_apprenant: faker.datatype.boolean() ? faker.datatype.uuid() : null,
-    tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
+    tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
     date_de_naissance_apprenant: getRandomDateNaissance(),
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
@@ -115,7 +115,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
     periode_formation: isPresent() ? periode_formation.join("-") : "",
     annee_scolaire,
     id_erp_apprenant: faker.datatype.boolean() ? faker.datatype.uuid() : null,
-    tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
+    tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
 
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat().toISOString() : null,
