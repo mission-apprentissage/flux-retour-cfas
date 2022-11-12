@@ -1,23 +1,23 @@
-function number(custom = {}) {
+export function number(custom = {}) {
   return { bsonType: "number", ...custom };
 }
-function integer(custom = {}) {
+export function integer(custom = {}) {
   return { bsonType: "int", ...custom };
 }
-function objectId(custom = {}) {
+export function objectId(custom = {}) {
   return { bsonType: "objectId", ...custom };
 }
-function string(custom = {}) {
+export function string(custom = {}) {
   return { bsonType: "string", ...custom };
 }
-function boolean(custom = {}) {
+export function boolean(custom = {}) {
   return { bsonType: "bool", ...custom };
 }
-function date(custom = {}) {
+export function date(custom = {}) {
   return { bsonType: "date", ...custom };
 }
 
-function arrayOf(items, custom = {}) {
+export function arrayOf(items, custom = {}) {
   return {
     bsonType: "array",
     ...custom,
@@ -25,14 +25,14 @@ function arrayOf(items, custom = {}) {
   };
 }
 
-function array(custom = {}) {
+export function array(custom = {}) {
   return {
     bsonType: "array",
     ...custom,
   };
 }
 
-function object(properties, custom = {}) {
+export function object(properties, custom = {}) {
   return {
     bsonType: "object",
     additionalProperties: false,
@@ -40,15 +40,3 @@ function object(properties, custom = {}) {
     properties,
   };
 }
-
-module.exports = {
-  number,
-  integer,
-  objectId,
-  string,
-  date,
-  boolean,
-  arrayOf,
-  array,
-  object,
-};

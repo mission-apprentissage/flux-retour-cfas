@@ -1,15 +1,15 @@
-const { object, objectId, string, date } = require("./json-schema/jsonSchemaTypes");
+import { object, objectId, string, date } from "./json-schema/jsonSchemaTypes";
 
-const collectionName = "userEvents";
+export const collectionName = "userEvents";
 
-const indexes = () => {
+export const indexes = () => {
   return [
     [{ username: 1 }, { name: "username" }],
     [{ action: 1 }, { name: "action" }],
   ];
 };
 
-const schema = () => {
+export const schema = () => {
   return object(
     {
       _id: objectId(),
@@ -26,10 +26,4 @@ const schema = () => {
       required: ["date"],
     }
   );
-};
-
-module.exports = {
-  collectionName,
-  schema,
-  indexes,
 };

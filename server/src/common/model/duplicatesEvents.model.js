@@ -1,8 +1,8 @@
-const { object, date, objectId, integer, arrayOf, string } = require("./json-schema/jsonSchemaTypes");
+import { object, date, objectId, integer, arrayOf, string } from "./json-schema/jsonSchemaTypes";
 
-const collectionName = "duplicatesEvents";
+export const collectionName = "duplicatesEvents";
 
-const schema = object(
+export const schema = object(
   {
     _id: objectId(),
     created_at: date(),
@@ -14,8 +14,3 @@ const schema = object(
   },
   { strict: false }
 );
-
-module.exports = {
-  schema,
-  collectionName,
-};

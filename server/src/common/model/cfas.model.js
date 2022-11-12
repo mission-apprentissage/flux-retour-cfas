@@ -1,8 +1,8 @@
-const { object, objectId, string, date, arrayOf, boolean } = require("./json-schema/jsonSchemaTypes");
+import { object, objectId, string, date, arrayOf, boolean } from "./json-schema/jsonSchemaTypes";
 
-const collectionName = "cfas";
+export const collectionName = "cfas";
 
-const indexes = () => {
+export const indexes = () => {
   return [
     [
       { nom: "text", nom_tokenized: "text" },
@@ -13,7 +13,7 @@ const indexes = () => {
   ];
 };
 
-const schema = () => {
+export const schema = () => {
   return object({
     _id: objectId(),
     uai: string({ description: "Code uai de l'établissement" }),
@@ -34,10 +34,4 @@ const schema = () => {
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
   });
-};
-
-module.exports = {
-  collectionName,
-  schema,
-  indexes,
 };

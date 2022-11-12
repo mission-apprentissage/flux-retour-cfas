@@ -1,8 +1,8 @@
-const { object, string, objectId, date, integer, arrayOf } = require("./json-schema/jsonSchemaTypes");
+import { object, string, objectId, date, integer, arrayOf } from "./json-schema/jsonSchemaTypes";
 
-const collectionName = "dossiersApprenants";
+export const collectionName = "dossiersApprenants";
 
-const indexes = () => {
+export const indexes = () => {
   return [
     [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
     [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
@@ -14,7 +14,7 @@ const indexes = () => {
   ];
 };
 
-const schema = object({
+export const schema = object({
   _id: objectId(),
   ine_apprenant: string({ description: "N° INE de l'apprenant" }),
   nom_apprenant: string({ description: "Nom de l'apprenant" }),
@@ -58,9 +58,3 @@ const schema = object({
   contrat_date_rupture: date({ description: "Date de rupture du contrat" }),
   formation_rncp: string({ description: "Code RNCP de la formation à laquelle l'apprenant est inscrit" }),
 });
-
-module.exports = {
-  schema,
-  collectionName,
-  indexes,
-};
