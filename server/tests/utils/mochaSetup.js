@@ -2,7 +2,7 @@ const nock = require("nock"); // eslint-disable-line node/no-unpublished-require
 const { clearAllCollections, startAndConnectMongodb, stopMongodb } = require("./mongoUtils");
 const { nockExternalApis } = require("./nockApis");
 const redisFakeClient = require("./redisClientMock");
-const { createIndexes } = require("../../src/common/indexes");
+const { createIndexes } = require("../../src/common/model/indexes/index");
 
 const LOCAL_HOST = "127.0.0.1";
 const MONGODB_MEMORY_SERVER_DL_HOST = "fastdl.mongodb.org";
