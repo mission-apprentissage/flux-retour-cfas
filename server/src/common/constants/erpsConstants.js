@@ -1,7 +1,7 @@
 /**
  * Noms des ERPs
  */
-const ERPS = {
+export const ERPS = {
   YMAG: {
     nomErp: "Ymag",
     nomFichier: "referentielCfas_ymag",
@@ -15,5 +15,3 @@ const ERPS = {
     nomFichier: "referentielCfas_scform",
   },
 };
-
-module.exports = { ERPS };
