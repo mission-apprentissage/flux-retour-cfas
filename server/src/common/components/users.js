@@ -264,4 +264,5 @@ export default () => ({
   removeUser,
   searchUsers,
   updateUser,
+  getAll,
 });

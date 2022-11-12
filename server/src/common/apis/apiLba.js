@@ -1,6 +1,6 @@
 import axios from "axios";
 import logger from "../logger.js";
-import config from "../../../config.js";
+import config from "../../../config/index.js";
 
 // Cf Documentation : https://labonnealternance.pole-emploi.fr/api-docs/
 

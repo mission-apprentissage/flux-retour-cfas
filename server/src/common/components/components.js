@@ -6,7 +6,7 @@ import cfasComponent from "./cfas.js";
 import reseauxCfasComponent from "./reseauxCfas.js";
 import formationsComponent from "./formations.js";
 import createStats from "./stats.js";
-import createEffectifs from "./effectifs";
+import createEffectifs from "./effectifs.js";
 import demandeIdentifiantsComponent from "./demandeIdentifiants.js";
 import demandeBranchementErpComponent from "./demandeBranchementErp.js";
 import createCacheComponent from "./cache.js";

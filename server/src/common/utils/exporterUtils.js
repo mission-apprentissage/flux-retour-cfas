@@ -1,6 +1,6 @@
 import XLSX from "xlsx";
 import { parse } from "json2csv";
-import "fs";
+import { writeFile, chown } from "fs";
 
 export const toXlsx = async (data, outputDirectoryFileName, workbookName = "", options = {}) => {
   const workbook = XLSX.utils.book_new();
