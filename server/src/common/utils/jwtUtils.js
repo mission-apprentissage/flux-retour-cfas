@@ -1,7 +1,7 @@
-const jwt = require("jsonwebtoken");
-const config = require("../../../config");
+import jwt from "jsonwebtoken";
+import config from "../../../config";
 
-const createToken = (type, subject, options = {}) => {
+export const createToken = (type, subject, options = {}) => {
   const defaults = config.auth[type];
   const secret = options.secret || defaults.jwtSecret;
   const expiresIn = options.expiresIn || defaults.expiresIn;
@@ -14,9 +14,7 @@ const createToken = (type, subject, options = {}) => {
   });
 };
 
-module.exports = {
-  createUserToken: (user, options = {}) => {
-    const payload = { permissions: user.permissions, network: user.network };
-    return createToken("user", user.username, { payload, ...options });
-  },
+export const createUserToken = (user, options = {}) => {
+  const payload = { permissions: user.permissions, network: user.network };
+  return createToken("user", user.username, { payload, ...options });
 };

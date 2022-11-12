@@ -1,4 +1,4 @@
-const flattenHistoriqueStatutApprenant = (historique = []) => {
+export const flattenHistoriqueStatutApprenant = (historique = []) => {
   let bufferValue = null;
   const flattened = [];
 
@@ -10,8 +10,4 @@ const flattenHistoriqueStatutApprenant = (historique = []) => {
   });
 
   return flattened;
-};
-
-module.exports = {
-  flattenHistoriqueStatutApprenant,
 };
