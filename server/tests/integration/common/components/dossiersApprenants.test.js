@@ -1,15 +1,14 @@
-const assert = require("assert").strict;
+import { strict as assert } from 'assert';
+
 // eslint-disable-next-line node/no-unpublished-require
-const MockDate = require("mockdate");
-const { addDays, isEqual } = require("date-fns");
-const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
-const { createRandomDossierApprenant, getRandomUaiEtablissement } = require("../../../data/randomizedSample");
-const {
-  CODES_STATUT_APPRENANT,
-  DUPLICATE_TYPE_CODES,
-} = require("../../../../src/common/constants/dossierApprenantConstants");
-const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { cfasDb, dossiersApprenantsDb } = require("../../../../src/common/model/collections");
+import MockDate from 'mockdate';
+
+import { addDays, isEqual } from 'date-fns';
+import dossiersApprenants from '../../../../src/common/components/dossiersApprenants';
+import { createRandomDossierApprenant, getRandomUaiEtablissement } from '../../../data/randomizedSample';
+import { CODES_STATUT_APPRENANT, DUPLICATE_TYPE_CODES } from '../../../../src/common/constants/dossierApprenantConstants';
+import { RESEAUX_CFAS } from '../../../../src/common/constants/networksConstants';
+import { cfasDb, dossiersApprenantsDb } from '../../../../src/common/model/collections';
 
 describe(__filename, () => {
   let fakeNowDate;

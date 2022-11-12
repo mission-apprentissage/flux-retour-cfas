@@ -1,15 +1,16 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { createRandomDossierApprenant, getRandomSiretEtablissement } = require("../../data/randomizedSample");
-const { apiRoles } = require("../../../src/common/roles");
+import { strict as assert } from 'assert';
+import { startServer } from '../../utils/testUtils';
+import { createRandomDossierApprenant, getRandomSiretEtablissement } from '../../data/randomizedSample';
+import { apiRoles } from '../../../src/common/roles';
 
-const {
+import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
-} = require("../../data/historySequenceSamples");
-const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/organisme-de-formation/nature");
-const { dossiersApprenantsDb, cfasDb } = require("../../../src/common/model/collections");
+} from '../../data/historySequenceSamples';
+
+import { NATURE_ORGANISME_DE_FORMATION } from '../../../src/common/domain/organisme-de-formation/nature';
+import { dossiersApprenantsDb, cfasDb } from '../../../src/common/model/collections';
 
 describe(__filename, () => {
   describe("/api/effectifs route", () => {

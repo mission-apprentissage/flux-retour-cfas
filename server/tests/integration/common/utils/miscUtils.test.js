@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { generateRandomAlphanumericPhrase } = require("../../../../src/common/utils/miscUtils");
+import { strict as assert } from 'assert';
+import { generateRandomAlphanumericPhrase } from '../../../../src/common/utils/miscUtils';
 
 describe("generateRandomAlphanumericPhrase", () => {
   it("crée une chaîne de caractère aléatoire de longueur demandée", () => {

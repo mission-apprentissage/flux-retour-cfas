@@ -1,6 +1,6 @@
-const assert = require("assert").strict;
-const { Cfa } = require("../../../../src/common/factory/cfa");
-const pick = require("lodash.pick");
+import { strict as assert } from 'assert';
+import { Cfa } from '../../../../src/common/factory/cfa';
+import pick from 'lodash.pick';
 
 describe("Factory CFA", () => {
   describe("createCfa", () => {

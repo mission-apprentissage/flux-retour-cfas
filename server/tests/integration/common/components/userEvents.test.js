@@ -1,7 +1,7 @@
-const assert = require("assert").strict;
-const userEvents = require("../../../../src/common/components/userEvents");
-const users = require("../../../../src/common/components/users");
-const { userEventsDb, usersDb } = require("../../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import userEvents from '../../../../src/common/components/userEvents';
+import users from '../../../../src/common/components/users';
+import { userEventsDb, usersDb } from '../../../../src/common/model/collections';
 
 describe(__filename, () => {
   describe("createUserEvent", () => {

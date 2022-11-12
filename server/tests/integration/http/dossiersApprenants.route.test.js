@@ -1,15 +1,17 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const users = require("../../../src/common/components/users");
-const { apiRoles } = require("../../../src/common/roles");
-const {
+import { strict as assert } from 'assert';
+import { startServer } from '../../utils/testUtils';
+import users from '../../../src/common/components/users';
+import { apiRoles } from '../../../src/common/roles';
+
+import {
   createRandomDossierApprenantApiInputList,
   createRandomDossierApprenantApiInput,
   createRandomDossierApprenant,
-} = require("../../data/randomizedSample");
-const { cfdRegex } = require("../../../src/common/domain/cfd");
-const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
-const { dossiersApprenantsDb } = require("../../../src/common/model/collections");
+} from '../../data/randomizedSample';
+
+import { cfdRegex } from '../../../src/common/domain/cfd';
+import dossiersApprenants from '../../../src/common/components/dossiersApprenants';
+import { dossiersApprenantsDb } from '../../../src/common/model/collections';
 
 const user = {
   name: "userApi",

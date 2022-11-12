@@ -1,11 +1,11 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const users = require("../../../src/common/components/users");
-const { apiRoles } = require("../../../src/common/roles");
-const { JOB_NAMES, jobEventStatuts } = require("../../../src/common/constants/jobsConstants");
-const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
-const { createRandomEffectifApprenant } = require("../../data/randomizedSample");
-const { jobEventsDb, effectifsApprenantsDb } = require("../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import { startServer } from '../../utils/testUtils';
+import users from '../../../src/common/components/users';
+import { apiRoles } from '../../../src/common/roles';
+import { JOB_NAMES, jobEventStatuts } from '../../../src/common/constants/jobsConstants';
+import { EFFECTIF_INDICATOR_NAMES } from '../../../src/common/constants/dossierApprenantConstants';
+import { createRandomEffectifApprenant } from '../../data/randomizedSample';
+import { jobEventsDb, effectifsApprenantsDb } from '../../../src/common/model/collections';
 
 const user = { name: "apiConsumerUser", password: "password" };
 

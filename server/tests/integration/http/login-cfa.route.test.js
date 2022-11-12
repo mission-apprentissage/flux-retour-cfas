@@ -1,9 +1,9 @@
-const assert = require("assert").strict;
-const config = require("../../../config");
-const jwt = require("jsonwebtoken");
-const { startServer } = require("../../utils/testUtils");
-const { tdbRoles } = require("../../../src/common/roles");
-const { cfasDb } = require("../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import config from '../../../config';
+import jwt from 'jsonwebtoken';
+import { startServer } from '../../utils/testUtils';
+import { tdbRoles } from '../../../src/common/roles';
+import { cfasDb } from '../../../src/common/model/collections';
 
 describe(__filename, () => {
   it("Vérifie qu'on peut se connecter avec un access token cfa", async () => {

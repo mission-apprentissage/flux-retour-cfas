@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const validators = require("../../../../src/http/utils/validators");
+import { strict as assert } from 'assert';
+import validators from '../../../../src/http/utils/validators';
 
 describe("Validators", () => {
   describe("password", () => {

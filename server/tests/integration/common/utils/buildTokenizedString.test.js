@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { buildTokenizedString } = require("../../../../src/common/utils/buildTokenizedString");
+import { strict as assert } from 'assert';
+import { buildTokenizedString } from '../../../../src/common/utils/buildTokenizedString';
 
 describe("buildTokenizedString", () => {
   it('returns "" when given undefined', () => {

@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { validateUai, getDepartementCodeFromUai } = require("../../../../src/common/domain/uai");
+import { strict as assert } from 'assert';
+import { validateUai, getDepartementCodeFromUai } from '../../../../src/common/domain/uai';
 
 describe("Domain UAI", () => {
   describe("validateUai", () => {

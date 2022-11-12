@@ -1,8 +1,8 @@
-const assert = require("assert").strict;
-const { cfasDb } = require("../../../../src/common/model/collections");
-const { createIndexes, dropIndexes } = require("../../../../src/common/model/indexes/index");
-const { getDbCollectionIndexes } = require("../../../../src/common/mongodb");
-const cfasModelDescriptor = require("./../../../../src/common/model/cfas.model");
+import { strict as assert } from 'assert';
+import { cfasDb } from '../../../../src/common/model/collections';
+import { createIndexes, dropIndexes } from '../../../../src/common/model/indexes/index';
+import { getDbCollectionIndexes } from '../../../../src/common/mongodb';
+import cfasModelDescriptor from './../../../../src/common/model/cfas.model';
 
 // TODO : Boucler sur la liste des index names pour les tests
 describe("Cfas Indexes", () => {

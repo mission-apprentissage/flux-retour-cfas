@@ -1,6 +1,6 @@
-const assert = require("assert").strict;
-const config = require("../../../config");
-const { startServer } = require("../../utils/testUtils");
+import { strict as assert } from 'assert';
+import config from '../../../config';
+import { startServer } from '../../utils/testUtils';
 
 describe(__filename, () => {
   it("Vérifie que le server fonctionne", async () => {

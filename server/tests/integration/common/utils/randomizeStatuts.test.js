@@ -1,8 +1,8 @@
-const assert = require("assert").strict;
-const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const { historySequenceApprentiToAbandon } = require("../../../data/historySequenceSamples");
-const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import dossiersApprenants from '../../../../src/common/components/dossiersApprenants';
+import { createRandomDossierApprenant } from '../../../data/randomizedSample';
+import { historySequenceApprentiToAbandon } from '../../../data/historySequenceSamples';
+import { dossiersApprenantsDb } from '../../../../src/common/model/collections';
 
 describe(__filename, () => {
   describe("createRandomDossierApprenant", () => {

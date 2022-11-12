@@ -1,7 +1,7 @@
-const assert = require("assert").strict;
-const config = require("../../../config");
-const { startServer } = require("../../utils/testUtils");
-const jwt = require("jsonwebtoken");
+import { strict as assert } from 'assert';
+import config from '../../../config';
+import { startServer } from '../../utils/testUtils';
+import jwt from 'jsonwebtoken';
 
 describe(__filename, () => {
   it("Vérifie qu'on peut se connecter", async () => {

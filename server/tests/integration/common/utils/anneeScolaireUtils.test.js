@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { getAnneesScolaireListFromDate } = require("../../../../src/common/utils/anneeScolaireUtils");
+import { strict as assert } from 'assert';
+import { getAnneesScolaireListFromDate } from '../../../../src/common/utils/anneeScolaireUtils';
 
 describe("anneeScolaireUtils", () => {
   describe("getAnneesScolaireListFromDate", () => {

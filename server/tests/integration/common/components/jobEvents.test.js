@@ -1,8 +1,8 @@
-const assert = require("assert").strict;
-const jobEvents = require("../../../../src/common/components/jobEvents");
-const { jobEventStatuts } = require("../../../../src/common/constants/jobsConstants");
-const { addMinutes } = require("date-fns");
-const { jobEventsDb } = require("../../../../src/common/model/collections");
+import { strict as assert } from 'assert';
+import jobEvents from '../../../../src/common/components/jobEvents';
+import { jobEventStatuts } from '../../../../src/common/constants/jobsConstants';
+import { addMinutes } from 'date-fns';
+import { jobEventsDb } from '../../../../src/common/model/collections';
 
 describe(__filename, () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {

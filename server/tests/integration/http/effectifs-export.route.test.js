@@ -1,19 +1,20 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { createRandomDossierApprenant } = require("../../data/randomizedSample");
-const { tdbRoles } = require("../../../src/common/roles");
-const config = require("../../../config");
-const jwt = require("jsonwebtoken");
+import { strict as assert } from 'assert';
+import { startServer } from '../../utils/testUtils';
+import { createRandomDossierApprenant } from '../../data/randomizedSample';
+import { tdbRoles } from '../../../src/common/roles';
+import config from '../../../config';
+import jwt from 'jsonwebtoken';
 
-const {
+import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
-} = require("../../data/historySequenceSamples");
-const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
-const { USER_EVENTS_ACTIONS } = require("../../../src/common/constants/userEventsConstants");
-const { userEventsDb, dossiersApprenantsDb, cfasDb } = require("../../../src/common/model/collections");
+} from '../../data/historySequenceSamples';
+
+import { RESEAUX_CFAS } from '../../../src/common/constants/networksConstants';
+import { USER_EVENTS_ACTIONS } from '../../../src/common/constants/userEventsConstants';
+import { userEventsDb, dossiersApprenantsDb, cfasDb } from '../../../src/common/model/collections';
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {
