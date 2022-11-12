@@ -1,4 +1,4 @@
-module.exports = (callback) => {
+export default (callback) => {
   return async (req, res, next) => {
     try {
       await callback(req, res, next);
