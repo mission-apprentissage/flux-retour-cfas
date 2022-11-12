@@ -1,4 +1,4 @@
-import { flattenHistoriqueStatutApprenant } from "../src/common/utils/flattenHistoriqueStatutApprenant";
+import { flattenHistoriqueStatutApprenant } from "../src/common/utils/flattenHistoriqueStatutApprenant.js";
 
 /* will flatten the historique_statut_apprenant in documents from collection statutsCandidats so we only keep history of changes */
 /*

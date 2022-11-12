@@ -1,4 +1,4 @@
-import { USER_EVENTS_ACTIONS } from "../src/common/constants/userEventsConstants";
+import { USER_EVENTS_ACTIONS } from "../src/common/constants/userEventsConstants.js";
 
 export const up = async (db) => {
   await db

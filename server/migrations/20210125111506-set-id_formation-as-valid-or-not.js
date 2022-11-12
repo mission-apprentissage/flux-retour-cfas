@@ -1,4 +1,4 @@
-import { validateCfd } from "../src/common/domain/cfd";
+import { validateCfd } from "../src/common/domain/cfd.js";
 
 export const up = async (db) => {
   const collection = db.collection("statutsCandidats");
