@@ -1,21 +1,12 @@
-const { validateCfd } = require("../domain/cfd");
-const { getCfdInfo } = require("../apis/apiTablesCorrespondances");
-const { getMetiersByCfd } = require("../apis/apiLba");
-
-const { Formation } = require("../factory/formation");
-const { escapeRegExp } = require("../utils/regexUtils");
-const logger = require("../logger");
-const { formationsDb, dossiersApprenantsDb } = require("../model/collections");
+import { validateCfd } from "../domain/cfd";
+import { getCfdInfo } from "../apis/apiTablesCorrespondances";
+import { getMetiersByCfd } from "../apis/apiLba";
+import { Formation } from "../factory/formation";
+import { escapeRegExp } from "../utils/regexUtils";
+import logger from "../logger";
+import { formationsDb, dossiersApprenantsDb } from "../model/collections";
 
 const SEARCH_RESULTS_LIMIT = 50;
-
-module.exports = () => ({
-  createFormation,
-  existsFormation,
-  getFormationWithCfd,
-  searchFormations,
-  getNiveauFormationFromLibelle,
-});
 
 /**
  * Checks if formation with given CFD exists
@@ -120,3 +111,11 @@ const searchFormations = async (searchCriteria) => {
     .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
     .toArray();
 };
+
+export default () => ({
+  createFormation,
+  existsFormation,
+  getFormationWithCfd,
+  searchFormations,
+  getNiveauFormationFromLibelle,
+});

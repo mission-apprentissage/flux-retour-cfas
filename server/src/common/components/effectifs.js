@@ -1,13 +1,14 @@
-const { EffectifsApprentis } = require("./effectifs/apprentis");
-const { EffectifsAbandons } = require("./effectifs/abandons");
-const { EffectifsInscritsSansContrats } = require("./effectifs/inscrits-sans-contrats");
-const { EffectifsRupturants } = require("./effectifs/rupturants");
-const cfas = require("./cfas")();
-const { mergeObjectsBy } = require("../utils/mergeObjectsBy");
-const { asyncForEach } = require("../utils/asyncUtils");
-const { EFFECTIF_INDICATOR_NAMES } = require("../constants/dossierApprenantConstants");
+import { EffectifsApprentis } from './effectifs/apprentis';
+import { EffectifsAbandons } from './effectifs/abandons';
+import { EffectifsInscritsSansContrats } from './effectifs/inscrits-sans-contrats';
+import { EffectifsRupturants } from './effectifs/rupturants';
+import cfasFactory from './cfas';
+const cfas = cfasFactory();
+import { mergeObjectsBy } from '../utils/mergeObjectsBy';
+import { asyncForEach } from '../utils/asyncUtils';
+import { EFFECTIF_INDICATOR_NAMES } from '../constants/dossierApprenantConstants';
 
-module.exports = () => {
+export default () => {
   const apprentis = new EffectifsApprentis();
   const abandons = new EffectifsAbandons();
   const inscritsSansContrats = new EffectifsInscritsSansContrats();

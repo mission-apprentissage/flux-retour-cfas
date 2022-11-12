@@ -1,19 +1,11 @@
-const { ObjectId } = require("mongodb");
-const omit = require("lodash.omit");
-const { DUPLICATE_TYPE_CODES } = require("../constants/dossierApprenantConstants");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { escapeRegExp } = require("../utils/regexUtils");
-const { isEqual } = require("date-fns");
-const { DossierApprenant } = require("../factory/dossierApprenant");
-const { cfasDb, dossiersApprenantsDb } = require("../model/collections");
-
-module.exports = () => ({
-  getDossierApprenant,
-  addOrUpdateDossiersApprenants,
-  createDossierApprenant,
-  updateDossierApprenant,
-  getDuplicatesList,
-});
+import { ObjectId } from "mongodb";
+import omit from "lodash.omit";
+import { DUPLICATE_TYPE_CODES } from "../constants/dossierApprenantConstants";
+import { asyncForEach } from "../../common/utils/asyncUtils";
+import { escapeRegExp } from "../utils/regexUtils";
+import { isEqual } from "date-fns";
+import { DossierApprenant } from "../factory/dossierApprenant";
+import { cfasDb, dossiersApprenantsDb } from "../model/collections";
 
 /**
  * Find a dossier apprenant from unicity key params
@@ -344,3 +336,11 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
     };
   });
 };
+
+export default () => ({
+  getDossierApprenant,
+  addOrUpdateDossiersApprenants,
+  createDossierApprenant,
+  updateDossierApprenant,
+  getDuplicatesList,
+});

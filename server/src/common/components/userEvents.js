@@ -1,9 +1,10 @@
-const { userEventsDb, usersDb } = require("../model/collections");
+import { userEventsDb, usersDb } from "../model/collections";
 
-module.exports = () => ({
-  create,
-});
-
+/**
+ * Création d'un user event
+ * @param {*} param0
+ * @returns
+ */
 const create = async ({ username, type, action, data }) => {
   const user = await usersDb().findOne({ username });
   const UNKNOWN_DEFAULT_VALUE = "NC";
@@ -21,3 +22,7 @@ const create = async ({ username, type, action, data }) => {
 
   return;
 };
+
+export default () => ({
+  create,
+});
