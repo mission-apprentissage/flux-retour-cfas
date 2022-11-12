@@ -1,11 +1,11 @@
-import { strict as assert } from 'assert';
-import { startServer } from '../../utils/testUtils';
-import { asyncForEach } from '../../../src/common/utils/asyncUtils';
-import { Formation } from '../../../src/common/factory/formation';
-import { createRandomDossierApprenant } from '../../data/randomizedSample';
-import { formationsDb, dossiersApprenantsDb } from '../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { asyncForEach } from "../../../src/common/utils/asyncUtils.js";
+import { Formation } from "../../../src/common/factory/formation.js";
+import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
+import { formationsDb, dossiersApprenantsDb } from "../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Formations Route", () => {
   const formationsSeed = [
     {
       cfd: "01022103",

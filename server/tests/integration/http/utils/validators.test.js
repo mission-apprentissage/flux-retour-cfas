@@ -1,5 +1,5 @@
-import { strict as assert } from 'assert';
-import validators from '../../../../src/http/utils/validators';
+import { strict as assert } from "assert";
+import validators from "../../../../src/http/utils/validators.js";
 
 describe("Validators", () => {
   describe("password", () => {

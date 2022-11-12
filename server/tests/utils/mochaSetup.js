@@ -1,8 +1,8 @@
-import nock from 'nock'; // eslint-disable-line node/no-unpublished-require
-import { clearAllCollections, startAndConnectMongodb, stopMongodb } from './mongoUtils';
-import { nockExternalApis } from './nockApis';
-import redisFakeClient from './redisClientMock';
-import { createIndexes } from '../../src/common/model/indexes/index';
+import nock from "nock";
+import { clearAllCollections, startAndConnectMongodb, stopMongodb } from "./mongoUtils.js";
+import { nockExternalApis } from "./nockApis/index.js";
+import redisFakeClient from "./redisClientMock.js";
+import { createIndexes } from "../../src/common/model/indexes/index.js";
 
 const LOCAL_HOST = "127.0.0.1";
 const MONGODB_MEMORY_SERVER_DL_HOST = "fastdl.mongodb.org";

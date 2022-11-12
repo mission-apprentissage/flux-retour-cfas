@@ -1,22 +1,22 @@
-import { strict as assert } from 'assert';
-import { startServer } from '../../utils/testUtils';
-import { createRandomDossierApprenant } from '../../data/randomizedSample';
-import { tdbRoles } from '../../../src/common/roles';
-import config from '../../../config';
-import jwt from 'jsonwebtoken';
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
+import { tdbRoles } from "../../../src/common/roles.js";
+import config from "../../../config/index.js";
+import jwt from "jsonwebtoken";
 
 import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
-} from '../../data/historySequenceSamples';
+} from "../../data/historySequenceSamples.js";
 
-import { RESEAUX_CFAS } from '../../../src/common/constants/networksConstants';
-import { USER_EVENTS_ACTIONS } from '../../../src/common/constants/userEventsConstants';
-import { userEventsDb, dossiersApprenantsDb, cfasDb } from '../../../src/common/model/collections';
+import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants.js";
+import { USER_EVENTS_ACTIONS } from "../../../src/common/constants/userEventsConstants.js";
+import { userEventsDb, dossiersApprenantsDb, cfasDb } from "../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Effectifs Export Route", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     const nbAbandons = 10;
     const nbApprentis = 5;

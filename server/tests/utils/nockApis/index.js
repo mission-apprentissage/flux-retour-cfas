@@ -1,5 +1,5 @@
-import { nockGetMetiersByCfd, nockGetMetiersBySiret } from "./nock-Lba";
-import { nockGetCfdInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
+import { nockGetMetiersByCfd, nockGetMetiersBySiret } from "./nock-Lba.js";
+import { nockGetCfdInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances.js";
 
 export const nockExternalApis = () => {
   nockGetCfdInfo();

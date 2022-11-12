@@ -1,8 +1,8 @@
-import { strict as assert } from 'assert';
-import { startServer } from '../../utils/testUtils';
-import { apiRoles } from '../../../src/common/roles';
-import users from '../../../src/common/components/users';
-import { cfasDb } from '../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { apiRoles } from "../../../src/common/roles.js";
+import users from "../../../src/common/components/users.js";
+import { cfasDb } from "../../../src/common/model/collections.js";
 
 const user = {
   name: "erpUser",
@@ -23,7 +23,7 @@ const getJwtForUser = async (httpClient) => {
   return data.access_token;
 };
 
-describe(__filename, () => {
+describe("Liens Prives Route", () => {
   it("Vérifie que la route liens-prives-cfas renvoie une 401 pour un user non authentifié", async () => {
     const { httpClient } = await startServer();
 

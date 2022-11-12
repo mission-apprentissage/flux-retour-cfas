@@ -1,18 +1,18 @@
-import { strict as assert } from 'assert';
-import { startServer } from '../../utils/testUtils';
-import { createRandomDossierApprenant, getRandomSiretEtablissement } from '../../data/randomizedSample';
-import { apiRoles } from '../../../src/common/roles';
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { createRandomDossierApprenant, getRandomSiretEtablissement } from "../../data/randomizedSample.js";
+import { apiRoles } from "../../../src/common/roles.js";
 
 import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
-} from '../../data/historySequenceSamples';
+} from "../../data/historySequenceSamples.js";
 
-import { NATURE_ORGANISME_DE_FORMATION } from '../../../src/common/domain/organisme-de-formation/nature';
-import { dossiersApprenantsDb, cfasDb } from '../../../src/common/model/collections';
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../src/common/domain/organisme-de-formation/nature.js";
+import { dossiersApprenantsDb, cfasDb } from "../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Effectifs route", () => {
   describe("/api/effectifs route", () => {
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();

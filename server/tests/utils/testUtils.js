@@ -1,10 +1,10 @@
 // eslint-disable-next-line node/no-unpublished-require
 import axiosist from "axiosist";
 
-import createComponents from "../../src/common/components/components";
-import server from "../../src/http/server";
-import { getDatabase } from "../../src/common/mongodb";
-import redisFakeClient from "./redisClientMock";
+import createComponents from "../../src/common/components/components.js";
+import server from "../../src/http/server.js";
+import { getDatabase } from "../../src/common/mongodb.js";
+import redisFakeClient from "./redisClientMock.js";
 
 export const startServer = async () => {
   const components = await createComponents({
