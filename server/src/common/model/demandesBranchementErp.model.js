@@ -17,3 +17,5 @@ export const schema = object(
   },
   { required: ["erp", "nom_organisme", "uai_organisme", "email_demandeur", "created_at"] }
 );
+
+export default { schema, collectionName };

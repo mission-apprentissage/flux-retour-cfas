@@ -33,3 +33,5 @@ export const schema = object(
   },
   { required: ["uai"] }
 );
+
+export default { schema, indexes, collectionName };

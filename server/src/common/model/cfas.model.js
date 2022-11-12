@@ -35,3 +35,5 @@ export const schema = () => {
     created_at: date({ description: "Date d'ajout en base de données" }),
   });
 };
+
+export default { schema, indexes, collectionName };
