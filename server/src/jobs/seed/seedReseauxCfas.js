@@ -7,6 +7,7 @@ import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
 import { RESEAUX_CFAS } from "../../common/constants/networksConstants.js";
 import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
 import { reseauxCfasDb } from "../../common/model/collections.js";
+import { getDirname } from "../../common/utils/esmUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -45,7 +46,7 @@ runScript(async ({ reseauxCfas, ovhStorage }) => {
  */
 const seedReseauxCfasFromNetwork = async (reseauxCfas, ovhStorage, { nomReseau, nomFichier }) => {
   logger.info(`Seeding reseauxCfas network for ${nomReseau}`);
-  const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
+  const cfasReferenceFilePath = path.join(getDirname(import.meta.url), `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
   await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, { clearFile: true });
