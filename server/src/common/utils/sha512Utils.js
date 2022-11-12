@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import config from "../../../config";
+import config from "../../../config.js";
 import { sha512crypt } from "sha512crypt-node";
 
 export const hash = (password, rounds = config.auth.passwordHashRounds) => {

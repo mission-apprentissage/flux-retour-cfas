@@ -1,9 +1,9 @@
-import cliProgress from 'cli-progress';
-import { runScript } from '../../scriptWrapper';
-import logger from '../../../common/logger';
-import { asyncForEach } from '../../../common/utils/asyncUtils';
-import { DUPLICATE_TYPE_CODES } from '../../../common/constants/dossierApprenantConstants';
-import { collectionNames } from '../../constants';
+import cliProgress from "cli-progress";
+import { runScript } from "../../scriptWrapper.js";
+import logger from "../../../common/logger.js";
+import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+import { DUPLICATE_TYPE_CODES } from "../../../common/constants/dossierApprenantConstants.js";
+import { collectionNames } from "../../constants.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

@@ -1,8 +1,8 @@
-import { strict as assert } from 'assert';
-import jobEvents from '../../../../src/common/components/jobEvents';
-import { jobEventStatuts } from '../../../../src/common/constants/jobsConstants';
-import { addMinutes } from 'date-fns';
-import { jobEventsDb } from '../../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import jobEvents from "../../../../src/common/components/jobEvents.js";
+import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.js";
+import { addMinutes } from "date-fns";
+import { jobEventsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {

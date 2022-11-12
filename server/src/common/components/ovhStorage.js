@@ -1,7 +1,7 @@
-import config from "../../../config";
+import config from "../../../config.js";
 import OvhStorage from "node-ovh-objectstorage";
 import fs from "fs-extra";
-import logger from "../logger";
+import logger from "../logger.js";
 
 /**
  * Téléchargement du fichier depuis OVH Storage si nécessaire

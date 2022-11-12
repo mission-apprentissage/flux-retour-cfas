@@ -1,6 +1,6 @@
-import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from '../../../common/constants/userEventsConstants';
-import logger from '../../../common/logger';
-import { userEventsDb } from '../../../common/model/collections';
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../common/constants/userEventsConstants.js";
+import logger from "../../../common/logger.js";
+import { userEventsDb } from "../../../common/model/collections.js";
 
 const purgeStatutsImportsUserEvents = async (lastDateToKeep) => {
   logger.info(`... Purging dossiersApprenants Imports UserEvents ...`);

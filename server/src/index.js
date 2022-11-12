@@ -1,9 +1,9 @@
-import server from "./http/server";
-import logger from "./common/logger";
-import config from "../config";
-import { initRedis } from "./common/infra/redis";
-import createComponents from "./common/components/components";
-import { connectToMongodb, getDatabase } from "./common/mongodb";
+import server from "./http/server.js";
+import logger from "./common/logger.js";
+import config from "../config.js";
+import { initRedis } from "./common/infra/redis.js";
+import createComponents from "./common/components/components.js";
+import { connectToMongodb, getDatabase } from "./common/mongodb.js";
 
 process.on("unhandledRejection", (e) => logger.error("An unexpected error occurred", e));
 process.on("uncaughtException", (e) => logger.error("An unexpected error occurred", e));

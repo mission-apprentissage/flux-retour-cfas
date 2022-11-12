@@ -1,12 +1,12 @@
-import express from 'express';
-import Joi from 'joi';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import { JOB_NAMES, jobEventStatuts } from '../../common/constants/jobsConstants';
-import { oleoduc, transformIntoJSON } from 'oleoduc';
-import { sendJsonStream } from '../../common/utils/httpUtils';
-import { findAndPaginate } from '../../common/utils/dbUtils';
-import validateRequestQuery from '../middlewares/validateRequestQuery';
-import { effectifsApprenantsDb } from '../../common/model/collections';
+import express from "express";
+import Joi from "joi";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import { JOB_NAMES, jobEventStatuts } from "../../common/constants/jobsConstants.js";
+import { oleoduc, transformIntoJSON } from "oleoduc";
+import { sendJsonStream } from "../../common/utils/httpUtils.js";
+import { findAndPaginate } from "../../common/utils/dbUtils.js";
+import validateRequestQuery from "../middlewares/validateRequestQuery.js";
+import { effectifsApprenantsDb } from "../../common/model/collections.js";
 
 export default ({ jobEvents }) => {
   const router = express.Router();

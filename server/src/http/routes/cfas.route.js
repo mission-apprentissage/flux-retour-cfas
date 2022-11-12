@@ -1,10 +1,10 @@
-import express from 'express';
-import Joi from 'joi';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import pick from 'lodash.pick';
-import validateRequestBody from '../middlewares/validateRequestBody';
-import validateRequestQuery from '../middlewares/validateRequestQuery';
-import { cfasDb } from '../../common/model/collections';
+import express from "express";
+import Joi from "joi";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import pick from "lodash.pick";
+import validateRequestBody from "../middlewares/validateRequestBody.js";
+import validateRequestQuery from "../middlewares/validateRequestQuery.js";
+import { cfasDb } from "../../common/model/collections.js";
 
 export default ({ cfas }) => {
   const router = express.Router();

@@ -1,8 +1,8 @@
-import express from 'express';
-import logger from '../../common/logger';
-import config from '../../../config';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import packageJson from '../../../package.json';
+import express from "express";
+import logger from "../../common/logger.js";
+import config from "../../../config.js";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import packageJson from "../../../package.json";
 
 export default ({ db }) => {
   const router = express.Router();

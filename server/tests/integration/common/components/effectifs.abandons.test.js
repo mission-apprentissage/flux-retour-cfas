@@ -1,14 +1,14 @@
-import { strict as assert } from 'assert';
-import { createRandomDossierApprenant } from '../../../data/randomizedSample';
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 
 import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
-} from '../../../data/historySequenceSamples';
+} from "../../../data/historySequenceSamples.js";
 
-import { EffectifsAbandons } from '../../../../src/common/components/effectifs/abandons';
-import { dossiersApprenantsDb } from '../../../../src/common/model/collections';
+import { EffectifsAbandons } from "../../../../src/common/components/effectifs/abandons.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   const seedDossiersApprenants = async (statutsProps) => {

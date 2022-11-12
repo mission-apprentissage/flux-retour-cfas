@@ -1,7 +1,7 @@
 import Joi from "joi";
-import { schema as cfdSchema } from "../domain/cfd";
-import { buildTokenizedString } from "../utils/buildTokenizedString";
-import { BaseFactory } from "./baseFactory";
+import { schema as cfdSchema } from "../domain/cfd.js";
+import { buildTokenizedString } from "../utils/buildTokenizedString.js";
+import { BaseFactory } from "./baseFactory.js";
 
 export class Formation extends BaseFactory {
   /**

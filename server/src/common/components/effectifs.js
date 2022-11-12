@@ -1,12 +1,12 @@
-import { EffectifsApprentis } from './effectifs/apprentis';
-import { EffectifsAbandons } from './effectifs/abandons';
-import { EffectifsInscritsSansContrats } from './effectifs/inscrits-sans-contrats';
-import { EffectifsRupturants } from './effectifs/rupturants';
-import cfasFactory from './cfas';
+import { EffectifsApprentis } from "./effectifs/apprentis.js";
+import { EffectifsAbandons } from "./effectifs/abandons.js";
+import { EffectifsInscritsSansContrats } from "./effectifs/inscrits-sans-contrats.js";
+import { EffectifsRupturants } from "./effectifs/rupturants.js";
+import cfasFactory from "./cfas.js";
 const cfas = cfasFactory();
-import { mergeObjectsBy } from '../utils/mergeObjectsBy';
-import { asyncForEach } from '../utils/asyncUtils';
-import { EFFECTIF_INDICATOR_NAMES } from '../constants/dossierApprenantConstants';
+import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
+import { asyncForEach } from "../utils/asyncUtils.js";
+import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
 
 export default () => {
   const apprentis = new EffectifsApprentis();

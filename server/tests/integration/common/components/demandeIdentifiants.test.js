@@ -1,6 +1,6 @@
-import { strict as assert } from 'assert';
-import demandeIdentifiants from '../../../../src/common/components/demandeIdentifiants';
-import { demandesIdentifiantsDb } from '../../../../src/common/model/collections';
+import { strict as assert } from "assert";
+import demandeIdentifiants from "../../../../src/common/components/demandeIdentifiants.js";
+import { demandesIdentifiantsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   it("Permet de vérifier la création d'une demande d'identifiants", async () => {

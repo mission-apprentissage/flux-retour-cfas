@@ -1,4 +1,4 @@
-import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants";
+import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
 
 export const simpleStatutBadUpdate = {
   ine_apprenant: "12345",

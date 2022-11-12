@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { BaseFactory } from "./baseFactory";
+import { BaseFactory } from "./baseFactory.js";
 
 export class DossierApprenantApiInputFiabilite extends BaseFactory {
   /**

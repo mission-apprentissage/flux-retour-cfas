@@ -1,7 +1,7 @@
-import { strict as assert } from 'assert';
-import dossiersApprenants from '../../../../src/common/components/dossiersApprenants';
-import stats from '../../../../src/common/components/stats';
-import { createRandomDossierApprenant } from '../../../data/randomizedSample';
+import { strict as assert } from "assert";
+import dossiersApprenants from "../../../../src/common/components/dossiersApprenants.js";
+import stats from "../../../../src/common/components/stats.js";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 
 describe(__filename, () => {
   it("Permet de récupérer le nb d'etablissements distincts par uai", async () => {

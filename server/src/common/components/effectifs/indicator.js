@@ -1,4 +1,4 @@
-import { dossiersApprenantsDb } from "../../model/collections";
+import { dossiersApprenantsDb } from "../../model/collections.js";
 
 export class Indicator {
   /**

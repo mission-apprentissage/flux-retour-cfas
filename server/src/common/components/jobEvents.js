@@ -1,4 +1,4 @@
-import { jobEventsDb } from "../model/collections";
+import { jobEventsDb } from "../model/collections.js";
 
 /**
  * Vérification si le job est dans l'action spécifiée

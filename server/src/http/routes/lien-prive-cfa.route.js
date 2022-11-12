@@ -1,8 +1,8 @@
-import express from 'express';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import Joi from 'joi';
-import validateRequestQuery from '../middlewares/validateRequestQuery';
-import { cfasDb } from '../../common/model/collections';
+import express from "express";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import Joi from "joi";
+import validateRequestQuery from "../middlewares/validateRequestQuery.js";
+import { cfasDb } from "../../common/model/collections.js";
 
 export default () => {
   const router = express.Router();

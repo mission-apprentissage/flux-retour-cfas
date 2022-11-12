@@ -1,11 +1,11 @@
 import { ObjectId } from "mongodb";
-import { getDepartementCodeFromUai, validateUai } from "../domain/uai";
-import { escapeRegExp } from "../utils/regexUtils";
-import { Cfa } from "../factory/cfa";
-import { getMetiersBySirets } from "../../common/apis/apiLba";
-import logger from "../../common/logger";
-import { validateNatureOrganismeDeFormation } from "../domain/organisme-de-formation/nature";
-import { cfasDb, dossiersApprenantsDb } from "../model/collections";
+import { getDepartementCodeFromUai, validateUai } from "../domain/uai.js";
+import { escapeRegExp } from "../utils/regexUtils.js";
+import { Cfa } from "../factory/cfa.js";
+import { getMetiersBySirets } from "../../common/apis/apiLba.js";
+import logger from "../../common/logger.js";
+import { validateNatureOrganismeDeFormation } from "../domain/organisme-de-formation/nature.js";
+import { cfasDb, dossiersApprenantsDb } from "../model/collections.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 

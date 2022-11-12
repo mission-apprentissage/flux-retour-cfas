@@ -1,11 +1,11 @@
-import path from 'path';
-import groupBy from 'lodash.groupby';
-import logger from '../../../common/logger';
-import { runScript } from '../../scriptWrapper';
-import { readJsonFromCsvFile } from '../../../common/utils/fileUtils';
-import { RESEAUX_CFAS } from '../../../common/constants/networksConstants';
-import { toXlsx } from '../../../common/utils/exporterUtils';
-import { JOB_NAMES } from '../../../common/constants/jobsConstants';
+import path from "path";
+import groupBy from "lodash.groupby";
+import logger from "../../../common/logger.js";
+import { runScript } from "../../scriptWrapper.js";
+import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
+import { RESEAUX_CFAS } from "../../../common/constants/networksConstants.js";
+import { toXlsx } from "../../../common/utils/exporterUtils.js";
+import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
 
 /**
  * Ce script permet d'identifier les doublons dans les fichiers de référence des réseaux

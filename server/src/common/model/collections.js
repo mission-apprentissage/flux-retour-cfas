@@ -1,15 +1,15 @@
-import { getDbCollection } from "../mongodb";
-import usersModelDescriptor from "./users.model";
-import userEventsModelDescriptor from "./userEvents.model";
-import cfasModelDescriptor from "./cfas.model";
-import formationsModelDescriptor from "./formations.model";
-import reseauxCfasModelDescriptor from "./reseauxCfas.model";
-import dossiersApprenantsModelDescriptor from "./dossiersApprenants.model";
-import jobEventsModelDescriptor from "./jobEvents.model";
-import effectifsApprenantsModelDescriptor from "./effectifsApprenants.model";
-import demandesIdentifiantsModelDescriptor from "./demandesIdentifiants.model";
-import demandesBranchementErpDbModelDescriptor from "./demandesBranchementErp.model";
-import duplicatesEventsModelDescriptor from "./duplicatesEvents.model";
+import { getDbCollection } from "../mongodb.js";
+import usersModelDescriptor from "./users.model.js";
+import userEventsModelDescriptor from "./userEvents.model.js";
+import cfasModelDescriptor from "./cfas.model.js";
+import formationsModelDescriptor from "./formations.model.js";
+import reseauxCfasModelDescriptor from "./reseauxCfas.model.js";
+import dossiersApprenantsModelDescriptor from "./dossiersApprenants.model.js";
+import jobEventsModelDescriptor from "./jobEvents.model.js";
+import effectifsApprenantsModelDescriptor from "./effectifsApprenants.model.js";
+import demandesIdentifiantsModelDescriptor from "./demandesIdentifiants.model.js";
+import demandesBranchementErpDbModelDescriptor from "./demandesBranchementErp.model.js";
+import duplicatesEventsModelDescriptor from "./duplicatesEvents.model.js";
 
 export const dossiersApprenantsDb = () => {
   return getDbCollection(dossiersApprenantsModelDescriptor.collectionName);

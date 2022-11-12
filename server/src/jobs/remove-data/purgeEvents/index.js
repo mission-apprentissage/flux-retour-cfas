@@ -1,8 +1,8 @@
-import { runScript } from '../../scriptWrapper';
-import logger from '../../../common/logger';
-import { purgeStatutsImportsUserEvents } from './purgeStatutsImportsUserEvents';
-import { purgeJobEvents } from './purgeJobEvents';
-import { subDays } from 'date-fns';
+import { runScript } from "../../scriptWrapper.js";
+import logger from "../../../common/logger.js";
+import { purgeStatutsImportsUserEvents } from "./purgeStatutsImportsUserEvents.js";
+import { purgeJobEvents } from "./purgeJobEvents.js";
+import { subDays } from "date-fns";
 
 const NB_DAYS_TO_KEEP = 15;
 

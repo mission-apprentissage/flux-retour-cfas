@@ -1,7 +1,7 @@
-import { runScript } from '../scriptWrapper';
-import logger from '../../common/logger';
-import { asyncForEach } from '../../common/utils/asyncUtils';
-import { sleep } from '../../common/utils/miscUtils';
+import { runScript } from "../scriptWrapper.js";
+import logger from "../../common/logger.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { sleep } from "../../common/utils/miscUtils.js";
 
 const SLEEP_TIME_BETWEEN_CREATION = 100; // 100ms to avoid flooding TCO and LBA APIs
 

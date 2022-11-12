@@ -1,10 +1,10 @@
-import cliProgress from 'cli-progress';
-import indexBy from 'lodash.indexby';
-import { runScript } from '../scriptWrapper';
-import { asyncForEach } from '../../common/utils/asyncUtils';
-import logger from '../../common/logger';
-import { getDepartementCodeFromUai } from '../../common/domain/uai';
-import { DEPARTEMENTS } from '../../common/constants/territoiresConstants';
+import cliProgress from "cli-progress";
+import indexBy from "lodash.indexby";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import logger from "../../common/logger.js";
+import { getDepartementCodeFromUai } from "../../common/domain/uai.js";
+import { DEPARTEMENTS } from "../../common/constants/territoiresConstants.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

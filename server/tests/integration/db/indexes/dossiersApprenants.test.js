@@ -1,9 +1,9 @@
-import { strict as assert } from 'assert';
-import { createIndexes, dropIndexes } from '../../../../src/common/model/indexes/index';
-import { getDbCollectionIndexes } from '../../../../src/common/mongodb';
-import dossiersApprenantsModelDescriptor from '../../../../src/common/model/dossiersApprenants.model';
-import { createRandomDossierApprenant } from '../../../data/randomizedSample';
-import dossiersApprenants from '../../../../src/common/components/dossiersApprenants';
+import { strict as assert } from "assert";
+import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
+import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
+import dossiersApprenantsModelDescriptor from "../../../../src/common/model/dossiersApprenants.model.js";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import dossiersApprenants from "../../../../src/common/components/dossiersApprenants.js";
 
 // TODO : Boucler sur la liste des index names pour les tests
 describe("DossiersApprenants Indexes", () => {

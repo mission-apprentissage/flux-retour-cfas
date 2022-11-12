@@ -1,14 +1,17 @@
-import { strict as assert } from 'assert';
+import { strict as assert } from "assert";
 
 // eslint-disable-next-line node/no-unpublished-require
-import MockDate from 'mockdate';
+import MockDate from "mockdate";
 
-import { addDays, isEqual } from 'date-fns';
-import dossiersApprenants from '../../../../src/common/components/dossiersApprenants';
-import { createRandomDossierApprenant, getRandomUaiEtablissement } from '../../../data/randomizedSample';
-import { CODES_STATUT_APPRENANT, DUPLICATE_TYPE_CODES } from '../../../../src/common/constants/dossierApprenantConstants';
-import { RESEAUX_CFAS } from '../../../../src/common/constants/networksConstants';
-import { cfasDb, dossiersApprenantsDb } from '../../../../src/common/model/collections';
+import { addDays, isEqual } from "date-fns";
+import dossiersApprenants from "../../../../src/common/components/dossiersApprenants.js";
+import { createRandomDossierApprenant, getRandomUaiEtablissement } from "../../../data/randomizedSample.js";
+import {
+  CODES_STATUT_APPRENANT,
+  DUPLICATE_TYPE_CODES,
+} from "../../../../src/common/constants/dossierApprenantConstants.js";
+import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
+import { cfasDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
 describe(__filename, () => {
   let fakeNowDate;

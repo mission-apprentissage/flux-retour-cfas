@@ -1,7 +1,7 @@
-import express from 'express';
-import Joi from 'joi';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import validateRequestBody from '../middlewares/validateRequestBody';
+import express from "express";
+import Joi from "joi";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import validateRequestBody from "../middlewares/validateRequestBody.js";
 
 export default ({ demandeIdentifiants }) => {
   const router = express.Router();

@@ -1,10 +1,10 @@
 import { ObjectId } from "mongodb";
 import { addHours, isBefore } from "date-fns";
-import { usersDb } from "../model/collections";
-import { generateRandomAlphanumericPhrase } from "../utils/miscUtils";
-import sha512Utils from "../utils/sha512Utils";
-import { validatePassword } from "../domain/password";
-import { escapeRegExp } from "../utils/regexUtils";
+import { usersDb } from "../model/collections.js";
+import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
+import sha512Utils from "../utils/sha512Utils.js";
+import { validatePassword } from "../domain/password.js";
+import { escapeRegExp } from "../utils/regexUtils.js";
 
 const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
 

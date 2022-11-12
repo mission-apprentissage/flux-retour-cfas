@@ -1,4 +1,4 @@
-import { userEventsDb, usersDb } from "../model/collections";
+import { userEventsDb, usersDb } from "../model/collections.js";
 
 /**
  * Création d'un user event

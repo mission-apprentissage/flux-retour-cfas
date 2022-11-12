@@ -1,8 +1,8 @@
-import express from 'express';
-import Joi from 'joi';
-import { schema as uaiSchema } from '../../common/domain/uai';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import validateRequestBody from '../middlewares/validateRequestBody';
+import express from "express";
+import Joi from "joi";
+import { schema as uaiSchema } from "../../common/domain/uai.js";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import validateRequestBody from "../middlewares/validateRequestBody.js";
 
 export default ({ demandeBranchementErp }) => {
   const router = express.Router();

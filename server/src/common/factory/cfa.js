@@ -1,10 +1,10 @@
-import { buildTokenizedString } from "../utils/buildTokenizedString";
+import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import Joi from "joi";
-import { schema as uaiSchema } from "../domain/uai";
-import { schema as natureSchema } from "../domain/organisme-de-formation/nature";
-import config from "../../../config";
-import { generateRandomAlphanumericPhrase } from "../utils/miscUtils";
-import { BaseFactory } from "./baseFactory";
+import { schema as uaiSchema } from "../domain/uai.js";
+import { schema as natureSchema } from "../domain/organisme-de-formation/nature.js";
+import config from "../../../config.js";
+import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
+import { BaseFactory } from "./baseFactory.js";
 
 const TOKENIZED_STRING_SIZE = 4;
 

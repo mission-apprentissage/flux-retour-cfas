@@ -2,7 +2,7 @@ import util from "util";
 import bunyan from "bunyan";
 import PrettyStream from "bunyan-prettystream";
 import BunyanSlack from "bunyan-slack";
-import config from "../../config";
+import config from "../../config.js";
 
 const createStreams = () => {
   const { type, level } = config.log;

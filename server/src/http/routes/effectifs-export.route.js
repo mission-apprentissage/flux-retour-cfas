@@ -1,11 +1,14 @@
-import express from 'express';
-import { Parser } from 'json2csv';
-import tryCatch from '../middlewares/tryCatchMiddleware';
-import Joi from 'joi';
-import { getAnneesScolaireListFromDate } from '../../common/utils/anneeScolaireUtils';
-import { tdbRoles } from '../../common/roles';
-import validateRequestQuery from '../middlewares/validateRequestQuery';
-import { getExportAnonymizedEventNameFromFilters, USER_EVENTS_TYPES } from '../../common/constants/userEventsConstants';
+import express from "express";
+import { Parser } from "json2csv";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import Joi from "joi";
+import { getAnneesScolaireListFromDate } from "../../common/utils/anneeScolaireUtils.js";
+import { tdbRoles } from "../../common/roles.js";
+import validateRequestQuery from "../middlewares/validateRequestQuery.js";
+import {
+  getExportAnonymizedEventNameFromFilters,
+  USER_EVENTS_TYPES,
+} from "../../common/constants/userEventsConstants.js";
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {

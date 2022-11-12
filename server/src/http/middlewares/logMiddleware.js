@@ -1,5 +1,5 @@
 import omitBy from "lodash.omitby";
-import logger from "../../common/logger";
+import logger from "../../common/logger.js";
 
 export default () => {
   return (req, res, next) => {

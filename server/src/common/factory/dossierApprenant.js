@@ -1,10 +1,10 @@
 import Joi from "joi";
-import { BaseFactory } from "./baseFactory";
-import { schema as anneeScolaireSchema } from "../../common/domain/anneeScolaire";
-import { historiqueSchema as historiqueStatutsSchema } from "../../common/domain/apprenant/statutApprenant";
-import { schema as uaiSchema } from "../../common/domain/uai";
-import { schema as cfdSchema } from "../../common/domain/cfd";
-import { schema as siretSchema } from "../../common/domain/siret";
+import { BaseFactory } from "./baseFactory.js";
+import { schema as anneeScolaireSchema } from "../../common/domain/anneeScolaire.js";
+import { historiqueSchema as historiqueStatutsSchema } from "../../common/domain/apprenant/statutApprenant.js";
+import { schema as uaiSchema } from "../../common/domain/uai.js";
+import { schema as cfdSchema } from "../../common/domain/cfd.js";
+import { schema as siretSchema } from "../../common/domain/siret.js";
 
 export class DossierApprenant extends BaseFactory {
   /**

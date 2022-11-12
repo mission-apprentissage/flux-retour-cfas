@@ -1,4 +1,4 @@
-import { demandesIdentifiantsDb } from "../model/collections";
+import { demandesIdentifiantsDb } from "../model/collections.js";
 
 /**
  * Création d'une demande d'identifiants

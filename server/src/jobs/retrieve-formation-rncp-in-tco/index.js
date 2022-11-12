@@ -1,8 +1,8 @@
-import cliProgress from 'cli-progress';
-import { runScript } from '../scriptWrapper';
-import { asyncForEach } from '../../common/utils/asyncUtils';
-import { getCfdInfo } from '../../common/apis/apiTablesCorrespondances';
-import logger from '../../common/logger';
+import cliProgress from "cli-progress";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { getCfdInfo } from "../../common/apis/apiTablesCorrespondances.js";
+import logger from "../../common/logger.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

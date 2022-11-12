@@ -1,8 +1,8 @@
-import { strict as assert } from 'assert';
-import { createIndexes, dropIndexes } from '../../../../src/common/model/indexes/index';
-import { getDbCollectionIndexes } from '../../../../src/common/mongodb';
-import userEventsModelDescriptor from '../../../../src/common/model/userEvents.model';
-import userEvents from '../../../../src/common/components/userEvents';
+import { strict as assert } from "assert";
+import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
+import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
+import userEventsModelDescriptor from "../../../../src/common/model/userEvents.model.js";
+import userEvents from "../../../../src/common/components/userEvents.js";
 
 // TODO : Boucler sur la liste des index names pour les tests
 describe("UserEvents Indexes", () => {
