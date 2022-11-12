@@ -1,13 +1,9 @@
-const { nockGetMetiersByCfd, nockGetMetiersBySiret } = require("./nock-Lba");
-const { nockGetCfdInfo, nockGetSiretInfo } = require("./nock-tablesCorrespondances");
+import { nockGetMetiersByCfd, nockGetMetiersBySiret } from "./nock-Lba";
+import { nockGetCfdInfo, nockGetSiretInfo } from "./nock-tablesCorrespondances";
 
-const nockExternalApis = () => {
+export const nockExternalApis = () => {
   nockGetCfdInfo();
   nockGetSiretInfo();
   nockGetMetiersByCfd();
   nockGetMetiersBySiret();
-};
-
-module.exports = {
-  nockExternalApis,
 };

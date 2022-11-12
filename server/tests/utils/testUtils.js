@@ -1,11 +1,12 @@
 // eslint-disable-next-line node/no-unpublished-require
-const axiosist = require("axiosist");
-const createComponents = require("../../src/common/components/components");
-const server = require("../../src/http/server");
-const { getDatabase } = require("../../src/common/mongodb");
-const redisFakeClient = require("./redisClientMock");
+import axiosist from "axiosist";
 
-const startServer = async () => {
+import createComponents from "../../src/common/components/components";
+import server from "../../src/http/server";
+import { getDatabase } from "../../src/common/mongodb";
+import redisFakeClient from "./redisClientMock";
+
+export const startServer = async () => {
   const components = await createComponents({
     db: getDatabase(),
     redisClient: redisFakeClient,
@@ -32,15 +33,10 @@ const startServer = async () => {
   };
 };
 
-const wait = async (time) => {
+export const wait = async (time) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve();
     }, time);
   });
-};
-
-module.exports = {
-  startServer,
-  wait,
 };
