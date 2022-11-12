@@ -6,7 +6,8 @@
   "private": false,
   "author": "MNA",
   "license": "MIT",
-  "main": "src/index.js",
+  "exports": "./src/index.js",
+  "type": "module",
   "scripts": {
     "start": "node -r dotenv/config src/index.js",
     "watch": "nodemon --ignore tests/ src/index.js",
