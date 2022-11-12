@@ -1,15 +1,15 @@
 import { fullSampleWithUpdates } from "../../../../tests/data/sample.js";
 import { createRandomDossierApprenantList } from "../../../../tests/data/randomizedSample.js";
 
-const seedSample = async (dossiersApprenants) => {
+export const seedSample = async (dossiersApprenants) => {
   await dossiersApprenants.addOrUpdateDossiersApprenants(fullSampleWithUpdates);
 };
 
-const seedRandomizedSample = async (dossiersApprenants, nbStatuts = 10) => {
+export const seedRandomizedSample = async (dossiersApprenants, nbStatuts = 10) => {
   await dossiersApprenants.addOrUpdateDossiersApprenants(createRandomDossierApprenantList(nbStatuts));
 };
 
-const seedRandomizedSampleWithStatut = async (dossiersApprenants, nbStatuts, statutValue) => {
+export const seedRandomizedSampleWithStatut = async (dossiersApprenants, nbStatuts, statutValue) => {
   const randomDossiersApprenants = createRandomDossierApprenantList(nbStatuts).map((dossierApprenant) => {
     return {
       ...dossierApprenant,
@@ -18,10 +18,4 @@ const seedRandomizedSampleWithStatut = async (dossiersApprenants, nbStatuts, sta
   });
 
   await dossiersApprenants.addOrUpdateDossiersApprenants(randomDossiersApprenants);
-};
-
-export default {
-  seedSample,
-  seedRandomizedSample,
-  seedRandomizedSampleWithStatut,
 };
