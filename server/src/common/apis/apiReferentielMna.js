@@ -1,6 +1,6 @@
 import axios from "axios";
 import logger from "../logger.js";
-import config from "../../../config.js";
+import config from "../../../config/index.js";
 
 // Cf Documentation : https://referentiel.apprentissage.beta.gouv.fr/api/v1/doc/#/
 

@@ -1,10 +1,10 @@
 import { connectToMongodb, closeMongodbConnection } from "../common/mongodb.js";
 import createComponents from "../common/components/components.js";
 import logger from "../common/logger.js";
-import { initRedis } from "../common/infra/redis.js";
+import { initRedis } from "../common/infra/redis/index.js";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { jobEventStatuts } from "../common/constants/jobsConstants.js";
-import config from "../../config.js";
+import config from "../../config/index.js";
 import { jobEventsDb } from "../common/model/collections.js";
 
 process.on("unhandledRejection", (e) => console.log(e));
