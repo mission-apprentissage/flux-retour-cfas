@@ -1,4 +1,4 @@
-import logger from "../src/common/logger";
+import logger from "../src/common/logger.js";
 
 export const up = async (db) => {
   const collection = db.collection("userEvents");

@@ -1,4 +1,4 @@
-import { validateUai } from "../src/common/domain/uai";
+import { validateUai } from "../src/common/domain/uai.js";
 
 export const up = async (db) => {
   const collection = db.collection("statutsCandidats");

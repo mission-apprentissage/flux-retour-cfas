@@ -5,9 +5,9 @@
     - niveau_formation : string (the former niveau_formation)
 */
 
-import { asyncForEach } from "../src/common/utils/asyncUtils";
+import { asyncForEach } from "../src/common/utils/asyncUtils.js";
 
-import formationsComponent from "../src/common/components/formations";
+import formationsComponent from "../src/common/components/formations.js";
 
 export const up = async (db) => {
   const { getNiveauFormationFromLibelle } = formationsComponent();

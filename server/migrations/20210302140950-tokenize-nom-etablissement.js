@@ -1,4 +1,4 @@
-import { buildTokenizedString } from "../src/common/utils/buildTokenizedString";
+import { buildTokenizedString } from "../src/common/utils/buildTokenizedString.js";
 
 /* will add a field `nom_etablissement_tokenized` to allow fuzzy search */
 export const up = async (db) => {
