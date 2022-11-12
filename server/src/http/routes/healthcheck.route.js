@@ -1,10 +1,10 @@
-const express = require("express");
-const logger = require("../../common/logger");
-const config = require("../../../config");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const packageJson = require("../../../package.json");
+import express from 'express';
+import logger from '../../common/logger';
+import config from '../../../config';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import packageJson from '../../../package.json';
 
-module.exports = ({ db }) => {
+export default ({ db }) => {
   const router = express.Router();
 
   router.get(

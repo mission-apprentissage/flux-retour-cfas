@@ -1,12 +1,12 @@
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const express = require("express");
-const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScolaireUtils");
-const { format } = require("date-fns");
-const { getCacheKeyForRoute } = require("../../common/utils/cacheUtils");
-const validateRequestQuery = require("../middlewares/validateRequestQuery");
-const Joi = require("joi");
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import express from 'express';
+import { getAnneesScolaireListFromDate } from '../../common/utils/anneeScolaireUtils';
+import { format } from 'date-fns';
+import { getCacheKeyForRoute } from '../../common/utils/cacheUtils';
+import validateRequestQuery from '../middlewares/validateRequestQuery';
+import Joi from 'joi';
 
-module.exports = ({ stats, effectifs, cache }) => {
+export default ({ stats, effectifs, cache }) => {
   const router = express.Router();
   router.get(
     "/",

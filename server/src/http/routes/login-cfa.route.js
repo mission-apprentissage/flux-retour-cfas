@@ -1,9 +1,9 @@
-const express = require("express");
-const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
-const { tdbRoles } = require("../../common/roles");
-const { createUserToken } = require("../../common/utils/jwtUtils");
+import express from 'express';
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from '../../common/constants/userEventsConstants';
+import { tdbRoles } from '../../common/roles';
+import { createUserToken } from '../../common/utils/jwtUtils';
 
-module.exports = ({ cfas, userEvents }) => {
+export default ({ cfas, userEvents }) => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   router.post("/", async (req, res) => {

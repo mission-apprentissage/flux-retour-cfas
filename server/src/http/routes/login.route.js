@@ -1,9 +1,9 @@
-const express = require("express");
-const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
-const { createUserToken } = require("../../common/utils/jwtUtils");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
+import express from 'express';
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from '../../common/constants/userEventsConstants';
+import { createUserToken } from '../../common/utils/jwtUtils';
+import tryCatch from '../middlewares/tryCatchMiddleware';
 
-module.exports = ({ users, userEvents }) => {
+export default ({ users, userEvents }) => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   router.post(

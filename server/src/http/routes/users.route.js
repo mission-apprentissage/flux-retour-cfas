@@ -1,9 +1,9 @@
-const Joi = require("joi");
-const express = require("express");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const validateRequestBody = require("../middlewares/validateRequestBody");
-const { tdbRoles } = require("../../common/roles");
-const config = require("../../../config");
+import Joi from 'joi';
+import express from 'express';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import validateRequestBody from '../middlewares/validateRequestBody';
+import { tdbRoles } from '../../common/roles';
+import config from '../../../config';
 
 const mapUserToApiOutput = (user) => {
   return {
@@ -18,7 +18,7 @@ const mapUserToApiOutput = (user) => {
   };
 };
 
-module.exports = ({ users }) => {
+export default ({ users }) => {
   const router = express.Router();
 
   router.get(

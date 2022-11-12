@@ -1,15 +1,11 @@
-const express = require("express");
-const { Parser } = require("json2csv");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const Joi = require("joi");
-const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScolaireUtils");
-const { tdbRoles } = require("../../common/roles");
-
-const validateRequestQuery = require("../middlewares/validateRequestQuery");
-const {
-  getExportAnonymizedEventNameFromFilters,
-  USER_EVENTS_TYPES,
-} = require("../../common/constants/userEventsConstants");
+import express from 'express';
+import { Parser } from 'json2csv';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import Joi from 'joi';
+import { getAnneesScolaireListFromDate } from '../../common/utils/anneeScolaireUtils';
+import { tdbRoles } from '../../common/roles';
+import validateRequestQuery from '../middlewares/validateRequestQuery';
+import { getExportAnonymizedEventNameFromFilters, USER_EVENTS_TYPES } from '../../common/constants/userEventsConstants';
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -42,7 +38,7 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
-module.exports = ({ effectifs, userEvents }) => {
+export default ({ effectifs, userEvents }) => {
   const router = express.Router();
 
   /**

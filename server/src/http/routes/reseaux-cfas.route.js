@@ -1,7 +1,7 @@
-const express = require("express");
-const Joi = require("joi");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const validateRequestBody = require("../middlewares/validateRequestBody");
+import express from 'express';
+import Joi from 'joi';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import validateRequestBody from '../middlewares/validateRequestBody';
 
 const mapCfasToApiOutput = (reseauxCfas) => {
   return {
@@ -14,7 +14,7 @@ const mapCfasToApiOutput = (reseauxCfas) => {
   };
 };
 
-module.exports = ({ reseauxCfas }) => {
+export default ({ reseauxCfas }) => {
   const router = express.Router();
 
   router.get(

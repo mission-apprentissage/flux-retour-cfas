@@ -1,9 +1,9 @@
-const express = require("express");
-const Joi = require("joi");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const validateRequestBody = require("../middlewares/validateRequestBody");
+import express from 'express';
+import Joi from 'joi';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import validateRequestBody from '../middlewares/validateRequestBody';
 
-module.exports = ({ formations }) => {
+export default ({ formations }) => {
   const router = express.Router();
 
   router.post(
