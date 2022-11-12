@@ -1,6 +1,6 @@
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const { validateAnneeScolaire } = require("../../common/domain/anneeScolaire");
+import { runScript } from '../scriptWrapper';
+import logger from '../../common/logger';
+import { validateAnneeScolaire } from '../../common/domain/anneeScolaire';
 
 const ANNEE_SCOLAIRE_START_LIMIT = 2021;
 

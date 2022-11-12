@@ -1,7 +1,7 @@
-const { runScript } = require("../../scriptWrapper");
-const logger = require("../../../common/logger");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
-const { dossiersApprenantsDb } = require("../../../common/model/collections");
+import { runScript } from '../../scriptWrapper';
+import logger from '../../../common/logger';
+import { JOB_NAMES } from '../../../common/constants/jobsConstants';
+import { dossiersApprenantsDb } from '../../../common/model/collections';
 
 runScript(async () => {
   logger.info("Suppression du champ etablissement_reseaux de tous les documents dossiersApprenants ....");

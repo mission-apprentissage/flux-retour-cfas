@@ -1,11 +1,10 @@
-const cliProgress = require("cli-progress");
-
-const { runScript } = require("../../scriptWrapper");
-const logger = require("../../../common/logger");
-const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
-const { DUPLICATE_TYPE_CODES } = require("../../../common/constants/dossierApprenantConstants");
-const { collectionNames } = require("../../constants");
+import cliProgress from 'cli-progress';
+import { runScript } from '../../scriptWrapper';
+import logger from '../../../common/logger';
+import { asyncForEach } from '../../../common/utils/asyncUtils';
+import { JOB_NAMES } from '../../../common/constants/jobsConstants';
+import { DUPLICATE_TYPE_CODES } from '../../../common/constants/dossierApprenantConstants';
+import { collectionNames } from '../../constants';
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

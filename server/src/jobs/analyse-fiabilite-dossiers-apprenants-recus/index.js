@@ -1,21 +1,19 @@
-const { runScript } = require("../scriptWrapper");
-const { v4: uuid } = require("uuid");
-const { validateNomApprenant, normalizeNomApprenant } = require("../../common/domain/apprenant/nomApprenant");
-const { validatePrenomApprenant, normalizePrenomApprenant } = require("../../common/domain/apprenant/prenomApprenant");
-const { DossierApprenantApiInputFiabilite } = require("../../common/factory/dossierApprenantApiInputFiabilite");
-const {
-  DossierApprenantApiInputFiabiliteReport,
-} = require("../../common/factory/dossierApprenantApiInputFiabiliteReport");
-const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
-const { validateIneApprenant } = require("../../common/domain/apprenant/ineApprenant");
-const { validateDateDeNaissanceApprenant } = require("../../common/domain/apprenant/dateDeNaissanceApprenant");
-const { validateCodeCommune } = require("../../common/domain/codeCommune");
-const { validateFrenchTelephoneNumber } = require("../../common/domain/frenchTelephoneNumber");
-const { validateEmail } = require("../../common/domain/email");
-const { validateUai } = require("../../common/domain/uai");
-const { validateSiret } = require("../../common/domain/siret");
-const logger = require("../../common/logger");
-const { userEventsDb } = require("../../common/model/collections");
+import { runScript } from '../scriptWrapper';
+import { v4 as uuid } from 'uuid';
+import { validateNomApprenant, normalizeNomApprenant } from '../../common/domain/apprenant/nomApprenant';
+import { validatePrenomApprenant, normalizePrenomApprenant } from '../../common/domain/apprenant/prenomApprenant';
+import { DossierApprenantApiInputFiabilite } from '../../common/factory/dossierApprenantApiInputFiabilite';
+import { DossierApprenantApiInputFiabiliteReport } from '../../common/factory/dossierApprenantApiInputFiabiliteReport';
+import { USER_EVENTS_ACTIONS } from '../../common/constants/userEventsConstants';
+import { validateIneApprenant } from '../../common/domain/apprenant/ineApprenant';
+import { validateDateDeNaissanceApprenant } from '../../common/domain/apprenant/dateDeNaissanceApprenant';
+import { validateCodeCommune } from '../../common/domain/codeCommune';
+import { validateFrenchTelephoneNumber } from '../../common/domain/frenchTelephoneNumber';
+import { validateEmail } from '../../common/domain/email';
+import { validateUai } from '../../common/domain/uai';
+import { validateSiret } from '../../common/domain/siret';
+import logger from '../../common/logger';
+import { userEventsDb } from '../../common/model/collections';
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";

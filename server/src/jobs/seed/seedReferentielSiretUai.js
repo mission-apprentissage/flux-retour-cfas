@@ -1,8 +1,8 @@
-const path = require("path");
-const { runScript } = require("../scriptWrapper");
-const { fetchOrganismes } = require("../../common/apis/apiReferentielMna");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
+import path from 'path';
+import { runScript } from '../scriptWrapper';
+import { fetchOrganismes } from '../../common/apis/apiReferentielMna';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import { readJsonFromCsvFile } from '../../common/utils/fileUtils';
 
 const REFERENTIEL_FIELDS_TO_FETCH = [
   "siret",

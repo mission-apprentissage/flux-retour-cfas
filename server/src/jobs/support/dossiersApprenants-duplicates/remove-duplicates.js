@@ -1,10 +1,10 @@
-const logger = require("../../../common/logger");
-const arg = require("arg");
-const { runScript } = require("../../scriptWrapper");
-const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const sortBy = require("lodash.sortby");
-const omit = require("lodash.omit");
-const { dossiersApprenantsDb, duplicatesEventsDb } = require("../../../common/model/collections");
+import logger from '../../../common/logger';
+import arg from 'arg';
+import { runScript } from '../../scriptWrapper';
+import { asyncForEach } from '../../../common/utils/asyncUtils';
+import sortBy from 'lodash.sortby';
+import omit from 'lodash.omit';
+import { dossiersApprenantsDb, duplicatesEventsDb } from '../../../common/model/collections';
 
 let args = [];
 let mongo;

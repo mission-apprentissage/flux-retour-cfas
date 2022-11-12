@@ -1,11 +1,10 @@
-const cliProgress = require("cli-progress");
-const indexBy = require("lodash.indexby");
-
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const logger = require("../../common/logger");
-const { getDepartementCodeFromUai } = require("../../common/domain/uai");
-const { DEPARTEMENTS } = require("../../common/constants/territoiresConstants");
+import cliProgress from 'cli-progress';
+import indexBy from 'lodash.indexby';
+import { runScript } from '../scriptWrapper';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import logger from '../../common/logger';
+import { getDepartementCodeFromUai } from '../../common/domain/uai';
+import { DEPARTEMENTS } from '../../common/constants/territoiresConstants';
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

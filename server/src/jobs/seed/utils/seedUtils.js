@@ -1,5 +1,5 @@
-const { fullSampleWithUpdates } = require("../../../../tests/data/sample");
-const { createRandomDossierApprenantList } = require("../../../../tests/data/randomizedSample");
+import { fullSampleWithUpdates } from '../../../../tests/data/sample';
+import { createRandomDossierApprenantList } from '../../../../tests/data/randomizedSample';
 
 const seedSample = async (dossiersApprenants) => {
   await dossiersApprenants.addOrUpdateDossiersApprenants(fullSampleWithUpdates);
@@ -20,7 +20,7 @@ const seedRandomizedSampleWithStatut = async (dossiersApprenants, nbStatuts, sta
   await dossiersApprenants.addOrUpdateDossiersApprenants(randomDossiersApprenants);
 };
 
-module.exports = {
+export default {
   seedSample,
   seedRandomizedSample,
   seedRandomizedSampleWithStatut,

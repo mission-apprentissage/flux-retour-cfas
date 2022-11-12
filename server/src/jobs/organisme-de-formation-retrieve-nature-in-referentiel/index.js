@@ -1,7 +1,7 @@
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const logger = require("../../common/logger");
-const { cfasDb } = require("../../common/model/collections");
+import { runScript } from '../scriptWrapper';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import logger from '../../common/logger';
+import { cfasDb } from '../../common/model/collections';
 
 /**
  * Ce script tente de récupérer pour chaque UAI présent dans la collection Cfa la nature de l'organisme de formation

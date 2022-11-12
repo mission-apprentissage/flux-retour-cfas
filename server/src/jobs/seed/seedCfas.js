@@ -1,13 +1,12 @@
-const cliProgress = require("cli-progress");
-const logger = require("../../common/logger");
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
-
-const { ERPS } = require("../../common/constants/erpsConstants");
-const { validateSiret } = require("../../common/domain/siret");
-const { dossiersApprenantsDb, cfasDb, reseauxCfasDb } = require("../../common/model/collections");
+import cliProgress from 'cli-progress';
+import logger from '../../common/logger';
+import { runScript } from '../scriptWrapper';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import { JOB_NAMES } from '../../common/constants/jobsConstants';
+import { RESEAUX_CFAS } from '../../common/constants/networksConstants';
+import { ERPS } from '../../common/constants/erpsConstants';
+import { validateSiret } from '../../common/domain/siret';
+import { dossiersApprenantsDb, cfasDb, reseauxCfasDb } from '../../common/model/collections';
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

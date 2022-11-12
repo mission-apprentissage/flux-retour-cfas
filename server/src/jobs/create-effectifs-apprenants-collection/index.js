@@ -1,11 +1,11 @@
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-const { EFFECTIF_INDICATOR_NAMES } = require("../../common/constants/dossierApprenantConstants");
-const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScolaireUtils");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const cliProgress = require("cli-progress");
-const { effectifsApprenantsDb } = require("../../common/model/collections");
+import { runScript } from '../scriptWrapper';
+import logger from '../../common/logger';
+import { JOB_NAMES } from '../../common/constants/jobsConstants';
+import { EFFECTIF_INDICATOR_NAMES } from '../../common/constants/dossierApprenantConstants';
+import { getAnneesScolaireListFromDate } from '../../common/utils/anneeScolaireUtils';
+import { asyncForEach } from '../../common/utils/asyncUtils';
+import cliProgress from 'cli-progress';
+import { effectifsApprenantsDb } from '../../common/model/collections';
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

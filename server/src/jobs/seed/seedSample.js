@@ -1,7 +1,7 @@
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const { seedSample } = require("./utils/seedUtils");
-const { JOB_NAMES } = require("../../common/constants/jobsConstants");
+import { runScript } from '../scriptWrapper';
+import logger from '../../common/logger';
+import { seedSample } from './utils/seedUtils';
+import { JOB_NAMES } from '../../common/constants/jobsConstants';
 
 runScript(async ({ dossiersApprenants }) => {
   logger.info("Seeding data with Sample...");

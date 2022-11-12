@@ -1,9 +1,8 @@
-const path = require("path");
-const logger = require("../../common/logger");
-const { runScript } = require("../scriptWrapper");
-const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-
-const fs = require("fs-extra");
+import path from 'path';
+import logger from '../../common/logger';
+import { runScript } from '../scriptWrapper';
+import { JOB_NAMES } from '../../common/constants/jobsConstants';
+import fs from 'fs-extra';
 
 /**
  * Script qui vide le dossier assets du job seed
