@@ -1,7 +1,7 @@
-const express = require("express");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
+import express from 'express';
+import tryCatch from '../middlewares/tryCatchMiddleware';
 
-module.exports = ({ cache }) => {
+export default ({ cache }) => {
   const router = express.Router();
 
   router.post(

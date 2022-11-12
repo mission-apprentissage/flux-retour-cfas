@@ -1,12 +1,12 @@
-const express = require("express");
-const Joi = require("joi");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const pick = require("lodash.pick");
-const validateRequestBody = require("../middlewares/validateRequestBody");
-const validateRequestQuery = require("../middlewares/validateRequestQuery");
-const { cfasDb } = require("../../common/model/collections");
+import express from 'express';
+import Joi from 'joi';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import pick from 'lodash.pick';
+import validateRequestBody from '../middlewares/validateRequestBody';
+import validateRequestQuery from '../middlewares/validateRequestQuery';
+import { cfasDb } from '../../common/model/collections';
 
-module.exports = ({ cfas }) => {
+export default ({ cfas }) => {
   const router = express.Router();
 
   /**

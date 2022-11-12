@@ -1,12 +1,11 @@
-const express = require("express");
-const { format } = require("date-fns");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const Joi = require("joi");
-const { getAnneesScolaireListFromDate } = require("../../common/utils/anneeScolaireUtils");
-const { tdbRoles } = require("../../common/roles");
-
-const validateRequestQuery = require("../middlewares/validateRequestQuery");
-const { getCacheKeyForRoute } = require("../../common/utils/cacheUtils");
+import express from 'express';
+import { format } from 'date-fns';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import Joi from 'joi';
+import { getAnneesScolaireListFromDate } from '../../common/utils/anneeScolaireUtils';
+import { tdbRoles } from '../../common/roles';
+import validateRequestQuery from '../middlewares/validateRequestQuery';
+import { getCacheKeyForRoute } from '../../common/utils/cacheUtils';
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -39,7 +38,7 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
-module.exports = ({ stats, effectifs, cache }) => {
+export default ({ stats, effectifs, cache }) => {
   const router = express.Router();
 
   /**

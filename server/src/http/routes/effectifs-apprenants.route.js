@@ -1,14 +1,14 @@
-const express = require("express");
-const Joi = require("joi");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { JOB_NAMES, jobEventStatuts } = require("../../common/constants/jobsConstants");
-const { oleoduc, transformIntoJSON } = require("oleoduc");
-const { sendJsonStream } = require("../../common/utils/httpUtils");
-const { findAndPaginate } = require("../../common/utils/dbUtils");
-const validateRequestQuery = require("../middlewares/validateRequestQuery");
-const { effectifsApprenantsDb } = require("../../common/model/collections");
+import express from 'express';
+import Joi from 'joi';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import { JOB_NAMES, jobEventStatuts } from '../../common/constants/jobsConstants';
+import { oleoduc, transformIntoJSON } from 'oleoduc';
+import { sendJsonStream } from '../../common/utils/httpUtils';
+import { findAndPaginate } from '../../common/utils/dbUtils';
+import validateRequestQuery from '../middlewares/validateRequestQuery';
+import { effectifsApprenantsDb } from '../../common/model/collections';
 
-module.exports = ({ jobEvents }) => {
+export default ({ jobEvents }) => {
   const router = express.Router();
 
   /**

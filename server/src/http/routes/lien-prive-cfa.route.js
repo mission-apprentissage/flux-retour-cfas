@@ -1,10 +1,10 @@
-const express = require("express");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const Joi = require("joi");
-const validateRequestQuery = require("../middlewares/validateRequestQuery");
-const { cfasDb } = require("../../common/model/collections");
+import express from 'express';
+import tryCatch from '../middlewares/tryCatchMiddleware';
+import Joi from 'joi';
+import validateRequestQuery from '../middlewares/validateRequestQuery';
+import { cfasDb } from '../../common/model/collections';
 
-module.exports = () => {
+export default () => {
   const router = express.Router();
 
   router.get(
