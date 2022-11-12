@@ -1,4 +1,4 @@
-import stringify from "json-stringify-deterministic";
+import { stringify } from "safe-stable-stringify";
 
 export const mergeObjectsBy = (objects = [], key) => {
   return Object.values(

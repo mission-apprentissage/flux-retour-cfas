@@ -68,7 +68,6 @@
     "fs-extra": "10.1.0",
     "iconv-lite": "0.6.3",
     "joi": "17.6.0",
-    "json-stringify-deterministic": "1.0.6",
     "json2csv": "5.0.7",
     "jsonwebtoken": "8.5.1",
     "lodash.groupby": "4.6.0",
@@ -85,6 +84,7 @@
     "passport-jwt": "4.0.0",
     "randexp": "0.5.3",
     "redis": "4.1.0",
+    "safe-stable-stringify": "2.4.1",
     "sha512crypt-node": "1.0.2",
     "uuid": "8.3.2",
     "xlsx": "0.18.5"
