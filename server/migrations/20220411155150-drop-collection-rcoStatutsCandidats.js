@@ -1,7 +1,5 @@
-module.exports = {
-  async up(db) {
-    db.collection("rcoStatutsCandidats").drop();
-  },
-
-  async down() {},
+export const up = async (db) => {
+  db.collection("rcoStatutsCandidats").drop();
 };
+
+export const down = async () => {};

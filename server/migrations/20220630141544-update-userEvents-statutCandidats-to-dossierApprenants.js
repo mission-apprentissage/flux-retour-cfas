@@ -1,17 +1,15 @@
-const { USER_EVENTS_ACTIONS } = require("../src/common/constants/userEventsConstants");
+import { USER_EVENTS_ACTIONS } from "../src/common/constants/userEventsConstants";
 
-module.exports = {
-  async up(db) {
-    db.collection("userEvents").updateMany(
-      { action: "statut-candidats" },
-      { $set: { action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT } }
-    );
-  },
+export const up = async (db) => {
+  db.collection("userEvents").updateMany(
+    { action: "statut-candidats" },
+    { $set: { action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT } }
+  );
+};
 
-  async down(db) {
-    db.collection("userEvents").updateMany(
-      { action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT },
-      { $set: { action: "statut-candidats" } }
-    );
-  },
+export const down = async (db) => {
+  db.collection("userEvents").updateMany(
+    { action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT },
+    { $set: { action: "statut-candidats" } }
+  );
 };

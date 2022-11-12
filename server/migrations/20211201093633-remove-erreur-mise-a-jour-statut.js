@@ -1,10 +1,8 @@
 // statut_mise_a_jour_statut are not useful to us
 
-module.exports = {
-  async up(db) {
-    const collection = db.collection("statutsCandidats");
-    await collection.updateMany({}, { $unset: { erreur_mise_a_jour_statut: "" } });
-  },
-
-  async down() {},
+export const up = async (db) => {
+  const collection = db.collection("statutsCandidats");
+  await collection.updateMany({}, { $unset: { erreur_mise_a_jour_statut: "" } });
 };
+
+export const down = async () => {};

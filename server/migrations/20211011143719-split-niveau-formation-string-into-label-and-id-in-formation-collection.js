@@ -5,35 +5,34 @@
     - niveau_formation : string (the former niveau_formation)
 */
 
-const { asyncForEach } = require("../src/common/utils/asyncUtils");
-const formationsComponent = require("../src/common/components/formations");
+import { asyncForEach } from "../src/common/utils/asyncUtils";
 
-module.exports = {
-  async up(db) {
-    const { getNiveauFormationFromLibelle } = formationsComponent();
-    const formationsCollection = db.collection("formations");
-    const allNiveauFormation = await formationsCollection.distinct("niveau", { niveau: { $exists: true } });
+import formationsComponent from "../src/common/components/formations";
 
-    await asyncForEach(allNiveauFormation, async (niveau) => {
-      const parsedNiveau = getNiveauFormationFromLibelle(niveau);
-      await formationsCollection.updateMany(
-        { niveau },
-        {
-          $set: { niveau: parsedNiveau, niveau_libelle: niveau },
-        }
-      );
-    });
-  },
+export const up = async (db) => {
+  const { getNiveauFormationFromLibelle } = formationsComponent();
+  const formationsCollection = db.collection("formations");
+  const allNiveauFormation = await formationsCollection.distinct("niveau", { niveau: { $exists: true } });
 
-  async down(db) {
-    const collection = db.collection("formations");
-
-    await collection.updateMany(
-      {},
+  await asyncForEach(allNiveauFormation, async (niveau) => {
+    const parsedNiveau = getNiveauFormationFromLibelle(niveau);
+    await formationsCollection.updateMany(
+      { niveau },
       {
-        $rename: { niveau_libelle: "niveau" },
-        $unset: { niveau_libelle: "" },
+        $set: { niveau: parsedNiveau, niveau_libelle: niveau },
       }
     );
-  },
+  });
+};
+
+export const down = async (db) => {
+  const collection = db.collection("formations");
+
+  await collection.updateMany(
+    {},
+    {
+      $rename: { niveau_libelle: "niveau" },
+      $unset: { niveau_libelle: "" },
+    }
+  );
 };
