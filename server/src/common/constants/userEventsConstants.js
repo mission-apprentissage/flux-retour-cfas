@@ -1,7 +1,7 @@
 /**
  * Nom des types des UserEvents
  */
-const USER_EVENTS_TYPES = {
+export const USER_EVENTS_TYPES = {
   POST: "POST",
   GET: "GET",
   EXPORT_CSV: "EXPORT-CSV",
@@ -9,7 +9,7 @@ const USER_EVENTS_TYPES = {
 /**
  * Noms des actions des UserEvents
  */
-const USER_EVENTS_ACTIONS = {
+export const USER_EVENTS_ACTIONS = {
   DOSSIER_APPRENANT: "dossier-apprenants",
   EXPORT_CSV_EFFECTIFS_LISTS: {
     TERRITOIRE_NATIONAL: "export-csv-effectifs-territoire-national",
@@ -25,7 +25,7 @@ const USER_EVENTS_ACTIONS = {
   UPDATE_PASSWORD: "update-password",
 };
 
-const getExportAnonymizedEventNameFromFilters = (filters, namedMode = false) => {
+export const getExportAnonymizedEventNameFromFilters = (filters, namedMode = false) => {
   if ("etablissement_num_region" in filters) {
     return USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_REGION;
   }
@@ -45,5 +45,3 @@ const getExportAnonymizedEventNameFromFilters = (filters, namedMode = false) => 
   }
   return USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_NATIONAL;
 };
-
-module.exports = { USER_EVENTS_TYPES, USER_EVENTS_ACTIONS, getExportAnonymizedEventNameFromFilters };

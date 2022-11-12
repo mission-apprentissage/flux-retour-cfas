@@ -1,7 +1,7 @@
 /**
  * Liste des régions du territoire national
  */
-const REGIONS = [
+export const REGIONS = [
   {
     nom: "Guadeloupe",
     code: "01",
@@ -84,7 +84,7 @@ const REGIONS = [
   },
 ];
 
-const DEPARTEMENTS = [
+export const DEPARTEMENTS = [
   {
     nom: "Ain",
     code: "01",
@@ -1096,5 +1096,3 @@ const DEPARTEMENTS = [
     },
   },
 ];
-
-module.exports = { REGIONS, DEPARTEMENTS };

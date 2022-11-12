@@ -1,7 +1,7 @@
 /**
  * Noms des types d'organismes d'appartenance des utilisateurs possibles
  */
-const ORGANISMES_APPARTENANCE = {
+export const ORGANISMES_APPARTENANCE = {
   TETE_DE_RESEAU: "TÊTE DE RÉSEAU",
   ACADEMIE: "ACADÉMIE",
   DRAAF: "DRAAF",
@@ -14,5 +14,3 @@ const ORGANISMES_APPARTENANCE = {
   MISSION_LOCALE: "MISSION LOCALE",
   CELLULE_APPRENTISSAGE: "CELLULE APPRENTISSAGE",
 };
-
-module.exports = { ORGANISMES_APPARTENANCE };
