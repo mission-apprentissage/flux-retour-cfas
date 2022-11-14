@@ -15,7 +15,7 @@ const { validateEmail } = require("../../common/domain/email");
 const { validateUai } = require("../../common/domain/uai");
 const { validateSiret } = require("../../common/domain/siret");
 const logger = require("../../common/logger");
-const { userEventsDb } = require("../../common/model/collections");
+const { userEventsDb, referentielSiretUaiDb } = require("../../common/model/collections");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
@@ -161,13 +161,13 @@ const getReceivedDossiersApprenantsInLast24hCursor = () => {
   ]);
 };
 
-const isUaiFoundUniqueInReferentiel = (db) => async (uai) => {
-  const organismesInReferentiel = await db.collection("referentielSiret").find({ uai }).toArray();
+const isUaiFoundUniqueInReferentiel = () => async (uai) => {
+  const organismesInReferentiel = await referentielSiretUaiDb().find({ uai }).toArray();
   return organismesInReferentiel?.length === 1;
 };
 
-const isSiretFoundInReferentiel = (db) => async (siret) => {
-  const organismesInReferentiel = await db.collection("referentielSiret").find({ siret }).toArray();
+const isSiretFoundInReferentiel = () => async (siret) => {
+  const organismesInReferentiel = await referentielSiretUaiDb().find({ siret }).toArray();
   return organismesInReferentiel?.length > 0;
 };
 

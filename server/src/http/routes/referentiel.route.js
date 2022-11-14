@@ -3,8 +3,9 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
 const { REGIONS, DEPARTEMENTS } = require("../../common/constants/territoiresConstants");
 const { ORGANISMES_APPARTENANCE } = require("../../common/constants/usersConstants");
+const { referentielSiretUaiDb } = require("../../common/model/collections");
 
-module.exports = ({ db }) => {
+module.exports = () => {
   const router = express.Router();
 
   router.get(
@@ -19,7 +20,7 @@ module.exports = ({ db }) => {
   router.get(
     "/siret-uai-reseaux",
     tryCatch(async (req, res) => {
-      const referentielSiretUaiCursor = db.collection("referentielSiret").find();
+      const referentielSiretUaiCursor = referentielSiretUaiDb().find();
 
       const mappingResult = [];
 

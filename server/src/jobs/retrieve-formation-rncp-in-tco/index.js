@@ -4,14 +4,15 @@ const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
 const logger = require("../../common/logger");
+const { dossiersApprenantsDb } = require("../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
  * Ce script permet de récupérer les RNCP pour les dossiersApprenants n'en ayant pas ; le code RNCP est retrouvé via le CFD dans les TCO
  */
-runScript(async ({ db }) => {
-  const allValidCfds = await db.collection("dossiersApprenants").distinct("formation_cfd", {
+runScript(async () => {
+  const allValidCfds = await dossiersApprenantsDb().distinct("formation_cfd", {
     formation_rncp: null,
   });
 
@@ -29,7 +30,7 @@ runScript(async ({ db }) => {
     if (cfdInfo?.rncp?.code_rncp) {
       matchedCfdCount++;
 
-      const { modifiedCount } = await db.collection("dossiersApprenants").updateMany(
+      const { modifiedCount } = await dossiersApprenantsDb().updateMany(
         {
           formation_cfd: cfd,
           formation_rncp: null,

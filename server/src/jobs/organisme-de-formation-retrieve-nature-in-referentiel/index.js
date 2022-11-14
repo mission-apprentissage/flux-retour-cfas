@@ -1,12 +1,12 @@
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const logger = require("../../common/logger");
-const { cfasDb } = require("../../common/model/collections");
+const { cfasDb, referentielSiretUaiDb } = require("../../common/model/collections");
 
 /**
  * Ce script tente de récupérer pour chaque UAI présent dans la collection Cfa la nature de l'organisme de formation
  */
-runScript(async ({ cfas, db }) => {
+runScript(async ({ cfas }) => {
   // Gets all cfa
   const allCfa = await cfasDb().find().toArray();
 
@@ -14,7 +14,7 @@ runScript(async ({ cfas, db }) => {
 
   await asyncForEach(allCfa, async (cfa) => {
     try {
-      const result = await db.collection("referentielSiret").find({ uai: cfa.uai }).toArray();
+      const result = await referentielSiretUaiDb().find({ uai: cfa.uai }).toArray();
       // skip if no result or more than one found in Referentiel
       const uniqueResult = result.length === 1;
 

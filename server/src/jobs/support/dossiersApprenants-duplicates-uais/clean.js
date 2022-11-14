@@ -7,6 +7,7 @@ const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const { DUPLICATE_TYPE_CODES } = require("../../../common/constants/dossierApprenantConstants");
 
 const { collectionNames } = require("../../constants");
+const { dossiersApprenantsDb } = require("../../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -44,7 +45,7 @@ const cleanUaisDuplicates = async ({ dossiersApprenants, db }) => {
 
     // Delete each ancient duplicates
     await asyncForEach(duplicatesIdToRemove, async (currentIdToRemove) => {
-      await db.collection("dossiersApprenants").deleteOne({ _id: currentIdToRemove });
+      await dossiersApprenantsDb().deleteOne({ _id: currentIdToRemove });
     });
   });
 

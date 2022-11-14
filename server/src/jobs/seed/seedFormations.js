@@ -2,6 +2,7 @@ const { runScript } = require("../scriptWrapper");
 const logger = require("../../common/logger");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { sleep } = require("../../common/utils/miscUtils");
+const { dossiersApprenantsDb } = require("../../common/model/collections");
 
 const SLEEP_TIME_BETWEEN_CREATION = 100; // 100ms to avoid flooding TCO and LBA APIs
 
@@ -9,13 +10,13 @@ const SLEEP_TIME_BETWEEN_CREATION = 100; // 100ms to avoid flooding TCO and LBA 
     Ce script récupère tous les CFDs valides présents dans la collection DossierApprenant, crée une formation en base
     pour chacun si elle n'existe pas et ajoute les infos de la formation aux dossiers apprenants correspondant
 */
-runScript(async ({ db, formations }) => {
+runScript(async ({ formations }) => {
   let createdFormationsCount = 0;
   let notCreatedFormationsCount = 0;
   let dossiersApprenantUpdatedCount = 0;
 
   // get all CFDs from dossiers apprenants collection
-  const allCfds = await db.collection("dossiersApprenants").distinct("formation_cfd");
+  const allCfds = await dossiersApprenantsDb().distinct("formation_cfd");
   logger.info(allCfds.length, "distinct CFD found in collection DossierApprenant");
 
   // filter out CFD for which we already have a formation in db
@@ -33,7 +34,7 @@ runScript(async ({ db, formations }) => {
       const createdFormation = await formations.createFormation(cfd);
       createdFormationsCount++;
 
-      const { result: dossierApprenantsUpdateResult } = await db.collection("dossiersApprenants").updateMany(
+      const { result: dossierApprenantsUpdateResult } = await dossiersApprenantsDb().updateMany(
         { formation_cfd: cfd },
         {
           $set: {
