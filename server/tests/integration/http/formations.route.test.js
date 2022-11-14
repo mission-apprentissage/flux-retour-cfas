@@ -20,10 +20,13 @@ describe(__filename, () => {
     await asyncForEach(formationsSeed, async (formationSeed) => {
       const formation = Formation.create(formationSeed);
       await formationsDb().insertOne(formation);
-      await dossiersApprenantsDb().insertOne({
-        ...createRandomDossierApprenant(),
-        formation_cfd: formation.cfd,
-      });
+      await dossiersApprenantsDb().insertOne(
+        {
+          ...createRandomDossierApprenant(),
+          formation_cfd: formation.cfd,
+        },
+        { bypassDocumentValidation: true }
+      );
     });
   };
 

@@ -2,8 +2,9 @@
 const axiosist = require("axiosist");
 const createComponents = require("../../src/common/components/components");
 const server = require("../../src/http/server");
-const { getDatabase } = require("../../src/common/mongodb");
+const { getDatabase, configureDbSchemaValidation } = require("../../src/common/mongodb");
 const redisFakeClient = require("./redisClientMock");
+const { modelDescriptors } = require("../../src/common/model/collections");
 
 const startServer = async () => {
   const components = await createComponents({
@@ -13,6 +14,7 @@ const startServer = async () => {
   });
   const app = await server(components);
   const httpClient = axiosist(app);
+  await configureDbSchemaValidation(modelDescriptors);
 
   return {
     httpClient,

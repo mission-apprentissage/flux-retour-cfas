@@ -3,7 +3,8 @@ const logger = require("./common/logger");
 const config = require("../config");
 const { initRedis } = require("./common/infra/redis");
 const createComponents = require("./common/components/components");
-const { connectToMongodb, getDatabase } = require("./common/mongodb");
+const { connectToMongodb, getDatabase, configureDbSchemaValidation } = require("./common/mongodb");
+const { modelDescriptors } = require("./common/model/collections");
 
 process.on("unhandledRejection", (e) => logger.error("An unexpected error occurred", e));
 process.on("uncaughtException", (e) => logger.error("An unexpected error occurred", e));
@@ -17,6 +18,7 @@ process.on("uncaughtException", (e) => logger.error("An unexpected error occurre
   });
 
   await connectToMongodb(config.mongodb.uri);
+  await configureDbSchemaValidation(modelDescriptors);
   const db = getDatabase();
 
   const components = await createComponents({ db, redisClient });

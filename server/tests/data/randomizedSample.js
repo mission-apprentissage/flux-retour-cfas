@@ -74,7 +74,6 @@ const createRandomEffectifApprenant = (params = {}) => {
     dossierApprenantId: faker.datatype.uuid(),
     uai_etablissement: getRandomUaiEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-    statut_apprenant: getRandomStatutApprenant(),
     formation_cfd: getRandomIdFormation(),
     periode_formation: isPresent() ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),

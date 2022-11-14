@@ -14,6 +14,23 @@ const archiveDossiersApprenantsModelDescriptor = require("./archiveDossiersAppre
 const dossiersApprenantsApiErrorsModelDescriptor = require("./dossiersApprenantsApiErrors.model");
 const referentielSiretUaiModelDescriptor = require("./referentielSiretUai.model");
 
+const modelDescriptors = [
+  usersModelDescriptor,
+  userEventsModelDescriptor,
+  cfasModelDescriptor,
+  formationsModelDescriptor,
+  reseauxCfasModelDescriptor,
+  dossiersApprenantsModelDescriptor,
+  jobEventsModelDescriptor,
+  effectifsApprenantsModelDescriptor,
+  demandesIdentifiantsModelDescriptor,
+  demandesBranchementErpDbModelDescriptor,
+  duplicatesEventsModelDescriptor,
+  archiveDossiersApprenantsModelDescriptor,
+  dossiersApprenantsApiErrorsModelDescriptor,
+  referentielSiretUaiModelDescriptor,
+];
+
 const dossiersApprenantsDb = () => {
   return getDbCollection(dossiersApprenantsModelDescriptor.collectionName);
 };
@@ -71,6 +88,7 @@ const referentielSiretUaiDb = () => {
 };
 
 module.exports = {
+  modelDescriptors,
   dossiersApprenantsDb,
   cfasDb,
   reseauxCfasDb,

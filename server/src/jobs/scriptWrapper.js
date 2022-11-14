@@ -1,11 +1,11 @@
-const { connectToMongodb, closeMongodbConnection } = require("../common/mongodb");
+const { connectToMongodb, closeMongodbConnection, configureDbSchemaValidation } = require("../common/mongodb");
 const createComponents = require("../common/components/components");
 const logger = require("../common/logger");
 const { initRedis } = require("../common/infra/redis");
 const { formatDuration, intervalToDuration } = require("date-fns");
 const { jobEventStatuts } = require("../common/constants/jobsConstants");
 const config = require("../../config");
-const { jobEventsDb } = require("../common/model/collections");
+const { jobEventsDb, modelDescriptors } = require("../common/model/collections");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -45,6 +45,7 @@ module.exports = {
       });
 
       const mongodbClient = await connectToMongodb(config.mongodb.uri);
+      await configureDbSchemaValidation(modelDescriptors);
 
       const components = await createComponents({ redisClient, db: mongodbClient });
       await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
@@ -55,7 +56,7 @@ module.exports = {
 
       await jobEventsDb().insertOne({
         jobname: jobName,
-        created_at: new Date(),
+        date: new Date(),
         action: jobEventStatuts.executed,
         data: { startDate, endDate, duration },
       });

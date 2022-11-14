@@ -16,22 +16,23 @@ const { validateUai } = require("../../common/domain/uai");
 const { validateSiret } = require("../../common/domain/siret");
 const logger = require("../../common/logger");
 const { userEventsDb, referentielSiretUaiDb } = require("../../common/model/collections");
+const { getDbCollection } = require("../../common/mongodb");
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
 };
 
-runScript(async ({ db }) => {
+runScript(async () => {
   const analysisId = uuid();
   const analysisDate = new Date();
 
   let latestReceivedDossiersApprenantsCount = 0;
 
   // find all dossiers apprenants sent in the last 24 hours
-  const latestReceivedDossiersApprenantsCursor = getReceivedDossiersApprenantsInLast24hCursor(db);
+  const latestReceivedDossiersApprenantsCursor = getReceivedDossiersApprenantsInLast24hCursor();
 
   // delete existing dossiers apprenant analysis results
-  await db.collection("dossiersApprenantsApiInputFiabilite").deleteMany();
+  await getDbCollection("dossiersApprenantsApiInputFiabilite").deleteMany();
 
   // build map of non unique apprenants to mark them as such in fiabilité analysis
   logger.info(`Building Map of unique apprenants received in the last 24h`);
@@ -96,15 +97,15 @@ runScript(async ({ db }) => {
       // Etablissement information
       uaiEtablissementPresent: isSet(data.uai_etablissement),
       uaiEtablissementFormatValide: !validateUai(data.uai_etablissement).error,
-      uaiEtablissementUniqueFoundInReferentiel: await isUaiFoundUniqueInReferentiel(db)(data.uai_etablissement),
+      uaiEtablissementUniqueFoundInReferentiel: await isUaiFoundUniqueInReferentiel()(data.uai_etablissement),
       siretEtablissementPresent: isSet(data.siret_etablissement),
       siretEtablissementFormatValide: !validateSiret(data.siret_etablissement).error,
-      siretEtablissementFoundInReferentiel: await isSiretFoundInReferentiel(db)(data.siret_etablissement),
+      siretEtablissementFoundInReferentiel: await isSiretFoundInReferentiel()(data.siret_etablissement),
       uniqueApprenant: !nonUniqueApprenants.get(buildApprenantNormalizedId(data)),
     });
 
     // store analysis result for this dossier apprenant in db
-    await db.collection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
+    await getDbCollection("dossiersApprenantsApiInputFiabilite").insertOne(newDossierApprenantApiInputFiabiliteEntry);
 
     // update counts for final reports
     Object.keys(fiabiliteCounts).forEach((key) => {
@@ -115,7 +116,7 @@ runScript(async ({ db }) => {
   }
 
   logger.info(`Creating fiabilité analysis report with id ${analysisId}`);
-  await db.collection("dossiersApprenantsApiInputFiabiliteReport").insertOne(
+  await getDbCollection("dossiersApprenantsApiInputFiabiliteReport").insertOne(
     DossierApprenantApiInputFiabiliteReport.create({
       analysisId,
       analysisDate,

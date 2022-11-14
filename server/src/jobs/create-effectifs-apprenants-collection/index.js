@@ -69,7 +69,7 @@ runScript(async ({ effectifs }) => {
   // Ajout en base pour chaque élément de la liste
   await asyncForEach(allStatutsByIndicators, async (currentStatut) => {
     await effectifsApprenantsDb().insertOne({
-      dossierApprenantId: currentStatut.dossierApprenantId,
+      dossierApprenantId: currentStatut.dossierApprenantId.toString(),
       uai_etablissement: currentStatut.uai_etablissement,
       nom_etablissement: currentStatut.nom_etablissement,
       formation_cfd: currentStatut.formation_cfd,

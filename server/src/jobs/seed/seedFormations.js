@@ -33,8 +33,7 @@ runScript(async ({ formations }) => {
     try {
       const createdFormation = await formations.createFormation(cfd);
       createdFormationsCount++;
-
-      const { result: dossierApprenantsUpdateResult } = await dossiersApprenantsDb().updateMany(
+      const dossiersApprenantsUpdateResults = await dossiersApprenantsDb().updateMany(
         { formation_cfd: cfd },
         {
           $set: {
@@ -43,7 +42,7 @@ runScript(async ({ formations }) => {
           },
         }
       );
-      dossiersApprenantUpdatedCount += dossierApprenantsUpdateResult.nModified;
+      dossiersApprenantUpdatedCount += dossiersApprenantsUpdateResults.modifiedCount;
     } catch (err) {
       logger.error("error while creating formation for CFD", cfd, err);
       notCreatedFormationsCount++;
