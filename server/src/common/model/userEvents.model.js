@@ -2,6 +2,13 @@ const { object, objectId, string, date } = require("./json-schema/jsonSchemaType
 
 const collectionName = "userEvents";
 
+const indexes = () => {
+  return [
+    [{ username: 1 }, { name: "username" }],
+    [{ action: 1 }, { name: "action" }],
+  ];
+};
+
 const schema = () => {
   return object(
     {
@@ -24,4 +31,5 @@ const schema = () => {
 module.exports = {
   collectionName,
   schema,
+  indexes,
 };

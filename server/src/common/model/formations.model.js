@@ -2,6 +2,18 @@ const { object, arrayOf, string, date, objectId } = require("./json-schema/jsonS
 
 const collectionName = "formations";
 
+const indexes = () => {
+  return [
+    [
+      { libelle: "text", tokenized_libelle: "text" },
+      { default_language: "french" },
+      { name: "libelle_text_tokenized_libelle_text" },
+    ],
+    [{ cfd: 1 }, { name: "cfd", unique: true }],
+    [{ rncps: 1 }, { name: "rncps" }],
+  ];
+};
+
 const schema = object(
   {
     _id: objectId(),
@@ -22,4 +34,4 @@ const schema = object(
   { required: ["uai"] }
 );
 
-module.exports = { collectionName, schema };
+module.exports = { collectionName, schema, indexes };

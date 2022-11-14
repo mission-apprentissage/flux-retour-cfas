@@ -2,6 +2,17 @@ const { object, objectId, string, date, arrayOf, boolean } = require("./json-sch
 
 const collectionName = "cfas";
 
+const indexes = () => {
+  return [
+    [
+      { nom: "text", nom_tokenized: "text" },
+      { name: "nom_tokenized_text", default_language: "french" },
+    ],
+    [{ uai: 1 }, { name: "uai" }],
+    [{ sirets: 1 }, { name: "sirets" }],
+  ];
+};
+
 const schema = () => {
   return object({
     _id: objectId(),
@@ -28,4 +39,5 @@ const schema = () => {
 module.exports = {
   collectionName,
   schema,
+  indexes,
 };
