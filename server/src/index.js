@@ -1,3 +1,4 @@
+import "dotenv/config.js";
 import server from "./http/server.js";
 import logger from "./common/logger.js";
 import config from "./config.js";

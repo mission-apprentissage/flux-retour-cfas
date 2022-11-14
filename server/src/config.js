@@ -51,7 +51,7 @@ export const config = {
     containerName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").required().asString(),
   },
   redis: {
-    uri: env.get("FLUX_RETOUR_CFAS_REDIS_URI").required().default("127.0.0.1:6379").asString(),
+    uri: env.get("FLUX_RETOUR_CFAS_REDIS_URI").default("redis://127.0.0.1:6379").asString(),
   },
 };
 
