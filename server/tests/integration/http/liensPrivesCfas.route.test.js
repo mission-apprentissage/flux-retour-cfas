@@ -83,7 +83,8 @@ describe(__filename, () => {
 
     await cfasDb().insertOne({
       uai: "0451582A",
-      siret: "31521327200067",
+      sirets: ["31521327200067"],
+      created_at: new Date(),
       nom: "TEST CFA",
       erps: [user.name],
       private_url: "http://test",
@@ -120,38 +121,43 @@ describe(__filename, () => {
     // Add 4 cfas for this ERP - 1 Cfa for other erp
     await cfasDb().insertOne({
       uai: "0451582A",
-      siret: "31521327200061",
+      sirets: ["31521327200061"],
       nom: "TEST CFA",
       erps: [user.name],
       private_url: "http://test",
+      created_at: new Date(),
     });
     await cfasDb().insertOne({
       uai: "0451582B",
-      siret: "99921327200062",
+      sirets: ["99921327200062"],
       nom: "TEST CFA 2",
       erps: [user.name],
       private_url: "http://test2",
+      created_at: new Date(),
     });
     await cfasDb().insertOne({
       uai: "0451582C",
-      siret: "99921327200063",
+      sirets: ["99921327200063"],
       nom: "TEST CFA 3",
       erps: [user.name],
       private_url: "http://test3",
+      created_at: new Date(),
     });
     await cfasDb().insertOne({
       uai: "0451582D",
-      siret: "99921327200064",
+      sirets: ["99921327200064"],
       nom: "TEST CFA 4",
       erps: [user.name],
       private_url: "http://test4",
+      created_at: new Date(),
     });
     await cfasDb().insertOne({
       uai: "0451582E",
-      siret: "11121327200065",
+      sirets: ["11121327200065"],
       nom: "TEST CFA 5",
       erps: ["BAD_ERP"],
       private_url: "http://test5",
+      created_at: new Date(),
     });
 
     // Call api route with 1 page & 2 elements max per page
@@ -179,31 +185,35 @@ describe(__filename, () => {
     // Add 4 Cfas - only 2 with test UAI to search
     await cfasDb().insertOne({
       uai: uaiTest1,
-      siret: "31521327200061",
+      sirets: ["31521327200061"],
       nom: "TEST CFA",
       erps: [user.name],
       private_url: "http://test",
+      created_at: new Date(),
     });
     await cfasDb().insertOne({
       uai: uaiTest2,
-      siret: "99921327200062",
+      sirets: ["99921327200062"],
       nom: "TEST CFA 2",
       erps: [user.name],
       private_url: "http://test2",
+      created_at: new Date(),
     });
     await cfasDb().insertOne({
       uai: "0451582C",
-      siret: "99921327200063",
+      sirets: ["99921327200063"],
       nom: "TEST CFA 3",
       erps: [user.name],
       private_url: "http://test3",
+      created_at: new Date(),
     });
     await cfasDb().insertOne({
       uai: "0451582D",
-      siret: "99921327200064",
+      sirets: ["99921327200064"],
       nom: "TEST CFA 4",
       erps: [user.name],
       private_url: "http://test4",
+      created_at: new Date(),
     });
 
     // Call api route with uaiTest1 & uaiTest2 filters
@@ -230,10 +240,11 @@ describe(__filename, () => {
 
     await cfasDb().insertOne({
       uai: "0451582A",
-      siret: "31521327200067",
+      sirets: ["31521327200067"],
       nom: "TEST CFA",
       erps: ["BAD_ERP"],
       private_url: "http://test",
+      created_at: new Date(),
     });
 
     // Call api route

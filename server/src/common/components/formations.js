@@ -80,7 +80,7 @@ const createFormation = async (cfd) => {
     libelle: buildFormationLibelle(formationInfo),
     niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
     niveau_libelle: formationInfo?.niveau,
-    metiers: metiersFromCfd,
+    metiers: metiersFromCfd || [],
   });
 
   const { insertedId } = await formationsDb().insertOne(formationEntity);

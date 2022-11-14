@@ -53,10 +53,10 @@ module.exports = () => {
       const password = userProps.password || generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
       const passwordHash = sha512Utils.hash(password);
       const permissions = userProps.permissions || [];
-      const network = userProps.network || null;
-      const region = userProps.region || null;
-      const organisme = userProps.organisme || null;
-      const email = userProps.email || null;
+      const network = userProps.network;
+      const region = userProps.region;
+      const organisme = userProps.organisme;
+      const email = userProps.email;
 
       // check if username is not taken
       const user = await usersDb().findOne({ username });

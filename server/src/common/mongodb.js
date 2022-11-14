@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
 const logger = require("./logger");
+const { asyncForEach } = require("./utils/asyncUtils");
 
 let mongodbClient;
 
@@ -46,29 +47,39 @@ const getDbCollectionIndexes = async (name) => {
   return await mongodbClient.db().collection(name).indexes();
 };
 
-// const configureValidation = async () => {
-//   await ensureInitialization();
-//   await Promise.all(
-//     getCollectionDescriptors().map(async ({ name, schema }) => {
-//       await createCollectionIfNeeded(name);
+/**
+ * Création d'une collection si elle n'existe pas
+ * @param {string} collectionName
+ */
+const createCollectionIfDoesNotExist = async (collectionName) => {
+  const db = getDatabase();
+  const collectionsInDb = await db.listCollections().toArray();
+  const collectionExistsInDb = collectionsInDb.map(({ name }) => name).includes(collectionName);
 
-//       if (!schema) {
-//         return;
-//       }
+  if (!collectionExistsInDb) {
+    await db.createCollection(collectionName);
+  }
+};
 
-//       logger.debug(`Configuring validation for collection ${name}...`);
-//       let db = getDatabase();
-//       await db.command({
-//         collMod: name,
-//         validationLevel: "strict",
-//         validationAction: "error",
-//         validator: {
-//           $jsonSchema: schema(),
-//         },
-//       });
-//     })
-//   );
-// };
+const configureDbSchemaValidation = async (modelDescriptors) => {
+  const db = getDatabase();
+  await ensureInitialization();
+  await asyncForEach(modelDescriptors, async ({ collectionName, schema }) => {
+    await createCollectionIfDoesNotExist(collectionName);
+
+    if (!schema) {
+      return;
+    }
+    await db.command({
+      collMod: collectionName,
+      validationLevel: "strict",
+      validationAction: "error",
+      validator: {
+        $jsonSchema: { title: `${collectionName} validation schema`, ...schema },
+      },
+    });
+  });
+};
 
 module.exports = {
   connectToMongodb,
@@ -76,4 +87,5 @@ module.exports = {
   getDbCollection,
   getDatabase,
   getDbCollectionIndexes,
+  configureDbSchemaValidation,
 };

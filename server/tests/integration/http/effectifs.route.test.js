@@ -9,7 +9,13 @@ const {
   historySequenceInscritToApprenti,
 } = require("../../data/historySequenceSamples");
 const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/organisme-de-formation/nature");
-const { dossiersApprenantsDb, cfasDb } = require("../../../src/common/model/collections");
+const { cfasDb, dossiersApprenantsDb } = require("../../../src/common/model/collections");
+const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
+
+const createRandomDossierApprenantWithHistorique = async (props) => {
+  const { _id } = await dossiersApprenants().createDossierApprenant(createRandomDossierApprenant());
+  await dossiersApprenantsDb().updateOne({ _id }, { $set: props });
+};
 
 describe(__filename, () => {
   describe("/api/effectifs route", () => {
@@ -29,38 +35,33 @@ describe(__filename, () => {
 
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2020-2021",
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // this one should be ignored because of annee_scolaire
-      await dossiersApprenantsDb().insertOne(
-        createRandomDossierApprenant({
-          historique_statut_apprenant: historySequenceInscritToApprenti,
-          annee_scolaire: "2021-2022",
-        })
-      );
+      await createRandomDossierApprenantWithHistorique({
+        historique_statut_apprenant: historySequenceInscritToApprenti,
+        annee_scolaire: "2021-2022",
+      });
 
       // Expected results
       const expectedResults = {
@@ -89,32 +90,29 @@ describe(__filename, () => {
 
       // Add 10 statuts for filter with history sequence - full
       for (let index = 0; index < 10; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Add 5 statuts for filter with history sequence - simple apprenti
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Add 15 statuts for filter  with history sequence - inscritToApprenti
       for (let index = 0; index < 15; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           historique_statut_apprenant: historySequenceInscritToApprenti,
           annee_scolaire: "2020-2021",
           ...filterQuery,
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
       // Expected results
@@ -156,24 +154,22 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           ...filterQuery,
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
           niveau_formation: "1",
           niveau_formation_libelle: "1 (blabla)",
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
-      const randomStatut = createRandomDossierApprenant({
+      await createRandomDossierApprenantWithHistorique({
         ...filterQuery,
         historique_statut_apprenant: historySequenceApprenti,
         annee_scolaire: "2020-2021",
         niveau_formation: "2",
         niveau_formation_libelle: "2 (blabla)",
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/niveau-formation?${searchParams}`, {
@@ -205,15 +201,14 @@ describe(__filename, () => {
       const regionNumTest = "28";
 
       // Add 1 statut for region
-      await dossiersApprenantsDb().insertOne(
-        createRandomDossierApprenant({
-          nom_etablissement: "TEST CFA",
-          annee_scolaire: "2020-2021",
-          siret_etablissement: "77929544300013",
-          uai_etablissement: "0762232N",
-          etablissement_num_region: regionNumTest,
-        })
-      );
+      await createRandomDossierApprenantWithHistorique({
+        nom_etablissement: "TEST CFA",
+        annee_scolaire: "2020-2021",
+        siret_etablissement: "77929544300013",
+        uai_etablissement: "0762232N",
+        etablissement_num_region: regionNumTest,
+        historique_statut_apprenant: historySequenceApprenti,
+      });
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/total-organismes", {
@@ -245,15 +240,14 @@ describe(__filename, () => {
       const formationCfd = "abcd1234";
 
       // Add 1 statut for formation
-      await dossiersApprenantsDb().insertOne(
-        createRandomDossierApprenant({
-          nom_etablissement: "TEST CFA",
-          annee_scolaire: "2020-2021",
-          siret_etablissement: getRandomSiretEtablissement(),
-          uai_etablissement: "0762232N",
-          formation_cfd: formationCfd,
-        })
-      );
+      await createRandomDossierApprenantWithHistorique({
+        nom_etablissement: "TEST CFA",
+        annee_scolaire: "2020-2021",
+        siret_etablissement: getRandomSiretEtablissement(),
+        uai_etablissement: "0762232N",
+        formation_cfd: formationCfd,
+        historique_statut_apprenant: historySequenceApprenti,
+      });
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/total-organismes", {
@@ -274,15 +268,14 @@ describe(__filename, () => {
       const formationCfd = "abcd1234";
 
       // Add 1 statut for formation
-      await dossiersApprenantsDb().insertOne(
-        createRandomDossierApprenant({
-          nom_etablissement: "TEST CFA",
-          annee_scolaire: "2022-2023",
-          siret_etablissement: getRandomSiretEtablissement(),
-          uai_etablissement: "0762232N",
-          formation_cfd: formationCfd,
-        })
-      );
+      await createRandomDossierApprenantWithHistorique({
+        nom_etablissement: "TEST CFA",
+        annee_scolaire: "2022-2023",
+        siret_etablissement: getRandomSiretEtablissement(),
+        uai_etablissement: "0762232N",
+        formation_cfd: formationCfd,
+        historique_statut_apprenant: historySequenceApprenti,
+      });
 
       // Check good api call
       const response = await httpClient.get("/api/effectifs/total-organismes", {
@@ -305,7 +298,7 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           ...filterQuery,
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
@@ -314,10 +307,9 @@ describe(__filename, () => {
           libelle_long_formation: "a",
           formation_cfd: "77929544300013",
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
-      const randomStatut = createRandomDossierApprenant({
+      await createRandomDossierApprenantWithHistorique({
         ...filterQuery,
         historique_statut_apprenant: historySequenceApprenti,
         annee_scolaire: "2020-2021",
@@ -326,7 +318,6 @@ describe(__filename, () => {
         libelle_long_formation: "b",
         formation_cfd: "77929544300014",
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/formation?${searchParams}`, {
@@ -345,22 +336,19 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           ...filterQuery,
           historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
           annee_formation: 1,
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
-
-      const randomStatut = createRandomDossierApprenant({
+      await createRandomDossierApprenantWithHistorique({
         ...filterQuery,
         historique_statut_apprenant: historySequenceApprenti,
         annee_scolaire: "2020-2021",
         annee_formation: 2,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/annee-formation?${searchParams}`, {
@@ -386,8 +374,10 @@ describe(__filename, () => {
       };
       await cfasDb().insertOne({
         uai: cfaData1.uai_etablissement,
+        nom: "aaaa",
         nature: cfaData1.nature,
         nature_validity_warning: cfaData1.nature_validity_warning,
+        created_at: new Date(),
       });
 
       const cfaData2 = {
@@ -398,29 +388,29 @@ describe(__filename, () => {
       };
       await cfasDb().insertOne({
         uai: cfaData2.uai_etablissement,
+        nom: "bbbb",
         nature: cfaData2.nature,
         nature_validity_warning: cfaData2.nature_validity_warning,
+        created_at: new Date(),
       });
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           ...filterQuery,
-          historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
           uai_etablissement: cfaData1.uai_etablissement,
           siret_etablissement: cfaData1.siret_etablissement,
+          historique_statut_apprenant: historySequenceApprenti,
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
-      const randomStatut = createRandomDossierApprenant({
+      await createRandomDossierApprenantWithHistorique({
         ...filterQuery,
-        historique_statut_apprenant: historySequenceApprenti,
         annee_scolaire: "2020-2021",
         uai_etablissement: cfaData2.uai_etablissement,
         siret_etablissement: cfaData2.siret_etablissement,
+        historique_statut_apprenant: historySequenceApprenti,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/cfa?${searchParams}`, {
@@ -439,22 +429,20 @@ describe(__filename, () => {
       const filterQuery = { etablissement_num_region: "84" };
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({
+        await createRandomDossierApprenantWithHistorique({
           ...filterQuery,
-          historique_statut_apprenant: historySequenceApprenti,
           annee_scolaire: "2020-2021",
           siret_etablissement: "40239075100046",
+          historique_statut_apprenant: historySequenceApprenti,
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
-      const randomStatut = createRandomDossierApprenant({
+      await createRandomDossierApprenantWithHistorique({
         ...filterQuery,
-        historique_statut_apprenant: historySequenceApprenti,
         annee_scolaire: "2020-2021",
         siret_etablissement: "40239075100099",
+        historique_statut_apprenant: historySequenceApprenti,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
       const response = await httpClient.get(`/api/effectifs/siret?${searchParams}`, {
@@ -472,22 +460,20 @@ describe(__filename, () => {
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
 
       for (let index = 0; index < 5; index++) {
-        const randomStatut = createRandomDossierApprenant({
-          historique_statut_apprenant: historySequenceApprenti,
+        await createRandomDossierApprenantWithHistorique({
           annee_scolaire: "2020-2021",
           etablissement_num_departement: "01",
           etablissement_nom_departement: "Ain",
+          historique_statut_apprenant: historySequenceApprenti,
         });
-        await dossiersApprenantsDb().insertOne(randomStatut);
       }
 
-      const randomStatut = createRandomDossierApprenant({
-        historique_statut_apprenant: historySequenceApprenti,
+      await createRandomDossierApprenantWithHistorique({
         annee_scolaire: "2020-2021",
         etablissement_num_departement: "91",
         etablissement_nom_departement: "Essonne",
+        historique_statut_apprenant: historySequenceApprenti,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
 
       const searchParams = `date=2020-10-10T00:00:00.000Z`;
       const response = await httpClient.get(`/api/effectifs/departement?${searchParams}`, {
