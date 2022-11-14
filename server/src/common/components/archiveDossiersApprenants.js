@@ -1,6 +1,6 @@
-const COLLECTION_NAME = "archiveDossiersApprenants";
+const { archiveDossiersApprenantsDb } = require("../model/collections");
 
-module.exports = ({ db }) => ({
+module.exports = () => ({
   async create(dossierApprenantData) {
     const anonymousValue = `XXXXX`;
     const anonymizedData = {
@@ -15,7 +15,7 @@ module.exports = ({ db }) => ({
     };
     delete anonymizedData._id;
 
-    await db.collection(COLLECTION_NAME).insertOne({
+    await archiveDossiersApprenantsDb().insertOne({
       created_at: new Date(),
       data: anonymizedData,
     });

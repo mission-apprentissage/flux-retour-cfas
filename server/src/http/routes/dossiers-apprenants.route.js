@@ -17,11 +17,11 @@ const { findAndPaginate } = require("../../common/utils/dbUtils");
 const { sendJsonStream } = require("../../common/utils/httpUtils");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
 const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
-const { dossiersApprenantsDb } = require("../../common/model/collections");
+const { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } = require("../../common/model/collections");
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
-module.exports = ({ dossiersApprenants, userEvents, db }) => {
+module.exports = ({ dossiersApprenants, userEvents }) => {
   const router = express.Router();
 
   /**
@@ -114,7 +114,7 @@ module.exports = ({ dossiersApprenants, userEvents, db }) => {
           if (dossierApprenantValidation.error) {
             const prettyValidationError = buildPrettyValidationError(dossierApprenantValidation.error);
             validationErrors.push(prettyValidationError);
-            await db.collection("dossiersApprenantsApiErrors").insert({
+            await dossiersApprenantsApiErrorsDb().insert({
               erp: req.user.username,
               created_at: new Date(),
               ...prettyValidationError,

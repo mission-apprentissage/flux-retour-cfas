@@ -3,6 +3,7 @@ const { runScript } = require("../scriptWrapper");
 const { fetchOrganismes } = require("../../common/apis/apiReferentielMna");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
 const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
+const { referentielSiretUaiDb } = require("../../common/model/collections");
 
 const REFERENTIEL_FIELDS_TO_FETCH = [
   "siret",
@@ -33,7 +34,7 @@ const EXCELLENCE_PRO_FILE_PATH = path.join(__dirname, `./referentiel-reseau-exce
 /**
  * Script qui crée une collection contenant le référentiel UAI/SIRET enrichi des réseaux existants dans le TDB et dans le fichier Excellence Pro
  */
-runScript(async ({ db, cfas }) => {
+runScript(async ({ cfas }) => {
   const excellenceProReferentielJson = readJsonFromCsvFile(EXCELLENCE_PRO_FILE_PATH, ",").map((line) => {
     return {
       siret: line["Siret"],
@@ -41,9 +42,8 @@ runScript(async ({ db, cfas }) => {
       reseaux: parseReseauxTextFromCsv(line["Réseauàjour"]),
     };
   });
-  const referentielSiretCollection = db.collection("referentielSiret");
 
-  await referentielSiretCollection.deleteMany();
+  await referentielSiretUaiDb().deleteMany();
 
   const { organismes } = await fetchOrganismes({
     champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),
@@ -69,7 +69,7 @@ runScript(async ({ db, cfas }) => {
       }
     }
 
-    await referentielSiretCollection.insertOne({
+    await referentielSiretUaiDb().insertOne({
       ...organismeReferentiel,
       reseaux: [...reseaux],
     });

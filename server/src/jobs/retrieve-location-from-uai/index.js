@@ -6,15 +6,16 @@ const { asyncForEach } = require("../../common/utils/asyncUtils");
 const logger = require("../../common/logger");
 const { getDepartementCodeFromUai } = require("../../common/domain/uai");
 const { DEPARTEMENTS } = require("../../common/constants/territoiresConstants");
+const { dossiersApprenantsDb } = require("../../common/model/collections");
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
  * Ce script permet de créer un export contenant les CFAS sans SIRET
  */
-runScript(async ({ db }) => {
+runScript(async () => {
   const departementsMap = indexBy(DEPARTEMENTS, "uaiCode");
-  const allUais = await db.collection("dossiersApprenants").distinct("uai_etablissement");
+  const allUais = await dossiersApprenantsDb().distinct("uai_etablissement");
 
   logger.info(`${allUais.length} UAI found. Will update matching dossiersApprenants...`);
   loadingBar.start(allUais.length, 0);
@@ -28,7 +29,7 @@ runScript(async ({ db }) => {
 
     if (!info) return;
 
-    const updateResult = await db.collection("dossiersApprenants").updateMany(
+    const updateResult = await dossiersApprenantsDb().updateMany(
       { uai_etablissement: uaiToUpdate },
       {
         $set: {
