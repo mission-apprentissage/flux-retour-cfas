@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import config from "../../../config/index.js";
+import config from "../../../src/config.js";
 import jwt from "jsonwebtoken";
 import { startServer } from "../../utils/testUtils.js";
 import { tdbRoles } from "../../../src/common/roles.js";

@@ -25,7 +25,7 @@ services:
         - SKIP_PREFLIGHT_CHECK=true
 
   server:
-    command: [ "yarn", "debug" ]
+    command: ["yarn", "debug"]
     ports:
       - "127.0.0.1:9229:9229" # Allows remote debugging
     volumes:
@@ -48,6 +48,8 @@ services:
       - 3310:3310
 
   redis:
+    ports:
+      - 6379:6379
     volumes:
       - flux_retour_cfas_redis_data:/data
 

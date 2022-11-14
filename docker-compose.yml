@@ -9,27 +9,45 @@ services:
     restart: unless-stopped
     ports:
       - 80:80
+      - 443:443
     networks:
       - flux_retour_cfas_network
     depends_on:
       - server
       - ui
+    environment:
+      - PARANOIA=1
+      - ANOMALY_INBOUND=5
+      - ANOMALY_OUTBOUND=4
+      - REPORTING_LEVEL=4
+      - DNS_SERVER=127.0.0.11
+      - PROXY=1
+      - SERVERNAME=localhost
+      - ACCESSLOG=/data/access.log
+      - ERRORLOG=/data/error.log
+      - LOGLEVEL=warn
+      - NGINX_ALWAYS_TLS_REDIRECT=false
+      - ALLOWED_METHODS=GET HEAD POST OPTIONS PUT DELETE
 
   ui:
     image: flux_retour_cfas_ui
     container_name: flux_retour_cfas_ui
     build:
       context: ui
+    mem_limit: 256m
     networks:
       - flux_retour_cfas_network
     depends_on:
       - server
+    environment:
+      - SERVER_URI=http://server:5000
 
   server:
     image: flux_retour_cfas_server
     container_name: flux_retour_cfas_server
     build:
       context: server
+    mem_limit: 1g
     restart: unless-stopped
     networks:
       - flux_retour_cfas_network
@@ -45,6 +63,7 @@ services:
   mongodb:
     image: mongo:6.0.2-focal
     container_name: flux_retour_cfas_mongodb
+    mem_limit: 2g
     restart: unless-stopped
     networks:
       - flux_retour_cfas_network
@@ -57,7 +76,7 @@ services:
     networks:
       - flux_retour_cfas_network
     healthcheck:
-      test: [ "CMD", "/usr/local/bin/clamdcheck.sh" ]
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
       interval: 60s
       retries: 3
       start_period: 120s

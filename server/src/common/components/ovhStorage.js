@@ -1,4 +1,4 @@
-import config from "../../../config/index.js";
+import config from "../../config.js";
 import OvhStorage from "node-ovh-objectstorage";
 import fs from "fs-extra";
 import logger from "../logger.js";

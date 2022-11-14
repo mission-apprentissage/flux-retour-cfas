@@ -6,7 +6,7 @@ import MockDate from "mockdate";
 import { startServer } from "../../utils/testUtils.js";
 import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
 import { differenceInCalendarDays } from "date-fns";
-import config from "../../../config/index.js";
+import config from "../../../src/config.js";
 import { ORGANISMES_APPARTENANCE } from "../../../src/common/constants/usersConstants.js";
 import omit from "lodash.omit";
 import { usersDb } from "../../../src/common/model/collections.js";

@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import config from "../../../config/index.js";
+import config from "../../config.js";
 import { tdbRoles } from "../../common/roles.js";
 
 export default ({ users, cfas }) => {

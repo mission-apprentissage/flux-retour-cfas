@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import config from "../../../config/index.js";
+import config from "../../../src/config.js";
 import { startServer } from "../../utils/testUtils.js";
 
 describe("Healthcheck route", () => {

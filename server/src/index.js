@@ -1,6 +1,6 @@
 import server from "./http/server.js";
 import logger from "./common/logger.js";
-import config from "../config/index.js";
+import config from "./config.js";
 import { initRedis } from "./common/infra/redis/index.js";
 import createComponents from "./common/components/components.js";
 import { connectToMongodb, getDatabase } from "./common/mongodb.js";

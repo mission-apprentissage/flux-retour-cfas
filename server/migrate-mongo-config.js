@@ -1,5 +1,5 @@
 // In this file you can configure migrate-mongo
-import { config as appConfig } from "./config/index.js";
+import { config as appConfig } from "./src/config.js";
 
 const config = {
   mongodb: {

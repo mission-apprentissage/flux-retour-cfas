@@ -1,5 +1,7 @@
 import express from "express";
+import passport from "passport";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import { apiRoles } from "../common/roles.js";
 import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
@@ -33,6 +35,8 @@ export default async (components) => {
 
   app.use(bodyParser.json());
   app.use(logMiddleware());
+  app.use(cookieParser());
+  app.use(passport.initialize());
 
   // open routes
   app.use("/api/login", loginRouter(components));

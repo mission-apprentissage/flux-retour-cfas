@@ -10,6 +10,9 @@ import effectifsApprenantsModelDescriptor from "./effectifsApprenants.model.js";
 import demandesIdentifiantsModelDescriptor from "./demandesIdentifiants.model.js";
 import demandesBranchementErpDbModelDescriptor from "./demandesBranchementErp.model.js";
 import duplicatesEventsModelDescriptor from "./duplicatesEvents.model.js";
+import * as usersMigrationModelDescriptor from "./usersMigration.model.js";
+import * as RolesModelDescriptor from "./roles.model.js";
+import * as JwtSessionsModelDescriptor from "./jwtSessions.model.js";
 
 export const dossiersApprenantsDb = () => {
   return getDbCollection(dossiersApprenantsModelDescriptor.collectionName);
@@ -54,3 +57,13 @@ export const demandesBranchementErpDb = () => {
 export const duplicatesEventsDb = () => {
   return getDbCollection(duplicatesEventsModelDescriptor.collectionName);
 };
+
+export const usersMigrationDb = () => {
+  return getDbCollection(usersMigrationModelDescriptor.collectionName);
+};
+export function rolesDb() {
+  return getDbCollection(RolesModelDescriptor.collectionName);
+}
+export function jwtSessionsDb() {
+  return getDbCollection(JwtSessionsModelDescriptor.collectionName);
+}
