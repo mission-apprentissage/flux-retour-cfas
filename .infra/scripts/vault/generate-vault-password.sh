@@ -22,7 +22,7 @@ function create_password_file() {
   echo "Fetching gpg keys and add them as a recipients..."
   for key in "${keys[@]}"; do
     echo $key
-    gpg --quiet --keyserver keyserver.ubuntu.com --recv-keys "$key"
+    gpg --quiet --recv-keys "$key"
     recipients+=("--recipient $key")
   done
 
