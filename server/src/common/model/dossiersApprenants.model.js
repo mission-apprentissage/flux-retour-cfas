@@ -40,27 +40,21 @@ const schema = object(
     }),
     uai_etablissement: string({ description: "Code uai de l'établissement formateur" }),
     siret_etablissement: stringOrNull({ description: "Siret de l'établissement d'origine" }),
-    siret_catalogue: stringOrNull({ description: "Siret de l'établissement retrouvé depuis le catalogue" }),
     nom_etablissement: string({ description: "Nom de l'établissement d'origine" }),
-    etablissement_reseaux: arrayOf(string(), {
+    etablissement_reseaux: arrayOfOrNull(string(), {
       description: "Réseaux auxquels appartient l'organisme de formation de l'apprenant",
     }),
     etablissement_adresse: stringOrNull({ description: "Adresse complète du CFA" }),
-    etablissement_localite: stringOrNull({ description: "Localité du CFA" }),
     etablissement_nom_region: stringOrNull({ description: "Région du CFA" }),
     etablissement_num_region: stringOrNull({ description: "Numéro de la région du CFA" }),
     etablissement_num_departement: stringOrNull({ description: "Numéro de departement du CFA" }),
     etablissement_nom_departement: stringOrNull({ description: "Nom du departement du CFA" }),
-    etablissement_nom_academie: stringOrNull({ description: "Nom de l'académie du CFA" }),
-    etablissement_num_academie: stringOrNull({ description: "Numéro de l'académie du CFA" }),
-    etablissement_gestionnaire_uai: stringOrNull({ description: "UAI du CFA gestionnaire - depuis le catalogue" }),
-    etablissement_formateur_uai: stringOrNull({ description: "UAI du CFA formateur - depuis le catalogue" }),
     historique_statut_apprenant: arrayOf(
       object({}, { additionalProperties: true, description: "Historique du statut de l'apprenant" })
     ),
     periode_formation: arrayOfOrNull(integer(), { description: "Date debut & date de fin de la formation" }),
     annee_formation: integerOrNull({ description: "Numéro de l'année dans la formation (promo)" }),
-    annee_scolaire: stringOrNull({
+    annee_scolaire: string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
     }),
     updated_at: dateOrNull({ description: "Date de mise à jour en base de données" }),
@@ -69,21 +63,14 @@ const schema = object(
     id_erp_apprenant: stringOrNull({ description: "Identifiant de l'apprenant dans l'erp" }),
     tel_apprenant: stringOrNull({ description: "Numéro de téléphone de l'apprenant" }),
     code_commune_insee_apprenant: stringOrNull({ description: "Code commune insee de l'apprenant" }),
-    date_de_naissance_apprenant: date({ description: "Date de naissance de l'apprenant" }),
-    etablissement_formateur_ville: stringOrNull({ description: "Ville de l'établissement formateur" }),
+    date_de_naissance_apprenant: dateOrNull({ description: "Date de naissance de l'apprenant" }),
     contrat_date_debut: dateOrNull({ description: "Date de début du contrat" }),
     contrat_date_fin: dateOrNull({ description: "Date de fin du contrat" }),
     contrat_date_rupture: dateOrNull({ description: "Date de rupture du contrat" }),
     formation_rncp: stringOrNull({ description: "Code RNCP de la formation à laquelle l'apprenant est inscrit" }),
   },
   {
-    required: [
-      "nom_apprenant",
-      "prenom_apprenant",
-      "uai_etablissement",
-      "formation_cfd",
-      "date_de_naissance_apprenant",
-    ],
+    required: ["nom_apprenant", "prenom_apprenant", "uai_etablissement", "formation_cfd", "annee_scolaire"],
   }
 );
 
