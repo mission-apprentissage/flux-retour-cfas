@@ -1,10 +1,10 @@
-const assert = require("assert").strict;
+import { strict as assert } from "assert";
+
 // eslint-disable-next-line node/no-unpublished-require
-const MockDate = require("mockdate");
-const {
-  DossierApprenantApiInputFiabilite,
-} = require("../../../../src/common/factory/dossierApprenantApiInputFiabilite");
-const omit = require("lodash.omit");
+import MockDate from "mockdate";
+
+import { DossierApprenantApiInputFiabilite } from "../../../../src/common/factory/dossierApprenantApiInputFiabilite.js";
+import omit from "lodash.omit";
 
 describe("Factory DossierApprenantApiInputFiabilite", () => {
   beforeEach(() => {

@@ -1,9 +1,9 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
-const { REGIONS, DEPARTEMENTS } = require("../../../src/common/constants/territoiresConstants");
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants.js";
+import { REGIONS, DEPARTEMENTS } from "../../../src/common/constants/territoiresConstants.js";
 
-describe(__filename, () => {
+describe("Referentiel Route", () => {
   it("Vérifie qu'on peut récupérer les réseaux référentiels via API", async () => {
     const { httpClient } = await startServer();
 

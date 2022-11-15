@@ -1,4 +1,4 @@
-const validateRequestQuery = (validationSchema) => async (req, res, next) => {
+export default (validationSchema) => async (req, res, next) => {
   try {
     await validationSchema.validateAsync(req.query, { abortEarly: false });
     next();
@@ -6,5 +6,3 @@ const validateRequestQuery = (validationSchema) => async (req, res, next) => {
     next(err);
   }
 };
-
-module.exports = validateRequestQuery;

@@ -1,8 +1,8 @@
-const { runScript } = require("../../scriptWrapper");
-const logger = require("../../../common/logger");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
-const arg = require("arg");
-const config = require("../../../../config");
+import { runScript } from "../../scriptWrapper.js";
+import logger from "../../../common/logger.js";
+import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
+import arg from "arg";
+import config from "../../../../config/index.js";
 
 let args = [];
 

@@ -1,11 +1,11 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { asyncForEach } = require("../../../src/common/utils/asyncUtils");
-const { Formation } = require("../../../src/common/factory/formation");
-const { createRandomDossierApprenant } = require("../../data/randomizedSample");
-const { formationsDb, dossiersApprenantsDb } = require("../../../src/common/model/collections");
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { asyncForEach } from "../../../src/common/utils/asyncUtils.js";
+import { Formation } from "../../../src/common/factory/formation.js";
+import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
+import { formationsDb, dossiersApprenantsDb } from "../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Formations Route", () => {
   const formationsSeed = [
     {
       cfd: "01022103",

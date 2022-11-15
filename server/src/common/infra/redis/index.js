@@ -1,6 +1,6 @@
-const redis = require("redis");
+import redis from "redis";
 
-const initRedis = async ({ uri, onReady, onError }) => {
+export const initRedis = async ({ uri, onReady, onError }) => {
   const redisClient = redis.createClient({
     url: uri,
   });
@@ -12,5 +12,3 @@ const initRedis = async ({ uri, onReady, onError }) => {
 
   return redisClient;
 };
-
-module.exports = { initRedis };

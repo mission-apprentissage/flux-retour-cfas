@@ -1,15 +1,17 @@
-const assert = require("assert").strict;
-// eslint-disable-next-line node/no-unpublished-require
-const MockDate = require("mockdate");
-const { startServer } = require("../../utils/testUtils");
-const { apiRoles, tdbRoles } = require("../../../src/common/roles");
-const { differenceInCalendarDays } = require("date-fns");
-const config = require("../../../config");
-const { ORGANISMES_APPARTENANCE } = require("../../../src/common/constants/usersConstants");
-const omit = require("lodash.omit");
-const { usersDb } = require("../../../src/common/model/collections");
+import { strict as assert } from "assert";
 
-describe(__filename, () => {
+// eslint-disable-next-line node/no-unpublished-require
+import MockDate from "mockdate";
+
+import { startServer } from "../../utils/testUtils.js";
+import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
+import { differenceInCalendarDays } from "date-fns";
+import config from "../../../config/index.js";
+import { ORGANISMES_APPARTENANCE } from "../../../src/common/constants/usersConstants.js";
+import omit from "lodash.omit";
+import { usersDb } from "../../../src/common/model/collections.js";
+
+describe("Users Route", () => {
   afterEach(() => {
     MockDate.reset();
   });

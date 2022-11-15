@@ -1,6 +1,6 @@
-const stringify = require("json-stringify-deterministic");
+import { stringify } from "safe-stable-stringify";
 
-const mergeObjectsBy = (objects = [], key) => {
+export const mergeObjectsBy = (objects = [], key) => {
   return Object.values(
     objects.reduce((acc, cur) => {
       // sometimes the key value can be an object (for example if result comes from a mongodb groupBy with _id representing multiple fields)
@@ -13,5 +13,3 @@ const mergeObjectsBy = (objects = [], key) => {
     }, {})
   );
 };
-
-module.exports = { mergeObjectsBy };

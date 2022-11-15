@@ -1,8 +1,8 @@
-const assert = require("assert").strict;
-const { createIndexes, dropIndexes } = require("../../../../src/common/model/indexes/index");
-const { getDbCollectionIndexes } = require("../../../../src/common/mongodb");
-const usersModelDescriptor = require("../../../../src/common/model/users.model");
-const users = require("../../../../src/common/components/users");
+import { strict as assert } from "assert";
+import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
+import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
+import usersModelDescriptor from "../../../../src/common/model/users.model.js";
+import users from "../../../../src/common/components/users.js";
 
 // TODO : Boucler sur la liste des index names pour les tests
 describe("Users Indexes", () => {

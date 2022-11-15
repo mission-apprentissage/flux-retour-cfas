@@ -1,9 +1,9 @@
-const assert = require("assert").strict;
-const config = require("../../../config");
-const { startServer } = require("../../utils/testUtils");
-const jwt = require("jsonwebtoken");
+import { strict as assert } from "assert";
+import config from "../../../config/index.js";
+import { startServer } from "../../utils/testUtils.js";
+import jwt from "jsonwebtoken";
 
-describe(__filename, () => {
+describe("Login Route", () => {
   it("Vérifie qu'on peut se connecter", async () => {
     const { httpClient, components } = await startServer();
     await components.users.createUser({ username: "user", password: "password" });

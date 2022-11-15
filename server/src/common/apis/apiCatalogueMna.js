@@ -1,12 +1,12 @@
-const axios = require("axios");
-const logger = require("../logger");
-const config = require("../../../config");
+import axios from "axios";
+import logger from "../logger.js";
+import config from "../../../config/index.js";
 
 // Cf Documentation : https://catalogue.apprentissage.beta.gouv.fr/api/v1/docs
 
 const API_ENDPOINT = config.mnaCatalogApi.endpoint;
 
-const getFormations = async (options) => {
+export const getFormations = async (options) => {
   const url = `${API_ENDPOINT}/entity/formations`;
   try {
     let { page, allFormations, limit, query, select } = { page: 1, allFormations: [], limit: 1050, ...options };
@@ -27,8 +27,4 @@ const getFormations = async (options) => {
     logger.error(`getFormations: something went wrong while requesting ${url}`, err);
     return null;
   }
-};
-
-module.exports = {
-  getFormations,
 };

@@ -1,11 +1,11 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { createRandomDossierApprenant } = require("../../data/randomizedSample");
-const { tdbRoles } = require("../../../src/common/roles");
-const config = require("../../../config");
-const jwt = require("jsonwebtoken");
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
+import { tdbRoles } from "../../../src/common/roles.js";
+import config from "../../../config/index.js";
+import jwt from "jsonwebtoken";
 
-const {
+import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
@@ -17,7 +17,11 @@ const { userEventsDb, cfasDb } = require("../../../src/common/model/collections"
 const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
 const { Cfa } = require("../../../src/common/factory/cfa");
 
-describe(__filename, () => {
+import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants.js";
+import { USER_EVENTS_ACTIONS } from "../../../src/common/constants/userEventsConstants.js";
+import { userEventsDb, dossiersApprenantsDb, cfasDb } from "../../../src/common/model/collections.js";
+
+describe("Effectifs Export Route", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     const nbAbandons = 10;
     const nbApprentis = 5;

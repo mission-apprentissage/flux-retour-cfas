@@ -1,11 +1,11 @@
-const express = require("express");
-const Joi = require("joi");
-const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
-const logger = require("../../common/logger");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const validateRequestBody = require("../middlewares/validateRequestBody");
+import express from "express";
+import Joi from "joi";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
+import logger from "../../common/logger.js";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import validateRequestBody from "../middlewares/validateRequestBody.js";
 
-module.exports = ({ users, userEvents }) => {
+export default ({ users, userEvents }) => {
   const router = express.Router();
 
   router.post(

@@ -1,10 +1,10 @@
-const assert = require("assert").strict;
-const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const { historySequenceApprentiToAbandon } = require("../../../data/historySequenceSamples");
-const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
+import { strict as assert } from "assert";
+import dossiersApprenants from "../../../../src/common/components/dossiersApprenants.js";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { historySequenceApprentiToAbandon } from "../../../data/historySequenceSamples.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Randomize Statuts test", () => {
   describe("createRandomDossierApprenant", () => {
     it("Vérifie l'existence d'un DossierApprenant randomisé", async () => {
       const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();

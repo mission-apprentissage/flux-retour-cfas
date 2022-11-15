@@ -1,9 +1,9 @@
-const assert = require("assert").strict;
-const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
-const stats = require("../../../../src/common/components/stats");
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
+import { strict as assert } from "assert";
+import dossiersApprenants from "../../../../src/common/components/dossiersApprenants.js";
+import stats from "../../../../src/common/components/stats.js";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 
-describe(__filename, () => {
+describe("Components Stats Test", () => {
   it("Permet de récupérer le nb d'etablissements distincts par uai", async () => {
     // Seed with sample data
     const { addOrUpdateDossiersApprenants } = await dossiersApprenants();

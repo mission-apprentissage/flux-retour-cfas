@@ -6,14 +6,6 @@ const { isEqual } = require("date-fns");
 const { DossierApprenant } = require("../factory/dossierApprenant");
 const { cfasDb, dossiersApprenantsDb } = require("../model/collections");
 
-module.exports = () => ({
-  getDossierApprenant,
-  addOrUpdateDossiersApprenants,
-  createDossierApprenant,
-  updateDossierApprenant,
-  getDuplicatesList,
-});
-
 /**
  * Find a dossier apprenant from unicity key params
  * @param {*} unicityFields
@@ -353,3 +345,11 @@ const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
     };
   });
 };
+
+export default () => ({
+  getDossierApprenant,
+  addOrUpdateDossiersApprenants,
+  createDossierApprenant,
+  updateDossierApprenant,
+  getDuplicatesList,
+});

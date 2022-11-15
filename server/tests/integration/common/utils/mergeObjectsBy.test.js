@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { mergeObjectsBy } = require("../../../../src/common/utils/mergeObjectsBy");
+import { strict as assert } from "assert";
+import { mergeObjectsBy } from "../../../../src/common/utils/mergeObjectsBy.js";
 
 describe("mergeObjectsBy", () => {
   it("returns an empty array when given an empty array", async () => {

@@ -1,4 +1,8 @@
-const cliProgress = require("cli-progress");
+import cliProgress from "cli-progress";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { getCfdInfo } from "../../common/apis/apiTablesCorrespondances.js";
+import logger from "../../common/logger.js";
 
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");

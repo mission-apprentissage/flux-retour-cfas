@@ -1,6 +1,6 @@
-const { ObjectId } = require("mongodb");
-const { reseauxCfasDb } = require("../model/collections");
-const { escapeRegExp } = require("../utils/regexUtils");
+import { ObjectId } from "mongodb";
+import { reseauxCfasDb } from "../model/collections.js";
+import { escapeRegExp } from "../utils/regexUtils.js";
 
 const create = async ({ nom_reseau, nom_etablissement, uai, siret }) => {
   const { insertedId } = await reseauxCfasDb().insertOne({
@@ -50,17 +50,21 @@ const searchReseauxCfas = async (searchCriteria) => {
   });
 };
 
-module.exports = () => ({
-  getAll: async () => {
-    return await reseauxCfasDb().find().toArray();
-  },
+/**
+ * Récupération de la liste des réseaux de cfas
+ * @returns
+ */
+const getAll = async () => {
+  return await reseauxCfasDb().find().toArray();
+};
+
+export default () => ({
   delete: async (id) => {
     const _id = new ObjectId(id);
-
     if (!ObjectId.isValid(_id)) throw new Error("Wrong reseauxCfas _id passed");
-
     await reseauxCfasDb().deleteOne({ _id });
   },
+  getAll,
   create,
   searchReseauxCfas,
 });

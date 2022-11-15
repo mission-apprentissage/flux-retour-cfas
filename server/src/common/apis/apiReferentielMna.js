@@ -1,12 +1,12 @@
-const axios = require("axios");
-const logger = require("../logger");
-const config = require("../../../config");
+import axios from "axios";
+import logger from "../logger.js";
+import config from "../../../config/index.js";
 
 // Cf Documentation : https://referentiel.apprentissage.beta.gouv.fr/api/v1/doc/#/
 
 const API_ENDPOINT = config.mnaReferentielApi.endpoint;
 
-const fetchOrganismes = async (options = {}) => {
+export const fetchOrganismes = async (options = {}) => {
   const { itemsPerPage = 100, champs } = options;
 
   const { data } = await axios({
@@ -21,7 +21,7 @@ const fetchOrganismes = async (options = {}) => {
   return data;
 };
 
-const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", champs = "contacts,uai,siret") => {
+export const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", champs = "contacts,uai,siret") => {
   const url = `${API_ENDPOINT}/organismes`;
   try {
     const { data } = await axios.post(url, {
@@ -37,21 +37,14 @@ const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", ch
   }
 };
 
-const fetchOrganismeWithSiret = async (siret) => {
+export const fetchOrganismeWithSiret = async (siret) => {
   const url = `${API_ENDPOINT}/organismes/${siret}`;
   const { data } = await axios.get(url);
   return data;
 };
 
-const fetchOrganismesWithUai = async (uai) => {
+export const fetchOrganismesWithUai = async (uai) => {
   const url = `${API_ENDPOINT}/organismes`;
   const { data } = await axios.get(url, { params: { uais: uai } });
   return data;
-};
-
-module.exports = {
-  fetchOrganismes,
-  fetchOrganismeWithSiret,
-  fetchOrganismesWithUai,
-  fetchOrganismesContactsFromSirets,
 };

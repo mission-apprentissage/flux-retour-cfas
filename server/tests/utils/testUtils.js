@@ -6,7 +6,12 @@ const { getDatabase, configureDbSchemaValidation } = require("../../src/common/m
 const redisFakeClient = require("./redisClientMock");
 const { modelDescriptors } = require("../../src/common/model/collections");
 
-const startServer = async () => {
+import createComponents from "../../src/common/components/components.js";
+import server from "../../src/http/server.js";
+import { getDatabase } from "../../src/common/mongodb.js";
+import redisFakeClient from "./redisClientMock.js";
+
+export const startServer = async () => {
   const components = await createComponents({
     db: getDatabase(),
     redisClient: redisFakeClient,
@@ -34,15 +39,10 @@ const startServer = async () => {
   };
 };
 
-const wait = async (time) => {
+export const wait = async (time) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve();
     }, time);
   });
-};
-
-module.exports = {
-  startServer,
-  wait,
 };

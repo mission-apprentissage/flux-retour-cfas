@@ -29,7 +29,7 @@ const parseReseauxTextFromCsv = (reseauText) => {
   return reseaux;
 };
 
-const EXCELLENCE_PRO_FILE_PATH = path.join(__dirname, `./referentiel-reseau-excellence-pro.csv`);
+const EXCELLENCE_PRO_FILE_PATH = path.join(getDirname(import.meta.url), `./referentiel-reseau-excellence-pro.csv`);
 
 /**
  * Script qui crée une collection contenant le référentiel UAI/SIRET enrichi des réseaux existants dans le TDB et dans le fichier Excellence Pro

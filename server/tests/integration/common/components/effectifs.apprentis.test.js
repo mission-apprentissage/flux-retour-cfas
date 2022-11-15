@@ -1,15 +1,17 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const {
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+
+import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
-} = require("../../../data/historySequenceSamples");
-const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { EffectifsApprentis } = require("../../../../src/common/components/effectifs/apprentis");
-const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
+} from "../../../data/historySequenceSamples.js";
 
-describe(__filename, () => {
+import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
+import { EffectifsApprentis } from "../../../../src/common/components/effectifs/apprentis.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+
+describe("Components Effectifs apprentis Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     // Add 10 statuts with history sequence - full
     for (let index = 0; index < 10; index++) {

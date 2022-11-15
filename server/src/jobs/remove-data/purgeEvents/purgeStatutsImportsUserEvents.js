@@ -1,6 +1,6 @@
-const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../../common/constants/userEventsConstants");
-const logger = require("../../../common/logger");
-const { userEventsDb } = require("../../../common/model/collections");
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../common/constants/userEventsConstants.js";
+import logger from "../../../common/logger.js";
+import { userEventsDb } from "../../../common/model/collections.js";
 
 const purgeStatutsImportsUserEvents = async (lastDateToKeep) => {
   logger.info(`... Purging dossiersApprenants Imports UserEvents ...`);
@@ -12,6 +12,6 @@ const purgeStatutsImportsUserEvents = async (lastDateToKeep) => {
   logger.info("... Purged dossiersApprenants Imports  UserEvents done !");
 };
 
-module.exports = {
+export default {
   purgeStatutsImportsUserEvents,
 };

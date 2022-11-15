@@ -9,9 +9,9 @@ const {
   dateOrNull,
 } = require("./json-schema/jsonSchemaTypes");
 
-const collectionName = "cfas";
+export const collectionName = "cfas";
 
-const indexes = () => {
+export const indexes = () => {
   return [
     [
       { nom: "text", nom_tokenized: "text" },
@@ -48,8 +48,4 @@ const schema = object(
   { required: ["uai", "created_at"] }
 );
 
-module.exports = {
-  collectionName,
-  schema,
-  indexes,
-};
+export default { schema, indexes, collectionName };

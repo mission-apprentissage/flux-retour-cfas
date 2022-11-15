@@ -1,5 +1,10 @@
-const cliProgress = require("cli-progress");
-const indexBy = require("lodash.indexby");
+import cliProgress from "cli-progress";
+import indexBy from "lodash.indexby";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import logger from "../../common/logger.js";
+import { getDepartementCodeFromUai } from "../../common/domain/uai.js";
+import { DEPARTEMENTS } from "../../common/constants/territoiresConstants.js";
 
 const { runScript } = require("../scriptWrapper");
 const { asyncForEach } = require("../../common/utils/asyncUtils");

@@ -1,11 +1,10 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { CODES_STATUT_APPRENANT } from "../../../../src/common/constants/dossierApprenantConstants.js";
+import { EffectifsInscritsSansContrats } from "../../../../src/common/components/effectifs/inscrits-sans-contrats.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-const { CODES_STATUT_APPRENANT } = require("../../../../src/common/constants/dossierApprenantConstants");
-const { EffectifsInscritsSansContrats } = require("../../../../src/common/components/effectifs/inscrits-sans-contrats");
-const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
-
-describe(__filename, () => {
+describe("Components Effectifs Inscrits sans contrats Test", () => {
   const inscritsSansContrats = new EffectifsInscritsSansContrats();
 
   beforeEach(async () => {

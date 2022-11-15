@@ -1,11 +1,11 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const users = require("../../../src/common/components/users");
-const { apiRoles } = require("../../../src/common/roles");
-const { JOB_NAMES, jobEventStatuts } = require("../../../src/common/constants/jobsConstants");
-const { EFFECTIF_INDICATOR_NAMES } = require("../../../src/common/constants/dossierApprenantConstants");
-const { createRandomEffectifApprenant } = require("../../data/randomizedSample");
-const { jobEventsDb, effectifsApprenantsDb } = require("../../../src/common/model/collections");
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import users from "../../../src/common/components/users.js";
+import { apiRoles } from "../../../src/common/roles.js";
+import { JOB_NAMES, jobEventStatuts } from "../../../src/common/constants/jobsConstants.js";
+import { EFFECTIF_INDICATOR_NAMES } from "../../../src/common/constants/dossierApprenantConstants.js";
+import { createRandomEffectifApprenant } from "../../data/randomizedSample.js";
+import { jobEventsDb, effectifsApprenantsDb } from "../../../src/common/model/collections.js";
 
 const user = { name: "apiConsumerUser", password: "password" };
 
@@ -27,7 +27,7 @@ const getJwtForUser = async (httpClient) => {
   return data.access_token;
 };
 
-describe(__filename, () => {
+describe("Effectifs Apprenants Route", () => {
   describe("GET effectifs-apprenants/test", () => {
     it("Vérifie que la route effectifs-apprenants/test fonctionne avec un jeton JWT", async () => {
       const { httpClient } = await startServer();

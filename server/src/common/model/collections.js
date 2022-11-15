@@ -35,43 +35,43 @@ const dossiersApprenantsDb = () => {
   return getDbCollection(dossiersApprenantsModelDescriptor.collectionName);
 };
 
-const cfasDb = () => {
+export const cfasDb = () => {
   return getDbCollection(cfasModelDescriptor.collectionName);
 };
 
-const reseauxCfasDb = () => {
+export const reseauxCfasDb = () => {
   return getDbCollection(reseauxCfasModelDescriptor.collectionName);
 };
 
-const formationsDb = () => {
+export const formationsDb = () => {
   return getDbCollection(formationsModelDescriptor.collectionName);
 };
 
-const usersDb = () => {
+export const usersDb = () => {
   return getDbCollection(usersModelDescriptor.collectionName);
 };
 
-const userEventsDb = () => {
+export const userEventsDb = () => {
   return getDbCollection(userEventsModelDescriptor.collectionName);
 };
 
-const jobEventsDb = () => {
+export const jobEventsDb = () => {
   return getDbCollection(jobEventsModelDescriptor.collectionName);
 };
 
-const effectifsApprenantsDb = () => {
+export const effectifsApprenantsDb = () => {
   return getDbCollection(effectifsApprenantsModelDescriptor.collectionName);
 };
 
-const demandesIdentifiantsDb = () => {
+export const demandesIdentifiantsDb = () => {
   return getDbCollection(demandesIdentifiantsModelDescriptor.collectionName);
 };
 
-const demandesBranchementErpDb = () => {
+export const demandesBranchementErpDb = () => {
   return getDbCollection(demandesBranchementErpDbModelDescriptor.collectionName);
 };
 
-const duplicatesEventsDb = () => {
+export const duplicatesEventsDb = () => {
   return getDbCollection(duplicatesEventsModelDescriptor.collectionName);
 };
 

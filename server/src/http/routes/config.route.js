@@ -1,8 +1,8 @@
-const express = require("express");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const config = require("../../../config");
+import express from "express";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import config from "../../../config/index.js";
 
-module.exports = () => {
+export default () => {
   const router = express.Router();
 
   router.get(

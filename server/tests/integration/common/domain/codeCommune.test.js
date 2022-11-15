@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { validateCodeCommune } = require("../../../../src/common/domain/codeCommune");
+import { strict as assert } from "assert";
+import { validateCodeCommune } from "../../../../src/common/domain/codeCommune.js";
 
 describe("Domain Code Commune", () => {
   describe("validateCodeCommune", () => {

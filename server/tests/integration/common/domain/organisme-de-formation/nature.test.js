@@ -1,7 +1,5 @@
-const assert = require("assert").strict;
-const {
-  validateNatureOrganismeDeFormation,
-} = require("../../../../../src/common/domain/organisme-de-formation/nature");
+import { strict as assert } from "assert";
+import { validateNatureOrganismeDeFormation } from "../../../../../src/common/domain/organisme-de-formation/nature.js";
 
 describe("Domain Organisme de formation nature", () => {
   describe("validateNatureOrganismeDeFormation", () => {

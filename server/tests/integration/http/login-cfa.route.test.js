@@ -6,7 +6,7 @@ const { tdbRoles } = require("../../../src/common/roles");
 const { cfasDb } = require("../../../src/common/model/collections");
 const { Cfa } = require("../../../src/common/factory/cfa");
 
-describe(__filename, () => {
+describe("LoginCFA Route", () => {
   it("Vérifie qu'on peut se connecter avec un access token cfa", async () => {
     const { httpClient } = await startServer();
     // create cfa in db

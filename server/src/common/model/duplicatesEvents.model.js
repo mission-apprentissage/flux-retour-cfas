@@ -1,6 +1,6 @@
-const { object, date, objectId, integer, arrayOf, string } = require("./json-schema/jsonSchemaTypes");
+import { object, date, objectId, integer, arrayOf, string } from "./json-schema/jsonSchemaTypes.js";
 
-const collectionName = "duplicatesEvents";
+export const collectionName = "duplicatesEvents";
 
 const schema = object({
   _id: objectId(),
@@ -12,7 +12,4 @@ const schema = object({
   duplicatesIds: arrayOf(string()),
 });
 
-module.exports = {
-  schema,
-  collectionName,
-};
+export default { schema, collectionName };

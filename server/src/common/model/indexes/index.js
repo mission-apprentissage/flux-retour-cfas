@@ -1,12 +1,12 @@
-const { BaseIndexer } = require("./baseIndexer");
-const cfasModelDescriptor = require("./../cfas.model");
-const dossiersApprenantsModelDescriptor = require("../dossiersApprenants.model");
-const formationsModelDescriptor = require("../formations.model");
-const reseauxCfasModelDescriptor = require("../reseauxCfas.model");
-const userEventsModelDescriptor = require("../userEvents.model");
-const usersModelDescriptor = require("../users.model");
+import { BaseIndexer } from "./baseIndexer.js";
+import cfasModelDescriptor from "./../cfas.model.js";
+import dossiersApprenantsModelDescriptor from "../dossiersApprenants.model.js";
+import formationsModelDescriptor from "../formations.model.js";
+import reseauxCfasModelDescriptor from "../reseauxCfas.model.js";
+import userEventsModelDescriptor from "../userEvents.model.js";
+import usersModelDescriptor from "../users.model.js";
 
-const createIndexes = async () => {
+export const createIndexes = async () => {
   await new BaseIndexer({
     collectionName: cfasModelDescriptor.collectionName,
     indexesList: cfasModelDescriptor.indexes,
@@ -38,7 +38,7 @@ const createIndexes = async () => {
   }).createIndexs();
 };
 
-const dropIndexes = async () => {
+export const dropIndexes = async () => {
   await new BaseIndexer({
     collectionName: cfasModelDescriptor.collectionName,
     indexesList: cfasModelDescriptor.indexes,
@@ -69,5 +69,3 @@ const dropIndexes = async () => {
     indexesList: usersModelDescriptor.indexes,
   }).dropIndexs();
 };
-
-module.exports = { createIndexes, dropIndexes };

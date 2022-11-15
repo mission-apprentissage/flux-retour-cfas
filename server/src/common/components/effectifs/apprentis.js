@@ -1,7 +1,7 @@
-const { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } = require("../../constants/dossierApprenantConstants");
-const { Indicator } = require("./indicator");
+import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { Indicator } from "./indicator.js";
 
-class EffectifsApprentis extends Indicator {
+export class EffectifsApprentis extends Indicator {
   /**
    * Pipeline de récupération des apprentis à une date donnée
    * @param {*} searchDate
@@ -37,5 +37,3 @@ class EffectifsApprentis extends Indicator {
     }));
   }
 }
-
-module.exports = { EffectifsApprentis };

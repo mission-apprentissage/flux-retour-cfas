@@ -1,9 +1,9 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
-const { createRandomDossierApprenant, getRandomSiretEtablissement } = require("../../data/randomizedSample");
-const { apiRoles } = require("../../../src/common/roles");
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
+import { createRandomDossierApprenant, getRandomSiretEtablissement } from "../../data/randomizedSample.js";
+import { apiRoles } from "../../../src/common/roles.js";
 
-const {
+import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,

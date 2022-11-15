@@ -1,12 +1,15 @@
-const { dossiersApprenantsDb } = require("../model/collections");
+import { dossiersApprenantsDb } from "../model/collections.js";
 
-module.exports = () => {
-  return {
-    getNbDistinctCfasByUai,
-  };
-};
-
+/**
+ * Récupération du nb distinct de cfas via leurs UAI
+ * @param {*} filters
+ * @returns
+ */
 const getNbDistinctCfasByUai = async (filters = {}) => {
   const distinctCfas = await dossiersApprenantsDb().distinct("uai_etablissement", filters);
   return distinctCfas ? distinctCfas.length : 0;
 };
+
+export default () => ({
+  getNbDistinctCfasByUai,
+});

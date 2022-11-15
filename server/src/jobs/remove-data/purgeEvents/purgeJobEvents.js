@@ -1,5 +1,5 @@
-const logger = require("../../../common/logger");
-const { jobEventsDb } = require("../../../common/model/collections");
+import logger from "../../../common/logger.js";
+import { jobEventsDb } from "../../../common/model/collections.js";
 
 const purgeJobEvents = async (lastDateToKeep) => {
   logger.info(`... Purging JobEvent data ...`);
@@ -7,6 +7,6 @@ const purgeJobEvents = async (lastDateToKeep) => {
   logger.info("... Purged JobEvent done !");
 };
 
-module.exports = {
+export default {
   purgeJobEvents,
 };

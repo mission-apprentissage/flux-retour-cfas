@@ -1,8 +1,8 @@
-const { object, string, date, objectId } = require("./json-schema/jsonSchemaTypes");
+import { object, string, date, objectId } from "./json-schema/jsonSchemaTypes.js";
 
-const collectionName = "jobEvents";
+export const collectionName = "jobEvents";
 
-const schema = object(
+export const schema = object(
   {
     _id: objectId(),
     jobname: string({ description: "Le nom du job" }),
@@ -13,7 +13,4 @@ const schema = object(
   { required: ["jobname", "action", "date"] }
 );
 
-module.exports = {
-  schema,
-  collectionName,
-};
+export default { schema, collectionName };

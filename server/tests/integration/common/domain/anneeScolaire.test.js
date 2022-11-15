@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { validateAnneeScolaire } = require("../../../../src/common/domain/anneeScolaire");
+import { strict as assert } from "assert";
+import { validateAnneeScolaire } from "../../../../src/common/domain/anneeScolaire.js";
 
 describe("Domain AnneeScolaire", () => {
   describe("validateAnneeScolaire", () => {

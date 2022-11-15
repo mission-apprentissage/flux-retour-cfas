@@ -1,7 +1,3 @@
-const escapeRegExp = (string) => {
+export const escapeRegExp = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-};
-
-module.exports = {
-  escapeRegExp,
 };

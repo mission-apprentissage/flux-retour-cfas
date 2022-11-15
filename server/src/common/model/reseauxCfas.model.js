@@ -1,8 +1,8 @@
 const { object, objectId, string, date, stringOrNull, dateOrNull } = require("./json-schema/jsonSchemaTypes");
 
-const collectionName = "reseauxCfas";
+export const collectionName = "reseauxCfas";
 
-const indexes = () => {
+export const indexes = () => {
   return [
     [
       { nom_etablissement: "text", nom_tokenized: "text" },
@@ -14,7 +14,7 @@ const indexes = () => {
   ];
 };
 
-const schema = object({
+export const schema = object({
   _id: objectId(),
   nom_reseau: string({ description: "Nom du réseau de cfas" }),
   nom_etablissement: stringOrNull({ description: "Nom de l'établissement" }),
@@ -24,8 +24,4 @@ const schema = object({
   created_at: date({ description: "Date d'ajout en base de données" }),
 });
 
-module.exports = {
-  collectionName,
-  schema,
-  indexes,
-};
+export default { schema, indexes, collectionName };

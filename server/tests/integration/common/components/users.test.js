@@ -5,7 +5,7 @@ const users = require("../../../../src/common/components/users");
 const { usersDb } = require("../../../../src/common/model/collections");
 const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
 
-describe(__filename, () => {
+describe("Components Users Test", () => {
   describe("createUser", () => {
     const { createUser } = users();
     it("Permet de créer un utilisateur avec mot de passe", async () => {

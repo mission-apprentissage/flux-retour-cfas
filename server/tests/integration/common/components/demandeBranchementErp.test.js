@@ -1,8 +1,8 @@
-const assert = require("assert").strict;
-const demandeBranchementErp = require("../../../../src/common/components/demandeBranchementErp");
-const { demandesBranchementErpDb } = require("../../../../src/common/model/collections");
+import { strict as assert } from "assert";
+import demandeBranchementErp from "../../../../src/common/components/demandeBranchementErp.js";
+import { demandesBranchementErpDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Demande Branchement Test", () => {
   it("Permet de vérifier la création d'une demande de branchement ERP en cours d'interfacage", async () => {
     const { create } = await demandeBranchementErp();
 

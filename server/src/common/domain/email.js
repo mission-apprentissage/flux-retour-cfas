@@ -1,12 +1,7 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-const schema = Joi.string().email();
+export const schema = Joi.string().email();
 
-const validateEmail = (value) => {
+export const validateEmail = (value) => {
   return schema.validate(value);
-};
-
-module.exports = {
-  schema,
-  validateEmail,
 };

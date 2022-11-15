@@ -1,9 +1,9 @@
-const { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } = require("../../constants/dossierApprenantConstants");
-const { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } = require("../../domain/effectif");
-const { Indicator } = require("./indicator");
-const { addMonths } = require("date-fns");
+import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
+import { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } from "../../domain/effectif.js";
+import { Indicator } from "./indicator.js";
+import { addMonths } from "date-fns";
 
-class EffectifsRupturants extends Indicator {
+export class EffectifsRupturants extends Indicator {
   /**
    * Pipeline de récupération des rupturants à une date donnée
    * @param {*} searchDate
@@ -72,5 +72,3 @@ class EffectifsRupturants extends Indicator {
     }));
   }
 }
-
-module.exports = { EffectifsRupturants };

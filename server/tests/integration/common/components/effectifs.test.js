@@ -1,15 +1,15 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const effectifs = require("../../../../src/common/components/effectifs");
-const {
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import effectifs from "../../../../src/common/components/effectifs.js";
+import {
   CODES_STATUT_APPRENANT,
   EFFECTIF_INDICATOR_NAMES,
-} = require("../../../../src/common/constants/dossierApprenantConstants");
-const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { NATURE_ORGANISME_DE_FORMATION } = require("../../../../src/common/domain/organisme-de-formation/nature");
-const { dossiersApprenantsDb, cfasDb } = require("../../../../src/common/model/collections");
+} from "../../../../src/common/constants/dossierApprenantConstants.js";
+import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/domain/organisme-de-formation/nature.js";
+import { dossiersApprenantsDb, cfasDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Effectifs Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     const nbAbandons = 10;
     const nbApprentis = 5;
