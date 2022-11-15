@@ -8,8 +8,8 @@ const contentSecurityPolicy = `
       block-all-mixed-content;
       font-src 'self' https://client.crisp.chat https: data:;
       media-src https://client.crisp.chat;
-      frame-ancestors 'self';
-      frame-src 'self' https://game.crisp.chat https://plausible.io/;
+      frame-ancestors 'self' https://cfas.apprentissage.beta.gouv.fr;
+      frame-src 'self' https://game.crisp.chat https://plausible.io https://cfas.apprentissage.beta.gouv.fr;
       img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://client.crisp.chat https://image.crisp.chat https://www.notion.so data: ${
         process.env.NEXT_PUBLIC_ENV !== "production" ? "" : ""
       };
@@ -19,7 +19,7 @@ const contentSecurityPolicy = `
       };
       script-src-attr 'none';
       style-src 'self' https: https://client.crisp.chat https: *.plausible.io 'unsafe-inline';
-      connect-src 'self' https://geo.api.gouv.fr/ https://client.crisp.chat https://storage.crisp.chat wss://client.relay.crisp.chat wss://stream.relay.crisp.chat https://plausible.io/;
+      connect-src 'self' https://geo.api.gouv.fr/ https://client.crisp.chat https://storage.crisp.chat wss://client.relay.crisp.chat wss://stream.relay.crisp.chat https://plausible.io;
       upgrade-insecure-requests;
 `;
 

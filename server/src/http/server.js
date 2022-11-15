@@ -3,10 +3,14 @@ import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import { apiRoles } from "../common/roles.js";
+
 import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
+import { authMiddleware } from "./middlewares/authMiddleware.js";
+import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
+
 import effectifsApprenantsRouter from "./routes/effectifs-apprenants.route.js";
 import dossierApprenantRouter from "./routes/dossiers-apprenants.route.js";
 import lienPriveCfaRouter from "./routes/lien-prive-cfa.route.js";
@@ -27,17 +31,50 @@ import usersRouter from "./routes/users.route.js";
 import reseauxCfasRouter from "./routes/reseaux-cfas.route.js";
 import effectifsNationalRouter from "./routes/effectifs-national.route.js";
 
+import auth from "./routes/user.routes/auth.routes.js";
+import password from "./routes/user.routes/password.routes.js";
+import profile from "./routes/user.routes/profile.routes.js";
+import session from "./routes/session.routes.js";
+
+import usersAdmin from "./routes/admin.routes/users.routes.js";
+import rolesAdmin from "./routes/admin.routes/roles.routes.js";
+
 export default async (components) => {
   const app = express();
 
   const requireJwtAuthentication = requireJwtAuthenticationMiddleware(components);
   const adminOnly = permissionsMiddleware([apiRoles.administrator]);
 
+  const checkJwtToken = authMiddleware();
+
   app.use(bodyParser.json());
   app.use(logMiddleware());
   app.use(cookieParser());
   app.use(passport.initialize());
 
+  // public access
+  app.use("/api/v1/auth", auth());
+  app.use("/api/v1/password", password(components));
+
+  // private access
+  app.use("/api/v1/session", checkJwtToken, session());
+  app.use("/api/v1/profile", checkJwtToken, profile());
+
+  // private admin access
+  app.use(
+    "/api/v1/admin",
+    checkJwtToken,
+    pageAccessMiddleware(["admin/page_gestion_utilisateurs"]),
+    usersAdmin(components)
+  );
+  app.use(
+    "/api/v1/admin",
+    checkJwtToken,
+    pageAccessMiddleware(["admin/page_gestion_utilisateurs", "admin/page_gestion_roles"]),
+    rolesAdmin()
+  );
+
+  // PREVIOUS
   // open routes
   app.use("/api/login", loginRouter(components));
   app.use("/api/login-cfa", loginCfaRouter(components));

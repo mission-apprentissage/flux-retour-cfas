@@ -9,20 +9,4 @@ location / {
     if ($always_redirect = on) {
         return 301 https://$host$request_uri;
     }
-
-    # set $CSP "default-src 'self';";
-    # set $CSP "connect-src 'self' https://*.ingest.sentry.io;base-uri;";
-    # set $CSP "block-all-mixed-content;";
-    # set $CSP "font-src 'self' https://client.crisp.chat https: data:;";
-    # set $CSP "media-src https://client.crisp.chat;";
-    # set $CSP "frame-ancestors 'self';";
-    # set $CSP "frame-src 'self' https://game.crisp.chat https://plausible.io/;";
-    # set $CSP "img-src 'self' https://files.tableau-de-bord.apprentissage.beta.gouv.fr https://client.crisp.chat https://image.crisp.chat data:;";
-    # set $CSP "object-src 'none';";
-    # set $CSP "script-src 'self' https://plausible.io/js/plausible.js https://client.crisp.chat https://settings.crisp.chat 'sha256-yt+SNVxRkIi6H6yb7ndFuZM1esMX9esg3UpRHaTsyVk=';";# create-react-app iframe error
-    # set $CSP "script-src-attr 'none';";
-    # set $CSP "style-src 'self' https: https://client.crisp.chat https: *.plausible.io 'unsafe-inline';";
-    # set $CSP "connect-src 'self' https://geo.api.gouv.fr/ https://client.crisp.chat https://storage.crisp.chat wss://client.relay.crisp.chat wss://stream.relay.crisp.chat https://plausible.io/;";
-    # set $CSP "upgrade-insecure-requests;";
-    # add_header Content-Security-Policy $CSP always;
 }

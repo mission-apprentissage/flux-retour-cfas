@@ -3,6 +3,7 @@ import { Box, Container } from "@chakra-ui/react";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
+import ContactSection from "../ContactSection/ContactSection";
 
 export function Page({ children, ...rest }) {
   return (
@@ -14,6 +15,7 @@ export function Page({ children, ...rest }) {
           <Container maxW="xl">{children}</Container>
         </Box>
       </Box>
+      <ContactSection />
       <Footer />
     </Container>
   );

@@ -1,7 +1,7 @@
 import { Flex, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import NavLink from "next/link";
+import Link from "../Links/Link";
 
 import { RightLine } from "../../theme/components/icons";
 
@@ -42,8 +42,8 @@ const LinkCard = ({ children, linkHref, variant = "blue", ...styleProps }) => {
       fontWeight={cardVariants[variant].fontWeight}
       paddingX={cardVariants[variant].paddingX}
       flex="1"
-      as={NavLink}
-      to={linkHref}
+      as={Link}
+      href={linkHref}
       {...styleProps}
     >
       <Text color={cardVariants[variant].textColor} marginBottom="4w" flex="1">

@@ -100,10 +100,7 @@ const Footer = () => {
                 </Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="https://github.com/mission-apprentissage/cerfa/releases" isExternal>
-                  Journal des versions
-                  <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
-                </Link>
+                <Link href="/journal-des-evolutions">Journal des évolutions</Link>
               </ListItem>
               <ListItem _after={{ content: "''", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href="https://github.com/mission-apprentissage/cerfa" isExternal>
