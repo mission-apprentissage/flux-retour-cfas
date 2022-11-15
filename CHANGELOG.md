@@ -1,3 +1,10 @@
+## [2.55.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1-beta.1...v2.55.1-beta.2) (2022-11-15)
+
+
+### Bug Fixes
+
+* **ui:** corrige lien vers la page question réponses ([#2242](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2242)) ([3f8d30f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3f8d30f834286d56b0b3e39989c4254b3329f545))
+
 ## [2.55.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.0...v2.55.1-beta.1) (2022-11-15)
 
 
