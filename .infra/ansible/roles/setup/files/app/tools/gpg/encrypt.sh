@@ -7,7 +7,7 @@ function import_recipients() {
   IFS=', ' read -r -a keys <<<"${RECIPIENTS_KEYS:-""}"
 
   for key in "${keys[@]}"; do
-    gpg --keyserver keyserver.ubuntu.com --recv-keys "${key}"
+    gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "${key}"
   done
 }
 
@@ -31,11 +31,12 @@ function encrypt() {
   add_recipients_as_params recipients
   gpg \
     --default-key "mna_devops" \
+    -vvv \
+    --charset=utf-8 \
     --encrypt \
     --cipher-algo AES256 \
     --always-trust \
     ${recipients[*]} <"${input}"
-
 }
 
 encrypt "$@"
