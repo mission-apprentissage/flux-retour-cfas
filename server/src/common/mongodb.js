@@ -46,6 +46,22 @@ export const getDbCollectionIndexes = async (name) => {
   return await mongodbClient.db().collection(name).indexes();
 };
 
+/**
+ * Clear de toutes les collections
+ * @returns
+ */
+export const clearAllCollections = async () => {
+  let collections = await getDatabase().collections();
+  return Promise.all(collections.map((c) => c.deleteMany({})));
+};
+
+export function clearCollection(name) {
+  logger.warn(`Suppression des données de la collection ${name}...`);
+  return getDbCollection(name)
+    .deleteMany({})
+    .then((res) => res.deletedCount);
+}
+
 // export const configureValidation = async () => {
 //   await ensureInitialization();
 //   await Promise.all(

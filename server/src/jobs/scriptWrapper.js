@@ -45,7 +45,6 @@ const exit = async (rawError) => {
 export const runScript = async (job, jobName) => {
   try {
     const startDate = new Date();
-    console.log(config);
     redisClient = await initRedis({
       uri: config.redis.uri,
       onError: (err) => logger.error("Redis client error", err),

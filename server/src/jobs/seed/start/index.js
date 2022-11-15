@@ -17,12 +17,12 @@ const createUsers = async ({ adminEmail }) => {
 };
 
 export const seed = async ({ adminEmail }) => {
-  await createUsers({ adminEmail });
-
   for (const key of Object.keys(defaultRolesAcls)) {
     await createRole(defaultRolesAcls[key]);
     logger.info(`Role ${key} created`);
   }
+
+  await createUsers({ adminEmail });
 
   logger.info(`Seed tjp-pilotage created`);
 };

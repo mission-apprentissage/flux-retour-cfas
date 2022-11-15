@@ -17,7 +17,13 @@ export function schemaValidation(entity, schema, extensions = []) {
     extensions: [
       {
         type: "objectId",
-        base: Joi.string(), // TODO
+        base: Joi.alternatives(
+          Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+          Joi.object().keys({
+            id: Joi.any(),
+            // _bsontype: Joi.allow("ObjectId"), // Cannot assign to read only property '_bsontype' of object '[object Object]'
+          })
+        ),
       },
       {
         type: "int",

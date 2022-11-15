@@ -27,7 +27,7 @@ export function schema() {
       has_accept_cgu_version: string({ description: "Version des cgu accepté par l'utilisateur" }),
       orign_register: string({ description: "Origine de l'inscription", enum: ["ORIGIN"] }),
       is_admin: boolean({ description: "true si l'utilisateur est administrateur" }),
-      roles: arrayOf(objectId({ bsonType: "string" }), { description: "Roles de l'utilisateur" }),
+      roles: arrayOf(objectId(), { description: "Roles de l'utilisateur" }),
       custom_acl: arrayOf(string(), { description: "Custom Access control level array" }),
       created_at: date({ description: "Date de création du compte" }),
       last_connection: date({ description: "Date de dernière connexion" }),

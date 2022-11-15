@@ -2,7 +2,7 @@ import "dotenv/config.js";
 import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seed } from "./seed/start/index.js";
-// import { clear } from "./clear/index.js";
+import { clear } from "./clear/index.js";
 
 /**
  * Job d'initialisation projet
@@ -18,16 +18,16 @@ cli
   });
 
 /**
- * Job de netoyyage de db
+ * Job de netoyage de db
  */
-// cli
-//   .command("clear")
-//   .description("Clear projet")
-//   .option("-a, --all", "Tout supprimer")
-//   .action(({ all }) => {
-//     runScript(async () => {
-//       return clear({ clearAll: all });
-//     }, "Clear");
-//   });
+cli
+  .command("clear")
+  .description("Clear projet")
+  .option("-a, --all", "Tout supprimer")
+  .action(({ all }) => {
+    runScript(async () => {
+      return clear({ clearAll: all });
+    }, "Clear");
+  });
 
 cli.parse(process.argv);

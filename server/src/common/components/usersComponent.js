@@ -21,7 +21,7 @@ export const createUser = async ({ email, password }, options = {}) => {
     rolesMatchIds = await rolesDb()
       .find({ name: { $in: roles } }, { projection: { _id: 1 } })
       .toArray();
-    rolesMatchIds = rolesMatchIds.map(({ _id }) => _id.toString());
+    rolesMatchIds = rolesMatchIds.map(({ _id }) => _id);
     if (!rolesMatchIds.length === 0) {
       throw new Error("Roles doesn't exist");
     }
