@@ -48,26 +48,18 @@ const getUser = async (username) => {
   return await usersDb().findOne({ username });
 };
 
-      return user;
-    },
-    // TODO à tester
-    getAll: async () => {
-      return await usersDb().find().toArray();
-    },
-    createUser: async (userProps) => {
-      const username = userProps.username;
-      const password = userProps.password || generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
-      const passwordHash = sha512Utils.hash(password);
-      const permissions = userProps.permissions || [];
-      const network = userProps.network;
-      const region = userProps.region;
-      const organisme = userProps.organisme;
-      const email = userProps.email;
-
+/**
+ * Récupération d'un utilisateur depuis son id
+ * @param {*} id
+ * @returns
+ */
+const getUserById = async (id) => {
+  const _id = new ObjectId(id);
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+  const user = await usersDb().findOne({ _id });
   if (!user) {
     throw new Error(`Unable to find user`);
   }
-
   return user;
 };
 

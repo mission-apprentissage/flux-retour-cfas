@@ -1,6 +1,6 @@
-const { archiveDossiersApprenantsDb } = require("../model/collections");
+import { archiveDossiersApprenantsDb } from "../model/collections.js";
 
-module.exports = () => ({
+export default () => ({
   async create(dossierApprenantData) {
     const anonymousValue = `XXXXX`;
     const anonymizedData = {

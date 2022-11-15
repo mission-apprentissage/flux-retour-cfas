@@ -1,11 +1,11 @@
-const express = require("express");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
-const { REGIONS, DEPARTEMENTS } = require("../../common/constants/territoiresConstants");
-const { ORGANISMES_APPARTENANCE } = require("../../common/constants/usersConstants");
-const { referentielSiretUaiDb } = require("../../common/model/collections");
+import express from "express";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import { RESEAUX_CFAS } from "../../common/constants/networksConstants.js";
+import { REGIONS, DEPARTEMENTS } from "../../common/constants/territoiresConstants.js";
+import { ORGANISMES_APPARTENANCE } from "../../common/constants/usersConstants.js";
+import { referentielSiretUaiDb } from "../../common/model/collections.js";
 
-module.exports = () => {
+export default () => {
   const router = express.Router();
 
   router.get(

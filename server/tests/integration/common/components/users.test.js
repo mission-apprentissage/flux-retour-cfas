@@ -1,9 +1,9 @@
-const assert = require("assert").strict;
-const { subMinutes, differenceInCalendarDays, differenceInSeconds } = require("date-fns");
-const mongodb = require("mongodb");
-const users = require("../../../../src/common/components/users");
-const { usersDb } = require("../../../../src/common/model/collections");
-const { apiRoles, tdbRoles } = require("../../../../src/common/roles");
+import { strict as assert } from "assert";
+import { subMinutes, differenceInCalendarDays, differenceInSeconds } from "date-fns";
+import mongodb from "mongodb";
+import users from "../../../../src/common/components/users.js";
+import { usersDb } from "../../../../src/common/model/collections.js";
+import { apiRoles, tdbRoles } from "../../../../src/common/roles.js";
 
 describe("Components Users Test", () => {
   describe("createUser", () => {

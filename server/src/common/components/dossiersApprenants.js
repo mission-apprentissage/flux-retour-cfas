@@ -1,10 +1,10 @@
-const { ObjectId } = require("mongodb");
-const { DUPLICATE_TYPE_CODES } = require("../constants/dossierApprenantConstants");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { escapeRegExp } = require("../utils/regexUtils");
-const { isEqual } = require("date-fns");
-const { DossierApprenant } = require("../factory/dossierApprenant");
-const { cfasDb, dossiersApprenantsDb } = require("../model/collections");
+import { ObjectId } from "mongodb";
+import { DUPLICATE_TYPE_CODES } from "../constants/dossierApprenantConstants.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { escapeRegExp } from "../utils/regexUtils.js";
+import { isEqual } from "date-fns";
+import { DossierApprenant } from "../factory/dossierApprenant.js";
+import { cfasDb, dossiersApprenantsDb } from "../model/collections.js";
 
 /**
  * Find a dossier apprenant from unicity key params

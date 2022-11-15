@@ -1,4 +1,4 @@
-const { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } = require("./json-schema/jsonSchemaTypes");
+import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "users";
 

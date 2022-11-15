@@ -1,4 +1,4 @@
-const {
+import {
   object,
   string,
   integer,
@@ -7,7 +7,7 @@ const {
   stringOrNull,
   dateOrNull,
   arrayOfOrNull,
-} = require("./json-schema/jsonSchemaTypes");
+} from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "effectifsApprenants";
 

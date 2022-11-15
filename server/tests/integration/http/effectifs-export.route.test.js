@@ -10,16 +10,12 @@ import {
   historySequenceApprenti,
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
-} = require("../../data/historySequenceSamples");
-const { RESEAUX_CFAS } = require("../../../src/common/constants/networksConstants");
-const { USER_EVENTS_ACTIONS } = require("../../../src/common/constants/userEventsConstants");
-const { userEventsDb, cfasDb } = require("../../../src/common/model/collections");
-const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
-const { Cfa } = require("../../../src/common/factory/cfa");
-
+} from "../../data/historySequenceSamples.js";
 import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants.js";
 import { USER_EVENTS_ACTIONS } from "../../../src/common/constants/userEventsConstants.js";
-import { userEventsDb, dossiersApprenantsDb, cfasDb } from "../../../src/common/model/collections.js";
+import { userEventsDb, cfasDb } from "../../../src/common/model/collections.js";
+import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
+import { Cfa } from "../../../src/common/factory/cfa.js";
 
 describe("Effectifs Export Route", () => {
   const seedDossiersApprenants = async (statutsProps) => {

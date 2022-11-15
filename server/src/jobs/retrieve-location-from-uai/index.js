@@ -5,13 +5,7 @@ import { asyncForEach } from "../../common/utils/asyncUtils.js";
 import logger from "../../common/logger.js";
 import { getDepartementCodeFromUai } from "../../common/domain/uai.js";
 import { DEPARTEMENTS } from "../../common/constants/territoiresConstants.js";
-
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const logger = require("../../common/logger");
-const { getDepartementCodeFromUai } = require("../../common/domain/uai");
-const { DEPARTEMENTS } = require("../../common/constants/territoiresConstants");
-const { dossiersApprenantsDb } = require("../../common/model/collections");
+import { dossiersApprenantsDb } from "../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

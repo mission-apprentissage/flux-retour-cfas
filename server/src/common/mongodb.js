@@ -1,6 +1,6 @@
-const { MongoClient } = require("mongodb");
-const logger = require("./logger");
-const { asyncForEach } = require("./utils/asyncUtils");
+import { MongoClient } from "mongodb";
+import logger from "./logger.js";
+import { asyncForEach } from "./utils/asyncUtils.js";
 
 let mongodbClient;
 
@@ -61,7 +61,7 @@ const createCollectionIfDoesNotExist = async (collectionName) => {
   }
 };
 
-const configureDbSchemaValidation = async (modelDescriptors) => {
+export const configureDbSchemaValidation = async (modelDescriptors) => {
   const db = getDatabase();
   await ensureInitialization();
   await asyncForEach(modelDescriptors, async ({ collectionName, schema }) => {
@@ -79,13 +79,4 @@ const configureDbSchemaValidation = async (modelDescriptors) => {
       },
     });
   });
-};
-
-module.exports = {
-  connectToMongodb,
-  closeMongodbConnection,
-  getDbCollection,
-  getDatabase,
-  getDbCollectionIndexes,
-  configureDbSchemaValidation,
 };

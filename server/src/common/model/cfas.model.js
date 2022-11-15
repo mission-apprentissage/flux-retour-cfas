@@ -1,4 +1,4 @@
-const {
+import {
   object,
   objectId,
   string,
@@ -7,7 +7,7 @@ const {
   boolean,
   stringOrNull,
   dateOrNull,
-} = require("./json-schema/jsonSchemaTypes");
+} from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "cfas";
 

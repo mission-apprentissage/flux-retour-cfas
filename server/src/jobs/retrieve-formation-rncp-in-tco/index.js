@@ -3,12 +3,7 @@ import { runScript } from "../scriptWrapper.js";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";
 import { getCfdInfo } from "../../common/apis/apiTablesCorrespondances.js";
 import logger from "../../common/logger.js";
-
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { getCfdInfo } = require("../../common/apis/apiTablesCorrespondances");
-const logger = require("../../common/logger");
-const { dossiersApprenantsDb } = require("../../common/model/collections");
+import { dossiersApprenantsDb } from "../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

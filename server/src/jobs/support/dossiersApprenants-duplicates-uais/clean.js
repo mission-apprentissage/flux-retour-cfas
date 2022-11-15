@@ -5,15 +5,7 @@ import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
 import { DUPLICATE_TYPE_CODES } from "../../../common/constants/dossierApprenantConstants.js";
 import { collectionNames } from "../../constants.js";
-
-const { runScript } = require("../../scriptWrapper");
-const logger = require("../../../common/logger");
-const { asyncForEach } = require("../../../common/utils/asyncUtils");
-const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
-const { DUPLICATE_TYPE_CODES } = require("../../../common/constants/dossierApprenantConstants");
-
-const { collectionNames } = require("../../constants");
-const { dossiersApprenantsDb } = require("../../../common/model/collections");
+import { dossiersApprenantsDb } from "../../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

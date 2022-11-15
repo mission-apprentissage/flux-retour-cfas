@@ -1,11 +1,11 @@
-const { connectToMongodb, closeMongodbConnection, configureDbSchemaValidation } = require("../common/mongodb");
-const createComponents = require("../common/components/components");
-const logger = require("../common/logger");
-const { initRedis } = require("../common/infra/redis");
-const { formatDuration, intervalToDuration } = require("date-fns");
-const { jobEventStatuts } = require("../common/constants/jobsConstants");
-const config = require("../../config");
-const { jobEventsDb, modelDescriptors } = require("../common/model/collections");
+import { connectToMongodb, closeMongodbConnection, configureDbSchemaValidation } from "../common/mongodb.js";
+import createComponents from "../common/components/components.js";
+import logger from "../common/logger.js";
+import { initRedis } from "../common/infra/redis/index.js";
+import { formatDuration, intervalToDuration } from "date-fns";
+import { jobEventStatuts } from "../common/constants/jobsConstants.js";
+import config from "../../config/index.js";
+import { jobEventsDb, modelDescriptors } from "../common/model/collections.js";
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -52,8 +52,8 @@ export const runScript = async (job, jobName) => {
       onReady: () => logger.info("Redis client ready!"),
     });
 
-      const mongodbClient = await connectToMongodb(config.mongodb.uri);
-      await configureDbSchemaValidation(modelDescriptors);
+    const mongodbClient = await connectToMongodb(config.mongodb.uri);
+    await configureDbSchemaValidation(modelDescriptors);
 
     const components = await createComponents({ redisClient, db: mongodbClient });
     await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
@@ -62,12 +62,12 @@ export const runScript = async (job, jobName) => {
     const endDate = new Date();
     const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
 
-      await jobEventsDb().insertOne({
-        jobname: jobName,
-        date: new Date(),
-        action: jobEventStatuts.executed,
-        data: { startDate, endDate, duration },
-      });
+    await jobEventsDb().insertOne({
+      jobname: jobName,
+      date: new Date(),
+      action: jobEventStatuts.executed,
+      data: { startDate, endDate, duration },
+    });
 
     await exit();
   } catch (e) {

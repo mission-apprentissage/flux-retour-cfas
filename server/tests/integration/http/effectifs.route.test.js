@@ -7,17 +7,18 @@ import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
-} = require("../../data/historySequenceSamples");
-const { NATURE_ORGANISME_DE_FORMATION } = require("../../../src/common/domain/organisme-de-formation/nature");
-const { cfasDb, dossiersApprenantsDb } = require("../../../src/common/model/collections");
-const dossiersApprenants = require("../../../src/common/components/dossiersApprenants");
+} from "../../data/historySequenceSamples.js";
+
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../src/common/domain/organisme-de-formation/nature.js";
+import { cfasDb, dossiersApprenantsDb } from "../../../src/common/model/collections.js";
+import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
 
 const createRandomDossierApprenantWithHistorique = async (props) => {
   const { _id } = await dossiersApprenants().createDossierApprenant(createRandomDossierApprenant());
   await dossiersApprenantsDb().updateOne({ _id }, { $set: props });
 };
 
-describe(__filename, () => {
+describe("Effectifs Route", () => {
   describe("/api/effectifs route", () => {
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();
