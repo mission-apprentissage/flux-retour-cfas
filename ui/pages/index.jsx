@@ -31,7 +31,12 @@ export default function Home() {
                   les <strong>données clés</strong> de l&apos;apprentissage en <strong>temps réel</strong>
                 </Text>
               </Box>
-              <Image src="/images/dashboard-illustration.svg" alt="illustration tableau de bord" paddingBottom="3w" />
+              <Image
+                src="/images/dashboard-illustration.svg"
+                alt="illustration tableau de bord"
+                paddingBottom="3w"
+                display={["none", "none", "none", "inline-block"]}
+              />
             </Flex>
             <HStack spacing="3w" _hover={{ cursor: "pointer" }}>
               <LinkCard linkHref={NAVIGATION_PAGES.Login.path}>
