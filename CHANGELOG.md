@@ -1,3 +1,10 @@
+## [2.55.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.0...v2.55.1-beta.1) (2022-11-15)
+
+
+### Bug Fixes
+
+* **server:** fix le schema de validation du modele dossiersApprenants et supprime champs inutiles (migration) ([0b64d2c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0b64d2c99da7909dfb0c70bc6ca49e32269ef11e))
+
 # [2.55.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.54.0...v2.55.0) (2022-11-09)
 
 
