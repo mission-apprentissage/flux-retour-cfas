@@ -1373,6 +1373,11 @@ charenc@0.0.2:
   resolved "https://registry.npmjs.org/charenc/-/charenc-0.0.2.tgz"
   integrity sha1-wKHS86cJLgN3S/qD8UwPxXkKhmc=
 
+checksum-stream@1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/checksum-stream/-/checksum-stream-1.0.3.tgz#4e17e6f83c80f7a9f43e83b445a81454c38a0172"
+  integrity sha512-OUI+PL6ksDK1ZXdpgv+xFO59rfTjFUl3KhTXqvR5gNYiuYUpGBuU0NMc5cR4uGmzJ4i3NMNowgClBfrUpTFoGg==
+
 cheerio-select@^1.5.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/cheerio-select/-/cheerio-select-1.6.0.tgz#489f36604112c722afa147dedd0d4609c09e1696"
@@ -4567,6 +4572,11 @@ range-parser@~1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/range-parser/-/range-parser-1.2.1.tgz"
   integrity sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==
+
+rate-limiter-flexible@2.3.6:
+  version "2.3.6"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-2.3.6.tgz#b1a2549dca91069c8a33d57c08a27262c0356c60"
+  integrity sha512-8DVFOe89rreyut/vzwBI7vgXJynyYoYnH5XogtAKs0F/neAbCTTglXxSJ7fZeZamcFXZDvMidCBvps4KM+1srw==
 
 raw-body@2.5.1:
   version "2.5.1"

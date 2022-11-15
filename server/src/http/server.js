@@ -31,7 +31,9 @@ import usersRouter from "./routes/users.route.js";
 import reseauxCfasRouter from "./routes/reseaux-cfas.route.js";
 import effectifsNationalRouter from "./routes/effectifs-national.route.js";
 
+import emails from "./routes/emails.routes.js";
 import auth from "./routes/user.routes/auth.routes.js";
+import register from "./routes/user.routes/register.routes.js";
 import password from "./routes/user.routes/password.routes.js";
 import profile from "./routes/user.routes/profile.routes.js";
 import session from "./routes/session.routes.js";
@@ -53,7 +55,9 @@ export default async (components) => {
   app.use(passport.initialize());
 
   // public access
+  app.use("/api/emails", emails()); // No versionning to be sure emails links are always working
   app.use("/api/v1/auth", auth());
+  app.use("/api/v1/auth", register(components));
   app.use("/api/v1/password", password(components));
 
   // private access
