@@ -2,9 +2,10 @@ import "dotenv/config.js";
 import server from "./http/server.js";
 import logger from "./common/logger.js";
 import config from "./config.js";
-import { initRedis } from "./common/infra/redis/index.js";
+import { initRedis } from "./common/services/redis.js";
 import createComponents from "./common/components/components.js";
 import { connectToMongodb, getDatabase } from "./common/mongodb.js";
+import createServices from "./services.js";
 
 process.on("unhandledRejection", (e) => logger.error("An unexpected error occurred", e));
 process.on("uncaughtException", (e) => logger.error("An unexpected error occurred", e));
@@ -21,7 +22,8 @@ process.on("uncaughtException", (e) => logger.error("An unexpected error occurre
   const db = getDatabase();
 
   const components = await createComponents({ db, redisClient });
+  const services = await createServices();
 
-  const http = await server(components);
+  const http = await server({ ...components, ...services });
   http.listen(5000, () => logger.info(`${config.appName} - Server ready and listening on port ${5000}`));
 })();

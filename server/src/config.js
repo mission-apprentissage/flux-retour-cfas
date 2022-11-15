@@ -13,6 +13,22 @@ export const config = {
       jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET").required().asString(),
       expiresIn: env.get("FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET_EXPIRES").default("24h").asString(),
     },
+    activation: {
+      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET").asString(),
+      expiresIn: "96h",
+    },
+    actionToken: {
+      jwtSecret: env.get("FLUX_RETOUR_CFAS__AUTH_ACTION_TOKEN_JWT_SECRET").asString(),
+      expiresIn: "90 days",
+    },
+    resetPasswordToken: {
+      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET").asString(),
+      expiresIn: "1h",
+    },
+    apiToken: {
+      jwtSecret: env.get("FLUX_RETOUR_CFAS_AUTH_API_TOKEN_JWT_SECRET").asString(),
+      expiresIn: "24h",
+    },
   },
   log: {
     type: env.get("FLUX_RETOUR_CFAS_LOG_TYPE").default("console").asString(),
@@ -38,6 +54,14 @@ export const config = {
   },
   mnaReferentielApi: {
     endpoint: env.get("FLUX_RETOUR_CFAS_MNA_REFERENTIEL_ENDPOINT_URL").required().asString(),
+  },
+  smtp: {
+    host: env.get("FLUX_RETOUR_CFAS_SMTP_HOST").asString(),
+    port: env.get("FLUX_RETOUR_CFAS_SMTP_PORT").asString(),
+    auth: {
+      user: env.get("FLUX_RETOUR_CFAS_SMTP_AUTH_USER").asString(),
+      pass: env.get("FLUX_RETOUR_CFAS_SMTP_AUTH_PASS").asString(),
+    },
   },
   clamav: {
     uri: env.get("FLUX_RETOUR_CFAS_CLAMAV_URI").default("127.0.0.1:3310").asString(),

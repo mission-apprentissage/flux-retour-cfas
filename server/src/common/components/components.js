@@ -12,8 +12,6 @@ import demandeBranchementErpComponent from "./demandeBranchementErp.js";
 import createCacheComponent from "./cache.js";
 import createOvhStorageComponent from "./ovhStorage.js";
 import createArchiveDossiersApprenantsComponent from "./archiveDossiersApprenants.js";
-import { createClamav } from "../infra/clamav/index.js";
-import config from "../../config.js";
 
 export default async (options = {}) => {
   const db = options.db;
@@ -32,7 +30,6 @@ export default async (options = {}) => {
   const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
 
   // TODO Refacto infra components -> to services structure
-  const clamav = options.clamav || (await createClamav(config.clamav.uri));
   const cache = options.cache || createCacheComponent(options.redisClient);
 
   const archiveDossiersApprenants =
@@ -44,7 +41,6 @@ export default async (options = {}) => {
     userEvents,
     jobEvents,
     cache,
-    clamav,
     db,
     dossiersApprenants,
     formations,
