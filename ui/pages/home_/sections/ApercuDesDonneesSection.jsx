@@ -8,7 +8,7 @@ import useFetchEffectifsNational from "../../../hooks/useFetchEffectifsNational"
 import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
 import { Checkbox } from "../../../theme/components/icons";
 
-const Count = ({ count, label }) => {
+const Count = ({ count = 0, label }) => {
   return (
     <article>
       <Text as="strong" fontSize="beta">
@@ -26,7 +26,7 @@ Count.propTypes = {
 
 const ApercuDesDonneesSection = () => {
   const date = startOfHour(new Date());
-  const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
+  // const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
 
   return (
     <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} background="galt" paddingY="4w">
@@ -38,8 +38,14 @@ const ApercuDesDonneesSection = () => {
             Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
             En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
           </Text>
-
-          {isEffectifsNationalLoading && (
+          <HStack marginTop="3w" spacing="5w" fontSize="gamma" color="grey.800">
+            <Count label="Organismes de formation" />
+            <Count label="Apprentis" />
+            <Count label="Jeunes sans contrat" />
+            <Count label="Rupturants" />
+            <Count label="Abandons" />
+          </HStack>
+          {/* {isEffectifsNationalLoading && (
             <Skeleton marginTop="3w" width="100%" height="4rem" startColor="grey.300" endColor="galt" />
           )}
           {effectifsNational && (
@@ -50,12 +56,12 @@ const ApercuDesDonneesSection = () => {
               <Count count={effectifsNational.rupturants} label="Rupturants" />
               <Count count={effectifsNational.abandons} label="Abandons" />
             </HStack>
-          )}
+          // )}
           {error && (
             <Text color="error" marginTop="3w">
               Impossible de charger les effectifs au national
             </Text>
-          )}
+          )} */}
 
           <Divider marginY="3w" />
 
