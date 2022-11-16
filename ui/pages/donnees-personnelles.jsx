@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
-import { Box, Container, Heading } from "@chakra-ui/react";
-import { Page } from "../components";
+import { Heading } from "@chakra-ui/react";
+import { Page, Section } from "../components";
 import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 import DonneesPersonnelles from "../components/legal/DonneesPersonnelles";
 import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
@@ -18,15 +18,11 @@ const DonneesPersonnellesPage = () => {
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box w="100%" pt={[4, 8]} px={[1, 1, 12, 24]}>
-        <Container maxW="xl">
-          <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
-          <Heading textStyle="h2" color="grey.800" mt={5}>
-            {title}
-          </Heading>
-          <DonneesPersonnelles />
-        </Container>
-      </Box>
+      <Section>
+        <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
+
+        <DonneesPersonnelles />
+      </Section>
     </Page>
   );
 };
