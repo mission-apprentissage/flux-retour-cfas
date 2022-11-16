@@ -66,8 +66,11 @@ export const Cgu = ({ onLoad = () => {} }) => {
         </Heading>
         <Text>
           L'accès à certaines données du Tableau de bord est restreint à une inscription à un compte :
-          https://cfas.apprentissage.beta.gouv.fr/login. Les services proposés ne sont accessibles qu'aux seuls
-          utilisateurs munis d'un identifiant d'authentification et d'un mot de passe.
+          <Link color="primary" href="https://cfas.apprentissage.beta.gouv.fr/login">
+            https://cfas.apprentissage.beta.gouv.fr/login
+          </Link>
+          . Les services proposés ne sont accessibles qu'aux seuls utilisateurs munis d'un identifiant
+          d'authentification et d'un mot de passe.
           <br />
           <br />
           De la même façon, la connexion au compte permet d’accéder, de façon contextualisée selon le profil de
