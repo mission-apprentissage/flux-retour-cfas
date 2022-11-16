@@ -5,7 +5,6 @@ import Section from "../components/Section/Section";
 import ArrowLink from "../components/ArrowLink/ArrowLink";
 import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../common/constants/product";
-// import useAuth from "../hooks/useAuth";
 import { CityHall, GraphsAndStatistics, QuestcequeLeTableauDeBordSVG, School } from "../theme/components/icons";
 import AmeliorerLesPratiques from "./sections/ameliorer-les-pratiques/AmeliorerLesPratiques";
 import ApercuDonneesNationalHomePage from "./sections/apercu-donnees-national-homePage/ApercuDonneesNationalHomePage";

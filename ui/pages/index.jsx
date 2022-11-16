@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { Box, Container, Flex, Heading, HStack, Image, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, Image, Text } from "@chakra-ui/react";
 import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../common/constants/product";
 import ApercuDesDonneesSection from "./home_/sections/ApercuDesDonneesSection";
