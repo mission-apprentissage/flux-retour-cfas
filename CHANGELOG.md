@@ -1,3 +1,10 @@
+## [2.55.1-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1-beta.2...v2.55.1-beta.3) (2022-11-16)
+
+
+### Bug Fixes
+
+* **server:** migate-mongo using dotEnv ([#2247](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2247)) ([177da9b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/177da9bf4afe0f4e0c957f1d8e2baa83c6ef95f1))
+
 ## [2.55.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1-beta.1...v2.55.1-beta.2) (2022-11-15)
 
 
