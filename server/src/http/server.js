@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const { apiRoles } = require("../common/roles");
+const { apiRoles, tdbRoles } = require("../common/roles");
 
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
@@ -16,7 +16,7 @@ const loginCfaRouter = require("./routes/login-cfa.route");
 const configRouter = require("./routes/config.route");
 const referentielRouter = require("./routes/referentiel.route");
 const effectifsRouter = require("./routes/effectifs.route");
-const effecitfsExportRouter = require("./routes/effectifs-export.route");
+const effectifsExportRouter = require("./routes/effectifs-export.route");
 const cfasRouter = require("./routes/cfas.route");
 const formationRouter = require("./routes/formations.route");
 const healthcheckRouter = require("./routes/healthcheck.route");
@@ -75,8 +75,18 @@ module.exports = async (components) => {
     permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
     effectifsApprenantsRouter(components)
   );
-  app.use("/api/effectifs", requireJwtAuthentication, effectifsRouter(components));
-  app.use("/api/effectifs-export", requireJwtAuthentication, effecitfsExportRouter(components));
+  app.use(
+    "/api/effectifs",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    effectifsRouter(components)
+  );
+  app.use(
+    "/api/effectifs-export",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    effectifsExportRouter(components)
+  );
 
   // admin routes
   app.use("/api/users", requireJwtAuthentication, adminOnly, usersRouter(components));

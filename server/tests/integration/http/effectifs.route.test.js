@@ -23,6 +23,19 @@ describe(__filename, () => {
       assert.equal(response.status, 401);
     });
 
+    it("Vérifie qu'on ne peut pas accéder à la route en étant authentifié mais sans le bon rôle", async () => {
+      const { httpClient, createAndLogUser } = await startServer();
+      const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+
+      const response = await httpClient.get("/api/effectifs", {
+        params: { date: "2020-10-10T00:00:00.000Z" },
+        headers: authHeader,
+      });
+
+      assert.equal(response.status, 403);
+      assert.equal(response.data, "Not authorized");
+    });
+
     it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts sans filtres", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });

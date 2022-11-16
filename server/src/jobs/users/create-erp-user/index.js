@@ -2,7 +2,7 @@ const { runScript } = require("../../scriptWrapper");
 const logger = require("../../../common/logger");
 const { JOB_NAMES } = require("../../../common/constants/jobsConstants");
 const arg = require("arg");
-const { apiRoles, tdbRoles } = require("../../../common/roles");
+const { apiRoles } = require("../../../common/roles");
 
 let args = [];
 
@@ -18,7 +18,7 @@ runScript(async ({ users }) => {
 
   await users.createUser({
     username,
-    permissions: [apiRoles.apiStatutsSeeder, tdbRoles.pilot],
+    permissions: [apiRoles.apiStatutsSeeder],
   });
 
   logger.info(`User ${username} successfully created`);
