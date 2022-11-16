@@ -31,13 +31,18 @@ export function createActionToken(subject, options = {}) {
   return createToken("actionToken", subject, options);
 }
 
-export function createUserToken(options = {}) {
-  return createToken("user", null, options);
-}
-
 export function createApiToken(user, options = {}) {
   return createToken("apiToken", user.username, {
     payload: { type: user.type, permissions: pick(user, ["is_admin"]) },
     ...options,
   });
 }
+
+export function createUserTokenSimple(options = {}) {
+  return createToken("user", null, options);
+}
+
+export const createUserToken = (user, options = {}) => {
+  const payload = { permissions: user.permissions, network: user.network };
+  return createToken("user", user.username, { payload, ...options });
+};

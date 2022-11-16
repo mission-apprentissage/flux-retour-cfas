@@ -4,7 +4,7 @@ import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getUser, authenticate, loggedInUser, structureUser } from "../../../common/components/usersComponent.js";
 import * as sessions from "../../../common/components/sessionsComponent.js";
-import { createUserToken } from "../../../common/utils/jwtUtils.js";
+import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { COOKIE_NAME } from "../../../common/constants/cookieName.js";
 
@@ -36,7 +36,7 @@ export default () => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserToken({ payload });
+      const token = createUserTokenSimple({ payload });
 
       if (await sessions.findJwt(token)) {
         await sessions.removeJwt(token);

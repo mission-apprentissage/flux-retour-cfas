@@ -15,7 +15,7 @@ import {
   getUserById,
 } from "../../../common/components/usersComponent.js";
 import * as sessions from "../../../common/components/sessionsComponent.js";
-import { createUserToken } from "../../../common/utils/jwtUtils.js";
+import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/components/infoSiretComponent.js";
 
@@ -136,7 +136,7 @@ export default ({ mailer }) => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserToken({ payload });
+      const token = createUserTokenSimple({ payload });
       await sessions.addJwt(token);
 
       return responseWithCookie({ res, token }).status(200).json({

@@ -4,7 +4,7 @@ import Joi from "joi";
 import config from "../../../config.js";
 import { passwordSchema } from "../../../common/utils/validationUtils.js";
 import passport from "passport";
-import { createResetPasswordToken, createUserToken } from "../../../common/utils/jwtUtils.js";
+import { createResetPasswordToken, createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { Strategy, ExtractJwt } from "passport-jwt";
 import { changePassword, getUser, loggedInUser, structureUser } from "../../../common/components/usersComponent.js";
 import * as sessions from "../../../common/components/sessionsComponent.js";
@@ -80,7 +80,7 @@ export default ({ mailer }) => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserToken({ payload });
+      const token = createUserTokenSimple({ payload });
       await sessions.addJwt(token);
 
       responseWithCookie({ res, token }).status(200).json({
