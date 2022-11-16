@@ -1,6 +1,6 @@
 import { Box, Flex, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import React from "react";
-import { Page } from "../components/Page/Page";
+import { Page } from "../components";
 import Section from "../components/Section/Section";
 import ArrowLink from "../components/ArrowLink/ArrowLink";
 import { NAVIGATION_PAGES } from "../common/constants/navigationPages";

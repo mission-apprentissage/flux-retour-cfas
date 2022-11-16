@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import { Box, Container, Heading } from "@chakra-ui/react";
-import { Page } from "../components/Page/Page";
+import { Page } from "../components";
 import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 import Cookies from "../components/legal/Cookies";
 import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";

@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 import { Box, Container, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 
-import { Page } from "../components/Page/Page";
+import { Page } from "../components";
 import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 import Sommaire from "../components/Sommaire/Sommaire";
 import { PRODUCT_NAME } from "../common/constants/product";
