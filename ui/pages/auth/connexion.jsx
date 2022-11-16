@@ -138,7 +138,7 @@ const Login = (props) => {
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const ConnexionPage = () => {
+export default function ConnexionPage() {
   const styleProps = {
     flexBasis: "50%",
     p: 12,
@@ -156,6 +156,4 @@ const ConnexionPage = () => {
       </Flex>
     </Page>
   );
-};
-
-export default ConnexionPage;
+}

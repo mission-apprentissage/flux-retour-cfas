@@ -16,7 +16,7 @@ export { default as TerritoireFilter } from "./TerritoireFilter/TerritoireFilter
 export { default as FormationFilter } from "./FormationFilter/FormationFilter";
 export { default as MonthSelect } from "./MonthSelect/MonthSelect";
 
-export { default as Page } from "./Page/Page";
+export { Page } from "./Page/Page";
 export { default as Section } from "./Section/Section";
 
 export { default as Header } from "./Page_OLD/Header";
