@@ -21,13 +21,18 @@ const ContactSection = () => {
           </Text>
           <Link href={NAVIGATION_PAGES.QuestionsReponses.path} color="bluefrance" whiteSpace="nowrap">
             <HStack>
-              <Text>Consulter la page d&apos;aide</Text>
+              <Text fontSize={["14px", "16px", "16px"]}>Consulter la page d&apos;aide</Text>
               <RightLine boxSize={3} />
             </HStack>
           </Link>
           <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
             <HStack>
-              <Text>Contacter l’équipe {CONTACT_ADDRESS}</Text>
+              <Text fontSize={["14px", "16px", "16px"]}>
+                Contacter l’équipe{" "}
+                <Text as="span" display={["block", "block", "inline-block", "inline-block"]}>
+                  {CONTACT_ADDRESS}
+                </Text>
+              </Text>
               <RightLine boxSize={3} />
             </HStack>
           </Link>
