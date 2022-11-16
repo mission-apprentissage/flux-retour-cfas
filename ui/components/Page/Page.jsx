@@ -5,7 +5,7 @@ import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
 import ContactSection from "../ContactSection/ContactSection";
 
-export function Page({ children, ...rest }) {
+export default function Page({ children, ...rest }) {
   return (
     <Container maxW="full" minH="100vh" d="flex" flexDirection="column" p={0} {...rest}>
       <Header />
