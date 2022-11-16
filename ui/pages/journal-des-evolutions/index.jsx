@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Box, Container, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
+import { Badge, Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import { format, formatISO } from "date-fns";
 import fr from "date-fns/locale/fr";
 

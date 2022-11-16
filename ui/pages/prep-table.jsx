@@ -94,7 +94,7 @@ const PrepTable = () => {
                 cell: (item) => item.renderValue(),
               },
             }}
-            onRowClick={(rowId) => console.log(rowId)}
+            // onRowClick={(rowId) => console.log(rowId)}
             mt={5}
           />
         </Container>
