@@ -2,7 +2,7 @@ import express from "express";
 import Joi from "joi";
 import tryCatch from "../middlewares/tryCatchMiddleware.js";
 import { JOB_NAMES, jobEventStatuts } from "../../common/constants/jobsConstants.js";
-import { oleoduc, transformIntoJSON } from "oleoduc";
+import { compose, transformIntoJSON } from "oleoduc";
 import { sendJsonStream } from "../../common/utils/httpUtils.js";
 import { findAndPaginate } from "../../common/utils/dbUtils.js";
 import validateRequestQuery from "../middlewares/validateRequestQuery.js";
@@ -40,7 +40,7 @@ export default ({ jobEvents }) => {
         );
 
         return sendJsonStream(
-          oleoduc(
+          compose(
             find.stream(),
             transformIntoJSON({
               arrayPropertyName: "effectifsApprenants",

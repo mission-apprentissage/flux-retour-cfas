@@ -15,7 +15,7 @@ import validateRequestBody from "../middlewares/validateRequestBody.js";
 import validateRequestQuery from "../middlewares/validateRequestQuery.js";
 import { findAndPaginate } from "../../common/utils/dbUtils.js";
 import { sendJsonStream } from "../../common/utils/httpUtils.js";
-import { oleoduc, transformIntoJSON } from "oleoduc";
+import { compose, transformIntoJSON } from "oleoduc";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
 import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../common/model/collections.js";
 
@@ -190,7 +190,7 @@ export default ({ dossiersApprenants, userEvents }) => {
 
         // Return JSON Stream
         return sendJsonStream(
-          oleoduc(
+          compose(
             find.stream(),
             transformIntoJSON({
               arrayPropertyName: "dossiersApprenants",
