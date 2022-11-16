@@ -9,7 +9,7 @@ import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const CguPage = () => {
-  const title = "CONDITIONS GÉNÉRALES D'UTILISATION DE LA PLATEFORME";
+  const title = "CONDITIONS GÉNÉRALES D'UTILISATION DU TABLEAU DE BORD DE L’APPRENTISSAGE";
   return (
     <Page>
       <Head>
