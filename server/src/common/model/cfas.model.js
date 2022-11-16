@@ -7,6 +7,7 @@ import {
   boolean,
   stringOrNull,
   dateOrNull,
+  arrayOfOrNull,
 } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "cfas";
@@ -39,7 +40,7 @@ const schema = object(
     region_nom: stringOrNull({ description: "Région du CFA" }),
     region_num: stringOrNull({ description: "Numéro de la région du CFA" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
-    metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
+    metiers: arrayOfOrNull(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     access_token: stringOrNull({ description: "Le token permettant l'accès au CFA à sa propre page" }),
     private_url: stringOrNull({ description: "L'url via laquelle le CFA peut accéder à sa propre page" }),
     updated_at: dateOrNull({ description: "Date de mise à jour en base de données" }),
