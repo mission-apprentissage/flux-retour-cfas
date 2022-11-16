@@ -11,7 +11,11 @@ const DonneesPersonnelles = () => {
 
   return (
     <Box pt="4w" pb={16}>
-      <HStack spacing="12w">
+      <HStack
+        spacing={["0", "0", "0", "12w"]}
+        flexDirection={["column", "column", "column", "row"]}
+        alignItems={["normal", "normal", "normal", "center"]}
+      >
         <Sommaire>
           <Flex flexDirection="column" fontSize="zeta">
             <Link padding="1w" href="#mission" _hover={{ textDecoration: "none", bg: "grey.200" }}>

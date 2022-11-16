@@ -20,7 +20,6 @@ const DonneesPersonnellesPage = () => {
       </Head>
       <Section>
         <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
-
         <DonneesPersonnelles />
       </Section>
     </Page>
