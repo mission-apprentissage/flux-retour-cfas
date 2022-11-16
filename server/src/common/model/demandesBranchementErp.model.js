@@ -1,4 +1,4 @@
-import { object, string, date, boolean, objectId } from "./json-schema/jsonSchemaTypes.js";
+import { object, string, date, boolean, objectId, stringOrNull } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "demandesBranchementErp";
 
@@ -9,7 +9,7 @@ export const schema = object(
     nom_organisme: string({ description: "Nom de l'organisme faisant la demande" }),
     uai_organisme: string({ description: "UAI de l'organisme faisant la demande" }),
     email_demandeur: string({ description: "Adresse email de la personne faisant la demande" }),
-    nb_apprentis: string({ description: "Nombre d'apprentis sur la dernière année" }),
+    nb_apprentis: stringOrNull({ description: "Nombre d'apprentis sur la dernière année" }),
     is_ready_co_construction: boolean({
       description: "Indique si l'établissement souhaite participer à la construction du nouvel ERP",
     }),

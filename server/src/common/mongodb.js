@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import logger from "./logger.js";
+import { asyncForEach } from "./utils/asyncUtils.js";
 
 let mongodbClient;
 
@@ -47,41 +48,35 @@ export const getDbCollectionIndexes = async (name) => {
 };
 
 /**
- * Clear de toutes les collections
- * @returns
+ * Création d'une collection si elle n'existe pas
+ * @param {string} collectionName
  */
-export const clearAllCollections = async () => {
-  let collections = await getDatabase().collections();
-  return Promise.all(collections.map((c) => c.deleteMany({})));
+const createCollectionIfDoesNotExist = async (collectionName) => {
+  const db = getDatabase();
+  const collectionsInDb = await db.listCollections().toArray();
+  const collectionExistsInDb = collectionsInDb.map(({ name }) => name).includes(collectionName);
+
+  if (!collectionExistsInDb) {
+    await db.createCollection(collectionName);
+  }
 };
 
-export function clearCollection(name) {
-  logger.warn(`Suppression des données de la collection ${name}...`);
-  return getDbCollection(name)
-    .deleteMany({})
-    .then((res) => res.deletedCount);
-}
+export const configureDbSchemaValidation = async (modelDescriptors) => {
+  const db = getDatabase();
+  await ensureInitialization();
+  await asyncForEach(modelDescriptors, async ({ collectionName, schema }) => {
+    await createCollectionIfDoesNotExist(collectionName);
 
-// export const configureValidation = async () => {
-//   await ensureInitialization();
-//   await Promise.all(
-//     getCollectionDescriptors().map(async ({ name, schema }) => {
-//       await createCollectionIfNeeded(name);
-
-//       if (!schema) {
-//         return;
-//       }
-
-//       logger.debug(`Configuring validation for collection ${name}...`);
-//       let db = getDatabase();
-//       await db.command({
-//         collMod: name,
-//         validationLevel: "strict",
-//         validationAction: "error",
-//         validator: {
-//           $jsonSchema: schema(),
-//         },
-//       });
-//     })
-//   );
-// };
+    if (!schema) {
+      return;
+    }
+    await db.command({
+      collMod: collectionName,
+      validationLevel: "strict",
+      validationAction: "error",
+      validator: {
+        $jsonSchema: { title: `${collectionName} validation schema`, ...schema },
+      },
+    });
+  });
+};

@@ -8,9 +8,9 @@ export const schema = object(
     jobname: string({ description: "Le nom du job" }),
     date: date({ description: "La date de l'evenement" }),
     action: string({ description: "L'action en cours" }),
-    data: object({ description: "La donnée liéé à l'action" }),
+    data: object({}, { additionalProperties: true, description: "La donnée liéé à l'action" }),
   },
-  { required: ["jobname", "action"] }
+  { required: ["jobname", "action", "date"] }
 );
 
 export default { schema, collectionName };

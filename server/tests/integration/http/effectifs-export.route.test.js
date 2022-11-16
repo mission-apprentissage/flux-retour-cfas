@@ -11,10 +11,11 @@ import {
   historySequenceInscritToApprenti,
   historySequenceApprentiToInscrit,
 } from "../../data/historySequenceSamples.js";
-
 import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants.js";
 import { USER_EVENTS_ACTIONS } from "../../../src/common/constants/userEventsConstants.js";
-import { userEventsDb, dossiersApprenantsDb, cfasDb } from "../../../src/common/model/collections.js";
+import { userEventsDb, cfasDb } from "../../../src/common/model/collections.js";
+import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
+import { Cfa } from "../../../src/common/factory/cfa.js";
 
 describe("Effectifs Export Route", () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -23,38 +24,42 @@ describe("Effectifs Export Route", () => {
 
     // Add 10 statuts with history sequence - full
     for (let index = 0; index < nbAbandons; index++) {
-      const randomStatut = createRandomDossierApprenant({
-        historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
-        ...statutsProps,
-      });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenants().createDossierApprenant(
+        createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
+          ...statutsProps,
+        })
+      );
     }
 
     // Add 5 statuts with history sequence - simple apprenti
     for (let index = 0; index < nbApprentis; index++) {
-      const randomStatut = createRandomDossierApprenant({
-        historique_statut_apprenant: historySequenceApprenti,
-        ...statutsProps,
-      });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenants().createDossierApprenant(
+        createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceApprenti,
+          ...statutsProps,
+        })
+      );
     }
 
     // Add 15 statuts with history sequence - inscritToApprenti
     for (let index = 0; index < 15; index++) {
-      const randomStatut = createRandomDossierApprenant({
-        historique_statut_apprenant: historySequenceInscritToApprenti,
-        ...statutsProps,
-      });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenants().createDossierApprenant(
+        createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceInscritToApprenti,
+          ...statutsProps,
+        })
+      );
     }
 
     // Add 8 statuts with history sequence - inscritToApprentiToInscrit (rupturant)
     for (let index = 0; index < 8; index++) {
-      const randomStatut = createRandomDossierApprenant({
-        historique_statut_apprenant: historySequenceApprentiToInscrit,
-        ...statutsProps,
-      });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenants().createDossierApprenant(
+        createRandomDossierApprenant({
+          historique_statut_apprenant: historySequenceApprentiToInscrit,
+          ...statutsProps,
+        })
+      );
     }
   };
 
@@ -246,16 +251,18 @@ describe("Effectifs Export Route", () => {
       const { httpClient } = await startServer();
 
       // create cfa in db
-      const token = "eyP33IyEAisoErO";
       const uai_etablissement = "0762232N";
-      await cfasDb().insertOne({
-        uai: uai_etablissement,
-        access_token: token,
-      });
+      await cfasDb().insertOne(
+        Cfa.create({
+          uai: uai_etablissement,
+          nom: "cfa",
+        })
+      );
+      const { access_token } = await cfasDb().findOne({ uai: uai_etablissement });
 
       // Authent cfa
       const authentResponse = await httpClient.post("/api/login-cfa", {
-        cfaAccessToken: token,
+        cfaAccessToken: access_token,
       });
 
       // Check cfa authent

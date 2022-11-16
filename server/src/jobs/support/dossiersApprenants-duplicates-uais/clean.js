@@ -5,6 +5,7 @@ import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
 import { DUPLICATE_TYPE_CODES } from "../../../common/constants/dossierApprenantConstants.js";
 import { collectionNames } from "../../constants.js";
+import { dossiersApprenantsDb } from "../../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -42,7 +43,7 @@ const cleanUaisDuplicates = async ({ dossiersApprenants, db }) => {
 
     // Delete each ancient duplicates
     await asyncForEach(duplicatesIdToRemove, async (currentIdToRemove) => {
-      await db.collection("dossiersApprenants").deleteOne({ _id: currentIdToRemove });
+      await dossiersApprenantsDb().deleteOne({ _id: currentIdToRemove });
     });
   });
 

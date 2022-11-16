@@ -1,9 +1,10 @@
+import { getDirname } from "../../common/utils/esmUtils.js";
 import path from "path";
 import { runScript } from "../scriptWrapper.js";
 import { fetchOrganismes } from "../../common/apis/apiReferentielMna.js";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";
 import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
-import { getDirname } from "../../common/utils/esmUtils.js";
+import { referentielSiretUaiDb } from "../../common/model/collections.js";
 
 const REFERENTIEL_FIELDS_TO_FETCH = [
   "siret",
@@ -34,7 +35,7 @@ const EXCELLENCE_PRO_FILE_PATH = path.join(getDirname(import.meta.url), `./refer
 /**
  * Script qui crée une collection contenant le référentiel UAI/SIRET enrichi des réseaux existants dans le TDB et dans le fichier Excellence Pro
  */
-runScript(async ({ db, cfas }) => {
+runScript(async ({ cfas }) => {
   const excellenceProReferentielJson = readJsonFromCsvFile(EXCELLENCE_PRO_FILE_PATH, ",").map((line) => {
     return {
       siret: line["Siret"],
@@ -42,9 +43,8 @@ runScript(async ({ db, cfas }) => {
       reseaux: parseReseauxTextFromCsv(line["Réseauàjour"]),
     };
   });
-  const referentielSiretCollection = db.collection("referentielSiret");
 
-  await referentielSiretCollection.deleteMany();
+  await referentielSiretUaiDb().deleteMany();
 
   const { organismes } = await fetchOrganismes({
     champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),
@@ -70,7 +70,7 @@ runScript(async ({ db, cfas }) => {
       }
     }
 
-    await referentielSiretCollection.insertOne({
+    await referentielSiretUaiDb().insertOne({
       ...organismeReferentiel,
       reseaux: [...reseaux],
     });

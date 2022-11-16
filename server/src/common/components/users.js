@@ -57,11 +57,9 @@ const getUserById = async (id) => {
   const _id = new ObjectId(id);
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
   const user = await usersDb().findOne({ _id });
-
   if (!user) {
     throw new Error(`Unable to find user`);
   }
-
   return user;
 };
 

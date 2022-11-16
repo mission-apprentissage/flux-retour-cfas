@@ -1,4 +1,4 @@
-import { object, objectId, string, date } from "./json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, date, stringOrNull, dateOrNull } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "reseauxCfas";
 
@@ -17,10 +17,10 @@ export const indexes = () => {
 export const schema = object({
   _id: objectId(),
   nom_reseau: string({ description: "Nom du réseau de cfas" }),
-  nom_etablissement: string({ description: "Nom de l'établissement" }),
+  nom_etablissement: stringOrNull({ description: "Nom de l'établissement" }),
   uai: string({ description: "Code uai de l'établissement" }),
-  siret: string({ description: "Siret de l'établissement" }),
-  updated_at: date({ description: "Date de mise à jour en base de données" }),
+  siret: stringOrNull({ description: "Siret de l'établissement" }),
+  updated_at: dateOrNull({ description: "Date de mise à jour en base de données" }),
   created_at: date({ description: "Date d'ajout en base de données" }),
 });
 

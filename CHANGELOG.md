@@ -1,3 +1,24 @@
+## [2.55.1-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1-beta.2...v2.55.1-beta.3) (2022-11-16)
+
+
+### Bug Fixes
+
+* **server:** migate-mongo using dotEnv ([#2247](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2247)) ([177da9b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/177da9bf4afe0f4e0c957f1d8e2baa83c6ef95f1))
+
+## [2.55.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1-beta.1...v2.55.1-beta.2) (2022-11-15)
+
+
+### Bug Fixes
+
+* **ui:** corrige lien vers la page question réponses ([#2242](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2242)) ([3f8d30f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3f8d30f834286d56b0b3e39989c4254b3329f545))
+
+## [2.55.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.0...v2.55.1-beta.1) (2022-11-15)
+
+
+### Bug Fixes
+
+* **server:** fix le schema de validation du modele dossiersApprenants et supprime champs inutiles (migration) ([0b64d2c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0b64d2c99da7909dfb0c70bc6ca49e32269ef11e))
+
 # [2.55.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.54.0...v2.55.0) (2022-11-09)
 
 

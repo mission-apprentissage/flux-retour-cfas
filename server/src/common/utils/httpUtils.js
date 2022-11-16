@@ -7,6 +7,11 @@ import { COOKIE_NAME } from "../constants/cookieName.js";
 
 const IS_OFFLINE = Boolean(config.isOffline);
 
+export const sendJsonStream = (stream, res) => {
+  res.setHeader("Content-Type", "application/json");
+  oleoduc(stream, res);
+};
+
 export async function createRequestStream(url, httpOptions = {}) {
   return new Promise((resolve, reject) => {
     let options = {
@@ -50,9 +55,4 @@ export function responseWithCookie({ res, token }) {
 export function sendHTML(html, res) {
   res.set("Content-Type", "text/html");
   res.send(Buffer.from(html));
-}
-
-export function sendJsonStream(stream, res) {
-  res.setHeader("Content-Type", "application/json");
-  oleoduc(stream, res);
 }

@@ -17,11 +17,11 @@ import { findAndPaginate } from "../../common/utils/dbUtils.js";
 import { sendJsonStream } from "../../common/utils/httpUtils.js";
 import { oleoduc, transformIntoJSON } from "oleoduc";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
-import { dossiersApprenantsDb } from "../../common/model/collections.js";
+import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../common/model/collections.js";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
-export default ({ dossiersApprenants, userEvents, db }) => {
+export default ({ dossiersApprenants, userEvents }) => {
   const router = express.Router();
 
   /**
@@ -114,7 +114,7 @@ export default ({ dossiersApprenants, userEvents, db }) => {
           if (dossierApprenantValidation.error) {
             const prettyValidationError = buildPrettyValidationError(dossierApprenantValidation.error);
             validationErrors.push(prettyValidationError);
-            await db.collection("dossiersApprenantsApiErrors").insert({
+            await dossiersApprenantsApiErrorsDb().insert({
               erp: req.user.username,
               created_at: new Date(),
               ...prettyValidationError,

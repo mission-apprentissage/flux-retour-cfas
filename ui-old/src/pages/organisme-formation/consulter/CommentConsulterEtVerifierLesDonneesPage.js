@@ -38,7 +38,7 @@ const CommentConsulterEtVerifierLesDonneesPage = () => {
                 </strong>
                 . Cette URL est privée, ne la partagez qu’avec les personnes gestionnaires de votre organisme de
                 formation.
-                <Link color="bluefrance" fontWeight="bold" to="/organisme-formation/aide" as={NavLink}>
+                <Link color="bluefrance" fontWeight="bold" to="/questions-reponses" as={NavLink}>
                   {" "}
                   Pour plus d’informations, consultez la rubrique d’aide.
                 </Link>

@@ -29,6 +29,8 @@ export class Formation extends BaseFactory {
     return new Formation({
       ...props,
       tokenized_libelle,
+      cfd_start_date: props.cfd_start_date && new Date(props.cfd_start_date),
+      cfd_end_date: props.cfd_end_date && new Date(props.cfd_end_date),
       created_at: new Date(),
       updated_at: null,
     });

@@ -1,5 +1,4 @@
 import { ObjectId } from "mongodb";
-import omit from "lodash.omit";
 import { DUPLICATE_TYPE_CODES } from "../constants/dossierApprenantConstants.js";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
@@ -26,7 +25,7 @@ const getDossierApprenant = ({
   return dossiersApprenantsDb().findOne({
     nom_apprenant: { $regex: nomApprenantRegexp },
     prenom_apprenant: { $regex: prenomApprenantRegexp },
-    date_de_naissance_apprenant,
+    date_de_naissance_apprenant: new Date(date_de_naissance_apprenant),
     formation_cfd,
     uai_etablissement,
     annee_scolaire,
@@ -44,7 +43,7 @@ const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
     // Search dossier with unicity fields
-    let foundItem = await getDossierApprenant({
+    const foundItem = await getDossierApprenant({
       nom_apprenant: item.nom_apprenant,
       prenom_apprenant: item.prenom_apprenant,
       date_de_naissance_apprenant: item.date_de_naissance_apprenant,
@@ -70,21 +69,37 @@ const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
 
 const updateDossierApprenant = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
-
-  // strip unicity criteria because it does not make sense to update them
-  let updatePayload = omit(
-    toUpdate,
-    "nom_apprenant",
-    "prenom_apprenant",
-    "date_de_naissance_apprenant",
-    "formation_cfd",
-    "uai_etablissement",
-    "annee_scolaire"
-  );
   const _id = new ObjectId(existingItemId);
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+
+  const updateFieldsWhitelist = [
+    "ine_apprenant",
+    "email_contact",
+    "tel_apprenant",
+    "code_commune_insee_apprenant",
+    "siret_etablissement",
+    "libelle_long_formation",
+    "periode_formation",
+    "annee_formation",
+    "formation_rncp",
+    "contrat_date_debut",
+    "contrat_date_fin",
+    "contrat_date_rupture",
+  ];
+  const updateQuery = {
+    updated_at: new Date(),
+  };
   const existingItem = await dossiersApprenantsDb().findOne({ _id });
 
+  updateFieldsWhitelist.forEach((field) => {
+    updateQuery[field] = toUpdate[field];
+  });
+  // date fields update
+  updateQuery.contrat_date_debut = toUpdate.contrat_date_debut && new Date(toUpdate.contrat_date_debut);
+  updateQuery.contrat_date_fin = toUpdate.contrat_date_fin && new Date(toUpdate.contrat_date_fin);
+  updateQuery.contrat_date_rupture = toUpdate.contrat_date_rupture && new Date(toUpdate.contrat_date_rupture);
+
+  // historique_statut_apprenant update
   // new statut_apprenant to add ?
   const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {
     return (
@@ -95,8 +110,8 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
 
   if (!statutExistsInHistorique) {
     const newHistoriqueElement = {
-      valeur_statut: updatePayload.statut_apprenant,
-      date_statut: new Date(updatePayload.date_metier_mise_a_jour_statut),
+      valeur_statut: toUpdate.statut_apprenant,
+      date_statut: new Date(toUpdate.date_metier_mise_a_jour_statut),
       date_reception: new Date(),
     };
 
@@ -111,15 +126,9 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
     // find new element index in sorted historique to remove subsequent ones
     const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
 
-    updatePayload.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1);
-    updatePayload.statut_apprenant = newHistoriqueElement.valeur_statut;
+    updateQuery.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1);
   }
 
-  // Update & return
-  const updateQuery = {
-    ...updatePayload,
-    updated_at: new Date(),
-  };
   await dossiersApprenantsDb().updateOne({ _id }, { $set: updateQuery });
   // TODO return nothing (single responsibility)
   return await dossiersApprenantsDb().findOne({ _id });

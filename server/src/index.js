@@ -1,11 +1,11 @@
-import "dotenv/config.js";
 import server from "./http/server.js";
 import logger from "./common/logger.js";
-import config from "./config.js";
+import config from "../src/config.js";
 import { initRedis } from "./common/services/redis.js";
 import createComponents from "./common/components/components.js";
-import { connectToMongodb, getDatabase } from "./common/mongodb.js";
 import createServices from "./services.js";
+import { connectToMongodb, getDatabase, configureDbSchemaValidation } from "./common/mongodb.js";
+import { modelDescriptors } from "./common/model/collections.js";
 
 process.on("unhandledRejection", (e) => logger.error("An unexpected error occurred", e));
 process.on("uncaughtException", (e) => logger.error("An unexpected error occurred", e));
@@ -19,6 +19,7 @@ process.on("uncaughtException", (e) => logger.error("An unexpected error occurre
   });
 
   await connectToMongodb(config.mongodb.uri);
+  await configureDbSchemaValidation(modelDescriptors);
   const db = getDatabase();
 
   const components = await createComponents({ db, redisClient });

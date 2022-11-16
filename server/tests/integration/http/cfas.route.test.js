@@ -26,6 +26,8 @@ describe("Cfa Route", () => {
         nom: "BTP CFA Somme",
         nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
         uai: "0801302F",
+        sirets: [],
+        created_at: new Date(),
       });
 
       const response = await httpClient.post("/api/cfas/search", { searchTerm: "Somme" });
@@ -41,6 +43,7 @@ describe("Cfa Route", () => {
         nom_tokenized: buildTokenizedString("BTP CFA Somme", 4),
         uai: "0801302F",
         sirets: ["34012780200015"],
+        created_at: new Date(),
       });
 
       const response = await httpClient.post("/api/cfas/search", { searchTerm: "Somme" });
@@ -69,6 +72,7 @@ describe("Cfa Route", () => {
         reseaux: reseauxTest,
         sirets: [siretTest],
         adresse: adresseTest,
+        created_at: new Date(),
       };
 
       await cfasDb().insertOne(cfaProps);
@@ -77,7 +81,8 @@ describe("Cfa Route", () => {
           siret_etablissement: siretTest,
           uai_etablissement: uaiTest,
           nom_etablissement: nomTest,
-        })
+        }),
+        { bypassDocumentValidation: true }
       );
 
       const response = await httpClient.get(`/api/cfas/${uaiTest}`);
@@ -121,7 +126,7 @@ describe("Cfa Route", () => {
       };
 
       const randomStatut = createRandomDossierApprenant(cfaInfos);
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenantsDb().insertOne(randomStatut, { bypassDocumentValidation: true });
 
       // Add Cfa in referentiel
       const cfaReferenceToAdd = cfasDb().insertOne({
@@ -130,6 +135,7 @@ describe("Cfa Route", () => {
         uai: uaiTest,
         reseaux: reseauxTest,
         access_token: tokenTest,
+        created_at: new Date(),
       });
       await cfaReferenceToAdd;
 
@@ -155,10 +161,11 @@ describe("Cfa Route", () => {
 
       await cfasDb().insertOne({
         uai: "0451582A",
-        siret: "31521327200067",
+        sirets: ["31521327200067"],
         nom: "TEST CFA",
         region_nom: regionToTest.nom,
         region_num: regionToTest.code,
+        created_at: new Date(),
       });
 
       const queryStringified = JSON.stringify({ region_num: regionToTest.code });

@@ -51,6 +51,11 @@ export class DossierApprenant extends BaseFactory {
       ...props,
       nom_apprenant: props.nom_apprenant.toUpperCase().trim(),
       prenom_apprenant: props.prenom_apprenant.toUpperCase().trim(),
+      date_de_naissance_apprenant: new Date(props.date_de_naissance_apprenant),
+      contrat_date_debut: props.contrat_date_debut && new Date(props.contrat_date_debut),
+      contrat_date_fin: props.contrat_date_fin && new Date(props.contrat_date_fin),
+      contrat_date_rupture: props.contrat_date_rupture && new Date(props.contrat_date_rupture),
+      etablissement_reseaux: props.etablissement_reseaux || [],
       created_at: new Date(),
       updated_at: null,
     });

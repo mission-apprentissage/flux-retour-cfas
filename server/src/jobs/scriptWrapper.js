@@ -1,11 +1,11 @@
-import { connectToMongodb, closeMongodbConnection } from "../common/mongodb.js";
+import { connectToMongodb, closeMongodbConnection, configureDbSchemaValidation } from "../common/mongodb.js";
 import createComponents from "../common/components/components.js";
 import logger from "../common/logger.js";
 import { initRedis } from "../common/services/redis.js";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { jobEventStatuts } from "../common/constants/jobsConstants.js";
-import config from "../config.js";
-import { jobEventsDb } from "../common/model/collections.js";
+import config from "../../src/config.js";
+import { jobEventsDb, modelDescriptors } from "../common/model/collections.js";
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -52,6 +52,7 @@ export const runScript = async (job, jobName) => {
     });
 
     const mongodbClient = await connectToMongodb(config.mongodb.uri);
+    await configureDbSchemaValidation(modelDescriptors);
 
     const components = await createComponents({ redisClient, db: mongodbClient });
     await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
@@ -62,7 +63,7 @@ export const runScript = async (job, jobName) => {
 
     await jobEventsDb().insertOne({
       jobname: jobName,
-      created_at: new Date(),
+      date: new Date(),
       action: jobEventStatuts.executed,
       data: { startDate, endDate, duration },
     });

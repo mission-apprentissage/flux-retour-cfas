@@ -1,10 +1,9 @@
-// eslint-disable-next-line node/no-unpublished-require
 import axiosist from "axiosist";
-
 import createComponents from "../../src/common/components/components.js";
 import server from "../../src/http/server.js";
-import { getDatabase } from "../../src/common/mongodb.js";
+import { getDatabase, configureDbSchemaValidation } from "../../src/common/mongodb.js";
 import redisFakeClient from "./redisClientMock.js";
+import { modelDescriptors } from "../../src/common/model/collections.js";
 
 export const startServer = async () => {
   const components = await createComponents({
@@ -14,6 +13,7 @@ export const startServer = async () => {
   });
   const app = await server(components);
   const httpClient = axiosist(app);
+  await configureDbSchemaValidation(modelDescriptors);
 
   return {
     httpClient,

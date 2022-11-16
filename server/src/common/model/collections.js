@@ -1,3 +1,6 @@
+import * as usersMigrationModelDescriptor from "./usersMigration.model.js";
+import * as RolesModelDescriptor from "./roles.model.js";
+import * as JwtSessionsModelDescriptor from "./jwtSessions.model.js";
 import { getDbCollection } from "../mongodb.js";
 import usersModelDescriptor from "./users.model.js";
 import userEventsModelDescriptor from "./userEvents.model.js";
@@ -10,9 +13,26 @@ import effectifsApprenantsModelDescriptor from "./effectifsApprenants.model.js";
 import demandesIdentifiantsModelDescriptor from "./demandesIdentifiants.model.js";
 import demandesBranchementErpDbModelDescriptor from "./demandesBranchementErp.model.js";
 import duplicatesEventsModelDescriptor from "./duplicatesEvents.model.js";
-import * as usersMigrationModelDescriptor from "./usersMigration.model.js";
-import * as RolesModelDescriptor from "./roles.model.js";
-import * as JwtSessionsModelDescriptor from "./jwtSessions.model.js";
+import archiveDossiersApprenantsModelDescriptor from "./archiveDossiersApprenants.model.js";
+import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
+import referentielSiretUaiModelDescriptor from "./referentielSiretUai.model.js";
+
+export const modelDescriptors = [
+  usersModelDescriptor,
+  userEventsModelDescriptor,
+  cfasModelDescriptor,
+  formationsModelDescriptor,
+  reseauxCfasModelDescriptor,
+  dossiersApprenantsModelDescriptor,
+  jobEventsModelDescriptor,
+  effectifsApprenantsModelDescriptor,
+  demandesIdentifiantsModelDescriptor,
+  demandesBranchementErpDbModelDescriptor,
+  duplicatesEventsModelDescriptor,
+  archiveDossiersApprenantsModelDescriptor,
+  dossiersApprenantsApiErrorsModelDescriptor,
+  referentielSiretUaiModelDescriptor,
+];
 
 export const dossiersApprenantsDb = () => {
   return getDbCollection(dossiersApprenantsModelDescriptor.collectionName);
@@ -61,9 +81,23 @@ export const duplicatesEventsDb = () => {
 export const usersMigrationDb = () => {
   return getDbCollection(usersMigrationModelDescriptor.collectionName);
 };
-export function rolesDb() {
+
+export const rolesDb = () => {
   return getDbCollection(RolesModelDescriptor.collectionName);
-}
-export function jwtSessionsDb() {
+};
+
+export const jwtSessionsDb = () => {
   return getDbCollection(JwtSessionsModelDescriptor.collectionName);
-}
+};
+
+export const archiveDossiersApprenantsDb = () => {
+  return getDbCollection(archiveDossiersApprenantsModelDescriptor.collectionName);
+};
+
+export const dossiersApprenantsApiErrorsDb = () => {
+  return getDbCollection(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
+};
+
+export const referentielSiretUaiDb = () => {
+  return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
+};

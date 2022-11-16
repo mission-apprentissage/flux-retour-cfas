@@ -3,8 +3,9 @@ import tryCatch from "../middlewares/tryCatchMiddleware.js";
 import { RESEAUX_CFAS } from "../../common/constants/networksConstants.js";
 import { REGIONS, DEPARTEMENTS } from "../../common/constants/territoiresConstants.js";
 import { ORGANISMES_APPARTENANCE } from "../../common/constants/usersConstants.js";
+import { referentielSiretUaiDb } from "../../common/model/collections.js";
 
-export default ({ db }) => {
+export default () => {
   const router = express.Router();
 
   router.get(
@@ -19,7 +20,7 @@ export default ({ db }) => {
   router.get(
     "/siret-uai-reseaux",
     tryCatch(async (req, res) => {
-      const referentielSiretUaiCursor = db.collection("referentielSiret").find();
+      const referentielSiretUaiCursor = referentielSiretUaiDb().find();
 
       const mappingResult = [];
 
