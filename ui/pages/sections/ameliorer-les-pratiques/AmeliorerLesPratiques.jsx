@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 
-import { Section } from "../../../components";
+import Section from "../../../components/Section/Section";
 import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../../common/constants/product";
 import {
   Academies,
@@ -21,7 +21,7 @@ const AmeliorerLesPratiques = () => (
       Différents acteurs consultent le tableau de bord de l’apprentissage quotidiennement pour suivre l’évolution des
       effectifs
     </Text>
-    <HStack marginTop="4w" spacing="4w">
+    <HStack marginTop="4w" spacing={["0", "0", "0", "4w"]} flexDirection={["column", "column", "column", "row"]}>
       <AmeliorerLesPratiquesCard Logo={School} content={<>Administrations centrales</>} />
       <AmeliorerLesPratiquesCard Logo={ReseauxCfa} content={<>Réseaux de CFA</>} />
       <AmeliorerLesPratiquesCard Logo={ConseilsRegionaux} content={<>Conseils régionaux</>} />
@@ -36,7 +36,7 @@ const AmeliorerLesPratiques = () => (
       <AmeliorerLesPratiquesCard Logo={Academies} content={<>Académies</>} />
       <AmeliorerLesPratiquesCard Logo={CarifOref} content={<>Carif-Oref</>} />
     </HStack>
-    <Box border="1px solid" borderColor="bluefrance" marginTop="10w" width="75%" mx="auto" display="block">
+    <Box border="1px solid" borderColor="bluefrance" marginTop="6w" width="75%" mx="auto" display="block">
       <Flex padding="4w" alignItems="center" flexDirection="column">
         <Heading as="h2" fontWeight="400" fontSize="20px">
           Vous souhaitez nous aider à améliorer le {PRODUCT_NAME} ?

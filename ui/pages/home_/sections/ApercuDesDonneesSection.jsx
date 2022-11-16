@@ -26,7 +26,7 @@ Count.propTypes = {
 
 const ApercuDesDonneesSection = () => {
   const date = startOfHour(new Date());
-  // const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
+  const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
 
   return (
     <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} background="galt" paddingY="4w">
@@ -38,37 +38,43 @@ const ApercuDesDonneesSection = () => {
             Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
             En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
           </Text>
-          <HStack marginTop="3w" spacing="5w" fontSize="gamma" color="grey.800">
-            <Count label="Organismes de formation" />
-            <Count label="Apprentis" />
-            <Count label="Jeunes sans contrat" />
-            <Count label="Rupturants" />
-            <Count label="Abandons" />
-          </HStack>
-          {/* {isEffectifsNationalLoading && (
+
+          {isEffectifsNationalLoading && (
             <Skeleton marginTop="3w" width="100%" height="4rem" startColor="grey.300" endColor="galt" />
           )}
           {effectifsNational && (
-            <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
+            <HStack
+              marginTop="3w"
+              fontSize="gamma"
+              color="grey.800"
+              alignItems={["normal", "normal", "normal", "center"]}
+              spacing={["0", "0", "5w"]}
+              flexDirection={["column", "column", "row"]}
+            >
               <Count count={effectifsNational.totalOrganismes} label="Organismes de formation" />
               <Count count={effectifsNational.apprentis} label="Apprentis" />
               <Count count={effectifsNational.inscritsSansContrat} label="Jeunes sans contrat" />
               <Count count={effectifsNational.rupturants} label="Rupturants" />
               <Count count={effectifsNational.abandons} label="Abandons" />
             </HStack>
-          // )}
+          )}
           {error && (
             <Text color="error" marginTop="3w">
               Impossible de charger les effectifs au national
             </Text>
-          )} */}
+          )}
 
           <Divider marginY="3w" />
 
           <Text fontWeight="700" color="grey.800" fontSize="gamma">
             Aujourd&apos;hui, le tableau de bord est interfaçable avec :
           </Text>
-          <HStack marginTop="3v">
+          <HStack
+            marginTop="3v"
+            spacing={["0", "0", "1w"]}
+            flexDirection={["column", "column", "row"]}
+            alignItems={["normal", "normal", "center"]}
+          >
             {ERPS.filter((erp) => erp.state !== "coming").map(({ name, state }) => {
               return (
                 <Box key={name}>
@@ -89,7 +95,12 @@ const ApercuDesDonneesSection = () => {
             <Text color="grey.600" fontWeight={700}>
               À venir :
             </Text>
-            <HStack spacing="1w" marginLeft="2w">
+            <HStack
+              marginLeft="2w"
+              spacing={["0", "0", "1w"]}
+              flexDirection={["column", "column", "row"]}
+              alignItems={["normal", "normal", "center"]}
+            >
               {ERPS.filter((erp) => erp.state === "coming").map(({ name }) => {
                 return (
                   <Box key={name}>

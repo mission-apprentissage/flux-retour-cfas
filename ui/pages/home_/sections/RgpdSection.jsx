@@ -11,7 +11,13 @@ const RgpdSection = (props) => {
   return (
     <Box {...props} w="100%" pt={[4, 8]} px={[1, 1, 6, 8]}>
       <Container maxW="xl">
-        <HStack spacing="10w" color="grey.800" alignItems="flex-start" marginBottom="5w">
+        <HStack
+          color="grey.800"
+          marginBottom="5w"
+          spacing={["0", "0", "5w"]}
+          flexDirection={["column", "column", "row"]}
+          alignItems={["normal", "normal", "flex-start"]}
+        >
           <Box flex="1">
             <Heading as="h2" fontSize="1.9em">
               {currentPage.title}

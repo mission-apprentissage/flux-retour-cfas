@@ -27,9 +27,8 @@ Count.propTypes = {
 const ApercuDesDonneesHomePage = () => {
   const date = startOfHour(new Date());
   const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
-
   return (
-    <Box paddingY="2w">
+    <Box>
       <Heading as="h2">Aperçu des données</Heading>
       <Text fontStyle="italic" color="grey.800">
         Au national le {formatDateDayMonthYear(date)}. <br />
@@ -41,7 +40,14 @@ const ApercuDesDonneesHomePage = () => {
         <Skeleton marginTop="3w" width="100%" height="4rem" startColor="grey.300" endColor="galt" />
       )}
       {effectifsNational && (
-        <HStack marginTop="3w" spacing="10w" fontSize="gamma" color="grey.800">
+        <HStack
+          flexDirection={["column", "column", "column", "row"]}
+          marginTop="3w"
+          alignItems={["normal", "normal", "normal", "center"]}
+          spacing={["0", "0", "0", "5w"]}
+          fontSize="gamma"
+          color="grey.800"
+        >
           <Count count={effectifsNational.totalOrganismes} label="Organismes de formation" />
           <Count count={effectifsNational.apprentis} label="Apprentis" />
           <Count count={effectifsNational.inscritsSansContrat} label="Jeunes sans contrat" />
@@ -61,13 +67,25 @@ const ApercuDesDonneesHomePage = () => {
         Aujourd&apos;hui, le tableau de bord est interfaçable avec :
       </Text>
 
-      <Flex flexDirection="row" spacing="3w">
+      <Flex flexDirection={["column", "column", "column", "row"]}>
         <Flex flexDirection="column">
-          <HStack marginTop="3v">
+          <HStack
+            marginTop="3v"
+            spacing={["0", "0", "0", "3w"]}
+            flexDirection={["column", "column", "column", "row"]}
+            alignItems={["normal", "normal", "normal", "center"]}
+            w={["30%", "30%", "30%", "100%"]}
+          >
             {ERPS.filter((erp) => erp.state !== "coming").map(({ name, state }) => {
               return (
-                <Box key={name}>
-                  <Box alignItems="center" background="#E3E3FD" borderRadius="24px" paddingX="2w" paddingY="1w">
+                <Box key={name} pt={["1w", "1w", "1w", "0"]}>
+                  <Box
+                    alignItems={["normal", "normal", "normal", "center"]}
+                    background="#E3E3FD"
+                    borderRadius="24px"
+                    paddingX="2w"
+                    paddingY="1w"
+                  >
                     <Checkbox marginBottom="5px" />
                     <Text marginLeft="1v" as="span">
                       <strong>
@@ -83,10 +101,16 @@ const ApercuDesDonneesHomePage = () => {
           <Text fontSize="18px" marginTop="2w">
             Outils de gestion bientôt connectés :
           </Text>
-          <HStack spacing="1w" marginTop="1w">
+          <HStack
+            spacing={["0", "0", "0", "1w"]}
+            flexDirection={["column", "column", "column", "row"]}
+            alignItems={["normal", "normal", "normal", "center"]}
+            w={["50%", "50%", "50%", "100%"]}
+            marginTop="1w"
+          >
             {ERPS.filter((erp) => erp.state === "coming").map(({ name }) => {
               return (
-                <Box key={name}>
+                <Box key={name} pt={["1w", "1w", "1w", "0"]}>
                   <Box color="#666666" background="#E5E5E5" borderRadius="24px" paddingX="2w" paddingY="1w">
                     <CheckBoxWhite marginBottom="5px" />
                     <Text marginLeft="1v" as="span">
@@ -98,7 +122,7 @@ const ApercuDesDonneesHomePage = () => {
             })}
           </HStack>
         </Flex>
-        <Box flex="1" marginLeft="8w">
+        <Box flex="1" marginLeft={["0", "0", "0", "8w"]} pt={["3w", "3w", "3w", "0"]}>
           <Box borderLeft="4px solid" borderColor="#6A6AF4">
             <Text color="#666666" marginLeft="4w">
               <strong>Partage Simplifié</strong>
