@@ -1,4 +1,6 @@
 // In this file you can configure migrate-mongo
+// eslint-disable-next-line node/no-unpublished-import
+import "dotenv/config";
 import { config as appConfig } from "./config/index.js";
 
 const config = {
