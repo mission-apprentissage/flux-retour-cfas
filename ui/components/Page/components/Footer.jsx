@@ -91,6 +91,9 @@ const Footer = () => {
                 <Link href={"/assistance"}>Assistance</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
+                <Link href={"/politique-confidentialite"}>Politique de condidentialité</Link>
+              </ListItem>
+              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link
                   href="https://mission-apprentissage.notion.site/Documentation-32235dc713c04bbf9b44e6963e02c07e"
                   isExternal
