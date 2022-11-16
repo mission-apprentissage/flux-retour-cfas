@@ -9,12 +9,11 @@ const APP_VERSION = process.env.NEXT_PUBLIC_VERSION;
 const Footer = () => {
   return (
     <Box borderTop="1px solid" borderColor="bluefrance" color="#1E1E1E" fontSize="zeta" w="full">
-      <Container maxW="xl" my={"-2.5rem"}>
-        <Flex flexDirection={["column", "column", "row"]}>
-          <Link href="/" w={["100%", "100%", "50%"]}>
+      <Container maxW="xl" my={["0", "0", "0", "-2.5rem"]} pb={["4w", "4w", "2w", "0"]}>
+        <Flex flexDirection={["column", "column", "column", "row"]}>
+          <Link href="/" w={["100%", "100%", "100%", "50%"]} display="none">
             <LogoFooter size={"xl"} />
           </Link>
-
           <Box alignSelf="center" flex="1">
             <Text>
               Mandatée par le Ministère du Travail, de l&apos;Emploi et de l&apos;Insertion, le Ministère de la
