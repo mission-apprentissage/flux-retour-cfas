@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import "../styles/MonthSelect.css";
+import "remixicon/fonts/remixicon.css";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChakraProvider } from "@chakra-ui/react";
 import { RecoilRoot } from "recoil";

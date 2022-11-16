@@ -6,6 +6,16 @@ const commonButtonStyle = {
   _focusVisible: { boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" },
 };
 
+const baseStyle = {
+  fontWeight: "400",
+  fontFamily: "Marianne",
+  borderRadius: "0",
+  paddingX: "2w",
+  lineHeight: "1.4",
+  color: "grey.800",
+  _hover: { textDecoration: "underline" },
+};
+
 const Button = {
   variants: {
     unstyled: {
@@ -34,6 +44,28 @@ const Button = {
       px: 3,
       py: 1,
       _hover: { bg: "grey.200", textDecoration: "none" },
+    },
+    badge: {
+      ...baseStyle,
+      color: "bluefrance",
+      backgroundColor: "#E3E3FD",
+      height: "30px",
+      borderRadius: "40px",
+      fontSize: "zeta",
+      _hover: {
+        background: "#CCCCFF",
+      },
+    },
+    badgeSelected: {
+      ...baseStyle,
+      color: "white",
+      backgroundColor: "bluefrance",
+      height: "30px",
+      borderRadius: "40px",
+      fontSize: "zeta",
+      _hover: {
+        background: "bluefrance_hover",
+      },
     },
   },
 };
