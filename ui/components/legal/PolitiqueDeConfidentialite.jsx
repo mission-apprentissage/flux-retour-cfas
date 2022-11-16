@@ -168,37 +168,37 @@ const PolitiqueDeConfidentialite = () => {
         <Text as={"h4"} fontSize="30px" fontWeight="700" my={5}>
           Sous-traitants
         </Text>
-        <Flex flexDirection={"row"} w="full">
+        <Flex flexDirection={["column", "column", "column", "row"]} w="full">
           <Flex flexDirection={"column"}>
-            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={0} p={5}>
+            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
               <strong>Partenaire</strong>
             </Flex>
-            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={0} h="65px" p={5}>
+            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="65px" p={5}>
               <Text>OVH SAS</Text>
             </Flex>
-            <Flex border="1px solid" h="65px" borderRightWidth={0} p={5}>
+            <Flex border="1px solid" h="65px" borderRightWidth={[1, 1, 1, 0]} p={5}>
               <Text>Crisp</Text>
             </Flex>
           </Flex>
           <Flex flexDirection={"column"}>
-            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={0} p={5}>
+            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
               <strong>Pays destinataire</strong>
             </Flex>
-            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={0} h="65px" p={5}>
+            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="65px" p={5}>
               <Text>France</Text>
             </Flex>
-            <Flex border="1px solid" h="65px" borderRightWidth={0} p={5}>
+            <Flex border="1px solid" h="65px" borderRightWidth={[1, 1, 1, 0]} p={5}>
               <Text>Union européenne</Text>
             </Flex>
           </Flex>
           <Flex flexDirection={"column"}>
-            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={0} p={5}>
+            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
               <strong>Traitement réalisé</strong>
             </Flex>
-            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={0} h="65px" p={5}>
+            <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="65px" p={5}>
               <Text>Hébergement</Text>
             </Flex>
-            <Flex border="1px solid" h="65px" borderRightWidth={0} p={5}>
+            <Flex border="1px solid" h="65px" borderRightWidth={[1, 1, 1, 0]} p={5}>
               <Text>Chat de support</Text>
             </Flex>
           </Flex>
