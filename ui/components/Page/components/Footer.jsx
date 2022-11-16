@@ -11,7 +11,7 @@ const Footer = () => {
     <Box borderTop="1px solid" borderColor="bluefrance" color="#1E1E1E" fontSize="zeta" w="full">
       <Container maxW="xl" my={["0", "0", "0", "-2.5rem"]} pb={["4w", "4w", "2w", "0"]}>
         <Flex flexDirection={["column", "column", "column", "row"]}>
-          <Link href="/" w={["100%", "100%", "100%", "50%"]} display="none">
+          <Link href="/" w={["100%", "100%", "100%", "50%"]} display={["none", "none", "inline-block"]}>
             <LogoFooter size={"xl"} />
           </Link>
           <Box alignSelf="center" flex="1">
