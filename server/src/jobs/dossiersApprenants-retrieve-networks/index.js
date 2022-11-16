@@ -93,7 +93,8 @@ const addReseauxToDossierApprenant = async (currentDossierForSiret, reseauxToAdd
     { _id: currentDossierForSiret._id },
     {
       $addToSet: {
-        etablissement_reseaux: reseauxToAdd,
+        // https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/#value-to-add-is-an-array
+        etablissement_reseaux: { $each: reseauxToAdd },
       },
     }
   );
