@@ -22,7 +22,7 @@ export function schema() {
       siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
       account_status: string({
         description: "Statut du compte",
-        enum: ["NOT_CONFIRMED", "FORCE_RESET_PASSWORD", "CONFIRMED"],
+        enum: ["NOT_CONFIRMED", "FORCE_RESET_PASSWORD", "FORCE_COMPLETE_PROFILE", "CONFIRMED"],
       }),
       has_accept_cgu_version: string({ description: "Version des cgu accepté par l'utilisateur" }),
       orign_register: string({ description: "Origine de l'inscription", enum: ["ORIGIN"] }),
