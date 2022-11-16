@@ -5,36 +5,35 @@
     - niveau_formation : the former niveau_formation
 */
 
-const { asyncForEach } = require("../src/common/utils/asyncUtils");
-const formationsComponent = require("../src/common/components/formations");
+import { asyncForEach } from "../src/common/utils/asyncUtils.js";
 
-module.exports = {
-  async up(db) {
-    const { getNiveauFormationFromLibelle } = formationsComponent();
-    const collection = db.collection("statutsCandidats");
+import formationsComponent from "../src/common/components/formations.js";
 
-    const allNiveauFormation = await collection.distinct("niveau_formation", { niveau_formation: { $exists: true } });
+export const up = async (db) => {
+  const { getNiveauFormationFromLibelle } = formationsComponent();
+  const collection = db.collection("statutsCandidats");
 
-    await asyncForEach(allNiveauFormation, async (niveau) => {
-      const parsedNiveau = getNiveauFormationFromLibelle(niveau);
-      await collection.updateMany(
-        { niveau_formation: niveau },
-        {
-          $set: { niveau_formation: parsedNiveau, niveau_formation_libelle: niveau },
-        }
-      );
-    });
-  },
+  const allNiveauFormation = await collection.distinct("niveau_formation", { niveau_formation: { $exists: true } });
 
-  async down(db) {
-    const collection = db.collection("statutsCandidats");
-
+  await asyncForEach(allNiveauFormation, async (niveau) => {
+    const parsedNiveau = getNiveauFormationFromLibelle(niveau);
     await collection.updateMany(
-      {},
+      { niveau_formation: niveau },
       {
-        $rename: { niveau_formation_libelle: "niveau_formation" },
-        $unset: { niveau_formation_libelle: "" },
+        $set: { niveau_formation: parsedNiveau, niveau_formation_libelle: niveau },
       }
     );
-  },
+  });
+};
+
+export const down = async (db) => {
+  const collection = db.collection("statutsCandidats");
+
+  await collection.updateMany(
+    {},
+    {
+      $rename: { niveau_formation_libelle: "niveau_formation" },
+      $unset: { niveau_formation_libelle: "" },
+    }
+  );
 };

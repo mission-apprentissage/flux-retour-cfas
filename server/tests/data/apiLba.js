@@ -1,4 +1,4 @@
-const dataForGetMetiersByCfd = {
+export const dataForGetMetiersByCfd = {
   metiers: [
     "Enseignement, Recherche",
     "Ingéniérie d'affaires en industrie",
@@ -23,7 +23,7 @@ const dataForGetMetiersByCfd = {
   ],
 };
 
-const dataForGetMetiersBySiret = {
+export const dataForGetMetiersBySiret = {
   metiers: [
     "Exploitation agricole",
     "Paysagisme, jardinage, entretien des espaces verts",
@@ -42,9 +42,4 @@ const dataForGetMetiersBySiret = {
     "Soins aux animaux",
     "Elevage de poissons, produits de la mer",
   ],
-};
-
-module.exports = {
-  dataForGetMetiersByCfd,
-  dataForGetMetiersBySiret,
 };

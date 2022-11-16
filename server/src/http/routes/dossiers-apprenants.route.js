@@ -1,27 +1,27 @@
-const express = require("express");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const Joi = require("joi");
-const logger = require("../../common/logger");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { schema: ISO8601DateSchema } = require("../../common/domain/date");
-const { schema: statutApprenantSchema } = require("../../common/domain/apprenant/statutApprenant");
-const { schema: uaiSchema } = require("../../common/domain/uai");
-const { schema: cfdSchema } = require("../../common/domain/cfd");
-const { schema: nomApprenantSchema } = require("../../common/domain/apprenant/nomApprenant");
-const { schema: prenomApprenantSchema } = require("../../common/domain/apprenant/prenomApprenant");
-const { schema: siretSchema } = require("../../common/domain/siret");
-const validateRequestBody = require("../middlewares/validateRequestBody");
-const validateRequestQuery = require("../middlewares/validateRequestQuery");
-const { findAndPaginate } = require("../../common/utils/dbUtils");
-const { sendJsonStream } = require("../../common/utils/httpUtils");
-const { oleoduc, transformIntoJSON } = require("oleoduc");
-const { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } = require("../../common/constants/userEventsConstants");
-const { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } = require("../../common/model/collections");
+import express from "express";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import Joi from "joi";
+import logger from "../../common/logger.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { schema as anneeScolaireSchema } from "../../common/domain/anneeScolaire.js";
+import { schema as ISO8601DateSchema } from "../../common/domain/date.js";
+import { schema as statutApprenantSchema } from "../../common/domain/apprenant/statutApprenant.js";
+import { schema as uaiSchema } from "../../common/domain/uai.js";
+import { schema as cfdSchema } from "../../common/domain/cfd.js";
+import { schema as nomApprenantSchema } from "../../common/domain/apprenant/nomApprenant.js";
+import { schema as prenomApprenantSchema } from "../../common/domain/apprenant/prenomApprenant.js";
+import { schema as siretSchema } from "../../common/domain/siret.js";
+import validateRequestBody from "../middlewares/validateRequestBody.js";
+import validateRequestQuery from "../middlewares/validateRequestQuery.js";
+import { findAndPaginate } from "../../common/utils/dbUtils.js";
+import { sendJsonStream } from "../../common/utils/httpUtils.js";
+import { oleoduc, transformIntoJSON } from "oleoduc";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
+import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../common/model/collections.js";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
-module.exports = ({ dossiersApprenants, userEvents }) => {
+export default ({ dossiersApprenants, userEvents }) => {
   const router = express.Router();
 
   /**

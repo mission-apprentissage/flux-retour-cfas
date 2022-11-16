@@ -1,22 +1,20 @@
-const { runScript } = require("../scriptWrapper");
-const { v4: uuid } = require("uuid");
-const { validateNomApprenant, normalizeNomApprenant } = require("../../common/domain/apprenant/nomApprenant");
-const { validatePrenomApprenant, normalizePrenomApprenant } = require("../../common/domain/apprenant/prenomApprenant");
-const { DossierApprenantApiInputFiabilite } = require("../../common/factory/dossierApprenantApiInputFiabilite");
-const {
-  DossierApprenantApiInputFiabiliteReport,
-} = require("../../common/factory/dossierApprenantApiInputFiabiliteReport");
-const { USER_EVENTS_ACTIONS } = require("../../common/constants/userEventsConstants");
-const { validateIneApprenant } = require("../../common/domain/apprenant/ineApprenant");
-const { validateDateDeNaissanceApprenant } = require("../../common/domain/apprenant/dateDeNaissanceApprenant");
-const { validateCodeCommune } = require("../../common/domain/codeCommune");
-const { validateFrenchTelephoneNumber } = require("../../common/domain/frenchTelephoneNumber");
-const { validateEmail } = require("../../common/domain/email");
-const { validateUai } = require("../../common/domain/uai");
-const { validateSiret } = require("../../common/domain/siret");
-const logger = require("../../common/logger");
-const { userEventsDb, referentielSiretUaiDb } = require("../../common/model/collections");
-const { getDbCollection } = require("../../common/mongodb");
+import { runScript } from "../scriptWrapper.js";
+import { v4 as uuid } from "uuid";
+import { validateNomApprenant, normalizeNomApprenant } from "../../common/domain/apprenant/nomApprenant.js";
+import { validatePrenomApprenant, normalizePrenomApprenant } from "../../common/domain/apprenant/prenomApprenant.js";
+import { DossierApprenantApiInputFiabilite } from "../../common/factory/dossierApprenantApiInputFiabilite.js";
+import { DossierApprenantApiInputFiabiliteReport } from "../../common/factory/dossierApprenantApiInputFiabiliteReport.js";
+import { USER_EVENTS_ACTIONS } from "../../common/constants/userEventsConstants.js";
+import { validateIneApprenant } from "../../common/domain/apprenant/ineApprenant.js";
+import { validateDateDeNaissanceApprenant } from "../../common/domain/apprenant/dateDeNaissanceApprenant.js";
+import { validateCodeCommune } from "../../common/domain/codeCommune.js";
+import { validateFrenchTelephoneNumber } from "../../common/domain/frenchTelephoneNumber.js";
+import { validateEmail } from "../../common/domain/email.js";
+import { validateUai } from "../../common/domain/uai.js";
+import { validateSiret } from "../../common/domain/siret.js";
+import logger from "../../common/logger.js";
+import { userEventsDb, referentielSiretUaiDb } from "../../common/model/collections.js";
+import { getDbCollection } from "../../common/mongodb.js";
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";

@@ -1,12 +1,12 @@
-const assert = require("assert").strict;
-const config = require("../../../config");
-const jwt = require("jsonwebtoken");
-const { startServer } = require("../../utils/testUtils");
-const { tdbRoles } = require("../../../src/common/roles");
-const { cfasDb } = require("../../../src/common/model/collections");
-const { Cfa } = require("../../../src/common/factory/cfa");
+import { strict as assert } from "assert";
+import config from "../../../config/index.js";
+import jwt from "jsonwebtoken";
+import { startServer } from "../../utils/testUtils.js";
+import { tdbRoles } from "../../../src/common/roles.js";
+import { cfasDb } from "../../../src/common/model/collections.js";
+import { Cfa } from "../../../src/common/factory/cfa.js";
 
-describe(__filename, () => {
+describe("LoginCFA Route", () => {
   it("Vérifie qu'on peut se connecter avec un access token cfa", async () => {
     const { httpClient } = await startServer();
     // create cfa in db

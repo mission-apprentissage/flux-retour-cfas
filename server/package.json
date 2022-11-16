@@ -6,7 +6,8 @@
   "private": false,
   "author": "MNA",
   "license": "MIT",
-  "main": "src/index.js",
+  "exports": "./src/index.js",
+  "type": "module",
   "scripts": {
     "start": "node -r dotenv/config src/index.js",
     "watch": "nodemon --ignore tests/ src/index.js",
@@ -50,7 +51,6 @@
     "migration:down": "migrate-mongo down"
   },
   "dependencies": {
-    "@faker-js/faker": "7.2.0",
     "arg": "5.0.1",
     "async": "3.2.3",
     "axios": "0.27.2",
@@ -68,7 +68,6 @@
     "fs-extra": "10.1.0",
     "iconv-lite": "0.6.3",
     "joi": "17.6.0",
-    "json-stringify-deterministic": "1.0.6",
     "json2csv": "5.0.7",
     "jsonwebtoken": "8.5.1",
     "lodash.groupby": "4.6.0",
@@ -80,11 +79,12 @@
     "migrate-mongo": "9.0.0",
     "mongodb": "4.11.0",
     "node-ovh-objectstorage": "2.0.5",
-    "oleoduc": "0.6.0",
+    "oleoduc": "0.7.0",
     "passport": "0.5.2",
     "passport-jwt": "4.0.0",
     "randexp": "0.5.3",
     "redis": "4.1.0",
+    "safe-stable-stringify": "2.4.1",
     "sha512crypt-node": "1.0.2",
     "uuid": "8.3.2",
     "xlsx": "0.18.5"
@@ -98,10 +98,12 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
+    "@faker-js/faker": "7.6.0",
     "axiosist": "0.10.0",
     "dotenv": "16.0.1",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-mocha": "10.1.0",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-prettier": "3.4.0",
     "mocha": "10.0.0",

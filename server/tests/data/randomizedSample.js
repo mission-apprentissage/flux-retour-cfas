@@ -1,17 +1,17 @@
-const { faker } = require("@faker-js/faker/locale/fr");
-const RandExp = require("randexp");
-const sampleLibelles = require("./sampleLibelles.json");
-const { subMonths, addYears } = require("date-fns");
-const { CODES_STATUT_APPRENANT } = require("../../src/common/constants/dossierApprenantConstants");
+import { faker } from "@faker-js/faker/locale/fr";
+import RandExp from "randexp";
+import { sampleLibelles } from "./sampleLibelles.js";
+import { subMonths, addYears } from "date-fns";
+import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
 const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
-const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
-const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
+export const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
+export const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
-const getRandomPeriodeFormation = (anneeScolaire) => {
+export const getRandomPeriodeFormation = (anneeScolaire) => {
   const yearToInclude = Number(anneeScolaire.slice(0, 4));
   const startYear = faker.helpers.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
   const endYear = startYear + faker.helpers.arrayElement([1, 2]);
@@ -32,7 +32,7 @@ const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1)
 const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
-const createRandomDossierApprenant = (params = {}) => {
+export const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -54,7 +54,7 @@ const createRandomDossierApprenant = (params = {}) => {
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
     id_erp_apprenant: faker.datatype.boolean() ? faker.datatype.uuid() : null,
-    tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
+    tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
     date_de_naissance_apprenant: getRandomDateNaissance(),
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
@@ -66,7 +66,7 @@ const createRandomDossierApprenant = (params = {}) => {
   };
 };
 
-const createRandomEffectifApprenant = (params = {}) => {
+export const createRandomEffectifApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -90,7 +90,7 @@ const createRandomEffectifApprenant = (params = {}) => {
 };
 
 // random DossierApprenant shaped along our REST API schema
-const createRandomDossierApprenantApiInput = (params = {}) => {
+export const createRandomDossierApprenantApiInput = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
@@ -114,7 +114,7 @@ const createRandomDossierApprenantApiInput = (params = {}) => {
     periode_formation: isPresent() ? periode_formation.join("-") : "",
     annee_scolaire,
     id_erp_apprenant: faker.datatype.boolean() ? faker.datatype.uuid() : null,
-    tel_apprenant: faker.datatype.boolean() ? faker.phone.phoneNumber() : null,
+    tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
 
     contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat().toISOString() : null,
@@ -139,17 +139,6 @@ const createRandomListOf =
     return randomList;
   };
 
-const createRandomDossierApprenantApiInputList = createRandomListOf(createRandomDossierApprenantApiInput);
+export const createRandomDossierApprenantApiInputList = createRandomListOf(createRandomDossierApprenantApiInput);
 
-const createRandomDossierApprenantList = createRandomListOf(createRandomDossierApprenant);
-
-module.exports = {
-  getRandomPeriodeFormation,
-  createRandomDossierApprenant,
-  createRandomDossierApprenantApiInput,
-  createRandomDossierApprenantList,
-  createRandomDossierApprenantApiInputList,
-  getRandomSiretEtablissement,
-  getRandomUaiEtablissement,
-  createRandomEffectifApprenant,
-};
+export const createRandomDossierApprenantList = createRandomListOf(createRandomDossierApprenant);

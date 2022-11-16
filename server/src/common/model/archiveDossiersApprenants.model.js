@@ -1,4 +1,4 @@
-const { object, objectId } = require("./json-schema/jsonSchemaTypes");
+import { object, objectId } from "./json-schema/jsonSchemaTypes.js";
 
 const collectionName = "archiveDossiersApprenants";
 
@@ -7,7 +7,7 @@ const schema = object({
   data: object({}, { additionalProperties: true }),
 });
 
-module.exports = {
+export default {
   collectionName,
   schema,
 };

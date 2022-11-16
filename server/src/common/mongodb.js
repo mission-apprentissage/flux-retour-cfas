@@ -1,20 +1,20 @@
-const { MongoClient } = require("mongodb");
-const logger = require("./logger");
-const { asyncForEach } = require("./utils/asyncUtils");
+import { MongoClient } from "mongodb";
+import logger from "./logger.js";
+import { asyncForEach } from "./utils/asyncUtils.js";
 
 let mongodbClient;
 
-function ensureInitialization() {
+const ensureInitialization = () => {
   if (!mongodbClient) {
     throw new Error("Database connection does not exist. Please call connectToMongodb before.");
   }
-}
+};
 
 /**
  * @param  {string} uri
  * @returns client
  */
-const connectToMongodb = async (uri) => {
+export const connectToMongodb = async (uri) => {
   logger.info("Connecting to MongoDB at", uri);
   const client = new MongoClient(uri, {
     useNewUrlParser: true,
@@ -27,22 +27,22 @@ const connectToMongodb = async (uri) => {
   return client;
 };
 
-const closeMongodbConnection = () => {
+export const closeMongodbConnection = () => {
   ensureInitialization();
   return mongodbClient.close();
 };
 
-const getDatabase = () => {
+export const getDatabase = () => {
   ensureInitialization();
   return mongodbClient.db();
 };
 
-const getDbCollection = (name) => {
+export const getDbCollection = (name) => {
   ensureInitialization();
   return mongodbClient.db().collection(name);
 };
 
-const getDbCollectionIndexes = async (name) => {
+export const getDbCollectionIndexes = async (name) => {
   ensureInitialization();
   return await mongodbClient.db().collection(name).indexes();
 };
@@ -61,7 +61,7 @@ const createCollectionIfDoesNotExist = async (collectionName) => {
   }
 };
 
-const configureDbSchemaValidation = async (modelDescriptors) => {
+export const configureDbSchemaValidation = async (modelDescriptors) => {
   const db = getDatabase();
   await ensureInitialization();
   await asyncForEach(modelDescriptors, async ({ collectionName, schema }) => {
@@ -79,13 +79,4 @@ const configureDbSchemaValidation = async (modelDescriptors) => {
       },
     });
   });
-};
-
-module.exports = {
-  connectToMongodb,
-  closeMongodbConnection,
-  getDbCollection,
-  getDatabase,
-  getDbCollectionIndexes,
-  configureDbSchemaValidation,
 };

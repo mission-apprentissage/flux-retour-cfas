@@ -1,14 +1,14 @@
-const { buildTokenizedString } = require("../utils/buildTokenizedString");
-const Joi = require("joi");
-const { schema: uaiSchema } = require("../domain/uai");
-const { schema: natureSchema } = require("../domain/organisme-de-formation/nature");
-const config = require("../../../config");
-const { generateRandomAlphanumericPhrase } = require("../utils/miscUtils");
-const { BaseFactory } = require("./baseFactory");
+import { buildTokenizedString } from "../utils/buildTokenizedString.js";
+import Joi from "joi";
+import { schema as uaiSchema } from "../domain/uai.js";
+import { schema as natureSchema } from "../domain/organisme-de-formation/nature.js";
+import config from "../../../config/index.js";
+import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
+import { BaseFactory } from "./baseFactory.js";
 
 const TOKENIZED_STRING_SIZE = 4;
 
-class Cfa extends BaseFactory {
+export class Cfa extends BaseFactory {
   /**
    * Create a Cfa Entry from props
    * Generate a random accessToken and privateUrl
@@ -49,5 +49,3 @@ class Cfa extends BaseFactory {
     return buildTokenizedString(nom.trim(), TOKENIZED_STRING_SIZE);
   }
 }
-
-module.exports = { Cfa };

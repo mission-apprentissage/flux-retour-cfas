@@ -1,7 +1,7 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
 
-describe(__filename, () => {
+describe("Update Password route", () => {
   describe("POST /update-password", () => {
     it("renvoie une 200 quand le token fourni et le nouveau mot de passe sont corrects", async () => {
       const { httpClient, components } = await startServer();

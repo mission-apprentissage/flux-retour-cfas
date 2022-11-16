@@ -1,9 +1,9 @@
-const passport = require("passport");
-const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
-const config = require("../../../config");
-const { tdbRoles } = require("../../common/roles");
+import passport from "passport";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
+import config from "../../../config/index.js";
+import { tdbRoles } from "../../common/roles.js";
 
-module.exports = ({ users, cfas }) => {
+export default ({ users, cfas }) => {
   const findUserOrCfa = async (usernameOrUai) => {
     const foundUser = await users.getUser(usernameOrUai);
 

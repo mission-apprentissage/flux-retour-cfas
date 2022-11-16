@@ -1,13 +1,13 @@
-const cliProgress = require("cli-progress");
-const logger = require("../../common/logger");
-const path = require("path");
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-const { RESEAUX_CFAS } = require("../../common/constants/networksConstants");
-
-const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
-const { reseauxCfasDb } = require("../../common/model/collections");
+import cliProgress from "cli-progress";
+import logger from "../../common/logger.js";
+import path from "path";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
+import { RESEAUX_CFAS } from "../../common/constants/networksConstants.js";
+import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
+import { reseauxCfasDb } from "../../common/model/collections.js";
+import { getDirname } from "../../common/utils/esmUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -46,7 +46,7 @@ runScript(async ({ reseauxCfas, ovhStorage }) => {
  */
 const seedReseauxCfasFromNetwork = async (reseauxCfas, ovhStorage, { nomReseau, nomFichier }) => {
   logger.info(`Seeding reseauxCfas network for ${nomReseau}`);
-  const cfasReferenceFilePath = path.join(__dirname, `./assets/${nomFichier}.csv`);
+  const cfasReferenceFilePath = path.join(getDirname(import.meta.url), `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
   await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, { clearFile: true });

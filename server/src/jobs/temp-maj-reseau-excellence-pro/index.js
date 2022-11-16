@@ -1,8 +1,9 @@
-const logger = require("../../common/logger");
-const path = require("path");
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
+import logger from "../../common/logger.js";
+import path from "path";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
+import { getDirname } from "../../common/utils/esmUtils.js";
 
 /**
  * @param  {string} reseauText
@@ -31,7 +32,7 @@ const arraysContainSameValues = (array1, array2) => {
   return true;
 };
 
-const FILE_PATH = path.join(__dirname, "referentiel-reseau-excellence-pro.csv");
+const FILE_PATH = path.join(getDirname(import.meta.url), "referentiel-reseau-excellence-pro.csv");
 
 runScript(async ({ cfas }) => {
   // read référentiel file from Excellence Pro and convert it to JSON

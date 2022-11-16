@@ -14,10 +14,8 @@ const flushall = async () => {
   });
 };
 
-const redisFakeClient = {
+export default {
   set,
   get,
   flushall,
 };
-
-module.exports = redisFakeClient;

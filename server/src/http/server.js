@@ -1,34 +1,31 @@
-const express = require("express");
-const bodyParser = require("body-parser");
+import express from "express";
+import bodyParser from "body-parser";
+import { apiRoles } from "../common/roles.js";
+import logMiddleware from "./middlewares/logMiddleware.js";
+import errorMiddleware from "./middlewares/errorMiddleware.js";
+import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
+import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
+import effectifsApprenantsRouter from "./routes/effectifs-apprenants.route.js";
+import dossierApprenantRouter from "./routes/dossiers-apprenants.route.js";
+import lienPriveCfaRouter from "./routes/lien-prive-cfa.route.js";
+import loginRouter from "./routes/login.route.js";
+import loginCfaRouter from "./routes/login-cfa.route.js";
+import configRouter from "./routes/config.route.js";
+import referentielRouter from "./routes/referentiel.route.js";
+import effectifsRouter from "./routes/effectifs.route.js";
+import effecitfsExportRouter from "./routes/effectifs-export.route.js";
+import cfasRouter from "./routes/cfas.route.js";
+import formationRouter from "./routes/formations.route.js";
+import healthcheckRouter from "./routes/healthcheck.route.js";
+import demandeIdentifiantsRouter from "./routes/demande-identifiants.route.js";
+import demandeBranchementErpRouter from "./routes/demande-branchement-erp.route.js";
+import cacheRouter from "./routes/cache.route.js";
+import updatePasswordRouter from "./routes/update-password.route.js";
+import usersRouter from "./routes/users.route.js";
+import reseauxCfasRouter from "./routes/reseaux-cfas.route.js";
+import effectifsNationalRouter from "./routes/effectifs-national.route.js";
 
-const { apiRoles } = require("../common/roles");
-
-const logMiddleware = require("./middlewares/logMiddleware");
-const errorMiddleware = require("./middlewares/errorMiddleware");
-const requireJwtAuthenticationMiddleware = require("./middlewares/requireJwtAuthentication");
-const permissionsMiddleware = require("./middlewares/permissionsMiddleware");
-
-const effectifsApprenantsRouter = require("./routes/effectifs-apprenants.route");
-const dossierApprenantRouter = require("./routes/dossiers-apprenants.route");
-const lienPriveCfaRouter = require("./routes/lien-prive-cfa.route");
-const loginRouter = require("./routes/login.route");
-const loginCfaRouter = require("./routes/login-cfa.route");
-const configRouter = require("./routes/config.route");
-const referentielRouter = require("./routes/referentiel.route");
-const effectifsRouter = require("./routes/effectifs.route");
-const effecitfsExportRouter = require("./routes/effectifs-export.route");
-const cfasRouter = require("./routes/cfas.route");
-const formationRouter = require("./routes/formations.route");
-const healthcheckRouter = require("./routes/healthcheck.route");
-const demandeIdentifiantsRouter = require("./routes/demande-identifiants.route");
-const demandeBranchementErpRouter = require("./routes/demande-branchement-erp.route");
-const cacheRouter = require("./routes/cache.route");
-const updatePasswordRouter = require("./routes/update-password.route");
-const usersRouter = require("./routes/users.route");
-const reseauxCfasRouter = require("./routes/reseaux-cfas.route");
-const effectifsNationalRouter = require("./routes/effectifs-national.route");
-
-module.exports = async (components) => {
+export default async (components) => {
   const app = express();
 
   const requireJwtAuthentication = requireJwtAuthenticationMiddleware(components);

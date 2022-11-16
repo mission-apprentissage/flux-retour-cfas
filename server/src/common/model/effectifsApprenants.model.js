@@ -1,4 +1,4 @@
-const {
+import {
   object,
   string,
   integer,
@@ -7,11 +7,11 @@ const {
   stringOrNull,
   dateOrNull,
   arrayOfOrNull,
-} = require("./json-schema/jsonSchemaTypes");
+} from "./json-schema/jsonSchemaTypes.js";
 
-const collectionName = "effectifsApprenants";
+export const collectionName = "effectifsApprenants";
 
-const schema = object({
+export const schema = object({
   _id: objectId(),
   dossierApprenantId: string({ description: "Identifiant du dossier apprenant d'origine" }),
   uai_etablissement: string({ description: "Code uai de l'établissement d'origine" }),
@@ -33,7 +33,4 @@ const schema = object({
   created_at: date({ description: "Date d'ajout en base de données" }),
 });
 
-module.exports = {
-  schema,
-  collectionName,
-};
+export default { schema, collectionName };

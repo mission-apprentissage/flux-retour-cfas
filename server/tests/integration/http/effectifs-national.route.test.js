@@ -1,7 +1,7 @@
-const assert = require("assert").strict;
-const { startServer } = require("../../utils/testUtils");
+import { strict as assert } from "assert";
+import { startServer } from "../../utils/testUtils.js";
 
-describe(__filename, () => {
+describe("EffectifsNational Route", () => {
   it("Verifie si la route fonctionne et verifie si l'objet renvoyé est correct", async () => {
     const { httpClient } = await startServer();
     const response = await httpClient.get("/api/effectifs-national", { params: { date: "2020-10-10T00:00:00.000Z" } });

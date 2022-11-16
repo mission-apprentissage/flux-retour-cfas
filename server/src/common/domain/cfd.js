@@ -1,14 +1,8 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-const validateCfd = (cfd) => {
+export const validateCfd = (cfd) => {
   return Boolean(cfd) && cfdRegex.test(cfd);
 };
 
-const cfdRegex = /^[a-zA-Z0-9_]{8}$/;
-const schema = Joi.string().regex(cfdRegex);
-
-module.exports = {
-  validateCfd,
-  cfdRegex,
-  schema,
-};
+export const cfdRegex = /^[a-zA-Z0-9_]{8}$/;
+export const schema = Joi.string().regex(cfdRegex);

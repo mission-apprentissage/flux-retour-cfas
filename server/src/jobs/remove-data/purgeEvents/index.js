@@ -1,9 +1,8 @@
-const { runScript } = require("../../scriptWrapper");
-const logger = require("../../../common/logger");
-const { purgeStatutsImportsUserEvents } = require("./purgeStatutsImportsUserEvents");
-const { purgeJobEvents } = require("./purgeJobEvents");
-
-const { subDays } = require("date-fns");
+import { runScript } from "../../scriptWrapper.js";
+import logger from "../../../common/logger.js";
+import { purgeStatutsImportsUserEvents } from "./purgeStatutsImportsUserEvents.js";
+import { purgeJobEvents } from "./purgeJobEvents.js";
+import { subDays } from "date-fns";
 
 const NB_DAYS_TO_KEEP = 15;
 

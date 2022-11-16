@@ -1,5 +1,3 @@
-const collectionName = "referentielSiret";
+export const collectionName = "referentielSiret";
 
-module.exports = {
-  collectionName,
-};
+export default { collectionName };

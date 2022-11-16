@@ -1,14 +1,16 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const {
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+
+import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
-} = require("../../../data/historySequenceSamples");
-const { EffectifsAbandons } = require("../../../../src/common/components/effectifs/abandons");
-const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
+} from "../../../data/historySequenceSamples.js";
 
-describe(__filename, () => {
+import { EffectifsAbandons } from "../../../../src/common/components/effectifs/abandons.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+
+describe("Components Effectifs Abandons Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     const abandonsStatuts = [];
 

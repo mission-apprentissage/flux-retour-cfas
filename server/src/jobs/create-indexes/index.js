@@ -1,7 +1,7 @@
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const { createIndexes, dropIndexes } = require("../../common/model/indexes/index");
-const { JOB_NAMES } = require("../../common/constants/jobsConstants");
+import { runScript } from "../scriptWrapper.js";
+import logger from "../../common/logger.js";
+import { createIndexes, dropIndexes } from "../../common/model/indexes/index.js";
+import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
 
 runScript(async () => {
   logger.info("Drop all existing indexes...");

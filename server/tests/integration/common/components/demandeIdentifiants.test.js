@@ -1,8 +1,8 @@
-const assert = require("assert").strict;
-const demandeIdentifiants = require("../../../../src/common/components/demandeIdentifiants");
-const { demandesIdentifiantsDb } = require("../../../../src/common/model/collections");
+import { strict as assert } from "assert";
+import demandeIdentifiants from "../../../../src/common/components/demandeIdentifiants.js";
+import { demandesIdentifiantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Demande Identifiants Test", () => {
   it("Permet de vérifier la création d'une demande d'identifiants", async () => {
     const { create } = await demandeIdentifiants();
 

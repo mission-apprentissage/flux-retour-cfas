@@ -1,8 +1,8 @@
-const { object, string, date, boolean, objectId, stringOrNull } = require("./json-schema/jsonSchemaTypes");
+import { object, string, date, boolean, objectId, stringOrNull } from "./json-schema/jsonSchemaTypes.js";
 
-const collectionName = "demandesBranchementErp";
+export const collectionName = "demandesBranchementErp";
 
-const schema = object(
+export const schema = object(
   {
     _id: objectId(),
     erp: string({ description: "Nom de l'ERP" }),
@@ -18,7 +18,4 @@ const schema = object(
   { required: ["erp", "nom_organisme", "uai_organisme", "email_demandeur", "created_at"] }
 );
 
-module.exports = {
-  collectionName,
-  schema,
-};
+export default { schema, collectionName };

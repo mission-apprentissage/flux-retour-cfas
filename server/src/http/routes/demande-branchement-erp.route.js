@@ -1,10 +1,10 @@
-const express = require("express");
-const Joi = require("joi");
-const { schema: uaiSchema } = require("../../common/domain/uai");
-const tryCatch = require("../middlewares/tryCatchMiddleware");
-const validateRequestBody = require("../middlewares/validateRequestBody");
+import express from "express";
+import Joi from "joi";
+import { schema as uaiSchema } from "../../common/domain/uai.js";
+import tryCatch from "../middlewares/tryCatchMiddleware.js";
+import validateRequestBody from "../middlewares/validateRequestBody.js";
 
-module.exports = ({ demandeBranchementErp }) => {
+export default ({ demandeBranchementErp }) => {
   const router = express.Router();
 
   router.post(

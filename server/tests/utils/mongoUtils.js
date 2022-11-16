@@ -1,11 +1,12 @@
 // eslint-disable-next-line node/no-unpublished-require
-const { MongoMemoryServer } = require("mongodb-memory-server");
-const { connectToMongodb, closeMongodbConnection, getDatabase, getDbCollection } = require("../../src/common/mongodb");
-const { asyncForEach } = require("../../src/common/utils/asyncUtils");
+import { MongoMemoryServer } from "mongodb-memory-server";
+
+import { connectToMongodb, closeMongodbConnection, getDatabase, getDbCollection } from "../../src/common/mongodb.js";
+import { asyncForEach } from "../../src/common/utils/asyncUtils.js";
 
 let mongoInMemory;
 
-const startAndConnectMongodb = async () => {
+export const startAndConnectMongodb = async () => {
   mongoInMemory = await MongoMemoryServer.create({
     binary: {
       version: "5.0.2",
@@ -15,21 +16,15 @@ const startAndConnectMongodb = async () => {
   await connectToMongodb(uri);
 };
 
-const stopMongodb = async () => {
+export const stopMongodb = async () => {
   await closeMongodbConnection();
   await mongoInMemory.stop();
 };
 
-const clearAllCollections = async () => {
+export const clearAllCollections = async () => {
   const collections = await getDatabase().listCollections({}, { nameOnly: true }).toArray();
 
   await asyncForEach(collections, async (collection) => {
     await getDbCollection(collection.name).deleteMany({});
   });
-};
-
-module.exports = {
-  startAndConnectMongodb,
-  stopMongodb,
-  clearAllCollections,
 };

@@ -1,17 +1,11 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-const schema = Joi.string().min(1);
+export const schema = Joi.string().min(1);
 
-const validateNomApprenant = (value) => {
+export const validateNomApprenant = (value) => {
   return schema.validate(value);
 };
 
-const normalizeNomApprenant = (value) => {
+export const normalizeNomApprenant = (value) => {
   return typeof value === "string" ? value.toUpperCase().trim() : value;
-};
-
-module.exports = {
-  schema,
-  validateNomApprenant,
-  normalizeNomApprenant,
 };

@@ -1,10 +1,9 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { EffectifsRupturants } from "../../../../src/common/components/effectifs/rupturants.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-const { EffectifsRupturants } = require("../../../../src/common/components/effectifs/rupturants");
-const { dossiersApprenantsDb } = require("../../../../src/common/model/collections");
-
-describe(__filename, () => {
+describe("Components Effectifs Rupturants Test", () => {
   beforeEach(async () => {
     const statuts = [
       // following statuts are potential rupturants (depends on date)

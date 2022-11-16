@@ -1,7 +1,7 @@
 /**
  * Codes des statuts des apprenants
  */
-const CODES_STATUT_APPRENANT = {
+export const CODES_STATUT_APPRENANT = {
   inscrit: 2,
   apprenti: 3,
   abandon: 0,
@@ -10,7 +10,7 @@ const CODES_STATUT_APPRENANT = {
 /**
  * Nom des statuts
  */
-const LABELS_STATUT_APPRENANT = [
+export const LABELS_STATUT_APPRENANT = [
   { code: CODES_STATUT_APPRENANT.abandon, name: "abandon" },
   { code: CODES_STATUT_APPRENANT.inscrit, name: "inscrit" },
   { code: CODES_STATUT_APPRENANT.apprenti, name: "apprenti" },
@@ -21,13 +21,13 @@ const LABELS_STATUT_APPRENANT = [
  * @param {*} statutCode
  * @returns
  */
-const getStatutApprenantNameFromCode = (statutCode) =>
+export const getStatutApprenantNameFromCode = (statutCode) =>
   LABELS_STATUT_APPRENANT.find((item) => item.code === statutCode)?.name ?? "NC";
 
 /**
  * Code pour les types de doublons identifiables
  */
-const DUPLICATE_TYPE_CODES = {
+export const DUPLICATE_TYPE_CODES = {
   unique: {
     name: "Uniques (clé d'unicité identique)",
     code: 1,
@@ -53,17 +53,9 @@ const DUPLICATE_TYPE_CODES = {
 /**
  * Liste des nom des indicateurs
  */
-const EFFECTIF_INDICATOR_NAMES = {
+export const EFFECTIF_INDICATOR_NAMES = {
   apprentis: "apprenti",
   inscritsSansContrats: "inscrit sans contrat",
   rupturants: "rupturant",
   abandons: "abandon",
-};
-
-module.exports = {
-  CODES_STATUT_APPRENANT,
-  DUPLICATE_TYPE_CODES,
-  EFFECTIF_INDICATOR_NAMES,
-  LABELS_STATUT_APPRENANT,
-  getStatutApprenantNameFromCode,
 };

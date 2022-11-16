@@ -1,6 +1,6 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-module.exports = {
+export default {
   password: () =>
     Joi.string().regex(
       /^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!"#$€%&'()ç*+,-./:;<=>?@[\]^_`{|}~])[a-zA-Z0-9À-ž!"#$€%&'()ç*+,-./:;<=>?@[\]^_`{|}~]{8,}$/

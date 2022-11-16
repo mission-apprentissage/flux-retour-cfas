@@ -1,4 +1,4 @@
-module.exports = (redisClient) => {
+export default (redisClient) => {
   return {
     get: (cacheKey) => {
       return redisClient.get(cacheKey);

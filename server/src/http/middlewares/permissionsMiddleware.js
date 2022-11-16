@@ -1,5 +1,4 @@
-module.exports =
-  (permissions = {}) =>
+export default (permissions = {}) =>
   (req, res, next) => {
     const { user } = req;
     if (user && user.permissions.some((item) => permissions.includes(item))) {
