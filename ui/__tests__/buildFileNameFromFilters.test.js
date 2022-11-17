@@ -1,4 +1,4 @@
-import { buildFileName } from "./buildFileNameFromFilters";
+import { buildFileName } from "../common/utils/buildFileNameFromFilters";
 
 it("builds file name with no filters", () => {
   const base = "nom_fichier";
