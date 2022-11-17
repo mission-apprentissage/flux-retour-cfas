@@ -23,6 +23,7 @@
     "@choc-ui/paginator": "3.4.0",
     "@emotion/react": "11.10.4",
     "@emotion/styled": "11.10.4",
+    "@nivo/bar": "0.80.0",
     "@tanstack/react-query": "4.13.0",
     "@tanstack/react-table": "8.5.30",
     "axios": "1.1.3",
