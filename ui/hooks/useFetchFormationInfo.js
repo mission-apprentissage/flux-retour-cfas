@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 
-import { fetchFormation } from "../api/tableauDeBord";
+import { fetchFormation } from "../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../common/constants/queryKeys";
 
 const useFetchFormationInfo = (formationCfd) => {

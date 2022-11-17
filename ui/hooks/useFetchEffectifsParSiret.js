@@ -1,9 +1,9 @@
 import { useQuery } from "react-query";
 
-import { fetchEffectifsParSiret } from "../api/tableauDeBord";
+import { fetchEffectifsParSiret } from "../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../common/constants/queryKeys";
-import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
-import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
+import { mapFiltersToApiFormat } from "../common/utils/mapFiltersToApiFormat";
+import { sortAlphabeticallyBy } from "../common/utils/sortAlphabetically";
 
 const useFetchEffectifsParSiret = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);

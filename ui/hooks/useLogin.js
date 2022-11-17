@@ -1,12 +1,12 @@
 import queryString from "query-string";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-import { _post } from "../../common/httpClient";
+import { _post } from "../common/httpClient";
 import useAuth from "./useAuth";
 
 export default function useLogin() {
   const { setAuthFromToken } = useAuth();
-  const history = useHistory();
+  const history = useNavigate();
   const pathToRedirectTo = queryString.parse(history.location.search)?.redirect || "/";
 
   const login = async (values, { setStatus }) => {

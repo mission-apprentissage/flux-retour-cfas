@@ -1,4 +1,5 @@
 import { useContext } from "react";
+
 import { AuthenticationContext } from "../components/UserWrapper/UserWrapper";
 
 export default function useAuth() {
