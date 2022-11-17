@@ -2,8 +2,8 @@ import { Box, Divider, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-import { BreadcrumbNav, Page, Section } from "../../../common/components";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
+import { BreadcrumbNav, Page, Section } from "../../../components";
 import OrganismeFormationPagesMenu from "../OrganismeFormationPagesMenu";
 import CheckCfaTransmissionContent from "./CheckCfaTransmission/CheckCfaTransmissionContent";
 const CommentConsulterEtVerifierLesDonneesPage = () => {

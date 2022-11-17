@@ -2,9 +2,9 @@ import { Badge, Box, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { formatSiretSplitted } from "../../../../../../common/utils/stringUtils";
 import { Section } from "../../../../../../components/index";
 import NatureOrganismeDeFormationWarning from "../../../../../../components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
-import { formatSiretSplitted } from "../../../../../../common/utils/stringUtils";
 import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";

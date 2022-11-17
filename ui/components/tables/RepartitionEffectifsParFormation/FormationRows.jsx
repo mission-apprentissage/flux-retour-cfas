@@ -2,12 +2,12 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useQuery } from "react-query";
 
-import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
-import { fetchEffectifsParFormation } from "../../../api/tableauDeBord";
-import { QUERY_KEYS } from "../../../constants/queryKeys";
-import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
-import { pick } from "../../../utils/pick";
-import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
+import { fetchEffectifsParFormation } from "../../../common/api/tableauDeBord";
+import { QUERY_KEYS } from "../../../common/constants/queryKeys";
+import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
+import { pick } from "../../../common/utils/pick";
+import { sortAlphabeticallyBy } from "../../../common/utils/sortAlphabetically";
+import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import FormationRow from "./FormationRow";
 

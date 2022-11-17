@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { useRouter } from "next/router";
 import { Box, Container, Flex, Text } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+
 import useAuth from "../../../hooks/useAuth";
-import { MenuFill, Close } from "../../../theme/components/icons";
+import { Close, MenuFill } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 
 const NavigationMenu = ({ ...props }) => {
@@ -52,10 +53,10 @@ const NavLinks = ({ isOpen }) => {
   return (
     <Box display={{ base: isOpen ? "block" : "none", md: "block" }} flexBasis={{ base: "100%", md: "auto" }}>
       <Flex
-        align="center"
-        justify={["center", "space-between", "flex-end", "flex-end"]}
-        direction={["column", "row", "row", "row"]}
-        pb={[8, 0]}
+        alignItems="center"
+        justifyContent={["center", "space-between", "flex-end", "flex-end"]}
+        flexDirection={["column", "row", "row", "row"]}
+        paddingBottom={[8, 0]}
         textStyle="sm"
       >
         <NavItem to="/">Accueil</NavItem>
@@ -76,9 +77,9 @@ const NavBarContainer = ({ children, ...props }) => {
   };
 
   return (
-    <Box w="full" {...boxProps}>
-      <Container maxW="xl">
-        <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" {...props}>
+    <Box width="full" {...boxProps}>
+      <Container maxWidth="xl">
+        <Flex as="nav" alignItems="center" justifyContent="space-between" flexWrap="wrap" width="100%" {...props}>
           {children}
         </Flex>
       </Container>

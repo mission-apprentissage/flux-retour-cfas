@@ -2,7 +2,7 @@ import { Box, Heading, List, ListItem } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { OverlayMenu, PrimarySelectButton } from "../../../../../../common/components";
+import { OverlayMenu, PrimarySelectButton } from "../../../../../../components";
 import { useFiltersContext } from "../../../FiltersContext";
 
 const MultiSiretFilter = ({ onSiretClick, sirets }) => {

@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
 import { Badge, Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import { format, formatISO } from "date-fns";
 import fr from "date-fns/locale/fr";
+import Head from "next/head";
+import React, { useEffect, useState } from "react";
 
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
-import { Page } from "../../components/Page/Page";
-import Sommaire from "../../components/Sommaire/Sommaire";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { getUniquesMonthAndYearFromDatesList } from "../../common/utils/dateUtils";
 import { capitalize } from "../../common/utils/stringUtils";
+import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
+import { Page } from "../../components/Page/Page";
+import Section from "../../components/Section/Section";
+import Sommaire from "../../components/Sommaire/Sommaire";
 import { groupEvolutionsByDate } from "./groupEvolutionsByDate";
 import JournalDesEvolutionsTagFilter from "./JournalDesEvolutionsTagFilter";
 import { JOURNAL_DES_EVOLUTIONS_DATA, JOURNAL_DES_EVOLUTIONS_TAGS } from "./JournalEvolutionsData";
-import Head from "next/head";
-import Section from "../../components/Section/Section";
 
 const JournalDesEvolutions = () => {
   const title = "Journal des évolutions";

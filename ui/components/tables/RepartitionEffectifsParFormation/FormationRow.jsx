@@ -2,8 +2,8 @@ import { Box, Flex, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
-import { isDateFuture } from "../../../utils/dateUtils";
+import { isDateFuture } from "../../../common/utils/dateUtils";
+import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import NumberValueCell from "../NumberValueCell";
 import AnneeFormationRows from "./AnneeFormationRows";
 

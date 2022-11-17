@@ -2,11 +2,11 @@ import { Box, Flex, Heading, HStack, Spacer } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { BreadcrumbNav, CfasFilter, Page, Section } from "../../../../common/components";
-import CfaPanel from "../../../../common/components/CfasFilter/CfasPanel";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
-import useAuth from "../../../../common/hooks/useAuth";
-import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
+import { BreadcrumbNav, CfasFilter, Page, Section } from "../../../../components";
+import CfaPanel from "../../../../components/CfasFilter/CfasPanel";
+import useAuth from "../../../../hooks/useAuth";
+import useFetchCfaInfo from "../../../../hooks/useFetchCfaInfo";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import OrganismeViewContent from "./OrganismeViewContent";

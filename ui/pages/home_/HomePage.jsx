@@ -3,10 +3,10 @@ import React from "react";
 import { Redirect } from "react-router";
 
 import { hasUserRoles, roles } from "../../common/auth/roles";
-import { LinkCard, Page, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../common/constants/product";
-import useAuth from "../../common/hooks/useAuth";
+import { LinkCard, Page, Section } from "../../components";
+import useAuth from "../../hooks/useAuth";
 import dashboardIllustration from "./dashboard-illustration.svg";
 import ApercuDesDonneesSection from "./sections/ApercuDesDonneesSection";
 import RgpdSection from "./sections/RgpdSection";

@@ -1,16 +1,17 @@
+import { Box, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import React from "react";
-import { Box, Heading, Text, Flex, HStack, Link } from "@chakra-ui/react";
-import Sommaire from "../Sommaire/Sommaire";
-import Section from "../Section/Section";
+
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../common/constants/product";
+import Section from "../Section/Section";
+import Sommaire from "../Sommaire/Sommaire";
 
 const DonneesPersonnelles = () => {
   const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
   const title = PRODUCT_NAME;
 
   return (
-    <Box pt="4w" pb={16}>
+    <Box paddingTop="4w" paddingBottom={16}>
       <HStack
         spacing={["0", "0", "0", "12w"]}
         flexDirection={["column", "column", "column", "row"]}

@@ -1,6 +1,6 @@
-import React from "react";
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Box } from "@chakra-ui/react";
+import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import React from "react";
 
 export default function Table({ data: defaultData, onRowClick, columns: columnsDef, ...props }) {
   const data = React.useMemo(
@@ -22,7 +22,7 @@ export default function Table({ data: defaultData, onRowClick, columns: columnsD
   });
 
   return (
-    <Box as="table" flex={1} fontSize="delta" w="100%" {...props}>
+    <Box as="table" flex={1} fontSize="delta" width="100%" {...props}>
       <Box as="thead">
         {table.getHeaderGroups().map((headerGroup, key) => (
           <Box as="tr" key={key} borderBottom="3px solid" borderColor="bluefrance">
@@ -55,7 +55,7 @@ export default function Table({ data: defaultData, onRowClick, columns: columnsD
             key={row.id}
             data-rowindex={row.id}
             onClick={() => onRowClick?.(row.id)}
-            bg={j % 2 === 0 ? "galt" : "white"}
+            background={j % 2 === 0 ? "galt" : "white"}
             py="3"
           >
             {row.getVisibleCells().map((cell) => (

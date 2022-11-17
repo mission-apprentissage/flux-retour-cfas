@@ -1,10 +1,10 @@
 import { Box, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../common/components";
-import Sommaire from "../../common/components/Sommaire/Sommaire";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../common/constants/product";
+import { BreadcrumbNav, Page, Section } from "../../components";
+import Sommaire from "../../components/Sommaire/Sommaire";
 
 const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
 

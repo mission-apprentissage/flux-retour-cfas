@@ -3,12 +3,12 @@ import React from "react";
 import { useQuery } from "react-query";
 import { useHistory } from "react-router-dom";
 
-import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
-import { fetchEffectifsParCfa } from "../../../api/tableauDeBord";
-import { QUERY_KEYS } from "../../../constants/queryKeys";
-import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
-import { navigateToOrganismePage } from "../../../utils/routing";
-import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
+import { fetchEffectifsParCfa } from "../../../common/api/tableauDeBord";
+import { QUERY_KEYS } from "../../../common/constants/queryKeys";
+import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
+import { navigateToOrganismePage } from "../../../common/utils/routing";
+import { sortAlphabeticallyBy } from "../../../common/utils/sortAlphabetically";
+import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import CfaRow from "./CfaRow";
 

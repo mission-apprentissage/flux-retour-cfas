@@ -1,15 +1,16 @@
-import React from "react";
 import {
   Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  Text,
   HStack,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
 } from "@chakra-ui/react";
+import React from "react";
+
 import { ArrowRightLine, Close } from "../../theme/components/icons";
 
 const PromptModal = ({
@@ -27,8 +28,8 @@ const PromptModal = ({
 }) => {
   return (
     <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose} size={size}>
-      <ModalOverlay bg={bgOverlay} />
-      <ModalContent bg="white" color="primaryText" borderRadius="none">
+      <ModalOverlay background={bgOverlay} />
+      <ModalContent background="white" color="primaryText" borderRadius="none">
         {canBeClosed && (
           <Button
             display={"flex"}
@@ -39,24 +40,24 @@ const PromptModal = ({
               onClose();
             }}
             variant="unstyled"
-            pt={10}
-            pb={6}
-            pr={10}
+            paddingTop={10}
+            paddingBottom={6}
+            paddingRight={10}
             fontWeight={400}
           >
             Fermer{" "}
-            <Text as={"span"} ml={2}>
+            <Text as={"span"} marginLeft={2}>
               <Close boxSize={4} />
             </Text>
           </Button>
         )}
         <ModalHeader>
           <ArrowRightLine mt="-0.5rem" />
-          <Text as="span" ml="1rem" textStyle={"h4"}>
+          <Text as="span" marginLeft="1rem" textStyle={"h4"}>
             {title}
           </Text>
         </ModalHeader>
-        <ModalBody pb={6}>{children}</ModalBody>
+        <ModalBody paddingBottom={6}>{children}</ModalBody>
         <ModalFooter>
           <HStack spacing={4}>
             <Button

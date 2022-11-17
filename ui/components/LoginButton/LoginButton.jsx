@@ -1,9 +1,9 @@
 import { Box, Link } from "@chakra-ui/react";
-import React from "react";
 import NavLink from "next/link";
+import React from "react";
 
-import { Padlock } from "../../theme/components/icons";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
+import { Padlock } from "../../theme/components/icons";
 
 const LoginButton = () => {
   return (

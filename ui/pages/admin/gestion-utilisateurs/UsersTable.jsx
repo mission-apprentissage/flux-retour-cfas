@@ -16,9 +16,9 @@ import {
 import PropTypes from "prop-types";
 import React from "react";
 
-import { BasePagination } from "../../../common/components/Pagination/Pagination";
-import usePaginatedItems from "../../../common/hooks/usePaginatedItems";
 import { formatDate } from "../../../common/utils/dateUtils";
+import { BasePagination } from "../../../components/Pagination/Pagination";
+import usePaginatedItems from "../../../hooks/usePaginatedItems";
 import GetUpdatePasswordUrlMenuItem from "./menuItems/GetUpdatePasswordUrlMenuItem";
 import RemoveUserMenuItem from "./menuItems/RemoveUserMenuItem";
 import UpdateUserMenuItem from "./menuItems/UpdateUserMenuItem";

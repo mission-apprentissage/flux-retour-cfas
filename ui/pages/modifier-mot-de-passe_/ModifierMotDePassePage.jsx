@@ -2,9 +2,9 @@ import { Box, Heading, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Footer, Header, Section } from "../../common/components";
-import ContactSection from "../../common/components/ContactSection/ContactSection";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
+import { Footer, Header, Section } from "../../components";
+import ContactSection from "../../components/ContactSection/ContactSection";
 import ModifierMotPasseForm from "./ModifierMotDePasseForm";
 import useUpdatePassword, { REQUEST_STATE } from "./useUpdatePassword";
 

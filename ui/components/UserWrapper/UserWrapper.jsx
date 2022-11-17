@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef, createContext } from "react";
+import { Box, Spinner, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { Box, Text, Spinner } from "@chakra-ui/react";
-import { _get, _post, _put } from "../../common/httpClient";
-import useAuth from "../../hooks/useAuth";
-import { Cgu, cguVersion } from "../legal/Cgu";
-import AcknowledgeModal from "../../components/Modals/AcknowledgeModal";
+import React, { createContext, useEffect, useRef, useState } from "react";
+
 import { anonymous } from "../../common/anonymous";
 import { emitter } from "../../common/emitter";
+import { _get, _post, _put } from "../../common/httpClient";
+import AcknowledgeModal from "../../components/Modals/AcknowledgeModal";
+import useAuth from "../../hooks/useAuth";
+import { Cgu, cguVersion } from "../legal/Cgu";
 
 const AccountWrapper = ({ children }) => {
   let [auth] = useAuth();
@@ -58,7 +59,7 @@ const ForceAcceptCGU = ({ children }) => {
           canBeClosed={false}
           bgOverlay="rgba(0, 0, 0, 0.28)"
         >
-          <Box mb={3}>
+          <Box marginBottom={3}>
             {!auth.has_accept_cgu_version && (
               <Text fontSize="1.1rem" fontWeight="bold">
                 Merci de lire attentivement les conditions générales d&apos;utilisation avant de les accepter.
@@ -73,7 +74,7 @@ const ForceAcceptCGU = ({ children }) => {
               </Text>
             )}
           </Box>
-          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} h="60vh" ref={cguContainer}>
+          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} height="60vh" ref={cguContainer}>
             <Cgu
               isWrapped="1"
               onLoad={async () => {

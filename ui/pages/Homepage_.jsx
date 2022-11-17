@@ -1,15 +1,16 @@
 import { Box, Flex, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import Head from "next/head";
 import React from "react";
-import { Page } from "../components";
-import Section from "../components/Section/Section";
-import ArrowLink from "../components/ArrowLink/ArrowLink";
+
 import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../common/constants/product";
+import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
+import { Page } from "../components";
+import ArrowLink from "../components/ArrowLink/ArrowLink";
+import Section from "../components/Section/Section";
 import { CityHall, GraphsAndStatistics, QuestcequeLeTableauDeBordSVG, School } from "../theme/components/icons";
 import AmeliorerLesPratiques from "./sections/ameliorer-les-pratiques/AmeliorerLesPratiques";
 import ApercuDonneesNationalHomePage from "./sections/apercu-donnees-national-homePage/ApercuDonneesNationalHomePage";
-import Head from "next/head";
-import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 export default function Home() {

@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { Box, Button, Flex, Heading, Input, Text, List, ListItem, ListIcon } from "@chakra-ui/react";
-import { useFormik } from "formik";
-import { useRouter } from "next/router";
-import * as Yup from "yup";
-import { decodeJwt } from "jose";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { Box, Button, Flex, Heading, Input, List, ListIcon, ListItem, Text } from "@chakra-ui/react";
+import { useFormik } from "formik";
+import { decodeJwt } from "jose";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+import * as Yup from "yup";
 
-import useAuth from "../../hooks/useAuth";
-import useToken from "../../hooks/useToken";
 import { _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import useAuth from "../../hooks/useAuth";
+import useToken from "../../hooks/useToken";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -100,7 +100,7 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <Flex height="100vh" justifyContent="center" mt="10">
+    <Flex height="100vh" justifyContent="center" marginTop="10">
       <Box width={["auto", "40rem"]}>
         <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
           Une mise à jour de votre mot de passe est obligatoire
@@ -113,9 +113,9 @@ const ResetPasswordPage = () => {
             placeholder="Votre nouveau mot de passe..."
             onChange={onChange}
             value={values.newPassword}
-            mb={3}
+            marginBottom={3}
           />
-          <List mb={5}>
+          <List marginBottom={5}>
             <ListItem color={variant[conditions.min].color}>
               <ListIcon aria-hidden={true} as={variant[conditions.min].icon} color={variant[conditions.min].color} />
               Le mot de passe doit contenir <strong>au moins {minLength} caractères</strong>
@@ -157,7 +157,7 @@ const ResetPasswordPage = () => {
             Réinitialiser le mot de passe
           </Button>
           {status.error && (
-            <Text color="error" mt={2}>
+            <Text color="error" marginTop={2}>
               {status.error}
             </Text>
           )}

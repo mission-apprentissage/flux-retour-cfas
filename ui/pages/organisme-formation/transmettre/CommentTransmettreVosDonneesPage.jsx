@@ -1,8 +1,8 @@
 import { Box, Divider, Flex, Heading, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../../common/components";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
+import { BreadcrumbNav, Page, Section } from "../../../components";
 import OrganismeFormationPagesMenu from "../OrganismeFormationPagesMenu";
 import DemandeBranchementErpFormBlock from "./DemandeBranchementErp/DemandeBranchementErpFormBlock";
 

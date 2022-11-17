@@ -4,8 +4,8 @@ import React from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { fetchReseaux, postCreateReseauCfa } from "../../../common/api/tableauDeBord";
-import ModalClosingButton from "../../../common/components/ModalClosingButton/ModalClosingButton";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
+import ModalClosingButton from "../../../components/ModalClosingButton/ModalClosingButton";
 import CreateReseauCfaForm from "./CreateReseauCfaForm";
 
 const CreateReseauCfaModal = ({ isOpen, onClose }) => {

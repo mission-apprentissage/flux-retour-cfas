@@ -1,8 +1,8 @@
 import { Box, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 
-import { BaseAccordionGroup } from "../../../common/components/BaseAccordionGroup/BaseAccordionGroup";
 import { CONTACT_ADDRESS } from "../../../common/constants/product";
+import { BaseAccordionGroup } from "../../../components/BaseAccordionGroup/BaseAccordionGroup";
 
 const QuestionsFrequemmementPosees = () => (
   <BaseAccordionGroup

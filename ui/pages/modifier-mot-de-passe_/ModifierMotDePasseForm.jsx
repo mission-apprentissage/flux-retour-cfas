@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import * as Yup from "yup";
 
-import { InputLegend } from "../../common/components";
+import { InputLegend } from "../../components";
 
 const formValidationSchema = Yup.object().shape({
   newPassword: Yup.string().min(16, "Votre mot de passe doit contenir au moins 16 caractères").required("Requis"),

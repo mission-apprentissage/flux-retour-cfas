@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { EffectifCard } from "../../../common/components";
+import { EffectifCard } from "../../../components";
 
 const OrganismesCountCard = ({ count }) => {
   return (

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Button,
@@ -16,16 +15,18 @@ import {
   Tag,
   Text,
 } from "@chakra-ui/react";
-import { Logo } from "./Logo";
-import Link from "../../Links/Link";
+import React from "react";
+
 import { PRODUCT_NAME } from "../../../common/constants/product";
-import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
-import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
-import useAuth from "../../../hooks/useAuth.js";
-import { hasPageAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
 import { _get } from "../../../common/httpClient.js";
-import { Parametre } from "../../../theme/components/icons/Parametre.js";
+import { hasPageAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
+import useAuth from "../../../hooks/useAuth.js";
 import { NotificationFill, Settings4Fill, UserFill } from "../../../theme/components/icons";
+import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
+import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
+import { Parametre } from "../../../theme/components/icons/Parametre.js";
+import Link from "../../Links/Link";
+import { Logo } from "./Logo";
 
 const UserMenu = () => {
   let [auth] = useAuth();
@@ -40,7 +41,7 @@ const UserMenu = () => {
   let accountType = auth.roles.length ? auth.roles[0].name : isUserAdmin(auth) ? "admin" : "utilisateur";
 
   return (
-    <Box mb={["3w", "3w", "0", "0"]}>
+    <Box marginBottom={["3w", "3w", "0", "0"]}>
       {auth?.sub === "anonymous" && (
         <HStack>
           <Link href="/auth/inscription" variant="pill" px={3} py={1}>
@@ -67,7 +68,7 @@ const UserMenu = () => {
               <Flex>
                 <UserFill mt="0.3rem" boxSize={4} />
 
-                <Box display={["none", "block"]} ml={2}>
+                <Box display={["none", "block"]} marginLeft={2}>
                   <Text color="bluefrance" textStyle="sm">
                     {auth.email}{" "}
                     <Text color="grey.600" as="span">
@@ -112,14 +113,14 @@ const UserMenu = () => {
 
 const Header = () => {
   return (
-    <Container maxW={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
-      <Container maxW="xl" py={[0, 2]} px={[0, 4]}>
+    <Container maxWidth={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
+      <Container maxWidth="xl" py={[0, 2]} px={[0, 4]}>
         <Flex flexDirection={["column", "column", "column", "row"]} alignItems="center" color="grey.800">
           {/* Logo */}
           <Link href="/" p={[4, 0]}>
             <Logo />
           </Link>
-          <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]}>
+          <Box marginTop={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]}>
             <Heading as="h6" variant="h1" fontSize="gamma">
               Le {PRODUCT_NAME}{" "}
             </Heading>
@@ -128,7 +129,7 @@ const Header = () => {
             </Text>
           </Box>
           <Box flex="1" my={["2w", "2w", "0"]}>
-            <Tag marginBottom="1w" backgroundColor="bluefrance" color="white" ml="5">
+            <Tag marginBottom="1w" backgroundColor="bluefrance" color="white" marginLeft="5">
               Beta-V1
             </Tag>
           </Box>

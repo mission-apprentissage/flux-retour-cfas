@@ -1,8 +1,9 @@
 import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
+import { useRouter } from "next/router";
 import React from "react";
 import * as Yup from "yup";
-import { useRouter } from "next/router";
+
 import { _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 
@@ -25,7 +26,7 @@ const ForgottenPasswordPage = () => {
   const title = "Mot de passe oublié";
 
   return (
-    <Flex height="100vh" justifyContent="center" mt="10">
+    <Flex height="100vh" justifyContent="center" marginTop="10">
       <Box width={["auto", "28rem"]}>
         <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
           {title}
@@ -57,12 +58,12 @@ const ForgottenPasswordPage = () => {
                   Demander un nouveau mot de passe
                 </Button>
                 {status.error && (
-                  <Text color="error" mt={2}>
+                  <Text color="error" marginTop={2}>
                     {status.error}
                   </Text>
                 )}
                 {status.message && (
-                  <Text color="info" mt={2}>
+                  <Text color="info" marginTop={2}>
                     {status.message}
                   </Text>
                 )}

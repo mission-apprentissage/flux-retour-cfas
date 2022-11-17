@@ -4,9 +4,9 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 
-import { Section } from "../../components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../common/constants/product";
+import { Section } from "../../components";
 
 const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
 

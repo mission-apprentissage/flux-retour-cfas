@@ -1,6 +1,6 @@
-import React from "react";
-import NavLink from "next/link";
 import { Box, Button, Container, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import NavLink from "next/link";
+import React from "react";
 
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../../common/constants/product";
@@ -10,7 +10,7 @@ const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
 const RgpdSection = (props) => {
   return (
     <Box {...props} w="100%" pt={[4, 8]} px={[1, 1, 6, 8]}>
-      <Container maxW="xl">
+      <Container maxWidth="xl">
         <HStack
           color="grey.800"
           marginBottom="5w"

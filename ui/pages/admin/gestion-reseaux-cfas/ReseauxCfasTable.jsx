@@ -4,9 +4,9 @@ import React from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { deleteReseauCfa } from "../../../common/api/tableauDeBord";
-import { BasePagination } from "../../../common/components/Pagination/Pagination";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
-import usePaginatedItems from "../../../common/hooks/usePaginatedItems";
+import { BasePagination } from "../../../components/Pagination/Pagination";
+import usePaginatedItems from "../../../hooks/usePaginatedItems";
 
 const ReseauxCfasTable = ({ reseauxCfas }) => {
   const toast = useToast();

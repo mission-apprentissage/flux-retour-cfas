@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 
-import Section from "../../../components/Section/Section";
 import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../../common/constants/product";
+import Section from "../../../components/Section/Section";
 import {
   Academies,
   CarifOref,

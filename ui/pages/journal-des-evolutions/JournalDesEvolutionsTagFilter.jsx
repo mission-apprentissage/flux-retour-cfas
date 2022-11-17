@@ -16,13 +16,13 @@ const JournalDesEvolutionsTagFilter = ({ children, onShowFilteredData, onHideFil
   };
 
   return filterEnabled === false ? (
-    <Box mt="5 !important">
+    <Box marginTop="5 !important">
       <Button onClick={onSetFilterChange} variant="badge">
         {children}
       </Button>
     </Box>
   ) : (
-    <Box mt="5">
+    <Box marginTop="5">
       <Button onClick={onSetFilterChange} variant="badgeSelected">
         {children}
         <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">

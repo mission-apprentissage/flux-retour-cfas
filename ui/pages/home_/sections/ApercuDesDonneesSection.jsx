@@ -1,11 +1,11 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { startOfHour } from "date-fns";
 import { Box, Container, Divider, Flex, Heading, HStack, Skeleton, Text } from "@chakra-ui/react";
+import { startOfHour } from "date-fns";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { ERPS } from "../../../common/constants/erps";
-import useFetchEffectifsNational from "../../../hooks/useFetchEffectifsNational";
 import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
+import useFetchEffectifsNational from "../../../hooks/useFetchEffectifsNational";
 import { Checkbox } from "../../../theme/components/icons";
 
 const Count = ({ count = 0, label }) => {
@@ -29,8 +29,8 @@ const ApercuDesDonneesSection = () => {
   const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
 
   return (
-    <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} background="galt" paddingY="4w">
-      <Container maxW="xl">
+    <Box width="100%" paddingTop={[4, 8]} px={[1, 1, 6, 8]} background="galt" paddingY="4w">
+      <Container maxWidth="xl">
         <Box>
           <Heading as="h2">Aperçu des données</Heading>
           <Text fontStyle="italic" color="grey.800">

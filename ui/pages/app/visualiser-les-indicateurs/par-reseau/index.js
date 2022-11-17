@@ -1,7 +1,7 @@
 import React from "react";
 
 import { hasUserRoles, roles } from "../../../../common/auth/roles";
-import useAuth from "../../../../common/hooks/useAuth";
+import useAuth from "../../../../hooks/useAuth";
 import { FiltersProvider, getDefaultState } from "../FiltersContext";
 import IndicateursVueReseauPage from "./IndicateursVueReseauPage";
 

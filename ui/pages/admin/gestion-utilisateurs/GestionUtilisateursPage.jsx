@@ -1,11 +1,11 @@
 import { Box, Button, Divider, Heading, Input, useDisclosure } from "@chakra-ui/react";
 import React, { useState } from "react";
 
-import { InputLegend, Page, Section } from "../../../common/components";
-import Loading from "../../../common/components/Loading/Loading";
-import NoResults from "../../../common/components/NoResults/NoResults";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
-import useUsersSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "../../../common/hooks/useUsersSearch";
+import { InputLegend, Page, Section } from "../../../components";
+import Loading from "../../../components/Loading/Loading";
+import NoResults from "../../../components/NoResults/NoResults";
+import useUsersSearch, { MINIMUM_CHARS_TO_PERFORM_SEARCH } from "../../../hooks/useUsersSearch";
 import CreateUserModal from "./createUser/CreateUserModal";
 import UsersTable from "./UsersTable";
 

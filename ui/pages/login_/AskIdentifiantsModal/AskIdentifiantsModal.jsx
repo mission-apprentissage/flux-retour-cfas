@@ -2,7 +2,7 @@ import { Box, Modal, ModalBody, ModalContent, ModalHeader, ModalOverlay, Text } 
 import PropTypes from "prop-types";
 import React from "react";
 
-import ModalClosingButton from "../../../common/components/ModalClosingButton/ModalClosingButton";
+import ModalClosingButton from "../../../components/ModalClosingButton/ModalClosingButton";
 import DemandeAccesForm from "./AskIdentifiantsForm";
 import useAskIdentifiantsSubmit, { REQUEST_STATE } from "./useAskIdentifiantsSubmit";
 

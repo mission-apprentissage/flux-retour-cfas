@@ -1,11 +1,11 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Container, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
+import { PRODUCT_NAME } from "../common/constants/product";
 import { Page } from "../components";
 import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 import Sommaire from "../components/Sommaire/Sommaire";
-import { PRODUCT_NAME } from "../common/constants/product";
 
 const ComprendreLesDonneesPage = () => {
   const title = "Comprendre les données";
@@ -15,15 +15,15 @@ const ComprendreLesDonneesPage = () => {
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]}>
-        <Container maxW="xl">
+      <Box width="100%" paddingTop={[4, 8]} px={[1, 1, 6, 8]}>
+        <Container maxWidth="xl">
           <Box paddingTop="3w">
             <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
           </Box>
         </Container>
       </Box>
-      <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} color="grey.800" marginTop="5w" marginBottom="10w">
-        <Container maxW="xl">
+      <Box width="100%" paddingTop={[4, 8]} px={[1, 1, 6, 8]} color="grey.800" marginTop="5w" marginBottom="10w">
+        <Container maxWidth="xl">
           <Flex>
             <Sommaire>
               <Flex flexDirection="column" paddingRight="10w" fontSize="zeta">

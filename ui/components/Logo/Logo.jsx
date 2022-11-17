@@ -1,7 +1,7 @@
 import { Box, Text } from "@chakra-ui/react";
+import NavLink from "next/link";
 import PropTypes from "prop-types";
 import React from "react";
-import NavLink from "next/link";
 
 const Logo = ({ scale = 1 }) => {
   let fontSize = "0.7875rem";

@@ -1,10 +1,11 @@
-import React from "react";
 import { Box, Link, Text } from "@chakra-ui/react";
+import React from "react";
+
 import { ExternalLinkLine } from "../../theme/components/icons";
 
 const Cookies = () => {
   return (
-    <Box pt={4} pb={16}>
+    <Box paddingTop={4} paddingBottom={16}>
       <Text>
         Pour les utilisateurs connectés, ce site dépose un petit fichier texte (un « cookie ») sur votre ordinateur pour
         vous authentifier et garder votre session active.

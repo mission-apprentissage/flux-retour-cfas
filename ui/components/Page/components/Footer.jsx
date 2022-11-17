@@ -1,15 +1,16 @@
-import React from "react";
 import { Box, Container, Flex, List, ListItem, Text } from "@chakra-ui/react";
+import React from "react";
+
 import { ExternalLinkLine } from "../../../theme/components/icons";
-import LogoFooter from "./LogoFooter";
 import Link from "../../Links/Link";
+import LogoFooter from "./LogoFooter";
 
 const APP_VERSION = process.env.NEXT_PUBLIC_VERSION;
 
 const Footer = () => {
   return (
-    <Box borderTop="1px solid" borderColor="bluefrance" color="#1E1E1E" fontSize="zeta" w="full">
-      <Container maxW="xl" my={["0", "0", "0", "-2.5rem"]} pb={["4w", "4w", "2w", "0"]}>
+    <Box borderTop="1px solid" borderColor="bluefrance" color="#1E1E1E" fontSize="zeta" width="full">
+      <Container maxWidth="xl" my={["0", "0", "0", "-2.5rem"]} paddingBottom={["4w", "4w", "2w", "0"]}>
         <Flex flexDirection={["column", "column", "column", "row"]}>
           <Link href="/" w={["100%", "100%", "100%", "50%"]} display={["none", "none", "inline-block"]}>
             <LogoFooter size={"xl"} />
@@ -29,7 +30,14 @@ const Footer = () => {
               développe plusieurs services destinés à faciliter les entrées en apprentissage.
             </Text>
             <br />
-            <List textStyle="sm" fontWeight="700" flexDirection={"row"} flexWrap={"wrap"} mb={[3, 3, 0]} display="flex">
+            <List
+              textStyle="sm"
+              fontWeight="700"
+              flexDirection={"row"}
+              flexWrap={"wrap"}
+              marginBottom={[3, 3, 0]}
+              display="flex"
+            >
               <ListItem>
                 <Link href="https://www.legifrance.gouv.fr/" mr={4} isExternal>
                   legifrance.gouv.fr
@@ -55,7 +63,7 @@ const Footer = () => {
         </Flex>
       </Container>
       <Box borderTop="1px solid" borderColor="#CECECE" color="#6A6A6A">
-        <Container maxW="xl" py={[3, 3, 5]}>
+        <Container maxWidth="xl" py={[3, 3, 5]}>
           <Flex flexDirection={["column", "column", "row"]}>
             <List
               textStyle="xs"
@@ -111,7 +119,7 @@ const Footer = () => {
                 </Link>
               </ListItem>
             </List>
-            <Text textStyle="xs" mt={[2, 2, 0]}>
+            <Text textStyle="xs" marginTop={[2, 2, 0]}>
               {APP_VERSION && `v.${APP_VERSION} `}© République française 2022
             </Text>
           </Flex>

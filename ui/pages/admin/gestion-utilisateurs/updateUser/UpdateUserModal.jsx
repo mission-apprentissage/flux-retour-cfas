@@ -4,8 +4,8 @@ import React from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { putUser } from "../../../../common/api/tableauDeBord";
-import ModalClosingButton from "../../../../common/components/ModalClosingButton/ModalClosingButton";
 import { QUERY_KEYS } from "../../../../common/constants/queryKeys";
+import ModalClosingButton from "../../../../components/ModalClosingButton/ModalClosingButton";
 import UpdateUserForm from "./UpdateUserForm";
 
 const UpdateUserModal = ({ userId, isOpen, onClose }) => {

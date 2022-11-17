@@ -6,7 +6,7 @@ import { fetchSearchCfas } from "../../../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../../../common/constants/queryKeys";
 import { validateSiret } from "../../../../../common/domain/siret";
 import { validateUai } from "../../../../../common/domain/uai";
-import { queryClient } from "../../../../../queryClient";
+import { queryClient } from "../../../../../common/queryClient";
 
 const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => {
   const [searchTerm, setSearchTerm] = useState("");

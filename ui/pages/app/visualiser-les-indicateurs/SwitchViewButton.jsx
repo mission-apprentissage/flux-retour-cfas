@@ -2,8 +2,8 @@ import { Box, Button, List } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 
-import { FilterOption, OverlayMenu } from "../../../common/components";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
+import { FilterOption, OverlayMenu } from "../../../components";
 
 const SwitchViewButton = () => {
   const [isOpen, setIsOpen] = useState(false);

@@ -2,8 +2,8 @@ import { Box, Modal, ModalBody, ModalContent, ModalHeader, ModalOverlay } from "
 import PropTypes from "prop-types";
 import React from "react";
 
-import ModalClosingButton from "../../common/components/ModalClosingButton/ModalClosingButton";
-import useLogin from "../../common/hooks/useLogin";
+import ModalClosingButton from "../../components/ModalClosingButton/ModalClosingButton";
+import useLogin from "../../hooks/useLogin";
 import LoginBlock from "./LoginBlock";
 
 const LoginModal = ({ isOpen, onClose }) => {

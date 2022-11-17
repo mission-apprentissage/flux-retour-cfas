@@ -1,8 +1,9 @@
+import { Box, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import React, { useEffect } from "react";
-import { Box, HStack, Heading, Text, Link, Flex } from "@chakra-ui/react";
-import Sommaire from "../Sommaire/Sommaire.jsx";
+
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages.js";
 import Section from "../Section/Section.jsx";
+import Sommaire from "../Sommaire/Sommaire.jsx";
 
 export const cguVersion = () => {
   return "v0.1";
@@ -37,7 +38,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
 
   return (
     <HStack
-      mt="4w"
+      marginTop="4w"
       spacing={["0", "0", "0", "6w"]}
       flexDirection={["column", "column", "column", "row"]}
       alignItems={["normal", "normal", "normal", "center"]}
@@ -63,17 +64,17 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
       </Sommaire>
       <Box>
         <Section pt="0">
-          <Heading textStyle="h2" color="grey.800" mt={5}>
+          <Heading textStyle="h2" color="grey.800" marginTop={5}>
             CONDITIONS GÉNÉRALES D&apos;UTILISATION DU TABLEAU DE BORD DE L’APPRENTISSAGE
           </Heading>
           <Text>Dernière mise à jour le : 3 novembre 2022 - {cguVersion()} </Text>
-          <Text mt={4}>
+          <Text marginTop={4}>
             Les présentes conditions générales d’utilisation (dites « CGU ») définissent les conditions d’accès et
             d’utilisation des Services par l’Utilisateur.
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.ChampApplication}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 1 – Champ d’application
           </Heading>
           <Text>
@@ -82,7 +83,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.Objet}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 2 – Objet
           </Heading>
           <Text>
@@ -91,7 +92,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.Definition}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 3 – Définitions
           </Heading>
           <Text>
@@ -117,7 +118,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.FonctionnaliteLieesAuxComptesDesUtilisateurs}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 4 – Fonctionnalités liées aux comptes des utilisateurs
           </Heading>
           <Text>
@@ -154,7 +155,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.PresentationDesServices}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 5 – Présentation des services
           </Heading>
           <Text>
@@ -193,7 +194,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.Securite}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 6 - Sécurité
           </Heading>
           <Text>
@@ -212,7 +213,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.Hyperliens}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 7 – Hyperliens
           </Heading>
           <Text>
@@ -236,10 +237,10 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.Responsabilites}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 8 – Responsabilités
           </Heading>
-          <Text as={"h4"} fontSize="20px" fontWeight="700" mb={5}>
+          <Text as={"h4"} fontSize="20px" fontWeight="700" marginBottom={5}>
             8.1. Limites de la responsabilité de la Mission interministérielle de l’apprentissage
           </Text>
           <Text>
@@ -275,7 +276,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             performance quelconque.
           </Text>
           <br />
-          <Text as={"h4"} fontSize="20px" fontWeight="700" mt={4}>
+          <Text as={"h4"} fontSize="20px" fontWeight="700" marginTop={4}>
             8.2. Responsabilité des utilisateurs
           </Text>
           <Text>
@@ -344,7 +345,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.ProprieteIntellectuelle}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 9 – Propriété intellectuelle
           </Heading>
           <Text>
@@ -371,7 +372,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.MiseAjourDesConditionsUtilisation}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={5}>
             Article 10 – Mise à jour des conditions d’utilisation
           </Heading>
           <Text>

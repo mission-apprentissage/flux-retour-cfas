@@ -1,7 +1,4 @@
 // TODO
-import React, { useEffect, useState } from "react";
-import { _delete, _get, _post, _put } from "../../common/httpClient";
-import { useFormik } from "formik";
 import {
   Accordion,
   AccordionButton,
@@ -17,18 +14,21 @@ import {
   HStack,
   Input,
   Stack,
-  useToast,
   Text,
+  useToast,
 } from "@chakra-ui/react";
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
-import generator from "generate-password-browser";
 import { useQuery } from "@tanstack/react-query";
-import { Page } from "../../components/Page/Page";
+import { useFormik } from "formik";
+import generator from "generate-password-browser";
 import Head from "next/head";
-import withAuth from "../../components/withAuth";
+import React, { useEffect, useState } from "react";
 
-import Acl from "../../components/Acl";
+import { _delete, _get, _post, _put } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import Acl from "../../components/Acl";
+import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
+import { Page } from "../../components/Page/Page";
+import withAuth from "../../components/withAuth";
 
 const buildRolesAcl = (newRoles, roles) => {
   let acl = [];
@@ -196,7 +196,7 @@ const UserLine = ({ user, roles }) => {
         </FormControl>
       )}
 
-      <FormControl py={2} mt={3}>
+      <FormControl py={2} marginTop={3}>
         <Checkbox
           name="accessAllCheckbox"
           id="accessAllCheckbox"
@@ -239,7 +239,7 @@ const UserLine = ({ user, roles }) => {
 
       {user && (
         <Box>
-          <Button type="submit" variant="primary" mr={5}>
+          <Button type="submit" variant="primary" marginRight={5}>
             Enregistrer
           </Button>
           <Button variant="outline" colorScheme="red" borderRadius="none" onClick={onDeleteClicked}>
@@ -278,20 +278,20 @@ const Users = () => {
 
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
 
-      <Heading as="h1" mb={8} mt={6}>
+      <Heading as="h1" marginBottom={8} marginTop={6}>
         {title}
       </Heading>
       <Stack spacing={2}>
-        <Accordion bg="white" allowToggle>
+        <Accordion background="white" allowToggle>
           {roles && (
-            <AccordionItem mb={12}>
-              <AccordionButton bg="bluefrance" color="white" _hover={{ bg: "blue.700" }}>
+            <AccordionItem marginBottom={12}>
+              <AccordionButton background="bluefrance" color="white" _hover={{ bg: "blue.700" }}>
                 <Box flex="1" textAlign="left" fontSize="gamma">
                   Créer un utilisateur
                 </Box>
                 <AccordionIcon />
               </AccordionButton>
-              <AccordionPanel pb={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
+              <AccordionPanel paddingBottom={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
                 <UserLine user={null} roles={roles} />
               </AccordionPanel>
             </AccordionItem>
@@ -309,7 +309,7 @@ const Users = () => {
                         </Box>
                         <AccordionIcon />
                       </AccordionButton>
-                      <AccordionPanel pb={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
+                      <AccordionPanel paddingBottom={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
                         {isExpanded && <UserLine user={user} roles={roles} />}
                       </AccordionPanel>
                     </>

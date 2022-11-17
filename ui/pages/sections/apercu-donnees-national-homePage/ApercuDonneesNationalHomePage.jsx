@@ -4,8 +4,8 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { ERPS } from "../../../common/constants/erps";
-import useFetchEffectifsNational from "../../../hooks/useFetchEffectifsNational";
 import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
+import useFetchEffectifsNational from "../../../hooks/useFetchEffectifsNational";
 import { Checkbox, CheckBoxWhite } from "../../../theme/components/icons";
 
 const Count = ({ count, label }) => {
@@ -74,11 +74,11 @@ const ApercuDesDonneesHomePage = () => {
             spacing={["0", "0", "0", "3w"]}
             flexDirection={["column", "column", "column", "row"]}
             alignItems={["normal", "normal", "normal", "center"]}
-            w={["30%", "30%", "30%", "100%"]}
+            width={["30%", "30%", "30%", "100%"]}
           >
             {ERPS.filter((erp) => erp.state !== "coming").map(({ name, state }) => {
               return (
-                <Box key={name} pt={["1w", "1w", "1w", "0"]}>
+                <Box key={name} paddingTop={["1w", "1w", "1w", "0"]}>
                   <Box
                     alignItems={["normal", "normal", "normal", "center"]}
                     background="#E3E3FD"
@@ -105,12 +105,12 @@ const ApercuDesDonneesHomePage = () => {
             spacing={["0", "0", "0", "1w"]}
             flexDirection={["column", "column", "column", "row"]}
             alignItems={["normal", "normal", "normal", "center"]}
-            w={["50%", "50%", "50%", "100%"]}
+            width={["50%", "50%", "50%", "100%"]}
             marginTop="1w"
           >
             {ERPS.filter((erp) => erp.state === "coming").map(({ name }) => {
               return (
-                <Box key={name} pt={["1w", "1w", "1w", "0"]}>
+                <Box key={name} paddingTop={["1w", "1w", "1w", "0"]}>
                   <Box color="#666666" background="#E5E5E5" borderRadius="24px" paddingX="2w" paddingY="1w">
                     <CheckBoxWhite marginBottom="5px" />
                     <Text marginLeft="1v" as="span">
@@ -122,7 +122,7 @@ const ApercuDesDonneesHomePage = () => {
             })}
           </HStack>
         </Flex>
-        <Box flex="1" marginLeft={["0", "0", "0", "8w"]} pt={["3w", "3w", "3w", "0"]}>
+        <Box flex="1" marginLeft={["0", "0", "0", "8w"]} paddingTop={["3w", "3w", "3w", "0"]}>
           <Box borderLeft="4px solid" borderColor="#6A6AF4">
             <Text color="#666666" marginLeft="4w">
               <strong>Partage Simplifié</strong>

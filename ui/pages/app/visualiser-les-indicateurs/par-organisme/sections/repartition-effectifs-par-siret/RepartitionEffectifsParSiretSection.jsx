@@ -4,12 +4,12 @@ import React from "react";
 
 import { fetchEffectifsDataListCsvExport } from "../../../../../../common/api/tableauDeBord";
 import { hasUserRoles, roles } from "../../../../../../common/auth/roles";
-import { MonthSelect, Section } from "../../../../../../common/components";
-import DownloadBlock from "../../../../../../common/components/DownloadBlock/DownloadBlock";
-import RepartitionEffectifsParSiret from "../../../../../../common/components/tables/RepartitionEffectifsParSiretAndDepartement";
-import useAuth from "../../../../../../common/hooks/useAuth";
-import useFetchEffectifsParSiret from "../../../../../../common/hooks/useFetchEffectifsParSiret";
 import { mapFiltersToApiFormat } from "../../../../../../common/utils/mapFiltersToApiFormat";
+import { MonthSelect, Section } from "../../../../../../components";
+import DownloadBlock from "../../../../../../components/DownloadBlock/DownloadBlock";
+import RepartitionEffectifsParSiret from "../../../../../../components/tables/RepartitionEffectifsParSiretAndDepartement";
+import useAuth from "../../../../../../hooks/useAuth";
+import useFetchEffectifsParSiret from "../../../../../../hooks/useFetchEffectifsParSiret";
 import { InfoLine } from "../../../../../../theme/components/icons";
 import { filtersPropTypes, useFiltersContext } from "../../../FiltersContext";
 

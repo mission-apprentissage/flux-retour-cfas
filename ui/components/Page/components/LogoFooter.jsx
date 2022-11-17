@@ -1,5 +1,5 @@
-import React from "react";
 import { Box, Text } from "@chakra-ui/react";
+import React from "react";
 
 const LogoFooter = ({ size = "sm" }) => {
   let fontSize = "0.7875rem";
@@ -23,7 +23,7 @@ const LogoFooter = ({ size = "sm" }) => {
   }
 
   return (
-    <Box p={[0, 0, 4]}>
+    <Box padding={[0, 0, 4]}>
       <Text
         display="inline-block"
         fontSize={fontSize}

@@ -1,10 +1,10 @@
 import { Box, Heading, HStack, Link, List, ListItem, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, LinkCard, Page, Section } from "../../common/components";
 import { ERPS } from "../../common/constants/erps";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { CONTACT_ADDRESS } from "../../common/constants/product";
+import { BreadcrumbNav, LinkCard, Page, Section } from "../../components";
 import { Checkbox } from "../../theme/components/icons";
 import AcquisitionCfaBarGraph from "./AcquisitionCfaBarGraph";
 

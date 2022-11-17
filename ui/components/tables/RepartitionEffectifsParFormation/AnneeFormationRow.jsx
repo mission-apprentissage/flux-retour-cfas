@@ -2,7 +2,7 @@ import { Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { toPrettyYearLabel } from "../../../utils/stringUtils";
+import { toPrettyYearLabel } from "../../../common/utils/stringUtils";
 import NumberValueCell from "../NumberValueCell";
 
 const AnneeFormationRow = ({ anneeFormation, effectifs }) => {

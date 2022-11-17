@@ -1,10 +1,10 @@
 import { Box, Center, Container, Heading, Link, Stack, Text } from "@chakra-ui/react";
+import Head from "next/head";
 import React from "react";
 
-import { Page } from "../components";
 import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
+import { Page } from "../components";
 import { NotFound } from "../theme/components/icons";
-import Head from "next/head";
 
 const Page404 = () => {
   const title = "404";
@@ -14,8 +14,8 @@ const Page404 = () => {
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} color="grey.800" paddingY="4w">
-        <Container maxW="xl">
+      <Box width="100%" paddingTop={[4, 8]} px={[1, 1, 6, 8]} color="grey.800" paddingY="4w">
+        <Container maxWidth="xl">
           <Center>
             <Box width="769px" border="1px solid" borderColor="#E3E3FD" padding="4w" marginTop="6w">
               <Stack alignItems="center" spacing="4w">

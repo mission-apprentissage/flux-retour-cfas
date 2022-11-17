@@ -1,7 +1,8 @@
-import React from "react";
 import { Box, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
-import Section from "../Section/Section.jsx";
+import React from "react";
+
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages.js";
+import Section from "../Section/Section.jsx";
 import Sommaire from "../Sommaire/Sommaire.jsx";
 
 const MentionsLegales = () => {
@@ -21,7 +22,7 @@ const MentionsLegales = () => {
 
   return (
     <HStack
-      mt="4w"
+      marginTop="4w"
       spacing={["0", "0", "0", "6w"]}
       flexDirection={["column", "column", "column", "row"]}
       alignItems={["normal", "normal", "normal", "center"]}
@@ -47,13 +48,13 @@ const MentionsLegales = () => {
       </Sommaire>
       <Box>
         <Section pt={0}>
-          <Heading textStyle="h2" color="grey.800" mt={5}>
+          <Heading textStyle="h2" color="grey.800" marginTop={5}>
             Mentions légales
           </Heading>
           <Text>Mentions légales du site « Tableau de bord de l’apprentissage »</Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.EditeurDuSite}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Éditeur du site
           </Heading>
           <Text>
@@ -66,7 +67,7 @@ const MentionsLegales = () => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.DirecteurDeLaPublication}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Directeur de la publication
           </Heading>
           <Text>
@@ -75,7 +76,7 @@ const MentionsLegales = () => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.HebergementDuSite}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Hébergement du site
           </Heading>
           <Text>
@@ -99,7 +100,7 @@ const MentionsLegales = () => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.Accessibilite}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Accessibilité
           </Heading>
           <Text>
@@ -108,7 +109,7 @@ const MentionsLegales = () => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.SignalerUnDyfonctionnement}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Signaler un dysfonctionnement
           </Heading>
           <Text>

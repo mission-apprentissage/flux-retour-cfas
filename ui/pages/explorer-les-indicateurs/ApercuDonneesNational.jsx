@@ -2,9 +2,9 @@ import { Heading, Text } from "@chakra-ui/react";
 import { startOfHour } from "date-fns";
 import React from "react";
 
-import { Section } from "../../common/components";
-import useFetchEffectifsNational from "../../common/hooks/useFetchEffectifsNational";
 import { formatDateDayMonthYear } from "../../common/utils/dateUtils";
+import { Section } from "../../components";
+import useFetchEffectifsNational from "../../hooks/useFetchEffectifsNational";
 import IndicateursGridStack from "../app/visualiser-les-indicateurs/IndicateursGridStack";
 
 const ApercuDonneesNational = () => {

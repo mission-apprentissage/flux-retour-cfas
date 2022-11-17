@@ -4,10 +4,10 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { fetchEffectifsDataListCsvExport } from "../../../../common/api/tableauDeBord";
-import { Section } from "../../../../common/components";
-import DownloadBlock from "../../../../common/components/DownloadBlock/DownloadBlock";
-import useFetchOrganismesCount from "../../../../common/hooks/useFetchOrganismesCount";
 import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
+import { Section } from "../../../../components";
+import DownloadBlock from "../../../../components/DownloadBlock/DownloadBlock";
+import useFetchOrganismesCount from "../../../../hooks/useFetchOrganismesCount";
 import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { useFiltersContext } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";

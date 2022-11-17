@@ -1,10 +1,10 @@
 import { Box, Heading, HStack, Link, Text, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
+import { BreadcrumbNav, Page, Section } from "../../components";
 import { Padlock } from "../../theme/components/icons";
-import LoginModal from "../login/LoginModal";
+import LoginModal from "../login_/LoginModal.jsx";
 import ApercuDonneesNational from "./ApercuDonneesNational";
 
 const ExplorerLesIndicateursPage = () => {

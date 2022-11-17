@@ -2,8 +2,8 @@ import { Box, Heading, HStack, Text } from "@chakra-ui/react";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-import { BreadcrumbNav, Page, Section, Tuile } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
+import { BreadcrumbNav, Page, Section, Tuile } from "../../components";
 import { DataVisualisation, Notification, TechnicalError } from "../../theme/components/icons";
 import QuestionsFrequemmementPosees from "./reponses-details/QuestionsFrequemmementPosees";
 

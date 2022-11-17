@@ -2,12 +2,12 @@ import PropTypes from "prop-types";
 import React from "react";
 import { useQuery } from "react-query";
 
-import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
-import { fetchEffectifsParAnneeFormation } from "../../../api/tableauDeBord";
-import { QUERY_KEYS } from "../../../constants/queryKeys";
-import { mapFiltersToApiFormat } from "../../../utils/mapFiltersToApiFormat";
-import { pick } from "../../../utils/pick";
-import { sortAlphabeticallyBy } from "../../../utils/sortAlphabetically";
+import { fetchEffectifsParAnneeFormation } from "../../../common/api/tableauDeBord";
+import { QUERY_KEYS } from "../../../common/constants/queryKeys";
+import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
+import { pick } from "../../../common/utils/pick";
+import { sortAlphabeticallyBy } from "../../../common/utils/sortAlphabetically";
+import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import AnneeFormationRow from "./AnneeFormationRow";
 
 const AnneeFormationRows = ({ formationCfd }) => {

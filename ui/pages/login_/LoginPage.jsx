@@ -1,9 +1,9 @@
 import { Heading, HStack, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../common/components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import useLogin from "../../common/hooks/useLogin";
+import { BreadcrumbNav, Page, Section } from "../../components";
+import useLogin from "../../hooks/useLogin";
 import LoginBlock from "./LoginBlock";
 
 const LoginPage = () => {

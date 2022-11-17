@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
-import useAuth from "../hooks/useAuth";
+
 import { hasPageAccessTo } from "../common/utils/rolesUtils";
+import useAuth from "../hooks/useAuth";
 
 const withAuth = (Component, aclRef = null) => {
   const Auth = (props) => {

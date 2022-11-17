@@ -2,10 +2,10 @@ import { Box, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/re
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-import { BreadcrumbNav, Page, Section } from "../../../common/components";
-import { BaseAccordionGroup } from "../../../common/components/BaseAccordionGroup/BaseAccordionGroup";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../../common/constants/product";
+import { BreadcrumbNav, Page, Section } from "../../../components";
+import { BaseAccordionGroup } from "../../../components/BaseAccordionGroup/BaseAccordionGroup";
 
 const CommentFonctionneLeTdbPage = () => {
   const scrollToTop = () => {

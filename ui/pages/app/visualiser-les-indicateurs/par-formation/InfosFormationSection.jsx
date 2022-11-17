@@ -2,8 +2,8 @@ import { Badge, Box, HStack, Skeleton, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Section } from "../../../../common/components";
-import useFetchFormationInfo from "../../../../common/hooks/useFetchFormationInfo";
+import { Section } from "../../../../components";
+import useFetchFormationInfo from "../../../../hooks/useFetchFormationInfo";
 
 const InfosFormationSection = ({ formationCfd }) => {
   const { data: formation, loading, error } = useFetchFormationInfo(formationCfd);

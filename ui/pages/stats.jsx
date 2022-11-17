@@ -1,10 +1,10 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
 
+import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
 import { Page } from "../components";
 import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
-import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
 
 const StatistiquesPage = () => {
   const title = "Statistiques";
@@ -15,20 +15,20 @@ const StatistiquesPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} backgroundColor="galt" paddingY="8w">
-        <Container maxW="xl">
+      <Box width="100%" paddingTop={[4, 8]} px={[1, 1, 6, 8]} backgroundColor="galt" paddingY="8w">
+        <Container maxWidth="xl">
           <Heading as="h1" variant="h1" marginBottom="1w">
             {NAVIGATION_PAGES.Statistiques.title}
           </Heading>
         </Container>
       </Box>
-      <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} paddingTop="3w">
-        <Container maxW="xl">
+      <Box width="100%" paddingTop={[4, 8]} px={[1, 1, 6, 8]}>
+        <Container maxWidth="xl">
           <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
         </Container>
       </Box>
-      <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} paddingY="4w">
-        <Container maxW="xl">
+      <Box width="100%" paddingTop={[4, 8]} px={[1, 1, 6, 8]} paddingY="4w">
+        <Container maxWidth="xl">
           <Tabs isLazy lazyBehavior="keepMounted">
             <TabList>
               <Tab>Visites</Tab>

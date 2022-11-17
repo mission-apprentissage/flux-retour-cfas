@@ -2,10 +2,10 @@ import { Box, Heading, Link, Text } from "@chakra-ui/react";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-import { BreadcrumbNav, Page, Section } from "../../../common/components";
-import { BaseAccordionGroup } from "../../../common/components/BaseAccordionGroup/BaseAccordionGroup";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { CONTACT_ADDRESS } from "../../../common/constants/product";
+import { BreadcrumbNav, Page, Section } from "../../../components";
+import { BaseAccordionGroup } from "../../../components/BaseAccordionGroup/BaseAccordionGroup";
 
 const ContacterLequipeDuTdbPage = () => {
   return (

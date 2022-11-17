@@ -1,6 +1,6 @@
 import { Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-ui/react";
-import React from "react";
 import NavLink from "next/link";
+import React from "react";
 
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../common/constants/product";

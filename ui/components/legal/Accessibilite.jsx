@@ -1,10 +1,11 @@
-import React from "react";
 import { Box, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import React from "react";
+
 import { ExternalLinkLine } from "../../theme/components/icons";
 
 const Accessibilite = () => {
   return (
-    <Box pt={4} pb={16}>
+    <Box paddingTop={4} paddingBottom={16}>
       <Box>
         <Text>
           L&apos;initiative internationale pour l&apos;accessibilité du Web (Web Accessiblility Initiative) définit
@@ -43,8 +44,8 @@ const Accessibilite = () => {
           La déclaration de conformité sera publiée ultérieurement.
         </Text>
       </Box>
-      <Box mt={4}>
-        <Heading as={"h3"} textStyle="h6" mb={2}>
+      <Box marginTop={4}>
+        <Heading as={"h3"} textStyle="h6" marginBottom={2}>
           Nos engagements
         </Heading>
         <Text>
@@ -62,7 +63,7 @@ const Accessibilite = () => {
           Des améliorations vont être apportées régulièrement.
         </Text>
       </Box>
-      <Box mt={4}>
+      <Box marginTop={4}>
         <Text>
           Pour en savoir plus sur la politique d&apos;accessibilité numérique de l&apos;État :{" "}
           <Link
@@ -75,8 +76,8 @@ const Accessibilite = () => {
           </Link>
         </Text>
       </Box>
-      <Box mt={4}>
-        <Heading as={"h3"} textStyle="h6" mb={2}>
+      <Box marginTop={4}>
+        <Heading as={"h3"} textStyle="h6" marginBottom={2}>
           Voie de recours
         </Heading>
         <Box>

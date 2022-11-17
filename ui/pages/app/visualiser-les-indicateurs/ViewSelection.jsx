@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { hasUserRoles, roles } from "../../../common/auth/roles";
-import { LinkCard } from "../../../common/components";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
-import useAuth from "../../../common/hooks/useAuth";
+import { LinkCard } from "../../../components";
+import useAuth from "../../../hooks/useAuth";
 
 const ViewOptionCard = ({ navigationPageData }) => {
   return (

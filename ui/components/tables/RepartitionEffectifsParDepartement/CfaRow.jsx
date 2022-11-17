@@ -2,9 +2,9 @@ import { Box, Link, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../../../pages/app/visualiser-les-indicateurs/FiltersContext";
-import { mapNatureOrganismeDeFormation } from "../../../../pages/app/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
-import { isDateFuture } from "../../../utils/dateUtils";
+import { isDateFuture } from "../../../common/utils/dateUtils";
+import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { mapNatureOrganismeDeFormation } from "../../../pages/app/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
 import NatureOrganismeDeFormationWarning from "../../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import NumberValueCell from "../NumberValueCell";
 

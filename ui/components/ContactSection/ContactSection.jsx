@@ -1,11 +1,11 @@
 import { Flex, Heading, HStack, Stack, Text } from "@chakra-ui/react";
 import React from "react";
-import Link from "../Links/Link";
 
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../common/constants/product";
-import Section from "../Section/Section";
 import { RightLine } from "../../theme/components/icons";
+import Link from "../Links/Link";
+import Section from "../Section/Section";
 
 const ContactSection = () => {
   return (

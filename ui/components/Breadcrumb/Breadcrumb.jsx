@@ -1,7 +1,8 @@
-import React from "react";
-import { ArrowDropRightLine } from "../../theme/components/icons";
-import { BreadcrumbItem, BreadcrumbLink, Breadcrumb as ChakraBreadcrumb } from "@chakra-ui/react";
+import { Breadcrumb as ChakraBreadcrumb, BreadcrumbItem, BreadcrumbLink } from "@chakra-ui/react";
 import NavLink from "next/link";
+import React from "react";
+
+import { ArrowDropRightLine } from "../../theme/components/icons";
 
 const Breadcrumb = ({ pages }) => {
   return (

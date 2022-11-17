@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from "react";
 import {
-  Box,
-  Checkbox,
-  VStack,
-  Flex,
-  RadioGroup,
-  Radio,
   Accordion,
   AccordionButton,
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  Box,
+  Checkbox,
+  Flex,
   FormControl,
+  Radio,
+  RadioGroup,
+  VStack,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
+import React, { useEffect, useState } from "react";
+
 import ACL from "../common/constants/acl";
 
 const specialsAcls = {
@@ -47,8 +48,8 @@ const rendreACL = (feature, deepth, handleChange, values) => {
         let shouldBeDisabled = shouldBeNotAllowed(values.newAcl, item.ref);
 
         return (
-          <Flex flexDirection="column" mb={deepth === 0 ? 5 : 2} key={`${item.ref}_${deepth}`} w="100%">
-            <Box mb={2}>
+          <Flex flexDirection="column" marginBottom={deepth === 0 ? 5 : 2} key={`${item.ref}_${deepth}`} width="100%">
+            <Box marginBottom={2}>
               <Checkbox
                 name="newAcl"
                 onChange={handleChange}
@@ -61,18 +62,18 @@ const rendreACL = (feature, deepth, handleChange, values) => {
               </Checkbox>
             </Box>
             {!item.uniqSubFeature && (
-              <Box ml={5} pr={14}>
+              <Box marginLeft={5} paddingRight={14}>
                 {item.subFeatures?.map((subitem) => {
                   if (subitem.subFeatures) {
                     return (
-                      <Flex flexDirection="column" key={`${subitem.ref}_${deepth}`} ml={5}>
+                      <Flex flexDirection="column" key={`${subitem.ref}_${deepth}`} marginLeft={5}>
                         {rendreACL([subitem], deepth + 1, handleChange, values)}
                       </Flex>
                     );
                   }
 
                   return (
-                    <VStack spacing={5} ml={5} key={`${subitem.ref}_${deepth}`} alignItems="baseline">
+                    <VStack spacing={5} marginLeft={5} key={`${subitem.ref}_${deepth}`} alignItems="baseline">
                       <Checkbox
                         name="newAcl"
                         onChange={handleChange}
@@ -88,9 +89,9 @@ const rendreACL = (feature, deepth, handleChange, values) => {
               </Box>
             )}
             {item.uniqSubFeature && (
-              <Box ml={5} pr={14}>
+              <Box marginLeft={5} paddingRight={14}>
                 <RadioGroup id={`${item.ref}_SUB`} name={`${item.ref}_SUB`} defaultValue={values[`${item.ref}_SUB`]}>
-                  <VStack spacing={0} ml={5} alignItems="baseline">
+                  <VStack spacing={0} marginLeft={5} alignItems="baseline">
                     {item.subFeatures?.map((subitem) => {
                       return (
                         <Radio
@@ -171,7 +172,7 @@ const Acl = ({ title = "Droits d'accès", acl = [], onChanged }) => {
   };
 
   return (
-    <Accordion bg="white" mt={3} allowToggle>
+    <Accordion background="white" marginTop={3} allowToggle>
       <AccordionItem>
         <AccordionButton _expanded={{ bg: "grey.200" }} border={"none"}>
           <Box flex="1" textAlign="left" fontSize="sm">
@@ -179,8 +180,8 @@ const Acl = ({ title = "Droits d'accès", acl = [], onChanged }) => {
           </Box>
           <AccordionIcon />
         </AccordionButton>
-        <AccordionPanel pb={4} border={"none"} bg="grey.100">
-          <FormControl p={2}>{rendreACL(ACL, 0, onAclChanged, values)}</FormControl>
+        <AccordionPanel paddingBottom={4} border={"none"} background="grey.100">
+          <FormControl padding={2}>{rendreACL(ACL, 0, onAclChanged, values)}</FormControl>
         </AccordionPanel>
       </AccordionItem>
     </Accordion>

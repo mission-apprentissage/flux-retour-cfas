@@ -1,8 +1,8 @@
 import { Box, Heading, Link, Text } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 
-import { BaseAccordionGroup } from "../../common/components/BaseAccordionGroup/BaseAccordionGroup";
 import { CONTACT_ADDRESS, PRODUCT_NAME } from "../../common/constants/product";
+import { BaseAccordionGroup } from "../../components/BaseAccordionGroup/BaseAccordionGroup";
 
 // prettier-ignore
 const MentionsLegalesAccordions = () => (

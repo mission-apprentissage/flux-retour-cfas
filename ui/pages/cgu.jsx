@@ -1,10 +1,11 @@
-import React from "react";
 import Head from "next/head";
+import React from "react";
+
+import { NAVIGATION_PAGES } from "../common/constants/navigationPages.js";
+import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
+import { Page, Section } from "../components";
 import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 import { Cgu } from "../components/legal/Cgu";
-import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
-import { NAVIGATION_PAGES } from "../common/constants/navigationPages.js";
-import { Section, Page } from "../components";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

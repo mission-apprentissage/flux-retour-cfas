@@ -1,9 +1,9 @@
 import { Box, Button, Divider, Heading, HStack, Stack, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { BreadcrumbNav, Page, Section } from "../../../common/components";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { CONTACT_ADDRESS } from "../../../common/constants/product";
+import { BreadcrumbNav, Page, Section } from "../../../components";
 import OrganismeFormationPagesMenu from "../OrganismeFormationPagesMenu";
 import Question from "./Question";
 import { questions } from "./questions";

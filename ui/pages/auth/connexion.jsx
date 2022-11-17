@@ -1,33 +1,32 @@
 import {
-  Flex,
   Box,
   Button,
+  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Heading,
   HStack,
-  InputGroup,
   Input,
+  InputGroup,
   InputRightElement,
   Link,
   Text,
-  Heading,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
+import { decodeJwt } from "jose";
+import Head from "next/head";
+import NavLink from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 import * as Yup from "yup";
-import { decodeJwt } from "jose";
-import { useRouter } from "next/router";
-import NavLink from "next/link";
-import Head from "next/head";
-import { Page } from "../../components/Page/Page";
 
+import { _post } from "../../common/httpClient";
+import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { Page } from "../../components/Page/Page";
 import useAuth from "../../hooks/useAuth";
 import useToken from "../../hooks/useToken";
-import { _post } from "../../common/httpClient";
-
 import { ShowPassword } from "../../theme/components/icons";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 
 const Login = (props) => {
   const [, setAuth] = useAuth();
@@ -62,7 +61,7 @@ const Login = (props) => {
 
   return (
     <Flex {...props}>
-      <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
+      <Heading as="h2" fontSize="2xl" marginBottom={[3, 6]}>
         J&apos;ai déjà un compte
       </Heading>
       <Formik
@@ -79,7 +78,7 @@ const Login = (props) => {
               <Box>
                 <Field name="email">
                   {({ field, meta }) => (
-                    <FormControl isRequired isInvalid={meta.error && meta.touched} mb={5}>
+                    <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom={5}>
                       <FormLabel>Identifiant</FormLabel>
                       <Input {...field} id={field.name} placeholder="Exemple : prenom.nom@mail.com" />
                       <FormErrorMessage>{meta.error}</FormErrorMessage>
@@ -89,7 +88,7 @@ const Login = (props) => {
                 <Field name="password">
                   {({ field, meta }) => {
                     return (
-                      <FormControl isRequired isInvalid={meta.error && meta.touched} mb={5}>
+                      <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom={5}>
                         <FormLabel>Mot de passe</FormLabel>
                         <InputGroup size="md">
                           <Input
@@ -108,7 +107,7 @@ const Login = (props) => {
                   }}
                 </Field>
               </Box>
-              <HStack spacing="4w" mt={8}>
+              <HStack spacing="4w" marginTop={8}>
                 <Button variant="primary" type="submit">
                   Se connecter
                 </Button>
@@ -117,7 +116,7 @@ const Login = (props) => {
                 </Link>
               </HStack>
               {status.error && (
-                <Text color="error" mt={2}>
+                <Text color="error" marginTop={2}>
                   {status.error}
                 </Text>
               )}
@@ -125,9 +124,9 @@ const Login = (props) => {
           );
         }}
       </Formik>
-      <Box mt={12}>
+      <Box marginTop={12}>
         <Text fontSize="1rem">
-          <Link href="/auth/inscription" as={NavLink} color="bluefrance" ml={3}>
+          <Link href="/auth/inscription" as={NavLink} color="bluefrance" marginLeft={3}>
             &gt; Je n&apos;ai pas encore de compte
           </Link>
         </Text>
@@ -151,7 +150,7 @@ export default function ConnexionPage() {
         <title>Connexion</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Flex w="full" maxW="xl" mt={4}>
+      <Flex width="full" maxWidth="xl" marginTop={4}>
         <Login {...styleProps} flexDirection="column" border="1px solid" borderColor="openbluefrance" />
       </Flex>
     </Page>

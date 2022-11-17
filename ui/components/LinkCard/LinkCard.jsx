@@ -1,9 +1,9 @@
 import { Flex, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import Link from "../Links/Link";
 
 import { RightLine } from "../../theme/components/icons";
+import Link from "../Links/Link";
 
 const cardVariants = {
   blue: {

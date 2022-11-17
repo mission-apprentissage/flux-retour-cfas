@@ -1,31 +1,31 @@
 import {
-  Flex,
   Box,
   Button,
+  Center,
+  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
-  VStack,
+  Heading,
   HStack,
   Input,
   Link,
-  Text,
-  RadioGroup,
   Radio,
+  RadioGroup,
   Spinner,
-  Center,
-  Heading,
+  Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
+import generator from "generate-password-browser";
+import Head from "next/head";
+import NavLink from "next/link";
 import React, { useState } from "react";
 import * as Yup from "yup";
-import NavLink from "next/link";
-import Head from "next/head";
-import { Page } from "../../components/Page/Page";
-import generator from "generate-password-browser";
 
 import { _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { Page } from "../../components/Page/Page";
 
 const validate = async (validationSchema, obj) => {
   let isValid = false;
@@ -140,7 +140,7 @@ const Register = ({ onSucceeded, ...props }) => {
 
   return (
     <Flex {...props}>
-      <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
+      <Heading as="h2" fontSize="2xl" marginBottom={[3, 6]}>
         Je n&apos;ai pas encore de compte
       </Heading>
       <Box>
@@ -148,7 +148,7 @@ const Register = ({ onSucceeded, ...props }) => {
           {step === 0 && (
             <FormControl py={2} isRequired isInvalid={errors.type && touched.type}>
               <FormLabel>Je représente :</FormLabel>
-              <RadioGroup id="type" name="type" value={values.type} mt={8}>
+              <RadioGroup id="type" name="type" value={values.type} marginTop={8}>
                 <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
                   <Radio
                     value="employeur"
@@ -179,7 +179,7 @@ const Register = ({ onSucceeded, ...props }) => {
           {step === 1 && (
             <>
               <Text fontWeight="bold">Vous êtes {values.type === "employeur" ? "un employeur" : "un OF"}</Text>
-              <FormControl mt={4} py={2} isRequired isInvalid={errors.siret && touched.siret}>
+              <FormControl marginTop={4} py={2} isRequired isInvalid={errors.siret && touched.siret}>
                 <FormLabel>Votre Siret</FormLabel>
                 <Input
                   id="siret"
@@ -196,9 +196,9 @@ const Register = ({ onSucceeded, ...props }) => {
                 borderStyle="dashed"
                 borderColor={entrepriseData ? (entrepriseData.successed ? "green.500" : "error") : "grey.400"}
                 rounded="md"
-                minH="50"
+                minHeight="50"
                 flexDirection="column"
-                p={4}
+                padding={4}
               >
                 {isFetching && <Spinner />}
                 {!isFetching && entrepriseData && (
@@ -243,7 +243,7 @@ const Register = ({ onSucceeded, ...props }) => {
           {step === 2 && (
             <>
               <Text fontWeight="bold">Vous êtes {values.type === "employeur" ? "un employeur public." : "un OF"}</Text>
-              <FormControl mt={4} py={2} isRequired isInvalid={errors.email && touched.email}>
+              <FormControl marginTop={4} py={2} isRequired isInvalid={errors.email && touched.email}>
                 <FormLabel>Votre courriel</FormLabel>
                 <Input
                   id="email"
@@ -254,7 +254,7 @@ const Register = ({ onSucceeded, ...props }) => {
                 />
                 {errors.email && touched.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
               </FormControl>
-              <FormControl py={2} mt={5} isRequired isInvalid={errors.civility && touched.civility}>
+              <FormControl py={2} marginTop={5} isRequired isInvalid={errors.civility && touched.civility}>
                 <RadioGroup value={values.civility}>
                   <HStack>
                     <Radio
@@ -272,7 +272,7 @@ const Register = ({ onSucceeded, ...props }) => {
                       value="Madame"
                       checked={values.civility === "Madame"}
                       onChange={handleChange}
-                      ml="2.5rem !important"
+                      marginLeft="2.5rem !important"
                     >
                       Madame
                     </Radio>
@@ -303,7 +303,7 @@ const Register = ({ onSucceeded, ...props }) => {
           )}
         </Box>
         {step > 0 && (
-          <HStack spacing="4w" mt={5}>
+          <HStack spacing="4w" marginTop={5}>
             <Link onClick={() => setStep(step - 1)} color="bluefrance">
               {"< Précedent"}
             </Link>
@@ -328,8 +328,8 @@ const Register = ({ onSucceeded, ...props }) => {
         )}
       </Box>
       <Flex flexGrow={1}>
-        <Text mt={8} fontSize="1rem">
-          <Link href="/auth/connexion" as={NavLink} color="bluefrance" ml={3}>
+        <Text marginTop={8} fontSize="1rem">
+          <Link href="/auth/connexion" as={NavLink} color="bluefrance" marginLeft={3}>
             &gt; J&apos;ai déjà un compte
           </Link>
         </Text>
@@ -355,22 +355,20 @@ const RegisterPage = () => {
         <title>Inscription</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Flex w="full" maxW="xl" mt={4}>
+      <Flex width="full" maxWidth="xl" marginTop={4}>
         {!succeeded && (
-          <>
-            <Register
-              {...styleProps}
-              flexDirection="column"
-              border="1px solid"
-              borderColor="openbluefrance"
-              onSucceeded={() => {
-                setSucceeded(true);
-              }}
-            />
-          </>
+          <Register
+            {...styleProps}
+            flexDirection="column"
+            border="1px solid"
+            borderColor="openbluefrance"
+            onSucceeded={() => {
+              setSucceeded(true);
+            }}
+          />
         )}
         {succeeded && (
-          <Center w="full" flexDirection="column" border="1px solid" borderColor="openbluefrance" p={12}>
+          <Center width="full" flexDirection="column" border="1px solid" borderColor="openbluefrance" padding={12}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/advancedOutline.svg" alt="felicitation" />
             <Heading as="h2" fontSize="2xl" my={[3, 6]}>

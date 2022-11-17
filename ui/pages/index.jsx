@@ -1,14 +1,14 @@
-import React from "react";
-import Head from "next/head";
 import { Box, Flex, Heading, HStack, Image, Text } from "@chakra-ui/react";
+import Head from "next/head";
+import React from "react";
+
 import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../common/constants/product";
+import { Page, Section } from "../components";
+import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
+import LinkCard from "../components/LinkCard/LinkCard";
 import ApercuDesDonneesSection from "./home_/sections/ApercuDesDonneesSection";
 import RgpdSection from "./home_/sections/RgpdSection";
-
-import LinkCard from "../components/LinkCard/LinkCard";
-import { Section, Page } from "../components";
-import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 
 export default function Home() {
   const title = PRODUCT_NAME;
@@ -20,7 +20,7 @@ export default function Home() {
       </Head>
       <Section paddingY="4w">
         <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
-        <Flex pt="2w">
+        <Flex paddingTop="2w">
           <Box flex="1">
             <Heading as="h1" fontSize="2.3em" textAlign={["center", "center", "center", "initial"]}>
               Le {PRODUCT_NAME}
@@ -42,7 +42,7 @@ export default function Home() {
           _hover={{ cursor: "pointer" }}
           flexDirection={["column", "column", "column", "column", "row"]}
           alignItems={["normal", "normal", "normal", "normal", "center"]}
-          mt={["2w", "2w", "2w", "2w", "0"]}
+          marginTop={["2w", "2w", "2w", "2w", "0"]}
         >
           <LinkCard linkHref={NAVIGATION_PAGES.Login.path} mb={["2w", "2w", "2w", "2w", "0"]}>
             Vous êtes une{" "}

@@ -1,9 +1,10 @@
-import React from "react";
 import { Box, Flex, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
-import Link from "../Links/Link";
-import Sommaire from "../Sommaire/Sommaire.jsx";
+import React from "react";
+
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages.js";
+import Link from "../Links/Link";
 import Section from "../Section/Section.jsx";
+import Sommaire from "../Sommaire/Sommaire.jsx";
 
 const PolitiqueDeConfidentialite = () => {
   const currentPage = NAVIGATION_PAGES.PolitiqueDeConfidentialite;
@@ -35,7 +36,7 @@ const PolitiqueDeConfidentialite = () => {
   ];
   return (
     <HStack
-      mt="4w"
+      marginTop="4w"
       spacing={["0", "0", "0", "2rem"]}
       flexDirection={["column", "column", "column", "row"]}
       alignItems={["normal", "normal", "normal", "center"]}
@@ -61,10 +62,10 @@ const PolitiqueDeConfidentialite = () => {
       </Sommaire>
       <Box>
         <Section pt="0">
-          <Heading textStyle="h2" color="grey.800" mt={5}>
+          <Heading textStyle="h2" color="grey.800" marginTop={5}>
             Politique de confidentialité
           </Heading>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Traitement des données à caractère personnel
           </Heading>
           <Text>
@@ -73,14 +74,14 @@ const PolitiqueDeConfidentialite = () => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.Finalite}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Finalités
           </Heading>
           <Text>
             Nous manipulons des données à caractère personnel pour améliorer la qualité du suivi et du pilotage de
             l’apprentissage par les différents acteurs. Plus précisément, elles visent à :
           </Text>
-          <UnorderedList ml="30px !important" mt="1w">
+          <UnorderedList marginLeft="30px !important" marginTop="1w">
             <ListItem>
               Produire sous la forme d’un tableau de bord les données synthétiques des effectifs de l&apos;apprentissage
               afin de contribuer au pilotage de l’apprentissage au niveau national et territorial par les acteurs
@@ -99,13 +100,13 @@ const PolitiqueDeConfidentialite = () => {
           </UnorderedList>
         </Section>
         <Section mt={4} id={currentPage.anchors.DonneesACaracterePersonelTraitees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Données à caractère personnel traitées
           </Heading>
           <Text>
             Nous traitons les données à caractère personnel et catégories de données à caractère personnel suivantes :
           </Text>
-          <UnorderedList ml="30px !important" mt="1w">
+          <UnorderedList marginLeft="30px !important" marginTop="1w">
             <ListItem>
               Données relatives à l’identification du candidat ou jeune (nom, prénom, date de naissance, INE, adresse
               e-mail) ;
@@ -121,7 +122,7 @@ const PolitiqueDeConfidentialite = () => {
           </UnorderedList>
         </Section>
         <Section mt={4} id={currentPage.anchors.BaseJuridiqueDuTraitementDeDonnees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Base juridique du traitement de données
           </Heading>
           <Text>
@@ -132,7 +133,7 @@ const PolitiqueDeConfidentialite = () => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.DureeDeConservation}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Durée de conservation
           </Heading>
           <Text>
@@ -141,11 +142,11 @@ const PolitiqueDeConfidentialite = () => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.DroitDesPersonnesConcernees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Droit des personnes concernées
           </Heading>
           <Text>Vous disposez des droits suivants concernant vos données à caractère personnel :</Text>
-          <UnorderedList ml="30px !important" mt="1w">
+          <UnorderedList marginLeft="30px !important" marginTop="1w">
             <ListItem>Droit d’information et droit d’accès aux données ;</ListItem>
             <ListItem>Droit de rectification des données ;</ListItem>
             <ListItem>Droit d’opposition au traitement de données ;</ListItem>
@@ -183,14 +184,14 @@ const PolitiqueDeConfidentialite = () => {
           </Text>
         </Section>
         <Section mt={4} id={currentPage.anchors.DestinatairesDesDonnees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Destinataires des données
           </Heading>
           <Text>
             Nous nous engageons à ce que les données à caractères personnels soient traitées par les seules personnes
             autorisées. Ont accès aux données :
           </Text>
-          <UnorderedList ml="30px !important" mt="1w">
+          <UnorderedList marginLeft="30px !important" marginTop="1w">
             <ListItem>Les agents autorisés des DREETS, dans le cadre de leurs missions de service public ;</ListItem>
             <ListItem>Les organismes de formation ;</ListItem>
             <ListItem>Les réseaux d’organismes de formation ;</ListItem>
@@ -204,14 +205,14 @@ const PolitiqueDeConfidentialite = () => {
           </UnorderedList>
         </Section>
         <Section mt={4} id={currentPage.anchors.SecuriteEtConfidentialiteDesDonnees}>
-          <Heading as={"h3"} textStyle="h6" mb={2}>
+          <Heading as={"h3"} textStyle="h6" marginBottom={2}>
             Sécurité et confidentialité des données
           </Heading>
           <Text>
             Les mesures techniques et organisationnelles de sécurité adoptées pour assurer la confidentialité,
             l’intégrité et protéger l’accès des données sont notamment :
           </Text>
-          <UnorderedList ml="30px !important" mt="1w">
+          <UnorderedList marginLeft="30px !important" marginTop="1w">
             <ListItem>Anonymisation ;</ListItem>
             <ListItem>Stockage des données en base de données ;</ListItem>
             <ListItem>Stockage des mots de passe en base sont hachés ;</ListItem>
@@ -226,56 +227,56 @@ const PolitiqueDeConfidentialite = () => {
           <Text as={"h4"} fontSize="30px" fontWeight="700" my={5}>
             Sous-traitants
           </Text>
-          <Flex flexDirection={["column", "column", "column", "row"]} w="full">
+          <Flex flexDirection={["column", "column", "column", "row"]} width="full">
             <Flex flexDirection={"column"}>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
+              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} padding={5}>
                 <strong>
                   Partenaire <br />
                   <br />
                 </strong>
               </Flex>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="70px" p={5}>
+              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} height="70px" padding={5}>
                 <Text>OVH SAS</Text>
               </Flex>
-              <Flex border="1px solid" h="70px" borderRightWidth={[1, 1, 1, 0]} p={5}>
+              <Flex border="1px solid" height="70px" borderRightWidth={[1, 1, 1, 0]} padding={5}>
                 <Text>Crisp</Text>
               </Flex>
             </Flex>
             <Flex flexDirection={"column"}>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
+              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} padding={5}>
                 <strong>Pays destinataire</strong>
               </Flex>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="70px" p={5}>
+              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} height="70px" padding={5}>
                 <Text>France</Text>
               </Flex>
-              <Flex border="1px solid" h="70px" borderRightWidth={[1, 1, 1, 0]} p={5}>
+              <Flex border="1px solid" height="70px" borderRightWidth={[1, 1, 1, 0]} padding={5}>
                 <Text>Union européenne</Text>
               </Flex>
             </Flex>
             <Flex flexDirection={"column"}>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} p={5}>
+              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} padding={5}>
                 <strong>Traitement réalisé</strong>
               </Flex>
-              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} h="70px" p={5}>
+              <Flex border="1px solid" borderBottomWidth={0} borderRightWidth={[1, 1, 1, 0]} height="70px" padding={5}>
                 <Text>Hébergement</Text>
               </Flex>
-              <Flex border="1px solid" h="70px" borderRightWidth={[1, 1, 1, 0]} p={5}>
+              <Flex border="1px solid" height="70px" borderRightWidth={[1, 1, 1, 0]} padding={5}>
                 <Text>Chat de support</Text>
               </Flex>
             </Flex>
             <Flex flexDirection={"column"}>
-              <Flex border="1px solid" borderBottomWidth={0} p={5}>
+              <Flex border="1px solid" borderBottomWidth={0} padding={5}>
                 <strong>
                   Garenties <br />
                   <br />
                 </strong>
               </Flex>
-              <Flex border="1px solid" borderBottomWidth={0} h="70px" p={5}>
+              <Flex border="1px solid" borderBottomWidth={0} height="70px" padding={5}>
                 <Link color="primary" href="https://www.ovhcloud.com/fr/personal-data-protection">
                   https://www.ovhcloud.com/fr/personal-data-protection
                 </Link>
               </Flex>
-              <Flex border="1px solid" h="70px" p={5}>
+              <Flex border="1px solid" height="70px" padding={5}>
                 <Link color="primary" href="https://crisp.chat/fr/privacy">
                   https://crisp.chat/fr/privacy
                 </Link>

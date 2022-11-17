@@ -1,14 +1,15 @@
-import { Box, Flex, Heading, HStack, Spinner } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
-import React, { useEffect } from "react";
-import { useRouter } from "next/router";
-import { _post } from "../../common/httpClient";
-import decodeJWT from "../../common/utils/decodeJWT";
+import { Box, Flex, Heading, HStack, Spinner } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import { decodeJwt } from "jose";
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
+
+import { _post } from "../../common/httpClient";
+import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import decodeJWT from "../../common/utils/decodeJWT";
 import useAuth from "../../hooks/useAuth";
 import useToken from "../../hooks/useToken";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
-import { useQuery } from "@tanstack/react-query";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -56,9 +57,9 @@ const Confirmed = () => {
 
   if (isLoading)
     return (
-      <Flex minH="50vh" justifyContent="start" mt="10" flexDirection="column">
+      <Flex minHeight="50vh" justifyContent="start" marginTop="10" flexDirection="column">
         <HStack>
-          <Spinner mr={3} />
+          <Spinner marginRight={3} />
           <Heading fontSize="1rem" fontFamily="Marianne" fontWeight="500" marginBottom="2w">
             {title}
           </Heading>
@@ -67,7 +68,7 @@ const Confirmed = () => {
     );
 
   return (
-    <Flex minH="50vh" justifyContent="start" mt="10" flexDirection="column">
+    <Flex minHeight="50vh" justifyContent="start" marginTop="10" flexDirection="column">
       {isError && (
         <HStack>
           <CloseIcon aria-hidden={true} color="error" cursor="pointer" />

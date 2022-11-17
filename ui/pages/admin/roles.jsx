@@ -1,6 +1,3 @@
-import React, { useEffect, useState } from "react";
-import { _delete, _get, _post, _put } from "../../common/httpClient";
-import { useFormik } from "formik";
 import {
   Accordion,
   AccordionButton,
@@ -15,13 +12,16 @@ import {
   Input,
   Stack,
 } from "@chakra-ui/react";
+import { useFormik } from "formik";
+import Head from "next/head";
+import React, { useEffect, useState } from "react";
+
+import { _delete, _get, _post, _put } from "../../common/httpClient";
+import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import Acl from "../../components/Acl";
 import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
 import { Page } from "../../components/Page/Page";
-import Head from "next/head";
 import withAuth from "../../components/withAuth";
-
-import Acl from "../../components/Acl";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 
 // TODO
 const RoleLine = ({ role }) => {
@@ -70,7 +70,7 @@ const RoleLine = ({ role }) => {
 
       {role && (
         <Box>
-          <Button type="submit" variant="primary" mr={5}>
+          <Button type="submit" variant="primary" marginRight={5}>
             Enregistrer
           </Button>
           <Button variant="outline" colorScheme="red" borderRadius="none" onClick={onDeleteClicked}>
@@ -109,19 +109,19 @@ const Roles = () => {
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
 
-      <Heading as="h1" mb={8} mt={6}>
+      <Heading as="h1" marginBottom={8} marginTop={6}>
         {title}
       </Heading>
       <Stack spacing={2}>
-        <Accordion bg="white" mb={12} allowToggle>
+        <Accordion background="white" marginBottom={12} allowToggle>
           <AccordionItem>
-            <AccordionButton bg="bluefrance" color="white" _hover={{ bg: "blue.700" }}>
+            <AccordionButton background="bluefrance" color="white" _hover={{ bg: "blue.700" }}>
               <Box flex="1" textAlign="left" fontSize="gamma">
                 Créer un rôle
               </Box>
               <AccordionIcon />
             </AccordionButton>
-            <AccordionPanel pb={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
+            <AccordionPanel paddingBottom={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
               <RoleLine role={null} />
             </AccordionPanel>
           </AccordionItem>
@@ -129,12 +129,12 @@ const Roles = () => {
 
         {roles.map((roleAttr, i) => {
           return (
-            <Accordion bg="white" key={i} allowToggle>
+            <Accordion background="white" key={i} allowToggle>
               <AccordionItem>
                 <AccordionButton
                   _expanded={{ bg: roleAttr.type === "user" ? "greensoft.300" : "grey.200", color: "bluefrance" }}
                   _hover={{ bg: "grey.200", color: "bluefrance" }}
-                  bg={roleAttr.type === "user" ? "greensoft.500" : "transparent"}
+                  background={roleAttr.type === "user" ? "greensoft.500" : "transparent"}
                   color={roleAttr.type === "user" ? "white" : "bluefrance"}
                   border={"1px solid"}
                   borderColor={"bluefrance"}
@@ -144,7 +144,7 @@ const Roles = () => {
                   </Box>
                   <AccordionIcon />
                 </AccordionButton>
-                <AccordionPanel pb={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
+                <AccordionPanel paddingBottom={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
                   <RoleLine role={roleAttr} />
                 </AccordionPanel>
               </AccordionItem>

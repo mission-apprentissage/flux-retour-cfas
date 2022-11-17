@@ -2,8 +2,8 @@ import { Box, Heading, HStack, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
+import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../components";
 import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import ReseauSelect from "./ReseauSelect/ReseauSelect";
