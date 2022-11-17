@@ -61,6 +61,10 @@ const createCollectionIfDoesNotExist = async (collectionName) => {
   }
 };
 
+/**
+ * Config de la validation
+ * @param {*} modelDescriptors
+ */
 export const configureDbSchemaValidation = async (modelDescriptors) => {
   const db = getDatabase();
   await ensureInitialization();
@@ -80,3 +84,27 @@ export const configureDbSchemaValidation = async (modelDescriptors) => {
     });
   });
 };
+
+/**
+ * Clear de toutes les collections
+ * @returns
+ */
+export const clearAllCollections = async () => {
+  let collections = await getDatabase().collections();
+  return Promise.all(collections.map((c) => c.deleteMany({})));
+};
+
+/**
+ * Clear d'une collection
+ * @param {*} name
+ * @returns
+ */
+export function clearCollection(name) {
+  logger.warn(`Suppression des données de la collection ${name}...`);
+  ensureInitialization();
+  return mongodbClient
+    .db()
+    .collection(name)
+    .deleteMany({})
+    .then((res) => res.deletedCount);
+}
