@@ -1,8 +1,50 @@
 {
   "root": true,
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "parser": "@typescript-eslint/parser",
   "env": {
+    "browser": true,
+    "es6": true,
+    "node": true,
     "jest/globals": true
   },
-  "extends": ["eslint:recommended", "next", "next/core-web-vitals", "plugin:prettier/recommended"],
-  "plugins": ["jest"]
+  "extends": [
+    "eslint:recommended",
+    "next",
+    "next/core-web-vitals",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:prettier/recommended" // Make sure this is always the last element in the array.
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    /* REACT */
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off", // TODO READD RULE ?
+    "react/button-has-type": "error",
+    "react/destructuring-assignment": "error",
+    "react/no-did-mount-set-state": "error",
+    "react/no-did-update-set-state": "error",
+    "react/no-unsafe": "error",
+    "react/no-unused-prop-types": "error",
+    "react/no-unused-state": "error",
+    "react/jsx-no-useless-fragment": "off", // TODO READD RULE ?
+    /* CHAKRA */
+    "chakra-ui/props-shorthand": ["error", { "noShorthand": true }],
+    /* IMPORT ORDER */
+    "import/order": "off",
+    "simple-import-sort/imports": "error"
+  },
+  "plugins": ["simple-import-sort", "import", "react", "chakra-ui", "jest", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  }
 }
