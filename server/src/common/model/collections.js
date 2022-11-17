@@ -17,6 +17,8 @@ import archiveDossiersApprenantsModelDescriptor from "./archiveDossiersApprenant
 import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
 import referentielSiretUaiModelDescriptor from "./referentielSiretUai.model.js";
 
+import * as CerfasModelDescriptor from "./cerfa.model/cerfa.model.js";
+
 export const modelDescriptors = [
   usersModelDescriptor,
   userEventsModelDescriptor,
@@ -101,3 +103,7 @@ export const dossiersApprenantsApiErrorsDb = () => {
 export const referentielSiretUaiDb = () => {
   return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
 };
+
+export function CerfasDb() {
+  return getDbCollection(CerfasModelDescriptor.collectionName);
+}

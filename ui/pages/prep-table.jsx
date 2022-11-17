@@ -5,6 +5,7 @@ import { Page } from "../components";
 import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
 import Table from "../components/Table/Table";
+// import Dossier from "../modules/Dossier/Dossier.jsx";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -97,6 +98,8 @@ const PrepTable = () => {
             // onRowClick={(rowId) => console.log(rowId)}
             mt={5}
           />
+
+          {/* <Dossier /> */}
         </Container>
       </Box>
     </Page>
