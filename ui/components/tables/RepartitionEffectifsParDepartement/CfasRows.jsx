@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { useQuery } from "react-query";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { fetchEffectifsParCfa } from "../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../common/constants/queryKeys";
@@ -14,7 +14,7 @@ import CfaRow from "./CfaRow";
 
 const CfasRows = ({ departementCode }) => {
   const filtersContext = useFiltersContext();
-  const history = useHistory();
+  const history = useNavigate();
   const requestFilters = {
     ...mapFiltersToApiFormat(filtersContext.state),
     etablissement_num_departement: departementCode,

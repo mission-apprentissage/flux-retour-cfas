@@ -1,6 +1,6 @@
 import qs from "query-string";
 import { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { _post } from "../../common/httpClient";
 
@@ -12,7 +12,7 @@ export const REQUEST_STATE = {
 };
 
 const useUpdatePassword = () => {
-  const history = useHistory();
+  const history = useNavigate();
   const { token } = qs.parse(history.location.search.slice(1));
 
   const [updatePasswordSubmitState, setUpdatePasswordSubmitState] = useState(REQUEST_STATE.idle);

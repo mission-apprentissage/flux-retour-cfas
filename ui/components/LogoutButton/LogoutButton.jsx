@@ -1,13 +1,13 @@
 import { Box, Link } from "@chakra-ui/react";
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import useAuth from "../../hooks/useAuth";
 
 const LogoutButton = () => {
   const { resetAuthState } = useAuth();
-  const history = useHistory();
+  const history = useNavigate();
 
   const logout = () => {
     resetAuthState();

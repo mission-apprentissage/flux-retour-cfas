@@ -1,7 +1,7 @@
 import { Box, Link, Tbody, Td, Tr } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { isDateFuture } from "../../common/utils/dateUtils";
 import { navigateToOrganismePage } from "../../common/utils/routing";
@@ -20,7 +20,7 @@ const getSiretText = (sirets) => {
 const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error }) => {
   let content = null;
   const filtersContext = useFiltersContext();
-  const history = useHistory();
+  const history = useNavigate();
   const isPeriodInvalid = isDateFuture(filtersContext.state.date);
   const tableHeader = isPeriodInvalid
     ? ["Nom de l'organisme de formation", "Nature", "apprentis", "inscrits sans contrat"]

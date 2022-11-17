@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import qs from "query-string";
 import { createContext, useContext, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { omitNullishValues } from "../../../common/utils/omitNullishValues";
 
@@ -81,7 +81,7 @@ const isStateValid = (state) => {
 };
 
 export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }) => {
-  const history = useHistory();
+  const history = useNavigate();
   const currentQueryString = history.location.search.slice(1);
 
   const updateUrlWithState = (state) => {
