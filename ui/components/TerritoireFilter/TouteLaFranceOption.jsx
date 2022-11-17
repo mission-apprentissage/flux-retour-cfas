@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { useFiltersContext } from "../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "../../components/_pagesComponents/FiltersContext.js";
 import FilterOption from "../FilterOption/FilterOption";
 
 const TouteLaFranceOption = ({ onClick }) => {

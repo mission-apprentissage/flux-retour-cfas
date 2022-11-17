@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { isDateFuture } from "../../../common/utils/dateUtils";
-import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "../../../components/_pagesComponents/FiltersContext.js";
 import NumberValueCell from "../NumberValueCell";
 import Table from "../Table";
 

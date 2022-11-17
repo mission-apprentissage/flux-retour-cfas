@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import { isDateFuture } from "../../common/utils/dateUtils";
 import { navigateToOrganismePage } from "../../common/utils/routing";
-import { useFiltersContext } from "../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "../../components/_pagesComponents/FiltersContext.js";
 import { mapNatureOrganismeDeFormation } from "../../pages/app/visualiser-les-indicateurs/par-organisme/sections/informations-cfa/CfaInformationSection";
 import NatureOrganismeDeFormationWarning from "../NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
 import NumberValueCell from "./NumberValueCell";

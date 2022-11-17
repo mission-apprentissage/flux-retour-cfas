@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { filtersPropTypes } from "../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { filtersPropTypes } from "../../components/_pagesComponents/FiltersContext.js";
 import OverlayMenu from "../OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "../SelectButton/PrimarySelectButton";
 import SecondarySelectButton from "../SelectButton/SecondarySelectButton";

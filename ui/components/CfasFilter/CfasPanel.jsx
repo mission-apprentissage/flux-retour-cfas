@@ -2,7 +2,7 @@ import { Box, Divider, Heading } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 
-import { filtersPropTypes } from "../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { filtersPropTypes } from "../../components/_pagesComponents/FiltersContext.js";
 import InputLegend from "../InputLegend/InputLegend";
 import Loading from "../Loading/Loading";
 import NoResults from "../NoResults/NoResults";

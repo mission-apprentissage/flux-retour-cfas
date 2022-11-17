@@ -8,7 +8,7 @@ import { QUERY_KEYS } from "../../../common/constants/queryKeys";
 import { mapFiltersToApiFormat } from "../../../common/utils/mapFiltersToApiFormat";
 import { navigateToOrganismePage } from "../../../common/utils/routing";
 import { sortAlphabeticallyBy } from "../../../common/utils/sortAlphabetically";
-import { useFiltersContext } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { useFiltersContext } from "../../../components/_pagesComponents/FiltersContext.js";
 import RowsSkeleton from "../../skeletons/RowsSkeleton";
 import CfaRow from "./CfaRow";
 
