@@ -23,6 +23,7 @@ export default ({ users, cfas }) => {
   };
 
   passport.use(
+    "jwtStrategy1",
     new JwtStrategy(jwtStrategyOptions, async (jwt_payload, done) => {
       try {
         const foundUser = await findUserOrCfa(jwt_payload.sub);
@@ -36,5 +37,5 @@ export default ({ users, cfas }) => {
     })
   );
 
-  return passport.authenticate("jwt", { session: false });
+  return passport.authenticate("jwtStrategy1", { session: false });
 };

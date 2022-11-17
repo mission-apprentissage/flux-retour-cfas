@@ -19,7 +19,7 @@ const cookieExtractor = (req) => {
 
 export const authMiddleware = () => {
   passport.use(
-    "jwt",
+    "jwtStrategy2",
     new JWTStrategy(
       {
         jwtFromRequest: cookieExtractor,
@@ -50,7 +50,7 @@ export const authMiddleware = () => {
   );
 
   return compose([
-    passport.authenticate("jwt", { session: false }),
+    passport.authenticate("jwtStrategy2", { session: false }),
     async (req, res, next) => {
       const activeSession = await sessions.findJwt(req.cookies[COOKIE_NAME]);
       if (!activeSession) {
