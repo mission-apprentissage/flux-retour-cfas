@@ -1,3 +1,13 @@
+# [2.56.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.56.0-beta.1...v2.56.0-beta.2) (2022-11-17)
+
+
+### Bug Fixes
+
+* **data:** supprime données inutiles modele dossiersApprenants 2 ([9067007](https://github.com/mission-apprentissage/flux-retour-cfas/commit/90670078bf5659a2e7a64fa0328236d9e641167c))
+* fix l'ajout de réseaux aux dossiers apprenants depuis les cfas ([e3e8679](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e3e86792c91b449cd2e4909c5f8757da3c4f65dd))
+* fix le modele cfas ([c65864f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c65864f744cca6ca6ec656af8cc0c111cf828cb4))
+* modele effectifs apprennts ([25b66d9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/25b66d9f0e34fe8e04ccba85dfe417ac9093e372))
+
 # [2.56.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.2-beta.1...v2.56.0-beta.1) (2022-11-17)
 
 
