@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
 
-import { _post } from "../../common/httpClient";
+import { _post } from "../httpClient";
 import useAuth from "./useAuth";
 
 export default function useLogin() {

@@ -15,7 +15,7 @@ import VisualiserLesIndicateursParTerritoirePage from "./pages/app/visualiser-le
 import VisualiserLesIndicateursPage from "./pages/app/visualiser-les-indicateurs/VisualiserLesIndicateursPage";
 import ComprendreLesDonneesPage from "./pages/comprendre-les-donnees/ComprendreLesDonneesPage";
 import ExplorerLesIndicateursPage from "./pages/explorer-les-indicateurs/ExplorerLesIndicateursPage";
-import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
+import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home";
 import JournalDesEvolutionsPage from "./pages/journal-des-evolutions/JournalDesEvolutionsPage";
 import LoginPage from "./pages/login/LoginPage";
 import MentionsLegalesPage from "./pages/mentions-legales/MentionsLegalesPage";

@@ -5,8 +5,8 @@ import React from "react";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { Footer, Header, Section } from "../../components";
 import ContactSection from "../../components/ContactSection/ContactSection";
+import useUpdatePassword, { REQUEST_STATE } from "../../hooks/useUpdatePassword.js";
 import ModifierMotPasseForm from "./ModifierMotDePasseForm";
-import useUpdatePassword, { REQUEST_STATE } from "./useUpdatePassword";
 
 const ModifierMotDePassePage = () => {
   const [updatePassword, updatePasswordSubmitState] = useUpdatePassword();

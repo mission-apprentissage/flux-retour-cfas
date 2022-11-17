@@ -7,13 +7,16 @@ import React, { useEffect, useState } from "react";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { getUniquesMonthAndYearFromDatesList } from "../../common/utils/dateUtils";
 import { capitalize } from "../../common/utils/stringUtils";
+import { groupEvolutionsByDate } from "../../components/_pagesComponents/journal-des-evolutions/groupEvolutionsByDate.js";
+import {
+  JOURNAL_DES_EVOLUTIONS_DATA,
+  JOURNAL_DES_EVOLUTIONS_TAGS,
+} from "../../components/_pagesComponents/journal-des-evolutions/JournalEvolutionsData.js";
 import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
 import { Page } from "../../components/Page/Page";
 import Section from "../../components/Section/Section";
 import Sommaire from "../../components/Sommaire/Sommaire";
-import { groupEvolutionsByDate } from "./groupEvolutionsByDate";
 import JournalDesEvolutionsTagFilter from "./JournalDesEvolutionsTagFilter";
-import { JOURNAL_DES_EVOLUTIONS_DATA, JOURNAL_DES_EVOLUTIONS_TAGS } from "./JournalEvolutionsData";
 
 const JournalDesEvolutions = () => {
   const title = "Journal des évolutions";

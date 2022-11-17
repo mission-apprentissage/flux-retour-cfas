@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { filtersPropTypes } from "../../../pages/app/visualiser-les-indicateurs/FiltersContext";
-import { OverlayMenu, PrimarySelectButton } from "../";
+import { OverlayMenu, PrimarySelectButton } from "..";
 import SecondarySelectButton from "../SelectButton/SecondarySelectButton";
 import { TERRITOIRE_TYPE } from "./constants";
 import TerritoiresList from "./TerritoireList";

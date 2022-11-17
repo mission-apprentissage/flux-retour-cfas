@@ -6,12 +6,10 @@ import { Page, Section } from "../../../../components";
 import { useFiltersContext } from "../../../../components/_pagesComponents/FiltersContext.js";
 import useEffectifs from "../../../../hooks/useEffectifs.js";
 import useFetchCfaInfo from "../../../../hooks/useFetchCfaInfo";
-import {
-  CfaInformationSection,
-  IndicateursAndRepartionCfaNiveauAnneesSection,
-  MultiSiretDetailInformationSection,
-  RepartitionEffectifsParSiretSection,
-} from "../par-organisme/sections";
+import CfaInformationSection from "../par-organisme/sections/informations-cfa/CfaInformationSection.jsx";
+import MultiSiretDetailInformationSection from "../par-organisme/sections/multi-siret-detail/MultiSiretDetailInformationSection.jsx";
+import IndicateursAndRepartionCfaNiveauAnneesSection from "../par-organisme/sections/repartition-effectifs/IndicateursAndRepartionCfaNiveauAnneesSection.jsx";
+import RepartitionEffectifsParSiretSection from "../par-organisme/sections/repartition-effectifs-par-siret/RepartitionEffectifsParSiretSection.jsx";
 
 const CfaPrivateView = ({ cfaUai }) => {
   const [effectifs, effectifsLoading] = useEffectifs();

@@ -4,9 +4,9 @@ import React from "react";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { CONTACT_ADDRESS } from "../../../common/constants/product";
 import { BreadcrumbNav, Page, Section } from "../../../components";
+import { questions } from "../../../components/_pagesComponents/organismes-formation/questions.js";
 import OrganismeFormationPagesMenu from "../OrganismeFormationPagesMenu";
 import Question from "./Question";
-import { questions } from "./questions";
 
 const SupportPage = () => {
   return (

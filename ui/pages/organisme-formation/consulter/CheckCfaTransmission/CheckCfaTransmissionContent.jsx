@@ -1,7 +1,9 @@
 import { Box, Link } from "@chakra-ui/react";
 import React, { useState } from "react";
 
-import { CfaTransmissionFound, CfaTransmissionNotFound, CfaTransmissionSection } from "./FormSections";
+import CfaTransmissionFound from "./FormSections/CfaTransmissionFound.jsx";
+import CfaTransmissionNotFound from "./FormSections/CfaTransmissionNotFound.jsx";
+import CfaTransmissionSection from "./FormSections/CfaTransmissionSection.jsx";
 
 export const ASKURL_FORM_STATE = {
   askOrganisme: "askOrganisme",

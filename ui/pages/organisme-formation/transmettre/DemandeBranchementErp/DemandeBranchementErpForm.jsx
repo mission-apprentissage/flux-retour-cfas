@@ -6,13 +6,11 @@ import * as Yup from "yup";
 
 import { ERP_STATE, ERPS_FORM_CASES } from "../../../../common/constants/erps";
 import { uaiRegex } from "../../../../common/domain/uai";
-import {
-  DemandeBranchementErpFormErpComingSection,
-  DemandeBranchementErpFormErpOnGoingSection,
-  DemandeBranchementErpFormErpReadySection,
-  DemandeBranchementErpFormNoErpSection,
-  DemandeBranchementErpFormOtherErpSection,
-} from "./FormSections";
+import DemandeBranchementErpFormErpComingSection from "./FormSections/DemandeBranchementErpFormErpComingSection.jsx";
+import DemandeBranchementErpFormErpOnGoingSection from "./FormSections/DemandeBranchementErpFormErpOnGoingSection.jsx";
+import DemandeBranchementErpFormErpReadySection from "./FormSections/DemandeBranchementErpFormErpReadySection.jsx";
+import DemandeBranchementErpFormNoErpSection from "./FormSections/DemandeBranchementErpFormNoErpSection.jsx";
+import DemandeBranchementErpFormOtherErpSection from "./FormSections/DemandeBranchementErpFormOtherErpSection.jsx";
 
 const formInitialValues = {
   erpIndex: 0,

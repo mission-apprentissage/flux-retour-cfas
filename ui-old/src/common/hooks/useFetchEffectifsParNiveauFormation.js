@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 
-import { fetchEffectifsParNiveauFormation } from "../../common/api/tableauDeBord";
+import { fetchEffectifsParNiveauFormation } from "../api/tableauDeBord";
 import { QUERY_KEYS } from "../constants/queryKeys";
 import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 

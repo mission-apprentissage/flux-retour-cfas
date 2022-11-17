@@ -4,12 +4,10 @@ import React from "react";
 import { filtersPropTypes } from "../../../../components/_pagesComponents/FiltersContext";
 import { infosCfaPropType } from "../../../../components/_pagesComponents/propTypes";
 import useEffectifs from "../../../../hooks/useEffectifs";
-import {
-  CfaInformationSection,
-  IndicateursAndRepartionCfaNiveauAnneesSection,
-  MultiSiretDetailInformationSection,
-  RepartitionEffectifsParSiretSection,
-} from "./sections";
+import CfaInformationSection from "./sections/informations-cfa/CfaInformationSection.jsx";
+import MultiSiretDetailInformationSection from "./sections/multi-siret-detail/MultiSiretDetailInformationSection.jsx";
+import IndicateursAndRepartionCfaNiveauAnneesSection from "./sections/repartition-effectifs/IndicateursAndRepartionCfaNiveauAnneesSection.jsx";
+import RepartitionEffectifsParSiretSection from "./sections/repartition-effectifs-par-siret/RepartitionEffectifsParSiretSection.jsx";
 
 const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
   const [effectifs, effectifsLoading] = useEffectifs();

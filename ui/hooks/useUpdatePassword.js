@@ -2,7 +2,7 @@ import qs from "query-string";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { _post } from "../../common/httpClient";
+import { _post } from "../common/httpClient";
 
 export const REQUEST_STATE = {
   idle: "idle",

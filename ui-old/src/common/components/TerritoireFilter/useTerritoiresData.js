@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 
-import { fetchDepartements, fetchRegions } from "../../../common/api/tableauDeBord";
+import { fetchDepartements, fetchRegions } from "../../api/tableauDeBord";
 import { QUERY_KEYS } from "../../constants/queryKeys";
 import { sortAlphabeticallyBy } from "../../utils/sortAlphabetically";
 import { TERRITOIRE_TYPE } from "./constants";

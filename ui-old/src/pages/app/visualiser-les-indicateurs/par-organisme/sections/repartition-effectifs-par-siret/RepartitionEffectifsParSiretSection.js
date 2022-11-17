@@ -11,7 +11,7 @@ import useAuth from "../../../../../../common/hooks/useAuth";
 import useFetchEffectifsParSiret from "../../../../../../common/hooks/useFetchEffectifsParSiret";
 import { mapFiltersToApiFormat } from "../../../../../../common/utils/mapFiltersToApiFormat";
 import { InfoLine } from "../../../../../../theme/components/icons";
-import { filtersPropTypes, useFiltersContext } from "../../../../../app/visualiser-les-indicateurs/FiltersContext";
+import { filtersPropTypes, useFiltersContext } from "../../../FiltersContext";
 
 const RepartitionEffectifsParSiretSection = ({ filters, namedDataDownloadMode = false }) => {
   const { data, loading, error } = useFetchEffectifsParSiret(filters);

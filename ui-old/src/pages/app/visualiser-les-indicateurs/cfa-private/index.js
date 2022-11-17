@@ -4,7 +4,7 @@ import { Redirect } from "react-router";
 
 import useAuth from "../../../../common/hooks/useAuth";
 import { _post } from "../../../../common/httpClient";
-import { FiltersProvider, getDefaultState } from "../../../app/visualiser-les-indicateurs/FiltersContext";
+import { FiltersProvider, getDefaultState } from "../FiltersContext";
 import CfaPrivateView from "./CfaPrivateView";
 
 const PAGE_STATES = {
