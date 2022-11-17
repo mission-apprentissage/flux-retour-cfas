@@ -1,8 +1,8 @@
 import React from "react";
 
 import { hasUserRoles, roles } from "../../../../common/auth/roles";
+import { FiltersProvider, getDefaultState } from "../../../../components/_pagesComponents/FiltersContext.js";
 import useAuth from "../../../../hooks/useAuth";
-import { FiltersProvider, getDefaultState } from "../FiltersContext";
 import IndicateursVueOrganismePage from "./IndicateursVueOrganismePage";
 
 const IndicateursVueOrganismePageContainer = () => {

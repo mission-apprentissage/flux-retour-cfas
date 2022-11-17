@@ -6,12 +6,12 @@ import { fetchEffectifsDataListCsvExport } from "../../../../../../common/api/ta
 import { hasUserRoles, roles } from "../../../../../../common/auth/roles";
 import { mapFiltersToApiFormat } from "../../../../../../common/utils/mapFiltersToApiFormat";
 import { MonthSelect, Section } from "../../../../../../components";
+import { filtersPropTypes, useFiltersContext } from "../../../../../../components/_pagesComponents/FiltersContext.js";
 import DownloadBlock from "../../../../../../components/DownloadBlock/DownloadBlock";
 import RepartitionEffectifsParSiret from "../../../../../../components/tables/RepartitionEffectifsParSiretAndDepartement";
 import useAuth from "../../../../../../hooks/useAuth";
 import useFetchEffectifsParSiret from "../../../../../../hooks/useFetchEffectifsParSiret";
 import { InfoLine } from "../../../../../../theme/components/icons";
-import { filtersPropTypes, useFiltersContext } from "../../../FiltersContext";
 
 const RepartitionEffectifsParSiretSection = ({ filters, namedDataDownloadMode = false }) => {
   const { data, loading, error } = useFetchEffectifsParSiret(filters);

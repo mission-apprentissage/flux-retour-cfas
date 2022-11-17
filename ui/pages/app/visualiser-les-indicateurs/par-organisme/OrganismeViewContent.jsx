@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import React from "react";
 
+import { filtersPropTypes } from "../../../../components/_pagesComponents/FiltersContext";
+import { infosCfaPropType } from "../../../../components/_pagesComponents/propTypes";
 import useEffectifs from "../../../../hooks/useEffectifs";
-import { filtersPropTypes } from "../FiltersContext";
-import { infosCfaPropType } from "./propTypes";
 import {
   CfaInformationSection,
   IndicateursAndRepartionCfaNiveauAnneesSection,

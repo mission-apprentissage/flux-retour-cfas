@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { filtersPropTypes } from "../FiltersContext";
+import { filtersPropTypes } from "../../../../components/_pagesComponents/FiltersContext.js";
 import IndicateursAndRepartitionEffectifsDepartement from "./IndicateursAndRepartitionEffectifsDepartement";
 import IndicateursAndRepartitionEffectifsNational from "./IndicateursAndRepartitionEffectifsNational";
 import IndicateursAndRepartitionEffectifsRegion from "./IndicateursAndRepartitionEffectifsRegion";

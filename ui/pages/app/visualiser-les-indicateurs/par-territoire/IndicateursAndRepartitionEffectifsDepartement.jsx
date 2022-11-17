@@ -6,6 +6,7 @@ import React from "react";
 import { fetchEffectifsDataListCsvExport } from "../../../../common/api/tableauDeBord";
 import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
 import { RepartitionEffectifsTabs, Section } from "../../../../components";
+import { filtersPropTypes } from "../../../../components/_pagesComponents/FiltersContext.js";
 import DownloadBlock from "../../../../components/DownloadBlock/DownloadBlock";
 import RepartitionEffectifsParCfa from "../../../../components/tables/RepartitionEffectifsParCfa";
 import RepartitionEffectifsParNiveauFormation from "../../../../components/tables/RepartitionEffectifsParNiveauFormation";
@@ -13,7 +14,6 @@ import useFetchEffectifsParCfa from "../../../../hooks/useFetchEffectifsParCfa";
 import useFetchEffectifsParNiveauFormation from "../../../../hooks/useFetchEffectifsParNiveauFormation";
 import useFetchOrganismesCount from "../../../../hooks/useFetchOrganismesCount";
 import DateWithTooltipSelector from "../DateWithTooltipSelector";
-import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
 const IndicateursAndRepartitionEffectifsDepartement = ({ filters, effectifs, loading }) => {

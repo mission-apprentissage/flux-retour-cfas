@@ -6,12 +6,12 @@ import { fetchEffectifsDataListCsvExport } from "../../../../../../common/api/ta
 import { hasUserRoles, roles } from "../../../../../../common/auth/roles";
 import { mapFiltersToApiFormat } from "../../../../../../common/utils/mapFiltersToApiFormat";
 import { Section } from "../../../../../../components";
+import { filtersPropTypes } from "../../../../../../components/_pagesComponents/FiltersContext.js";
 import DownloadBlock from "../../../../../../components/DownloadBlock/DownloadBlock";
 import RepartitionEffectifsParFormation from "../../../../../../components/tables/RepartitionEffectifsParFormation";
 import useAuth from "../../../../../../hooks/useAuth";
 import useFetchEffectifsParNiveauFormation from "../../../../../../hooks/useFetchEffectifsParNiveauFormation";
 import DateWithTooltipSelector from "../../../DateWithTooltipSelector";
-import { filtersPropTypes } from "../../../FiltersContext";
 import IndicateursGridStack from "../../../IndicateursGridStack";
 
 const IndicateursAndRepartionCfaNiveauAnneesSection = ({

@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router";
 
 import { _post } from "../../../../common/httpClient";
+import { FiltersProvider, getDefaultState } from "../../../../components/_pagesComponents/FiltersContext.js";
 import useAuth from "../../../../hooks/useAuth";
-import { FiltersProvider, getDefaultState } from "../../../app/visualiser-les-indicateurs/FiltersContext";
 import CfaPrivateView from "./CfaPrivateView";
 
 const PAGE_STATES = {

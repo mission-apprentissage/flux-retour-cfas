@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { OverlayMenu, PrimarySelectButton } from "../../../../../../components";
-import { useFiltersContext } from "../../../FiltersContext";
+import { useFiltersContext } from "../../../../../../components/_pagesComponents/FiltersContext.js";
 
 const MultiSiretFilter = ({ onSiretClick, sirets }) => {
   const [isOpen, setIsOpen] = useState(false);

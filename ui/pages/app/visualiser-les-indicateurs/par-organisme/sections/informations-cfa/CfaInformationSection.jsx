@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { formatSiretSplitted } from "../../../../../../common/utils/stringUtils";
+import { infosCfaPropType } from "../../../../../../components/_pagesComponents/propTypes";
 import { Section } from "../../../../../../components/index";
 import NatureOrganismeDeFormationWarning from "../../../../../../components/NatureOrganismeDeFormationWarning/NatureOrganismeDeFormationWarning";
-import { infosCfaPropType } from "../../propTypes";
 import CfaInformationSkeleton from "./CfaInformationSkeleton";
 import DomainesMetiers from "./DomainesMetiers";
 import OrganismeDeFormationReseauAndAdresse from "./OrganismeDeFormationReseauAndAdresse";

@@ -5,12 +5,12 @@ import React from "react";
 import { fetchEffectifsDataListCsvExport } from "../../../../common/api/tableauDeBord";
 import { mapFiltersToApiFormat } from "../../../../common/utils/mapFiltersToApiFormat";
 import { Section } from "../../../../components";
+import { filtersPropTypes } from "../../../../components/_pagesComponents/FiltersContext.js";
 import DownloadBlock from "../../../../components/DownloadBlock/DownloadBlock";
 import RepartitionEffectifsParCfa from "../../../../components/tables/RepartitionEffectifsParCfa";
 import useFetchEffectifsParCfa from "../../../../hooks/useFetchEffectifsParCfa";
 import useFetchOrganismesCount from "../../../../hooks/useFetchOrganismesCount";
 import DateWithTooltipSelector from "../DateWithTooltipSelector";
-import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
 
 const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading }) => {

@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Page, Section } from "../../../../components";
+import { useFiltersContext } from "../../../../components/_pagesComponents/FiltersContext.js";
 import useEffectifs from "../../../../hooks/useEffectifs.js";
 import useFetchCfaInfo from "../../../../hooks/useFetchCfaInfo";
-import { useFiltersContext } from "../FiltersContext";
 import {
   CfaInformationSection,
   IndicateursAndRepartionCfaNiveauAnneesSection,

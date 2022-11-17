@@ -1,6 +1,6 @@
 import React from "react";
 
-import { FiltersProvider } from "../FiltersContext";
+import { FiltersProvider } from "../../../../components/_pagesComponents/FiltersContext.js";
 import IndicateursVueTerritoirePage from "./IndicateursVueTerritoirePage";
 
 const IndicateursVueTerritoirePageContainer = () => {

@@ -3,8 +3,8 @@ import React from "react";
 
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import { BreadcrumbNav, FormationFilter, Page, Section, TerritoireFilter } from "../../../../components";
+import { useFiltersContext } from "../../../../components/_pagesComponents/FiltersContext.js";
 import useEffectifs from "../../../../hooks/useEffectifs";
-import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import IndicateursAndRepartitionEffectifsTerritoire from "./IndicateursAndRepartitionEffectifsTerritoire";
 

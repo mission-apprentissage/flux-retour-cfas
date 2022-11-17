@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Section } from "../../../../../../components";
-import { useFiltersContext } from "../../../FiltersContext";
+import { useFiltersContext } from "../../../../../../components/_pagesComponents/FiltersContext.js";
 import MultiSiretFilter from "./MultiSiretFilter";
 
 const MultiSiretDetailInformationSection = ({ sirets }) => {

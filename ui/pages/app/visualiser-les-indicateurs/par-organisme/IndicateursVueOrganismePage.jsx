@@ -4,10 +4,10 @@ import React from "react";
 
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
 import { BreadcrumbNav, CfasFilter, Page, Section } from "../../../../components";
+import { useFiltersContext } from "../../../../components/_pagesComponents/FiltersContext.js";
 import CfaPanel from "../../../../components/CfasFilter/CfasPanel";
 import useAuth from "../../../../hooks/useAuth";
 import useFetchCfaInfo from "../../../../hooks/useFetchCfaInfo";
-import { useFiltersContext } from "../FiltersContext";
 import SwitchViewButton from "../SwitchViewButton";
 import OrganismeViewContent from "./OrganismeViewContent";
 
