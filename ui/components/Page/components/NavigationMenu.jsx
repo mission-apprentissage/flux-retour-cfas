@@ -1,25 +1,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import {
-  Box,
-  Container,
-  Flex,
-  Text,
-  Menu,
-  MenuItem as ChakraMenuItem,
-  MenuButton,
-  MenuDivider,
-  MenuGroup,
-  MenuList,
-  Button,
-  HStack,
-} from "@chakra-ui/react";
+import { Box, Container, Flex, Text } from "@chakra-ui/react";
 import useAuth from "../../../hooks/useAuth";
-import { isUserAdmin, hasPageAccessTo } from "../../../common/utils/rolesUtils";
-import { MenuFill, Close, AccountFill, AccountUnfill, Parametre } from "../../../theme/components/icons";
-import { _get } from "../../../common/httpClient";
+import { MenuFill, Close } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
-import MenuItem from "../../../components/Links/MenuItem";
 
 const NavigationMenu = ({ ...props }) => {
   const [isOpen, setIsOpen] = useState(false);

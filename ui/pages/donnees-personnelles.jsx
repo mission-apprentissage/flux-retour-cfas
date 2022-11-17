@@ -1,6 +1,5 @@
 import React from "react";
 import Head from "next/head";
-import { Heading } from "@chakra-ui/react";
 import { Page, Section } from "../components";
 import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 import DonneesPersonnelles from "../components/legal/DonneesPersonnelles";

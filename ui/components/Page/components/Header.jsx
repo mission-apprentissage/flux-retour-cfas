@@ -1,12 +1,30 @@
 import React from "react";
-import { Box, Container, Flex, Heading, HStack, Tag, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuGroup,
+  MenuItem as ChakraMenuItem,
+  MenuItem,
+  MenuList,
+  Tag,
+  Text,
+} from "@chakra-ui/react";
 import { Logo } from "./Logo";
 import Link from "../../Links/Link";
 import { PRODUCT_NAME } from "../../../common/constants/product";
 import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
 import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
 import useAuth from "../../../hooks/useAuth.js";
-import { isUserAdmin } from "../../../common/utils/rolesUtils.js";
+import { hasPageAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
+import { _get } from "../../../common/httpClient.js";
+import { Parametre } from "../../../theme/components/icons/Parametre.js";
 
 const UserMenu = () => {
   let [auth] = useAuth();

@@ -24,9 +24,9 @@ const PolitiqueDeConfidentialite = () => {
         </Text>
         <UnorderedList ml="30px !important" mt="1w">
           <ListItem>
-            Produire sous la forme d’un tableau de bord les données synthétiques des effectifs de l'apprentissage afin
-            de contribuer au pilotage de l’apprentissage au niveau national et territorial par les acteurs publics ou
-            avec délégation de service public ;
+            Produire sous la forme d’un tableau de bord les données synthétiques des effectifs de l&apos;apprentissage
+            afin de contribuer au pilotage de l’apprentissage au niveau national et territorial par les acteurs publics
+            ou avec délégation de service public ;
           </ListItem>
           <ListItem>
             Identifier les jeunes en recherche de contrat ou en situation de décrochage pour améliorer leur
@@ -36,7 +36,7 @@ const PolitiqueDeConfidentialite = () => {
             Produire les données nécessaires aux organismes de formation pour répondre aux enquêtes (notamment SIFA) ;
           </ListItem>
           <ListItem>Créer un compte pour accéder ou fournir des données;</ListItem>
-          <ListItem>Suivre et piloter l'usage du Tableau par l'équipe Mission apprentissage ;</ListItem>
+          <ListItem>Suivre et piloter l&apos;usage du Tableau par l&apos;équipe Mission apprentissage ;</ListItem>
           <ListItem>Identifier les organismes de formation et leurs réseaux (référentiel).</ListItem>
         </UnorderedList>
       </Box>
