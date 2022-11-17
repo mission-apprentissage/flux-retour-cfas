@@ -1,3 +1,10 @@
+## [2.55.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.0...v2.55.1) (2022-11-17)
+
+
+### Bug Fixes
+
+* hotfix retire permission pilot aux utilisateurs erp ([b11b31a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b11b31a7fb26afbda489803736c4064e6e65d385))
+
 # [2.55.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.54.0...v2.55.0) (2022-11-09)
 
 
