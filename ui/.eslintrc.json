@@ -3,6 +3,9 @@
   "settings": {
     "react": {
       "version": "detect"
+    },
+    "settings": {
+      "import/resolver": "webpack"
     }
   },
   "parser": "@typescript-eslint/parser",
