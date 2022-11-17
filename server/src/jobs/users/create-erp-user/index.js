@@ -2,7 +2,7 @@ import { runScript } from "../../scriptWrapper.js";
 import logger from "../../../common/logger.js";
 import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
 import arg from "arg";
-import { apiRoles, tdbRoles } from "../../../common/roles.js";
+import { apiRoles } from "../../../common/roles.js";
 
 let args = [];
 
@@ -18,7 +18,7 @@ runScript(async ({ users }) => {
 
   await users.createUser({
     username,
-    permissions: [apiRoles.apiStatutsSeeder, tdbRoles.pilot],
+    permissions: [apiRoles.apiStatutsSeeder],
   });
 
   logger.info(`User ${username} successfully created`);
