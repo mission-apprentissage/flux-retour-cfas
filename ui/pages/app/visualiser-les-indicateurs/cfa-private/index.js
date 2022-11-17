@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
-import { Redirect } from "react-router";
+import { Navigate } from "react-router";
 
 import { _post } from "../../../../common/httpClient";
 import useAuth from "../../../../hooks/useAuth";
@@ -33,7 +33,7 @@ const CfaPrivateViewPage = ({ match }) => {
     // eslint-disable-next-line
   }, [cfaAccessToken]);
 
-  if (pageState === PAGE_STATES.error) return <Redirect to="/404"></Redirect>;
+  if (pageState === PAGE_STATES.error) return <Navigate to="/404"></Navigate>;
 
   if (pageState === PAGE_STATES.ready) {
     const uai = auth?.sub;

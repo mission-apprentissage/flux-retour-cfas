@@ -1,6 +1,6 @@
 import { Box, Flex, Heading, HStack, Image, Text } from "@chakra-ui/react";
 import React from "react";
-import { Redirect } from "react-router";
+import { Navigate } from "react-router";
 
 import { hasUserRoles, roles } from "../../common/auth/roles";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
@@ -15,7 +15,7 @@ const HomePage = () => {
   const { auth, isAuthTokenValid } = useAuth();
 
   if (isAuthTokenValid() && hasUserRoles(auth, [roles.pilot, roles.administrator, roles.network])) {
-    return <Redirect to="/visualiser-les-indicateurs" />;
+    return <Navigate to="/visualiser-les-indicateurs" />;
   }
 
   return (
