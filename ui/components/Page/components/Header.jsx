@@ -58,9 +58,9 @@ const UserMenu = () => {
         </HStack>
       )}
       {auth?.sub !== "anonymous" && (
-        <HStack spacing="4w" alignItems="center">
-          <NotificationFill boxSize={4} />
-          <Settings4Fill boxSize={4} />
+        <Flex alignItems="center">
+          <NotificationFill boxSize={4} mr={4} />
+          <Settings4Fill boxSize={4} mr={4} />
           <Menu placement="bottom">
             <MenuButton as={Button} variant="pill">
               {/* <AccountFill color={"bluefrance"} mt="0.3rem" boxSize={4} /> */}
@@ -104,7 +104,7 @@ const UserMenu = () => {
               <ChakraMenuItem onClick={logout}>Déconnexion</ChakraMenuItem>
             </MenuList>
           </Menu>
-        </HStack>
+        </Flex>
       )}
     </Box>
   );
