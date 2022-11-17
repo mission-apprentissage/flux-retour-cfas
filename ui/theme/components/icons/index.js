@@ -76,3 +76,5 @@ export * from "./ConseilsRegionaux";
 export * from "./ReseauxCfa";
 export * from "./DreetsDraaf";
 export * from "./CheckBoxWhite";
+export * from "./NotificationFill";
+export * from "./UserFill";

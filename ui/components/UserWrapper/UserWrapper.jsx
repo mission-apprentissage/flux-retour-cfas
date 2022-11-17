@@ -73,8 +73,9 @@ const ForceAcceptCGU = ({ children }) => {
               </Text>
             )}
           </Box>
-          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={8} py={4} h="30vh" ref={cguContainer}>
+          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} h="60vh" ref={cguContainer}>
             <Cgu
+              isWrapped="1"
               onLoad={async () => {
                 // eslint-disable-next-line no-undef
                 await new Promise((resolve) => setTimeout(resolve, 500));

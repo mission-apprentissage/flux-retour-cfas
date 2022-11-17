@@ -1,10 +1,10 @@
 import { Box, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 
-const Sommaire = ({ children, ...otherProps }) => (
+const Sommaire = ({ isWrapped, children, ...otherProps }) => (
   <Box
-    position={["static", "static", "static", "sticky"]}
-    top={["0", "0", "0", "10"]}
+    position={isWrapped === "1" ? "static" : ["static", "static", "static", "sticky"]}
+    top={isWrapped === "1" ? "0" : ["0", "0", "0", "10"]}
     background="galt"
     padding="3w"
     color="grey.800"

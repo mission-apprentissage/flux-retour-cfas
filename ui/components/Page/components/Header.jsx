@@ -25,6 +25,7 @@ import useAuth from "../../../hooks/useAuth.js";
 import { hasPageAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
 import { _get } from "../../../common/httpClient.js";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
+import { NotificationFill, Settings4Fill, UserFill } from "../../../theme/components/icons";
 
 const UserMenu = () => {
   let [auth] = useAuth();
@@ -57,74 +58,53 @@ const UserMenu = () => {
         </HStack>
       )}
       {auth?.sub !== "anonymous" && (
-        <Menu placement="bottom">
-          <MenuButton as={Button} variant="pill">
-            <Flex>
-              <Box
-                as="i"
-                className="ri-notification-3-fill"
-                color="bluefrance"
-                mt="0.15rem"
-                boxSize={4}
-                fontSize="20px"
-              />
-              <Box
-                ml="4w"
-                as="i"
-                className="ri-settings-2-line"
-                color="bluefrance"
-                mt="0.15rem"
-                boxSize={4}
-                fontSize="20px"
-              />
-              <Box
-                ml="4w"
-                mr="1w"
-                as="i"
-                className="ri-user-fill"
-                color="bluefrance"
-                mt="-0.15rem"
-                boxSize={4}
-                fontSize="25px"
-              />
+        <HStack spacing="4w" alignItems="center">
+          <NotificationFill boxSize={4} />
+          <Settings4Fill boxSize={4} />
+          <Menu placement="bottom">
+            <MenuButton as={Button} variant="pill">
               {/* <AccountFill color={"bluefrance"} mt="0.3rem" boxSize={4} /> */}
-              <Box display={["none", "block"]} ml={2}>
-                <Text color="bluefrance" textStyle="sm">
-                  {auth.email}{" "}
-                  <Text color="grey.600" as="span">
-                    ({accountType})
+              <Flex>
+                <UserFill mt="0.3rem" boxSize={4} />
+
+                <Box display={["none", "block"]} ml={2}>
+                  <Text color="bluefrance" textStyle="sm">
+                    {auth.email}{" "}
+                    <Text color="grey.600" as="span">
+                      ({accountType})
+                    </Text>
                   </Text>
-                </Text>
-              </Box>
-            </Flex>
-          </MenuButton>
-          <MenuList>
-            <MenuItem href="/mon-compte" icon={<AccountFill boxSize={4} color={"bluefrance"} />}>
-              Mon compte
-            </MenuItem>
-            {hasPageAccessTo(auth, "admin") && (
-              <MenuGroup title="Administration">
-                {hasPageAccessTo(auth, "admin/page_gestion_utilisateurs") && (
-                  <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
-                    Gestion des utilisateurs
-                  </MenuItem>
-                )}
-                {hasPageAccessTo(auth, "admin/page_gestion_roles") && (
-                  <MenuItem href="/admin/roles" icon={<Parametre boxSize={4} />}>
-                    Gestion des rôles
-                  </MenuItem>
-                )}
-                {hasPageAccessTo(auth, "admin/page_message_maintenance") && (
-                  <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
-                    Message de maintenance
-                  </MenuItem>
-                )}
-              </MenuGroup>
-            )}
-            <MenuDivider />
-            <ChakraMenuItem onClick={logout}>Déconnexion</ChakraMenuItem>
-          </MenuList>
-        </Menu>
+                </Box>
+              </Flex>
+            </MenuButton>
+            <MenuList>
+              <MenuItem href="/mon-compte" icon={<AccountFill boxSize={4} color={"bluefrance"} />}>
+                Mon compte
+              </MenuItem>
+              {hasPageAccessTo(auth, "admin") && (
+                <MenuGroup title="Administration">
+                  {hasPageAccessTo(auth, "admin/page_gestion_utilisateurs") && (
+                    <MenuItem href="/admin/users" icon={<Parametre boxSize={4} />}>
+                      Gestion des utilisateurs
+                    </MenuItem>
+                  )}
+                  {hasPageAccessTo(auth, "admin/page_gestion_roles") && (
+                    <MenuItem href="/admin/roles" icon={<Parametre boxSize={4} />}>
+                      Gestion des rôles
+                    </MenuItem>
+                  )}
+                  {hasPageAccessTo(auth, "admin/page_message_maintenance") && (
+                    <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
+                      Message de maintenance
+                    </MenuItem>
+                  )}
+                </MenuGroup>
+              )}
+              <MenuDivider />
+              <ChakraMenuItem onClick={logout}>Déconnexion</ChakraMenuItem>
+            </MenuList>
+          </Menu>
+        </HStack>
       )}
     </Box>
   );

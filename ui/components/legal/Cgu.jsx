@@ -8,7 +8,7 @@ export const cguVersion = () => {
   return "v0.1";
 };
 
-export const Cgu = ({ onLoad = () => {} }) => {
+export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
   useEffect(() => {
     onLoad();
   }, [onLoad]);
@@ -28,16 +28,21 @@ export const Cgu = ({ onLoad = () => {} }) => {
     { anchorTitle: "Article 7", anchorName: "Hyperliens", anchorLink: "hyperliens" },
     { anchorTitle: "Article 8", anchorName: "Responsabilités", anchorLink: "responsabilites" },
     { anchorTitle: "Article 9", anchorName: "Propriété intellectuelle", anchorLink: "propriete-intellectuelle" },
+    {
+      anchorTitle: "Article 10",
+      anchorName: "Mise à jour des conditions d'utilisation",
+      anchorLink: "mise-a-jour-des-conditions-utilisation",
+    },
   ];
 
   return (
     <HStack
       mt="4w"
-      spacing={["0", "0", "0", "12w"]}
+      spacing={["0", "0", "0", "6w"]}
       flexDirection={["column", "column", "column", "row"]}
       alignItems={["normal", "normal", "normal", "center"]}
     >
-      <Sommaire>
+      <Sommaire isWrapped={isWrapped}>
         <Flex flexDirection="column" fontSize="zeta">
           {SommaireData.map((item) => (
             <Link
@@ -365,7 +370,7 @@ export const Cgu = ({ onLoad = () => {} }) => {
             téléchargement est proposé, reproduire, transmettre, vendre ou distribuer, le contenu du Tableau de bord.
           </Text>
         </Section>
-        <Box mt={4}>
+        <Section mt={4} id={currentPage.anchors.MiseAjourDesConditionsUtilisation}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
             Article 10 – Mise à jour des conditions d’utilisation
           </Heading>
@@ -374,7 +379,7 @@ export const Cgu = ({ onLoad = () => {} }) => {
             fonction des modifications apportées au site, de l’évolution de la législation ou pour tout autre motif jugé
             nécessaire, nécessite votre consentement.
           </Text>
-        </Box>
+        </Section>
       </Box>
     </HStack>
   );
