@@ -23,7 +23,7 @@ export const schema = object({
     description: 'Année scolaire sur laquelle le dossierApprenant est enregistré (ex: "2020-2021")',
   }),
   code_commune_insee_apprenant: stringOrNull({ description: "Code commune insee du jeune" }),
-  date_de_naissance_apprenant: date({ description: "Date de naissance du jeune" }),
+  date_de_naissance_apprenant: dateOrNull({ description: "Date de naissance du jeune" }),
   contrat_date_debut: dateOrNull({ description: "Date de début du contrat" }),
   contrat_date_fin: dateOrNull({ description: "Date de fin du contrat" }),
   contrat_date_rupture: dateOrNull({ description: "Date de rupture du contrat" }),
