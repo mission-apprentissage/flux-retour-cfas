@@ -60,7 +60,34 @@ const UserMenu = () => {
         <Menu placement="bottom">
           <MenuButton as={Button} variant="pill">
             <Flex>
-              <AccountFill color={"bluefrance"} mt="0.3rem" boxSize={4} />
+              <Box
+                as="i"
+                className="ri-notification-3-fill"
+                color="bluefrance"
+                mt="0.15rem"
+                boxSize={4}
+                fontSize="20px"
+              />
+              <Box
+                ml="4w"
+                as="i"
+                className="ri-settings-2-line"
+                color="bluefrance"
+                mt="0.15rem"
+                boxSize={4}
+                fontSize="20px"
+              />
+              <Box
+                ml="4w"
+                mr="1w"
+                as="i"
+                className="ri-user-fill"
+                color="bluefrance"
+                mt="-0.15rem"
+                boxSize={4}
+                fontSize="25px"
+              />
+              {/* <AccountFill color={"bluefrance"} mt="0.3rem" boxSize={4} /> */}
               <Box display={["none", "block"]} ml={2}>
                 <Text color="bluefrance" textStyle="sm">
                   {auth.email}{" "}
