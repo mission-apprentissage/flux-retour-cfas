@@ -1,10 +1,10 @@
 import { connectToMongodb, closeMongodbConnection, configureDbSchemaValidation } from "../common/mongodb.js";
 import createComponents from "../common/components/components.js";
 import logger from "../common/logger.js";
-import { initRedis } from "../common/infra/redis/index.js";
+import { initRedis } from "../common/services/redis.js";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { jobEventStatuts } from "../common/constants/jobsConstants.js";
-import config from "../../config/index.js";
+import config from "../../src/config.js";
 import { jobEventsDb, modelDescriptors } from "../common/model/collections.js";
 
 process.on("unhandledRejection", (e) => console.log(e));
@@ -45,7 +45,6 @@ const exit = async (rawError) => {
 export const runScript = async (job, jobName) => {
   try {
     const startDate = new Date();
-
     redisClient = await initRedis({
       uri: config.redis.uri,
       onError: (err) => logger.error("Redis client error", err),

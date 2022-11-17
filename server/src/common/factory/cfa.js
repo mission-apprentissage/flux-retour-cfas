@@ -2,9 +2,9 @@ import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import Joi from "joi";
 import { schema as uaiSchema } from "../domain/uai.js";
 import { schema as natureSchema } from "../domain/organisme-de-formation/nature.js";
-import config from "../../../config/index.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { BaseFactory } from "./baseFactory.js";
+import config from "../../config.js";
 
 const TOKENIZED_STRING_SIZE = 4;
 

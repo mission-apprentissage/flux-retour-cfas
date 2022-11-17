@@ -1,3 +1,6 @@
+import * as usersMigrationModelDescriptor from "./usersMigration.model.js";
+import * as RolesModelDescriptor from "./roles.model.js";
+import * as JwtSessionsModelDescriptor from "./jwtSessions.model.js";
 import { getDbCollection } from "../mongodb.js";
 import usersModelDescriptor from "./users.model.js";
 import userEventsModelDescriptor from "./userEvents.model.js";
@@ -73,6 +76,18 @@ export const demandesBranchementErpDb = () => {
 
 export const duplicatesEventsDb = () => {
   return getDbCollection(duplicatesEventsModelDescriptor.collectionName);
+};
+
+export const usersMigrationDb = () => {
+  return getDbCollection(usersMigrationModelDescriptor.collectionName);
+};
+
+export const rolesDb = () => {
+  return getDbCollection(RolesModelDescriptor.collectionName);
+};
+
+export const jwtSessionsDb = () => {
+  return getDbCollection(JwtSessionsModelDescriptor.collectionName);
 };
 
 export const archiveDossiersApprenantsDb = () => {

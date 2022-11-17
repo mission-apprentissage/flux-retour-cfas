@@ -2,7 +2,7 @@ import { runScript } from "../../scriptWrapper.js";
 import logger from "../../../common/logger.js";
 import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
 import arg from "arg";
-import config from "../../../../config/index.js";
+import config from "../../../config.js";
 
 let args = [];
 

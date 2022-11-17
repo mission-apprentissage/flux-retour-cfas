@@ -1,9 +1,9 @@
 import { strict as assert } from "assert";
 import { startServer } from "../../utils/testUtils.js";
 import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
-import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
-import config from "../../../config/index.js";
+import config from "../../../src/config.js";
 import jwt from "jsonwebtoken";
+import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
 
 import {
   historySequenceInscritToApprentiToAbandon,

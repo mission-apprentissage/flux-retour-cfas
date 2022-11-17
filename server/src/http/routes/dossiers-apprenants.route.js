@@ -14,10 +14,9 @@ import { schema as siretSchema } from "../../common/domain/siret.js";
 import validateRequestBody from "../middlewares/validateRequestBody.js";
 import validateRequestQuery from "../middlewares/validateRequestQuery.js";
 import { findAndPaginate } from "../../common/utils/dbUtils.js";
-import { sendJsonStream } from "../../common/utils/httpUtils.js";
-import { oleoduc, transformIntoJSON } from "oleoduc";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
 import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../common/model/collections.js";
+import { sendTransformedPaginatedJsonStream } from "../../common/utils/httpUtils.js";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
@@ -188,19 +187,8 @@ export default ({ dossiersApprenants, userEvents }) => {
           { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
         );
 
-        // Return JSON Stream
-        return sendJsonStream(
-          oleoduc(
-            find.stream(),
-            transformIntoJSON({
-              arrayPropertyName: "dossiersApprenants",
-              arrayWrapper: {
-                pagination,
-              },
-            })
-          ),
-          res
-        );
+        // Return JSON transformed Stream
+        return sendTransformedPaginatedJsonStream(find.stream(), "dossiersApprenants", pagination, res);
       } catch (err) {
         logger.error("GET DossierApprenants error : " + err);
         res.status(500).json({

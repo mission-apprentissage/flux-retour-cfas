@@ -1,0 +1,39 @@
+- name: Mise à jour configuration sshd
+  when: update_sshd_config|bool == true
+  copy:
+    src: sshd/sshd_config
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0640
+  notify:
+    - restart-sshd
+
+- name: Install pam packages
+  apt:
+    name: [ 'libpam-cracklib' ]
+
+- name: Ensure group "mna" exists
+  group:
+    name: mna
+    state: present
+
+- name: Set password policy
+  lineinfile:
+    path: /etc/pam.d/common-password
+    regexp: "pam_cracklib.so"
+    line: "password   requisite   pam_cracklib.so retry=3 minlen=8 difok=3 dcredit=-1 ucredit=-1 lcredit=-1 ocredit=-1"
+
+- name: Set umask=077 for root user
+  lineinfile:
+    path: /root/.bashrc
+    regexp: '^umask$'
+    line: 'umask 0077'
+
+- name: Set default umask
+  lineinfile:
+    path: /etc/pam.d/common-session
+    regexp: '^session optional			pam_umask.so$'
+    line: 'session optional pam_umask.so umask=0027'
+
+

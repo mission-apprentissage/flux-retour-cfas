@@ -2,11 +2,10 @@ import express from "express";
 import Joi from "joi";
 import tryCatch from "../middlewares/tryCatchMiddleware.js";
 import { JOB_NAMES, jobEventStatuts } from "../../common/constants/jobsConstants.js";
-import { oleoduc, transformIntoJSON } from "oleoduc";
-import { sendJsonStream } from "../../common/utils/httpUtils.js";
 import { findAndPaginate } from "../../common/utils/dbUtils.js";
 import validateRequestQuery from "../middlewares/validateRequestQuery.js";
 import { effectifsApprenantsDb } from "../../common/model/collections.js";
+import { sendTransformedPaginatedJsonStream } from "../../common/utils/httpUtils.js";
 
 export default ({ jobEvents }) => {
   const router = express.Router();
@@ -39,18 +38,8 @@ export default ({ jobEvents }) => {
           { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
         );
 
-        return sendJsonStream(
-          oleoduc(
-            find.stream(),
-            transformIntoJSON({
-              arrayPropertyName: "effectifsApprenants",
-              arrayWrapper: {
-                pagination,
-              },
-            })
-          ),
-          res
-        );
+        //  Return JSON Stream
+        return sendTransformedPaginatedJsonStream(find.stream(), "effectifsApprenants", pagination, res);
       }
     })
   );

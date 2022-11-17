@@ -28,7 +28,10 @@ export default async (options = {}) => {
   const effectifs = options.effectifs || createEffectifs();
   const demandeIdentifiants = options.demandeIdentifiants || demandeIdentifiantsComponent();
   const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
+
+  // TODO Refacto infra components -> to services structure
   const cache = options.cache || createCacheComponent(options.redisClient);
+
   const archiveDossiersApprenants =
     options.archiveDossiersApprenants || createArchiveDossiersApprenantsComponent({ db });
 

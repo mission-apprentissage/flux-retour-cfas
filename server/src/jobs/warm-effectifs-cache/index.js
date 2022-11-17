@@ -1,7 +1,7 @@
 import axios from "axios";
 import { runScript } from "../scriptWrapper.js";
 import logger from "../../common/logger.js";
-import config from "../../../config/index.js";
+import config from "../../config.js";
 import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
 import { REGIONS } from "../../common/constants/territoiresConstants.js";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";

@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import config from "../../../config/index.js";
+import config from "../../config.js";
 import { tdbRoles } from "../../common/roles.js";
 
 export default ({ users, cfas }) => {
@@ -23,6 +23,7 @@ export default ({ users, cfas }) => {
   };
 
   passport.use(
+    "jwtStrategy1",
     new JwtStrategy(jwtStrategyOptions, async (jwt_payload, done) => {
       try {
         const foundUser = await findUserOrCfa(jwt_payload.sub);
@@ -36,5 +37,5 @@ export default ({ users, cfas }) => {
     })
   );
 
-  return passport.authenticate("jwt", { session: false });
+  return passport.authenticate("jwtStrategy1", { session: false });
 };

@@ -1,0 +1,8 @@
+map $sent_http_content_type $ui_expires {
+    default                    off;
+    text/html                  epoch;
+    text/css                   max;
+    ~application/javascript    max;
+    ~image/                    max;
+    ~font/                     max;
+}

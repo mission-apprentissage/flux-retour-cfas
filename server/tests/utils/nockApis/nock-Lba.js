@@ -1,7 +1,7 @@
 /* eslint-disable node/no-unpublished-require */
 import nock from "nock";
 
-import config from "../../../config/index.js";
+import config from "../../../src/config.js";
 import { dataForGetMetiersByCfd, dataForGetMetiersBySiret } from "../../data/apiLba.js";
 
 const API_ENDPOINT = config.lbaApi.endpoint;
