@@ -1,7 +1,7 @@
 import { contratSchema } from "./blocks/contrat/contratSchema";
-import { formationSchema } from "./blocks/formation/formationSchema";
-import { maitreSchema } from "./blocks/maitre/maitreSchema";
-import { apprentiSchema } from "./blocks/apprenti/apprentiSchema";
+// import { formationSchema } from "./blocks/formation/formationSchema";
+// import { maitreSchema } from "./blocks/maitre/maitreSchema";
+// import { apprentiSchema } from "./blocks/apprenti/apprentiSchema";
 import { employerSchema } from "./blocks/employer/employerSchema";
 import { cerfaSchema } from "../formEngine/cerfaSchema";
 import { getValues } from "../formEngine/utils/getValues";
@@ -10,25 +10,19 @@ import { isEmptyValue } from "../formEngine/utils/isEmptyValue";
 export const getFormStatus = ({ fields, values }) => {
   const formErrors = getBlocErrors({ fields, values });
 
-  const contratStatus = getContratCompletion(fields, "contrat", formErrors);
-  const formationStatus = getBlocCompletion(Object.keys(formationSchema), fields, "formation", formErrors);
-  const maitreStatus = getBlocCompletion(Object.keys(maitreSchema), fields, "maitre", formErrors);
-  const apprentiStatus = getBlocCompletion(Object.keys(apprentiSchema), fields, "apprenti", formErrors);
+  // const contratStatus = getContratCompletion(fields, "contrat", formErrors);
+  // const formationStatus = getBlocCompletion(Object.keys(formationSchema), fields, "formation", formErrors);
+  // const maitreStatus = getBlocCompletion(Object.keys(maitreSchema), fields, "maitre", formErrors);
+  // const apprentiStatus = getBlocCompletion(Object.keys(apprentiSchema), fields, "apprenti", formErrors);
   const employeurStatus = getBlocCompletion(Object.keys(employerSchema), fields, "employeur", formErrors);
 
-  const cerfaTabCompletion =
-    (contratStatus.completion +
-      formationStatus.completion +
-      maitreStatus.completion +
-      apprentiStatus.completion +
-      employeurStatus.completion) /
-    5;
+  const cerfaTabCompletion = employeurStatus.completion;
 
   return {
-    contrat: contratStatus,
-    formation: formationStatus,
-    maitre: maitreStatus,
-    apprenti: apprentiStatus,
+    // contrat: contratStatus,
+    // formation: formationStatus,
+    // maitre: maitreStatus,
+    // apprenti: apprentiStatus,
     employeur: employeurStatus,
     complete: cerfaTabCompletion === 100,
     completion: cerfaTabCompletion,
@@ -38,6 +32,7 @@ export const getFormStatus = ({ fields, values }) => {
   };
 };
 
+// eslint-disable-next-line no-unused-vars
 const getContratCompletion = (fields, values, formErrors) => {
   const requiredFieldNames = getRequiredFieldNames(Object.keys(contratSchema), fields);
   const invalidFields = getInvalidFields(requiredFieldNames, fields);

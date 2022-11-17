@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { _get } from "../../../../common/httpClient";
 import { initFields } from "../initFields";
 import { cerfaSchema } from "../cerfaSchema";
-import { useRecoilValue } from "recoil";
-import { dossierAtom } from "../../atoms";
+// import { useRecoilValue } from "recoil";
+// import { dossierAtom } from "../../atoms";
 
 export const useInitCerfa = ({ controller }) => {
-  const dossier = useRecoilValue(dossierAtom);
+  const dossier = { _id: "6376500374c10993ee47ac60" }; //useRecoilValue(dossierAtom);
 
   const { isLoading } = useQuery(
     ["cerfa", dossier?._id],

@@ -1,13 +1,13 @@
 import React, { memo, useEffect, useRef, useState } from "react";
 import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack, Text } from "@chakra-ui/react";
 import { AddFill, StepComplete, StepWip, SubtractLine } from "../../../theme/components/icons";
-import { CerfaMaitre } from "./blocks/maitre/CerfaMaitre";
+// import { CerfaMaitre } from "./blocks/maitre/CerfaMaitre";
 import { CerfaEmployer } from "./blocks/employer/CerfaEmployer";
 import { cerfaStatusGetter } from "../formEngine/atoms";
 import { useRecoilValue } from "recoil";
-import { CerfaApprenti } from "./blocks/apprenti/CerfaApprenti";
-import { CerfaContrat } from "./blocks/contrat/cerfaContrat";
-import { CerfaFormation } from "./blocks/formation/CerfaFormation";
+// import { CerfaApprenti } from "./blocks/apprenti/CerfaApprenti";
+// import { CerfaContrat } from "./blocks/contrat/cerfaContrat";
+// import { CerfaFormation } from "./blocks/formation/CerfaFormation";
 
 const useOpenAccordionToLocation = () => {
   const scrolledRef = useRef(false);
@@ -48,7 +48,7 @@ export const CerfaForm = memo(() => {
   return (
     <div>
       {cerfaStatus && (
-        <Accordion allowMultiple allowToggle mt={12} minH="25vh" index={accordionIndex} onChange={setAccordionIndex}>
+        <Accordion allowMultiple mt={12} minH="25vh" index={accordionIndex} onChange={setAccordionIndex}>
           <AccordionItem border="none" id={`employeur`}>
             {({ isExpanded }) => (
               <AccordionItemChild
@@ -60,7 +60,7 @@ export const CerfaForm = memo(() => {
               </AccordionItemChild>
             )}
           </AccordionItem>
-          <AccordionItem border="none" id={`employeur`}>
+          {/* <AccordionItem border="none" id={`employeur`}>
             {({ isExpanded }) => (
               <AccordionItemChild
                 isExpanded={isExpanded}
@@ -99,7 +99,7 @@ export const CerfaForm = memo(() => {
                 <CerfaFormation />
               </AccordionItemChild>
             )}
-          </AccordionItem>
+          </AccordionItem> */}
         </Accordion>
       )}
     </div>

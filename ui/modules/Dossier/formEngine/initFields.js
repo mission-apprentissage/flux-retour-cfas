@@ -13,36 +13,36 @@ export const initFields = ({ cerfa, schema }) => {
     fields[name] = createField({ name, data });
   });
 
-  cerfa.contrat.remunerationsAnnuelles.forEach((annee, i) => {
-    fields[`contrat.remunerationsAnnuelles[${i}].dateDebut`] = createField({
-      name: `contrat.remunerationsAnnuelles[${i}].dateDebut`,
-      data: annee.dateDebut,
-    });
-    fields[`contrat.remunerationsAnnuelles[${i}].dateFin`] = createField({
-      name: `contrat.remunerationsAnnuelles[${i}].dateFin`,
-      data: annee.dateFin,
-    });
-    fields[`contrat.remunerationsAnnuelles[${i}].taux`] = createField({
-      name: `contrat.remunerationsAnnuelles[${i}].taux`,
-      data: annee.taux,
-    });
-    fields[`contrat.remunerationsAnnuelles[${i}].ordre`] = createField({
-      name: `contrat.remunerationsAnnuelles[${i}].ordre`,
-      data: annee.ordre,
-    });
-    fields[`contrat.remunerationsAnnuelles[${i}].salaireBrut`] = createField({
-      name: `contrat.remunerationsAnnuelles[${i}].salaireBrut`,
-      data: annee.salaireBrut,
-    });
-    fields[`contrat.remunerationsAnnuelles[${i}].tauxMinimal`] = createField({
-      name: `contrat.remunerationsAnnuelles[${i}].tauxMinimal`,
-      data: annee.tauxMinimal,
-    });
-    fields[`contrat.remunerationsAnnuelles[${i}].typeSalaire`] = createField({
-      name: `contrat.remunerationsAnnuelles[${i}].typeSalaire`,
-      data: annee.typeSalaire,
-    });
-  });
+  // cerfa.contrat.remunerationsAnnuelles.forEach((annee, i) => {
+  //   fields[`contrat.remunerationsAnnuelles[${i}].dateDebut`] = createField({
+  //     name: `contrat.remunerationsAnnuelles[${i}].dateDebut`,
+  //     data: annee.dateDebut,
+  //   });
+  //   fields[`contrat.remunerationsAnnuelles[${i}].dateFin`] = createField({
+  //     name: `contrat.remunerationsAnnuelles[${i}].dateFin`,
+  //     data: annee.dateFin,
+  //   });
+  //   fields[`contrat.remunerationsAnnuelles[${i}].taux`] = createField({
+  //     name: `contrat.remunerationsAnnuelles[${i}].taux`,
+  //     data: annee.taux,
+  //   });
+  //   fields[`contrat.remunerationsAnnuelles[${i}].ordre`] = createField({
+  //     name: `contrat.remunerationsAnnuelles[${i}].ordre`,
+  //     data: annee.ordre,
+  //   });
+  //   fields[`contrat.remunerationsAnnuelles[${i}].salaireBrut`] = createField({
+  //     name: `contrat.remunerationsAnnuelles[${i}].salaireBrut`,
+  //     data: annee.salaireBrut,
+  //   });
+  //   fields[`contrat.remunerationsAnnuelles[${i}].tauxMinimal`] = createField({
+  //     name: `contrat.remunerationsAnnuelles[${i}].tauxMinimal`,
+  //     data: annee.tauxMinimal,
+  //   });
+  //   fields[`contrat.remunerationsAnnuelles[${i}].typeSalaire`] = createField({
+  //     name: `contrat.remunerationsAnnuelles[${i}].typeSalaire`,
+  //     data: annee.typeSalaire,
+  //   });
+  // });
 
   fields["employeur.codeIdcc_special"] = createField({
     name: `employeur.codeIdcc_special`,

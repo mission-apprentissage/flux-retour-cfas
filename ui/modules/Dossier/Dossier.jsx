@@ -6,7 +6,7 @@ import { useRecoilValue } from "recoil";
 // import useAuth from "../../hooks/useAuth";
 // import { hasPageAccessTo } from "../../common/utils/rolesUtils";
 
-// import { CerfaForm } from "./cerfaForm/CerfaForm";
+import { CerfaForm } from "./cerfaForm/CerfaForm";
 import { useCerfa } from "./formEngine/useCerfa";
 import { cerfaSchema } from "./formEngine/cerfaSchema";
 import { CerfaControllerContext } from "./formEngine/CerfaControllerContext";
@@ -85,7 +85,7 @@ const Dossier = () => {
       <Box w="100%" px={[1, 1, 6, 6]} mb={10}>
         <Container maxW="xl">
           <Flex flexDir="column" width="100%" mt={9}>
-            {/* <CerfaForm /> */}
+            <CerfaForm />
           </Flex>
         </Container>
       </Box>

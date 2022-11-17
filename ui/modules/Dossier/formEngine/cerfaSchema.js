@@ -1,21 +1,21 @@
 import { employerSchema } from "../cerfaForm/blocks/employer/employerSchema";
-import { maitreSchema } from "../cerfaForm/blocks/maitre/maitreSchema";
-import { apprentiSchema } from "../cerfaForm/blocks/apprenti/apprentiSchema";
+// import { maitreSchema } from "../cerfaForm/blocks/maitre/maitreSchema";
+// import { apprentiSchema } from "../cerfaForm/blocks/apprenti/apprentiSchema";
 import { controls } from "./controls";
-import { contratSchema } from "../cerfaForm/blocks/contrat/contratSchema";
-import { formationSchema } from "../cerfaForm/blocks/formation/formationSchema";
-import { signatureSchema } from "../Signatures/signatureSchema";
-import { piecesJustificativesSchema } from "../PiecesJustificatives/piecesJustificativesSchema";
+// import { contratSchema } from "../cerfaForm/blocks/contrat/contratSchema";
+// import { formationSchema } from "../cerfaForm/blocks/formation/formationSchema";
+// import { signatureSchema } from "../Signatures/signatureSchema";
+// import { piecesJustificativesSchema } from "../PiecesJustificatives/piecesJustificativesSchema";
 
 export const cerfaSchema = {
   fields: {
     ...employerSchema,
-    ...maitreSchema,
-    ...apprentiSchema,
-    ...contratSchema,
-    ...formationSchema,
-    ...signatureSchema,
-    ...piecesJustificativesSchema,
+    // ...maitreSchema,
+    // ...apprentiSchema,
+    // ...contratSchema,
+    // ...formationSchema,
+    // ...signatureSchema,
+    // ...piecesJustificativesSchema,
   },
   logics: controls,
 };
