@@ -2,7 +2,8 @@ import express from "express";
 import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import { apiRoles } from "../common/roles.js";
+import effectifsExportRouter from "./routes/effectifs-export.route.js";
+import { apiRoles, tdbRoles } from "../common/roles.js";
 
 import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
@@ -19,7 +20,6 @@ import loginCfaRouter from "./routes/login-cfa.route.js";
 import configRouter from "./routes/config.route.js";
 import referentielRouter from "./routes/referentiel.route.js";
 import effectifsRouter from "./routes/effectifs.route.js";
-import effecitfsExportRouter from "./routes/effectifs-export.route.js";
 import cfasRouter from "./routes/cfas.route.js";
 import formationRouter from "./routes/formations.route.js";
 import healthcheckRouter from "./routes/healthcheck.route.js";
@@ -118,8 +118,18 @@ export default async (components) => {
     permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
     effectifsApprenantsRouter(components)
   );
-  app.use("/api/effectifs", requireJwtAuthentication, effectifsRouter(components));
-  app.use("/api/effectifs-export", requireJwtAuthentication, effecitfsExportRouter(components));
+  app.use(
+    "/api/effectifs",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    effectifsRouter(components)
+  );
+  app.use(
+    "/api/effectifs-export",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    effectifsExportRouter(components)
+  );
 
   // admin routes
   app.use("/api/users", requireJwtAuthentication, adminOnly, usersRouter(components));

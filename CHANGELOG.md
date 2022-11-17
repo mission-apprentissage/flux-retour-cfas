@@ -1,3 +1,18 @@
+## [2.55.2-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1...v2.55.2-beta.1) (2022-11-17)
+
+
+### Bug Fixes
+
+* **server:** fix le schema de validation du modele dossiersApprenants et supprime champs inutiles (migration) ([0b64d2c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0b64d2c99da7909dfb0c70bc6ca49e32269ef11e))
+* **server:** migate-mongo using dotEnv ([#2247](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2247)) ([177da9b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/177da9bf4afe0f4e0c957f1d8e2baa83c6ef95f1))
+* **ui:** corrige lien vers la page question réponses ([#2242](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2242)) ([3f8d30f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3f8d30f834286d56b0b3e39989c4254b3329f545))
+
+## [2.55.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.0...v2.55.1) (2022-11-17)
+
+### Bug Fixes
+
+* hotfix retire permission pilot aux utilisateurs erp ([b11b31a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b11b31a7fb26afbda489803736c4064e6e65d385))
+
 ## [2.55.1-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1-beta.2...v2.55.1-beta.3) (2022-11-16)
 
 
