@@ -2,7 +2,7 @@ import { HStack, Link } from "@chakra-ui/react";
 import NavLink from "next/link";
 import PropTypes from "prop-types";
 import React from "react";
-import { useRouteMatch } from "react-router-dom";
+import { useMatch } from "react-router-dom";
 
 import { hasUserRoles, roles } from "../../common/auth/roles";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
@@ -10,7 +10,7 @@ import useAuth from "../../hooks/useAuth";
 import Section from "../Section/Section";
 
 const NavItem = ({ to, children, exactMatchActive = false }) => {
-  const isActive = useRouteMatch({
+  const isActive = useMatch({
     path: to,
     exact: exactMatchActive,
   });
