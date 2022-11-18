@@ -10,9 +10,8 @@ import {
   MenuButton,
   MenuDivider,
   MenuGroup,
-  MenuItem as ChakraMenuItem,
-  MenuItem,
   MenuList,
+  MenuItem as ChakraMenuItem,
   Tag,
   Text,
 } from "@chakra-ui/react";
@@ -24,6 +23,7 @@ import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
 import useAuth from "../../../hooks/useAuth.js";
 import { hasPageAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
 import { _get } from "../../../common/httpClient.js";
+import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
 import { NotificationFill, Settings4Fill, UserFill } from "../../../theme/components/icons";
 
@@ -78,8 +78,8 @@ const UserMenu = () => {
               </Flex>
             </MenuButton>
             <MenuList>
-              <MenuItem href="/mon-compte" icon={<AccountFill boxSize={4} color={"bluefrance"} />}>
-                Mon compte
+              <MenuItem href="/mon-espace/mon-tableau-de-bord" icon={<AccountFill boxSize={4} color={"bluefrance"} />}>
+                Mon espace
               </MenuItem>
               {hasPageAccessTo(auth, "admin") && (
                 <MenuGroup title="Administration">
@@ -129,7 +129,7 @@ const Header = () => {
           </Box>
           <Box flex="1" my={["2w", "2w", "0"]}>
             <Tag marginBottom="1w" backgroundColor="bluefrance" color="white" ml="5">
-              Beta-V1
+              BETA
             </Tag>
           </Box>
           <UserMenu />

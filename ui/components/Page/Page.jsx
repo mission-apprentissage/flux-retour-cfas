@@ -10,8 +10,8 @@ export function Page({ children, ...rest }) {
     <Container maxW="full" minH="100vh" d="flex" flexDirection="column" p={0} {...rest}>
       <Header />
       <NavigationMenu />
-      <Box minH={"60vh"} flexGrow="1">
-        <Box w="100%" py={[4, 8]} px={[1, 1, 12, 24]}>
+      <Box minH={"47vh"} flexGrow="1">
+        <Box w="100%" py={[4, 4]} px={[1, 1, 12, 24]}>
           <Container maxW="xl">{children}</Container>
         </Box>
       </Box>

@@ -56,7 +56,7 @@ export default () => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      const cerfa = await CerfasDb().findOne({ _id: ObjectId("6376500374c10993ee47ac60") });
+      const cerfa = await CerfasDb().findOne({ _id: ObjectId("6377b292445e114a214805e7") });
       return res.json(buildCerfaResult(cerfa));
     })
   );

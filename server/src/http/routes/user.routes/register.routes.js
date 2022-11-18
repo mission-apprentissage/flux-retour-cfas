@@ -50,7 +50,7 @@ export default ({ mailer }) => {
     "/register",
     tryCatch(async ({ body }, res) => {
       const { type, email, password, siret, nom, prenom, civility } = await Joi.object({
-        type: Joi.string().allow("entreprise", "of").required(),
+        type: Joi.string().allow("pilot", "of", "reseau_of", "erp").required(),
         email: Joi.string().required(),
         password: Joi.string().required(),
         siret: Joi.string().required(),

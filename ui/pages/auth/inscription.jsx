@@ -151,14 +151,14 @@ const Register = ({ onSucceeded, ...props }) => {
               <RadioGroup id="type" name="type" value={values.type} mt={8}>
                 <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
                   <Radio
-                    value="employeur"
+                    value="pilot"
                     onChange={(e) => {
                       setStep(1);
                       handleChange(e);
                     }}
                     size="lg"
                   >
-                    Un employeur
+                    Un Pilot (Dreets)
                   </Radio>
                   <Radio
                     value="of"
@@ -168,7 +168,27 @@ const Register = ({ onSucceeded, ...props }) => {
                     }}
                     size="lg"
                   >
-                    Un OF
+                    Un Organisme de Formation
+                  </Radio>
+                  <Radio
+                    value="reseau_of"
+                    onChange={(e) => {
+                      setStep(1);
+                      handleChange(e);
+                    }}
+                    size="lg"
+                  >
+                    Une tête de réseau OF
+                  </Radio>
+                  <Radio
+                    value="erp"
+                    onChange={(e) => {
+                      setStep(1);
+                      handleChange(e);
+                    }}
+                    size="lg"
+                  >
+                    Un logiciel de gestion
                   </Radio>
                 </VStack>
               </RadioGroup>

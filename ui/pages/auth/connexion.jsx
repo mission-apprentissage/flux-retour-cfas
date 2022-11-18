@@ -47,7 +47,7 @@ const Login = (props) => {
         if (!user.account_status === "NOT_CONFIRMED") {
           router.push(`/auth/en-attente-confirmation`);
         } else {
-          router.push("/");
+          router.push("/mon-espace/mon-tableau-de-bord");
         }
       }
     } catch (e) {

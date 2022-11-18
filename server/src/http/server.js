@@ -39,6 +39,7 @@ import profile from "./routes/user.routes/profile.routes.js";
 import session from "./routes/session.routes.js";
 
 import cerfa from "./routes/specific.routes/cerfa.routes.js";
+import upload from "./routes/specific.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
@@ -62,11 +63,13 @@ export default async (components) => {
   app.use("/api/v1/auth", register(components));
   app.use("/api/v1/password", password(components));
 
-  app.use("/api/v1/cerfa", cerfa()); // TODO TMP
-
   // private access
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
+
+  // TODO TEST ROUTES TMEPORARY
+  app.use("/api/v1/cerfa", cerfa()); // TODO TMP
+  app.use("/api/v1/upload", upload(components));
 
   // private admin access
   app.use(
