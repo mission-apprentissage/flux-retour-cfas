@@ -13,11 +13,13 @@ import {
   activateUser,
   createUser,
   getUserById,
+  finalizeUser,
 } from "../../../common/components/usersComponent.js";
 import * as sessions from "../../../common/components/sessionsComponent.js";
 import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/components/infoSiretComponent.js";
+import { authMiddleware } from "../../middlewares/authMiddleware.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -141,6 +143,50 @@ export default ({ mailer }) => {
 
       return responseWithCookie({ res, token }).status(200).json({
         succeeded: true,
+        token,
+      });
+    })
+  );
+
+  router.post(
+    "/finalize",
+    authMiddleware(),
+    tryCatch(async ({ body, user }, res) => {
+      // TODO
+      // eslint-disable-next-line no-unused-vars
+      const { compte, siret } = await Joi.object({
+        compte: Joi.string().required(),
+        siret: Joi.string().required(),
+      }).validateAsync(body, { abortEarly: false });
+
+      const userDb = await getUser(user.email.toLowerCase());
+      if (!userDb) {
+        throw Boom.conflict(`Unable to retrieve user`);
+      }
+
+      if (userDb.account_status !== "FORCE_COMPLETE_PROFILE") {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      // TODO
+      const updateUser = await finalizeUser(userDb.email, {});
+      if (!updateUser) {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      const payload = await structureUser(updateUser);
+
+      await loggedInUser(payload.email);
+
+      const token = createUserTokenSimple({ payload });
+
+      if (await sessions.findJwt(token)) {
+        await sessions.removeJwt(token);
+      }
+      await sessions.addJwt(token);
+
+      return responseWithCookie({ res, token }).status(200).json({
+        loggedIn: true,
         token,
       });
     })

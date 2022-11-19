@@ -84,6 +84,12 @@ export default async (components) => {
     pageAccessMiddleware(["admin/page_gestion_utilisateurs", "admin/page_gestion_roles"]),
     rolesAdmin()
   );
+  app.use(
+    "/api/v1/admin/reseaux-cfas",
+    checkJwtToken,
+    pageAccessMiddleware(["admin/page_gestion_reseaux_cfa"]),
+    reseauxCfasRouter(components)
+  );
 
   // TDB PREVIOUS ROUTES
   // open routes

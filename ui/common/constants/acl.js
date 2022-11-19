@@ -12,6 +12,10 @@ const acl = [
         ref: "admin/page_gestion_roles",
       },
       {
+        feature: "Gestion des Réseaux CFAS",
+        ref: "admin/page_gestion_reseaux_cfa",
+      },
+      {
         feature: "Message de maintenance",
         ref: "admin/page_message_maintenance",
       },

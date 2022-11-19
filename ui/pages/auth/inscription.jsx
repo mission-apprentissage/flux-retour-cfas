@@ -150,46 +150,38 @@ const Register = ({ onSucceeded, ...props }) => {
               <FormLabel>Je représente :</FormLabel>
               <RadioGroup id="type" name="type" value={values.type} mt={8}>
                 <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
-                  <Radio
-                    value="pilot"
-                    onChange={(e) => {
-                      setStep(1);
-                      handleChange(e);
-                    }}
-                    size="lg"
-                  >
-                    Un Pilot (Dreets)
-                  </Radio>
-                  <Radio
-                    value="of"
-                    onChange={(e) => {
-                      setStep(1);
-                      handleChange(e);
-                    }}
-                    size="lg"
-                  >
-                    Un Organisme de Formation
-                  </Radio>
-                  <Radio
-                    value="reseau_of"
-                    onChange={(e) => {
-                      setStep(1);
-                      handleChange(e);
-                    }}
-                    size="lg"
-                  >
-                    Une tête de réseau OF
-                  </Radio>
-                  <Radio
-                    value="erp"
-                    onChange={(e) => {
-                      setStep(1);
-                      handleChange(e);
-                    }}
-                    size="lg"
-                  >
-                    Un logiciel de gestion
-                  </Radio>
+                  {[
+                    {
+                      text: "Un Pilot (Dreets)",
+                      value: "pilot",
+                    },
+                    {
+                      text: "Un Organisme de Formation",
+                      value: "of",
+                    },
+                    {
+                      text: "Une tête de réseau OF",
+                      value: "reseau_of",
+                    },
+                    {
+                      text: " Un logiciel de gestion",
+                      value: "erp",
+                    },
+                  ].map((item, i) => {
+                    return (
+                      <Radio
+                        key={i}
+                        value={item.value}
+                        onChange={(e) => {
+                          setStep(1);
+                          handleChange(e);
+                        }}
+                        size="lg"
+                      >
+                        {item.text}
+                      </Radio>
+                    );
+                  })}
                 </VStack>
               </RadioGroup>
               {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}

@@ -22,7 +22,13 @@ export function schema() {
       siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
       account_status: string({
         description: "Statut du compte",
-        enum: ["NOT_CONFIRMED", "FORCE_RESET_PASSWORD", "FORCE_COMPLETE_PROFILE", "CONFIRMED"],
+        enum: [
+          "NOT_CONFIRMED",
+          "FIRST_FORCE_RESET_PASSWORD",
+          "FORCE_COMPLETE_PROFILE",
+          "CONFIRMED",
+          "FORCE_RESET_PASSWORD",
+        ],
       }),
       has_accept_cgu_version: string({ description: "Version des cgu accepté par l'utilisateur" }),
       orign_register: string({ description: "Origine de l'inscription", enum: ["ORIGIN"] }),
@@ -55,6 +61,7 @@ export function schema() {
         )
       ),
       unsubscribe: boolean({ description: "unsubscribe email" }),
+      tour_guide: boolean({ description: "true si le tour guide est actif" }),
       v: integer(),
     },
     { required: ["email"], additionalProperties: true }
@@ -70,6 +77,7 @@ export function defaultValuesUser() {
     is_admin: false,
     roles: [],
     custom_acl: [],
+    tour_guide: true,
     invalided_token: false,
     password_updated_at: new Date(),
     connection_history: [],

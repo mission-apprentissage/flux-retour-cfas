@@ -212,7 +212,27 @@ export const activateUser = async (email) => {
     { _id: user._id },
     {
       $set: {
-        account_status: "FORCE_RESET_PASSWORD",
+        account_status: "FIRST_FORCE_RESET_PASSWORD",
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
+};
+
+export const finalizeUser = async (email, data) => {
+  const user = await usersMigrationDb().findOne({ email });
+  if (!user) {
+    throw new Error(`Unable to find user`);
+  }
+
+  const updated = await usersMigrationDb().findOneAndUpdate(
+    { _id: user._id },
+    {
+      $set: {
+        account_status: "CONFIRMED",
+        ...data,
       },
     },
     { returnDocument: "after" }
@@ -236,11 +256,18 @@ export const changePassword = async (email, newPassword) => {
     throw new Error("Password must be valid");
   }
 
+  let account_status = user.account_status;
+  if (user.account_status === "FIRST_FORCE_RESET_PASSWORD") {
+    account_status = "FORCE_COMPLETE_PROFILE";
+  } else if (user.account_status === "FORCE_RESET_PASSWORD") {
+    account_status = "CONFIRMED";
+  }
+
   const updated = await usersMigrationDb().findOneAndUpdate(
     { _id: user._id },
     {
       $set: {
-        account_status: user.account_status === "FORCE_RESET_PASSWORD" ? "CONFIRMED" : user.account_status,
+        account_status,
         password: hashUtil(newPassword),
         password_updated_at: new Date(),
       },
