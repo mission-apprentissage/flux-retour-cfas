@@ -11,8 +11,6 @@ import { schema as cfdSchema } from "../../../common/domain/cfd.js";
 import { schema as nomApprenantSchema } from "../../../common/domain/apprenant/nomApprenant.js";
 import { schema as prenomApprenantSchema } from "../../../common/domain/apprenant/prenomApprenant.js";
 import { schema as siretSchema } from "../../../common/domain/siret.js";
-import validateRequestBody from "../../middlewares/validateRequestBody.js";
-import validateRequestQuery from "../../middlewares/validateRequestQuery.js";
 import { findAndPaginate } from "../../../common/utils/dbUtils.js";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../common/constants/userEventsConstants.js";
 import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../../common/model/collections.js";
@@ -88,8 +86,11 @@ export default ({ dossiersApprenants, userEvents }) => {
    */
   router.post(
     "/",
-    validateRequestBody(Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)),
-    tryCatch(async (req, res) => {
+    tryCatch(async ({ user, body }, res) => {
+      const dataIn = await Joi.array()
+        .max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH)
+        .validateAsync(body, { abortEarly: false });
+
       try {
         let nbItemsValid = 0;
         let validationErrors = [];
@@ -97,14 +98,14 @@ export default ({ dossiersApprenants, userEvents }) => {
 
         // Add user event
         await userEvents.create({
-          username: req.user.username,
+          username: user.username,
           type: USER_EVENTS_TYPES.POST,
           action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
-          data: req.body,
+          data: dataIn,
         });
 
         // Validate items one by one
-        await asyncForEach(req.body, async (currentDossierApprenant, index) => {
+        await asyncForEach(dataIn, async (currentDossierApprenant, index) => {
           const dossierApprenantValidation = dossierApprenantItemSchema.validate(currentDossierApprenant, {
             stripUnknown: true, // will remove keys that are not defined in schema, without throwing an error
             abortEarly: false, // make sure every invalid field will be communicated to the caller
@@ -114,11 +115,11 @@ export default ({ dossiersApprenants, userEvents }) => {
             const prettyValidationError = buildPrettyValidationError(dossierApprenantValidation.error);
             validationErrors.push(prettyValidationError);
             await dossiersApprenantsApiErrorsDb().insert({
-              erp: req.user.username,
+              erp: user.username,
               created_at: new Date(),
               ...prettyValidationError,
             });
-            logger.warn(`Could not validate item from ${req.user.username} at index ${index}`, prettyValidationError);
+            logger.warn(`Could not validate item from ${user.username} at index ${index}`, prettyValidationError);
           } else {
             nbItemsValid++;
             // Build toAddOrUpdateList list
@@ -129,7 +130,7 @@ export default ({ dossiersApprenants, userEvents }) => {
               periode_formation: currentDossierApprenant.periode_formation
                 ? currentDossierApprenant.periode_formation.split("-").map(Number)
                 : null,
-              source: req.user.username,
+              source: user.username,
             });
           }
         });
@@ -159,15 +160,17 @@ export default ({ dossiersApprenants, userEvents }) => {
    */
   router.get(
     "/",
-    validateRequestQuery(
-      Joi.object({
+    tryCatch(async (req, res) => {
+      const {
+        page: reqPage,
+        limit: reqLimit,
+        ...filtersFromBody
+      } = await Joi.object({
         page: Joi.number(),
         limit: Joi.number(),
         ...commonDossiersApprenantsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const { page: reqPage, limit: reqLimit, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const page = Number(reqPage ?? 1);
       const limit = Number(reqLimit ?? 1000);
 

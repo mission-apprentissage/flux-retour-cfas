@@ -3,22 +3,20 @@ import Joi from "joi";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../common/constants/userEventsConstants.js";
 import logger from "../../../common/logger.js";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import validateRequestBody from "../../middlewares/validateRequestBody.js";
 
 export default ({ users, userEvents }) => {
   const router = express.Router();
 
   router.post(
     "/",
-    validateRequestBody(
-      Joi.object({
+    tryCatch(async (req, res) => {
+      const { token, newPassword } = await Joi.object({
         token: Joi.string().required(),
         newPassword: Joi.string().min(16).required(),
-      })
-    ),
-    tryCatch(async (req, res) => {
+      }).validateAsync(req.body, { abortEarly: false });
+
       try {
-        const username = await users.updatePassword(req.body.token, req.body.newPassword);
+        const username = await users.updatePassword(token, newPassword);
 
         await userEvents.create({
           type: USER_EVENTS_TYPES.POST,

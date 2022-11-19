@@ -2,8 +2,6 @@ import express from "express";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import pick from "lodash.pick";
-import validateRequestBody from "../../middlewares/validateRequestBody.js";
-import validateRequestQuery from "../../middlewares/validateRequestQuery.js";
 import { cfasDb } from "../../../common/model/collections.js";
 
 export default ({ cfas }) => {
@@ -14,17 +12,16 @@ export default ({ cfas }) => {
    */
   router.get(
     "/",
-    validateRequestQuery(
-      Joi.object({
+    tryCatch(async (req, res) => {
+      const params = await Joi.object({
         query: Joi.string(),
         page: Joi.number(),
         limit: Joi.number(),
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const query = req.query.query ?? "{}";
-      const page = Number(req.query.page ?? 1);
-      const limit = Number(req.query.limit ?? 50);
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const query = params.query ?? "{}";
+      const page = Number(params.page ?? 1);
+      const limit = Number(params.limit ?? 50);
       const skip = (page - 1) * limit;
 
       const jsonQuery = JSON.parse(query);
@@ -58,16 +55,15 @@ export default ({ cfas }) => {
 
   router.post(
     "/search",
-    validateRequestBody(
-      Joi.object({
+    tryCatch(async (req, res) => {
+      const body = await Joi.object({
         searchTerm: Joi.string().min(3),
         etablissement_num_region: Joi.string().allow(null, ""),
         etablissement_num_departement: Joi.string().allow(null, ""),
         etablissement_reseaux: Joi.string().allow(null, ""),
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const foundCfas = await cfas.searchCfas(req.body);
+      }).validateAsync(req.body, { abortEarly: false });
+
+      const foundCfas = await cfas.searchCfas(body);
       return res.json(foundCfas);
     })
   );

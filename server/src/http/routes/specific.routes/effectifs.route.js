@@ -4,22 +4,24 @@ import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
 import { tdbRoles } from "../../../common/roles.js";
-import validateRequestQuery from "../../middlewares/validateRequestQuery.js";
 import { getCacheKeyForRoute } from "../../../common/utils/cacheUtils.js";
 
 const filterQueryForNetworkRole = (req) => {
-  if (req.user?.permissions.includes(tdbRoles.network)) {
-    req.query.etablissement_reseaux = req.user.network;
-  }
+  // TODO user.acl or permissions mecanism
+  // if (req.user?.permissions.includes(tdbRoles.network)) {
+  //   req.query.etablissement_reseaux = req.user.network;
+  // }
 };
 
 const filterQueryForCfaRole = (req) => {
-  if (req.user?.permissions.includes(tdbRoles.cfa)) {
-    req.query.uai_etablissement = req.user?.username;
-  }
+  // TODO user.acl or permissions mecanism
+  // if (req.user?.permissions.includes(tdbRoles.cfa)) {
+  //   req.query.uai_etablissement = req.user?.username;
+  // }
 };
 
 const applyUserRoleFilter = (req, _res, next) => {
+  console.log(req.user);
   // users with network role should not be able to see data for other reseau
   filterQueryForNetworkRole(req);
 
@@ -46,15 +48,13 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/total-organismes",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
+    applyUserRoleFilter, // TODO
+    tryCatch(async (req, res) => {
+      const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
@@ -74,16 +74,13 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
+    applyUserRoleFilter, // TODO
+    tryCatch(async (req, res) => {
+      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      // Gets & format params:
-      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
@@ -119,15 +116,13 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/niveau-formation",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
+    applyUserRoleFilter, // TODO
+    tryCatch(async (req, res) => {
+      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
@@ -156,16 +151,14 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/formation",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
+    applyUserRoleFilter, // TODO
+    tryCatch(async (req, res) => {
+      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
         niveau_formation: Joi.string().allow(null, ""),
         ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
@@ -194,15 +187,14 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/annee-formation",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
-        date: Joi.date().required(),
-        ...commonEffectifsFilters,
-      })
-    ),
+    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
-      const { date: dateFromParams, ...filtersFromBody } = req.query;
+      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
+        date: Joi.date().required(),
+        niveau_formation: Joi.string().allow(null, ""),
+        ...commonEffectifsFilters,
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
@@ -232,15 +224,13 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/cfa",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
+    applyUserRoleFilter, // TODO
+    tryCatch(async (req, res) => {
+      const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
@@ -270,15 +260,13 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/siret",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
+    applyUserRoleFilter, // TODO
+    tryCatch(async (req, res) => {
+      const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,
@@ -308,15 +296,13 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/departement",
-    applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
+    applyUserRoleFilter, // TODO
+    tryCatch(async (req, res) => {
+      const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const { date: dateFromQuery, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromQuery);
       const filters = {
         ...filtersFromBody,

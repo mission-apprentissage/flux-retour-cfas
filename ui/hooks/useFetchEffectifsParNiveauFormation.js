@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchEffectifsParNiveauFormation } from "../../common/api/tableauDeBord";
+import { fetchEffectifsParNiveauFormation } from "../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../common/constants/queryKeys";
-import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
+import { mapFiltersToApiFormat } from "../common/utils/mapFiltersToApiFormat";
 
 const useFetchEffectifsParNiveauFormation = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);

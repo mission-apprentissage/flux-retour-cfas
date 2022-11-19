@@ -53,7 +53,6 @@ export default () => {
   router.get(
     "/logout",
     tryCatch(async (req, res) => {
-      console.log(req.cookies);
       if (req.cookies[COOKIE_NAME]) {
         await sessions.removeJwt(req.cookies[COOKIE_NAME]);
         res.clearCookie(COOKIE_NAME).status(200).json({

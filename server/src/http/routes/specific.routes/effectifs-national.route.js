@@ -4,19 +4,16 @@ import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
 import { getCacheKeyForRoute } from "../../../common/utils/cacheUtils.js";
-import validateRequestQuery from "../../middlewares/validateRequestQuery.js";
 
 export default ({ stats, effectifs, cache }) => {
   const router = express.Router();
   router.get(
     "/",
-    validateRequestQuery(
-      Joi.object({
-        date: Joi.date().required(),
-      })
-    ),
     tryCatch(async (req, res) => {
-      const { date: dateFromQuery } = req.query;
+      const { date: dateFromQuery } = await Joi.object({
+        date: Joi.date().required(),
+      }).validateAsync(req.query, { abortEarly: false });
+
       const date = new Date(dateFromQuery);
       const filters = { annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } };
       const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {

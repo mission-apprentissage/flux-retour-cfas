@@ -11,7 +11,7 @@ import Link from "../components/Links/Link";
 import { Section } from "../components";
 import useFetchEffectifsNational from "../hooks/useFetchEffectifsNational";
 import { formatDateDayMonthYear } from "../common/utils/dateUtils";
-import IndicateursGridStack from "./app/visualiser-les-indicateurs/IndicateursGridStack";
+import IndicateursGridStack from "../components/IndicateursGridStack";
 
 const ExplorerLesIndicateursPage = () => {
   const title = "Visualiser les indicateurs en temps réel";

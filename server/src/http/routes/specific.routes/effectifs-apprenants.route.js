@@ -3,7 +3,6 @@ import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { JOB_NAMES, jobEventStatuts } from "../../../common/constants/jobsConstants.js";
 import { findAndPaginate } from "../../../common/utils/dbUtils.js";
-import validateRequestQuery from "../../middlewares/validateRequestQuery.js";
 import { effectifsApprenantsDb } from "../../../common/model/collections.js";
 import { sendTransformedPaginatedJsonStream } from "../../../common/utils/httpUtils.js";
 
@@ -15,15 +14,14 @@ export default ({ jobEvents }) => {
    */
   router.get(
     "/",
-    validateRequestQuery(
-      Joi.object({
+    tryCatch(async (req, res) => {
+      const params = await Joi.object({
         page: Joi.number(),
         limit: Joi.number(),
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const page = Number(req.query.page ?? 1);
-      const limit = Number(req.query.limit ?? 1000);
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const page = Number(params.page ?? 1);
+      const limit = Number(params.limit ?? 1000);
 
       if (!(await jobEvents.isJobInAction(JOB_NAMES.createEffectifsApprenantsCollection, jobEventStatuts.ended))) {
         // Job RCO not ended, no data should be get

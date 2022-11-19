@@ -27,7 +27,6 @@ import formationRouter from "./routes/specific.routes/formations.route.js";
 import demandeIdentifiantsRouter from "./routes/specific.routes/demande-identifiants.route.js";
 import demandeBranchementErpRouter from "./routes/specific.routes/demande-branchement-erp.route.js";
 import updatePasswordRouter from "./routes/specific.routes/update-password.route.js";
-import usersRouter from "./routes/specific.routes/users.route.js";
 import reseauxCfasRouter from "./routes/specific.routes/reseaux-cfas.route.js";
 import effectifsNationalRouter from "./routes/specific.routes/effectifs-national.route.js";
 
@@ -67,10 +66,12 @@ export default async (components) => {
   // private access
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
-
-  // TODO TEST ROUTES TMEPORARY
-  app.use("/api/v1/cerfa", cerfa()); // TODO TMP
-  app.use("/api/v1/upload", upload(components));
+  app.use(
+    ["/api/effectifs", "/api/v1/effectifs"],
+    checkJwtToken,
+    // TODO permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    effectifsRouter(components)
+  );
 
   // private admin access
   app.use(
@@ -91,11 +92,10 @@ export default async (components) => {
     pageAccessMiddleware(["admin/page_gestion_reseaux_cfa"]),
     reseauxCfasRouter(components)
   );
-  app.use("/api/users", checkJwtToken, pageAccessMiddleware(["_ADMIN"]), usersRouter(components)); // TODO TO REMOVE
   app.get(
     "/api/cache",
     checkJwtToken,
-    pageAccessMiddleware(["_ADMIN"]),
+    pageAccessMiddleware(["_ADMIN"]), // TODO
     tryCatch(async (req, res) => {
       await components.cache.clear();
       return res.json({});
@@ -104,13 +104,17 @@ export default async (components) => {
   app.get(
     "/api/config",
     checkJwtToken,
-    pageAccessMiddleware(["_ADMIN"]),
+    pageAccessMiddleware(["_ADMIN"]), // TODO
     tryCatch(async (req, res) => {
       return res.json({
         config,
       });
     })
   );
+
+  // TODO TEST ROUTES TMEPORARY
+  app.use("/api/v1/cerfa", cerfa()); // TODO TMP
+  app.use("/api/v1/upload", upload(components));
 
   // TDB OLD PREVIOUS ROUTES
   // open routes
@@ -128,13 +132,7 @@ export default async (components) => {
   // requires JWT auth
   // @deprecated to /dossiers-apprenants
   app.use(
-    "/api/statut-candidats",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    dossierApprenantRouter(components)
-  );
-  app.use(
-    "/api/dossiers-apprenants",
+    ["/api/statut-candidats", "/api/dossiers-apprenants"],
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     dossierApprenantRouter(components)
@@ -150,12 +148,6 @@ export default async (components) => {
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
     effectifsApprenantsRouter(components)
-  );
-  app.use(
-    "/api/effectifs",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
-    effectifsRouter(components)
   );
   app.use(
     "/api/effectifs-export",

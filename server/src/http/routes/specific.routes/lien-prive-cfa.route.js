@@ -1,7 +1,6 @@
 import express from "express";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import validateRequestQuery from "../../middlewares/validateRequestQuery.js";
 import { cfasDb } from "../../../common/model/collections.js";
 
 export default () => {
@@ -9,25 +8,24 @@ export default () => {
 
   router.get(
     "/",
-    validateRequestQuery(
-      Joi.object({
+    tryCatch(async ({ user, query }, res) => {
+      const params = await Joi.object({
         uais: Joi.array().items(Joi.string()).allow(null),
         page: Joi.number(),
         limit: Joi.number(),
-      })
-    ),
-    tryCatch(async (req, res) => {
-      const uais = req.query.uais ?? null;
-      const page = Number(req.query.page ?? 1);
-      const limit = Number(req.query.limit ?? 100);
+      }).validateAsync(query, { abortEarly: false });
+
+      const uais = params.uais ?? null;
+      const page = Number(params.page ?? 1);
+      const limit = Number(params.limit ?? 100);
       const skip = (page - 1) * limit;
 
-      const query = uais
-        ? { uai: { $in: uais }, erps: req.user.username, private_url: { $nin: [null, ""] } }
-        : { erps: req.user.username, private_url: { $nin: [null, ""] } };
+      const mongoQuery = uais
+        ? { uai: { $in: uais }, erps: user.username, private_url: { $nin: [null, ""] } }
+        : { erps: user.username, private_url: { $nin: [null, ""] } };
 
-      const allData = await cfasDb().find(query).skip(skip).limit(limit).toArray();
-      const count = await cfasDb().countDocuments(query);
+      const allData = await cfasDb().find(mongoQuery).skip(skip).limit(limit).toArray();
+      const count = await cfasDb().countDocuments(mongoQuery);
       const cfaDataWithPrivateLinkFormatted = allData.map((item) => ({
         nom: item.nom,
         uai: item.uai,

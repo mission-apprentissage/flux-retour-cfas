@@ -4,7 +4,6 @@ import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
 import { tdbRoles } from "../../../common/roles.js";
-import validateRequestQuery from "../../middlewares/validateRequestQuery.js";
 import {
   getExportAnonymizedEventNameFromFilters,
   USER_EVENTS_TYPES,
@@ -50,16 +49,17 @@ export default ({ effectifs, userEvents }) => {
   router.get(
     "/export-csv-list",
     applyUserRoleFilter,
-    validateRequestQuery(
-      Joi.object({
+    tryCatch(async (req, res) => {
+      const {
+        date: dateFromParams,
+        namedDataMode,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
         namedDataMode: Joi.boolean(),
         ...commonEffectifsFilters,
-      })
-    ),
-    tryCatch(async (req, res) => {
-      // Gets & format params
-      const { date: dateFromParams, namedDataMode, ...filtersFromBody } = req.query;
+      }).validateAsync(req.query, { abortEarly: false });
+
       const namedDataListMode = namedDataMode ? Boolean(namedDataMode) : false;
       const date = new Date(dateFromParams);
       const filters = { ...filtersFromBody, annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } };

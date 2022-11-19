@@ -1,7 +1,6 @@
 import express from "express";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import validateRequestBody from "../../middlewares/validateRequestBody.js";
 
 const mapCfasToApiOutput = (reseauxCfas) => {
   return {
@@ -44,13 +43,12 @@ export default ({ reseauxCfas }) => {
 
   router.post(
     "/search",
-    validateRequestBody(
-      Joi.object({
-        searchTerm: Joi.string().min(3),
-      })
-    ),
     tryCatch(async (req, res) => {
-      const foundReseauxCfas = await reseauxCfas.searchReseauxCfas(req.body);
+      const body = await Joi.object({
+        searchTerm: Joi.string().min(3),
+      }).validateAsync(req.body, { abortEarly: false });
+
+      const foundReseauxCfas = await reseauxCfas.searchReseauxCfas(body);
       return res.json(foundReseauxCfas);
     })
   );

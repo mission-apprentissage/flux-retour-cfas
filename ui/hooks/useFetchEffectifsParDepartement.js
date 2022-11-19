@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchEffectifsParDepartement } from "../api/tableauDeBord";
+import { fetchEffectifsParDepartement } from "../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../common/constants/queryKeys";
-import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
-import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
+import { mapFiltersToApiFormat } from "../common/utils/mapFiltersToApiFormat";
+import { sortAlphabeticallyBy } from "../common/utils/sortAlphabetically";
 
 const useFetchEffectifsParDepartement = (filters = {}) => {
   const requestFilters = mapFiltersToApiFormat(filters);

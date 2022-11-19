@@ -1,4 +1,4 @@
-import { QueryClient } from "react-query";
+import { QueryClient } from "@tanstack/react-query";
 
 const QUERY_CLIENT_RETRY_DELAY = 3000;
 const QUERY_CLIENT_RETRY_ATTEMPTS = 1;
