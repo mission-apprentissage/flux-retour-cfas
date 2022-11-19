@@ -1,8 +1,8 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
-import { fetchSearchUsers } from "../api/tableauDeBord";
+import { fetchSearchUsers } from "../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../common/constants/queryKeys";
-import { omitNullishValues } from "../utils/omitNullishValues";
+import { omitNullishValues } from "../common/utils/omitNullishValues";
 import useDebounce from "./useDebounce";
 
 export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 4;

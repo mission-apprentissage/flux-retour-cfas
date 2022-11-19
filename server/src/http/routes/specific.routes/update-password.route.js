@@ -1,9 +1,9 @@
 import express from "express";
 import Joi from "joi";
-import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../common/constants/userEventsConstants.js";
-import logger from "../../common/logger.js";
-import tryCatch from "../middlewares/tryCatchMiddleware.js";
-import validateRequestBody from "../middlewares/validateRequestBody.js";
+import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../common/constants/userEventsConstants.js";
+import logger from "../../../common/logger.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import validateRequestBody from "../../middlewares/validateRequestBody.js";
 
 export default ({ users, userEvents }) => {
   const router = express.Router();

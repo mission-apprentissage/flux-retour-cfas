@@ -27,7 +27,7 @@ const getJwtForUser = async (httpClient) => {
 };
 
 describe("Reseaux CFA route", () => {
-  describe("GET /reseaux-cfas", () => {
+  describe("GET /api/v1/admin/reseaux-cfas", () => {
     it("sends a 200 HTTP response with list of reseaux cfas", async () => {
       const { httpClient, components } = await startServer();
       await createApiUser();
@@ -48,7 +48,7 @@ describe("Reseaux CFA route", () => {
       await components.reseauxCfas.create(reseauCfa1);
       await components.reseauxCfas.create(reseauCfa2);
 
-      const response = await httpClient.get("/api/reseaux-cfas", {
+      const response = await httpClient.get("/api/v1/admin/reseaux-cfas", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       assert.equal(response.status, 200);
@@ -63,14 +63,14 @@ describe("Reseaux CFA route", () => {
     });
   });
 
-  describe("POST /reseaux-cfas/search", () => {
+  describe("POST /api/v1/admin/reseaux-cfas/search", () => {
     it("sends a 200 HTTP empty response when no match", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
       const response = await httpClient.post(
-        "/api/reseaux-cfas/search",
+        "/api/v1/admin/reseaux-cfas/search",
         {
           searchTerm: "blabla",
         },
@@ -94,19 +94,19 @@ describe("Reseaux CFA route", () => {
       });
 
       const responseUai = await httpClient.post(
-        "/api/reseaux-cfas/search",
+        "/api/v1/admin/reseaux-cfas/search",
         { searchTerm: "0801302F" },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
       const responseSiret = await httpClient.post(
-        "/api/reseaux-cfas/search",
+        "/api/v1/admin/reseaux-cfas/search",
         { searchTerm: "34012780200015" },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
       const responseNomEtablissement = await httpClient.post(
-        "/api/reseaux-cfas/search",
+        "/api/v1/admin/reseaux-cfas/search",
         { searchTerm: "Somme" },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -125,7 +125,7 @@ describe("Reseaux CFA route", () => {
     });
   });
 
-  describe("DELETE /reseaux-cfas/delete/:id", () => {
+  describe("DELETE /api/v1/admin/reseaux-cfas/delete/:id", () => {
     it("Permet de supprimer un reseau de cfa", async () => {
       const { httpClient, components } = await startServer();
       await createApiUser();
@@ -139,7 +139,7 @@ describe("Reseaux CFA route", () => {
 
       const { _id } = await components.reseauxCfas.create(reseauCfa1);
 
-      await httpClient.delete(`/api/reseaux-cfas/delete/${_id}`, {
+      await httpClient.delete(`/api/v1/admin/reseaux-cfas/delete/${_id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const found = await reseauxCfasDb().find().toArray();

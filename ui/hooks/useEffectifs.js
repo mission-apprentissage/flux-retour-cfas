@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { useFiltersContext } from "../../pages/app/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifs } from "../api/tableauDeBord";

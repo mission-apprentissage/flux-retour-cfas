@@ -2,9 +2,11 @@ import express from "express";
 import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import effectifsExportRouter from "./routes/effectifs-export.route.js";
+import config from "../config.js";
+
 import { apiRoles, tdbRoles } from "../common/roles.js";
 
+import tryCatch from "./middlewares/tryCatchMiddleware.js";
 import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
@@ -12,34 +14,34 @@ import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
-import effectifsApprenantsRouter from "./routes/effectifs-apprenants.route.js";
-import dossierApprenantRouter from "./routes/dossiers-apprenants.route.js";
-import lienPriveCfaRouter from "./routes/lien-prive-cfa.route.js";
-import loginRouter from "./routes/login.route.js";
-import loginCfaRouter from "./routes/login-cfa.route.js";
-import configRouter from "./routes/config.route.js";
-import referentielRouter from "./routes/referentiel.route.js";
-import effectifsRouter from "./routes/effectifs.route.js";
-import cfasRouter from "./routes/cfas.route.js";
-import formationRouter from "./routes/formations.route.js";
-import healthcheckRouter from "./routes/healthcheck.route.js";
-import demandeIdentifiantsRouter from "./routes/demande-identifiants.route.js";
-import demandeBranchementErpRouter from "./routes/demande-branchement-erp.route.js";
-import cacheRouter from "./routes/cache.route.js";
-import updatePasswordRouter from "./routes/update-password.route.js";
-import usersRouter from "./routes/users.route.js";
-import reseauxCfasRouter from "./routes/reseaux-cfas.route.js";
-import effectifsNationalRouter from "./routes/effectifs-national.route.js";
+import effectifsExportRouter from "./routes/specific.routes/effectifs-export.route.js";
+import effectifsApprenantsRouter from "./routes/specific.routes/effectifs-apprenants.route.js";
+import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.route.js";
+import lienPriveCfaRouter from "./routes/specific.routes/lien-prive-cfa.route.js";
+import loginRouter from "./routes/specific.routes/login.route.js";
+import loginCfaRouter from "./routes/specific.routes/login-cfa.route.js";
+import referentielRouter from "./routes/specific.routes/referentiel.route.js";
+import effectifsRouter from "./routes/specific.routes/effectifs.route.js";
+import cfasRouter from "./routes/specific.routes/cfas.route.js";
+import formationRouter from "./routes/specific.routes/formations.route.js";
+import demandeIdentifiantsRouter from "./routes/specific.routes/demande-identifiants.route.js";
+import demandeBranchementErpRouter from "./routes/specific.routes/demande-branchement-erp.route.js";
+import updatePasswordRouter from "./routes/specific.routes/update-password.route.js";
+import usersRouter from "./routes/specific.routes/users.route.js";
+import reseauxCfasRouter from "./routes/specific.routes/reseaux-cfas.route.js";
+import effectifsNationalRouter from "./routes/specific.routes/effectifs-national.route.js";
 
 import emails from "./routes/emails.routes.js";
+import session from "./routes/session.routes.js";
+import healthcheckRouter from "./routes/healthcheck.route.js";
+
 import auth from "./routes/user.routes/auth.routes.js";
 import register from "./routes/user.routes/register.routes.js";
 import password from "./routes/user.routes/password.routes.js";
 import profile from "./routes/user.routes/profile.routes.js";
-import session from "./routes/session.routes.js";
 
-import cerfa from "./routes/specific.routes/cerfa.routes.js";
-import upload from "./routes/specific.routes/upload.routes.js";
+import cerfa from "./routes/specific.temp.routes/cerfa.routes.js";
+import upload from "./routes/specific.temp.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
@@ -48,7 +50,6 @@ export default async (components) => {
   const app = express();
 
   const requireJwtAuthentication = requireJwtAuthenticationMiddleware(components);
-  const adminOnly = permissionsMiddleware([apiRoles.administrator]);
 
   const checkJwtToken = authMiddleware();
 
@@ -90,8 +91,28 @@ export default async (components) => {
     pageAccessMiddleware(["admin/page_gestion_reseaux_cfa"]),
     reseauxCfasRouter(components)
   );
+  app.use("/api/users", checkJwtToken, pageAccessMiddleware(["_ADMIN"]), usersRouter(components)); // TODO TO REMOVE
+  app.get(
+    "/api/cache",
+    checkJwtToken,
+    pageAccessMiddleware(["_ADMIN"]),
+    tryCatch(async (req, res) => {
+      await components.cache.clear();
+      return res.json({});
+    })
+  );
+  app.get(
+    "/api/config",
+    checkJwtToken,
+    pageAccessMiddleware(["_ADMIN"]),
+    tryCatch(async (req, res) => {
+      return res.json({
+        config,
+      });
+    })
+  );
 
-  // TDB PREVIOUS ROUTES
+  // TDB OLD PREVIOUS ROUTES
   // open routes
   app.use("/api/login", loginRouter(components));
   app.use("/api/login-cfa", loginCfaRouter(components));
@@ -142,12 +163,6 @@ export default async (components) => {
     permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
     effectifsExportRouter(components)
   );
-
-  // admin routes
-  app.use("/api/users", requireJwtAuthentication, adminOnly, usersRouter(components));
-  app.use("/api/reseaux-cfas", requireJwtAuthentication, adminOnly, reseauxCfasRouter(components));
-  app.use("/api/cache", requireJwtAuthentication, adminOnly, cacheRouter(components));
-  app.use("/api/config", requireJwtAuthentication, adminOnly, configRouter());
 
   app.use(errorMiddleware());
 

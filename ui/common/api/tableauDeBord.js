@@ -75,15 +75,20 @@ export const fetchCfa = (cfaUai) => {
 
 /* Reseaux CFAS */
 export const fetchReseauxCfas = () => {
-  return _get("/api/reseaux-cfas");
+  return _get("/api/v1/admin/reseaux-cfas");
+};
+
+/* Reseaux CFAS Search */
+export const fetchSearchReseauxCfas = async (filters) => {
+  return await _post("/api/v1/admin/reseaux-cfas/search", filters);
 };
 
 export const postCreateReseauCfa = (body) => {
-  return _post("/api/reseaux-cfas", body);
+  return _post("/api/v1/admin/reseaux-cfas", body);
 };
 
 export const deleteReseauCfa = (body) => {
-  return _delete(`/api/reseaux-cfas/delete/${body}`);
+  return _delete(`/api/v1/admin/reseaux-cfas/delete/${body}`);
 };
 
 /* Organismes appartenance */
@@ -104,11 +109,6 @@ export const fetchRegions = () => {
 /* Departements */
 export const fetchDepartements = () => {
   return _get("/api/referentiel/departements");
-};
-
-/* Reseaux CFAS Search */
-export const fetchSearchReseauxCfas = async (filters) => {
-  return await _post("/api/reseaux-cfas/search", filters);
 };
 
 /* Users Search */
