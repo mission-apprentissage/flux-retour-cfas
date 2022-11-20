@@ -1,5 +1,5 @@
 import { SifasDb } from "../model/collections.js";
-import { defaultValuesSifa } from "../model/new.models/sifa.model/sifa.model.js";
+import { defaultValuesSifa } from "../model/next.toKeep.models/sifas.model/sifas.model.js";
 
 /**
  * Méthode de création d'un sifa

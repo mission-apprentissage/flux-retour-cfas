@@ -5,7 +5,7 @@ export const adresseSchema = object({
     description: "N° de la voie",
     example: 13,
     pattern: "^(?!0{1})[0-9]*$",
-    // Nullable
+    // Nullable IMPORTANT
   }),
   repetition_voie: string({
     description: "Indice de répétition du numéro de voie",
@@ -42,20 +42,20 @@ export const adresseSchema = object({
     example: "PARIS",
     maxLength: 80,
   }),
-  // departement: object(
-  //   {
-  //     code: string(),
-  //     nom: string(),
-  //   },
-  //   { required: ["code", "nom"] }
-  // ),
-  // region: object(
-  //   {
-  //     code: string(),
-  //     nom: string(),
-  //   },
-  //   { required: ["code", "nom"] }
-  // ),
+  departement: object(
+    {
+      code: string(),
+      nom: string(),
+    },
+    { required: ["code", "nom"] }
+  ),
+  region: object(
+    {
+      code: string(),
+      nom: string(),
+    },
+    { required: ["code", "nom"] }
+  ),
   // academie: object(
   //   {
   //     code: string(),
@@ -63,6 +63,10 @@ export const adresseSchema = object({
   //   },
   //   { required: ["code", "nom"] }
   // ),
+  complete: string({
+    description: "Adresse complète",
+    example: "13 Bis Boulevard de la liberté 75000 PARIS",
+  }),
 });
 
 // Default value

@@ -2,7 +2,7 @@ import express from "express";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { cloneDeep, mergeWith } from "lodash-es";
 
-import { schema } from "../../../common/model/new.models/sifa.model/sifa.model.js";
+import { schema } from "../../../common/model/next.toKeep.models/sifas.model/sifas.model.js";
 import { SifasDb } from "../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
 

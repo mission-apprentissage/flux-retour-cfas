@@ -14,10 +14,10 @@ import archiveDossiersApprenantsModelDescriptor from "./previous.models/archiveD
 import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
 import referentielSiretUaiModelDescriptor from "./previous.models/referentielSiretUai.model.js";
 
-import * as usersMigrationModelDescriptor from "./new.models/usersMigration.model.js";
-import * as RolesModelDescriptor from "./new.models/roles.model.js";
-import * as JwtSessionsModelDescriptor from "./new.models/jwtSessions.model.js";
-import * as sifasModelDescriptor from "./new.models/sifa.model/sifa.model.js";
+import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
+import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
+import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
+import * as sifasModelDescriptor from "./next.toKeep.models/sifas.model/sifas.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,

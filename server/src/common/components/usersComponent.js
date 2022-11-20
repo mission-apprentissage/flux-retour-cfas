@@ -1,6 +1,6 @@
 import { pick, uniq } from "lodash-es";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
-import { defaultValuesUser, validateUser } from "../model/new.models/usersMigration.model.js";
+import { defaultValuesUser, validateUser } from "../model/next.toKeep.models/usersMigration.model.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { passwordSchema } from "../utils/validationUtils.js";
