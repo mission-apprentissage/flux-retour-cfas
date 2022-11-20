@@ -1,4 +1,4 @@
-import { object, arrayOf, string, date, objectId, dateOrNull, stringOrNull } from "./json-schema/jsonSchemaTypes.js";
+import { object, arrayOf, string, date, objectId, dateOrNull, stringOrNull } from "../json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "formations";
 

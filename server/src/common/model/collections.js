@@ -1,23 +1,23 @@
-import * as usersMigrationModelDescriptor from "./usersMigration.model.js";
-import * as RolesModelDescriptor from "./roles.model.js";
-import * as JwtSessionsModelDescriptor from "./jwtSessions.model.js";
 import { getDbCollection } from "../mongodb.js";
-import usersModelDescriptor from "./users.model.js";
-import userEventsModelDescriptor from "./userEvents.model.js";
-import cfasModelDescriptor from "./cfas.model.js";
-import formationsModelDescriptor from "./formations.model.js";
-import reseauxCfasModelDescriptor from "./reseauxCfas.model.js";
-import dossiersApprenantsModelDescriptor from "./dossiersApprenants.model.js";
-import jobEventsModelDescriptor from "./jobEvents.model.js";
-import effectifsApprenantsModelDescriptor from "./effectifsApprenants.model.js";
-import demandesIdentifiantsModelDescriptor from "./demandesIdentifiants.model.js";
-import demandesBranchementErpDbModelDescriptor from "./demandesBranchementErp.model.js";
-import duplicatesEventsModelDescriptor from "./duplicatesEvents.model.js";
-import archiveDossiersApprenantsModelDescriptor from "./archiveDossiersApprenants.model.js";
-import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
-import referentielSiretUaiModelDescriptor from "./referentielSiretUai.model.js";
+import usersModelDescriptor from "./previous.models/users.model.js";
+import userEventsModelDescriptor from "./previous.models/userEvents.model.js";
+import cfasModelDescriptor from "./previous.models/cfas.model.js";
+import formationsModelDescriptor from "./previous.models/formations.model.js";
+import reseauxCfasModelDescriptor from "./previous.models/reseauxCfas.model.js";
+import dossiersApprenantsModelDescriptor from "./previous.models/dossiersApprenants.model.js";
+import jobEventsModelDescriptor from "./previous.models/jobEvents.model.js";
+import effectifsApprenantsModelDescriptor from "./previous.models/effectifsApprenants.model.js";
+import demandesIdentifiantsModelDescriptor from "./previous.models/demandesIdentifiants.model.js";
+import demandesBranchementErpDbModelDescriptor from "./previous.models/demandesBranchementErp.model.js";
+import duplicatesEventsModelDescriptor from "./previous.models/duplicatesEvents.model.js";
+import archiveDossiersApprenantsModelDescriptor from "./previous.models/archiveDossiersApprenants.model.js";
+import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
+import referentielSiretUaiModelDescriptor from "./previous.models/referentielSiretUai.model.js";
 
-import * as CerfasModelDescriptor from "./cerfa.model/cerfa.model.js";
+import * as usersMigrationModelDescriptor from "./new.models/usersMigration.model.js";
+import * as RolesModelDescriptor from "./new.models/roles.model.js";
+import * as JwtSessionsModelDescriptor from "./new.models/jwtSessions.model.js";
+import * as sifasModelDescriptor from "./new.models/sifa.model/sifa.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
@@ -34,6 +34,7 @@ export const modelDescriptors = [
   archiveDossiersApprenantsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
   referentielSiretUaiModelDescriptor,
+  sifasModelDescriptor,
 ];
 
 export const dossiersApprenantsDb = () => {
@@ -104,6 +105,6 @@ export const referentielSiretUaiDb = () => {
   return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
 };
 
-export function CerfasDb() {
-  return getDbCollection(CerfasModelDescriptor.collectionName);
+export function SifasDb() {
+  return getDbCollection(sifasModelDescriptor.collectionName);
 }

@@ -2,8 +2,8 @@ import express from "express";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { cloneDeep, mergeWith } from "lodash-es";
 
-import { schema } from "../../../common/model/cerfa.model/cerfa.model.js";
-import { CerfasDb } from "../../../common/model/collections.js";
+import { schema } from "../../../common/model/new.models/sifa.model/sifa.model.js";
+import { SifasDb } from "../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
 
 // TODO TMP
@@ -56,7 +56,7 @@ export default () => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      const cerfa = await CerfasDb().findOne({ _id: ObjectId("6378dd696c02a7506753a02e") });
+      const cerfa = await SifasDb().findOne({ _id: ObjectId("6379d1f12329a49fbea0b535") });
       return res.json(buildCerfaResult(cerfa));
     })
   );

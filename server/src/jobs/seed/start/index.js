@@ -2,7 +2,7 @@ import logger from "../../../common/logger.js";
 import { createUser } from "../../../common/components/usersComponent.js";
 import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
 import { createRole } from "../../../common/components/rolesComponent.js";
-import { createCerfa } from "../../../common/components/cerfasComponent.js";
+import { createSifa } from "../../../common/components/sifasComponent.js";
 
 const createUsers = async ({ adminEmail }) => {
   await createUser(
@@ -25,7 +25,7 @@ export const seed = async ({ adminEmail }) => {
 
   await createUsers({ adminEmail });
 
-  await createCerfa(); // TODO TMP
+  await createSifa(); // TODO TMP
 
   logger.info(`Seed tjp-pilotage created`);
 };

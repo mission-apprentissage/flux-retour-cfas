@@ -7,7 +7,7 @@ import {
   stringOrNull,
   dateOrNull,
   arrayOfOrNull,
-} from "./json-schema/jsonSchemaTypes.js";
+} from "../json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "effectifsApprenants";
 

@@ -1,6 +1,6 @@
-import { object, boolean, objectId } from "../json-schema/jsonSchemaTypes.js";
+import { object, boolean, objectId } from "../../json-schema/jsonSchemaTypes.js";
 
-import { employeurCerfaSchema, defaultValuesEmployeurCerfa } from "./parts/employeurCerfa.part.js";
+import { employeurCerfaSchema, defaultValuesEmployeurSifa } from "./parts/employeurSifa.part.js";
 // import apprentiSchema from "./parts/apprenti.part.js";
 // import maitreApprentissageSchema from "./parts/maitreApprentissage.part.js";
 // import formationSchema from "./parts/formation.part.js";
@@ -9,7 +9,7 @@ import { employeurCerfaSchema, defaultValuesEmployeurCerfa } from "./parts/emplo
 // import etablissementFormationSchema from "./parts/etablissementFormation.part.js";
 import { fieldLockedSchema, defaultValuesFieldLocked } from "./parts/fieldLocked.part.js";
 
-export const collectionName = "cerfas";
+export const collectionName = "sifas";
 
 export function schema() {
   return object(
@@ -46,10 +46,10 @@ export function schema() {
 }
 
 // Default value
-export function defaultValuesCerfa() {
+export function defaultValuesSifa() {
   return {
     draft: true,
-    employeur: defaultValuesEmployeurCerfa(),
+    employeur: defaultValuesEmployeurSifa(),
     isLockedField: defaultValuesFieldLocked(),
   };
 }

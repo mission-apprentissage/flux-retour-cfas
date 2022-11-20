@@ -1,5 +1,5 @@
-import { object, string, integer } from "../../json-schema/jsonSchemaTypes.js";
-import { adresseSchema, defaultValuesAdresse } from "../../json-schema/adresseSchema.js";
+import { object, string, integer } from "../../../json-schema/jsonSchemaTypes.js";
+import { adresseSchema, defaultValuesAdresse } from "../../../json-schema/adresseSchema.js";
 // const idccEnum = require("./idcc.part");
 // import departementEnum from "./departements.part.js";
 
@@ -201,7 +201,7 @@ export const employeurCerfaSchema = object({
 // privePublic
 
 // Default value
-export function defaultValuesEmployeurCerfa() {
+export function defaultValuesEmployeurSifa() {
   return {
     denomination: null,
     raison_sociale: null,

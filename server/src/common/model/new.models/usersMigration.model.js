@@ -1,7 +1,7 @@
 import Joi from "joi";
-import { integer, object, objectId, string, boolean, arrayOf, date } from "./json-schema/jsonSchemaTypes.js";
-import { schemaValidation } from "../utils/schemaUtils.js";
-import { siretSchema, passwordSchema } from "../utils/validationUtils.js";
+import { integer, object, objectId, string, boolean, arrayOf, date } from "../json-schema/jsonSchemaTypes.js";
+import { schemaValidation } from "../../utils/schemaUtils.js";
+import { siretSchema, passwordSchema } from "../../utils/validationUtils.js";
 
 export const collectionName = "usersMigration";
 

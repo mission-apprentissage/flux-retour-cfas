@@ -39,7 +39,7 @@ import register from "./routes/user.routes/register.routes.js";
 import password from "./routes/user.routes/password.routes.js";
 import profile from "./routes/user.routes/profile.routes.js";
 
-import cerfa from "./routes/specific.temp.routes/cerfa.routes.js";
+import sifa from "./routes/specific.temp.routes/sifa.routes.js";
 import upload from "./routes/specific.temp.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
@@ -113,7 +113,7 @@ export default async (components) => {
   );
 
   // TODO TEST ROUTES TMEPORARY
-  app.use("/api/v1/cerfa", cerfa()); // TODO TMP
+  app.use("/api/v1/sifa", sifa()); // TODO TMP
   app.use("/api/v1/upload", upload(components));
 
   // TDB OLD PREVIOUS ROUTES

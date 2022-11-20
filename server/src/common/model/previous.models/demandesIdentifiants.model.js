@@ -1,4 +1,4 @@
-import { object, string, date, objectId } from "./json-schema/jsonSchemaTypes.js";
+import { object, string, date, objectId } from "../json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "demandesIdentifiants";
 

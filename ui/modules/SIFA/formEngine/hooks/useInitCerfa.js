@@ -12,7 +12,7 @@ export const useInitCerfa = ({ controller }) => {
     ["cerfa", dossier?._id],
     async () => {
       if (!dossier?._id) return;
-      const cerfa = await _get(`/api/v1/cerfa?dossierId=${dossier?._id}`);
+      const cerfa = await _get(`/api/v1/sifa?dossierId=${dossier?._id}`);
       const fields = initFields({ cerfa, schema: cerfaSchema });
       controller.setFields(fields);
       return cerfa;

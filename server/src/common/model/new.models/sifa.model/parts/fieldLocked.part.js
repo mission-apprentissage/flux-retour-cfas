@@ -1,4 +1,4 @@
-import { object, boolean } from "../../json-schema/jsonSchemaTypes.js";
+import { object, boolean } from "../../../json-schema/jsonSchemaTypes.js";
 
 export const fieldLockedSchema = () => {
   return object({
