@@ -133,6 +133,19 @@ const Badge = {
       pr: "15px",
       fontWeight: "500",
     },
+    purple: {
+      ...commonStatusBadgeStyle,
+      bg: "#E3E3FD",
+      color: "bluefrance",
+    },
+    grey: {
+      ...commonStatusBadgeStyle,
+      bg: "#EEEEEE",
+      color: "#161616",
+      pl: "15px",
+      pr: "15px",
+      fontWeight: "500",
+    },
   },
 };
 

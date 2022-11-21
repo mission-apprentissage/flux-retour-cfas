@@ -1,6 +1,4 @@
-// import { Box, Container, Stack } from "@chakra-ui/react";
-// import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/tabs";
-import { Box, Container, Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import { Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -19,39 +17,35 @@ const IndicateursAndRepartitionEffectifsNational = ({ effectifs, loading }) => {
   const exportFilename = `tdb-données-territoire-national-${new Date().toLocaleDateString()}.csv`;
 
   return (
-    <Box w="100%" py={[4, 6]}>
-      <Container maxWidth="xl">
-        <Tabs variant={"search"} isLazy lazyBehavior="keepMounted">
-          <TabList bg="white">
-            <Tab fontWeight="bold" fontSize="delta">
-              Vue globale
-            </Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel paddingTop="4w">
-              <Stack spacing="4w">
-                <Stack>
-                  <DateWithTooltipSelector />
-                  <IndicateursGridStack
-                    effectifs={effectifs}
-                    loading={loading}
-                    organismesCount={organismesCount}
-                    showOrganismesCount
-                    effectifsDate={filters.date}
-                  />
-                </Stack>
-                <DownloadBlock
-                  title="Télécharger les données du territoire sélectionné"
-                  description="Le fichier est généré à date du jour, en fonction du territoire sélectionné et comprend la liste anonymisée des apprenants par organisme et formation."
-                  fileName={exportFilename}
-                  getFile={() => fetchEffectifsDataListCsvExport(mapFiltersToApiFormat(filters))}
-                />
-              </Stack>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Container>
-    </Box>
+    <Tabs mt="4w" variant={"search"} isLazy lazyBehavior="keepMounted">
+      <TabList bg="white">
+        <Tab fontWeight="bold" fontSize="delta">
+          Vue globale
+        </Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel paddingTop="4w">
+          <Stack spacing="4w">
+            <Stack>
+              <DateWithTooltipSelector />
+              <IndicateursGridStack
+                effectifs={effectifs}
+                loading={loading}
+                organismesCount={organismesCount}
+                showOrganismesCount
+                effectifsDate={filters.date}
+              />
+            </Stack>
+            <DownloadBlock
+              title="Télécharger les données du territoire sélectionné"
+              description="Le fichier est généré à date du jour, en fonction du territoire sélectionné et comprend la liste anonymisée des apprenants par organisme et formation."
+              fileName={exportFilename}
+              getFile={() => fetchEffectifsDataListCsvExport(mapFiltersToApiFormat(filters))}
+            />
+          </Stack>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   );
 };
 

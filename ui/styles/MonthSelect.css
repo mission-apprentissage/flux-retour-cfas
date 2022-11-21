@@ -1,5 +1,5 @@
 .react-datepicker {
-  font-family: "Marianne", sans-serif;
+  font-family: "Marianne", sans-serif !important;
   border-color: #e1e5f3;
 }
 
@@ -15,8 +15,8 @@
   text-transform: capitalize;
   color: #1e1e1e;
   padding: 4px 8px;
-  margin: 4px;
-  width: 96px;
+  margin: 4px !important;
+  width: 96px !important;
   font-weight: 400;
 }
 
@@ -32,12 +32,12 @@
 }
 
 .react-datepicker__header {
-  color: white;
-  text-align: center;
-  background-color: #000091;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  border-bottom-color: #e7e7e7;
+  color: white !important;
+  text-align: center !important;
+  background-color: #000091 !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  border-bottom-color: #e7e7e7 !important;
 }
 
 .react-datepicker__navigation--previous {

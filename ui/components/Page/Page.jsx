@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
 import ContactSection from "../ContactSection/ContactSection";
+import Section from "../Section/Section";
 
 export function Page({ children, ...rest }) {
   return (
@@ -11,9 +12,7 @@ export function Page({ children, ...rest }) {
       <Header />
       <NavigationMenu />
       <Box minH={"47vh"} flexGrow="1">
-        <Box w="100%" py={[4, 4]} px={[1, 1, 12, 24]}>
-          <Container maxW="xl">{children}</Container>
-        </Box>
+        <Section>{children}</Section>
       </Box>
       <ContactSection />
       <Footer />
