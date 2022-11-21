@@ -1,4 +1,4 @@
-import { SifasDb } from "../model/collections.js";
+import { sifasDb } from "../model/collections.js";
 import { defaultValuesSifa } from "../model/next.toKeep.models/sifas.model/sifas.model.js";
 
 /**
@@ -6,7 +6,7 @@ import { defaultValuesSifa } from "../model/next.toKeep.models/sifas.model/sifas
  * @returns
  */
 export const createSifa = async () => {
-  const { insertedId } = await SifasDb().insertOne({
+  const { insertedId } = await sifasDb().insertOne({
     ...defaultValuesSifa(),
   });
 

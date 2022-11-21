@@ -6,11 +6,11 @@ export const collectionName = "organismes";
 
 export const indexes = () => {
   return [
+    [{ uai: 1 }, { name: "uai" }],
     [
       { nom: "text", nom_tokenized: "text" },
       { name: "nom_tokenized_text", default_language: "french" },
     ],
-    [{ uai: 1 }, { name: "uai" }],
     [{ sirets: 1 }, { name: "sirets" }],
   ];
 };
@@ -35,6 +35,7 @@ export const schema = object(
     },
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
+    est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
 
     contributeurs: arrayOf(string(), { description: "Emails des contributeurs de cet organisme" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),

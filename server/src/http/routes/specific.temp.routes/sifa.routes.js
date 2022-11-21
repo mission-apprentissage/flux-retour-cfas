@@ -3,7 +3,7 @@ import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { cloneDeep, mergeWith } from "lodash-es";
 
 import { schema } from "../../../common/model/next.toKeep.models/sifas.model/sifas.model.js";
-import { SifasDb } from "../../../common/model/collections.js";
+import { sifasDb } from "../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
 
 // TODO TMP
@@ -56,7 +56,7 @@ export default () => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      const cerfa = await SifasDb().findOne({ _id: ObjectId("6379d1f12329a49fbea0b535") });
+      const cerfa = await sifasDb().findOne({ _id: ObjectId("6379d1f12329a49fbea0b535") });
       return res.json(buildCerfaResult(cerfa));
     })
   );

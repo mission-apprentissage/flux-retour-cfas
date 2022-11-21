@@ -17,6 +17,7 @@ import referentielSiretUaiModelDescriptor from "./previous.models/referentielSir
 import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
 import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
 import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
+import * as OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
 import * as sifasModelDescriptor from "./next.toKeep.models/sifas.model/sifas.model.js";
 
 export const modelDescriptors = [
@@ -34,7 +35,12 @@ export const modelDescriptors = [
   archiveDossiersApprenantsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
   referentielSiretUaiModelDescriptor,
-  sifasModelDescriptor,
+
+  usersMigrationModelDescriptor,
+  RolesModelDescriptor,
+  JwtSessionsModelDescriptor,
+  OrganismesModelDescriptor,
+  // sifasModelDescriptor,
 ];
 
 export const dossiersApprenantsDb = () => {
@@ -105,6 +111,10 @@ export const referentielSiretUaiDb = () => {
   return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
 };
 
-export function SifasDb() {
+export function organismesDb() {
+  return getDbCollection(OrganismesModelDescriptor.collectionName);
+}
+
+export function sifasDb() {
   return getDbCollection(sifasModelDescriptor.collectionName);
 }
