@@ -38,7 +38,7 @@ function IndicateursVueTerritoire() {
           </Heading>
           <SwitchViewButton />
         </HStack>
-        <HStack spacing="4w">
+        <HStack spacing="4w" flexDirection={["column", "column", "row"]}>
           <TerritoireFilter
             onDepartementChange={filtersContext.setters.setDepartement}
             onRegionChange={filtersContext.setters.setRegion}

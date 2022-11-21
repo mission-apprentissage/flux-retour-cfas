@@ -61,7 +61,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Ajout des codes INSEE de la Corse",
     explication:
-      "Afin de corriger les bug d’affichage et de localisation des organismes Corses : résolution de bug en lien avec l’API INSEE. A présent les organismes corses transmettant au Tableau de bord sont visibles sur la vue territoriale.",
+      "Afin de corriger les bug d’affichage et de localisation des organismes Corses : résolution de bug en lien avec l’API INSEE. A présent les organismes corses transmettant au Tableau de bord sont visibles sur la itoriale.",
     correctif: "Oui",
     date: "2022/07/04",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.CollecteDesDonnees,
