@@ -33,10 +33,19 @@ export const findRolePermissionById = async (id, projection = {}) => {
 };
 
 export const findRolesByNames = async (names, projection = {}) => {
-  const roles = await rolesDb()
+  return await rolesDb()
     .find({ name: { $in: names } }, { projection })
     .toArray();
-  return roles;
+};
+
+/**
+ * Méthode de récupération d'un role depuis un nom
+ * @param {string} name
+ * @param {*} projection
+ * @returns
+ */
+export const findRoleByName = async (name, projection = {}) => {
+  return await rolesDb().findOne(name, { projection });
 };
 
 export const findRoleById = async (id, projection = {}) => {

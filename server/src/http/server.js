@@ -11,6 +11,7 @@ import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
 import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
+import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
@@ -69,7 +70,7 @@ export default async (components) => {
   app.use(
     ["/api/effectifs", "/api/v1/effectifs"],
     checkJwtToken,
-    // TODO permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    permissionsOrganismeMiddleware(["espace/tableau_de_bord"]),
     effectifsRouter(components)
   );
 

@@ -15,9 +15,11 @@ import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossie
 import referentielSiretUaiModelDescriptor from "./previous.models/referentielSiretUai.model.js";
 
 import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
-import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
 import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
+import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
+import * as PermissionsDescriptor from "./next.toKeep.models/permissions.model.js";
 import * as OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
+import * as dossiersApprenantsMigrationModelDescriptor from "./next.toKeep.models/dossiersApprenantsMigration.model.js";
 import * as sifasModelDescriptor from "./next.toKeep.models/sifas.model/sifas.model.js";
 
 export const modelDescriptors = [
@@ -37,10 +39,12 @@ export const modelDescriptors = [
   referentielSiretUaiModelDescriptor,
 
   usersMigrationModelDescriptor,
-  RolesModelDescriptor,
   JwtSessionsModelDescriptor,
+  RolesModelDescriptor,
+  PermissionsDescriptor,
   OrganismesModelDescriptor,
-  // sifasModelDescriptor,
+  dossiersApprenantsMigrationModelDescriptor,
+  sifasModelDescriptor,
 ];
 
 export const dossiersApprenantsDb = () => {
@@ -87,18 +91,6 @@ export const duplicatesEventsDb = () => {
   return getDbCollection(duplicatesEventsModelDescriptor.collectionName);
 };
 
-export const usersMigrationDb = () => {
-  return getDbCollection(usersMigrationModelDescriptor.collectionName);
-};
-
-export const rolesDb = () => {
-  return getDbCollection(RolesModelDescriptor.collectionName);
-};
-
-export const jwtSessionsDb = () => {
-  return getDbCollection(JwtSessionsModelDescriptor.collectionName);
-};
-
 export const archiveDossiersApprenantsDb = () => {
   return getDbCollection(archiveDossiersApprenantsModelDescriptor.collectionName);
 };
@@ -111,10 +103,28 @@ export const referentielSiretUaiDb = () => {
   return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
 };
 
+export const usersMigrationDb = () => {
+  return getDbCollection(usersMigrationModelDescriptor.collectionName);
+};
+
+export const rolesDb = () => {
+  return getDbCollection(RolesModelDescriptor.collectionName);
+};
+
+export const jwtSessionsDb = () => {
+  return getDbCollection(JwtSessionsModelDescriptor.collectionName);
+};
+
 export function organismesDb() {
   return getDbCollection(OrganismesModelDescriptor.collectionName);
 }
+export function permissionsDb() {
+  return getDbCollection(PermissionsDescriptor.collectionName);
+}
 
+export function dossiersApprenantsMigrationDb() {
+  return getDbCollection(dossiersApprenantsMigrationModelDescriptor.collectionName);
+}
 export function sifasDb() {
   return getDbCollection(sifasModelDescriptor.collectionName);
 }

@@ -2,6 +2,10 @@ import Joi from "joi";
 import { integer, object, objectId, string, boolean, arrayOf, date } from "../json-schema/jsonSchemaTypes.js";
 import { schemaValidation } from "../../utils/schemaUtils.js";
 import { siretSchema, passwordSchema } from "../../utils/validationUtils.js";
+import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
+import { DEPARTEMENTS, REGIONS } from "../../constants/territoiresConstants.js";
+import { ACADEMIES } from "../../constants/academiesConstants.js";
+import { ORGANISMES_APPARTENANCE } from "../../constants/usersConstants.js";
 
 export const collectionName = "usersMigration";
 
@@ -18,7 +22,40 @@ export const schema = object(
     nom: string({ description: "Le nom de l'utilisateur" }),
     prenom: string({ description: "Le prénom de l'utilisateur" }),
     telephone: string({ description: "Le téléphone de l'utilisateur" }),
+    description: string({ description: "Description de l'utilisateur" }),
     siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
+    organisation: string({
+      description: "Appartenance à une organisation (exemple DREETS, MISSION_LOCALE..)",
+      enum: Object.keys(ORGANISMES_APPARTENANCE),
+    }),
+
+    // Scoping
+    reseau: string({
+      description: "Si l'utilisateur est scopé à un réseau, le quel ?",
+      enum: Object.keys(RESEAUX_CFAS),
+    }),
+    erp: string({ description: "Si l'utilisateur est scopé à un erp, le quel ?" }),
+    codes_region: arrayOf(
+      string({
+        enum: REGIONS.map(({ code }) => code),
+      }),
+      { description: "Si l'utilisateur est scopé à une ou des région(s), lesquelles ?" }
+    ),
+    codes_academie: arrayOf(
+      string({
+        enum: Object.values(ACADEMIES).map(({ code }) => code),
+      }),
+      { description: "Si l'utilisateur est scopé à une ou des académie(s), lesquelles ?" }
+    ),
+    codes_departement: arrayOf(
+      string({
+        enum: DEPARTEMENTS.map(({ code }) => code),
+      }),
+      { description: "Si l'utilisateur est scopé à un ou des département(s), lesquels ?" }
+    ),
+    is_cross_organismes: boolean({ description: "true si l'utilisateur est transverse à tous les organismes" }),
+
+    // Internal
     account_status: string({
       description: "Statut du compte",
       enum: [
@@ -72,8 +109,10 @@ export function defaultValuesUser() {
     account_status: "NOT_CONFIRMED",
     orign_register: "ORIGIN",
     has_accept_cgu_version: "",
+    is_cross_organismes: false,
     is_admin: false,
     roles: [],
+    codes_region: [],
     custom_acl: [],
     tour_guide: true,
     invalided_token: false,
@@ -86,7 +125,7 @@ export function defaultValuesUser() {
 
 // Extra validation
 export function validateUser(props) {
-  return schemaValidation(props, schema(), [
+  return schemaValidation(props, schema, [
     {
       name: "email",
       base: Joi.string().email(),

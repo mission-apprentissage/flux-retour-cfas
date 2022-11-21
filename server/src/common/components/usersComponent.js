@@ -14,7 +14,24 @@ export const createUser = async ({ email, password }, options = {}) => {
   const passwordHash = options.hash || hashUtil(password);
   const permissions = options.permissions || {};
 
-  const { civility, nom, prenom, telephone, siret, account_status, custom_acl, orign_register, roles } = options;
+  const {
+    civility,
+    nom,
+    prenom,
+    telephone,
+    siret,
+    organisation,
+    account_status,
+    custom_acl,
+    orign_register,
+    roles,
+    description,
+    reseau,
+    erp,
+    codes_region,
+    codes_academie,
+    codes_departement,
+  } = options;
 
   let rolesMatchIds = [];
   if (roles && roles.length > 0) {
@@ -33,6 +50,7 @@ export const createUser = async ({ email, password }, options = {}) => {
       email: email.toLowerCase(),
       password: passwordHash,
       is_admin: !!permissions.is_admin,
+      is_cross_organismes: !!permissions.is_cross_organismes,
       ...(civility ? { civility } : {}),
       ...(nom ? { nom } : {}),
       ...(prenom ? { prenom } : {}),
@@ -42,10 +60,17 @@ export const createUser = async ({ email, password }, options = {}) => {
       ...(custom_acl ? { custom_acl } : {}),
       ...(roles ? { roles: rolesMatchIds } : {}),
       ...(orign_register ? { orign_register } : {}),
+      ...(description ? { description } : {}),
+      ...(organisation ? { organisation } : {}),
+      ...(reseau ? { reseau } : {}),
+      ...(erp ? { erp } : {}),
+      ...(codes_region ? { codes_region } : {}),
+      ...(codes_academie ? { codes_academie } : {}),
+      ...(codes_departement ? { codes_departement } : {}),
     })
   );
 
-  return insertedId;
+  return await usersMigrationDb().findOne({ _id: insertedId });
 };
 
 /**
@@ -156,9 +181,10 @@ export const updateUser = async (_id, data) => {
   const updated = await usersMigrationDb().findOneAndUpdate(
     { _id: user._id },
     {
-      $set: {
+      $set: validateUser({
+        email: user.email,
         ...data,
-      },
+      }),
     },
     { returnDocument: "after" }
   );
@@ -167,8 +193,7 @@ export const updateUser = async (_id, data) => {
 };
 
 export const structureUser = async (user) => {
-  const permissions = pick(user, ["is_admin"]);
-
+  const permissions = pick(user, ["is_admin", "is_cross_organismes"]);
   const rolesList = await rolesDb()
     .find({ _id: { $in: user.roles } })
     .toArray();
@@ -182,9 +207,17 @@ export const structureUser = async (user) => {
     prenom: user.prenom,
     telephone: user.telephone,
     siret: user.siret,
+    description: user.description,
+    organisation: user.organisation,
+    reseau: user.reseau,
+    erp: user.erp,
+    codes_region: user.codes_region, // TODO send full regions
+    codes_academie: user.codes_academie, // TODO send full académie
+    codes_departement: user.codes_departement, // TODO send full department
     account_status: user.account_status,
     roles: rolesList,
     acl: uniq([...rolesAcl, ...user.custom_acl]),
+    // TODO organisme_ids: []
     orign_register: user.orign_register,
     has_accept_cgu_version: user.has_accept_cgu_version,
   };

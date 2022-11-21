@@ -12,7 +12,6 @@ import {
   structureUser,
   activateUser,
   createUser,
-  getUserById,
   finalizeUser,
 } from "../../../common/components/usersComponent.js";
 import * as sessions from "../../../common/components/sessionsComponent.js";
@@ -66,7 +65,7 @@ export default ({ mailer }) => {
         throw Boom.conflict(`Unable to create`, { message: `email already in use` });
       }
 
-      const userId = await createUser(
+      const user = await createUser(
         { email, password },
         {
           roles: [type],
@@ -77,11 +76,10 @@ export default ({ mailer }) => {
         }
       );
 
-      if (!userId) {
+      if (!user) {
         throw Boom.badRequest("Something went wrong");
       }
 
-      const user = await getUserById(userId);
       await mailer.sendEmail({ ...user, tmpPwd: password }, "activation_user");
 
       return res.json({ succeeded: true });

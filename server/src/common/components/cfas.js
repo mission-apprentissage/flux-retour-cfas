@@ -46,8 +46,8 @@ const createCfa = async (dossierForCfa, sirets = []) => {
 
   if (Array.isArray(sirets) && sirets.length !== 0) {
     try {
-      const { data } = await getMetiersBySirets(sirets);
-      metiersFromSirets = data?.metiers;
+      const { metiers } = await getMetiersBySirets(sirets);
+      metiersFromSirets = metiers ?? [];
     } catch {
       logger.error(
         `createCfa / getMetiersBySirets: something went wrong while requesting for cfa with uai ${dossierForCfa.uai_etablissement}`
