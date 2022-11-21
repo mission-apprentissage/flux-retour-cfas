@@ -70,7 +70,7 @@ const NavLinks = ({ isOpen }) => {
         ) : (
           <>
             <Box p={4} bg={"transparent"}>
-              <UserFill mt="0.3rem" boxSize={4} />
+              <UserFill mt="-0.3rem" boxSize={4} />
             </Box>
             <NavItem to="/mon-espace/mon-tableau-de-bord">Mon tableau de bord</NavItem>
             <NavItem to="/mon-espace/mes-contacts">Mes contacts</NavItem>

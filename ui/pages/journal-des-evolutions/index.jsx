@@ -38,7 +38,9 @@ const JournalDesEvolutions = () => {
         <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
       </Section>
       <Section marginTop="5w">
-        <Heading as="h1">{NAVIGATION_PAGES.JournalDesEvolutions.title}</Heading>
+        <Heading as="h1" mb="2w">
+          {NAVIGATION_PAGES.JournalDesEvolutions.title}
+        </Heading>
         <HStack
           spacing={["0", "0", "4w", "2w"]}
           paddingY="1w"
@@ -58,7 +60,8 @@ const JournalDesEvolutions = () => {
       </Section>
       <Section>
         <HStack
-          spacing={["0", "0", "0", "12w"]}
+          alignItems="start"
+          spacing={["0", "0", "0", "6w"]}
           flexDirection={["column-reverse", "column-reverse", "column-reverse", "row"]}
         >
           <Box flex="1">
