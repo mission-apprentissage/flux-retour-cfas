@@ -1,7 +1,7 @@
-import { createActionToken, createResetPasswordToken, createActivationToken } from "../utils/jwtUtils.js";
 import path from "path";
-import config from "../../config.js";
-import { __dirname } from "../utils/esmUtils.js";
+import config from "../../../../config.js";
+import { createActionToken, createResetPasswordToken, createActivationToken } from "../../../utils/jwtUtils.js";
+import { __dirname } from "../../../utils/esmUtils.js";
 
 function getTemplateFile(name) {
   return path.join(__dirname(import.meta.url), `${name}.mjml.ejs`);

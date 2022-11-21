@@ -1,9 +1,9 @@
 import logger from "../../../common/logger.js";
-import { createUser } from "../../../common/components/usersComponent.js";
+import { createUser } from "../../../common/actions/users.actions.js";
 import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
-import { createRole } from "../../../common/components/rolesComponent.js";
-// import { createSifa } from "../../../common/components/sifasComponent.js";
-import { createOrganisme } from "../../../common/components/organismesComponents.js";
+import { createRole } from "../../../common/actions/roles.actions.js";
+// import { createSifa } from "../../../common/actions/sifas.actions.js";
+import { createOrganisme } from "../../../common/actions/organismes.actions.js";
 
 export const seed = async ({ adminEmail }) => {
   for (const key of Object.keys(defaultRolesAcls)) {

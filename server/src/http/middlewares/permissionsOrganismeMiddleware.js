@@ -1,8 +1,8 @@
 import Joi from "joi";
 import Boom from "boom";
 import tryCatch from "./tryCatchMiddleware.js";
-import { findRolePermissionById, hasAclsByRoleId } from "../../common/components/rolesComponent.js";
-import { hasPermission } from "../../common/components/permissionsComponent.js";
+import { findRolePermissionById, hasAclsByRoleId } from "../../common/actions/roles.actions.js";
+import { hasPermission } from "../../common/actions/permissions.actions.js";
 
 export default (acls) =>
   tryCatch(async ({ method, body, query, user }, res, next) => {

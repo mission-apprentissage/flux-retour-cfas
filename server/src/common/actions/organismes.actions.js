@@ -3,7 +3,7 @@ import { getMetiersBySirets } from "../apis/apiLba.js";
 import { organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
-import { createPermission } from "./permissionsComponent.js";
+import { createPermission } from "./permissions.actions.js";
 
 /**
  * Méthode de création d'un organisme

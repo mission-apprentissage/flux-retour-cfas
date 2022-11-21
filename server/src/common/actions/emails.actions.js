@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 import { usersDb } from "../model/collections.js";
-import * as templates from "../emails/templates.js";
 import { generateHtml } from "../utils/emailsUtils.js";
 
 export function addEmail(userEmail, token, templateName) {
@@ -126,7 +125,7 @@ export async function unsubscribeUser(id) {
   );
 }
 
-export async function renderEmail(token) {
+export async function renderEmail({ templates }, token) {
   const user = await usersDb().findOne({ "emails.token": token });
   const { templateName } = user.emails.find((e) => e.token === token);
   const template = templates[templateName](user, token);
@@ -144,7 +143,7 @@ export const createMailer = (mailerSerice) => {
   return {
     async sendEmail(user, templateName) {
       const token = uuidv4();
-      const template = templates[templateName](user, token);
+      const template = mailerSerice.templates[templateName](user, token);
 
       try {
         await addEmail(user.email, token, templateName);
@@ -161,7 +160,7 @@ export const createMailer = (mailerSerice) => {
       const previous = user.emails.find((e) => e.token === token);
 
       const nextTemplateName = options.newTemplateName || previous.templateName;
-      const template = templates[nextTemplateName](user, token, { resend: !options.retry });
+      const template = mailerSerice.templates[nextTemplateName](user, token, { resend: !options.retry });
 
       try {
         await addEmailSendDate(token, nextTemplateName);
@@ -173,5 +172,6 @@ export const createMailer = (mailerSerice) => {
 
       return token;
     },
+    templates: mailerSerice.templates,
   };
 };

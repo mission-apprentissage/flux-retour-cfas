@@ -13,11 +13,11 @@ import {
   activateUser,
   createUser,
   finalizeUser,
-} from "../../../common/components/usersComponent.js";
-import * as sessions from "../../../common/components/sessionsComponent.js";
+} from "../../../common/actions/users.actions.js";
+import * as sessions from "../../../common/actions/sessions.actions.js";
 import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
-import { findDataFromSiret } from "../../../common/components/infoSiretComponent.js";
+import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { authMiddleware } from "../../middlewares/authMiddleware.js";
 
 const checkActivationToken = () => {

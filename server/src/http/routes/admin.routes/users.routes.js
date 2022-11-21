@@ -12,8 +12,8 @@ import {
   searchUsers,
   structureUser,
   updateUser,
-} from "../../../common/components/usersComponent.js";
-import { findRoleById, findRolesByNames } from "../../../common/components/rolesComponent.js";
+} from "../../../common/actions/users.actions.js";
+import { findRoleById, findRolesByNames } from "../../../common/actions/roles.actions.js";
 
 // TODO
 // eslint-disable-next-line no-unused-vars
