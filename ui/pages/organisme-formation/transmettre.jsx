@@ -1,8 +1,8 @@
 import Head from "next/head";
 import React from "react";
-import { Box, Container, Divider, Flex, Heading, Text } from "@chakra-ui/react";
+import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
 
-import { Page } from "../../components";
+import { Page, Section } from "../../components";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import OrganismeFormationPagesMenu from "../../modules/organisme-formation/OrganismeFormationPagesMenu";
 import DemandeBranchementErpFormBlock from "../../modules/organisme-formation/DemandeBranchementErp/DemandeBranchementErpFormBlock";
@@ -16,39 +16,42 @@ const CommentTransmettreVosDonneesPage = () => {
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]}>
-        <Container maxW="xl">
-          <Breadcrumb
-            pages={[
-              { title: "Accueil", to: "/" },
-              { title: "Vous êtes un organisme de formation", to: "/organisme-formation" },
-              { title: title },
-            ]}
-          />
+      <Section>
+        <Breadcrumb
+          pages={[
+            { title: "Accueil", to: "/" },
+            { title: "Vous êtes un organisme de formation", to: "/organisme-formation" },
+            { title: title },
+          ]}
+        />
 
-          <Box paddingTop="5w" marginBottom="10w">
-            <Flex>
-              <Box width="25%" marginRight="5w">
-                <OrganismeFormationPagesMenu />
-              </Box>
-              <Divider height="250px" orientation="vertical" marginX="5w" />
-              <Box marginLeft="5w">
-                <Box color="grey.800" fontSize="gamma">
-                  <Heading as="h1" fontSize="alpha">
-                    {NAVIGATION_PAGES.OrganismeFormation.transmettre.title}
-                  </Heading>
-                  <Text marginBottom="2w" color="black">
-                    Afin de mieux vous guider, merci de renseigner le formulaire ci dessous :
-                  </Text>
-                  <Box padding="4w" background="white" borderColor="bluefrance" border="1px solid" minWidth="420px">
-                    <DemandeBranchementErpFormBlock />
-                  </Box>
+        <Box paddingTop="5w">
+          <HStack spacing={["0", "0", "0", "0", "4w"]} flexDirection={["column", "column", "column", "column", "row"]}>
+            <Box alignSelf="flex-start" width={["100%", "100%", "100%", "100%", "34%"]}>
+              <OrganismeFormationPagesMenu />
+            </Box>
+            <Divider
+              height="250px"
+              orientation="vertical"
+              alignSelf="flex-start"
+              display={["none", "none", "none", "none", "inline-block"]}
+            />
+            <Box alignSelf="start" marginLeft={["0", "0", "0", "0", "5w"]}>
+              <Box color="grey.800" fontSize="gamma" marginY={["4w", "4w", "4w", "4w", "0"]}>
+                <Heading as="h1" fontSize="alpha">
+                  {NAVIGATION_PAGES.OrganismeFormation.transmettre.title}
+                </Heading>
+                <Text marginBottom="2w" color="black">
+                  Afin de mieux vous guider, merci de renseigner le formulaire ci dessous :
+                </Text>
+                <Box padding="4w" background="white" borderColor="bluefrance" border="1px solid" minWidth="420px">
+                  <DemandeBranchementErpFormBlock />
                 </Box>
               </Box>
-            </Flex>
-          </Box>
-        </Container>
-      </Box>
+            </Box>
+          </HStack>
+        </Box>
+      </Section>
     </Page>
   );
 };
