@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { integer, object, objectId, string, boolean, arrayOf, date } from "../json-schema/jsonSchemaTypes.js";
 import { schemaValidation } from "../../utils/schemaUtils.js";
-import { siretSchema, passwordSchema } from "../../utils/validationUtils.js";
+import { siretSchema, passwordSchema, uaiSchema } from "../../utils/validationUtils.js";
 import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
 import { REGIONS } from "../../constants/territoiresConstants.js";
 import { ACADEMIES } from "../../constants/academiesConstants.js";
@@ -25,6 +25,12 @@ export const schema = object(
     telephone: string({ description: "Le téléphone de l'utilisateur" }),
     description: string({ description: "Description de l'utilisateur" }),
     siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
+    uai: string({
+      description: "Code uai de l'organisme (seulement pour les utilisateurs OF)",
+      pattern: "^[0-9]{7}[a-zA-Z]$",
+      maxLength: 8,
+      minLength: 8,
+    }),
     organisation: string({
       description: "Appartenance à une organisation (exemple DREETS, MISSION_LOCALE..)",
       enum: Object.keys(ORGANISMES_APPARTENANCE),
@@ -59,8 +65,6 @@ export const schema = object(
       { description: "Si l'utilisateur est scopé à un ou des département(s), lesquels ?" }
     ),
     is_cross_organismes: boolean({ description: "true si l'utilisateur est transverse à tous les organismes" }),
-
-    // TODO API_KEY ?
 
     // Internal
     account_status: string({
@@ -133,18 +137,19 @@ export function defaultValuesUser() {
 }
 
 // Extra validation
-
-// TODO
-// if one not empty the rest MUST BE EMPTY
-// codes_region
-// codes_academie
-// codes_departement
-
-// if one not empty the other MUST BE EMPTY
-// reseau
-// erp
-
 export function validateUser(props) {
+  const { codes_region, codes_academie, codes_departement, reseau, erp } = props;
+
+  // Check if only one settled
+  const scopeTerritoire = [codes_region.length, codes_academie.length, codes_departement.length];
+  if (scopeTerritoire.length - scopeTerritoire.filter((v) => !!v).length < 2) {
+    throw new Error(`schema not valid : codes_region, codes_academie, codes_departement ONLY ONE OF THEM CAN BE SET`);
+  }
+
+  if (reseau && erp) {
+    throw new Error(`schema not valid : reseau, erp ONLY ONE OF THEM CAN BE SET`);
+  }
+
   return schemaValidation(props, schema, [
     {
       name: "email",
@@ -157,6 +162,10 @@ export function validateUser(props) {
     {
       name: "siret",
       base: siretSchema(),
+    },
+    {
+      name: "uai",
+      base: uaiSchema(),
     },
   ]);
 }

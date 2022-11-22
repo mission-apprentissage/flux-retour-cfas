@@ -34,6 +34,9 @@ export const schema = object(
     organisme_id: objectId({
       description: "Organisme id",
     }),
+    source: string({ description: "Source du dossier apprenant (Ymag, Gesti, MANUEL...)" }), // TODO ENUM of this ? maybe not
+    id_erp_apprenant: stringOrNull({ description: "Identifiant de l'apprenant dans l'erp" }),
+
     uai_etablissement: string({ description: "Code uai de l'établissement formateur" }),
     siret_etablissement: stringOrNull({ description: "Siret de l'établissement d'origine" }),
 
@@ -72,15 +75,6 @@ export const schema = object(
     contrat_date_fin: dateOrNull({ description: "Date de fin du contrat" }),
     contrat_date_rupture: dateOrNull({ description: "Date de rupture du contrat" }),
     formation_rncp: stringOrNull({ description: "Code RNCP de la formation à laquelle l'apprenant est inscrit" }),
-
-    source: string({ description: "Source du dossier apprenant (Ymag, Gesti...)" }), // TODO ERP ? if yes should be REMOVE => Useless
-    id_erp_apprenant: stringOrNull({ description: "Identifiant de l'apprenant dans l'erp" }),
-
-    mode: string({
-      description: "Mode d'ajout",
-      enum: ["API", "MANUEL"],
-    }),
-    draft: boolean({ description: "Statut interne brouillon" }),
 
     updated_at: dateOrNull({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),

@@ -134,7 +134,7 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
  * @param {*} organisme_id
  * @returns
  */
-export const addContributeurOrganisme = async (organisme_id, userEmail, as, custom_acl = [], pending = true) => {
+export const addContributeurOrganisme = async (organisme_id, userEmail, as, pending = true, custom_acl = []) => {
   const _id = typeof id === "string" ? ObjectId(organisme_id) : organisme_id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 

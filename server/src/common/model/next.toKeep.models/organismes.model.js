@@ -10,7 +10,7 @@ export const collectionName = "organismes";
 
 export const indexes = () => {
   return [
-    [{ uai: 1 }, { name: "uai" }],
+    [{ uai: 1 }, { name: "uai", unique: true }],
     [
       { nom: "text", nom_tokenized: "text" },
       { name: "nom_tokenized_text", default_language: "french" },
@@ -52,12 +52,16 @@ export const schema = object(
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
 
+    // TODO API_KEY
+
+    // TODO TO REMOVE LATER
+    access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
+
     contributeurs: arrayOf(string(), { description: "Emails des contributeurs de cet organisme" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
   },
-  { required: ["uai"] }
-  // TODO adresse.departement adresse.region adresse.academie should be required
+  { required: ["uai", "adresse.departement", "adresse.region", "adresse.academie"] }
 );
 
 // Default value
@@ -86,6 +90,3 @@ export function validateOrganisme(props) {
     },
   ]);
 }
-//   adresse: Joi.string().allow("", null),
-//   region_nom: Joi.string().allow("", null),
-//   region_num: Joi.string().allow("", null),

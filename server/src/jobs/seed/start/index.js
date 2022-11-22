@@ -85,6 +85,7 @@ export const seed = async ({ adminEmail }) => {
       roles: ["of"],
       account_status: "FORCE_RESET_PASSWORD",
       siret: "44492238900010",
+      uai: "0142321X",
       organisation: "ORGANISME_FORMATION",
     }
   );
