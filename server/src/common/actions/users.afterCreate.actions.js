@@ -75,6 +75,7 @@ export const userAfterCreate = async ({
         // TODO VALIDATION FLOW => BE SURE HE IS WHO IS PRETEND TO BE
         // Notif TDB_admin or whatever who
       } else {
+        // TODO VERIFY PERMS IS NOT PENDING == 1 "organisme.admin"
         await addContributeurOrganisme(organisme._id, userEmail, "organisme.readonly", pending);
         // TODO VALIDATION FLOW => organisme.admin Validate people that wants to join is organisme
         // Notif organisme.admin

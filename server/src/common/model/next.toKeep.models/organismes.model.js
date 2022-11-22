@@ -53,6 +53,7 @@ export const schema = object(
     est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
 
     // TODO API_KEY
+    api_key: string({ description: "API key pour envoi de données" }),
 
     // TODO TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),

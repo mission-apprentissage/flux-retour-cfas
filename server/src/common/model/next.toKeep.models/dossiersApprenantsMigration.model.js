@@ -16,9 +16,12 @@ export const collectionName = "dossiersApprenantsMigration";
 
 export const indexes = () => {
   return [
-    [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
-    [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
+    [
+      { id_erp_apprenant: 1, uai_etablissement: 1 },
+      { name: "uai_id_erp", unique: true },
+    ],
     [{ organisme_id: 1 }],
+    [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
 
     [{ formation_cfd: 1 }, { name: "formation_cfd" }],
     [{ etablissement_num_region: 1 }, { name: "etablissement_num_region" }],
@@ -34,10 +37,10 @@ export const schema = object(
     organisme_id: objectId({
       description: "Organisme id",
     }),
-    source: string({ description: "Source du dossier apprenant (Ymag, Gesti, MANUEL...)" }), // TODO ENUM of this ? maybe not
-    id_erp_apprenant: stringOrNull({ description: "Identifiant de l'apprenant dans l'erp" }),
-
+    id_erp_apprenant: string({ description: "Identifiant de l'apprenant dans l'erp" }),
     uai_etablissement: string({ description: "Code uai de l'établissement formateur" }),
+
+    source: string({ description: "Source du dossier apprenant (Ymag, Gesti, MANUEL...)" }), // TODO ENUM of this ? maybe not
     siret_etablissement: stringOrNull({ description: "Siret de l'établissement d'origine" }),
 
     etablissement_reseaux: arrayOfOrNull(string(), {
@@ -84,6 +87,7 @@ export const schema = object(
     required: [
       "organisme_id",
       "uai_etablissement",
+      "id_erp_apprenant",
 
       "nom_apprenant",
       "prenom_apprenant",
