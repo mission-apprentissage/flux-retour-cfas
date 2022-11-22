@@ -70,7 +70,7 @@ export default async (components) => {
   app.use(
     ["/api/effectifs", "/api/v1/effectifs"],
     checkJwtToken,
-    permissionsOrganismeMiddleware(["espace/tableau_de_bord"]),
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
     effectifsRouter(components)
   );
 

@@ -32,7 +32,7 @@ export const userAfterCreate = async ({
       await createPermission({
         organisme_id: null,
         userEmail,
-        role: "espace.readonly",
+        role: "organisme.readonly",
         pending,
       });
     } else {
@@ -50,7 +50,7 @@ export const userAfterCreate = async ({
 
       const organismes = await findOrganismesByQuery(queryScoped);
       for (const { _id } of organismes) {
-        await addContributeurOrganisme(_id, userEmail, "espace.readonly", pending);
+        await addContributeurOrganisme(_id, userEmail, "organisme.readonly", pending);
       }
     }
   } else {
@@ -58,26 +58,26 @@ export const userAfterCreate = async ({
       // user is scoped reseau
       const organismes = await findOrganismesByQuery({ reseaux: { $in: reseau } });
       for (const { _id } of organismes) {
-        await addContributeurOrganisme(_id, userEmail, "espace.readonly", pending);
+        await addContributeurOrganisme(_id, userEmail, "organisme.readonly", pending);
       }
     } else if (erp) {
       // user is scoped erp
       const organismes = await findOrganismesByQuery({ erps: { $in: erp } });
       for (const { _id } of organismes) {
-        await addContributeurOrganisme(_id, userEmail, "espace.readonly", pending);
+        await addContributeurOrganisme(_id, userEmail, "organisme.readonly", pending);
       }
     } else {
       // TODO user is NOT cross_organismes and NOT scoped -> example OF
       const organisme = await findOrganismeByUai(uai); // uai
       if (!organisme.contributeurs.length) {
         // is the first user on this organisme
-        await addContributeurOrganisme(organisme._id, userEmail, "espace.admin", pending);
+        await addContributeurOrganisme(organisme._id, userEmail, "organisme.admin", pending);
         // TODO VALIDATION FLOW => BE SURE HE IS WHO IS PRETEND TO BE
         // Notif TDB_admin or whatever who
       } else {
-        await addContributeurOrganisme(organisme._id, userEmail, "espace.readonly", pending);
-        // TODO VALIDATION FLOW => espace.admin Validate people that wants to join is organisme
-        // Notif espace.admin
+        await addContributeurOrganisme(organisme._id, userEmail, "organisme.readonly", pending);
+        // TODO VALIDATION FLOW => organisme.admin Validate people that wants to join is organisme
+        // Notif organisme.admin
       }
     }
   }
