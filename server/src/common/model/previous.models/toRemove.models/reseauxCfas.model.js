@@ -1,4 +1,4 @@
-import { object, objectId, string, date, stringOrNull, dateOrNull } from "../json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, date, stringOrNull, dateOrNull } from "../../json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "reseauxCfas";
 
