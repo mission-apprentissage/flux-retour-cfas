@@ -12,7 +12,7 @@ export const userAfterCreate = async ({
   // notify = true,
   // mailer
 }) => {
-  // TODO Check if user has already permissions
+  // TODO For invite Check if user has already permissions
 
   const {
     is_cross_organismes,
@@ -28,7 +28,7 @@ export const userAfterCreate = async ({
   // Below Flow
   if (is_cross_organismes) {
     if (!codes_region.length && !codes_academie.length && !codes_departement.length) {
-      // user is cross_organismes and National ("super viewer")
+      // user is cross_organismes and Non scoped = National ("super viewer")
       await createPermission({
         organisme_id: null,
         userEmail,
@@ -56,13 +56,13 @@ export const userAfterCreate = async ({
   } else {
     if (reseau) {
       // user is scoped reseau
-      const organismes = await findOrganismesByQuery({ reseaux: { $in: reseau } });
+      const organismes = await findOrganismesByQuery({ reseaux: { $in: [reseau] } });
       for (const { _id } of organismes) {
         await addContributeurOrganisme(_id, userEmail, "organisme.readonly", pending);
       }
     } else if (erp) {
       // user is scoped erp
-      const organismes = await findOrganismesByQuery({ erps: { $in: erp } });
+      const organismes = await findOrganismesByQuery({ erps: { $in: [erp] } });
       for (const { _id } of organismes) {
         await addContributeurOrganisme(_id, userEmail, "organisme.readonly", pending);
       }

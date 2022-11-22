@@ -45,7 +45,7 @@ export const findRolesByNames = async (names, projection = {}) => {
  * @returns
  */
 export const findRoleByName = async (name, projection = {}) => {
-  return await rolesDb().findOne(name, { projection });
+  return await rolesDb().findOne({ name }, { projection });
 };
 
 export const findRoleById = async (id, projection = {}) => {

@@ -13,7 +13,7 @@ cli
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
   .action(async ({ email }) => {
     runScript(async () => {
-      return seed({ adminEmail: email.toLowerCase() });
+      return seed({ adminEmail: email?.toLowerCase() });
     }, "Seed");
   });
 
