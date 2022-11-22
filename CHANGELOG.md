@@ -1,3 +1,10 @@
+# [2.56.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.56.0-beta.2...v2.56.0-beta.3) (2022-11-22)
+
+
+### Bug Fixes
+
+* **server:** améliore le calcul des effectifs en triant l'historique_statut_apprenant par date_statut puis date_reception ([95e930b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/95e930b29246c3239f6b23e9d9d767d4c6066a37))
+
 ## [2.55.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1...v2.55.2) (2022-11-22)
 
 
