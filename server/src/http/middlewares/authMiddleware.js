@@ -3,8 +3,8 @@ import passport from "passport";
 import { Strategy as JWTStrategy } from "passport-jwt";
 import { compose } from "compose-middleware";
 
-import { getUser, updateUser, structureUser } from "../../common/components/usersComponent.js";
-import * as sessions from "../../common/components/sessionsComponent.js";
+import { getUser, updateUser, structureUser } from "../../common/actions/users.actions.js";
+import * as sessions from "../../common/actions/sessions.actions.js";
 import { COOKIE_NAME } from "../../common/constants/cookieName.js";
 
 const cookieExtractor = (req) => {

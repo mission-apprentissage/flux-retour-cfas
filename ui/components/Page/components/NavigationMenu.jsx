@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { Box, Container, Flex, Text } from "@chakra-ui/react";
 import useAuth from "../../../hooks/useAuth";
-import { MenuFill, Close } from "../../../theme/components/icons";
+import { MenuFill, Close, UserFill } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 
 const NavigationMenu = ({ ...props }) => {
@@ -49,6 +49,8 @@ const NavItem = ({ children, to = "/", ...rest }) => {
 
 const NavLinks = ({ isOpen }) => {
   let [auth] = useAuth();
+  const router = useRouter();
+  const myWks = router.pathname.includes("/mon-espace") && auth?.sub !== "anonymous";
   return (
     <Box display={{ base: isOpen ? "block" : "none", md: "block" }} flexBasis={{ base: "100%", md: "auto" }}>
       <Flex
@@ -58,11 +60,22 @@ const NavLinks = ({ isOpen }) => {
         pb={[8, 0]}
         textStyle="sm"
       >
-        <NavItem to="/">Accueil</NavItem>
-        {auth?.sub !== "anonymous" && (
+        {!myWks ? (
           <>
-            {" "}
-            <NavItem to="/mes-dossiers/mon-espace">Mon espace</NavItem>
+            <NavItem to="/">Accueil</NavItem>
+            <NavItem to="/explorer-les-indicateurs">Indicateurs en temps réel</NavItem>
+            <NavItem to="/comprendre-les-donnees">Comprendre les données</NavItem>
+            <NavItem to="/organisme-formation">Organisme de formation</NavItem>
+          </>
+        ) : (
+          <>
+            <Box p={4} bg={"transparent"}>
+              <UserFill mt="-0.3rem" boxSize={4} />
+            </Box>
+            <NavItem to="/mon-espace/mon-tableau-de-bord">Mon tableau de bord</NavItem>
+            <NavItem to="/mon-espace/mes-contacts">Mes contacts</NavItem>
+            <NavItem to="/mon-espace/mes-effectifs">Mes effectifs</NavItem>
+            <NavItem to="/mon-espace/mon-enquete-SIFA2">Mon enquête SIFA2</NavItem>
           </>
         )}
       </Flex>

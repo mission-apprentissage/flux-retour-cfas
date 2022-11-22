@@ -6,8 +6,8 @@ import { passwordSchema } from "../../../common/utils/validationUtils.js";
 import passport from "passport";
 import { createResetPasswordToken, createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { Strategy, ExtractJwt } from "passport-jwt";
-import { changePassword, getUser, loggedInUser, structureUser } from "../../../common/components/usersComponent.js";
-import * as sessions from "../../../common/components/sessionsComponent.js";
+import { changePassword, getUser, loggedInUser, structureUser } from "../../../common/actions/users.actions.js";
+import * as sessions from "../../../common/actions/sessions.actions.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 
 const checkPasswordToken = () => {

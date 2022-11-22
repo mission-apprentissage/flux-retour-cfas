@@ -75,15 +75,20 @@ export const fetchCfa = (cfaUai) => {
 
 /* Reseaux CFAS */
 export const fetchReseauxCfas = () => {
-  return _get("/api/reseaux-cfas");
+  return _get("/api/v1/admin/reseaux-cfas");
+};
+
+/* Reseaux CFAS Search */
+export const fetchSearchReseauxCfas = async (filters) => {
+  return await _post("/api/v1/admin/reseaux-cfas/search", filters);
 };
 
 export const postCreateReseauCfa = (body) => {
-  return _post("/api/reseaux-cfas", body);
+  return _post("/api/v1/admin/reseaux-cfas", body);
 };
 
 export const deleteReseauCfa = (body) => {
-  return _delete(`/api/reseaux-cfas/delete/${body}`);
+  return _delete(`/api/v1/admin/reseaux-cfas/delete/${body}`);
 };
 
 /* Organismes appartenance */
@@ -106,16 +111,6 @@ export const fetchDepartements = () => {
   return _get("/api/referentiel/departements");
 };
 
-/* Reseaux CFAS Search */
-export const fetchSearchReseauxCfas = async (filters) => {
-  return await _post("/api/reseaux-cfas/search", filters);
-};
-
-/* Users Search */
-export const fetchSearchUsers = async (filters) => {
-  return await _post("/api/users/search", filters);
-};
-
 /* CFA Search */
 export const fetchSearchCfas = async (filters) => {
   return await _post("/api/cfas/search", filters);
@@ -135,30 +130,35 @@ export const fetchEffectifsDataListCsvExport = (filters) => {
 
 /* Utilisateurs */
 export const fetchUsers = async () => {
-  return await _get("/api/users");
+  return await _get("/api/v1/admin/users");
+};
+
+/* Users Search */
+export const fetchSearchUsers = async (filters) => {
+  return await _post("/api/v1/admin/users/search", filters);
 };
 
 /* Utilisateur by id */
 export const fetchUserById = (userId) => {
-  const url = `/api/users/${userId}`;
+  const url = `/api/v1/admin/user/${userId}`;
   return _get(url);
 };
 
 /* Update user for id */
 export const putUser = (userId, body) => {
-  const url = `/api/users/${userId}`;
+  const url = `/api/v1/admin/user/${userId}`;
   return _put(url, body);
 };
 
 /* Create user */
 export const postCreateUser = async (body) => {
-  return await _post("/api/users", body);
+  return await _post("/api/v1/admin/user", body);
 };
 
 export const postGetUserUpdatePasswordUrl = async (username) => {
-  return await _post(`/api/users/generate-update-password-url`, { username });
+  return await _post(`/api/v1/admin/user/generate-update-password-url`, { username });
 };
 
 export const deleteUser = (body) => {
-  return _delete(`/api/users/${body}`);
+  return _delete(`/api/v1/admin/user/${body}`);
 };

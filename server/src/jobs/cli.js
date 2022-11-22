@@ -10,7 +10,7 @@ import { clear } from "./clear/index.js";
 cli
   .command("seed")
   .description("Seed projet")
-  .requiredOption("-e, --email <string>", "Email de l'utilisateur Admin")
+  .option("-e, --email <string>", "Email de l'utilisateur Admin")
   .action(async ({ email }) => {
     runScript(async () => {
       return seed({ adminEmail: email.toLowerCase() });

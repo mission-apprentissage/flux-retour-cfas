@@ -150,26 +150,38 @@ const Register = ({ onSucceeded, ...props }) => {
               <FormLabel>Je représente :</FormLabel>
               <RadioGroup id="type" name="type" value={values.type} mt={8}>
                 <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
-                  <Radio
-                    value="employeur"
-                    onChange={(e) => {
-                      setStep(1);
-                      handleChange(e);
-                    }}
-                    size="lg"
-                  >
-                    Un employeur
-                  </Radio>
-                  <Radio
-                    value="of"
-                    onChange={(e) => {
-                      setStep(1);
-                      handleChange(e);
-                    }}
-                    size="lg"
-                  >
-                    Un OF
-                  </Radio>
+                  {[
+                    {
+                      text: "Un Pilot (Dreets)",
+                      value: "pilot",
+                    },
+                    {
+                      text: "Un Organisme de Formation",
+                      value: "of",
+                    },
+                    {
+                      text: "Une tête de réseau OF",
+                      value: "reseau_of",
+                    },
+                    {
+                      text: " Un logiciel de gestion",
+                      value: "erp",
+                    },
+                  ].map((item, i) => {
+                    return (
+                      <Radio
+                        key={i}
+                        value={item.value}
+                        onChange={(e) => {
+                          setStep(1);
+                          handleChange(e);
+                        }}
+                        size="lg"
+                      >
+                        {item.text}
+                      </Radio>
+                    );
+                  })}
                 </VStack>
               </RadioGroup>
               {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}

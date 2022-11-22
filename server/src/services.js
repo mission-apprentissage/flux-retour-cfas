@@ -1,7 +1,7 @@
 import config from "./config.js";
 import { createClamav } from "./common/services/clamav.js";
-import { createMailerService } from "./common/services/mailer.js";
-import { createMailer } from "./common/components/emailsComponent.js";
+import { createMailerService } from "./common/services/mailer/mailer.js";
+import { createMailer } from "./common/actions/emails.actions.js";
 
 const createServices = async (options = {}) => {
   return {

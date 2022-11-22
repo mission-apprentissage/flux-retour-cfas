@@ -1,10 +1,12 @@
 import { BaseIndexer } from "./baseIndexer.js";
-import cfasModelDescriptor from "./../cfas.model.js";
-import dossiersApprenantsModelDescriptor from "../dossiersApprenants.model.js";
-import formationsModelDescriptor from "../formations.model.js";
-import reseauxCfasModelDescriptor from "../reseauxCfas.model.js";
-import userEventsModelDescriptor from "../userEvents.model.js";
-import usersModelDescriptor from "../users.model.js";
+import cfasModelDescriptor from "../previous.models/cfas.model.js";
+import dossiersApprenantsModelDescriptor from "../previous.models/dossiersApprenants.model.js";
+import formationsModelDescriptor from "../previous.models/formations.model.js";
+import reseauxCfasModelDescriptor from "../previous.models/reseauxCfas.model.js";
+import userEventsModelDescriptor from "../previous.models/userEvents.model.js";
+import usersModelDescriptor from "../previous.models/users.model.js";
+
+// TODO ADD INDEXES NEW MODEL
 
 export const createIndexes = async () => {
   await new BaseIndexer({

@@ -2,7 +2,7 @@ import express from "express";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
 import Boom from "boom";
-import { getUser, structureUser, updateUser } from "../../../common/components/usersComponent.js";
+import { getUser, structureUser, updateUser } from "../../../common/actions/users.actions.js";
 
 export default () => {
   const router = express.Router();

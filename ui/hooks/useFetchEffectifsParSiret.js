@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { fetchEffectifsParSiret } from "../api/tableauDeBord";
 import { QUERY_KEYS } from "../common/constants/queryKeys";
