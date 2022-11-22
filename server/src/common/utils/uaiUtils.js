@@ -16,7 +16,7 @@ export const buildAdresseFromUai = (uai) => {
   };
 };
 
-const getLocalisationInfoFromUai = (uai) => {
+export const getLocalisationInfoFromUai = (uai) => {
   const infoCodeFromUai = getDepartementCodeFromUai(uai);
 
   // TODO : gérer proprement les cas de la corse

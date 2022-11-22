@@ -22,9 +22,10 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
 
   // TODO really used ?
   let metiers = [];
-  if (Array.isArray(sirets) && sirets.length !== 0) {
-    metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
-  }
+  // TODO uncomment when needed
+  // if (Array.isArray(sirets) && sirets.length !== 0) {
+  //   metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
+  // }
 
   const { insertedId } = await organismesDb().insertOne(
     validateOrganisme({

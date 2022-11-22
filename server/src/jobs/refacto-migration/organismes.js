@@ -3,6 +3,9 @@ import { asyncForEach } from "../../common/utils/asyncUtils.js";
 import logger from "../../common/logger.js";
 import { cfasDb, jobEventsDb, organismesDb } from "../../common/model/collections.js";
 import { createOrganisme, mapCfaPropsToOrganismeProps } from "../../common/actions/organismes.actions.js";
+import { getLocalisationInfoFromUai } from "../../common/utils/uaiUtils.js";
+import Joi from "joi";
+import { siretSchema } from "../../common/utils/validationUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -20,7 +23,9 @@ export const migrateCfasToOrganismes = async () => {
   const allCfas = await cfasDb().find({}).toArray();
 
   let nbCfasMigrated = 0;
-  let nbCfasNotMigrated = 0;
+  let cfasNotMigrated = [];
+  let cfasUaiErrors = [];
+  let cfasSiretsErrors = [];
 
   logger.info(`Migration de ${allCfas.length} "cfas" vers la collection "organismes"...`);
   loadingBar.start(allCfas.length, 0);
@@ -31,32 +36,46 @@ export const migrateCfasToOrganismes = async () => {
     try {
       await createOrganisme(mappedToOrganisme);
       nbCfasMigrated++;
-    } catch (err) {
-      nbCfasNotMigrated++;
-      const { stack: errorStack, message: errorMessage } = err;
+    } catch (error) {
+      cfasNotMigrated.push(currentOldCfa.uai);
+
+      // Custom Check erreur de localisation via UAI
+      const localisationInfoFromUai = getLocalisationInfoFromUai(currentOldCfa.uai);
+      if (!localisationInfoFromUai) {
+        cfasUaiErrors.push(currentOldCfa.uai); // TODO mettre dans une collection pour gestion métier ?
+      }
+
+      // Custom Check erreur de format de siret
+      const validateSirets = Joi.array().items(siretSchema()).validate(currentOldCfa.sirets);
+      if (validateSirets.error) {
+        cfasSiretsErrors.push(currentOldCfa.uai); // TODO mettre dans une collection pour gestion métier ?
+      }
+
       // Si erreur on la stocke avec l'objet cfa
+      const { stack: errorStack, message: errorMessage } = error;
       await jobEventsDb().insertOne({
         jobname: "refacto-migration-cfas-to-organismes",
         date: new Date(),
         action: "log-cfasNotMigrated",
-        data: { cfaProps: currentOldCfa, mappedPros: mappedToOrganisme, error: err, errorMessage, errorStack },
+        data: {
+          cfaProps: currentOldCfa,
+          mappedPros: mappedToOrganisme,
+          error,
+          errorStack,
+          errorMessage,
+        },
       });
-      // TODO better error handling
-      // logger.error(`${currentOldCfa.uai} error`);
     }
 
     loadingBar.increment();
   });
 
-  loadingBar.stop();
-
   // Log & stats
   logger.info(`--> ${allCfas.length} cfas initiaux`);
   logger.info(`--> ${nbCfasMigrated} cfas transformés avec succès en organismes`);
-  logger.info(`--> ${nbCfasNotMigrated} cfas non transformés (erreur)`);
-
-  // let allOrganismesCount = await organismesDb().countDocuments();
-  // logger.info(`--> ${allOrganismesCount} organismes crées`);
+  logger.info(`--> ${cfasNotMigrated.length} cfas non transformés (erreur)`);
+  logger.info(`---> ${cfasUaiErrors.length} cfas non transformés à cause d'un pb de localisation via UAI (erreur)`);
+  logger.info(`---> ${cfasSiretsErrors.length} cfas non transformés à cause d'un pb de sirets (erreur)`);
 };
 
 /**
@@ -76,15 +95,22 @@ export const migrateSingleCfaToOrganisme = async (uai) => {
   try {
     await createOrganisme(mappedToOrganisme);
     logger.error(`Cfa ${uai} migré avec succès`);
-  } catch (err) {
-    const { stack: errorStack, message: errorMessage } = err;
+  } catch (error) {
     // Si erreur on la stocke avec l'objet cfa
+    const { stack: errorStack, message: errorMessage } = error;
     await jobEventsDb().insertOne({
-      jobname: "refacto-migration-cfas-to-organismes-unique",
+      jobname: "refacto-migration-cfas-to-organismes",
       date: new Date(),
       action: "log-cfasNotMigrated-unique",
-      data: { cfaProps: currentCfa, mappedPros: mappedToOrganisme, error: err, errorMessage, errorStack },
+      data: {
+        cfaProps: currentCfa,
+        mappedPros: mappedToOrganisme,
+        error,
+        errorStack,
+        errorMessage,
+      },
     });
+
     logger.error(`Erreur lors de la migration du cfa ${currentCfa.uai}`);
   }
 };
