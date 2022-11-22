@@ -3,7 +3,7 @@ import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seed } from "./seed/start/index.js";
 import { clear } from "./clear/index.js";
-import { migrateCfasToOrganismes } from "./refacto-migration/organismes.js";
+import { migrateCfasToOrganismes, migrateSingleCfaToOrganisme } from "./refacto-migration/organismes.js";
 
 /**
  * Job d'initialisation projet
@@ -41,6 +41,16 @@ cli
     runScript(async () => {
       return migrateCfasToOrganismes();
     }, "refacto-migration-cfas-to-organismes");
+  });
+
+cli
+  .command("refacto-migration-organisme-unique")
+  .description("Migration d'un cfa vers organismes")
+  .requiredOption("-u, --uai <string>", "Uai du cfa à migrer")
+  .action(async ({ uai }) => {
+    runScript(async () => {
+      return migrateSingleCfaToOrganisme(uai);
+    }, "refacto-migration-cfas-to-organismes-unique");
   });
 
 cli.parse(process.argv);

@@ -58,3 +58,33 @@ export const migrateCfasToOrganismes = async () => {
   // let allOrganismesCount = await organismesDb().countDocuments();
   // logger.info(`--> ${allOrganismesCount} organismes crées`);
 };
+
+/**
+ * Méthode de migration d'un cfa unique depuis son uai
+ * @param {*} uai
+ */
+export const migrateSingleCfaToOrganisme = async (uai) => {
+  logger.info(`Migration du cfas avec uai ${uai} vers la collection organismes`);
+
+  // Clear des organismes existants
+  logger.info(`Suppression de l'organisme avec uai ${uai} si existant...`);
+  await organismesDb().deleteMany({ uai });
+
+  const currentCfa = await cfasDb().findOne({ uai });
+  const mappedToOrganisme = mapCfaPropsToOrganismeProps(currentCfa);
+
+  try {
+    await createOrganisme(mappedToOrganisme);
+    logger.error(`Cfa ${uai} migré avec succès`);
+  } catch (err) {
+    const { stack: errorStack, message: errorMessage } = err;
+    // Si erreur on la stocke avec l'objet cfa
+    await jobEventsDb().insertOne({
+      jobname: "refacto-migration-cfas-to-organismes-unique",
+      date: new Date(),
+      action: "log-cfasNotMigrated-unique",
+      data: { cfaProps: currentCfa, mappedPros: mappedToOrganisme, error: err, errorMessage, errorStack },
+    });
+    logger.error(`Erreur lors de la migration du cfa ${currentCfa.uai}`);
+  }
+};
