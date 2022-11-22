@@ -1,0 +1,27 @@
+import { getDepartementCodeFromUai } from "../domain/uai.js";
+import departements from "../constants/departements.js";
+
+const SPECIFIC_UAI_CODES_CORSE1 = { code: "2A", uaiCode: "620" };
+const SPECIFIC_UAI_CODES_CORSE2 = { code: "2B", uaiCode: "720" };
+
+export const buildAdresseFromUai = (uai) => {
+  const localisationInfo = getLocalisationInfoFromUai(uai);
+  if (!localisationInfo) return {};
+  return {
+    adresse: {
+      departement: localisationInfo.code_dept,
+      region: localisationInfo.code_region,
+      academie: localisationInfo.num_academie.toString(),
+    },
+  };
+};
+
+const getLocalisationInfoFromUai = (uai) => {
+  const infoCodeFromUai = getDepartementCodeFromUai(uai);
+
+  // TODO : gérer proprement les cas de la corse
+  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE1.uaiCode) return departements[SPECIFIC_UAI_CODES_CORSE1.code];
+  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE2.uaiCode) return departements[SPECIFIC_UAI_CODES_CORSE2.code];
+
+  return departements[infoCodeFromUai];
+};

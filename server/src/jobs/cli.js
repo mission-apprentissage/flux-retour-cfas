@@ -3,6 +3,7 @@ import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seed } from "./seed/start/index.js";
 import { clear } from "./clear/index.js";
+import { migrateCfasToOrganismes } from "./refacto-migration/organismes.js";
 
 /**
  * Job d'initialisation projet
@@ -28,6 +29,18 @@ cli
     runScript(async () => {
       return clear({ clearAll: all });
     }, "Clear");
+  });
+
+/**
+ * Job de migration de la collection cfas vers la collection organismes
+ */
+cli
+  .command("refacto-migration-organismes")
+  .description("Migration cfas vers organismes")
+  .action(() => {
+    runScript(async () => {
+      return migrateCfasToOrganismes();
+    }, "refacto-migration-cfas-to-organismes");
   });
 
 cli.parse(process.argv);

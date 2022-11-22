@@ -32,7 +32,9 @@ export const schema = object(
     sirets: arrayOf(string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }), {
       description: "Liste des sirets reliés à l'établissement",
     }),
-    reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS) }), { description: "Réseaux du CFA, s'ils existent" }),
+    reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS).map((id) => RESEAUX_CFAS[id].nomReseau) }), {
+      description: "Réseaux du CFA, s'ils existent",
+    }),
     erps: arrayOf(string(), { description: "ERPs rattachés au CFA, s'ils existent" }),
 
     nature: string({

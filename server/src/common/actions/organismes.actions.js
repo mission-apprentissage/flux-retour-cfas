@@ -1,3 +1,4 @@
+import { omit } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { getMetiersBySirets } from "../apis/apiLba.js";
 import { organismesDb } from "../model/collections.js";
