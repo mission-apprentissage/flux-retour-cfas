@@ -7,7 +7,7 @@ let mongoInMemory;
 const startAndConnectMongodb = async () => {
   mongoInMemory = await MongoMemoryServer.create({
     binary: {
-      version: "5.0.2",
+      version: "6.0.2",
     },
   });
   const uri = mongoInMemory.getUri();

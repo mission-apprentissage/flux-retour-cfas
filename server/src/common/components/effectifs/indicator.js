@@ -85,39 +85,27 @@ class Indicator {
           },
         },
       },
+      // on élimine les historique vides (un dossier sur lequel on aurait un seul élément à une date ultérieure à celle donnée)
       {
         $match: { historique_statut_apprenant: { $not: { $size: 0 } } },
       },
-      // Ajout d'un champ diff_date_search : écart entre la date de l'historique et la date recherchée
+      // on trie les historique par date_statut puis par date_reception si date_statut identiques (cas régulier)
       {
-        $addFields: {
+        $project: {
+          ...projection,
           historique_statut_apprenant: {
-            $map: {
+            $sortArray: {
               input: "$historique_statut_apprenant",
-              as: "item",
-              in: {
-                date_statut: "$$item.date_statut",
-                valeur_statut: "$$item.valeur_statut",
-                // Calcul de la différence entre item.date_statut & date
-                diff_date_search: { $abs: [{ $subtract: ["$$item.date_statut", date] }] },
-              },
+              sortBy: { date_statut: 1, date_reception: 1 },
             },
           },
         },
       },
-      // Ajout d'un champ statut_apprenant_at_date correspondant à l'élément de l'historique ayant le plus petit écart avec la date recherchée
+      // on récupère le dernier élément, considéré comme le statut à la date donnée
       {
         $addFields: {
           statut_apprenant_at_date: {
-            $first: {
-              $filter: {
-                input: "$historique_statut_apprenant",
-                as: "result",
-                cond: {
-                  $eq: ["$$result.diff_date_search", { $min: "$historique_statut_apprenant.diff_date_search" }],
-                },
-              },
-            },
+            $last: "$historique_statut_apprenant",
           },
         },
       },
