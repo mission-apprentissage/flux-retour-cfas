@@ -3,9 +3,10 @@ import { integer, object, objectId, string, boolean, arrayOf, date } from "../js
 import { schemaValidation } from "../../utils/schemaUtils.js";
 import { siretSchema, passwordSchema } from "../../utils/validationUtils.js";
 import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
-import { DEPARTEMENTS, REGIONS } from "../../constants/territoiresConstants.js";
+import { REGIONS } from "../../constants/territoiresConstants.js";
 import { ACADEMIES } from "../../constants/academiesConstants.js";
 import { ORGANISMES_APPARTENANCE } from "../../constants/usersConstants.js";
+import { DEPARTEMENT_CODES } from "../../constants/departements.TRUELIST.js";
 
 export const collectionName = "usersMigration";
 
@@ -49,11 +50,17 @@ export const schema = object(
     ),
     codes_departement: arrayOf(
       string({
-        enum: DEPARTEMENTS.map(({ code }) => code),
+        example: "1 Ain, 99 Étranger",
+        pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
+        enum: DEPARTEMENT_CODES.map((code) => code.replace(/^(0){1}/, "")),
+        maxLength: 3,
+        minLength: 1,
       }),
       { description: "Si l'utilisateur est scopé à un ou des département(s), lesquels ?" }
     ),
     is_cross_organismes: boolean({ description: "true si l'utilisateur est transverse à tous les organismes" }),
+
+    // TODO API_KEY ?
 
     // Internal
     account_status: string({
@@ -113,6 +120,8 @@ export function defaultValuesUser() {
     is_admin: false,
     roles: [],
     codes_region: [],
+    codes_academie: [],
+    codes_departement: [],
     custom_acl: [],
     tour_guide: true,
     invalided_token: false,
@@ -124,6 +133,17 @@ export function defaultValuesUser() {
 }
 
 // Extra validation
+
+// TODO
+// if one not empty the rest MUST BE EMPTY
+// codes_region
+// codes_academie
+// codes_departement
+
+// if one not empty the other MUST BE EMPTY
+// reseau
+// erp
+
 export function validateUser(props) {
   return schemaValidation(props, schema, [
     {

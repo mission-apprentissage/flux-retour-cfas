@@ -1,4 +1,7 @@
 import { object, string, integer } from "./jsonSchemaTypes.js";
+import { DEPARTEMENT_CODES } from "../../constants/departements.TRUELIST.js";
+import { REGIONS } from "../../constants/territoiresConstants.js";
+import { ACADEMIES } from "../../constants/academiesConstants.js";
 
 export const adresseSchema = object({
   numero: integer({
@@ -38,27 +41,19 @@ export const adresseSchema = object({
     example: "PARIS",
     maxLength: 80,
   }),
-  departement: object(
-    {
-      code: string(),
-      nom: string(),
-    },
-    { required: ["code", "nom"] }
-  ),
-  region: object(
-    {
-      code: string(),
-      nom: string(),
-    },
-    { required: ["code", "nom"] }
-  ),
-  academie: object(
-    {
-      code: string(),
-      nom: string(),
-    },
-    { required: ["code", "nom"] }
-  ),
+  departement: string({
+    example: "1 Ain, 99 Étranger",
+    pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
+    enum: DEPARTEMENT_CODES.map((code) => code.replace(/^(0){1}/, "")),
+    maxLength: 3,
+    minLength: 1,
+  }),
+  region: string({
+    enum: REGIONS.map(({ code }) => code),
+  }),
+  academie: string({
+    enum: Object.values(ACADEMIES).map(({ code }) => code),
+  }),
   complete: string({
     description: "Adresse complète",
     example: "13 Bis Boulevard de la liberté 75000 PARIS",

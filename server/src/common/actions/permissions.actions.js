@@ -34,7 +34,7 @@ export const createPermission = async ({ organisme_id = null, userEmail, role, p
  * @param {*} projection
  * @returns
  */
-export const findOrganismesByQuery = async (query, projection = {}) => {
+export const findPermissionsByQuery = async (query, projection = {}) => {
   return await permissionsDb().find(query, { projection }).toArray();
 };
 

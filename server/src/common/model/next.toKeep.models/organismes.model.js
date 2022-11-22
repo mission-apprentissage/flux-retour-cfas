@@ -57,6 +57,7 @@ export const schema = object(
     created_at: date({ description: "Date d'ajout en base de données" }),
   },
   { required: ["uai"] }
+  // TODO adresse.departement adresse.region adresse.academie should be required
 );
 
 // Default value
