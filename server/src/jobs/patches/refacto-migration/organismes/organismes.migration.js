@@ -6,6 +6,7 @@ import { getLocalisationInfoFromUai } from "../../../../common/utils/uaiUtils.js
 import Joi from "joi";
 import { siretSchema } from "../../../../common/utils/validationUtils.js";
 import { createOrganismeFromCfa, mapCfaPropsToOrganismeProps } from "./organismes.migration.actions.js";
+import { updateOrganismeApiKey } from "../../../../common/actions/organismes.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -34,7 +35,8 @@ export const migrateCfasToOrganismes = async () => {
     // Pour chaque cfa on le transforme en organisme
     const mappedToOrganisme = mapCfaPropsToOrganismeProps(currentOldCfa);
     try {
-      await createOrganismeFromCfa(mappedToOrganisme);
+      const { _id } = await createOrganismeFromCfa(mappedToOrganisme);
+      await updateOrganismeApiKey(_id);
       nbCfasMigrated++;
     } catch (error) {
       cfasNotMigrated.push(currentOldCfa.uai);
