@@ -31,41 +31,6 @@ const getDossierApprenant = ({
   });
 };
 
-/**
- * Add or update items in a list of DossierApprenant
- * @param {*} itemsToAddOrUpdate
- * @returns
- */
-const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
-  const added = [];
-  const updated = [];
-
-  await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // Search dossier with unicity fields
-    const foundItem = await getDossierApprenant({
-      nom_apprenant: item.nom_apprenant,
-      prenom_apprenant: item.prenom_apprenant,
-      date_de_naissance_apprenant: item.date_de_naissance_apprenant,
-      formation_cfd: item.formation_cfd,
-      uai_etablissement: item.uai_etablissement,
-      annee_scolaire: item.annee_scolaire,
-    });
-
-    if (!foundItem) {
-      const addedItem = await createDossierApprenant(item);
-      added.push(addedItem);
-    } else {
-      const updatedItem = await updateDossierApprenant(foundItem._id, item);
-      updated.push(updatedItem);
-    }
-  });
-
-  return {
-    added,
-    updated,
-  };
-};
-
 const updateDossierApprenant = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
   const _id = new ObjectId(existingItemId);
@@ -180,6 +145,42 @@ const createDossierApprenant = async (itemToCreate) => {
 
   // TODO throw error if factory validation didn't pass
   return null;
+};
+
+// TODO SHOULD NOT EXIST AT ALL => All called ONCE in dossiers-apprenants.routes.js  VERSUS 51 dans les tests....
+/**
+ * Add or update items in a list of DossierApprenant
+ * @param {*} itemsToAddOrUpdate
+ * @returns
+ */
+const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
+  const added = [];
+  const updated = [];
+
+  await asyncForEach(itemsToAddOrUpdate, async (item) => {
+    // Search dossier with unicity fields
+    const foundItem = await getDossierApprenant({
+      nom_apprenant: item.nom_apprenant,
+      prenom_apprenant: item.prenom_apprenant,
+      date_de_naissance_apprenant: item.date_de_naissance_apprenant,
+      formation_cfd: item.formation_cfd,
+      uai_etablissement: item.uai_etablissement,
+      annee_scolaire: item.annee_scolaire,
+    });
+
+    if (!foundItem) {
+      const addedItem = await createDossierApprenant(item);
+      added.push(addedItem);
+    } else {
+      const updatedItem = await updateDossierApprenant(foundItem._id, item);
+      updated.push(updatedItem);
+    }
+  });
+
+  return {
+    added,
+    updated,
+  };
 };
 
 export default () => ({
