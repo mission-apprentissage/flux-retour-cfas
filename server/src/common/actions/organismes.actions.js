@@ -1,4 +1,3 @@
-import { omit } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { getMetiersBySirets } from "../apis/apiLba.js";
 import { organismesDb } from "../model/collections.js";
@@ -22,10 +21,9 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
 
   // TODO really used ?
   let metiers = [];
-  // TODO uncomment when needed
-  // if (Array.isArray(sirets) && sirets.length !== 0) {
-  //   metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
-  // }
+  if (Array.isArray(sirets) && sirets.length !== 0) {
+    metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
+  }
 
   const { insertedId } = await organismesDb().insertOne(
     validateOrganisme({
