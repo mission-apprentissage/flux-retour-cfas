@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { validateUai } from "../utils/validationUtils.js";
-import { getDepartementCodeFromUai } from "../utils/specificUtils.js";
+import { getDepartementCodeFromUai } from "../utils/uaiUtils.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { Cfa } from "../factory/cfa.js";
 import { getMetiersBySirets } from "../../common/apis/apiLba.js";

@@ -4,6 +4,7 @@ import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { DUPLICATE_TYPE_CODES } from "../../../common/constants/dossierApprenantConstants.js";
 import { collectionNames } from "../../constants.js";
+import { getDuplicatesList } from "../dossiersApprenants.duplicates.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -15,18 +16,14 @@ runScript(async ({ dossiersApprenants, effectifs, db }) => {
   await identifyCfdDuplicates({ dossiersApprenants, effectifs, db });
 }, "dossiersApprenants-identify-cfd-duplicates");
 
-const identifyCfdDuplicates = async ({ dossiersApprenants, effectifs, db }) => {
+const identifyCfdDuplicates = async ({ effectifs, db }) => {
   logger.info("Run identification dossiresApprenants with duplicates cfd...");
 
   const resultsCollection = db.collection(collectionNames.dossiersApprenantsDoublonsCfd);
   await resultsCollection.deleteMany({});
 
   // Identify all duplicates
-  const duplicates = await dossiersApprenants.getDuplicatesList(
-    DUPLICATE_TYPE_CODES.formation_cfd.code,
-    {},
-    { allowDiskUse: true }
-  );
+  const duplicates = await getDuplicatesList(DUPLICATE_TYPE_CODES.formation_cfd.code, {}, { allowDiskUse: true });
   loadingBar.start(duplicates.length, 0);
 
   // Calcul for total statuts & for this current duplicate

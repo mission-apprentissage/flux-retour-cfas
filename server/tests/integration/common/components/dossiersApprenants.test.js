@@ -12,6 +12,7 @@ import {
 } from "../../../../src/common/constants/dossierApprenantConstants.js";
 import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
 import { cfasDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+import { getDuplicatesList } from "../../../../src/jobs/support/dossiersApprenants.duplicates.actions.js";
 
 describe("Components Dossiers Apprenants Test", () => {
   let fakeNowDate;
@@ -1025,7 +1026,7 @@ describe("Components Dossiers Apprenants Test", () => {
 
   describe("getDuplicatesList", () => {
     it("Vérifie la récupération des doublons de dossiersApprenants", async () => {
-      const { createDossierApprenant, getDuplicatesList } = await dossiersApprenants();
+      const { createDossierApprenant } = await dossiersApprenants();
 
       // Create 10 random statuts
       for (let index = 0; index < 5; index++) {
@@ -1055,7 +1056,7 @@ describe("Components Dossiers Apprenants Test", () => {
     });
 
     it("Vérifie la récupération de dossiersApprenants ayant le même nom_apprenant, uai_etablissement, formation_cfd", async () => {
-      const { createDossierApprenant, getDuplicatesList } = await dossiersApprenants();
+      const { createDossierApprenant } = await dossiersApprenants();
 
       // Create 10 random statuts
       for (let index = 0; index < 5; index++) {
@@ -1085,7 +1086,7 @@ describe("Components Dossiers Apprenants Test", () => {
     });
 
     it("Vérifie la récupération des doublons de dossiersApprenants n'ayant jamais eu d'update", async () => {
-      const { createDossierApprenant, addOrUpdateDossiersApprenants, getDuplicatesList } = await dossiersApprenants();
+      const { createDossierApprenant, addOrUpdateDossiersApprenants } = await dossiersApprenants();
 
       // Create 10 random statuts
       for (let index = 0; index < 0; index++) {
@@ -1140,7 +1141,7 @@ describe("Components Dossiers Apprenants Test", () => {
     });
 
     it("Vérifie la récupération des doublons d'uai", async () => {
-      const { createDossierApprenant, getDuplicatesList } = await dossiersApprenants();
+      const { createDossierApprenant } = await dossiersApprenants();
 
       // Create 10 random statuts without duplicates
       for (let index = 0; index < 5; index++) {

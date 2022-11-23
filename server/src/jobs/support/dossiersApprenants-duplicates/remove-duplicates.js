@@ -5,6 +5,7 @@ import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import sortBy from "lodash.sortby";
 import omit from "lodash.omit";
 import { dossiersApprenantsDb, duplicatesEventsDb } from "../../../common/model/collections.js";
+import { getDuplicatesList } from "../dossiersApprenants.duplicates.actions.js";
 
 let args = [];
 let mongo;
@@ -17,7 +18,7 @@ let mongo;
  * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
  * --dry : will run but won't delete any data
  */
-runScript(async ({ dossiersApprenants, db }) => {
+runScript(async ({ db }) => {
   mongo = db;
   args = arg(
     {
@@ -41,7 +42,7 @@ runScript(async ({ dossiersApprenants, db }) => {
   const filterQuery = {};
   const jobTimestamp = Date.now();
 
-  const duplicatesGroups = await dossiersApprenants.getDuplicatesList(duplicatesTypeCode, filterQuery, {
+  const duplicatesGroups = await getDuplicatesList(duplicatesTypeCode, filterQuery, {
     allowDiskUse,
     duplicatesWithNoUpdate,
   });

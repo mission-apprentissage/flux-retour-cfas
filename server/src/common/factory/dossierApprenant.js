@@ -2,7 +2,7 @@ import Joi from "joi";
 import { BaseFactory } from "./baseFactory.js";
 import { schema as anneeScolaireSchema } from "../../common/domain/anneeScolaire.js";
 import { historiqueSchema as historiqueStatutsSchema } from "../../common/domain/apprenant/statutApprenant.js";
-import { schema as uaiSchema } from "../../common/utils/validationUtils.js";
+import { uaiSchema } from "../../common/utils/validationUtils.js";
 import { schema as cfdSchema } from "../../common/domain/cfd.js";
 import { schema as siretSchema } from "../../common/domain/siret.js";
 
