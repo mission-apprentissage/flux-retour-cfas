@@ -70,6 +70,8 @@ export const migrateCfasToOrganismes = async () => {
     loadingBar.increment();
   });
 
+  loadingBar.stop();
+
   // Log & stats
   logger.info(`--> ${allCfas.length} cfas initiaux`);
   logger.info(`--> ${nbCfasMigrated} cfas transformés avec succès en organismes`);
