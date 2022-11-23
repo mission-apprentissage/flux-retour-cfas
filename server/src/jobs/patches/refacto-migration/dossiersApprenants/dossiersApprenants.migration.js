@@ -15,6 +15,19 @@ import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
+// Const for jobEvents analysis
+const JOBNAME = "refacto-migration-dossiersApprenants";
+const LOG_ACTIONS = {
+  DOSSIERS: {
+    NOT_MIGRATED: "log-dossierApprenantNotMigrated",
+    NOT_MIGRATED_DETAIL: "log-dossierApprenantNotMigrated-detail",
+  },
+  ORGANISME: {
+    CREATED: "log-dossierApprenantMigration-organismeCreated",
+    CREATION_ERROR: "log-dossierApprenantMigration-organismeCreated-error",
+  },
+};
+
 /**
  * Ce script effectue la migration de la collection dossiersApprenants vers la nouvelle collection DossiersApprenantsMigration
  */
@@ -57,9 +70,9 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
       nbOrganismeCreatedErrorsTotal += nbOrganismes.notCreated;
     } catch (error) {
       await jobEventsDb().insertOne({
-        jobname: "refacto-migration-dossiersApprenants",
+        jobname: JOBNAME,
         date: new Date(),
-        action: "log-dossierApprenantNotMigrated",
+        action: LOG_ACTIONS.DOSSIERS.NOT_MIGRATED,
         data: {
           uai: currentUai,
           error,
@@ -111,18 +124,18 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
 
       // Store log organisme création
       await jobEventsDb().insertOne({
-        jobname: "refacto-migration-dossiersApprenants",
+        jobname: JOBNAME,
         date: new Date(),
-        action: "log-dossierApprenantMigration-organismeCreated",
+        action: LOG_ACTIONS.ORGANISME.CREATED,
         data: { organisme },
       });
     } catch (error) {
       nbOrganismeCreatedErrors++;
-      // Store log organisme création
+      // Store log error organisme création
       await jobEventsDb().insertOne({
-        jobname: "refacto-migration-dossiersApprenants",
+        jobname: JOBNAME,
         date: new Date(),
-        action: "log-dossierApprenantMigration-organismeCreated-error",
+        action: LOG_ACTIONS.ORGANISME.CREATION_ERROR,
         data: { error, uai },
       });
     }
@@ -147,9 +160,9 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
         // Store log error + détail
         const { stack: errorStack, message: errorMessage } = error;
         await jobEventsDb().insertOne({
-          jobname: "refacto-migration-dossiersApprenants",
+          jobname: JOBNAME,
           date: new Date(),
-          action: "log-dossierApprenantNotMigrated-detail",
+          action: LOG_ACTIONS.DOSSIERS.NOT_MIGRATED_DETAIL,
           data: {
             dossierApprenant: currentDossierToMigrate,
             error,
