@@ -195,6 +195,10 @@ const acl = [
                 feature: "Gestion des notifications de l'organisme",
                 ref: "organisme/page_parametres/gestion_notifications",
               },
+              {
+                feature: "Gestion clé d'api",
+                ref: "organisme/page_parametres/api_key",
+              },
             ],
           },
         ],

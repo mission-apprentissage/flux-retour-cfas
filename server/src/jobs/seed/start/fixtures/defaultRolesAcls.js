@@ -50,6 +50,7 @@ export default {
       "organisme/page_parametres/gestion_acces",
       "organisme/page_parametres/gestion_acces/supprimer_contributeur",
       "organisme/page_parametres/gestion_notifications",
+      "organisme/page_parametres/api_key",
     ],
   },
   "organisme.member": {

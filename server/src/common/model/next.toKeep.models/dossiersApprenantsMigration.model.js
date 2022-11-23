@@ -85,9 +85,9 @@ export const schema = object(
   },
   {
     required: [
-      "organisme_id",
-      "uai_etablissement",
       "id_erp_apprenant",
+      "uai_etablissement",
+      "organisme_id",
 
       "nom_apprenant",
       "prenom_apprenant",
@@ -100,7 +100,6 @@ export const schema = object(
 // Default value
 export function defaultValuesDossiersApprenantsMigration() {
   return {
-    draft: true,
     created_at: new Date(),
   };
 }
