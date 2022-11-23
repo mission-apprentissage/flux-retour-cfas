@@ -5,10 +5,13 @@ import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import path from "path";
 import { getDirname } from "../../../common/utils/esmUtils.js";
 import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
-import { findOrganismeByUai } from "../../../common/actions/organismes.actions.js";
+import { createOrganisme, findOrganismeByUai } from "../../../common/actions/organismes.actions.js";
 import { ERPS } from "../../../common/constants/erpsConstants.js";
+import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
+import { jobEventsDb } from "../../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+const JOBNAME = "hydrate-organismes-reseaux";
 
 // TODO : voir coté métier quels réseaux on gère
 const CFAS_NETWORKS = [
@@ -61,14 +64,29 @@ const hydrateForNetwork = async (allOrganismesForReseau, nomReseau) => {
     loadingBar.increment();
 
     // Check organisme existance
-    const organisme = await findOrganismeByUai(currentOrganisme?.uai);
+    let organisme = await findOrganismeByUai(currentOrganisme?.uai);
 
     if (!organisme) {
-      // TODO Create organisme from csv
+      try {
+        organisme = await createOrganisme({
+          uai: currentOrganisme?.uai,
+          ...buildAdresseFromUai(currentOrganisme?.uai),
+          nom: currentOrganisme?.nom_etablissement ?? "",
+        });
+      } catch (err) {
+        // Store log organisme création failed
+        await jobEventsDb().insertOne({
+          jobname: JOBNAME,
+          date: new Date(),
+          action: "create-organisme-error",
+          data: { organisme: currentOrganisme },
+        });
+      }
     }
 
     // Si organisme déja présent ou création ok
     if (organisme) {
+      // TODO Rechecker coté métier cette règle
       // Do not handle organisme in network AGRI and having GESTI as ERP
       if (nomReseau === RESEAUX_CFAS.AGRI.nomReseau && organisme.erps.includes(ERPS.GESTI.nomErp.toLowerCase())) {
         return;
