@@ -22,9 +22,9 @@ export class DossierApprenant extends BaseFactory {
       formation_cfd: cfdSchema.required(),
       annee_scolaire: anneeScolaireSchema.required(),
       historique_statut_apprenant: historiqueStatutsSchema.required(),
+      id_erp_apprenant: Joi.string().required(),
 
       ine_apprenant: Joi.string().allow(null, ""),
-      id_erp_apprenant: Joi.string().allow(null),
       email_contact: Joi.string().allow(null, ""),
       tel_apprenant: Joi.string().allow(null, ""),
       code_commune_insee_apprenant: Joi.string().allow(null),
