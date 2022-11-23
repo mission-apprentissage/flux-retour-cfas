@@ -3,7 +3,7 @@ import { RESEAUX_CFAS } from "../../../common/constants/networksConstants.js";
 import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import path from "path";
-import { getDirname } from "../../../common/utils/esmUtils.js";
+import { __dirname } from "../../../common/utils/esmUtils.js";
 import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
 import { createOrganisme, findOrganismeByUai } from "../../../common/actions/organismes.actions.js";
 import { ERPS } from "../../../common/constants/erpsConstants.js";
@@ -44,7 +44,7 @@ export const hydrateOrganismesFromReseaux = async (ovhStorage) => {
  */
 const getOrganismesListForNetwork = async (ovhStorage, nomFichier) => {
   // Get Reference CSV File if needed
-  const cfasReferenceFilePath = path.join(getDirname(import.meta.url), `./assets/${nomFichier}.csv`);
+  const cfasReferenceFilePath = path.join(__dirname(import.meta.url), `./assets/${nomFichier}.csv`);
   await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, {
     clearFile: true,
   });
