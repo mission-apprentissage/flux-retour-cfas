@@ -6,7 +6,7 @@ import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { schema as anneeScolaireSchema } from "../../../common/domain/anneeScolaire.js";
 import { schema as ISO8601DateSchema } from "../../../common/domain/date.js";
 import { schema as statutApprenantSchema } from "../../../common/domain/apprenant/statutApprenant.js";
-import { schema as uaiSchema } from "../../../common/utils/validationUtils.js";
+import { uaiSchema } from "../../../common/utils/validationUtils.js";
 import { schema as cfdSchema } from "../../../common/domain/cfd.js";
 import { schema as nomApprenantSchema } from "../../../common/domain/apprenant/nomApprenant.js";
 import { schema as prenomApprenantSchema } from "../../../common/domain/apprenant/prenomApprenant.js";

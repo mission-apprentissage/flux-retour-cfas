@@ -1,6 +1,6 @@
 import express from "express";
 import Joi from "joi";
-import { schema as uaiSchema } from "../../../common/utils/validationUtils.js";
+import { uaiSchema } from "../../../common/utils/validationUtils.js";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 
 export default ({ demandeBranchementErp }) => {
