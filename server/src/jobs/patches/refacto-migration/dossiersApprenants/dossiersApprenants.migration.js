@@ -92,6 +92,7 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
           ...mappedToDossierApprenantMigration,
         });
       } catch (error) {
+        const { stack: errorStack, message: errorMessage } = error;
         await jobEventsDb().insertOne({
           jobname: "refacto-migration-dossiersApprenants",
           date: new Date(),
@@ -99,6 +100,8 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
           data: {
             dossierApprenant: currentDossierToMigrate,
             error,
+            errorStack,
+            errorMessage,
           },
         });
       }

@@ -54,14 +54,39 @@ export const createDossierApprenantMigrationFromDossierApprenant = async ({
 
 /**
  * Méthode (temp) de transformation des props d'un dossiersApprenant en props d'un dossiersApprenantMigration
- * Gestion des ine_apprenant nulls
+ * Gestion des fields nulls à mettre en string ""
+ * Gestion des historiques non clean
  */
 export const mapToDossiersApprenantsMigrationProps = (props) => {
+  const historiqueMissingDateReception = props.historique_statut_apprenant.some(
+    (item) => item.date_reception === undefined
+  );
+
+  // Remplissage des dates de reception manquantes par la date de création
+  // TODO : se mettre d'accord sur la gestion à avoir : pour le moment on set la date à created_at / envisager de ne pas prendre le dossier ?
+  const fillEmptyDateReceptionForHistorique = () => {
+    const historiqueCleaned = props.historique_statut_apprenant.map((item) => {
+      if (item.date_reception === undefined) return { ...item, date_reception: props.created_at };
+      return item;
+    });
+    return historiqueCleaned;
+  };
+
   return {
     ...props,
-    // handle ine null
+    // handle null fields to pass in ""
     ine_apprenant: props.ine_apprenant ?? "",
-    // handle etablissement adresse null
     etablissement_adresse: props.etablissement_adresse ?? "",
+    email_contact: props.email_contact ?? "",
+    formation_rncp: props.formation_rncp ?? "",
+    id_erp_apprenant: props.id_erp_apprenant ?? "",
+    tel_apprenant: props.tel_apprenant ?? "",
+    niveau_formation: props.niveau_formation ?? "",
+    niveau_formation_libelle: props.niveau_formation_libelle ?? "",
+    periode_formation: props.periode_formation ?? [],
+    updated_at: props.updated_at ?? new Date(),
+    historique_statut_apprenant: historiqueMissingDateReception
+      ? fillEmptyDateReceptionForHistorique()
+      : props.historique_statut_apprenant,
   };
 };

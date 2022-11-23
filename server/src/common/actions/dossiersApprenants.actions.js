@@ -34,7 +34,7 @@ export const createDossierApprenant = async ({
       ...defaultValuesDossiersApprenantsMigration(),
       organisme_id: organisme._id,
       ...(nom_apprenant ? { nom_apprenant: nom_apprenant.toUpperCase().trim() } : {}),
-      ...(prenom_apprenant ? { nom_apprenant: prenom_apprenant.toUpperCase().trim() } : {}),
+      ...(prenom_apprenant ? { prenom_apprenant: prenom_apprenant.toUpperCase().trim() } : {}),
       ...(date_de_naissance_apprenant
         ? {
             date_de_naissance_apprenant:

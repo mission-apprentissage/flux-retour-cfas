@@ -83,10 +83,10 @@ cli
 cli
   .command("refacto-migration-dossiersApprenants")
   .description("Migration d'un cfa vers organismes")
-  .option("--sample <int>", "Nb de dossiers à traiter")
-  .action(async ({ sample }) => {
+  .option("--sampleNbUais <int>", "Nb de dossiers à traiter")
+  .action(async ({ sampleNbUais }) => {
     runScript(async () => {
-      return migrateDossiersApprenantsToDossiersApprenantsMigration(sample);
+      return migrateDossiersApprenantsToDossiersApprenantsMigration(sampleNbUais);
     }, "refacto-migration-dossiersApprenants");
   });
 
