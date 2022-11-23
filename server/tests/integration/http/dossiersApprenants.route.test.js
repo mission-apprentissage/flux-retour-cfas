@@ -1,7 +1,7 @@
 const assert = require("assert").strict;
 const { startServer } = require("../../utils/testUtils");
 const users = require("../../../src/common/components/users");
-const { apiRoles } = require("../../../src/common/roles");
+const { apiRoles, tdbRoles } = require("../../../src/common/roles");
 const { DossierApprenantModel } = require("../../../src/common/model");
 const {
   createRandomDossierApprenantApiInputList,
@@ -92,9 +92,8 @@ describe(__filename, () => {
       const userWithoutPermission = await createUser({
         username: "normal-user",
         password: "password",
-        permissions: [],
+        permissions: [tdbRoles.cfa, tdbRoles.network, tdbRoles.pilot],
       });
-      assert.deepEqual(userWithoutPermission.permissions.length, 0);
 
       const { data } = await httpClient.post("/api/login", {
         username: userWithoutPermission.username,
@@ -120,6 +119,7 @@ describe(__filename, () => {
       "statut_apprenant",
       "annee_scolaire",
       "date_metier_mise_a_jour_statut",
+      "id_erp_apprenant",
     ];
     requiredFields.forEach((requiredField) => {
       it(`Vérifie qu'on ne crée pas de donnée et renvoie une 200 + WARNING lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
@@ -456,7 +456,7 @@ describe(__filename, () => {
       assert.equal(await DossierApprenantModel.countDocuments({}), 0);
     });
 
-    it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec mauvais siret", async () => {
+    it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec un SIRET au mauvais format", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
