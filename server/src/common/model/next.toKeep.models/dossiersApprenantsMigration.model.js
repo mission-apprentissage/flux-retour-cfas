@@ -1,16 +1,9 @@
-import {
-  object,
-  string,
-  objectId,
-  date,
-  integer,
-  arrayOf,
-  stringOrNull,
-  dateOrNull,
-  arrayOfOrNull,
-  integerOrNull,
-  boolean,
-} from "../json-schema/jsonSchemaTypes.js";
+import Joi from "joi";
+import { object, string, objectId, date, integer, arrayOf, boolean } from "../json-schema/jsonSchemaTypes.js";
+import { schemaValidation } from "../../utils/schemaUtils.js";
+import { siretSchema, uaiSchema } from "../../utils/validationUtils.js";
+import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
+import { REGIONS } from "../../constants/territoiresConstants.js";
 
 export const collectionName = "dossiersApprenantsMigration";
 
@@ -41,45 +34,71 @@ export const schema = object(
     uai_etablissement: string({ description: "Code uai de l'établissement formateur" }),
 
     source: string({ description: "Source du dossier apprenant (Ymag, Gesti, MANUEL...)" }), // TODO ENUM of this ? maybe not
-    siret_etablissement: stringOrNull({ description: "Siret de l'établissement d'origine" }),
+    siret_etablissement: string({ description: "Siret de l'établissement d'origine" }),
 
-    etablissement_reseaux: arrayOfOrNull(string(), {
+    etablissement_reseaux: arrayOf(string(), {
       description: "Réseaux auxquels appartient l'organisme de formation de l'apprenant",
     }), // TODO MUST BE REMOVE after migration => Useless
 
-    ine_apprenant: stringOrNull({ description: "N° INE de l'apprenant" }),
+    ine_apprenant: string({ description: "N° INE de l'apprenant" }),
     nom_apprenant: string({ description: "Nom de l'apprenant" }),
     prenom_apprenant: string({ description: "Prénom de l'apprenant" }),
-    email_contact: stringOrNull({ description: "Adresse mail de contact de l'apprenant" }),
-    formation_cfd: string({ description: "CFD de la formation à laquelle l'apprenant est inscrit" }),
-    libelle_long_formation: stringOrNull({ description: "Libellé court de la formation visée" }),
-    niveau_formation: stringOrNull({ description: "Le niveau de la formation (ex: 3)" }),
-    niveau_formation_libelle: stringOrNull({
+    email_contact: string({ description: "Adresse mail de contact de l'apprenant" }),
+    formation_cfd: string({
+      description: "CFD de la formation à laquelle l'apprenant est inscrit",
+      pattern: "^[0-9A-Z]{8}[A-Z]?$",
+      maxLength: 8,
+    }),
+    libelle_long_formation: string({ description: "Libellé court de la formation visée" }),
+    niveau_formation: string({ description: "Le niveau de la formation (ex: 3)" }),
+    niveau_formation_libelle: string({
       description: "Libellé du niveau de la formation (ex: '3 (BTS, DUT...)')",
     }),
     nom_etablissement: string({ description: "Nom de l'établissement d'origine" }),
-    etablissement_adresse: stringOrNull({ description: "Adresse complète du CFA" }),
-    etablissement_nom_region: stringOrNull({ description: "Région du CFA" }),
-    etablissement_num_region: stringOrNull({ description: "Numéro de la région du CFA" }),
-    etablissement_num_departement: stringOrNull({ description: "Numéro de departement du CFA" }),
-    etablissement_nom_departement: stringOrNull({ description: "Nom du departement du CFA" }),
+    etablissement_adresse: string({ description: "Adresse complète du CFA" }),
+    etablissement_nom_region: string({ description: "Région du CFA" }),
+    etablissement_num_region: string({
+      description: "Numéro de la région du CFA",
+      enum: REGIONS.map(({ code }) => code),
+    }),
+    etablissement_num_departement: string({ description: "Numéro de departement du CFA" }),
+    etablissement_nom_departement: string({ description: "Nom du departement du CFA" }),
     historique_statut_apprenant: arrayOf(
-      object({}, { additionalProperties: true, description: "Historique du statut de l'apprenant" })
+      object(
+        {
+          valeur_statut: integer({
+            enum: Object.values(CODES_STATUT_APPRENANT),
+          }),
+          date_statut: date(),
+          date_reception: date(),
+        },
+        {
+          required: ["valeur_statut", "date_statut", "date_reception"],
+          additionalProperties: true,
+          description: "Historique du statut de l'apprenant",
+        }
+      )
     ),
-    periode_formation: arrayOfOrNull(integer(), { description: "Date debut & date de fin de la formation" }),
-    annee_formation: integerOrNull({ description: "Numéro de l'année dans la formation (promo)" }),
+    periode_formation: arrayOf(integer(), { description: "Date debut & date de fin de la formation" }),
+    annee_formation: integer({ description: "Numéro de l'année dans la formation (promo)" }),
     annee_scolaire: string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
+      pattern: "^d{4}-d{4}$",
     }),
-    tel_apprenant: stringOrNull({ description: "Numéro de téléphone de l'apprenant" }),
-    code_commune_insee_apprenant: stringOrNull({ description: "Code commune insee de l'apprenant" }),
-    date_de_naissance_apprenant: dateOrNull({ description: "Date de naissance de l'apprenant" }),
-    contrat_date_debut: dateOrNull({ description: "Date de début du contrat" }),
-    contrat_date_fin: dateOrNull({ description: "Date de fin du contrat" }),
-    contrat_date_rupture: dateOrNull({ description: "Date de rupture du contrat" }),
-    formation_rncp: stringOrNull({ description: "Code RNCP de la formation à laquelle l'apprenant est inscrit" }),
+    tel_apprenant: string({ description: "Numéro de téléphone de l'apprenant" }),
+    code_commune_insee_apprenant: string({
+      description: "Code commune insee de l'apprenant",
+      pattern: "^[0-9]{5}$",
+      maxLength: 5,
+      minLength: 5,
+    }),
+    date_de_naissance_apprenant: date({ description: "Date de naissance de l'apprenant" }),
+    contrat_date_debut: date({ description: "Date de début du contrat" }),
+    contrat_date_fin: date({ description: "Date de fin du contrat" }),
+    contrat_date_rupture: date({ description: "Date de rupture du contrat" }),
+    formation_rncp: string({ description: "Code RNCP de la formation à laquelle l'apprenant est inscrit" }),
 
-    updated_at: dateOrNull({ description: "Date de mise à jour en base de données" }),
+    updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
     archive: boolean({ description: "Dossier apprenant est archivé (retnetion maximum 5 ans)" }),
   },
@@ -88,11 +107,14 @@ export const schema = object(
       "id_erp_apprenant",
       "uai_etablissement",
       "organisme_id",
+      "source",
 
       "nom_apprenant",
       "prenom_apprenant",
       "formation_cfd",
       "annee_scolaire",
+
+      "historique_statut_apprenant",
     ],
   }
 );
@@ -100,6 +122,28 @@ export const schema = object(
 // Default value
 export function defaultValuesDossiersApprenantsMigration() {
   return {
+    etablissement_reseaux: [],
+    historique_statut_apprenant: [],
+    periode_formation: [],
+    updated_at: new Date(),
     created_at: new Date(),
   };
+}
+
+// Extra validation
+export function validateDossiersApprenantsMigration(props) {
+  return schemaValidation(props, schema, [
+    {
+      name: "uai_etablissement",
+      base: uaiSchema(),
+    },
+    {
+      name: "siret_etablissement",
+      base: siretSchema(),
+    },
+    {
+      name: "email_contact",
+      base: Joi.string().email(),
+    },
+  ]);
 }
