@@ -6,11 +6,12 @@ import {
   dossiersApprenantsMigrationDb,
   jobEventsDb,
 } from "../../../../common/model/collections.js";
-import { findOrganismeByUai } from "../../../../common/actions/organismes.actions.js";
+import { createOrganisme, findOrganismeByUai } from "../../../../common/actions/organismes.actions.js";
 import {
   createDossierApprenantMigrationFromDossierApprenant,
   mapToDossiersApprenantsMigrationProps,
 } from "./dossiersApprenants.migration.actions.js";
+import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -33,7 +34,10 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
   let nbDossiersToMigrate = 0;
   let nbDossiersMigratedTotal = 0;
   let nbDossiersNotMigratedTotal = 0;
-  let nbUaiMigrated = 0;
+  let nbOrganismeExistantTotal = 0;
+  let nbOrganismeCreatedTotal = 0;
+  let nbOrganismeCreatedErrorsTotal = 0;
+  let nbUaiHandled = 0;
 
   await asyncForEach(allUaisInDossiers, async (currentUai) => {
     try {
@@ -41,16 +45,16 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
       const dossiersForUai = await dossiersApprenantsDb().find({ uai_etablissement: currentUai }).toArray();
 
       // Migration de la liste des dossiers
-      const { nbDossiersMigrated, nbDossiersNotMigrated } = await migrateDossiersApprenantsByUai(
-        currentUai,
-        dossiersForUai
-      );
+      const { nbDossiers, nbOrganismes } = await migrateDossiersApprenantsByUai(currentUai, dossiersForUai);
 
       // Update count
-      nbUaiMigrated++;
+      nbUaiHandled++;
       nbDossiersToMigrate += dossiersForUai.length;
-      nbDossiersMigratedTotal += nbDossiersMigrated;
-      nbDossiersNotMigratedTotal += nbDossiersNotMigrated;
+      nbDossiersMigratedTotal += nbDossiers.migrated;
+      nbDossiersNotMigratedTotal += nbDossiers.notMigrated;
+      nbOrganismeExistantTotal += nbOrganismes.existant;
+      nbOrganismeCreatedTotal += nbOrganismes.created;
+      nbOrganismeCreatedErrorsTotal += nbOrganismes.notCreated;
     } catch (error) {
       await jobEventsDb().insertOne({
         jobname: "refacto-migration-dossiersApprenants",
@@ -69,26 +73,65 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
   loadingBar.stop();
 
   // Log & stats
-  logger.info(`-> ${nbUaiMigrated} uais distincts initiaux à traiter dans les dossiersApprenants.`);
-  logger.info(`--> ${nbDossiersToMigrate} dossiersApprenants à migrer.`);
-  logger.info(`---> ${nbDossiersMigratedTotal} dossiersApprenants migrés.`);
-  logger.info(`---> ${nbDossiersNotMigratedTotal} dossiersApprenants non migrés (erreurs).`);
+  logger.info(`-> ${nbUaiHandled} uais distincts initiaux traités dans les dossiersApprenants.`);
+  logger.info(`-> ${nbDossiersToMigrate} dossiersApprenants à migrer.`);
+
+  logger.info(`--> ${nbDossiersMigratedTotal} dossiersApprenants migrés.`);
+  logger.info(`--> ${nbDossiersNotMigratedTotal} dossiersApprenants non migrés (erreurs).`);
+
+  logger.info(`---> ${nbOrganismeExistantTotal} organismes déja existants.`);
+  logger.info(`---> ${nbOrganismeCreatedTotal} organismes crées.`);
+  logger.info(`---> ${nbOrganismeCreatedErrorsTotal} organismes non créées à cause d'erreurs.`);
 };
 
 /**
  * Migration d'une liste de dossiers d'un uai
- * 1ère étape : on créé l'organisme s'il n'existe pas déja et recupère son _id
- * 2e étape : on create les dossiersApprenantsMigration avec l'_id de l'organisme
+ * On cherche l'organisme, s'il existe on migre tous ses dossiers
+ * s'il n'existe pas on le créé et ensuite on migre ses dossiers
  */
 const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
   let nbDossiersMigrated = 0;
   let nbDossiersNotMigrated = 0;
+  let nbOrganismeExistant = 0;
+  let nbOrganismeCreated = 0;
+  let nbOrganismeCreatedErrors = 0;
 
   let organisme = await findOrganismeByUai(uai);
 
+  // Si organisme non trouvé on le créé
   if (!organisme) {
-    //TODO ADD organisme + count creation organismes + no else
+    try {
+      organisme = await createOrganisme({
+        uai,
+        ...buildAdresseFromUai(uai),
+        nom: dossiersForUai[0]?.nom_etablissement ?? "", // On prends le premier nom fourni dans le dossier - voir si gestion différente
+      });
+
+      nbOrganismeCreated++;
+
+      // Store log organisme création
+      await jobEventsDb().insertOne({
+        jobname: "refacto-migration-dossiersApprenants",
+        date: new Date(),
+        action: "log-dossierApprenantMigration-organismeCreated",
+        data: { organisme },
+      });
+    } catch (error) {
+      nbOrganismeCreatedErrors++;
+      // Store log organisme création
+      await jobEventsDb().insertOne({
+        jobname: "refacto-migration-dossiersApprenants",
+        date: new Date(),
+        action: "log-dossierApprenantMigration-organismeCreated-error",
+        data: { error, uai },
+      });
+    }
   } else {
+    nbOrganismeExistant++;
+  }
+
+  // Si organisme trouvé ou création OK
+  if (organisme) {
     await asyncForEach(dossiersForUai, async (currentDossierToMigrate) => {
       try {
         // Map des champs pour la migration puis création
@@ -100,6 +143,8 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
         nbDossiersMigrated++;
       } catch (error) {
         nbDossiersNotMigrated++;
+
+        // Store log error + détail
         const { stack: errorStack, message: errorMessage } = error;
         await jobEventsDb().insertOne({
           jobname: "refacto-migration-dossiersApprenants",
@@ -116,5 +161,12 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
     });
   }
 
-  return { nbDossiersMigrated, nbDossiersNotMigrated };
+  return {
+    nbDossiers: { migrated: nbDossiersMigrated, notMigrated: nbDossiersNotMigrated },
+    nbOrganismes: {
+      existant: nbOrganismeExistant,
+      created: nbOrganismeCreated,
+      notCreated: nbOrganismeCreatedErrors,
+    },
+  };
 };
