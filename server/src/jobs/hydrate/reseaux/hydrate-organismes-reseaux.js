@@ -5,10 +5,11 @@ import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import path from "path";
 import { __dirname } from "../../../common/utils/esmUtils.js";
 import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
-import { createOrganisme, findOrganismeByUai } from "../../../common/actions/organismes.actions.js";
+import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { ERPS } from "../../../common/constants/erpsConstants.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
-import { jobEventsDb } from "../../../common/model/collections.js";
+import { dossiersApprenantsDb, jobEventsDb } from "../../../common/model/collections.js";
+import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOBNAME = "hydrate-organismes-reseaux";
@@ -92,8 +93,11 @@ const hydrateForNetwork = async (allOrganismesForReseau, nomReseau) => {
         return;
       }
 
-      // TODO Update des réseaux de l'organisme si nécessaire
-      // TODO Update des dossiersApprenants de l'organisme si nécessaire
+      // Update des réseaux de l'organisme si nécessaire
+      await updateOrganismeNetworksIfNeeded(organisme, nomReseau);
+
+      // Update des dossiersApprenants de l'organisme si nécessaire
+      await updateDossiersApprenantsNetworksIfNeeded(organisme, nomReseau);
     }
   });
 
@@ -101,23 +105,33 @@ const hydrateForNetwork = async (allOrganismesForReseau, nomReseau) => {
   logger.info(`All organismes from ${nomReseau} network were handled !`);
 };
 
-// /**
-//  * Update organisme in collection if it has not this network already
-//  * @param {*} organismeInReferentiel
-//  * @param {*} nomReseau
-//  * @param {*} nomFichier
-//  */
-// const updateOrganismeFromNetwork = async (organismeInReferentiel, organisme, nomReseau) => {
-//   const organismeExistantWithoutCurrentNetwork =
-//     !organismeInReferentiel?.reseaux || !organismeInReferentiel?.reseaux?.some((item) => item === nomReseau);
+/**
+ * MAJ les réseaux de l'organisme si nécessaire
+ * @param {*} organismeInReferentiel
+ * @param {*} nomReseau
+ */
+const updateOrganismeNetworksIfNeeded = async (organisme, nomReseau) => {
+  // Si cet organisme n'a pas déja ce réseau dans sa liste alors ajout du réseau aux réseaux existants de l'organisme
+  if (!organisme?.reseaux.some((item) => item === nomReseau)) {
+    await updateOrganisme(organisme._id, { ...organisme, reseaux: [...organisme.reseaux, nomReseau] });
+  }
+};
 
-//   // Update only if cfa in referentiel has not network or current network not included
-//   if (organismeExistantWithoutCurrentNetwork) {
-//     await organismesDb().updateOne(
-//       { _id: organismeInReferentiel._id },
-//       {
-//         $addToSet: { noms_cfa: cfaInFile.nom_etablissement?.trim(), reseaux: nomReseau },
-//       }
-//     );
-//   }
-// };
+/**
+ * MAJ les réseaux des dossiersApprenants de l'organisme si nécessaire
+ * @param {*} organismeInReferentiel
+ * @param {*} nomReseau
+ */
+const updateDossiersApprenantsNetworksIfNeeded = async (organisme, nomReseau) => {
+  // Récupération de tous les dossiersApprenants de cet organismes qui n'ont pas ce réseau dans leur liste
+  const dossiersApprenantsForOrganismeWithoutThisNetwork = await dossiersApprenantsDb()
+    .find({ uai: organisme.uai, etablissement_reseaux: { $ne: nomReseau } })
+    .toArray();
+
+  await asyncForEach(dossiersApprenantsForOrganismeWithoutThisNetwork, async (dossierToUpdate) => {
+    await updateDossierApprenant(dossierToUpdate._id, {
+      ...dossierToUpdate,
+      etablissement_reseaux: [...dossierToUpdate.etablissement_reseaux, nomReseau],
+    });
+  });
+};
