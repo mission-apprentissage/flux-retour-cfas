@@ -85,6 +85,7 @@ export const mapToDossiersApprenantsMigrationProps = (props) => {
     niveau_formation_libelle: props.niveau_formation_libelle ?? "",
     periode_formation: props.periode_formation ?? [],
     updated_at: props.updated_at ?? new Date(),
+    libelle_long_formation: props.libelle_long_formation ?? "",
     historique_statut_apprenant: historiqueMissingDateReception
       ? fillEmptyDateReceptionForHistorique()
       : props.historique_statut_apprenant,

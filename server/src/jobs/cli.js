@@ -12,6 +12,8 @@ import {
   analyseFiabilisationCfas,
 } from "./patches/refacto-migration/organismes/organismes.init.migration.js";
 import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patches/refacto-migration/dossiersApprenants/dossiersApprenants.migration.js";
+import { hydrateOrganismesFromReseaux } from "./hydrate/reseaux/hydrate-organismes-reseaux.js";
+import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
 
 /**
  * Job d'initialisation projet
@@ -51,6 +53,9 @@ cli
     }, "refacto-migration-cfas-to-organismes");
   });
 
+/**
+ * Job de migration d'un cfa vers un organisme unique
+ */
 cli
   .command("refacto-migration-organisme-unique")
   .description("Migration d'un cfa vers organismes")
@@ -61,6 +66,9 @@ cli
     }, "refacto-migration-cfas-to-organismes-unique");
   });
 
+/**
+ * Job d'analyse de la fiabilité d'un cfa en vue de migration organisme
+ */
 cli
   .command("refacto-migration-organisme-fiabilite-cfa")
   .description("Analyse de la fiabilité d'un cfa avant migration")
@@ -71,6 +79,9 @@ cli
     }, "refacto-migration-cfas-to-organismes-fiabilite-cfa");
   });
 
+/**
+ * Job d'analyse de la fiabilité des cfas en vue de migration vers organismes
+ */
 cli
   .command("refacto-migration-organismes-fiabilite")
   .description("Analyse de la fiabilité des cfas avant migration")
@@ -80,6 +91,9 @@ cli
     }, "refacto-migration-cfas-to-organismes-fiabilite-cfa");
   });
 
+/**
+ * Job de migration des dossiersApprenants
+ */
 cli
   .command("refacto-migration-dossiersApprenants")
   .description("Migration d'un cfa vers organismes")
@@ -88,6 +102,30 @@ cli
     runScript(async () => {
       return migrateDossiersApprenantsToDossiersApprenantsMigration(sampleNbUais);
     }, "refacto-migration-dossiersApprenants");
+  });
+
+/**
+ * Job de remplissage & maj des d'organismes depuis les fichiers réseaux
+ */
+cli
+  .command("hydrate-organismes-reseaux")
+  .description("Remplissage des organismes depuis les réseaux")
+  .action(async () => {
+    runScript(async ({ ovhStorage }) => {
+      return hydrateOrganismesFromReseaux(ovhStorage);
+    }, "hydrate-organismes-reseaux");
+  });
+
+/**
+ * Job de remplissage & maj des organismes depuis le référentiel
+ */
+cli
+  .command("hydrate-referentiel")
+  .description("Remplissage des organismes depuis le référentiel")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateReferentiel();
+    }, "hydrate-referentiel");
   });
 
 cli.parse(process.argv);
