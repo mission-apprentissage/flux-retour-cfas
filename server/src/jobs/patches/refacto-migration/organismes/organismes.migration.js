@@ -1,11 +1,11 @@
 import cliProgress from "cli-progress";
-import { asyncForEach } from "../../common/utils/asyncUtils.js";
-import logger from "../../common/logger.js";
-import { cfasDb, jobEventsDb, organismesDb } from "../../common/model/collections.js";
-import { createOrganisme, mapCfaPropsToOrganismeProps } from "../../common/actions/organismes.actions.js";
-import { getLocalisationInfoFromUai } from "../../common/utils/uaiUtils.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
+import logger from "../../../../common/logger.js";
+import { cfasDb, jobEventsDb, organismesDb } from "../../../../common/model/collections.js";
+import { getLocalisationInfoFromUai } from "../../../../common/utils/uaiUtils.js";
 import Joi from "joi";
-import { siretSchema } from "../../common/utils/validationUtils.js";
+import { siretSchema } from "../../../../common/utils/validationUtils.js";
+import { createOrganismeFromCfa, mapCfaPropsToOrganismeProps } from "./organismes.migration.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -34,7 +34,7 @@ export const migrateCfasToOrganismes = async () => {
     // Pour chaque cfa on le transforme en organisme
     const mappedToOrganisme = mapCfaPropsToOrganismeProps(currentOldCfa);
     try {
-      await createOrganisme(mappedToOrganisme);
+      await createOrganismeFromCfa(mappedToOrganisme);
       nbCfasMigrated++;
     } catch (error) {
       cfasNotMigrated.push(currentOldCfa.uai);
@@ -93,8 +93,8 @@ export const migrateSingleCfaToOrganisme = async (uai) => {
   const mappedToOrganisme = mapCfaPropsToOrganismeProps(currentCfa);
 
   try {
-    await createOrganisme(mappedToOrganisme);
-    logger.error(`Cfa ${uai} migré avec succès`);
+    await createOrganismeFromCfa(mappedToOrganisme);
+    logger.info(`Cfa ${uai} migré avec succès`);
   } catch (error) {
     // Si erreur on la stocke avec l'objet cfa
     const { stack: errorStack, message: errorMessage } = error;

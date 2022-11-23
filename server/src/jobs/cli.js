@@ -3,7 +3,10 @@ import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seed } from "./seed/start/index.js";
 import { clear } from "./clear/index.js";
-import { migrateCfasToOrganismes, migrateSingleCfaToOrganisme } from "./refacto-migration/organismes.js";
+import {
+  migrateCfasToOrganismes,
+  migrateSingleCfaToOrganisme,
+} from "./patches/refacto-migration/organismes/organismes.migration.js";
 
 /**
  * Job d'initialisation projet
