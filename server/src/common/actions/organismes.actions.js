@@ -3,7 +3,10 @@ import { getMetiersBySirets } from "../apis/apiLba.js";
 import { organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
-import { createPermission } from "./permissions.actions.js";
+import { generateKey } from "../utils/cryptoUtils.js";
+import { createPermission, hasPermission } from "./permissions.actions.js";
+import { findRolePermissionById } from "./roles.actions.js";
+import { getUser } from "./users.actions.js";
 
 /**
  * Méthode de création d'un organisme
@@ -167,6 +170,79 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, as, pend
 
   return updated.value;
 };
+
+export const getContributeurs = async (organisme_id) => {
+  const _id = typeof id === "string" ? ObjectId(organisme_id) : organisme_id;
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+
+  const organisme = await organismesDb().findOne({ _id });
+  if (!organisme) {
+    throw new Error(`Unable to find organisme ${_id.toString()}`);
+  }
+
+  const buildContributeursResult = async (contributeurEmail, organisme_id) => {
+    const userSelectFields = { email: 1, nom: 1, prenom: 1, _id: 0 };
+    const permSelectFields = { pending: 1, created_at: 1, role: 1, custom_acl: 1 };
+    const roleSelectFields = { name: 1, description: 1, title: 1, _id: 1 };
+
+    const currentUser = (await getUser(contributeurEmail, userSelectFields)) || {
+      email: contributeurEmail,
+      nom: "",
+      prenom: "",
+    };
+
+    const currentUserPerm = await hasPermission({ organisme_id, userEmail: contributeurEmail }, permSelectFields);
+    if (!currentUserPerm) {
+      throw new Error("Something went wrong");
+    }
+    const currentUserRole = await findRolePermissionById(currentUserPerm.role, roleSelectFields);
+    if (!currentUserRole) {
+      throw new Error("Something went wrong");
+    }
+    return {
+      user: currentUser,
+      permission: {
+        permId: currentUserPerm._id,
+        created_at: currentUserPerm.created_at,
+        customAcl: currentUserPerm.custom_acl,
+        ...currentUserRole,
+      },
+    };
+  };
+
+  const contributeurs = [];
+  for (const contributeur of organisme.contributeurs) {
+    contributeurs.push(await buildContributeursResult(contributeur));
+  }
+
+  return contributeurs;
+};
+
+export const updateOrganismeApiKey = async (id) => {
+  const _id = typeof id === "string" ? ObjectId(id) : id;
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+
+  const organisme = await organismesDb().findOne({ _id });
+  if (!organisme) {
+    throw new Error(`Unable to find organisme ${_id.toString()}`);
+  }
+
+  const key = generateKey();
+  // const secretHash = generateSecretHash(key); // TODO Should be like this but users are not ready yet
+
+  await organismesDb().findOneAndUpdate(
+    { _id: organisme._id },
+    {
+      $set: {
+        api_key: key,
+      },
+    }
+  );
+
+  return key;
+};
+
+////////
 
 // TODO USELESS ABSTRACTION HERE => only in route
 // /**

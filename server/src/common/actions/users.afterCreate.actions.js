@@ -1,5 +1,6 @@
 import { addContributeurOrganisme, findOrganismeByUai, findOrganismesByQuery } from "./organismes.actions.js";
-import { createPermission } from "./permissions.actions.js";
+import { createPermission, findPermissionsByQuery } from "./permissions.actions.js";
+import { findRoleByName } from "./roles.actions.js";
 
 /**
  * Méthode d'ajouts des permissions en fonction de l'utilisateur
@@ -69,16 +70,32 @@ export const userAfterCreate = async ({
     } else {
       // TODO user is NOT cross_organismes and NOT scoped -> example OF
       const organisme = await findOrganismeByUai(uai); // uai
+      if (!organisme) {
+        throw new Error(`No organisme found for this uai ${uai}`);
+      }
+
       if (!organisme.contributeurs.length) {
         // is the first user on this organisme
         await addContributeurOrganisme(organisme._id, userEmail, "organisme.admin", pending);
-        // TODO VALIDATION FLOW => BE SURE HE IS WHO IS PRETEND TO BE
+        // TODO VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
         // Notif TDB_admin or whatever who
       } else {
-        // TODO VERIFY PERMS IS NOT PENDING == 1 "organisme.admin"
-        await addContributeurOrganisme(organisme._id, userEmail, "organisme.readonly", pending);
-        // TODO VALIDATION FLOW => organisme.admin Validate people that wants to join is organisme
-        // Notif organisme.admin
+        const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName = "organisme.admin") => {
+          const roleDb = await findRoleByName(roleName, { _id: 1 });
+          if (!roleDb) {
+            throw new Error("Role doesn't exist");
+          }
+          const permissions = await findPermissionsByQuery({ organisme_id, role: roleDb._id }, { pending: 1 });
+          return !!permissions.find(({ pending }) => !pending);
+        };
+
+        if (await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin")) {
+          await addContributeurOrganisme(organisme._id, userEmail, "organisme.readonly", pending);
+          // TODO VALIDATION FLOW [2] => organisme.admin Validate people that wants to join is organisme
+          // Notif organisme.admin
+        } else {
+          // TODO OOPS NOBODY IS HERE TO VALIDATE =>  VALIDATION FLOW [1]
+        }
       }
     }
   }
