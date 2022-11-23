@@ -7,6 +7,10 @@ import {
   migrateCfasToOrganismes,
   migrateSingleCfaToOrganisme,
 } from "./patches/refacto-migration/organismes/organismes.migration.js";
+import {
+  analyseFiabilisationCfa,
+  analyseFiabilisationCfas,
+} from "./patches/refacto-migration/organismes/organismes.init.migration.js";
 
 /**
  * Job d'initialisation projet
@@ -54,6 +58,25 @@ cli
     runScript(async () => {
       return migrateSingleCfaToOrganisme(uai);
     }, "refacto-migration-cfas-to-organismes-unique");
+  });
+
+cli
+  .command("refacto-migration-organisme-fiabilite-cfa")
+  .description("Analyse de la fiabilité d'un cfa avant migration")
+  .requiredOption("-u, --uai <string>", "Uai du cfa à migrer")
+  .action(async ({ uai }) => {
+    runScript(async () => {
+      return analyseFiabilisationCfa(uai);
+    }, "refacto-migration-cfas-to-organismes-fiabilite-cfa");
+  });
+
+cli
+  .command("refacto-migration-organismes-fiabilite")
+  .description("Analyse de la fiabilité des cfas avant migration")
+  .action(async () => {
+    runScript(async () => {
+      return analyseFiabilisationCfas();
+    }, "refacto-migration-cfas-to-organismes-fiabilite-cfa");
   });
 
 cli.parse(process.argv);
