@@ -11,6 +11,7 @@ import {
   analyseFiabilisationCfa,
   analyseFiabilisationCfas,
 } from "./patches/refacto-migration/organismes/organismes.init.migration.js";
+import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patches/refacto-migration/dossiersApprenants/dossiersApprenants.migration.js";
 
 /**
  * Job d'initialisation projet
@@ -77,6 +78,16 @@ cli
     runScript(async () => {
       return analyseFiabilisationCfas();
     }, "refacto-migration-cfas-to-organismes-fiabilite-cfa");
+  });
+
+cli
+  .command("refacto-migration-dossiersApprenants")
+  .description("Migration d'un cfa vers organismes")
+  .option("--sample <int>", "Nb de dossiers à traiter")
+  .action(async ({ sample }) => {
+    runScript(async () => {
+      return migrateDossiersApprenantsToDossiersApprenantsMigration(sample);
+    }, "refacto-migration-dossiersApprenants");
   });
 
 cli.parse(process.argv);
