@@ -5,6 +5,7 @@ import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
 import { DUPLICATE_TYPE_CODES } from "../../../common/constants/dossierApprenantConstants.js";
 import { collectionNames } from "../../constants.js";
+import { getDuplicatesList } from "../dossiersApprenants.duplicates.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -16,14 +17,14 @@ runScript(async ({ dossiersApprenants, effectifs, db }) => {
   await identifyUaisDuplicates({ dossiersApprenants, effectifs, db });
 }, JOB_NAMES.dossiersApprenantsBadHistoryIdentifyAntidated);
 
-const identifyUaisDuplicates = async ({ dossiersApprenants, effectifs, db }) => {
+const identifyUaisDuplicates = async ({ effectifs, db }) => {
   logger.info("Run identification dossiersApprenants with duplicates uais...");
 
   const resultsCollection = db.collection(collectionNames.dossiersApprenantsDoublonsUais);
   await resultsCollection.deleteMany({});
 
   // Identify all uais duplicates
-  const uaisDuplicates = await dossiersApprenants.getDuplicatesList(
+  const uaisDuplicates = await getDuplicatesList(
     DUPLICATE_TYPE_CODES.uai_etablissement.code,
     {},
     { allowDiskUse: true }
