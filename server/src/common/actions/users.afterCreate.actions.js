@@ -29,7 +29,7 @@ export const userAfterCreate = async ({
   // Below Flow
   if (is_cross_organismes) {
     if (!codes_region.length && !codes_academie.length && !codes_departement.length) {
-      // user is cross_organismes and Non scoped = National ("super viewer")
+      // user is cross_organismes and Non scoped = National ("Tranverse viewer")
       await createPermission({
         organisme_id: null,
         userEmail,

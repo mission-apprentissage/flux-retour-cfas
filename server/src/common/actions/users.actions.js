@@ -202,6 +202,7 @@ export const structureUser = async (user) => {
   const rolesAcl = rolesList.reduce((acc, { acl }) => [...acc, ...acl], []);
 
   return {
+    // TODO organisme_ids: []
     permissions,
     email: user.email,
     civility: user.civility,
@@ -220,7 +221,6 @@ export const structureUser = async (user) => {
     account_status: user.account_status,
     roles: rolesList,
     acl: uniq([...rolesAcl, ...user.custom_acl]),
-    // TODO organisme_ids: []
     orign_register: user.orign_register,
     has_accept_cgu_version: user.has_accept_cgu_version,
   };

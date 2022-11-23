@@ -17,7 +17,7 @@ export class DossierApprenant extends BaseFactory {
       nom_apprenant: Joi.string().required(),
       prenom_apprenant: Joi.string().required(),
       date_de_naissance_apprenant: Joi.date().required(),
-      uai_etablissement: uaiSchema.required(),
+      uai_etablissement: uaiSchema().required(),
       nom_etablissement: Joi.string().required(),
       formation_cfd: cfdSchema.required(),
       annee_scolaire: anneeScolaireSchema.required(),

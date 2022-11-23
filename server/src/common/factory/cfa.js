@@ -17,7 +17,7 @@ export class Cfa extends BaseFactory {
    */
   static create(props) {
     const schema = Joi.object({
-      uai: uaiSchema.required(),
+      uai: uaiSchema().required(),
       sirets: Joi.array().items(Joi.string()).allow(null),
       nom: Joi.string().allow("").required(),
       nature: natureSchema,
