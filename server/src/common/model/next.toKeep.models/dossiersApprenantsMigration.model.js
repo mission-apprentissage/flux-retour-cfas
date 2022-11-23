@@ -49,6 +49,11 @@ export const schema = object(
       pattern: "^[0-9A-Z]{8}[A-Z]?$",
       maxLength: 8,
     }),
+    formation_rncp: string({
+      description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
+      pattern: "^(RNCP)?[0-9]{2,5}$",
+      maxLength: 9,
+    }),
     libelle_long_formation: string({ description: "Libellé court de la formation visée" }),
     niveau_formation: string({ description: "Le niveau de la formation (ex: 3)" }),
     niveau_formation_libelle: string({
@@ -96,7 +101,6 @@ export const schema = object(
     contrat_date_debut: date({ description: "Date de début du contrat" }),
     contrat_date_fin: date({ description: "Date de fin du contrat" }),
     contrat_date_rupture: date({ description: "Date de rupture du contrat" }),
-    formation_rncp: string({ description: "Code RNCP de la formation à laquelle l'apprenant est inscrit" }),
 
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
