@@ -22,7 +22,6 @@ import lienPriveCfaRouter from "./routes/specific.routes/lien-prive-cfa.route.js
 import loginRouter from "./routes/specific.routes/login.route.js";
 import loginCfaRouter from "./routes/specific.routes/login-cfa.route.js";
 import referentielRouter from "./routes/specific.routes/referentiel.route.js";
-import effectifsRouter from "./routes/specific.routes/effectifs.route.js";
 import cfasRouter from "./routes/specific.routes/cfas.route.js";
 import formationRouter from "./routes/specific.routes/formations.route.js";
 import demandeIdentifiantsRouter from "./routes/specific.routes/demande-identifiants.route.js";
@@ -40,8 +39,9 @@ import register from "./routes/user.routes/register.routes.js";
 import password from "./routes/user.routes/password.routes.js";
 import profile from "./routes/user.routes/profile.routes.js";
 
-import sifa from "./routes/specific.temp.routes/sifa.routes.js";
-import upload from "./routes/specific.temp.routes/upload.routes.js";
+import effectifs from "./routes/specific.routes/effectifs.route.js";
+import sifa from "./routes/specific.temp.routes/sifa.routes.js"; // TMP
+import upload from "./routes/specific.temp.routes/upload.routes.js"; // TMP
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
@@ -71,7 +71,19 @@ export default async (components) => {
     ["/api/effectifs", "/api/v1/effectifs"],
     checkJwtToken,
     permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    effectifsRouter(components)
+    effectifs(components)
+  );
+  app.use(
+    "/api/effectifs-apprenants",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
+    effectifsApprenantsRouter(components)
+  );
+  app.use(
+    "/api/effectifs-export",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    effectifsExportRouter(components)
   );
 
   // private admin access
@@ -131,30 +143,19 @@ export default async (components) => {
   app.use("/api/effectifs-national", effectifsNationalRouter(components));
 
   // requires JWT auth
-  // @deprecated to /dossiers-apprenants
-  app.use(
-    ["/api/statut-candidats", "/api/dossiers-apprenants"],
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    dossierApprenantRouter(components)
-  );
   app.use(
     "/api/liens-prives-cfas",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     lienPriveCfaRouter(components)
   );
+
+  // @deprecated to /dossiers-apprenants
   app.use(
-    "/api/effectifs-apprenants",
+    ["/api/statut-candidats", "/api/dossiers-apprenants"],
     requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
-    effectifsApprenantsRouter(components)
-  );
-  app.use(
-    "/api/effectifs-export",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
-    effectifsExportRouter(components)
+    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    dossierApprenantRouter(components)
   );
 
   app.use(errorMiddleware());

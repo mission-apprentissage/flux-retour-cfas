@@ -141,7 +141,7 @@ export function validateUser(props) {
   const { codes_region, codes_academie, codes_departement, reseau, erp } = props;
 
   // Check if only one settled
-  const scopeTerritoire = [codes_region.length, codes_academie.length, codes_departement.length];
+  const scopeTerritoire = [codes_region?.length, codes_academie?.length, codes_departement?.length];
   if (scopeTerritoire.length - scopeTerritoire.filter((v) => !!v).length < 2) {
     throw new Error(`schema not valid : codes_region, codes_academie, codes_departement ONLY ONE OF THEM CAN BE SET`);
   }

@@ -3,35 +3,10 @@ import { format } from "date-fns";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { tdbRoles } from "../../../common/roles.js";
 import { getCacheKeyForRoute } from "../../../common/utils/cacheUtils.js";
 
-const filterQueryForNetworkRole = (req) => {
-  // TODO user.acl or permissions mecanism
-  // if (req.user?.permissions.includes(tdbRoles.network)) {
-  //   req.query.etablissement_reseaux = req.user.network;
-  // }
-};
-
-const filterQueryForCfaRole = (req) => {
-  // TODO user.acl or permissions mecanism
-  // if (req.user?.permissions.includes(tdbRoles.cfa)) {
-  //   req.query.uai_etablissement = req.user?.username;
-  // }
-};
-
-const applyUserRoleFilter = (req, _res, next) => {
-  console.log(req.user);
-  // users with network role should not be able to see data for other reseau
-  filterQueryForNetworkRole(req);
-
-  // users with cfa role should not be able to see data for other cfas
-  filterQueryForCfaRole(req);
-
-  next();
-};
-
 const commonEffectifsFilters = {
+  organisme_id: Joi.string().required(),
   etablissement_num_region: Joi.string().allow(null, ""),
   etablissement_num_departement: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().allow(null, ""),
@@ -48,7 +23,6 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/total-organismes",
-    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
       const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
@@ -74,7 +48,6 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/",
-    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
@@ -116,7 +89,6 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/niveau-formation",
-    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
@@ -151,7 +123,6 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/formation",
-    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
@@ -187,7 +158,6 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/annee-formation",
-    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
       const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
@@ -224,7 +194,6 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/cfa",
-    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
       const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
@@ -260,7 +229,6 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/siret",
-    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
       const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
@@ -296,7 +264,6 @@ export default ({ stats, effectifs, cache }) => {
    */
   router.get(
     "/departement",
-    applyUserRoleFilter, // TODO
     tryCatch(async (req, res) => {
       const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
         date: Joi.date().required(),
