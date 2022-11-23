@@ -123,16 +123,10 @@ export const updateDossierApprenant = async (
   }
 
   let updateQuery = {
-    id_erp_apprenant: dossiersApprenant.id_erp_apprenant, // required do not modify ever
-    uai_etablissement: dossiersApprenant.uai_etablissement, // required do not modify ever
-    source: dossiersApprenant.source, // required do not modify ever
-    organisme_id: dossiersApprenant.organisme_id, // required do not modify ever // Discutable
-
-    nom_apprenant: dossiersApprenant.nom_apprenant, // required do not modify ever // Discutable
-    prenom_apprenant: dossiersApprenant.prenom_apprenant, // required do not modify ever // Discutable
-    formation_cfd: dossiersApprenant.formation_cfd, // required do not modify ever // Discutable
-    annee_scolaire: dossiersApprenant.annee_scolaire, // required do not modify ever // Discutable
-
+    nom_apprenant: dossiersApprenant.nom_apprenant, // required
+    prenom_apprenant: dossiersApprenant.prenom_apprenant, // required
+    formation_cfd: dossiersApprenant.formation_cfd, // required
+    annee_scolaire: dossiersApprenant.annee_scolaire, // required
     historique_statut_apprenant: dossiersApprenant.historique_statut_apprenant, // required
 
     ...(contrat_date_debut
@@ -148,6 +142,10 @@ export const updateDossierApprenant = async (
         }
       : {}),
     ...data,
+    organisme_id: dossiersApprenant.organisme_id, // required do not modify ever // Discutable
+    id_erp_apprenant: dossiersApprenant.id_erp_apprenant, // required do not modify ever
+    uai_etablissement: dossiersApprenant.uai_etablissement, // required do not modify ever
+    source: dossiersApprenant.source, // required do not modify ever
   };
 
   const updated = await dossiersApprenantsMigrationDb().findOneAndUpdate(
