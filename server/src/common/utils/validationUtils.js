@@ -20,6 +20,10 @@ export function uaiSchema() {
   return Joi.string().regex(/^[0-9]{7}[a-zA-Z]$/);
 }
 
+export function validateUai(uai) {
+  return uaiSchema().required().validate(uai);
+}
+
 const customJoi = Joi.extend((joi) => ({
   type: "arrayOf",
   base: joi.array(),

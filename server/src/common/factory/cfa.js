@@ -1,6 +1,6 @@
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import Joi from "joi";
-import { schema as uaiSchema } from "../domain/uai.js";
+import { schema as uaiSchema } from "../utils/validationUtils.js";
 import { schema as natureSchema } from "../domain/organisme-de-formation/nature.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { BaseFactory } from "./baseFactory.js";

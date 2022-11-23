@@ -10,7 +10,7 @@ import { validateDateDeNaissanceApprenant } from "../../common/domain/apprenant/
 import { validateCodeCommune } from "../../common/domain/codeCommune.js";
 import { validateFrenchTelephoneNumber } from "../../common/domain/frenchTelephoneNumber.js";
 import { validateEmail } from "../../common/domain/email.js";
-import { validateUai } from "../../common/domain/uai.js";
+import { validateUai } from "../../common/utils/validationUtils.js";
 import { validateSiret } from "../../common/domain/siret.js";
 import logger from "../../common/logger.js";
 import { userEventsDb, referentielSiretUaiDb } from "../../common/model/collections.js";

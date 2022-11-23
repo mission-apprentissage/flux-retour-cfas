@@ -3,7 +3,7 @@ import indexBy from "lodash.indexby";
 import { runScript } from "../scriptWrapper.js";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";
 import logger from "../../common/logger.js";
-import { getDepartementCodeFromUai } from "../../common/domain/uai.js";
+import { getDepartementCodeFromUai } from "../../common/utils/specificUtils.js";
 import { DEPARTEMENTS } from "../../common/constants/territoiresConstants.js";
 import { dossiersApprenantsDb } from "../../common/model/collections.js";
 
