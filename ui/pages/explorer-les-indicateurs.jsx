@@ -25,7 +25,7 @@ const ExplorerLesIndicateursPage = () => {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]} backgroundColor="galt" paddingY="2w" color="grey.800">
         <Container maxW="xl">
-          <Breadcrumb pages={[{ title: "Mon espace", to: "/mon-espace/mon-tableau-de-bord" }, { title: title }]} />
+          <Breadcrumb pages={[{ title: "Mon espace", to: "/mon-espace/mon-organisme" }, { title: title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
             {title}
           </Heading>

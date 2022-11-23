@@ -21,14 +21,19 @@ import { PRODUCT_NAME } from "../../../common/constants/product";
 import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
 import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
 import useAuth from "../../../hooks/useAuth.js";
-import { hasPageAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
+import {
+  hasPageAccessTo,
+  // isUserAdmin
+} from "../../../common/utils/rolesUtils.js";
 import { _get } from "../../../common/httpClient.js";
 import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
 import { NotificationFill, Settings4Fill, UserFill } from "../../../theme/components/icons";
+import { useRouter } from "next/router";
 
 const UserMenu = () => {
   let [auth] = useAuth();
+  const router = useRouter();
 
   let logout = async () => {
     const { loggedOut } = await _get("/api/v1/auth/logout");
@@ -37,7 +42,8 @@ const UserMenu = () => {
     }
   };
 
-  let accountType = auth.roles.length ? auth.roles[0].name : isUserAdmin(auth) ? "admin" : "utilisateur";
+  // let accountType = auth.roles.length ? auth.roles[0].name : isUserAdmin(auth) ? "admin" : "utilisateur";
+  const myWks = router.pathname.includes("/mon-espace") && auth?.sub !== "anonymous";
 
   return (
     <Box mb={["3w", "3w", "0", "0"]}>
@@ -58,28 +64,35 @@ const UserMenu = () => {
         </HStack>
       )}
       {auth?.sub !== "anonymous" && (
-        <Flex alignItems="center">
-          <NotificationFill boxSize={4} mr={4} />
-          <Settings4Fill boxSize={4} mr={4} />
+        <HStack spacing={6}>
+          <NotificationFill boxSize={4} />
+
+          <Link
+            href="/mon-espace/mon-organisme"
+            borderBottom="1px solid"
+            borderColor={myWks ? "bluefrance" : "transparent"}
+            color={myWks ? "bluefrance" : "grey.800"}
+          >
+            Mon espace
+          </Link>
           <Menu placement="bottom">
-            <MenuButton as={Button} variant="pill">
-              {/* <AccountFill color={"bluefrance"} mt="0.3rem" boxSize={4} /> */}
+            <MenuButton as={Button} variant="pill" px={0}>
               <Flex>
                 <UserFill mt="0.3rem" boxSize={4} />
-
                 <Box display={["none", "block"]} ml={2}>
                   <Text color="bluefrance" textStyle="sm">
-                    {auth.email}{" "}
+                    {auth.email}
+                    {/* {" "}
                     <Text color="grey.600" as="span">
                       ({accountType})
-                    </Text>
+                    </Text> */}
                   </Text>
                 </Box>
               </Flex>
             </MenuButton>
             <MenuList>
-              <MenuItem href="/mon-espace/mon-tableau-de-bord" icon={<AccountFill boxSize={4} color={"bluefrance"} />}>
-                Mon espace
+              <MenuItem href="/profile" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
+                Mon profile
               </MenuItem>
               {hasPageAccessTo(auth, "admin") && (
                 <MenuGroup title="Administration">
@@ -109,7 +122,7 @@ const UserMenu = () => {
               <ChakraMenuItem onClick={logout}>Déconnexion</ChakraMenuItem>
             </MenuList>
           </Menu>
-        </Flex>
+        </HStack>
       )}
     </Box>
   );
@@ -124,7 +137,7 @@ const Header = () => {
           <Link href="/" p={[4, 0]}>
             <Logo />
           </Link>
-          <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]}>
+          <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]} flexGrow={1}>
             <Heading as="h6" variant="h1" fontSize="gamma">
               Le {PRODUCT_NAME}{" "}
             </Heading>
@@ -132,11 +145,9 @@ const Header = () => {
               Mettre à disposition des différents acteurs les données clés de l&apos;apprentissage en temps réel
             </Text>
           </Box>
-          <Box flex="1" my={["2w", "2w", "0"]}>
-            <Tag marginBottom="1w" backgroundColor="bluefrance" color="white" ml="5">
-              BETA
-            </Tag>
-          </Box>
+          <Tag marginBottom="1w" backgroundColor="bluefrance" color="white" position="absolute">
+            BETA
+          </Tag>
           <UserMenu />
         </Flex>
       </Container>

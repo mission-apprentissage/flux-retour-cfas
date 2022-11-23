@@ -6,7 +6,7 @@ import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolai
 import { getCacheKeyForRoute } from "../../../common/utils/cacheUtils.js";
 
 const commonEffectifsFilters = {
-  organisme_id: Joi.string().required(),
+  organisme_id: Joi.string(),
   etablissement_num_region: Joi.string().allow(null, ""),
   etablissement_num_departement: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().allow(null, ""),

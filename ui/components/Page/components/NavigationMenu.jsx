@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { Box, Container, Flex, Text } from "@chakra-ui/react";
 import useAuth from "../../../hooks/useAuth";
-import { MenuFill, Close, UserFill } from "../../../theme/components/icons";
+import { MenuFill, Close, Settings4Fill, ArrowDropRightLine } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 
 const NavigationMenu = ({ ...props }) => {
@@ -39,10 +39,9 @@ const NavItem = ({ children, to = "/", ...rest }) => {
       borderBottom="3px solid"
       borderColor={isActive ? "bluefrance" : "transparent"}
       bg={"transparent"}
+      {...rest}
     >
-      <Text display="block" {...rest}>
-        {children}
-      </Text>
+      <Text display="block">{children}</Text>
     </Link>
   );
 };
@@ -51,31 +50,44 @@ const NavLinks = ({ isOpen }) => {
   let [auth] = useAuth();
   const router = useRouter();
   const myWks = router.pathname.includes("/mon-espace") && auth?.sub !== "anonymous";
+
   return (
-    <Box display={{ base: isOpen ? "block" : "none", md: "block" }} flexBasis={{ base: "100%", md: "auto" }}>
+    <Box
+      display={{ base: isOpen ? "block" : "none", md: "block" }}
+      flexBasis={{ base: "100%", md: "auto" }}
+      w="full"
+      px={1}
+    >
       <Flex
         align="center"
-        justify={["center", "space-between", "flex-end", "flex-end"]}
+        justify={["center", "space-between", "flex-end", "flex-start"]}
         direction={["column", "row", "row", "row"]}
         pb={[8, 0]}
         textStyle="sm"
       >
-        {!myWks ? (
+        {!myWks && (
           <>
             <NavItem to="/">Accueil</NavItem>
             <NavItem to="/explorer-les-indicateurs">Indicateurs en temps réel</NavItem>
             <NavItem to="/comprendre-les-donnees">Comprendre les données</NavItem>
             <NavItem to="/organisme-formation">Organisme de formation</NavItem>
           </>
-        ) : (
+        )}
+        {myWks && (
           <>
             <Box p={4} bg={"transparent"}>
-              <UserFill mt="-0.3rem" boxSize={4} />
+              {/* Aden formation Caen */}
+              Mon organisme
+              <ArrowDropRightLine boxSize={3} />
             </Box>
-            <NavItem to="/mon-espace/mon-tableau-de-bord">Mon tableau de bord</NavItem>
-            <NavItem to="/mon-espace/mes-contacts">Mes contacts</NavItem>
-            <NavItem to="/mon-espace/mes-effectifs">Mes effectifs</NavItem>
-            <NavItem to="/mon-espace/mon-enquete-SIFA2">Mon enquête SIFA2</NavItem>
+            <NavItem to="/mon-espace/mon-organisme">Informations</NavItem>
+
+            <NavItem to="/mon-organisme/effectifs">Effectifs</NavItem>
+            <NavItem to="/mon-organisme/enquete-SIFA2">Enquête SIFA2</NavItem>
+            <Box flexGrow={1} />
+            <NavItem to="/mon-organisme/parametres">
+              <Settings4Fill boxSize={4} mr={2} /> Paramètres
+            </NavItem>
           </>
         )}
       </Flex>

@@ -1,9 +1,10 @@
-import { pick, uniq } from "lodash-es";
+import { compact, pick, uniq } from "lodash-es";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
 import { defaultValuesUser, validateUser } from "../model/next.toKeep.models/usersMigration.model.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { passwordSchema } from "../utils/validationUtils.js";
+import { findActivePermissionsForUser } from "./permissions.actions.js";
 
 /**
  * Méthode de création d'un utilisateur
@@ -201,8 +202,14 @@ export const structureUser = async (user) => {
     .toArray();
   const rolesAcl = rolesList.reduce((acc, { acl }) => [...acc, ...acl], []);
 
+  const organisme_ids = compact(
+    (await findActivePermissionsForUser({ userEmail: user.email }, { organisme_id: 1, _id: 0 })).map(
+      ({ organisme_id }) => organisme_id
+    )
+  );
+
   return {
-    // TODO organisme_ids: []
+    organisme_ids,
     permissions,
     email: user.email,
     civility: user.civility,

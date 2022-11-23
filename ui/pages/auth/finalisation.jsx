@@ -78,7 +78,7 @@ const Finalize = () => {
             const user = decodeJwt(result.token);
             setAuth(user);
             setToken(result.token);
-            router.push("/mon-espace/mon-tableau-de-bord");
+            router.push("/mon-espace/mon-organisme");
           }
         } catch (e) {
           console.error(e);

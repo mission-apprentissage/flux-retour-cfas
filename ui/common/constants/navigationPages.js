@@ -88,23 +88,23 @@ export const NAVIGATION_PAGES = {
     title: "Visualiser les indicateurs en temps réel",
   },
   VisualiserLesIndicateurs: {
-    path: "/mon-espace/mon-tableau-de-bord/",
+    path: "/mon-espace/mon-organisme/",
     title: "Visualiser les indicateurs en temps réel",
   },
   VisualiserLesIndicateursParTerritoire: {
-    path: "/mon-espace/mon-tableau-de-bord/par-territoire",
+    path: "/mon-espace/mon-organisme/par-territoire",
     title: "Vue territoriale",
   },
   VisualiserLesIndicateursParReseau: {
-    path: "/mon-espace/mon-tableau-de-bord/par-reseau",
+    path: "/mon-espace/mon-organisme/par-reseau",
     title: "Vue par réseau",
   },
   VisualiserLesIndicateursParOrganisme: {
-    path: "/mon-espace/mon-tableau-de-bord/par-organisme",
+    path: "/mon-espace/mon-organisme/par-organisme",
     title: "Vue par organisme de formation",
   },
   VisualiserLesIndicateursParFormation: {
-    path: "/mon-espace/mon-tableau-de-bord/par-formation",
+    path: "/mon-espace/mon-organisme/par-formation",
     title: "Vue par formation",
   },
   Statistiques: {

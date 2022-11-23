@@ -38,6 +38,10 @@ export const findPermissionsByQuery = async (query, projection = {}) => {
   return await permissionsDb().find(query, { projection }).toArray();
 };
 
+export const findActivePermissionsForUser = async ({ userEmail }, projection = {}) => {
+  return await permissionsDb().find({ pending: false, userEmail: userEmail.toLowerCase() }, { projection }).toArray();
+};
+
 export const hasPermission = async ({ organisme_id, userEmail }, projection = {}) => {
   return await permissionsDb().findOne({ organisme_id, userEmail: userEmail.toLowerCase() }, { projection });
 };

@@ -27,8 +27,8 @@ function IndicateursVueTerritoire() {
       <Section>
         <Breadcrumb
           pages={[
-            // { title: "Mon espace", to: "/mon-espace/mon-tableau-de-bord" },
-            { title: "Mon tableau de bord", to: "/mon-espace/mon-tableau-de-bord" },
+            // { title: "Mon espace", to: "/mon-espace/mon-organisme" },
+            { title: "Mon tableau de bord", to: "/mon-espace/mon-organisme" },
             { title: title },
           ]}
         />

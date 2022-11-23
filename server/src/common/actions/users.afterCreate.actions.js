@@ -85,6 +85,7 @@ export const userAfterCreate = async ({
           if (!roleDb) {
             throw new Error("Role doesn't exist");
           }
+
           const permissions = await findPermissionsByQuery({ organisme_id, role: roleDb._id }, { pending: 1 });
           return !!permissions.find(({ pending }) => !pending);
         };
