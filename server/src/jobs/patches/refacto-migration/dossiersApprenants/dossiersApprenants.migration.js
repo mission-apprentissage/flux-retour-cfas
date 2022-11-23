@@ -30,7 +30,9 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
   if (sample > 0) allUaisInDossiers = allUaisInDossiers.slice(0, sample);
 
   loadingBar.start(allUaisInDossiers.length, 0);
-  let nbDossiersMigrated = 0;
+  let nbDossiersToMigrate = 0;
+  let nbDossiersMigratedTotal = 0;
+  let nbDossiersNotMigratedTotal = 0;
   let nbUaiMigrated = 0;
 
   await asyncForEach(allUaisInDossiers, async (currentUai) => {
@@ -39,11 +41,16 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
       const dossiersForUai = await dossiersApprenantsDb().find({ uai_etablissement: currentUai }).toArray();
 
       // Migration de la liste des dossiers
-      await migrateDossiersApprenantsByUai(currentUai, dossiersForUai);
+      const { nbDossiersMigrated, nbDossiersNotMigrated } = await migrateDossiersApprenantsByUai(
+        currentUai,
+        dossiersForUai
+      );
 
       // Update count
-      nbDossiersMigrated += dossiersForUai.length;
       nbUaiMigrated++;
+      nbDossiersToMigrate += dossiersForUai.length;
+      nbDossiersMigratedTotal += nbDossiersMigrated;
+      nbDossiersNotMigratedTotal += nbDossiersNotMigrated;
     } catch (error) {
       await jobEventsDb().insertOne({
         jobname: "refacto-migration-dossiersApprenants",
@@ -62,11 +69,10 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
   loadingBar.stop();
 
   // Log & stats
-  logger.info(`--> ${nbUaiMigrated} uais distincts initiaux dans les dossiersApprenants`);
-  logger.info(`--> ${nbDossiersMigrated} dossiers transformés avec succès en organismes`);
-  // logger.info(`--> ${cfasNotMigrated.length} cfas non transformés (erreur)`);
-  // logger.info(`---> ${cfasUaiErrors.length} cfas non transformés à cause d'un pb de localisation via UAI (erreur)`);
-  // logger.info(`---> ${cfasSiretsErrors.length} cfas non transformés à cause d'un pb de sirets (erreur)`);
+  logger.info(`-> ${nbUaiMigrated} uais distincts initiaux à traiter dans les dossiersApprenants.`);
+  logger.info(`--> ${nbDossiersToMigrate} dossiersApprenants à migrer.`);
+  logger.info(`---> ${nbDossiersMigratedTotal} dossiersApprenants migrés.`);
+  logger.info(`---> ${nbDossiersNotMigratedTotal} dossiersApprenants non migrés (erreurs).`);
 };
 
 /**
@@ -75,15 +81,15 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
  * 2e étape : on create les dossiersApprenantsMigration avec l'_id de l'organisme
  */
 const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
-  // TODO
-  // logger.info(dossiersForUai.length);
-  const organisme = await findOrganismeByUai(uai);
+  let nbDossiersMigrated = 0;
+  let nbDossiersNotMigrated = 0;
+
+  let organisme = await findOrganismeByUai(uai);
 
   if (!organisme) {
-    //TODO ADD organisme
+    //TODO ADD organisme + count creation organismes + no else
   } else {
     await asyncForEach(dossiersForUai, async (currentDossierToMigrate) => {
-      // TODO create dossier with id
       try {
         // Map des champs pour la migration puis création
         const mappedToDossierApprenantMigration = mapToDossiersApprenantsMigrationProps(currentDossierToMigrate);
@@ -91,7 +97,9 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
           organisme_id: organisme._id,
           ...mappedToDossierApprenantMigration,
         });
+        nbDossiersMigrated++;
       } catch (error) {
+        nbDossiersNotMigrated++;
         const { stack: errorStack, message: errorMessage } = error;
         await jobEventsDb().insertOne({
           jobname: "refacto-migration-dossiersApprenants",
@@ -107,4 +115,6 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
       }
     });
   }
+
+  return { nbDossiersMigrated, nbDossiersNotMigrated };
 };
