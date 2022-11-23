@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { validateUai } from "../../../../src/common/utils/validationUtils.js";
-import { getDepartementCodeFromUai } from "../../../../src/common/utils/specificUtils.js";
+import { getDepartementCodeFromUai } from "../../../../src/common/utils/uaiUtils.js";
 
 describe("Domain UAI", () => {
   describe("validateUai", () => {
