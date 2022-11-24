@@ -4,6 +4,7 @@ import { Box, Container, Flex, Text } from "@chakra-ui/react";
 import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, Settings4Fill, UserFill, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
+import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
 
 const NavItem = ({ children, to = "/", colorActive = "bluefrance", isActive = false, ...rest }) => {
   const router = useRouter();
@@ -89,6 +90,8 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
           },
         }),
   };
+
+  // hasContextAccessTo(workspace, "organisme/page_effectifs")
 
   return (
     <Box

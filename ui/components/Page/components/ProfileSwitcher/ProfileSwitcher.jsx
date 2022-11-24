@@ -3,30 +3,6 @@ import { Flex, Menu, MenuButton, MenuList, MenuItem, Text, Box } from "@chakra-u
 import { DoubleArrows } from "../../../../theme/components/icons";
 import useAuth from "../../../../hooks/useAuth";
 
-// {
-//   "organisme_ids": [],
-//   "permissions": {
-//       "is_admin": true,
-//       "is_cross_organismes": true
-//   },
-//   "email": "admin@test.fr",
-//   "civility": "Monsieur",
-//   "nom": "Admin",
-//   "prenom": "SuperTest",
-//   "telephone": "+33612647511",
-//   "siret": "13002526500013",
-//   "codes_region": [],
-//   "codes_academie": [],
-//   "codes_departement": [],
-//   "account_status": "CONFIRMED",
-//   "roles": [],
-//   "acl": [],
-//   "orign_register": "ORIGIN",
-//   "has_accept_cgu_version": "v0.1",
-//   "_id": "637cdc9c172957402fd0990c",
-//   "loggedIn": true
-// }
-
 const fakeProfile = (auth) => ({
   ofF: {
     ...auth,
@@ -61,30 +37,41 @@ const fakeProfile = (auth) => ({
     ...auth,
     permissions: {},
     roles: [{ name: "reseau_of" }],
+    siret: "13001727000013",
     reseau: "CCI",
+    organisme_ids: ["453533583585", "453533583586"],
+    acl: ["organisme", "organisme/tableau_de_bord"],
   },
   piloteR: {
     ...auth,
     permissions: {},
     roles: [{ name: "pilot" }],
+    siret: "13000992100011",
     codes_region: ["84"],
+    organisme_ids: ["453533583585", "453533583586", "453533583587"],
+    acl: ["organisme", "organisme/tableau_de_bord"],
   },
   piloteD: {
     ...auth,
     permissions: {},
     roles: [{ name: "pilot" }],
+    siret: "13000992100011",
     codes_departement: ["61"],
+    organisme_ids: ["453533583585", "453533583586", "453533583587"],
   },
   piloteA: {
     ...auth,
     permissions: {},
     roles: [{ name: "pilot" }],
+    siret: "13000992100011",
     codes_academie: ["70"],
+    organisme_ids: ["453533583585", "453533583586", "453533583587"],
   },
   erp: {
     ...auth,
     permissions: {},
     roles: [{ name: "erp" }],
+    siret: "31497933700081",
     erp: "YMAG",
   },
 });

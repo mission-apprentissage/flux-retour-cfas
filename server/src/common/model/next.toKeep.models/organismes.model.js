@@ -60,7 +60,7 @@ export const schema = object(
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
   },
-  { required: ["uai", "adresse.departement", "adresse.region", "adresse.academie"] }
+  { required: ["uai", "adresse.departement", "adresse.region", "adresse.academie"], additionalProperties: true }
 );
 
 // Default value
