@@ -1,8 +1,8 @@
-import cliProgress from "cli-progress";
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+// import cliProgress from "cli-progress";
+// import logger from "../../../common/logger.js";
+// import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 
-const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+// const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
  * Script qui initialise les organismes du référentiel

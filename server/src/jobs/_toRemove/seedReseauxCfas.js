@@ -1,13 +1,13 @@
 import cliProgress from "cli-progress";
-import logger from "../../../common/logger.js";
+import logger from "../../common/logger.js";
 import path from "path";
-import { runScript } from "../../scriptWrapper.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
-import { RESEAUX_CFAS } from "../../../common/constants/networksConstants.js";
-import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
-import { reseauxCfasDb } from "../../../common/model/collections.js";
-import { getDirname } from "../../../common/utils/esmUtils.js";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
+import { RESEAUX_CFAS } from "../../common/constants/networksConstants.js";
+import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
+import { reseauxCfasDb } from "../../common/model/collections.js";
+import { getDirname } from "../../common/utils/esmUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

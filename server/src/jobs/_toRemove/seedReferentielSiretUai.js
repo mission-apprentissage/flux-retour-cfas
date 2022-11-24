@@ -1,10 +1,10 @@
-import { getDirname } from "../../../common/utils/esmUtils.js";
+import { getDirname } from "../../common/utils/esmUtils.js";
 import path from "path";
-import { runScript } from "../../scriptWrapper.js";
-import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
-import { referentielSiretUaiDb } from "../../../common/model/collections.js";
+import { runScript } from "../scriptWrapper.js";
+import { fetchOrganismes } from "../../common/apis/apiReferentielMna.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
+import { referentielSiretUaiDb } from "../../common/model/collections.js";
 
 const REFERENTIEL_FIELDS_TO_FETCH = [
   "siret",
