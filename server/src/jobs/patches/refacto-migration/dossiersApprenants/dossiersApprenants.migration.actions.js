@@ -20,6 +20,7 @@ export const createDossierApprenantMigrationFromDossierApprenant = async ({
   contrat_date_fin,
   contrat_date_rupture,
   code_commune_insee_apprenant,
+  siret_etablissement,
   email_contact,
   formation_rncp,
   telephone_apprenant,
@@ -29,6 +30,7 @@ export const createDossierApprenantMigrationFromDossierApprenant = async ({
     ...defaultValuesDossiersApprenantsMigration(),
     organisme_id,
     ...(code_commune_insee_apprenant ? { code_commune_insee_apprenant } : {}),
+    ...(siret_etablissement ? { siret_etablissement } : {}),
     ...(email_contact ? { email_contact } : {}),
     ...(formation_rncp ? { formation_rncp } : {}),
     ...(telephone_apprenant ? { telephone_apprenant } : {}),
@@ -108,7 +110,7 @@ const validateOrTransformTelephone = (tel_apprenant) => {
   let isValid = Boolean(tel_apprenant) && regexPattern.test(tel_apprenant);
 
   // Test transform into valid telephone if good length but not valid
-  if (!isValid && tel_apprenant.length === 10) {
+  if (!isValid && tel_apprenant?.length === 10) {
     const transformedPhoneNumber = transformToInternationalNumber(tel_apprenant);
     if (regexPattern.test(transformedPhoneNumber)) return transformedPhoneNumber;
   }
