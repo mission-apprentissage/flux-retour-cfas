@@ -1,13 +1,17 @@
-import { runScript } from "../scriptWrapper.js";
 import logger from "../../common/logger.js";
 import { validateAnneeScolaire } from "../../common/domain/anneeScolaire.js";
-import { dossiersApprenantsDb } from "../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../common/model/collections.js";
 
-const ANNEE_SCOLAIRE_START_LIMIT = 2021;
-
-runScript(async ({ archiveDossiersApprenants }) => {
-  logger.info("Archivage des dossiers apprenants avec année scolaire nulle ou antérieure à 2021");
-  const allAnneesScolaires = await dossiersApprenantsDb().distinct("annee_scolaire");
+/**
+ * Fonction d'archivage des anciens dossiers apprenants
+ * @param {*} archiveDossiersApprenants
+ * @param {*} ANNEE_SCOLAIRE_START_LIMIT
+ */
+export const archiveOldDossiersApprenants = async (archiveDossiersApprenants, ANNEE_SCOLAIRE_START_LIMIT = 2021) => {
+  logger.info(
+    `Archivage des dossiers apprenants avec année scolaire nulle ou antérieure à ${ANNEE_SCOLAIRE_START_LIMIT}`
+  );
+  const allAnneesScolaires = await dossiersApprenantsMigrationDb().distinct("annee_scolaire");
   const anneeScolaireBlacklistValues = allAnneesScolaires.filter((anneeScolaire) => {
     if (validateAnneeScolaire(anneeScolaire).error) return true;
 
@@ -24,18 +28,18 @@ runScript(async ({ archiveDossiersApprenants }) => {
 
   const query = { annee_scolaire: { $in: anneeScolaireBlacklistValues } };
 
-  const count = await dossiersApprenantsDb().countDocuments(query);
+  const count = await dossiersApprenantsMigrationDb().countDocuments(query);
   logger.info(count, "dossiers apprenants seront archivés");
 
-  const cursor = dossiersApprenantsDb().find(query);
+  const cursor = dossiersApprenantsMigrationDb().find(query);
   while (await cursor.hasNext()) {
     const dossierApprenantToArchive = await cursor.next();
 
     try {
       await archiveDossiersApprenants.create(dossierApprenantToArchive);
-      await dossiersApprenantsDb().deleteOne({ _id: dossierApprenantToArchive._id });
+      await dossiersApprenantsMigrationDb().deleteOne({ _id: dossierApprenantToArchive._id });
     } catch (err) {
       logger.error("Could not archive dossier apprenant with _id", dossierApprenantToArchive._id);
     }
   }
-}, "archivage-dossiers-apprenants");
+};

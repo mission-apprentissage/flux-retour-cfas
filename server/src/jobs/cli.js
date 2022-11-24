@@ -14,6 +14,7 @@ import {
 import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patches/refacto-migration/dossiersApprenants/dossiersApprenants.migration.js";
 import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
+import { archiveOldDossiersApprenants } from "./archive-old-dossiers-apprenants/index.js";
 
 /**
  * Job d'initialisation projet
@@ -127,6 +128,19 @@ cli
     runScript(async () => {
       return hydrateReferentiel();
     }, "hydrate-referentiel");
+  });
+
+/**
+ * Job d'archivage des anciens dossiers apprenants
+ */
+cli
+  .command("archive-old-dossiersApprenants")
+  .description("Archivage des anciens dossiers apprenants")
+  .option("--limit <int>", "Année limite d'archivage")
+  .action(async ({ limit }) => {
+    runScript(async ({ archiveDossiersApprenants }) => {
+      return archiveOldDossiersApprenants(archiveDossiersApprenants, limit);
+    }, "archive-old-dossiersApprenants");
   });
 
 cli.parse(process.argv);
