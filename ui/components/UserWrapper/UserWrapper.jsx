@@ -62,6 +62,7 @@ const ForceAcceptCGU = ({ children }) => {
           onAcknowledgement={onAcceptCguClicked}
           canBeClosed={false}
           bgOverlay="rgba(0, 0, 0, 0.28)"
+          size="full"
         >
           <Box mb={3}>
             {!auth.has_accept_cgu_version && (
@@ -78,7 +79,7 @@ const ForceAcceptCGU = ({ children }) => {
               </Text>
             )}
           </Box>
-          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} h="60vh" ref={cguContainer}>
+          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} ref={cguContainer}>
             <Cgu
               isWrapped="1"
               onLoad={async () => {

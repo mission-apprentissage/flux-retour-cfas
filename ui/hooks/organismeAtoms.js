@@ -1,21 +1,16 @@
 import { atom } from "recoil";
 
+export const organismeMineAtom = atom({
+  key: "organisme/mine",
+  default: null,
+});
+
 export const organismeAtom = atom({
   key: "organisme",
   default: null,
 });
 
-export const organismePathsAtom = atom({
-  key: "organisme/paths",
-  default: null,
-});
-
-export const organismeTitlesAtom = atom({
-  key: "organisme/titles",
-  default: null,
-});
-
-export const organismeTitleAtom = atom({
-  key: "organisme/title",
+export const organismeNavigationAtom = atom({
+  key: "organisme/navigation",
   default: null,
 });

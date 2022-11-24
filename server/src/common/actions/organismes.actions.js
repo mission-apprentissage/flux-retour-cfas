@@ -70,8 +70,7 @@ export const findOrganismeByUai = async (uai, projection = {}) => {
  * @returns
  */
 export const findOrganismeById = async (id, projection = {}) => {
-  const _id = typeof id === "string" ? ObjectId(id) : id;
-  const role = await organismesDb().findOne({ _id }, { projection });
+  const role = await organismesDb().findOne({ _id: ObjectId(id) }, { projection });
   return role;
 };
 

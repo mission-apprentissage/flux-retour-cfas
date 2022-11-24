@@ -4,8 +4,8 @@ import { Box, Container, Flex, Text } from "@chakra-ui/react";
 import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, Settings4Fill, UserFill, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
-// import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
-import { useOrganisme } from "../../../hooks/useOrganisme";
+import { useEspace } from "../../../hooks/useEspace";
+import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
 
 const NavItem = ({ children, to = "/", colorActive = "bluefrance", isActive = false, ...rest }) => {
   const router = useRouter();
@@ -27,7 +27,7 @@ const NavItem = ({ children, to = "/", colorActive = "bluefrance", isActive = fa
   );
 };
 
-const NavBarPublic = ({ isOpen }) => {
+const NavContainer = ({ isOpen, children }) => {
   return (
     <Box
       display={{ base: isOpen ? "block" : "none", md: "block" }}
@@ -42,150 +42,84 @@ const NavBarPublic = ({ isOpen }) => {
         pb={[8, 0]}
         textStyle="sm"
       >
-        <NavItem to="/">Accueil</NavItem>
-        <NavItem to="/explorer-les-indicateurs">Indicateurs en temps réel</NavItem>
-        <NavItem to="/comprendre-les-donnees">Comprendre les données</NavItem>
-        <NavItem to="/organisme-formation">Organisme de formation</NavItem>
+        {children}
       </Flex>
     </Box>
+  );
+};
+
+const NavBarPublic = ({ isOpen }) => {
+  return (
+    <NavContainer isOpen={isOpen}>
+      <NavItem to="/">Accueil</NavItem>
+      <NavItem to="/explorer-les-indicateurs">Indicateurs en temps réel</NavItem>
+      <NavItem to="/comprendre-les-donnees">Comprendre les données</NavItem>
+      <NavItem to="/organisme-formation">Organisme de formation</NavItem>
+    </NavContainer>
   );
 };
 
 const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
-  let [auth] = useAuth();
-
-  const whoIs = auth.roles.find((role) => ["pilot", "erp", "of", "reseau_of"].includes(role.name))?.name;
-  const hasAccessToOnlyOneOrganisme = auth.organisme_ids.length === 1;
-
-  const mesOrganismesNames = {
-    pilot: "Sur mon territoire",
-    erp: "Les organismes connectés",
-    of: "Mes organismes",
-    reseau_of: "Mon réseau",
-    ...(hasAccessToOnlyOneOrganisme ? {} : { global: "Tous les organismes" }),
-  };
-
-  const myOwn = {
-    landingOrganisme: {
-      name: "Mon tableau de bord",
-      path: "/mon-espace/mon-organisme",
-    },
-    effectifs: {
-      name: "Mes effectifs",
-      path: "/mon-espace/mon-organisme/effectifs",
-    },
-    sifa2: {
-      name: "Mon enquête SIFA2",
-      path: "/mon-espace/mon-organisme/enquete-SIFA2",
-    },
-    parametres: {
-      name: "Mes paramètres",
-      path: "/mon-espace/mon-organisme/parametres",
-    },
-    ...(hasAccessToOnlyOneOrganisme
-      ? {}
-      : {
-          mesOrganismes: {
-            name: mesOrganismesNames[whoIs] ?? mesOrganismesNames.global,
-            path: "/mon-espace/mes-organismes",
-          },
-        }),
-  };
-
-  // hasContextAccessTo(workspace, "organisme/page_effectifs")
+  let {
+    navigation: { user: userNavigation },
+    myOrganisme,
+  } = useEspace();
 
   return (
-    <Box
-      display={{ base: isOpen ? "block" : "none", md: "block" }}
-      flexBasis={{ base: "100%", md: "auto" }}
-      w="full"
-      px={1}
-    >
-      <Flex
-        align="center"
-        justify={["center", "space-between", "flex-end", "flex-start"]}
-        direction={["column", "row", "row", "row"]}
-        pb={[8, 0]}
-        textStyle="sm"
-      >
-        <Box p={4} bg={"transparent"}>
-          <UserFill mt="-0.3rem" boxSize={4} />
-        </Box>
-        <NavItem to={myOwn.landingOrganisme.path}>{myOwn.landingOrganisme.name}</NavItem>
-        {myOwn.mesOrganismes && (
-          <NavItem to={myOwn.mesOrganismes.path} isActive={mesOrganismesActive}>
-            {myOwn.mesOrganismes.name}
-          </NavItem>
-        )}
-        <NavItem to={myOwn.effectifs.path}>{myOwn.effectifs.name}</NavItem>
-        <NavItem to={myOwn.sifa2.path}>{myOwn.sifa2.name}</NavItem>
-
-        <Box flexGrow={1} />
-        <NavItem to={myOwn.parametres.path}>
-          <Settings4Fill boxSize={4} mr={2} color="bluefrance" /> {myOwn.parametres.name}
+    <NavContainer isOpen={isOpen}>
+      <Box p={4} bg={"transparent"}>
+        <UserFill mt="-0.3rem" boxSize={4} />
+      </Box>
+      <NavItem to={userNavigation.landingEspace.path}>{userNavigation.landingEspace.navTitle}</NavItem>
+      {userNavigation.mesOrganismes && (
+        <NavItem to={userNavigation.mesOrganismes.path} isActive={mesOrganismesActive}>
+          {userNavigation.mesOrganismes.navTitle}
         </NavItem>
-      </Flex>
-    </Box>
+      )}
+      {hasContextAccessTo(myOrganisme, "organisme/page_effectifs") && userNavigation.effectifs && (
+        <NavItem to={userNavigation.effectifs.path}>{userNavigation.effectifs.navTitle}</NavItem>
+      )}
+      {hasContextAccessTo(myOrganisme, "organisme/page_sifa2") && userNavigation.sifa2 && (
+        <NavItem to={userNavigation.sifa2.path}>{userNavigation.sifa2.navTitle}</NavItem>
+      )}
+
+      {hasContextAccessTo(myOrganisme, "organisme/page_parametres") && userNavigation.parametres && (
+        <>
+          <Box flexGrow={1} />
+          <NavItem to={userNavigation.parametres.path}>
+            <Settings4Fill boxSize={4} mr={2} color="bluefrance" /> {userNavigation.parametres.navTitle}
+          </NavItem>
+        </>
+      )}
+    </NavContainer>
   );
 };
 
 const NavBarOrganisme = ({ isOpen }) => {
-  let { organisme_id } = useOrganisme();
-
-  const organisme = {
-    landingOrganisme: {
-      name: "Son tableau de bord",
-      path: `/mon-espace/organisme/${organisme_id}`,
-    },
-    effectifs: {
-      name: "Ses effectifs",
-      path: `/mon-espace/organisme/${organisme_id}/effectifs`,
-    },
-    sifa2: {
-      name: "Son enquête SIFA2",
-      path: `/mon-espace/organisme/${organisme_id}/enquete-SIFA2`,
-    },
-    parametres: {
-      name: "Ses paramètres",
-      path: `/mon-espace/organisme/${organisme_id}/parametres`,
-    },
-  };
-
+  let {
+    navigation: { organisme: organismeNavigation },
+  } = useEspace();
   return (
-    <Box
-      display={{ base: isOpen ? "block" : "none", md: "block" }}
-      flexBasis={{ base: "100%", md: "auto" }}
-      w="full"
-      px={1}
-    >
-      <Flex
-        align="center"
-        justify={["center", "space-between", "flex-end", "flex-start"]}
-        direction={["column", "row", "row", "row"]}
-        pb={[8, 0]}
-        textStyle="sm"
-      >
-        <>
-          <Box p={4} bg={"transparent"}>
-            <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
-          </Box>
-          <NavItem to={organisme.landingOrganisme.path} colorActive="dsfr_lightprimary.bluefrance_850">
-            {organisme.landingOrganisme.name}
-          </NavItem>
-          <NavItem to={organisme.effectifs.path} colorActive="dsfr_lightprimary.bluefrance_850">
-            {organisme.effectifs.name}
-          </NavItem>
-          <NavItem to={organisme.sifa2.path} colorActive="dsfr_lightprimary.bluefrance_850">
-            {organisme.sifa2.name}
-          </NavItem>
+    <NavContainer isOpen={isOpen}>
+      <Box p={4} bg={"transparent"}>
+        <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
+      </Box>
+      <NavItem to={organismeNavigation.landingEspace.path} colorActive="dsfr_lightprimary.bluefrance_850">
+        {organismeNavigation.landingEspace.navTitle}
+      </NavItem>
+      <NavItem to={organismeNavigation.effectifs.path} colorActive="dsfr_lightprimary.bluefrance_850">
+        {organismeNavigation.effectifs.navTitle}
+      </NavItem>
+      <NavItem to={organismeNavigation.sifa2.path} colorActive="dsfr_lightprimary.bluefrance_850">
+        {organismeNavigation.sifa2.navTitle}
+      </NavItem>
 
-          <Box flexGrow={1} />
-          <NavItem to={organisme.parametres.path} colorActive="dsfr_lightprimary.bluefrance_850">
-            <Settings4Fill boxSize={4} mr={2} color="dsfr_lightprimary.bluefrance_850" /> {organisme.parametres.name}
-          </NavItem>
-        </>
-      </Flex>
-    </Box>
+      <Box flexGrow={1} />
+      <NavItem to={organismeNavigation.parametres.path} colorActive="dsfr_lightprimary.bluefrance_850">
+        <Settings4Fill boxSize={4} mr={2} color="dsfr_lightprimary.bluefrance_850" />
+        {organismeNavigation.parametres.navTitle}
+      </NavItem>
+    </NavContainer>
   );
 };
 
@@ -193,7 +127,7 @@ const NavigationMenu = ({ ...props }) => {
   let [auth] = useAuth();
   const router = useRouter();
 
-  let { isOrganismePages } = useOrganisme();
+  let { isOrganismePages } = useEspace();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggle = () => setIsOpen(!isOpen);

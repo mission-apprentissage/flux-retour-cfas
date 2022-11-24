@@ -6,10 +6,11 @@ import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
 
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import Link from "../../components/Links/Link";
+import withAuth from "../../components/withAuth";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-export default function MesOrganismes() {
+function MesOrganismes() {
   const title = "Mes Organismes";
   return (
     <Page>
@@ -25,7 +26,7 @@ export default function MesOrganismes() {
           </Heading>
           <ul>
             <li>
-              <Link href="/mon-espace/organisme/637fa2398a3c0baeaf0a649a">OOF1 : Aden formation Caen </Link>
+              <Link href="/mon-espace/organisme/637fed03b6d2c1a37a2ffdab">OOF1 : Aden formation Caen </Link>
             </li>
           </ul>
         </Container>
@@ -33,3 +34,5 @@ export default function MesOrganismes() {
     </Page>
   );
 }
+
+export default withAuth(MesOrganismes);

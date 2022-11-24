@@ -56,6 +56,7 @@ export default (acls) =>
           throw Boom.unauthorized("Accès non autorisé");
         }
       }
+
       permission = await hasPermission({ organisme_id, userEmail: user.email });
     }
 

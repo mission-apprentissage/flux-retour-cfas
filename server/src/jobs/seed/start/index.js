@@ -3,7 +3,7 @@ import { createUser } from "../../../common/actions/users.actions.js";
 import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
 import { createRole } from "../../../common/actions/roles.actions.js";
 // import { createSifa } from "../../../common/actions/sifas.actions.js";
-import { createOrganisme } from "../../../common/actions/organismes.actions.js";
+import { addContributeurOrganisme, createOrganisme } from "../../../common/actions/organismes.actions.js";
 import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
 
 export const seed = async ({ adminEmail }) => {
@@ -16,8 +16,7 @@ export const seed = async ({ adminEmail }) => {
   // Create Organisme B reseau A erp B
   // Create Organisme C reseau B erp A
   // Create Organisme D pas de reseau, pas d'erp, pas de siret
-  // const organismeA =
-  await createOrganisme({
+  const organismeOFF = await createOrganisme({
     uai: "0142321X",
     sirets: ["44492238900010"],
     adresse: {
@@ -122,7 +121,24 @@ export const seed = async ({ adminEmail }) => {
     }
   );
   await userAfterCreate({ user: urserOf, pending: false });
-  logger.info(`User of created`);
+  logger.info(`User off created`);
+
+  const urserOfR = await createUser(
+    { email: "ofr@test.fr", password: "Secret!Password1" },
+    {
+      nom: "ofr",
+      prenom: "test",
+      description: "ADEN Formations (Damigny)",
+      roles: ["of"],
+      account_status: "FORCE_RESET_PASSWORD",
+      siret: "44492238900044",
+      uai: "0611309S",
+      organisation: "ORGANISME_FORMATION",
+    }
+  );
+  await userAfterCreate({ user: urserOfR, pending: false });
+  await addContributeurOrganisme(organismeOFF._id, urserOfR.email, "organisme.admin", false);
+  logger.info(`User ofr created`);
 
   // Create user Reseau
   const urserReseau = await createUser(
