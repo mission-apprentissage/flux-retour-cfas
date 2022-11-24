@@ -1,13 +1,16 @@
-import logger from "../../common/logger.js";
-import { validateAnneeScolaire } from "../../common/domain/anneeScolaire.js";
-import { dossiersApprenantsMigrationDb } from "../../common/model/collections.js";
+import { validateAnneeScolaire } from "../../../common/domain/anneeScolaire.js";
+import logger from "../../../common/logger.js";
+import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
 
 /**
  * Fonction d'archivage des anciens dossiers apprenants
  * @param {*} archiveDossiersApprenants
  * @param {*} ANNEE_SCOLAIRE_START_LIMIT
  */
-export const archiveOldDossiersApprenants = async (archiveDossiersApprenants, ANNEE_SCOLAIRE_START_LIMIT = 2021) => {
+export const hydrateArchivesDossiersApprenants = async (
+  archiveDossiersApprenants,
+  ANNEE_SCOLAIRE_START_LIMIT = 2021
+) => {
   logger.info(
     `Archivage des dossiers apprenants avec année scolaire nulle ou antérieure à ${ANNEE_SCOLAIRE_START_LIMIT}`
   );

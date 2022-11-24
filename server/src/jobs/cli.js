@@ -14,9 +14,9 @@ import {
 import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patches/refacto-migration/dossiersApprenants/dossiersApprenants.migration.js";
 import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
-import { archiveOldDossiersApprenants } from "./archive-old-dossiers-apprenants/index.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 import { hydrateRncpCodes } from "./hydrate/rncp/hydrate-rncp.js";
+import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 
 /**
  * Job d'initialisation projet
@@ -133,16 +133,16 @@ cli
   });
 
 /**
- * Job d'archivage des anciens dossiers apprenants
+ * Job de remplissage des archives des anciens dossiers apprenants
  */
 cli
-  .command("archive-old-dossiersApprenants")
+  .command("hydrate-archives-dossiersApprenants")
   .description("Archivage des anciens dossiers apprenants")
   .option("--limit <int>", "Année limite d'archivage")
   .action(async ({ limit }) => {
     runScript(async ({ archiveDossiersApprenants }) => {
-      return archiveOldDossiersApprenants(archiveDossiersApprenants, limit);
-    }, "archive-old-dossiersApprenants");
+      return hydrateArchivesDossiersApprenants(archiveDossiersApprenants, limit);
+    }, "hydrate-archive-dossiersApprenants");
   });
 
 /**
