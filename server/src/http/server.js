@@ -23,9 +23,6 @@ import loginCfaRouter from "./routes/specific.routes/login-cfa.route.js";
 import referentielRouter from "./routes/specific.routes/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/cfas.route.js";
 import formationRouter from "./routes/specific.routes/formations.route.js";
-import demandeIdentifiantsRouter from "./routes/specific.routes/demande-identifiants.route.js";
-import demandeBranchementErpRouter from "./routes/specific.routes/demande-branchement-erp.route.js";
-import updatePasswordRouter from "./routes/specific.routes/update-password.route.js";
 import reseauxCfasRouter from "./routes/specific.routes/reseaux-cfas.route.js";
 import effectifsNationalRouter from "./routes/specific.routes/effectifs-national.route.js";
 
@@ -67,29 +64,6 @@ export default async (components) => {
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
 
-  //// TODO ABD
-  app.use("/api/formations", formationRouter(components)); // FRONT
-  app.use("/api/cfas", cfasRouter(components)); // FRONT
-  app.use("/api/referentiel", referentielRouter(components)); // FRONT
-  app.use("/api/demande-identifiants", demandeIdentifiantsRouter(components)); // FRONT
-  app.use("/api/demande-branchement-erp", demandeBranchementErpRouter(components)); // FRONT
-  app.use("/api/update-password", updatePasswordRouter(components)); // FRONT
-  app.use("/api/effectifs-national", effectifsNationalRouter(components)); // FRONT
-  app.use(
-    // FRONT
-    ["/api/effectifs", "/api/v1/effectifs"],
-    checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    effectifs(components)
-  );
-  app.use(
-    // FRONT
-    "/api/effectifs-export",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
-    effectifsExportRouter(components)
-  );
-
   // private admin access
   app.use(
     "/api/v1/admin",
@@ -123,7 +97,28 @@ export default async (components) => {
   app.use("/api/v1/sifa", sifa()); // TODO TMP
   app.use("/api/v1/upload", upload(components));
 
-  // TODO TDB OLD PREVIOUS ROUTES BACK TO KEEEP !!!!!
+  // TODO TDB OLD PREVIOUS
+  //// TODO
+  app.use("/api/formations", formationRouter(components)); // FRONT
+  app.use("/api/cfas", cfasRouter(components)); // FRONT
+  app.use("/api/referentiel", referentielRouter(components)); // FRONT
+  app.use("/api/effectifs-national", effectifsNationalRouter(components)); // FRONT
+  app.use(
+    // FRONT
+    ["/api/effectifs", "/api/v1/effectifs"],
+    checkJwtToken,
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    effectifs(components)
+  );
+  app.use(
+    // FRONT
+    "/api/effectifs-export",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    effectifsExportRouter(components)
+  );
+
+  // ROUTES BACK TO KEEEP !
   app.use(
     // BACK RCO
     "/api/effectifs-apprenants",
