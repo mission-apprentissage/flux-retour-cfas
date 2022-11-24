@@ -1,11 +1,11 @@
 import cliProgress from "cli-progress";
 import indexBy from "lodash.indexby";
-import { runScript } from "../scriptWrapper.js";
-import { asyncForEach } from "../../common/utils/asyncUtils.js";
-import logger from "../../common/logger.js";
-import { getDepartementCodeFromUai } from "../../common/utils/uaiUtils.js";
-import { DEPARTEMENTS } from "../../common/constants/territoiresConstants.js";
-import { dossiersApprenantsDb } from "../../common/model/collections.js";
+import { runScript } from "../../scriptWrapper.js";
+import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+import logger from "../../../common/logger.js";
+import { getDepartementCodeFromUai } from "../../../common/utils/uaiUtils.js";
+import { DEPARTEMENTS } from "../../../common/constants/territoiresConstants.js";
+import { dossiersApprenantsDb } from "../../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

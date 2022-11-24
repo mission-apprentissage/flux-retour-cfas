@@ -1,12 +1,12 @@
 import cliProgress from "cli-progress";
-import logger from "../../../common/logger.js";
-import { runScript } from "../../scriptWrapper.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
-import { RESEAUX_CFAS } from "../../../common/constants/networksConstants.js";
-import { ERPS } from "../../../common/constants/erpsConstants.js";
-import { validateSiret } from "../../../common/domain/siret.js";
-import { dossiersApprenantsDb, cfasDb, reseauxCfasDb } from "../../../common/model/collections.js";
+import logger from "../../common/logger.js";
+import { runScript } from "../scriptWrapper.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
+import { RESEAUX_CFAS } from "../../common/constants/networksConstants.js";
+import { ERPS } from "../../common/constants/erpsConstants.js";
+import { validateSiret } from "../../common/domain/siret.js";
+import { dossiersApprenantsDb, cfasDb, reseauxCfasDb } from "../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

@@ -1,7 +1,7 @@
-import { runScript } from "../scriptWrapper.js";
-import { asyncForEach } from "../../common/utils/asyncUtils.js";
-import logger from "../../common/logger.js";
-import { cfasDb, referentielSiretUaiDb } from "../../common/model/collections.js";
+import { runScript } from "../../scriptWrapper.js";
+import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+import logger from "../../../common/logger.js";
+import { cfasDb, referentielSiretUaiDb } from "../../../common/model/collections.js";
 
 /**
  * Ce script tente de récupérer pour chaque UAI présent dans la collection Cfa la nature de l'organisme de formation

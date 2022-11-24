@@ -12,7 +12,7 @@ import {
   analyseFiabilisationCfas,
 } from "./patches/refacto-migration/organismes/organismes.init.migration.js";
 import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patches/refacto-migration/dossiersApprenants/dossiersApprenants.migration.js";
-import { hydrateOrganismesFromReseaux } from "./hydrate/reseaux/hydrate-organismes-reseaux.js";
+import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
 
 /**
@@ -105,14 +105,14 @@ cli
   });
 
 /**
- * Job de remplissage & maj des d'organismes depuis les fichiers réseaux
+ * Job de remplissage & maj des d'organismes et des dossiersApprenants depuis les fichiers réseaux
  */
 cli
-  .command("hydrate-organismes-reseaux")
-  .description("Remplissage des organismes depuis les réseaux")
+  .command("hydrate-reseaux")
+  .description("Remplissage des organismes et dossiersApprenants depuis les réseaux")
   .action(async () => {
     runScript(async ({ ovhStorage }) => {
-      return hydrateOrganismesFromReseaux(ovhStorage);
+      return hydrateFromReseaux(ovhStorage);
     }, "hydrate-organismes-reseaux");
   });
 

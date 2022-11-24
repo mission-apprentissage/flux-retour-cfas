@@ -18,10 +18,12 @@ const JOBNAME = "hydrate-organismes-reseaux";
 const CFAS_NETWORKS_KEYS_TO_HANDLE = ["CMA", "UIMM", "AGRI", "MFR", "CCI", "GRETA", "AFTRAL"];
 
 /**
- * Script qui initialise les nouveaux organismes "stock" trouvés depuis les fichiers de réseaux
- * et MAJ les réseaux d'organismes déja existants
+ * Script qui initialise les données depuis les fichiers de réseaux
+ * Ajout de nouveaux organismes "stock" trouvés depuis les fichiers de réseaux
+ * MAJ les réseaux d'organismes déja existants
+ * MAJ les dossiersApprenants liés
  */
-export const hydrateOrganismesFromReseaux = async (ovhStorage) => {
+export const hydrateFromReseaux = async (ovhStorage) => {
   await asyncForEach(Object.keys(RESEAUX_CFAS), async (currentNetwork) => {
     if (CFAS_NETWORKS_KEYS_TO_HANDLE.includes(currentNetwork)) {
       const organismesForNetwork = await getOrganismesListForNetwork(
