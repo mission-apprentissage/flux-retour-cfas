@@ -15,6 +15,7 @@ import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patche
 import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
 import { archiveOldDossiersApprenants } from "./archive-old-dossiers-apprenants/index.js";
+import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 
 /**
  * Job d'initialisation projet
@@ -141,6 +142,18 @@ cli
     runScript(async ({ archiveDossiersApprenants }) => {
       return archiveOldDossiersApprenants(archiveDossiersApprenants, limit);
     }, "archive-old-dossiersApprenants");
+  });
+
+/**
+ * Job de remplissage des effectifs apprenants
+ */
+cli
+  .command("hydrate-effectifsApprenants")
+  .description("Remplissage des effectifs apprenants")
+  .action(async () => {
+    runScript(async ({ effectifs }) => {
+      return hydrateEffectifsApprenants(effectifs);
+    }, "hydrate-effectifsApprenants");
   });
 
 cli.parse(process.argv);
