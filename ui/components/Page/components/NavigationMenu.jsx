@@ -50,6 +50,19 @@ const NavBarPublic = ({ isOpen }) => {
 };
 
 const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
+  let [auth] = useAuth();
+
+  const whoIs = auth.roles.find((role) => ["pilot", "erp", "of", "reseau_of"].includes(role.name))?.name;
+  const hasAccessToOnlyOneOrganisme = auth.organisme_ids.length === 1;
+
+  const mesOrganismesNames = {
+    pilot: "Sur mon territoire",
+    erp: "Les organismes connectés",
+    of: "Mes organismes",
+    reseau_of: "Mon réseau",
+    ...(hasAccessToOnlyOneOrganisme ? {} : { global: "Tous les organismes" }),
+  };
+
   const myOwn = {
     landingOrganisme: {
       name: "Mon tableau de bord",
@@ -67,10 +80,14 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
       name: "Mes paramètres",
       path: "/mon-espace/mon-organisme/parametres",
     },
-    mesOrganismes: {
-      name: "Sur mon territoire",
-      path: "/mon-espace/mes-organismes",
-    },
+    ...(hasAccessToOnlyOneOrganisme
+      ? {}
+      : {
+          mesOrganismes: {
+            name: mesOrganismesNames[whoIs] ?? mesOrganismesNames.global,
+            path: "/mon-espace/mes-organismes",
+          },
+        }),
   };
 
   return (
@@ -91,9 +108,11 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
           <UserFill mt="-0.3rem" boxSize={4} />
         </Box>
         <NavItem to={myOwn.landingOrganisme.path}>{myOwn.landingOrganisme.name}</NavItem>
-        <NavItem to={myOwn.mesOrganismes.path} isActive={mesOrganismesActive}>
-          {myOwn.mesOrganismes.name}
-        </NavItem>
+        {myOwn.mesOrganismes && (
+          <NavItem to={myOwn.mesOrganismes.path} isActive={mesOrganismesActive}>
+            {myOwn.mesOrganismes.name}
+          </NavItem>
+        )}
         <NavItem to={myOwn.effectifs.path}>{myOwn.effectifs.name}</NavItem>
         <NavItem to={myOwn.sifa2.path}>{myOwn.sifa2.name}</NavItem>
 
@@ -172,6 +191,7 @@ const NavigationMenu = ({ ...props }) => {
   const toggle = () => setIsOpen(!isOpen);
   const isWorkspacePage = router.pathname.includes("/mon-espace/") && auth?.sub !== "anonymous";
   const isMesOrganismes = router.pathname.includes("/mon-espace/mes-organismes") && auth?.sub !== "anonymous";
+
   const isAOrganismePage = router.pathname.includes("/espace/") && auth?.sub !== "anonymous";
 
   function NavToggle({ toggle, isOpen }) {
@@ -184,7 +204,7 @@ const NavigationMenu = ({ ...props }) => {
 
   return (
     <Box w="full" {...props} boxShadow="md">
-      <Box borderBottom={"3px solid"} borderColor={"grey.400"}>
+      <Box borderBottom={"1px solid"} borderColor={"grey.400"}>
         <Container maxW="xl">
           <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" {...props}>
             <NavToggle toggle={toggle} isOpen={isOpen} />

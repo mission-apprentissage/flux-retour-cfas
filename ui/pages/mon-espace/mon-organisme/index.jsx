@@ -4,6 +4,7 @@ import {
   Box,
   Container,
   Heading,
+  Image,
   // Text
 } from "@chakra-ui/react";
 import { Page } from "../../../components";
@@ -31,13 +32,14 @@ export default function MonTableauDeBord() {
             ]}
           />
           <Heading textStyle="h2" color="grey.800" mt={5}>
-            {title}
+            Bienvenue sur votre tableau de bord
           </Heading>
           {/* <Text marginTop="3v" fontSize="gamma" color="grey.800">
             Quelle vue souhaitez-vous afficher ?
           </Text>
           <ViewSelection /> */}
-          STUFF ABOUT MON Organisme
+          <Image src="/images/fake/tdbOF.png" alt="fake tdb of" w="full" mt={3} />
+          {/* <Image src="/images/fake/tdbReseau.png" alt="fake tdb reseau" w="full" mt={3} /> */}
         </Container>
       </Box>
     </Page>

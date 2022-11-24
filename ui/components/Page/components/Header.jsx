@@ -21,13 +21,14 @@ import { PRODUCT_NAME } from "../../../common/constants/product";
 import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
 import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
 import useAuth from "../../../hooks/useAuth.js";
-import { hasPageAccessTo } from "../../../common/utils/rolesUtils.js";
+import { hasPageAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
 import { _get } from "../../../common/httpClient.js";
 import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
 import { Settings4Fill, UserFill } from "../../../theme/components/icons";
 import { useRouter } from "next/router";
 import { NotificationsMenu } from "./Notifications/Notifications";
+import { ProfileSwitcher } from "./ProfileSwitcher/ProfileSwitcher";
 
 const UserMenu = () => {
   let [auth] = useAuth();
@@ -63,6 +64,7 @@ const UserMenu = () => {
       )}
       {auth?.sub !== "anonymous" && (
         <Flex>
+          {isUserAdmin(auth) && <ProfileSwitcher mr={5} />}
           <NotificationsMenu mr={5} />
           <Link
             href="/mon-espace/mon-organisme"

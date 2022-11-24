@@ -29,7 +29,6 @@ const ProfileInformation = () => {
       telephone: auth.telephone ? auth.telephone.replace("+", "") : "",
       email: auth.email || "",
       civility: auth.civility || "",
-      beta: auth.beta || "",
     },
     validationSchema: Yup.object().shape({
       prenom: Yup.string(),
@@ -38,17 +37,16 @@ const ProfileInformation = () => {
       civility: Yup.string(),
       email: Yup.string().email("Email invalide"),
     }),
-    onSubmit: ({ nom, prenom, telephone, email, beta, civility }, { setSubmitting }) => {
+    onSubmit: ({ nom, prenom, telephone, email, civility }, { setSubmitting }) => {
       // eslint-disable-next-line no-undef, no-async-promise-executor
       return new Promise(async (resolve) => {
         try {
           await _put(`/api/v1/profile/user`, {
-            nom: nom || null,
-            prenom: prenom || null,
-            telephone: telephone ? `+${telephone}` : null,
-            civility: civility || null,
+            nom: nom || "",
+            prenom: prenom || "",
+            telephone: telephone ? `+${telephone}` : "",
+            civility: civility || "",
             email,
-            beta: beta || null,
           });
           window.location.reload();
         } catch (e) {

@@ -7,6 +7,15 @@ export default {
     acl: [
       "organisme",
       "organisme/tableau_de_bord",
+      "organisme/page_effectifs",
+      "organisme/page_sifa2",
+
+      "organisme/page_parametres",
+      "organisme/page_parametres/gestion_acces",
+      "organisme/page_parametres/gestion_acces/supprimer_contributeur",
+      "organisme/page_parametres/gestion_notifications",
+      "organisme/page_parametres/api_key",
+      /*
 
       "organisme/tableau_de_bord/vue_territoriale",
       "organisme/tableau_de_bord/vue_territoriale/selectionner_territoire",
@@ -45,12 +54,7 @@ export default {
       "organisme/tableau_de_bord/vue_formation/filtrer_par_periode",
       "organisme/tableau_de_bord/vue_formation/telecharger_anonyme",
       "organisme/tableau_de_bord/vue_formation/telecharger",
-
-      "organisme/page_parametres",
-      "organisme/page_parametres/gestion_acces",
-      "organisme/page_parametres/gestion_acces/supprimer_contributeur",
-      "organisme/page_parametres/gestion_notifications",
-      "organisme/page_parametres/api_key",
+      */
     ],
   },
   "organisme.member": {
