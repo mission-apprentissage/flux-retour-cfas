@@ -2,7 +2,6 @@ import express from "express";
 import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import config from "../config.js";
 
 import { apiRoles, tdbRoles } from "../common/roles.js";
 
@@ -67,19 +66,24 @@ export default async (components) => {
   // private access
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
+
+  //// TODO ABD
+  app.use("/api/formations", formationRouter(components)); // FRONT
+  app.use("/api/cfas", cfasRouter(components)); // FRONT
+  app.use("/api/referentiel", referentielRouter(components)); // FRONT
+  app.use("/api/demande-identifiants", demandeIdentifiantsRouter(components)); // FRONT
+  app.use("/api/demande-branchement-erp", demandeBranchementErpRouter(components)); // FRONT
+  app.use("/api/update-password", updatePasswordRouter(components)); // FRONT
+  app.use("/api/effectifs-national", effectifsNationalRouter(components)); // FRONT
   app.use(
+    // FRONT
     ["/api/effectifs", "/api/v1/effectifs"],
     checkJwtToken,
     permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
     effectifs(components)
   );
   app.use(
-    "/api/effectifs-apprenants",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
-    effectifsApprenantsRouter(components)
-  );
-  app.use(
+    // FRONT
     "/api/effectifs-export",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
@@ -114,44 +118,33 @@ export default async (components) => {
       return res.json({});
     })
   );
-  app.get(
-    "/api/config",
-    checkJwtToken,
-    pageAccessMiddleware(["_ADMIN"]), // TODO
-    tryCatch(async (req, res) => {
-      return res.json({
-        config,
-      });
-    })
-  );
 
   // TODO TEST ROUTES TMEPORARY
   app.use("/api/v1/sifa", sifa()); // TODO TMP
   app.use("/api/v1/upload", upload(components));
 
-  // TDB OLD PREVIOUS ROUTES
-  // open routes
-  app.use("/api/login", loginRouter(components));
-  app.use("/api/login-cfa", loginCfaRouter(components));
-  app.use("/api/formations", formationRouter(components));
-  app.use("/api/cfas", cfasRouter(components));
-  app.use("/api/referentiel", referentielRouter(components));
+  // TODO TDB OLD PREVIOUS ROUTES BACK TO KEEEP !!!!!
+  app.use(
+    // BACK RCO
+    "/api/effectifs-apprenants",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
+    effectifsApprenantsRouter(components)
+  );
   app.use("/api/healthcheck", healthcheckRouter(components));
-  app.use("/api/demande-identifiants", demandeIdentifiantsRouter(components));
-  app.use("/api/demande-branchement-erp", demandeBranchementErpRouter(components));
-  app.use("/api/update-password", updatePasswordRouter(components));
-  app.use("/api/effectifs-national", effectifsNationalRouter(components));
-
+  app.use("/api/login-cfa", loginCfaRouter(components)); // FRONT / BACK
+  app.use("/api/login", loginRouter(components)); // BACK
   // requires JWT auth
   app.use(
     "/api/liens-prives-cfas",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     lienPriveCfaRouter(components)
-  );
+  ); // BACK !important
 
   // @deprecated to /dossiers-apprenants
   app.use(
+    // BACK !important
     ["/api/statut-candidats", "/api/dossiers-apprenants"],
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
