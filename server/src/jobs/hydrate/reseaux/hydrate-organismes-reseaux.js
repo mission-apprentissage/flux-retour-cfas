@@ -8,32 +8,28 @@ import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
 import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { ERPS } from "../../../common/constants/erpsConstants.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
-import { dossiersApprenantsDb, jobEventsDb } from "../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb, jobEventsDb } from "../../../common/model/collections.js";
 import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOBNAME = "hydrate-organismes-reseaux";
 
 // TODO : voir coté métier quels réseaux on gère
-const CFAS_NETWORKS = [
-  RESEAUX_CFAS.CMA,
-  RESEAUX_CFAS.UIMM,
-  RESEAUX_CFAS.AGRI,
-  RESEAUX_CFAS.MFR,
-  RESEAUX_CFAS.CCI,
-  RESEAUX_CFAS.GRETA,
-  RESEAUX_CFAS.AFTRAL,
-];
+const CFAS_NETWORKS_KEYS_TO_HANDLE = ["CMA", "UIMM", "AGRI", "MFR", "CCI", "GRETA", "AFTRAL"];
 
 /**
  * Script qui initialise les nouveaux organismes "stock" trouvés depuis les fichiers de réseaux
  * et MAJ les réseaux d'organismes déja existants
  */
 export const hydrateOrganismesFromReseaux = async (ovhStorage) => {
-  // Parse des réseaux
-  await asyncForEach(CFAS_NETWORKS, async ({ nomReseau, nomFichier }) => {
-    const organismesForNetwork = await getOrganismesListForNetwork(ovhStorage, nomFichier);
-    await hydrateForNetwork(organismesForNetwork, nomReseau);
+  await asyncForEach(Object.keys(RESEAUX_CFAS), async (currentNetwork) => {
+    if (CFAS_NETWORKS_KEYS_TO_HANDLE.includes(currentNetwork)) {
+      const organismesForNetwork = await getOrganismesListForNetwork(
+        ovhStorage,
+        RESEAUX_CFAS[currentNetwork].nomFichier
+      );
+      await hydrateForNetwork(organismesForNetwork, currentNetwork);
+    }
   });
 };
 
@@ -56,9 +52,14 @@ const getOrganismesListForNetwork = async (ovhStorage, nomFichier) => {
  * Gestion des organismes d'un réseau
  * @param {*} reseau
  */
-const hydrateForNetwork = async (allOrganismesForReseau, nomReseau) => {
-  logger.info(`Traitement des organismes du réseau ${nomReseau}`);
+const hydrateForNetwork = async (allOrganismesForReseau, reseau) => {
+  logger.info(`Traitement des organismes du réseau ${reseau}`);
   loadingBar.start(allOrganismesForReseau.length, 0);
+
+  let nbOrganismesCreated = 0;
+  let nbOrganismesNotCreated = 0;
+  let nbOrganismesUpdated = 0;
+  let nbDossiersApprenantsUpdated = 0;
 
   // Parse all organisme
   await asyncForEach(allOrganismesForReseau, async (currentOrganisme) => {
@@ -66,15 +67,27 @@ const hydrateForNetwork = async (allOrganismesForReseau, nomReseau) => {
 
     // Check organisme existance
     let organisme = await findOrganismeByUai(currentOrganisme?.uai);
+    let newOrganismeCreated = false;
 
     if (!organisme) {
       try {
         organisme = await createOrganisme({
           uai: currentOrganisme?.uai,
           ...buildAdresseFromUai(currentOrganisme?.uai),
-          nom: currentOrganisme?.nom_etablissement ?? "",
+          nom: currentOrganisme?.nom ?? "",
+          reseaux: [reseau],
+        });
+        newOrganismeCreated = true;
+        nbOrganismesCreated++;
+        // Store log organisme création
+        await jobEventsDb().insertOne({
+          jobname: JOBNAME,
+          date: new Date(),
+          action: "create-organisme-success",
+          data: { organisme: currentOrganisme },
         });
       } catch (err) {
+        nbOrganismesNotCreated++;
         // Store log organisme création failed
         await jobEventsDb().insertOne({
           jobname: JOBNAME,
@@ -89,20 +102,28 @@ const hydrateForNetwork = async (allOrganismesForReseau, nomReseau) => {
     if (organisme) {
       // TODO Rechecker coté métier cette règle
       // Do not handle organisme in network AGRI and having GESTI as ERP
-      if (nomReseau === RESEAUX_CFAS.AGRI.nomReseau && organisme.erps.includes(ERPS.GESTI.nomErp.toLowerCase())) {
+      if (reseau === "AGRI" && organisme.erps.includes(ERPS.GESTI.nomErp.toLowerCase())) {
         return;
       }
 
-      // Update des réseaux de l'organisme si nécessaire
-      await updateOrganismeNetworksIfNeeded(organisme, nomReseau);
+      // Update des réseaux de l'organisme si nécessaire (si organisme déja existant à la base)
+      if (newOrganismeCreated === false) {
+        if ((await updateOrganismeNetworksIfNeeded(organisme, reseau)) === true) nbOrganismesUpdated++;
+      }
 
       // Update des dossiersApprenants de l'organisme si nécessaire
-      await updateDossiersApprenantsNetworksIfNeeded(organisme, nomReseau);
+      const nbDossierUpdatedForOrganisme = await updateDossiersApprenantsNetworksIfNeeded(organisme, reseau);
+      nbDossiersApprenantsUpdated += nbDossierUpdatedForOrganisme;
     }
   });
 
   loadingBar.stop();
-  logger.info(`All organismes from ${nomReseau} network were handled !`);
+  logger.info(`Réseau ${reseau} : ${nbOrganismesCreated} organismes créés`);
+  logger.info(`Réseau ${reseau} : ${nbOrganismesNotCreated} organismes non créés à cause d'erreurs`);
+  logger.info(`Réseau ${reseau} : ${nbOrganismesUpdated} organismes dont la liste des réseaux a été mis à jour`);
+  logger.info(
+    `Réseau ${reseau} : ${nbDossiersApprenantsUpdated} dossiersApprenants dont la liste des réseaux a été mis à jour`
+  );
 };
 
 /**
@@ -114,24 +135,45 @@ const updateOrganismeNetworksIfNeeded = async (organisme, nomReseau) => {
   // Si cet organisme n'a pas déja ce réseau dans sa liste alors ajout du réseau aux réseaux existants de l'organisme
   if (!organisme?.reseaux.some((item) => item === nomReseau)) {
     await updateOrganisme(organisme._id, { ...organisme, reseaux: [...organisme.reseaux, nomReseau] });
+
+    // Log update
+    await jobEventsDb().insertOne({
+      jobname: JOBNAME,
+      date: new Date(),
+      action: "update-organisme-success",
+      data: { organisme },
+    });
+
+    return true;
   }
+  return false;
 };
 
 /**
  * MAJ les réseaux des dossiersApprenants de l'organisme si nécessaire
  * @param {*} organismeInReferentiel
- * @param {*} nomReseau
+ * @param {*} reseau
  */
-const updateDossiersApprenantsNetworksIfNeeded = async (organisme, nomReseau) => {
+const updateDossiersApprenantsNetworksIfNeeded = async (organisme, reseau) => {
   // Récupération de tous les dossiersApprenants de cet organismes qui n'ont pas ce réseau dans leur liste
-  const dossiersApprenantsForOrganismeWithoutThisNetwork = await dossiersApprenantsDb()
-    .find({ uai: organisme.uai, etablissement_reseaux: { $ne: nomReseau } })
+  const dossiersApprenantsForOrganismeWithoutThisNetwork = await dossiersApprenantsMigrationDb()
+    .find({ uai_etablissement: organisme.uai, etablissement_reseaux: { $ne: reseau } })
     .toArray();
 
   await asyncForEach(dossiersApprenantsForOrganismeWithoutThisNetwork, async (dossierToUpdate) => {
     await updateDossierApprenant(dossierToUpdate._id, {
       ...dossierToUpdate,
-      etablissement_reseaux: [...dossierToUpdate.etablissement_reseaux, nomReseau],
+      etablissement_reseaux: [...dossierToUpdate.etablissement_reseaux, reseau],
+    });
+
+    // Log update
+    await jobEventsDb().insertOne({
+      jobname: JOBNAME,
+      date: new Date(),
+      action: "update-dossierApprenant-success",
+      data: { dossierUpdated: dossierToUpdate },
     });
   });
+
+  return dossiersApprenantsForOrganismeWithoutThisNetwork.length;
 };
