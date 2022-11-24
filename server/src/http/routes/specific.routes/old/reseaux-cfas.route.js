@@ -1,6 +1,6 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 
 const mapCfasToApiOutput = (reseauxCfas) => {
   return {

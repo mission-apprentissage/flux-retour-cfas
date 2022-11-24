@@ -7,8 +7,6 @@ import reseauxCfasComponent from "./reseauxCfas.js";
 import formationsComponent from "./formations.js";
 import createStats from "./stats.js";
 import createEffectifs from "./effectifs.js";
-import demandeIdentifiantsComponent from "./demandeIdentifiants.js";
-import demandeBranchementErpComponent from "./demandeBranchementErp.js";
 import createCacheComponent from "./cache.js";
 import createOvhStorageComponent from "./ovhStorage.js";
 import createArchiveDossiersApprenantsComponent from "./archiveDossiersApprenants.js";
@@ -26,8 +24,6 @@ export default async (options = {}) => {
   const reseauxCfas = options.reseauxCfas || reseauxCfasComponent();
   const stats = options.stats || createStats();
   const effectifs = options.effectifs || createEffectifs();
-  const demandeIdentifiants = options.demandeIdentifiants || demandeIdentifiantsComponent();
-  const demandeBranchementErp = options.demandeBranchementErp || demandeBranchementErpComponent();
 
   // TODO Refacto infra components -> to services structure
   const cache = options.cache || createCacheComponent(options.redisClient);
@@ -48,8 +44,6 @@ export default async (options = {}) => {
     reseauxCfas,
     stats,
     effectifs,
-    demandeIdentifiants,
-    demandeBranchementErp,
     archiveDossiersApprenants,
   };
 };

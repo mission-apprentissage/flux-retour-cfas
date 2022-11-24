@@ -1,6 +1,6 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 
 export default ({ formations }) => {
   const router = express.Router();

@@ -1,13 +1,13 @@
 import express from "express";
 import { Parser } from "json2csv";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { tdbRoles } from "../../../common/roles.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
+import { getAnneesScolaireListFromDate } from "../../../../common/utils/anneeScolaireUtils.js";
+import { tdbRoles } from "../../../../common/roles.js";
 import {
   getExportAnonymizedEventNameFromFilters,
   USER_EVENTS_TYPES,
-} from "../../../common/constants/userEventsConstants.js";
+} from "../../../../common/constants/userEventsConstants.js";
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {

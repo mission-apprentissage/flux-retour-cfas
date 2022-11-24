@@ -1,7 +1,7 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { cfasDb } from "../../../common/model/collections.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
+import { cfasDb } from "../../../../common/model/collections.js";
 
 export default () => {
   const router = express.Router();

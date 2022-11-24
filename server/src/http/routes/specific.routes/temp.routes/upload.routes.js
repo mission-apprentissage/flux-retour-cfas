@@ -1,13 +1,13 @@
 import express from "express";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
 import { createWriteStream } from "fs";
-import { getFromStorage, uploadToStorage, deleteFromStorage } from "../../../common/utils/ovhUtils.js";
+import { getFromStorage, uploadToStorage, deleteFromStorage } from "../../../../common/utils/ovhUtils.js";
 import { oleoduc } from "oleoduc";
 import multiparty from "multiparty";
 import { EventEmitter } from "events";
 import { PassThrough } from "stream";
-import logger from "../../../common/logger.js";
+import logger from "../../../../common/logger.js";
 // import permissionsDossierMiddleware = require("../../middlewares/permissionsDossierMiddleware");
 
 function discard() {

@@ -1,9 +1,9 @@
 import express from "express";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { RESEAUX_CFAS } from "../../../common/constants/networksConstants.js";
-import { REGIONS, DEPARTEMENTS } from "../../../common/constants/territoiresConstants.js";
-import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
-import { referentielSiretUaiDb } from "../../../common/model/collections.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
+import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
+import { REGIONS, DEPARTEMENTS } from "../../../../common/constants/territoiresConstants.js";
+import { ORGANISMES_APPARTENANCE } from "../../../../common/constants/usersConstants.js";
+import { referentielSiretUaiDb } from "../../../../common/model/collections.js";
 
 export default () => {
   const router = express.Router();

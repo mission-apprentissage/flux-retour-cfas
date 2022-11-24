@@ -14,17 +14,18 @@ import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMi
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
-import effectifsExportRouter from "./routes/specific.routes/effectifs-export.route.js";
-import effectifsApprenantsRouter from "./routes/specific.routes/effectifs-apprenants.route.js";
-import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.route.js";
-import lienPriveCfaRouter from "./routes/specific.routes/lien-prive-cfa.route.js";
-import loginRouter from "./routes/specific.routes/login.route.js";
-import loginCfaRouter from "./routes/specific.routes/login-cfa.route.js";
-import referentielRouter from "./routes/specific.routes/referentiel.route.js";
-import cfasRouter from "./routes/specific.routes/cfas.route.js";
-import formationRouter from "./routes/specific.routes/formations.route.js";
-import reseauxCfasRouter from "./routes/specific.routes/reseaux-cfas.route.js";
-import effectifsNationalRouter from "./routes/specific.routes/effectifs-national.route.js";
+import effectifsExportRouter from "./routes/specific.routes/old/effectifs-export.route.js";
+import effectifsApprenantsRouter from "./routes/specific.routes/old/effectifs-apprenants.route.js";
+import dossierApprenantRouter from "./routes/specific.routes/old/dossiers-apprenants.route.js";
+import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.route.js";
+import loginRouter from "./routes/specific.routes/old/login.route.js";
+import loginCfaRouter from "./routes/specific.routes/old/login-cfa.route.js";
+import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
+import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
+import formationRouter from "./routes/specific.routes/old/formations.route.js";
+import reseauxCfasRouter from "./routes/specific.routes/old/reseaux-cfas.route.js";
+import effectifsNationalRouter from "./routes/specific.routes/old/effectifs-national.route.js";
+import effectifs from "./routes/specific.routes/old/effectifs.route.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -35,9 +36,8 @@ import register from "./routes/user.routes/register.routes.js";
 import password from "./routes/user.routes/password.routes.js";
 import profile from "./routes/user.routes/profile.routes.js";
 
-import effectifs from "./routes/specific.routes/effectifs.route.js";
-import sifa from "./routes/specific.temp.routes/sifa.routes.js"; // TMP
-import upload from "./routes/specific.temp.routes/upload.routes.js"; // TMP
+import sifa from "./routes/specific.routes//temp.routes/sifa.routes.js"; // TMP
+import upload from "./routes/specific.routes//temp.routes/upload.routes.js"; // TMP
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";

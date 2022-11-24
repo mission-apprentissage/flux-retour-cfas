@@ -1,9 +1,9 @@
 import express from "express";
 import { format } from "date-fns";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { getCacheKeyForRoute } from "../../../common/utils/cacheUtils.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
+import { getAnneesScolaireListFromDate } from "../../../../common/utils/anneeScolaireUtils.js";
+import { getCacheKeyForRoute } from "../../../../common/utils/cacheUtils.js";
 
 export default ({ stats, effectifs, cache }) => {
   const router = express.Router();

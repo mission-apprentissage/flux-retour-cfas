@@ -1,8 +1,8 @@
 import express from "express";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import pick from "lodash.pick";
-import { cfasDb } from "../../../common/model/collections.js";
+import { cfasDb } from "../../../../common/model/collections.js";
 
 export default ({ cfas }) => {
   const router = express.Router();
