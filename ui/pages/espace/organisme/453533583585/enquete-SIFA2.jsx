@@ -1,11 +1,11 @@
 import React from "react";
 import Head from "next/head";
 import { Avatar, Box, Container, Heading, HStack, Text } from "@chakra-ui/react";
-import { Page } from "../../../components";
-import { Breadcrumb } from "../../../components/Breadcrumb/Breadcrumb";
-import { getAuthServerSideProps } from "../../../common/SSR/getAuthServerSideProps";
-import Table from "../../../components/Table/Table";
-import Dossier from "../../../modules/SIFA/Dossier.jsx";
+import { Page } from "../../../../components";
+import { Breadcrumb } from "../../../../components/Breadcrumb/Breadcrumb";
+import { getAuthServerSideProps } from "../../../../common/SSR/getAuthServerSideProps";
+import Table from "../../../../components/Table/Table";
+import Dossier from "../../../../modules/SIFA/Dossier.jsx";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -37,7 +37,7 @@ const data = [
 ];
 
 const MonEnqueteSIFA = () => {
-  const title = "Mon Enquete SIFA2";
+  const title = "Enquete SIFA2 Aden formation Caen";
   return (
     <Page>
       <Head>

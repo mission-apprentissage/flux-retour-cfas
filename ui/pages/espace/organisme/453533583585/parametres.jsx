@@ -1,14 +1,14 @@
 import React from "react";
 import Head from "next/head";
 import { Box, Container, Heading } from "@chakra-ui/react";
-import { Page } from "../../../components";
-import { Breadcrumb } from "../../../components/Breadcrumb/Breadcrumb";
-import { getAuthServerSideProps } from "../../../common/SSR/getAuthServerSideProps";
+import { Page } from "../../../../components";
+import { Breadcrumb } from "../../../../components/Breadcrumb/Breadcrumb";
+import { getAuthServerSideProps } from "../../../../common/SSR/getAuthServerSideProps";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-export default function MesEffectifs() {
-  const title = "Mes Effectifs";
+export default function ParametreOrganisme() {
+  const title = "Paramètres de l'organisme Aden formation Caen";
   return (
     <Page>
       <Head>

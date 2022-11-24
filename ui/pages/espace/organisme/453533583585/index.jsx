@@ -6,16 +6,16 @@ import {
   Heading,
   // Text
 } from "@chakra-ui/react";
-import { Page } from "../../../components";
-import { Breadcrumb } from "../../../components/Breadcrumb/Breadcrumb";
+import { Page } from "../../../../components";
+import { Breadcrumb } from "../../../../components/Breadcrumb/Breadcrumb";
 // import ViewSelection from "../../../modules/visualiser-les-indicateurs/ViewSelection";
 
-import { getAuthServerSideProps } from "../../../common/SSR/getAuthServerSideProps";
+import { getAuthServerSideProps } from "../../../../common/SSR/getAuthServerSideProps";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 export default function MonTableauDeBord() {
-  const title = "Informations sur mon organisme";
+  const title = "Informations sur l'organisme: Aden formation Caen";
   return (
     <Page>
       <Head>
@@ -37,7 +37,7 @@ export default function MonTableauDeBord() {
             Quelle vue souhaitez-vous afficher ?
           </Text>
           <ViewSelection /> */}
-          STUFF ABOUT MON Organisme
+          STUFF ABOUT Aden formation Caen
         </Container>
       </Box>
     </Page>

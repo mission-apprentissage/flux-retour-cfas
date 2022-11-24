@@ -10,7 +10,7 @@ import { ObjectId } from "mongodb";
 export default () => {
   const router = express.Router();
 
-  const buildCerfaResult = (cerfa) => {
+  const buildSifaResult = (cerfa) => {
     const { properties: cerfaSchema } = schema();
 
     function customizer(objValue, srcValue) {
@@ -56,8 +56,8 @@ export default () => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      const cerfa = await sifasDb().findOne({ _id: ObjectId("6379d1f12329a49fbea0b535") });
-      return res.json(buildCerfaResult(cerfa));
+      const sifa = await sifasDb().findOne({ _id: ObjectId("6379d1f12329a49fbea0b535") });
+      return res.json(buildSifaResult(sifa));
     })
   );
 

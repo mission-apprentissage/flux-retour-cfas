@@ -34,6 +34,9 @@ const colors = {
     200: "#000091",
     100: "#000091",
   },
+  dsfr_lightprimary: {
+    bluefrance_850: "#8B8BF6",
+  },
   grey: {
     800: "#1e1e1e",
     750: "#2a2a2a",

@@ -1,15 +1,15 @@
 import React from "react";
 import Head from "next/head";
 import { Box, Heading, HStack } from "@chakra-ui/react";
-import { Page, Section } from "../../../components";
-import { Breadcrumb } from "../../../components/Breadcrumb/Breadcrumb";
-import { getAuthServerSideProps } from "../../../common/SSR/getAuthServerSideProps";
-import { FiltersProvider, useFiltersContext } from "../../../modules/visualiser-les-indicateurs/FiltersContext";
-import SwitchViewButton from "../../../modules/visualiser-les-indicateurs/SwitchViewButton";
-import IndicateursAndRepartitionEffectifsTerritoire from "../../../modules/visualiser-les-indicateurs/par-territoire/IndicateursAndRepartitionEffectifsTerritoire";
-import useEffectifs from "../../../hooks/useEffectifs";
-import TerritoireFilter from "../../../modules/visualiser-les-indicateurs/components/TerritoireFilter/TerritoireFilter";
-import FormationFilter from "../../../modules/visualiser-les-indicateurs/components/FormationFilter/FormationFilter";
+import { Page, Section } from "../../components";
+import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
+import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { FiltersProvider, useFiltersContext } from "../visualiser-les-indicateurs/FiltersContext";
+import SwitchViewButton from "../visualiser-les-indicateurs/SwitchViewButton";
+import IndicateursAndRepartitionEffectifsTerritoire from "../visualiser-les-indicateurs/par-territoire/IndicateursAndRepartitionEffectifsTerritoire";
+import useEffectifs from "../../hooks/useEffectifs";
+import TerritoireFilter from "../visualiser-les-indicateurs/components/TerritoireFilter/TerritoireFilter";
+import FormationFilter from "../visualiser-les-indicateurs/components/FormationFilter/FormationFilter";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

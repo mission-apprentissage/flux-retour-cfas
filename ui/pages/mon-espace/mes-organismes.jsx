@@ -1,14 +1,16 @@
 import React from "react";
 import Head from "next/head";
 import { Box, Container, Heading } from "@chakra-ui/react";
-import { Page } from "../../../components";
-import { Breadcrumb } from "../../../components/Breadcrumb/Breadcrumb";
-import { getAuthServerSideProps } from "../../../common/SSR/getAuthServerSideProps";
+import { Page } from "../../components";
+import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
+
+import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import Link from "../../components/Links/Link";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-export default function MesEffectifs() {
-  const title = "Mes Effectifs";
+export default function MesOrganismes() {
+  const title = "Mes Organismes";
   return (
     <Page>
       <Head>
@@ -21,7 +23,11 @@ export default function MesEffectifs() {
           <Heading textStyle="h2" color="grey.800" mt={5}>
             {title}
           </Heading>
-          STUFF
+          <ul>
+            <li>
+              <Link href="/espace/organisme/453533583585">OOF1 : Aden formation Caen </Link>
+            </li>
+          </ul>
         </Container>
       </Box>
     </Page>

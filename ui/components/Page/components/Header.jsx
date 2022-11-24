@@ -21,15 +21,13 @@ import { PRODUCT_NAME } from "../../../common/constants/product";
 import { AccountUnfill } from "../../../theme/components/icons/AccountUnfill.jsx";
 import { AccountFill } from "../../../theme/components/icons/AccountFill.jsx";
 import useAuth from "../../../hooks/useAuth.js";
-import {
-  hasPageAccessTo,
-  // isUserAdmin
-} from "../../../common/utils/rolesUtils.js";
+import { hasPageAccessTo } from "../../../common/utils/rolesUtils.js";
 import { _get } from "../../../common/httpClient.js";
 import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
-import { NotificationFill, Settings4Fill, UserFill } from "../../../theme/components/icons";
+import { Settings4Fill, UserFill } from "../../../theme/components/icons";
 import { useRouter } from "next/router";
+import { NotificationsMenu } from "./Notifications/Notifications";
 
 const UserMenu = () => {
   let [auth] = useAuth();
@@ -42,8 +40,8 @@ const UserMenu = () => {
     }
   };
 
-  // let accountType = auth.roles.length ? auth.roles[0].name : isUserAdmin(auth) ? "admin" : "utilisateur";
-  const myWks = router.pathname.includes("/mon-espace") && auth?.sub !== "anonymous";
+  const myWks =
+    (router.pathname.includes("/mon-espace") || router.pathname.includes("/espace")) && auth?.sub !== "anonymous";
 
   return (
     <Box mb={["3w", "3w", "0", "0"]}>
@@ -64,14 +62,15 @@ const UserMenu = () => {
         </HStack>
       )}
       {auth?.sub !== "anonymous" && (
-        <HStack spacing={6}>
-          <NotificationFill boxSize={4} />
-
+        <Flex>
+          <NotificationsMenu mr={5} />
           <Link
             href="/mon-espace/mon-organisme"
             borderBottom="1px solid"
             borderColor={myWks ? "bluefrance" : "transparent"}
             color={myWks ? "bluefrance" : "grey.800"}
+            mr={5}
+            variant="summary"
           >
             Mon espace
           </Link>
@@ -82,17 +81,13 @@ const UserMenu = () => {
                 <Box display={["none", "block"]} ml={2}>
                   <Text color="bluefrance" textStyle="sm">
                     {auth.email}
-                    {/* {" "}
-                    <Text color="grey.600" as="span">
-                      ({accountType})
-                    </Text> */}
                   </Text>
                 </Box>
               </Flex>
             </MenuButton>
             <MenuList>
-              <MenuItem href="/profile" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
-                Mon profile
+              <MenuItem href="/mon-compte" icon={<Settings4Fill boxSize={4} color={"bluefrance"} />}>
+                Mon compte
               </MenuItem>
               {hasPageAccessTo(auth, "admin") && (
                 <MenuGroup title="Administration">
@@ -122,7 +117,7 @@ const UserMenu = () => {
               <ChakraMenuItem onClick={logout}>Déconnexion</ChakraMenuItem>
             </MenuList>
           </Menu>
-        </HStack>
+        </Flex>
       )}
     </Box>
   );
@@ -140,14 +135,15 @@ const Header = () => {
           <Box mt={["2w", "2w", "0"]} marginLeft="5w" textAlign={["center", "center", "initial"]} flexGrow={1}>
             <Heading as="h6" variant="h1" fontSize="gamma">
               Le {PRODUCT_NAME}{" "}
+              <Tag backgroundColor="bluefrance" color="white" position="absolute" ml={4} mt={-2}>
+                BETA
+              </Tag>
             </Heading>
             <Text fontFamily="Marianne" color="grey.700" fontSize="zeta">
               Mettre à disposition des différents acteurs les données clés de l&apos;apprentissage en temps réel
             </Text>
           </Box>
-          <Tag marginBottom="1w" backgroundColor="bluefrance" color="white" position="absolute">
-            BETA
-          </Tag>
+
           <UserMenu />
         </Flex>
       </Container>
