@@ -2,12 +2,13 @@ import "dotenv/config.js";
 import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seed } from "./seed/start/index.js";
-import { clear } from "./clear/index.js";
+import { clear } from "./clear/clear-all.js";
 import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 import { hydrateRncpCodes } from "./hydrate/rncp/hydrate-rncp.js";
 import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
+import { purgeEvents } from "./clear/purge-events.js";
 
 /**
  * Job d'initialisation projet
@@ -95,6 +96,19 @@ cli
     runScript(async () => {
       return hydrateRncpCodes();
     }, "hydrate-rncp");
+  });
+
+/**
+ * Job de purge des events
+ */
+cli
+  .command("purge:events")
+  .description("Purge des logs inutiles")
+  .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
+  .action(async ({ nbDaysToKeep }) => {
+    runScript(async () => {
+      return purgeEvents(nbDaysToKeep);
+    }, "purge-events");
   });
 
 cli.parse(process.argv);
