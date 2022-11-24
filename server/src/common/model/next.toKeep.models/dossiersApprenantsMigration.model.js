@@ -44,6 +44,24 @@ export const schema = object(
     nom_apprenant: string({ description: "Nom de l'apprenant" }),
     prenom_apprenant: string({ description: "Prénom de l'apprenant" }),
     email_contact: string({ description: "Adresse mail de contact de l'apprenant" }),
+
+    telephone_apprenant: string({
+      description: `Dans le cas d'un numéro français, il n'est pas 
+        nécessaire de saisir le "0" car l'indicateur pays est 
+        pré-renseigné.
+        Il doit contenir 9 chiffres après l'indicatif.`,
+      example: "+33908070605",
+      pattern: "^([+])?(\\d{7,12})$",
+      maxLength: 13,
+      minLength: 8,
+    }),
+    employeur_siret: string({
+      description: "N° SIRET de l'employeur",
+      pattern: "^[0-9]{14}$",
+      maxLength: 14,
+      minLength: 14,
+    }),
+
     formation_cfd: string({
       description: "CFD de la formation à laquelle l'apprenant est inscrit",
       pattern: "^[0-9A-Z]{8}[A-Z]?$",
@@ -120,6 +138,7 @@ export const schema = object(
 
       "historique_statut_apprenant",
     ],
+    additionalProperties: true,
   }
 );
 
