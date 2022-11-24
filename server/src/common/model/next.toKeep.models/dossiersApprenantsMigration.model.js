@@ -170,7 +170,7 @@ export function validateDossiersApprenantsMigration(props) {
     },
     {
       name: "email_contact",
-      base: Joi.string().email().allow(""), // Allow empty : va rajouter + de 20 000 dossiers avec email invalides
+      base: Joi.string().email(),
     },
   ]);
 }
