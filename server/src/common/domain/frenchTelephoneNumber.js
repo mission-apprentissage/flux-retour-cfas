@@ -12,3 +12,5 @@ export const schema = Joi.string().pattern(FRENCH_TELEPHONE_NUMBER_REGEX);
 export const validateFrenchTelephoneNumber = (value) => {
   return schema.validate(value);
 };
+
+export const transformToInternationalNumber = (value) => `+33${value.replace(/^0/, "")}`;

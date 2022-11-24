@@ -31,7 +31,7 @@ const LOG_ACTIONS = {
 /**
  * Ce script effectue la migration de la collection dossiersApprenants vers la nouvelle collection DossiersApprenantsMigration
  */
-export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sample = 0) => {
+export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sample = 0, specificUai = null) => {
   logger.info("Migration des dossiersApprenants vers la collection dossiersApprenantsMigration");
 
   // Clear
@@ -42,6 +42,7 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
   let allUaisInDossiers = await dossiersApprenantsDb().distinct("uai_etablissement");
   // Handle sample slicing with option
   if (sample > 0) allUaisInDossiers = allUaisInDossiers.slice(0, sample);
+  if (specificUai !== null) allUaisInDossiers = [specificUai];
 
   loadingBar.start(allUaisInDossiers.length, 0);
   let nbDossiersToMigrate = 0;
