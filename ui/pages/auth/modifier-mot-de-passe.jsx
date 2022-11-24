@@ -64,7 +64,7 @@ const ResetPasswordPage = () => {
           const user = decodeJwt(result.token);
           setAuth(user);
           setToken(result.token);
-          router.push("/");
+          router.push("/mon-espace/mon-organisme");
         }
       } catch (e) {
         console.error(e);

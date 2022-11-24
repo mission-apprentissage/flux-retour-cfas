@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { fetchSearchFormations } from "../../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../../common/constants/queryKeys";
-import useDebounce from "../../../../hooks/useDebounce";
+import useDebounce from "../../../../hooks/old/useDebounce";
 import { omitNullishValues } from "../../../../common/utils/omitNullishValues";
 
 export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;

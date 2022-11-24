@@ -1,4 +1,4 @@
-import { _post, _put } from "../../../common/httpClient";
+import { _post, _put } from "../../../../../common/httpClient";
 
 const saveCerfa = async ({ dossierId, cerfaId, data, inputNames }) => {
   try {

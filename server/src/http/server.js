@@ -36,8 +36,10 @@ import register from "./routes/user.routes/register.routes.js";
 import password from "./routes/user.routes/password.routes.js";
 import profile from "./routes/user.routes/profile.routes.js";
 
-import sifa from "./routes/specific.routes//temp.routes/sifa.routes.js"; // TMP
-import upload from "./routes/specific.routes//temp.routes/upload.routes.js"; // TMP
+import organisme from "./routes/specific.routes/organisme.routes.js";
+
+import sifa from "./routes/specific.routes/temp.routes/sifa.routes.js"; // TMP
+import upload from "./routes/specific.routes/temp.routes/upload.routes.js"; // TMP
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
@@ -63,6 +65,7 @@ export default async (components) => {
   // private access
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
+  app.use("/api/v1/organisme", checkJwtToken, organisme(components));
 
   // private admin access
   app.use(

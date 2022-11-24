@@ -35,6 +35,9 @@ export const schema = object(
       description: "Appartenance à une organisation (exemple DREETS, MISSION_LOCALE..)",
       enum: Object.keys(ORGANISMES_APPARTENANCE),
     }),
+    main_organisme_id: objectId({
+      description: "Organisme principe id",
+    }),
 
     // Scoping
     reseau: string({

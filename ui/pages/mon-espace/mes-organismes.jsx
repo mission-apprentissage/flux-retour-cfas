@@ -25,7 +25,7 @@ export default function MesOrganismes() {
           </Heading>
           <ul>
             <li>
-              <Link href="/espace/organisme/453533583585">OOF1 : Aden formation Caen </Link>
+              <Link href="/mon-espace/organisme/637fa2398a3c0baeaf0a649a">OOF1 : Aden formation Caen </Link>
             </li>
           </ul>
         </Container>

@@ -42,7 +42,7 @@ const UserMenu = () => {
   };
 
   const myWks =
-    (router.pathname.includes("/mon-espace") || router.pathname.includes("/espace")) && auth?.sub !== "anonymous";
+    (router.pathname.includes("/mon-espace") || router.pathname.includes("/organisme")) && auth?.sub !== "anonymous";
 
   return (
     <Box mb={["3w", "3w", "0", "0"]}>

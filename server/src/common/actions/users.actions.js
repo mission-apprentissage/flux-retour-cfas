@@ -1,4 +1,5 @@
 import { compact, pick, uniq } from "lodash-es";
+import { ObjectId } from "mongodb";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
 import { defaultValuesUser, validateUser } from "../model/next.toKeep.models/usersMigration.model.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
@@ -195,6 +196,34 @@ export const updateUser = async (_id, data) => {
   return updated.value;
 };
 
+/**
+ * Méthode de mise à jour de l'organisme principal du l'utilisateur
+ * @param {*} permissionProps
+ * @returns
+ */
+export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
+  const user = await usersMigrationDb().findOne({ email: userEmail });
+
+  if (!user) {
+    throw new Error(`Unable to find user`);
+  }
+
+  const main_organisme_id = typeof id === "string" ? ObjectId(organisme_id) : organisme_id;
+  if (!ObjectId.isValid(main_organisme_id)) throw new Error("Invalid id passed");
+
+  const updated = await usersMigrationDb().findOneAndUpdate(
+    { _id: user._id },
+    {
+      $set: {
+        main_organisme_id,
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
+};
+
 export const structureUser = async (user) => {
   const permissions = pick(user, ["is_admin", "is_cross_organismes"]);
   const rolesList = await rolesDb()
@@ -210,6 +239,7 @@ export const structureUser = async (user) => {
 
   return {
     organisme_ids,
+    main_organisme_id: user?.main_organisme_id,
     permissions,
     email: user.email,
     civility: user.civility,
@@ -220,8 +250,8 @@ export const structureUser = async (user) => {
     uai: user.uai,
     description: user.description,
     organisation: user.organisation,
-    reseau: user.reseau,
-    erp: user.erp,
+    reseau: user?.reseau,
+    erp: user?.erp,
     codes_region: user.codes_region, // TODO send full regions
     codes_academie: user.codes_academie, // TODO send full académie
     codes_departement: user.codes_departement, // TODO send full department

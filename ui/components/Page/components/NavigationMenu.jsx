@@ -4,11 +4,12 @@ import { Box, Container, Flex, Text } from "@chakra-ui/react";
 import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, Settings4Fill, UserFill, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
-import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
+// import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
+import { useOrganisme } from "../../../hooks/useOrganisme";
 
 const NavItem = ({ children, to = "/", colorActive = "bluefrance", isActive = false, ...rest }) => {
   const router = useRouter();
-  const isActiveInternal = isActive || router.pathname === to;
+  const isActiveInternal = isActive || router.pathname === to || router.asPath === to;
 
   return (
     <Link
@@ -129,22 +130,24 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
 };
 
 const NavBarOrganisme = ({ isOpen }) => {
+  let { organisme_id } = useOrganisme();
+
   const organisme = {
     landingOrganisme: {
       name: "Son tableau de bord",
-      path: "/espace/organisme/453533583585",
+      path: `/mon-espace/organisme/${organisme_id}`,
     },
     effectifs: {
       name: "Ses effectifs",
-      path: "/espace/organisme/453533583585/effectifs",
+      path: `/mon-espace/organisme/${organisme_id}/effectifs`,
     },
     sifa2: {
       name: "Son enquête SIFA2",
-      path: "/espace/organisme/453533583585/enquete-SIFA2",
+      path: `/mon-espace/organisme/${organisme_id}/enquete-SIFA2`,
     },
     parametres: {
       name: "Ses paramètres",
-      path: "/espace/organisme/453533583585/parametres",
+      path: `/mon-espace/organisme/${organisme_id}/parametres`,
     },
   };
 
@@ -189,13 +192,14 @@ const NavBarOrganisme = ({ isOpen }) => {
 const NavigationMenu = ({ ...props }) => {
   let [auth] = useAuth();
   const router = useRouter();
+
+  let { isOrganismePages } = useOrganisme();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggle = () => setIsOpen(!isOpen);
-  const isWorkspacePage = router.pathname.includes("/mon-espace/") && auth?.sub !== "anonymous";
-  const isMesOrganismes = router.pathname.includes("/mon-espace/mes-organismes") && auth?.sub !== "anonymous";
 
-  const isAOrganismePage = router.pathname.includes("/espace/") && auth?.sub !== "anonymous";
+  const isMonEspacePage = router.pathname.includes("/mon-espace/") && auth?.sub !== "anonymous";
+  const isMesOrganismes = router.pathname.includes("/mon-espace/mes-organismes") && auth?.sub !== "anonymous";
 
   function NavToggle({ toggle, isOpen }) {
     return (
@@ -211,14 +215,14 @@ const NavigationMenu = ({ ...props }) => {
         <Container maxW="xl">
           <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" {...props}>
             <NavToggle toggle={toggle} isOpen={isOpen} />
-            {!isWorkspacePage && !isAOrganismePage && <NavBarPublic isOpen={isOpen} />}
-            {(isWorkspacePage || isAOrganismePage) && (
-              <NavBarUser isOpen={isOpen} mesOrganismesActive={isMesOrganismes || isAOrganismePage} />
+            {!isMonEspacePage && !isOrganismePages && <NavBarPublic isOpen={isOpen} />}
+            {(isMonEspacePage || isOrganismePages) && (
+              <NavBarUser isOpen={isOpen} mesOrganismesActive={isMesOrganismes || isOrganismePages} />
             )}
           </Flex>
         </Container>
       </Box>
-      {isAOrganismePage && (
+      {isOrganismePages && (
         <Container maxW="xl" mt={1}>
           <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" {...props}>
             <NavBarOrganisme isOpen={isOpen} />

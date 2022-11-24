@@ -1,6 +1,7 @@
 import { addContributeurOrganisme, findOrganismeByUai, findOrganismesByQuery } from "./organismes.actions.js";
 import { createPermission, findPermissionsByQuery } from "./permissions.actions.js";
 import { findRoleByName } from "./roles.actions.js";
+import { updateMainOrganismeUser } from "./users.actions.js";
 
 /**
  * Méthode d'ajouts des permissions en fonction de l'utilisateur
@@ -77,6 +78,7 @@ export const userAfterCreate = async ({
       if (!organisme.contributeurs.length) {
         // is the first user on this organisme
         await addContributeurOrganisme(organisme._id, userEmail, "organisme.admin", pending);
+        await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
         // TODO VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
         // Notif TDB_admin or whatever who
       } else {
@@ -92,10 +94,12 @@ export const userAfterCreate = async ({
 
         if (await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin")) {
           await addContributeurOrganisme(organisme._id, userEmail, "organisme.readonly", pending);
+          await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
           // TODO VALIDATION FLOW [2] => organisme.admin Validate people that wants to join is organisme
           // Notif organisme.admin
         } else {
           // TODO OOPS NOBODY IS HERE TO VALIDATE =>  VALIDATION FLOW [1]
+          throw new Error(`OOPS NOBODY IS HERE TO VALIDATE USER`);
         }
       }
     }
