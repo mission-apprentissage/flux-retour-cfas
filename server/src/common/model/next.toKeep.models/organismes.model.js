@@ -53,7 +53,7 @@ export const schema = object(
     date_derniere_transmission: date({ description: "Date de la dernière transmission de données" }),
     est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
 
-    // TODO TO REMOVE LATER
+    // TODO [tech] TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
 
     api_key: string({ description: "API key pour envoi de données" }),

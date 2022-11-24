@@ -21,7 +21,7 @@ export function activation_user(user, token, options = {}) {
   };
 }
 
-// TODO
+// TODO [metier]
 export function notification(cfa, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   return {

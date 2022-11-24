@@ -252,9 +252,9 @@ export const structureUser = async (user) => {
     organisation: user.organisation,
     reseau: user?.reseau,
     erp: user?.erp,
-    codes_region: user.codes_region, // TODO send full regions
-    codes_academie: user.codes_academie, // TODO send full académie
-    codes_departement: user.codes_departement, // TODO send full department
+    codes_region: user.codes_region, // TODO [tech] send full regions
+    codes_academie: user.codes_academie, // TODO [tech] send full académie
+    codes_departement: user.codes_departement, // TODO [tech] send full department
     account_status: user.account_status,
     roles: rolesList,
     acl: uniq([...rolesAcl, ...user.custom_acl]),

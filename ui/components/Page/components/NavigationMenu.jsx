@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { Box, Container, Flex, Text } from "@chakra-ui/react";
+import { Box, Container, Flex, Skeleton, Text } from "@chakra-ui/react";
 import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, Settings4Fill, UserFill, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 import { useEspace } from "../../../hooks/useEspace";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
+import { useOrganisme } from "../../../hooks/useOrganisme";
 
 const NavItem = ({ children, to = "/", colorActive = "bluefrance", isActive = false, ...rest }) => {
   const router = useRouter();
@@ -99,26 +100,42 @@ const NavBarOrganisme = ({ isOpen }) => {
   let {
     navigation: { organisme: organismeNavigation },
   } = useEspace();
+
+  const { isloaded, organisme } = useOrganisme();
+
+  if (!isloaded && !organisme) {
+    return <Skeleton />;
+  }
+
   return (
     <NavContainer isOpen={isOpen}>
       <Box p={4} bg={"transparent"}>
         <ParentGroupIcon mt="-0.3rem" boxSize={4} color="dsfr_lightprimary.bluefrance_850" />
       </Box>
-      <NavItem to={organismeNavigation.landingEspace.path} colorActive="dsfr_lightprimary.bluefrance_850">
-        {organismeNavigation.landingEspace.navTitle}
-      </NavItem>
-      <NavItem to={organismeNavigation.effectifs.path} colorActive="dsfr_lightprimary.bluefrance_850">
-        {organismeNavigation.effectifs.navTitle}
-      </NavItem>
-      <NavItem to={organismeNavigation.sifa2.path} colorActive="dsfr_lightprimary.bluefrance_850">
-        {organismeNavigation.sifa2.navTitle}
-      </NavItem>
-
-      <Box flexGrow={1} />
-      <NavItem to={organismeNavigation.parametres.path} colorActive="dsfr_lightprimary.bluefrance_850">
-        <Settings4Fill boxSize={4} mr={2} color="dsfr_lightprimary.bluefrance_850" />
-        {organismeNavigation.parametres.navTitle}
-      </NavItem>
+      {hasContextAccessTo(organisme, "organisme/tableau_de_bord") && (
+        <NavItem to={organismeNavigation.landingEspace.path} colorActive="dsfr_lightprimary.bluefrance_850">
+          {organismeNavigation.landingEspace.navTitle}
+        </NavItem>
+      )}
+      {hasContextAccessTo(organisme, "organisme/page_effectifs") && (
+        <NavItem to={organismeNavigation.effectifs.path} colorActive="dsfr_lightprimary.bluefrance_850">
+          {organismeNavigation.effectifs.navTitle}
+        </NavItem>
+      )}
+      {hasContextAccessTo(organisme, "organisme/page_sifa2") && (
+        <NavItem to={organismeNavigation.sifa2.path} colorActive="dsfr_lightprimary.bluefrance_850">
+          {organismeNavigation.sifa2.navTitle}
+        </NavItem>
+      )}
+      {hasContextAccessTo(organisme, "organisme/page_parametres") && (
+        <>
+          <Box flexGrow={1} />
+          <NavItem to={organismeNavigation.parametres.path} colorActive="dsfr_lightprimary.bluefrance_850">
+            <Settings4Fill boxSize={4} mr={2} color="dsfr_lightprimary.bluefrance_850" />
+            {organismeNavigation.parametres.navTitle}
+          </NavItem>
+        </>
+      )}
     </NavContainer>
   );
 };

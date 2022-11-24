@@ -24,7 +24,7 @@ export function createMailerService(transporter = createTransporter({ ...config.
       subject,
       html: await generateHtml(to, template),
       list: {
-        help: "https://mission-apprentissage.gitbook.io/general/les-services-en-devenir/accompagner-les-futurs-apprentis", // TODO
+        help: "https://mission-apprentissage.gitbook.io/general/les-services-en-devenir/accompagner-les-futurs-apprentis", // TODO [metier/tech]
         unsubscribe: getPublicUrl(`/api/emails/${data.token}/unsubscribe`),
       },
     });

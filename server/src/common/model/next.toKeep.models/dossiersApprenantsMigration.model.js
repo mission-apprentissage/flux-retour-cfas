@@ -38,7 +38,7 @@ export const schema = object(
 
     etablissement_reseaux: arrayOf(string(), {
       description: "Réseaux auxquels appartient l'organisme de formation de l'apprenant",
-    }), // TODO MUST BE REMOVE after migration => Useless
+    }), // TODO [tech] MUST BE REMOVE after migration => Useless
 
     ine_apprenant: string({ description: "N° INE de l'apprenant" }),
     nom_apprenant: string({ description: "Nom de l'apprenant" }),

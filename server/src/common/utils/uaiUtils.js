@@ -19,7 +19,7 @@ export const buildAdresseFromUai = (uai) => {
 export const getLocalisationInfoFromUai = (uai) => {
   const infoCodeFromUai = getDepartementCodeFromUai(uai);
 
-  // TODO : gérer proprement les cas de la corse
+  // TODO [tech] : gérer proprement les cas de la corse
   if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE1.uaiCode) return departements[SPECIFIC_UAI_CODES_CORSE1.code];
   if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE2.uaiCode) return departements[SPECIFIC_UAI_CODES_CORSE2.code];
 

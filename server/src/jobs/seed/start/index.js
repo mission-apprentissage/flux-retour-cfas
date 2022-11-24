@@ -176,7 +176,7 @@ export const seed = async ({ adminEmail }) => {
 
   ///BELOW OTHER STUFF
 
-  // await createSifa(); // TODO TMP
+  // await createSifa(); // TODO [tech] TMP
 
   logger.info(`Seed tjp-pilotage created`);
 };

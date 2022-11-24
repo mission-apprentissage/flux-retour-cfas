@@ -89,7 +89,7 @@ export default async (components) => {
   app.get(
     "/api/cache",
     checkJwtToken,
-    pageAccessMiddleware(["_ADMIN"]), // TODO
+    pageAccessMiddleware(["_ADMIN"]), // TODO [tech]
     tryCatch(async (req, res) => {
       await components.cache.clear();
       return res.json({});
@@ -97,10 +97,10 @@ export default async (components) => {
   );
 
   // TODO TEST ROUTES TMEPORARY
-  app.use("/api/v1/sifa", sifa()); // TODO TMP
+  app.use("/api/v1/sifa", sifa()); // TODO TMP [tech]
   app.use("/api/v1/upload", upload(components));
 
-  // TODO TDB OLD PREVIOUS
+  // TODO TDB OLD PREVIOUS [tech]
   //// TODO
   app.use("/api/formations", formationRouter(components)); // FRONT
   app.use("/api/cfas", cfasRouter(components)); // FRONT

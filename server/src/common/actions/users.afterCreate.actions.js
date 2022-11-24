@@ -14,7 +14,7 @@ export const userAfterCreate = async ({
   // notify = true,
   // mailer
 }) => {
-  // TODO For invite Check if user has already permissions
+  // TODO [metier/tech] For invite Check if user has already permissions
 
   const {
     is_cross_organismes,
@@ -69,7 +69,7 @@ export const userAfterCreate = async ({
         await addContributeurOrganisme(_id, userEmail, "organisme.readonly", pending);
       }
     } else {
-      // TODO user is NOT cross_organismes and NOT scoped -> example OF
+      // user is NOT cross_organismes and NOT scoped -> example OF
       const organisme = await findOrganismeByUai(uai); // uai
       if (!organisme) {
         throw new Error(`No organisme found for this uai ${uai}`);
@@ -79,7 +79,7 @@ export const userAfterCreate = async ({
         // is the first user on this organisme
         await addContributeurOrganisme(organisme._id, userEmail, "organisme.admin", pending);
         await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
-        // TODO VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
+        // TODO [metier] VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
         // Notif TDB_admin or whatever who
       } else {
         const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName = "organisme.admin") => {
@@ -95,10 +95,10 @@ export const userAfterCreate = async ({
         if (await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin")) {
           await addContributeurOrganisme(organisme._id, userEmail, "organisme.readonly", pending);
           await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
-          // TODO VALIDATION FLOW [2] => organisme.admin Validate people that wants to join is organisme
+          // TODO [metier] VALIDATION FLOW [2] => organisme.admin Validate people that wants to join is organisme
           // Notif organisme.admin
         } else {
-          // TODO OOPS NOBODY IS HERE TO VALIDATE =>  VALIDATION FLOW [1]
+          // TODO [tech] OOPS NOBODY IS HERE TO VALIDATE =>  VALIDATION FLOW [1]
           throw new Error(`OOPS NOBODY IS HERE TO VALIDATE USER`);
         }
       }

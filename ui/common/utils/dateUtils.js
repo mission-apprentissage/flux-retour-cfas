@@ -2,7 +2,7 @@ import { endOfMonth, format } from "date-fns";
 
 const DATE_FORMAT = "dd/MM/yyyy";
 
-// TODO TO REMOVE
+// TODO [tech] TO REMOVE
 export const prettyPrintDate = (date) => {
   const event = new Date(date);
   const options = { hour: "2-digit", minute: "2-digit", year: "numeric", month: "short", day: "numeric" };

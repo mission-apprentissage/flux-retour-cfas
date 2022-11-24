@@ -17,7 +17,7 @@ import { useDossier } from "./hooks/useDossier";
 
 const Dossier = () => {
   const router = useRouter();
-  // TODO BETTER GETTER SLUGS
+  // TODO [tech] BETTER GETTER SLUGS
   const { slug } = router.query;
   const dossierIdParam = slug?.[slug.length - 2];
   const paramstep = slug?.[slug.length - 1];
@@ -78,7 +78,7 @@ const Dossier = () => {
     );
   }
 
-  // TODO not Authorize handler
+  // TODO [tech] not Authorize handler
 
   return (
     <CerfaControllerContext.Provider value={cerfaController}>

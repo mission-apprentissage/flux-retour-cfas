@@ -19,7 +19,7 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
     throw new Error(`Un organisme avec l'uai ${uai} existe déjà`);
   }
 
-  // TODO really used ?
+  // TODO [metier] really used ?
   let metiers = [];
   if (Array.isArray(sirets) && sirets.length !== 0) {
     metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
@@ -108,7 +108,7 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  // TODO really used ?
+  // TODO [metier] really used ?
   let metiers = [];
   if (sirets && Array.isArray(sirets) && !sirets.every((newSiret) => organisme.sirets.includes(newSiret))) {
     metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
@@ -227,7 +227,7 @@ export const updateOrganismeApiKey = async (id) => {
   }
 
   const key = generateKey();
-  // const secretHash = generateSecretHash(key); // TODO Should be like this but users are not ready yet
+  // const secretHash = generateSecretHash(key); // TODO [metier/tech] Should be like this but users are not ready yet
 
   await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -243,7 +243,7 @@ export const updateOrganismeApiKey = async (id) => {
 
 ////////
 
-// TODO USELESS ABSTRACTION HERE => only in route
+// TODO [tech] USELESS ABSTRACTION HERE => only in route
 // /**
 //  * Retourn la liste des organismes matching passed criteria
 //  * @param {{}} searchCriteria
@@ -289,7 +289,7 @@ export const updateOrganismeApiKey = async (id) => {
 //   });
 // };
 
-// TODO SHOULD NOT BE HERE => dossiersApprentisMigration component ?
+// TODO [tech] SHOULD NOT BE HERE => dossiersApprentisMigration component ?
 // /**
 //  * Returns the first date of dossierApprenant transmission for a UAI
 //  * @param {*} uai

@@ -1,4 +1,4 @@
-// TODO to merge departements.js and territoiresConstants.js
+// TODO [tech] to merge departements.js and territoiresConstants.js
 
 export const DEPARTEMENT_CODES = [
   "001",

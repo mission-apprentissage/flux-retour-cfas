@@ -47,7 +47,7 @@ const useWebSocketSubscription = () => {
   return { liveUsers: liveUsers || [] };
 };
 
-// TODO @antoine why double rendering when receiveing a message (the event is received once) ??
+// TODO [tech] @antoine why double rendering when receiveing a message (the event is received once) ??
 // eslint-disable-next-line react/display-name
 const LivePeopleAvatar = React.memo(() => {
   const { liveUsers } = useWebSocketSubscription();

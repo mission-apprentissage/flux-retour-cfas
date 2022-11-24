@@ -6,7 +6,7 @@ import reseauxCfasModelDescriptor from "../previous.models/toRemove.models/resea
 import userEventsModelDescriptor from "../next.toKeep.models/userEvents.model.js";
 import usersModelDescriptor from "../previous.models/toRemove.models/users.model.js";
 
-// TODO ADD INDEXES NEW MODEL
+// TODO [tech] ADD INDEXES NEW MODEL
 
 export const createIndexes = async () => {
   await new BaseIndexer({

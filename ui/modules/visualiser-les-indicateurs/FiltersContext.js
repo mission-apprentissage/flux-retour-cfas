@@ -81,8 +81,8 @@ const isStateValid = (state) => {
 };
 
 export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }) => {
-  // const history = useHistory(); TODO
-  const currentQueryString = ""; // TODO history.location.search.slice(1);
+  // const history = useHistory(); TODO [tech]
+  const currentQueryString = ""; // TODO [tech] history.location.search.slice(1);
 
   const updateUrlWithState = (state) => {
     // in some cases, we want some fields in the state to never change (network for a network user for example)
@@ -90,7 +90,7 @@ export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }
     // serialize state to url query string
     // eslint-disable-next-line no-unused-vars
     const queryString = stateToQueryString(newState);
-    // history.push({ search: queryString }); // TODO
+    // history.push({ search: queryString }); // TODO [tech]
   };
   const initialState = { ...getDefaultState(), ...defaultState };
 

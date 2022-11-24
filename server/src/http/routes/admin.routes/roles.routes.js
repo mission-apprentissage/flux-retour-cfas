@@ -4,7 +4,7 @@ import Joi from "joi";
 import { rolesDb } from "../../../common/model/collections.js";
 import { createRole, findRoleById } from "../../../common/actions/roles.actions.js";
 
-// TODO
+// TODO [tech]
 export default () => {
   const router = express.Router();
 

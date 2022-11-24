@@ -176,7 +176,7 @@ export async function buildNewHistoriqueStatutApprenantFromId(
 
   let newHistoriqueStatutApprenant = dossiersApprenant.historique_statut_apprenant;
 
-  // TODO new statut_apprenant to add ?
+  // TODO [metier] new statut_apprenant to add ?
   const statutExistsInHistorique = dossiersApprenant.historique_statut_apprenant.find((historiqueItem) => {
     return (
       historiqueItem.valeur_statut === statut_apprenant &&

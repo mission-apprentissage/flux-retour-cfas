@@ -131,7 +131,7 @@ export default ({ mailer }) => {
       }
 
       const updatedUser = await activateUser(user.email.toLowerCase());
-
+      // TODO [tech] AFTERACTIONS
       const payload = await structureUser(updatedUser);
 
       await loggedInUser(payload.email);
@@ -150,7 +150,7 @@ export default ({ mailer }) => {
     "/finalize",
     authMiddleware(),
     tryCatch(async ({ body, user }, res) => {
-      // TODO
+      // TODO [tech]
       // eslint-disable-next-line no-unused-vars
       const { compte, siret } = await Joi.object({
         compte: Joi.string().required(),
@@ -166,7 +166,7 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      // TODO
+      // TODO [tech]
       const updateUser = await finalizeUser(userDb.email, {});
       if (!updateUser) {
         throw Boom.badRequest("Something went wrong");

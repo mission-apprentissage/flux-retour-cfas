@@ -42,13 +42,13 @@ export const migrateCfasToOrganismes = async () => {
       // Custom Check erreur de localisation via UAI
       const localisationInfoFromUai = getLocalisationInfoFromUai(currentOldCfa.uai);
       if (!localisationInfoFromUai) {
-        cfasUaiErrors.push(currentOldCfa.uai); // TODO mettre dans une collection pour gestion métier ?
+        cfasUaiErrors.push(currentOldCfa.uai); // TODO [tech] mettre dans une collection pour gestion métier ?
       }
 
       // Custom Check erreur de format de siret
       const validateSirets = Joi.array().items(siretSchema()).validate(currentOldCfa.sirets);
       if (validateSirets.error) {
-        cfasSiretsErrors.push(currentOldCfa.uai); // TODO mettre dans une collection pour gestion métier ?
+        cfasSiretsErrors.push(currentOldCfa.uai); // TODO [tech] mettre dans une collection pour gestion métier ?
       }
 
       // Si erreur on la stocke avec l'objet cfa
