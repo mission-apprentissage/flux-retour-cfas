@@ -67,6 +67,7 @@ export const schema = object(
       pattern: "^[0-9A-Z]{8}[A-Z]?$",
       maxLength: 8,
     }),
+    // TODO Allow null ? (si on allow on rajoute + 47 000 dossiers avec formation_rncp null)
     formation_rncp: string({
       description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
       pattern: "^(RNCP)?[0-9]{2,5}$",
@@ -110,7 +111,7 @@ export const schema = object(
     }),
     code_commune_insee_apprenant: string({
       description: "Code commune insee de l'apprenant",
-      pattern: "^[0-9]{5}$",
+      pattern: "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$", // Pattern updated for Corsica - va rajouter 5296 dossiers non pris
       maxLength: 5,
       minLength: 5,
     }),
@@ -169,7 +170,7 @@ export function validateDossiersApprenantsMigration(props) {
     },
     {
       name: "email_contact",
-      base: Joi.string().email(),
+      base: Joi.string().email().allow(""), // Allow empty : va rajouter + de 20 000 dossiers avec email invalides
     },
   ]);
 }
