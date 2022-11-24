@@ -16,6 +16,7 @@ import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
 import { archiveOldDossiersApprenants } from "./archive-old-dossiers-apprenants/index.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
+import { hydrateRncpCodes } from "./hydrate/rncp/hydrate-rncp.js";
 
 /**
  * Job d'initialisation projet
@@ -154,6 +155,19 @@ cli
     runScript(async ({ effectifs }) => {
       return hydrateEffectifsApprenants(effectifs);
     }, "hydrate-effectifsApprenants");
+  });
+
+/**
+ * Job de remplissage des codes rncp
+ // TODO : voir coté métier si toujours utile si on passe le RNCP en obligatoire ?
+ */
+cli
+  .command("hydrate-rncp")
+  .description("Remplissage des codes rncp des dossiersApprenants")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateRncpCodes();
+    }, "hydrate-rncp");
   });
 
 cli.parse(process.argv);

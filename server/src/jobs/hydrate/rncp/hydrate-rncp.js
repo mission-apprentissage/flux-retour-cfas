@@ -1,17 +1,17 @@
 import cliProgress from "cli-progress";
-import { runScript } from "../scriptWrapper.js";
-import { asyncForEach } from "../../common/utils/asyncUtils.js";
-import { getCfdInfo } from "../../common/apis/apiTablesCorrespondances.js";
-import logger from "../../common/logger.js";
-import { dossiersApprenantsDb } from "../../common/model/collections.js";
+import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+import { getCfdInfo } from "../../../common/apis/apiTablesCorrespondances.js";
+import logger from "../../../common/logger.js";
+import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Ce script permet de récupérer les RNCP pour les dossiersApprenants n'en ayant pas ; le code RNCP est retrouvé via le CFD dans les TCO
+ * Ce script permet de récupérer les RNCP pour les dossiersApprenants n'en ayant pas
+ * le code RNCP est retrouvé via le CFD dans les TCO
  */
-runScript(async () => {
-  const allValidCfds = await dossiersApprenantsDb().distinct("formation_cfd", {
+export const hydrateRncpCodes = async () => {
+  const allValidCfds = await dossiersApprenantsMigrationDb().distinct("formation_cfd", {
     formation_rncp: null,
   });
 
@@ -29,7 +29,7 @@ runScript(async () => {
     if (cfdInfo?.rncp?.code_rncp) {
       matchedCfdCount++;
 
-      const { modifiedCount } = await dossiersApprenantsDb().updateMany(
+      const { modifiedCount } = await dossiersApprenantsMigrationDb().updateMany(
         {
           formation_cfd: cfd,
           formation_rncp: null,
@@ -47,4 +47,4 @@ runScript(async () => {
   loadingBar.stop();
   logger.info(`${matchedCfdCount} RNCP found for ${allValidCfds.length} valid CFDs`);
   logger.info(`${updatedDossiersApprenantsCount} dossiersApprenants updated with RNCP found in TCO`);
-}, "retrieve-formation-rncp-in-tco");
+};
