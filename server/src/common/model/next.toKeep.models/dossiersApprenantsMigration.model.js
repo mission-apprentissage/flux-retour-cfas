@@ -108,7 +108,6 @@ export const schema = object(
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
       pattern: "^d{4}-d{4}$",
     }),
-    tel_apprenant: string({ description: "Numéro de téléphone de l'apprenant" }),
     code_commune_insee_apprenant: string({
       description: "Code commune insee de l'apprenant",
       pattern: "^[0-9]{5}$",
@@ -162,6 +161,10 @@ export function validateDossiersApprenantsMigration(props) {
     },
     {
       name: "siret_etablissement",
+      base: siretSchema(),
+    },
+    {
+      name: "employeur_siret",
       base: siretSchema(),
     },
     {
