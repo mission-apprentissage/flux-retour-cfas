@@ -1,3 +1,10 @@
+# [2.56.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.56.0-beta.3...v2.56.0-beta.4) (2022-11-24)
+
+
+### Features
+
+* **server:** id_erp_apprenant est maintenant obligatoire ([ca1468c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ca1468c7ea35ad37976e1492ff94c575a5509923))
+
 # [2.56.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.56.0-beta.2...v2.56.0-beta.3) (2022-11-22)
 
 
