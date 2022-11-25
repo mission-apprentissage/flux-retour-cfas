@@ -59,8 +59,8 @@ cli
   .command("hydrate:reseaux")
   .description("Remplissage des organismes et dossiersApprenants depuis les réseaux")
   .action(async () => {
-    runScript(async ({ ovhStorage }) => {
-      return hydrateFromReseaux(ovhStorage);
+    runScript(async () => {
+      return hydrateFromReseaux();
     }, "hydrate-reseaux");
   });
 
@@ -72,8 +72,8 @@ cli
   .command("hydrate:reseau-excellencePro")
   .description("MAJ des organismes pour le réseau excellencePro")
   .action(async () => {
-    runScript(async ({ ovhStorage }) => {
-      return hydrateReseauExcellencePro(ovhStorage);
+    runScript(async () => {
+      return hydrateReseauExcellencePro();
     }, "hydrate-reseau-excellencePro");
   });
 

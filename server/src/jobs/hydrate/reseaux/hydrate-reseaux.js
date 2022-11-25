@@ -10,6 +10,7 @@ import { ERPS } from "../../../common/constants/erpsConstants.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
 import { dossiersApprenantsMigrationDb, jobEventsDb } from "../../../common/model/collections.js";
 import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
+import { downloadIfNeededFileTo } from "../../../common/utils/ovhStorageUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOBNAME = "hydrate-organismes-reseaux";
@@ -23,13 +24,10 @@ const CFAS_NETWORKS_KEYS_TO_HANDLE = ["CMA", "UIMM", "AGRI", "MFR", "CCI", "GRET
  * MAJ les réseaux d'organismes déja existants
  * MAJ les dossiersApprenants liés
  */
-export const hydrateFromReseaux = async (ovhStorage) => {
+export const hydrateFromReseaux = async () => {
   await asyncForEach(Object.keys(RESEAUX_CFAS), async (currentNetwork) => {
     if (CFAS_NETWORKS_KEYS_TO_HANDLE.includes(currentNetwork)) {
-      const organismesForNetwork = await getOrganismesListForNetwork(
-        ovhStorage,
-        RESEAUX_CFAS[currentNetwork].nomFichier
-      );
+      const organismesForNetwork = await getOrganismesListForNetwork(RESEAUX_CFAS[currentNetwork].nomFichier);
       await hydrateForNetwork(organismesForNetwork, currentNetwork);
     }
   });
@@ -37,14 +35,13 @@ export const hydrateFromReseaux = async (ovhStorage) => {
 
 /**
  * Téléchargement si nécessaire du CSV du réseau et récupération de la liste des organismes
- * @param {*} ovhStorage
  * @param {*} nomFichier
  * @returns
  */
-const getOrganismesListForNetwork = async (ovhStorage, nomFichier) => {
+const getOrganismesListForNetwork = async (nomFichier) => {
   // Get Reference CSV File if needed
   const cfasReferenceFilePath = path.join(__dirname(import.meta.url), `./assets/${nomFichier}.csv`);
-  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, {
+  await downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, {
     clearFile: true,
   });
   return readJsonFromCsvFile(cfasReferenceFilePath);

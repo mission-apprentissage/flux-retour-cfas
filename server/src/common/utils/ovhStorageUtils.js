@@ -10,7 +10,7 @@ import logger from "../logger.js";
  * @param {*} options
  * @returns
  */
-const downloadIfNeededFileTo = async (filePath, fileDestination, options = {}) => {
+export const downloadIfNeededFileTo = async (filePath, fileDestination, options = {}) => {
   const clearFile = options.clearFile || false;
 
   // Connection to OvhStorage
@@ -37,5 +37,3 @@ const downloadIfNeededFileTo = async (filePath, fileDestination, options = {}) =
     logger.info(`File ${fileDestination} already present.`);
   }
 };
-
-export default () => ({ downloadIfNeededFileTo });

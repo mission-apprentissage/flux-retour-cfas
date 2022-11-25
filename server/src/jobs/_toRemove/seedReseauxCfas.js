@@ -8,6 +8,7 @@ import { RESEAUX_CFAS } from "../../common/constants/networksConstants.js";
 import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
 import { reseauxCfasDb } from "../../common/model/collections.js";
 import { getDirname } from "../../common/utils/esmUtils.js";
+import { downloadIfNeededFileTo } from "../../common/utils/ovhStorageUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -24,7 +25,7 @@ const CFAS_NETWORKS = [
 /**
  * Script qui initialise la collection CFAs
  */
-runScript(async ({ reseauxCfas, ovhStorage }) => {
+runScript(async ({ reseauxCfas }) => {
   logger.info("Seeding ReseauxCfas");
 
   // Clear reseauxCfas collection
@@ -32,7 +33,7 @@ runScript(async ({ reseauxCfas, ovhStorage }) => {
 
   // Set networks from CSV
   await asyncForEach(CFAS_NETWORKS, async (currentNetwork) => {
-    await seedReseauxCfasFromNetwork(reseauxCfas, ovhStorage, currentNetwork);
+    await seedReseauxCfasFromNetwork(reseauxCfas, currentNetwork);
   });
 
   logger.info("End seeding ReseauxCfas !");
@@ -41,15 +42,14 @@ runScript(async ({ reseauxCfas, ovhStorage }) => {
 /**
  * Seed de la collection reseauxCfas depuis un fichier csv de réseau
  * @param {*} reseauxCfas
- * @param {*} ovhStorage
  * @param {*} currentNetwork
  */
-const seedReseauxCfasFromNetwork = async (reseauxCfas, ovhStorage, { nomReseau, nomFichier }) => {
+const seedReseauxCfasFromNetwork = async (reseauxCfas, { nomReseau, nomFichier }) => {
   logger.info(`Seeding reseauxCfas network for ${nomReseau}`);
   const cfasReferenceFilePath = path.join(getDirname(import.meta.url), `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
-  await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, { clearFile: true });
+  await downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath, { clearFile: true });
 
   const allCfasForNetworkFile = readJsonFromCsvFile(cfasReferenceFilePath);
   loadingBar.start(allCfasForNetworkFile.length, 0);

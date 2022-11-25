@@ -6,14 +6,12 @@ import reseauxCfasComponent from "./reseauxCfas.js";
 import createStats from "./stats.js";
 import createEffectifs from "./effectifs.js";
 import createCacheComponent from "./cache.js";
-import createOvhStorageComponent from "./ovhStorage.js";
 import createArchiveDossiersApprenantsComponent from "./archiveDossiersApprenants.js";
 
 export default async (options = {}) => {
   const db = options.db;
 
   const users = options.users || (await createUsers());
-  const ovhStorage = options.ovhStorage || createOvhStorageComponent();
   const userEvents = options.userEvents || createUserEvents();
   const dossiersApprenants = options.dossiersApprenants || createDossierApprenant();
   const cfas = options.cfas || cfasComponent();
@@ -29,7 +27,6 @@ export default async (options = {}) => {
 
   return {
     users,
-    ovhStorage,
     userEvents,
     cache,
     db,

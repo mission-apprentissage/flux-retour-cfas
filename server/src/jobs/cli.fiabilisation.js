@@ -15,8 +15,8 @@ cli
   .command("duplicates:identify-networks")
   .description("Identification des doublons dans les fichiers CSV de réseaux")
   .action(() => {
-    runScript(async ({ ovhStorage }) => {
-      return identifyNetworkReferenceDuplicates(ovhStorage);
+    runScript(async () => {
+      return identifyNetworkReferenceDuplicates();
     }, "duplicates-identify-networks");
   });
 
