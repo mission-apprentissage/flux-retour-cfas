@@ -1,10 +1,12 @@
 import cliProgress from "cli-progress";
-import { runScript } from "../../scriptWrapper.js";
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { DUPLICATE_TYPE_CODES } from "../../../common/constants/dossierApprenantConstants.js";
-import { collectionNames } from "../../constants.js";
-import { getDuplicatesList } from "../dossiersApprenants.duplicates.actions.js";
+import logger from "../../../../common/logger.js";
+import { getDbCollection } from "../../../../common/mongodb.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
+import {
+  DUPLICATE_COLLECTION_NAMES,
+  DUPLICATE_TYPE_CODES,
+  getDuplicatesList,
+} from "../dossiersApprenants.duplicates.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -12,14 +14,10 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * Job d'identification des doublons de CFDs
  * Construit une collection dossiersApprenantsDoublonsCfds contenant les doublons
  */
-runScript(async ({ dossiersApprenants, effectifs, db }) => {
-  await identifyCfdDuplicates({ dossiersApprenants, effectifs, db });
-}, "dossiersApprenants-identify-cfd-duplicates");
+export const identifyCfdDuplicates = async (effectifs) => {
+  logger.info("Run identification dossiersApprenants with duplicates cfd...");
 
-const identifyCfdDuplicates = async ({ effectifs, db }) => {
-  logger.info("Run identification dossiresApprenants with duplicates cfd...");
-
-  const resultsCollection = db.collection(collectionNames.dossiersApprenantsDoublonsCfd);
+  const resultsCollection = getDbCollection(DUPLICATE_COLLECTION_NAMES.dossiersApprenantsDoublonsCfd);
   await resultsCollection.deleteMany({});
 
   // Identify all duplicates

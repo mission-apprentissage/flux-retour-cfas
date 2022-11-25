@@ -1,26 +1,24 @@
 import cliProgress from "cli-progress";
-import { runScript } from "../../scriptWrapper.js";
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
-import { DUPLICATE_TYPE_CODES } from "../../../common/constants/dossierApprenantConstants.js";
-import { collectionNames } from "../../constants.js";
-import { getDuplicatesList } from "../dossiersApprenants.duplicates.actions.js";
+import logger from "../../../../common/logger.js";
+import { getDbCollection } from "../../../../common/mongodb.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
+import {
+  DUPLICATE_COLLECTION_NAMES,
+  DUPLICATE_TYPE_CODES,
+  getDuplicatesList,
+} from "../dossiersApprenants.duplicates.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
- * Job d'identification des doublons d'UAIs
+ * Identification des doublons d'UAIs
  * Construit une collection dossiersApprenantsDoublonsUais contenant les doublons
+ * @param {*} param0
  */
-runScript(async ({ dossiersApprenants, effectifs, db }) => {
-  await identifyUaisDuplicates({ dossiersApprenants, effectifs, db });
-}, JOB_NAMES.dossiersApprenantsBadHistoryIdentifyAntidated);
-
-const identifyUaisDuplicates = async ({ effectifs, db }) => {
+export const identifyUaisDuplicates = async (effectifs) => {
   logger.info("Run identification dossiersApprenants with duplicates uais...");
 
-  const resultsCollection = db.collection(collectionNames.dossiersApprenantsDoublonsUais);
+  const resultsCollection = getDbCollection(DUPLICATE_COLLECTION_NAMES.dossiersApprenantsDoublonsUais);
   await resultsCollection.deleteMany({});
 
   // Identify all uais duplicates

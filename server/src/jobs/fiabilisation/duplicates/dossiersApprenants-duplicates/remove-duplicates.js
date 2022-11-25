@@ -1,14 +1,10 @@
-import logger from "../../../common/logger.js";
-import arg from "arg";
-import { runScript } from "../../scriptWrapper.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+import logger from "../../../../common/logger.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import sortBy from "lodash.sortby";
 import omit from "lodash.omit";
-import { dossiersApprenantsDb, duplicatesEventsDb } from "../../../common/model/collections.js";
-import { getDuplicatesList } from "../dossiersApprenants.duplicates.actions.js";
-
-let args = [];
-let mongo;
+import { dossiersApprenantsMigrationDb, duplicatesEventsDb } from "../../../../common/model/collections.js";
+import { DUPLICATE_COLLECTION_NAMES, getDuplicatesList } from "../dossiersApprenants.duplicates.actions.js";
+import { getDbCollection } from "../../../../common/mongodb.js";
 
 /**
  * Ce script permet de nettoyer les doublons des statuts identifiés
@@ -18,26 +14,18 @@ let mongo;
  * --allowDiskUse : si mode allowDiskUse actif, permet d'utiliser l'espace disque pour les requetes d'aggregation mongoDb
  * --dry : will run but won't delete any data
  */
-runScript(async ({ db }) => {
-  mongo = db;
-  args = arg(
-    {
-      "--duplicatesTypeCode": Number,
-      "--allowDiskUse": Boolean,
-      "--duplicatesWithNoUpdate": Boolean,
-      "--dry": Boolean,
-    },
-    { argv: process.argv.slice(2) }
+export const removeDossierApprenantsDuplicates = async (
+  duplicatesTypeCode = "",
+  allowDiskUse = false,
+  duplicatesWithNoUpdate = false,
+  dry = false
+) => {
+  logger.info(
+    `Suppression des doublons avec duplicatesTypeCode:${duplicatesTypeCode}, allowDiskUse:${allowDiskUse}, duplicatesWithNoUpdate:${duplicatesWithNoUpdate}, dry:${dry}`
   );
 
-  if (!args["--duplicatesTypeCode"])
+  if (duplicatesTypeCode === "")
     throw new Error("missing required argument: --duplicatesTypeCode  (should be in [1/2/3/4])");
-
-  // arguments
-  const duplicatesTypeCode = args["--duplicatesTypeCode"];
-  const allowDiskUse = args["--allowDiskUse"] ? true : false;
-  const duplicatesWithNoUpdate = args["--duplicatesWithNoUpdate"] ? true : false;
-  const dry = args["--dry"] ? true : false;
 
   const filterQuery = {};
   const jobTimestamp = Date.now();
@@ -74,14 +62,14 @@ runScript(async ({ db }) => {
   logger.info(`Removed ${duplicatesRemoved.length} dossiersApprenants in db`);
 
   logger.info("Job Ended !");
-}, "remove-duplicates");
+};
 
 /* Will keep the oldest statut in duplicates group, delete the others and store them in a specific collection */
 const removeDuplicates = async (duplicatesGroup) => {
   const statutsFound = [];
 
   await asyncForEach(duplicatesGroup.duplicatesIds, async (duplicateId) => {
-    statutsFound.push(await dossiersApprenantsDb().findOne({ _id: duplicateId }));
+    statutsFound.push(await dossiersApprenantsMigrationDb().findOne({ _id: duplicateId }));
   });
 
   // will sort by created_at, last item is the one with the most recent date
@@ -92,11 +80,12 @@ const removeDuplicates = async (duplicatesGroup) => {
   // Remove duplicates
   await asyncForEach(statutsToRemove, async (toRemove) => {
     try {
-      await dossiersApprenantsDb().deleteOne({ _id: toRemove._id });
+      await dossiersApprenantsMigrationDb().deleteOne({ _id: toRemove._id });
       // archive the deleted duplicate in dedicated collection
-      await mongo
-        .collection("dossiersApprenantsDuplicatesRemoved")
-        .insertOne({ ...omit(toRemove, "_id"), original_id: toRemove._id });
+      await getDbCollection(DUPLICATE_COLLECTION_NAMES.dossiersApprenantsDuplicatesRemoved).insertOne({
+        ...omit(toRemove, "_id"),
+        original_id: toRemove._id,
+      });
     } catch (err) {
       logger.error(`Could not delete DossierApprenant with _id ${toRemove._id}`);
     }

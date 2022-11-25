@@ -1,17 +1,15 @@
 import path from "path";
 import groupBy from "lodash.groupby";
-import logger from "../../../common/logger.js";
-import { runScript } from "../../scriptWrapper.js";
-import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
-import { RESEAUX_CFAS } from "../../../common/constants/networksConstants.js";
-import { toXlsx } from "../../../common/utils/exporterUtils.js";
-import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
-import { getDirname } from "../../../common/utils/esmUtils.js";
+import logger from "../../../../common/logger.js";
+import { readJsonFromCsvFile } from "../../../../common/utils/fileUtils.js";
+import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
+import { toXlsx } from "../../../../common/utils/exporterUtils.js";
+import { __dirname } from "../../../../common/utils/esmUtils.js";
 
 /**
  * Ce script permet d'identifier les doublons dans les fichiers de référence des réseaux
  */
-runScript(async ({ ovhStorage }) => {
+export const identifyNetworkReferenceDuplicates = async (ovhStorage) => {
   logger.info("Identifying Network Referentiel Duplicates");
 
   await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.CCI);
@@ -25,14 +23,14 @@ runScript(async ({ ovhStorage }) => {
   await identifyDuplicatesForNetwork(ovhStorage, RESEAUX_CFAS.MFR);
 
   logger.info("End identifying Network Referentiel Duplicates");
-}, JOB_NAMES.identifyNetworkDuplicates);
+};
 
 /**
  * Identify duplicates for Network
  */
 const identifyDuplicatesForNetwork = async (ovhStorage, { nomReseau, nomFichier }) => {
   logger.info(`Identifying duplicates for network ${nomReseau}`);
-  const cfasReferenceFilePath = path.join(getDirname(import.meta.url), `./assets/${nomFichier}.csv`);
+  const cfasReferenceFilePath = path.join(__dirname(import.meta.url), `./assets/${nomFichier}.csv`);
 
   // Get Reference CSV File if needed
   await ovhStorage.downloadIfNeededFileTo(`cfas-reseaux/${nomFichier}.csv`, cfasReferenceFilePath);
@@ -46,7 +44,7 @@ const identifyDuplicatesForNetwork = async (ovhStorage, { nomReseau, nomFichier 
   if (cfasMultiSiret.length > 0) {
     // Build export XLSX
     const fileToBuild = `doublons_reseau_${nomReseau}_${Date.now()}.xlsx`;
-    await toXlsx(cfasMultiSiret, path.join(getDirname(import.meta.url), `/output/${fileToBuild}`));
+    await toXlsx(cfasMultiSiret, path.join(__dirname(import.meta.url), `/output/${fileToBuild}`));
     logger.info(`Export duplicate identification file ${fileToBuild} created.`);
   }
 };

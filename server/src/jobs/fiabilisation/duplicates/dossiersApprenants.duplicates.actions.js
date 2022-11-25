@@ -1,4 +1,10 @@
-import { dossiersApprenantsDb } from "../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
+
+export const DUPLICATE_COLLECTION_NAMES = {
+  dossiersApprenantsDoublonsUais: "dossiersApprenantsDoublonsUais",
+  dossiersApprenantsDoublonsCfd: "dossiersApprenantsDoublonsCfd",
+  dossiersApprenantsDuplicatesRemoved: "dossiersApprenantsDuplicatesRemoved",
+};
 
 /**
  * Code pour les types de doublons identifiables
@@ -6,23 +12,23 @@ import { dossiersApprenantsDb } from "../../common/model/collections.js";
 export const DUPLICATE_TYPE_CODES = {
   unique: {
     name: "Uniques (clé d'unicité identique)",
-    code: 1,
+    code: "1",
   },
   formation_cfd: {
     name: "CFDs",
-    code: 2,
+    code: "2",
   },
   prenom_apprenant: {
     name: "Prenom",
-    code: 3,
+    code: "3",
   },
   nom_apprenant: {
     name: "Nom",
-    code: 4,
+    code: "4",
   },
   uai_etablissement: {
     name: "Uai",
-    code: 5,
+    code: "5",
   },
 };
 
@@ -160,7 +166,7 @@ const findDossiersApprenantsDuplicates = async (
     },
   ];
 
-  const dossiersApprenantsFound = await dossiersApprenantsDb().aggregate(aggregateQuery).toArray();
+  const dossiersApprenantsFound = await dossiersApprenantsMigrationDb().aggregate(aggregateQuery).toArray();
 
   return dossiersApprenantsFound;
 };

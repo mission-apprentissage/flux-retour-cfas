@@ -1,12 +1,13 @@
 import cliProgress from "cli-progress";
-import { runScript } from "../../scriptWrapper.js";
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { JOB_NAMES } from "../../../common/constants/jobsConstants.js";
-import { DUPLICATE_TYPE_CODES } from "../../../common/constants/dossierApprenantConstants.js";
-import { collectionNames } from "../../constants.js";
-import { dossiersApprenantsDb } from "../../../common/model/collections.js";
-import { getDuplicatesList } from "../dossiersApprenants.duplicates.actions.js";
+import logger from "../../../../common/logger.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
+import { dossiersApprenantsDb } from "../../../../common/model/collections.js";
+import {
+  DUPLICATE_COLLECTION_NAMES,
+  DUPLICATE_TYPE_CODES,
+  getDuplicatesList,
+} from "../dossiersApprenants.duplicates.actions.js";
+import { getDbCollection } from "../../../../common/mongodb.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -14,14 +15,10 @@ const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_clas
  * Job de suppression des doublons d'UAIs
  * Récupère les doublons et ne conserve que le plus récent
  */
-runScript(async ({ dossiersApprenants, db }) => {
-  await cleanUaisDuplicates({ dossiersApprenants, db });
-}, JOB_NAMES.dossiersApprenantsBadHistoryIdentifyAntidated);
-
-const cleanUaisDuplicates = async ({ db }) => {
+export const cleanUaisDuplicates = async () => {
   logger.info("Run clean dossiersApprenants with duplicates uais...");
 
-  const resultsCollection = db.collection(collectionNames.dossiersApprenantsDoublonsUais);
+  const resultsCollection = getDbCollection(DUPLICATE_COLLECTION_NAMES.dossiersApprenantsDoublonsUais);
   await resultsCollection.deleteMany({});
 
   // Identify all uais duplicates
