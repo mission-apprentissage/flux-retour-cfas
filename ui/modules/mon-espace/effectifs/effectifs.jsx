@@ -14,7 +14,7 @@ const EffectifsOrganisme = () => {
     <>
       <Heading textStyle="h2" color="grey.800" mt={5}>
         {isMonOrganismePages && `Mes effectifs`}
-        {isOrganismePages && `Ses effetifs`}
+        {isOrganismePages && `Ses effectifs`}
       </Heading>
     </>
   );
