@@ -1,6 +1,5 @@
 import createUsers from "./users.js";
 import createUserEvents from "./userEvents.js";
-import createJobEvents from "./jobEvents.js";
 import createDossierApprenant from "./dossiersApprenants.js";
 import cfasComponent from "./cfas.js";
 import reseauxCfasComponent from "./reseauxCfas.js";
@@ -16,7 +15,6 @@ export default async (options = {}) => {
   const users = options.users || (await createUsers());
   const ovhStorage = options.ovhStorage || createOvhStorageComponent();
   const userEvents = options.userEvents || createUserEvents();
-  const jobEvents = options.jobEvents || createJobEvents();
   const dossiersApprenants = options.dossiersApprenants || createDossierApprenant();
   const cfas = options.cfas || cfasComponent();
   const reseauxCfas = options.reseauxCfas || reseauxCfasComponent();
@@ -33,7 +31,6 @@ export default async (options = {}) => {
     users,
     ovhStorage,
     userEvents,
-    jobEvents,
     cache,
     db,
     dossiersApprenants,

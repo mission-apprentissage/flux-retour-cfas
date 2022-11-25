@@ -8,16 +8,20 @@ import { nockGetCfdInfo } from "../../../utils/nockApis/nock-tablesCorrespondanc
 import { asyncForEach } from "../../../../src/common/utils/asyncUtils.js";
 import { dataForGetCfdInfo } from "../../../data/apiTablesDeCorrespondances.js";
 import { dataForGetMetiersByCfd } from "../../../data/apiLba.js";
-import formationsComponent from "../../../../src/common/components/formations.js";
 import { Formation } from "../../../../src/common/factory/formation.js";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 import { nockGetMetiersByCfd } from "../../../utils/nockApis/nock-Lba.js";
 import { formationsDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+import {
+  createFormation,
+  existsFormation,
+  getFormationWithCfd,
+  getNiveauFormationFromLibelle,
+  searchFormations,
+} from "../../../../src/common/actions/formations.actions.js";
 
 describe("Components Formations Test", () => {
   describe("existsFormation", () => {
-    const { existsFormation } = formationsComponent();
-
     it("returns false when formation with formations collection is empty", async () => {
       const shouldBeFalse = await existsFormation("blabla");
       assert.equal(shouldBeFalse, false);
@@ -42,8 +46,6 @@ describe("Components Formations Test", () => {
   });
 
   describe("getFormationWithCfd", () => {
-    const { getFormationWithCfd } = formationsComponent();
-
     it("returns null when formation does not exist", async () => {
       const found = await getFormationWithCfd("blabla");
       assert.equal(found, null);
@@ -60,8 +62,6 @@ describe("Components Formations Test", () => {
   });
 
   describe("createFormation", () => {
-    const { createFormation } = formationsComponent();
-
     it("throws when given cfd is invalid", async () => {
       await assert.rejects(() => createFormation("invalid"), new Error("Invalid CFD"));
     });
@@ -125,8 +125,6 @@ describe("Components Formations Test", () => {
   });
 
   describe("searchFormations", () => {
-    const { searchFormations } = formationsComponent();
-
     const formationsSeed = [
       { cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" },
       { cfd: "01023288", libelle: "ZINGUERIE (MC NIVEAU V)" },
@@ -283,8 +281,6 @@ describe("Components Formations Test", () => {
   });
 
   describe("getNiveauFormationFromLibelle", () => {
-    const { getNiveauFormationFromLibelle } = formationsComponent();
-
     it("should return null when passed null", () => {
       assert.equal(getNiveauFormationFromLibelle(null), null);
     });
