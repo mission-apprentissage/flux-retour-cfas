@@ -5,7 +5,7 @@ import { escapeRegExp } from "../utils/regexUtils.js";
 import { Cfa } from "../factory/cfa.js";
 import { getMetiersBySirets } from "../../common/apis/apiLba.js";
 import logger from "../../common/logger.js";
-import { validateNatureOrganismeDeFormation } from "../domain/organisme-de-formation/nature.js";
+import { validateNatureOrganismeDeFormation } from "../utils/validationsUtils/organisme-de-formation/nature.js";
 import { cfasDb, dossiersApprenantsDb } from "../model/collections.js";
 
 const SEARCH_RESULTS_LIMIT = 50;

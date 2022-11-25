@@ -2,7 +2,7 @@ import Joi from "joi";
 import { object, objectId, string, date, arrayOf, boolean } from "../json-schema/jsonSchemaTypes.js";
 import { adresseSchema } from "../json-schema/adresseSchema.js";
 import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../domain/organisme-de-formation/nature.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../utils/validationsUtils/organisme-de-formation/nature.js";
 import { schemaValidation } from "../../utils/schemaUtils.js";
 import { siretSchema, uaiSchema } from "../../utils/validationUtils.js";
 

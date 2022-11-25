@@ -2,7 +2,7 @@ import { strict as assert } from "assert";
 import { startServer } from "../../utils/testUtils.js";
 import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
 import { buildTokenizedString } from "../../../src/common/utils/buildTokenizedString.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../src/common/domain/organisme-de-formation/nature.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
 import { cfasDb, dossiersApprenantsDb } from "../../../src/common/model/collections.js";
 
 describe("Cfa Route", () => {

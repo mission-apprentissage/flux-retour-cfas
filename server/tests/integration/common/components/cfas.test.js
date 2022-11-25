@@ -10,7 +10,7 @@ import nock from "nock";
 
 import { dataForGetMetiersBySiret } from "../../../data/apiLba.js";
 import { nockGetMetiersBySiret } from "../../../utils/nockApis/nock-Lba.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/domain/organisme-de-formation/nature.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
 import { cfasDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
 describe("Components Cfa Test", () => {
