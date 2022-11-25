@@ -93,7 +93,7 @@ export default async (components) => {
     checkJwtToken,
     pageAccessMiddleware(["_ADMIN"]), // TODO [tech]
     tryCatch(async (req, res) => {
-      await components.cache.clear();
+      await components.cache.flushAll();
       return res.json({});
     })
   );
