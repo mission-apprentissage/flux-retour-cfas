@@ -6,7 +6,7 @@ import {
   EFFECTIF_INDICATOR_NAMES,
 } from "../../../../src/common/constants/dossierApprenantConstants.js";
 import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/domain/organisme-de-formation/nature.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
 import { dossiersApprenantsDb, cfasDb } from "../../../../src/common/model/collections.js";
 
 describe("Components Effectifs Test", () => {

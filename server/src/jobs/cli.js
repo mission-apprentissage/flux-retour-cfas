@@ -2,11 +2,16 @@ import "dotenv/config.js";
 import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seed } from "./seed/start/index.js";
-import { clear } from "./clear/index.js";
-import {
-  migrateCfasToOrganismes,
-  migrateSingleCfaToOrganisme,
-} from "./patches/refacto-migration/organismes/organismes.migration.js";
+import { clear } from "./clear/clear-all.js";
+import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
+import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
+import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
+import { hydrateRncpCodes } from "./hydrate/rncp/hydrate-rncp.js";
+import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
+import { purgeEvents } from "./clear/purge-events.js";
+import { seedWithSample } from "./seed/samples/seedSample.js";
+import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
+import { hydrateReseauExcellencePro } from "./hydrate/reseaux/hydrate-reseau-excellence-pro.js";
 
 /**
  * Job d'initialisation projet
@@ -22,7 +27,20 @@ cli
   });
 
 /**
- * Job de netoyage de db
+ * Job d'initialisation projet avec des données d'exemple
+ */
+cli
+  .command("seed:sample")
+  .description("Seed projet avec des données d'exemple")
+  .option("-r, --random", "Indique si le seed doit générer des données aléatoires")
+  .action(async ({ random }) => {
+    runScript(async ({ dossiersApprenants }) => {
+      return seedWithSample(dossiersApprenants, random);
+    }, "Seed-sample");
+  });
+
+/**
+ * Job de nettoyage de db
  */
 cli
   .command("clear")
@@ -35,25 +53,103 @@ cli
   });
 
 /**
- * Job de migration de la collection cfas vers la collection organismes
+ * Job de remplissage & maj des d'organismes et des dossiersApprenants depuis les fichiers réseaux
  */
 cli
-  .command("refacto-migration-organismes")
-  .description("Migration cfas vers organismes")
-  .action(() => {
+  .command("hydrate:reseaux")
+  .description("Remplissage des organismes et dossiersApprenants depuis les réseaux")
+  .action(async () => {
     runScript(async () => {
-      return migrateCfasToOrganismes();
-    }, "refacto-migration-cfas-to-organismes");
+      return hydrateFromReseaux();
+    }, "hydrate-reseaux");
   });
 
+/**
+ * Job de remplissage & maj des d'organismes pour le réseau excellencePro
+ */
+// TODO Update le csv pour gérer le réseau
 cli
-  .command("refacto-migration-organisme-unique")
-  .description("Migration d'un cfa vers organismes")
-  .requiredOption("-u, --uai <string>", "Uai du cfa à migrer")
-  .action(async ({ uai }) => {
+  .command("hydrate:reseau-excellencePro")
+  .description("MAJ des organismes pour le réseau excellencePro")
+  .action(async () => {
     runScript(async () => {
-      return migrateSingleCfaToOrganisme(uai);
-    }, "refacto-migration-cfas-to-organismes-unique");
+      return hydrateReseauExcellencePro();
+    }, "hydrate-reseau-excellencePro");
+  });
+
+/**
+ * Job de remplissage & maj des organismes depuis le référentiel
+ */
+cli
+  .command("hydrate:referentiel")
+  .description("Remplissage des organismes depuis le référentiel")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateReferentiel();
+    }, "hydrate-referentiel");
+  });
+
+/**
+ * Job de remplissage des archives des anciens dossiers apprenants
+ */
+cli
+  .command("hydrate:archives-dossiersApprenants")
+  .description("Archivage des anciens dossiers apprenants")
+  .option("--limit <int>", "Année limite d'archivage")
+  .action(async ({ limit }) => {
+    runScript(async () => {
+      return hydrateArchivesDossiersApprenants(limit);
+    }, "hydrate-archive-dossiersApprenants");
+  });
+
+/**
+ * Job de remplissage des effectifs apprenants
+ */
+cli
+  .command("hydrate:effectifsApprenants")
+  .description("Remplissage des effectifs apprenants")
+  .action(async () => {
+    runScript(async ({ effectifs }) => {
+      return hydrateEffectifsApprenants(effectifs);
+    }, "hydrate-effectifsApprenants");
+  });
+
+/**
+ * Job de remplissage des codes rncp
+ // TODO : voir coté métier si toujours utile si on passe le RNCP en obligatoire ?
+ */
+cli
+  .command("hydrate:rncp")
+  .description("Remplissage des codes rncp des dossiersApprenants")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateRncpCodes();
+    }, "hydrate-rncp");
+  });
+
+/**
+ * Job de remplissage des formations
+ */
+cli
+  .command("hydrate:formations")
+  .description("Remplissage des formations")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateFormations();
+    }, "hydrate-formations");
+  });
+
+/**
+ * Job de purge des events
+ */
+cli
+  .command("purge:events")
+  .description("Purge des logs inutiles")
+  .option("--nbDaysToKeep <int>", "Nombre de jours à conserver")
+  .action(async ({ nbDaysToKeep }) => {
+    runScript(async () => {
+      return purgeEvents(nbDaysToKeep);
+    }, "purge-events");
   });
 
 cli.parse(process.argv);

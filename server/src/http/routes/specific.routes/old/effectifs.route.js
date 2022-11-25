@@ -4,6 +4,7 @@ import Joi from "joi";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../../common/utils/anneeScolaireUtils.js";
 import { getCacheKeyForRoute } from "../../../../common/utils/cacheUtils.js";
+import { getNbDistinctOrganismesByUai } from "../../../../common/actions/dossiersApprenants.actions.js";
 
 const commonEffectifsFilters = {
   organisme_id: Joi.string(),
@@ -15,7 +16,7 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
-export default ({ stats, effectifs, cache }) => {
+export default ({ effectifs, cache }) => {
   const router = express.Router();
 
   /**
@@ -35,7 +36,7 @@ export default ({ stats, effectifs, cache }) => {
         annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
-      const nbOrganismes = await stats.getNbDistinctCfasByUai(filters);
+      const nbOrganismes = await getNbDistinctOrganismesByUai(filters);
 
       return res.json({
         nbOrganismes,

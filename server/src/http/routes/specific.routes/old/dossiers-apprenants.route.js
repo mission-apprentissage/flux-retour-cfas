@@ -3,22 +3,23 @@ import Joi from "joi";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import logger from "../../../../common/logger.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
-import { schema as anneeScolaireSchema } from "../../../../common/domain/anneeScolaire.js";
-import { schema as ISO8601DateSchema } from "../../../../common/domain/date.js";
-import { schema as statutApprenantSchema } from "../../../../common/domain/apprenant/statutApprenant.js";
+import { schema as anneeScolaireSchema } from "../../../../common/utils/validationsUtils/anneeScolaire.js";
+import { schema as ISO8601DateSchema } from "../../../../common/utils/validationsUtils/date.js";
+import { schema as statutApprenantSchema } from "../../../../common/utils/validationsUtils/apprenant/statutApprenant.js";
 import { uaiSchema } from "../../../../common/utils/validationUtils.js";
-import { schema as cfdSchema } from "../../../../common/domain/cfd.js";
-import { schema as nomApprenantSchema } from "../../../../common/domain/apprenant/nomApprenant.js";
-import { schema as prenomApprenantSchema } from "../../../../common/domain/apprenant/prenomApprenant.js";
-import { schema as siretSchema } from "../../../../common/domain/siret.js";
+import { schema as cfdSchema } from "../../../../common/utils/validationsUtils/cfd.js";
+import { schema as nomApprenantSchema } from "../../../../common/utils/validationsUtils/apprenant/nomApprenant.js";
+import { schema as prenomApprenantSchema } from "../../../../common/utils/validationsUtils/apprenant/prenomApprenant.js";
+import { schema as siretSchema } from "../../../../common/utils/validationsUtils/siret.js";
 import { findAndPaginate } from "../../../../common/utils/dbUtils.js";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../../common/constants/userEventsConstants.js";
 import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../../../common/model/collections.js";
 import { sendTransformedPaginatedJsonStream } from "../../../../common/utils/httpUtils.js";
+import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
-export default ({ dossiersApprenants, userEvents }) => {
+export default ({ dossiersApprenants }) => {
   const router = express.Router();
 
   /**
@@ -97,7 +98,7 @@ export default ({ dossiersApprenants, userEvents }) => {
         let validDossiersApprenantToAddOrUpdate = [];
 
         // Add user event
-        await userEvents.create({
+        await createUserEvent({
           username: user.username,
           type: USER_EVENTS_TYPES.POST,
           action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
@@ -176,7 +177,7 @@ export default ({ dossiersApprenants, userEvents }) => {
 
       try {
         // Add user event
-        await userEvents.create({
+        await createUserEvent({
           username: req.user.username,
           type: USER_EVENTS_TYPES.GET,
           action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,

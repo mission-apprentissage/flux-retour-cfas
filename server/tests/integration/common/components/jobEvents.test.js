@@ -1,13 +1,11 @@
 import { strict as assert } from "assert";
-import jobEvents from "../../../../src/common/components/jobEvents.js";
 import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.js";
 import { addMinutes } from "date-fns";
 import { jobEventsDb } from "../../../../src/common/model/collections.js";
+import { isJobInAction } from "../../../../src/common/actions/jobEvents.actions.js";
 
 describe("Components JobEvents Test", () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
-    const { isJobInAction } = await jobEvents();
-
     const testJobName = "TEST-JOB";
     // Add started event
     await jobEventsDb().insertOne({
@@ -35,8 +33,6 @@ describe("Components JobEvents Test", () => {
   });
 
   it("Permet de vérifier si le job courant n'est pas dans l'action terminée", async () => {
-    const { isJobInAction } = await jobEvents();
-
     const testJobName = "TEST-JOB";
     // Add started event
     await jobEventsDb().insertOne({

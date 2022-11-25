@@ -106,11 +106,11 @@ export const schema = object(
     annee_formation: integer({ description: "Numéro de l'année dans la formation (promo)" }),
     annee_scolaire: string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
-      pattern: "^d{4}-d{4}$",
+      pattern: "^\\d{4}-\\d{4}$",
     }),
     code_commune_insee_apprenant: string({
       description: "Code commune insee de l'apprenant",
-      pattern: "^[0-9]{5}$",
+      pattern: "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
       maxLength: 5,
       minLength: 5,
     }),

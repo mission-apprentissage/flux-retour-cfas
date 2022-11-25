@@ -34,7 +34,7 @@ export const createDossierApprenant = async ({
       ...defaultValuesDossiersApprenantsMigration(),
       organisme_id: organisme._id,
       ...(nom_apprenant ? { nom_apprenant: nom_apprenant.toUpperCase().trim() } : {}),
-      ...(prenom_apprenant ? { nom_apprenant: prenom_apprenant.toUpperCase().trim() } : {}),
+      ...(prenom_apprenant ? { prenom_apprenant: prenom_apprenant.toUpperCase().trim() } : {}),
       ...(date_de_naissance_apprenant
         ? {
             date_de_naissance_apprenant:
@@ -207,3 +207,14 @@ export async function buildNewHistoriqueStatutApprenantFromId(
 
   return newHistoriqueStatutApprenant;
 }
+
+/**
+ * Récupération du nb distinct d'organismes via leurs UAI
+ // TODO voir si on garde ici ou dans un utils ?
+ * @param {*} filters
+ * @returns
+ */
+export const getNbDistinctOrganismesByUai = async (filters = {}) => {
+  const distinctCfas = await dossiersApprenantsMigrationDb().distinct("uai_etablissement", filters);
+  return distinctCfas ? distinctCfas.length : 0;
+};
