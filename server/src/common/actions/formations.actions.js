@@ -63,6 +63,7 @@ export const createFormation = async (cfd) => {
     logger.error(`createFormation / getMetiersByCfd: something went wrong while requesting cfd ${cfd}`);
   }
 
+  // TODO Remove factory here
   const formationEntity = Formation.create({
     cfd,
     cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO

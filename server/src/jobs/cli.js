@@ -11,6 +11,7 @@ import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-ap
 import { purgeEvents } from "./clear/purge-events.js";
 import { seedWithSample } from "./seed/samples/seedSample.js";
 import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
+import { hydrateReseauExcellencePro } from "./hydrate/reseaux/hydrate-reseau-excellence-pro.js";
 
 /**
  * Job d'initialisation projet
@@ -61,6 +62,19 @@ cli
     runScript(async ({ ovhStorage }) => {
       return hydrateFromReseaux(ovhStorage);
     }, "hydrate-reseaux");
+  });
+
+/**
+ * Job de remplissage & maj des d'organismes pour le réseau excellencePro
+ */
+// TODO Update le csv pour gérer le réseau
+cli
+  .command("hydrate:reseau-excellencePro")
+  .description("MAJ des organismes pour le réseau excellencePro")
+  .action(async () => {
+    runScript(async ({ ovhStorage }) => {
+      return hydrateReseauExcellencePro(ovhStorage);
+    }, "hydrate-reseau-excellencePro");
   });
 
 /**

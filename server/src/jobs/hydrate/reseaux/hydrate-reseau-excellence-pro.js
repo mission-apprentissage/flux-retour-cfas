@@ -1,9 +1,13 @@
-import logger from "../../common/logger.js";
+import logger from "../../../common/logger.js";
 import path from "path";
-import { runScript } from "../scriptWrapper.js";
-import { asyncForEach } from "../../common/utils/asyncUtils.js";
-import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
-import { getDirname } from "../../common/utils/esmUtils.js";
+import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
+import { __dirname } from "../../../common/utils/esmUtils.js";
+import {
+  findOrganismeByUaiAndSiret,
+  findOrganismesBySiret,
+  updateOrganisme,
+} from "../../../common/actions/organismes.actions.js";
 
 /**
  * @param  {string} reseauText
@@ -16,6 +20,7 @@ const parseReseauxTextFromCsv = (reseauText) => {
   const reseaux = reseauText.split("|").map((reseau) => reseau.toUpperCase());
   return reseaux;
 };
+
 /**
  * @param  {[any]} array1
  * @param  {[any]} array2
@@ -32,9 +37,12 @@ const arraysContainSameValues = (array1, array2) => {
   return true;
 };
 
-const FILE_PATH = path.join(getDirname(import.meta.url), "referentiel-reseau-excellence-pro.csv");
+const FILE_PATH = path.join(__dirname(import.meta.url), "referentiel-reseau-excellence-pro.csv");
 
-runScript(async ({ cfas }) => {
+/**
+ * MAJ les réseaux des organismes en base depuis le fichier csv du réseau Excellence pro
+ */
+export const hydrateReseauExcellencePro = async () => {
   // read référentiel file from Excellence Pro and convert it to JSON
   const excellenceProReferentielJson = readJsonFromCsvFile(FILE_PATH, ",");
 
@@ -54,8 +62,8 @@ runScript(async ({ cfas }) => {
 
     // try to retrieve organisme in our database with UAI and SIRET if UAI is provided
     const organismeInDb = organismeReferentielExcellencePro.uai
-      ? await cfas.getFromUaiAndSiret(organismeReferentielExcellencePro.uai, organismeReferentielExcellencePro.siret)
-      : await cfas.getFromSiret(organismeReferentielExcellencePro.siret);
+      ? await findOrganismeByUaiAndSiret(organismeReferentielExcellencePro.uai, organismeReferentielExcellencePro.siret)
+      : await findOrganismesBySiret(organismeReferentielExcellencePro.siret);
 
     const found = organismeInDb.length !== 0;
     const foundUnique = found && organismeInDb.length === 1;
@@ -81,7 +89,10 @@ runScript(async ({ cfas }) => {
           reseauxFromReferentiel.join(", ")
         );
         try {
-          await cfas.updateCfaReseauxFromUai(uniqueOrganismeFromDb.uai, reseauxFromReferentiel);
+          await updateOrganisme(uniqueOrganismeFromDb._id, {
+            ...uniqueOrganismeFromDb,
+            reseaux: [...uniqueOrganismeFromDb.reseaux, reseauxFromReferentiel],
+          });
           organismeUpdatedCount++;
         } catch (err) {
           organismeUpdateErrorCount++;
@@ -104,4 +115,4 @@ runScript(async ({ cfas }) => {
   );
   logger.info("Organismes en base dont les réseaux ont été mis à jour :", organismeUpdatedCount);
   logger.info("Organismes en base n'ont pas pu être mis à jour :", organismeUpdateErrorCount);
-}, "temp-maj-organismes-reseau-excellence-pro");
+};

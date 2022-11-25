@@ -64,6 +64,18 @@ export const findOrganismeByUai = async (uai, projection = {}) => {
 };
 
 /**
+ * Méthode de récupération d'un organisme depuis un uai et un siret
+ * Previously getFromUaiAndSiret
+ * @param {string} uai
+ * @param {string} siret
+ * @param {*} projection
+ * @returns
+ */
+export const findOrganismeByUaiAndSiret = async (uai, siret, projection = {}) => {
+  return await organismesDb().findOne({ uai, sirets: siret }, { projection });
+};
+
+/**
  * Méthode de récupération d'un organisme depuis un id
  * @param {string|ObjectId} id
  * @param {*} projection
