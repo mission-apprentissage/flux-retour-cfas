@@ -10,6 +10,7 @@ import { hydrateRncpCodes } from "./hydrate/rncp/hydrate-rncp.js";
 import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
 import { seedWithSample } from "./seed/samples/seedSample.js";
+import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
 
 /**
  * Job d'initialisation projet
@@ -110,6 +111,18 @@ cli
     runScript(async () => {
       return hydrateRncpCodes();
     }, "hydrate-rncp");
+  });
+
+/**
+ * Job de remplissage des formations
+ */
+cli
+  .command("hydrate:formations")
+  .description("Remplissage des formations")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateFormations();
+    }, "hydrate-formations");
   });
 
 /**

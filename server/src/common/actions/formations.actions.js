@@ -13,7 +13,7 @@ const SEARCH_RESULTS_LIMIT = 50;
  * @param {string} cfd
  * @return {boolean} Does it exist
  */
-const existsFormation = async (cfd) => {
+export const existsFormation = async (cfd) => {
   const count = await formationsDb().countDocuments({ cfd });
   return count !== 0;
 };
@@ -23,15 +23,15 @@ const existsFormation = async (cfd) => {
  * @param {string} cfd
  * @return {Formation | null} Found formation
  */
-const getFormationWithCfd = async (cfd) => {
+export const getFormationWithCfd = async (cfd) => {
   return await formationsDb().findOne({ cfd });
 };
 
-const buildFormationLibelle = (formationFromTCO) => {
+export const buildFormationLibelle = (formationFromTCO) => {
   return formationFromTCO.intitule_long || "";
 };
 
-const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
+export const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
   if (niveauFormationLibelle == null || niveauFormationLibelle === "") return null;
 
   const niveau = niveauFormationLibelle.split(" ")[0];
@@ -43,7 +43,7 @@ const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
  * @param {string} cfd
  * @return {Formation | null} The newly created Formation or null
  */
-const createFormation = async (cfd) => {
+export const createFormation = async (cfd) => {
   if (!validateCfd(cfd)) {
     throw Error("Invalid CFD");
   }
@@ -84,7 +84,7 @@ const createFormation = async (cfd) => {
  * @param {Object} searchCriteria
  * @return {[Formation]} Array of formations
  */
-const searchFormations = async (searchCriteria) => {
+export const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
 
   const eligibleCfds = await dossiersApprenantsDb().distinct("formation_cfd", otherFilters);
@@ -111,11 +111,3 @@ const searchFormations = async (searchCriteria) => {
     .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
     .toArray();
 };
-
-export default () => ({
-  createFormation,
-  existsFormation,
-  getFormationWithCfd,
-  searchFormations,
-  getNiveauFormationFromLibelle,
-});

@@ -4,7 +4,6 @@ import createJobEvents from "./jobEvents.js";
 import createDossierApprenant from "./dossiersApprenants.js";
 import cfasComponent from "./cfas.js";
 import reseauxCfasComponent from "./reseauxCfas.js";
-import formationsComponent from "./formations.js";
 import createStats from "./stats.js";
 import createEffectifs from "./effectifs.js";
 import createCacheComponent from "./cache.js";
@@ -19,7 +18,6 @@ export default async (options = {}) => {
   const userEvents = options.userEvents || createUserEvents();
   const jobEvents = options.jobEvents || createJobEvents();
   const dossiersApprenants = options.dossiersApprenants || createDossierApprenant();
-  const formations = options.formations || formationsComponent();
   const cfas = options.cfas || cfasComponent();
   const reseauxCfas = options.reseauxCfas || reseauxCfasComponent();
   const stats = options.stats || createStats();
@@ -39,7 +37,6 @@ export default async (options = {}) => {
     cache,
     db,
     dossiersApprenants,
-    formations,
     cfas,
     reseauxCfas,
     stats,
