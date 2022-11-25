@@ -237,6 +237,13 @@ export const structureUser = async (user) => {
     )
   );
 
+  const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
+
+  let specialAcl = [];
+  if (!hasAccessToOnlyOneOrganisme) {
+    specialAcl = ["page/mes-organismes"];
+  }
+
   return {
     organisme_ids,
     main_organisme_id: user?.main_organisme_id,
@@ -257,7 +264,7 @@ export const structureUser = async (user) => {
     codes_departement: user.codes_departement, // TODO [tech] send full department
     account_status: user.account_status,
     roles: rolesList,
-    acl: uniq([...rolesAcl, ...user.custom_acl]),
+    acl: uniq([...rolesAcl, ...user.custom_acl, ...specialAcl]),
     orign_register: user.orign_register,
     has_accept_cgu_version: user.has_accept_cgu_version,
   };

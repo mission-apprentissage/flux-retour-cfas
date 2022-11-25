@@ -27,7 +27,7 @@ const acl = [
   },
   // {
   //   feature: "Accès aux fonctionnalités mes organismes",
-  //   ref: "mes-organismes",
+  //   ref: "page/mes-organismes",
   // },
   {
     feature: "Accès aux fonctionnalités d'organisme",

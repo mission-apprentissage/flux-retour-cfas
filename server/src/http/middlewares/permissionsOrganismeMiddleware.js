@@ -27,7 +27,8 @@ export default (acls) =>
 
     let permission = null;
     if (isTransverseUser) {
-      // TODO [tech] HANDLE specific permission given by the organisme.admin
+      // TODO [tech] HANDLE specific permission given (by the organisme.admin); find if other perms exist
+      // for instance => support or help a of
       permission = await hasPermission({ organisme_id: null, userEmail: user.email });
     } else {
       let { organisme_id } = await Joi.object({

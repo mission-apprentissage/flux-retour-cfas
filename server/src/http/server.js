@@ -37,6 +37,7 @@ import password from "./routes/user.routes/password.routes.js";
 import profile from "./routes/user.routes/profile.routes.js";
 
 import organisme from "./routes/specific.routes/organisme.routes.js";
+import espace from "./routes/specific.routes/espace.routes.js";
 
 import sifa from "./routes/specific.routes/temp.routes/sifa.routes.js"; // TMP
 import upload from "./routes/specific.routes/temp.routes/upload.routes.js"; // TMP
@@ -65,6 +66,7 @@ export default async (components) => {
   // private access
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
+  app.use("/api/v1/espace", checkJwtToken, espace());
   app.use("/api/v1/organisme", checkJwtToken, organisme(components));
 
   // private admin access

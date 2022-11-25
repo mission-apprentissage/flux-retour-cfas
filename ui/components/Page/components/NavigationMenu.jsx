@@ -5,7 +5,7 @@ import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, Settings4Fill, UserFill, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 import { useEspace } from "../../../hooks/useEspace";
-import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
+import { hasContextAccessTo, hasPageAccessTo } from "../../../common/utils/rolesUtils";
 import { useOrganisme } from "../../../hooks/useOrganisme";
 
 const NavItem = ({ children, to = "/", colorActive = "bluefrance", isActive = false, ...rest }) => {
@@ -61,6 +61,7 @@ const NavBarPublic = ({ isOpen }) => {
 };
 
 const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
+  let [auth] = useAuth();
   let {
     navigation: { user: userNavigation },
     myOrganisme,
@@ -72,11 +73,13 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
         <UserFill mt="-0.3rem" boxSize={4} />
       </Box>
       <NavItem to={userNavigation.landingEspace.path}>{userNavigation.landingEspace.navTitle}</NavItem>
-      {userNavigation.mesOrganismes && (
+
+      {userNavigation.mesOrganismes && hasPageAccessTo(auth, "page/mes-organismes") && (
         <NavItem to={userNavigation.mesOrganismes.path} isActive={mesOrganismesActive}>
           {userNavigation.mesOrganismes.navTitle}
         </NavItem>
       )}
+
       {hasContextAccessTo(myOrganisme, "organisme/page_effectifs") && userNavigation.effectifs && (
         <NavItem to={userNavigation.effectifs.path}>{userNavigation.effectifs.navTitle}</NavItem>
       )}

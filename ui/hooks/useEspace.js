@@ -35,6 +35,7 @@ export function useEspace() {
   const { part, slug = [] } = router.query;
   const isMonOrganismePages = part === "mon-organisme";
   const isOrganismePages = part === "organisme";
+  const isMesOrganismesPages = router.asPath.includes("/mon-espace/mes-organismes");
   const isMonOrganismePage = isMonOrganismePages && !slug.length;
   const isEffectifsPage = slug.includes("effectifs");
   const isSIFA2Page = slug.includes("enquete-SIFA2");
@@ -175,6 +176,7 @@ export function useEspace() {
     breadcrumb,
     isMonOrganismePages,
     isOrganismePages,
+    isMesOrganismesPages,
     isMonOrganismePage,
     isEffectifsPage,
     isSIFA2Page,

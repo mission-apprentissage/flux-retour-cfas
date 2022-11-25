@@ -8,9 +8,9 @@ import Section from "../Section/Section";
 import { useEspace } from "../../hooks/useEspace";
 
 export function Page({ children, ...rest }) {
-  let { isloaded, isMonOrganismePages, isOrganismePages } = useEspace();
+  let { isloaded, isMonOrganismePages, isOrganismePages, isMesOrganismesPages } = useEspace();
 
-  if (!isloaded && (isMonOrganismePages || isOrganismePages)) {
+  if (!isloaded && (isMonOrganismePages || isOrganismePages || isMesOrganismesPages)) {
     return (
       <Center>
         <Spinner />
