@@ -9,6 +9,7 @@ import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydra
 import { hydrateRncpCodes } from "./hydrate/rncp/hydrate-rncp.js";
 import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
+import { seedWithSample } from "./seed/samples/seedSample.js";
 
 /**
  * Job d'initialisation projet
@@ -24,7 +25,20 @@ cli
   });
 
 /**
- * Job de netoyage de db
+ * Job d'initialisation projet avec des données d'exemple
+ */
+cli
+  .command("seed:sample")
+  .description("Seed projet avec des données d'exemple")
+  .option("-r, --random", "Indique si le seed doit générer des données aléatoires")
+  .action(async ({ random }) => {
+    runScript(async ({ dossiersApprenants }) => {
+      return seedWithSample(dossiersApprenants, random);
+    }, "Seed-sample");
+  });
+
+/**
+ * Job de nettoyage de db
  */
 cli
   .command("clear")
