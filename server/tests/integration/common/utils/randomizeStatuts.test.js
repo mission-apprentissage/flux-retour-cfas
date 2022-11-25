@@ -10,7 +10,7 @@ describe(__filename, () => {
       const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
 
       const randomDossierApprenantProps = createRandomDossierApprenant();
-      const result = await (await createDossierApprenant(randomDossierApprenantProps)).toJSON();
+      const result = await await createDossierApprenant(randomDossierApprenantProps);
 
       // Checks creation
       assert.equal(result.ine_apprenant, randomDossierApprenantProps.ine_apprenant);
@@ -34,12 +34,7 @@ describe(__filename, () => {
 
       // Checks exists method
       const found = await getDossierApprenant({
-        ine_apprenant: result.ine_apprenant,
-        nom_apprenant: result.nom_apprenant,
-        prenom_apprenant: result.prenom_apprenant,
-        date_de_naissance_apprenant: result.date_de_naissance_apprenant,
-        email_contact: result.email_contact,
-        formation_cfd: result.formation_cfd,
+        id_erp_apprenant: result.id_erp_apprenant,
         uai_etablissement: result.uai_etablissement,
         annee_scolaire: result.annee_scolaire,
       });
@@ -76,14 +71,9 @@ describe(__filename, () => {
 
       // Checks exists method
       const found = await DossierApprenantModel.countDocuments({
-        ine_apprenant: result.ine_apprenant,
-        nom_apprenant: result.nom_apprenant,
-        prenom_apprenant: result.prenom_apprenant,
-        date_de_naissance_apprenant: result.date_de_naissance_apprenant,
-        email_contact: result.email_contact,
-        formation_cfd: result.formation_cfd,
+        id_erp_apprenant: result.id_erp_apprenant,
         uai_etablissement: result.uai_etablissement,
-        historique_statut_apprenant: historySequenceApprentiToAbandon,
+        annee_scolaire: result.annee_scolaire,
       });
       assert.equal(found, 1);
     });

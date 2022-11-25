@@ -1,20 +1,13 @@
 const { DossierApprenantModel, CfaModel } = require("../model");
-const omit = require("lodash.omit");
-const { DUPLICATE_TYPE_CODES } = require("../constants/dossierApprenantConstants");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { escapeRegExp } = require("../utils/regexUtils");
 const { isEqual } = require("date-fns");
 const { DossierApprenant } = require("../factory/dossierApprenant");
-const { faker } = require("@faker-js/faker/locale/fr");
 
 module.exports = () => ({
   getDossierApprenant,
   addOrUpdateDossiersApprenants,
   createDossierApprenant,
   updateDossierApprenant,
-  getDuplicatesList,
-  anonymize,
-  ANONYMOUS_PREFIX,
 });
 
 /**
@@ -22,22 +15,9 @@ module.exports = () => ({
  * @param {*} unicityFields
  * @returns
  */
-const getDossierApprenant = ({
-  nom_apprenant,
-  prenom_apprenant,
-  date_de_naissance_apprenant,
-  formation_cfd,
-  uai_etablissement,
-  annee_scolaire,
-}) => {
-  const nomApprenantRegexp = new RegExp("^" + escapeRegExp(nom_apprenant.trim()) + "$", "i");
-  const prenomApprenantRegexp = new RegExp("^" + escapeRegExp(prenom_apprenant.trim()) + "$", "i");
-
+const getDossierApprenant = ({ id_erp_apprenant, uai_etablissement, annee_scolaire }) => {
   return DossierApprenantModel.findOne({
-    nom_apprenant: { $regex: nomApprenantRegexp },
-    prenom_apprenant: { $regex: prenomApprenantRegexp },
-    date_de_naissance_apprenant,
-    formation_cfd,
+    id_erp_apprenant,
     uai_etablissement,
     annee_scolaire,
   }).lean();
@@ -53,12 +33,9 @@ const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // Search dossier with unicity fields
-    let foundItem = await getDossierApprenant({
-      nom_apprenant: item.nom_apprenant,
-      prenom_apprenant: item.prenom_apprenant,
-      date_de_naissance_apprenant: item.date_de_naissance_apprenant,
-      formation_cfd: item.formation_cfd,
+    // Search dossier apprenant with unicity fields
+    const foundItem = await getDossierApprenant({
+      id_erp_apprenant: item.id_erp_apprenant,
       uai_etablissement: item.uai_etablissement,
       annee_scolaire: item.annee_scolaire,
     });
@@ -78,21 +55,42 @@ const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
   };
 };
 
-const updateDossierApprenant = async (existingItemId, toUpdate) => {
-  if (!existingItemId) return null;
+const updateDossierApprenant = async (_id, toUpdate) => {
+  if (!_id) return null;
 
-  // strip unicity criteria because it does not make sense to update them
-  let updatePayload = omit(
-    toUpdate,
-    "nom_apprenant",
+  const updateFieldsWhitelist = [
     "prenom_apprenant",
-    "date_de_naissance_apprenant",
+    "nom_apprenant",
     "formation_cfd",
-    "uai_etablissement",
-    "annee_scolaire"
-  );
-  const existingItem = await DossierApprenantModel.findById(existingItemId);
+    "date_de_naissance_apprenant",
+    "nom_etablissement",
+    "ine_apprenant",
+    "email_contact",
+    "tel_apprenant",
+    "code_commune_insee_apprenant",
+    "siret_etablissement",
+    "libelle_long_formation",
+    "periode_formation",
+    "annee_formation",
+    "formation_rncp",
+    "contrat_date_debut",
+    "contrat_date_fin",
+    "contrat_date_rupture",
+  ];
+  const updateQuery = {
+    updated_at: new Date(),
+  };
+  const existingItem = await DossierApprenantModel.findOne({ _id }).lean();
 
+  updateFieldsWhitelist.forEach((field) => {
+    updateQuery[field] = toUpdate[field];
+  });
+  // date fields update
+  updateQuery.contrat_date_debut = toUpdate.contrat_date_debut && new Date(toUpdate.contrat_date_debut);
+  updateQuery.contrat_date_fin = toUpdate.contrat_date_fin && new Date(toUpdate.contrat_date_fin);
+  updateQuery.contrat_date_rupture = toUpdate.contrat_date_rupture && new Date(toUpdate.contrat_date_rupture);
+
+  // historique_statut_apprenant update
   // new statut_apprenant to add ?
   const statutExistsInHistorique = existingItem.historique_statut_apprenant.find((historiqueItem) => {
     return (
@@ -103,8 +101,8 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
 
   if (!statutExistsInHistorique) {
     const newHistoriqueElement = {
-      valeur_statut: updatePayload.statut_apprenant,
-      date_statut: new Date(updatePayload.date_metier_mise_a_jour_statut),
+      valeur_statut: toUpdate.statut_apprenant,
+      date_statut: new Date(toUpdate.date_metier_mise_a_jour_statut),
       date_reception: new Date(),
     };
 
@@ -119,17 +117,12 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
     // find new element index in sorted historique to remove subsequent ones
     const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
 
-    updatePayload.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1);
-    updatePayload.statut_apprenant = newHistoriqueElement.valeur_statut;
+    updateQuery.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1);
   }
 
-  // Update & return
-  const updateQuery = {
-    ...updatePayload,
-    updated_at: new Date(),
-  };
-  const updated = await DossierApprenantModel.findByIdAndUpdate(existingItemId, updateQuery, { new: true });
-  return updated;
+  await DossierApprenantModel.updateOne({ _id }, { $set: updateQuery });
+  // TODO return nothing (single responsibility)
+  return await DossierApprenantModel.findOne({ _id }).lean();
 };
 
 const createDossierApprenant = async (itemToCreate) => {
@@ -173,194 +166,15 @@ const createDossierApprenant = async (itemToCreate) => {
 
   if (dossierApprenantEntity) {
     const dossierApprenantToAdd = new DossierApprenantModel(dossierApprenantEntity);
-    return dossierApprenantToAdd.save();
+    return (await dossierApprenantToAdd.save()).toObject();
   }
 
   return null;
 };
 
-/**
- * Récupération de la liste des DossierApprenant en doublons stricts pour les filtres passés en paramètres
- * @param {*} duplicatesTypesCode
- * @param {*} filters
- * @returns
- */
-const findDossiersApprenantsDuplicates = async (
-  duplicatesTypesCode,
-  filters = {},
-  { allowDiskUse = false, duplicatesWithNoUpdate = false } = {}
-) => {
-  let unicityQueryGroup = {};
-
-  switch (duplicatesTypesCode) {
-    case DUPLICATE_TYPE_CODES.unique.code:
-      unicityQueryGroup = {
-        _id: {
-          nom_apprenant: "$nom_apprenant",
-          prenom_apprenant: "$prenom_apprenant",
-          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
-          formation_cfd: "$formation_cfd",
-          uai_etablissement: "$uai_etablissement",
-          annee_scolaire: "$annee_scolaire",
-        },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
-        etablissement_num_region: { $addToSet: "$etablissement_num_region" },
-        // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
-        count: { $sum: 1 },
-      };
-      break;
-
-    case DUPLICATE_TYPE_CODES.formation_cfd.code:
-      unicityQueryGroup = {
-        _id: {
-          nom_apprenant: "$nom_apprenant",
-          prenom_apprenant: "$prenom_apprenant",
-          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
-          uai_etablissement: "$uai_etablissement",
-          annee_scolaire: "$annee_scolaire",
-        },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
-        etablissement_num_region: { $addToSet: "$etablissement_num_region" },
-        // Ajout des différents formation_cfd en doublon potentiel
-        formation_cfds: { $addToSet: "$formation_cfd" },
-        // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
-        count: { $sum: 1 },
-      };
-      break;
-
-    case DUPLICATE_TYPE_CODES.uai_etablissement.code:
-      unicityQueryGroup = {
-        _id: {
-          nom_apprenant: "$nom_apprenant",
-          prenom_apprenant: "$prenom_apprenant",
-          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
-          formation_cfd: "$formation_cfd",
-          annee_scolaire: "$annee_scolaire",
-        },
-        // Ajout des ids unique de chaque doublons avec date de création
-        duplicatesCreatedDatesAndIds: { $addToSet: { id: "$_id", created_at: "$created_at" } },
-        // Ajout des différents uais en doublon potentiel
-        uais: { $addToSet: "$uai_etablissement" },
-        count: { $sum: 1 },
-      };
-      break;
-
-    case DUPLICATE_TYPE_CODES.prenom_apprenant.code:
-      unicityQueryGroup = {
-        _id: {
-          nom_apprenant: "$nom_apprenant",
-          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
-          formation_cfd: "$formation_cfd",
-          uai_etablissement: "$uai_etablissement",
-          annee_scolaire: "$annee_scolaire",
-        },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
-        etablissement_num_region: { $addToSet: "$etablissement_num_region" },
-        // Ajout des différentes prenom_apprenant en doublon potentiel
-        prenom_apprenants: { $addToSet: "$prenom_apprenant" },
-        // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
-        count: { $sum: 1 },
-      };
-      break;
-
-    case DUPLICATE_TYPE_CODES.nom_apprenant.code:
-      unicityQueryGroup = {
-        _id: {
-          prenom_apprenant: "$prenom_apprenant",
-          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
-          formation_cfd: "$formation_cfd",
-          uai_etablissement: "$uai_etablissement",
-          annee_scolaire: "$annee_scolaire",
-        },
-        // Ajout des ids unique de chaque doublons
-        duplicatesIds: { $addToSet: "$_id" },
-        etablissement_num_region: { $addToSet: "$etablissement_num_region" },
-        // Ajout des différents nom_apprenant en doublon potentiel
-        nom_apprenants: { $addToSet: "$nom_apprenant" },
-        // ajout des différents statut_apprenant
-        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
-        count: { $sum: 1 },
-      };
-      break;
-
-    default:
-      throw new Error("findDossiersApprenantsDuplicates Error :  duplicatesTypesCode not matching any code");
-  }
-
-  if (duplicatesWithNoUpdate) filters.historique_statut_apprenant = { $size: 1 };
-
-  const aggregateQuery = [
-    // Filtrage sur les filtres passées en paramètres
-    {
-      $match: filters,
-    },
-    // Regroupement sur les critères d'unicité
-    {
-      $group: unicityQueryGroup,
-    },
-    // Récupération des DossierApprenant en doublons = regroupement count > 1
-    {
-      $match: {
-        ...(duplicatesWithNoUpdate ? { statut_apprenants: { $size: 1 } } : {}),
-        count: { $gt: 1 },
-      },
-    },
-  ];
-
-  const dossiersApprenantsFound = allowDiskUse
-    ? await DossierApprenantModel.aggregate(aggregateQuery).allowDiskUse(true).exec()
-    : await DossierApprenantModel.aggregate(aggregateQuery);
-
-  return dossiersApprenantsFound;
-};
-
-/**
- * Construction d'une liste de doublons de type duplicatesTypeCode de DossierApprenant
- * regroupés par UAI pour les filtres passés en paramètres
- * @param {*} duplicatesTypeCode
- * @param {*} filters
- * @param {*} allowDiskUse
- * @returns
- */
-const getDuplicatesList = async (duplicatesTypeCode, filters = {}, options) => {
-  // Récupération des doublons pour le type souhaité
-  const duplicates = await findDossiersApprenantsDuplicates(duplicatesTypeCode, filters, options);
-
-  return duplicates.map((duplicateItem) => {
-    const { _id, count, duplicatesIds, ...discriminants } = duplicateItem;
-    return {
-      commonData: _id,
-      duplicatesCount: count,
-      duplicatesIds: duplicatesIds ?? null,
-      discriminants,
-    };
-  });
-};
-
-const ANONYMOUS_PREFIX = "ANONYME";
-
-/**
- * Anonymisation des champs nominatifs d'un dossier apprenant
- * ajoute un prefix ANONYME_ devant chaque champ mis à jour
- * @param {*} dossierApprenantId
- * @returns
- */
-const anonymize = async (dossierApprenantId) => {
-  const anonymizeQuery = {
-    nom_apprenant: `${ANONYMOUS_PREFIX}_${faker.name.lastName().toUpperCase()}`,
-    prenom_apprenant: `${ANONYMOUS_PREFIX}_${faker.name.firstName()}`,
-    email_contact: `${ANONYMOUS_PREFIX}_${faker.internet.email()}`,
-    tel_apprenant: `${ANONYMOUS_PREFIX}_${faker.phone.phoneNumber()}`,
-    code_commune_insee_apprenant: `${ANONYMOUS_PREFIX}_${faker.address.zipCode()}`,
-    date_de_naissance_apprenant: faker.date.birthdate({ min: 15, max: 25, mode: "age" }),
-    updated_at: new Date(),
-  };
-  const updated = await DossierApprenantModel.findByIdAndUpdate(dossierApprenantId, anonymizeQuery, { new: true });
-  return updated;
-};
+module.exports = () => ({
+  getDossierApprenant,
+  addOrUpdateDossiersApprenants,
+  createDossierApprenant,
+  updateDossierApprenant,
+});
