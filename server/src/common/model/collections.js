@@ -1,21 +1,26 @@
-import * as usersMigrationModelDescriptor from "./usersMigration.model.js";
-import * as RolesModelDescriptor from "./roles.model.js";
-import * as JwtSessionsModelDescriptor from "./jwtSessions.model.js";
 import { getDbCollection } from "../mongodb.js";
-import usersModelDescriptor from "./users.model.js";
-import userEventsModelDescriptor from "./userEvents.model.js";
-import cfasModelDescriptor from "./cfas.model.js";
-import formationsModelDescriptor from "./formations.model.js";
-import reseauxCfasModelDescriptor from "./reseauxCfas.model.js";
-import dossiersApprenantsModelDescriptor from "./dossiersApprenants.model.js";
-import jobEventsModelDescriptor from "./jobEvents.model.js";
-import effectifsApprenantsModelDescriptor from "./effectifsApprenants.model.js";
-import demandesIdentifiantsModelDescriptor from "./demandesIdentifiants.model.js";
-import demandesBranchementErpDbModelDescriptor from "./demandesBranchementErp.model.js";
-import duplicatesEventsModelDescriptor from "./duplicatesEvents.model.js";
-import archiveDossiersApprenantsModelDescriptor from "./archiveDossiersApprenants.model.js";
-import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
-import referentielSiretUaiModelDescriptor from "./referentielSiretUai.model.js";
+import usersModelDescriptor from "./previous.models/toRemove.models/users.model.js";
+import userEventsModelDescriptor from "./next.toKeep.models/userEvents.model.js";
+import cfasModelDescriptor from "./previous.models/toRemove.models/cfas.model.js";
+import formationsModelDescriptor from "./next.toKeep.models/formations.model.js";
+import reseauxCfasModelDescriptor from "./previous.models/toRemove.models/reseauxCfas.model.js";
+import dossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/dossiersApprenants.model.js";
+import jobEventsModelDescriptor from "./next.toKeep.models/jobEvents.model.js";
+import effectifsApprenantsModelDescriptor from "./previous.models/effectifsApprenants.model.js";
+import demandesIdentifiantsModelDescriptor from "./previous.models/toRemove.models/demandesIdentifiants.model.js";
+import demandesBranchementErpDbModelDescriptor from "./previous.models/toRemove.models/demandesBranchementErp.model.js";
+import duplicatesEventsModelDescriptor from "./previous.models/duplicatesEvents.model.js";
+import archiveDossiersApprenantsModelDescriptor from "./previous.models/archiveDossiersApprenants.model.js";
+import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
+import referentielSiretUaiModelDescriptor from "./previous.models/referentielSiretUai.model.js";
+
+import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
+import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
+import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
+import * as PermissionsDescriptor from "./next.toKeep.models/permissions.model.js";
+import * as OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
+import * as dossiersApprenantsMigrationModelDescriptor from "./next.toKeep.models/dossiersApprenantsMigration.model.js";
+import * as sifasModelDescriptor from "./next.toKeep.models/sifas.model/sifas.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
@@ -32,6 +37,14 @@ export const modelDescriptors = [
   archiveDossiersApprenantsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
   referentielSiretUaiModelDescriptor,
+
+  usersMigrationModelDescriptor,
+  JwtSessionsModelDescriptor,
+  RolesModelDescriptor,
+  PermissionsDescriptor,
+  OrganismesModelDescriptor,
+  dossiersApprenantsMigrationModelDescriptor,
+  sifasModelDescriptor,
 ];
 
 export const dossiersApprenantsDb = () => {
@@ -78,6 +91,18 @@ export const duplicatesEventsDb = () => {
   return getDbCollection(duplicatesEventsModelDescriptor.collectionName);
 };
 
+export const archiveDossiersApprenantsDb = () => {
+  return getDbCollection(archiveDossiersApprenantsModelDescriptor.collectionName);
+};
+
+export const dossiersApprenantsApiErrorsDb = () => {
+  return getDbCollection(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
+};
+
+export const referentielSiretUaiDb = () => {
+  return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
+};
+
 export const usersMigrationDb = () => {
   return getDbCollection(usersMigrationModelDescriptor.collectionName);
 };
@@ -90,14 +115,16 @@ export const jwtSessionsDb = () => {
   return getDbCollection(JwtSessionsModelDescriptor.collectionName);
 };
 
-export const archiveDossiersApprenantsDb = () => {
-  return getDbCollection(archiveDossiersApprenantsModelDescriptor.collectionName);
-};
+export function organismesDb() {
+  return getDbCollection(OrganismesModelDescriptor.collectionName);
+}
+export function permissionsDb() {
+  return getDbCollection(PermissionsDescriptor.collectionName);
+}
 
-export const dossiersApprenantsApiErrorsDb = () => {
-  return getDbCollection(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
-};
-
-export const referentielSiretUaiDb = () => {
-  return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
-};
+export function dossiersApprenantsMigrationDb() {
+  return getDbCollection(dossiersApprenantsMigrationModelDescriptor.collectionName);
+}
+export function sifasDb() {
+  return getDbCollection(sifasModelDescriptor.collectionName);
+}

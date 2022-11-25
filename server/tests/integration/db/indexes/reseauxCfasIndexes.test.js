@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
 import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
-import reseauxCfasModelDescriptor from "../../../../src/common/model/reseauxCfas.model.js";
+import reseauxCfasModelDescriptor from "../../../../src/common/model/previous.models/toRemove.models/reseauxCfas.model.js";
 import reseauxCfas from "../../../../src/common/components/reseauxCfas.js";
 
 // TODO : Boucler sur la liste des index names pour les tests

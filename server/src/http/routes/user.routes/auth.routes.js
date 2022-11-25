@@ -2,8 +2,8 @@ import express from "express";
 import Boom from "boom";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { getUser, authenticate, loggedInUser, structureUser } from "../../../common/components/usersComponent.js";
-import * as sessions from "../../../common/components/sessionsComponent.js";
+import { getUser, authenticate, loggedInUser, structureUser } from "../../../common/actions/users.actions.js";
+import * as sessions from "../../../common/actions/sessions.actions.js";
 import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { COOKIE_NAME } from "../../../common/constants/cookieName.js";
@@ -53,7 +53,6 @@ export default () => {
   router.get(
     "/logout",
     tryCatch(async (req, res) => {
-      console.log(req.cookies);
       if (req.cookies[COOKIE_NAME]) {
         await sessions.removeJwt(req.cookies[COOKIE_NAME]);
         res.clearCookie(COOKIE_NAME).status(200).json({

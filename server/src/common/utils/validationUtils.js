@@ -15,9 +15,13 @@ export function siretSchema() {
         new Error(`Error: schema not valid : ValidationError: ${errors[0].local.key} must be follow Luhn algorithm`)
     );
 }
-
+// const UAI_REGEX = /^[0-9_]{7}[a-zA-Z]{1}$/;
 export function uaiSchema() {
   return Joi.string().regex(/^[0-9]{7}[a-zA-Z]$/);
+}
+
+export function validateUai(uai) {
+  return uaiSchema().required().validate(uai);
 }
 
 const customJoi = Joi.extend((joi) => ({

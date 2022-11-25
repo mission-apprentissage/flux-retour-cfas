@@ -10,17 +10,11 @@ export { default as LinkCard } from "./LinkCard/LinkCard";
 export { default as InputLegend } from "./InputLegend/InputLegend";
 export { default as Tuile } from "./Tuile/Tuile";
 
-export { default as EffectifCard } from "./EffectifCard/EffectifCard";
-export { default as CfasFilter } from "./CfasFilter/CfasFilter";
-export { default as TerritoireFilter } from "./TerritoireFilter/TerritoireFilter";
-export { default as FormationFilter } from "./FormationFilter/FormationFilter";
 export { default as MonthSelect } from "./MonthSelect/MonthSelect";
 
 export { Page } from "./Page/Page";
 export { default as Section } from "./Section/Section";
 
-export { default as Header } from "./Page_OLD/Header";
-export { default as Footer } from "./Page_OLD/Footer";
 export { default as Logo } from "./Logo/Logo";
 export { default as ContactSection } from "./ContactSection/ContactSection";
 export { default as BreadcrumbNav } from "./BreadcrumbNav/BreadcrumbNav";

@@ -9,7 +9,7 @@ import {
   createRandomDossierApprenant,
 } from "../../data/randomizedSample.js";
 
-import { cfdRegex } from "../../../src/common/domain/cfd.js";
+import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd.js";
 import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
 import { dossiersApprenantsDb } from "../../../src/common/model/collections.js";
 

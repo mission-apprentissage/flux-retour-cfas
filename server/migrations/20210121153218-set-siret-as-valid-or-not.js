@@ -1,4 +1,4 @@
-import { validateSiret } from "../src/common/domain/siret.js";
+import { validateSiret } from "../src/common/utils/validationsUtils/siret.js";
 
 export const up = async (db) => {
   const collection = db.collection("statutsCandidats");
