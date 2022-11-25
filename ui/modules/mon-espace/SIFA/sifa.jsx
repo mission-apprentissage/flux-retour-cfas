@@ -1,6 +1,8 @@
 import React from "react";
-import { Avatar, HStack, Text } from "@chakra-ui/react";
+import { Avatar, Heading, HStack, Text } from "@chakra-ui/react";
 import Table from "../../../components/Table/Table";
+import { useOrganisme } from "../../../hooks/useOrganisme";
+import { useEspace } from "../../../hooks/useEspace";
 // import Dossier from "./engine/Dossier.jsx";
 
 const data = [
@@ -31,8 +33,18 @@ const data = [
 ];
 
 const EnqueteSIFA = () => {
+  const { myOrganisme, isMonOrganismePages, isOrganismePages } = useEspace();
+  const { organisme } = useOrganisme();
+
+  // eslint-disable-next-line no-unused-vars
+  const curentOrganisme = myOrganisme || organisme;
+
   return (
     <>
+      <Heading textStyle="h2" color="grey.800" mt={5}>
+        {isMonOrganismePages && `Mon Enquete SIFA2`}
+        {isOrganismePages && `Son Enquete SIFA2`}
+      </Heading>
       <Table
         data={data}
         columns={{

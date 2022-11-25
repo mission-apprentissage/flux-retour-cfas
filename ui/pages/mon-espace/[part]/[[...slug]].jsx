@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Container,
-  // Image,
-  Heading,
-} from "@chakra-ui/react";
+import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 import { Breadcrumb } from "../../../components/Breadcrumb/Breadcrumb";
 import { Page } from "../../../components/Page/Page";
@@ -12,20 +7,35 @@ import { Page } from "../../../components/Page/Page";
 import withAuth from "../../../components/withAuth";
 import { getAuthServerSideProps } from "../../../common/SSR/getAuthServerSideProps";
 import { useEspace } from "../../../hooks/useEspace";
-import EnqueteSIFA from "../../../modules/mon-espace/SIFA/EnqueteSIFA";
+import EnqueteSIFA from "../../../modules/mon-espace/sifa/sifa";
+import { useOrganisme } from "../../../hooks/useOrganisme";
+import LandingOrganisme from "../../../modules/mon-espace/landing/LandingOrganisme/LandingOrganisme";
+import LandingReseau from "../../../modules/mon-espace/landing/LandingReseau";
+import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
+import EffectifsOrganisme from "../../../modules/mon-espace/effectifs/effectifs";
+import ParametresOrganisme from "../../../modules/mon-espace/parametres/parametresOrganisme";
+import LandingPilot from "../../../modules/mon-espace/landing/LandingPilot";
+import LandingErp from "../../../modules/mon-espace/landing/LandingErp";
+import LandingTransverse from "../../../modules/mon-espace/landing/LandingTransverse";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const MonEspace = () => {
   let {
     isMonOrganismePage,
+    isMonOrganismePages,
     isOrganismePages,
     isEffectifsPage,
     isSIFA2Page,
     isParametresPage,
-    organisme_id,
     breadcrumb,
+    myOrganisme,
+    whoIs,
   } = useEspace();
+
+  const { organisme } = useOrganisme();
+
+  const currentOrganisme = isMonOrganismePages ? myOrganisme : isOrganismePages ? organisme : null;
 
   return (
     <Page>
@@ -37,43 +47,26 @@ const MonEspace = () => {
         <Container maxW="xl">
           <Breadcrumb pages={breadcrumb} />
           <Box mt={4}>
-            {isMonOrganismePage && (
-              <>
-                <Heading textStyle="h2" color="grey.800" mt={5}>
-                  Bienvenue sur votre tableau de bord
-                </Heading>
-                {/* <Image src="/images/fake/tdbOF.png" alt="fake tdb of" w="full" mt={3} /> */}
-                {/* <Image src="/images/fake/tdbReseau.png" alt="fake tdb reseau" w="full" mt={3} /> */}
-              </>
+            {isMonOrganismePage && !currentOrganisme && whoIs === "reseau_of" && <LandingReseau />}
+            {isMonOrganismePage && !currentOrganisme && whoIs === "pilot" && <LandingPilot />}
+            {isMonOrganismePage && !currentOrganisme && whoIs === "erp" && <LandingErp />}
+            {isMonOrganismePage && !currentOrganisme && !whoIs && <LandingTransverse />}
+
+            {(isMonOrganismePage || isOrganismePages) &&
+              currentOrganisme &&
+              !isEffectifsPage &&
+              !isSIFA2Page &&
+              !isParametresPage &&
+              hasContextAccessTo(currentOrganisme, "organisme/tableau_de_bord") && <LandingOrganisme />}
+            {isEffectifsPage &&
+              currentOrganisme &&
+              hasContextAccessTo(currentOrganisme, "organisme/page_effectifs") && <EffectifsOrganisme />}
+            {isSIFA2Page && currentOrganisme && hasContextAccessTo(currentOrganisme, "organisme/page_sifa2") && (
+              <EnqueteSIFA />
             )}
-            {isOrganismePages && !isEffectifsPage && !isSIFA2Page && !isParametresPage && organisme_id && (
-              <>
-                {/* TODO USEORGANISME */}
-                <Heading textStyle="h2" color="grey.800" mt={5}>
-                  Bienvenue sur le tableau de bord de &quot;Aden formation Caen&quot;
-                </Heading>
-                {/* <Image src="/images/fake/tdbOF.png" alt="fake tdb of" w="full" mt={3} /> */}
-                {/* <Image src="/images/fake/tdbReseau.png" alt="fake tdb reseau" w="full" mt={3} /> */}
-              </>
-            )}
-            {isEffectifsPage && (
-              <Heading textStyle="h2" color="grey.800" mt={5}>
-                Mes Effectifs
-              </Heading>
-            )}
-            {isSIFA2Page && (
-              <>
-                <Heading textStyle="h2" color="grey.800" mt={5}>
-                  Mon Enquete SIFA2
-                </Heading>
-                <EnqueteSIFA />
-              </>
-            )}
-            {isParametresPage && (
-              <Heading textStyle="h2" color="grey.800" mt={5}>
-                Paramètres de mon organisme
-              </Heading>
-            )}
+            {isParametresPage &&
+              currentOrganisme &&
+              hasContextAccessTo(currentOrganisme, "organisme/page_parametres") && <ParametresOrganisme />}
           </Box>
         </Container>
       </Box>

@@ -9,6 +9,7 @@ import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps"
 import Link from "../../components/Links/Link";
 import withAuth from "../../components/withAuth";
 import { _get } from "../../common/httpClient";
+import { useEspace } from "../../hooks/useEspace";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -28,6 +29,16 @@ function MesOrganismes() {
   const title = "Mes Organismes";
   const { isLoading, organismes } = useEspaceOrganismes();
 
+  let { whoIs } = useEspace();
+
+  const headerTitle = {
+    pilot: "Les organismes sur mon territoire",
+    erp: "Les organismes connectés de mon erp",
+    of: "Mes organismes",
+    reseau_of: "Les organismes de mon réseau",
+    global: "Tous les organismes",
+  };
+
   return (
     <Page>
       <Head>
@@ -38,7 +49,7 @@ function MesOrganismes() {
         <Container maxW="xl">
           <Breadcrumb pages={[{ title: "Mon espace", to: "/mon-espace/mon-organisme" }, { title: title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
-            {title}
+            {headerTitle[whoIs ?? "global"]}
           </Heading>
           {isLoading && !organismes && (
             <Center>
