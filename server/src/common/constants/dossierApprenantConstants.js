@@ -25,32 +25,6 @@ const getStatutApprenantNameFromCode = (statutCode) =>
   LABELS_STATUT_APPRENANT.find((item) => item.code === statutCode)?.name ?? "NC";
 
 /**
- * Code pour les types de doublons identifiables
- */
-const DUPLICATE_TYPE_CODES = {
-  unique: {
-    name: "Uniques (clé d'unicité identique)",
-    code: 1,
-  },
-  formation_cfd: {
-    name: "CFDs",
-    code: 2,
-  },
-  prenom_apprenant: {
-    name: "Prenom",
-    code: 3,
-  },
-  nom_apprenant: {
-    name: "Nom",
-    code: 4,
-  },
-  uai_etablissement: {
-    name: "Uai",
-    code: 5,
-  },
-};
-
-/**
  * Liste des nom des indicateurs
  */
 const EFFECTIF_INDICATOR_NAMES = {
@@ -62,7 +36,6 @@ const EFFECTIF_INDICATOR_NAMES = {
 
 module.exports = {
   CODES_STATUT_APPRENANT,
-  DUPLICATE_TYPE_CODES,
   EFFECTIF_INDICATOR_NAMES,
   LABELS_STATUT_APPRENANT,
   getStatutApprenantNameFromCode,
