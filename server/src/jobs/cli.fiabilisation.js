@@ -6,6 +6,7 @@ import { identifyUaisDuplicates } from "./fiabilisation/duplicates/dossiersAppre
 import { cleanUaisDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates-uais/clean.js";
 import { identifyCfdDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates-cfd/identify.js";
 import { removeDossierApprenantsDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates/remove-duplicates.js";
+import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
 
 /**
  * Job d'identification des doublons dans les fichiers CSV de réseaux
@@ -69,6 +70,18 @@ cli
     runScript(async () => {
       return removeDossierApprenantsDuplicates(duplicatesTypeCode, allowDiskUse, duplicatesWithNoUpdate, dry);
     }, "duplicates-remove");
+  });
+
+/**
+ * Job d'analyse de la fiabilité des dossiersApprenants reçus
+ */
+cli
+  .command("analyse:dossiersApprenants-recus")
+  .description("Analyse de la fiabilité des dossiersApprenants reçus")
+  .action(() => {
+    runScript(async () => {
+      return analyseFiabiliteDossierApprenantsRecus();
+    }, "analyse-dossiersApprenants-recus");
   });
 
 cli.parse(process.argv);

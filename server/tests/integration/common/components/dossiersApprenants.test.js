@@ -12,7 +12,7 @@ import {
 } from "../../../../src/common/constants/dossierApprenantConstants.js";
 import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
 import { cfasDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
-import { getDuplicatesList } from "../../../../src/jobs/support/dossiersApprenants.duplicates.actions.js";
+import { getDuplicatesList } from "../../../../src/jobs/fiabilisation/duplicates/dossiersApprenants.duplicates.actions.js";
 
 describe("Components Dossiers Apprenants Test", () => {
   let fakeNowDate;

@@ -52,7 +52,6 @@ export const removeDossierApprenantsDuplicates = async (
   await asyncForEach(duplicatesRemoved, async (duplicate) => {
     await duplicatesEventsDb.insertOne({
       jobType: "remove-duplicates",
-      args,
       filters: filterQuery,
       jobTimestamp,
       created_at: new Date(),

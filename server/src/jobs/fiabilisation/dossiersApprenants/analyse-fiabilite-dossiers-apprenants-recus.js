@@ -1,4 +1,3 @@
-import { runScript } from "../../scriptWrapper.js";
 import { v4 as uuid } from "uuid";
 import { validateNomApprenant, normalizeNomApprenant } from "../../../common/domain/apprenant/nomApprenant.js";
 import { validatePrenomApprenant, normalizePrenomApprenant } from "../../../common/domain/apprenant/prenomApprenant.js";
@@ -13,14 +12,15 @@ import { validateEmail } from "../../../common/domain/email.js";
 import { validateUai } from "../../../common/utils/validationUtils.js";
 import { validateSiret } from "../../../common/domain/siret.js";
 import logger from "../../../common/logger.js";
-import { userEventsDb, referentielSiretUaiDb } from "../../../common/model/collections.js";
+import { userEventsDb } from "../../../common/model/collections.js";
 import { getDbCollection } from "../../../common/mongodb.js";
+import { fetchOrganismesWithUai, fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna.js";
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
 };
 
-runScript(async () => {
+export const analyseFiabiliteDossierApprenantsRecus = async () => {
   const analysisId = uuid();
   const analysisDate = new Date();
 
@@ -142,7 +142,7 @@ runScript(async () => {
       totalUniqueApprenant: fiabiliteCounts.uniqueApprenant,
     })
   );
-}, "analyse-fiabilite-dossiers-apprenants-dernieres-24h");
+};
 
 const getReceivedDossiersApprenantsInLast24hCursor = () => {
   return userEventsDb().aggregate([
@@ -161,13 +161,13 @@ const getReceivedDossiersApprenantsInLast24hCursor = () => {
 };
 
 const isUaiFoundUniqueInReferentiel = () => async (uai) => {
-  const organismesInReferentiel = await referentielSiretUaiDb().find({ uai }).toArray();
-  return organismesInReferentiel?.length === 1;
+  const { organismes } = await fetchOrganismesWithUai(uai);
+  return organismes?.length === 1;
 };
 
 const isSiretFoundInReferentiel = () => async (siret) => {
-  const organismesInReferentiel = await referentielSiretUaiDb().find({ siret }).toArray();
-  return organismesInReferentiel?.length > 0;
+  const { organismes } = await fetchOrganismeWithSiret(siret);
+  return organismes?.length > 0;
 };
 
 const buildApprenantNormalizedId = (apprenant) => {
