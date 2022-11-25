@@ -59,7 +59,7 @@ cli
   .action(async () => {
     runScript(async ({ ovhStorage }) => {
       return hydrateFromReseaux(ovhStorage);
-    }, "hydrate-organismes-reseaux");
+    }, "hydrate-reseaux");
   });
 
 /**

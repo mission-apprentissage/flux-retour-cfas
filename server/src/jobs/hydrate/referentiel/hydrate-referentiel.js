@@ -37,51 +37,94 @@ export const hydrateReferentiel = async () => {
   });
 
   let nbOrganismeCreated = 0;
+  let nbOrganismeNotCreated = 0;
+  let nbOrganismeWithoutUai = 0;
   let nbOrganismeUpdated = 0;
+  let nbOrganismeNotUpdated = 0;
 
   logger.info(`Traitement de ${organismes.length} organismes provenant du référentiel...`);
   loadingBar.start(organismes.length, 0);
 
   await asyncForEach(organismes, async (organismeReferentiel) => {
-    const organisme = await findOrganismeByUai(organismeReferentiel.uai);
+    const { uai, siret, raison_sociale, nature } = organismeReferentiel;
 
-    if (organisme) {
-      // Ajout de l'organisme
-      const { uai, siret, raison_sociale, nature } = organismeReferentiel;
-      await createOrganisme({
-        uai,
-        ...buildAdresseFromUai(uai),
-        nature,
-        sirets: [siret],
-        nom: raison_sociale,
-      });
-      nbOrganismeCreated++;
-
+    // Si aucun uai on ne peut pas effectuer de traitement
+    if (!uai) {
+      // TODO voir coté métier comment gérer la récupération d'organismes sans uai dans le référentiel
+      nbOrganismeWithoutUai++;
       // Log & store
       await jobEventsDb().insertOne({
         jobname: "hydrate-referentiel",
         date: new Date(),
-        action: "organisme-created",
+        action: "no-uai-for-organisme-in-referentiel",
         data: { organisme: organismeReferentiel },
       });
     } else {
-      // Update de l'organisme en settant la nature et un flag natureValidityWarning = perfectMatch
-      const perfectUaiSiretMatch = organisme.sirets.length === 1 && organisme.sirets[0] === organismeReferentiel.siret;
-      const updatedOrganisme = {
-        ...organisme,
-        nature: organismeReferentiel.nature,
-        natureValidityWarning: !perfectUaiSiretMatch,
-      };
-      await updateOrganisme(organisme._id, updatedOrganisme);
-      nbOrganismeUpdated++;
+      const organisme = await findOrganismeByUai(organismeReferentiel.uai);
 
-      // Log & store
-      await jobEventsDb().insertOne({
-        jobname: "hydrate-referentiel",
-        date: new Date(),
-        action: "organisme-updated",
-        data: { organisme: updatedOrganisme },
-      });
+      // Ajout de l'organisme si non existant
+      if (!organisme) {
+        try {
+          await createOrganisme({
+            uai,
+            ...buildAdresseFromUai(uai),
+            nature,
+            sirets: [siret],
+            nom: raison_sociale,
+            est_dans_le_referentiel: true,
+          });
+          nbOrganismeCreated++;
+
+          // Log & store
+          await jobEventsDb().insertOne({
+            jobname: "hydrate-referentiel",
+            date: new Date(),
+            action: "organisme-created",
+            data: { organisme: organismeReferentiel },
+          });
+        } catch (error) {
+          nbOrganismeNotCreated++;
+          // Log & store error
+          await jobEventsDb().insertOne({
+            jobname: "hydrate-referentiel",
+            date: new Date(),
+            action: "organisme-not-created",
+            data: { organisme: organismeReferentiel, error },
+          });
+        }
+      } else {
+        // Update de l'organisme si existant
+        // Set de la nature et un flag natureValidityWarning = perfectMatch
+        const perfectUaiSiretMatch =
+          organisme.sirets.length === 1 && organisme.sirets[0] === organismeReferentiel.siret;
+        const updatedOrganisme = {
+          ...organisme,
+          nature: organismeReferentiel.nature,
+          natureValidityWarning: !perfectUaiSiretMatch,
+          est_dans_le_referentiel: true,
+        };
+        try {
+          await updateOrganisme(organisme._id, updatedOrganisme);
+          nbOrganismeUpdated++;
+
+          // Log & store
+          await jobEventsDb().insertOne({
+            jobname: "hydrate-referentiel",
+            date: new Date(),
+            action: "organisme-updated",
+            data: { organisme: updatedOrganisme },
+          });
+        } catch (error) {
+          nbOrganismeNotUpdated++;
+          // Log & store errors
+          await jobEventsDb().insertOne({
+            jobname: "hydrate-referentiel",
+            date: new Date(),
+            action: "organisme-notUpdated",
+            data: { organisme: updatedOrganisme, error },
+          });
+        }
+      }
     }
 
     loadingBar.increment();
@@ -90,6 +133,9 @@ export const hydrateReferentiel = async () => {
   loadingBar.stop();
 
   // Log & stats
+  logger.info(`-> ${nbOrganismeWithoutUai} organismes sans UAI dans le référentiel (pas de traitement)`);
   logger.info(`--> ${nbOrganismeCreated} organismes créés depuis le référentiel`);
-  logger.info(`--> ${nbOrganismeUpdated} organismes mis à jour depuis le référentiel (nature)`);
+  logger.info(`--> ${nbOrganismeNotCreated} organismes non créés depuis le référentiel (erreur)`);
+  logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour depuis le référentiel (nature)`);
+  logger.info(`---> ${nbOrganismeNotUpdated} organismes non mis à jour depuis le référentiel (erreur)`);
 };
