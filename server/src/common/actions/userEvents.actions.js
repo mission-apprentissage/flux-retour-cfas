@@ -5,7 +5,7 @@ import { userEventsDb, usersDb } from "../model/collections.js";
  * @param {*} param0
  * @returns
  */
-const create = async ({ username, type, action, data }) => {
+export const createUserEvent = async ({ username, type, action, data }) => {
   const user = await usersDb().findOne({ username });
   const UNKNOWN_DEFAULT_VALUE = "NC";
 
@@ -22,7 +22,3 @@ const create = async ({ username, type, action, data }) => {
 
   return;
 };
-
-export default () => ({
-  create,
-});

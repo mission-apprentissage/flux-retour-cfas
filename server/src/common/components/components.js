@@ -1,18 +1,15 @@
 import createUsers from "./users.js";
-import createUserEvents from "./userEvents.js";
 import createDossierApprenant from "./dossiersApprenants.js";
 import cfasComponent from "./cfas.js";
 import reseauxCfasComponent from "./reseauxCfas.js";
 import createStats from "./stats.js";
 import createEffectifs from "./effectifs.js";
 import createCacheComponent from "./cache.js";
-import createArchiveDossiersApprenantsComponent from "./archiveDossiersApprenants.js";
 
 export default async (options = {}) => {
   const db = options.db;
 
   const users = options.users || (await createUsers());
-  const userEvents = options.userEvents || createUserEvents();
   const dossiersApprenants = options.dossiersApprenants || createDossierApprenant();
   const cfas = options.cfas || cfasComponent();
   const reseauxCfas = options.reseauxCfas || reseauxCfasComponent();
@@ -22,12 +19,8 @@ export default async (options = {}) => {
   // TODO Refacto infra components -> to services structure
   const cache = options.cache || createCacheComponent(options.redisClient);
 
-  const archiveDossiersApprenants =
-    options.archiveDossiersApprenants || createArchiveDossiersApprenantsComponent({ db });
-
   return {
     users,
-    userEvents,
     cache,
     db,
     dossiersApprenants,
@@ -35,6 +28,5 @@ export default async (options = {}) => {
     reseauxCfas,
     stats,
     effectifs,
-    archiveDossiersApprenants,
   };
 };

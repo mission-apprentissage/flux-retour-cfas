@@ -1,16 +1,13 @@
 import { validateAnneeScolaire } from "../../../common/utils/validationsUtils/anneeScolaire.js";
 import logger from "../../../common/logger.js";
 import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
+import { createArchiveDossiersApprenants } from "../../../common/actions/archiveDossiersApprenants.actions.js";
 
 /**
  * Fonction d'archivage des anciens dossiers apprenants
- * @param {*} archiveDossiersApprenants
  * @param {*} ANNEE_SCOLAIRE_START_LIMIT
  */
-export const hydrateArchivesDossiersApprenants = async (
-  archiveDossiersApprenants,
-  ANNEE_SCOLAIRE_START_LIMIT = 2021
-) => {
+export const hydrateArchivesDossiersApprenants = async (ANNEE_SCOLAIRE_START_LIMIT = 2021) => {
   logger.info(
     `Archivage des dossiers apprenants avec année scolaire nulle ou antérieure à ${ANNEE_SCOLAIRE_START_LIMIT}`
   );
@@ -39,7 +36,7 @@ export const hydrateArchivesDossiersApprenants = async (
     const dossierApprenantToArchive = await cursor.next();
 
     try {
-      await archiveDossiersApprenants.create(dossierApprenantToArchive);
+      await createArchiveDossiersApprenants(dossierApprenantToArchive);
       await dossiersApprenantsMigrationDb().deleteOne({ _id: dossierApprenantToArchive._id });
     } catch (err) {
       logger.error("Could not archive dossier apprenant with _id", dossierApprenantToArchive._id);

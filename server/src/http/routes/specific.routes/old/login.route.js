@@ -1,9 +1,10 @@
 import express from "express";
+import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../../common/constants/userEventsConstants.js";
 import { createUserToken } from "../../../../common/utils/jwtUtils.js";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 
-export default ({ users, userEvents }) => {
+export default ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   router.post(
@@ -16,7 +17,7 @@ export default ({ users, userEvents }) => {
 
       const token = createUserToken(authenticatedUser);
 
-      await userEvents.create({ username, type: USER_EVENTS_TYPES.POST, action: USER_EVENTS_ACTIONS.LOGIN });
+      await createUserEvent({ username, type: USER_EVENTS_TYPES.POST, action: USER_EVENTS_ACTIONS.LOGIN });
       return res.json({ access_token: token });
     })
   );

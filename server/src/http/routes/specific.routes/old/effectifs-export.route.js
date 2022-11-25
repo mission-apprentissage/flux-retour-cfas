@@ -8,6 +8,7 @@ import {
   getExportAnonymizedEventNameFromFilters,
   USER_EVENTS_TYPES,
 } from "../../../../common/constants/userEventsConstants.js";
+import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
 
 const filterQueryForNetworkRole = (req) => {
   if (req.user?.permissions.includes(tdbRoles.network)) {
@@ -40,7 +41,7 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
-export default ({ effectifs, userEvents }) => {
+export default ({ effectifs }) => {
   const router = express.Router();
 
   /**
@@ -65,7 +66,7 @@ export default ({ effectifs, userEvents }) => {
       const filters = { ...filtersFromBody, annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } };
 
       // create user event
-      await userEvents.create({
+      await createUserEvent({
         type: USER_EVENTS_TYPES.EXPORT_CSV,
         action: getExportAnonymizedEventNameFromFilters(filters, namedDataListMode),
         username: req.user.username,

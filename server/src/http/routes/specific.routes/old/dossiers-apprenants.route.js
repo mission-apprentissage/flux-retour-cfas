@@ -15,10 +15,11 @@ import { findAndPaginate } from "../../../../common/utils/dbUtils.js";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../../common/constants/userEventsConstants.js";
 import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../../../common/model/collections.js";
 import { sendTransformedPaginatedJsonStream } from "../../../../common/utils/httpUtils.js";
+import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
-export default ({ dossiersApprenants, userEvents }) => {
+export default ({ dossiersApprenants }) => {
   const router = express.Router();
 
   /**
@@ -97,7 +98,7 @@ export default ({ dossiersApprenants, userEvents }) => {
         let validDossiersApprenantToAddOrUpdate = [];
 
         // Add user event
-        await userEvents.create({
+        await createUserEvent({
           username: user.username,
           type: USER_EVENTS_TYPES.POST,
           action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,
@@ -176,7 +177,7 @@ export default ({ dossiersApprenants, userEvents }) => {
 
       try {
         // Add user event
-        await userEvents.create({
+        await createUserEvent({
           username: req.user.username,
           type: USER_EVENTS_TYPES.GET,
           action: USER_EVENTS_ACTIONS.DOSSIER_APPRENANT,

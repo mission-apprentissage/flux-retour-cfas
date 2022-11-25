@@ -97,8 +97,8 @@ cli
   .description("Archivage des anciens dossiers apprenants")
   .option("--limit <int>", "Année limite d'archivage")
   .action(async ({ limit }) => {
-    runScript(async ({ archiveDossiersApprenants }) => {
-      return hydrateArchivesDossiersApprenants(archiveDossiersApprenants, limit);
+    runScript(async () => {
+      return hydrateArchivesDossiersApprenants(limit);
     }, "hydrate-archive-dossiersApprenants");
   });
 
