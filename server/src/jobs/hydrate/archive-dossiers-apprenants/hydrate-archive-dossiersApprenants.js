@@ -1,4 +1,4 @@
-import { validateAnneeScolaire } from "../../../common/domain/anneeScolaire.js";
+import { validateAnneeScolaire } from "../../../common/utils/validationsUtils/anneeScolaire.js";
 import logger from "../../../common/logger.js";
 import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
 

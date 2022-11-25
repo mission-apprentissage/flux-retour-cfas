@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { transformToInternationalNumber } from "../../../../common/domain/frenchTelephoneNumber.js";
+import { transformToInternationalNumber } from "../../../../common/utils/validationsUtils/frenchTelephoneNumber.js";
 import { dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
 import {
   defaultValuesDossiersApprenantsMigration,

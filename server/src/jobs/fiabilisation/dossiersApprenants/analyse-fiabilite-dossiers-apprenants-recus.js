@@ -12,11 +12,11 @@ import { DossierApprenantApiInputFiabiliteReport } from "../../../common/factory
 import { USER_EVENTS_ACTIONS } from "../../../common/constants/userEventsConstants.js";
 import { validateIneApprenant } from "../../../common/utils/validationsUtils/apprenant/ineApprenant.js";
 import { validateDateDeNaissanceApprenant } from "../../../common/utils/validationsUtils/apprenant/dateDeNaissanceApprenant.js";
-import { validateCodeCommune } from "../../../common/domain/codeCommune.js";
-import { validateFrenchTelephoneNumber } from "../../../common/domain/frenchTelephoneNumber.js";
-import { validateEmail } from "../../../common/domain/email.js";
+import { validateCodeCommune } from "../../../common/utils/validationsUtils/codeCommune.js";
+import { validateFrenchTelephoneNumber } from "../../../common/utils/validationsUtils/frenchTelephoneNumber.js";
+import { validateEmail } from "../../../common/utils/validationsUtils/email.js";
 import { validateUai } from "../../../common/utils/validationUtils.js";
-import { validateSiret } from "../../../common/domain/siret.js";
+import { validateSiret } from "../../../common/utils/validationsUtils/siret.js";
 import logger from "../../../common/logger.js";
 import { userEventsDb } from "../../../common/model/collections.js";
 import { getDbCollection } from "../../../common/mongodb.js";

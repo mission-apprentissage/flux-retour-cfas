@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { schema as cfdSchema } from "../domain/cfd.js";
+import { schema as cfdSchema } from "../utils/validationsUtils/cfd.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { BaseFactory } from "./baseFactory.js";
 

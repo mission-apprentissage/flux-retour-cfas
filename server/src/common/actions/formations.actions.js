@@ -1,4 +1,4 @@
-import { validateCfd } from "../domain/cfd.js";
+import { validateCfd } from "../utils/validationsUtils/cfd.js";
 import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { getMetiersByCfd } from "../apis/apiLba.js";
 import { Formation } from "../factory/formation.js";
