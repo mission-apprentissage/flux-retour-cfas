@@ -32,7 +32,7 @@ export const adresseSchema = object({
   code_insee: string({
     description: "Le code insee doit contenir 5 caractères",
     example: "54318",
-    pattern: "^[0-9]{5}$",
+    pattern: "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
     maxLength: 5,
     minLength: 5,
   }),
@@ -62,10 +62,5 @@ export const adresseSchema = object({
 
 // Default value
 export function defaultValuesAdresse() {
-  return {
-    // voie: null,
-    // code_postal: null,
-    // code_insee: null,
-    // commune: null,
-  };
+  return {};
 }

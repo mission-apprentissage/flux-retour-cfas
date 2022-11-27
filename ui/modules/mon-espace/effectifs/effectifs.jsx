@@ -1,14 +1,10 @@
 import React from "react";
 import { Heading } from "@chakra-ui/react";
 import { useEspace } from "../../../hooks/useEspace";
-import { useOrganisme } from "../../../hooks/useOrganisme";
+import EffectifsTable from "./engine/EffectifsTable.jsx";
 
 const EffectifsOrganisme = () => {
-  const { myOrganisme, isMonOrganismePages, isOrganismePages } = useEspace();
-  const { organisme } = useOrganisme();
-
-  // eslint-disable-next-line no-unused-vars
-  const curentOrganisme = myOrganisme || organisme;
+  const { isMonOrganismePages, isOrganismePages } = useEspace();
 
   return (
     <>
@@ -16,6 +12,8 @@ const EffectifsOrganisme = () => {
         {isMonOrganismePages && `Mes effectifs`}
         {isOrganismePages && `Ses effectifs`}
       </Heading>
+
+      <EffectifsTable />
     </>
   );
 };

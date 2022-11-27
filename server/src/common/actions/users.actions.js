@@ -238,6 +238,7 @@ export const structureUser = async (user) => {
   );
 
   const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
+  const isInPendingValidation = !organisme_ids.length && !!user.main_organisme_id;
 
   let specialAcl = [];
   if (!hasAccessToOnlyOneOrganisme) {
@@ -246,8 +247,9 @@ export const structureUser = async (user) => {
 
   return {
     organisme_ids,
-    main_organisme_id: user?.main_organisme_id,
+    main_organisme_id: user.main_organisme_id,
     permissions,
+    isInPendingValidation,
     email: user.email,
     civility: user.civility,
     nom: user.nom,

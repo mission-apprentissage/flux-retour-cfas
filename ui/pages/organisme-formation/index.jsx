@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import Head from "next/head";
 import { Box, Heading, HStack, Link, Text } from "@chakra-ui/react";
 
@@ -108,9 +108,9 @@ export default function OrganismeFormation() {
                 </Text>
                 {ERPS.map(({ name, state }) => {
                   return (
-                    <>
+                    <Fragment key={name}>
                       {state != "coming" && (
-                        <Box key={name} fontSize="epsilon" color="grey.800" alignItems="center">
+                        <Box fontSize="epsilon" color="grey.800" alignItems="center">
                           <Checkbox color="#03053D" />
                           <Text marginLeft="1w" as="span">
                             <strong>
@@ -120,7 +120,7 @@ export default function OrganismeFormation() {
                           </Text>
                         </Box>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })}
               </HStack>
@@ -136,9 +136,9 @@ export default function OrganismeFormation() {
                 </Text>
                 {ERPS.map(({ name, state }) => {
                   return (
-                    <>
+                    <Fragment key={name}>
                       {state == "coming" && (
-                        <Box key={name} fontSize="epsilon" color="grey.800" alignItems="center" marginLeft="1v">
+                        <Box fontSize="epsilon" color="grey.800" alignItems="center" marginLeft="1v">
                           <Checkbox
                             color="white"
                             bg="white"
@@ -151,7 +151,7 @@ export default function OrganismeFormation() {
                           </Text>
                         </Box>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })}
               </HStack>

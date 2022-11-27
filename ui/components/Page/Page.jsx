@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Center, Container, Spinner } from "@chakra-ui/react";
+import { Box, Container } from "@chakra-ui/react";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
@@ -8,22 +8,17 @@ import Section from "../Section/Section";
 import { useEspace } from "../../hooks/useEspace";
 
 export function Page({ children, ...rest }) {
-  let { isloaded, isMonOrganismePages, isOrganismePages, isMesOrganismesPages } = useEspace();
+  let { isloaded, isReloaded, isMonOrganismePages, isOrganismePages, isMesOrganismesPages } = useEspace();
 
-  if (!isloaded && (isMonOrganismePages || isOrganismePages || isMesOrganismesPages)) {
-    return (
-      <Center>
-        <Spinner />
-      </Center>
-    );
-  }
+  const espaceContextisLoading =
+    (!isloaded || !isReloaded) && (isMonOrganismePages || isOrganismePages || isMesOrganismesPages);
 
   return (
     <Container maxW="full" minH="100vh" d="flex" flexDirection="column" p={0} {...rest}>
-      <Header />
-      <NavigationMenu />
-      <Box minH={"47vh"} flexGrow="1">
-        <Section>{children}</Section>
+      <Header espaceContextisLoading={espaceContextisLoading} />
+      <NavigationMenu espaceContextisLoading={espaceContextisLoading} />
+      <Box minH={"40vh"} flexGrow="1">
+        <Section>{!espaceContextisLoading && children}</Section>
       </Box>
       <ContactSection />
       <Footer />

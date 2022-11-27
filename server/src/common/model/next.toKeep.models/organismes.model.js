@@ -32,6 +32,7 @@ export const schema = object(
     sirets: arrayOf(string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }), {
       description: "Liste des sirets reliés à l'établissement",
     }),
+    siret: string({ description: "N° SIRET fiabilisé", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
     reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS) }), { description: "Réseaux du CFA, s'ils existent" }),
     erps: arrayOf(string(), { description: "ERPs rattachés au CFA, s'ils existent" }),
 
@@ -87,6 +88,10 @@ export function validateOrganisme(props) {
     {
       name: "sirets",
       base: Joi.array().items(siretSchema()),
+    },
+    {
+      name: "siret",
+      base: siretSchema(),
     },
   ]);
 }

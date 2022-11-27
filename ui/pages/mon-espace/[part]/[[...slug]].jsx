@@ -33,7 +33,7 @@ const MonEspace = () => {
     whoIs,
   } = useEspace();
 
-  const { organisme } = useOrganisme();
+  const { organisme } = useOrganisme(); // TODO A lot of re-render ~15
 
   const currentOrganisme = isMonOrganismePages ? myOrganisme : isOrganismePages ? organisme : null;
 
@@ -43,8 +43,8 @@ const MonEspace = () => {
         <title>Mon espace</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]}>
-        <Container maxW="xl">
+      <Box w="100%" pt={[4, 6]} px={[1, 1, 2, 4]}>
+        <Container maxW="xl" px={0}>
           <Breadcrumb pages={breadcrumb} />
           <Box mt={4}>
             {isMonOrganismePage && !currentOrganisme && whoIs === "reseau_of" && <LandingReseau />}

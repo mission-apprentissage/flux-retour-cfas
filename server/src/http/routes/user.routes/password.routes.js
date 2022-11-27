@@ -57,7 +57,7 @@ export default ({ mailer }) => {
         return res.json({ token });
       }
 
-      await mailer.sendEmail(user, "reset_password");
+      await mailer.sendEmail({ to: user.email, payload: user }, "reset_password");
 
       return res.json({});
     })

@@ -143,7 +143,7 @@ const NavBarOrganisme = ({ isOpen }) => {
   );
 };
 
-const NavigationMenu = ({ ...props }) => {
+const NavigationMenu = ({ espaceContextisLoading, ...props }) => {
   let [auth] = useAuth();
   const router = useRouter();
 
@@ -169,14 +169,14 @@ const NavigationMenu = ({ ...props }) => {
         <Container maxW="xl">
           <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" {...props}>
             <NavToggle toggle={toggle} isOpen={isOpen} />
-            {!isMonEspacePage && !isOrganismePages && <NavBarPublic isOpen={isOpen} />}
-            {(isMonEspacePage || isOrganismePages) && (
+            {!isMonEspacePage && !isOrganismePages && !espaceContextisLoading && <NavBarPublic isOpen={isOpen} />}
+            {(isMonEspacePage || isOrganismePages) && !espaceContextisLoading && (
               <NavBarUser isOpen={isOpen} mesOrganismesActive={isMesOrganismes || isOrganismePages} />
             )}
           </Flex>
         </Container>
       </Box>
-      {isOrganismePages && (
+      {isOrganismePages && !espaceContextisLoading && (
         <Container maxW="xl" mt={1}>
           <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" {...props}>
             <NavBarOrganisme isOpen={isOpen} />

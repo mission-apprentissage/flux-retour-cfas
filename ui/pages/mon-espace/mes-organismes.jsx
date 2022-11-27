@@ -64,7 +64,7 @@ function MesOrganismes() {
                     <Link href={`/mon-espace/organisme/${organisme._id}`} flexGrow={1}>
                       {organisme.nom} [uai: {organisme.uai}]
                     </Link>
-                    {!organisme.first_transmission_date && <Text color="tomato">Non connecté</Text>}
+                    {!organisme.first_transmission_date && <Text color="tomato">Ne transmet pas</Text>}
                   </ListItem>
                 );
               })}

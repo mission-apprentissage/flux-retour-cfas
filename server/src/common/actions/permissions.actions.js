@@ -84,7 +84,10 @@ export const updatePermission = async ({ organisme_id, userEmail, roleId, custom
  * @returns
  */
 export const updatePermissionPending = async ({ organisme_id, userEmail, pending }) => {
-  const permission = await permissionsDb().findOne({ organisme_id, userEmail: userEmail.toLowerCase() });
+  const permission = await permissionsDb().findOne({
+    organisme_id: ObjectId(organisme_id),
+    userEmail: userEmail.toLowerCase(),
+  });
   if (!permission) {
     throw new Error(`Unable to find permission`);
   }

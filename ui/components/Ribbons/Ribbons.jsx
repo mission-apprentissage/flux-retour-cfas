@@ -8,6 +8,7 @@ const colorsMap = {
   warning: { color: "flatwarm", bg: "galt2" },
   info: { color: "plaininfo", bg: "galt2" },
   info_clear: { color: "bluefrance", bg: "white" },
+  loading: { color: "bluefrance", bg: "white" },
   alert_clear: { color: "flaterror", bg: "white" },
   unstyled: { color: "grey", bg: "galt2" },
 };
@@ -22,6 +23,8 @@ const Icon = ({ variant, ...rest }) => {
       return <Alert {...rest} />;
     case "info_clear":
       return <InfoCircle {...rest} />;
+    case "loading":
+      return <Spinner {...rest} />;
     case "alert_clear":
       return <Alert {...rest} />;
     case "info":

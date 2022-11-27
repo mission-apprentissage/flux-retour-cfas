@@ -3,7 +3,6 @@ import { Avatar, Heading, HStack, Text } from "@chakra-ui/react";
 import Table from "../../../components/Table/Table";
 import { useOrganisme } from "../../../hooks/useOrganisme";
 import { useEspace } from "../../../hooks/useEspace";
-// import Dossier from "./engine/Dossier.jsx";
 
 const data = [
   {
@@ -93,8 +92,6 @@ const EnqueteSIFA = () => {
         // onRowClick={(rowId) => console.log(rowId)}
         mt={5}
       />
-
-      {/* <Dossier /> */}
     </>
   );
 };

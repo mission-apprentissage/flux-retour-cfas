@@ -1,7 +1,7 @@
 import { validateCfd } from "../utils/validationsUtils/cfd.js";
 import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { getMetiersByCfd } from "../apis/apiLba.js";
-import { Formation } from "../factory/formation.js";
+import { Formation } from "../factory/formation.js"; // TODO
 import { escapeRegExp } from "../utils/regexUtils.js";
 import logger from "../logger.js";
 import { formationsDb, dossiersApprenantsDb } from "../model/collections.js";

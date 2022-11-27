@@ -14,6 +14,7 @@ import {
   MenuItem as ChakraMenuItem,
   Tag,
   Text,
+  // Skeleton,
 } from "@chakra-ui/react";
 import { Logo } from "./Logo";
 import Link from "../../Links/Link";
@@ -44,7 +45,7 @@ const UserMenu = () => {
     (router.pathname.includes("/mon-espace") || router.pathname.includes("/organisme")) && auth?.sub !== "anonymous";
 
   return (
-    <Box mb={["3w", "3w", "0", "0"]}>
+    <>
       {auth?.sub === "anonymous" && (
         <HStack>
           <Link href="/auth/inscription" variant="pill" px={3} py={1}>
@@ -62,8 +63,8 @@ const UserMenu = () => {
         </HStack>
       )}
       {auth?.sub !== "anonymous" && (
-        <Flex>
-          <NotificationsMenu mr={5} />
+        <Flex w="full">
+          <NotificationsMenu mr={5} w="15px" />
           <Link
             href="/mon-espace/mon-organisme"
             borderBottom="1px solid"
@@ -71,15 +72,16 @@ const UserMenu = () => {
             color={myWks ? "bluefrance" : "grey.800"}
             mr={5}
             variant="summary"
+            w="97px"
           >
             Mon espace
           </Link>
           <Menu placement="bottom">
-            <MenuButton as={Button} variant="pill" px={0}>
-              <Flex>
+            <MenuButton as={Button} variant="pill" px={0} flexGrow={1}>
+              <Flex maxWidth="226px">
                 <UserFill mt="0.3rem" boxSize={4} />
                 <Box display={["none", "block"]} ml={2}>
-                  <Text color="bluefrance" textStyle="sm">
+                  <Text color="bluefrance" textStyle="sm" textOverflow="ellipsis" maxWidth="200px" overflow="hidden">
                     {auth.email}
                   </Text>
                 </Box>
@@ -119,11 +121,11 @@ const UserMenu = () => {
           </Menu>
         </Flex>
       )}
-    </Box>
+    </>
   );
 };
 
-const Header = () => {
+const Header = ({ espaceContextisLoading }) => {
   return (
     <Container maxW={"full"} borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 4]} as="header">
       <Container maxW="xl" py={[0, 2]} px={[0, 4]}>
@@ -144,7 +146,17 @@ const Header = () => {
             </Text>
           </Box>
 
-          <UserMenu />
+          <Flex
+            maxWidth="380px"
+            h="42px"
+            overflow="hidden"
+            justifyItems="center"
+            alignItems="center"
+            mb={["3w", "3w", "0", "0"]}
+          >
+            {/* {espaceContextisLoading && <Skeleton height="30px" w="200px" startColor="grey.300" endColor="galt" />} */}
+            {!espaceContextisLoading && <UserMenu />}
+          </Flex>
         </Flex>
       </Container>
     </Container>

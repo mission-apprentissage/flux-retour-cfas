@@ -141,13 +141,13 @@ export async function checkIfEmailExists(token) {
 //Ces actions sont construites à la volée car il est nécessaire de pouvoir injecter un mailer durant les tests
 export const createMailer = (mailerSerice) => {
   return {
-    async sendEmail(user, templateName) {
+    async sendEmail({ to, payload }, templateName) {
       const token = uuidv4();
-      const template = mailerSerice.templates[templateName](user, token);
+      const template = mailerSerice.templates[templateName]({ to, payload }, token);
 
       try {
-        await addEmail(user.email, token, templateName);
-        const messageId = await mailerSerice.sendEmailMessage(user.email, template);
+        await addEmail(to, token, templateName);
+        const messageId = await mailerSerice.sendEmailMessage(to, template);
         await addEmailMessageId(token, messageId);
       } catch (e) {
         await addEmailError(token, e);

@@ -20,7 +20,7 @@ import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
 import * as PermissionsDescriptor from "./next.toKeep.models/permissions.model.js";
 import * as OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
 import * as dossiersApprenantsMigrationModelDescriptor from "./next.toKeep.models/dossiersApprenantsMigration.model.js";
-import * as sifasModelDescriptor from "./next.toKeep.models/sifas.model/sifas.model.js";
+import * as effectifsModelDescriptor from "./next.toKeep.models/effectifs.model/effectifs.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
@@ -44,7 +44,7 @@ export const modelDescriptors = [
   PermissionsDescriptor,
   OrganismesModelDescriptor,
   dossiersApprenantsMigrationModelDescriptor,
-  sifasModelDescriptor,
+  effectifsModelDescriptor,
 ];
 
 export const dossiersApprenantsDb = () => {
@@ -125,6 +125,6 @@ export function permissionsDb() {
 export function dossiersApprenantsMigrationDb() {
   return getDbCollection(dossiersApprenantsMigrationModelDescriptor.collectionName);
 }
-export function sifasDb() {
-  return getDbCollection(sifasModelDescriptor.collectionName);
+export function effectifsDb() {
+  return getDbCollection(effectifsModelDescriptor.collectionName);
 }

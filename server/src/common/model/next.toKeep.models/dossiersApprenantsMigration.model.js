@@ -31,20 +31,34 @@ export const schema = object(
       description: "Organisme id",
     }),
     id_erp_apprenant: string({ description: "Identifiant de l'apprenant dans l'erp" }),
-    uai_etablissement: string({ description: "Code uai de l'établissement formateur" }),
-
     source: string({ description: "Source du dossier apprenant (Ymag, Gesti, MANUEL...)" }), // TODO ENUM of this ? maybe not
-    siret_etablissement: string({ description: "Siret de l'établissement d'origine" }),
+    annee_scolaire: string({
+      description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
+      pattern: "^\\d{4}-\\d{4}$",
+    }),
 
+    // Etablissement
+    uai_etablissement: string({ description: "Code uai de l'établissement formateur" }),
+    siret_etablissement: string({ description: "Siret de l'établissement d'origine" }),
     etablissement_reseaux: arrayOf(string(), {
       description: "Réseaux auxquels appartient l'organisme de formation de l'apprenant",
     }), // TODO [tech] MUST BE REMOVE after migration => Useless
+    nom_etablissement: string({ description: "Nom de l'établissement d'origine" }),
+    etablissement_adresse: string({ description: "Adresse complète du CFA" }),
+    etablissement_nom_region: string({ description: "Région du CFA" }),
+    etablissement_num_region: string({
+      description: "Numéro de la région du CFA",
+      enum: REGIONS.map(({ code }) => code),
+    }),
+    etablissement_num_departement: string({ description: "Numéro de departement du CFA" }),
+    etablissement_nom_departement: string({ description: "Nom du departement du CFA" }),
 
+    // Apprenant
     ine_apprenant: string({ description: "N° INE de l'apprenant" }),
     nom_apprenant: string({ description: "Nom de l'apprenant" }),
     prenom_apprenant: string({ description: "Prénom de l'apprenant" }),
     email_contact: string({ description: "Adresse mail de contact de l'apprenant" }),
-
+    date_de_naissance_apprenant: date({ description: "Date de naissance de l'apprenant" }),
     telephone_apprenant: string({
       description: `Dans le cas d'un numéro français, il n'est pas 
         nécessaire de saisir le "0" car l'indicateur pays est 
@@ -55,37 +69,12 @@ export const schema = object(
       maxLength: 13,
       minLength: 8,
     }),
-    employeur_siret: string({
-      description: "N° SIRET de l'employeur",
-      pattern: "^[0-9]{14}$",
-      maxLength: 14,
-      minLength: 14,
+    code_commune_insee_apprenant: string({
+      description: "Code commune insee de l'apprenant",
+      pattern: "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
+      maxLength: 5,
+      minLength: 5,
     }),
-
-    formation_cfd: string({
-      description: "CFD de la formation à laquelle l'apprenant est inscrit",
-      pattern: "^[0-9A-Z]{8}[A-Z]?$",
-      maxLength: 8,
-    }),
-    formation_rncp: string({
-      description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-      pattern: "^(RNCP)?[0-9]{2,5}$",
-      maxLength: 9,
-    }),
-    libelle_long_formation: string({ description: "Libellé court de la formation visée" }),
-    niveau_formation: string({ description: "Le niveau de la formation (ex: 3)" }),
-    niveau_formation_libelle: string({
-      description: "Libellé du niveau de la formation (ex: '3 (BTS, DUT...)')",
-    }),
-    nom_etablissement: string({ description: "Nom de l'établissement d'origine" }),
-    etablissement_adresse: string({ description: "Adresse complète du CFA" }),
-    etablissement_nom_region: string({ description: "Région du CFA" }),
-    etablissement_num_region: string({
-      description: "Numéro de la région du CFA",
-      enum: REGIONS.map(({ code }) => code),
-    }),
-    etablissement_num_departement: string({ description: "Numéro de departement du CFA" }),
-    etablissement_nom_departement: string({ description: "Nom du departement du CFA" }),
     historique_statut_apprenant: arrayOf(
       object(
         {
@@ -102,23 +91,38 @@ export const schema = object(
         }
       )
     ),
-    periode_formation: arrayOf(integer(), { description: "Date debut & date de fin de la formation" }),
-    annee_formation: integer({ description: "Numéro de l'année dans la formation (promo)" }),
-    annee_scolaire: string({
-      description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,
-      pattern: "^\\d{4}-\\d{4}$",
+
+    // contrat
+    employeur_siret: string({
+      description: "N° SIRET de l'employeur",
+      pattern: "^[0-9]{14}$",
+      maxLength: 14,
+      minLength: 14,
     }),
-    code_commune_insee_apprenant: string({
-      description: "Code commune insee de l'apprenant",
-      pattern: "^[0-9]{1}[0-9A-Z]{1}[0-9]{3}$",
-      maxLength: 5,
-      minLength: 5,
-    }),
-    date_de_naissance_apprenant: date({ description: "Date de naissance de l'apprenant" }),
     contrat_date_debut: date({ description: "Date de début du contrat" }),
     contrat_date_fin: date({ description: "Date de fin du contrat" }),
     contrat_date_rupture: date({ description: "Date de rupture du contrat" }),
 
+    // Formation
+    formation_cfd: string({
+      description: "CFD de la formation à laquelle l'apprenant est inscrit",
+      pattern: "^[0-9A-Z]{8}[A-Z]?$",
+      maxLength: 8,
+    }),
+    formation_rncp: string({
+      description: "Code RNCP de la formation à laquelle l'apprenant est inscrit",
+      pattern: "^(RNCP)?[0-9]{2,5}$",
+      maxLength: 9,
+    }),
+    libelle_long_formation: string({ description: "Libellé court de la formation visée" }),
+    niveau_formation: string({ description: "Le niveau de la formation (ex: 3)" }),
+    niveau_formation_libelle: string({
+      description: "Libellé du niveau de la formation (ex: '3 (BTS, DUT...)')",
+    }),
+    periode_formation: arrayOf(integer(), { description: "Date debut & date de fin de la formation" }),
+    annee_formation: integer({ description: "Numéro de l'année dans la formation (promo)" }),
+
+    // Technique
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
     archive: boolean({ description: "Dossier apprenant est archivé (retnetion maximum 5 ans)" }),

@@ -20,7 +20,7 @@ const fetchOrganisme = async (organisme_id) => {
 };
 
 export function useOrganisme() {
-  let { organisme_id } = useEspace();
+  let { organisme_id, myOrganisme } = useEspace();
 
   const [isloaded, setIsLoaded] = useState(false);
   const [isReloaded, setIsReloaded] = useState(false);
@@ -29,12 +29,14 @@ export function useOrganisme() {
   const [organisme, setOrganisme] = useRecoilState(organismeAtom);
 
   useEffect(() => {
+    // TODO A lot of re-render ~15 - Maybe add Ref ?
     const abortController = new AbortController();
     setIsReloaded(false);
     fetchOrganisme(organisme_id)
       .then(({ organisme }) => {
+        // console.log("fetching", organisme_id);
         if (!abortController.signal.aborted) {
-          setOrganisme(organisme);
+          setOrganisme(organisme || myOrganisme);
           setIsReloaded(true);
           setIsLoaded(true);
         }
@@ -49,7 +51,7 @@ export function useOrganisme() {
     return () => {
       abortController.abort();
     };
-  }, [organisme_id, setOrganisme]);
+  }, [myOrganisme, organisme_id, setOrganisme]);
 
   if (error !== null) {
     throw error;

@@ -19,6 +19,8 @@ import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { authMiddleware } from "../../middlewares/authMiddleware.js";
+import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
+import { fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -65,6 +67,16 @@ export default ({ mailer }) => {
         throw Boom.conflict(`Unable to create`, { message: `email already in use` });
       }
 
+      let uai = null;
+      if (type === "of") {
+        const resp = await fetchOrganismeWithSiret(siret);
+        if (resp) {
+          uai = resp.uai;
+        } else {
+          throw Boom.badRequest("Something went wrong");
+        }
+      }
+
       const user = await createUser(
         { email, password },
         {
@@ -73,6 +85,7 @@ export default ({ mailer }) => {
           nom,
           prenom,
           civility,
+          ...(uai ? { uai } : {}),
         }
       );
 
@@ -80,7 +93,7 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      await mailer.sendEmail({ ...user, tmpPwd: password }, "activation_user");
+      await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
 
       return res.json({ succeeded: true });
     })
@@ -89,14 +102,23 @@ export default ({ mailer }) => {
   router.post(
     "/siret-adresse",
     tryCatch(async ({ body }, res) => {
-      const { siret } = await Joi.object({
+      const { siret, organismeFormation } = await Joi.object({
         siret: Joi.string().required(),
+        organismeFormation: Joi.boolean().default(false),
       }).validateAsync(body, { abortEarly: false });
 
       const { result, messages } = await findDataFromSiret(siret, false);
 
       if (Object.keys(result).length === 0) {
         return res.json({ result, messages });
+      }
+
+      let uai = null;
+      if (organismeFormation) {
+        const resp = await fetchOrganismeWithSiret(siret);
+        if (resp) {
+          uai = resp.uai;
+        }
       }
 
       return res.json({
@@ -110,6 +132,7 @@ export default ({ mailer }) => {
           localite: result.localite,
           ferme: result.ferme,
           secretSiret: result.secretSiret || false,
+          uai,
         },
         messages,
       });
@@ -131,7 +154,9 @@ export default ({ mailer }) => {
       }
 
       const updatedUser = await activateUser(user.email.toLowerCase());
-      // TODO [tech] AFTERACTIONS
+
+      await userAfterCreate({ user: updatedUser, mailer });
+
       const payload = await structureUser(updatedUser);
 
       await loggedInUser(payload.email);

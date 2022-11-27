@@ -10,7 +10,9 @@ export default () => {
     "/organismes",
     pageAccessMiddleware(["page/mes-organismes"]),
     tryCatch(async ({ user }, res) => {
-      const query = !user.organisme_ids.length ? {} : { _id: { $in: user.organisme_ids } };
+      const query = !user.organisme_ids.length
+        ? {}
+        : { _id: { $in: user.organisme_ids.filter((id) => id.toString() !== user.main_organisme_id.toString()) } };
       const organismes = await findOrganismesByQuery(query);
       return res.json(organismes);
     })

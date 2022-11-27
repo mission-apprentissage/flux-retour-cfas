@@ -12,6 +12,7 @@ import useAuth from "../../hooks/useAuth";
 import { _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import Link from "../../components/Links/Link";
+import Ribbons from "../../components/Ribbons/Ribbons";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -23,10 +24,7 @@ const Finalize = () => {
   const title = "Finalisation de votre inscription";
 
   const { handleSubmit } = useFormik({
-    initialValues: {
-      compte: "",
-      siret: auth.siret || "",
-    },
+    initialValues: {},
 
     onSubmit: (values) => {
       // eslint-disable-next-line no-undef, no-async-promise-executor
@@ -59,12 +57,32 @@ const Finalize = () => {
           {title}
         </Heading>
         <Box mt={5}>
-          <HStack spacing="4w">
-            <Button size="md" variant="primary" onClick={handleSubmit} px={6}>
-              Finaliser votre inscription
-            </Button>
-          </HStack>
-          <Flex flexGrow={1} alignItems="end">
+          {auth.isInPendingValidation && (
+            <Ribbons variant="loading" mt="0.5rem">
+              <Box ml={3}>
+                <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
+                  Votre demande est en cours d&rsquo;étude par nos services.
+                </Text>
+                <Text color="bleufrance" mt={4} fontSize="0.9rem">
+                  Vous serez notifié dès que votre demander aura été validée.
+                </Text>
+                <Text color="grey.800" mt={4}>
+                  <Text textStyle="sm">
+                    Vous êtes la premieres personne a demander une accès à cet organisme. <br />
+                    Pour des raisons de sécurité, un de nos administrateurs va examiner votre demander. <br />
+                  </Text>
+                </Text>
+              </Box>
+            </Ribbons>
+          )}
+          {!auth.isInPendingValidation && (
+            <HStack spacing="4w">
+              <Button size="md" variant="primary" onClick={handleSubmit} px={6}>
+                Finaliser votre inscription
+              </Button>
+            </HStack>
+          )}
+          <Flex flexGrow={1} alignItems="end" mt={8}>
             <Text mt={8} fontSize="1rem">
               Vous rencontrez des difficultés à passer cette étape ?{" "}
               <Link href="/questions-reponses" color="bluefrance" ml={3}>

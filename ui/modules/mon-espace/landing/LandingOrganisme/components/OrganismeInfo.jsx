@@ -4,6 +4,8 @@ import { Badge, Box, Heading, HStack, Skeleton, Text } from "@chakra-ui/react";
 import { Section } from "../../../../../components/index";
 import NatureOrganismeDeFormationWarning from "./NatureOrganismeDeFormationWarning";
 import { formatSiretSplitted } from "../../../../../common/utils/stringUtils";
+import { organismeAtom } from "../../../../../hooks/organismeAtoms";
+import { useRecoilValue } from "recoil";
 
 export const mapNatureOrganismeDeFormation = (nature) => {
   switch (nature) {
@@ -18,7 +20,9 @@ export const mapNatureOrganismeDeFormation = (nature) => {
   }
 };
 
-export default function OrganismeInfo({ organisme }) {
+export default function OrganismeInfo() {
+  const organisme = useRecoilValue(organismeAtom);
+
   if (!organisme) {
     return (
       <Section borderTop="solid 1px" borderTopColor="grey.300" backgroundColor="galt" paddingY="2w">

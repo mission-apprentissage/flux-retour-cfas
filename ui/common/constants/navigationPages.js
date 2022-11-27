@@ -1,6 +1,6 @@
 export const NAVIGATION_PAGES = {
   Login: {
-    path: "/login",
+    path: "/auth/connexion",
     title: "Institution ou une organisation professionnelle",
   },
   Accueil: {

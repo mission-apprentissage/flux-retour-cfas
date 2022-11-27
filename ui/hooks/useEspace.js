@@ -5,8 +5,8 @@ import useAuth from "./useAuth";
 import { useRecoilState } from "recoil";
 import { organismeMineAtom, organismeNavigationAtom } from "./organismeAtoms";
 
-const fetchMyOrganisme = async (my_organisme_id) => {
-  if (!my_organisme_id) return { myOrganisme: null };
+const fetchMyOrganisme = async (my_organisme_id, accountIsNotReady = false) => {
+  if (!my_organisme_id || accountIsNotReady) return { myOrganisme: null };
   try {
     const myOrganisme = await _get(`/api/v1/organisme/entity/${my_organisme_id}?organisme_id=${my_organisme_id}`);
     return { myOrganisme };
@@ -52,7 +52,8 @@ export function useEspace() {
   useEffect(() => {
     const abortController = new AbortController();
     setIsReloaded(false);
-    fetchMyOrganisme(auth.main_organisme_id)
+
+    fetchMyOrganisme(auth.main_organisme_id, auth.account_status !== "CONFIRMED" || auth.isInPendingValidation)
       .then(({ myOrganisme }) => {
         if (!abortController.signal.aborted) {
           const mesOrganismesNames = {
@@ -160,6 +161,8 @@ export function useEspace() {
     setMyOrganisme,
     userIsAnOrganisme,
     whoIs,
+    auth.isInPendingValidation,
+    auth.account_status,
   ]);
 
   if (error !== null) {

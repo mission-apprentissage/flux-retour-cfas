@@ -14,6 +14,7 @@ import {
   updateUser,
 } from "../../../common/actions/users.actions.js";
 import { findRoleById, findRolesByNames } from "../../../common/actions/roles.actions.js";
+import { updatePermissionPending } from "../../../common/actions/permissions.actions.js";
 
 // TODO [tech]
 // eslint-disable-next-line no-unused-vars
@@ -48,6 +49,23 @@ export default ({ mailer }) => {
       const foundUsers = await searchUsers(searchTerm);
       const usersMapped = await Promise.all(foundUsers.map(async (u) => await structureUser(u)));
       return res.json(usersMapped);
+    })
+  );
+
+  router.get(
+    "/users/confirm-user",
+    tryCatch(async ({ query }, res) => {
+      const { userEmail, organisme_id, validate } = await Joi.object({
+        userEmail: Joi.string().email().required(),
+        organisme_id: Joi.string().required(),
+        validate: Joi.boolean().required(),
+      }).validateAsync(query, { abortEarly: false });
+      if (validate) {
+        await updatePermissionPending({ organisme_id, userEmail, pending: false });
+      } else {
+        // TODO REJECTED PERM
+      }
+      return res.json({ ok: true });
     })
   );
 

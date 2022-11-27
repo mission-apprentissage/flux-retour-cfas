@@ -2,7 +2,6 @@ import logger from "../../../common/logger.js";
 import { createUser } from "../../../common/actions/users.actions.js";
 import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
 import { createRole } from "../../../common/actions/roles.actions.js";
-// import { createSifa } from "../../../common/actions/sifas.actions.js";
 import { addContributeurOrganisme, createOrganisme } from "../../../common/actions/organismes.actions.js";
 import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
 
@@ -85,7 +84,7 @@ export const seed = async ({ adminEmail }) => {
       siret: "13002526500013", // Siret Dinum
     }
   );
-  await userAfterCreate({ user: userAdmin, pending: false });
+  await userAfterCreate({ user: userAdmin, pending: false, notify: false });
   logger.info(`User ${aEmail} with password 'Secret!Password1' and admin is successfully created `);
 
   // Create user Pilot
@@ -103,7 +102,7 @@ export const seed = async ({ adminEmail }) => {
       organisation: "DREETS",
     }
   );
-  await userAfterCreate({ user: urserPilot, pending: false });
+  await userAfterCreate({ user: urserPilot, pending: false, notify: false });
   logger.info(`User pilot created`);
 
   // Create user OF
@@ -120,7 +119,7 @@ export const seed = async ({ adminEmail }) => {
       organisation: "ORGANISME_FORMATION",
     }
   );
-  await userAfterCreate({ user: urserOf, pending: false });
+  await userAfterCreate({ user: urserOf, pending: false, notify: false });
   logger.info(`User off created`);
 
   const urserOfR = await createUser(
@@ -136,7 +135,7 @@ export const seed = async ({ adminEmail }) => {
       organisation: "ORGANISME_FORMATION",
     }
   );
-  await userAfterCreate({ user: urserOfR, pending: false });
+  await userAfterCreate({ user: urserOfR, pending: false, notify: false });
   await addContributeurOrganisme(organismeOFF._id, urserOfR.email, "organisme.admin", false);
   logger.info(`User ofr created`);
 
@@ -154,7 +153,7 @@ export const seed = async ({ adminEmail }) => {
       organisation: "TETE_DE_RESEAU",
     }
   );
-  await userAfterCreate({ user: urserReseau, pending: false });
+  await userAfterCreate({ user: urserReseau, pending: false, notify: false });
   logger.info(`User reseau created`);
 
   // Create user ERP
@@ -171,12 +170,10 @@ export const seed = async ({ adminEmail }) => {
       organisation: "ERP",
     }
   );
-  await userAfterCreate({ user: urserErp, pending: false });
+  await userAfterCreate({ user: urserErp, pending: false, notify: false });
   logger.info(`User erp created`);
 
   ///BELOW OTHER STUFF
-
-  // await createSifa(); // TODO [tech] TMP
 
   logger.info(`Seed tjp-pilotage created`);
 };
