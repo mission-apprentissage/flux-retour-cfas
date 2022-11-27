@@ -1,38 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Flex, Text, HStack, Center, Spinner, Button, Tooltip, Circle } from "@chakra-ui/react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { Box, Flex, Text, HStack, Button, Tooltip, Circle } from "@chakra-ui/react";
+import { useSetRecoilState } from "recoil";
+import { useQueryClient } from "@tanstack/react-query";
 
 import Table from "../../../../components/Table/Table";
 
 import { AddFill, Alert, ErrorIcon, InfoLine, SubtractLine, ValidateIcon } from "../../../../theme/components/icons";
 import Effectif from "./Effectif";
-import { organismeAtom } from "../../../../hooks/organismeAtoms";
-import { _get } from "../../../../common/httpClient";
 import { effectifIdAtom } from "./atoms";
-
-function useOrganismesEffectifs() {
-  const organisme = useRecoilValue(organismeAtom);
-  const queryClient = useQueryClient();
-  const prevOrganismeId = useRef(null);
-
-  useEffect(() => {
-    if (prevOrganismeId.current !== organisme._id) {
-      prevOrganismeId.current = organisme._id;
-      queryClient.resetQueries("organismesEffectifs", { exact: true });
-    }
-  }, [queryClient, organisme._id]);
-
-  const {
-    data: organismesEffectifs,
-    isLoading,
-    isFetching,
-  } = useQuery(["organismesEffectifs"], () => _get(`/api/v1/organisme/effectifs?organisme_id=${organisme._id}`), {
-    refetchOnWindowFocus: false,
-  });
-
-  return { isLoading: isFetching || isLoading, organismesEffectifs };
-}
 
 const EffectifDetails = ({ row }) => {
   const queryClient = useQueryClient();
@@ -57,35 +32,37 @@ const EffectifDetails = ({ row }) => {
   );
 };
 
-const EffectifsTable = () => {
-  const { isLoading, organismesEffectifs } = useOrganismesEffectifs();
-
-  if (isLoading) {
-    return (
-      <Center>
-        <Spinner />
-      </Center>
-    );
-  }
-
-  if (!organismesEffectifs.length) {
-    return <Box mt={9}>Vous ne transmettez pas encore vos effectifs.</Box>;
-  }
-
+const EffectifsTable = ({ organismesEffectifs }) => {
   return (
     <Flex flexDir="column" width="100%" my={9}>
-      <HStack>
-        <Text>Grouper par :</Text>
-        <Button onClick={() => {}} variant="badgeSelected">
-          par formations
-          <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">
-            <Box as="i" className="ri-checkbox-circle-line" fontSize="gamma" />
-          </Circle>
+      <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%">
+        <Box flexBasis={{ base: "auto", md: "auto" }} flexGrow="1">
+          <HStack>
+            <Text>Grouper par :</Text>
+            <Button onClick={() => {}} variant="badgeSelected">
+              par formations
+              <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">
+                <Box as="i" className="ri-checkbox-circle-line" fontSize="gamma" />
+              </Circle>
+            </Button>
+            <Button onClick={() => {}} variant="badge">
+              par années scolaire
+            </Button>
+          </HStack>
+        </Box>
+
+        <Button
+          size="md"
+          fontSize={{ base: "sm", md: "md" }}
+          p={{ base: 2, md: 4 }}
+          h={{ base: 8, md: 10 }}
+          onClick={() => {}}
+          variant="primary"
+        >
+          + Ajout apprenant(e)
         </Button>
-        <Button onClick={() => {}} variant="badge">
-          par années scolaire
-        </Button>
-      </HStack>
+      </Flex>
+
       <Box mt={10}>
         <HStack>
           <Text fontWeight="bold" textDecoration="underline">
