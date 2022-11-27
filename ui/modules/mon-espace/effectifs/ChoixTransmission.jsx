@@ -59,7 +59,7 @@ const ChoixTransmission = ({ onModeClicked }) => {
             <Box flexGrow="1">
               <Flex flexDirection="column" alignItems="flex-start" p={0}>
                 <Heading as="h4" fontSize="1.5rem" mb={4}>
-                  Téléverser votre fichier
+                  Téléverser vos fichiers
                 </Heading>
                 <Heading as="h5" fontSize="1rem" mb={4}>
                   Laissez-vous guider à partir de votre fichier. Notre outil transforme rapidement au format souhaité.

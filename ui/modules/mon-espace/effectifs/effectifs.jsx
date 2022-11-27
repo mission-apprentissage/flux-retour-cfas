@@ -8,6 +8,7 @@ import { _get } from "../../../common/httpClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import ChoixTransmission from "./choixTransmission";
+import UploadFiles from "./engine/PiecesJustificatives/components/UploadFiles";
 
 function useOrganismesEffectifs() {
   const organisme = useRecoilValue(organismeAtom);
@@ -62,7 +63,11 @@ const EffectifsOrganisme = () => {
         />
       )}
       {mode === "erp" && <Box mt={10}>STUFF ABOUT HOW TO ERP</Box>}
-      {mode === "file" && <Box mt={10}>Upload page</Box>}
+      {mode === "file" && (
+        <Box mt={10}>
+          <UploadFiles title={`Téléverser vos fichiers`} typeDocument="CONVENTION_FORMATION" />
+        </Box>
+      )}
       {displayEffectifs && <EffectifsTable organismesEffectifs={organismesEffectifs} />}
     </>
   );

@@ -2,12 +2,13 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Box, HStack, Button, Heading, Input, ListItem, Text, List, useToast, Spinner, Link } from "@chakra-ui/react";
 import { useDropzone } from "react-dropzone";
 import { useRecoilValue } from "recoil";
-import { _postFile, _delete } from "../../../../common/httpClient";
-import { DownloadLine, File, Bin } from "../../../../theme/components/icons";
-import { hasContextAccessTo } from "../../../../common/utils/rolesUtils";
+
 import queryString from "query-string";
 import { useDocuments } from "../hooks/useDocuments";
 import { dossierAtom } from "../../atoms";
+import { _delete, _postFile } from "../../../../../../common/httpClient";
+import { hasContextAccessTo } from "../../../../../../common/utils/rolesUtils";
+import { Bin, DownloadLine, File } from "../../../../../../theme/components/icons";
 
 const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
 
@@ -79,7 +80,7 @@ const UploadFiles = ({ title, typeDocument }) => {
         setIsSubmitting(false);
       }
     },
-    [dossier._id, onDocumentsChanged, toast, typeDocument]
+    [dossier?._id, onDocumentsChanged, toast, typeDocument]
   );
 
   const onDropRejected = useCallback(
@@ -135,7 +136,7 @@ const UploadFiles = ({ title, typeDocument }) => {
       </Heading>
       <Box mb={8}>
         {uploadError && <Text color="error">{uploadError}</Text>}
-        {documents.length > 0 && (
+        {documents?.length > 0 && (
           <>
             <List>
               {documents.map((file) => {
@@ -163,31 +164,30 @@ const UploadFiles = ({ title, typeDocument }) => {
           </>
         )}
       </Box>
-      {dossier.draft && (
-        <Box {...getRootProps({ style })} mb={8}>
-          {!isSubmitting && (
-            <>
-              <Input {...getInputProps()} />
-              {isDragActive ? (
-                <Text>Glissez et déposez ici ...</Text>
-              ) : (
-                <>
-                  <DownloadLine boxSize="4" color="bluefrance" mb={4} />
-                  <Text color="mgalt">
-                    Glissez le fichier dans cette zone ou cliquez sur le bouton pour ajouter un document depuis votre
-                    disque dur
-                  </Text>
-                  <Text color="mgalt">(pdf uniquement, maximum 10mb)</Text>
-                  <Button size="md" variant="secondary" mt={4}>
-                    Ajouter un document
-                  </Button>
-                </>
-              )}
-            </>
-          )}
-          {isSubmitting && <Spinner />}
-        </Box>
-      )}
+
+      <Box {...getRootProps({ style })} mb={8}>
+        {!isSubmitting && (
+          <>
+            <Input {...getInputProps()} />
+            {isDragActive ? (
+              <Text>Glissez et déposez ici ...</Text>
+            ) : (
+              <>
+                <DownloadLine boxSize="4" color="bluefrance" mb={4} />
+                <Text color="mgalt">
+                  Glissez le fichier dans cette zone ou cliquez sur le bouton pour ajouter un document depuis votre
+                  disque dur
+                </Text>
+                <Text color="mgalt">(pdf uniquement, maximum 10mb)</Text>
+                <Button size="md" variant="secondary" mt={4}>
+                  Ajouter un document
+                </Button>
+              </>
+            )}
+          </>
+        )}
+        {isSubmitting && <Spinner />}
+      </Box>
     </>
   );
 };
