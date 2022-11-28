@@ -24,7 +24,7 @@ export const formationSchema = object(
     annee: integer({ description: "Numéro de l'année dans la formation (promo)" }),
   },
   {
-    required: ["cfd", "formation_id"],
+    required: ["cfd"], // TODO formation_id
     additionalProperties: true,
   }
 );
