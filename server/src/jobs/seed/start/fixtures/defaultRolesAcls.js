@@ -8,6 +8,11 @@ export default {
       "organisme",
       "organisme/tableau_de_bord",
       "organisme/page_effectifs",
+
+      "organisme/page_effectifs/edition",
+      "organisme/page_effectifs/ajout_apprenant",
+      "organisme/page_effectifs/telecharger",
+
       "organisme/page_sifa2",
 
       "organisme/page_parametres",

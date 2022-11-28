@@ -1,13 +1,23 @@
 import React, { useEffect, useRef } from "react";
 import { Box, Flex, Text, HStack, Button, Tooltip, Circle } from "@chakra-ui/react";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
 
 import Table from "../../../../components/Table/Table";
 
-import { AddFill, Alert, ErrorIcon, InfoLine, SubtractLine, ValidateIcon } from "../../../../theme/components/icons";
+import {
+  AddFill,
+  Alert,
+  DownloadLine,
+  ErrorIcon,
+  InfoLine,
+  SubtractLine,
+  ValidateIcon,
+} from "../../../../theme/components/icons";
 import Effectif from "./Effectif";
 import { effectifIdAtom } from "./atoms";
+import { hasContextAccessTo } from "../../../../common/utils/rolesUtils";
+import { organismeAtom } from "../../../../hooks/organismeAtoms";
 
 const EffectifDetails = ({ row }) => {
   const queryClient = useQueryClient();
@@ -33,9 +43,11 @@ const EffectifDetails = ({ row }) => {
 };
 
 const EffectifsTable = ({ organismesEffectifs }) => {
+  const organisme = useRecoilValue(organismeAtom);
+
   return (
     <Flex flexDir="column" width="100%" my={9}>
-      <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%">
+      <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Box flexBasis={{ base: "auto", md: "auto" }} flexGrow="1">
           <HStack>
             <Text>Grouper par :</Text>
@@ -49,18 +61,41 @@ const EffectifsTable = ({ organismesEffectifs }) => {
               par années scolaire
             </Button>
           </HStack>
+          <HStack mt={10}>
+            <Text>Voir :</Text>
+            <Button onClick={() => {}} variant="badgeSelected">
+              Tous les effectifs
+              <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">
+                <Box as="i" className="ri-checkbox-circle-line" fontSize="gamma" />
+              </Circle>
+            </Button>
+            <Button onClick={() => {}} variant="badge" bg="none" borderWidth="1px" borderColor="bluefrance">
+              Seulement les erreurs
+            </Button>
+          </HStack>
         </Box>
-
-        <Button
-          size="md"
-          fontSize={{ base: "sm", md: "md" }}
-          p={{ base: 2, md: 4 }}
-          h={{ base: 8, md: 10 }}
-          onClick={() => {}}
-          variant="primary"
-        >
-          + Ajout apprenant(e)
-        </Button>
+        <HStack spacing={4}>
+          {hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
+            <Button size="md" onClick={() => {}} variant="secondary">
+              <DownloadLine />
+              <Text as="span" ml={2}>
+                Télécharger
+              </Text>
+            </Button>
+          )}
+          {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") && (
+            <Button
+              size="md"
+              fontSize={{ base: "sm", md: "md" }}
+              p={{ base: 2, md: 4 }}
+              h={{ base: 8, md: 10 }}
+              onClick={() => {}}
+              variant="primary"
+            >
+              + Ajout apprenant(e)
+            </Button>
+          )}
+        </HStack>
       </Flex>
 
       <Box mt={10}>
@@ -228,7 +263,7 @@ const EffectifsTable = ({ organismesEffectifs }) => {
                 return (
                   <Box textAlign="left">
                     <Tooltip
-                      label={<Text>Si les données sont suffissantes pour SIFA ou en erreurs</Text>}
+                      label={<Text>Si les données sont suffissantes pour SIFA2</Text>}
                       aria-label="A tooltip"
                       background="bluefrance"
                       color="white"

@@ -26,10 +26,10 @@ export default () => {
     tryCatch(async ({ query: { organisme_id } }, res) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
-      let fakeState = ["complete_sifa", "missing_sifa", "error"];
+      let fakeState = ["complete_sifa", "missing_sifa", ""];
       const effectifs = [];
       for (const { _id, id_erp_apprenant, source, annee_scolaire, apprenant, formation } of effectifsDb) {
-        // apprenant.historique_statut
+        // TODO apprenant.historique_statut
         effectifs.push({
           id: _id.toString(),
           id_erp_apprenant,

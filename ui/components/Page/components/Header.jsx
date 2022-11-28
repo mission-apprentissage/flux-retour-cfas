@@ -28,7 +28,7 @@ import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
 import { Settings4Fill, UserFill } from "../../../theme/components/icons";
 import { useRouter } from "next/router";
-import { NotificationsMenu } from "./Notifications/Notifications";
+// import { NotificationsMenu } from "./Notifications/Notifications";
 
 const UserMenu = () => {
   let [auth] = useAuth();
@@ -64,7 +64,7 @@ const UserMenu = () => {
       )}
       {auth?.sub !== "anonymous" && (
         <Flex w="full">
-          <NotificationsMenu mr={5} w="15px" />
+          {/* <NotificationsMenu mr={5} w="15px" /> */}
           <Link
             href="/mon-espace/mon-organisme"
             borderBottom="1px solid"

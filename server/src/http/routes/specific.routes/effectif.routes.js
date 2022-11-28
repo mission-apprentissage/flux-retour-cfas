@@ -95,7 +95,7 @@ export default () => {
 
   router.get(
     "/",
-    // PERM(["effectif/get"]),
+    // PERM(["organisme/page_effectifs/edition"]),
     tryCatch(async (req, res) => {
       let { effectifId } = await Joi.object({
         effectifId: Joi.string().required(),
@@ -110,7 +110,7 @@ export default () => {
 
   router.get(
     "/create",
-    // PERM(["effectif/create"]),
+    // PERM(["organisme/page_effectifs/ajout_apprenant"]),
     tryCatch(async (req, res) => {
       //validateEf
       const effectif = await createEffectif({
@@ -126,7 +126,7 @@ export default () => {
 
   router.put(
     "/:id",
-    // PERM(["effectif/sauvegarder"]),
+    // PERM(["organisme/page_effectifs/edition"]),
     tryCatch(async ({ body, params }, res) => {
       // eslint-disable-next-line no-unused-vars
       const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)
