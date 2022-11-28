@@ -6,6 +6,10 @@ export function passwordSchema(isAdmin = false) {
     : Joi.string().regex(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){12,}$/);
 }
 
+export function cfdSchema() {
+  return Joi.string().regex(/^[0-9A-Z]{8}[A-Z]?$/);
+}
+
 export function siretSchema() {
   return Joi.string()
     .regex(/^[0-9]{14}$/)

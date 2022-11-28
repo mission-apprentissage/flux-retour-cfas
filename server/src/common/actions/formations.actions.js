@@ -1,10 +1,11 @@
 import { validateCfd } from "../utils/validationsUtils/cfd.js";
 import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { getMetiersByCfd } from "../apis/apiLba.js";
-import { Formation } from "../factory/formation.js"; // TODO
 import { escapeRegExp } from "../utils/regexUtils.js";
 import logger from "../logger.js";
 import { formationsDb, dossiersApprenantsDb } from "../model/collections.js";
+import { validateFormation } from "../model/next.toKeep.models/formations.model.js";
+import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -53,8 +54,10 @@ export const createFormation = async (cfd) => {
     throw new Error(`A Formation with CFD ${cfd} already exists`);
   }
 
+  // Call TCO Api
   const formationInfo = await getCfdInfo(cfd);
 
+  // Call LBA Api
   let metiersFromCfd = null;
   try {
     const { data } = await getMetiersByCfd(cfd);
@@ -63,21 +66,27 @@ export const createFormation = async (cfd) => {
     logger.error(`createFormation / getMetiersByCfd: something went wrong while requesting cfd ${cfd}`);
   }
 
-  // TODO Remove factory here
-  const formationEntity = Formation.create({
-    cfd,
-    cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
-    cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
-    rncps: formationInfo?.rncps?.map((item) => item.code_rncp) || [], // Returned by TCO
-    libelle: buildFormationLibelle(formationInfo),
-    niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
-    niveau_libelle: formationInfo?.niveau,
-    metiers: metiersFromCfd || [],
-  });
+  // Libelle
+  const libelleFormationBuilt = buildFormationLibelle(formationInfo);
+  const tokenizedLibelle = buildTokenizedString(libelleFormationBuilt || "", 3);
 
-  const { insertedId } = await formationsDb().insertOne(formationEntity);
-  // TODO return only the id (single responsibility)
-  return await formationsDb().findOne({ _id: insertedId });
+  const { insertedId } = await formationsDb().insertOne(
+    validateFormation({
+      cfd,
+      cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
+      cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
+      rncps: formationInfo?.rncps?.map((item) => item.code_rncp) || [], // Returned by TCO
+      libelle: libelleFormationBuilt,
+      tokenized_libelle: tokenizedLibelle,
+      niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
+      niveau_libelle: formationInfo?.niveau,
+      metiers: metiersFromCfd || [],
+      created_at: new Date(),
+      updated_at: null,
+    })
+  );
+
+  return insertedId;
 };
 
 /**
