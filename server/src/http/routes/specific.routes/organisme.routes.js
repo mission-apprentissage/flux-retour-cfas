@@ -1,7 +1,7 @@
 import express from "express";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
-import { findOrganismeById, getContributeurs } from "../../../common/actions/organismes.actions.js";
+import { findOrganismeById, getContributeurs, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 
 export default () => {
@@ -20,6 +20,19 @@ export default () => {
     })
   );
 
+  router.put(
+    "/entity/:id",
+    permissionsOrganismeMiddleware(["organisme/page_parametres"]),
+    tryCatch(async ({ body, params, user }, res) => {
+      // TODO JOI
+      const updatedOrganisme = await updateOrganisme(params.id, body);
+      return res.json({
+        ...updatedOrganisme,
+        acl: user.currentPermissionAcl,
+      });
+    })
+  );
+
   router.get(
     "/effectifs",
     permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
@@ -27,8 +40,10 @@ export default () => {
       const effectifsDb = await findEffectifs(organisme_id);
 
       let fakeState = ["complete_sifa", "missing_sifa", ""];
+
       const effectifs = [];
       for (const { _id, id_erp_apprenant, source, annee_scolaire, apprenant, formation } of effectifsDb) {
+        const random = Math.floor(Math.random() * fakeState.length);
         // TODO apprenant.historique_statut
         effectifs.push({
           id: _id.toString(),
@@ -49,7 +64,7 @@ export default () => {
               date_statut: "10/10/2022",
             },
           ],
-          state: fakeState.pop(),
+          state: fakeState[random],
         });
       }
 

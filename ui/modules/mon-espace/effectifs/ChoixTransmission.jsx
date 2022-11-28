@@ -1,8 +1,11 @@
 import React from "react";
 import { Box, Button, Center, Flex, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 import { ArrowDropRightLine } from "../../../theme/components/icons";
+import { useOrganisme } from "../../../hooks/useOrganisme";
 
-const ChoixTransmission = ({ onModeClicked }) => {
+const ChoixTransmission = () => {
+  const { organisme, updateOrganisme } = useOrganisme();
+
   return (
     <>
       <Box my={9} color="bluesoft.500" fontWeight="700">
@@ -20,7 +23,7 @@ const ChoixTransmission = ({ onModeClicked }) => {
             borderColor="dgalt"
             p={10}
             w="33%"
-            h="30vh"
+            h="40vh"
             borderBottomWidth="4px"
             borderBottomColor="bluefrance"
           >
@@ -40,7 +43,11 @@ const ChoixTransmission = ({ onModeClicked }) => {
               </UnorderedList>
             </Box>
             <Center h="10%">
-              <Button onClick={() => onModeClicked("erp")} size={"md"} variant={"secondary"}>
+              <Button
+                onClick={() => updateOrganisme(organisme.id, { mode_de_transmission: "API" })}
+                size={"md"}
+                variant={"secondary"}
+              >
                 Choisir cette méthode
                 <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
               </Button>
@@ -52,7 +59,7 @@ const ChoixTransmission = ({ onModeClicked }) => {
             borderColor="dgalt"
             p={10}
             w="33%"
-            h="30vh"
+            h="40vh"
             borderBottomWidth="4px"
             borderBottomColor="bluefrance"
           >
@@ -72,7 +79,11 @@ const ChoixTransmission = ({ onModeClicked }) => {
               </UnorderedList>
             </Box>
             <Center h="10%">
-              <Button onClick={() => onModeClicked("file")} size={"md"} variant={"secondary"}>
+              <Button
+                onClick={() => updateOrganisme(organisme.id, { mode_de_transmission: "FICHIERS" })}
+                size={"md"}
+                variant={"secondary"}
+              >
                 Choisir cette méthode
                 <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
               </Button>
@@ -84,7 +95,7 @@ const ChoixTransmission = ({ onModeClicked }) => {
             borderColor="dgalt"
             p={10}
             w="33%"
-            h="30vh"
+            h="40vh"
             borderBottomWidth="4px"
             borderBottomColor="bluefrance"
           >
@@ -104,7 +115,13 @@ const ChoixTransmission = ({ onModeClicked }) => {
               </UnorderedList>
             </Box>
             <Center h="10%">
-              <Button onClick={() => onModeClicked("manuel")} size={"md"} variant={"secondary"}>
+              <Button
+                onClick={() =>
+                  updateOrganisme(organisme.id, { mode_de_transmission: "MANUEL", setup_step_courante: "COMPLETE" })
+                }
+                size={"md"}
+                variant={"secondary"}
+              >
                 Choisir cette méthode
                 <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
               </Button>

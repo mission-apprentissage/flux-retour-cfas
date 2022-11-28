@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Skeleton } from "@chakra-ui/react";
+import { Box, Skeleton, Text } from "@chakra-ui/react";
 
 import { useCerfa } from "./formEngine/useCerfa";
 import { cerfaSchema } from "./formEngine/cerfaSchema";
@@ -20,6 +20,8 @@ const Effectif = React.memo(function EffectifMemo() {
   return (
     <CerfaControllerContext.Provider value={cerfaController}>
       <Box my={12} px={5}>
+        <Text mt={3}>+ formulaire STATUT</Text>
+
         <EffectifApprenant />
       </Box>
     </CerfaControllerContext.Provider>

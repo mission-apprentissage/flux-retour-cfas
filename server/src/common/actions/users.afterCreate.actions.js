@@ -29,7 +29,7 @@ export const userAfterCreate = async ({ user, pending = true, notify = true, mai
       await createPermission({
         organisme_id: null,
         userEmail,
-        role: "organisme.readonly",
+        role: "organisme.statsonly",
         pending: false, // TODO for now not pending Auto confirm
       });
     } else {
@@ -47,7 +47,7 @@ export const userAfterCreate = async ({ user, pending = true, notify = true, mai
 
       const organismes = await findOrganismesByQuery(queryScoped);
       for (const { _id } of organismes) {
-        await addContributeurOrganisme(_id, userEmail, "organisme.readonly", false); // TODO pending: false for now not pending Auto confirm
+        await addContributeurOrganisme(_id, userEmail, "organisme.statsonly", false); // TODO pending: false for now not pending Auto confirm
       }
 
       // TODO [metier] VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
@@ -57,14 +57,14 @@ export const userAfterCreate = async ({ user, pending = true, notify = true, mai
       // user is scoped reseau
       const organismes = await findOrganismesByQuery({ reseaux: { $in: [reseau] } });
       for (const { _id } of organismes) {
-        await addContributeurOrganisme(_id, userEmail, "organisme.readonly", false); // TODO pending: false for now not pending Auto confirm
+        await addContributeurOrganisme(_id, userEmail, "organisme.statsonly", false); // TODO pending: false for now not pending Auto confirm
       }
       // TODO [metier] VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
     } else if (erp) {
       // user is scoped erp
       const organismes = await findOrganismesByQuery({ erps: { $in: [erp] } });
       for (const { _id } of organismes) {
-        await addContributeurOrganisme(_id, userEmail, "organisme.readonly", false); // TODO pending: false for now not pending Auto confirm
+        await addContributeurOrganisme(_id, userEmail, "organisme.statsonly", false); // TODO pending: false for now not pending Auto confirm
       }
       // TODO [metier] VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
     } else {
@@ -101,7 +101,7 @@ export const userAfterCreate = async ({ user, pending = true, notify = true, mai
           ); // Notif TDB_admin or whatever who
         }
       } else {
-        await addContributeurOrganisme(organisme._id, userEmail, "organisme.readonly", pending);
+        await addContributeurOrganisme(organisme._id, userEmail, "organisme.statsonly", pending);
         await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
         // TODO [metier] VALIDATION FLOW [2] => organisme.admin Validate people that wants to join is organisme
         // Notif organisme.admin

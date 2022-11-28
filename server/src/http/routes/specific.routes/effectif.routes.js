@@ -6,6 +6,7 @@ import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { schema } from "../../../common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
 import { effectifsDb } from "../../../common/model/collections.js";
 import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
+import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 
 const flattenKeys = (obj, path = []) =>
   !isObject(obj)
@@ -94,31 +95,43 @@ export default () => {
   };
 
   router.get(
-    "/",
-    // PERM(["organisme/page_effectifs/edition"]),
-    tryCatch(async (req, res) => {
-      let { effectifId } = await Joi.object({
-        effectifId: Joi.string().required(),
+    "/:id",
+    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    tryCatch(async ({ params }, res) => {
+      let { id } = await Joi.object({
+        id: Joi.string().required(),
       })
         .unknown()
-        .validateAsync(req.query, { abortEarly: false });
+        .validateAsync(params, { abortEarly: false });
 
-      const effectif = await effectifsDb().findOne({ _id: ObjectId(effectifId) });
+      const effectif = await effectifsDb().findOne({ _id: ObjectId(id) });
       return res.json(buildEffectifResult(effectif));
     })
   );
 
-  router.get(
-    "/create",
-    // PERM(["organisme/page_effectifs/ajout_apprenant"]),
-    tryCatch(async (req, res) => {
-      //validateEf
+  router.post(
+    "/",
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/ajout_apprenant"]),
+    tryCatch(async ({ body }, res) => {
+      const { organisme_id, annee_scolaire, source, apprenant, formation } = await Joi.object({
+        organisme_id: Joi.string().required(),
+        annee_scolaire: Joi.string().required(),
+        source: Joi.string().required(),
+        apprenant: Joi.object({
+          nom: Joi.string().required(),
+          prenom: Joi.string().required(),
+        }).required(),
+        formation: Joi.object({
+          cfd: Joi.string().required(),
+        }).required(),
+      }).validateAsync(body, { abortEarly: false });
+
       const effectif = await createEffectif({
-        organisme_id: ObjectId("637fed03b6d2c1a37a2ffdab"),
-        annee_scolaire: "2020-2021",
-        source: "TDB_MANUEL",
-        apprenant: { nom: "Hanry", prenom: "Pablo" },
-        formation: { cfd: "26033206" },
+        organisme_id,
+        annee_scolaire,
+        source,
+        apprenant,
+        formation,
       });
       return res.json(effectif);
     })
@@ -126,7 +139,7 @@ export default () => {
 
   router.put(
     "/:id",
-    // PERM(["organisme/page_effectifs/edition"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/edition"]),
     tryCatch(async ({ body, params }, res) => {
       // eslint-disable-next-line no-unused-vars
       const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)

@@ -7,8 +7,8 @@ export default {
     acl: [
       "organisme",
       "organisme/tableau_de_bord",
-      "organisme/page_effectifs",
 
+      "organisme/page_effectifs",
       "organisme/page_effectifs/edition",
       "organisme/page_effectifs/ajout_apprenant",
       "organisme/page_effectifs/telecharger",
@@ -27,13 +27,28 @@ export default {
     type: "permission",
     title: "Rédacteur",
     description: "Permission rédacteur d'organisme",
-    acl: ["organisme", "organisme/tableau_de_bord"],
+    acl: [
+      "organisme",
+      "organisme/tableau_de_bord",
+      "organisme/page_effectifs",
+      "organisme/page_effectifs/edition",
+      "organisme/page_effectifs/ajout_apprenant",
+      "organisme/page_effectifs/telecharger",
+      "organisme/page_sifa2",
+    ],
   },
   "organisme.readonly": {
     name: "organisme.readonly",
     type: "permission",
     title: "Lecteur",
     description: "Permission lecteur d'organisme",
+    acl: ["organisme", "organisme/tableau_de_bord", "organisme/page_effectifs", "organisme/page_effectifs/telecharger"],
+  },
+  "organisme.statsonly": {
+    name: "organisme.statsonly",
+    type: "permission",
+    title: "Lecteur",
+    description: "Permission lecteur de stats d'organisme",
     acl: ["organisme", "organisme/tableau_de_bord"],
   },
   support: {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Flex, Text, HStack, Button, Tooltip, Circle } from "@chakra-ui/react";
+import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure } from "@chakra-ui/react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -18,6 +18,7 @@ import Effectif from "./Effectif";
 import { effectifIdAtom } from "./atoms";
 import { hasContextAccessTo } from "../../../../common/utils/rolesUtils";
 import { organismeAtom } from "../../../../hooks/organismeAtoms";
+import AjoutApprenantModal from "./AjoutApprenantModal";
 
 const EffectifDetails = ({ row }) => {
   const queryClient = useQueryClient();
@@ -44,57 +45,84 @@ const EffectifDetails = ({ row }) => {
 
 const EffectifsTable = ({ organismesEffectifs }) => {
   const organisme = useRecoilValue(organismeAtom);
+  const ajoutModal = useDisclosure();
 
   return (
-    <Flex flexDir="column" width="100%" my={9}>
+    <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Box flexBasis={{ base: "auto", md: "auto" }} flexGrow="1">
           <HStack>
             <Text>Grouper par :</Text>
-            <Button onClick={() => {}} variant="badgeSelected">
+            <Button onClick={() => alert("TODO NOT YET")} variant="badgeSelected">
               par formations
               <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">
                 <Box as="i" className="ri-checkbox-circle-line" fontSize="gamma" />
               </Circle>
             </Button>
-            <Button onClick={() => {}} variant="badge">
+            <Button onClick={() => alert("TODO NOT YET")} variant="badge">
               par années scolaire
             </Button>
           </HStack>
           <HStack mt={10}>
             <Text>Voir :</Text>
-            <Button onClick={() => {}} variant="badgeSelected">
+            <Button onClick={() => alert("TODO NOT YET")} variant="badgeSelected">
               Tous les effectifs
               <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">
                 <Box as="i" className="ri-checkbox-circle-line" fontSize="gamma" />
               </Circle>
             </Button>
-            <Button onClick={() => {}} variant="badge" bg="none" borderWidth="1px" borderColor="bluefrance">
+            <Button
+              onClick={() => alert("TODO NOT YET")}
+              variant="badge"
+              bg="none"
+              borderWidth="1px"
+              borderColor="bluefrance"
+            >
               Seulement les erreurs
             </Button>
           </HStack>
         </Box>
         <HStack spacing={4}>
           {hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
-            <Button size="md" onClick={() => {}} variant="secondary">
+            <Button size="md" onClick={() => alert("TODO NOT YET")} variant="secondary">
               <DownloadLine />
               <Text as="span" ml={2}>
                 Télécharger
               </Text>
             </Button>
           )}
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") && (
-            <Button
-              size="md"
-              fontSize={{ base: "sm", md: "md" }}
-              p={{ base: 2, md: 4 }}
-              h={{ base: 8, md: 10 }}
-              onClick={() => {}}
-              variant="primary"
-            >
-              + Ajout apprenant(e)
-            </Button>
-          )}
+          {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
+            organisme.mode_de_transmission === "FICHIERS" && (
+              <>
+                <Button
+                  size="md"
+                  fontSize={{ base: "sm", md: "md" }}
+                  p={{ base: 2, md: 4 }}
+                  h={{ base: 8, md: 10 }}
+                  onClick={() => alert("TODO NOT YET")}
+                  variant="primary"
+                >
+                  Historique des téleversements
+                </Button>
+                <AjoutApprenantModal size="md" isOpen={ajoutModal.isOpen} onClose={ajoutModal.onClose} />
+              </>
+            )}
+          {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
+            organisme.mode_de_transmission !== "API" && (
+              <>
+                <Button
+                  size="md"
+                  fontSize={{ base: "sm", md: "md" }}
+                  p={{ base: 2, md: 4 }}
+                  h={{ base: 8, md: 10 }}
+                  onClick={ajoutModal.onOpen}
+                  variant="primary"
+                >
+                  + Nouvelle·au apprenant(e)
+                </Button>
+                <AjoutApprenantModal size="md" isOpen={ajoutModal.isOpen} onClose={ajoutModal.onClose} />
+              </>
+            )}
         </HStack>
       </Flex>
 
@@ -103,7 +131,7 @@ const EffectifsTable = ({ organismesEffectifs }) => {
           <Text fontWeight="bold" textDecoration="underline">
             Conseiller en économie sociale familiale
           </Text>
-          <Text>[Code diplôme 26033206]</Text>
+          <Text>[Code diplôme 26033206] - hardcodé TODO</Text>
         </HStack>
         <Table
           mt={4}

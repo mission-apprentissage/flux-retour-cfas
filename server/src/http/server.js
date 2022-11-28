@@ -67,7 +67,7 @@ export default async (services) => {
   app.use("/api/v1/profile", checkJwtToken, profile());
   app.use("/api/v1/espace", checkJwtToken, espace());
   app.use("/api/v1/organisme", checkJwtToken, organisme());
-  app.use("/api/v1/effectif", effectif()); // TODO checkJwtToken
+  app.use("/api/v1/effectif", checkJwtToken, effectif());
   // app.use("/api/v1/serp/upload", checkJwtToken, upload(services));
 
   // private admin access

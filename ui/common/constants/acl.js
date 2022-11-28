@@ -186,6 +186,20 @@ const acl = [
       {
         feature: "Voir la page effectifs",
         ref: "organisme/page_effectifs",
+        subFeatures: [
+          {
+            feature: "Edition des effectifs",
+            ref: "organisme/page_effectifs/edition",
+          },
+          {
+            feature: "Ajouter un apprenant",
+            ref: "organisme/page_effectifs/ajout_apprenant",
+          },
+          {
+            feature: "Télécharger les données anonymisées",
+            ref: "organisme/page_effectifs/telecharger",
+          },
+        ],
       },
       {
         feature: "Voir la page sifa2",

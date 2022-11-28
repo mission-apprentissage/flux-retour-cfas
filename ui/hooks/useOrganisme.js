@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { _get } from "../common/httpClient";
+import { useState, useEffect, useCallback } from "react";
+import { _get, _put } from "../common/httpClient";
 import { useRecoilState } from "recoil";
 import { organismeAtom } from "./organismeAtoms";
 import { useEspace } from "./useEspace";
@@ -27,6 +27,25 @@ export function useOrganisme() {
   const [error, setError] = useState(null);
 
   const [organisme, setOrganisme] = useRecoilState(organismeAtom);
+
+  const updateOrganisme = useCallback(
+    async (id, data) => {
+      id = organisme._id || id;
+      let upOrganisme = null;
+      try {
+        upOrganisme = await _put(`/api/v1/organisme/entity/${id}`, {
+          ...data,
+          organisme_id: id,
+        });
+      } catch (e) {
+        setError(e);
+      } finally {
+        setOrganisme(upOrganisme);
+      }
+      return upOrganisme;
+    },
+    [organisme?._id, setOrganisme]
+  );
 
   useEffect(() => {
     // TODO A lot of re-render ~15 - Maybe add Ref ?
@@ -61,5 +80,6 @@ export function useOrganisme() {
     isloaded,
     isReloaded,
     organisme,
+    updateOrganisme,
   };
 }

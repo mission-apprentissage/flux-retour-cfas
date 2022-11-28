@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Box, Center, Heading, Spinner } from "@chakra-ui/react";
+import React, { useEffect, useRef } from "react";
+import { Center, Heading, Spinner } from "@chakra-ui/react";
 import { useEspace } from "../../../hooks/useEspace";
 import EffectifsTable from "./engine/EffectifsTable.jsx";
 
@@ -8,7 +8,8 @@ import { _get } from "../../../common/httpClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import ChoixTransmission from "./choixTransmission";
-import UploadFiles from "./engine/PiecesJustificatives/components/UploadFiles";
+import TransmissionAPI from "./TransmissionAPI";
+import TransmissionFichier from "./TransmissionFichier";
 
 function useOrganismesEffectifs() {
   const organisme = useRecoilValue(organismeAtom);
@@ -35,8 +36,8 @@ function useOrganismesEffectifs() {
 
 const EffectifsOrganisme = () => {
   const { isMonOrganismePages, isOrganismePages } = useEspace();
+  const organisme = useRecoilValue(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs();
-  const [mode, setMode] = useState(null);
 
   if (isLoading) {
     return (
@@ -46,7 +47,8 @@ const EffectifsOrganisme = () => {
     );
   }
 
-  const displayEffectifs = !!organismesEffectifs.length || mode === "manuel";
+  const displayEffectifs =
+    !!organismesEffectifs.length && organisme.mode_de_transmission && organisme.setup_step_courante === "COMPLETE";
 
   return (
     <>
@@ -55,18 +57,10 @@ const EffectifsOrganisme = () => {
         {isOrganismePages && `Ses effectifs`}
       </Heading>
 
-      {!organismesEffectifs.length && !mode && (
-        <ChoixTransmission
-          onModeClicked={(mod) => {
-            setMode(mod);
-          }}
-        />
-      )}
-      {mode === "erp" && <Box mt={10}>STUFF ABOUT HOW TO ERP</Box>}
-      {mode === "file" && (
-        <Box mt={10}>
-          <UploadFiles title={`Téléverser vos fichiers`} typeDocument="CONVENTION_FORMATION" />
-        </Box>
+      {!organisme.mode_de_transmission && <ChoixTransmission />}
+      {organisme.mode_de_transmission === "API" && organisme.setup_step_courante !== "COMPLETE" && <TransmissionAPI />}
+      {organisme.mode_de_transmission === "FICHIERS" && organisme.setup_step_courante !== "COMPLETE" && (
+        <TransmissionFichier />
       )}
       {displayEffectifs && <EffectifsTable organismesEffectifs={organismesEffectifs} />}
     </>

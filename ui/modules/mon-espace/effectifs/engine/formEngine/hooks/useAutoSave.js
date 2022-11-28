@@ -4,8 +4,9 @@ import { isEmptyValue } from "../utils/isEmptyValue";
 import { getValues } from "../utils/getValues";
 import { apiService } from "../../services/api.service";
 import debounce from "lodash.debounce";
-import { dossierAtom, effectifIdAtom } from "../../atoms";
+import { effectifIdAtom } from "../../atoms";
 import setWith from "lodash.setwith";
+import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
 
 const getIsLocked = (fields) => {
   if (!fields) return undefined;
@@ -22,10 +23,10 @@ export const autoSaveStatusAtom = atom({
 });
 
 export const useAutoSave = ({ controller }) => {
-  const getDossier = useRecoilCallback(
+  const getOrganisme = useRecoilCallback(
     ({ snapshot }) =>
       async () =>
-        snapshot.getPromise(dossierAtom),
+        snapshot.getPromise(organismeAtom),
     []
   );
   const effectifId = useRecoilValue(effectifIdAtom);
@@ -49,10 +50,10 @@ export const useAutoSave = ({ controller }) => {
         );
 
         const data = { ...getValues(toSave), is_lock: getIsLocked(toSave) };
-        const dossier = await getDossier();
+        const organisme = await getOrganisme();
         try {
           await apiService.saveCerfa({
-            dossierId: dossier?._id, // TODO
+            organisme_id: organisme._id,
             data,
             effectifId,
             inputNames: inputNamesRef.current,
@@ -83,5 +84,5 @@ export const useAutoSave = ({ controller }) => {
       controller.off("CHANGE", handler);
       clearTimeout(timeout);
     };
-  }, [controller, effectifId, getDossier, setAutoSave]);
+  }, [controller, effectifId, getOrganisme, setAutoSave]);
 };
