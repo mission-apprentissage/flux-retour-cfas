@@ -47,8 +47,7 @@ const EffectifsOrganisme = () => {
     );
   }
 
-  const displayEffectifs =
-    !!organismesEffectifs.length && organisme.mode_de_transmission && organisme.setup_step_courante === "COMPLETE";
+  const displayEffectifs = organisme.mode_de_transmission && organisme.setup_step_courante === "COMPLETE";
 
   return (
     <>

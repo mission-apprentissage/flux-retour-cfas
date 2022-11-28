@@ -23,9 +23,10 @@ export default () => {
   router.put(
     "/entity/:id",
     permissionsOrganismeMiddleware(["organisme/page_parametres"]),
-    tryCatch(async ({ body, params, user }, res) => {
+    // eslint-disable-next-line no-unused-vars
+    tryCatch(async ({ body: { organisme_id, ...data }, params, user }, res) => {
       // TODO JOI
-      const updatedOrganisme = await updateOrganisme(params.id, body);
+      const updatedOrganisme = await updateOrganisme(params.id, data);
       return res.json({
         ...updatedOrganisme,
         acl: user.currentPermissionAcl,
