@@ -6,27 +6,30 @@ import { defaultValuesEffectif } from "../model/next.toKeep.models/effectifs.mod
  * Méthode de création d'un effectif
  * @returns
  */
-export const createEffectif = async (lockAtCreate = false) => {
-  const id_erp_apprenant = new ObjectId();
+export const createEffectif = async (
+  { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant: { nom, prenom }, formation: { cfd } },
+  lockAtCreate = false
+) => {
+  const _id_erp_apprenant = id_erp_apprenant ?? new ObjectId().toString();
   const defaultValues = defaultValuesEffectif({ lockAtCreate });
-  const test = {
+  const dataToInsert = {
     ...defaultValues,
     apprenant: {
-      nom: "Hanry",
-      prenom: "Pablo",
+      nom,
+      prenom,
       ...defaultValues.apprenant,
     },
     formation: {
-      cfd: "26033206",
+      cfd,
       ...defaultValues.formation,
     },
-    id_erp_apprenant: id_erp_apprenant.toString(), // == _id ??
-    organisme_id: ObjectId("637fed03b6d2c1a37a2ffdab"),
-    source: "TDB_MANUEL",
-    annee_scolaire: "2020-2021",
+    id_erp_apprenant: _id_erp_apprenant,
+    organisme_id: ObjectId(organisme_id),
+    source,
+    annee_scolaire,
   };
   //validateEffectif
-  const { insertedId } = await effectifsDb().insertOne(test);
+  const { insertedId } = await effectifsDb().insertOne(dataToInsert);
 
   return insertedId;
 };

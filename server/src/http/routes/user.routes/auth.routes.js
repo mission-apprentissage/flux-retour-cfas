@@ -19,7 +19,7 @@ export default () => {
         password: Joi.string().required(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      if (["old.username"].includes(emailOrUsername)) {
+      if (["old.username", "old.username1"].includes(emailOrUsername)) {
         // TODO List of old username
         throw Boom.conflict(`Old connection method`, { message: `Ancienne méthode de connexion` });
       }

@@ -48,11 +48,11 @@ export const useAutoSave = ({ controller }) => {
             })
         );
 
-        const data = { ...getValues(toSave), isLockedField: getIsLocked(toSave) };
+        const data = { ...getValues(toSave), is_lock: getIsLocked(toSave) };
         const dossier = await getDossier();
         try {
           await apiService.saveCerfa({
-            dossierId: dossier?._id,
+            dossierId: dossier?._id, // TODO
             data,
             effectifId,
             inputNames: inputNamesRef.current,

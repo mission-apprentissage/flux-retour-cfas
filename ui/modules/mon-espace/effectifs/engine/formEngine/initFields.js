@@ -62,7 +62,7 @@ const createFieldFactory =
     if (type === "date") {
       value = value ? DateTime.fromISO(data.value).setLocale("fr-FR").toFormat("yyyy-MM-dd") : "";
     } else if (type === "number") {
-      value = value + "";
+      value = value ? value + "" : "";
     }
 
     return {

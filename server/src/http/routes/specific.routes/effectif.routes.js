@@ -95,6 +95,7 @@ export default () => {
 
   router.get(
     "/",
+    // PERM(["effectif/get"]),
     tryCatch(async (req, res) => {
       let { effectifId } = await Joi.object({
         effectifId: Joi.string().required(),
@@ -109,15 +110,23 @@ export default () => {
 
   router.get(
     "/create",
+    // PERM(["effectif/create"]),
     tryCatch(async (req, res) => {
-      const effectif = await createEffectif();
+      //validateEf
+      const effectif = await createEffectif({
+        organisme_id: ObjectId("637fed03b6d2c1a37a2ffdab"),
+        annee_scolaire: "2020-2021",
+        source: "TDB_MANUEL",
+        apprenant: { nom: "Hanry", prenom: "Pablo" },
+        formation: { cfd: "26033206" },
+      });
       return res.json(effectif);
     })
   );
 
   router.put(
     "/:id",
-    // permissionsDossierMiddleware(components, ["dossier/sauvegarder"]),
+    // PERM(["effectif/sauvegarder"]),
     tryCatch(async ({ body, params }, res) => {
       // eslint-disable-next-line no-unused-vars
       const { inputNames, ...data } = body; // TODO JOI
@@ -126,19 +135,30 @@ export default () => {
       if (!effectifDb) {
         throw new Error(`Unable to find effectif ${params.id}`);
       }
-      // TODO DEAL WITH NULL values
-      // eslint-disable-next-line no-unused-vars
-      const { _id, apprenant, formation, ...mergedData } = merge(effectifDb, data);
-      const tmp = {
-        apprenant: {
-          nom: apprenant.nom,
-          prenom: apprenant.prenom,
-          historique_statut: [],
-        },
-        formation,
+
+      const { is_lock, ...restData } = data;
+      const compactObject = (val) => {
+        const data = Array.isArray(val) ? val.filter(Boolean) : val;
+        const ret = Object.keys(data).reduce(
+          (acc, key) => {
+            const value = data[key];
+            // TODO Might be an issue with number and boolean
+            if (value) acc[key] = typeof value === "object" ? compactObject(value) : value;
+            if (!acc[key]) delete acc[key];
+            return acc;
+          },
+          Array.isArray(val) ? [] : {}
+        );
+        return !Array.isArray(val) ? (!Object.keys(ret).length ? null : ret) : ret;
       };
-      console.log(tmp);
-      const effectifUpdated = await updateEffectif(effectifDb._id, tmp);
+      // eslint-disable-next-line no-unused-vars
+      const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
+        merge(effectifDb, {
+          ...compactObject(restData),
+          is_lock,
+        });
+
+      const effectifUpdated = await updateEffectif(effectifDb._id, dataToUpdate);
 
       return res.json(buildEffectifResult(effectifUpdated));
     })
