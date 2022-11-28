@@ -20,7 +20,7 @@ const ParametresOrganisme = ({ organisme }) => {
             <Button size="md" onClick={inviteModal.onOpen} variant="secondary">
               <AvatarPlus />
               <Text as="span" ml={2}>
-                Partager
+                Partages organisme
               </Text>
             </Button>
             {/* <InviteModal

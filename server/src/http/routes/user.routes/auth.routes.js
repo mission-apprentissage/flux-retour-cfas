@@ -14,18 +14,20 @@ export default () => {
   router.post(
     "/login",
     tryCatch(async (req, res) => {
-      const { email, password } = await Joi.object({
-        email: Joi.string().email().required(),
+      const { email: emailOrUsername, password } = await Joi.object({
+        email: Joi.string().required(),
         password: Joi.string().required(),
       }).validateAsync(req.body, { abortEarly: false });
+
+      if (["old.username"].includes(emailOrUsername)) {
+        // TODO List of old username
+        throw Boom.conflict(`Old connection method`, { message: `Ancienne méthode de connexion` });
+      }
+      const email = Joi.string().email().required().validateAsync(emailOrUsername, { abortEarly: false });
 
       const user = await getUser(email.toLowerCase());
       if (!user) {
         return res.status(401).json({ message: "Accès non autorisé" });
-      }
-
-      if (user.orign_register !== "ORIGIN") {
-        throw Boom.conflict(`Wrong connection method`, { message: `Mauvaise méthode de connexion` });
       }
 
       const auth = await authenticate(user.email, password);

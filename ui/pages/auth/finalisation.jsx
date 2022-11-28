@@ -78,7 +78,7 @@ const Finalize = () => {
           {!auth.isInPendingValidation && (
             <HStack spacing="4w">
               <Button size="md" variant="primary" onClick={handleSubmit} px={6}>
-                Finaliser votre inscription
+                Accéder à mon espace
               </Button>
             </HStack>
           )}
