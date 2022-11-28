@@ -49,6 +49,29 @@ export const schema = object(
       ...adresseSchema,
       description: "Adresse de l'établissement",
     },
+    formations: arrayOf(
+      object(
+        {
+          formation_id: objectId(),
+          organismes: arrayOf(
+            object(
+              {
+                organisme_id: objectId(),
+                nature: string({
+                  enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
+                }),
+              },
+              { additionalProperties: true }
+            )
+          ),
+        },
+        { additionalProperties: true }
+      ),
+      {
+        description: "Formations de cet organisme",
+      }
+    ),
+
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à l'établissement" }),
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     date_derniere_transmission: date({ description: "Date de la dernière transmission de données" }),
@@ -72,6 +95,7 @@ export function defaultValuesOrganisme() {
     metiers: [],
     reseaux: [],
     erps: [],
+    formations: [],
     contributeurs: [],
     created_at: new Date(),
     updated_at: new Date(),
