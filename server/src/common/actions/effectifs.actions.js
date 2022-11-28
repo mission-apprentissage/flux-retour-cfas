@@ -98,9 +98,19 @@ export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
       ? { [path.join(".")]: obj }
       : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
   const updatePaths = Object.keys(flattenKeys({ apprenant, formation }));
-  for (const path of updatePaths) {
+
+  // Handle manually array fields
+  const updatePathsFiltered = updatePaths
+    .filter((item) => !item.includes("apprenant.historique_statut"))
+    .filter((item) => !item.includes("formation.periode"));
+
+  for (const path of updatePathsFiltered) {
     set(newLocker, path, true);
   }
+
+  // Handle manually field historique & periode_formation
+  set(newLocker, "apprenant.historique_statut", true);
+  set(newLocker, "formation.periode", true);
 
   const updated = await effectifsDb().findOneAndUpdate(
     { _id: effectif._id },

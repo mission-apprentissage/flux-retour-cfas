@@ -5,6 +5,63 @@ import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
 } from "../../../../common/model/next.toKeep.models/dossiersApprenantsMigration.model.js";
+import { createEffectif, updateEffectifAndLock } from "../../../../common/actions/effectifs.actions.js";
+
+export const createEffectifFromDossierApprenantMigrated = async (dossiersApprenantsMigrated) => {
+  // Map dossiersApprenantsMigrated fields for creation / update
+  const {
+    organisme_id,
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
+
+    formation_cfd: cfd,
+    formation_rncp: rncp,
+    libelle_long_formation: libelle_long,
+    niveau_formation: niveau,
+    niveau_formation_libelle: niveau_libelle,
+    periode_formation: periode,
+    annee_formation: annee,
+
+    nom_apprenant: nom,
+    prenom_apprenant: prenom,
+    ine_apprenant: ine,
+    date_de_naissance_apprenant: date_de_naissance,
+    email_contact: courriel,
+    telephone_apprenant: telephone,
+
+    historique_statut_apprenant: historique_statut,
+  } = dossiersApprenantsMigrated;
+
+  // Create effectif not locked
+  const effectifId = await createEffectif({
+    organisme_id,
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
+    apprenant: {
+      nom,
+      prenom,
+    },
+    formation: {
+      cfd,
+    },
+  });
+
+  // Maj de l'effectif en le lockant
+  await updateEffectifAndLock(effectifId, {
+    apprenant: { ine, nom, prenom, date_de_naissance, courriel, telephone, historique_statut },
+    formation: {
+      cfd,
+      rncp,
+      libelle_long,
+      niveau,
+      niveau_libelle,
+      periode,
+      annee,
+    },
+  });
+};
 
 /**
  * Méthode de création d'un dossierApprenantMigration depuis un dossier apprenant historique

@@ -4,11 +4,13 @@ import logger from "../../../../common/logger.js";
 import {
   dossiersApprenantsDb,
   dossiersApprenantsMigrationDb,
+  effectifsDb,
   jobEventsDb,
 } from "../../../../common/model/collections.js";
 import { createOrganisme, findOrganismeByUai } from "../../../../common/actions/organismes.actions.js";
 import {
   createDossierApprenantMigrationFromDossierApprenant,
+  createEffectifFromDossierApprenantMigrated,
   mapToDossiersApprenantsMigrationProps,
 } from "./dossiersApprenants.migration.actions.js";
 import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
@@ -32,11 +34,12 @@ const LOG_ACTIONS = {
  * Ce script effectue la migration de la collection dossiersApprenants vers la nouvelle collection DossiersApprenantsMigration
  */
 export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sample = 0, specificUai = null) => {
-  logger.info("Migration des dossiersApprenants vers la collection dossiersApprenantsMigration");
-
   // Clear
-  logger.info(`Suppression des dossiersApprenantsMigration existants...`);
+  logger.info(`Suppression des dossiersApprenantsMigration et effectifs existants...`);
   await dossiersApprenantsMigrationDb().deleteMany();
+  await effectifsDb().deleteMany();
+
+  logger.info("Migration des dossiersApprenants vers la collection dossiersApprenantsMigration");
 
   // Parse all distinct uais in dossiersApprenants
   let allUaisInDossiers = await dossiersApprenantsDb().distinct("uai_etablissement");
@@ -47,6 +50,7 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
   loadingBar.start(allUaisInDossiers.length, 0);
   let nbDossiersToMigrate = 0;
   let nbDossiersMigratedTotal = 0;
+  let nbEffectifsCreatedTotal = 0;
   let nbDossiersNotMigratedTotal = 0;
   let nbOrganismeExistantTotal = 0;
   let nbOrganismeCreatedTotal = 0;
@@ -59,12 +63,16 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
       const dossiersForUai = await dossiersApprenantsDb().find({ uai_etablissement: currentUai }).toArray();
 
       // Migration de la liste des dossiers
-      const { nbDossiers, nbOrganismes } = await migrateDossiersApprenantsByUai(currentUai, dossiersForUai);
+      const { nbEffectifsCreated, nbDossiers, nbOrganismes } = await migrateDossiersApprenantsByUai(
+        currentUai,
+        dossiersForUai
+      );
 
       // Update count
       nbUaiHandled++;
       nbDossiersToMigrate += dossiersForUai.length;
       nbDossiersMigratedTotal += nbDossiers.migrated;
+      nbEffectifsCreatedTotal += nbEffectifsCreated;
       nbDossiersNotMigratedTotal += nbDossiers.notMigrated;
       nbOrganismeExistantTotal += nbOrganismes.existant;
       nbOrganismeCreatedTotal += nbOrganismes.created;
@@ -92,6 +100,7 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
 
   logger.info(`--> ${nbDossiersMigratedTotal} dossiersApprenants migrés.`);
   logger.info(`--> ${nbDossiersNotMigratedTotal} dossiersApprenants non migrés (erreurs).`);
+  logger.info(`--> ${nbEffectifsCreatedTotal} effectifs créés.`);
 
   logger.info(`---> ${nbOrganismeExistantTotal} organismes déja existants.`);
   logger.info(`---> ${nbOrganismeCreatedTotal} organismes crées.`);
@@ -105,6 +114,7 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
  */
 const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
   let nbDossiersMigrated = 0;
+  let nbEffectifsCreated = 0;
   let nbDossiersNotMigrated = 0;
   let nbOrganismeExistant = 0;
   let nbOrganismeCreated = 0;
@@ -148,13 +158,16 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
   if (organisme) {
     await asyncForEach(dossiersForUai, async (currentDossierToMigrate) => {
       try {
-        // Map des champs pour la migration puis création
+        // Map des champs pour la migration puis création du dossier
         const mappedToDossierApprenantMigration = mapToDossiersApprenantsMigrationProps(currentDossierToMigrate);
-        await createDossierApprenantMigrationFromDossierApprenant({
+        const dossierApprenantCreated = await createDossierApprenantMigrationFromDossierApprenant({
           organisme_id: organisme._id,
           ...mappedToDossierApprenantMigration,
         });
+        // Création de l'effectif lié au dossier
+        await createEffectifFromDossierApprenantMigrated(dossierApprenantCreated);
         nbDossiersMigrated++;
+        nbEffectifsCreated++;
       } catch (error) {
         nbDossiersNotMigrated++;
 
@@ -176,6 +189,7 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
   }
 
   return {
+    nbEffectifsCreated,
     nbDossiers: { migrated: nbDossiersMigrated, notMigrated: nbDossiersNotMigrated },
     nbOrganismes: {
       existant: nbOrganismeExistant,
