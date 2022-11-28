@@ -66,7 +66,9 @@ const MonEspace = () => {
             )}
             {isParametresPage &&
               currentOrganisme &&
-              hasContextAccessTo(currentOrganisme, "organisme/page_parametres") && <ParametresOrganisme />}
+              hasContextAccessTo(currentOrganisme, "organisme/page_parametres") && (
+                <ParametresOrganisme organisme={currentOrganisme} />
+              )}
           </Box>
         </Container>
       </Box>

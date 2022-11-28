@@ -1,11 +1,11 @@
 import express from "express";
-import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
+import Joi from "joi";
 import { ObjectId } from "mongodb";
+import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { schema } from "../../../common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
 import { effectifsDb } from "../../../common/model/collections.js";
-import { createEffectif } from "../../../common/actions/effectifs.actions.js";
-import Joi from "joi";
+import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
 
 const flattenKeys = (obj, path = []) =>
   !isObject(obj)
@@ -112,6 +112,35 @@ export default () => {
     tryCatch(async (req, res) => {
       const effectif = await createEffectif();
       return res.json(effectif);
+    })
+  );
+
+  router.put(
+    "/:id",
+    // permissionsDossierMiddleware(components, ["dossier/sauvegarder"]),
+    tryCatch(async ({ body, params }, res) => {
+      // eslint-disable-next-line no-unused-vars
+      const { inputNames, ...data } = body; // TODO JOI
+
+      const effectifDb = await effectifsDb().findOne({ _id: ObjectId(params.id) }, { _id: 0, __v: 0 });
+      if (!effectifDb) {
+        throw new Error(`Unable to find effectif ${params.id}`);
+      }
+      // TODO DEAL WITH NULL values
+      // eslint-disable-next-line no-unused-vars
+      const { _id, apprenant, formation, ...mergedData } = merge(effectifDb, data);
+      const tmp = {
+        apprenant: {
+          nom: apprenant.nom,
+          prenom: apprenant.prenom,
+          historique_statut: [],
+        },
+        formation,
+      };
+      console.log(tmp);
+      const effectifUpdated = await updateEffectif(effectifDb._id, tmp);
+
+      return res.json(buildEffectifResult(effectifUpdated));
     })
   );
 

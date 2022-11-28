@@ -42,3 +42,31 @@ export const findEffectifs = async (organisme_id, projection = {}) => {
     .find({ organisme_id: ObjectId(organisme_id) }, { projection })
     .toArray();
 };
+
+/**
+ * Méthode de mise à jour d'un effectif depuis son id
+ * @param {*} id
+ * @returns
+ */
+export const updateEffectif = async (id, data) => {
+  const _id = typeof id === "string" ? ObjectId(id) : id;
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+
+  const effectif = await effectifsDb().findOne({ _id });
+  if (!effectif) {
+    throw new Error(`Unable to find effectif ${_id.toString()}`);
+  }
+  //validateEffectif
+  const updated = await effectifsDb().findOneAndUpdate(
+    { _id: effectif._id },
+    {
+      $set: {
+        ...data,
+        updated_at: new Date(),
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
+};

@@ -145,6 +145,7 @@ const EffectifsTable = ({ organismesEffectifs }) => {
               cell: (item) => item.renderValue(),
             },
             prenom: {
+              size: 110,
               header: () => {
                 return (
                   <Box textAlign="left">
@@ -186,7 +187,7 @@ const EffectifsTable = ({ organismesEffectifs }) => {
               },
             },
             source: {
-              size: 140,
+              size: 130,
               header: () => {
                 return (
                   <Box textAlign="left">
@@ -222,19 +223,19 @@ const EffectifsTable = ({ organismesEffectifs }) => {
               },
             },
             state: {
-              size: 110,
+              size: 180,
               header: () => {
                 return (
                   <Box textAlign="left">
                     <Tooltip
-                      label={<Text>Si la donnée est suffissant ou en erreur</Text>}
+                      label={<Text>Si les données sont suffissantes pour SIFA ou en erreurs</Text>}
                       aria-label="A tooltip"
                       background="bluefrance"
                       color="white"
                       padding="2w"
                     >
                       <Box pl={5}>
-                        État
+                        État de la données
                         <Text as="span" ml={1}>
                           <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
                         </Text>
@@ -252,14 +253,14 @@ const EffectifsTable = ({ organismesEffectifs }) => {
                         <ErrorIcon boxSize={4} /> <Text fontSize="1rem">Erreurs</Text>
                       </HStack>
                     )}
-                    {state === "missing" && (
+                    {state === "missing_sifa" && (
                       <HStack color="flatwarm" w="full" pl={5}>
-                        <Alert boxSize={4} /> <Text fontSize="1rem">Manquant</Text>
+                        <Alert boxSize={4} /> <Text fontSize="1rem">Manquantes pour SIFA2</Text>
                       </HStack>
                     )}
-                    {state === "complete" && (
+                    {state === "complete_sifa" && (
                       <HStack color="flatsuccess" w="full" pl={5}>
-                        <ValidateIcon boxSize={4} /> <Text fontSize="1rem">Complet</Text>
+                        <ValidateIcon boxSize={4} /> <Text fontSize="1rem">Complètes pour SIFA2</Text>
                       </HStack>
                     )}
                   </>

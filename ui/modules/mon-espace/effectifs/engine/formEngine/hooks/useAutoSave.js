@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { atom, useRecoilCallback, useSetRecoilState } from "recoil";
+import { atom, useRecoilCallback, useRecoilValue, useSetRecoilState } from "recoil";
 import { isEmptyValue } from "../utils/isEmptyValue";
 import { getValues } from "../utils/getValues";
 import { apiService } from "../../services/api.service";
 import debounce from "lodash.debounce";
-import { dossierAtom } from "../../atoms";
+import { dossierAtom, effectifIdAtom } from "../../atoms";
 import setWith from "lodash.setwith";
 
 const getIsLocked = (fields) => {
@@ -28,6 +28,7 @@ export const useAutoSave = ({ controller }) => {
         snapshot.getPromise(dossierAtom),
     []
   );
+  const effectifId = useRecoilValue(effectifIdAtom);
   const inputNamesRef = useRef([]);
   const setAutoSave = useSetRecoilState(autoSaveStatusAtom);
 
@@ -51,9 +52,9 @@ export const useAutoSave = ({ controller }) => {
         const dossier = await getDossier();
         try {
           await apiService.saveCerfa({
-            dossierId: dossier._id,
+            dossierId: dossier?._id,
             data,
-            cerfaId: dossier.cerfaId,
+            effectifId,
             inputNames: inputNamesRef.current,
           });
           inputNamesRef.current = [];
@@ -82,5 +83,5 @@ export const useAutoSave = ({ controller }) => {
       controller.off("CHANGE", handler);
       clearTimeout(timeout);
     };
-  }, [controller, getDossier, setAutoSave]);
+  }, [controller, effectifId, getDossier, setAutoSave]);
 };

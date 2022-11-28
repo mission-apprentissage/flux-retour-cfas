@@ -53,6 +53,7 @@
     "cookie-parser": "1.4.6",
     "cross-env": "7.0.3",
     "date-fns": "2.28.0",
+    "deepmerge": "4.2.2",
     "dotenv": "16.0.1",
     "ejs": "3.1.7",
     "enjoi": "9.0.1",

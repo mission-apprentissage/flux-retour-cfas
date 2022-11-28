@@ -1,10 +1,11 @@
 import { _post, _put } from "../../../../../common/httpClient";
 
-const saveCerfa = async ({ dossierId, cerfaId, data, inputNames }) => {
+// eslint-disable-next-line no-unused-vars
+const saveCerfa = async ({ dossierId, effectifId, data, inputNames }) => {
   try {
-    return await _put(`/api/v1/cerfa/${cerfaId}`, {
+    return await _put(`/api/v1/effectif/${effectifId}`, {
       ...data,
-      dossierId,
+      // dossierId,
       inputNames,
     });
   } catch (e) {

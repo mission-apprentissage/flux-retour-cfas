@@ -1,7 +1,7 @@
 import express from "express";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
-import { findOrganismeById } from "../../../common/actions/organismes.actions.js";
+import { findOrganismeById, getContributeurs } from "../../../common/actions/organismes.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 
 export default () => {
@@ -26,6 +26,7 @@ export default () => {
     tryCatch(async ({ query: { organisme_id } }, res) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
+      let fakeState = ["complete_sifa", "missing_sifa", "error"];
       const effectifs = [];
       for (const { _id, id_erp_apprenant, source, annee_scolaire, apprenant, formation } of effectifsDb) {
         // apprenant.historique_statut
@@ -48,11 +49,21 @@ export default () => {
               date_statut: "10/10/2022",
             },
           ],
-          state: "missing", // state: "complete", // state: "error",
+          state: fakeState.pop(),
         });
       }
 
       return res.json(effectifs);
+    })
+  );
+
+  router.get(
+    "/contributors",
+    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    tryCatch(async ({ query: { organisme_id } }, res) => {
+      const contributors = await getContributeurs(organisme_id);
+
+      return res.json(contributors);
     })
   );
 
