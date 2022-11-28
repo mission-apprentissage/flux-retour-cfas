@@ -90,11 +90,11 @@ cli
   });
 
 /**
- * Job de remplissage des archives des anciens dossiers apprenants
+ * Job d'archivage des dossiers apprenants
  */
 cli
-  .command("hydrate:archives-dossiersApprenants")
-  .description("Archivage des anciens dossiers apprenants")
+  .command("archive:dossiersApprenants")
+  .description("Archivage des dossiers apprenants")
   .option("--limit <int>", "Année limite d'archivage")
   .action(async ({ limit }) => {
     runScript(async () => {

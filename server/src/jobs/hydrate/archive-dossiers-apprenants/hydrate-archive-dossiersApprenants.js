@@ -1,7 +1,7 @@
 import { validateAnneeScolaire } from "../../../common/utils/validationsUtils/anneeScolaire.js";
 import logger from "../../../common/logger.js";
 import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
-import { createArchiveDossiersApprenants } from "../../../common/actions/archiveDossiersApprenants.actions.js";
+import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
 
 /**
  * Fonction d'archivage des anciens dossiers apprenants
@@ -36,8 +36,7 @@ export const hydrateArchivesDossiersApprenants = async (ANNEE_SCOLAIRE_START_LIM
     const dossierApprenantToArchive = await cursor.next();
 
     try {
-      await createArchiveDossiersApprenants(dossierApprenantToArchive);
-      await dossiersApprenantsMigrationDb().deleteOne({ _id: dossierApprenantToArchive._id });
+      await updateDossierApprenant(dossierApprenantToArchive._id, { ...dossierApprenantToArchive, archive: true });
     } catch (err) {
       logger.error("Could not archive dossier apprenant with _id", dossierApprenantToArchive._id);
     }

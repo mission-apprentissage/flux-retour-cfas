@@ -1,6 +1,6 @@
-import { archiveDossiersApprenantsDb } from "../model/collections.js";
+import { archiveDossiersApprenantsDb } from "../../model/collections.js";
 
-// TODO voir quoi faire de cette action
+// TODO A supprimer
 export const createArchiveDossiersApprenants = async (dossierApprenantData) => {
   const anonymousValue = `XXXXX`;
   const anonymizedData = {
