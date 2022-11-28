@@ -7,7 +7,7 @@ import { Page } from "../../../components/Page/Page";
 import withAuth from "../../../components/withAuth";
 import { getAuthServerSideProps } from "../../../common/SSR/getAuthServerSideProps";
 import { useEspace } from "../../../hooks/useEspace";
-import EnqueteSIFA from "../../../modules/mon-espace/sifa/sifa";
+import EnqueteSIFA from "../../../modules/mon-espace/SIFA/sifa";
 import { useOrganisme } from "../../../hooks/useOrganisme";
 import LandingOrganisme from "../../../modules/mon-espace/landing/LandingOrganisme/LandingOrganisme";
 import LandingReseau from "../../../modules/mon-espace/landing/LandingReseau";

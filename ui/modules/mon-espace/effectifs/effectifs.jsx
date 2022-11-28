@@ -7,7 +7,7 @@ import { organismeAtom } from "../../../hooks/organismeAtoms";
 import { _get } from "../../../common/httpClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
-import ChoixTransmission from "./choixTransmission";
+import ChoixTransmission from "./ChoixTransmission";
 import TransmissionAPI from "./TransmissionAPI";
 import TransmissionFichier from "./TransmissionFichier";
 
