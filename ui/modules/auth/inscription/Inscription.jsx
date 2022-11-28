@@ -23,13 +23,13 @@ import { _post } from "../../../common/httpClient";
 import { SiretBlock } from "./SiretBlock";
 
 const typeCompte = {
-  pilot: {
-    text: "Un Pilot (Dreets)",
-    value: "pilot",
-  },
   of: {
     text: "Un Organisme de Formation",
     value: "of",
+  },
+  pilot: {
+    text: "Un Pilot (Dreets, Draaf, Académie, Conseil régional, Mission locale, cellule apprentissage)",
+    value: "pilot",
   },
   reseau_of: {
     text: "Une tête de réseau OF",

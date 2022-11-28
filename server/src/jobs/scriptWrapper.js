@@ -10,7 +10,7 @@ import config from "../config.js";
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
 
-let redisClient;
+// let redisClient; // TODO Samir
 
 /**
  * Fonction de sortie du script
@@ -32,7 +32,7 @@ const exit = async (rawError) => {
       });
   }, 500);
 
-  await redisClient.quit();
+  // await redisClient.quit(); // TODO Samir
 
   process.exitCode = error ? 1 : 0;
 };
