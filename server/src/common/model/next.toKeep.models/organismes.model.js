@@ -79,8 +79,16 @@ export const schema = object(
 
     // TODO [tech] TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
-
     api_key: string({ description: "API key pour envoi de données" }),
+
+    mode_de_transmission: string({
+      description: "Mode de transmission des effectifs",
+      enum: ["API", "FICHIERS", "MANUEL"],
+    }),
+    setup_step_courante: string({
+      description: "Etape d'installation courante",
+      // enum: ["STEP1", "STEP2", "STEP3"], // TODO
+    }),
     contributeurs: arrayOf(string(), { description: "Emails des contributeurs de cet organisme" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
