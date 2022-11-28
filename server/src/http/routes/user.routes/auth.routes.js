@@ -23,7 +23,7 @@ export default () => {
         // TODO List of old username
         throw Boom.conflict(`Old connection method`, { message: `Ancienne méthode de connexion` });
       }
-      const email = Joi.string().email().required().validateAsync(emailOrUsername, { abortEarly: false });
+      const { value: email } = Joi.string().email().validate(emailOrUsername, { abortEarly: false });
 
       const user = await getUser(email.toLowerCase());
       if (!user) {
