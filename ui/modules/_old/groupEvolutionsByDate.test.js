@@ -1,4 +1,4 @@
-import { groupEvolutionsByDate } from "./groupEvolutionsByDate";
+import { groupEvolutionsByDate } from "../../pages/journal-des-evolutions/groupEvolutionsByDate";
 
 it("renvoie un tableau d'éléments avec date et évolutions groupés par date", () => {
   const input = [

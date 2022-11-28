@@ -9,9 +9,12 @@ import Sommaire from "../../components/Sommaire/Sommaire";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { getUniquesMonthAndYearFromDatesList } from "../../common/utils/dateUtils";
 import { capitalize } from "../../common/utils/stringUtils";
-import { groupEvolutionsByDate } from "./groupEvolutionsByDate";
-import JournalDesEvolutionsTagFilter from "./JournalDesEvolutionsTagFilter";
-import { JOURNAL_DES_EVOLUTIONS_DATA, JOURNAL_DES_EVOLUTIONS_TAGS } from "./JournalEvolutionsData";
+import { groupEvolutionsByDate } from "../../modules/journal-des-evolutions/groupEvolutionsByDate";
+import JournalDesEvolutionsTagFilter from "../../modules/journal-des-evolutions/JournalDesEvolutionsTagFilter";
+import {
+  JOURNAL_DES_EVOLUTIONS_DATA,
+  JOURNAL_DES_EVOLUTIONS_TAGS,
+} from "../../modules/journal-des-evolutions/JournalEvolutionsData";
 import Head from "next/head";
 import Section from "../../components/Section/Section";
 
