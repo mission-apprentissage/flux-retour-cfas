@@ -38,6 +38,7 @@ const schema = object(
   },
   {
     required: ["username", "created_at"],
+    additionalProperties: true, // Temporary for archive
   }
 );
 

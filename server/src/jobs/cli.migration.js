@@ -10,6 +10,8 @@ import {
   analyseFiabilisationCfas,
 } from "./patches/refacto-migration/organismes/organismes.init.migration.js";
 import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patches/refacto-migration/dossiersApprenants/dossiersApprenants.migration.js";
+import { migrateUsersToArchives } from "./patches/refacto-migration/users/users.archive.migration.js";
+import { cleanUserValidation } from "./patches/refacto-migration/users/users.clean.migration.js";
 
 // TEMP CLI Jobs
 // TODO Remove after big refacto migration
@@ -76,6 +78,30 @@ cli
     runScript(async () => {
       return migrateDossiersApprenantsToDossiersApprenantsMigration(sampleNbUais, specificUai);
     }, "refacto-migration-dossiersApprenants");
+  });
+
+/**
+ * Job d'archive des users non ERPs
+ */
+cli
+  .command("archive:users")
+  .description("Archive des users non erps")
+  .action(async () => {
+    runScript(async () => {
+      return migrateUsersToArchives();
+    }, "refacto-migration-archive-users");
+  });
+
+/**
+ * Job de nettoyage des users pour passer la validation
+ */
+cli
+  .command("clean:users")
+  .description("Nettoyage des users pour passer la validation")
+  .action(async () => {
+    runScript(async () => {
+      return cleanUserValidation();
+    }, "refacto-migration-clean-users");
   });
 
 cli.parse(process.argv);
