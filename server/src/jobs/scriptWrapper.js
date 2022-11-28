@@ -10,7 +10,7 @@ import config from "../config.js";
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
 
-// let redisClient; // TODO Samir
+let redisClient;
 
 /**
  * Fonction de sortie du script
@@ -32,7 +32,7 @@ const exit = async (rawError) => {
       });
   }, 500);
 
-  // await redisClient.quit(); // TODO Samir
+  await redisClient.quit();
 
   process.exitCode = error ? 1 : 0;
 };
@@ -51,6 +51,8 @@ export const runScript = async (job, jobName) => {
 
     const components = await createComponents();
     const services = await createServices();
+
+    redisClient = services.cache;
 
     await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
 
