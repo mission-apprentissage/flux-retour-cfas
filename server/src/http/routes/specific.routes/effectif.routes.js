@@ -129,7 +129,7 @@ export default () => {
     // PERM(["effectif/sauvegarder"]),
     tryCatch(async ({ body, params }, res) => {
       // eslint-disable-next-line no-unused-vars
-      const { inputNames, ...data } = body; // TODO JOI
+      const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)
 
       const effectifDb = await effectifsDb().findOne({ _id: ObjectId(params.id) }, { _id: 0, __v: 0 });
       if (!effectifDb) {

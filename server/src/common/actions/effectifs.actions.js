@@ -1,6 +1,9 @@
 import { ObjectId } from "mongodb";
 import { effectifsDb } from "../model/collections.js";
-import { defaultValuesEffectif } from "../model/next.toKeep.models/effectifs.model/effectifs.model.js";
+import {
+  defaultValuesEffectif,
+  validateEffectif,
+} from "../model/next.toKeep.models/effectifs.model/effectifs.model.js";
 
 /**
  * Méthode de création d'un effectif
@@ -28,8 +31,8 @@ export const createEffectif = async (
     source,
     annee_scolaire,
   };
-  //validateEffectif
-  const { insertedId } = await effectifsDb().insertOne(dataToInsert);
+
+  const { insertedId } = await effectifsDb().insertOne(validateEffectif(dataToInsert));
 
   return insertedId;
 };
@@ -59,12 +62,11 @@ export const updateEffectif = async (id, data) => {
   if (!effectif) {
     throw new Error(`Unable to find effectif ${_id.toString()}`);
   }
-  //validateEffectif
   const updated = await effectifsDb().findOneAndUpdate(
     { _id: effectif._id },
     {
       $set: {
-        ...data,
+        ...validateEffectif(data),
         updated_at: new Date(),
       },
     },

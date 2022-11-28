@@ -49,5 +49,8 @@ export function defaultValuesEffectif({ lockAtCreate = false }) {
 
 // TODO Extra validation
 export function validateEffectif(props) {
-  validateApprenant(props.apprenant);
+  return {
+    ...props,
+    apprenant: validateApprenant(props.apprenant),
+  };
 }
