@@ -1,8 +1,10 @@
-import { object, string, integer, arrayOf } from "../../../json-schema/jsonSchemaTypes.js";
+import { object, string, integer, arrayOf, objectId } from "../../../json-schema/jsonSchemaTypes.js";
 
-// TODO Could it be replace by a simple formation_id ?
 export const formationSchema = object(
   {
+    formation_id: objectId({
+      description: "formation id",
+    }),
     cfd: string({
       description: "CFD de la formation à laquelle l'apprenant est inscrit",
       pattern: "^[0-9A-Z]{8}[A-Z]?$",
@@ -22,7 +24,7 @@ export const formationSchema = object(
     annee: integer({ description: "Numéro de l'année dans la formation (promo)" }),
   },
   {
-    required: ["cfd"],
+    required: ["cfd", "formation_id"],
     additionalProperties: true,
   }
 );

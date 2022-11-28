@@ -32,6 +32,8 @@ export const schema = object(
     metiers: arrayOf(string(), { description: "Les domaines métiers rattachés à la formation" }),
     updated_at: dateOrNull({ description: "Date d'update en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
+    // TODO Samir duree
+    // TODO Samir annee
   },
   { required: ["cfd"] }
 );
