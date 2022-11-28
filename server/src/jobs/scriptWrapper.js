@@ -51,6 +51,7 @@ export const runScript = async (job, jobName) => {
 
     const components = await createComponents();
     const services = await createServices();
+    redisClient = services.cache;
 
     redisClient = services.cache;
 
