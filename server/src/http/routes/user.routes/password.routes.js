@@ -19,7 +19,6 @@ const checkPasswordToken = () => {
         secretOrKey: config.auth.resetPasswordToken.jwtSecret,
       },
       (jwt_payload, done) => {
-        console.log(jwt_payload);
         return getUser(jwt_payload.sub)
           .then((user) => {
             if (!user) {
