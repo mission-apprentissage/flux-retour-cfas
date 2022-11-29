@@ -1,23 +1,29 @@
-import { runScript } from "../scriptWrapper.js";
+import { generatePasswordUpdateTokenLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
+import { generatePasswordUpdateToken } from "../../common/actions/users.actions.js";
 import logger from "../../common/logger.js";
-import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
-import arg from "arg";
 import config from "../../config.js";
 
-let args = [];
+/**
+ *
+ * @param {*} param0
+ */
+export const generatePasswordUpdateTokenForUser = async (email) => {
+  logger.info(`Génération d'un lien de MAJ de mot de passe pour ${email}`);
+  const token = await generatePasswordUpdateToken(email);
 
-runScript(async ({ users }) => {
-  args = arg({ "--username": String }, { argv: process.argv.slice(2) });
-  const username = args["--username"];
+  logger.info(`Token pour ${email} créé avec succès -> ${token}`);
+  // TODO Update when parcours UI finished & good route
+  logger.info(`Lien de changement de mot de passe -> ${config.publicUrl}/modifier-mot-de-passe?token=${token}`);
+};
 
-  logger.info(`Will create password update token for user ${username}`);
+/**
+ *
+ * @param {*} param0
+ */
+export const generatePasswordUpdateTokenForUserLegacy = async (username) => {
+  logger.info(`Génération d'un lien de MAJ de mot de passe pour un ancien user ${username}`);
+  const token = await generatePasswordUpdateTokenLegacy(username);
 
-  if (!username) {
-    throw new Error("--username required argument is missing");
-  }
-
-  const token = await users.generatePasswordUpdateToken(username);
-
-  logger.info(`Password update token for user ${username} successfully created -> ${token}`);
-  logger.info(`Password update link -> ${config.publicUrl}/modifier-mot-de-passe?token=${token}`);
-}, JOB_NAMES.generatePasswordUpdateToken);
+  logger.info(`Token pour ${username} créé avec succès -> ${token}`);
+  logger.info(`Lien de changement de mot de passe -> ${config.publicUrl}/modifier-mot-de-passe?token=${token}`);
+};

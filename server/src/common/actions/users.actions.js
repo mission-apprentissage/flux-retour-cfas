@@ -1,7 +1,9 @@
+import { addHours } from "date-fns";
 import { compact, pick, uniq } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
 import { defaultValuesUser, validateUser } from "../model/next.toKeep.models/usersMigration.model.js";
+import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { passwordSchema } from "../utils/validationUtils.js";
@@ -383,4 +385,36 @@ export const searchUsers = async (searchTerm) => {
   const found = await usersMigrationDb().aggregate([{ $match: matchStage }, { $sort: sortStage }]);
 
   return found.toArray();
+};
+
+/**
+ * Génération d'un token d'update de mot de passe
+ * @param {*} email
+ * @returns
+ */
+export const generatePasswordUpdateToken = async (email) => {
+  const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
+
+  const user = await usersMigrationDb().findOne({ email });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
+  const token = generateRandomAlphanumericPhrase(80);
+  // token will only be valid for duration defined in PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS
+  const tokenExpiry = addHours(new Date(), PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS);
+
+  await usersMigrationDb().updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        password_update_token: token,
+        password_update_token_expiry: tokenExpiry,
+      },
+    }
+  );
+
+  return token;
 };

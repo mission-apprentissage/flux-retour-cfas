@@ -1,10 +1,10 @@
 import { ObjectId } from "mongodb";
 import { addHours, isBefore } from "date-fns";
-import { usersDb } from "../model/collections.js";
-import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
-import { compare, isTooWeak, hash } from "../utils/sha512Utils.js";
-import { validatePassword } from "../utils/validationsUtils/password.js";
-import { escapeRegExp } from "../utils/regexUtils.js";
+import { usersDb } from "../../model/collections.js";
+import { generateRandomAlphanumericPhrase } from "../../utils/miscUtils.js";
+import { compare, isTooWeak, hash } from "../../utils/sha512Utils.js";
+import { validatePassword } from "../../utils/validationsUtils/password.js";
+import { escapeRegExp } from "../../utils/regexUtils.js";
 
 const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
 
@@ -13,7 +13,7 @@ const PASSWORD_UPDATE_TOKEN_VALIDITY_HOURS = 48;
  * @param {*} user
  * @returns
  */
-const isUserPasswordUpdatedTokenValid = (user) => {
+export const isUserLegacyPasswordUpdatedTokenValid = (user) => {
   return Boolean(user.password_update_token_expiry) && isBefore(new Date(), user.password_update_token_expiry);
 };
 
@@ -23,7 +23,7 @@ const isUserPasswordUpdatedTokenValid = (user) => {
  * @param {*} password
  * @returns
  */
-const authenticate = async (username, password) => {
+export const authenticateLegacy = async (username, password) => {
   const user = await usersDb().findOne({ username });
   if (!user) {
     return null;
@@ -44,7 +44,7 @@ const authenticate = async (username, password) => {
  * @param {*} username
  * @returns
  */
-const getUser = async (username) => {
+export const getUserLegacy = async (username) => {
   return await usersDb().findOne({ username });
 };
 
@@ -53,7 +53,7 @@ const getUser = async (username) => {
  * @param {*} id
  * @returns
  */
-const getUserById = async (id) => {
+export const getUserLegacyById = async (id) => {
   const _id = new ObjectId(id);
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
   const user = await usersDb().findOne({ _id });
@@ -67,7 +67,7 @@ const getUserById = async (id) => {
  * Récupération de la liste des tous les utilisateurs
  * @returns
  */
-const getAll = async () => {
+export const getAllLegacy = async () => {
   return await usersDb().find().toArray();
 };
 
@@ -76,7 +76,7 @@ const getAll = async () => {
  * @param {*} userProps
  * @returns
  */
-const createUser = async (userProps) => {
+export const createUserLegacy = async (userProps) => {
   const username = userProps.username;
   const password = userProps.password || generateRandomAlphanumericPhrase(80); // 1 hundred quadragintillion years to crack https://www.security.org/how-secure-is-my-password/
   const passwordHash = hash(password);
@@ -110,7 +110,7 @@ const createUser = async (userProps) => {
  * @param {*} username
  * @returns
  */
-const generatePasswordUpdateToken = async (username) => {
+export const generatePasswordUpdateTokenLegacy = async (username) => {
   const user = await usersDb().findOne({ username });
 
   if (!user) {
@@ -141,7 +141,7 @@ const generatePasswordUpdateToken = async (username) => {
  * @param {*} password
  * @returns
  */
-const updatePassword = async (updateToken, password) => {
+export const updatePasswordLegacy = async (updateToken, password) => {
   if (!validatePassword(password)) throw new Error("Password must be valid (at least 16 characters)");
   // find user with password_update_token and ensures it exists
   const user = await usersDb().findOne({
@@ -176,7 +176,7 @@ const updatePassword = async (updateToken, password) => {
  * Suppression d'un utilisateur
  * @param {*} username
  */
-const removeUser = async (username) => {
+export const removeUserLegacy = async (username) => {
   const user = await usersDb().findOne({ username });
   if (!user) {
     throw new Error(`Unable to find user ${username}`);
@@ -190,7 +190,7 @@ const removeUser = async (username) => {
  * @param {*} searchCriteria
  * @returns
  */
-const searchUsers = async (searchCriteria) => {
+export const searchUsersLegacy = async (searchCriteria) => {
   const { searchTerm } = searchCriteria;
 
   const matchStage = {};
@@ -228,7 +228,7 @@ const searchUsers = async (searchCriteria) => {
  * @param {*} id
  * @param {*} param1
  */
-const updateUser = async (id, { username, email, network, region, organisme }) => {
+export const updateUserLegacy = async (id, { username, email, network, region, organisme }) => {
   const _id = new ObjectId(id);
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
@@ -251,16 +251,3 @@ const updateUser = async (id, { username, email, network, region, organisme }) =
     }
   );
 };
-
-export default () => ({
-  authenticate,
-  getUser,
-  getUserById,
-  createUser,
-  generatePasswordUpdateToken,
-  updatePassword,
-  removeUser,
-  searchUsers,
-  updateUser,
-  getAll,
-});

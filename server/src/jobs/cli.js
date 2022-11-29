@@ -13,6 +13,10 @@ import { seedWithSample } from "./seed/samples/seedSample.js";
 import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
 import { hydrateReseauExcellencePro } from "./hydrate/reseaux/hydrate-reseau-excellence-pro.js";
 import { createUserAccount } from "./users/create-user.js";
+import {
+  generatePasswordUpdateTokenForUser,
+  generatePasswordUpdateTokenForUserLegacy,
+} from "./users/generate-password-update-token.js";
 
 /**
  * Job d'initialisation projet
@@ -173,6 +177,32 @@ cli
         permissions: { is_admin: isAdmin, is_cross_organismes: isCrossOrganismes },
       });
     }, "create-user");
+  });
+
+/**
+ * Job de génération d'un token de MAJ de mot de passe pour un utilisateur
+ */
+cli
+  .command("generate:password-update-token")
+  .description("Génération d'un token de MAJ de mot de passe pour un utilisateur")
+  .requiredOption("--email <string>", "Email de l'utilisateur")
+  .action(async ({ email }) => {
+    runScript(async () => {
+      return generatePasswordUpdateTokenForUser(email);
+    }, "generate-password-update-token");
+  });
+
+/**
+ * Job de génération d'un token de MAJ de mot de passe pour un utilisateur legacy (ancien modèle)
+ */
+cli
+  .command("generate-legacy:password-update-token")
+  .description("Génération d'un token de MAJ de mot de passe pour un utilisateur legacy")
+  .requiredOption("--username <string>", "username de l'utilisateur")
+  .action(async ({ username }) => {
+    runScript(async () => {
+      return generatePasswordUpdateTokenForUserLegacy(username);
+    }, "generate-password-update-token-legacy");
   });
 
 cli.parse(process.argv);
