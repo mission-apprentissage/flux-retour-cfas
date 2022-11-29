@@ -53,10 +53,7 @@ export const runScript = async (job, jobName) => {
     const services = await createServices();
     redisClient = services.cache;
 
-    redisClient = services.cache;
-
     await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
-
     await job({ ...components, ...services });
 
     const endDate = new Date();
