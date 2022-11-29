@@ -99,7 +99,6 @@ export const USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION = [
   "celluleapprentissamayotte.mayotte@tdb.fr",
   "ac.reunion@tdb.fr",
   "ddets.hautesalpes@tdb.fr",
-  "",
   "excellencepro@tdb.fr",
   "chambre.regionale.comptes.bfc@tdb.fr",
   "aftral@tdb.fr",
