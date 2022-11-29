@@ -2,8 +2,6 @@
 version: "2.4"
 services:
   reverse_proxy:
-    # ports:
-    #   - 443:443
     environment:
       - SERVER_NAME={{dns_name}}
       - NGINX_ALWAYS_TLS_REDIRECT=true
