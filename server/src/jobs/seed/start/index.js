@@ -72,6 +72,18 @@ export const seed = async ({ adminEmail }) => {
   });
   logger.info(`organismeD created`);
 
+  await createOrganisme({
+    uai: "0312755B",
+    sirets: ["49917930700024"],
+    adresse: {
+      departement: "31",
+      region: "76",
+      academie: "16",
+    },
+    nature: "responsable_formateur",
+    nom: "MIDISUP",
+  });
+
   // Create user Admin
   const aEmail = adminEmail || "admin@test.fr";
   const userAdmin = await createUser(
