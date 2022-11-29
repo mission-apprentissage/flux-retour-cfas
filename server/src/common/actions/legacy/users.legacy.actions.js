@@ -151,7 +151,7 @@ export const updatePasswordLegacy = async (updateToken, password) => {
   // throw if user is not found
   if (!user) throw new Error("User not found");
   // token must be valid
-  if (!isUserPasswordUpdatedTokenValid(user)) {
+  if (!isUserLegacyPasswordUpdatedTokenValid(user)) {
     throw new Error("Password update token has expired");
   }
   // we store password hashes only
