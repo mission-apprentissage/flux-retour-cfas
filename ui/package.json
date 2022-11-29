@@ -8,9 +8,9 @@
   "private": true,
   "scripts": {
     "docker-dev": "yarn install && yarn dev",
-    "dev": "NEXT_PUBLIC_VERSION=$npm_package_version next dev",
-    "build": "NEXT_PUBLIC_VERSION=$npm_package_version next build",
-    "start": "NEXT_PUBLIC_VERSION=$npm_package_version next start",
+    "dev": "cross-env NEXT_PUBLIC_VERSION=$npm_package_version next dev",
+    "build": "cross-env NEXT_PUBLIC_VERSION=$npm_package_version next build",
+    "start": "cross-env NEXT_PUBLIC_VERSION=$npm_package_version next start",
     "lint": "next lint",
     "test": "jest --watch",
     "test:ci": "jest --ci",
