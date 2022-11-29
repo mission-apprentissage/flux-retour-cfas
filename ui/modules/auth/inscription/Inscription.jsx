@@ -28,7 +28,7 @@ const typeCompte = {
     value: "of",
   },
   pilot: {
-    text: "Un Pilot (Dreets, Draaf, Académie, Conseil régional, Mission locale, cellule apprentissage)",
+    text: "Un Pilot (Dreets, Draaf, Académie, Conseil régional, Mission locale)",
     value: "pilot",
   },
   reseau_of: {
