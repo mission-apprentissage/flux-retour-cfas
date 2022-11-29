@@ -7,8 +7,6 @@ import {
   validatePrenomApprenant,
   normalizePrenomApprenant,
 } from "../../../common/utils/validationsUtils/apprenant/prenomApprenant.js";
-import { DossierApprenantApiInputFiabilite } from "../../../common/factory/dossierApprenantApiInputFiabilite.js";
-import { DossierApprenantApiInputFiabiliteReport } from "../../../common/factory/dossierApprenantApiInputFiabiliteReport.js";
 import { USER_EVENTS_ACTIONS } from "../../../common/constants/userEventsConstants.js";
 import { validateIneApprenant } from "../../../common/utils/validationsUtils/apprenant/ineApprenant.js";
 import { validateDateDeNaissanceApprenant } from "../../../common/utils/validationsUtils/apprenant/dateDeNaissanceApprenant.js";
@@ -21,6 +19,8 @@ import logger from "../../../common/logger.js";
 import { userEventsDb } from "../../../common/model/collections.js";
 import { getDbCollection } from "../../../common/mongodb.js";
 import { fetchOrganismesWithUai, fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna.js";
+import { createDossierApprenantApiInputFiabilite } from "./factories/dossierApprenantApiInputFiabilite.js";
+import { createDossierApprenantApiInputFiabiliteReport } from "./factories/dossierApprenantApiInputFiabiliteReport.js";
 
 const isSet = (value) => {
   return value !== null && value !== undefined && value !== "";
@@ -76,7 +76,7 @@ export const analyseFiabiliteDossierApprenantsRecus = async () => {
     const { data, username, date } = await latestReceivedDossiersApprenantsCursor.next();
     latestReceivedDossiersApprenantsCount++;
 
-    const newDossierApprenantApiInputFiabiliteEntry = DossierApprenantApiInputFiabilite.create({
+    const newDossierApprenantApiInputFiabiliteEntry = createDossierApprenantApiInputFiabilite({
       analysisId,
       analysisDate,
       originalData: data,
@@ -121,7 +121,7 @@ export const analyseFiabiliteDossierApprenantsRecus = async () => {
 
   logger.info(`Creating fiabilité analysis report with id ${analysisId}`);
   await getDbCollection("dossiersApprenantsApiInputFiabiliteReport").insertOne(
-    DossierApprenantApiInputFiabiliteReport.create({
+    createDossierApprenantApiInputFiabiliteReport({
       analysisId,
       analysisDate,
       totalDossiersApprenants: latestReceivedDossiersApprenantsCount,
