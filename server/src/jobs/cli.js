@@ -12,6 +12,7 @@ import { purgeEvents } from "./clear/purge-events.js";
 import { seedWithSample } from "./seed/samples/seedSample.js";
 import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
 import { hydrateReseauExcellencePro } from "./hydrate/reseaux/hydrate-reseau-excellence-pro.js";
+import { createUserAccount } from "./users/create-user.js";
 
 /**
  * Job d'initialisation projet
@@ -150,6 +151,28 @@ cli
     runScript(async () => {
       return purgeEvents(nbDaysToKeep);
     }, "purge-events");
+  });
+
+/**
+ * Job de création d'un utilisateur
+ */
+cli
+  .command("create:user")
+  .description("Création d'un utilisateur")
+  .requiredOption("--email <string>", "Email de l'utilisateur")
+  .option("--prenom <string>", "Prénom de l'utilisateur")
+  .option("--nom <string>", "Nom de l'utilisateur")
+  .option("--isAdmin <bool>", "Indique s'il est administrateur")
+  .option("--isCrossOrganismes <bool>", "Indique s'il est cross organismes")
+  .action(async ({ email, prenom, nom, isAdmin, isCrossOrganismes }) => {
+    runScript(async () => {
+      return createUserAccount({
+        email,
+        prenom,
+        nom,
+        permissions: { is_admin: isAdmin, is_cross_organismes: isCrossOrganismes },
+      });
+    }, "create-user");
   });
 
 cli.parse(process.argv);

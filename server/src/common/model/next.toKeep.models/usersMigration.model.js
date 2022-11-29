@@ -5,7 +5,7 @@ import { siretSchema, passwordSchema, uaiSchema } from "../../utils/validationUt
 import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
 import { REGIONS } from "../../constants/territoiresConstants.js";
 import { ACADEMIES } from "../../constants/academiesConstants.js";
-import { ORGANISMES_APPARTENANCE } from "../../constants/usersConstants.js";
+import { ORGANISMES_APPARTENANCE, USER_ACCOUNT_STATUS } from "../../constants/usersConstants.js";
 import { DEPARTEMENT_CODES } from "../../constants/departements.TRUELIST.js";
 
 export const collectionName = "usersMigration";
@@ -72,13 +72,7 @@ export const schema = object(
     // Internal
     account_status: string({
       description: "Statut du compte",
-      enum: [
-        "NOT_CONFIRMED",
-        "FIRST_FORCE_RESET_PASSWORD",
-        "FORCE_COMPLETE_PROFILE",
-        "CONFIRMED",
-        "FORCE_RESET_PASSWORD",
-      ],
+      enum: Object.keys(USER_ACCOUNT_STATUS),
     }),
     has_accept_cgu_version: string({ description: "Version des cgu accepté par l'utilisateur" }),
     orign_register: string({ description: "Origine de l'inscription", enum: ["ORIGIN"] }),

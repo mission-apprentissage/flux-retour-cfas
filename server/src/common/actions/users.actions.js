@@ -47,6 +47,10 @@ export const createUser = async ({ email, password }, options = {}) => {
     }
   }
 
+  // Vérification de l'existence de l'email - même si on a un index unique
+  const existingUserEmail = await usersMigrationDb().findOne({ email });
+  if (existingUserEmail) throw new Error("User with this email already exists");
+
   const { insertedId } = await usersMigrationDb().insertOne(
     validateUser({
       ...defaultValuesUser(),
