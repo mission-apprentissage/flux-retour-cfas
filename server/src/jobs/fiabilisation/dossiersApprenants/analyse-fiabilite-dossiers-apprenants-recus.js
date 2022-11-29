@@ -104,7 +104,9 @@ export const analyseFiabiliteDossierApprenantsRecus = async () => {
       uaiEtablissementUniqueFoundInReferentiel: await isUaiFoundUniqueInReferentiel()(data.uai_etablissement),
       siretEtablissementPresent: isSet(data.siret_etablissement),
       siretEtablissementFormatValide: !validateSiret(data.siret_etablissement).error,
-      siretEtablissementFoundInReferentiel: await isSiretFoundInReferentiel()(data.siret_etablissement),
+      siretEtablissementFoundInReferentiel: data.siret_etablissement
+        ? await isSiretFoundInReferentiel()(data.siret_etablissement)
+        : false,
       uniqueApprenant: !nonUniqueApprenants.get(buildApprenantNormalizedId(data)),
     });
 
@@ -167,13 +169,23 @@ const getReceivedDossiersApprenantsInLast24hCursor = () => {
 };
 
 const isUaiFoundUniqueInReferentiel = () => async (uai) => {
-  const { organismes } = await fetchOrganismesWithUai(uai);
-  return organismes?.length === 1;
+  try {
+    const { organismes } = await fetchOrganismesWithUai(uai);
+    return organismes?.length === 1;
+  } catch (err) {
+    logger.error(err);
+    return false;
+  }
 };
 
 const isSiretFoundInReferentiel = () => async (siret) => {
-  const { organismes } = await fetchOrganismeWithSiret(siret);
-  return organismes?.length > 0;
+  try {
+    const { organismes } = await fetchOrganismeWithSiret(siret);
+    return organismes?.length > 0;
+  } catch (err) {
+    logger.error(err);
+    return false;
+  }
 };
 
 const buildApprenantNormalizedId = (apprenant) => {
