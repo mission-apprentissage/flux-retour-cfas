@@ -1,3 +1,10 @@
+# [2.56.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.2...v2.56.0) (2022-11-29)
+
+
+### Features
+
+* nouvelle clé d'unicité id_erp_apprenant/uai/annee scolaire + suppression des doublons sur cette clé ([d67c871](https://github.com/mission-apprentissage/flux-retour-cfas/commit/d67c8719f37e443acbeda4466f55126f91021ccf))
+
 ## [2.55.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.55.1...v2.55.2) (2022-11-22)
 
 
