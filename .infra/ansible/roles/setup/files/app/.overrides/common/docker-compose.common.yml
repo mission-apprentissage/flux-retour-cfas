@@ -10,8 +10,6 @@ services:
     volumes:
       - /opt/flux-retour-cfas/data/nginx:/data
       - /opt/flux-retour-cfas/data/ssl:/ssl:ro
-      # - /opt/flux-retour-cfas/.overrides/reverse_proxy/default.conf:/etc/nginx/conf.d/default.conf:ro
-      # - /opt/flux-retour-cfas/.overrides/reverse_proxy/maintenance_ips.conf:/etc/nginx/conf.d/maintenance_ips.conf:ro
       - /opt/flux-retour-cfas/.overrides/reverse_proxy/includes:/etc/nginx/templates/includes/env
 
   server:
