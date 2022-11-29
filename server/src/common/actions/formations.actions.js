@@ -6,6 +6,7 @@ import logger from "../logger.js";
 import { formationsDb, dossiersApprenantsDb } from "../model/collections.js";
 import { validateFormation } from "../model/next.toKeep.models/formations.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
+import { ObjectId } from "mongodb";
 
 const SEARCH_RESULTS_LIMIT = 50;
 
@@ -26,6 +27,17 @@ export const existsFormation = async (cfd) => {
  */
 export const getFormationWithCfd = async (cfd) => {
   return await formationsDb().findOne({ cfd });
+};
+
+/**
+ * Méthode de récupération d'une formation depuis un id
+ * @param {string|ObjectId} id
+ * @param {*} projection
+ * @returns
+ */
+export const findFormationById = async (id, projection = {}) => {
+  const found = await formationsDb().findOne({ _id: ObjectId(id) }, { projection });
+  return found;
 };
 
 export const buildFormationLibelle = (formationFromTCO) => {

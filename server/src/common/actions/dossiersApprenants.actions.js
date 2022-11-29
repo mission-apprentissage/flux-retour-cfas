@@ -112,7 +112,7 @@ export function findDossierApprenantByApprenant({
  */
 export const updateDossierApprenant = async (
   id,
-  { contrat_date_debut, contrat_date_fin, contrat_date_rupture, ...data }
+  { contrat_date_debut, contrat_date_fin, contrat_date_rupture, formation_id, ...data }
 ) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
@@ -141,6 +141,7 @@ export const updateDossierApprenant = async (
             contrat_date_rupture instanceof Date ? contrat_date_rupture : new Date(contrat_date_rupture),
         }
       : {}),
+    ...(formation_id ? { formation_id } : {}), // Handle formation_id undefined
     ...data,
     organisme_id: dossiersApprenant.organisme_id, // required do not modify ever // Discutable
     id_erp_apprenant: dossiersApprenant.id_erp_apprenant, // required do not modify ever

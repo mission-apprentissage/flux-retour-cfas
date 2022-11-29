@@ -17,6 +17,7 @@ import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token.js";
+import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations.js";
 
 /**
  * Job d'initialisation projet
@@ -142,6 +143,18 @@ cli
     runScript(async () => {
       return hydrateFormations();
     }, "hydrate-formations");
+  });
+
+/**
+ * Job de remplissage des formations liées aux organismes
+ */
+cli
+  .command("hydrate:organismes-formations")
+  .description("Remplissage des formations liées aux organismes")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateOrganismesFormations();
+    }, "hydrate-organismes-formations");
   });
 
 /**

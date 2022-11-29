@@ -2,8 +2,7 @@ import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
 import { sleep } from "../../../common/utils/miscUtils.js";
-import { createFormation, existsFormation } from "../../../common/actions/formations.actions.js";
-import { findOrganismeById, updateOrganisme } from "../../../common/actions/organismes.actions.js";
+import { createFormation, existsFormation, findFormationById } from "../../../common/actions/formations.actions.js";
 
 const SLEEP_TIME_BETWEEN_CREATION = 100; // 100ms to avoid flooding TCO and LBA APIs
 
@@ -34,9 +33,6 @@ export const hydrateFormations = async () => {
 
       await sleep(SLEEP_TIME_BETWEEN_CREATION);
     }
-
-    // TODO MAJ tous les organismes rattachés à cette formation
-    await majOrganismesFormationsForFormation(cfd);
   });
 
   logger.info(`${createdFormationsTotal} formations created in DB`);
@@ -55,16 +51,18 @@ const createFormationInReferentielAndUpdateDossiersApprenants = async (cfd) => {
   let notCreatedFormationsCount = 0;
 
   try {
-    const createdFormation = await createFormation(cfd);
+    const createdFormationId = await createFormation(cfd);
     createdFormationsCount++;
+    const formationCreated = await findFormationById(createdFormationId);
     const dossiersApprenantsUpdateResults = await dossiersApprenantsMigrationDb().updateMany(
       { formation_cfd: cfd },
       {
         $set: {
+          formation_id: createdFormationId, // Added formation id in dossierApprenant
           // TODO add when dispo in TCO : duree: createdFormation.duree,
           // TODO add when dispo in TCO : annee: createdFormation.annee,
-          niveau_formation: createdFormation.niveau,
-          niveau_formation_libelle: createdFormation.niveau_libelle,
+          niveau_formation: formationCreated.niveau,
+          niveau_formation_libelle: formationCreated.niveau_libelle,
         },
       }
     );
@@ -77,43 +75,4 @@ const createFormationInReferentielAndUpdateDossiersApprenants = async (cfd) => {
   await sleep(SLEEP_TIME_BETWEEN_CREATION);
 
   return { createdFormationsCount, dossiersApprenantUpdatedCount, notCreatedFormationsCount };
-};
-
-/**
- * Fonction de maj de la liste des formations liées à l'organisme
- * @param {*} cfd
- */
-const majOrganismesFormationsForFormation = async (cfd) => {
-  // Récupération des organismes id liés à ce CFD
-  const organismesIdForCfd = await dossiersApprenantsMigrationDb().distinct("organisme_id", {
-    formation_cfd: cfd,
-  });
-
-  // Parse des organismes et ajout des formations liées
-  await asyncForEach(organismesIdForCfd, async (currentOrganismeId) => {
-    const organismeToUpdate = await findOrganismeById(currentOrganismeId);
-
-    // TODO Update formations for organisme
-    const formationsToAdd = await getFormationsListForOrganismeAndCfd(organismeToUpdate.uai, cfd);
-    await updateOrganisme(currentOrganismeId, { organismeToUpdate, ...{ formations: formationsToAdd } });
-  });
-};
-
-/**
- *
- * @param {*} uai
- * @param {*} cfd
- * @returns
- */
-const getFormationsListForOrganismeAndCfd = async (uai, cfd) => {
-  // TODO Hardcoded : call Catalogue API
-  return [
-    {
-      formationId: "test",
-      organismes: [
-        { id_organisme: "OFR1", nature: "responsable" },
-        { id_organisme: "OFR2", nature: "formateur" },
-      ],
-    },
-  ];
 };

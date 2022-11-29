@@ -40,7 +40,7 @@ export const schema = object(
       description: "Nature de l'organisme de formation",
       enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
     }),
-    nature_validity_warning: boolean({ description: "Y a-t-il un doute sur la validié de la nature" }),
+    nature_validity_warning: boolean({ description: "Y a-t-il un doute sur la validité de la nature" }),
     nom: string({ description: "Nom de l'organisme de formation" }),
     nom_tokenized: string({
       description: "Nom de l'organisme de formation tokenized pour la recherche textuelle",

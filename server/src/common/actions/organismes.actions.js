@@ -82,8 +82,8 @@ export const findOrganismeByUaiAndSiret = async (uai, siret, projection = {}) =>
  * @returns
  */
 export const findOrganismeById = async (id, projection = {}) => {
-  const role = await organismesDb().findOne({ _id: ObjectId(id) }, { projection });
-  return role;
+  const found = await organismesDb().findOne({ _id: ObjectId(id) }, { projection });
+  return found;
 };
 
 /**
