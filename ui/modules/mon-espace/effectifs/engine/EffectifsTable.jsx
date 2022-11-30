@@ -19,8 +19,9 @@ import { effectifIdAtom } from "./atoms";
 import { hasContextAccessTo } from "../../../../common/utils/rolesUtils";
 import { organismeAtom } from "../../../../hooks/organismeAtoms";
 import AjoutApprenantModal from "./AjoutApprenantModal";
+import { DateTime } from "luxon";
 
-const EffectifDetails = ({ row }) => {
+const EffectifDetails = ({ row, modeSifa = false }) => {
   const queryClient = useQueryClient();
   const prevEffectifId = useRef(null);
   const setEffectifId = useSetRecoilState(effectifIdAtom);
@@ -38,12 +39,12 @@ const EffectifDetails = ({ row }) => {
 
   return (
     <Box>
-      <Effectif />
+      <Effectif modeSifa={modeSifa} />
     </Box>
   );
 };
 
-const EffectifsTable = ({ organismesEffectifs }) => {
+const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
 
@@ -174,12 +175,29 @@ const EffectifsTable = ({ organismesEffectifs }) => {
               },
               cell: ({ row }) => {
                 const { historique_statut } = organismesEffectifs[row.id];
+
+                const statut_text = {
+                  2: "Inscrit",
+                  3: "En contrat",
+                  0: "Abandon",
+                };
+
+                if (!historique_statut.length) {
+                  return (
+                    <Text fontSize="1rem" fontWeight="bold" color="redmarianne">
+                      Aucun statut
+                    </Text>
+                  );
+                }
                 return (
                   <HStack textAlign="left">
                     <Text fontSize="1rem" fontWeight="bold">
-                      {historique_statut[0].valeur_statut}
+                      {statut_text[historique_statut[0].valeur_statut]}
                     </Text>
-                    <Text fontSize="0.8rem">(depuis {historique_statut[0].date_statut})</Text>
+                    <Text fontSize="0.8rem">
+                      (depuis{" "}
+                      {DateTime.fromISO(historique_statut[0].date_statut).setLocale("fr-FR").toFormat("dd/MM/yyyy")})
+                    </Text>
                   </HStack>
                 );
               },
@@ -307,8 +325,11 @@ const EffectifsTable = ({ organismesEffectifs }) => {
                   </Box>
                 );
               },
-              cell: ({ row }) => {
-                const { state } = organismesEffectifs[row.id];
+              cell: () => {
+                const fakeState = ["complete_sifa", "missing_sifa", ""];
+                const random = Math.floor(Math.random() * fakeState.length);
+                const state = modeSifa ? fakeState[random] : ""; //organismesEffectifs[row.id];
+
                 return (
                   <>
                     {state === "error" && (
@@ -333,7 +354,7 @@ const EffectifsTable = ({ organismesEffectifs }) => {
           }}
           getRowCanExpand={() => true}
           renderSubComponent={({ row }) => {
-            return <EffectifDetails row={row} />;
+            return <EffectifDetails row={row} modeSifa={modeSifa} />;
           }}
         />
       </Box>

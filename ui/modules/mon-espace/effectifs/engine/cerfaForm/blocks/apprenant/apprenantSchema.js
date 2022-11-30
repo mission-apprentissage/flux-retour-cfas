@@ -14,11 +14,11 @@ export const apprenantSchema = {
     autosave: false,
     options: [
       {
-        label: "Inscrit en formation",
+        label: "Inscrit",
         value: 2,
       },
       {
-        label: "En contrat, apprenti",
+        label: "En contrat",
         value: 3,
       },
       {

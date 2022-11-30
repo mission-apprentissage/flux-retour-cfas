@@ -44,8 +44,6 @@ export const EffectifApprenant = memo(() => {
     [effectifId, organisme._id]
   );
 
-  console.log(nouveauStatutValeur);
-
   return (
     <Box>
       <Box my={9}>

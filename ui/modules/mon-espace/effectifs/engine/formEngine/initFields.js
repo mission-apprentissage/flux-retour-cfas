@@ -3,8 +3,8 @@ import { findDefinition } from "./utils";
 import { DateTime } from "luxon";
 import { isEmptyValue } from "./utils/isEmptyValue";
 
-export const initFields = ({ cerfa, schema }) => {
-  const createField = createFieldFactory({ draft: cerfa.draft, schema });
+export const initFields = ({ cerfa, schema, modeSifa }) => {
+  const createField = createFieldFactory({ modeSifa, schema });
   let fields = {};
 
   Object.keys(schema.fields).forEach((name) => {
@@ -41,10 +41,16 @@ export const initFields = ({ cerfa, schema }) => {
 };
 
 const createFieldFactory =
-  ({ schema }) =>
+  ({ schema, modeSifa }) =>
   ({ name, data }) => {
     const fieldSchema = findDefinition({ name, schema });
     if (!fieldSchema) throw new Error(`Field ${name} is not defined.`);
+
+    if (modeSifa) {
+      fieldSchema.required = true;
+      fieldSchema.error = "SIFA";
+    }
+
     const type = fieldSchema.fieldType;
     let value = data.value;
     if (type === "date") {

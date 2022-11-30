@@ -8,9 +8,9 @@ import { useInitCerfa } from "./formEngine/hooks/useInitCerfa";
 import { useAutoSave } from "./formEngine/hooks/useAutoSave";
 import { EffectifApprenant } from "./cerfaForm/blocks/apprenant/EffectifApprenant";
 
-const Effectif = React.memo(function EffectifMemo() {
+const Effectif = React.memo(function EffectifMemo({ modeSifa }) {
   const { controller: cerfaController } = useCerfa({ schema: cerfaSchema });
-  const { isLoading } = useInitCerfa({ controller: cerfaController });
+  const { isLoading } = useInitCerfa({ controller: cerfaController, modeSifa });
   useAutoSave({ controller: cerfaController });
 
   if (isLoading) {
