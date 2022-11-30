@@ -1,3 +1,10 @@
+# [2.58.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.58.0-beta.2...v2.58.0-beta.3) (2022-11-30)
+
+
+### Bug Fixes
+
+* **server:** fix exporterUtils ([fddacae](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fddacae80ad8285fa9b4e86a9582288354a0f1e8))
+
 # [2.58.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.58.0-beta.1...v2.58.0-beta.2) (2022-11-30)
 
 
