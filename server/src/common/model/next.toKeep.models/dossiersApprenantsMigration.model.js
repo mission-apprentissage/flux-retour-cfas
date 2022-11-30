@@ -103,10 +103,6 @@ export const schema = object(
     contrat_date_fin: date({ description: "Date de fin du contrat" }),
     contrat_date_rupture: date({ description: "Date de rupture du contrat" }),
 
-    // Formation
-    formation_id: objectId({
-      description: "Formation id",
-    }),
     formation_cfd: string({
       description: "CFD de la formation à laquelle l'apprenant est inscrit",
       pattern: "^[0-9A-Z]{8}[A-Z]?$",

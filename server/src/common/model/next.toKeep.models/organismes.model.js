@@ -53,6 +53,9 @@ export const schema = object(
       object(
         {
           formation_id: objectId(),
+          annee_formation: integer({
+            description: "Année millésime de la formation pour cet organisme",
+          }),
           organismes: arrayOf(
             object(
               {
@@ -65,6 +68,12 @@ export const schema = object(
                   pattern: "^[0-9]{7}[a-zA-Z]$",
                   maxLength: 8,
                   minLength: 8,
+                }),
+                siret: string({
+                  description: "Siret du lieu de formation (optionnel)",
+                  pattern: "^[0-9]{14}$",
+                  maxLength: 14,
+                  minLength: 14,
                 }),
                 adresse: {
                   ...adresseSchema,
