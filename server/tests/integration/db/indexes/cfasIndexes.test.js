@@ -2,7 +2,7 @@ import { strict as assert } from "assert";
 import { cfasDb } from "../../../../src/common/model/collections.js";
 import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
 import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
-import cfasModelDescriptor from "./../../../../src/common/model/cfas.model.js";
+import cfasModelDescriptor from "./../../../../src/common/model/previous.models/toRemove.models/cfas.model.js";
 
 // TODO : Boucler sur la liste des index names pour les tests
 describe("Cfas Indexes", () => {

@@ -14,4 +14,4 @@ VOLUME /data
 EXPOSE 5000
 CMD ["yarn", "start"]
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD [ "node", "scripts/healthcheck.js" ]
+# HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD [ "node", "scripts/healthcheck.js" ]

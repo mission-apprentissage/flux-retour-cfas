@@ -14,7 +14,7 @@ import {
   markEmailAsFailed,
   markEmailAsDelivered,
   renderEmail,
-} from "../../common/components/emailsComponent.js";
+} from "../../common/actions/emails.actions.js";
 
 function checkWebhookKey() {
   passport.use(
@@ -31,7 +31,7 @@ function checkWebhookKey() {
   return passport.authenticate("localapikey", { session: false, failWithError: true });
 }
 
-export default () => {
+export default ({ mailer }) => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   async function checkEmailToken(req, res, next) {
@@ -49,7 +49,7 @@ export default () => {
     tryCatch(async (req, res) => {
       const { token } = req.params;
 
-      const html = await renderEmail(token);
+      const html = await renderEmail(mailer, token);
 
       return sendHTML(html, res);
     })

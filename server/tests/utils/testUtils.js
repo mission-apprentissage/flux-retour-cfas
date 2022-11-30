@@ -9,7 +9,6 @@ export const startServer = async () => {
   const components = await createComponents({
     db: getDatabase(),
     redisClient: redisFakeClient,
-    ovhStorage: {},
   });
   const app = await server(components);
   const httpClient = axiosist(app);

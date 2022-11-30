@@ -5,11 +5,13 @@ const colors = {
   white: "#ffffff",
   redmarianne: "#e1000f",
   openbluefrance: "#E3E3FD",
+  bluefrance_hover: "#1414B2",
   success: "#0d6635",
   error: "#b60000",
   warning: "#fa5c00",
   info: "#3a55d1",
   galt: "#f9f8f6",
+  galt_hover: "#eceae3",
   galt2: "#F6F6F6",
   mgalt: "#666666",
   dgalt: "#E5E5E5",
@@ -20,6 +22,21 @@ const colors = {
   greensoftc: "#22967E",
   flatsuccess: "#18753C",
   flaterror: "#CE0500",
+  // hack so we can use bluefrance color in Progress component which only accepts a colorScheme prop
+  main: {
+    900: "#000091",
+    800: "#000091",
+    700: "#000091",
+    600: "#000091",
+    500: "#000091",
+    400: "#000091",
+    300: "#000091",
+    200: "#000091",
+    100: "#000091",
+  },
+  dsfr_lightprimary: {
+    bluefrance_850: "#8B8BF6",
+  },
   grey: {
     800: "#1e1e1e",
     750: "#2a2a2a",
@@ -155,6 +172,20 @@ const colors = {
     100: "#f9fafc",
   },
 };
+
+// const fontSizes = {
+//   giga: `${76 / rootFontSizePx}rem`,
+//   mega: `${54 / rootFontSizePx}rem`,
+//   alpha: `${32 / rootFontSizePx}rem`,
+//   beta: `${24 / rootFontSizePx}rem`,
+//   gamma: `${20 / rootFontSizePx}rem`,
+//   delta: `${18 / rootFontSizePx}rem`,
+//   epsilon: `${16 / rootFontSizePx}rem`,
+//   zeta: `${14 / rootFontSizePx}rem`,
+//   omega: `${12 / rootFontSizePx}rem`,
+//   caption: `${11 / rootFontSizePx}rem`,
+//   legal: `${10 / rootFontSizePx}rem`,
+// };
 
 const fontSizes = {
   giga: "4.75rem",

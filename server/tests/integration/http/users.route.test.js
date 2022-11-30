@@ -19,7 +19,7 @@ describe("Users Route", () => {
   describe("GET /users", () => {
     it("sends a 401 HTTP response when user is not authenticated", async () => {
       const { httpClient } = await startServer();
-      const response = await httpClient.get("/api/users", {});
+      const response = await httpClient.get("/api/v1/admin/users", {});
 
       assert.equal(response.status, 401);
     });
@@ -28,7 +28,7 @@ describe("Users Route", () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
-      const response = await httpClient.get("/api/users", { headers: bearerToken });
+      const response = await httpClient.get("/api/v1/admin/users", { headers: bearerToken });
 
       assert.equal(response.status, 403);
     });
@@ -54,7 +54,7 @@ describe("Users Route", () => {
         region: "REGION",
         organisme: "ORGANISME",
       });
-      const response = await httpClient.get("/api/users", { headers: bearerToken });
+      const response = await httpClient.get("/api/v1/admin/users", { headers: bearerToken });
 
       assert.equal(response.status, 200);
       assert.equal(response.data.length, 3);
@@ -77,7 +77,7 @@ describe("Users Route", () => {
     it("sends a 401 HTTP response when user is not authenticated", async () => {
       const { httpClient } = await startServer();
       const testObjectId = "an-id-&9393";
-      const response = await httpClient.get(`/api/users/${testObjectId}`, {});
+      const response = await httpClient.get(`/api/v1/admin/user/${testObjectId}`, {}); // TODO
 
       assert.equal(response.status, 401);
     });
@@ -87,7 +87,7 @@ describe("Users Route", () => {
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
       const testObjectId = "random-id-39393";
-      const response = await httpClient.get(`/api/users/${testObjectId}`, { headers: bearerToken });
+      const response = await httpClient.get(`/api/v1/admin/user/${testObjectId}`, { headers: bearerToken }); // TODO
 
       assert.equal(response.status, 403);
     });
@@ -105,7 +105,7 @@ describe("Users Route", () => {
       assert.equal(found._id !== null, true);
 
       // Get by id
-      const response = await httpClient.get(`/api/users/${found._id}`, { headers: bearerToken });
+      const response = await httpClient.get(`/api/v1/admin/user/${found._id}`, { headers: bearerToken }); // TODO
 
       // Check response & data returner
       assert.equal(response.status, 200);
@@ -116,7 +116,7 @@ describe("Users Route", () => {
   describe("POST /users", () => {
     it("sends a 401 HTTP response when user is not authenticated", async () => {
       const { httpClient } = await startServer();
-      const response = await httpClient.post("/api/users", {});
+      const response = await httpClient.post("/api/v1/admin/user", {});
 
       assert.equal(response.status, 401);
     });
@@ -125,7 +125,7 @@ describe("Users Route", () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
-      const response = await httpClient.post("/api/users", {}, { headers: bearerToken });
+      const response = await httpClient.post("/api/v1/admin/user", {}, { headers: bearerToken });
 
       assert.equal(response.status, 403);
     });
@@ -137,7 +137,7 @@ describe("Users Route", () => {
       MockDate.set(fakeNowDate);
 
       const response = await httpClient.post(
-        "/api/users",
+        "/api/v1/admin/user",
         { email: "test@mail.com", username: "test", role: tdbRoles.pilot },
         { headers: bearerToken }
       );
@@ -161,7 +161,7 @@ describe("Users Route", () => {
       MockDate.set(fakeNowDate);
 
       const response = await httpClient.post(
-        "/api/users",
+        "/api/v1/admin/user",
         {
           email: "test@mail.com",
           username: "test",
@@ -189,7 +189,7 @@ describe("Users Route", () => {
   describe("POST /users/generate-update-password-url", () => {
     it("sends a 401 HTTP response when user is not authenticated", async () => {
       const { httpClient } = await startServer();
-      const response = await httpClient.post("/api/users/generate-update-password-url");
+      const response = await httpClient.post("/api/v1/admin/user/generate-update-password-url"); // TODO
 
       assert.equal(response.status, 401);
     });
@@ -199,7 +199,7 @@ describe("Users Route", () => {
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
       const response = await httpClient.post(
-        "/api/users/generate-update-password-url",
+        "/api/v1/admin/user/generate-update-password-url", // TODO
         { username: "john-doe" },
         { headers: bearerToken }
       );
@@ -215,7 +215,7 @@ describe("Users Route", () => {
       await components.users.createUser({ username });
 
       const response = await httpClient.post(
-        "/api/users/generate-update-password-url",
+        "/api/v1/admin/user/generate-update-password-url", // TODO
         { username },
         { headers: bearerToken }
       );
@@ -242,7 +242,7 @@ describe("Users Route", () => {
       const checkUserBeforeDelete = await usersDb().count({ username });
       assert.equal(checkUserBeforeDelete, 1);
 
-      const response = await httpClient.delete(`/api/users/${username}`, { headers: bearerToken });
+      const response = await httpClient.delete(`/api/v1/admin/user/${username}`, { headers: bearerToken });
       assert.equal(response.status, 200);
       const checkAfterDelete = await usersDb().count({ username });
       assert.equal(checkAfterDelete, 0);
@@ -257,7 +257,7 @@ describe("Users Route", () => {
       const checkUserBeforeDelete = await usersDb().count({ username });
       assert.equal(checkUserBeforeDelete, 1);
 
-      const response = await httpClient.delete(`/api/users/${username}`, { headers: bearerToken });
+      const response = await httpClient.delete(`/api/v1/admin/user/${username}`, { headers: bearerToken });
 
       assert.equal(response.status, 403);
       const checkAfterDelete = await usersDb().count({ username });
@@ -274,7 +274,7 @@ describe("Users Route", () => {
       const checkUserBeforeDelete = await usersDb().count({ username });
       assert.equal(checkUserBeforeDelete, 1);
 
-      const response = await httpClient.delete(`/api/users/${badUsername}`, { headers: bearerToken });
+      const response = await httpClient.delete(`/api/v1/admin/user/${badUsername}`, { headers: bearerToken });
 
       assert.equal(response.status, 500);
       const checkAfterDelete = await usersDb().count({ username });
@@ -286,7 +286,11 @@ describe("Users Route", () => {
     it("sends a 200 HTTP empty response when no match", async () => {
       const { httpClient, createAndLogUser } = await startServer();
       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
-      const response = await httpClient.post("/api/users/search", { searchTerm: "blabla" }, { headers: bearerToken });
+      const response = await httpClient.post(
+        "/api/v1/admin/users/search",
+        { searchTerm: "blabla" },
+        { headers: bearerToken }
+      );
 
       assert.equal(response.status, 200);
       assert.deepEqual(response.data, []);
@@ -314,7 +318,11 @@ describe("Users Route", () => {
         organisme: "ORGANISME",
       });
 
-      const response = await httpClient.post("/api/users/search", { searchTerm: "user" }, { headers: bearerToken });
+      const response = await httpClient.post(
+        "/api/v1/admin/users/search",
+        { searchTerm: "user" },
+        { headers: bearerToken }
+      );
 
       assert.strictEqual(response.status, 200);
       assert.strictEqual(response.data.length, 3);
@@ -348,7 +356,11 @@ describe("Users Route", () => {
         organisme: "ORGANISME",
       });
 
-      const response = await httpClient.post("/api/users/search", { searchTerm: "mail.com" }, { headers: bearerToken });
+      const response = await httpClient.post(
+        "/api/v1/admin/users/search",
+        { searchTerm: "mail.com" },
+        { headers: bearerToken }
+      );
 
       assert.strictEqual(response.status, 200);
       assert.strictEqual(response.data.length, 3);
@@ -383,7 +395,7 @@ describe("Users Route", () => {
       });
 
       const response = await httpClient.post(
-        "/api/users/search",
+        "/api/v1/admin/users/search",
         { searchTerm: ORGANISMES_APPARTENANCE.ACADEMIE },
         { headers: bearerToken }
       );
@@ -410,7 +422,7 @@ describe("Users Route", () => {
 
       // Update
       const response = await httpClient.put(
-        `/api/users/${found._id}`,
+        `/api/v1/admin/user/${found._id}`,
         { username: "UPDATED" },
         { headers: bearerToken }
       );
@@ -434,7 +446,7 @@ describe("Users Route", () => {
 
       // Update
       const response = await httpClient.put(
-        `/api/users/${found._id}`,
+        `/api/v1/admin/user/${found._id}`,
         { username: "UPDATED" },
         { headers: bearerToken }
       );

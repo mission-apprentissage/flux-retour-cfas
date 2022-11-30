@@ -1,5 +1,12 @@
 import { strict as assert } from "assert";
-import validators from "../../../../src/http/utils/validators.js";
+import Joi from "joi";
+
+const validators = {
+  password: () =>
+    Joi.string().regex(
+      /^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!"#$€%&'()ç*+,-./:;<=>?@[\]^_`{|}~])[a-zA-Z0-9À-ž!"#$€%&'()ç*+,-./:;<=>?@[\]^_`{|}~]{8,}$/
+    ),
+};
 
 describe("Validators", () => {
   describe("password", () => {

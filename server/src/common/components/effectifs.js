@@ -2,11 +2,10 @@ import { EffectifsApprentis } from "./effectifs/apprentis.js";
 import { EffectifsAbandons } from "./effectifs/abandons.js";
 import { EffectifsInscritsSansContrats } from "./effectifs/inscrits-sans-contrats.js";
 import { EffectifsRupturants } from "./effectifs/rupturants.js";
-import cfasFactory from "./cfas.js";
-const cfas = cfasFactory();
 import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
 import { asyncForEach } from "../utils/asyncUtils.js";
 import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
+import { findOrganismeByUai } from "../actions/organismes.actions.js";
 
 export default () => {
   const apprentis = new EffectifsApprentis();
@@ -239,7 +238,7 @@ export default () => {
     await asyncForEach(
       effectifsCountByCfa,
       async ({ _id: uai, nom_etablissement, siret_etablissement, ...effectifs }) => {
-        const cfa = await cfas.getFromUai(uai);
+        const cfa = await findOrganismeByUai(uai);
 
         result.push({
           uai_etablissement: uai,
