@@ -13,7 +13,7 @@ import { effectifIdAtom } from "../../../atoms";
 import { organismeAtom } from "../../../../../../../hooks/organismeAtoms";
 
 // eslint-disable-next-line react/display-name
-export const EffectifApprenant = memo(() => {
+export const EffectifApprenant = memo(({ modeSifa = false }) => {
   const values = useRecoilValue(valuesSelector);
   const nouveauStatutValeurField = useRecoilValue(fieldSelector("apprenant.nouveau_statut.valeur_statut"));
   const nouveauStatutDateField = useRecoilValue(fieldSelector("apprenant.nouveau_statut.date_statut"));
@@ -47,51 +47,53 @@ export const EffectifApprenant = memo(() => {
   return (
     <Box>
       <Box my={9}>
-        <HStack spacing={4} alignItems="flex-end" h="92px">
-          <Flex w="33%" alignItems="flex-end">
-            <Input
-              {...nouveauStatutValeurField}
-              value={nouveauStatutValeur.value}
-              onSubmit={(value) => setNouveauStatutValeur({ value, hasError: false })}
-              onError={(value) => setNouveauStatutValeur({ value, hasError: true })}
-            />
-          </Flex>
-          <Flex w="33%" alignItems="flex-end">
-            <Input
-              {...nouveauStatutDateField}
-              value={nouveauStatutDate.value}
-              onSubmit={(value) => setNouveauStatutDate({ value, hasError: false })}
-              onError={(value) => setNouveauStatutDate({ value, hasError: true })}
-            />
-          </Flex>
-          <Flex w="33%" alignItems="center" h="full">
-            <Button
-              size="md"
-              disabled={
-                nouveauStatutValeur.hasError ||
-                nouveauStatutDate.hasError ||
-                nouveauStatutValeur.value === "" ||
-                !nouveauStatutDate.value
-              }
-              onClick={async () => {
-                if (!nouveauStatutValeur.hasError && !nouveauStatutDate.hasError) {
-                  await onSubmitted(nouveauStatutValeur.value, nouveauStatutDate.value);
-                  cerfaController.setField("apprenant.nouveau_statut.valeur_statut", nouveauStatutValeur.value, {
-                    triggerSave: false,
-                  });
-                  cerfaController.setField("apprenant.nouveau_statut.date_statut", nouveauStatutDate.value, {
-                    triggerSave: false,
-                  });
+        {!modeSifa && (
+          <HStack spacing={4} alignItems="flex-end" h="92px">
+            <Flex w="33%" alignItems="flex-end">
+              <Input
+                {...nouveauStatutValeurField}
+                value={nouveauStatutValeur.value}
+                onSubmit={(value) => setNouveauStatutValeur({ value, hasError: false })}
+                onError={(value) => setNouveauStatutValeur({ value, hasError: true })}
+              />
+            </Flex>
+            <Flex w="33%" alignItems="flex-end">
+              <Input
+                {...nouveauStatutDateField}
+                value={nouveauStatutDate.value}
+                onSubmit={(value) => setNouveauStatutDate({ value, hasError: false })}
+                onError={(value) => setNouveauStatutDate({ value, hasError: true })}
+              />
+            </Flex>
+            <Flex w="33%" alignItems="center" h="full">
+              <Button
+                size="md"
+                disabled={
+                  nouveauStatutValeur.hasError ||
+                  nouveauStatutDate.hasError ||
+                  nouveauStatutValeur.value === "" ||
+                  !nouveauStatutDate.value
                 }
-                return false;
-              }}
-              variant="primary"
-              mt={4}
-            >
-              + Ajouter le nouveau statut
-            </Button>
-          </Flex>
-        </HStack>
+                onClick={async () => {
+                  if (!nouveauStatutValeur.hasError && !nouveauStatutDate.hasError) {
+                    await onSubmitted(nouveauStatutValeur.value, nouveauStatutDate.value);
+                    cerfaController.setField("apprenant.nouveau_statut.valeur_statut", nouveauStatutValeur.value, {
+                      triggerSave: false,
+                    });
+                    cerfaController.setField("apprenant.nouveau_statut.date_statut", nouveauStatutDate.value, {
+                      triggerSave: false,
+                    });
+                  }
+                  return false;
+                }}
+                variant="primary"
+                mt={4}
+              >
+                + Ajouter le nouveau statut
+              </Button>
+            </Flex>
+          </HStack>
+        )}
 
         {values.apprenant.historique_statut?.map((statut, i) => {
           return (

@@ -14,6 +14,7 @@ export default {
       "organisme/page_effectifs/telecharger",
 
       "organisme/page_sifa2",
+      "organisme/page_sifa2/telecharger",
 
       "organisme/page_parametres",
       "organisme/page_parametres/gestion_acces",
@@ -35,6 +36,7 @@ export default {
       "organisme/page_effectifs/ajout_apprenant",
       "organisme/page_effectifs/telecharger",
       "organisme/page_sifa2",
+      "organisme/page_sifa2/telecharger",
     ],
   },
   "organisme.readonly": {

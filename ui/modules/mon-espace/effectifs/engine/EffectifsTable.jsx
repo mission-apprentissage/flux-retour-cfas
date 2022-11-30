@@ -84,7 +84,7 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
           </HStack>
         </Box>
         <HStack spacing={4}>
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
+          {!modeSifa && hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
             <Button size="md" onClick={() => alert("TODO NOT YET")} variant="secondary">
               <DownloadLine />
               <Text as="span" ml={2}>
@@ -92,7 +92,16 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
               </Text>
             </Button>
           )}
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
+          {modeSifa && hasContextAccessTo(organisme, "organisme/page_sifa2/telecharger") && (
+            <Button size="md" onClick={() => alert("TODO NOT YET")} variant="secondary">
+              <DownloadLine />
+              <Text as="span" ml={2}>
+                Télécharger SIFA
+              </Text>
+            </Button>
+          )}
+          {!modeSifa &&
+            hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
             organisme.mode_de_transmission === "FICHIERS" && (
               <>
                 <Button
@@ -108,7 +117,8 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
                 <AjoutApprenantModal size="md" isOpen={ajoutModal.isOpen} onClose={ajoutModal.onClose} />
               </>
             )}
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
+          {!modeSifa &&
+            hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
             organisme.mode_de_transmission !== "API" && (
               <>
                 <Button

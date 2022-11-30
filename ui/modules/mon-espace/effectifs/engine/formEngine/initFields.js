@@ -48,7 +48,7 @@ const createFieldFactory =
 
     if (modeSifa) {
       fieldSchema.required = true;
-      fieldSchema.error = "SIFA";
+      fieldSchema.warning = "SIFA";
     }
 
     const type = fieldSchema.fieldType;
