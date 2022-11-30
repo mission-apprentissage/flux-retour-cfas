@@ -41,7 +41,7 @@ export const schema = object(
     tokenized_libelle: stringOrNull({ description: "Libellé tokenizé pour la recherche" }),
     metiers: arrayOfOrNull(string(), { description: "Les domaines métiers rattachés à la formation" }),
     // TODO Samir duree -> non présent dans TCO
-    duree: stringOrNull({ description: "Durée de la formation" }),
+    duree: stringOrNull({ description: "Durée de la formation théorique" }),
     // TODO Samir annee -> non présent dans TCO
     annee: stringOrNull({ description: "Année de la formation (cursus)" }),
 
