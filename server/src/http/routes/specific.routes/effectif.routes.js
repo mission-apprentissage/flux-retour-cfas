@@ -167,6 +167,25 @@ export default () => {
     })
   );
 
+  const compactObject = (val) => {
+    const data = Array.isArray(val) ? val.filter(Boolean) : val;
+    return Object.keys(data).reduce(
+      (acc, key) => {
+        const value = data[key];
+        if (!(value === null || value === undefined))
+          acc[key] = typeof value === "object" ? compactObject(value) : value;
+        if (
+          acc[key] === null ||
+          acc[key] === undefined ||
+          (acc[key] instanceof Object && !Object.keys(acc[key]).length)
+        )
+          delete acc[key];
+        return acc;
+      },
+      Array.isArray(val) ? [] : {}
+    );
+  };
+
   router.put(
     "/:id",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/edition"]),
@@ -179,32 +198,24 @@ export default () => {
         throw new Error(`Unable to find effectif ${params.id}`);
       }
 
-      const { is_lock, ...restData } = data;
-      const compactObject = (val) => {
-        const data = Array.isArray(val) ? val.filter(Boolean) : val;
-        return Object.keys(data).reduce(
-          (acc, key) => {
-            const value = data[key];
-            if (!(value === null || value === undefined))
-              acc[key] = typeof value === "object" ? compactObject(value) : value;
-            if (
-              acc[key] === null ||
-              acc[key] === undefined ||
-              (acc[key] instanceof Object && !Object.keys(acc[key]).length)
-            )
-              delete acc[key];
-            return acc;
-          },
-          Array.isArray(val) ? [] : {}
-        );
-      };
-      console.log(compactObject(restData));
+      // eslint-disable-next-line no-unused-vars
+      const { is_lock, nouveau_statut, ...restData } = data;
+
+      // TODO CHECK IS LOCK IF COMING FROM API
+
       // eslint-disable-next-line no-unused-vars
       const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
         merge(effectifDb, {
           ...compactObject(restData),
-          is_lock,
         });
+
+      if (nouveau_statut) {
+        dataToUpdate.apprenant.historique_statut.push({
+          valeur_statut: nouveau_statut.valeur,
+          date_statut: nouveau_statut.date,
+          date_reception: new Date(),
+        });
+      }
 
       const effectifUpdated = await updateEffectif(effectifDb._id, dataToUpdate);
 

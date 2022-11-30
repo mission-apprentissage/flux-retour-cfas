@@ -1,6 +1,7 @@
 import { employeurSiretControl } from "./employeurSiret.control";
 import { idccControl } from "./idcc.control";
 // import { RemunerationsControl } from "./remunerations.control";
+// import { historiqueStatutControl } from "./historique_statut.control";
 // import { ContratDatesControl } from "./ContratDates.control";
 // import { ageApprentControl } from "./ageApprent.control";
 // import { avantagesNatureControl } from "./avantagesNature.control";
@@ -50,4 +51,5 @@ export const controls = [
   // ...RemunerationsControl,
   // ...rncpControl,
   // ...codeDiplomeControl,
+  // ...historiqueStatutControl,
 ];

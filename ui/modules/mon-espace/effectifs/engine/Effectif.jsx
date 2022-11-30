@@ -20,7 +20,7 @@ const Effectif = React.memo(function EffectifMemo() {
   return (
     <CerfaControllerContext.Provider value={cerfaController}>
       <Box my={12} px={5}>
-        <Text mt={3}>+ formulaire STATUT</Text>
+        <Text mt={3}>+ formulaire Contrats, + formulaire formation</Text>
 
         <EffectifApprenant />
       </Box>

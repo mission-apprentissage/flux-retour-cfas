@@ -3,6 +3,61 @@ import { INDICE_DE_REPETITION_OPTIONS } from "../../domain/indiceDeRepetionOptio
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 
 export const apprenantSchema = {
+  "apprenant.nouveau_statut.date_statut": {
+    label: "Date de changement de statut",
+    fieldType: "date",
+    autosave: false,
+  },
+  "apprenant.nouveau_statut.valeur_statut": {
+    fieldType: "select",
+    label: "Statut :",
+    autosave: false,
+    options: [
+      {
+        label: "Inscrit en formation",
+        value: 2,
+      },
+      {
+        label: "En contrat, apprenti",
+        value: 3,
+      },
+      {
+        label: "Abandon",
+        value: 0,
+      },
+    ],
+  },
+
+  "apprenant.historique_statut[].date_statut": {
+    label: "Date de changement de statut",
+    fieldType: "date",
+    locked: true,
+  },
+  "apprenant.historique_statut[].valeur_statut": {
+    fieldType: "select",
+    label: "Statut :",
+    locked: true,
+    options: [
+      {
+        label: "Inscrit en formation",
+        value: 2,
+      },
+      {
+        label: "En contrat, apprenti",
+        value: 3,
+      },
+      {
+        label: "Abandon",
+        value: 0,
+      },
+    ],
+  },
+  "apprenant.historique_statut[].date_reception": {
+    label: "Date de reception du statut",
+    fieldType: "date",
+    locked: true,
+  },
+
   "apprenant.ine": {
     showInfo: true,
     label: "Numéro INE de l'apprenant(e) :",
@@ -210,7 +265,6 @@ export const apprenantSchema = {
       },
     ],
   },
-  //historique_statut
 
   "apprenant.mineur_emancipe": {
     fieldType: "radio",
@@ -404,7 +458,6 @@ export const apprenantSchema = {
       },
     ],
   },
-
   "apprenant.derniere_situation": {
     fieldType: "select",
     label: "Situation de l'apprenant n-1 :",
@@ -461,7 +514,6 @@ export const apprenantSchema = {
       },
     ],
   },
-
   "apprenant.dernier_diplome": {
     fieldType: "select",
     label: "Dernier diplôme obtenu :",
@@ -518,7 +570,6 @@ export const apprenantSchema = {
       },
     ],
   },
-
   "apprenant.regime_scolaire": {
     fieldType: "select",
     label: "Régime scolaire :",
