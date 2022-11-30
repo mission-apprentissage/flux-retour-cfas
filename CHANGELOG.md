@@ -1,3 +1,10 @@
+# [2.58.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.58.0-beta.1...v2.58.0-beta.2) (2022-11-30)
+
+
+### Bug Fixes
+
+* **server:** fix le job seedReferentiel ([fc64513](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fc64513f50fd8d5e6905ca6dc5d91b5cdef501d2))
+
 # [2.58.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.57.0...v2.58.0-beta.1) (2022-11-30)
 
 
