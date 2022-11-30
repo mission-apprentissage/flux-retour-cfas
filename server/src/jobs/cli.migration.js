@@ -73,10 +73,12 @@ cli
   .command("migrate:dossiersApprenants")
   .description("Migration d'un cfa vers organismes")
   .option("--sampleNbUais <int>", "Nb de dossiers à traiter")
-  .option("--specificUai <string>", "UAI spécifique à traiter")
-  .action(async ({ sampleNbUais, specificUai }) => {
+  .option("--uai <string>", "UAI spécifique à traiter")
+  .option("--numRegion <string>", "Région spécifique à traiter")
+  .option("--numAcademie <string>", "Académie spécifique à traiter")
+  .action(async ({ sampleNbUais, uai, numRegion, numAcademie }) => {
     runScript(async () => {
-      return migrateDossiersApprenantsToDossiersApprenantsMigration(sampleNbUais, specificUai);
+      return migrateDossiersApprenantsToDossiersApprenantsMigration(sampleNbUais, uai, numRegion, numAcademie);
     }, "refacto-migration-dossiersApprenants");
   });
 

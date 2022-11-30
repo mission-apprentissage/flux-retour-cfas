@@ -33,7 +33,12 @@ const LOG_ACTIONS = {
 /**
  * Ce script effectue la migration de la collection dossiersApprenants vers la nouvelle collection DossiersApprenantsMigration
  */
-export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sample = 0, specificUai = null) => {
+export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (
+  sample = 0,
+  uai = null,
+  numRegion = null,
+  numAcademie = null
+) => {
   // Clear
   logger.info(`Suppression des dossiersApprenantsMigration et effectifs existants...`);
   await dossiersApprenantsMigrationDb().deleteMany();
@@ -43,9 +48,31 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (sam
 
   // Parse all distinct uais in dossiersApprenants
   let allUaisInDossiers = await dossiersApprenantsDb().distinct("uai_etablissement");
-  // Handle sample slicing with option
-  if (sample > 0) allUaisInDossiers = allUaisInDossiers.slice(0, sample);
-  if (specificUai !== null) allUaisInDossiers = [specificUai];
+
+  // Handle options
+  if (numRegion) {
+    allUaisInDossiers = await dossiersApprenantsDb().distinct("uai_etablissement", {
+      etablissement_num_region: numRegion,
+    });
+    logger.info(`Migration des dossiersApprenants de la région ${numRegion}`);
+  }
+
+  if (numAcademie) {
+    allUaisInDossiers = await dossiersApprenantsDb().distinct("uai_etablissement", {
+      etablissement_num_academie: numAcademie,
+    });
+    logger.info(`Migration des dossiersApprenants de l'academie ${numAcademie}`);
+  }
+
+  if (sample > 0) {
+    allUaisInDossiers = allUaisInDossiers.slice(0, sample);
+    logger.info(`Migration des dossiersApprenants des ${sample} premiers organismes`);
+  }
+
+  if (uai) {
+    allUaisInDossiers = [uai];
+    logger.info(`Migration des dossiersApprenants de l'organisme ${uai}`);
+  }
 
   loadingBar.start(allUaisInDossiers.length, 0);
   let nbDossiersToMigrate = 0;
