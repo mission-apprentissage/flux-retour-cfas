@@ -1,4 +1,4 @@
-import { getDirname } from "../../common/utils/esmUtils.js";
+import { __dirname } from "../../common/utils/esmUtils.js";
 import path from "path";
 import { runScript } from "../scriptWrapper.js";
 import { fetchOrganismes } from "../../common/apis/apiReferentielMna.js";
@@ -30,7 +30,7 @@ const parseReseauxTextFromCsv = (reseauText) => {
   return reseaux;
 };
 
-const EXCELLENCE_PRO_FILE_PATH = path.join(getDirname(import.meta.url), `./referentiel-reseau-excellence-pro.csv`);
+const EXCELLENCE_PRO_FILE_PATH = path.join(__dirname(import.meta.url), `./referentiel-reseau-excellence-pro.csv`);
 
 /**
  * Script qui crée une collection contenant le référentiel UAI/SIRET enrichi des réseaux existants dans le TDB et dans le fichier Excellence Pro
