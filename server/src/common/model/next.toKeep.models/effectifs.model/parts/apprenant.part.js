@@ -103,10 +103,10 @@ export const apprenantSchema = object(
       enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // TODO
       description: `**Dernier diplome obtenu`,
     }),
-    apprenti_mineur: boolean({
+    mineur: boolean({
       description: "À la date de signature de ce contrat, l'apprenti(e) sera-t-il(elle) mineur(e) ?",
     }),
-    apprenti_mineur_non_emancipe: boolean({
+    mineur_emancipe: boolean({
       description: `Un mineur émancipé peut accomplir seul les actes nécessitant la majorité légale. Plus d'informations à propos de l'émancipation sur [le site du Service public.](https://www.service-public.fr/particuliers/vosdroits/F1194) `,
     }),
     representant_legal: object({

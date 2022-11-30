@@ -18,6 +18,10 @@ export const EffectifApprenant = memo(() => {
           <InputController name="apprenant.courriel" />
           <InputController name="apprenant.telephone" />
           {/* historique_statut */}
+          <Box mt={5}>
+            <InputController name="apprenant.mineur" />
+            <InputController name="apprenant.mineur_emancipe" />
+          </Box>
         </Box>
         <Box w="45%" ml="5w">
           <FormLabel fontWeight="bold" my={3}>

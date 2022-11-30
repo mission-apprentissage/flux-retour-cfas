@@ -111,6 +111,39 @@ export const apprenantSchema = {
     label: "Téléphone de l'apprenant(e) :",
     showInfo: true,
   },
+  "apprenant.mineur": {
+    required: true,
+    fieldType: "radio",
+    label: "L'apprenant(e) est-t-il(elle) mineur(e) ?",
+    requiredMessage: "L'apprenant(e) est-t-il(elle) mineur(e) ?",
+    options: [
+      {
+        label: "Oui",
+        value: true,
+      },
+      {
+        label: "Non",
+        value: false,
+      },
+    ],
+  },
+  "apprenant.mineur_emancipe": {
+    required: true,
+    fieldType: "radio",
+    label: "L'apprenant(e) est émancipé ? Si non est sous la responsabilité d'un représentant légal",
+    showInfo: true,
+    requiredMessage: "Merci de renseigner si l'apprenant(e) mineur(e) est emancipé(e) ou non",
+    options: [
+      {
+        label: "Oui",
+        value: true,
+      },
+      {
+        label: "Non",
+        value: false,
+      },
+    ],
+  },
   "apprenant.adresse.numero": {
     fieldType: "number",
     label: "N° :",

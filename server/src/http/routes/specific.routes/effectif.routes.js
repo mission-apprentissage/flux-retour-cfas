@@ -73,6 +73,36 @@ export default () => {
             customizerPath
           ),
         },
+        representant_legal: {
+          ...mergeWith(
+            mergeWith(
+              mergeWith(
+                cloneDeep(effectifSchema.apprenant.properties.representant_legal.properties),
+                effectif.apprenant.representant_legal,
+                customizer
+              ),
+              effectif.is_lock.apprenant.representant_legal,
+              customizerLock
+            ),
+            paths.apprenant.representant_legal,
+            customizerPath
+          ),
+          adresse: {
+            ...mergeWith(
+              mergeWith(
+                mergeWith(
+                  cloneDeep(effectifSchema.apprenant.properties.representant_legal.properties.adresse.properties),
+                  effectif.apprenant.representant_legal ? effectif.apprenant.representant_legal.adresse : {},
+                  customizer
+                ),
+                effectif.is_lock.apprenant.representant_legal.adresse,
+                customizerLock
+              ),
+              paths.apprenant.representant_legal.adresse,
+              customizerPath
+            ),
+          },
+        },
       },
       formation: {
         ...mergeWith(
@@ -152,18 +182,23 @@ export default () => {
       const { is_lock, ...restData } = data;
       const compactObject = (val) => {
         const data = Array.isArray(val) ? val.filter(Boolean) : val;
-        const ret = Object.keys(data).reduce(
+        return Object.keys(data).reduce(
           (acc, key) => {
             const value = data[key];
-            // TODO Might be an issue with number and boolean
-            if (value) acc[key] = typeof value === "object" ? compactObject(value) : value;
-            if (!acc[key]) delete acc[key];
+            if (!(value === null || value === undefined))
+              acc[key] = typeof value === "object" ? compactObject(value) : value;
+            if (
+              acc[key] === null ||
+              acc[key] === undefined ||
+              (acc[key] instanceof Object && !Object.keys(acc[key]).length)
+            )
+              delete acc[key];
             return acc;
           },
           Array.isArray(val) ? [] : {}
         );
-        return !Array.isArray(val) ? (!Object.keys(ret).length ? null : ret) : ret;
       };
+      console.log(compactObject(restData));
       // eslint-disable-next-line no-unused-vars
       const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
         merge(effectifDb, {

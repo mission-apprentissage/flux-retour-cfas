@@ -12,6 +12,7 @@ const adresseLocker = object({
   region: boolean(),
   academie: boolean(),
   complete: boolean(),
+  pays: boolean(),
 });
 
 export const effectifFieldsLockerSchema = object({
@@ -28,6 +29,23 @@ export const effectifFieldsLockerSchema = object({
     adresse: adresseLocker,
     historique_statut: boolean(),
     contrats: boolean(),
+
+    code_postal_de_naissance: boolean(),
+    regime_scolaire: boolean(),
+    inscription_sportif_haut_niveau: boolean(),
+    situation_avant_contrat: boolean(),
+    derniere_situation: boolean(),
+    dernier_diplome: boolean(),
+    mineur: boolean(),
+    mineur_emancipe: boolean(),
+    representant_legal: object({
+      nom: boolean(),
+      prenom: boolean(),
+      meme_adresse: boolean(),
+      adresse: adresseLocker,
+      courriel: boolean(),
+      telephone: boolean(),
+    }),
   }),
   formation: object({
     cfd: boolean(),
@@ -37,6 +55,10 @@ export const effectifFieldsLockerSchema = object({
     niveau_libelle: boolean(),
     periode: boolean(),
     annee: boolean(),
+    date_debut_formation: boolean(),
+    date_fin_formation: boolean(),
+    date_obtention_diplome: boolean(),
+    duree_formation_relle: boolean(),
   }),
 });
 
@@ -52,6 +74,7 @@ const defaultAdresseLock = (lockAtCreate = false) => ({
   region: lockAtCreate,
   academie: lockAtCreate,
   complete: lockAtCreate,
+  pays: lockAtCreate,
 });
 
 // Default value
@@ -70,6 +93,22 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
       adresse: defaultAdresseLock(lockAtCreate),
       historique_statut: lockAtCreate,
       contrats: lockAtCreate,
+      code_postal_de_naissance: lockAtCreate,
+      regime_scolaire: lockAtCreate,
+      inscription_sportif_haut_niveau: lockAtCreate,
+      situation_avant_contrat: lockAtCreate,
+      derniere_situation: lockAtCreate,
+      dernier_diplome: lockAtCreate,
+      mineur: lockAtCreate,
+      mineur_emancipe: lockAtCreate,
+      representant_legal: {
+        nom: lockAtCreate,
+        prenom: lockAtCreate,
+        meme_adresse: lockAtCreate,
+        adresse: defaultAdresseLock(lockAtCreate),
+        courriel: lockAtCreate,
+        telephone: lockAtCreate,
+      },
     },
     formation: {
       cfd: lockAtCreate,
@@ -79,6 +118,10 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
       niveau_libelle: lockAtCreate,
       periode: lockAtCreate,
       annee: lockAtCreate,
+      date_debut_formation: lockAtCreate,
+      date_fin_formation: lockAtCreate,
+      date_obtention_diplome: lockAtCreate,
+      duree_formation_relle: lockAtCreate,
     },
   };
 }
