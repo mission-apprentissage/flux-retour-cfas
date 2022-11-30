@@ -151,9 +151,9 @@ export const apprenantSchema = object(
               "L'effectif salarié rempli automatiquement correspond à l'estimation de la base Entreprises de l'INSEE. <br/>L'effectif renseigné est celui de l’entreprise dans sa globalité (et non seulement l’effectif de l’établissement d’exécution du contrat).",
             example: 123,
           }),
-          adresse: object({
+          adresse: {
             ...adresseSchema,
-          }),
+          },
           date_debut: date({ description: "Date de début du contrat" }),
           date_fin: date({ description: "Date de fin du contrat" }),
           date_rupture: date({ description: "Date de rupture du contrat" }),
