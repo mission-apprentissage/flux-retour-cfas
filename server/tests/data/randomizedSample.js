@@ -6,7 +6,7 @@ import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierAppren
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
-const getRandomIdFormation = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
+export const getRandomFormationCfd = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
 export const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
 export const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
@@ -18,7 +18,7 @@ export const getRandomPeriodeFormation = (anneeScolaire) => {
   return [startYear, endYear];
 };
 const getRandomAnneeFormation = () => faker.helpers.arrayElement([0, 1, 2, 3]);
-const getRandomAnneeScolaire = () => {
+export const getRandomAnneeScolaire = () => {
   const currentYear = new Date().getFullYear();
   const anneeScolaire = faker.helpers.arrayElement([
     [currentYear - 1, currentYear], // [2020, 2021]
@@ -42,7 +42,7 @@ export const createRandomDossierApprenant = (params = {}) => {
     prenom_apprenant: faker.name.firstName(),
     email_contact: faker.internet.email(),
 
-    formation_cfd: getRandomIdFormation(),
+    formation_cfd: getRandomFormationCfd(),
     libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : null,
@@ -74,7 +74,7 @@ export const createRandomEffectifApprenant = (params = {}) => {
     dossierApprenantId: faker.datatype.uuid(),
     uai_etablissement: getRandomUaiEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-    formation_cfd: getRandomIdFormation(),
+    formation_cfd: getRandomFormationCfd(),
     periode_formation: isPresent() ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
@@ -102,7 +102,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
 
     email_contact: faker.internet.email(),
 
-    id_formation: getRandomIdFormation(),
+    id_formation: getRandomFormationCfd(),
     libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isPresent() ? getRandomSiretEtablissement() : "",
