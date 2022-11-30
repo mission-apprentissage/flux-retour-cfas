@@ -26,6 +26,7 @@ export const hydrateOrganismesFormations = async () => {
       await asyncForEach(formationsIdForOrganisme, async (formation_id) => {
         const formation = await findFormationById(formation_id);
 
+        // TODO Call Catalogue for CFD / UAI as gestionnaire & formateur
         // Ajout à la liste des formation de l'organisme d'un item contenant formation_id et liste des organismes liés à cette formation
         formationsForOrganismeArray.push({
           formation_id,
