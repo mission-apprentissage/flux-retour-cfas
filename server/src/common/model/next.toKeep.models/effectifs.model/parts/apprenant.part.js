@@ -27,6 +27,7 @@ export const apprenantSchema = object(
       enum: [1, 2, 3],
     }),
     regime_scolaire: integer({
+      // TODO
       description: `**Régime scolaire** :\r\n  1 : MSA\r\n  2 : URSSAF`,
       enum: [0, 1, 2],
     }),
@@ -104,7 +105,7 @@ export const apprenantSchema = object(
       description: `**Dernier diplome obtenu`,
     }),
     mineur: boolean({
-      description: "À la date de signature de ce contrat, l'apprenti(e) sera-t-il(elle) mineur(e) ?",
+      description: "l'apprenant(e) sera-t-il(elle) mineur(e) ? (calc)",
     }),
     mineur_emancipe: boolean({
       description: `Un mineur émancipé peut accomplir seul les actes nécessitant la majorité légale. Plus d'informations à propos de l'émancipation sur [le site du Service public.](https://www.service-public.fr/particuliers/vosdroits/F1194) `,
