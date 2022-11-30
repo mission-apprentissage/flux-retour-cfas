@@ -28,3 +28,31 @@ export const getFormations = async (options) => {
     return null;
   }
 };
+
+export const getOrganismesListForOrganismeFormation = async (uai, cfd) => {
+  const url = `${API_ENDPOINT}/entity/formations`;
+  try {
+    const query = {
+      published: true,
+      cfd: cfd,
+      $or: [{ etablissement_formateur_uai: uai }, { etablissement_gestionnaire_uai: uai }],
+    };
+    let { page, allFormations, limit, select } = { page: 1, allFormations: [], limit: 1050 };
+
+    let params = { page, limit, query, select };
+    logger.debug(`Requesting ${url}`, params);
+    const response = await axios.get(url, { params });
+
+    const { formations, pagination } = response.data;
+    allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
+
+    if (page < pagination.nombre_de_page) {
+      return getFormations({ page: page + 1, allFormations, limit });
+    } else {
+      return allFormations;
+    }
+  } catch (err) {
+    logger.error(`getFormations: something went wrong while requesting ${url}`, err);
+    return null;
+  }
+};
