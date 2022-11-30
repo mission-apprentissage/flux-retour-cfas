@@ -51,14 +51,6 @@ export const dossiersApprenantsDb = () => {
   return getDbCollection(dossiersApprenantsModelDescriptor.collectionName);
 };
 
-export const cfasDb = () => {
-  return getDbCollection(cfasModelDescriptor.collectionName);
-};
-
-export const reseauxCfasDb = () => {
-  return getDbCollection(reseauxCfasModelDescriptor.collectionName);
-};
-
 export const formationsDb = () => {
   return getDbCollection(formationsModelDescriptor.collectionName);
 };
@@ -77,6 +69,43 @@ export const jobEventsDb = () => {
 
 export const effectifsApprenantsDb = () => {
   return getDbCollection(effectifsApprenantsModelDescriptor.collectionName);
+};
+
+export const usersMigrationDb = () => {
+  return getDbCollection(usersMigrationModelDescriptor.collectionName);
+};
+
+export const rolesDb = () => {
+  return getDbCollection(RolesModelDescriptor.collectionName);
+};
+
+export const jwtSessionsDb = () => {
+  return getDbCollection(JwtSessionsModelDescriptor.collectionName);
+};
+
+export function organismesDb() {
+  return getDbCollection(OrganismesModelDescriptor.collectionName);
+}
+
+export function permissionsDb() {
+  return getDbCollection(PermissionsDescriptor.collectionName);
+}
+
+export function dossiersApprenantsMigrationDb() {
+  return getDbCollection(dossiersApprenantsMigrationModelDescriptor.collectionName);
+}
+
+export function effectifsDb() {
+  return getDbCollection(effectifsModelDescriptor.collectionName);
+}
+
+// TODO Collections descriptors à supprimer
+export const cfasDb = () => {
+  return getDbCollection(cfasModelDescriptor.collectionName);
+};
+
+export const referentielSiretUaiDb = () => {
+  return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
 };
 
 export const demandesIdentifiantsDb = () => {
@@ -99,32 +128,6 @@ export const dossiersApprenantsApiErrorsDb = () => {
   return getDbCollection(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
 };
 
-export const referentielSiretUaiDb = () => {
-  return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
+export const reseauxCfasDb = () => {
+  return getDbCollection(reseauxCfasModelDescriptor.collectionName);
 };
-
-export const usersMigrationDb = () => {
-  return getDbCollection(usersMigrationModelDescriptor.collectionName);
-};
-
-export const rolesDb = () => {
-  return getDbCollection(RolesModelDescriptor.collectionName);
-};
-
-export const jwtSessionsDb = () => {
-  return getDbCollection(JwtSessionsModelDescriptor.collectionName);
-};
-
-export function organismesDb() {
-  return getDbCollection(OrganismesModelDescriptor.collectionName);
-}
-export function permissionsDb() {
-  return getDbCollection(PermissionsDescriptor.collectionName);
-}
-
-export function dossiersApprenantsMigrationDb() {
-  return getDbCollection(dossiersApprenantsMigrationModelDescriptor.collectionName);
-}
-export function effectifsDb() {
-  return getDbCollection(effectifsModelDescriptor.collectionName);
-}
