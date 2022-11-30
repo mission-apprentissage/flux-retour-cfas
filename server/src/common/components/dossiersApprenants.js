@@ -31,6 +31,13 @@ const getDossierApprenant = ({
   });
 };
 
+/**
+ *
+ * TODO : Call update effectif ?
+ * @param {*} existingItemId
+ * @param {*} toUpdate
+ * @returns
+ */
 const updateDossierApprenant = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
   const _id = new ObjectId(existingItemId);
@@ -98,6 +105,11 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
   return await dossiersApprenantsDb().findOne({ _id });
 };
 
+/**
+ * TODO : Call create effectif ?
+ * @param {*} itemToCreate
+ * @returns
+ */
 const createDossierApprenant = async (itemToCreate) => {
   // if dossier apprenant établissement has a VALID uai try to retrieve information in Referentiel CFAs
   const etablissementInReferentielCfaFromUai = await cfasDb().findOne({ uai: itemToCreate.uai_etablissement });

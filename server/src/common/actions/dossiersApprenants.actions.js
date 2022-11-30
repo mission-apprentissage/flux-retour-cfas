@@ -11,6 +11,7 @@ import { findOrganismeById } from "./organismes.actions.js";
 /**
  * Méthode de création d'un organisme
  * Checks uai format & existence
+ * TODO : Voir ou l'on on créé un effectif lié
  * @param {*} organismeProps
  * @returns
  */
@@ -107,6 +108,7 @@ export function findDossierApprenantByApprenant({
 
 /**
  * Méthode de mise à jour d'un dossierApprennant depuis son id
+ * TODO : Voir ou l'on on update effectif lié
  * @param {*} id
  * @returns
  */
