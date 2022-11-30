@@ -75,7 +75,7 @@ export const schema = object(
             )
           ),
           duree_formation_theorique: integer({
-            description: "Durrée théorique de la formation en mois pour cet organisme",
+            description: "Durée théorique de la formation en mois pour cet organisme",
           }),
         },
         { additionalProperties: true }
