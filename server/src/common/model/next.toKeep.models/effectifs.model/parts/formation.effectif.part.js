@@ -1,9 +1,15 @@
-import { object, string, integer, arrayOf, objectId } from "../../../json-schema/jsonSchemaTypes.js";
+import { object, string, integer, arrayOf, objectId, date } from "../../../json-schema/jsonSchemaTypes.js";
 
-export const formationSchema = object(
+export const formationEffectifSchema = object(
   {
     formation_id: objectId({
       description: "formation id",
+    }),
+    date_debut_formation: date({ description: "Date de début de la formation" }),
+    date_fin_formation: date({ description: "Date de fin de la formation" }),
+    date_obtention_diplome: date({ description: "Date d'obtention du diplome" }),
+    duree_formation_relle: integer({
+      description: "Durrée rélle de la formation  en mois",
     }),
     cfd: string({
       description: "CFD de la formation à laquelle l'apprenant est inscrit",
@@ -30,7 +36,7 @@ export const formationSchema = object(
 );
 
 // Default value
-export function defaultValuesFormation() {
+export function defaultValuesFormationEffectif() {
   return {
     periode: [],
   };

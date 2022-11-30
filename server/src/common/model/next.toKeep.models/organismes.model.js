@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { object, objectId, string, date, arrayOf, boolean } from "../json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, date, arrayOf, boolean, integer } from "../json-schema/jsonSchemaTypes.js";
 import { adresseSchema } from "../json-schema/adresseSchema.js";
 import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../utils/validationsUtils/organisme-de-formation/nature.js";
@@ -60,10 +60,23 @@ export const schema = object(
                 nature: string({
                   enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
                 }),
+                uai: string({
+                  description: "Code uai du lieu de formation (optionnel)",
+                  pattern: "^[0-9]{7}[a-zA-Z]$",
+                  maxLength: 8,
+                  minLength: 8,
+                }),
+                adresse: {
+                  ...adresseSchema,
+                  description: "Adresse du lieu de formation (optionnel)",
+                },
               },
               { additionalProperties: true }
             )
           ),
+          duree_formation_theorique: integer({
+            description: "Durrée théorique de la formation  en mois",
+          }),
         },
         { additionalProperties: true }
       ),

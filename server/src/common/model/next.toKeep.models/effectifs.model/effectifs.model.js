@@ -2,7 +2,7 @@ import { object, objectId, string, date, boolean } from "../../json-schema/jsonS
 import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part.js";
 
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part.js";
-import { defaultValuesFormation, formationSchema } from "./parts/formation.part.js";
+import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part.js";
 
 export const collectionName = "effectifs";
 
@@ -23,7 +23,7 @@ export const schema = object(
     }),
 
     apprenant: apprenantSchema,
-    formation: formationSchema,
+    formation: formationEffectifSchema,
 
     is_lock: effectifFieldsLockerSchema,
     updated_at: date({ description: "Date de mise à jour en base de données" }),
@@ -40,7 +40,7 @@ export const schema = object(
 export function defaultValuesEffectif({ lockAtCreate = false }) {
   return {
     apprenant: defaultValuesApprenant(),
-    formation: defaultValuesFormation(),
+    formation: defaultValuesFormationEffectif(),
     is_lock: defaultValuesEffectifFieldsLocker(lockAtCreate),
     updated_at: new Date(),
     created_at: new Date(),

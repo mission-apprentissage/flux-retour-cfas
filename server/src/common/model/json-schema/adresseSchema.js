@@ -2,6 +2,7 @@ import { object, string, integer } from "./jsonSchemaTypes.js";
 import { DEPARTEMENT_CODES } from "../../constants/departements.TRUELIST.js";
 import { REGIONS } from "../../constants/territoiresConstants.js";
 import { ACADEMIES } from "../../constants/academiesConstants.js";
+import { PAYS } from "../../constants/paysConstant.js";
 
 export const adresseSchema = object({
   numero: integer({
@@ -57,6 +58,10 @@ export const adresseSchema = object({
   complete: string({
     description: "Adresse complète",
     example: "13 Bis Boulevard de la liberté 75000 PARIS",
+  }),
+  pays: string({
+    enum: [null, ...PAYS.map(({ code }) => code)],
+    description: "Pays",
   }),
 });
 
