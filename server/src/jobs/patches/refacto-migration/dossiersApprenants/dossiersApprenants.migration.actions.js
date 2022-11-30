@@ -6,6 +6,8 @@ import {
   validateDossiersApprenantsMigration,
 } from "../../../../common/model/next.toKeep.models/dossiersApprenantsMigration.model.js";
 import { createEffectif, updateEffectifAndLock } from "../../../../common/actions/effectifs.actions.js";
+import { defaultValuesApprenant } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
+import { defaultValuesFormationEffectif } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
 
 export const createEffectifFromDossierApprenantMigrated = async (dossiersApprenantsMigrated) => {
   // Map dossiersApprenantsMigrated fields for creation / update
@@ -33,33 +35,42 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
     historique_statut_apprenant: historique_statut,
   } = dossiersApprenantsMigrated;
 
+  const effectifApprenant = {
+    ...defaultValuesApprenant(),
+    ...(ine ? { ine } : {}),
+    ...(nom ? { nom } : {}),
+    ...(prenom ? { prenom } : {}),
+    ...(date_de_naissance ? { date_de_naissance } : {}),
+    ...(courriel ? { courriel } : {}),
+    ...(telephone ? { telephone } : {}),
+    ...(historique_statut ? { historique_statut } : {}),
+  };
+
+  const formationApprenant = {
+    ...defaultValuesFormationEffectif(),
+    ...(cfd ? { cfd } : {}),
+    ...(rncp ? { rncp } : {}),
+    ...(libelle_long ? { libelle_long } : {}),
+    ...(niveau ? { niveau } : {}),
+    ...(niveau_libelle ? { niveau_libelle } : {}),
+    ...(periode ? { periode } : {}),
+    ...(annee ? { annee } : {}),
+  };
+
   // Create effectif not locked
   const effectifId = await createEffectif({
     organisme_id,
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-    apprenant: {
-      nom,
-      prenom,
-    },
-    formation: {
-      cfd,
-    },
+    ...(annee_scolaire ? { annee_scolaire } : {}),
+    ...(source ? { source } : {}),
+    ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
+    apprenant: effectifApprenant,
+    formation: formationApprenant,
   });
 
   // Maj de l'effectif en le lockant
   await updateEffectifAndLock(effectifId, {
-    apprenant: { ine, nom, prenom, date_de_naissance, courriel, telephone, historique_statut },
-    formation: {
-      cfd,
-      rncp,
-      libelle_long,
-      niveau,
-      niveau_libelle,
-      periode,
-      annee,
-    },
+    apprenant: effectifApprenant,
+    formation: formationApprenant,
   });
 };
 
