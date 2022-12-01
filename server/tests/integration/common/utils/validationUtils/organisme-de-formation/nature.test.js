@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { validateNatureOrganismeDeFormation } from "../../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
+import { validateNatureOrganismeDeFormation } from "../../../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
 
 describe("Domain Organisme de formation nature", () => {
   describe("validateNatureOrganismeDeFormation", () => {
