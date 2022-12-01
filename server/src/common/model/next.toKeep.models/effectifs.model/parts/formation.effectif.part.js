@@ -9,7 +9,7 @@ export const formationEffectifSchema = object(
     date_fin_formation: date({ description: "Date de fin de la formation" }),
     date_obtention_diplome: date({ description: "Date d'obtention du diplome" }),
     duree_formation_relle: integer({
-      description: "Durrée rélle de la formation  en mois",
+      description: "Durée réelle de la formation en mois",
     }),
     cfd: string({
       description: "CFD de la formation à laquelle l'apprenant est inscrit",

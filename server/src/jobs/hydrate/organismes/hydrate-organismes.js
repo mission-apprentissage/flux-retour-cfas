@@ -1,7 +1,7 @@
 import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
-import { getFormationsForOrganismeFormation } from "../../../common/apis/apiCatalogueMna.js";
+import { getFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
 import { findFormationById } from "../../../common/actions/formations.actions.js";
 import { findOrganismeById, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
@@ -23,21 +23,20 @@ export const hydrateOrganismes = async () => {
     const organisme = await findOrganismeById(organisme_id);
 
     // Récupération des formations liés au cfd et à l'organisme
-    const formationsForOrganisme = await getFormationsForOrganismeFormation(organisme.uai);
+    const formationsForOrganisme = await getFormationsForOrganisme(organisme.uai);
 
     if (formationsForOrganisme.length > 0) {
       // Construction d'une liste de formations pour cet organisme
       let formationsForOrganismeArray = [];
       await asyncForEach(formationsForOrganisme, async (currentFormation) => {
         // Récupération du cfd de la formation
-        const { cfd } = await findFormationById(formation_id);
-
+        // const { cfd } = await findFormationById(formation_id);
         // Ajout à la liste des formation de l'organisme d'un item contenant formation_id
         // ainsi que la liste des organismes trouvés dans l'API Catalogue pour cet organisme (uai) et cette formation
-        formationsForOrganismeArray.push({
-          formation_id,
-          organismes: await fetchOrganismesInfoForFormation(organisme, cfd),
-        });
+        // formationsForOrganismeArray.push({
+        //   formation_id,
+        //   organismes: await fetchOrganismesInfoForFormation(organisme, cfd),
+        // });
       });
 
       // MAJ de l'organisme avec sa liste de formations
@@ -52,55 +51,55 @@ export const hydrateOrganismes = async () => {
  * @param {*} cfd
  * @returns
  */
-const buildOrganismesListFromFormationFromCatalog = async (organisme, cfd) => {
-  let organismesInfo = [];
+// const buildOrganismesListFromFormationFromCatalog = async (organisme, cfd) => {
+//   let organismesInfo = [];
 
-  // Construction de la liste des organismes pour les formations rattachés à l'uai
-  await asyncForEach(formationsForOrganismeAndCfd, async (currentFormation) => {
-    // Recuperer l'uai responsable (gestionnaire)
-    if (currentFormation.etablissement_gestionnaire_uai) {
-      const organismeResponsable = await findOrganismeByUai(currentFormation.etablissement_gestionnaire_uai);
-      if (organismeResponsable) {
-        organismesInfo.push({
-          organisme_id: organismeResponsable?._id,
-          nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
-          uai: currentFormation.etablissement_gestionnaire_uai, // TODO Get uai lieu de formation ?
+//   // Construction de la liste des organismes pour les formations rattachés à l'uai
+//   await asyncForEach(formationsForOrganismeAndCfd, async (currentFormation) => {
+//     // Recuperer l'uai responsable (gestionnaire)
+//     if (currentFormation.etablissement_gestionnaire_uai) {
+//       const organismeResponsable = await findOrganismeByUai(currentFormation.etablissement_gestionnaire_uai);
+//       if (organismeResponsable) {
+//         organismesInfo.push({
+//           organisme_id: organismeResponsable?._id,
+//           nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
+//           uai: currentFormation.etablissement_gestionnaire_uai, // TODO Get uai lieu de formation ?
 
-          // TODO Get adresse from réferentiel ?
-        });
-      } else {
-        // TODO Doit-on créer l'organisme si on ne le trouve pas dans les organismes du tdb ?
-        organismesInfo.push({
-          nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
-          uai: currentFormation.etablissement_gestionnaire_uai, // TODO Get uai lieu de formation ?
-          // TODO Get adresse from réferentiel ?
-        });
-      }
-    }
+//           // TODO Get adresse from réferentiel ?
+//         });
+//       } else {
+//         // TODO Doit-on créer l'organisme si on ne le trouve pas dans les organismes du tdb ?
+//         organismesInfo.push({
+//           nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
+//           uai: currentFormation.etablissement_gestionnaire_uai, // TODO Get uai lieu de formation ?
+//           // TODO Get adresse from réferentiel ?
+//         });
+//       }
+//     }
 
-    if (currentFormation.etablissement_formateur_uai) {
-      const organismeResponsable = await findOrganismeByUai(currentFormation.etablissement_formateur_uai);
-      if (organismeResponsable) {
-        organismesInfo.push({
-          organisme_id: organismeResponsable._id,
-          nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
-          uai: currentFormation.etablissement_formateur_uai, // TODO Get uai lieu de formation ?
-          // TODO Get adresse from réferentiel ?
-        });
-      } else {
-        // TODO Doit-on créer l'organisme si on ne le trouve pas dans les organismes du tdb ?
-        organismesInfo.push({
-          nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
-          uai: currentFormation.etablissement_formateur_uai, // TODO Get uai lieu de formation ?
-          // TODO Get uai lieu de formation ?
-          // TODO Get adresse from réferentiel ?
-        });
-      }
-    }
+//     if (currentFormation.etablissement_formateur_uai) {
+//       const organismeResponsable = await findOrganismeByUai(currentFormation.etablissement_formateur_uai);
+//       if (organismeResponsable) {
+//         organismesInfo.push({
+//           organisme_id: organismeResponsable._id,
+//           nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+//           uai: currentFormation.etablissement_formateur_uai, // TODO Get uai lieu de formation ?
+//           // TODO Get adresse from réferentiel ?
+//         });
+//       } else {
+//         // TODO Doit-on créer l'organisme si on ne le trouve pas dans les organismes du tdb ?
+//         organismesInfo.push({
+//           nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+//           uai: currentFormation.etablissement_formateur_uai, // TODO Get uai lieu de formation ?
+//           // TODO Get uai lieu de formation ?
+//           // TODO Get adresse from réferentiel ?
+//         });
+//       }
+//     }
 
-    // TODO Comment récupérer les organismes responsable_formateur / LIEU
-  });
+//     // TODO Comment récupérer les organismes responsable_formateur / LIEU
+//   });
 
-  let uniqOrganismes = [...new Set(organismesInfo.map(JSON.stringify))].map(JSON.parse);
-  return uniqOrganismes;
-};
+//   let uniqOrganismes = [...new Set(organismesInfo.map(JSON.stringify))].map(JSON.parse);
+//   return uniqOrganismes;
+// };

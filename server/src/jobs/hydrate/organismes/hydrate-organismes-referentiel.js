@@ -29,7 +29,7 @@ const REFERENTIEL_FIELDS_TO_FETCH = [
  * ajoute les organismes non présents (organisme stock)
  * et MAJ le champ nature des organismes déja existants
  */
-export const hydrateReferentiel = async () => {
+export const hydrateOrganismesReferentiel = async () => {
   // Fetch organismes from referentiel api
   const { organismes } = await fetchOrganismes({
     champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),

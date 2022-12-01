@@ -24,6 +24,7 @@ export const indexes = () => {
   ];
 };
 
+// TODO utiliser formationEffectifSchema ?
 export const schema = object(
   {
     _id: objectId(),

@@ -4,7 +4,6 @@ import { runScript } from "./scriptWrapper.js";
 import { seed } from "./seed/start/index.js";
 import { clear } from "./clear/clear-all.js";
 import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
-import { hydrateReferentiel } from "./hydrate/referentiel/hydrate-referentiel.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 import { hydrateRncpCodes } from "./hydrate/rncp/hydrate-rncp.js";
 import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
@@ -18,6 +17,7 @@ import {
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token.js";
 import { hydrateOrganismes } from "./hydrate/organismes/hydrate-organismes.js";
+import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 
 /**
  * Job d'initialisation projet
@@ -84,18 +84,6 @@ cli
   });
 
 /**
- * Job de remplissage & maj des organismes depuis le référentiel
- */
-cli
-  .command("hydrate:referentiel")
-  .description("Remplissage des organismes depuis le référentiel")
-  .action(async () => {
-    runScript(async () => {
-      return hydrateReferentiel();
-    }, "hydrate-referentiel");
-  });
-
-/**
  * Job d'archivage des dossiers apprenants
  */
 cli
@@ -155,6 +143,18 @@ cli
     runScript(async () => {
       return hydrateOrganismes();
     }, "hydrate-organismes");
+  });
+
+/**
+ * Job de remplissage & maj des organismes depuis le référentiel
+ */
+cli
+  .command("hydrate:organismes-referentiel")
+  .description("Remplissage des organismes depuis le référentiel")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateOrganismesReferentiel();
+    }, "hydrate-organismes+referentiel");
   });
 
 /**

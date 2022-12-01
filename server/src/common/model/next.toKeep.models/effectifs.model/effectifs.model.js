@@ -28,7 +28,7 @@ export const schema = object(
     is_lock: effectifFieldsLockerSchema,
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
-    archive: boolean({ description: "Dossier apprenant est archivé (retnetion maximum 5 ans)" }),
+    archive: boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }),
   },
   {
     required: ["apprenant", "id_erp_apprenant", "organisme_id", "source", "annee_scolaire"],
