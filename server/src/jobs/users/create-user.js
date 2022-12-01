@@ -1,7 +1,7 @@
+import { createJobEvent } from "../../common/actions/jobEvents.actions.js";
 import { createUser } from "../../common/actions/users.actions.js";
 import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
 import logger from "../../common/logger.js";
-import { jobEventsDb } from "../../common/model/collections.js";
 import { generateRandomAlphanumericPhrase } from "../../common/utils/miscUtils.js";
 
 /**
@@ -21,7 +21,7 @@ export const createUserAccount = async ({ email, nom, prenom, permissions = {} }
     }
   );
 
-  await jobEventsDb().insertOne({
+  await createJobEvent({
     jobname: "create-user",
     date: new Date(),
     action: "create-user",

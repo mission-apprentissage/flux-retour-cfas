@@ -5,7 +5,6 @@ import {
   dossiersApprenantsDb,
   dossiersApprenantsMigrationDb,
   effectifsDb,
-  jobEventsDb,
 } from "../../../../common/model/collections.js";
 import { createOrganisme, findOrganismeByUai } from "../../../../common/actions/organismes.actions.js";
 import {
@@ -14,6 +13,7 @@ import {
   mapToDossiersApprenantsMigrationProps,
 } from "./dossiersApprenants.migration.actions.js";
 import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -105,7 +105,7 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (
       nbOrganismeCreatedTotal += nbOrganismes.created;
       nbOrganismeCreatedErrorsTotal += nbOrganismes.notCreated;
     } catch (error) {
-      await jobEventsDb().insertOne({
+      await createJobEvent({
         jobname: JOBNAME,
         date: new Date(),
         action: LOG_ACTIONS.DOSSIERS.NOT_MIGRATED,
@@ -161,7 +161,7 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
       nbOrganismeCreated++;
 
       // Store log organisme création
-      await jobEventsDb().insertOne({
+      await createJobEvent({
         jobname: JOBNAME,
         date: new Date(),
         action: LOG_ACTIONS.ORGANISME.CREATED,
@@ -170,7 +170,7 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
     } catch (error) {
       nbOrganismeCreatedErrors++;
       // Store log error organisme création
-      await jobEventsDb().insertOne({
+      await createJobEvent({
         jobname: JOBNAME,
         date: new Date(),
         action: LOG_ACTIONS.ORGANISME.CREATION_ERROR,
@@ -200,7 +200,7 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
 
         // Store log error + détail
         const { stack: errorStack, message: errorMessage } = error;
-        await jobEventsDb().insertOne({
+        await createJobEvent({
           jobname: JOBNAME,
           date: new Date(),
           action: LOG_ACTIONS.DOSSIERS.NOT_MIGRATED_DETAIL,

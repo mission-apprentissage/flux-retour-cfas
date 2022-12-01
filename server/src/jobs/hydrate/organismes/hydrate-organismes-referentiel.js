@@ -3,8 +3,8 @@ import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
 import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
-import { jobEventsDb } from "../../../common/model/collections.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
+import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -53,7 +53,7 @@ export const hydrateOrganismesReferentiel = async () => {
       // TODO voir coté métier comment gérer la récupération d'organismes sans uai dans le référentiel
       nbOrganismeWithoutUai++;
       // Log & store
-      await jobEventsDb().insertOne({
+      await createJobEvent({
         jobname: "hydrate-referentiel",
         date: new Date(),
         action: "no-uai-for-organisme-in-referentiel",
@@ -76,7 +76,7 @@ export const hydrateOrganismesReferentiel = async () => {
           nbOrganismeCreated++;
 
           // Log & store
-          await jobEventsDb().insertOne({
+          await createJobEvent({
             jobname: "hydrate-referentiel",
             date: new Date(),
             action: "organisme-created",
@@ -85,7 +85,7 @@ export const hydrateOrganismesReferentiel = async () => {
         } catch (error) {
           nbOrganismeNotCreated++;
           // Log & store error
-          await jobEventsDb().insertOne({
+          await createJobEvent({
             jobname: "hydrate-referentiel",
             date: new Date(),
             action: "organisme-not-created",
@@ -108,7 +108,7 @@ export const hydrateOrganismesReferentiel = async () => {
           nbOrganismeUpdated++;
 
           // Log & store
-          await jobEventsDb().insertOne({
+          await createJobEvent({
             jobname: "hydrate-referentiel",
             date: new Date(),
             action: "organisme-updated",
@@ -117,7 +117,7 @@ export const hydrateOrganismesReferentiel = async () => {
         } catch (error) {
           nbOrganismeNotUpdated++;
           // Log & store errors
-          await jobEventsDb().insertOne({
+          await createJobEvent({
             jobname: "hydrate-referentiel",
             date: new Date(),
             action: "organisme-notUpdated",

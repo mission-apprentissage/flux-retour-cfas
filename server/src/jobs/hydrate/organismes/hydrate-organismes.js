@@ -1,11 +1,12 @@
 import cliProgress from "cli-progress";
 import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { dossiersApprenantsMigrationDb, jobEventsDb } from "../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
 import { getFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
 import { findOrganismeById, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
 import { getFormationWithCfd } from "../../../common/actions/formations.actions.js";
+import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -62,7 +63,7 @@ export const hydrateOrganismes = async () => {
     } else {
       nbOrganismesWithoutFormations++;
       // Log & store cases
-      await jobEventsDb().insertOne({
+      await createJobEvent({
         jobname: "hydrate-organismes",
         date: new Date(),
         action: "organisme-withoutFormations",

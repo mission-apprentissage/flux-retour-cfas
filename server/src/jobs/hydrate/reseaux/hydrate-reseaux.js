@@ -8,9 +8,10 @@ import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
 import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { ERPS } from "../../../common/constants/erpsConstants.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
-import { dossiersApprenantsMigrationDb, jobEventsDb } from "../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
 import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
 import { downloadIfNeededFileTo } from "../../../common/utils/ovhStorageUtils.js";
+import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOBNAME = "hydrate-organismes-reseaux";
@@ -79,7 +80,7 @@ const hydrateForNetwork = async (allOrganismesForReseau, reseau) => {
         newOrganismeCreated = true;
         nbOrganismesCreated++;
         // Store log organisme création
-        await jobEventsDb().insertOne({
+        await createJobEvent({
           jobname: JOBNAME,
           date: new Date(),
           action: "create-organisme-success",
@@ -88,7 +89,7 @@ const hydrateForNetwork = async (allOrganismesForReseau, reseau) => {
       } catch (err) {
         nbOrganismesNotCreated++;
         // Store log organisme création failed
-        await jobEventsDb().insertOne({
+        await createJobEvent({
           jobname: JOBNAME,
           date: new Date(),
           action: "create-organisme-error",
@@ -136,7 +137,7 @@ const updateOrganismeNetworksIfNeeded = async (organisme, nomReseau) => {
     await updateOrganisme(organisme._id, { ...organisme, reseaux: [...organisme.reseaux, nomReseau] });
 
     // Log update
-    await jobEventsDb().insertOne({
+    await createJobEvent({
       jobname: JOBNAME,
       date: new Date(),
       action: "update-organisme-success",
@@ -166,7 +167,7 @@ const updateDossiersApprenantsNetworksIfNeeded = async (organisme, reseau) => {
     });
 
     // Log update
-    await jobEventsDb().insertOne({
+    await createJobEvent({
       jobname: JOBNAME,
       date: new Date(),
       action: "update-dossierApprenant-success",

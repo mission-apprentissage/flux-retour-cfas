@@ -1,107 +1,26 @@
-// import { strict as assert } from "assert";
-// import { createUserEvent } from "../../../../src/common/actions/userEvents.actions.js";
-// import users from "../../../../src/common/components/users.js";
-// import { userEventsDb, usersDb } from "../../../../src/common/model/collections.js";
+import { strict as assert } from "assert";
+import { createUserEvent } from "../../../../src/common/actions/userEvents.actions.js";
+import { userEventsDb } from "../../../../src/common/model/collections.js";
 
-// describe("Components UserEvents Test", () => {
-//   describe("createUserEvent", () => {
-//     it("Permet de créer un userEvent et de le sauver en base", async () => {
-//       await createUserEvent({
-//         username: "admin",
-//         type: "any",
-//         action: "test",
-//         data: { hello: "world" },
-//         date: new Date(),
-//       });
-//       const foundInDb = await userEventsDb().findOne({ username: "admin" });
-//       assert.ok(foundInDb);
-//     });
+describe("Action UserEvents", () => {
+  describe("createUserEvent", () => {
+    it("Permet de créer un userEvent et de le sauver en base", async () => {
+      await createUserEvent({
+        username: "admin",
+        user_email: "admin@test.fr",
+        type: "any",
+        action: "test",
+        data: { hello: "world" },
+        date: new Date(),
+      });
 
-//     it("Permet de créer un userEvent pour un user avec region", async () => {
-//       const { createUser } = await users();
-
-//       const usernameTest = "userTest";
-//       const regionTest = "REGION";
-
-//       await createUser({
-//         username: usernameTest,
-//         password: "password",
-//         email: "email@test.fr",
-//         region: regionTest,
-//       });
-
-//       const foundUser = await usersDb().findOne({ username: usernameTest });
-//       assert.equal(foundUser.region === regionTest, true);
-
-//       await createUserEvent({
-//         username: usernameTest,
-//         type: "any",
-//         action: "test",
-//         data: { hello: "world" },
-//         date: new Date(),
-//       });
-//       const foundUserEvent = await userEventsDb().findOne({ username: usernameTest });
-//       assert.ok(foundUserEvent);
-//       assert.equal(foundUserEvent.username === usernameTest, true);
-//       assert.equal(foundUserEvent.user_region === regionTest, true);
-//     });
-
-//     it("Permet de créer un userEvent pour un user avec organisme", async () => {
-//       const { createUser } = await users();
-
-//       const usernameTest = "userTest";
-//       const organismeTest = "ORGANISME";
-
-//       await createUser({
-//         username: usernameTest,
-//         password: "password",
-//         email: "email@test.fr",
-//         organisme: organismeTest,
-//       });
-
-//       const foundUser = await usersDb().findOne({ username: usernameTest });
-//       assert.equal(foundUser.organisme === organismeTest, true);
-
-//       await createUserEvent({
-//         username: usernameTest,
-//         type: "any",
-//         action: "test",
-//         data: { hello: "world" },
-//         date: new Date(),
-//       });
-//       const foundUserEvent = await userEventsDb().findOne({ username: usernameTest });
-//       assert.ok(foundUserEvent);
-//       assert.equal(foundUserEvent.username === usernameTest, true);
-//       assert.equal(foundUserEvent.user_organisme === organismeTest, true);
-//     });
-
-//     it("Permet de créer un userEvent pour un user avec réseau", async () => {
-//       const { createUser } = await users();
-
-//       const usernameTest = "userTest";
-//       const networkTest = "RESEAU";
-
-//       await createUser({
-//         username: usernameTest,
-//         password: "password",
-//         email: "email@test.fr",
-//         network: networkTest,
-//       });
-
-//       const foundUser = await usersDb().findOne({ username: usernameTest });
-//       assert.equal(foundUser.network === networkTest, true);
-
-//       await createUserEvent({
-//         username: usernameTest,
-//         type: "any",
-//         action: "test",
-//         data: { hello: "world" },
-//         date: new Date(),
-//       });
-//       const foundUserEvent = await userEventsDb().findOne({ username: usernameTest });
-//       assert.ok(foundUserEvent);
-//       assert.equal(foundUserEvent.username === usernameTest, true);
-//       assert.equal(foundUserEvent.user_network === networkTest, true);
-//     });
-//   });
-// });
+      const foundInDb = await userEventsDb().findOne({ username: "admin" });
+      assert.ok(foundInDb);
+      assert.equal(foundInDb.username, "admin");
+      assert.equal(foundInDb.user_email, "admin@test.fr");
+      assert.equal(foundInDb.type, "any");
+      assert.equal(foundInDb.action, "test");
+      assert.deepEqual(foundInDb.data, { hello: "world" });
+    });
+  });
+});

@@ -3,9 +3,10 @@ import createComponents from "../common/components/components.js";
 import logger from "../common/logger.js";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { jobEventStatuts } from "../common/constants/jobsConstants.js";
-import { jobEventsDb, modelDescriptors } from "../common/model/collections.js";
+import { modelDescriptors } from "../common/model/collections.js";
 import createServices from "../services.js";
 import config from "../config.js";
+import { createJobEvent } from "../common/actions/jobEvents.actions.js";
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -53,13 +54,13 @@ export const runScript = async (job, jobName) => {
     const services = await createServices();
     redisClient = services.cache;
 
-    await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
+    await createJobEvent({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
     await job({ ...components, ...services });
 
     const endDate = new Date();
     const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
 
-    await jobEventsDb().insertOne({
+    await createJobEvent({
       jobname: jobName,
       date: new Date(),
       action: jobEventStatuts.executed,
@@ -70,6 +71,6 @@ export const runScript = async (job, jobName) => {
   } catch (e) {
     await exit(e);
   } finally {
-    await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() });
+    await createJobEvent({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() });
   }
 };

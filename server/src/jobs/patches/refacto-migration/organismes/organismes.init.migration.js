@@ -1,10 +1,11 @@
 import cliProgress from "cli-progress";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import logger from "../../../../common/logger.js";
-import { cfasDb, jobEventsDb } from "../../../../common/model/collections.js";
+import { cfasDb } from "../../../../common/model/collections.js";
 import { algoUAI, getLocalisationInfoFromUai } from "../../../../common/utils/uaiUtils.js";
 import { siretSchema } from "../../../../common/utils/validationUtils.js";
 import Joi from "joi";
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -73,7 +74,7 @@ const analyseCfaUaiAlgo = async (uai) => {
   const isValidUaiAlgo = algoUAI(uai);
 
   if (!isValidUaiAlgo) {
-    await jobEventsDb().insertOne({
+    await createJobEvent({
       jobname: "refacto-migration-cfas-to-organismes",
       date: new Date(),
       action: "analyse-cfa-invalid-uai-algo",
@@ -94,7 +95,7 @@ const analyseCfaUaiLocalisation = async (uai) => {
   const isValidUaiLocalisation = getLocalisationInfoFromUai(uai);
 
   if (!isValidUaiLocalisation) {
-    await jobEventsDb().insertOne({
+    await createJobEvent({
       jobname: "refacto-migration-cfas-to-organismes",
       date: new Date(),
       action: "analyse-cfa-invalid-uai-localisation",
@@ -114,7 +115,7 @@ const analyseCfaUaiLocalisation = async (uai) => {
 const analyseCfaSirets = async (sirets) => {
   const validateSirets = Joi.array().items(siretSchema()).validate(sirets);
   if (validateSirets.error) {
-    await jobEventsDb().insertOne({
+    await createJobEvent({
       jobname: "refacto-migration-cfas-to-organismes",
       date: new Date(),
       action: "analyse-cfa-invalid-sirets-format",

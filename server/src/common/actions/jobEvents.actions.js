@@ -1,6 +1,22 @@
 import { jobEventsDb } from "../model/collections.js";
 
 /**
+ * Création d'un user event
+ * @param {*} param0
+ * @returns
+ */
+export const createJobEvent = async ({ jobname, action, data }) => {
+  await jobEventsDb().insertOne({
+    jobname,
+    action,
+    data,
+    date: new Date(),
+  });
+
+  return;
+};
+
+/**
  * Vérification si le job est dans l'action spécifiée
  * @param {*} jobname
  * @param {*} action

@@ -54,7 +54,7 @@
 //       const uaiTest = "0152290X";
 
 //       // Add ended Job Event
-//       await jobEventsDb().insertOne({
+//       await createJobEvent({
 //         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
 //         action: jobEventStatuts.ended,
 //         date: new Date(),
@@ -88,7 +88,7 @@
 //       const uaiTest = "0152290X";
 
 //       // Add ended Job Event
-//       await jobEventsDb().insertOne({
+//       await createJobEvent({
 //         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
 //         action: jobEventStatuts.started,
 //         date: new Date(),
@@ -124,7 +124,7 @@
 //       const formation_rncpTest = "RNCP34945";
 
 //       // Add ended Job Event
-//       await jobEventsDb().insertOne({
+//       await createJobEvent({
 //         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
 //         action: jobEventStatuts.ended,
 //         date: new Date(),
@@ -184,7 +184,7 @@
 //       const accessToken = await getJwtForUser(httpClient);
 
 //       // Add ended Job Event
-//       await jobEventsDb().insertOne({
+//       await createJobEvent({
 //         jobname: JOB_NAMES.createEffectifsApprenantsCollection,
 //         action: jobEventStatuts.ended,
 //         date: new Date(),

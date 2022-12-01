@@ -1,12 +1,13 @@
 import cliProgress from "cli-progress";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import logger from "../../../../common/logger.js";
-import { cfasDb, jobEventsDb, organismesDb } from "../../../../common/model/collections.js";
+import { cfasDb, organismesDb } from "../../../../common/model/collections.js";
 import { getLocalisationInfoFromUai } from "../../../../common/utils/uaiUtils.js";
 import Joi from "joi";
 import { siretSchema } from "../../../../common/utils/validationUtils.js";
 import { createOrganismeFromCfa, mapCfaPropsToOrganismeProps } from "./organismes.migration.actions.js";
 import { updateOrganismeApiKey } from "../../../../common/actions/organismes.actions.js";
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -55,7 +56,7 @@ export const migrateCfasToOrganismes = async () => {
 
       // Si erreur on la stocke avec l'objet cfa
       const { stack: errorStack, message: errorMessage } = error;
-      await jobEventsDb().insertOne({
+      await createJobEvent({
         jobname: "refacto-migration-cfas-to-organismes",
         date: new Date(),
         action: "log-cfasNotMigrated",
@@ -102,7 +103,7 @@ export const migrateSingleCfaToOrganisme = async (uai) => {
   } catch (error) {
     // Si erreur on la stocke avec l'objet cfa
     const { stack: errorStack, message: errorMessage } = error;
-    await jobEventsDb().insertOne({
+    await createJobEvent({
       jobname: "refacto-migration-cfas-to-organismes",
       date: new Date(),
       action: "log-cfasNotMigrated-unique",
