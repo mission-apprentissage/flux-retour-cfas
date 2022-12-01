@@ -6,8 +6,6 @@ import formationsModelDescriptor from "./next.toKeep.models/formations.model.js"
 import dossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/dossiersApprenants.model.js";
 import jobEventsModelDescriptor from "./next.toKeep.models/jobEvents.model.js";
 import effectifsApprenantsModelDescriptor from "./previous.models/effectifsApprenants.model.js";
-import demandesIdentifiantsModelDescriptor from "./previous.models/toRemove.models/demandesIdentifiants.model.js";
-import demandesBranchementErpDbModelDescriptor from "./previous.models/toRemove.models/demandesBranchementErp.model.js";
 import duplicatesEventsModelDescriptor from "./previous.models/toRemove.models/duplicatesEvents.model.js";
 import archiveDossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/archiveDossiersApprenants.model.js";
 import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
@@ -29,8 +27,6 @@ export const modelDescriptors = [
   dossiersApprenantsModelDescriptor,
   jobEventsModelDescriptor,
   effectifsApprenantsModelDescriptor,
-  demandesIdentifiantsModelDescriptor,
-  demandesBranchementErpDbModelDescriptor,
   duplicatesEventsModelDescriptor,
   archiveDossiersApprenantsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
@@ -104,14 +100,6 @@ export const cfasDb = () => {
 
 export const referentielSiretUaiDb = () => {
   return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
-};
-
-export const demandesIdentifiantsDb = () => {
-  return getDbCollection(demandesIdentifiantsModelDescriptor.collectionName);
-};
-
-export const demandesBranchementErpDb = () => {
-  return getDbCollection(demandesBranchementErpDbModelDescriptor.collectionName);
 };
 
 export const duplicatesEventsDb = () => {
