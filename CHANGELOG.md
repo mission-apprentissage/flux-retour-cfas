@@ -1,3 +1,10 @@
+# [2.58.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.57.0...v2.58.0) (2022-12-01)
+
+
+### Features
+
+* **server:** amelioration script fichiers reseaux pour intégrer GRETA PDL ([a552e7d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a552e7dc09b2fdd1cc96550af4215e68b8239e8f))
+
 # [2.57.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.56.0...v2.57.0) (2022-11-30)
 
 
