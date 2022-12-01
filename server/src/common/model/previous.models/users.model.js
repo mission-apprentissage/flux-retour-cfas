@@ -1,12 +1,4 @@
-import {
-  object,
-  objectId,
-  string,
-  stringOrNull,
-  date,
-  arrayOf,
-  dateOrNull,
-} from "../../json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, stringOrNull, date, arrayOf, dateOrNull } from "../json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "users";
 

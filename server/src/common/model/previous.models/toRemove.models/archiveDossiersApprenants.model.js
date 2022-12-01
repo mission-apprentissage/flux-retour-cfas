@@ -1,4 +1,4 @@
-import { date, object, objectId } from "../json-schema/jsonSchemaTypes.js";
+import { date, object, objectId } from "../../json-schema/jsonSchemaTypes.js";
 
 const collectionName = "archiveDossiersApprenants";
 

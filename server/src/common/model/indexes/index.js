@@ -3,7 +3,7 @@ import cfasModelDescriptor from "../previous.models/toRemove.models/cfas.model.j
 import dossiersApprenantsModelDescriptor from "../previous.models/toRemove.models/dossiersApprenants.model.js";
 import formationsModelDescriptor from "../next.toKeep.models/formations.model.js";
 import userEventsModelDescriptor from "../next.toKeep.models/userEvents.model.js";
-import usersModelDescriptor from "../previous.models/toRemove.models/users.model.js";
+import usersModelDescriptor from "../previous.models/users.model.js";
 
 // TODO [tech] ADD INDEXES NEW MODEL
 
