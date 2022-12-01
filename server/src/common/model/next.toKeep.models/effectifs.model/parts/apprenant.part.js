@@ -56,6 +56,9 @@ export const apprenantSchema = object(
         numero: {
           ...adresseSchema.properties.numero,
         },
+        repetition_voie: {
+          ...adresseSchema.properties.repetition_voie,
+        },
         voie: {
           ...adresseSchema.properties.voie,
         },
@@ -71,6 +74,9 @@ export const apprenantSchema = object(
         },
         commune: {
           ...adresseSchema.properties.commune,
+        },
+        complete: {
+          ...adresseSchema.properties.complete,
         },
       },
     },

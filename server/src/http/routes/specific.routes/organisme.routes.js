@@ -3,6 +3,7 @@ import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import { findOrganismeById, getContributeurs, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
+import { generateSifa } from "../../../common/actions/sifa.actions/sifa.actions.js";
 
 export default () => {
   const router = express.Router();
@@ -57,6 +58,19 @@ export default () => {
       }
 
       return res.json(effectifs);
+    })
+  );
+
+  //http://localhost/api/v1/organisme/sifa/export-csv-list?organisme_id=6385ba0d75438191f0c3f1b9
+  router.get(
+    "/sifa/export-csv-list",
+    permissionsOrganismeMiddleware(["organisme/page_sifa2/telecharger"]),
+    tryCatch(async ({ query: { organisme_id } }, res) => {
+      const sifaCsv = await generateSifa(organisme_id);
+
+      // return res.json(sifa);
+
+      return res.attachment("export-SIFA.csv").send(sifaCsv);
     })
   );
 

@@ -93,7 +93,11 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
             </Button>
           )}
           {modeSifa && hasContextAccessTo(organisme, "organisme/page_sifa2/telecharger") && (
-            <Button size="md" onClick={() => alert("TODO NOT YET")} variant="secondary">
+            <Button
+              size="md"
+              onClick={() => alert(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
+              variant="secondary"
+            >
               <DownloadLine />
               <Text as="span" ml={2}>
                 Télécharger SIFA
