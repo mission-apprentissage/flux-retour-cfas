@@ -106,6 +106,14 @@ export const apprenantSchema = object(
       enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // TODO
       description: `**Situation de l'apprenant n-1`,
     }),
+    dernier_organisme_uai: string({
+      description:
+        "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation",
+      pattern: "^[0-9]{7}[a-zA-Z]$",
+      maxLength: 8,
+      minLength: 8,
+    }),
+
     dernier_diplome: integer({
       enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // TODO
       description: `**Dernier diplome obtenu`,
