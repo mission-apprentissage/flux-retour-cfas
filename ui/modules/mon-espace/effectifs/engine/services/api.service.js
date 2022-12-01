@@ -13,9 +13,9 @@ const saveCerfa = async ({ organisme_id, effectifId, data, inputNames }) => {
   }
 };
 
-const fetchSiret = async ({ siret, dossierId, organismeFormation = false, signal }) => {
+const fetchSiret = async ({ siret, organisme_id, organismeFormation = false, signal }) => {
   try {
-    return await _post(`/api/v1/siret`, { siret, dossierId, organismeFormation }, signal);
+    return await _post(`/api/v1/effectif/recherche-siret`, { siret, organisme_id, organismeFormation }, signal);
   } catch (e) {
     if (e.name === "AbortError") throw e;
     return { error: e.prettyMessage ?? "Une erreur technique est survenue" };

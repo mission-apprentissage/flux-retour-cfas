@@ -35,6 +35,7 @@ export const effectifFieldsLockerSchema = object({
     inscription_sportif_haut_niveau: boolean(),
     situation_avant_contrat: boolean(),
     derniere_situation: boolean(),
+    dernier_organisme_uai: boolean(),
     dernier_diplome: boolean(),
     mineur_emancipe: boolean(),
     representant_legal: object({
@@ -97,6 +98,7 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
       inscription_sportif_haut_niveau: lockAtCreate,
       situation_avant_contrat: lockAtCreate,
       derniere_situation: lockAtCreate,
+      dernier_organisme_uai: lockAtCreate,
       dernier_diplome: lockAtCreate,
       mineur_emancipe: lockAtCreate,
       representant_legal: {

@@ -1,4 +1,4 @@
-import { apprenantSchema } from "../cerfaForm/blocks/apprenant/apprenantSchema";
+import { apprenantSchema } from "../cerfaForm/blocks/apprenant/schemas/apprenantSchema";
 // import { employerSchema } from "../cerfaForm/blocks/employer/employerSchema";
 // import { maitreSchema } from "../cerfaForm/blocks/maitre/maitreSchema";
 // import { apprentiSchema } from "../cerfaForm/blocks/apprenti/apprentiSchema";

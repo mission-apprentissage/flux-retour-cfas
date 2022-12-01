@@ -7,6 +7,7 @@ import { schema } from "../../../common/model/next.toKeep.models/effectifs.model
 import { effectifsDb } from "../../../common/model/collections.js";
 import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
+import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 
 const flattenKeys = (obj, path = []) =>
   !isObject(obj)
@@ -199,7 +200,7 @@ export default () => {
       }
 
       // eslint-disable-next-line no-unused-vars
-      const { is_lock, nouveau_statut, ...restData } = data;
+      const { is_lock, nouveau_statut, nouveau_contrat, ...restData } = data;
 
       // TODO CHECK IS LOCK IF COMING FROM API
 
@@ -216,10 +217,32 @@ export default () => {
           date_reception: new Date(),
         });
       }
+      if (nouveau_contrat) {
+        dataToUpdate.apprenant.contrats.push(nouveau_contrat);
+      }
 
       const effectifUpdated = await updateEffectif(effectifDb._id, dataToUpdate);
 
       return res.json(buildEffectifResult(effectifUpdated));
+    })
+  );
+
+  router.post(
+    "/recherche-siret",
+    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    tryCatch(async ({ body }, res) => {
+      // TODO organismeFormation
+      // eslint-disable-next-line no-unused-vars
+      const { siret, organismeFormation } = await Joi.object({
+        siret: Joi.string().required(),
+        organismeFormation: Joi.boolean(),
+      })
+        .unknown()
+        .validateAsync(body, { abortEarly: false });
+
+      const data = await findDataFromSiret(siret);
+
+      return res.json(data);
     })
   );
 

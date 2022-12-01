@@ -1,5 +1,5 @@
 import { employeurSiretControl } from "./employeurSiret.control";
-import { idccControl } from "./idcc.control";
+// import { idccControl } from "./idcc.control";
 // import { RemunerationsControl } from "./remunerations.control";
 // import { historiqueStatutControl } from "./historique_statut.control";
 // import { ContratDatesControl } from "./ContratDates.control";
@@ -8,8 +8,8 @@ import { idccControl } from "./idcc.control";
 // import { etablissementFormationControl } from "./etablissementFormation.control";
 // import { responsableLegalControl } from "./responsableLegal.control";
 // import { typeContratAppControl } from "./typeContratApp.control";
-import { employeurCodePostalControl } from "./employeurCodePostal.control";
-import { employeurNafControl } from "./employeurNaf.control";
+// import { employeurCodePostalControl } from "./employeurCodePostal.control";
+// import { employeurNafControl } from "./employeurNaf.control";
 // import { typeDerogationControl } from "./typeDerogation.control";
 // import { maitresControl } from "./maitres.control";
 // import { rncpControl } from "./rncp.control";
@@ -32,14 +32,14 @@ export const controls = [
   // ...etablissementFormationCodePostalControl,
   // ...organismeFormationCodePostalControl,
   // ...apprentiCodePostalControl,
-  ...employeurNafControl,
-  ...employeurCodePostalControl,
+  // ...employeurNafControl,
+  // ...employeurCodePostalControl,
   // ...typeContratAppControl,
   // ...avantagesNatureControl,
   // ...etablissementFormationControl,
   // responsableLegalCodePostalControl,
   // ...responsableLegalControl,
-  ...idccControl,
+  // ...idccControl,
   ...employeurSiretControl,
   // ...ContratDatesControl,
   // ...dateFormationControl,

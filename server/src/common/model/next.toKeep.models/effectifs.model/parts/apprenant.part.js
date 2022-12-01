@@ -154,6 +154,14 @@ export const apprenantSchema = object(
             maxLength: 14,
             minLength: 14,
           }),
+          denomination: string({
+            description: "La dénomination sociale doit être celle de l'établissement dans lequel le contrat s'exécute.",
+          }),
+          type_employeur: integer({
+            // TODO
+            enum: [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+            description: "Le type d'employeur doit être en adéquation avec son statut juridique.",
+          }),
           naf: string({
             maxLength: 6,
             description:
@@ -174,7 +182,7 @@ export const apprenantSchema = object(
           date_rupture: date({ description: "Date de rupture du contrat" }),
         },
         {
-          required: ["date_debut", "date_fin", "date_rupture"],
+          required: ["date_debut", "date_fin", "date_rupture"], // TODO siret
           additionalProperties: true,
         }
       ),
@@ -207,7 +215,7 @@ export function validateApprenant({ contrats, ...props }) {
       },
     ]),
     contrats: contrats.map((contrat) => {
-      return schemaValidation({ contrat }, apprenantSchema, [
+      return schemaValidation(contrat, apprenantSchema.properties.contrats.items, [
         {
           name: "siret",
           base: siretSchema(),

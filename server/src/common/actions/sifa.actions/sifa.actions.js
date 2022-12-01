@@ -20,16 +20,16 @@ export const generateSifa = async (organisme_id) => {
   for (const effectif of effectifs) {
     const apprenantFields = {
       INE: effectif.apprenant.ine,
-      NOM: effectif.apprenant.nom,
-      PRENOM1: effectif.apprenant.prenom,
+      NOM: effectif.apprenant.nom, // REQUIRED
+      PRENOM1: effectif.apprenant.prenom, // REQUIRED
       TEL_JEUNE: effectif.apprenant.telephone,
       MAIL_JEUNE: effectif.apprenant.courriel,
-      DATE_NAIS: effectif.apprenant.date_de_naissance,
-      LIEU_NAIS: effectif.apprenant.code_postal_de_naissance,
-      SEXE: effectif.apprenant.sexe,
+      DATE_NAIS: effectif.apprenant.date_de_naissance, // REQUIRED
+      LIEU_NAIS: effectif.apprenant.code_postal_de_naissance, // REQUIRED
+      SEXE: effectif.apprenant.sexe, // REQUIRED
       HANDI: effectif.apprenant.handicap ? "1" : "0",
       NATIO: effectif.apprenant.nationalite,
-      ADRESSE: effectif.apprenant.adresse?.complete, // TODO concat
+      ADRESSE: effectif.apprenant.adresse?.complete, // // REQUIRED TODO concat
       COD_POST: effectif.apprenant.adresse?.code_postal,
       COM_RESID: effectif.apprenant.adresse?.code_insee,
       REGIME_SCO: effectif.apprenant.regime_scolaire,
@@ -41,18 +41,18 @@ export const generateSifa = async (organisme_id) => {
 
       SIT_AV_APP: effectif.apprenant.situation_avant_contrat,
       DIP_OBT: effectif.apprenant.dernier_diplome,
-      SIT_N_1: effectif.apprenant.derniere_situation,
-      ETAB_N_1: effectif.apprenant.dernier_organisme_uai,
+      SIT_N_1: effectif.apprenant.derniere_situation, // REQUIRED
+      ETAB_N_1: effectif.apprenant.dernier_organisme_uai, // REQUIRED
     };
 
     const dernierContratActif = effectif.apprenant.contrats?.[0];
     const employeurFields = {
-      TYPE_EMP: "", //dernierContratActif.siret,
+      SIRET_EMP: dernierContratActif?.siret,
+      TYPE_EMP: dernierContratActif?.type_employeur,
       DATE_DEB_CONT: dernierContratActif?.date_debut,
       DATE_RUPT_CONT: dernierContratActif?.date_rupture,
       NAF_ETAB: dernierContratActif?.naf,
       NBSAL_EMP: dernierContratActif?.nombre_de_salaries,
-      SIRET_EMP: dernierContratActif?.siret,
       COM_ETAB: dernierContratActif?.adresse.code_postal,
     };
 
@@ -63,10 +63,10 @@ export const generateSifa = async (organisme_id) => {
     // date_obtention_diplome
     // duree_formation_relle
     const formationFields = {
-      DIPLOME: formationBcn?.cfd,
-      DUR_FORM_THEO: formationOrganisme?.duree_formation_theorique,
-      DUR_FORM_REELLE: effectif.formation.duree_formation_relle,
-      AN_FORM: effectif.formation.annee,
+      DIPLOME: formationBcn?.cfd, // REQUIRED
+      DUR_FORM_THEO: formationOrganisme?.duree_formation_theorique, // REQUIRED
+      DUR_FORM_REELLE: effectif.formation.duree_formation_relle, // REQUIRED
+      AN_FORM: effectif.formation.annee, // REQUIRED
 
       SIT_FORM: "", // REQUIRED //RESPONSABLE / FORMATEUR / RESPONSABLE_FORMATEUR / LIEU
     };

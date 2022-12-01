@@ -2,13 +2,14 @@ import { useRecoilCallback, useSetRecoilState } from "recoil";
 import { cerfaAtom, cerfaSetter, cerfaStatusGetter, fieldSelector, valuesSelector } from "./atoms";
 import { validField } from "./utils/validField";
 import { useMemo, useRef } from "react";
-import { dossierAtom } from "../atoms";
+import { dossierAtom, effectifIdAtom } from "../atoms";
 import { isEmptyValue } from "./utils/isEmptyValue";
 import { indexedDependencies } from "./cerfaSchema";
 import { findDefinition } from "./utils";
 import { getValues } from "./utils/getValues";
 import { indexedDependencesRevalidationRules, indexedRules } from "./cerfaSchema";
 import { findLogicErrors } from "./utils/findLogicErrors";
+import { organismeAtom } from "../../../../../hooks/organismeAtoms";
 
 export const useCerfa = ({ schema } = {}) => {
   const setCerfa = useSetRecoilState(cerfaAtom);
@@ -17,7 +18,9 @@ export const useCerfa = ({ schema } = {}) => {
   const getData = useRecoilCallback(
     ({ snapshot }) =>
       async () => ({
-        dossier: await snapshot.getPromise(dossierAtom),
+        organisme: await snapshot.getPromise(organismeAtom),
+        effectifId: await snapshot.getPromise(effectifIdAtom),
+        dossier: await snapshot.getPromise(dossierAtom), // TODO
         fields: await snapshot.getPromise(cerfaAtom),
         values: await snapshot.getPromise(valuesSelector),
       }),
@@ -63,11 +66,20 @@ export const useCerfa = ({ schema } = {}) => {
     const computeGlobal = async ({ name }) => {
       abortControllers.current[name] = new AbortController();
       for (let logic of indexedRules[name] ?? []) {
-        const { values, dossier, fields } = await getData();
+        const { values, dossier, organisme, effectifId, fields } = await getData();
         try {
           const signal = abortControllers.current[name].signal;
           const { cascade, error, warning, cache } =
-            (await logic.process({ fields, values, signal, dossier, name, cache: logic.cache })) ?? {};
+            (await logic.process({
+              fields,
+              values,
+              signal,
+              dossier, // TODO to remove
+              organisme,
+              effectifId,
+              name,
+              cache: logic.cache,
+            })) ?? {};
           logic.cache = cache;
           if (error && !logic.target) {
             patchFields({ [name]: { error, success: false, warning: undefined } });
@@ -95,7 +107,7 @@ export const useCerfa = ({ schema } = {}) => {
     };
 
     const validDeps = async ({ name }) => {
-      const { values, dossier, fields } = await getData();
+      const { values, dossier, organisme, effectifId, fields } = await getData();
       // eslint-disable-next-line no-undef
       await Promise.all(
         (indexedDependencies[name] ?? []).map(async (dep) => {
@@ -105,7 +117,7 @@ export const useCerfa = ({ schema } = {}) => {
           error = (await validField({ field, value: field.value })).error;
           if (!error) {
             const logics = indexedDependencesRevalidationRules[name][dep];
-            error = await findLogicErrors({ name: dep, logics, values, dossier, fields });
+            error = await findLogicErrors({ name: dep, logics, values, dossier, organisme, effectifId, fields });
           }
           if (!error) {
             await processField({ name: dep, value: field.value });

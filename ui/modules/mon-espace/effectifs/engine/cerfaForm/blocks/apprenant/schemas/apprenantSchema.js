@@ -1,62 +1,12 @@
-import { INDICE_DE_REPETITION_OPTIONS } from "../../domain/indiceDeRepetionOptions";
+import { INDICE_DE_REPETITION_OPTIONS } from "../../../domain/indiceDeRepetionOptions";
+import { apprenantContratsSchema } from "./apprenantContratsSchema";
+import { apprenantStatutsSchema } from "./apprenantStatutsSchema";
 // import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
-import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
+import { shouldAskResponsalLegalAdresse } from "../domain/shouldAskResponsalLegalAdresse";
 
 export const apprenantSchema = {
-  "apprenant.nouveau_statut.date_statut": {
-    label: "Date de changement de statut",
-    fieldType: "date",
-    autosave: false,
-  },
-  "apprenant.nouveau_statut.valeur_statut": {
-    fieldType: "select",
-    label: "Statut :",
-    autosave: false,
-    options: [
-      {
-        label: "Inscrit",
-        value: 2,
-      },
-      {
-        label: "En contrat",
-        value: 3,
-      },
-      {
-        label: "Abandon",
-        value: 0,
-      },
-    ],
-  },
-
-  "apprenant.historique_statut[].date_statut": {
-    label: "Date de changement de statut",
-    fieldType: "date",
-    locked: true,
-  },
-  "apprenant.historique_statut[].valeur_statut": {
-    fieldType: "select",
-    label: "Statut :",
-    locked: true,
-    options: [
-      {
-        label: "Inscrit en formation",
-        value: 2,
-      },
-      {
-        label: "En contrat, apprenti",
-        value: 3,
-      },
-      {
-        label: "Abandon",
-        value: 0,
-      },
-    ],
-  },
-  "apprenant.historique_statut[].date_reception": {
-    label: "Date de reception du statut",
-    fieldType: "date",
-    locked: true,
-  },
+  ...apprenantContratsSchema,
+  ...apprenantStatutsSchema,
 
   "apprenant.ine": {
     showInfo: true,
@@ -194,7 +144,6 @@ export const apprenantSchema = {
     label: "Téléphone de l'apprenant(e) :",
     showInfo: true,
   },
-
   "apprenant.adresse.numero": {
     fieldType: "number",
     label: "N° :",
@@ -265,7 +214,6 @@ export const apprenantSchema = {
       },
     ],
   },
-
   "apprenant.mineur_emancipe": {
     fieldType: "radio",
     label: "L'apprenant(e) est émancipé ? Si non est sous la responsabilité d'un représentant légal",
@@ -401,7 +349,6 @@ export const apprenantSchema = {
       },
     ],
   },
-
   "apprenant.situation_avant_contrat": {
     fieldType: "select",
     label: "Situation avant contrat :",
@@ -513,6 +460,11 @@ export const apprenantSchema = {
         value: 12,
       },
     ],
+  },
+  "apprenant.dernier_organisme_uai": {
+    fieldType: "text",
+    showInfo: true,
+    label: "Établissement fréquenté l’année dernière (N-1):",
   },
   "apprenant.dernier_diplome": {
     fieldType: "select",
