@@ -150,31 +150,6 @@ const CommentFonctionneLeTdbPage = () => {
               ),
             },
             {
-              title: "Que recouvrent les chiffres clefs de l’apprentissage ?",
-              content: (
-                <Box>
-                  <Text>
-                    L’équipe du Tableau de bord récolte des données permettant d’identifier, de fiabiliser et de
-                    contrôler les données concernant les apprenantes et apprenants, les formations, les contrats et les
-                    organismes de formation.
-                    <br />
-                    <br />
-                    Aucune donnée n’est modifiée ou retraitée. Elles permettent d’identifier le nombre d’ “apprentis”
-                    (avec formation et contrat), de stagiaires de la formation professionnelle ou “inscrits sans
-                    contrat” (inscrits en formation mais sans aucun contrat pour cette formation), de “rupturants”
-                    (inscrits en formation avec un contrat rompu en attente d’un nouveau contrat), “abandons” (ayant
-                    quitté la formation et l’employeur).
-                    <br />
-                    <br />
-                    Pour en savoir plus, consulter la rubrique{" "}
-                    <Link to="/comprendre-les-donnees" as={NavLink} color="bluefrance" textDecoration="underLine">
-                      Comprendre les données <Box as="i" className="ri--link-line" />
-                    </Link>
-                  </Text>
-                </Box>
-              ),
-            },
-            {
               title: "Comment se construit le Tableau de bord ? Puis-je y participer ?",
               content: (
                 <Box>
@@ -512,7 +487,7 @@ const CommentFonctionneLeTdbPage = () => {
               ),
             },
             {
-              title: "Qui sont les utilisateurs du Tableau de bord de l’apprentissage",
+              title: "Qui sont les utilisateurs du Tableau de bord de l’apprentissage ?",
               content: (
                 <Box>
                   Nous avons à ce jour 4 types d’utilisateurs :
