@@ -42,7 +42,7 @@ export const generateSifa = async (organisme_id) => {
       SIT_AV_APP: effectif.apprenant.situation_avant_contrat,
       DIP_OBT: effectif.apprenant.dernier_diplome,
       SIT_N_1: effectif.apprenant.derniere_situation,
-      ETAB_N_1: "", // TODO to add UAI N-1
+      ETAB_N_1: effectif.apprenant.dernier_organisme_uai,
     };
 
     const dernierContratActif = effectif.apprenant.contrats?.[0];
