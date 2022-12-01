@@ -17,7 +17,7 @@ import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token.js";
-import { hydrateOrganismesFormations } from "./hydrate/organismes/hydrate-organismes-formations.js";
+import { hydrateOrganismes } from "./hydrate/organismes/hydrate-organismes.js";
 
 /**
  * Job d'initialisation projet
@@ -146,15 +146,15 @@ cli
   });
 
 /**
- * Job de remplissage des formations liées aux organismes
+ * Job de remplissage des organismes
  */
 cli
-  .command("hydrate:organismes-formations")
-  .description("Remplissage des formations liées aux organismes")
+  .command("hydrate:organismes")
+  .description("Remplissage des organismes")
   .action(async () => {
     runScript(async () => {
-      return hydrateOrganismesFormations();
-    }, "hydrate-organismes-formations");
+      return hydrateOrganismes();
+    }, "hydrate-organismes");
   });
 
 /**

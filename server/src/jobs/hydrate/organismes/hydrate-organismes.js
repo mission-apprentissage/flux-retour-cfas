@@ -7,30 +7,28 @@ import { findOrganismeById, findOrganismeByUai, updateOrganisme } from "../../..
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
 
 /**
- * Script qui initialise les formations liées aux organismes
+ * Script qui initialise les organismes
  * Va récupérer toutes les formations liés aux organismes via des dossiersApprenants présents en base
  * Sur chaque formation trouvée on va récupérer les infos de cette formation lié à cet organisme via le catalogue
  * et on en déduit la liste des organismes (avec leur nature) liés à cette formation pour cet organisme parent
  */
-export const hydrateOrganismesFormations = async () => {
+export const hydrateOrganismes = async () => {
   // Récupère tous les organismes id distinct dans les dossiersApprenants
   const allOrganismesId = await dossiersApprenantsMigrationDb().distinct("organisme_id");
 
   logger.info(allOrganismesId.length, "organismes id distincts dans les dossiersApprenants");
 
   await asyncForEach(allOrganismesId, async (organisme_id) => {
-    // Récupération de l'uai de l'organisme
+    // Récupération de l'organisme
     const organisme = await findOrganismeById(organisme_id);
 
-    // Récupère toutes les formations id distinctes pour cet organisme dans les dossiersApprenants
-    const formationsIdForOrganisme = await dossiersApprenantsMigrationDb().distinct("formation_id", {
-      organisme_id,
-    });
+    // Récupération des formations liés au cfd et à l'organisme
+    const formationsForOrganisme = await getFormationsForOrganismeFormation(organisme.uai);
 
-    if (formationsIdForOrganisme.length > 0) {
+    if (formationsForOrganisme.length > 0) {
       // Construction d'une liste de formations pour cet organisme
       let formationsForOrganismeArray = [];
-      await asyncForEach(formationsIdForOrganisme, async (formation_id) => {
+      await asyncForEach(formationsForOrganisme, async (currentFormation) => {
         // Récupération du cfd de la formation
         const { cfd } = await findFormationById(formation_id);
 
@@ -49,16 +47,13 @@ export const hydrateOrganismesFormations = async () => {
 };
 
 /**
- * Méthode de récupération des organismes liés à une formation d'un organisme
+ * Méthode de
  * @param {*} organisme
  * @param {*} cfd
  * @returns
  */
-const fetchOrganismesInfoForFormation = async (organisme, cfd) => {
+const buildOrganismesListFromFormationFromCatalog = async (organisme, cfd) => {
   let organismesInfo = [];
-
-  // Récupération des formations liés au cfd et à l'organisme
-  const formationsForOrganismeAndCfd = await getFormationsForOrganismeFormation(organisme.uai, cfd);
 
   // Construction de la liste des organismes pour les formations rattachés à l'uai
   await asyncForEach(formationsForOrganismeAndCfd, async (currentFormation) => {

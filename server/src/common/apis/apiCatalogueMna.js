@@ -31,19 +31,19 @@ export const getFormations = async (options) => {
 
 /**
  * TODO : Optim fetching & pagination récupération
- * Méthode de récupération depuis l'API Catalogue des formations lié à un uai d'organisme et un code CFD
+ * Méthode de récupération depuis l'API Catalogue des formations lié à un uai d'organisme
  * @param {*} uai
  * @param {*} cfd
  * @returns
  */
-export const getFormationsForOrganismeFormation = async (uai, cfd) => {
+export const getFormationsForOrganisme = async (uai) => {
   const url = `${API_ENDPOINT}/entity/formations`;
   try {
-    // On cherche parmi les formations ayant soit l'uai formateur soit l'uai gestionnaire
+    // On cherche parmi les formations publiées ayant soit l'uai formateur soit l'uai gestionnaire
     // TODO Voir coté métier si les uai des organismes du tdb sont tout le temps formateurs ou gestionnaires
     const query = {
       published: true,
-      cfd: cfd,
+      catalogue_published: true,
       $or: [{ etablissement_formateur_uai: uai }, { etablissement_gestionnaire_uai: uai }],
     };
 
@@ -56,12 +56,12 @@ export const getFormationsForOrganismeFormation = async (uai, cfd) => {
     allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
 
     if (page < pagination.nombre_de_page) {
-      return getFormationsForOrganismeFormation({ page: page + 1, allFormations, limit });
+      return getFormationsForOrganisme({ page: page + 1, allFormations, limit });
     } else {
       return allFormations;
     }
   } catch (err) {
-    logger.error(`getFormations: something went wrong while requesting ${url}`, err);
+    logger.error(`getFormationsForOrganisme: something went wrong while requesting ${url}`, err);
     return null;
   }
 };
