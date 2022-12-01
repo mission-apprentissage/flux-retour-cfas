@@ -1,10 +1,13 @@
+import cliProgress from "cli-progress";
 import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb, jobEventsDb } from "../../../common/model/collections.js";
 import { getFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
 import { findOrganismeById, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
 import { getFormationWithCfd } from "../../../common/actions/formations.actions.js";
+
+const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
  * Script qui initialise les organismes
@@ -16,16 +19,22 @@ export const hydrateOrganismes = async () => {
   // Récupère tous les organismes id distinct dans les dossiersApprenants
   const allOrganismesId = await dossiersApprenantsMigrationDb().distinct("organisme_id");
 
+  let nbOrganismesHandled = 0;
+  let nbOrganismesWithoutFormations = 0;
+  let nbFormationsAdded = 0;
+
   logger.info(allOrganismesId.length, "organismes id distincts dans les dossiersApprenants");
+  loadingBar.start(allOrganismesId.length, 0);
 
   await asyncForEach(allOrganismesId, async (organisme_id) => {
     // Récupération de l'organisme
     const organisme = await findOrganismeById(organisme_id);
 
-    // Récupération des formations liés au cfd et à l'organisme
+    // Récupération des formations liés à l'organisme
     const formationsForOrganisme = await getFormationsForOrganisme(organisme.uai);
 
     if (formationsForOrganisme.length > 0) {
+      nbOrganismesHandled++;
       // Construction d'une liste de formations pour cet organisme
       let formationsForOrganismeArray = [];
 
@@ -44,12 +53,30 @@ export const hydrateOrganismes = async () => {
           duree_formation_theorique: parseInt(currentFormation.duree) || -1,
           organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
         });
+        nbFormationsAdded++;
       });
 
       // MAJ de l'organisme avec sa liste de formations
       await updateOrganisme(organisme_id, { formations: formationsForOrganismeArray });
+      loadingBar.increment();
+    } else {
+      nbOrganismesWithoutFormations++;
+      // Log & store cases
+      await jobEventsDb().insertOne({
+        jobname: "hydrate-organismes",
+        date: new Date(),
+        action: "organisme-withoutFormations",
+        data: { organisme },
+      });
     }
   });
+
+  loadingBar.stop();
+
+  // Log & stats
+  logger.info(`-> ${nbOrganismesHandled} organismes traités (ayant des formations dans le catalogue).`);
+  logger.info(`-> ${nbOrganismesWithoutFormations} organismes non traités (sans formations dans le catalogue).`);
+  logger.info(`--> ${nbFormationsAdded} formations rattachées à des organismes.`);
 };
 
 /**
@@ -66,13 +93,14 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
 
     organismesLinkedToFormation.push({
       ...(organismeInTdb ? { organisme_id: organismeInTdb._id } : {}), // Si organisme trouvé dans le tdb
+      ...(organismeInTdb ? { adresse: organismeInTdb.adresse } : {}), // Si organisme trouvé dans le tdb on son adresse
       nature: getNature(NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, formationCatalog, organismesLinkedToFormation),
       uai: formationCatalog.etablissement_gestionnaire_uai,
       siret: formationCatalog.etablissement_gestionnaire_siret,
-      // TODO Get adresse from réferentiel ?
     });
 
     // TODO Voir ce qu'on fait si on ne trouve pas l'OF dans le tdb ? on le créé ? on logge l'anomalie ?
+    // TODO Si pas d'organisme depuis le Tdb on récupère l'adresse from référentiel ?
   }
 
   // Gestion du formateur si nécessaire
@@ -81,22 +109,23 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
 
     organismesLinkedToFormation.push({
       ...(organismeInTdb ? { organisme_id: organismeInTdb._id } : {}), // Si organisme trouvé dans le tdb
+      ...(organismeInTdb ? { adresse: organismeInTdb.adresse } : {}), // Si organisme trouvé dans le tdb on son adresse
       nature: getNature(NATURE_ORGANISME_DE_FORMATION.FORMATEUR, formationCatalog, organismesLinkedToFormation),
       uai: formationCatalog.etablissement_formateur_uai,
       siret: formationCatalog.etablissement_formateur_siret,
-      // TODO Get adresse from réferentiel ?
     });
 
     // TODO Voir ce qu'on fait si on ne trouve pas l'OF dans le tdb ? on le créé ? on logge l'anomalie ?
+    // TODO Si pas d'organisme depuis le Tdb on récupère l'adresse from référentiel ?
   }
 
   // Gestion du lieu de formation
   // TODO WIP
   organismesLinkedToFormation.push({
     nature: NATURE_ORGANISME_DE_FORMATION.LIEU,
-    // uai: formationCatalog.XXXX, // TODO voir ou recup l'uai du lieu
+    // uai: formationCatalog.XXXX, // TODO non récupérée par RCO donc pas présent dans le catalogue (vu avec Quentin)
     ...(formationCatalog.lieu_formation_siret ? { siret: formationCatalog.lieu_formation_siret } : {}),
-    // TODO Get adresse from  lieu_formation_adresse?
+    // TODO On récupère l'adresse depuis le référentiel en appelant avec le siret ?
   });
 
   return organismesLinkedToFormation;
