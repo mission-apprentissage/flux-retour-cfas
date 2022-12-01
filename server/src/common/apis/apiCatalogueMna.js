@@ -40,7 +40,6 @@ export const getFormationsForOrganisme = async (uai) => {
   const url = `${API_ENDPOINT}/entity/formations`;
   try {
     // On cherche parmi les formations publiées ayant soit l'uai formateur soit l'uai gestionnaire
-    // TODO Voir coté métier si les uai des organismes du tdb sont tout le temps formateurs ou gestionnaires
     const query = {
       published: true,
       catalogue_published: true,

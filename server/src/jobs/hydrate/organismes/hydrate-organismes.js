@@ -2,9 +2,9 @@ import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
 import { getFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
-import { findFormationById } from "../../../common/actions/formations.actions.js";
 import { findOrganismeById, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
+import { getFormationWithCfd } from "../../../common/actions/formations.actions.js";
 
 /**
  * Script qui initialise les organismes
@@ -28,15 +28,22 @@ export const hydrateOrganismes = async () => {
     if (formationsForOrganisme.length > 0) {
       // Construction d'une liste de formations pour cet organisme
       let formationsForOrganismeArray = [];
+
       await asyncForEach(formationsForOrganisme, async (currentFormation) => {
-        // Récupération du cfd de la formation
-        // const { cfd } = await findFormationById(formation_id);
-        // Ajout à la liste des formation de l'organisme d'un item contenant formation_id
-        // ainsi que la liste des organismes trouvés dans l'API Catalogue pour cet organisme (uai) et cette formation
-        // formationsForOrganismeArray.push({
-        //   formation_id,
-        //   organismes: await fetchOrganismesInfoForFormation(organisme, cfd),
-        // });
+        // Récupération de la formation du catalogue dans le TDB
+        // TODO Que faire si la formation n'est pas dans le tdb ? on la créé ? on logge l'erreur ?
+        const formationFromTdb = await getFormationWithCfd(currentFormation.cfd);
+
+        // Ajout à la liste des formation de l'organisme d'un item contenant
+        // formation_id si trouvé dans le tdb
+        // année & durée trouvé dans le catalog
+        // ainsi que la liste des organismes construite depuis l'API Catalogue
+        formationsForOrganismeArray.push({
+          ...(formationFromTdb ? { formation_id: formationFromTdb._id } : {}),
+          annee_formation: parseInt(currentFormation.annee) || -1,
+          duree_formation_theorique: parseInt(currentFormation.duree) || -1,
+          organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
+        });
       });
 
       // MAJ de l'organisme avec sa liste de formations
@@ -46,60 +53,74 @@ export const hydrateOrganismes = async () => {
 };
 
 /**
- * Méthode de
- * @param {*} organisme
- * @param {*} cfd
+ * Méthode de construction de la liste des organismes avec leur nature, rattachés à une formation du catalogue
+ * @param {*} formationCatalog
  * @returns
  */
-// const buildOrganismesListFromFormationFromCatalog = async (organisme, cfd) => {
-//   let organismesInfo = [];
+const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => {
+  let organismesLinkedToFormation = [];
 
-//   // Construction de la liste des organismes pour les formations rattachés à l'uai
-//   await asyncForEach(formationsForOrganismeAndCfd, async (currentFormation) => {
-//     // Recuperer l'uai responsable (gestionnaire)
-//     if (currentFormation.etablissement_gestionnaire_uai) {
-//       const organismeResponsable = await findOrganismeByUai(currentFormation.etablissement_gestionnaire_uai);
-//       if (organismeResponsable) {
-//         organismesInfo.push({
-//           organisme_id: organismeResponsable?._id,
-//           nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
-//           uai: currentFormation.etablissement_gestionnaire_uai, // TODO Get uai lieu de formation ?
+  // Récupération du responsable (gestionnaire)
+  if (formationCatalog.etablissement_gestionnaire_uai) {
+    const organismeInTdb = await findOrganismeByUai(formationCatalog.etablissement_gestionnaire_uai);
 
-//           // TODO Get adresse from réferentiel ?
-//         });
-//       } else {
-//         // TODO Doit-on créer l'organisme si on ne le trouve pas dans les organismes du tdb ?
-//         organismesInfo.push({
-//           nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
-//           uai: currentFormation.etablissement_gestionnaire_uai, // TODO Get uai lieu de formation ?
-//           // TODO Get adresse from réferentiel ?
-//         });
-//       }
-//     }
+    organismesLinkedToFormation.push({
+      ...(organismeInTdb ? { organisme_id: organismeInTdb._id } : {}), // Si organisme trouvé dans le tdb
+      nature: getNature(NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, formationCatalog, organismesLinkedToFormation),
+      uai: formationCatalog.etablissement_gestionnaire_uai,
+      siret: formationCatalog.etablissement_gestionnaire_siret,
+      // TODO Get adresse from réferentiel ?
+    });
 
-//     if (currentFormation.etablissement_formateur_uai) {
-//       const organismeResponsable = await findOrganismeByUai(currentFormation.etablissement_formateur_uai);
-//       if (organismeResponsable) {
-//         organismesInfo.push({
-//           organisme_id: organismeResponsable._id,
-//           nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
-//           uai: currentFormation.etablissement_formateur_uai, // TODO Get uai lieu de formation ?
-//           // TODO Get adresse from réferentiel ?
-//         });
-//       } else {
-//         // TODO Doit-on créer l'organisme si on ne le trouve pas dans les organismes du tdb ?
-//         organismesInfo.push({
-//           nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
-//           uai: currentFormation.etablissement_formateur_uai, // TODO Get uai lieu de formation ?
-//           // TODO Get uai lieu de formation ?
-//           // TODO Get adresse from réferentiel ?
-//         });
-//       }
-//     }
+    // TODO Voir ce qu'on fait si on ne trouve pas l'OF dans le tdb ? on le créé ? on logge l'anomalie ?
+  }
 
-//     // TODO Comment récupérer les organismes responsable_formateur / LIEU
-//   });
+  // Gestion du formateur si nécessaire
+  if (formationCatalog.etablissement_formateur_uai) {
+    const organismeInTdb = await findOrganismeByUai(formationCatalog.etablissement_formateur_uai);
 
-//   let uniqOrganismes = [...new Set(organismesInfo.map(JSON.stringify))].map(JSON.parse);
-//   return uniqOrganismes;
-// };
+    organismesLinkedToFormation.push({
+      ...(organismeInTdb ? { organisme_id: organismeInTdb._id } : {}), // Si organisme trouvé dans le tdb
+      nature: getNature(NATURE_ORGANISME_DE_FORMATION.FORMATEUR, formationCatalog, organismesLinkedToFormation),
+      uai: formationCatalog.etablissement_formateur_uai,
+      siret: formationCatalog.etablissement_formateur_siret,
+      // TODO Get adresse from réferentiel ?
+    });
+
+    // TODO Voir ce qu'on fait si on ne trouve pas l'OF dans le tdb ? on le créé ? on logge l'anomalie ?
+  }
+
+  // Gestion du lieu de formation
+  // TODO WIP
+  organismesLinkedToFormation.push({
+    nature: NATURE_ORGANISME_DE_FORMATION.LIEU,
+    // uai: formationCatalog.XXXX, // TODO voir ou recup l'uai du lieu
+    ...(formationCatalog.lieu_formation_siret ? { siret: formationCatalog.lieu_formation_siret } : {}),
+    // TODO Get adresse from  lieu_formation_adresse?
+  });
+
+  return organismesLinkedToFormation;
+};
+
+/**
+ * Vérifie la nature, si on détecte un uai formateur = reponsable alors on est dans le cas d'un responsable_formateur
+ * sinon on renvoi la nature default
+ * @param {*} defaultNature
+ * @param {*} formationCatalog
+ * @param {*} organismesLinkedToFormation
+ * @returns
+ */
+const getNature = (defaultNature, formationCatalog, organismesLinkedToFormation) => {
+  // Vérification si OF a la fois identifié gestionnaire (responsable) & formateur
+  const isResponsableEtFormateur =
+    formationCatalog.etablissement_gestionnaire_uai === formationCatalog.etablissement_formateur_uai;
+
+  // Vérification s'il n'est pas déja dans la liste
+  const isNotAlreadyInOrganismesLinkedToFormation = !organismesLinkedToFormation.some(
+    (item) => item.uai === formationCatalog.etablissement_gestionnaire_uai
+  );
+
+  return isResponsableEtFormateur && isNotAlreadyInOrganismesLinkedToFormation
+    ? NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
+    : defaultNature;
+};
