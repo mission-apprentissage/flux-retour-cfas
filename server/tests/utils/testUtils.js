@@ -6,11 +6,9 @@ import redisFakeClient from "./redisClientMock.js";
 import { modelDescriptors } from "../../src/common/model/collections.js";
 
 export const startServer = async () => {
-  const components = await createComponents({
-    db: getDatabase(),
-    redisClient: redisFakeClient,
-  });
-  const app = await server(components);
+  getDatabase();
+  const components = await createComponents();
+  const app = await server(...{ components }, ...{ cache: redisFakeClient });
   const httpClient = axiosist(app);
   await configureDbSchemaValidation(modelDescriptors);
 
