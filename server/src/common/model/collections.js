@@ -3,7 +3,6 @@ import usersModelDescriptor from "./previous.models/toRemove.models/users.model.
 import userEventsModelDescriptor from "./next.toKeep.models/userEvents.model.js";
 import cfasModelDescriptor from "./previous.models/toRemove.models/cfas.model.js";
 import formationsModelDescriptor from "./next.toKeep.models/formations.model.js";
-import reseauxCfasModelDescriptor from "./previous.models/toRemove.models/reseauxCfas.model.js";
 import dossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/dossiersApprenants.model.js";
 import jobEventsModelDescriptor from "./next.toKeep.models/jobEvents.model.js";
 import effectifsApprenantsModelDescriptor from "./previous.models/effectifsApprenants.model.js";
@@ -27,7 +26,6 @@ export const modelDescriptors = [
   userEventsModelDescriptor,
   cfasModelDescriptor,
   formationsModelDescriptor,
-  reseauxCfasModelDescriptor,
   dossiersApprenantsModelDescriptor,
   jobEventsModelDescriptor,
   effectifsApprenantsModelDescriptor,
@@ -126,8 +124,4 @@ export const archiveDossiersApprenantsDb = () => {
 
 export const dossiersApprenantsApiErrorsDb = () => {
   return getDbCollection(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
-};
-
-export const reseauxCfasDb = () => {
-  return getDbCollection(reseauxCfasModelDescriptor.collectionName);
 };

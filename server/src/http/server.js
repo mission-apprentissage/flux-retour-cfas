@@ -23,7 +23,6 @@ import loginCfaRouter from "./routes/specific.routes/old/login-cfa.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
-import reseauxCfasRouter from "./routes/specific.routes/old/reseaux-cfas.route.js";
 import effectifsNationalRouter from "./routes/specific.routes/old/effectifs-national.route.js";
 import effectifs from "./routes/specific.routes/old/effectifs.route.js";
 
@@ -82,12 +81,6 @@ export default async (services) => {
     checkJwtToken,
     pageAccessMiddleware(["admin/page_gestion_utilisateurs", "admin/page_gestion_roles"]),
     rolesAdmin()
-  );
-  app.use(
-    "/api/v1/admin/reseaux-cfas",
-    checkJwtToken,
-    pageAccessMiddleware(["admin/page_gestion_reseaux_cfa"]),
-    reseauxCfasRouter(services)
   );
   app.get(
     "/api/cache",
