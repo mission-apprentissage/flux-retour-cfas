@@ -28,3 +28,39 @@ export const getFormations = async (options) => {
     return null;
   }
 };
+
+/**
+ * TODO : Optim fetching & pagination récupération
+ * Méthode de récupération depuis l'API Catalogue des formations lié à un uai d'organisme
+ * @param {*} uai
+ * @param {*} cfd
+ * @returns
+ */
+export const getFormationsForOrganisme = async (uai) => {
+  const url = `${API_ENDPOINT}/entity/formations`;
+  try {
+    // On cherche parmi les formations publiées ayant soit l'uai formateur soit l'uai gestionnaire
+    const query = {
+      published: true,
+      catalogue_published: true,
+      $or: [{ etablissement_formateur_uai: uai }, { etablissement_gestionnaire_uai: uai }],
+    };
+
+    let { page, allFormations, limit, select } = { page: 1, allFormations: [], limit: 1050 };
+
+    let params = { page, limit, query, select };
+    const response = await axios.get(url, { params });
+
+    const { formations, pagination } = response.data;
+    allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
+
+    if (page < pagination.nombre_de_page) {
+      return getFormationsForOrganisme({ page: page + 1, allFormations, limit });
+    } else {
+      return allFormations;
+    }
+  } catch (err) {
+    logger.error(`getFormationsForOrganisme: something went wrong while requesting ${url}`, err);
+    return null;
+  }
+};

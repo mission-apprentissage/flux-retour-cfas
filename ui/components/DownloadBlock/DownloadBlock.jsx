@@ -30,7 +30,7 @@ const DownloadBlock = ({ title, description, fileName, getFile }) => {
             {description}
           </Text>
           <Flex justifyContent="flex-end">
-            <Box as="i" className="ri-download-line" fontWeight="400" />
+            <Box as="i" className="ri-download-line" fontWeight="400" color="bluefrance" />
           </Flex>
         </Box>
       )}

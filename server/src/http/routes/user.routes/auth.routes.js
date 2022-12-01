@@ -2,11 +2,13 @@ import express from "express";
 import Boom from "boom";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { getUser, authenticate, loggedInUser, structureUser } from "../../../common/components/usersComponent.js";
-import * as sessions from "../../../common/components/sessionsComponent.js";
+import { getUser, authenticate, loggedInUser, structureUser } from "../../../common/actions/users.actions.js";
+import * as sessions from "../../../common/actions/sessions.actions.js";
 import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { COOKIE_NAME } from "../../../common/constants/cookieName.js";
+
+import { USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION } from "../../../common/constants/usersToForceAccountCreation.js";
 
 export default () => {
   const router = express.Router();
@@ -14,18 +16,20 @@ export default () => {
   router.post(
     "/login",
     tryCatch(async (req, res) => {
-      const { email, password } = await Joi.object({
-        email: Joi.string().email().required(),
+      const { email: emailOrUsername, password } = await Joi.object({
+        email: Joi.string().required(),
         password: Joi.string().required(),
       }).validateAsync(req.body, { abortEarly: false });
+
+      if (USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION.includes(emailOrUsername)) {
+        // TODO List of old username
+        throw Boom.conflict(`Old connection method`, { message: `Ancienne méthode de connexion` });
+      }
+      const { value: email } = Joi.string().email().validate(emailOrUsername, { abortEarly: false });
 
       const user = await getUser(email.toLowerCase());
       if (!user) {
         return res.status(401).json({ message: "Accès non autorisé" });
-      }
-
-      if (user.orign_register !== "ORIGIN") {
-        throw Boom.conflict(`Wrong connection method`, { message: `Mauvaise méthode de connexion` });
       }
 
       const auth = await authenticate(user.email, password);
@@ -53,7 +57,6 @@ export default () => {
   router.get(
     "/logout",
     tryCatch(async (req, res) => {
-      console.log(req.cookies);
       if (req.cookies[COOKIE_NAME]) {
         await sessions.removeJwt(req.cookies[COOKIE_NAME]);
         res.clearCookie(COOKIE_NAME).status(200).json({

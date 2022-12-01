@@ -43,4 +43,25 @@ server {
 
     include includes/location_*.conf;
     include includes/env/location_*.conf;
+
+
+    # Redirect to maintenance if maintenance.on file present & not maintenance ip
+    if (-f /etc/nginx/html/maintenance.on) {
+        set $maintenance  1;
+    }
+
+    if ($maintenance_allowed_ips != 1) {
+        set $maintenance "${maintenance}1";
+    }
+
+    if ($maintenance = 11) {
+      return 503;
+    }
+
+    error_page 503 @maintenance;
+
+    location @maintenance {
+        rewrite ^(.*)$ /maintenance.html break;
+        root /etc/nginx/html;
+    }
 }
