@@ -43,12 +43,20 @@ const arraysContainSameValues = (array1, array2) => {
   return true;
 };
 
-runScript(async ({ cfas }) => {
+const mapFileOrganisme = (organismeFromFile) => {
+  return {
+    siret: organismeFromFile[INPUT_FILE_COLUMN_NAMES.SIRET],
+    uai: organismeFromFile[INPUT_FILE_COLUMN_NAMES.UAI],
+    reseaux: parseReseauxTextFromCsv(organismeFromFile[INPUT_FILE_COLUMN_NAMES.RESEAUX_A_JOUR]),
+  };
+};
+
+runScript(async ({ db, cfas }) => {
   await asyncForEach(INPUT_FILES, async (filename) => {
     logger.info("Importing data from", filename);
     // read référentiel file from réseau and convert it to JSON
     const filePath = path.join(__dirname, filename);
-    const reseauReferentielFileJson = readJsonFromCsvFile(filePath, ";");
+    const reseauFile = readJsonFromCsvFile(filePath, ";");
 
     // init counters for final log
     let foundCount = 0;
@@ -56,15 +64,14 @@ runScript(async ({ cfas }) => {
     let organismeUpdatedCount = 0;
     let organismeUpdateErrorCount = 0;
 
-    logger.info(reseauReferentielFileJson.length, "lines in", filename);
-    // iterate over every line (organisme de formation) in the référentiel file
-    await asyncForEach(reseauReferentielFileJson, async (reseauReferentielFileJsonLine) => {
-      const organismeParsedFromFile = {
-        siret: reseauReferentielFileJsonLine[INPUT_FILE_COLUMN_NAMES.SIRET],
-        uai: reseauReferentielFileJsonLine[INPUT_FILE_COLUMN_NAMES.UAI],
-        reseaux: parseReseauxTextFromCsv(reseauReferentielFileJsonLine[INPUT_FILE_COLUMN_NAMES.RESEAUX_A_JOUR]),
-      };
+    logger.info(reseauFile.length, "lines in", filename);
+    // iterate over every line (organisme de formation) in the réseau file
+    await asyncForEach(reseauFile, async (reseauFileLine) => {
+      const organismeParsedFromFile = mapFileOrganisme(reseauFileLine);
 
+      /*
+        1 - Add réseau information to organisme in TDB, if found unique
+      */
       // try to retrieve organisme in our database with UAI and SIRET if UAI is provided
       const organismeInTdb = organismeParsedFromFile.uai
         ? await cfas.getFromUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)
@@ -75,26 +82,26 @@ runScript(async ({ cfas }) => {
 
       if (found) foundCount++;
 
-      // if only one result, we compare reseaux between organisme in réseau file référentiel and the one we found in our database
+      // if only one result, we compare reseaux between organisme in réseau file and the one we found in our database
       // and update our organisme with the updated list of reseaux
       if (foundUnique) {
         foundUniqueCount++;
         const uniqueOrganismeFromTdb = organismeInTdb[0];
 
         const reseauxFromDb = uniqueOrganismeFromTdb.reseaux || [];
-        const reseauxFromReferentiel = organismeParsedFromFile.reseaux || [];
+        const reseauxFromFile = organismeParsedFromFile.reseaux || [];
 
-        if (!arraysContainSameValues(reseauxFromDb, reseauxFromReferentiel)) {
+        if (!arraysContainSameValues(reseauxFromDb, reseauxFromFile)) {
           logger.info(
             "Organisme with UAI",
             uniqueOrganismeFromTdb.uai,
             "and SIRET",
             organismeParsedFromFile.siret,
             "will be updated with list of reseaux",
-            reseauxFromReferentiel.join(", ")
+            reseauxFromFile.join(", ")
           );
           try {
-            await cfas.updateCfaReseauxFromUai(uniqueOrganismeFromTdb.uai, reseauxFromReferentiel);
+            await cfas.updateCfaReseauxFromUai(uniqueOrganismeFromTdb.uai, reseauxFromFile);
             organismeUpdatedCount++;
           } catch (err) {
             organismeUpdateErrorCount++;
@@ -102,24 +109,32 @@ runScript(async ({ cfas }) => {
           }
         }
       }
+
+      /*
+        2 - Add réseau information to organisme in Référentiel SIRET-UAI, if found
+      */
+      const organismeInReferentielSiretUai = await db
+        .collection("referentielSiret")
+        .findOne({ siret: organismeParsedFromFile.siret });
+      if (organismeInReferentielSiretUai && organismeParsedFromFile?.reseaux.length !== 0) {
+        await db
+          .collection("referentielSiret")
+          .updateOne(
+            { siret: organismeInReferentielSiretUai.siret },
+            { $set: { reseaux: organismeParsedFromFile.reseaux } }
+          );
+      }
     });
-    logger.info(
-      "Organismes du fichier",
-      filename,
-      "trouvés en base",
-      foundCount,
-      "/",
-      reseauReferentielFileJson.length
-    );
+    logger.info("Organismes du fichier", filename, "trouvés en base TDB", foundCount, "/", reseauFile.length);
     logger.info(
       "Organismes du ficher",
       filename,
-      "trouvés uniques en base",
+      "trouvés uniques en base TDB",
       foundUniqueCount,
       "/",
-      reseauReferentielFileJson.length
+      reseauFile.length
     );
-    logger.info("Organismes en base dont les réseaux ont été mis à jour :", organismeUpdatedCount);
-    logger.info("Organismes en base n'ont pas pu être mis à jour :", organismeUpdateErrorCount);
+    logger.info("Organismes en base TDB dont les réseaux ont été mis à jour :", organismeUpdatedCount);
+    logger.info("Organismes en base TDB n'ont pas pu être mis à jour :", organismeUpdateErrorCount);
   });
 }, "seed-reseaux-for-cfas");

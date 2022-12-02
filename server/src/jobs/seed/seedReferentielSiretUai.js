@@ -1,8 +1,6 @@
-const path = require("path");
 const { runScript } = require("../scriptWrapper");
 const { fetchOrganismes } = require("../../common/apis/apiReferentielMna");
 const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
 
 const REFERENTIEL_FIELDS_TO_FETCH = [
   "siret",
@@ -16,39 +14,19 @@ const REFERENTIEL_FIELDS_TO_FETCH = [
   "adresse",
   "numero_declaration_activite",
 ];
-/**
- * @param  {string} reseauText
- * @returns {[string]} List of parsed réseaux
- */
-const parseReseauxTextFromCsv = (reseauText) => {
-  if (!reseauText || reseauText === "Hors réseau CFA EC") {
-    return [];
-  }
-  const reseaux = reseauText.split("|").map((reseau) => reseau.toUpperCase());
-  return reseaux;
-};
-
-const EXCELLENCE_PRO_FILE_PATH = path.join(__dirname, `./referentiel-reseau-excellence-pro.csv`);
 
 /**
- * Script qui crée une collection contenant le référentiel UAI/SIRET enrichi des réseaux existants dans le TDB et dans le fichier Excellence Pro
+ * Script qui crée une collection contenant le référentiel UAI/SIRET enrichi des réseaux existants dans le TDB
  */
 runScript(async ({ db, cfas }) => {
-  const excellenceProReferentielJson = readJsonFromCsvFile(EXCELLENCE_PRO_FILE_PATH, ",").map((line) => {
-    return {
-      siret: line["Siret"],
-      uai: line["UAIvalidée"],
-      reseaux: parseReseauxTextFromCsv(line["Réseauàjour"]),
-    };
-  });
   const referentielSiretCollection = db.collection("referentielSiret");
-
-  await referentielSiretCollection.deleteMany();
 
   const { organismes } = await fetchOrganismes({
     champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),
     itemsPerPage: 10000,
   });
+
+  await referentielSiretCollection.deleteMany();
 
   await asyncForEach(organismes, async (organismeReferentiel) => {
     const reseaux = new Set();
@@ -58,16 +36,6 @@ runScript(async ({ db, cfas }) => {
     reseauxFromTdb.forEach((reseau) => {
       reseaux.add(reseau);
     });
-
-    if (organismesTdb.length === 0) {
-      const organismeExcellencePro = excellenceProReferentielJson.find(
-        ({ siret }) => organismeReferentiel.siret === siret
-      );
-
-      if (organismeExcellencePro?.reseaux) {
-        organismeExcellencePro.reseaux.forEach((reseau) => reseaux.add(reseau));
-      }
-    }
 
     await referentielSiretCollection.insertOne({
       ...organismeReferentiel,
