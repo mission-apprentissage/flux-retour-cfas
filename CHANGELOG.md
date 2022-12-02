@@ -1,3 +1,10 @@
+## [2.59.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.59.0...v2.59.1) (2022-12-02)
+
+
+### Bug Fixes
+
+* **ui:** correction ui ([10d16bc](https://github.com/mission-apprentissage/flux-retour-cfas/commit/10d16bcd3223b1920d3c09b9e8fff4790ff0df12))
+
 # [2.59.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.58.0...v2.59.0) (2022-12-02)
 
 
