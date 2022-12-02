@@ -3,7 +3,7 @@ import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.
 import { addMinutes } from "date-fns";
 import { createJobEvent, isJobInAction } from "../../../../src/common/actions/jobEvents.actions.js";
 
-describe("Components JobEvents Test", () => {
+describe("Test des actions JobEvents", () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
     const testJobName = "TEST-JOB";
     // Add started event

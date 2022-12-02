@@ -2,7 +2,7 @@ import { strict as assert } from "assert";
 import { createUserEvent } from "../../../../src/common/actions/userEvents.actions.js";
 import { userEventsDb } from "../../../../src/common/model/collections.js";
 
-describe("Action UserEvents", () => {
+describe("Tests des actions UserEvents", () => {
   describe("createUserEvent", () => {
     it("Permet de créer un userEvent et de le sauver en base", async () => {
       await createUserEvent({
