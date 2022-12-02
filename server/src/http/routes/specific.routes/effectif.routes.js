@@ -210,6 +210,14 @@ export default () => {
           ...compactObject(restData),
         });
 
+      // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
+      if (dataToUpdate.formation.date_debut_formation)
+        dataToUpdate.formation.date_debut_formation = new Date(dataToUpdate.formation.date_debut_formation);
+      if (dataToUpdate.formation.date_fin_formation)
+        dataToUpdate.formation.date_fin_formation = new Date(dataToUpdate.formation.date_fin_formation);
+      if (dataToUpdate.formation.date_obtention_diplome)
+        dataToUpdate.formation.date_obtention_diplome = new Date(dataToUpdate.formation.date_obtention_diplome);
+
       if (nouveau_statut) {
         dataToUpdate.apprenant.historique_statut.push({
           valeur_statut: nouveau_statut.valeur,
