@@ -12,6 +12,8 @@ let requiredFieldsSifa = [
   "apprenant.derniere_situation",
   "apprenant.dernier_organisme_uai",
 
+  "formation.duree_formation_relle",
+
   // "apprenant.contrats[0].siret",
   // "apprenant.contrats[0].type_employeur",
   // "apprenant.contrats[0].date_debut",

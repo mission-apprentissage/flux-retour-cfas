@@ -8,6 +8,7 @@ const useDownloadClick = (getFile, fileName) => {
     try {
       setIsLoading(true);
       const fileResponse = await getFile();
+
       const fileBlob = await fileResponse.blob();
 
       const link = document.createElement("a");

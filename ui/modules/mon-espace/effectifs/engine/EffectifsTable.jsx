@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure } from "@chakra-ui/react";
+import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure, Link } from "@chakra-ui/react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -95,7 +95,8 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
           {modeSifa && hasContextAccessTo(organisme, "organisme/page_sifa2/telecharger") && (
             <Button
               size="md"
-              onClick={() => alert(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
+              as={Link}
+              href={`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`}
               variant="secondary"
             >
               <DownloadLine />

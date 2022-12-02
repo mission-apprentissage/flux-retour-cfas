@@ -61,16 +61,13 @@ export default () => {
     })
   );
 
-  //http://localhost/api/v1/organisme/sifa/export-csv-list?organisme_id=6385ba0d75438191f0c3f1b9
   router.get(
     "/sifa/export-csv-list",
     permissionsOrganismeMiddleware(["organisme/page_sifa2/telecharger"]),
     tryCatch(async ({ query: { organisme_id } }, res) => {
       const sifaCsv = await generateSifa(organisme_id);
 
-      // return res.json(sifa);
-
-      return res.attachment("export-SIFA.csv").send(sifaCsv);
+      return res.attachment(`tdb-données-sifa-${organisme_id}.csv`).send(sifaCsv);
     })
   );
 

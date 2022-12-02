@@ -64,7 +64,9 @@ export const EffectifApprenant = memo(({ modeSifa = false }) => {
             Adresse de l&apos;apprenant(e) :
           </FormLabel>
           <Flex fontStyle="italic" fontSize="0.9rem" borderWidth="1px" borderColor="dgalt" alignItems="center" mb={4}>
-            {values.apprenant.adresse?.complete && <Box>Infomation ERP: {values.apprenant.adresse.complete}</Box>}
+            {values.apprenant.adresse?.complete && (
+              <Box fontWeight="bold">Infomation ERP/API: {values.apprenant.adresse.complete}</Box>
+            )}
             {!values.apprenant.adresse?.complete && (
               <HStack>
                 <Text>
@@ -99,6 +101,7 @@ export const EffectifApprenant = memo(({ modeSifa = false }) => {
           <InputController name="formation.date_debut_formation" w="33%" mb={0} />
           <InputController name="formation.date_fin_formation" w="33%" mb={0} />
           <InputController name="formation.date_obtention_diplome" w="33%" mb={0} />
+          <InputController name="formation.duree_formation_relle" w="33%" mb={0} />
         </HStack>
       </Box>
       <Box my={9} borderWidth="1px" borderColor="bluefrance">
