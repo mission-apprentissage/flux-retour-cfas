@@ -55,6 +55,7 @@ export const createRandomOrganisme = (params = {}) => ({
   sirets: [getSampleSiretEtablissement()],
   adresse: getRandomAdresseObject(),
   nature: getRandomNature(),
+  nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
   ...params,
 });
 

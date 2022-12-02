@@ -1,236 +1,108 @@
-// import { strict as assert } from "assert";
-// import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
-// import { addDays } from "date-fns";
-// import pick from "lodash.pick";
+import { strict as assert } from "assert";
+import { createRandomOrganisme } from "../../../data/randomizedSample.js";
+import pick from "lodash.pick";
+import {
+  createOrganisme,
+  findOrganismeById,
+  updateOrganisme,
+} from "../../../../src/common/actions/organismes.actions.js";
+import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
 
-// // eslint-disable-next-line node/no-unpublished-require
-// import nock from "nock";
+describe("Test des actions Organismes", () => {
+  describe("createOrganisme", () => {
+    it("throws when given organisme is null", async () => {
+      try {
+        await createOrganisme(null);
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
 
-// import { dataForGetMetiersBySiret } from "../../../data/apiLba.js";
-// import { nockGetMetiersBySiret } from "../../../utils/nockApis/nock-Lba.js";
-// import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
-// import { cfasDb, dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+    it("throws when cfa with given uai already exists", async () => {
+      const uai = "0802004U";
+      const randomOrganisme = createRandomOrganisme();
+      await createOrganisme({ ...randomOrganisme, uai });
 
-describe("Components Cfa Test", () => {
-  // describe("existsCfa", () => {
-  //   it("returns false when cfa with cfa collection is empty", async () => {
-  //     const shouldBeFalse = await existsCfa("blabla");
-  //     assert.equal(shouldBeFalse, false);
-  //   });
-  //   it("returns false when cfa with given uai does not exist", async () => {
-  //     await cfasDb().insertOne({ uai: "0802004U" });
-  //     const shouldBeFalse = await existsCfa("blabla");
-  //     assert.equal(shouldBeFalse, false);
-  //   });
-  //   it("returns true when cfa with given uai exists", async () => {
-  //     const uai = "0802004U";
-  //     await cfasDb().insertOne({ uai });
-  //     const shouldBeTrue = await existsCfa(uai);
-  //     assert.equal(shouldBeTrue, true);
-  //   });
-  // });
-  // describe("createCfa", () => {
-  //   const { createCfa } = cfasComponent();
-  //   it("throws when given dossier apprenants is null", async () => {
-  //     try {
-  //       await createCfa(null);
-  //     } catch (err) {
-  //       assert.notEqual(err, undefined);
-  //     }
-  //   });
-  //   it("throws when cfa with given uai already exists", async () => {
-  //     const uai = "0802004U";
-  //     await cfasDb().insertOne({ uai });
-  //     // TODO use assert.rejects
-  //     try {
-  //       await createCfa({ uai_etablissement: uai });
-  //     } catch (err) {
-  //       assert.notEqual(err, undefined);
-  //     }
-  //   });
-  //   it("returns created cfa when dossier apprenant is valid", async () => {
-  //     nock.cleanAll();
-  //     nockGetMetiersBySiret();
-  //     const uai = "0802004A";
-  //     const sirets = ["11111111100023"];
-  //     const { insertedId } = await dossiersApprenantsDb().insertOne({
-  //       uai_etablissement: uai,
-  //       nom_etablissement: "TestCfa",
-  //       etablissement_adresse: "10 rue de la paix 75016 Paris",
-  //       source: "MonErp",
-  //       etablissement_nom_region: "Ma région",
-  //       etablissement_num_region: "17",
-  //       created_at: new Date("2021-06-10T00:00:00.000+0000"),
-  //     });
-  //     const dossierApprenant = await dossiersApprenantsDb().findOne({ _id: insertedId });
-  //     const created = await createCfa(dossierApprenant, sirets);
-  //     assert.deepEqual(
-  //       pick(created, ["uai", "sirets", "nom", "adresse", "erps", "region_nom", "region_num", "metiers"]),
-  //       {
-  //         uai,
-  //         sirets,
-  //         nom: dossierApprenant.nom_etablissement,
-  //         adresse: dossierApprenant.etablissement_adresse,
-  //         region_nom: dossierApprenant.etablissement_nom_region,
-  //         region_num: dossierApprenant.etablissement_num_region,
-  //         metiers: dataForGetMetiersBySiret.metiers,
-  //         erps: [dossierApprenant.source],
-  //       }
-  //     );
-  //     assert.equal(created.first_transmission_date.getTime(), dossierApprenant.created_at.getTime());
-  //     assert.equal(created.nom_tokenized, Cfa.createTokenizedNom(dossierApprenant.nom_etablissement));
-  //     assert.equal(created.private_url !== null, true);
-  //     assert.equal(created.accessToken !== null, true);
-  //     assert.equal(created.created_at !== null, true);
-  //     assert.equal(created.updated_at, null);
-  //   });
-  // });
-  // describe("updateCfa", () => {
-  //   const { updateCfa } = cfasComponent();
-  //   it("throws when given dossier apprenants is null", async () => {
-  //     // TODO use assert.rejects
-  //     try {
-  //       await updateCfa("id", null);
-  //     } catch (err) {
-  //       assert.notEqual(err, undefined);
-  //     }
-  //   });
-  //   it("throws when given id is null", async () => {
-  //     const uai = "0802004A";
-  //     const dossierApprenant = {
-  //       uai_etablissement: uai,
-  //       nom_etablissement: "TestCfa",
-  //       etablissement_adresse: "10 rue de la paix 75016 Paris",
-  //       source: "MonErp",
-  //       etablissement_nom_region: "Ma région",
-  //       etablissement_num_region: "17",
-  //     };
-  //     // TODO use assert.rejects
-  //     try {
-  //       await updateCfa(null, dossierApprenant);
-  //     } catch (err) {
-  //       assert.notEqual(err, undefined);
-  //     }
-  //   });
-  //   it("throws when given id is not existant", async () => {
-  //     const uai = "0802004A";
-  //     await cfasDb().insertOne({ uai });
-  //     const dossierApprenant = {
-  //       uai_etablissement: uai,
-  //       nom_etablissement: "TestCfa",
-  //       etablissement_adresse: "10 rue de la paix 75016 Paris",
-  //       source: "MonErp",
-  //       etablissement_nom_region: "Ma région",
-  //       etablissement_num_region: "17",
-  //     };
-  //     // TODO use assert.rejects
-  //     try {
-  //       await updateCfa("random-id", dossierApprenant);
-  //     } catch (err) {
-  //       assert.notEqual(err, undefined);
-  //     }
-  //   });
-  //   it("returns update cfa when id and dossier apprenant are valid", async () => {
-  //     const uai = "0802004A";
-  //     const { insertedId: cfaIdToUpdate } = await cfasDb().insertOne({
-  //       uai,
-  //       nom: "TestCfa",
-  //       adresse: "12 rue de la paix 75016 PARIS",
-  //       sirets: [],
-  //       erps: ["MonErp"],
-  //       region_nom: "Ma région",
-  //       region_num: "17",
-  //     });
-  //     const sirets = ["11111111100023"];
-  //     const dossierApprenant = {
-  //       uai_etablissement: "9902004A",
-  //       nom_etablissement: "TestCfa Update",
-  //       etablissement_adresse: "10 rue de la paix 75016 Paris",
-  //       source: "MonErp2",
-  //       etablissement_nom_region: "Ma 2e région",
-  //       etablissement_num_region: "18",
-  //     };
-  //     await updateCfa(cfaIdToUpdate, dossierApprenant, sirets);
-  //     const updatedCfa = await cfasDb().findOne({ _id: cfaIdToUpdate });
-  //     assert.deepEqual(pick(updatedCfa, ["uai", "sirets", "nom", "adresse", "erps", "region_nom", "region_num"]), {
-  //       uai: dossierApprenant.uai_etablissement,
-  //       sirets,
-  //       nom: dossierApprenant.nom_etablissement,
-  //       adresse: dossierApprenant.etablissement_adresse,
-  //       region_nom: dossierApprenant.etablissement_nom_region,
-  //       region_num: dossierApprenant.etablissement_num_region,
-  //       erps: [dossierApprenant.source],
-  //     });
-  //     assert.equal(updatedCfa.nom_tokenized, Cfa.createTokenizedNom(dossierApprenant.nom_etablissement));
-  //     assert.equal(updatedCfa.created_at !== null, true);
-  //     assert.equal(updatedCfa.updated_at !== null, true);
-  //   });
-  // });
-  // describe("updateCfaNature", () => {
-  //   const { updateCfaNature } = cfasComponent();
-  //   it("throws when given nature is invalid", async () => {
-  //     const uai = "0802004A";
-  //     await cfasDb().insertOne({
-  //       uai,
-  //       nom: "TestCfa",
-  //       adresse: "12 rue de la paix 75016 PARIS",
-  //       sirets: [],
-  //       erps: ["MonErp"],
-  //       region_nom: "Ma région",
-  //       region_num: "17",
-  //     });
-  //     await assert.rejects(() => updateCfaNature(uai, { nature: "blabla", natureValidityWarning: true }));
-  //   });
-  //   it("throws when Cfa with given UAI not found in DB", async () => {
-  //     const uai = "0802004A";
-  //     await assert.rejects(() =>
-  //       updateCfaNature(uai, { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, natureValidityWarning: true })
-  //     );
-  //   });
-  //   it("updates Cfa with given nature and natureValidityWarning", async () => {
-  //     const uai = "0802004A";
-  //     await cfasDb().insertOne({
-  //       uai,
-  //       nom: "TestCfa",
-  //       adresse: "12 rue de la paix 75016 PARIS",
-  //       sirets: [],
-  //       erps: ["MonErp"],
-  //       region_nom: "Ma région",
-  //       region_num: "17",
-  //     });
-  //     await updateCfaNature(uai, {
-  //       nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
-  //       natureValidityWarning: true,
-  //     });
-  //     const updatedCfa = await cfasDb().findOne({ uai });
-  //     assert.equal(updatedCfa.nature, NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR);
-  //     assert.equal(updatedCfa.nature_validity_warning, true);
-  //   });
-  // });
-  // describe("updateCfaReseauxFromUai", () => {
-  //   const { updateCfaReseauxFromUai } = cfasComponent();
-  //   it("throws when Cfa with given UAI not found in DB", async () => {
-  //     const uai = "0802004A";
-  //     await assert.rejects(() => updateCfaReseauxFromUai(uai, []));
-  //   });
-  //   it("updates Cfa with given list of reseaux", async () => {
-  //     const uai = "0802004A";
-  //     await cfasDb().insertOne({
-  //       uai,
-  //       nom: "TestCfa",
-  //       adresse: "12 rue de la paix 75016 PARIS",
-  //       sirets: [],
-  //       erps: ["MonErp"],
-  //       reseaux: ["Reseau1"],
-  //       region_nom: "Ma région",
-  //       region_num: "17",
-  //     });
-  //     const newReseaux = ["Reseau2", "Reseau3"];
-  //     await updateCfaReseauxFromUai(uai, newReseaux);
-  //     const updatedCfa = await cfasDb().findOne({ uai });
-  //     assert.deepEqual(updatedCfa.reseaux, newReseaux);
-  //   });
-  // });
+      try {
+        await createOrganisme({ ...randomOrganisme, uai });
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("returns created organisme when valid", async () => {
+      const randomOrganisme = createRandomOrganisme();
+      const { _id } = await createOrganisme(randomOrganisme);
+      const created = await findOrganismeById(_id);
+
+      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
+        uai: randomOrganisme.uai,
+        sirets: randomOrganisme.sirets,
+        nom: randomOrganisme.nom,
+        adresse: randomOrganisme.adresse,
+        nature: randomOrganisme.nature,
+      });
+
+      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
+      assert.equal(created.private_url !== null, true);
+      assert.equal(created.accessToken !== null, true);
+      assert.equal(created.created_at !== null, true);
+      assert.equal(created.updated_at !== null, true);
+    });
+  });
+
+  describe("updateOrganisme", () => {
+    it("throws when given data is null", async () => {
+      // TODO use assert.rejects
+      try {
+        await updateOrganisme("id", null);
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("throws when given id is null", async () => {
+      const randomOrganisme = createRandomOrganisme();
+      // TODO use assert.rejects
+      try {
+        await updateOrganisme(null, randomOrganisme);
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("throws when given id is not existant", async () => {
+      const randomOrganisme = createRandomOrganisme();
+      // TODO use assert.rejects
+      try {
+        await updateOrganisme("random-id", randomOrganisme);
+      } catch (err) {
+        assert.notEqual(err, undefined);
+      }
+    });
+
+    it("returns update cfa when id and dossier apprenant are valid", async () => {
+      const randomOrganisme = createRandomOrganisme();
+      const { _id } = await createOrganisme(randomOrganisme);
+      const toUpdateOrganisme = { ...randomOrganisme, nom: "UPDATED" };
+      const updatedOrganisme = await updateOrganisme(_id, toUpdateOrganisme);
+
+      assert.deepEqual(pick(updatedOrganisme, ["uai", "sirets", "nom", "adresse", "nature"]), {
+        uai: updatedOrganisme.uai,
+        sirets: updatedOrganisme.sirets,
+        nom: "UPDATED",
+        adresse: updatedOrganisme.adresse,
+        nature: updatedOrganisme.nature,
+      });
+
+      assert.equal(updatedOrganisme.nom_tokenized, buildTokenizedString("UPDATED", 4));
+      assert.equal(updatedOrganisme.private_url !== null, true);
+      assert.equal(updatedOrganisme.accessToken !== null, true);
+      assert.equal(updatedOrganisme.created_at !== null, true);
+      assert.equal(updatedOrganisme.updated_at !== null, true);
+    });
+  });
+
   // describe("searchCfas", () => {
   //   const { searchCfas } = cfasComponent();
   //   const cfaSeed = [
@@ -418,6 +290,7 @@ describe("Components Cfa Test", () => {
   //     });
   //   });
   // });
+
   // describe("getCfaFirstTransmissionDateFromUai", () => {
   //   const { getCfaFirstTransmissionDateFromUai } = cfasComponent();
   //   const uaiToSearch = "0762290X";
@@ -463,6 +336,7 @@ describe("Components Cfa Test", () => {
   //     assert.deepEqual(firstTransmissionDateFromGoodUai, firstDate);
   //   });
   // });
+
   // describe("getCfaFirstTransmissionDateFromSiret", () => {
   //   const { getCfaFirstTransmissionDateFromSiret } = cfasComponent();
   //   const siretToSearch = "80420010000024";
@@ -508,6 +382,7 @@ describe("Components Cfa Test", () => {
   //     assert.deepEqual(getCfaFirstTransmissionDateFromGoodSiret, firstDate);
   //   });
   // });
+
   // describe("getFromAccessToken", () => {
   //   const { getFromAccessToken } = cfasComponent();
   //   it("returns Cfa found with access token", async () => {
@@ -527,6 +402,7 @@ describe("Components Cfa Test", () => {
   //     assert.equal(cfaFound, null);
   //   });
   // });
+
   // describe("getFromUai", () => {
   //   const { getFromUai } = cfasComponent();
   //   it("returns CFA found with UAI", async () => {
