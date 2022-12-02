@@ -144,6 +144,7 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
 };
 
 /**
+ * TODO add to unit tests
  * Méthode d'ajout d'un contributeur à un organisme
  * @param {*} organisme_id
  * @returns
@@ -182,6 +183,12 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, as, pend
   return updated.value;
 };
 
+/**
+ * TODO add to unit tests
+ * Méthode de récupération des contributeurs d'un organisme
+ * @param {*} organisme_id
+ * @returns
+ */
 export const getContributeurs = async (organisme_id) => {
   const _id = typeof id === "string" ? ObjectId(organisme_id) : organisme_id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
@@ -229,6 +236,12 @@ export const getContributeurs = async (organisme_id) => {
   return contributeurs;
 };
 
+/**
+ * TODO add to unit tests
+ * Méthode de maj de l'api key d'un organisme
+ * @param {*} id
+ * @returns
+ */
 export const updateOrganismeApiKey = async (id) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
@@ -252,106 +265,3 @@ export const updateOrganismeApiKey = async (id) => {
 
   return key;
 };
-
-////////
-
-// TODO [tech] USELESS ABSTRACTION HERE => only in route
-// /**
-//  * Retourn la liste des organismes matching passed criteria
-//  * @param {{}} searchCriteria
-//  * @return {Array<{uai: string, nom: string}>} Array of CFA information
-//  */
-// const searchOrganismes = async (searchCriteria) => {
-//   const { searchTerm, ...otherCriteria } = searchCriteria;
-//   const SEARCH_RESULTS_LIMIT = 50;
-
-//   const matchStage = {};
-//   if (searchTerm) {
-//     matchStage.$or = [
-//       { $text: { $search: searchTerm } },
-//       { uai: new RegExp(escapeRegExp(searchTerm), "g") },
-//       { sirets: new RegExp(escapeRegExp(searchTerm), "g") },
-//     ];
-//   }
-//   // if other criteria have been provided, find the list of uai matching those criteria in the DossierApprenant collection
-//   if (Object.keys(otherCriteria).length > 0) {
-//     const eligibleUais = await dossiersApprenantsDb().distinct("uai_etablissement", otherCriteria);
-//     matchStage.uai = { $in: eligibleUais };
-//   }
-
-//   const sortStage = searchTerm
-//     ? {
-//         score: { $meta: "textScore" },
-//         nom_etablissement: 1,
-//       }
-//     : { nom_etablissement: 1 };
-
-//   const found = await organismesDb()
-//     .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
-//     .toArray();
-
-//   return found.map((cfa) => {
-//     return {
-//       uai: cfa.uai,
-//       sirets: cfa.sirets,
-//       nom: cfa.nom,
-//       nature: cfa.nature,
-//       departement: getDepartementCodeFromUai(cfa.uai),
-//     };
-//   });
-// };
-
-// TODO [tech] SHOULD NOT BE HERE => dossiersApprentisMigration component ?
-// /**
-//  * Returns the first date of dossierApprenant transmission for a UAI
-//  * @param {*} uai
-//  * @returns
-//  */
-/*
-const getCfaFirstTransmissionDateFromUai = async (uai) => {
-  const historiqueDatesDossierApprenantWithUai = await dossiersApprenantsDb()
-    .find({ uai_etablissement: uai })
-    .sort("created_at")
-    .limit(1)
-    .toArray();
-
-  return historiqueDatesDossierApprenantWithUai.length > 0
-    ? historiqueDatesDossierApprenantWithUai[0].created_at
-    : null;
-};
-*/
-
-// /**
-//  * Returns the first date of dossierApprenant transmission for a SIRET
-//  * @param {*} uai
-//  * @returns {Date|null}
-//  */
-/*const getCfaFirstTransmissionDateFromSiret = async (siret) => {
-  const historiqueDatesDossiersApprenantsWithSiret = await dossiersApprenantsDb()
-    .find({ siret_etablissement: siret })
-    .sort("created_at")
-    .limit(1)
-    .toArray();
-
-  return historiqueDatesDossiersApprenantsWithSiret.length > 0
-    ? historiqueDatesDossiersApprenantsWithSiret[0].created_at
-    : null;
-};
-*/
-
-// /**
-//  * Returns sous-établissements by siret_etablissement for an uai_etablissement
-//  * @param {string} uai_etablissement
-//  * @returns {Array<{siret_etablissement: string, nom_etablissement: string}>}
-//  */
-/*
-const getSousEtablissementsForUai = async (uai) => {
-  return await dossiersApprenantsDb()
-    .aggregate([
-      { $match: { uai_etablissement: uai, siret_etablissement: { $ne: null } } },
-      { $group: { _id: "$siret_etablissement", nom_etablissement: { $first: "$nom_etablissement" } } },
-      { $project: { _id: 0, siret_etablissement: "$_id", nom_etablissement: "$nom_etablissement" } },
-    ])
-    .toArray();
-};
-*/

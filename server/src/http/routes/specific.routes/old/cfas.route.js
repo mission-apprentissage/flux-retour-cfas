@@ -2,7 +2,9 @@ import express from "express";
 import Joi from "joi";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import pick from "lodash.pick";
-import { cfasDb } from "../../../../common/model/collections.js";
+import { cfasDb, dossiersApprenantsMigrationDb, organismesDb } from "../../../../common/model/collections.js";
+import { escapeRegExp } from "../../../../common/utils/regexUtils.js";
+import { getDepartementCodeFromUai } from "../../../../common/utils/uaiUtils.js";
 
 export default ({ cfas }) => {
   const router = express.Router();
@@ -63,7 +65,7 @@ export default ({ cfas }) => {
         etablissement_reseaux: Joi.string().allow(null, ""),
       }).validateAsync(req.body, { abortEarly: false });
 
-      const foundCfas = await cfas.searchCfas(body);
+      const foundCfas = await searchOrganismes(body);
       return res.json(foundCfas);
     })
   );
@@ -113,6 +115,51 @@ export default ({ cfas }) => {
         : res.status(404).json({ message: `No cfa found for access_token ${token}` });
     })
   );
+
+  /**
+   * Retourne la liste des organismes matching passed criteria
+   * @param {{}} searchCriteria
+   * @return {Array<{uai: string, nom: string}>} Array of CFA information
+   */
+  const searchOrganismes = async (searchCriteria) => {
+    const { searchTerm, ...otherCriteria } = searchCriteria;
+    const SEARCH_RESULTS_LIMIT = 50;
+
+    const matchStage = {};
+    if (searchTerm) {
+      matchStage.$or = [
+        { $text: { $search: searchTerm } },
+        { uai: new RegExp(escapeRegExp(searchTerm), "g") },
+        { sirets: new RegExp(escapeRegExp(searchTerm), "g") },
+      ];
+    }
+    // if other criteria have been provided, find the list of uai matching those criteria in the DossierApprenant collection
+    if (Object.keys(otherCriteria).length > 0) {
+      const eligibleUais = await dossiersApprenantsMigrationDb().distinct("uai_etablissement", otherCriteria);
+      matchStage.uai = { $in: eligibleUais };
+    }
+
+    const sortStage = searchTerm
+      ? {
+          score: { $meta: "textScore" },
+          nom_etablissement: 1,
+        }
+      : { nom_etablissement: 1 };
+
+    const found = await organismesDb()
+      .aggregate([{ $match: matchStage }, { $sort: sortStage }, { $limit: SEARCH_RESULTS_LIMIT }])
+      .toArray();
+
+    return found.map((cfa) => {
+      return {
+        uai: cfa.uai,
+        sirets: cfa.sirets,
+        nom: cfa.nom,
+        nature: cfa.nature,
+        departement: getDepartementCodeFromUai(cfa.uai),
+      };
+    });
+  };
 
   return router;
 };

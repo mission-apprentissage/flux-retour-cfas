@@ -221,3 +221,39 @@ export const getNbDistinctOrganismesByUai = async (filters = {}) => {
   const distinctCfas = await dossiersApprenantsMigrationDb().distinct("uai_etablissement", filters);
   return distinctCfas ? distinctCfas.length : 0;
 };
+
+/**
+ * TODO add to unit tests
+ * Returns the first date of dossierApprenant transmission for a UAI
+ * @param {*} uai
+ * @returns
+ */
+export const getCfaFirstTransmissionDateFromUai = async (uai) => {
+  const historiqueDatesDossierApprenantWithUai = await dossiersApprenantsMigrationDb()
+    .find({ uai_etablissement: uai })
+    .sort("created_at")
+    .limit(1)
+    .toArray();
+
+  return historiqueDatesDossierApprenantWithUai.length > 0
+    ? historiqueDatesDossierApprenantWithUai[0].created_at
+    : null;
+};
+
+/**
+ * TODO add to unit tests
+ * Returns the first date of dossierApprenant transmission for a SIRET
+ * @param {*} uai
+ * @returns {Date|null}
+ */
+export const getCfaFirstTransmissionDateFromSiret = async (siret) => {
+  const historiqueDatesDossiersApprenantsWithSiret = await dossiersApprenantsMigrationDb()
+    .find({ siret_etablissement: siret })
+    .sort("created_at")
+    .limit(1)
+    .toArray();
+
+  return historiqueDatesDossiersApprenantsWithSiret.length > 0
+    ? historiqueDatesDossiersApprenantsWithSiret[0].created_at
+    : null;
+};
