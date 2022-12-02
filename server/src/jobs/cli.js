@@ -38,10 +38,11 @@ cli
 cli
   .command("seed:sample")
   .description("Seed projet avec des données d'exemple")
-  .option("-r, --random", "Indique si le seed doit générer des données aléatoires")
-  .action(async ({ random }) => {
-    runScript(async ({ dossiersApprenants }) => {
-      return seedWithSample(dossiersApprenants, random);
+  .option("--random", "Indique si le seed doit générer des données aléatoires")
+  .option("--nbDossiers <int>", "Indique le nombre de statuts à générer si mode random")
+  .action(async ({ random, nbDossiers }) => {
+    runScript(async () => {
+      return seedWithSample(random, nbDossiers);
     }, "Seed-sample");
   });
 

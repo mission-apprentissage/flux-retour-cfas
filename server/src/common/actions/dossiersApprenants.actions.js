@@ -25,7 +25,7 @@ export const createDossierApprenant = async ({
   contrat_date_rupture,
   ...data
 }) => {
-  const organisme = await findOrganismeById({ organisme_id });
+  const organisme = await findOrganismeById(organisme_id);
   if (!organisme) {
     throw new Error(`Unable to find organisme ${organisme_id.toString()}`);
   }
