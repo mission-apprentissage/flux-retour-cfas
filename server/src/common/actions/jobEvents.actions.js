@@ -9,7 +9,7 @@ export const createJobEvent = async ({ jobname, action, data }) => {
   await jobEventsDb().insertOne({
     jobname,
     action,
-    data,
+    ...(data ? { data } : {}),
     date: new Date(),
   });
 
