@@ -3,7 +3,7 @@ import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { getMetiersByCfd } from "../apis/apiLba.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import logger from "../logger.js";
-import { formationsDb, dossiersApprenantsDb } from "../model/collections.js";
+import { formationsDb, dossiersApprenantsMigrationDb } from "../model/collections.js";
 import { validateFormation } from "../model/next.toKeep.models/formations.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { ObjectId } from "mongodb";
@@ -21,6 +21,7 @@ export const existsFormation = async (cfd) => {
 };
 
 /**
+ * TODO : missing unit test (really useful ?)
  * Returns formation if found with given CFD
  * @param {string} cfd
  * @return {Formation | null} Found formation
@@ -30,6 +31,7 @@ export const getFormationWithCfd = async (cfd) => {
 };
 
 /**
+ * TODO : missing unit test (really useful ?)
  * Méthode de récupération d'une formation depuis un id
  * @param {string|ObjectId} id
  * @param {*} projection
@@ -40,10 +42,20 @@ export const findFormationById = async (id, projection = {}) => {
   return found;
 };
 
+/**
+ * Construction du libelle de la formation depuis TCO
+ * @param {*} formationFromTCO
+ * @returns
+ */
 export const buildFormationLibelle = (formationFromTCO) => {
   return formationFromTCO.intitule_long || "";
 };
 
+/**
+ * Méthode d'extraction du niveau depuis le libelle de la formation
+ * @param {*} niveauFormationLibelle
+ * @returns
+ */
 export const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
   if (niveauFormationLibelle == null || niveauFormationLibelle === "") return null;
 
@@ -56,7 +68,7 @@ export const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
  * @param {string} cfd
  * @return {Formation | null} The newly created Formation or null
  */
-export const createFormation = async (cfd) => {
+export const createFormation = async (cfd, libelle = null) => {
   if (!validateCfd(cfd)) {
     throw Error("Invalid CFD");
   }
@@ -79,7 +91,7 @@ export const createFormation = async (cfd) => {
   }
 
   // Libelle
-  const libelleFormationBuilt = buildFormationLibelle(formationInfo);
+  const libelleFormationBuilt = libelle || buildFormationLibelle(formationInfo);
   const tokenizedLibelle = buildTokenizedString(libelleFormationBuilt || "", 3);
 
   const { insertedId } = await formationsDb().insertOne(
@@ -109,7 +121,7 @@ export const createFormation = async (cfd) => {
 export const searchFormations = async (searchCriteria) => {
   const { searchTerm, ...otherFilters } = searchCriteria;
 
-  const eligibleCfds = await dossiersApprenantsDb().distinct("formation_cfd", otherFilters);
+  const eligibleCfds = await dossiersApprenantsMigrationDb().distinct("formation_cfd", otherFilters);
 
   const matchStage = searchTerm
     ? {
