@@ -353,12 +353,12 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
                     )}
                     {state === "missing_sifa" && (
                       <HStack color="flatwarm" w="full" pl={5}>
-                        <Alert boxSize={4} /> <Text fontSize="1rem">Manquantes pour SIFA2</Text>
+                        <Alert boxSize={4} /> <Text fontSize="1rem">Manquantes pour SIFA2 (fake)</Text>
                       </HStack>
                     )}
                     {state === "complete_sifa" && (
                       <HStack color="flatsuccess" w="full" pl={5}>
-                        <ValidateIcon boxSize={4} /> <Text fontSize="1rem">Complètes pour SIFA2</Text>
+                        <ValidateIcon boxSize={4} /> <Text fontSize="1rem">Complètes pour SIFA2 (fake)</Text>
                       </HStack>
                     )}
                   </>

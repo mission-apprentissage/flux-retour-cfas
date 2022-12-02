@@ -1,20 +1,20 @@
 import React, { memo } from "react";
 import { Box, Button, Flex, FormLabel, HStack } from "@chakra-ui/react";
 import { InputController } from "../../../../formEngine/components/Input/InputController";
-import { valuesSelector } from "../../../../formEngine/atoms";
+import { fieldSelector, valuesSelector } from "../../../../formEngine/atoms";
 import { useRecoilValue } from "recoil";
 import { useCerfaController } from "../../../../formEngine/CerfaControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
 export const ApprenantContrats = memo(({ modeSifa = false }) => {
   const values = useRecoilValue(valuesSelector);
+  const nouveaContratField = useRecoilValue(fieldSelector("apprenant.nouveau_contrat"));
   const cerfaController = useCerfaController();
-
   return (
     <>
       {values.apprenant.contrats?.map((contrat, i) => {
         return (
-          <Box key={i}>
+          <Box key={i} borderBottomWidth="1px" borderColor="grey.700">
             <HStack spacing={2} alignItems="flex-end" mb={3}>
               <InputController name={`apprenant.contrats[${i}].date_debut`} mb={0} w="33%" />
               <InputController name={`apprenant.contrats[${i}].date_fin`} mb={0} w="33%" />
@@ -43,7 +43,7 @@ export const ApprenantContrats = memo(({ modeSifa = false }) => {
                 <InputController name={`apprenant.contrats[${i}].naf`} fieldType="text" />
                 <InputController name={`apprenant.contrats[${i}].nombre_de_salaries`} fieldType="number" />
                 <InputController name={`apprenant.contrats[${i}].type_employeur`} fieldType="select" />
-                {i === 0 && (
+                {i === 0 && nouveaContratField && (
                   <Button
                     size="lg"
                     onClick={async () => {

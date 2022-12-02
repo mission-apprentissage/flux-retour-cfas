@@ -6,9 +6,12 @@ import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal"
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 import { ApprenantStatuts } from "./components/apprenantStatuts";
 import { ApprenantContrats } from "./components/ApprenantContrats";
+import { useRecoilValue } from "recoil";
+import { valuesSelector } from "../../../formEngine/atoms";
 
 // eslint-disable-next-line react/display-name
 export const EffectifApprenant = memo(({ modeSifa = false }) => {
+  const values = useRecoilValue(valuesSelector);
   return (
     <Box>
       <Box my={9} borderWidth="1px" borderColor="bluefrance">
@@ -60,6 +63,21 @@ export const EffectifApprenant = memo(({ modeSifa = false }) => {
           <FormLabel fontWeight="bold" my={3}>
             Adresse de l&apos;apprenant(e) :
           </FormLabel>
+          <Flex fontStyle="italic" fontSize="0.9rem" borderWidth="1px" borderColor="dgalt" alignItems="center" mb={4}>
+            {values.apprenant.adresse?.complete && <Box>Infomation ERP: {values.apprenant.adresse.complete}</Box>}
+            {!values.apprenant.adresse?.complete && (
+              <HStack>
+                <Text>
+                  {values.apprenant.adresse.numero} {values.apprenant.adresse.repetition_voie}{" "}
+                  {values.apprenant.adresse.voie}
+                </Text>
+                <Text>{values.apprenant.adresse.complement}</Text>
+                <Text>
+                  {values.apprenant.adresse.code_postal} {values.apprenant.adresse.commune}
+                </Text>
+              </HStack>
+            )}
+          </Flex>
           <HStack mb={3}>
             <InputController mb={0} name="apprenant.adresse.numero" />
             <InputController name="apprenant.adresse.repetition_voie" />

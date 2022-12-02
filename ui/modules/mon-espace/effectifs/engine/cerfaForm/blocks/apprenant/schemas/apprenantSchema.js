@@ -214,6 +214,18 @@ export const apprenantSchema = {
       },
     ],
   },
+  "apprenant.adresse.complete": {
+    label: "Complete: ",
+    locked: true,
+    mask: "C",
+    maskBlocks: [
+      {
+        name: "C",
+        mask: "Pattern",
+        pattern: "^.*$",
+      },
+    ],
+  },
   "apprenant.mineur_emancipe": {
     fieldType: "radio",
     label: "L'apprenant(e) est émancipé ? Si non est sous la responsabilité d'un représentant légal",

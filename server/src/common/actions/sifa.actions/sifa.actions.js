@@ -29,7 +29,9 @@ export const generateSifa = async (organisme_id) => {
       SEXE: effectif.apprenant.sexe, // REQUIRED
       HANDI: effectif.apprenant.handicap ? "1" : "0",
       NATIO: effectif.apprenant.nationalite,
-      ADRESSE: effectif.apprenant.adresse?.complete, // // REQUIRED TODO concat
+      ADRESSE:
+        effectif.apprenant.adresse?.complete ??
+        `${effectif.apprenant.adresse.numero} ${effectif.apprenant.adresse.repetition_voie} ${effectif.apprenant.adresse.voie}`, // REQUIRED
       COD_POST: effectif.apprenant.adresse?.code_postal,
       COM_RESID: effectif.apprenant.adresse?.code_insee,
       REGIME_SCO: effectif.apprenant.regime_scolaire,

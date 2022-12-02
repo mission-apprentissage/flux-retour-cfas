@@ -3,9 +3,36 @@ import { findDefinition } from "./utils";
 import { DateTime } from "luxon";
 import { isEmptyValue } from "./utils/isEmptyValue";
 
+let requiredFieldsSifa = [
+  "apprenant.nom",
+  "apprenant.prenom",
+  "apprenant.date_de_naissance",
+  "apprenant.code_postal_de_naissance",
+  "apprenant.sexe",
+  "apprenant.derniere_situation",
+  "apprenant.dernier_organisme_uai",
+
+  // "apprenant.contrats[0].siret",
+  // "apprenant.contrats[0].type_employeur",
+  // "apprenant.contrats[0].date_debut",
+  // "apprenant.contrats[0].date_rupture",
+  // "apprenant.contrats[0].naf",
+  // "apprenant.contrats[0].nombre_de_salaries",
+  // "apprenant.contrats[0].adresse.code_postal",
+];
+
+const requiredApprenantAdresseFieldsSifa = [
+  "apprenant.adresse.voie",
+  "apprenant.adresse.code_postal",
+  "apprenant.adresse.commune",
+];
+
 export const initFields = ({ cerfa, schema, modeSifa }) => {
   const createField = createFieldFactory({ modeSifa, schema });
   let fields = {};
+
+  if (!cerfa.apprenant.adresse.complete.value)
+    requiredFieldsSifa = [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa];
 
   Object.keys(schema.fields).forEach((name) => {
     const data = get(cerfa, name);
@@ -46,142 +73,154 @@ export const initFields = ({ cerfa, schema, modeSifa }) => {
     });
   });
 
-  [
-    {
-      siret: "",
-      denomination: "",
-      naf: "",
-      nombre_de_salaries: "",
-      type_employeur: "",
-      date_debut: "",
-      date_fin: "",
-      date_rupture: "",
-      adresse: {
-        numero: "",
-        repetition_voie: "",
-        voie: "",
-        complement: "",
-        code_postal: "",
-        commune: "",
-        departement: "",
-        region: "",
+  let contrats = [];
+  let showAddContrat = true;
+  if (modeSifa && !!cerfa.apprenant.contrats.value.length) {
+    contrats = cerfa.apprenant.contrats.value;
+    showAddContrat = false;
+  } else {
+    fields[`apprenant.nouveau_contrat`] = createField({
+      name: `apprenant.nouveau_contrat`,
+      data: "",
+    });
+    contrats = [
+      {
+        siret: "",
+        denomination: "",
+        naf: "",
+        nombre_de_salaries: "",
+        type_employeur: "",
+        date_debut: "",
+        date_fin: "",
+        date_rupture: "",
+        adresse: {
+          numero: "",
+          repetition_voie: "",
+          voie: "",
+          complement: "",
+          code_postal: "",
+          commune: "",
+          departement: "",
+          region: "",
+        },
       },
-    },
-    ...cerfa.apprenant.contrats.value,
-  ].forEach((contrat, i) => {
+      ...cerfa.apprenant.contrats.value,
+    ];
+  }
+  contrats.forEach((contrat, i) => {
     const prefix = `apprenant.contrats[${i}]`;
-    const isFirstLine = i === 0;
+    const showAddContratFirstLine = i === 0 && showAddContrat;
     fields[`${prefix}.siret`] = {
       ...createField({
         name: `${prefix}.siret`,
         data: { value: contrat.siret },
       }),
-      ...(isFirstLine ? { autosave: false, locked: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false, locked: false } : {}),
     };
     fields[`${prefix}.denomination`] = {
       ...createField({
         name: `${prefix}.denomination`,
         data: { value: contrat.denomination },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.naf`] = {
       ...createField({
         name: `${prefix}.naf`,
         data: { value: contrat.naf },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.nombre_de_salaries`] = {
       ...createField({
         name: `${prefix}.nombre_de_salaries`,
         data: { value: contrat.nombre_de_salaries },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.type_employeur`] = {
       ...createField({
         name: `${prefix}.type_employeur`,
         data: { value: contrat.type_employeur },
       }),
-      ...(isFirstLine ? { autosave: false, locked: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false, locked: false } : {}),
     };
     fields[`${prefix}.date_debut`] = {
       ...createField({
         name: `${prefix}.date_debut`,
         data: { value: contrat.date_debut },
       }),
-      ...(isFirstLine ? { autosave: false, locked: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false, locked: false } : {}),
     };
     fields[`${prefix}.date_fin`] = {
       ...createField({
         name: `${prefix}.date_fin`,
         data: { value: contrat.date_fin },
       }),
-      ...(isFirstLine ? { autosave: false, locked: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false, locked: false } : {}),
     };
     fields[`${prefix}.date_rupture`] = {
       ...createField({
         name: `${prefix}.date_rupture`,
         data: { value: contrat.date_rupture },
       }),
-      ...(isFirstLine ? { autosave: false, locked: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false, locked: false } : {}),
     };
     fields[`${prefix}.adresse.numero`] = {
       ...createField({
         name: `${prefix}.adresse.numero`,
         data: { value: contrat.adresse.numero },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.repetition_voie`] = {
       ...createField({
         name: `${prefix}.adresse.repetition_voie`,
         data: { value: contrat.adresse.repetition_voie },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.voie`] = {
       ...createField({
         name: `${prefix}.adresse.voie`,
         data: { value: contrat.adresse.voie },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.complement`] = {
       ...createField({
         name: `${prefix}.adresse.complement`,
         data: { value: contrat.adresse.complement },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.code_postal`] = {
       ...createField({
         name: `${prefix}.adresse.code_postal`,
         data: { value: contrat.adresse.code_postal },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.commune`] = {
       ...createField({
         name: `${prefix}.adresse.commune`,
         data: { value: contrat.adresse.commune },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.departement`] = {
       ...createField({
         name: `${prefix}.adresse.departement`,
         data: { value: contrat.adresse.departement },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.region`] = {
       ...createField({
         name: `${prefix}.adresse.region`,
         data: { value: contrat.adresse.region },
       }),
-      ...(isFirstLine ? { autosave: false } : {}),
+      ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
   });
 
@@ -194,17 +233,17 @@ const createFieldFactory =
     const fieldSchema = findDefinition({ name: forceFieldDefinition || name, schema });
     if (!fieldSchema) throw new Error(`Field ${name} is not defined.`);
 
-    if (modeSifa) {
-      fieldSchema.required = true; // TODO
-      fieldSchema.warning = "SIFA"; // TODO
-    }
-
     const type = fieldSchema.fieldType;
     let value = data.value;
     if (type === "date") {
       value = value ? DateTime.fromISO(data.value).setLocale("fr-FR").toFormat("yyyy-MM-dd") : "";
     } else if (type === "number") {
       value = value ? value + "" : "";
+    }
+
+    if (modeSifa && requiredFieldsSifa.includes(name)) {
+      fieldSchema.required = true; // TODO
+      if (!value) fieldSchema.error = "Requis pour l'enquête"; // TODO
     }
 
     return {
