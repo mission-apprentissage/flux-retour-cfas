@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure, Link } from "@chakra-ui/react";
+import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure, Center, Spinner } from "@chakra-ui/react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -20,6 +20,8 @@ import { hasContextAccessTo } from "../../../../common/utils/rolesUtils";
 import { organismeAtom } from "../../../../hooks/organismeAtoms";
 import AjoutApprenantModal from "./AjoutApprenantModal";
 import { DateTime } from "luxon";
+import { _getBlob } from "../../../../common/httpClient";
+import useDownloadClick from "../../../../hooks/old/useDownloadClick";
 
 const EffectifDetails = ({ row, modeSifa = false }) => {
   const queryClient = useQueryClient();
@@ -44,9 +46,32 @@ const EffectifDetails = ({ row, modeSifa = false }) => {
   );
 };
 
+const DownloadButton = ({ title, fileName, getFile }) => {
+  const [onClick, isLoading] = useDownloadClick(getFile, fileName);
+
+  return (
+    <Box>
+      {isLoading ? (
+        <Center>
+          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+        </Center>
+      ) : (
+        <Button size="md" onClick={onClick} variant="secondary">
+          <DownloadLine />
+          <Text as="span" ml={2}>
+            {title}
+          </Text>
+        </Button>
+      )}
+    </Box>
+  );
+};
+
 const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
+
+  const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
   return (
     <Flex flexDir="column" width="100%" my={10}>
@@ -93,17 +118,13 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
             </Button>
           )}
           {modeSifa && hasContextAccessTo(organisme, "organisme/page_sifa2/telecharger") && (
-            <Button
-              size="md"
-              as={Link}
-              href={`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`}
-              variant="secondary"
-            >
-              <DownloadLine />
-              <Text as="span" ml={2}>
-                Télécharger SIFA
-              </Text>
-            </Button>
+            <>
+              <DownloadButton
+                fileName={exportSifaFilename}
+                getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
+                title="Télécharger SIFA"
+              />
+            </>
           )}
           {!modeSifa &&
             hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&

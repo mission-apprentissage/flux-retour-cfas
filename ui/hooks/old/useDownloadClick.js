@@ -9,10 +9,8 @@ const useDownloadClick = (getFile, fileName) => {
       setIsLoading(true);
       const fileResponse = await getFile();
 
-      const fileBlob = await fileResponse.blob();
-
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(fileBlob);
+      link.href = URL.createObjectURL(fileResponse);
       link.download = fileName || new Date().toISOString();
       link.click();
     } catch (err) {
