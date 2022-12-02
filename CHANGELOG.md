@@ -1,3 +1,10 @@
+# [2.59.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.58.0...v2.59.0) (2022-12-02)
+
+
+### Features
+
+* **server:** amelioration seed reseaux referentiel ([1400817](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1400817a2ab2cc38c194ec59059be786c113c7b4))
+
 # [2.58.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.57.0...v2.58.0) (2022-12-01)
 
 
