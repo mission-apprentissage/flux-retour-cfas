@@ -63,7 +63,7 @@ export const generateSifa = async (organisme_id) => {
     // date_obtention_diplome
     // duree_formation_relle
     const formationFields = {
-      DIPLOME: formationBcn?.cfd, // REQUIRED
+      DIPLOME: formationBcn?.cfd || effectif.formation.cfd, // REQUIRED
       DUR_FORM_THEO: formationOrganisme?.duree_formation_theorique, // REQUIRED
       DUR_FORM_REELLE: effectif.formation.duree_formation_relle, // REQUIRED
       AN_FORM: effectif.formation.annee, // REQUIRED

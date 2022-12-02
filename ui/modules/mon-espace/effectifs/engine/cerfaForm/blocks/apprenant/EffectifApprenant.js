@@ -77,6 +77,13 @@ export const EffectifApprenant = memo(({ modeSifa = false }) => {
         </Box>
       </Flex>
       <Box my={9} borderWidth="1px" borderColor="bluefrance">
+        <HStack spacing={2} alignItems="flex-end">
+          <InputController name="formation.date_debut_formation" w="33%" mb={0} />
+          <InputController name="formation.date_fin_formation" w="33%" mb={0} />
+          <InputController name="formation.date_obtention_diplome" w="33%" mb={0} />
+        </HStack>
+      </Box>
+      <Box my={9} borderWidth="1px" borderColor="bluefrance">
         <ApprenantContrats modeSifa={modeSifa} />
       </Box>
     </Box>
