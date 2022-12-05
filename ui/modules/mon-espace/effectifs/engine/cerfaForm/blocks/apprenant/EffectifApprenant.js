@@ -4,7 +4,7 @@ import { InputController } from "../../../formEngine/components/Input/InputContr
 import { CollapseController } from "../../../formEngine/components/CollapseController";
 import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
-import { ApprenantStatuts } from "./components/apprenantStatuts";
+import { ApprenantStatuts } from "./components/ApprenantStatuts";
 import { ApprenantContrats } from "./components/ApprenantContrats";
 import { useRecoilValue } from "recoil";
 import { valuesSelector } from "../../../formEngine/atoms";
