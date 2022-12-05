@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure, Center, Spinner } from "@chakra-ui/react";
+import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure, Spinner } from "@chakra-ui/react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -50,20 +50,13 @@ const DownloadButton = ({ title, fileName, getFile }) => {
   const [onClick, isLoading] = useDownloadClick(getFile, fileName);
 
   return (
-    <Box>
-      {isLoading ? (
-        <Center>
-          <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
-        </Center>
-      ) : (
-        <Button size="md" onClick={onClick} variant="secondary">
-          <DownloadLine />
-          <Text as="span" ml={2}>
-            {title}
-          </Text>
-        </Button>
-      )}
-    </Box>
+    <Button size="md" onClick={onClick} variant="secondary">
+      {isLoading && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
+      {!isLoading && <DownloadLine />}
+      <Text as="span" ml={2}>
+        {title}
+      </Text>
+    </Button>
   );
 };
 
@@ -118,13 +111,11 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
             </Button>
           )}
           {modeSifa && hasContextAccessTo(organisme, "organisme/page_sifa2/telecharger") && (
-            <>
-              <DownloadButton
-                fileName={exportSifaFilename}
-                getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
-                title="Télécharger SIFA"
-              />
-            </>
+            <DownloadButton
+              fileName={exportSifaFilename}
+              getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
+              title="Télécharger SIFA"
+            />
           )}
           {!modeSifa &&
             hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
