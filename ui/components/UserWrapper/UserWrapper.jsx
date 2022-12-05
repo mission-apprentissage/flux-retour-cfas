@@ -20,9 +20,14 @@ const AccountWrapper = ({ children }) => {
             router.push(`/auth/en-attente-confirmation`);
           }
         } else {
-          if (auth.account_status === "FORCE_RESET_PASSWORD" && router.pathname !== "/auth/modifier-mot-de-passe") {
+          if (
+            (auth.account_status === "FIRST_FORCE_RESET_PASSWORD" || auth.account_status === "FORCE_RESET_PASSWORD") &&
+            router.pathname !== "/auth/modifier-mot-de-passe"
+          ) {
             let { token } = await _post("/api/v1/password/forgotten-password", { username: auth.email, noEmail: true });
             router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
+          } else if (auth.account_status === "FORCE_COMPLETE_PROFILE" && router.asPath !== "/auth/finalisation") {
+            router.push(`/auth/finalisation`);
           }
         }
       }
@@ -57,6 +62,7 @@ const ForceAcceptCGU = ({ children }) => {
           onAcknowledgement={onAcceptCguClicked}
           canBeClosed={false}
           bgOverlay="rgba(0, 0, 0, 0.28)"
+          size="full"
         >
           <Box mb={3}>
             {!auth.has_accept_cgu_version && (
@@ -73,7 +79,7 @@ const ForceAcceptCGU = ({ children }) => {
               </Text>
             )}
           </Box>
-          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} h="60vh" ref={cguContainer}>
+          <Box borderColor={"dgalt"} borderWidth={1} overflowY="scroll" px={15} py={4} ref={cguContainer}>
             <Cgu
               isWrapped="1"
               onLoad={async () => {

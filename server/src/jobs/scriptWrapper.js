@@ -1,11 +1,12 @@
-import { connectToMongodb, closeMongodbConnection, configureDbSchemaValidation } from "../common/mongodb.js";
+import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb } from "../common/mongodb.js";
 import createComponents from "../common/components/components.js";
 import logger from "../common/logger.js";
-import { initRedis } from "../common/services/redis.js";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { jobEventStatuts } from "../common/constants/jobsConstants.js";
-import config from "../../src/config.js";
-import { jobEventsDb, modelDescriptors } from "../common/model/collections.js";
+import { modelDescriptors } from "../common/model/collections.js";
+import createServices from "../services.js";
+import config from "../config.js";
+import { createJobEvent } from "../common/actions/jobEvents.actions.js";
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -45,23 +46,21 @@ const exit = async (rawError) => {
 export const runScript = async (job, jobName) => {
   try {
     const startDate = new Date();
-    redisClient = await initRedis({
-      uri: config.redis.uri,
-      onError: (err) => logger.error("Redis client error", err),
-      onReady: () => logger.info("Redis client ready!"),
-    });
 
-    const mongodbClient = await connectToMongodb(config.mongodb.uri);
+    await connectToMongodb(config.mongodb.uri);
     await configureDbSchemaValidation(modelDescriptors);
 
-    const components = await createComponents({ redisClient, db: mongodbClient });
-    await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
-    await job(components);
+    const components = await createComponents();
+    const services = await createServices();
+    redisClient = services.cache;
+
+    await createJobEvent({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
+    await job({ ...components, ...services });
 
     const endDate = new Date();
     const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
 
-    await jobEventsDb().insertOne({
+    await createJobEvent({
       jobname: jobName,
       date: new Date(),
       action: jobEventStatuts.executed,
@@ -72,6 +71,6 @@ export const runScript = async (job, jobName) => {
   } catch (e) {
     await exit(e);
   } finally {
-    await jobEventsDb().insertOne({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() });
+    await createJobEvent({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() });
   }
 };

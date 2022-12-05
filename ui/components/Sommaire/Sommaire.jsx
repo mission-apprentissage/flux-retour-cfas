@@ -10,7 +10,7 @@ const Sommaire = ({ isWrapped, children, ...otherProps }) => (
     color="grey.800"
     alignSelf="flex-start"
     fontSize="omega"
-    w="70%"
+    w="40%"
     {...otherProps}
   >
     <Text fontWeight="bold" marginBottom="1w" fontSize="epsilon">
@@ -23,4 +23,5 @@ const Sommaire = ({ isWrapped, children, ...otherProps }) => (
 Sommaire.propTypes = {
   children: PropTypes.node.isRequired,
 };
+
 export default Sommaire;
