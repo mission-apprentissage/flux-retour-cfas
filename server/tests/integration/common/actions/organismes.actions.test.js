@@ -133,50 +133,89 @@ describe("Test des actions Organismes", () => {
     });
   });
 
-  // describe("createAndControlOrganisme", () => {
-  //   it("return organisme id if uai-siret couple existant in db", async () => {
-  //     const uai = "0802004U";
-  //     const siret = "77937827200016";
+  describe("createAndControlOrganisme", () => {
+    it("return organisme id if uai-siret couple existant in db", async () => {
+      const uai = "0802004U";
+      const siret = "77937827200016";
 
-  //     const randomOrganisme = createRandomOrganisme({ uai, siret });
-  //     const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
+      const randomOrganisme = createRandomOrganisme({ uai, siret });
+      const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
 
-  //     const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret });
+      const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret });
 
-  //     assert.deepEqual(createdOrganismeId, foundOrganismeId);
-  //   });
+      assert.deepEqual(createdOrganismeId, foundOrganismeId);
+    });
 
-  //   it("return existant organisme id if uai-siret couple existant in db after fiabilisation mapping", async () => {
-  //     const uai = "0010016M";
-  //     const siret = "43937112100011";
+    it("return existant organisme id if uai-siret couple existant in db after fiabilisation mapping", async () => {
+      const uai = "0040533H";
+      const siret = "19040492100016";
 
-  //     // Création d'un organisme avec uai - siret présent dans le mapping de fiabilisation
-  //     const randomOrganisme = createRandomOrganisme({ uai, siret });
-  //     const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
+      // Création d'un organisme clean avec uai - siret présent dans le mapping de fiabilisation
+      const randomOrganisme = createRandomOrganisme({ uai, siret });
+      const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
 
-  //     // Création & control d'un organisme avec le même uai mais un siret non fiabilisé
-  //     const siretNotClean = "43937112100011";
-  //     const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret: siretNotClean });
+      // Création & control d'un organisme avec le même uai mais un siret non fiabilisé
+      const siretNotClean = "19050006600039";
+      const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret: siretNotClean });
 
-  //     assert.deepEqual(createdOrganismeId, foundOrganismeId);
-  //   });
+      assert.deepEqual(createdOrganismeId, foundOrganismeId);
+    });
 
-  //   it("throws error if uai existant in db with a different siret", async () => {
-  //     // TODO create organisme avec uai - siret
-  //     // TODO Faire un createAndControlOrganisme avec un couple uai - siret2
-  //   });
+    it("return existant organisme id if uai-siret couple existant in db after fiabilisation mapping", async () => {
+      const uai = "0040533H";
+      const siret = "19040492100016";
 
-  //   it("throws error if siret existant in db with a different uai", async () => {
-  //     // TODO create organisme avec uai - siret
-  //     // TODO Faire un createAndControlOrganisme avec un couple uai2 - siret
-  //   });
+      // Création d'un organisme clean avec uai - siret présent dans le mapping de fiabilisation
+      const randomOrganisme = createRandomOrganisme({ uai, siret });
+      const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
 
-  //   it("throws error if uai-siret not present in ACCES", async () => {
-  //     // TODO Faire un createAndControlOrganisme avec un couple uai - siret non présent en db et non présent dans ACCES
-  //   });
+      // Création & control d'un organisme avec le même uai mais un siret non fiabilisé
+      const siretNotClean = "19050006600039";
+      const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret: siretNotClean });
 
-  //   it("return a created organisme id if uai-siret couple existant in base ACCES and not in db", async () => {
-  //     // TODO Faire un createAndControlOrganisme avec un couple uai - siret non présent en db et présent dans ACCES
-  //   });
-  // });
+      assert.deepEqual(createdOrganismeId, foundOrganismeId);
+    });
+
+    it("return existant organisme id if uai-siret couple existant in db after fiabilisation mapping with siret empty in input", async () => {
+      const uai = "0912364A";
+      const siret = "20007515800010";
+
+      // Création d'un organisme clean avec uai - siret présent dans le mapping de fiabilisation
+      const randomOrganisme = createRandomOrganisme({ uai, siret });
+      const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
+
+      // Création & control d'un organisme avec le même uai mais un siret vide
+      const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret: null });
+
+      assert.deepEqual(createdOrganismeId, foundOrganismeId);
+    });
+
+    it("throws error if uai existant in db with a different siret", async () => {
+      const uai = "0011073L";
+      const siret = "77933737700021";
+
+      const randomOrganisme = createRandomOrganisme({ uai, siret });
+      await createOrganisme(randomOrganisme);
+
+      await assert.rejects(() => createAndControlOrganisme({ uai, siret: "20007515800010" }));
+    });
+
+    it("throws error if siret existant in db with a different uai", async () => {
+      const uai = "0011073L";
+      const siret = "77933737700021";
+
+      const randomOrganisme = createRandomOrganisme({ uai, siret });
+      await createOrganisme(randomOrganisme);
+
+      await assert.rejects(() => createAndControlOrganisme({ uai: "0912364A", siret }));
+    });
+
+    it("throws error if uai-siret not present in ACCES", async () => {
+      // TODO Faire un createAndControlOrganisme avec un couple uai - siret non présent en db et non présent dans ACCES
+    });
+
+    it("return a created organisme id if uai-siret couple existant in base ACCES and not in db", async () => {
+      // TODO Faire un createAndControlOrganisme avec un couple uai - siret non présent en db et présent dans ACCES
+    });
+  });
 });

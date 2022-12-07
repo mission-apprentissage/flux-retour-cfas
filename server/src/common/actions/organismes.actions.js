@@ -13,28 +13,29 @@ import { getUser } from "./users.actions.js";
  * TODO Rename
  */
 export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) => {
-  // Si pas de siret -> KO + Log
-  if (!siret) throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
-
   // Applique le mapping de fiabilisation
   const { uai: cleanUai, siret: cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
 
-  // Applique les règles de rejection si pas dans la db
-  const organismeFoundWithUaiSiret = findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
+  // Si pas de siret après fiabilisation -> KO + Log
+  if (!cleanSiret) throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
 
-  if (organismeFoundWithUaiSiret) {
+  // Applique les règles de rejection si pas dans la db
+  const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
+
+  if (organismeFoundWithUaiSiret._id) {
     return organismeFoundWithUaiSiret;
   } else {
-    const organismeFoundWithSiret = findOrganismeBySiret(cleanSiret);
+    const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
+
     // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO + Log
-    if (organismeFoundWithSiret)
+    if (organismeFoundWithSiret._id)
       throw new Error(
         `L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai} `
       ); // TODO LOG ?
 
-    const organismeFoundWithUai = findOrganismeByUai(cleanUai);
+    const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
     // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> KO + Log
-    if (organismeFoundWithUai)
+    if (organismeFoundWithUai._id)
       throw new Error(
         `L'organisme ayant l'uai ${uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret} `
       ); // TODO LOG ?
