@@ -54,7 +54,7 @@ export const runScript = async (job, jobName) => {
     const services = await createServices();
     redisClient = services.cache;
 
-    await createJobEvent({ jobname: jobName, action: jobEventStatuts.started, date: new Date() });
+    await createJobEvent({ jobname: jobName, action: jobEventStatuts.started });
     await job({ ...components, ...services });
 
     const endDate = new Date();
@@ -62,7 +62,6 @@ export const runScript = async (job, jobName) => {
 
     await createJobEvent({
       jobname: jobName,
-      date: new Date(),
       action: jobEventStatuts.executed,
       data: { startDate, endDate, duration },
     });
@@ -71,6 +70,6 @@ export const runScript = async (job, jobName) => {
   } catch (e) {
     await exit(e);
   } finally {
-    await createJobEvent({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() });
+    await createJobEvent({ jobname: jobName, action: jobEventStatuts.ended });
   }
 };
