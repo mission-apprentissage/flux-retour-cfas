@@ -1,83 +1,196 @@
 import cliProgress from "cli-progress";
 import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
-import { getFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
-import { findOrganismeById, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
-import { getFormationWithCfd } from "../../../common/actions/formations.actions.js";
+import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
+import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
+import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
+import { getCatalogFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
+import { getFormationWithCfd } from "../../../common/actions/formations.actions.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
+ * Liste des champs à récupérer depuis le référentiel
+ */
+const REFERENTIEL_FIELDS_TO_FETCH = [
+  "siret",
+  "uai",
+  "etat_administratif",
+  "qualiopi",
+  "raison_sociale",
+  "enseigne",
+  "nature",
+  "qualiopi",
+  "adresse",
+  "numero_declaration_activite",
+];
+
+/**
  * Script qui initialise les organismes
- * Va récupérer toutes les formations liés aux organismes via des dossiersApprenants présents en base
- * Sur chaque formation trouvée on va récupérer les infos de cette formation lié à cet organisme via le catalogue
- * et on en déduit la liste des organismes (avec leur nature) liés à cette formation pour cet organisme parent
+ * 1. On va créer tous les organismes "stock" non présents dans le tdb mais existants dans le référentiel
+ * sur la base de l'UAI, en ajoutant l'arbre des formations récupéré depuis le catalogue.
+ * 2. Pour les organismes déja présents va MAJ le champ nature et l'arbre des formations
+ * TODO : Que fait-on des organismes qui sont dans le TDB mais ne sont pas dans le référentiel ? TODO faire un script spécifique pour identif ?
  */
 export const hydrateOrganismes = async () => {
-  // Récupère tous les organismes id distinct dans les dossiersApprenants
-  const allOrganismesId = await dossiersApprenantsMigrationDb().distinct("organisme_id");
+  // Fetch organismes from referentiel api
+  const { organismes } = await fetchOrganismes({
+    champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),
+    itemsPerPage: 10000,
+  });
 
-  let nbOrganismesHandled = 0;
-  let nbOrganismesWithoutFormations = 0;
-  let nbFormationsAdded = 0;
+  let nbOrganismeCreated = 0;
+  let nbOrganismeNotCreated = 0;
+  let nbOrganismeWithoutUai = 0;
+  let nbOrganismeUpdated = 0;
+  let nbOrganismeNotUpdated = 0;
 
-  logger.info(allOrganismesId.length, "organismes id distincts dans les dossiersApprenants");
-  loadingBar.start(allOrganismesId.length, 0);
+  logger.info(`Traitement de ${organismes.length} organismes provenant du référentiel...`);
+  loadingBar.start(organismes.length, 0);
 
-  await asyncForEach(allOrganismesId, async (organisme_id) => {
-    // Récupération de l'organisme
-    const organisme = await findOrganismeById(organisme_id);
+  await asyncForEach(organismes, async (organismeReferentiel) => {
+    const { uai, siret, raison_sociale, nature } = organismeReferentiel;
 
-    // Récupération des formations liés à l'organisme
-    const formationsForOrganisme = await getFormationsForOrganisme(organisme.uai);
-
-    if (formationsForOrganisme.length > 0) {
-      nbOrganismesHandled++;
-      // Construction d'une liste de formations pour cet organisme
-      let formationsForOrganismeArray = [];
-
-      await asyncForEach(formationsForOrganisme, async (currentFormation) => {
-        // Récupération de la formation du catalogue dans le TDB
-        // TODO Que faire si la formation n'est pas dans le tdb ? on la créé ? on logge l'erreur ?
-        const formationFromTdb = await getFormationWithCfd(currentFormation.cfd);
-
-        // Ajout à la liste des formation de l'organisme d'un item contenant
-        // formation_id si trouvé dans le tdb
-        // année & durée trouvé dans le catalog
-        // ainsi que la liste des organismes construite depuis l'API Catalogue
-        formationsForOrganismeArray.push({
-          ...(formationFromTdb ? { formation_id: formationFromTdb._id } : {}),
-          annee_formation: parseInt(currentFormation.annee) || -1,
-          duree_formation_theorique: parseInt(currentFormation.duree) || -1,
-          organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
-        });
-        nbFormationsAdded++;
-      });
-
-      // MAJ de l'organisme avec sa liste de formations
-      await updateOrganisme(organisme_id, { formations: formationsForOrganismeArray });
-      loadingBar.increment();
-    } else {
-      nbOrganismesWithoutFormations++;
-      // Log & store cases
+    // Si aucun uai on ne peut pas effectuer de traitement
+    if (!uai) {
+      // TODO voir coté métier comment gérer la récupération d'organismes sans uai dans le référentiel
+      nbOrganismeWithoutUai++;
+      // Log & store
       await createJobEvent({
-        jobname: "hydrate-organismes",
+        jobname: "hydrate-referentiel",
         date: new Date(),
-        action: "organisme-withoutFormations",
-        data: { organisme },
+        action: "no-uai-for-organisme-in-referentiel",
+        data: { organisme: organismeReferentiel },
       });
+    } else {
+      const organisme = await findOrganismeByUai(uai);
+      const formations = await getFormationsTreeForOrganisme(organismeReferentiel);
+
+      // Ajout de l'organisme si non existant dans le tdb
+      if (!organisme) {
+        try {
+          await createOrganisme({
+            uai,
+            ...buildAdresseFromUai(uai),
+            nature,
+            siret,
+            sirets: [siret],
+            nom: raison_sociale,
+            est_dans_le_referentiel: true,
+            formations,
+          });
+          nbOrganismeCreated++;
+
+          // Log & store
+          await createJobEvent({
+            jobname: "hydrate-referentiel",
+            date: new Date(),
+            action: "organisme-created",
+            data: { organisme: organismeReferentiel },
+          });
+        } catch (error) {
+          nbOrganismeNotCreated++;
+          // Log & store error
+          await createJobEvent({
+            jobname: "hydrate-referentiel",
+            date: new Date(),
+            action: "organisme-not-created",
+            data: { organisme: organismeReferentiel, error },
+          });
+        }
+      } else {
+        // Update de l'organisme si existant
+        // Set de la nature et un flag natureValidityWarning = perfectMatch
+        // Set de l'arbre des formations
+        const perfectUaiSiretMatch =
+          organisme.sirets.length === 1 && organisme.sirets[0] === organismeReferentiel.siret;
+        const updatedOrganisme = {
+          ...organisme,
+          nature: organismeReferentiel.nature,
+          natureValidityWarning: !perfectUaiSiretMatch,
+          est_dans_le_referentiel: true,
+          formations,
+        };
+        try {
+          await updateOrganisme(organisme._id, updatedOrganisme);
+          nbOrganismeUpdated++;
+
+          // Log & store
+          await createJobEvent({
+            jobname: "hydrate-referentiel",
+            date: new Date(),
+            action: "organisme-updated",
+            data: { organisme: updatedOrganisme },
+          });
+        } catch (error) {
+          nbOrganismeNotUpdated++;
+          // Log & store errors
+          await createJobEvent({
+            jobname: "hydrate-referentiel",
+            date: new Date(),
+            action: "organisme-notUpdated",
+            data: { organisme: updatedOrganisme, error },
+          });
+        }
+      }
     }
+
+    loadingBar.increment();
   });
 
   loadingBar.stop();
 
   // Log & stats
-  logger.info(`-> ${nbOrganismesHandled} organismes traités (ayant des formations dans le catalogue).`);
-  logger.info(`-> ${nbOrganismesWithoutFormations} organismes non traités (sans formations dans le catalogue).`);
-  logger.info(`--> ${nbFormationsAdded} formations rattachées à des organismes.`);
+  logger.info(`-> ${nbOrganismeWithoutUai} organismes sans UAI dans le référentiel (pas de traitement)`);
+  logger.info(
+    `--> ${nbOrganismeCreated} organismes créés depuis le référentiel (avec ajout de l'arbre des formations)`
+  );
+  logger.info(`--> ${nbOrganismeNotCreated} organismes non créés depuis le référentiel (erreur)`);
+  logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour (nature + arbre des formations)`);
+  logger.info(`---> ${nbOrganismeNotUpdated} organismes non mis à jour depuis le référentiel (erreur)`);
+};
+
+/**
+ * Méthode de récupération de l'arbre des formations issues du catalogue liées à un organisme
+ * @param {*} uai
+ */
+export const getFormationsTreeForOrganisme = async (organisme) => {
+  // Récupération des formations liés à l'organisme
+  const catalogFormationsForOrganisme = await getCatalogFormationsForOrganisme(organisme.uai);
+
+  // Construction d'une liste de formations pour cet organisme
+  let formationsForOrganismeArray = [];
+
+  if (catalogFormationsForOrganisme.length > 0) {
+    await asyncForEach(catalogFormationsForOrganisme, async (currentFormation) => {
+      // Récupération de la formation du catalogue dans le TDB
+      // TODO Que faire si la formation n'est pas dans le tdb ? on la créé ? on logge l'erreur ?
+      const formationFromTdb = await getFormationWithCfd(currentFormation.cfd);
+
+      // Ajout à la liste des formation de l'organisme d'un item contenant
+      // formation_id si trouvé dans le tdb
+      // année & durée trouvé dans le catalog
+      // ainsi que la liste des organismes construite depuis l'API Catalogue
+      formationsForOrganismeArray.push({
+        ...(formationFromTdb ? { formation_id: formationFromTdb._id } : {}),
+        annee_formation: parseInt(currentFormation.annee) || -1,
+        duree_formation_theorique: parseInt(currentFormation.duree) || -1,
+        organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
+      });
+    });
+  } else {
+    // Log & store cases
+    await createJobEvent({
+      jobname: "hydrate-organismes",
+      date: new Date(),
+      action: "organisme-withoutFormations",
+      data: { organisme },
+    });
+  }
+
+  return formationsForOrganismeArray;
 };
 
 /**
@@ -133,7 +246,7 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
 };
 
 /**
- * Vérifie la nature, si on détecte un uai formateur = reponsable alors on est dans le cas d'un responsable_formateur
+ * Vérifie la nature, si on détecte un uai formateur = responsable alors on est dans le cas d'un responsable_formateur
  * sinon on renvoi la nature default
  * @param {*} defaultNature
  * @param {*} formationCatalog

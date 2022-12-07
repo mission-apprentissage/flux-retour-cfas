@@ -36,7 +36,7 @@ export const getFormations = async (options) => {
  * @param {*} cfd
  * @returns
  */
-export const getFormationsForOrganisme = async (uai) => {
+export const getCatalogFormationsForOrganisme = async (uai) => {
   const url = `${API_ENDPOINT}/entity/formations`;
   try {
     // On cherche parmi les formations publiées ayant soit l'uai formateur soit l'uai gestionnaire
@@ -55,7 +55,7 @@ export const getFormationsForOrganisme = async (uai) => {
     allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
 
     if (page < pagination.nombre_de_page) {
-      return getFormationsForOrganisme({ page: page + 1, allFormations, limit });
+      return getCatalogFormationsForOrganisme({ page: page + 1, allFormations, limit });
     } else {
       return allFormations;
     }

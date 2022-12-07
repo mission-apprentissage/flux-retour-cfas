@@ -16,7 +16,6 @@ import {
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token.js";
 import { hydrateOrganismes } from "./hydrate/organismes/hydrate-organismes.js";
-import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 
 /**
  * Job d'initialisation projet
@@ -130,18 +129,6 @@ cli
     runScript(async () => {
       return hydrateOrganismes();
     }, "hydrate-organismes");
-  });
-
-/**
- * Job de remplissage & maj des organismes depuis le référentiel
- */
-cli
-  .command("hydrate:organismes-referentiel")
-  .description("Remplissage des organismes depuis le référentiel")
-  .action(async () => {
-    runScript(async () => {
-      return hydrateOrganismesReferentiel();
-    }, "hydrate-organismes+referentiel");
   });
 
 /**
