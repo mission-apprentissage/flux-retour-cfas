@@ -1,8 +1,9 @@
-const logger = require("../../common/logger");
-const path = require("path");
-const { runScript } = require("../scriptWrapper");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { readJsonFromCsvFile } = require("../../common/utils/fileUtils");
+import path from "path";
+import logger from "../../common/logger.js";
+import { runScript } from "../scriptWrapper.js";
+import { __dirname } from "../../common/utils/esmUtils.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",
@@ -55,7 +56,7 @@ runScript(async ({ db, cfas }) => {
   await asyncForEach(INPUT_FILES, async (filename) => {
     logger.info("Importing data from", filename);
     // read référentiel file from réseau and convert it to JSON
-    const filePath = path.join(__dirname, filename);
+    const filePath = path.join(__dirname(import.meta.url), filename);
     const reseauFile = readJsonFromCsvFile(filePath, ";");
 
     // init counters for final log

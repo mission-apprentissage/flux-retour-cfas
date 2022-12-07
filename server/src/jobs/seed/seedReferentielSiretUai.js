@@ -1,4 +1,3 @@
-import { __dirname } from "../../common/utils/esmUtils.js";
 import { runScript } from "../scriptWrapper.js";
 import { fetchOrganismes } from "../../common/apis/apiReferentielMna.js";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";
