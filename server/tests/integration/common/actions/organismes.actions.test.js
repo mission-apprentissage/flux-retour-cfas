@@ -4,6 +4,7 @@ import pick from "lodash.pick";
 import {
   createOrganisme,
   findOrganismeById,
+  mapFiabilizedOrganismeUaiSiretCouple,
   updateOrganisme,
 } from "../../../../src/common/actions/organismes.actions.js";
 import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
@@ -100,6 +101,27 @@ describe("Test des actions Organismes", () => {
       assert.equal(updatedOrganisme.accessToken !== null, true);
       assert.equal(updatedOrganisme.created_at !== null, true);
       assert.equal(updatedOrganisme.updated_at !== null, true);
+    });
+  });
+
+  describe("mapFiabilizedOrganismeUaiSiretCouple", () => {
+    it("return same uai-siret couple when not present in fiabilisation file", async () => {
+      const uai = "0802004U";
+      const siret = "77937827200016";
+
+      const { uai: cleanUai, siret: cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+      assert.equal(cleanUai, uai);
+      assert.equal(cleanSiret, siret);
+    });
+
+    // TODO Replace with real values
+    it("return same cleaned uai-siret couple when present in fiabilisation file", async () => {
+      const uai = "xxxx";
+      const siret = "xxxx";
+
+      const { uai: cleanUai, siret: cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+      assert.equal(cleanUai, "xxxx1");
+      assert.equal(cleanSiret, "xxxx2");
     });
   });
 });

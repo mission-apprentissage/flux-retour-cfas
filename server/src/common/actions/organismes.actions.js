@@ -1,12 +1,62 @@
 import { ObjectId } from "mongodb";
 import { getMetiersBySirets } from "../apis/apiLba.js";
+import { FIABILISATION_UAI_SIRET_COUPLE_MAPPING } from "../constants/fiabilisationMappingUaiSiretCouples.js";
+import logger from "../logger.js";
 import { organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { createPermission, hasPermission } from "./permissions.actions.js";
 import { findRolePermissionById } from "./roles.actions.js";
+import { createUserEvent } from "./userEvents.actions.js";
 import { getUser } from "./users.actions.js";
+
+/**
+ * TODO Rename
+ */
+export const createAndControlOrganisme = async ({ uai, siret, ...data }) => {
+  // Si pas de siret -> KO + Log
+  if (!siret) throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
+
+  // Applique le mapping de fiabilisation
+  const { uai: cleanUai, siret: cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+
+  // Applique les règles de rejection si pas dans la db
+  const organismeFoundWithUaiSiret = findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
+
+  if (organismeFoundWithUaiSiret) {
+    return organismeFoundWithUaiSiret._id;
+  } else {
+    const organismeFoundWithSiret = findOrganismeBySiret(cleanSiret);
+    // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO + Log
+    if (organismeFoundWithSiret)
+      throw new Error(
+        `L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai} `
+      ); // TODO LOG ?
+
+    const organismeFoundWithUai = findOrganismeByUai(cleanUai);
+    // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> KO + Log
+    if (organismeFoundWithUai)
+      throw new Error(
+        `L'organisme ayant l'uai ${uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret} `
+      ); // TODO LOG ?
+
+    // TODO CHECK BASE ACCES
+    // TODO Create if ok acces
+  }
+};
+
+/**
+ * Renvoi le couple UAI-SIRET fiabilisé si présent dans le fichier de fiabilisation
+ * @param {*} param0
+ * @returns
+ */
+export const mapFiabilizedOrganismeUaiSiretCouple = ({ uai, siret }) => {
+  const foundCouple = FIABILISATION_UAI_SIRET_COUPLE_MAPPING.find(
+    (item) => item.oldCouple.uai === uai && item.oldCouple.siret === siret
+  );
+  return foundCouple?.newCouple || { uai, siret };
+};
 
 /**
  * Méthode de création d'un organisme
@@ -61,6 +111,16 @@ export const findOrganismesBySiret = async (siret, projection = {}) => {
  */
 export const findOrganismeByUai = async (uai, projection = {}) => {
   return await organismesDb().findOne({ uai }, { projection });
+};
+
+/**
+ * Méthode de récupération d'un organisme depuis un siret
+ * @param {string} siret
+ * @param {*} projection
+ * @returns
+ */
+export const findOrganismeBySiret = async (siret, projection = {}) => {
+  return await organismesDb().findOne({ siret }, { projection });
 };
 
 /**
