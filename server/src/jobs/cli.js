@@ -9,13 +9,13 @@ import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-ap
 import { purgeEvents } from "./clear/purge-events.js";
 import { seedWithSample } from "./seed/samples/seedSample.js";
 import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
-import { hydrateReseauExcellencePro } from "./hydrate/reseaux/hydrate-reseau-excellence-pro.js";
 import { createUserAccount } from "./users/create-user.js";
 import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token.js";
 import { hydrateOrganismes } from "./hydrate/organismes/hydrate-organismes.js";
+import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
 
 /**
  * Job d'initialisation projet
@@ -62,7 +62,7 @@ cli
  */
 cli
   .command("hydrate:reseaux")
-  .description("Remplissage des organismes et dossiersApprenants depuis les réseaux")
+  .description("MAJ des réseaux pour les organismes et dossiersApprenants")
   .action(async () => {
     runScript(async () => {
       return hydrateFromReseaux();
@@ -70,16 +70,15 @@ cli
   });
 
 /**
- * Job de remplissage & maj des d'organismes pour le réseau excellencePro
+ * Job de remplissage & maj des d'organismes / dossiersApprenants pour les réseaux avec le nouveau format
  */
-// TODO Update le csv pour gérer le réseau
 cli
-  .command("hydrate:reseau-excellencePro")
-  .description("MAJ des organismes pour le réseau excellencePro")
+  .command("hydrate:reseaux-newFormat")
+  .description("MAJ des réseaux nouveau format pour les organismes et dossiersApprenants")
   .action(async () => {
     runScript(async () => {
-      return hydrateReseauExcellencePro();
-    }, "hydrate-reseau-excellencePro");
+      return hydrateReseauxNewFormat();
+    }, "hydrate-reseaux-newFormat");
   });
 
 /**

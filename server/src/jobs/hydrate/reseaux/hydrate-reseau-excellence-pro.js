@@ -37,7 +37,7 @@ const arraysContainSameValues = (array1, array2) => {
   return true;
 };
 
-const FILE_PATH = path.join(__dirname(import.meta.url), "referentiel-reseau-excellence-pro.csv");
+const FILE_PATH = path.join(__dirname(import.meta.url), "/assets/referentiel-reseau-excellence-pro.csv");
 
 /**
  * MAJ les réseaux des organismes en base depuis le fichier csv du réseau Excellence pro
