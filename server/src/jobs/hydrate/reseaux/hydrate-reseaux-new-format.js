@@ -3,6 +3,12 @@ import path from "path";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
 import { __dirname } from "../../../common/utils/esmUtils.js";
+import {
+  findOrganismeByUaiAndSiret,
+  findOrganismesBySiret,
+  updateOrganisme,
+} from "../../../common/actions/organismes.actions.js";
+import { updateDossiersApprenantsNetworksIfNeeded } from "./hydrate-reseaux.actions.js";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",
@@ -63,6 +69,7 @@ export const hydrateReseauxNewFormat = async () => {
     let foundUniqueCount = 0;
     let organismeUpdatedCount = 0;
     let organismeUpdateErrorCount = 0;
+    let nbDossiersApprenantsUpdated = 0;
 
     logger.info(reseauFile.length, "lines in", filename);
     // iterate over every line (organisme de formation) in the réseau file
@@ -74,11 +81,11 @@ export const hydrateReseauxNewFormat = async () => {
       */
       // try to retrieve organisme in our database with UAI and SIRET if UAI is provided
       const organismeInTdb = organismeParsedFromFile.uai
-        ? await cfas.getFromUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)
-        : await cfas.getFromSiret(organismeParsedFromFile.siret);
+        ? await findOrganismeByUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)
+        : await findOrganismesBySiret(organismeParsedFromFile.siret);
 
-      const found = organismeInTdb.length !== 0;
-      const foundUnique = found && organismeInTdb.length === 1;
+      const found = organismeInTdb?.length !== 0;
+      const foundUnique = found && organismeInTdb?.length === 1;
 
       if (found) foundCount++;
 
@@ -101,30 +108,29 @@ export const hydrateReseauxNewFormat = async () => {
             reseauxFromFile.join(", ")
           );
           try {
-            await cfas.updateCfaReseauxFromUai(uniqueOrganismeFromTdb.uai, reseauxFromFile);
+            await updateOrganisme(uniqueOrganismeFromTdb._id, {
+              ...uniqueOrganismeFromTdb,
+              reseaux: [...reseauxFromDb, ...reseauxFromFile],
+            });
             organismeUpdatedCount++;
+
+            // MAJ des dossiersApprenants liés à chacun des réseaux issus du fichier
+            await asyncForEach(reseauxFromFile, async (currentReseau) => {
+              const nbDossierUpdatedForOrganisme = await updateDossiersApprenantsNetworksIfNeeded(
+                uniqueOrganismeFromTdb,
+                currentReseau,
+                "hydrate-reseaux-newFormat"
+              );
+              nbDossiersApprenantsUpdated += nbDossierUpdatedForOrganisme;
+            });
           } catch (err) {
             organismeUpdateErrorCount++;
             logger.error(err);
           }
         }
       }
-
-      /*
-        2 - Add réseau information to organisme in Référentiel SIRET-UAI, if found
-      */
-      const organismeInReferentielSiretUai = await db
-        .collection("referentielSiret")
-        .findOne({ siret: organismeParsedFromFile.siret });
-      if (organismeInReferentielSiretUai && organismeParsedFromFile?.reseaux.length !== 0) {
-        await db
-          .collection("referentielSiret")
-          .updateOne(
-            { siret: organismeInReferentielSiretUai.siret },
-            { $set: { reseaux: organismeParsedFromFile.reseaux } }
-          );
-      }
     });
+
     logger.info("Organismes du fichier", filename, "trouvés en base TDB", foundCount, "/", reseauFile.length);
     logger.info(
       "Organismes du ficher",
@@ -135,6 +141,7 @@ export const hydrateReseauxNewFormat = async () => {
       reseauFile.length
     );
     logger.info("Organismes en base TDB dont les réseaux ont été mis à jour :", organismeUpdatedCount);
+    logger.info(`${nbDossiersApprenantsUpdated} dossiersApprenants dont la liste des réseaux a été mis à jour`);
     logger.info("Organismes en base TDB n'ont pas pu être mis à jour :", organismeUpdateErrorCount);
   });
 };

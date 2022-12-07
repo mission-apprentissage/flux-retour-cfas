@@ -12,6 +12,7 @@ import { dossiersApprenantsMigrationDb } from "../../../common/model/collections
 import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
 import { downloadIfNeededFileTo } from "../../../common/utils/ovhStorageUtils.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
+import { updateDossiersApprenantsNetworksIfNeeded } from "./hydrate-reseaux.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOBNAME = "hydrate-organismes-reseaux";
@@ -112,7 +113,7 @@ const hydrateForNetwork = async (allOrganismesForReseau, reseau) => {
       }
 
       // Update des dossiersApprenants de l'organisme si nécessaire
-      const nbDossierUpdatedForOrganisme = await updateDossiersApprenantsNetworksIfNeeded(organisme, reseau);
+      const nbDossierUpdatedForOrganisme = await updateDossiersApprenantsNetworksIfNeeded(organisme, reseau, JOBNAME);
       nbDossiersApprenantsUpdated += nbDossierUpdatedForOrganisme;
     }
   });
@@ -147,33 +148,4 @@ const updateOrganismeNetworksIfNeeded = async (organisme, nomReseau) => {
     return true;
   }
   return false;
-};
-
-/**
- * MAJ les réseaux des dossiersApprenants de l'organisme si nécessaire
- * @param {*} organismeInReferentiel
- * @param {*} reseau
- */
-const updateDossiersApprenantsNetworksIfNeeded = async (organisme, reseau) => {
-  // Récupération de tous les dossiersApprenants de cet organismes qui n'ont pas ce réseau dans leur liste
-  const dossiersApprenantsForOrganismeWithoutThisNetwork = await dossiersApprenantsMigrationDb()
-    .find({ uai_etablissement: organisme.uai, etablissement_reseaux: { $ne: reseau } })
-    .toArray();
-
-  await asyncForEach(dossiersApprenantsForOrganismeWithoutThisNetwork, async (dossierToUpdate) => {
-    await updateDossierApprenant(dossierToUpdate._id, {
-      ...dossierToUpdate,
-      etablissement_reseaux: [...dossierToUpdate.etablissement_reseaux, reseau],
-    });
-
-    // Log update
-    await createJobEvent({
-      jobname: JOBNAME,
-      date: new Date(),
-      action: "update-dossierApprenant-success",
-      data: { dossierUpdated: dossierToUpdate },
-    });
-  });
-
-  return dossiersApprenantsForOrganismeWithoutThisNetwork.length;
 };
