@@ -124,4 +124,34 @@ describe("Test des actions Organismes", () => {
       assert.equal(cleanSiret, "xxxx2");
     });
   });
+
+  describe("createAndControlOrganisme", () => {
+    it("return organisme id if uai-siret couple existant in db", async () => {
+      // TODO create organisme avec uai - siret
+      // TODO Faire un createAndControlOrganisme avec ce couple
+    });
+
+    it("return existant organisme id if uai-siret couple existant in db after fiabilisation mapping", async () => {
+      // TODO create organisme avec uai - siret présent dans le mapping de fiabilisation
+      // TODO Faire un createAndControlOrganisme avec ce couple
+    });
+
+    it("throws error if uai existant in db with a different siret", async () => {
+      // TODO create organisme avec uai - siret
+      // TODO Faire un createAndControlOrganisme avec un couple uai - siret2
+    });
+
+    it("throws error if siret existant in db with a different uai", async () => {
+      // TODO create organisme avec uai - siret
+      // TODO Faire un createAndControlOrganisme avec un couple uai2 - siret
+    });
+
+    it("throws error if uai-siret not present in ACCES", async () => {
+      // TODO Faire un createAndControlOrganisme avec un couple uai - siret non présent en db et non présent dans ACCES
+    });
+
+    it("return a created organisme id if uai-siret couple existant in base ACCES and not in db", async () => {
+      // TODO Faire un createAndControlOrganisme avec un couple uai - siret non présent en db et présent dans ACCES
+    });
+  });
 });

@@ -1,20 +1,18 @@
 import { ObjectId } from "mongodb";
 import { getMetiersBySirets } from "../apis/apiLba.js";
 import { FIABILISATION_UAI_SIRET_COUPLE_MAPPING } from "../constants/fiabilisationMappingUaiSiretCouples.js";
-import logger from "../logger.js";
 import { organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { generateKey } from "../utils/cryptoUtils.js";
 import { createPermission, hasPermission } from "./permissions.actions.js";
 import { findRolePermissionById } from "./roles.actions.js";
-import { createUserEvent } from "./userEvents.actions.js";
 import { getUser } from "./users.actions.js";
 
 /**
  * TODO Rename
  */
-export const createAndControlOrganisme = async ({ uai, siret, ...data }) => {
+export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) => {
   // Si pas de siret -> KO + Log
   if (!siret) throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
 
@@ -43,6 +41,17 @@ export const createAndControlOrganisme = async ({ uai, siret, ...data }) => {
 
     // TODO CHECK BASE ACCES
     // TODO Create if ok acces
+    const { insertedId } = await organismesDb().insertOne(
+      validateOrganisme({
+        uai,
+        ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
+        ...defaultValuesOrganisme(),
+        siret,
+        ...data,
+      })
+    );
+
+    return await organismesDb().findOne({ _id: insertedId });
   }
 };
 
