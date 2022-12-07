@@ -12,8 +12,7 @@ describe("Randomize Statuts test", () => {
       const randomDossierApprenantProps = createRandomDossierApprenant();
       const result = await createDossierApprenant(randomDossierApprenantProps);
 
-      // Checks creation
-      assert.equal(result.ine_apprenant, randomDossierApprenantProps.ine_apprenant);
+      // Checks creation on mandatory fields
       assert.equal(result.nom_apprenant, randomDossierApprenantProps.nom_apprenant.toUpperCase());
       assert.equal(result.prenom_apprenant, randomDossierApprenantProps.prenom_apprenant.toUpperCase());
       assert.equal(
@@ -23,13 +22,11 @@ describe("Randomize Statuts test", () => {
 
       assert.equal(result.email_contact, randomDossierApprenantProps.email_contact);
       assert.equal(result.formation_cfd, randomDossierApprenantProps.formation_cfd);
-      assert.equal(result.libelle_long_formation, randomDossierApprenantProps.libelle_long_formation);
       assert.equal(result.uai_etablissement, randomDossierApprenantProps.uai_etablissement);
       assert.equal(result.siret_etablissement, randomDossierApprenantProps.siret_etablissement);
       assert.equal(result.nom_etablissement, randomDossierApprenantProps.nom_etablissement);
       assert.equal(result.source, randomDossierApprenantProps.source);
       assert.equal(result.annee_formation, randomDossierApprenantProps.annee_formation);
-      assert.deepEqual(result.periode_formation, randomDossierApprenantProps.periode_formation);
       assert.equal(result.annee_scolaire, randomDossierApprenantProps.annee_scolaire);
 
       // Checks exists method

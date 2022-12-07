@@ -130,6 +130,7 @@ export const schema = object(
     required: [
       "id_erp_apprenant",
       "uai_etablissement",
+      "siret_etablissement",
       "organisme_id",
       "source",
 

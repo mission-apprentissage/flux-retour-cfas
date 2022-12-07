@@ -8,8 +8,6 @@ import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
 import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { ERPS } from "../../../common/constants/erpsConstants.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
-import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
-import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
 import { downloadIfNeededFileTo } from "../../../common/utils/ovhStorageUtils.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { updateDossiersApprenantsNetworksIfNeeded } from "./hydrate-reseaux.actions.js";

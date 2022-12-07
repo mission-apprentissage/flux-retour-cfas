@@ -6,25 +6,30 @@ import { createJobEvent, isJobInAction } from "../../../../src/common/actions/jo
 describe("Test des actions JobEvents", () => {
   it("Permet de vérifier si le job courant est dans l'action terminée", async () => {
     const testJobName = "TEST-JOB";
+
+    const currentDate = new Date();
+    const currentDateAfterFiveMinutes = addMinutes(currentDate, 5);
+    const currentDateAfterTenMinutes = addMinutes(currentDate, 10);
+
     // Add started event
     await createJobEvent({
       jobname: testJobName,
       action: jobEventStatuts.started,
-      date: new Date(),
+      date: currentDate,
     });
 
     // Add executed event
     await createJobEvent({
       jobname: testJobName,
       action: jobEventStatuts.executed,
-      date: addMinutes(new Date(), 5),
+      date: currentDateAfterFiveMinutes,
     });
 
     // Add ended event
     await createJobEvent({
       jobname: testJobName,
       action: jobEventStatuts.ended,
-      date: addMinutes(new Date(), 6),
+      date: currentDateAfterTenMinutes,
     });
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);
@@ -33,18 +38,22 @@ describe("Test des actions JobEvents", () => {
 
   it("Permet de vérifier si le job courant n'est pas dans l'action terminée", async () => {
     const testJobName = "TEST-JOB";
+
+    const currentDate = new Date();
+    const currentDateAfterFiveMinutes = addMinutes(currentDate, 5);
+
     // Add started event
     await createJobEvent({
       jobname: testJobName,
       action: jobEventStatuts.started,
-      date: new Date(),
+      date: currentDate,
     });
 
     // Add executed event
     await createJobEvent({
       jobname: testJobName,
       action: jobEventStatuts.executed,
-      date: addMinutes(new Date(), 5),
+      date: currentDateAfterFiveMinutes,
     });
 
     const isEnded = await isJobInAction(testJobName, jobEventStatuts.ended);

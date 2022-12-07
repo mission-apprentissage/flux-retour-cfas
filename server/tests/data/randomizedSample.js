@@ -74,7 +74,7 @@ export const createRandomDossierApprenant = (params = {}) => {
       ? { libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long }
       : {}),
     uai_etablissement: getRandomUaiEtablissement(),
-    ...(isPresent() ? { siret_etablissement: getSampleSiretEtablissement() } : {}),
+    siret_etablissement: getSampleSiretEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
