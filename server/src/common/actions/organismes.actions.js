@@ -23,7 +23,7 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
   const organismeFoundWithUaiSiret = findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
 
   if (organismeFoundWithUaiSiret) {
-    return organismeFoundWithUaiSiret._id;
+    return organismeFoundWithUaiSiret;
   } else {
     const organismeFoundWithSiret = findOrganismeBySiret(cleanSiret);
     // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO + Log
@@ -44,9 +44,9 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
     const { insertedId } = await organismesDb().insertOne(
       validateOrganisme({
         uai,
+        siret,
         ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
         ...defaultValuesOrganisme(),
-        siret,
         ...data,
       })
     );
@@ -57,14 +57,15 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
 
 /**
  * Renvoi le couple UAI-SIRET fiabilisé si présent dans le fichier de fiabilisation
- * @param {*} param0
+ * @param {*} {param0}
  * @returns
  */
 export const mapFiabilizedOrganismeUaiSiretCouple = ({ uai, siret }) => {
-  const foundCouple = FIABILISATION_UAI_SIRET_COUPLE_MAPPING.find(
-    (item) => item.oldCouple.uai === uai && item.oldCouple.siret === siret
-  );
-  return foundCouple?.newCouple || { uai, siret };
+  const foundCouple = FIABILISATION_UAI_SIRET_COUPLE_MAPPING.filter(
+    (item) => (item.uai && item.uai === uai) || (item.siret && item.siret === siret)
+  ).map(({ uai_fiable, siret_fiable }) => ({ uai: uai_fiable, siret: siret_fiable }));
+
+  return foundCouple[0] || { uai, siret }; // Take only first match
 };
 
 /**
@@ -141,7 +142,7 @@ export const findOrganismeBySiret = async (siret, projection = {}) => {
  * @returns
  */
 export const findOrganismeByUaiAndSiret = async (uai, siret, projection = {}) => {
-  return await organismesDb().findOne({ uai, sirets: siret }, { projection });
+  return await organismesDb().findOne({ uai, siret }, { projection });
 };
 
 /**
