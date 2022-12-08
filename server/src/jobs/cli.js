@@ -5,7 +5,7 @@ import { seed } from "./seed/start/index.js";
 import { clear } from "./clear/clear-all.js";
 import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
-import { hydrateArchivesDossiersApprenants } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
+import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
 import { seedWithSample } from "./seed/samples/seedSample.js";
 import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
@@ -16,6 +16,7 @@ import {
 } from "./users/generate-password-update-token.js";
 import { hydrateOrganismes } from "./hydrate/organismes/hydrate-organismes.js";
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
+import { warmEffectifsCache } from "./warm-effectifs-cache/index.js";
 
 /**
  * Job d'initialisation projet
@@ -82,16 +83,16 @@ cli
   });
 
 /**
- * Job d'archivage des dossiers apprenants
+ * Job d'archivage des dossiers apprenants et des effectifs
  */
 cli
-  .command("archive:dossiersApprenants")
+  .command("archive:dossiersApprenantsEffectifs")
   .description("Archivage des dossiers apprenants")
   .option("--limit <int>", "Année limite d'archivage")
   .action(async ({ limit }) => {
     runScript(async () => {
-      return hydrateArchivesDossiersApprenants(limit);
-    }, "hydrate-archive-dossiersApprenants");
+      return hydrateArchivesDossiersApprenantsAndEffectifs(limit);
+    }, "hydrate-archive-dossiersApprenants-effectifs");
   });
 
 /**
@@ -189,6 +190,18 @@ cli
     runScript(async () => {
       return generatePasswordUpdateTokenForUserLegacy(username);
     }, "generate-password-update-token-legacy");
+  });
+
+/**
+ * Job de warm up du cache des requêtes des calcul d'effectifs
+ */
+cli
+  .command("cache:warmup")
+  .description("Appel des requêtes des calcul d'effectifs pour warmup du cache")
+  .action(async () => {
+    runScript(async () => {
+      return warmEffectifsCache();
+    }, "cache-warmup");
   });
 
 cli.parse(process.argv);
