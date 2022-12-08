@@ -1,6 +1,6 @@
 import XLSX from "xlsx";
 import { parse } from "json2csv";
-import { writeFile, chown } from "fs";
+import { writeFile, chown } from "fs/promises";
 
 export const toXlsx = async (data, outputDirectoryFileName, workbookName = "", options = {}) => {
   const workbook = XLSX.utils.book_new();
@@ -15,7 +15,7 @@ export const toXlsx = async (data, outputDirectoryFileName, workbookName = "", o
 };
 
 export const toCsv = async (data, outputDirectoryFileName, options = {}) => {
-  const csvData = parse(data, { delimiter: options.delimiter || "," });
+  const csvData = parse(data, { delimiter: options.delimiter || ",", quote: "" });
 
   await writeFile(outputDirectoryFileName, options.utf8Bom === true ? "\ufeff" + csvData : csvData, "utf8");
 

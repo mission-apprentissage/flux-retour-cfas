@@ -1,6 +1,5 @@
 import { ObjectId } from "mongodb";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";
-import { escapeRegExp } from "../utils/regexUtils.js";
 import { isEqual } from "date-fns";
 import { DossierApprenant } from "../factory/dossierApprenant.js";
 import { cfasDb, dossiersApprenantsDb } from "../model/collections.js";
@@ -10,40 +9,25 @@ import { cfasDb, dossiersApprenantsDb } from "../model/collections.js";
  * @param {*} unicityFields
  * @returns
  */
-const getDossierApprenant = ({
-  nom_apprenant,
-  prenom_apprenant,
-  date_de_naissance_apprenant,
-  formation_cfd,
-  uai_etablissement,
-  annee_scolaire,
-}) => {
-  const nomApprenantRegexp = new RegExp("^" + escapeRegExp(nom_apprenant.trim()) + "$", "i");
-  const prenomApprenantRegexp = new RegExp("^" + escapeRegExp(prenom_apprenant.trim()) + "$", "i");
-
-  return dossiersApprenantsDb().findOne({
-    nom_apprenant: { $regex: nomApprenantRegexp },
-    prenom_apprenant: { $regex: prenomApprenantRegexp },
-    date_de_naissance_apprenant: new Date(date_de_naissance_apprenant),
-    formation_cfd,
+const getDossierApprenant = async ({ id_erp_apprenant, uai_etablissement, annee_scolaire }) => {
+  return await dossiersApprenantsDb().findOne({
+    id_erp_apprenant,
     uai_etablissement,
     annee_scolaire,
   });
 };
 
-/**
- *
- * TODO : Call update effectif ?
- * @param {*} existingItemId
- * @param {*} toUpdate
- * @returns
- */
 const updateDossierApprenant = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
   const _id = new ObjectId(existingItemId);
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const updateFieldsWhitelist = [
+    "prenom_apprenant",
+    "nom_apprenant",
+    "formation_cfd",
+    "date_de_naissance_apprenant",
+    "nom_etablissement",
     "ine_apprenant",
     "email_contact",
     "tel_apprenant",
@@ -160,6 +144,7 @@ const createDossierApprenant = async (itemToCreate) => {
 };
 
 // TODO SHOULD NOT EXIST AT ALL => All called ONCE in dossiers-apprenants.routes.js  VERSUS 51 dans les tests....
+// TODO : Call update effectif ?
 /**
  * Add or update items in a list of DossierApprenant
  * @param {*} itemsToAddOrUpdate
@@ -170,12 +155,9 @@ const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
   const updated = [];
 
   await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // Search dossier with unicity fields
+    // Search dossier apprenant with unicity fields
     const foundItem = await getDossierApprenant({
-      nom_apprenant: item.nom_apprenant,
-      prenom_apprenant: item.prenom_apprenant,
-      date_de_naissance_apprenant: item.date_de_naissance_apprenant,
-      formation_cfd: item.formation_cfd,
+      id_erp_apprenant: item.id_erp_apprenant,
       uai_etablissement: item.uai_etablissement,
       annee_scolaire: item.annee_scolaire,
     });

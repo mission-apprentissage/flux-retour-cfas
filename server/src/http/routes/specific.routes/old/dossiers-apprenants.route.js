@@ -31,7 +31,7 @@ export default ({ dossiersApprenants }) => {
     nom_apprenant: nomApprenantSchema.required(),
     prenom_apprenant: prenomApprenantSchema.required(),
     date_de_naissance_apprenant: ISO8601DateSchema.required(),
-    uai_etablissement: uaiSchema().required(),
+    uai_etablissement: uaiSchema.required(),
     nom_etablissement: Joi.string().required(),
     id_formation: cfdSchema.required(),
     annee_scolaire: anneeScolaireSchema.required(),

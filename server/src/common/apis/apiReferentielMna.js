@@ -2,7 +2,7 @@ import axios from "axios";
 import logger from "../logger.js";
 import config from "../../config.js";
 
-// Cf Documentation : https://referentiel.apprentissage.beta.gouv.fr/api/v1/doc/#/
+// Cf Documentation : https://referentiel.apprentissage.onisep.fr/api/v1/doc/#/
 
 const API_ENDPOINT = config.mnaReferentielApi.endpoint;
 

@@ -181,9 +181,68 @@
 //       const date = new Date("2020-09-30T00:00:00.000+0000");
 //       const apprentisCountForAnneesScolaireList = await apprentis.getCountAtDate(date, filters);
 
-//       assert.equal(apprentisCountForAnneesScolaireList, 17);
-//     });
-//   });
+      assert.equal(apprentisCountForAnneesScolaireList, 17);
+    });
+
+    it("gets right count of apprentis for edge case where historique is not sorted by date_statut", async () => {
+      await dossiersApprenantsDb().insertOne(
+        createRandomDossierApprenant({
+          historique_statut_apprenant: [
+            { valeur_statut: 3, date_statut: new Date("2025-10-01"), date_reception: new Date("2025-09-02") },
+            { valeur_statut: 2, date_statut: new Date("2025-09-01"), date_reception: new Date("2025-10-02") },
+          ],
+          annee_scolaire: "2025-2026",
+        })
+      );
+
+      const date = new Date("2025-10-01");
+      const apprentisCountForAnneesScolaireList = await apprentis.getCountAtDate(date, {
+        annee_scolaire: "2025-2026",
+      });
+
+      assert.equal(apprentisCountForAnneesScolaireList, 1);
+    });
+
+    it("gets right count of apprentis for edge case where multiple elements have the same date_statut but different date_reception", async () => {
+      const sameDateStatut = new Date("2025-09-01");
+      await dossiersApprenantsDb().insertOne(
+        createRandomDossierApprenant({
+          historique_statut_apprenant: [
+            { valeur_statut: 3, date_statut: sameDateStatut, date_reception: new Date("2025-09-30") },
+            { valeur_statut: 2, date_statut: sameDateStatut, date_reception: new Date("2025-09-15") },
+          ],
+          annee_scolaire: "2025-2026",
+        })
+      );
+
+      const date = new Date("2025-10-01");
+      const apprentisCountForAnneesScolaireList = await apprentis.getCountAtDate(date, {
+        annee_scolaire: "2025-2026",
+      });
+
+      assert.equal(apprentisCountForAnneesScolaireList, 1);
+    });
+
+    it("gets right count of apprentis for edge case where multiple elements have the same date_statut but different date_reception (other case, no apprenti)", async () => {
+      const sameDateStatut = new Date("2025-09-01");
+      await dossiersApprenantsDb().insertOne(
+        createRandomDossierApprenant({
+          historique_statut_apprenant: [
+            { valeur_statut: 3, date_statut: sameDateStatut, date_reception: new Date("2025-08-30") },
+            { valeur_statut: 2, date_statut: sameDateStatut, date_reception: new Date("2025-09-15") },
+          ],
+          annee_scolaire: "2025-2026",
+        })
+      );
+
+      const date = new Date("2025-10-01");
+      const apprentisCountForAnneesScolaireList = await apprentis.getCountAtDate(date, {
+        annee_scolaire: "2025-2026",
+      });
+
+      assert.equal(apprentisCountForAnneesScolaireList, 0);
+    });
+  });
 
 //   describe("Apprentis - getListAtDate", () => {
 //     it("gets list of apprentis at one date", async () => {
