@@ -37,10 +37,10 @@ export default ({ dossiersApprenants }) => {
     annee_scolaire: anneeScolaireSchema.required(),
     statut_apprenant: statutApprenantSchema.required(),
     date_metier_mise_a_jour_statut: ISO8601DateSchema.required(),
+    id_erp_apprenant: Joi.string().required(),
 
     // optional
     ine_apprenant: Joi.string().allow(null, ""),
-    id_erp_apprenant: Joi.string().allow(null),
     email_contact: Joi.string().allow(null, ""),
     tel_apprenant: Joi.string().allow(null, ""),
     code_commune_insee_apprenant: Joi.string().allow(null),

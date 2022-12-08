@@ -142,7 +142,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
     annee_formation: getRandomAnneeFormation(),
     periode_formation: isPresent() ? periode_formation.join("-") : "",
     annee_scolaire,
-    id_erp_apprenant: faker.datatype.boolean() ? faker.datatype.uuid() : null,
+    id_erp_apprenant: faker.datatype.uuid().toString(),
     tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
 

@@ -1,7 +1,7 @@
 // import { strict as assert } from "assert";
 // import { startServer } from "../../utils/testUtils.js";
 // import users from "../../../src/common/components/users.js";
-// import { apiRoles } from "../../../src/common/roles.js";
+// import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
 
 // import {
 //   createRandomDossierApprenantApiInputList,
@@ -94,7 +94,7 @@
 //       const userWithoutPermission = await createUser({
 //         username: "normal-user",
 //         password: "password",
-//         permissions: [],
+//         permissions: [tdbRoles.cfa, tdbRoles.network, tdbRoles.pilot],
 //       });
 //       assert.deepEqual(userWithoutPermission.permissions.length, 0);
 
@@ -458,7 +458,7 @@
 //       assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
 //     });
 
-//     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec mauvais siret", async () => {
+//     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec un SIRET au mauvais format", async () => {
 //       const { httpClient } = await startServer();
 //       await createApiUser();
 //       const accessToken = await getJwtForUser(httpClient);

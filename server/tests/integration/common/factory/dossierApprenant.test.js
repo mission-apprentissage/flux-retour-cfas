@@ -14,6 +14,7 @@
 //         annee_scolaire: "2022-2023",
 //         historique_statut_apprenant: [],
 //         source: "test",
+//         id_erp_apprenant: "6eyUjk56kLo",
 //       };
 
 //       const createdDossierApprenantEntity = DossierApprenant.create(dossierApprenantProps);
@@ -34,6 +35,7 @@
 //       historique_statut_apprenant: [],
 //       source: "test",
 //       siret_etablissement: "invalide",
+//       id_erp_apprenant: "6eyUjk56kLo",
 //     };
 
 //     const createdDossierApprenantEntity = DossierApprenant.create(dossierApprenantProps);
