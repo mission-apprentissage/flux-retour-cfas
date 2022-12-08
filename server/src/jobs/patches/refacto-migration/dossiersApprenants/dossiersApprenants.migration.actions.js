@@ -5,7 +5,7 @@ import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
 } from "../../../../common/model/next.toKeep.models/dossiersApprenantsMigration.model.js";
-import { createEffectif, updateEffectifAndLock } from "../../../../common/actions/effectifs.actions.js";
+import { createEffectif } from "../../../../common/actions/effectifs.actions.js";
 import { defaultValuesApprenant } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
 

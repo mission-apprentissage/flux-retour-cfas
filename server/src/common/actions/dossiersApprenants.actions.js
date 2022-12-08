@@ -8,7 +8,7 @@ import {
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { createOrganisme, findOrganismeById, findOrganismeByUai } from "./organismes.actions.js";
 import { buildAdresseFromUai } from "../utils/uaiUtils.js";
-import { createEffectif, updateEffectifAndLock } from "./effectifs.actions.js";
+import { createEffectif } from "./effectifs.actions.js";
 import { defaultValuesFormationEffectif } from "../model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
 import { defaultValuesApprenant } from "../model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
 
@@ -288,6 +288,7 @@ export const updateDossierApprenant = async (
     organisme_id: dossiersApprenant.organisme_id, // required do not modify ever // Discutable
     id_erp_apprenant: dossiersApprenant.id_erp_apprenant, // required do not modify ever
     uai_etablissement: dossiersApprenant.uai_etablissement, // required do not modify ever
+    siret_etablissement: dossiersApprenant.siret_etablissement, // required do not modify ever
     source: dossiersApprenant.source, // required do not modify ever
   };
 

@@ -1,9 +1,10 @@
 import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb, effectifsDb } from "../../../common/model/collections.js";
 import { sleep } from "../../../common/utils/miscUtils.js";
 import { createFormation, findFormationById, getFormationWithCfd } from "../../../common/actions/formations.actions.js";
 import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
+import { updateEffectif } from "../../../common/actions/effectifs.actions.js";
 
 const SLEEP_TIME_BETWEEN_CREATION = 100; // 100ms to avoid flooding TCO and LBA APIs
 
@@ -15,6 +16,7 @@ export const hydrateFormations = async () => {
   let alreadyPresentFormationsTotal = 0;
 
   let dossiersApprenantUpdatedTotal = 0;
+  let effectifsUpdatedTotal = 0;
   let notCreatedFormationsTotal = 0;
 
   // Récupère tous les CFD distinct dans les dossiersApprenants
@@ -34,7 +36,10 @@ export const hydrateFormations = async () => {
         // MAJ les dossiers liés à cette nouvelle formation créé
         const formationCreated = await findFormationById(createdFormationId);
         const modifiedCount = await updateDossiersApprenantsFormation(formationCreated);
+        const modifiedEffectifsCount = await updateEffectifsFormation(formationCreated);
+
         dossiersApprenantUpdatedTotal += modifiedCount;
+        effectifsUpdatedTotal += modifiedEffectifsCount;
 
         // Wait for api calls
         await sleep(SLEEP_TIME_BETWEEN_CREATION);
@@ -49,6 +54,7 @@ export const hydrateFormations = async () => {
   logger.warn(`${notCreatedFormationsTotal} formations could not be created`);
   logger.info(`${alreadyPresentFormationsTotal} formations already present in DB`);
   logger.info(`${dossiersApprenantUpdatedTotal} dossiers apprenants updated with formation info`);
+  logger.info(`${effectifsUpdatedTotal} effectifs updated with formation info`);
 };
 
 /**
@@ -59,7 +65,9 @@ export const hydrateFormations = async () => {
  */
 const updateDossiersApprenantsFormation = async (formation) => {
   let updatedDossiersApprenantsCount = 0;
-  const dossiersApprenantsForFormation = await dossiersApprenantsMigrationDb().find({ formation_cfd: formation.cfd });
+  const dossiersApprenantsForFormation = await dossiersApprenantsMigrationDb()
+    .find({ formation_cfd: formation.cfd })
+    .toArray();
 
   await asyncForEach(dossiersApprenantsForFormation, async (currentDossierApprenantToUpdate) => {
     await updateDossierApprenant(currentDossierApprenantToUpdate._id, {
@@ -72,4 +80,29 @@ const updateDossiersApprenantsFormation = async (formation) => {
   });
 
   return updatedDossiersApprenantsCount;
+};
+
+/**
+ * Fonction de maj des effectifs liés à une formation
+ * lier niveau & niveau_libelle pour le moment
+ * @param {*} formation
+ * @returns
+ */
+const updateEffectifsFormation = async (formation) => {
+  let updatedEffectifsCount = 0;
+  const effectifsForFormation = await effectifsDb().find({ "formation.cfd": formation.cfd }).toArray();
+
+  await asyncForEach(effectifsForFormation, async (currentEffectifToUpdate) => {
+    const effectifToUpdate = await effectifsDb().findOne({ _id: currentEffectifToUpdate._id });
+    await updateEffectif(currentEffectifToUpdate._id, {
+      ...effectifToUpdate,
+      // TODO add when dispo in TCO : duree: createdFormation.duree,
+      // TODO add when dispo in TCO : annee: createdFormation.annee,
+      niveau_formation: formation.niveau,
+      niveau_formation_libelle: formation.niveau_libelle,
+    });
+    updatedEffectifsCount++;
+  });
+
+  return updatedEffectifsCount;
 };
