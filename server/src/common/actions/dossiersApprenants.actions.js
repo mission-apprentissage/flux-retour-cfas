@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { isEqual } from "date-fns";
-import { dossiersApprenantsMigrationDb } from "../model/collections.js";
+import { dossiersApprenantsMigrationDb, effectifsDb } from "../model/collections.js";
 import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
@@ -100,6 +100,8 @@ export const buildDossierApprenant = async ({
     validateDossiersApprenantsMigration({
       ...defaultValuesDossiersApprenantsMigration(),
       organisme_id: organismeForDossierApprenant._id,
+      uai_etablissement,
+      siret_etablissement,
       ...(nom_apprenant ? { nom_apprenant: nom_apprenant.toUpperCase().trim() } : {}),
       ...(prenom_apprenant ? { prenom_apprenant: prenom_apprenant.toUpperCase().trim() } : {}),
       ...(date_de_naissance_apprenant
@@ -128,9 +130,9 @@ export const buildDossierApprenant = async ({
 
   // Création de l'effectif lié au dossierApprenant
   const dossierApprenantCreated = await dossiersApprenantsMigrationDb().findOne({ _id: insertedId });
-  await createEffectifFromDossierApprenant(dossierApprenantCreated);
+  const effectifCreated = await createEffectifFromDossierApprenant(dossierApprenantCreated);
 
-  return dossierApprenantCreated;
+  return { dossierApprenant: dossierApprenantCreated, effectif: effectifCreated };
 };
 
 /**
@@ -184,21 +186,21 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant) => {
     ...(annee ? { annee } : {}),
   };
 
-  // Create effectif not locked
-  const effectifId = await createEffectif({
-    organisme_id,
-    ...(annee_scolaire ? { annee_scolaire } : {}),
-    ...(source ? { source } : {}),
-    ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-    apprenant: effectifApprenant,
-    formation: formationApprenant,
-  });
+  // Create effectif locked
+  const effectifId = await createEffectif(
+    {
+      organisme_id,
+      ...(annee_scolaire ? { annee_scolaire } : {}),
+      ...(source ? { source } : {}),
+      ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
+      apprenant: effectifApprenant,
+      formation: formationApprenant,
+    },
+    true
+  );
 
-  // Maj de l'effectif en le lockant
-  await updateEffectifAndLock(effectifId, {
-    apprenant: effectifApprenant,
-    formation: formationApprenant,
-  });
+  const effectifCreated = await effectifsDb().findOne({ _id: effectifId });
+  return effectifCreated;
 };
 
 /**

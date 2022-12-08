@@ -57,21 +57,18 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
     ...(annee ? { annee } : {}),
   };
 
-  // Create effectif not locked
-  const effectifId = await createEffectif({
-    organisme_id,
-    ...(annee_scolaire ? { annee_scolaire } : {}),
-    ...(source ? { source } : {}),
-    ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-    apprenant: effectifApprenant,
-    formation: formationApprenant,
-  });
-
-  // Maj de l'effectif en le lockant
-  await updateEffectifAndLock(effectifId, {
-    apprenant: effectifApprenant,
-    formation: formationApprenant,
-  });
+  // Create effectif locked
+  await createEffectif(
+    {
+      organisme_id,
+      ...(annee_scolaire ? { annee_scolaire } : {}),
+      ...(source ? { source } : {}),
+      ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
+      apprenant: effectifApprenant,
+      formation: formationApprenant,
+    },
+    true
+  );
 };
 
 /**
