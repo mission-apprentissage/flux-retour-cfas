@@ -1,7 +1,7 @@
-import { strict as assert } from "assert";
-import { startServer } from "../../utils/testUtils.js";
-import users from "../../../src/common/components/users.js";
-import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
+// import { strict as assert } from "assert";
+// import { startServer } from "../../utils/testUtils.js";
+// import users from "../../../src/common/components/users.js";
+// import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
 
 // import {
 //   createRandomDossierApprenantApiInputList,
@@ -91,11 +91,11 @@ import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
 //       // Create a normal user
 //       const { createUser } = await users();
 
-      const userWithoutPermission = await createUser({
-        username: "normal-user",
-        password: "password",
-        permissions: [tdbRoles.cfa, tdbRoles.network, tdbRoles.pilot],
-      });
+// const userWithoutPermission = await createUser({
+//   username: "normal-user",
+//   password: "password",
+//   permissions: [tdbRoles.cfa, tdbRoles.network, tdbRoles.pilot],
+// });
 
 //       const { data } = await httpClient.post("/api/login", {
 //         username: userWithoutPermission.username,
@@ -112,22 +112,22 @@ import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
 //       assert.deepEqual(response.status, 403);
 //     });
 
-    const requiredFields = [
-      "prenom_apprenant",
-      "nom_apprenant",
-      "date_de_naissance_apprenant",
-      "id_formation",
-      "uai_etablissement",
-      "statut_apprenant",
-      "annee_scolaire",
-      "date_metier_mise_a_jour_statut",
-      "id_erp_apprenant",
-    ];
-    requiredFields.forEach((requiredField) => {
-      it(`Vérifie qu'on ne crée pas de donnée et renvoie une 200 + WARNING lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
-        const { httpClient } = await startServer();
-        await createApiUser();
-        const accessToken = await getJwtForUser(httpClient);
+// const requiredFields = [
+//   "prenom_apprenant",
+//   "nom_apprenant",
+//   "date_de_naissance_apprenant",
+//   "id_formation",
+//   "uai_etablissement",
+//   "statut_apprenant",
+//   "annee_scolaire",
+//   "date_metier_mise_a_jour_statut",
+//   "id_erp_apprenant",
+// ];
+// requiredFields.forEach((requiredField) => {
+//   it(`Vérifie qu'on ne crée pas de donnée et renvoie une 200 + WARNING lorsque le champ obligatoire '${requiredField}' n'est pas renseigné`, async () => {
+//     const { httpClient } = await startServer();
+//     await createApiUser();
+//     const accessToken = await getJwtForUser(httpClient);
 
 //         // set required field as undefined
 //         const input = [createRandomDossierApprenantApiInput({ [requiredField]: undefined })];
@@ -458,10 +458,10 @@ import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
 //       assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
 //     });
 
-    it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec un SIRET au mauvais format", async () => {
-      const { httpClient } = await startServer();
-      await createApiUser();
-      const accessToken = await getJwtForUser(httpClient);
+// it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec un SIRET au mauvais format", async () => {
+//   const { httpClient } = await startServer();
+//   await createApiUser();
+//   const accessToken = await getJwtForUser(httpClient);
 
 //       const badSiret = "abc123456";
 

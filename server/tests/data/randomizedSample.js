@@ -69,7 +69,7 @@ export const createRandomDossierApprenant = (params = {}) => {
     prenom_apprenant: faker.name.firstName(),
     email_contact: faker.internet.email(),
 
-    formation_cfd: getRandomIdFormation(),
+    formation_cfd: getRandomFormationCfd(),
     ...(faker.datatype.boolean()
       ? { libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long }
       : {}),
