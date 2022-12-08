@@ -7,7 +7,7 @@ set -euo pipefail
 
 readonly LOG_FILEPATH="/var/log/data-jobs/log_$(date +'%Y-%m-%d_%H%M%S').log"
 
-call_data_jobs_with_logs(){
+call_daily_jobs_with_logs(){
   # Remplissage des organismes & réseaux liés
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes" || true >> ${LOG_FILEPATH}
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux" || true >> ${LOG_FILEPATH}
@@ -29,4 +29,4 @@ call_data_jobs_with_logs(){
   docker exec flux_retour_cfas_server bash -c "yarn cli cache:warmup" || true >> ${LOG_FILEPATH}
 } 
 
-call_data_jobs_with_logs
+call_daily_jobs_with_logs

@@ -1,10 +1,10 @@
 - name: Add CRON to run jobs processing application data everyday at 5:30AM
   become: true
   cron:
-    name: "application data jobs"
+    name: "Application des jobs quotidiens"
     minute: "30"
     hour: "5"
-    job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-data-jobs.sh"
+    job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-daily-jobs.sh"
 
 - name: Add CRON to run fiabilité analyses on data received in last 24hours everyday at 11:15AM
   become: true
@@ -13,3 +13,12 @@
     minute: "15"
     hour: "11"
     job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-analyse-fiabilite-donnees-recues-job.sh"
+
+- name: Add CRON to archive dossiersApprenants every 1rst day of the month at 12:45AM
+  become: true
+  cron:
+    name: "Archive dossiers apprenants & effectifs"
+    minute: "45"
+    hour: "12"
+    day: "1"
+    job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-archive-job.sh"
