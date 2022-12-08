@@ -20,7 +20,6 @@
     "cli": "node src/jobs/cli.js",
     "cli:migration": "node src/jobs/cli.migration.js",
     "cli:fiabilisation": "node src/jobs/cli.fiabilisation.js",
-    "cache:warmup": "node -r dotenv/config src/jobs/warm-effectifs-cache/index.js",
     "indexes:create": "node -r dotenv/config src/jobs/create-indexes/index.js",
     "migration:create": "migrate-mongo create",
     "migration:up": "migrate-mongo up",
