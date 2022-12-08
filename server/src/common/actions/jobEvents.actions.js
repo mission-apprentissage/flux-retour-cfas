@@ -5,12 +5,12 @@ import { jobEventsDb } from "../model/collections.js";
  * @param {*} param0
  * @returns
  */
-export const createJobEvent = async ({ jobname, action, data }) => {
+export const createJobEvent = async ({ jobname, action, data, date = new Date() }) => {
   await jobEventsDb().insertOne({
     jobname,
     action,
     ...(data ? { data } : {}),
-    date: new Date(),
+    date,
   });
 
   return;

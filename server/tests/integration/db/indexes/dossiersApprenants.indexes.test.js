@@ -4,7 +4,7 @@ import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
 import dossiersApprenantsModelDescriptor from "../../../../src/common/model/previous.models/toRemove.models/dossiersApprenants.model.js";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 
-describe("DossiersApprenantsMigration Indexes", () => {
+describe("DossiersApprenants Indexes", () => {
   let indexes = [];
 
   beforeEach(async () => {
