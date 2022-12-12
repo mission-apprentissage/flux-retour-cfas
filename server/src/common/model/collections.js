@@ -16,6 +16,7 @@ import duplicatesEventsModelDescriptor from "./duplicatesEvents.model.js";
 import archiveDossiersApprenantsModelDescriptor from "./archiveDossiersApprenants.model.js";
 import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
 import referentielSiretUaiModelDescriptor from "./referentielSiretUai.model.js";
+import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
@@ -32,6 +33,7 @@ export const modelDescriptors = [
   archiveDossiersApprenantsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
   referentielSiretUaiModelDescriptor,
+  fiabilisationUaiSiretModelDescriptor,
 ];
 
 export const dossiersApprenantsDb = () => {
@@ -100,4 +102,8 @@ export const dossiersApprenantsApiErrorsDb = () => {
 
 export const referentielSiretUaiDb = () => {
   return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
+};
+
+export const fiabilisationUaiSiretDb = () => {
+  return getDbCollection(fiabilisationUaiSiretModelDescriptor.collectionName);
 };
