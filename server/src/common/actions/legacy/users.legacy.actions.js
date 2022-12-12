@@ -101,8 +101,7 @@ export const createUserLegacy = async (userProps) => {
     created_at: new Date(),
   });
 
-  // TODO return only the id instead of the created object (single responsibility)
-  return await usersDb().findOne({ _id: insertedId });
+  return insertedId;
 };
 
 /**

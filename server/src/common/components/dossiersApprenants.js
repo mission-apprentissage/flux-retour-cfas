@@ -1,15 +1,15 @@
 import { ObjectId } from "mongodb";
-import { asyncForEach } from "../../common/utils/asyncUtils.js";
 import { isEqual } from "date-fns";
 import { DossierApprenant } from "../factory/dossierApprenant.js";
 import { cfasDb, dossiersApprenantsDb } from "../model/collections.js";
 
 /**
+ * TODO Remove
  * Find a dossier apprenant from unicity key params
  * @param {*} unicityFields
  * @returns
  */
-const getDossierApprenant = async ({ id_erp_apprenant, uai_etablissement, annee_scolaire }) => {
+const getDossierApprenantLegacy = async ({ id_erp_apprenant, uai_etablissement, annee_scolaire }) => {
   return await dossiersApprenantsDb().findOne({
     id_erp_apprenant,
     uai_etablissement,
@@ -17,7 +17,13 @@ const getDossierApprenant = async ({ id_erp_apprenant, uai_etablissement, annee_
   });
 };
 
-const updateDossierApprenant = async (existingItemId, toUpdate) => {
+/**
+ * TODO Remove
+ * @param {*} existingItemId
+ * @param {*} toUpdate
+ * @returns
+ */
+const updateDossierApprenantLegacy = async (existingItemId, toUpdate) => {
   if (!existingItemId) return null;
   const _id = new ObjectId(existingItemId);
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
@@ -90,11 +96,11 @@ const updateDossierApprenant = async (existingItemId, toUpdate) => {
 };
 
 /**
- * TODO : Call create effectif ?
+ * TODO : Remove
  * @param {*} itemToCreate
  * @returns
  */
-const createDossierApprenant = async (itemToCreate) => {
+const createDossierApprenantLegacy = async (itemToCreate) => {
   // if dossier apprenant établissement has a VALID uai try to retrieve information in Referentiel CFAs
   const etablissementInReferentielCfaFromUai = await cfasDb().findOne({ uai: itemToCreate.uai_etablissement });
 
@@ -143,43 +149,8 @@ const createDossierApprenant = async (itemToCreate) => {
   return null;
 };
 
-// TODO SHOULD NOT EXIST AT ALL => All called ONCE in dossiers-apprenants.routes.js  VERSUS 51 dans les tests....
-// TODO : Call update effectif ?
-/**
- * Add or update items in a list of DossierApprenant
- * @param {*} itemsToAddOrUpdate
- * @returns
- */
-const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
-  const added = [];
-  const updated = [];
-
-  await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // Search dossier apprenant with unicity fields
-    const foundItem = await getDossierApprenant({
-      id_erp_apprenant: item.id_erp_apprenant,
-      uai_etablissement: item.uai_etablissement,
-      annee_scolaire: item.annee_scolaire,
-    });
-
-    if (!foundItem) {
-      const addedItem = await createDossierApprenant(item);
-      added.push(addedItem);
-    } else {
-      const updatedItem = await updateDossierApprenant(foundItem._id, item);
-      updated.push(updatedItem);
-    }
-  });
-
-  return {
-    added,
-    updated,
-  };
-};
-
 export default () => ({
-  getDossierApprenant,
-  addOrUpdateDossiersApprenants,
-  createDossierApprenant,
-  updateDossierApprenant,
+  getDossierApprenantLegacy,
+  createDossierApprenantLegacy,
+  updateDossierApprenantLegacy,
 });

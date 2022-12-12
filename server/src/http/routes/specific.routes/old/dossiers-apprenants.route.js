@@ -16,10 +16,15 @@ import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../../common/const
 import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../../../common/model/collections.js";
 import { sendTransformedPaginatedJsonStream } from "../../../../common/utils/httpUtils.js";
 import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
+import {
+  buildDossierApprenant,
+  findDossierApprenantByQuery,
+  updateDossierApprenant,
+} from "../../../../common/actions/dossiersApprenants.actions.js";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
-export default ({ dossiersApprenants }) => {
+export default () => {
   const router = express.Router();
 
   /**
@@ -95,7 +100,6 @@ export default ({ dossiersApprenants }) => {
       try {
         let nbItemsValid = 0;
         let validationErrors = [];
-        let validDossiersApprenantToAddOrUpdate = [];
 
         // Add user event
         await createUserEvent({
@@ -123,8 +127,8 @@ export default ({ dossiersApprenants }) => {
             logger.warn(`Could not validate item from ${user.username} at index ${index}`, prettyValidationError);
           } else {
             nbItemsValid++;
-            // Build toAddOrUpdateList list
-            validDossiersApprenantToAddOrUpdate.push({
+            // Build toAddOrUpdate item
+            const itemToAddOrUpdate = {
               ...currentDossierApprenant,
               formation_cfd: currentDossierApprenant.id_formation,
               // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
@@ -132,12 +136,25 @@ export default ({ dossiersApprenants }) => {
                 ? currentDossierApprenant.periode_formation.split("-").map(Number)
                 : null,
               source: user.username,
-            });
+            };
+
+            // Add or update item
+            const foundDossierApprenantWithUnicityFields = await findDossierApprenantByQuery(
+              {
+                id_erp_apprenant: itemToAddOrUpdate.id_erp_apprenant,
+                uai_etablissement: itemToAddOrUpdate.uai_etablissement,
+                annee_scolaire: itemToAddOrUpdate.annee_scolaire,
+              },
+              { _id: 1 }
+            );
+
+            if (!foundDossierApprenantWithUnicityFields) {
+              await buildDossierApprenant(itemToAddOrUpdate);
+            } else {
+              await updateDossierApprenant(foundDossierApprenantWithUnicityFields._id, itemToAddOrUpdate);
+            }
           }
         });
-
-        // AddOrUpdate valid DossierApprenant
-        await dossiersApprenants.addOrUpdateDossiersApprenants(validDossiersApprenantToAddOrUpdate);
 
         res.json({
           status: validationErrors.length > 0 ? `WARNING` : "OK",
