@@ -81,9 +81,6 @@ const Footer = () => {
                 <Link href={"/donnees-personnelles"}>Données personnelles</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/cookies"}>Gestion des cookies</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href={"/stats"}>Statistiques</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>

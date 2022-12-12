@@ -131,7 +131,6 @@ export const NAVIGATION_PAGES = {
       Securite: "securite",
       Hyperliens: "hyperliens",
       Responsabilites: "responsabilites",
-      ProprieteIntellectuelle: "propriete-intellectuelle",
       MiseAjourDesConditionsUtilisation: "mise-a-jour-des-conditions-utilisation",
     },
     title: "CONDITIONS GÉNÉRALES D'UTILISATION DU TABLEAU DE BORD DE L’APPRENTISSAGE",
