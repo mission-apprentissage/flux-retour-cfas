@@ -1,3 +1,10 @@
+# [2.60.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.59.1...v2.60.0) (2022-12-12)
+
+
+### Features
+
+* **ui:** new ui legals content ([#2298](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2298)) ([9166dae](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9166daef48398da53440d7a9157456fbd86dd49b))
+
 ## [2.59.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.59.0...v2.59.1) (2022-12-02)
 
 
