@@ -1,11 +1,15 @@
 import { strict as assert } from "assert";
 import { subMinutes, differenceInCalendarDays, differenceInSeconds } from "date-fns";
-// import mongodb from "mongodb";
+import mongodb from "mongodb";
 import {
   authenticateLegacy,
   createUserLegacy,
   generatePasswordUpdateTokenLegacy,
+  getUserLegacyById,
   removeUserLegacy,
+  searchUsersLegacy,
+  updatePasswordLegacy,
+  updateUserLegacy,
 } from "../../../../src/common/actions/legacy/users.legacy.actions.js";
 import { usersDb } from "../../../../src/common/model/collections.js";
 import { apiRoles, tdbRoles } from "../../../../src/common/roles.js";
@@ -149,552 +153,545 @@ describe("Components Users Test", () => {
     });
   });
 
-  //   describe("updatePassword", () => {
-  //     const { createUser, updatePassword, generatePasswordUpdateToken } = users();
-
-  //     it("modifie le mot de passe d'un user et invalide le token d'update", async () => {
-  //       // create user
-  //       const user = await createUser({ username: "user" });
-  //       // generate update token
-  //       const token = await generatePasswordUpdateToken("user");
-
-  //       await updatePassword(token, "new-password-strong");
-  //       const foundAfterUpdate = await usersDb().findOne({ _id: user._id });
-
-  //       assert.notEqual(foundAfterUpdate.password, user.password);
-  //       assert.equal(foundAfterUpdate.password_update_token, null);
-  //       assert.equal(foundAfterUpdate.password_update_token_expiry, null);
-  //     });
-
-  //     it("renvoie une erreur quand le token passé ne permet pas de retrouver le user", async () => {
-  //       // create user
-  //       await createUser({ username: "user" });
-  //       // generate update token
-  //       await generatePasswordUpdateToken("user");
-
-  //       await assert.rejects(
-  //         () => updatePassword("wrong token", "new-password-strong"),
-  //         (err) => {
-  //           assert.equal(err.message, "User not found");
-  //           return true;
-  //         }
-  //       );
-  //     });
-
-  //     it("renvoie une erreur lorsque le nouveau mot de passe est trop court", async () => {
-  //       // create user
-  //       await createUser({ username: "user" });
-  //       // generate update token
-  //       const token = await generatePasswordUpdateToken("user");
-
-  //       const shortPassword = "hello-world";
-
-  //       await assert.rejects(
-  //         () => updatePassword(token, shortPassword),
-  //         (err) => {
-  //           assert.equal(err.message, "Password must be valid (at least 16 characters)");
-  //           return true;
-  //         }
-  //       );
-  //     });
-
-  //     it("renvoie une erreur lorsque l'update est fait plus de 24h après la création du token", async () => {
-  //       // create user
-  //       await createUser({ username: "user" });
-  //       // generate update token
-  //       const token = await generatePasswordUpdateToken("user");
-  //       // force password_update_token_expiry to 10 minutes ago
-  //       const user = await usersDb().findOne({ username: "user" });
-  //       await usersDb().updateOne(
-  //         { _id: user._id },
-  //         { $set: { password_update_token_expiry: subMinutes(new Date(), 10) } }
-  //       );
-
-  //       await assert.rejects(
-  //         () => updatePassword(token, "super-long-strong-password"),
-  //         (err) => {
-  //           assert.equal(err.message, "Password update token has expired");
-  //           return true;
-  //         }
-  //       );
-  //     });
-
-  //     it("renvoie une erreur lorsque l'update est tenté avec un token null", async () => {
-  //       // create user
-  //       await createUser({ username: "user" });
-
-  //       await assert.rejects(
-  //         () => updatePassword(null, "super-long-strong-password"),
-  //         (err) => {
-  //           assert.equal(err.message, "User not found");
-  //           return true;
-  //         }
-  //       );
-  //     });
-
-  //     it("renvoie une erreur lorsque l'update a déjà été fait", async () => {
-  //       // create user
-  //       await createUser({ username: "user" });
-
-  //       // generate update token
-  //       const token = await generatePasswordUpdateToken("user");
-
-  //       // update password first time
-  //       await updatePassword(token, "new-password-strong");
-
-  //       // try again
-  //       await assert.rejects(
-  //         () => updatePassword(token, "super-long-strong-password"),
-  //         (err) => {
-  //           assert.equal(err.message, "User not found");
-  //           return true;
-  //         }
-  //       );
-  //     });
-  //   });
-
-  //   describe("searchUsers", () => {
-  //     const { searchUsers, createUser } = users();
-
-  //     it("returns results matching username", async () => {
-  //       const searchTerm = "haver";
-  //       const usernameTest = "havertz";
-
-  //       const userProps = {
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       };
-
-  //       const user = await createUser(userProps);
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 1);
-  //       assert.ok(results[0].username, user.username);
-  //     });
-
-  //     it("returns results matching username case insensitive", async () => {
-  //       const searchTerm = "HaVEr";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 1);
-  //       assert.ok(results[0].username, user.username);
-  //     });
-
-  //     it("does not returns results without match on username", async () => {
-  //       const searchTerm = "benzema";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 0);
-  //     });
-
-  //     it("returns results matching email", async () => {
-  //       const searchTerm = "rma";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 1);
-  //       assert.ok(results[0].username, user.username);
-  //     });
-
-  //     it("returns results matching email case insensitive", async () => {
-  //       const searchTerm = "RMa";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 1);
-  //       assert.ok(results[0].username, user.username);
-  //     });
-
-  //     it("does not returns results without match on email", async () => {
-  //       const searchTerm = "fcbarcelona";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 0);
-  //     });
-
-  //     it("returns results matching organisme", async () => {
-  //       const searchTerm = "ORGAN";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 1);
-  //       assert.ok(results[0].username, user.username);
-  //     });
-
-  //     it("returns results matching organisme case insensitive", async () => {
-  //       const searchTerm = "organ";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 1);
-  //       assert.ok(results[0].username, user.username);
-  //     });
-
-  //     it("does not returns results without match on organisme", async () => {
-  //       const searchTerm = "BAD";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 0);
-  //     });
-
-  //     it("returns results matching region", async () => {
-  //       const searchTerm = "REGI";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 1);
-  //       assert.ok(results[0].username, user.username);
-  //     });
-
-  //     it("returns results matching region case insensitive", async () => {
-  //       const searchTerm = "regi";
-  //       const usernameTest = "havertz";
-
-  //       const user = await createUser({
-  //         username: usernameTest,
-  //         password: "password",
-  //         permissions: [tdbRoles.network],
-  //         email: "havertz@rma.es",
-  //         network: "test",
-  //         region: "REGION",
-  //         organisme: "ORGANISME",
-  //       });
-
-  //       const found = await usersDb().findOne({ username: usernameTest });
-
-  //       assert.equal(found.permissions.includes(tdbRoles.network), true);
-  //       assert.equal(found.network === user.network, true);
-  //       assert.equal(found.email === user.email, true);
-
-  //       const results = await searchUsers({ searchTerm });
-
-  //       assert.equal(results.length, 1);
-  //       assert.ok(results[0].username, user.username);
-  //     });
-  //   });
-
-  //   describe("updateUser", () => {
-  //     const { createUser, updateUser } = users();
-  //     it("renvoie une erreur quand l'id passé pour la maj d'un utilisateur n'est pas valide", async () => {
-  //       const usernameTest = "userTest";
-
-  //       // create user
-  //       await createUser({ username: usernameTest });
-
-  //       // find user
-  //       const found = await usersDb().findOne({ username: usernameTest });
-  //       assert.equal(found.username === usernameTest, true);
-  //       assert.equal(found._id !== null, true);
-
-  //       // update user with bad id
-  //       const objectId = new mongodb.ObjectId();
-  //       await assert.rejects(updateUser(objectId, { username: "UPDATED" }), { message: "Unable to find user" });
-  //     });
-
-  //     it("Permets la MAJ d'un utilisateur pour son username", async () => {
-  //       const usernameTest = "userTest";
-
-  //       // create user
-  //       await createUser({ username: usernameTest });
-
-  //       // find user
-  //       const found = await usersDb().findOne({ username: usernameTest });
-  //       assert.equal(found.username === usernameTest, true);
-  //       assert.equal(found._id !== null, true);
-
-  //       // update user
-  //       const updatedUserName = "UPDATED";
-  //       await updateUser(found._id, { username: updatedUserName });
-
-  //       // Check update
-  //       const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-  //       assert.equal(foundAfterUpdate.username === updatedUserName, true);
-  //     });
-
-  //     it("Permets la MAJ d'un utilisateur pour son email", async () => {
-  //       const usernameTest = "userTest";
-
-  //       // create user
-  //       await createUser({ username: usernameTest, email: "test@test.fr" });
-
-  //       // find user
-  //       const found = await usersDb().findOne({ username: usernameTest });
-  //       assert.equal(found.email === "test@test.fr", true);
-  //       assert.equal(found._id !== null, true);
-
-  //       // update user
-  //       const updateValue = "UPDATED@test.fr";
-  //       await updateUser(found._id, { email: updateValue });
-
-  //       // Check update
-  //       const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-  //       assert.equal(foundAfterUpdate.email === updateValue, true);
-  //     });
-
-  //     it("Permets la MAJ d'un utilisateur pour son réseau", async () => {
-  //       const usernameTest = "userTest";
-
-  //       // create user
-  //       await createUser({ username: usernameTest, network: "TEST_RESEAU" });
-
-  //       // find user
-  //       const found = await usersDb().findOne({ username: usernameTest });
-  //       assert.equal(found._id !== null, true);
-  //       assert.equal(found.network === "TEST_RESEAU", true);
-
-  //       // update user
-  //       const updateValue = "UPDATED_NETWORK";
-  //       await updateUser(found._id, { network: updateValue });
-
-  //       // Check update
-  //       const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-  //       assert.equal(foundAfterUpdate.network === updateValue, true);
-  //     });
-
-  //     it("Permets la MAJ d'un utilisateur pour sa région", async () => {
-  //       const usernameTest = "userTest";
-
-  //       // create user
-  //       await createUser({ username: usernameTest, region: "TEST_REGION" });
-
-  //       // find user
-  //       const found = await usersDb().findOne({ username: usernameTest });
-  //       assert.equal(found._id !== null, true);
-  //       assert.equal(found.region === "TEST_REGION", true);
-
-  //       // update user
-  //       const updateValue = "UPDATED_REGION";
-  //       await updateUser(found._id, { region: updateValue });
-
-  //       // Check update
-  //       const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-  //       assert.equal(foundAfterUpdate.region === updateValue, true);
-  //     });
-
-  //     it("Permets la MAJ d'un utilisateur pour son organisme", async () => {
-  //       const { createUser, updateUser } = await users();
-
-  //       const usernameTest = "userTest";
-
-  //       // create user
-  //       await createUser({ username: usernameTest, organisme: "TEST_ORGANISME" });
-
-  //       // find user
-  //       const found = await usersDb().findOne({ username: usernameTest });
-  //       assert.equal(found._id !== null, true);
-  //       assert.equal(found.organisme === "TEST_ORGANISME", true);
-
-  //       // update user
-  //       const updateValue = "UPDATED_ORGANISME";
-  //       await updateUser(found._id, { organisme: updateValue });
-
-  //       // Check update
-  //       const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
-  //       assert.equal(foundAfterUpdate.organisme === updateValue, true);
-  //     });
-  //   });
-
-  //   describe("getUserById", () => {
-  //     const { createUser, getUserById } = users();
-
-  //     it("renvoie une erreur quand l'id passé pour le getUserById n'est pas valide", async () => {
-  //       const usernameTest = "userTest";
-
-  //       // create user
-  //       await createUser({ username: usernameTest });
-
-  //       // find user
-  //       const found = await usersDb().findOne({ username: usernameTest });
-  //       assert.equal(found.username === usernameTest, true);
-  //       assert.equal(found._id !== null, true);
-
-  //       // get user with bad id
-  //       const objectId = "^pkazd^pkazd";
-  //       await assert.rejects(getUserById(objectId), { message: "Unable to find user" });
-  //     });
-
-  //     it("renvoie le bon utilisateur quand l'id passé pour le getUserById est valide", async () => {
-  //       const usernameTest = "userTest";
-
-  //       // create user
-  //       await createUser({ username: usernameTest });
-
-  //       // find user
-  //       const found = await usersDb().findOne({ username: usernameTest });
-  //       assert.equal(found.username === usernameTest, true);
-
-  //       // get user with id
-  //       const gettedUser = await getUserById(found._id);
-  //       assert.equal(gettedUser.username === found.username, true);
-  //     });
-  //   });
+  describe("updatePassword", () => {
+    it("modifie le mot de passe d'un user et invalide le token d'update", async () => {
+      // create user
+      const createdId = await createUserLegacy({ username: "user" });
+      const foundBeforeUpdate = await usersDb().findOne({ _id: createdId });
+
+      // generate update token
+      const token = await generatePasswordUpdateTokenLegacy("user");
+
+      await updatePasswordLegacy(token, "new-password-strong");
+      const foundAfterUpdate = await usersDb().findOne({ _id: createdId });
+
+      assert.notEqual(foundAfterUpdate.password, foundBeforeUpdate.password);
+      assert.equal(foundAfterUpdate.password_update_token, null);
+      assert.equal(foundAfterUpdate.password_update_token_expiry, null);
+    });
+
+    it("renvoie une erreur quand le token passé ne permet pas de retrouver le user", async () => {
+      // create user
+      await createUserLegacy({ username: "user" });
+      // generate update token
+      await generatePasswordUpdateTokenLegacy("user");
+
+      await assert.rejects(
+        () => updatePasswordLegacy("wrong token", "new-password-strong"),
+        (err) => {
+          assert.equal(err.message, "User not found");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque le nouveau mot de passe est trop court", async () => {
+      // create user
+      await createUserLegacy({ username: "user" });
+      // generate update token
+      const token = await generatePasswordUpdateTokenLegacy("user");
+
+      const shortPassword = "hello-world";
+
+      await assert.rejects(
+        () => updatePasswordLegacy(token, shortPassword),
+        (err) => {
+          assert.equal(err.message, "Password must be valid (at least 16 characters)");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque l'update est fait plus de 24h après la création du token", async () => {
+      // create user
+      const createdId = await createUserLegacy({ username: "user" });
+      // generate update token
+      const token = await generatePasswordUpdateTokenLegacy("user");
+      // force password_update_token_expiry to 10 minutes ago
+      const user = await usersDb().findOne({ _id: createdId });
+
+      await usersDb().updateOne(
+        { _id: user._id },
+        { $set: { password_update_token_expiry: subMinutes(new Date(), 10) } }
+      );
+
+      await assert.rejects(
+        () => updatePasswordLegacy(token, "super-long-strong-password"),
+        (err) => {
+          assert.equal(err.message, "Password update token has expired");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque l'update est tenté avec un token null", async () => {
+      // create user
+      await createUserLegacy({ username: "user" });
+
+      await assert.rejects(
+        () => updatePasswordLegacy(null, "super-long-strong-password"),
+        (err) => {
+          assert.equal(err.message, "User not found");
+          return true;
+        }
+      );
+    });
+
+    it("renvoie une erreur lorsque l'update a déjà été fait", async () => {
+      // create user
+      await createUserLegacy({ username: "user" });
+
+      // generate update token
+      const token = await generatePasswordUpdateTokenLegacy("user");
+
+      // update password first time
+      await updatePasswordLegacy(token, "new-password-strong");
+
+      // try again
+      await assert.rejects(
+        () => updatePasswordLegacy(token, "super-long-strong-password"),
+        (err) => {
+          assert.equal(err.message, "User not found");
+          return true;
+        }
+      );
+    });
+  });
+
+  describe("searchUsers", () => {
+    it("returns results matching username", async () => {
+      const searchTerm = "haver";
+      const usernameTest = "havertz";
+
+      const userProps = {
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      };
+
+      const createdId = await createUserLegacy(userProps);
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, found.username);
+    });
+
+    it("returns results matching username case insensitive", async () => {
+      const searchTerm = "HaVEr";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, usernameTest);
+    });
+
+    it("does not returns results without match on username", async () => {
+      const searchTerm = "benzema";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 0);
+    });
+
+    it("returns results matching email", async () => {
+      const searchTerm = "rma";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, usernameTest);
+    });
+
+    it("returns results matching email case insensitive", async () => {
+      const searchTerm = "RMa";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, usernameTest);
+    });
+
+    it("does not returns results without match on email", async () => {
+      const searchTerm = "fcbarcelona";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 0);
+    });
+
+    it("returns results matching organisme", async () => {
+      const searchTerm = "ORGAN";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, usernameTest);
+    });
+
+    it("returns results matching organisme case insensitive", async () => {
+      const searchTerm = "organ";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, usernameTest);
+    });
+
+    it("does not returns results without match on organisme", async () => {
+      const searchTerm = "BAD";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 0);
+    });
+
+    it("returns results matching region", async () => {
+      const searchTerm = "REGI";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, usernameTest);
+    });
+
+    it("returns results matching region case insensitive", async () => {
+      const searchTerm = "regi";
+      const usernameTest = "havertz";
+
+      const createdId = await createUserLegacy({
+        username: usernameTest,
+        password: "password",
+        permissions: [tdbRoles.network],
+        email: "havertz@rma.es",
+        network: "test",
+        region: "REGION",
+        organisme: "ORGANISME",
+      });
+
+      const found = await usersDb().findOne({ _id: createdId });
+
+      assert.equal(found.permissions.includes(tdbRoles.network), true);
+      assert.equal(found.network === "test", true);
+      assert.equal(found.email === "havertz@rma.es", true);
+
+      const results = await searchUsersLegacy({ searchTerm });
+
+      assert.equal(results.length, 1);
+      assert.ok(results[0].username, usernameTest);
+    });
+  });
+
+  describe("updateUser", () => {
+    it("renvoie une erreur quand l'id passé pour la maj d'un utilisateur n'est pas valide", async () => {
+      const usernameTest = "userTest";
+
+      // create user
+      await createUserLegacy({ username: usernameTest });
+
+      // find user
+      const found = await usersDb().findOne({ username: usernameTest });
+      assert.equal(found.username === usernameTest, true);
+      assert.equal(found._id !== null, true);
+
+      // update user with bad id
+      const objectId = new mongodb.ObjectId();
+      await assert.rejects(updateUserLegacy(objectId, { username: "UPDATED" }), { message: "Unable to find user" });
+    });
+
+    it("Permets la MAJ d'un utilisateur pour son username", async () => {
+      const usernameTest = "userTest";
+
+      // create user
+      await createUserLegacy({ username: usernameTest });
+
+      // find user
+      const found = await usersDb().findOne({ username: usernameTest });
+      assert.equal(found.username === usernameTest, true);
+      assert.equal(found._id !== null, true);
+
+      // update user
+      const updatedUserName = "UPDATED";
+      await updateUserLegacy(found._id, { username: updatedUserName });
+
+      // Check update
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
+      assert.equal(foundAfterUpdate.username === updatedUserName, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour son email", async () => {
+      const usernameTest = "userTest";
+
+      // create user
+      await createUserLegacy({ username: usernameTest, email: "test@test.fr" });
+
+      // find user
+      const found = await usersDb().findOne({ username: usernameTest });
+      assert.equal(found.email === "test@test.fr", true);
+      assert.equal(found._id !== null, true);
+
+      // update user
+      const updateValue = "UPDATED@test.fr";
+      await updateUserLegacy(found._id, { email: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
+      assert.equal(foundAfterUpdate.email === updateValue, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour son réseau", async () => {
+      const usernameTest = "userTest";
+
+      // create user
+      await createUserLegacy({ username: usernameTest, network: "TEST_RESEAU" });
+
+      // find user
+      const found = await usersDb().findOne({ username: usernameTest });
+      assert.equal(found._id !== null, true);
+      assert.equal(found.network === "TEST_RESEAU", true);
+
+      // update user
+      const updateValue = "UPDATED_NETWORK";
+      await updateUserLegacy(found._id, { network: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
+      assert.equal(foundAfterUpdate.network === updateValue, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour sa région", async () => {
+      const usernameTest = "userTest";
+
+      // create user
+      await createUserLegacy({ username: usernameTest, region: "TEST_REGION" });
+
+      // find user
+      const found = await usersDb().findOne({ username: usernameTest });
+      assert.equal(found._id !== null, true);
+      assert.equal(found.region === "TEST_REGION", true);
+
+      // update user
+      const updateValue = "UPDATED_REGION";
+      await updateUserLegacy(found._id, { region: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
+      assert.equal(foundAfterUpdate.region === updateValue, true);
+    });
+
+    it("Permets la MAJ d'un utilisateur pour son organisme", async () => {
+      const usernameTest = "userTest";
+
+      // create user
+      await createUserLegacy({ username: usernameTest, organisme: "TEST_ORGANISME" });
+
+      // find user
+      const found = await usersDb().findOne({ username: usernameTest });
+      assert.equal(found._id !== null, true);
+      assert.equal(found.organisme === "TEST_ORGANISME", true);
+
+      // update user
+      const updateValue = "UPDATED_ORGANISME";
+      await updateUserLegacy(found._id, { organisme: updateValue });
+
+      // Check update
+      const foundAfterUpdate = await usersDb().findOne({ _id: found._id });
+      assert.equal(foundAfterUpdate.organisme === updateValue, true);
+    });
+  });
+
+  describe("getUserById", () => {
+    it("renvoie une erreur quand l'id passé pour le getUserById n'est pas valide", async () => {
+      const usernameTest = "userTest";
+
+      // create user
+      await createUserLegacy({ username: usernameTest });
+
+      // find user
+      const found = await usersDb().findOne({ username: usernameTest });
+      assert.equal(found.username === usernameTest, true);
+      assert.equal(found._id !== null, true);
+
+      // get user with bad id
+      const objectId = "^pkazd^pkazd";
+      await assert.rejects(getUserLegacyById(objectId), { message: "Unable to find user" });
+    });
+
+    it("renvoie le bon utilisateur quand l'id passé pour le getUserById est valide", async () => {
+      const usernameTest = "userTest";
+
+      // create user
+      await createUserLegacy({ username: usernameTest });
+
+      // find user
+      const found = await usersDb().findOne({ username: usernameTest });
+      assert.equal(found.username === usernameTest, true);
+
+      // get user with id
+      const gettedUser = await getUserLegacyById(found._id);
+      assert.equal(gettedUser.username === found.username, true);
+    });
+  });
 });
