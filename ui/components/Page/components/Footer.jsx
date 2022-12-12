@@ -90,7 +90,7 @@ const Footer = () => {
                 <Link href={"/assistance"}>Assistance</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/politique-confidentialite"}>Politique de condidentialité</Link>
+                <Link href={"/politique-confidentialite"}>Politique de confidentialité</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link
