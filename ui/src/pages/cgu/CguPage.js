@@ -9,7 +9,7 @@ export const cguVersion = () => {
   return "v0.1";
 };
 
-export const CguPage = () => {
+const CguPage = () => {
   const currentPage = NAVIGATION_PAGES.CGU;
 
   const SommaireData = [
