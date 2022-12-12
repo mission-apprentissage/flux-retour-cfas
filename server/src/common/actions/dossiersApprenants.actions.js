@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { isEqual } from "date-fns";
-import { dossiersApprenantsMigrationDb, effectifsDb } from "../model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../model/collections.js";
 import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
@@ -8,9 +8,7 @@ import {
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { createOrganisme, findOrganismeById, findOrganismeByUai } from "./organismes.actions.js";
 import { buildAdresseFromUai } from "../utils/uaiUtils.js";
-import { createEffectif } from "./effectifs.actions.js";
-import { defaultValuesFormationEffectif } from "../model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
-import { defaultValuesApprenant } from "../model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
+import { createEffectifFromDossierApprenant } from "./effectifs.actions.js";
 
 /**
  * TODO TO REMOVE - Replaced by buildDossierApprenant
@@ -133,74 +131,6 @@ export const buildDossierApprenant = async ({
   const effectifCreated = await createEffectifFromDossierApprenant(dossierApprenantCreated);
 
   return { dossierApprenant: dossierApprenantCreated, effectif: effectifCreated };
-};
-
-/**
- * Méthode de création d'un effectif depuis un dossierApprenant
- * @param {*} dossiersApprenant
- */
-export const createEffectifFromDossierApprenant = async (dossiersApprenant) => {
-  const {
-    organisme_id,
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-
-    formation_cfd: cfd,
-    formation_rncp: rncp,
-    libelle_long_formation: libelle_long,
-    niveau_formation: niveau,
-    niveau_formation_libelle: niveau_libelle,
-    periode_formation: periode,
-    annee_formation: annee,
-
-    nom_apprenant: nom,
-    prenom_apprenant: prenom,
-    ine_apprenant: ine,
-    date_de_naissance_apprenant: date_de_naissance,
-    email_contact: courriel,
-    telephone_apprenant: telephone,
-
-    historique_statut_apprenant: historique_statut,
-  } = dossiersApprenant;
-
-  const effectifApprenant = {
-    ...defaultValuesApprenant(),
-    ...(ine ? { ine } : {}),
-    ...(nom ? { nom } : {}),
-    ...(prenom ? { prenom } : {}),
-    ...(date_de_naissance ? { date_de_naissance } : {}),
-    ...(courriel ? { courriel } : {}),
-    ...(telephone ? { telephone } : {}),
-    ...(historique_statut ? { historique_statut } : {}),
-  };
-
-  const formationApprenant = {
-    ...defaultValuesFormationEffectif(),
-    ...(cfd ? { cfd } : {}),
-    ...(rncp ? { rncp } : {}),
-    ...(libelle_long ? { libelle_long } : {}),
-    ...(niveau ? { niveau } : {}),
-    ...(niveau_libelle ? { niveau_libelle } : {}),
-    ...(periode ? { periode } : {}),
-    ...(annee ? { annee } : {}),
-  };
-
-  // Create effectif locked
-  const effectifId = await createEffectif(
-    {
-      organisme_id,
-      ...(annee_scolaire ? { annee_scolaire } : {}),
-      ...(source ? { source } : {}),
-      ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-      apprenant: effectifApprenant,
-      formation: formationApprenant,
-    },
-    true
-  );
-
-  const effectifCreated = await effectifsDb().findOne({ _id: effectifId });
-  return effectifCreated;
 };
 
 /**

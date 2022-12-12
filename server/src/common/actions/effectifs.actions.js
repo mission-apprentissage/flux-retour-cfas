@@ -5,6 +5,8 @@ import {
   defaultValuesEffectif,
   validateEffectif,
 } from "../model/next.toKeep.models/effectifs.model/effectifs.model.js";
+import { defaultValuesApprenant } from "../model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
+import { defaultValuesFormationEffectif } from "../model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
 
 /**
  * Méthode de création d'un effectif
@@ -36,6 +38,74 @@ export const createEffectif = async (
   const { insertedId } = await effectifsDb().insertOne(validateEffectif(dataToInsert));
 
   return insertedId;
+};
+
+/**
+ * Méthode de création d'un effectif depuis un dossierApprenant
+ * @param {*} dossiersApprenant
+ */
+export const createEffectifFromDossierApprenant = async (dossiersApprenant) => {
+  const {
+    organisme_id,
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
+
+    formation_cfd: cfd,
+    formation_rncp: rncp,
+    libelle_long_formation: libelle_long,
+    niveau_formation: niveau,
+    niveau_formation_libelle: niveau_libelle,
+    periode_formation: periode,
+    annee_formation: annee,
+
+    nom_apprenant: nom,
+    prenom_apprenant: prenom,
+    ine_apprenant: ine,
+    date_de_naissance_apprenant: date_de_naissance,
+    email_contact: courriel,
+    telephone_apprenant: telephone,
+
+    historique_statut_apprenant: historique_statut,
+  } = dossiersApprenant;
+
+  const effectifApprenant = {
+    ...defaultValuesApprenant(),
+    ...(ine ? { ine } : {}),
+    ...(nom ? { nom } : {}),
+    ...(prenom ? { prenom } : {}),
+    ...(date_de_naissance ? { date_de_naissance } : {}),
+    ...(courriel ? { courriel } : {}),
+    ...(telephone ? { telephone } : {}),
+    ...(historique_statut ? { historique_statut } : {}),
+  };
+
+  const formationApprenant = {
+    ...defaultValuesFormationEffectif(),
+    ...(cfd ? { cfd } : {}),
+    ...(rncp ? { rncp } : {}),
+    ...(libelle_long ? { libelle_long } : {}),
+    ...(niveau ? { niveau } : {}),
+    ...(niveau_libelle ? { niveau_libelle } : {}),
+    ...(periode ? { periode } : {}),
+    ...(annee ? { annee } : {}),
+  };
+
+  // Create effectif locked
+  const effectifId = await createEffectif(
+    {
+      organisme_id,
+      ...(annee_scolaire ? { annee_scolaire } : {}),
+      ...(source ? { source } : {}),
+      ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
+      apprenant: effectifApprenant,
+      formation: formationApprenant,
+    },
+    true
+  );
+
+  const effectifCreated = await effectifsDb().findOne({ _id: effectifId });
+  return effectifCreated;
 };
 
 /**
