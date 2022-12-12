@@ -7,10 +7,10 @@ import { dossiersApprenantsDb } from "../../../../src/common/model/collections.j
 describe("Randomize Statuts test", () => {
   describe("createRandomDossierApprenant", () => {
     it("Vérifie l'existence d'un DossierApprenant randomisé", async () => {
-      const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
+      const { getDossierApprenantLegacy, createDossierApprenantLegacy } = await dossiersApprenants();
 
       const randomDossierApprenantProps = createRandomDossierApprenant();
-      const result = await createDossierApprenant(randomDossierApprenantProps);
+      const result = await createDossierApprenantLegacy(randomDossierApprenantProps);
 
       // Checks creation on mandatory fields
       assert.equal(result.nom_apprenant, randomDossierApprenantProps.nom_apprenant.toUpperCase());
@@ -30,7 +30,7 @@ describe("Randomize Statuts test", () => {
       assert.equal(result.annee_scolaire, randomDossierApprenantProps.annee_scolaire);
 
       // Checks exists method
-      const found = await getDossierApprenant({
+      const found = await getDossierApprenantLegacy({
         id_erp_apprenant: result.id_erp_apprenant,
         uai_etablissement: result.uai_etablissement,
         annee_scolaire: result.annee_scolaire,

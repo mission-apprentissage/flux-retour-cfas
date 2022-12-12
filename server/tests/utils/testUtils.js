@@ -4,6 +4,7 @@ import server from "../../src/http/server.js";
 import { configureDbSchemaValidation } from "../../src/common/mongodb.js";
 import redisFakeClient from "./redisClientMock.js";
 import { modelDescriptors } from "../../src/common/model/collections.js";
+import { createUserLegacy } from "../../src/common/actions/legacy/users.legacy.actions.js";
 
 export const startServer = async () => {
   const components = await createComponents();
@@ -18,7 +19,7 @@ export const startServer = async () => {
     httpClient,
     components,
     createAndLogUser: async (username, password, options) => {
-      await components.users.createUser({ username, password, ...options });
+      await createUserLegacy({ username, password, ...options });
 
       const response = await httpClient.post("/api/login", {
         username: username,
