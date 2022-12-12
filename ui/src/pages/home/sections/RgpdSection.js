@@ -8,7 +8,7 @@ import { Section } from "../../../common/components";
 import { NAVIGATION_PAGES } from "../../../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../../../common/constants/product";
 
-const currentPage = NAVIGATION_PAGES.DonneesPersonnelles;
+const currentPage = NAVIGATION_PAGES.PolitiqueDeConfidentialite;
 
 const RgpdCard = ({ legend, text, backgroundColor, href }) => {
   return (
@@ -40,7 +40,7 @@ const RgpdSection = (props) => {
           <Heading as="h2" fontSize="alpha">
             {currentPage.title}
           </Heading>
-          <Button variant="secondary" to={NAVIGATION_PAGES.DonneesPersonnelles.path} marginTop="2w" as={NavLink}>
+          <Button variant="secondary" to={NAVIGATION_PAGES.PolitiqueDeConfidentialite.path} marginTop="2w" as={NavLink}>
             En savoir plus
           </Button>
         </Box>
