@@ -43,8 +43,8 @@ const Footer = () => (
           Accessibilité : Non conforme <Box as="i" marginBottom="2w" className="ri-external-link-line" />
         </Link>
         <Link href={NAVIGATION_PAGES.MentionsLegales.path}>{NAVIGATION_PAGES.MentionsLegales.title}</Link>
-        <Link href={NAVIGATION_PAGES.DonneesPersonnelles.path}>Données personnelles</Link>
-        <Link href="#">Gestion des cookies</Link>
+        <Link href={NAVIGATION_PAGES.PolitiqueDeConfidentialite.path}>Politique de confidentialité</Link>
+        <Link href={NAVIGATION_PAGES.CGU.path}>Conditions générales d&apos;utilisation</Link>
         <Link href={NAVIGATION_PAGES.QuestionsReponses.path}>Page d&apos;aide</Link>
       </HStack>
       <Text marginTop="3w">

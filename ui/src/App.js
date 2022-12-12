@@ -13,9 +13,10 @@ import VisualiserLesIndicateursParOrganismePage from "./pages/app/visualiser-les
 import VisualiserLesIndicateursParReseauPage from "./pages/app/visualiser-les-indicateurs/par-reseau";
 import VisualiserLesIndicateursParTerritoirePage from "./pages/app/visualiser-les-indicateurs/par-territoire";
 import VisualiserLesIndicateursPage from "./pages/app/visualiser-les-indicateurs/VisualiserLesIndicateursPage";
+import CguPage from "./pages/cgu/CguPage";
 import ComprendreLesDonneesPage from "./pages/comprendre-les-donnees/ComprendreLesDonneesPage";
 import ExplorerLesIndicateursPage from "./pages/explorer-les-indicateurs/ExplorerLesIndicateursPage";
-import { HomePage, ProtectionDonneesPersonnellesPage } from "./pages/home/";
+import { HomePage, PolitiqueDeConfidentialitePage } from "./pages/home/";
 import JournalDesEvolutionsPage from "./pages/journal-des-evolutions/JournalDesEvolutionsPage";
 import LoginPage from "./pages/login/LoginPage";
 import MentionsLegalesPage from "./pages/mentions-legales/MentionsLegalesPage";
@@ -88,7 +89,13 @@ const App = () => {
 
         {/* Secured By Token Pages */}
         <Route exact path={`${NAVIGATION_PAGES.Cfa.path}/:accessToken`} component={CfaPrivatePage} />
-        <Route path={NAVIGATION_PAGES.DonneesPersonnelles.path} exact component={ProtectionDonneesPersonnellesPage} />
+        <Route
+          path={NAVIGATION_PAGES.PolitiqueDeConfidentialite.path}
+          exact
+          component={PolitiqueDeConfidentialitePage}
+        />
+
+        <Route path={NAVIGATION_PAGES.CGU.path} exact component={CguPage} />
 
         {/* Secured By Auth Pages */}
         <ProtectedRoute

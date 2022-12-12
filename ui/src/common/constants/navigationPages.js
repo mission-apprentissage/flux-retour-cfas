@@ -30,6 +30,13 @@ export const NAVIGATION_PAGES = {
   MentionsLegales: {
     path: "/mentions-legales",
     title: "Mentions légales",
+    anchors: {
+      EditeurDuSite: "editeur-du-site",
+      DirecteurDeLaPublication: "directeur-de-la-publication",
+      HebergementDuSite: "hebergement-du-site",
+      Accessibilite: "accessibilite",
+      SignalerUnDyfonctionnement: "signaler-un-dyfonctionnement",
+    },
   },
   QuestionsReponses: {
     path: "/questions-reponses",
@@ -91,14 +98,33 @@ export const NAVIGATION_PAGES = {
     path: "/statistiques",
     title: "Statistiques",
   },
-  DonneesPersonnelles: {
-    path: "/donnees-personnelles",
+  PolitiqueDeConfidentialite: {
+    path: "/politique-confidentialite",
+    title: "Politique de confidentialite",
     anchors: {
-      missionInteretPublic: "mission-interet-public",
-      faciliterPilotage: "faciliter-pilotage-operationnel",
-      minimisationDonnees: "minimisation-donnees",
+      Finalite: "finalite",
+      DonneesACaracterePersonelTraitees: "donnees-a-caractere-personel-traitees",
+      BaseJuridiqueDuTraitementDeDonnees: "base-juridique-du-traitement-de-donnees",
+      DureeDeConservation: "duree-de-conservation",
+      DroitDesPersonnesConcernees: "droit-des-personnes-concernees",
+      DestinatairesDesDonnees: "destinataires-des-donnees",
+      SecuriteEtConfidentialiteDesDonnees: "securite-et-confidentialite-des-donnees",
     },
-    title: "Protection des données à caractère personnel",
+  },
+  CGU: {
+    path: "/cgu",
+    anchors: {
+      ChampApplication: "champ-application",
+      Objet: "objet",
+      Definition: "definition",
+      FonctionnaliteLieesAuxComptesDesUtilisateurs: "fonctionnalite-liees-aux-comptes-des-utilisateurs",
+      PresentationDesServices: "presentation-des-services",
+      Securite: "securite",
+      Hyperliens: "hyperliens",
+      Responsabilites: "responsabilites",
+      MiseAjourDesConditionsUtilisation: "mise-a-jour-des-conditions-utilisation",
+    },
+    title: "CONDITIONS GÉNÉRALES D'UTILISATION DU TABLEAU DE BORD DE L’APPRENTISSAGE",
   },
   Cfa: {
     path: "/cfa",
