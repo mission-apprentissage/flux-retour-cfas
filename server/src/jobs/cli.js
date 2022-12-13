@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
-import { seed } from "./seed/start/index.js";
+import { seed, seedAdmin, seedRoles } from "./seed/start/index.js";
 import { clear } from "./clear/clear-all.js";
 import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
@@ -29,6 +29,31 @@ cli
     runScript(async () => {
       return seed({ adminEmail: email?.toLowerCase() });
     }, "Seed");
+  });
+
+/**
+ * Job d'initialisation des roles
+ */
+cli
+  .command("seed:roles")
+  .description("Seed roles")
+  .action(async () => {
+    runScript(async () => {
+      return seedRoles();
+    }, "Seed-roles");
+  });
+
+/**
+ * Job d'initialisation d'un user admin
+ */
+cli
+  .command("seed:admin")
+  .description("Seed user admin")
+  .option("-e, --email <string>", "Email de l'utilisateur Admin")
+  .action(async ({ email }) => {
+    runScript(async () => {
+      return seedAdmin({ adminEmail: email?.toLowerCase() });
+    }, "Seed-admin");
   });
 
 /**

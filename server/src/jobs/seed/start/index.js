@@ -1,15 +1,23 @@
 import logger from "../../../common/logger.js";
 import { createUser } from "../../../common/actions/users.actions.js";
 import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
-import { createRole } from "../../../common/actions/roles.actions.js";
+import { createRole, findRoleByName } from "../../../common/actions/roles.actions.js";
 import { addContributeurOrganisme, createOrganisme } from "../../../common/actions/organismes.actions.js";
 import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
 
-export const seed = async ({ adminEmail }) => {
+export const seedRoles = async () => {
   for (const key of Object.keys(defaultRolesAcls)) {
-    await createRole(defaultRolesAcls[key]);
-    logger.info(`Role ${key} created`);
+    if (!findRoleByName(defaultRolesAcls[key].name)) {
+      await createRole(defaultRolesAcls[key]);
+      logger.info(`Role ${key} created`);
+    } else {
+      logger.info(`Role ${key} already existant`);
+    }
   }
+};
+
+export const seed = async ({ adminEmail }) => {
+  await seedRoles();
 
   // Create Organisme A reseau A erp A
   // Create Organisme B reseau A erp B
@@ -188,4 +196,25 @@ export const seed = async ({ adminEmail }) => {
   ///BELOW OTHER STUFF
 
   logger.info(`Seed tjp-pilotage created`);
+};
+
+export const seedAdmin = async ({ adminEmail }) => {
+  await seedRoles();
+
+  // Create user Admin
+  const aEmail = adminEmail || "admin@test.fr";
+  const userAdmin = await createUser(
+    { email: aEmail, password: "Secret!Password1" },
+    {
+      nom: "Admin",
+      prenom: "test",
+      permissions: { is_admin: true, is_cross_organismes: true },
+      account_status: "FORCE_RESET_PASSWORD",
+      siret: "13002526500013", // Siret Dinum
+    }
+  );
+  await userAfterCreate({ user: userAdmin, pending: false, notify: false });
+  logger.info(`User ${aEmail} with password 'Secret!Password1' and admin is successfully created `);
+
+  logger.info(`Seed admin created`);
 };
