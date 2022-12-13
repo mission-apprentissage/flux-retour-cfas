@@ -13,7 +13,7 @@ import { schema as prenomApprenantSchema } from "../../../../common/utils/valida
 import { schema as siretSchema } from "../../../../common/utils/validationsUtils/siret.js";
 import { findAndPaginate } from "../../../../common/utils/dbUtils.js";
 import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../../common/constants/userEventsConstants.js";
-import { dossiersApprenantsDb, dossiersApprenantsApiErrorsDb } from "../../../../common/model/collections.js";
+import { dossiersApprenantsApiErrorsDb, dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
 import { sendTransformedPaginatedJsonStream } from "../../../../common/utils/httpUtils.js";
 import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
 import {
@@ -134,7 +134,7 @@ export default () => {
               // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
               periode_formation: currentDossierApprenant.periode_formation
                 ? currentDossierApprenant.periode_formation.split("-").map(Number)
-                : null,
+                : [],
               source: user.username,
             };
 
@@ -168,6 +168,7 @@ export default () => {
         res.status(400).json({
           status: "ERROR",
           message: err.message,
+          error: err, // TEMP ajout temporaire pour debug ?
         });
       }
     })
@@ -203,7 +204,7 @@ export default () => {
 
         // Gets paginated data filtered on source mapped to username
         const { find, pagination } = await findAndPaginate(
-          dossiersApprenantsDb(),
+          dossiersApprenantsMigrationDb(),
           { ...filtersFromBody, source: req.user.username },
           { projection: { created_at: 0, updated_at: 0, _id: 0, __v: 0 }, page, limit: limit }
         );

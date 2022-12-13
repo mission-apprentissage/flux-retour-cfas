@@ -64,7 +64,7 @@ export const createRandomDossierApprenant = (params = {}) => {
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
   return {
-    ...(isPresent() ? { ine_apprenant: getRandomIne() } : {}),
+    ine_apprenant: getRandomIne(),
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
     email_contact: faker.internet.email(),
@@ -124,7 +124,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
 
   return {
-    ine_apprenant: isPresent() ? getRandomIne() : null,
+    ine_apprenant: getRandomIne(),
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
     date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
@@ -132,24 +132,25 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
     email_contact: faker.internet.email(),
 
     id_formation: getRandomFormationCfd(),
-    libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
+    ...(faker.datatype.boolean()
+      ? { libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long }
+      : {}),
     uai_etablissement: getRandomUaiEtablissement(),
-    siret_etablissement: isPresent() ? getSampleSiretEtablissement() : "",
+    siret_etablissement: getSampleSiretEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
     annee_formation: getRandomAnneeFormation(),
-    periode_formation: isPresent() ? periode_formation.join("-") : "",
+    ...(isPresent() ? { periode_formation: periode_formation.join("-") } : {}),
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid().toString(),
-    tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
-    code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
-
-    contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat().toISOString() : null,
-    contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat().toISOString() : null,
-    contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat().toISOString() : null,
-    formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
+    ...(faker.datatype.boolean() ? { tel_apprenant: faker.phone.number() } : {}),
+    ...(faker.datatype.boolean() ? { code_commune_insee_apprenant: faker.address.zipCode() } : {}),
+    ...(faker.datatype.boolean() ? { contrat_date_debut: getRandomDateDebutContrat().toISOString() } : {}),
+    ...(faker.datatype.boolean() ? { contrat_date_fin: getRandomDateFinContrat().toISOString() } : {}),
+    ...(faker.datatype.boolean() ? { contrat_date_rupture: getRandomDateRuptureContrat().toISOString() } : {}),
+    ...(faker.datatype.boolean() ? { formation_rncp: getRandomRncpFormation() } : {}),
 
     ...params,
   };
