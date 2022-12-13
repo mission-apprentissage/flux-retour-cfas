@@ -7,7 +7,7 @@ import { userAfterCreate } from "../../../common/actions/users.afterCreate.actio
 
 export const seedRoles = async () => {
   for (const key of Object.keys(defaultRolesAcls)) {
-    if (!findRoleByName(defaultRolesAcls[key].name)) {
+    if (!(await findRoleByName(defaultRolesAcls[key].name))) {
       await createRole(defaultRolesAcls[key]);
       logger.info(`Role ${key} created`);
     } else {

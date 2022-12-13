@@ -1,5 +1,6 @@
 import { Flex, Box, Button, HStack, Text, Heading } from "@chakra-ui/react";
 import { useFormik } from "formik";
+import * as Yup from "yup";
 import React from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -22,6 +23,31 @@ const Finalize = () => {
   const router = useRouter();
 
   const title = "Finalisation de votre inscription";
+
+  const { handleSubmit: handleDemandeAcces } = useFormik({
+    initialValues: {
+      type: "organisme.admin",
+    },
+    validationSchema: Yup.object().shape({
+      type: Yup.string().required("Requis"),
+    }),
+    onSubmit: (values) => {
+      // eslint-disable-next-line no-undef, no-async-promise-executor
+      return new Promise(async (resolve) => {
+        try {
+          const result = await _post("/api/v1/auth/demande-acces", values);
+          if (result.loggedIn) {
+            const user = decodeJwt(result.token);
+            setAuth(user);
+            setToken(result.token);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        resolve("onSubmitHandler publish complete");
+      });
+    },
+  });
 
   const { handleSubmit } = useFormik({
     initialValues: {},
@@ -57,7 +83,13 @@ const Finalize = () => {
           {title}
         </Heading>
         <Box mt={5}>
-          {auth.isInPendingValidation && (
+          {auth.isInPendingValidation && auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" && (
+            <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+              Demander l&rsquo;accès Gestion
+            </Button>
+          )}
+
+          {auth.isInPendingValidation && auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
             <Ribbons variant="loading" mt="0.5rem">
               <Box ml={3}>
                 <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">

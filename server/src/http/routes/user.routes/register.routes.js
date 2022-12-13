@@ -13,6 +13,7 @@ import {
   activateUser,
   createUser,
   finalizeUser,
+  userHasAskAccess,
 } from "../../../common/actions/users.actions.js";
 import * as sessions from "../../../common/actions/sessions.actions.js";
 import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
@@ -155,8 +156,6 @@ export default ({ mailer }) => {
 
       const updatedUser = await activateUser(user.email.toLowerCase());
 
-      await userAfterCreate({ user: updatedUser, mailer });
-
       const payload = await structureUser(updatedUser);
 
       await loggedInUser(payload.email);
@@ -166,6 +165,50 @@ export default ({ mailer }) => {
 
       return responseWithCookie({ res, token }).status(200).json({
         succeeded: true,
+        token,
+      });
+    })
+  );
+
+  router.post(
+    "/demande-acces",
+    authMiddleware(),
+    tryCatch(async ({ body, user }, res) => {
+      const { type } = await Joi.object({
+        type: Joi.string()
+          .valid("organisme.admin", "organisme.member", "organisme.readonly", "organisme.statsonly")
+          .required(),
+      }).validateAsync(body, { abortEarly: false });
+
+      const userDb = await getUser(user.email.toLowerCase());
+      if (!userDb) {
+        throw Boom.conflict(`Unable to retrieve user`);
+      }
+
+      if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP1") {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      await userAfterCreate({ user: userDb, mailer, asRole: type });
+
+      const updateUser = await userHasAskAccess(userDb.email, {});
+      if (!updateUser) {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      const payload = await structureUser(updateUser);
+
+      await loggedInUser(payload.email);
+
+      const token = createUserTokenSimple({ payload });
+
+      if (await sessions.findJwt(token)) {
+        await sessions.removeJwt(token);
+      }
+      await sessions.addJwt(token);
+
+      return responseWithCookie({ res, token }).status(200).json({
+        loggedIn: true,
         token,
       });
     })
@@ -188,7 +231,7 @@ export default ({ mailer }) => {
         throw Boom.conflict(`Unable to retrieve user`);
       }
 
-      if (userDb.account_status !== "FORCE_COMPLETE_PROFILE") {
+      if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP2") {
         throw Boom.badRequest("Something went wrong");
       }
 

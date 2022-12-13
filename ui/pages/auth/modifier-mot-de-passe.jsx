@@ -21,6 +21,8 @@ const ResetPasswordPage = () => {
 
   const minLength = auth.permissions.is_admin ? 20 : 12;
 
+  const isFirstSetPassword = auth.account_status === "FIRST_FORCE_RESET_PASSWORD";
+
   const [conditions, setConditions] = useState({
     min: "unknown",
     lowerCase: "unknown",
@@ -103,14 +105,15 @@ const ResetPasswordPage = () => {
     <Flex height="100vh" justifyContent="center" mt="10">
       <Box width={["auto", "40rem"]}>
         <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          Une mise à jour de votre mot de passe est obligatoire
+          {isFirstSetPassword && "Merci de créer votre mot de passe"}
+          {!isFirstSetPassword && "Une mise à jour de votre mot de passe est obligatoire"}
         </Heading>
         <form onSubmit={handleSubmit}>
           <Input
             id="newPassword"
             name="newPassword"
             type="password"
-            placeholder="Votre nouveau mot de passe..."
+            placeholder={isFirstSetPassword ? "Votre mot de passe..." : "Votre nouveau mot de passe..."}
             onChange={onChange}
             value={values.newPassword}
             mb={3}
@@ -154,7 +157,8 @@ const ResetPasswordPage = () => {
             </ListItem>
           </List>
           <Button variant="primary" type="submit">
-            Réinitialiser le mot de passe
+            {isFirstSetPassword && "Créer le mot de passe"}
+            {!isFirstSetPassword && "Réinitialiser le mot de passe"}
           </Button>
           {status.error && (
             <Text color="error" mt={2}>

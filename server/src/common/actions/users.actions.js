@@ -237,14 +237,11 @@ export const structureUser = async (user) => {
     .toArray();
   const rolesAcl = rolesList.reduce((acc, { acl }) => [...acc, ...acl], []);
 
-  const organisme_ids = compact(
-    (await findActivePermissionsForUser({ userEmail: user.email }, { organisme_id: 1, _id: 0 })).map(
-      ({ organisme_id }) => organisme_id
-    )
-  );
+  const activePermissions = await findActivePermissionsForUser({ userEmail: user.email }, { organisme_id: 1, _id: 0 });
+  const organisme_ids = compact(activePermissions.map(({ organisme_id }) => organisme_id));
 
   const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
-  const isInPendingValidation = !organisme_ids.length && !!user.main_organisme_id;
+  const isInPendingValidation = !organisme_ids.length && !activePermissions.length;
 
   let specialAcl = [];
   if (!hasAccessToOnlyOneOrganisme) {
@@ -309,6 +306,26 @@ export const activateUser = async (email) => {
   return updated.value;
 };
 
+export const userHasAskAccess = async (email, data) => {
+  const user = await usersMigrationDb().findOne({ email });
+  if (!user) {
+    throw new Error(`Unable to find user`);
+  }
+
+  const updated = await usersMigrationDb().findOneAndUpdate(
+    { _id: user._id },
+    {
+      $set: {
+        account_status: "FORCE_COMPLETE_PROFILE_STEP2",
+        ...data,
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
+};
+
 export const finalizeUser = async (email, data) => {
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
@@ -346,7 +363,7 @@ export const changePassword = async (email, newPassword) => {
 
   let account_status = user.account_status;
   if (user.account_status === "FIRST_FORCE_RESET_PASSWORD") {
-    account_status = "FORCE_COMPLETE_PROFILE";
+    account_status = "FORCE_COMPLETE_PROFILE_STEP1";
   } else if (user.account_status === "FORCE_RESET_PASSWORD") {
     account_status = "CONFIRMED";
   }

@@ -49,7 +49,7 @@ export default {
   "organisme.statsonly": {
     name: "organisme.statsonly",
     type: "permission",
-    title: "Lecteur",
+    title: "Lecteur stats",
     description: "Permission lecteur de stats d'organisme",
     acl: ["organisme", "organisme/tableau_de_bord"],
   },

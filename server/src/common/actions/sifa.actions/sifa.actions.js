@@ -74,8 +74,8 @@ export const generateSifa = async (organisme_id) => {
     };
 
     const statutFields = {
-      STATUT: "APP", // REQUIRED // STATUT courant
-      DATE_ENTREE_CFA: "", // STATUT Inscrit
+      STATUT: "APP", // REQUIRED // STATUT courant // TODO
+      DATE_ENTREE_CFA: "", // STATUT Inscrit // TODO
     };
 
     items.push({
@@ -86,7 +86,7 @@ export const generateSifa = async (organisme_id) => {
       ...statutFields,
       OG: 24, // Unknown for now    // REQUIRED
       UAI_EPLE: "NC", // Unknown for now // REQUIRED
-      NAT_STR_JUR: "L. 6231-3", // Unknown for now // REQUIRED
+      NAT_STR_JUR: "NC", // Unknown for now // REQUIRED
 
       NOM2: "", // Always empty
       PRENOM2: "", // Always empty
