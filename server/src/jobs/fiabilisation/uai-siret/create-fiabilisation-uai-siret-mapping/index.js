@@ -1,11 +1,10 @@
-import logger from "../../common/logger.js";
-import { runScript } from "../scriptWrapper.js";
+import logger from "../../../../common/logger.js";
 import {
   dossiersApprenantsDb,
   fiabilisationUaiSiretDb,
   referentielSiretUaiDb,
-} from "../../common/model/collections.js";
-import { asyncForEach } from "../../common/utils/asyncUtils.js";
+} from "../../../../common/model/collections.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { mapping as manualMapping } from "./mapping.js";
 
 const filters = {
@@ -19,7 +18,10 @@ const insertInFiabilisationMappingIfNotExist = async (mapping) => {
   return await fiabilisationUaiSiretDb().insertOne({ created_at: new Date(), ...mapping });
 };
 
-runScript(async () => {
+/**
+ * Méthode de création de la collection de mapping pour fiabilisation couples UAI SIRET
+ */
+export const createFiabilisationUaiSiretMapping = async () => {
   // on récupère tous les couples UAI/SIRET depuis les dossiers apprenants
   const allCouplesUaiSiretTdb = await dossiersApprenantsDb()
     .aggregate([
@@ -130,4 +132,4 @@ runScript(async () => {
   logger.info(couplesFiablesFound, "sont déjà fiables");
   logger.info(fiabilisationMappingInsertedCount, "nouveaux couples à fiabiliser insérés en base");
   logger.info(cannotMakeFiable.length, "couples ne peuvent pas être fiabilisés automatiquement");
-}, "fiabilisation-uai-siret-create-mapping");
+};

@@ -10,6 +10,7 @@ import duplicatesEventsModelDescriptor from "./previous.models/toRemove.models/d
 import archiveDossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/archiveDossiersApprenants.model.js";
 import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
 import referentielSiretUaiModelDescriptor from "./previous.models/toRemove.models/referentielSiretUai.model.js";
+import fiabilisationUaiSiretModelDescriptor from "./next.toKeep.models/fiabilisationUaiSiret.model.js";
 
 import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
 import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
@@ -31,7 +32,6 @@ export const modelDescriptors = [
   archiveDossiersApprenantsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
   referentielSiretUaiModelDescriptor,
-
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
   RolesModelDescriptor,
@@ -97,10 +97,6 @@ export function effectifsDb() {
 // TODO Collections descriptors à supprimer
 export const cfasDb = () => {
   return getDbCollection(cfasModelDescriptor.collectionName);
-};
-
-export const referentielSiretUaiDb = () => {
-  return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
 };
 
 export const duplicatesEventsDb = () => {

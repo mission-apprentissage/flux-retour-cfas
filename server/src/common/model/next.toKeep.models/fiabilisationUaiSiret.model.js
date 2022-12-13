@@ -1,4 +1,4 @@
-import { object, date, objectId, string, stringOrNull } from "./json-schema/jsonSchemaTypes.js";
+import { object, date, objectId, string, stringOrNull } from "../json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "fiabilisationUaiSiret";
 

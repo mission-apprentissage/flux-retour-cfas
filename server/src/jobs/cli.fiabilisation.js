@@ -7,6 +7,8 @@ import { cleanUaisDuplicates } from "./fiabilisation/duplicates/dossiersApprenan
 import { identifyCfdDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates-cfd/identify.js";
 import { removeDossierApprenantsDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates/remove-duplicates.js";
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
+import { createFiabilisationUaiSiretMapping } from "./fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/index.js";
+import { updateDossiersApprenantWithFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update-dossiers-apprenants-with-fiabilisation-uai-siret/index.js";
 
 /**
  * Job d'identification des doublons dans les fichiers CSV de réseaux
@@ -82,6 +84,30 @@ cli
     runScript(async () => {
       return analyseFiabiliteDossierApprenantsRecus();
     }, "analyse-dossiersApprenants-recus");
+  });
+
+/**
+ * Job de création de la collection de mapping fiabilisation UAI SIRET
+ */
+cli
+  .command("create:mapping-fiabilisation-uai-siret")
+  .description("Création de la collection de mapping pour fiabilisation des UAI SIRET")
+  .action(() => {
+    runScript(async () => {
+      return createFiabilisationUaiSiretMapping();
+    }, "create-mapping-fiabilisation-uai-siret");
+  });
+
+/**
+ * Job d'application de la fiabilisation UAI SIRET
+ */
+cli
+  .command("apply:fiabilisation-uai-siret")
+  .description("Application du mapping de fiabilisation des UAI SIRET")
+  .action(() => {
+    runScript(async () => {
+      return updateDossiersApprenantWithFiabilisationUaiSiret();
+    }, "apply-fiabilisation-uai-siret");
   });
 
 cli.parse(process.argv);
