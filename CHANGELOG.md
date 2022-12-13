@@ -1,3 +1,10 @@
+# [2.60.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.2...v2.60.0-beta.3) (2022-12-13)
+
+
+### Features
+
+* **data:** ajoute un mapping à partir d'un fichier JSON pour la fiabilisation ([20e902f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/20e902f1fddd1e4e634fb4f1f101822194b871e6))
+
 # [2.60.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.1...v2.60.0-beta.2) (2022-12-13)
 
 
