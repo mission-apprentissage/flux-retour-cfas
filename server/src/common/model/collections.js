@@ -39,6 +39,7 @@ export const modelDescriptors = [
   OrganismesModelDescriptor,
   dossiersApprenantsMigrationModelDescriptor,
   effectifsModelDescriptor,
+  fiabilisationUaiSiretModelDescriptor,
 ];
 
 export const dossiersApprenantsDb = () => {
@@ -112,4 +113,12 @@ export const archiveDossiersApprenantsDb = () => {
 
 export const dossiersApprenantsApiErrorsDb = () => {
   return getDbCollection(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
+};
+
+export const referentielSiretUaiDb = () => {
+  return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
+};
+
+export const fiabilisationUaiSiretDb = () => {
+  return getDbCollection(fiabilisationUaiSiretModelDescriptor.collectionName);
 };
