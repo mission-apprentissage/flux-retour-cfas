@@ -6,6 +6,7 @@ import {
   referentielSiretUaiDb,
 } from "../../common/model/collections.js";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";
+import { mapping as manualMapping } from "./mapping.js";
 
 const filters = {
   annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },
@@ -112,6 +113,20 @@ runScript(async () => {
 
     cannotMakeFiable.push({ uai: coupleUaiSiretTdb.uai, siret: coupleUaiSiretTdb.siret });
   });
+
+  // on insère les mapping de fiabilisation présents dans le fichier JSON créé à la main
+  // cette source est prioritaire par rapport à l'analyse faite plus haut
+  // on remplace donc la fiabilisation à faire si déjà existante
+  await asyncForEach(manualMapping, async (mapping) => {
+    const alreadyExists = await fiabilisationUaiSiretDb().findOne({ uai: mapping.uai, siret: mapping.siret });
+    if (alreadyExists) {
+      await fiabilisationUaiSiretDb().updateOne({ uai: mapping.uai, siret: mapping.siret }, { $set: mapping });
+    } else {
+      await fiabilisationUaiSiretDb().insertOne({ ...mapping, created_at: new Date() });
+      fiabilisationMappingInsertedCount++;
+    }
+  });
+
   logger.info(couplesFiablesFound, "sont déjà fiables");
   logger.info(fiabilisationMappingInsertedCount, "nouveaux couples à fiabiliser insérés en base");
   logger.info(cannotMakeFiable.length, "couples ne peuvent pas être fiabilisés automatiquement");
