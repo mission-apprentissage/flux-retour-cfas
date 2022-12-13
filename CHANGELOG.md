@@ -1,3 +1,10 @@
+# [2.60.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.1...v2.60.0-beta.2) (2022-12-13)
+
+
+### Features
+
+* **data:** fiabilisation des couples uai-siret ([a420499](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a420499572015eadf395f3118542990ca14f55b8))
+
 # [2.60.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.59.1...v2.60.0-beta.1) (2022-12-02)
 
 
