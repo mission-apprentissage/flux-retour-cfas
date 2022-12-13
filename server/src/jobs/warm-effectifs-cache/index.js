@@ -1,5 +1,4 @@
 import axios from "axios";
-import { runScript } from "../scriptWrapper.js";
 import logger from "../../common/logger.js";
 import config from "../../config.js";
 import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
@@ -11,7 +10,7 @@ const ROUTES_TO_WARM_UP = ["/api/effectifs", "/api/effectifs/niveau-formation", 
 /*
     This job will perform expensive requests made by the UI to warm up the cache
 */
-runScript(async () => {
+export const warmEffectifsCache = async () => {
   logger.info("START", JOB_NAMES.warmUpCache);
 
   const response = await axios.post(`${config.publicUrl}/api/login`, {
@@ -50,4 +49,4 @@ runScript(async () => {
     });
   });
   logger.info("END", JOB_NAMES.warmUpCache);
-}, JOB_NAMES.warmUpCache);
+};

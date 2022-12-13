@@ -3,7 +3,8 @@ const anonymous = {
   acl: [],
   permissions: {},
   roles: [],
-  workspaceId: null,
+  organisme_id: null,
+  organisme_ids: [],
 };
 
 export { anonymous };

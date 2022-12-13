@@ -1,4 +1,4 @@
-import { stateToQueryString } from "../../pages/app/visualiser-les-indicateurs/FiltersContext";
+import { stateToQueryString } from "../../modules/visualiser-les-indicateurs/FiltersContext";
 import { NAVIGATION_PAGES } from "../constants/navigationPages";
 
 export const navigateToOrganismePage = (history, organisme) => {

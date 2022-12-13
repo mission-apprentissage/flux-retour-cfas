@@ -3,8 +3,9 @@ import logger from "../../common/logger.js";
 import config from "../../config.js";
 import tryCatch from "../middlewares/tryCatchMiddleware.js";
 import { packageJson } from "../../common/utils/esmUtils.js";
+import { jobEventsDb } from "../../common/model/collections.js";
 
-export default ({ db }) => {
+export default () => {
   const router = express.Router();
 
   router.get(
@@ -13,7 +14,7 @@ export default ({ db }) => {
       let mongodbStatus = false;
 
       try {
-        await db.stats();
+        await jobEventsDb();
         mongodbStatus = true;
       } catch (e) {
         logger.error("Healthcheck failed", e);

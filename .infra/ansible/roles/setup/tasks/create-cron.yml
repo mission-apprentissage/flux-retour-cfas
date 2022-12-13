@@ -1,26 +1,10 @@
 - name: Add CRON to run jobs processing application data everyday at 5:30AM
   become: true
   cron:
-    name: "application data jobs"
+    name: "Application des jobs quotidiens"
     minute: "30"
     hour: "5"
-    job: "bash /opt/flux-retour-cfas/tools/data-jobs/cron/run-data-jobs.sh"
-
-- name: Add CRON to run localisation by UAI job everyday at 10:30AM
-  become: true
-  cron:
-    name: "localisation data job"
-    minute: "30"
-    hour: "10"
-    job: "bash /opt/flux-retour-cfas/tools/data-jobs/cron/run-localisation-job.sh"
-
-- name: Add CRON to run nature organisme de formation retrieval in Referentiel UAI/SIRET everyday at 11:00AM
-  become: true
-  cron:
-    name: "OF nature retrieval from referentiel uai/siret"
-    minute: "00"
-    hour: "11"
-    job: "bash /opt/flux-retour-cfas/tools/data-jobs/cron/run-nature-organisme-formation-retrieval-in-referentiel-job.sh"
+    job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-daily-jobs.sh"
 
 - name: Add CRON to run fiabilité analyses on data received in last 24hours everyday at 11:15AM
   become: true
@@ -28,13 +12,13 @@
     name: "Analyses fiabilité données reçues"
     minute: "15"
     hour: "11"
-    job: "bash /opt/flux-retour-cfas/tools/data-jobs/cron/run-analyse-fiabilite-donnees-recues-job.sh"
+    job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-analyse-fiabilite-donnees-recues-job.sh"
 
-- name: Add CRON to run creation of referentiel siret-uai every Monday at 03:00AM
+- name: Add CRON to archive dossiersApprenants every 1rst day of the month at 12:45AM
   become: true
   cron:
-    name: "Création référentiel SIRET-UAI"
-    weekday: "1"
-    hour: "3"
-    minute: "0"
-    job: "bash /opt/flux-retour-cfas/tools/data-jobs/cron/run-create-referentiel-siret-uai-job.sh"
+    name: "Archive dossiers apprenants & effectifs"
+    minute: "45"
+    hour: "12"
+    day: "1"
+    job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-archive-job.sh"
