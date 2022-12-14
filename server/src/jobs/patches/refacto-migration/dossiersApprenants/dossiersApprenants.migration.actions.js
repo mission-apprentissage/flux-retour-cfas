@@ -62,7 +62,7 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
     ...(prenom ? { prenom } : {}),
     ...(date_de_naissance ? { date_de_naissance } : {}),
     ...(courriel ? { courriel } : {}),
-    ...(telephone ? { telephone } : {}),
+    ...(telephone ? { telephone: transformToInternationalNumber(telephone) } : {}),
     ...(historique_statut ? { historique_statut } : {}),
     // Build adresse with code_commune_insee
     ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),

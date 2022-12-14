@@ -178,7 +178,9 @@ export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
     set(newLocker, path, true);
   }
 
-  // Handle manually field historique & periode_formation
+  // Handle manually locked fields
+  // TODO Fix flattenKeys function for handling properly
+  set(newLocker, "apprenant.date_de_naissance", true);
   set(newLocker, "apprenant.historique_statut", true);
   set(newLocker, "formation.periode", true);
 

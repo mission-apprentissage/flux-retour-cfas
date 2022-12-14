@@ -13,4 +13,4 @@ export const validateFrenchTelephoneNumber = (value) => {
   return schema.validate(value);
 };
 
-export const transformToInternationalNumber = (value) => `+33${value.replace(/^0/, "")}`;
+export const transformToInternationalNumber = (value) => `33${value.replace(/^0/, "")}`;
