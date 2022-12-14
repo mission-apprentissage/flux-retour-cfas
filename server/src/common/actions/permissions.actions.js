@@ -49,6 +49,25 @@ export const hasPermission = async ({ organisme_id, userEmail }, projection = {}
   );
 };
 
+export const findActivePermissionsByRoleName = async (organisme_id, roleName, projection = {}) => {
+  const roleDb = await findRoleByName(roleName, { _id: 1 });
+  if (!roleDb) {
+    throw new Error("Role doesn't exist");
+  }
+
+  return await findPermissionsByQuery({ organisme_id, role: roleDb._id, pending: false }, projection);
+};
+
+export const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName = "organisme.admin") => {
+  const roleDb = await findRoleByName(roleName, { _id: 1 });
+  if (!roleDb) {
+    throw new Error("Role doesn't exist");
+  }
+
+  const permissions = await findPermissionsByQuery({ organisme_id, role: roleDb._id }, { pending: 1 });
+  return !!permissions.find(({ pending }) => !pending);
+};
+
 /**
  * Méthode de mise à jour d'une permission
  * @param {*} permissionProps

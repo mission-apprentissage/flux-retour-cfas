@@ -109,7 +109,7 @@ export const schema = object(
     }),
     setup_step_courante: string({
       description: "Etape d'installation courante",
-      // enum: ["STEP1", "STEP2", "STEP3"], // TODO
+      // enum: ["STEP1", "STEP2", "STEP3"], // TODO "COMPLETE"
     }),
     contributeurs: arrayOf(string(), { description: "Emails des contributeurs de cet organisme" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),

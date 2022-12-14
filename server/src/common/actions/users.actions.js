@@ -7,7 +7,7 @@ import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { passwordSchema } from "../utils/validationUtils.js";
-import { findActivePermissionsForUser } from "./permissions.actions.js";
+import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } from "./permissions.actions.js";
 
 /**
  * Méthode de création d'un utilisateur
@@ -242,6 +242,9 @@ export const structureUser = async (user) => {
 
   const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
   const isInPendingValidation = !organisme_ids.length && !activePermissions.length;
+  const hasAtLeastOneUserToValidate = user.main_organisme_id
+    ? await hasAtLeastOneContributeurNotPending(user.main_organisme_id, "organisme.admin")
+    : false;
 
   let specialAcl = [];
   if (!hasAccessToOnlyOneOrganisme) {
@@ -253,6 +256,7 @@ export const structureUser = async (user) => {
     main_organisme_id: user.main_organisme_id,
     permissions,
     isInPendingValidation,
+    hasAtLeastOneUserToValidate,
     email: user.email,
     civility: user.civility,
     nom: user.nom,

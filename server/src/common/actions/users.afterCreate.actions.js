@@ -1,6 +1,9 @@
 import { addContributeurOrganisme, findOrganismeByUai, findOrganismesByQuery } from "./organismes.actions.js";
-import { createPermission, findPermissionsByQuery } from "./permissions.actions.js";
-import { findRoleByName } from "./roles.actions.js";
+import {
+  createPermission,
+  findActivePermissionsByRoleName,
+  hasAtLeastOneContributeurNotPending,
+} from "./permissions.actions.js";
 import { updateMainOrganismeUser } from "./users.actions.js";
 
 /**
@@ -80,16 +83,6 @@ export const userAfterCreate = async ({
         throw new Error(`No organisme found for this uai ${uai}`);
       }
 
-      const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName = "organisme.admin") => {
-        const roleDb = await findRoleByName(roleName, { _id: 1 });
-        if (!roleDb) {
-          throw new Error("Role doesn't exist");
-        }
-
-        const permissions = await findPermissionsByQuery({ organisme_id, role: roleDb._id }, { pending: 1 });
-        return !!permissions.find(({ pending }) => !pending);
-      };
-
       const hasAtLeastOneUserToValidate = await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin");
 
       // TODO pour les organismes RESPONSABLE ou RESPONSABLE_FORMATEUR => Multiple Permissions
@@ -107,10 +100,28 @@ export const userAfterCreate = async ({
           ); // Notif TDB_admin or whatever who
         }
       } else {
-        await addContributeurOrganisme(organisme._id, userEmail, "organisme.statsonly", pending);
+        await addContributeurOrganisme(organisme._id, userEmail, asRole, pending); // "organisme.statsonly"
         await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
         // TODO [metier] VALIDATION FLOW [2] => organisme.admin Validate people that wants to join is organisme
         // Notif organisme.admin
+        if (notify) {
+          const usersToNotify = (
+            await findActivePermissionsByRoleName(organisme._id, "organisme.admin", { userEmail: 1 })
+          ).map(({ userEmail }) => userEmail);
+
+          const accessType = {
+            "organisme.admin": "Gestionnaire",
+            "organisme.member": "Éditeur",
+            "organisme.readonly": "Lecteur",
+          };
+
+          for (const userToNotify of usersToNotify) {
+            await mailer.sendEmail(
+              { to: userToNotify, payload: { user, organisme, type: accessType[asRole] } },
+              "validation_user_by_orga_admin"
+            );
+          }
+        }
       }
     }
   }

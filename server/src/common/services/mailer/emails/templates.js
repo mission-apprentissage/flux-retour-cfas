@@ -34,6 +34,20 @@ export function validation_first_organisme_user_by_tdb_team({ payload }, token, 
   };
 }
 
+export function validation_user_by_orga_admin({ payload }, token, options = {}) {
+  const prefix = options.resend ? "[Rappel] " : "";
+  return {
+    subject: `${prefix} Demande d'accès à votre organisme ${payload.organisme.nom}`,
+    templateFile: getTemplateFile("validation_user_by_orga_admin"),
+    data: {
+      user: payload.user,
+      organisme: payload.organisme,
+      type: payload.type,
+      token,
+    },
+  };
+}
+
 // TODO [metier]
 // export function notification(cfa, token, options = {}) {
 //   const prefix = options.resend ? "[Rappel] " : "";

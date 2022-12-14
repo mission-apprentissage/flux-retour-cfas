@@ -89,24 +89,47 @@ const Finalize = () => {
             </Button>
           )}
 
-          {auth.isInPendingValidation && auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
-            <Ribbons variant="loading" mt="0.5rem">
-              <Box ml={3}>
-                <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
-                  Votre demande est en cours d&rsquo;étude par nos services.
-                </Text>
-                <Text color="bleufrance" mt={4} fontSize="0.9rem">
-                  Vous serez notifié dès que votre demander aura été validée.
-                </Text>
-                <Text color="grey.800" mt={4}>
-                  <Text textStyle="sm">
-                    Vous êtes la premieres personne a demander une accès à cet organisme. <br />
-                    Pour des raisons de sécurité, un de nos administrateurs va examiner votre demander. <br />
+          {auth.isInPendingValidation &&
+            !auth.hasAtLeastOneUserToValidate &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
+              <Ribbons variant="loading" mt="0.5rem">
+                <Box ml={3}>
+                  <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
+                    Votre demande est en cours d&rsquo;étude par nos services.
                   </Text>
-                </Text>
-              </Box>
-            </Ribbons>
-          )}
+                  <Text color="bleufrance" mt={4} fontSize="0.9rem">
+                    Vous serez notifié dès que votre demander aura été validée.
+                  </Text>
+                  <Text color="grey.800" mt={4}>
+                    <Text textStyle="sm">
+                      Vous êtes la premieres personne a demander une accès à cet organisme. <br />
+                      Pour des raisons de sécurité, un de nos administrateurs va examiner votre demande. <br />
+                    </Text>
+                  </Text>
+                </Box>
+              </Ribbons>
+            )}
+          {auth.isInPendingValidation &&
+            auth.hasAtLeastOneUserToValidate &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
+              <Ribbons variant="loading" mt="0.5rem">
+                <Box ml={3}>
+                  <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
+                    Votre demande d&rsquo;accès est en cours d&rsquo;étude par un gestionnaire de cet organisme.
+                  </Text>
+                  <Text color="bleufrance" mt={4} fontSize="0.9rem">
+                    Vous serez notifié dès que votre demander aura été validée.
+                  </Text>
+                  <Text color="grey.800" mt={4}>
+                    <Text textStyle="sm">
+                      Vous êtes la premieres personne a demander une accès à cet organisme. <br />
+                      Pour des raisons de sécurité, un des gestionnaire de cet organisme va examiner votre demande.
+                      <br />
+                    </Text>
+                  </Text>
+                </Box>
+              </Ribbons>
+            )}
           {!auth.isInPendingValidation && (
             <HStack spacing="4w">
               <Button size="md" variant="primary" onClick={handleSubmit} px={6}>

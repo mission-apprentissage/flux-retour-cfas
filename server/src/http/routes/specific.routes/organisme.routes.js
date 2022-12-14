@@ -1,9 +1,11 @@
 import express from "express";
+import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import { findOrganismeById, getContributeurs, updateOrganisme } from "../../../common/actions/organismes.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa } from "../../../common/actions/sifa.actions/sifa.actions.js";
+import { updatePermissionPending } from "../../../common/actions/permissions.actions.js";
 
 export default () => {
   const router = express.Router();
@@ -78,6 +80,24 @@ export default () => {
       const contributors = await getContributeurs(organisme_id);
 
       return res.json(contributors);
+    })
+  );
+
+  router.get(
+    "/contributors/confirm-access",
+    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    tryCatch(async ({ query }, res) => {
+      const { userEmail, organisme_id, validate } = await Joi.object({
+        userEmail: Joi.string().email().required(),
+        organisme_id: Joi.string().required(),
+        validate: Joi.boolean().required(),
+      }).validateAsync(query, { abortEarly: false });
+      if (validate) {
+        await updatePermissionPending({ organisme_id, userEmail, pending: false });
+      } else {
+        // TODO REJECTED PERM
+      }
+      return res.json({ ok: true });
     })
   );
 
