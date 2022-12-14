@@ -1,13 +1,18 @@
 import Joi from "joi";
 import { transformToInternationalNumber } from "../../../../common/utils/validationsUtils/frenchTelephoneNumber.js";
-import { dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb, effectifsDb } from "../../../../common/model/collections.js";
 import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
 } from "../../../../common/model/next.toKeep.models/dossiersApprenantsMigration.model.js";
-import { createEffectif } from "../../../../common/actions/effectifs.actions.js";
+import { createEffectif, updateEffectifAndLock } from "../../../../common/actions/effectifs.actions.js";
 import { defaultValuesApprenant } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
+import { ObjectId } from "mongodb";
+import {
+  defaultValuesEffectif,
+  validateEffectif,
+} from "../../../../common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
 
 export const createEffectifFromDossierApprenantMigrated = async (dossiersApprenantsMigrated) => {
   // Map dossiersApprenantsMigrated fields for creation / update
@@ -57,18 +62,44 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
     ...(annee ? { annee } : {}),
   };
 
-  // Create effectif locked
-  await createEffectif(
-    {
-      organisme_id,
-      ...(annee_scolaire ? { annee_scolaire } : {}),
-      ...(source ? { source } : {}),
-      ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-      apprenant: effectifApprenant,
-      formation: formationApprenant,
-    },
-    true
-  );
+  // Create effectif for migration
+  // TODO Handle contrats
+  const createdId = await createEffectifForMigration({
+    organisme_id,
+    ...(annee_scolaire ? { annee_scolaire } : {}),
+    ...(source ? { source } : {}),
+    ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
+    apprenant: effectifApprenant,
+    formation: formationApprenant,
+  });
+
+  // Lock api fields
+  await updateEffectifAndLock(createdId, { apprenant: effectifApprenant, formation: formationApprenant });
+};
+
+/**
+ * Méthode de création d'un effectif
+ * @returns
+ */
+export const createEffectifForMigration = async (
+  { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant, formation },
+  lockAtCreate = false
+) => {
+  const _id_erp_apprenant = id_erp_apprenant ?? new ObjectId().toString();
+  const defaultValues = defaultValuesEffectif({ lockAtCreate });
+  const dataToInsert = {
+    ...defaultValues,
+    apprenant,
+    formation,
+    id_erp_apprenant: _id_erp_apprenant,
+    organisme_id: ObjectId(organisme_id),
+    source,
+    annee_scolaire,
+  };
+
+  const { insertedId } = await effectifsDb().insertOne(validateEffectif(dataToInsert));
+
+  return insertedId;
 };
 
 /**
