@@ -1,4 +1,7 @@
 export const apprenantStatutsSchema = {
+  "apprenant.nouveau_statut": {
+    autosave: false,
+  },
   "apprenant.historique_statut[].date_statut": {
     label: "Date de changement de statut",
     fieldType: "date",

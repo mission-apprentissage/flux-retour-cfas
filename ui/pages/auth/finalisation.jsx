@@ -1,4 +1,17 @@
-import { Flex, Box, Button, HStack, Text, Heading } from "@chakra-ui/react";
+import {
+  Flex,
+  Box,
+  Button,
+  HStack,
+  Text,
+  Heading,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  VStack,
+  Radio,
+  FormErrorMessage,
+} from "@chakra-ui/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import React from "react";
@@ -24,12 +37,20 @@ const Finalize = () => {
 
   const title = "Finalisation de votre inscription";
 
-  const { handleSubmit: handleDemandeAcces } = useFormik({
+  const {
+    handleSubmit: handleDemandeAcces,
+    handleChange,
+    errors,
+    touched,
+    values: valuesAccess,
+  } = useFormik({
     initialValues: {
-      type: "organisme.admin",
+      type: "",
     },
     validationSchema: Yup.object().shape({
-      type: Yup.string().required("Requis"),
+      type: Yup.string()
+        .matches(/(organisme.admin|organisme.member|organisme.readonly)/)
+        .required("Requis"),
     }),
     onSubmit: (values) => {
       // eslint-disable-next-line no-undef, no-async-promise-executor
@@ -84,9 +105,28 @@ const Finalize = () => {
         </Heading>
         <Box mt={5}>
           {auth.isInPendingValidation && auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" && (
-            <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
-              Demander l&rsquo;accès Gestion
-            </Button>
+            <>
+              <FormControl py={2} isRequired isInvalid={errors.type && touched.type}>
+                <FormLabel>Votre accès</FormLabel>
+                <RadioGroup id="type" name="type" value={valuesAccess.type} mt={8}>
+                  <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
+                    <Radio value={"organisme.readonly"} onChange={handleChange} size="lg">
+                      Lecture
+                    </Radio>
+                    <Radio value={"organisme.member"} onChange={handleChange} size="lg">
+                      Écriture
+                    </Radio>
+                    <Radio value={"organisme.admin"} onChange={handleChange} size="lg">
+                      Gestion
+                    </Radio>
+                  </VStack>
+                </RadioGroup>
+                {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
+              </FormControl>
+              <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                Demander l&rsquo;accès
+              </Button>
+            </>
           )}
 
           {auth.isInPendingValidation &&

@@ -220,8 +220,8 @@ export default () => {
 
       if (nouveau_statut) {
         dataToUpdate.apprenant.historique_statut.push({
-          valeur_statut: nouveau_statut.valeur,
-          date_statut: nouveau_statut.date,
+          valeur_statut: nouveau_statut.valeur_statut,
+          date_statut: nouveau_statut.date_statut,
           date_reception: new Date(),
         });
       }

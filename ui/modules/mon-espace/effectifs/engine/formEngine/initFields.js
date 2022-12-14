@@ -29,7 +29,7 @@ const requiredApprenantAdresseFieldsSifa = [
   "apprenant.adresse.commune",
 ];
 
-export const initFields = ({ cerfa, schema, modeSifa }) => {
+export const initFields = ({ cerfa, schema, modeSifa, canEdit }) => {
   const createField = createFieldFactory({ modeSifa, schema });
   let fields = {};
 
@@ -39,45 +39,59 @@ export const initFields = ({ cerfa, schema, modeSifa }) => {
   Object.keys(schema.fields).forEach((name) => {
     const data = get(cerfa, name);
     if (!data) return;
-    fields[name] = createField({ name, data });
+    fields[name] = { ...createField({ name, data }), ...(!canEdit ? { locked: true } : {}) };
   });
 
-  fields[`apprenant.nouveau_statut.date_statut`] = {
-    ...createField({
-      forceFieldDefinition: `apprenant.historique_statut[].date_statut`,
-      name: `apprenant.nouveau_statut.date_statut`,
+  let historique_statut = [];
+  let showAddStatut = true;
+  if ((modeSifa && !!cerfa.apprenant.historique_statut.value.length) || !canEdit) {
+    historique_statut = cerfa.apprenant.historique_statut.value;
+    showAddStatut = false;
+  } else {
+    fields[`apprenant.nouveau_statut`] = createField({
+      name: `apprenant.nouveau_statut`,
       data: "",
-    }),
-    locked: false,
-  };
-  fields[`apprenant.nouveau_statut.valeur_statut`] = {
-    ...createField({
-      forceFieldDefinition: `apprenant.historique_statut[].valeur_statut`,
-      name: `apprenant.nouveau_statut.valeur_statut`,
-      data: "",
-    }),
-    locked: false,
-  };
+    });
+    historique_statut = [
+      {
+        date_statut: "",
+        date_reception: "",
+        valeur_statut: "",
+      },
+      ...cerfa.apprenant.historique_statut.value,
+    ];
+  }
 
-  cerfa.apprenant.historique_statut.value.forEach((statut, i) => {
+  historique_statut.forEach((statut, i) => {
     const prefix = `apprenant.historique_statut[${i}]`;
-    fields[`${prefix}.date_statut`] = createField({
-      name: `${prefix}.date_statut`,
-      data: { value: statut.date_statut },
-    });
-    fields[`${prefix}.date_reception`] = createField({
-      name: `${prefix}.date_reception`,
-      data: { value: statut.date_reception },
-    });
-    fields[`${prefix}.valeur_statut`] = createField({
-      name: `${prefix}.valeur_statut`,
-      data: { value: statut.valeur_statut },
-    });
+    const showAddStatutFirstLine = i === 0 && showAddStatut;
+
+    fields[`${prefix}.date_statut`] = {
+      ...createField({
+        name: `${prefix}.date_statut`,
+        data: { value: statut.date_statut },
+      }),
+      ...(showAddStatutFirstLine ? { autosave: false, locked: false } : {}),
+    };
+    fields[`${prefix}.date_reception`] = {
+      ...createField({
+        name: `${prefix}.date_reception`,
+        data: { value: statut.date_reception },
+      }),
+      ...(showAddStatutFirstLine ? { autosave: false, locked: false } : {}),
+    };
+    fields[`${prefix}.valeur_statut`] = {
+      ...createField({
+        name: `${prefix}.valeur_statut`,
+        data: { value: statut.valeur_statut },
+      }),
+      ...(showAddStatutFirstLine ? { autosave: false, locked: false } : {}),
+    };
   });
 
   let contrats = [];
   let showAddContrat = true;
-  if (modeSifa && !!cerfa.apprenant.contrats.value.length) {
+  if ((modeSifa && !!cerfa.apprenant.contrats.value.length) || !canEdit) {
     contrats = cerfa.apprenant.contrats.value;
     showAddContrat = false;
   } else {

@@ -1,3 +1,4 @@
+import { apprenantNouveauStatutControl } from "./apprenantNouveauStatut.control";
 import { employeurSiretControl } from "./employeurSiret.control";
 // import { idccControl } from "./idcc.control";
 // import { RemunerationsControl } from "./remunerations.control";
@@ -41,6 +42,7 @@ export const controls = [
   // ...responsableLegalControl,
   // ...idccControl,
   ...employeurSiretControl,
+  ...apprenantNouveauStatutControl,
   // ...ContratDatesControl,
   // ...dateFormationControl,
   // siretOrganismeFormationLogic,

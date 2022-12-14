@@ -14,6 +14,7 @@ export default {
       "organisme/page_effectifs/telecharger",
 
       "organisme/page_sifa2",
+      "organisme/page_sifa2/edition",
       "organisme/page_sifa2/telecharger",
 
       "organisme/page_parametres",
@@ -36,6 +37,7 @@ export default {
       "organisme/page_effectifs/ajout_apprenant",
       "organisme/page_effectifs/telecharger",
       "organisme/page_sifa2",
+      "organisme/page_sifa2/edition",
       "organisme/page_sifa2/telecharger",
     ],
   },
@@ -44,7 +46,14 @@ export default {
     type: "permission",
     title: "Lecteur",
     description: "Permission lecteur d'organisme",
-    acl: ["organisme", "organisme/tableau_de_bord", "organisme/page_effectifs", "organisme/page_effectifs/telecharger"],
+    acl: [
+      "organisme",
+      "organisme/tableau_de_bord",
+      "organisme/page_effectifs",
+      "organisme/page_effectifs/telecharger",
+      "organisme/page_sifa2",
+      "organisme/page_sifa2/telecharger",
+    ],
   },
   "organisme.statsonly": {
     name: "organisme.statsonly",

@@ -23,7 +23,7 @@ import { DateTime } from "luxon";
 import { _getBlob } from "../../../../common/httpClient";
 import useDownloadClick from "../../../../hooks/old/useDownloadClick";
 
-const EffectifDetails = ({ row, modeSifa = false }) => {
+const EffectifDetails = ({ row, modeSifa = false, canEdit = false }) => {
   const queryClient = useQueryClient();
   const prevEffectifId = useRef(null);
   const setEffectifId = useSetRecoilState(effectifIdAtom);
@@ -41,7 +41,7 @@ const EffectifDetails = ({ row, modeSifa = false }) => {
 
   return (
     <Box>
-      <Effectif modeSifa={modeSifa} />
+      <Effectif modeSifa={modeSifa} canEdit={canEdit} />
     </Box>
   );
 };
@@ -63,6 +63,7 @@ const DownloadButton = ({ title, fileName, getFile }) => {
 const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
+  const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
 
   const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
@@ -381,7 +382,7 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
           }}
           getRowCanExpand={() => true}
           renderSubComponent={({ row }) => {
-            return <EffectifDetails row={row} modeSifa={modeSifa} />;
+            return <EffectifDetails row={row} modeSifa={modeSifa} canEdit={canEdit} />;
           }}
         />
       </Box>
