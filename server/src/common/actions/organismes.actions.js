@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
+import { mapping } from "../../jobs/fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/mapping.js";
 import { getMetiersBySirets } from "../apis/apiLba.js";
-import { FIABILISATION_UAI_SIRET_COUPLE_MAPPING } from "../constants/fiabilisationMappingUaiSiretCouples.js";
-import { organismesDb } from "../model/collections.js";
+import { fiabilisationUaiSiretDb, organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { generateKey } from "../utils/cryptoUtils.js";
@@ -61,10 +61,13 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
  * @param {*} {param0}
  * @returns
  */
-export const mapFiabilizedOrganismeUaiSiretCouple = ({ uai, siret }) => {
-  const foundCouple = FIABILISATION_UAI_SIRET_COUPLE_MAPPING.filter(
-    (item) => (item.uai && item.uai === uai) || (item.siret && item.siret === siret)
-  ).map(({ uai_fiable, siret_fiable }) => ({ uai: uai_fiable, siret: siret_fiable }));
+export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret }) => {
+  // Check fiabilized couple in fiabilisation file merged collection
+  const fiabilisationMappings = [...(await fiabilisationUaiSiretDb().find().toArray()), ...mapping];
+
+  const foundCouple = fiabilisationMappings
+    .filter((item) => (item.uai && item.uai === uai) || (item.siret && item.siret === siret))
+    .map(({ uai_fiable, siret_fiable }) => ({ uai: uai_fiable, siret: siret_fiable }));
 
   return foundCouple[0] || { uai, siret }; // Take only first match
 };
