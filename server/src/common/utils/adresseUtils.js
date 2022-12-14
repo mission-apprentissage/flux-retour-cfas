@@ -13,7 +13,8 @@ export const buildAdresseFromApiEntreprise = async (siret) => {
 
   // Handle academie
   const { nom_academie } = findDataByDepartementNum(code_dept);
-  const academieFromConstant = Object.keys(ACADEMIES).find((key) => ACADEMIES[key].nom === nom_academie);
+  const academieKeyMatching = Object.keys(ACADEMIES).find((key) => ACADEMIES[key].nom === nom_academie);
+  const academie = `${ACADEMIES[academieKeyMatching].code}`;
 
   return {
     adresse: {
@@ -35,7 +36,7 @@ export const buildAdresseFromApiEntreprise = async (siret) => {
       ...(etablissementApiInfo.region_implantation.value
         ? { region: etablissementApiInfo.region_implantation.code }
         : {}),
-      ...(academieFromConstant ? { academie: academieFromConstant } : {}),
+      ...(academie ? { academie: academie } : {}),
       ...(buildAdresse(etablissementApiInfo.adresse) ? { complete: buildAdresse(etablissementApiInfo.adresse) } : {}),
       ...(etablissementApiInfo.pays_implantation.code ? { pays: etablissementApiInfo.pays_implantation.code } : {}),
     },

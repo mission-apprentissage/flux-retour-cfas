@@ -1,13 +1,16 @@
+import Joi from "joi";
 import { omit } from "lodash-es";
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
 import { organismesDb } from "../../../../common/model/collections.js";
 import {
   defaultValuesOrganisme,
   validateOrganisme,
 } from "../../../../common/model/next.toKeep.models/organismes.model.js";
-// import { buildAdresseFromApiEntreprise } from "../../../../common/utils/adresseUtils.js";
+import { buildAdresseFromApiEntreprise } from "../../../../common/utils/adresseUtils.js";
 import { buildTokenizedString } from "../../../../common/utils/buildTokenizedString.js";
 import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
+import { siretSchema } from "../../../../common/utils/validationUtils.js";
 
 /**
  * Méthode de création d'un organisme pour la migration des cfas
@@ -49,21 +52,14 @@ const RESEAUX_NAMES_TO_KEY = Object.keys(RESEAUX_CFAS).reduce(
 export const mapCfaPropsToOrganismeProps = async (cfaProps) => {
   const mappedReseaux = cfaProps.reseaux.map((oldReseau) => RESEAUX_NAMES_TO_KEY[oldReseau]);
 
-  // Si un seul siret on récupère l'adresse depuis l'API Entreprise (si aucun alors on construit depuis l'UAI)
-  // Si plusieurs sirets on construit l'adresse depuis l'UAI
-  // TODO Voir quoi faire pour les organismes multi sirets
-  // TODO : Erreurs 422 sur l'appel API Entreprise en boucle : desactivé temporairement
-  // const adresseBuildFromSiretOrUai =
-  //   cfaProps.sirets.length === 1
-  //     ? (await buildAdresseFromApiEntreprise(cfaProps.sirets[0])) || buildAdresseFromUai(cfaProps.uai)
-  //     : buildAdresseFromUai(cfaProps.uai);
+  const adresseForOrganisme = await buildAdresseForOrganisme(cfaProps);
 
   return {
     // remove field not needed
     ...omit(cfaProps, ["region_nom", "region_num", "adresse", "private_url"]),
-    // add adresse from api entreprise or uai
-    //...adresseBuildFromSiretOrUai, // TODO : Erreurs 422 sur l'appel API Entreprise en boucle : desactivé temporairement
-    ...buildAdresseFromUai(cfaProps.uai),
+    // add adresse from api entreprise or from uai
+    ...adresseForOrganisme,
+    // ...buildAdresseFromUai(cfaProps.uai),
     // handle métiers null
     metiers: cfaProps.metiers ?? [],
     // handle updated_at null : only specific cases
@@ -74,4 +70,41 @@ export const mapCfaPropsToOrganismeProps = async (cfaProps) => {
     mode_de_transmission: "API",
     setup_step_courante: "COMPLETE",
   };
+};
+
+/**
+ * Méthode de récupération de l'adresse pour un organisme via ses props
+ * Par défaut l'adresse est construite depuis l'UAI
+ * Si l'organisme a un seul siret et qu'il est valide alors on récupère l'adresse depuis l'API Entreprise
+ // TODO Voir quoi faire pour les organismes multi sirets
+ * @param {*} cfaProps
+ */
+const buildAdresseForOrganisme = async (cfaProps) => {
+  let adresseForOrganisme = buildAdresseFromUai(cfaProps.uai);
+
+  try {
+    // Si un seul siret et qu'il est valide on récupère l'adresse via l'API Entreprise
+    if (cfaProps.sirets.length === 1) {
+      const siretForOrganisme = cfaProps.sirets[0];
+      const validSiret = siretSchema().validate(siretForOrganisme);
+      if (!validSiret.error) {
+        adresseForOrganisme = await buildAdresseFromApiEntreprise(siretForOrganisme);
+      }
+    }
+  } catch (error) {
+    const { stack: errorStack, message: errorMessage } = error;
+    await createJobEvent({
+      jobname: "refacto-migration-cfas-to-organismes",
+      date: new Date(),
+      action: "log-cfasNotMigrated-buildAdresseForOrganisme-error",
+      data: {
+        cfaProps,
+        error,
+        errorStack,
+        errorMessage,
+      },
+    });
+  }
+
+  return adresseForOrganisme;
 };

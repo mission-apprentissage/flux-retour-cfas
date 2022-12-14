@@ -11,7 +11,6 @@ import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js"
 import { sleep } from "../../../../common/utils/miscUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-const SLEEP_TIME_BETWEEN_CREATION = 1000;
 
 /**
  * Ce script effectue la migration de la collection cfas vers la nouvelle collection organismes
@@ -41,9 +40,6 @@ export const migrateCfasToOrganismes = async () => {
       const { _id } = await createOrganismeFromCfa(mappedToOrganisme);
       await updateOrganismeApiKey(_id);
       nbCfasMigrated++;
-
-      // Wait for api calls
-      await sleep(SLEEP_TIME_BETWEEN_CREATION);
     } catch (error) {
       cfasNotMigrated.push(currentOldCfa.uai);
 

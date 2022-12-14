@@ -63,7 +63,7 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
   };
 
   // Create effectif for migration
-  // TODO Handle contrats
+  // TODO Handle contrats add one element with date_debut / fin / rupture
   const createdId = await createEffectifForMigration({
     organisme_id,
     ...(annee_scolaire ? { annee_scolaire } : {}),
