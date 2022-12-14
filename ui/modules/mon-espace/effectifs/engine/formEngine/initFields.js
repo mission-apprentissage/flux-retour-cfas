@@ -185,56 +185,56 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit }) => {
     fields[`${prefix}.adresse.numero`] = {
       ...createField({
         name: `${prefix}.adresse.numero`,
-        data: { value: contrat.adresse.numero },
+        data: { value: contrat.adresse?.numero },
       }),
       ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.repetition_voie`] = {
       ...createField({
         name: `${prefix}.adresse.repetition_voie`,
-        data: { value: contrat.adresse.repetition_voie },
+        data: { value: contrat.adresse?.repetition_voie },
       }),
       ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.voie`] = {
       ...createField({
         name: `${prefix}.adresse.voie`,
-        data: { value: contrat.adresse.voie },
+        data: { value: contrat.adresse?.voie },
       }),
       ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.complement`] = {
       ...createField({
         name: `${prefix}.adresse.complement`,
-        data: { value: contrat.adresse.complement },
+        data: { value: contrat.adresse?.complement },
       }),
       ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.code_postal`] = {
       ...createField({
         name: `${prefix}.adresse.code_postal`,
-        data: { value: contrat.adresse.code_postal },
+        data: { value: contrat.adresse?.code_postal },
       }),
       ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.commune`] = {
       ...createField({
         name: `${prefix}.adresse.commune`,
-        data: { value: contrat.adresse.commune },
+        data: { value: contrat.adresse?.commune },
       }),
       ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.departement`] = {
       ...createField({
         name: `${prefix}.adresse.departement`,
-        data: { value: contrat.adresse.departement },
+        data: { value: contrat.adresse?.departement },
       }),
       ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
     fields[`${prefix}.adresse.region`] = {
       ...createField({
         name: `${prefix}.adresse.region`,
-        data: { value: contrat.adresse.region },
+        data: { value: contrat.adresse?.region },
       }),
       ...(showAddContratFirstLine ? { autosave: false } : {}),
     };
