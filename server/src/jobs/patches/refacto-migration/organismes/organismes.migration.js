@@ -8,8 +8,10 @@ import { siretSchema } from "../../../../common/utils/validationUtils.js";
 import { createOrganismeFromCfa, mapCfaPropsToOrganismeProps } from "./organismes.migration.actions.js";
 import { updateOrganismeApiKey } from "../../../../common/actions/organismes.actions.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
+import { sleep } from "../../../../common/utils/miscUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+const SLEEP_TIME_BETWEEN_CREATION = 1000;
 
 /**
  * Ce script effectue la migration de la collection cfas vers la nouvelle collection organismes
@@ -34,11 +36,14 @@ export const migrateCfasToOrganismes = async () => {
 
   await asyncForEach(allCfas, async (currentOldCfa) => {
     // Pour chaque cfa on le transforme en organisme
-    const mappedToOrganisme = mapCfaPropsToOrganismeProps(currentOldCfa);
+    const mappedToOrganisme = await mapCfaPropsToOrganismeProps(currentOldCfa);
     try {
       const { _id } = await createOrganismeFromCfa(mappedToOrganisme);
       await updateOrganismeApiKey(_id);
       nbCfasMigrated++;
+
+      // Wait for api calls
+      await sleep(SLEEP_TIME_BETWEEN_CREATION);
     } catch (error) {
       cfasNotMigrated.push(currentOldCfa.uai);
 
@@ -95,7 +100,7 @@ export const migrateSingleCfaToOrganisme = async (uai) => {
   await organismesDb().deleteMany({ uai });
 
   const currentCfa = await cfasDb().findOne({ uai });
-  const mappedToOrganisme = mapCfaPropsToOrganismeProps(currentCfa);
+  const mappedToOrganisme = await mapCfaPropsToOrganismeProps(currentCfa);
 
   try {
     await createOrganismeFromCfa(mappedToOrganisme);

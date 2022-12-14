@@ -5,6 +5,7 @@ import {
   defaultValuesOrganisme,
   validateOrganisme,
 } from "../../../../common/model/next.toKeep.models/organismes.model.js";
+// import { buildAdresseFromApiEntreprise } from "../../../../common/utils/adresseUtils.js";
 import { buildTokenizedString } from "../../../../common/utils/buildTokenizedString.js";
 import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
 
@@ -45,13 +46,23 @@ const RESEAUX_NAMES_TO_KEY = Object.keys(RESEAUX_CFAS).reduce(
  * Récupération de l'adresse depuis l'uai
  * Suppression des champs inutiles
  */
-export const mapCfaPropsToOrganismeProps = (cfaProps) => {
+export const mapCfaPropsToOrganismeProps = async (cfaProps) => {
   const mappedReseaux = cfaProps.reseaux.map((oldReseau) => RESEAUX_NAMES_TO_KEY[oldReseau]);
+
+  // Si un seul siret on récupère l'adresse depuis l'API Entreprise (si aucun alors on construit depuis l'UAI)
+  // Si plusieurs sirets on construit l'adresse depuis l'UAI
+  // TODO Voir quoi faire pour les organismes multi sirets
+  // TODO : Erreurs 422 sur l'appel API Entreprise en boucle : desactivé temporairement
+  // const adresseBuildFromSiretOrUai =
+  //   cfaProps.sirets.length === 1
+  //     ? (await buildAdresseFromApiEntreprise(cfaProps.sirets[0])) || buildAdresseFromUai(cfaProps.uai)
+  //     : buildAdresseFromUai(cfaProps.uai);
 
   return {
     // remove field not needed
     ...omit(cfaProps, ["region_nom", "region_num", "adresse", "private_url"]),
-    // add adresse from uai
+    // add adresse from api entreprise or uai
+    //...adresseBuildFromSiretOrUai, // TODO : Erreurs 422 sur l'appel API Entreprise en boucle : desactivé temporairement
     ...buildAdresseFromUai(cfaProps.uai),
     // handle métiers null
     metiers: cfaProps.metiers ?? [],
@@ -59,5 +70,8 @@ export const mapCfaPropsToOrganismeProps = (cfaProps) => {
     updated_at: cfaProps.updated_at ?? new Date(),
     // handle réseaux
     reseaux: mappedReseaux,
+    // handle réseaux
+    mode_de_transmission: "API",
+    setup_step_courante: "COMPLETE",
   };
 };

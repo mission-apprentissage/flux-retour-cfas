@@ -2,14 +2,11 @@ import { strict as assert } from "assert";
 import { createRandomOrganisme } from "../../../data/randomizedSample.js";
 import pick from "lodash.pick";
 import {
-  createAndControlOrganisme,
   createOrganisme,
   findOrganismeById,
-  mapFiabilizedOrganismeUaiSiretCouple,
   updateOrganisme,
 } from "../../../../src/common/actions/organismes.actions.js";
 import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
-import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
 
 describe("Test des actions Organismes", () => {
   describe("createOrganisme", () => {
