@@ -8,7 +8,6 @@ import { siretSchema } from "../../../../common/utils/validationUtils.js";
 import { createOrganismeFromCfa, mapCfaPropsToOrganismeProps } from "./organismes.migration.actions.js";
 import { updateOrganismeApiKey } from "../../../../common/actions/organismes.actions.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
-import { sleep } from "../../../../common/utils/miscUtils.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

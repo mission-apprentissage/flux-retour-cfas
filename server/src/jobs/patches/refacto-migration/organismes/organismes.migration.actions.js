@@ -1,4 +1,3 @@
-import Joi from "joi";
 import { omit } from "lodash-es";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";

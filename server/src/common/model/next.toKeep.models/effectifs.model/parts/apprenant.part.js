@@ -182,7 +182,7 @@ export const apprenantSchema = object(
           date_rupture: date({ description: "Date de rupture du contrat" }),
         },
         {
-          required: ["date_debut", "date_fin", "date_rupture"], // TODO siret
+          required: ["date_debut", "date_fin"], // TODO siret // Removed required date_rupture car on contrat peut ne pas avoir de rupture
           additionalProperties: true,
         }
       ),

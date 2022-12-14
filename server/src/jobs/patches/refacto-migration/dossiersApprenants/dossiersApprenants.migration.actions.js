@@ -5,7 +5,7 @@ import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
 } from "../../../../common/model/next.toKeep.models/dossiersApprenantsMigration.model.js";
-import { createEffectif, updateEffectifAndLock } from "../../../../common/actions/effectifs.actions.js";
+import { updateEffectifAndLock } from "../../../../common/actions/effectifs.actions.js";
 import { defaultValuesApprenant } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
 import { ObjectId } from "mongodb";
@@ -29,7 +29,10 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
     niveau_formation_libelle: niveau_libelle,
     periode_formation: periode,
     annee_formation: annee,
-
+    code_commune_insee_apprenant,
+    contrat_date_debut,
+    contrat_date_fin,
+    contrat_date_rupture,
     nom_apprenant: nom,
     prenom_apprenant: prenom,
     ine_apprenant: ine,
@@ -40,7 +43,19 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
     historique_statut_apprenant: historique_statut,
   } = dossiersApprenantsMigrated;
 
-  const effectifApprenant = {
+  // Construction d'une liste de contrat avec un seul élement matchant les 3 dates si nécessaire
+  const contrats =
+    contrat_date_debut || contrat_date_fin || contrat_date_rupture
+      ? [
+          {
+            ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
+            ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
+            ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
+          },
+        ]
+      : [];
+
+  const apprenantEffectif = {
     ...defaultValuesApprenant(),
     ...(ine ? { ine } : {}),
     ...(nom ? { nom } : {}),
@@ -49,9 +64,13 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
     ...(courriel ? { courriel } : {}),
     ...(telephone ? { telephone } : {}),
     ...(historique_statut ? { historique_statut } : {}),
+    // Build adresse with code_commune_insee
+    ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
+    // Build contrats si nécessaire
+    contrats,
   };
 
-  const formationApprenant = {
+  const formationEffectif = {
     ...defaultValuesFormationEffectif(),
     ...(cfd ? { cfd } : {}),
     ...(rncp ? { rncp } : {}),
@@ -63,18 +82,17 @@ export const createEffectifFromDossierApprenantMigrated = async (dossiersApprena
   };
 
   // Create effectif for migration
-  // TODO Handle contrats add one element with date_debut / fin / rupture
   const createdId = await createEffectifForMigration({
     organisme_id,
     ...(annee_scolaire ? { annee_scolaire } : {}),
     ...(source ? { source } : {}),
     ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-    apprenant: effectifApprenant,
-    formation: formationApprenant,
+    apprenant: apprenantEffectif,
+    formation: formationEffectif,
   });
 
   // Lock api fields
-  await updateEffectifAndLock(createdId, { apprenant: effectifApprenant, formation: formationApprenant });
+  await updateEffectifAndLock(createdId, { apprenant: apprenantEffectif, formation: formationEffectif });
 };
 
 /**
