@@ -1,4 +1,4 @@
-import { object, objectId, string, date, boolean } from "../../json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, date, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes.js";
 import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part.js";
 
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part.js";
@@ -29,6 +29,16 @@ export const schema = object(
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
     archive: boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }),
+    validation_errors: arrayOf(
+      object({
+        fieldName: string({ description: "Nom du champ en erreur" }),
+        inputValue: string({ description: "Valeur fournie en entrée" }),
+        message: string({ description: "Message de l'erreur" }),
+      }),
+      {
+        description: "Erreurs de validation de cet effectif",
+      }
+    ),
   },
   {
     required: ["apprenant", "id_erp_apprenant", "organisme_id", "source", "annee_scolaire"],
@@ -42,6 +52,7 @@ export function defaultValuesEffectif({ lockAtCreate = false }) {
     apprenant: defaultValuesApprenant(),
     formation: defaultValuesFormationEffectif(),
     is_lock: defaultValuesEffectifFieldsLocker(lockAtCreate),
+    validation_errors: [],
     updated_at: new Date(),
     created_at: new Date(),
   };
