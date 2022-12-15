@@ -7,28 +7,22 @@ import {
 } from "../model/next.toKeep.models/effectifs.model/effectifs.model.js";
 import { defaultValuesApprenant } from "../model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
+import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber.js";
 
 /**
  * Méthode de création d'un effectif
  * @returns
  */
 export const createEffectif = async (
-  { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant: { nom, prenom }, formation: { cfd } },
+  { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant, formation },
   lockAtCreate = false
 ) => {
   const _id_erp_apprenant = id_erp_apprenant ?? new ObjectId().toString();
   const defaultValues = defaultValuesEffectif({ lockAtCreate });
   const dataToInsert = {
     ...defaultValues,
-    apprenant: {
-      nom,
-      prenom,
-      ...defaultValues.apprenant,
-    },
-    formation: {
-      cfd,
-      ...defaultValues.formation,
-    },
+    apprenant,
+    formation,
     id_erp_apprenant: _id_erp_apprenant,
     organisme_id: ObjectId(organisme_id),
     source,
@@ -44,7 +38,7 @@ export const createEffectif = async (
  * Méthode de création d'un effectif depuis un dossierApprenant
  * @param {*} dossiersApprenant
  */
-export const createEffectifFromDossierApprenant = async (dossiersApprenant) => {
+export const createEffectifFromDossierApprenant = async (dossiersApprenant, lockAtCreate = false) => {
   const {
     organisme_id,
     annee_scolaire,
@@ -58,7 +52,10 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant) => {
     niveau_formation_libelle: niveau_libelle,
     periode_formation: periode,
     annee_formation: annee,
-
+    code_commune_insee_apprenant,
+    contrat_date_debut,
+    contrat_date_fin,
+    contrat_date_rupture,
     nom_apprenant: nom,
     prenom_apprenant: prenom,
     ine_apprenant: ine,
@@ -69,18 +66,34 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant) => {
     historique_statut_apprenant: historique_statut,
   } = dossiersApprenant;
 
-  const effectifApprenant = {
+  // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
+  const contrats =
+    contrat_date_debut || contrat_date_fin || contrat_date_rupture
+      ? [
+          {
+            ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
+            ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
+            ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
+          },
+        ]
+      : [];
+
+  const apprenantEffectif = {
     ...defaultValuesApprenant(),
     ...(ine ? { ine } : {}),
     ...(nom ? { nom } : {}),
     ...(prenom ? { prenom } : {}),
     ...(date_de_naissance ? { date_de_naissance } : {}),
     ...(courriel ? { courriel } : {}),
-    ...(telephone ? { telephone } : {}),
+    ...(telephone ? { telephone: transformToInternationalNumber(telephone) } : {}),
     ...(historique_statut ? { historique_statut } : {}),
+    // Build adresse with code_commune_insee
+    ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
+    // Build contrats si nécessaire
+    contrats,
   };
 
-  const formationApprenant = {
+  const formationEffectif = {
     ...defaultValuesFormationEffectif(),
     ...(cfd ? { cfd } : {}),
     ...(rncp ? { rncp } : {}),
@@ -91,17 +104,17 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant) => {
     ...(annee ? { annee } : {}),
   };
 
-  // Create effectif locked
+  // Create effectif with lock option
   const effectifId = await createEffectif(
     {
       organisme_id,
       ...(annee_scolaire ? { annee_scolaire } : {}),
       ...(source ? { source } : {}),
       ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-      apprenant: effectifApprenant,
-      formation: formationApprenant,
+      apprenant: apprenantEffectif,
+      formation: formationEffectif,
     },
-    true
+    lockAtCreate
   );
 
   const effectifCreated = await effectifsDb().findOne({ _id: effectifId });
@@ -197,4 +210,8 @@ export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
   );
 
   return updated.value;
+};
+
+export const buildEffectifValidationErrors = async (data) => {
+  validateEffectif(data);
 };

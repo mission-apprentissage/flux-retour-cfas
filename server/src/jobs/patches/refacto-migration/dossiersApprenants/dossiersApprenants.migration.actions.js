@@ -1,123 +1,27 @@
 import Joi from "joi";
 import { transformToInternationalNumber } from "../../../../common/utils/validationsUtils/frenchTelephoneNumber.js";
-import { dossiersApprenantsMigrationDb, effectifsDb } from "../../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
 import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
 } from "../../../../common/model/next.toKeep.models/dossiersApprenantsMigration.model.js";
-import { updateEffectifAndLock } from "../../../../common/actions/effectifs.actions.js";
-import { defaultValuesApprenant } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
-import { defaultValuesFormationEffectif } from "../../../../common/model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
-import { ObjectId } from "mongodb";
 import {
-  defaultValuesEffectif,
-  validateEffectif,
-} from "../../../../common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
-
-export const createEffectifFromDossierApprenantMigrated = async (dossiersApprenantsMigrated) => {
-  // Map dossiersApprenantsMigrated fields for creation / update
-  const {
-    organisme_id,
-    annee_scolaire,
-    source,
-    id_erp_apprenant,
-
-    formation_cfd: cfd,
-    formation_rncp: rncp,
-    libelle_long_formation: libelle_long,
-    niveau_formation: niveau,
-    niveau_formation_libelle: niveau_libelle,
-    periode_formation: periode,
-    annee_formation: annee,
-    code_commune_insee_apprenant,
-    contrat_date_debut,
-    contrat_date_fin,
-    contrat_date_rupture,
-    nom_apprenant: nom,
-    prenom_apprenant: prenom,
-    ine_apprenant: ine,
-    date_de_naissance_apprenant: date_de_naissance,
-    email_contact: courriel,
-    telephone_apprenant: telephone,
-
-    historique_statut_apprenant: historique_statut,
-  } = dossiersApprenantsMigrated;
-
-  // Construction d'une liste de contrat avec un seul élement matchant les 3 dates si nécessaire
-  const contrats =
-    contrat_date_debut || contrat_date_fin || contrat_date_rupture
-      ? [
-          {
-            ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
-            ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
-            ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
-          },
-        ]
-      : [];
-
-  const apprenantEffectif = {
-    ...defaultValuesApprenant(),
-    ...(ine ? { ine } : {}),
-    ...(nom ? { nom } : {}),
-    ...(prenom ? { prenom } : {}),
-    ...(date_de_naissance ? { date_de_naissance } : {}),
-    ...(courriel ? { courriel } : {}),
-    ...(telephone ? { telephone: transformToInternationalNumber(telephone) } : {}),
-    ...(historique_statut ? { historique_statut } : {}),
-    // Build adresse with code_commune_insee
-    ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
-    // Build contrats si nécessaire
-    contrats,
-  };
-
-  const formationEffectif = {
-    ...defaultValuesFormationEffectif(),
-    ...(cfd ? { cfd } : {}),
-    ...(rncp ? { rncp } : {}),
-    ...(libelle_long ? { libelle_long } : {}),
-    ...(niveau ? { niveau } : {}),
-    ...(niveau_libelle ? { niveau_libelle } : {}),
-    ...(periode ? { periode } : {}),
-    ...(annee ? { annee } : {}),
-  };
-
-  // Create effectif for migration
-  const createdId = await createEffectifForMigration({
-    organisme_id,
-    ...(annee_scolaire ? { annee_scolaire } : {}),
-    ...(source ? { source } : {}),
-    ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-    apprenant: apprenantEffectif,
-    formation: formationEffectif,
-  });
-
-  // Lock api fields
-  await updateEffectifAndLock(createdId, { apprenant: apprenantEffectif, formation: formationEffectif });
-};
+  createEffectifFromDossierApprenant,
+  updateEffectifAndLock,
+} from "../../../../common/actions/effectifs.actions.js";
 
 /**
- * Méthode de création d'un effectif
- * @returns
+ * Méthode de création d'un effectif depuis un dossierApprenant migré
+ * va créer l'effectif et l'update pour locker les champs de l'API
  */
-export const createEffectifForMigration = async (
-  { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant, formation },
-  lockAtCreate = false
-) => {
-  const _id_erp_apprenant = id_erp_apprenant ?? new ObjectId().toString();
-  const defaultValues = defaultValuesEffectif({ lockAtCreate });
-  const dataToInsert = {
-    ...defaultValues,
-    apprenant,
-    formation,
-    id_erp_apprenant: _id_erp_apprenant,
-    organisme_id: ObjectId(organisme_id),
-    source,
-    annee_scolaire,
-  };
+export const createEffectifFromDossierApprenantMigrated = async (dossiersApprenantsMigrated) => {
+  const effectifCreated = await createEffectifFromDossierApprenant(dossiersApprenantsMigrated);
 
-  const { insertedId } = await effectifsDb().insertOne(validateEffectif(dataToInsert));
-
-  return insertedId;
+  // Lock api fields
+  await updateEffectifAndLock(effectifCreated._id, {
+    apprenant: effectifCreated.apprenant,
+    formation: effectifCreated.formation,
+  });
 };
 
 /**

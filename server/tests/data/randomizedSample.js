@@ -62,6 +62,7 @@ export const createRandomOrganisme = (params = {}) => ({
 export const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+  const isContratPresent = faker.datatype.boolean();
 
   return {
     ine_apprenant: getRandomIne(),
@@ -86,9 +87,9 @@ export const createRandomDossierApprenant = (params = {}) => {
     ...(faker.datatype.boolean() ? { tel_apprenant: faker.phone.number() } : {}),
     ...(faker.datatype.boolean() ? { code_commune_insee_apprenant: faker.address.zipCode() } : {}),
     date_de_naissance_apprenant: getRandomDateNaissance(),
-    ...(faker.datatype.boolean() ? { contrat_date_debut: getRandomDateDebutContrat() } : {}),
-    ...(faker.datatype.boolean() ? { contrat_date_fin: getRandomDateFinContrat() } : {}),
-    ...(faker.datatype.boolean() ? { contrat_date_rupture: getRandomDateRuptureContrat() } : {}),
+    ...(isContratPresent ? { contrat_date_debut: getRandomDateDebutContrat() } : {}),
+    ...(isContratPresent ? { contrat_date_fin: getRandomDateFinContrat() } : {}),
+    ...(isContratPresent && faker.datatype.boolean() ? { contrat_date_rupture: getRandomDateRuptureContrat() } : {}),
     ...(faker.datatype.boolean() ? { formation_rncp: getRandomRncpFormation() } : {}),
     source: faker.random.word(),
     ...params,
@@ -122,6 +123,7 @@ export const createRandomEffectifApprenant = (params = {}) => {
 export const createRandomDossierApprenantApiInput = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+  const isContratPresent = faker.datatype.boolean();
 
   return {
     ine_apprenant: getRandomIne(),
@@ -147,9 +149,11 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
     id_erp_apprenant: faker.datatype.uuid().toString(),
     ...(faker.datatype.boolean() ? { tel_apprenant: faker.phone.number() } : {}),
     ...(faker.datatype.boolean() ? { code_commune_insee_apprenant: faker.address.zipCode() } : {}),
-    ...(faker.datatype.boolean() ? { contrat_date_debut: getRandomDateDebutContrat().toISOString() } : {}),
-    ...(faker.datatype.boolean() ? { contrat_date_fin: getRandomDateFinContrat().toISOString() } : {}),
-    ...(faker.datatype.boolean() ? { contrat_date_rupture: getRandomDateRuptureContrat().toISOString() } : {}),
+    ...(isContratPresent ? { contrat_date_debut: getRandomDateDebutContrat().toISOString() } : {}),
+    ...(isContratPresent ? { contrat_date_fin: getRandomDateFinContrat().toISOString() } : {}),
+    ...(isContratPresent && faker.datatype.boolean()
+      ? { contrat_date_rupture: getRandomDateRuptureContrat().toISOString() }
+      : {}),
     ...(faker.datatype.boolean() ? { formation_rncp: getRandomRncpFormation() } : {}),
 
     ...params,
