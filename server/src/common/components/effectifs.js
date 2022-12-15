@@ -238,14 +238,10 @@ export default () => {
     await asyncForEach(
       effectifsCountByCfa,
       async ({ _id: uai, nom_etablissement, siret_etablissement, ...effectifs }) => {
-        const cfa = await findOrganismeByUai(uai);
-
         result.push({
           uai_etablissement: uai,
           siret_etablissement,
           nom_etablissement,
-          nature: cfa?.nature,
-          natureValidityWarning: cfa?.nature_validity_warning,
           effectifs: {
             apprentis: effectifs.apprentis || 0,
             inscritsSansContrat: effectifs.inscritsSansContrat || 0,
