@@ -409,7 +409,7 @@ describe("Dossiers Apprenants Route", () => {
       assert.deepEqual(await dossiersApprenantsMigrationDb().countDocuments({}), nbValidItems);
     });
 
-    // TODO Voir comment gérer ça avec le additional properties true dans le model
+    // OLD Test : n'est plus pertinent dans la nouvelle structure
     // it("Vérifie l'ajout via route /dossiers-apprenants d'un statut avec champs non renseignés dans le schéma mais ignorés en base", async () => {
     //   const { httpClient } = await startServer();
     //   await createApiUser();
