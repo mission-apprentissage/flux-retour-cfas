@@ -4,9 +4,12 @@ import pick from "lodash.pick";
 import {
   createOrganisme,
   findOrganismeById,
+  mapFiabilizedOrganismeUaiSiretCouple,
   updateOrganisme,
 } from "../../../../src/common/actions/organismes.actions.js";
 import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
+import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
+import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/mapping.js";
 
 describe("Test des actions Organismes", () => {
   describe("createOrganisme", () => {
@@ -103,42 +106,94 @@ describe("Test des actions Organismes", () => {
     });
   });
 
-  // TODO WIP
-  // describe("mapFiabilizedOrganismeUaiSiretCouple", () => {
-  //   it("return same uai-siret couple when not present in fiabilisation file or collection", async () => {
-  //     const uai = "0802004U";
-  //     const siret = "77937827200016";
+  describe("mapFiabilizedOrganismeUaiSiretCouple", () => {
+    it("return same uai-siret couple when not present in fiabilisation file or collection", async () => {
+      const uai = "0802004U";
+      const siret = "77937827200016";
 
-  //     const { uai: cleanUai, siret: cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
-  //     assert.equal(cleanUai, uai);
-  //     assert.equal(cleanSiret, siret);
-  //   });
+      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
+        uai,
+        siret,
+      });
+      assert.equal(cleanUai, uai);
+      assert.equal(cleanSiret, siret);
+    });
 
-  //   it("return cleaned uai-siret couple when uai present in fiabilisation file", async () => {
-  //     const uai = "0922672E";
-  //     const siret = null;
+    it("return cleaned uai-siret couple when uai present in fiabilisation file", async () => {
+      const uai = FIABILISATION_MAPPINGS[0].uai;
+      const siret = FIABILISATION_MAPPINGS[0].siret;
 
-  //     const { uai: cleanUai, siret: cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
-  //     assert.equal(cleanUai, "0922672E");
-  //     assert.equal(cleanSiret, "78370584100063");
-  //   });
+      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+      assert.equal(cleanUai, FIABILISATION_MAPPINGS[0].uai_fiable);
+      assert.equal(cleanSiret, FIABILISATION_MAPPINGS[0].siret_fiable);
+    });
 
-  //   it("return cleaned uai-siret couple when only uai present in fiabilisation collection", async () => {
-  //     const uai = "0912364A";
+    it("return cleaned uai-siret couple when uai is the same in fiabilisation collection", async () => {
+      const sampleUai = "0755805C";
+      const sampleSiret = "77568013501139";
+      const sampleUaiFiable = "0755805C";
+      const sampleSiretFiable = "77568013501089";
 
-  //     // Create entry in fiabilisation collection
-  //     await fiabilisationUaiSiretDb().insertOne({
-  //       uai: "0755805C",
-  //       siret: "77568013501139",
-  //       uai_fiable: "0755805C",
-  //       siret_fiable: "77568013501089",
-  //     });
+      // Create entry in fiabilisation collection
+      await fiabilisationUaiSiretDb().insertOne({
+        uai: sampleUai,
+        siret: sampleSiret,
+        uai_fiable: sampleUaiFiable,
+        siret_fiable: sampleSiretFiable,
+      });
 
-  //     const { uai: cleanUai, siret: cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret: null });
-  //     assert.equal(cleanUai, "0912364A");
-  //     assert.equal(cleanSiret, "20007515800010");
-  //   });
-  // });
+      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
+        uai: sampleUai,
+        siret: sampleSiret,
+      });
+      assert.equal(cleanUai, sampleUaiFiable);
+      assert.equal(cleanSiret, sampleSiretFiable);
+    });
+
+    it("return cleaned uai-siret couple when siret is the same in fiabilisation collection", async () => {
+      const sampleUai = "0755805C";
+      const sampleSiret = "77568013501139";
+      const sampleUaiFiable = "0802004U";
+      const sampleSiretFiable = "77568013501139";
+
+      // Create entry in fiabilisation collection
+      await fiabilisationUaiSiretDb().insertOne({
+        uai: sampleUai,
+        siret: sampleSiret,
+        uai_fiable: sampleUaiFiable,
+        siret_fiable: sampleSiretFiable,
+      });
+
+      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
+        uai: sampleUai,
+        siret: sampleSiret,
+      });
+      assert.equal(cleanUai, sampleUaiFiable);
+      assert.equal(cleanSiret, sampleSiretFiable);
+    });
+
+    it("return cleaned uai-siret couple when siret is null in fiabilisation collection", async () => {
+      const sampleUai = "0755805C";
+      const sampleSiret = null;
+      const sampleUaiFiable = "0755805C";
+      const sampleSiretFiable = "77568013501139";
+
+      // Create entry in fiabilisation collection
+      await fiabilisationUaiSiretDb().insertOne({
+        uai: sampleUai,
+        siret: sampleSiret,
+        uai_fiable: sampleUaiFiable,
+        siret_fiable: sampleSiretFiable,
+      });
+
+      const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
+        uai: sampleUai,
+        siret: sampleSiret,
+      });
+      assert.equal(cleanUai, sampleUaiFiable);
+      assert.equal(cleanSiret, sampleSiretFiable);
+    });
+  });
 
   // describe("createAndControlOrganisme", () => {
   //   it("return organisme id if uai-siret couple existant in db", async () => {

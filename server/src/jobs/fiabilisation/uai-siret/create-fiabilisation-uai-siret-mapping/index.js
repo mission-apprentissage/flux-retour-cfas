@@ -5,7 +5,7 @@ import {
   referentielSiretUaiDb,
 } from "../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
-import { mapping as manualMapping } from "./mapping.js";
+import { FIABILISATION_MAPPINGS as manualMapping } from "./mapping.js";
 
 const filters = {
   annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },

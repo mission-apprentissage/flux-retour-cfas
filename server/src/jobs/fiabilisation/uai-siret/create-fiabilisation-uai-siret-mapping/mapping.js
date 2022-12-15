@@ -1,4 +1,4 @@
-export const mapping = [
+export const FIABILISATION_MAPPINGS = [
   {
     uai: "0922672E",
     siret: null,

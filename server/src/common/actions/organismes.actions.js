@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { mapping } from "../../jobs/fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/mapping.js";
+import { FIABILISATION_MAPPINGS } from "../../jobs/fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/mapping.js";
 import { getMetiersBySirets } from "../apis/apiLba.js";
 import { fiabilisationUaiSiretDb, organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
@@ -14,7 +14,7 @@ import { getUser } from "./users.actions.js";
  */
 export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) => {
   // Applique le mapping de fiabilisation
-  const { uai: cleanUai, siret: cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+  const { cleanUai, cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
 
   // Si pas de siret après fiabilisation -> KO + Log
   if (!cleanSiret) throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
@@ -62,14 +62,15 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
  * @returns
  */
 export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret }) => {
-  // Check fiabilized couple in fiabilisation file merged collection
-  const fiabilisationMappings = [...(await fiabilisationUaiSiretDb().find().toArray()), ...mapping];
+  // Construction d'un tableau de mapping à partir de la collection et du tableau mapping
+  const fiabilisationUaiSiretFromCollection = await fiabilisationUaiSiretDb().find().toArray();
+  const fiabilisationMappings = [...fiabilisationUaiSiretFromCollection, ...FIABILISATION_MAPPINGS];
 
   const foundCouple = fiabilisationMappings
     .filter((item) => (item.uai && item.uai === uai) || (item.siret && item.siret === siret))
-    .map(({ uai_fiable, siret_fiable }) => ({ uai: uai_fiable, siret: siret_fiable }));
+    .map(({ uai_fiable, siret_fiable }) => ({ cleanUai: uai_fiable, cleanSiret: siret_fiable }));
 
-  return foundCouple[0] || { uai, siret }; // Take only first match
+  return foundCouple[0] || { cleanUai: uai, cleanSiret: siret }; // Take only first match
 };
 
 /**
