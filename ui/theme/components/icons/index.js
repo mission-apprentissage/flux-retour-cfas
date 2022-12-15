@@ -78,3 +78,5 @@ export * from "./DreetsDraaf";
 export * from "./CheckBoxWhite";
 export * from "./NotificationFill";
 export * from "./UserFill";
+export * from "./ParentGroupIcon";
+export * from "./ClockIcon";

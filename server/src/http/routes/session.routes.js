@@ -1,6 +1,6 @@
 import express from "express";
 import tryCatch from "../middlewares/tryCatchMiddleware.js";
-import { loggedInUser, structureUser } from "../../common/components/usersComponent.js";
+import { loggedInUser, structureUser } from "../../common/actions/users.actions.js";
 
 export default () => {
   const router = express.Router();

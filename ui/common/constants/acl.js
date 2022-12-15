@@ -12,6 +12,10 @@ const acl = [
         ref: "admin/page_gestion_roles",
       },
       {
+        feature: "Gestion des Réseaux CFAS",
+        ref: "admin/page_gestion_reseaux_cfa",
+      },
+      {
         feature: "Message de maintenance",
         ref: "admin/page_message_maintenance",
       },
@@ -19,158 +23,213 @@ const acl = [
         feature: "Upload de fichiers source",
         ref: "admin/page_upload",
       },
-      {
-        feature: "Dépublier un dossier",
-        ref: "admin/dossier_depublier",
-      },
     ],
   },
+  // {
+  //   feature: "Accès aux fonctionnalités mes organismes",
+  //   ref: "page/mes-organismes",
+  // },
   {
-    feature: "Accès aux fonctionnalités d'espace",
-    ref: "wks",
+    feature: "Accès aux fonctionnalités d'organisme",
+    ref: "organisme",
     subFeatures: [
       {
-        feature: "Voir la page d'espace",
-        ref: "wks/page_espace",
+        feature: "Voir la page tableau de board d'un organisme",
+        ref: "organisme/tableau_de_bord",
+        // subFeatures: [
+        //   {
+        //     feature: "Voir la page vue territoriale",
+        //     ref: "organisme/tableau_de_bord/vue_territoriale",
+        //     subFeatures: [
+        //       {
+        //         feature: "Sélectionner un territoire",
+        //         ref: "organisme/tableau_de_bord/vue_territoriale/selectionner_territoire",
+        //       },
+        //       {
+        //         feature: "Filtrer par formation",
+        //         ref: "organisme/tableau_de_bord/vue_territoriale/filtrer_par_formation",
+        //       },
+        //       {
+        //         feature: "Consulter la vue globale",
+        //         ref: "organisme/tableau_de_bord/vue_territoriale/voir_globale",
+        //       },
+        //       {
+        //         feature: "Consulter les effectifs par formations",
+        //         ref: "organisme/tableau_de_bord/vue_territoriale/voir_par_formations",
+        //       },
+        //       {
+        //         feature: "Consulter les effectifs par organismes",
+        //         ref: "organisme/tableau_de_bord/vue_territoriale/voir_par_organismes",
+        //       },
+        //       {
+        //         feature: "Choisir la période",
+        //         ref: "organisme/tableau_de_bord/vue_territoriale/filtrer_par_periode",
+        //       },
+        //       {
+        //         feature: "Télécharger les données anonymisées",
+        //         ref: "organisme/tableau_de_bord/vue_territoriale/telecharger_anonyme",
+        //       },
+        //       {
+        //         feature: "Télécharger les données nominatives",
+        //         ref: "organisme/tableau_de_bord/vue_territoriale/telecharger",
+        //       },
+        //     ],
+        //   },
+        //   {
+        //     feature: "Voir la page vue réseau",
+        //     ref: "organisme/tableau_de_bord/vue_reseau",
+        //     subFeatures: [
+        //       {
+        //         feature: "Changer de réseau",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/selectionner_reseau",
+        //       },
+        //       {
+        //         feature: "Filtrer par formation",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/filtrer_par_formation",
+        //       },
+        //       {
+        //         feature: "Filtrer par territoire",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/filtrer_par_territoire",
+        //       },
+        //       {
+        //         feature: "Consulter la vue globale",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/voir_globale",
+        //       },
+        //       {
+        //         feature: "Consulter les effectifs par formations",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/voir_par_formations",
+        //       },
+        //       {
+        //         feature: "Consulter les effectifs par organismes",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/voir_par_organismes",
+        //       },
+        //       {
+        //         feature: "Choisir la période",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/filtrer_par_periode",
+        //       },
+        //       {
+        //         feature: "Télécharger les données anonymisées",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/telecharger_anonyme",
+        //       },
+        //       {
+        //         feature: "Télécharger les données nominatives",
+        //         ref: "organisme/tableau_de_bord/vue_reseau/telecharger",
+        //       },
+        //     ],
+        //   },
+        //   {
+        //     feature: "Voir la page vue organisme",
+        //     ref: "organisme/tableau_de_bord/vue_organisme",
+        //     subFeatures: [
+        //       {
+        //         feature: "Changer d'organisme",
+        //         ref: "organisme/tableau_de_bord/vue_organisme/selectionner_organisme",
+        //       },
+        //       {
+        //         feature: "Consulter la vue globale",
+        //         ref: "organisme/tableau_de_bord/vue_organisme/voir_globale",
+        //       },
+        //       {
+        //         feature: "Consulter les effectifs par formations",
+        //         ref: "organisme/tableau_de_bord/vue_organisme/voir_par_formations",
+        //       },
+        //       {
+        //         feature: "Choisir la période",
+        //         ref: "organisme/tableau_de_bord/vue_organisme/filtrer_par_periode",
+        //       },
+        //       {
+        //         feature: "Télécharger les données anonymisées",
+        //         ref: "organisme/tableau_de_bord/vue_organisme/telecharger_anonyme",
+        //       },
+        //       {
+        //         feature: "Télécharger les données nominatives",
+        //         ref: "organisme/tableau_de_bord/vue_organisme/telecharger",
+        //       },
+        //     ],
+        //   },
+        //   {
+        //     feature: "Voir la page vue formations",
+        //     ref: "organisme/tableau_de_bord/vue_formation",
+        //     subFeatures: [
+        //       {
+        //         feature: "Changer de formation",
+        //         ref: "organisme/tableau_de_bord/vue_formation/selectionner_formation",
+        //       },
+        //       {
+        //         feature: "Filtrer par territoire",
+        //         ref: "organisme/tableau_de_bord/vue_formation/filtrer_par_territoire",
+        //       },
+        //       {
+        //         feature: "Consulter la vue globale",
+        //         ref: "organisme/tableau_de_bord/vue_formation/voir_globale",
+        //       },
+        //       {
+        //         feature: "Consulter les effectifs par organismes",
+        //         ref: "organisme/tableau_de_bord/vue_formation/voir_par_organismes",
+        //       },
+        //       {
+        //         feature: "Choisir la période",
+        //         ref: "organisme/tableau_de_bord/vue_formation/filtrer_par_periode",
+        //       },
+        //       {
+        //         feature: "Télécharger les données anonymisées",
+        //         ref: "organisme/tableau_de_bord/vue_formation/telecharger_anonyme",
+        //       },
+        //       {
+        //         feature: "Télécharger les données nominatives",
+        //         ref: "organisme/tableau_de_bord/vue_formation/telecharger",
+        //       },
+        //     ],
+        //   },
+        // ],
+      },
+      {
+        feature: "Voir la page effectifs",
+        ref: "organisme/page_effectifs",
         subFeatures: [
           {
-            feature: "Voir la page mes dossiers",
-            ref: "wks/page_espace/page_dossiers",
+            feature: "Edition des effectifs",
+            ref: "organisme/page_effectifs/edition",
+          },
+          {
+            feature: "Ajouter un apprenant",
+            ref: "organisme/page_effectifs/ajout_apprenant",
+          },
+          {
+            feature: "Télécharger les données anonymisées",
+            ref: "organisme/page_effectifs/telecharger",
+          },
+        ],
+      },
+      {
+        feature: "Voir la page sifa2",
+        ref: "organisme/page_sifa2",
+      },
+      {
+        feature: "Voir la page des paramètres d'organisme",
+        ref: "organisme/page_parametres",
+        subFeatures: [
+          {
+            feature: "Gestion des accès à l'organisme",
+            ref: "organisme/page_parametres/gestion_acces",
             subFeatures: [
               {
-                feature: "Ajouter un nouveau dossier",
-                ref: "wks/page_espace/page_dossiers/ajouter_nouveau_dossier",
-              },
-              {
-                feature: "Supprimer un dossier de l'espace",
-                ref: "wks/page_espace/page_dossiers/supprimer_dossier",
-              },
-              {
-                feature: "Voir la liste des dossiers",
-                ref: "wks/page_espace/page_dossiers/voir_liste_dossiers",
-                uniqSubFeature: true,
-                subFeatures: [
-                  {
-                    feature: "Voir tous les dossiers",
-                    ref: "wks/page_espace/page_dossiers/voir_liste_dossiers/tous",
-                  },
-                  {
-                    feature: "Voir uniquement les dossiers en cours d'instruction",
-                    ref: "wks/page_espace/page_dossiers/voir_liste_dossiers/instruction_en_cours",
-                  },
-                ],
+                feature: "Retirer un contributeur de l'organisme",
+                ref: "organisme/page_parametres/gestion_acces/supprimer_contributeur",
               },
             ],
           },
           {
-            feature: "Voir la page des paramètres d'espace",
-            ref: "wks/page_espace/page_parametres",
-            subFeatures: [
-              {
-                feature: "Gestion des accès à l'espace",
-                ref: "wks/page_espace/page_parametres/gestion_acces",
-                subFeatures: [
-                  {
-                    feature: "Retirer un contributeur de l'espace",
-                    ref: "wks/page_espace/page_parametres/gestion_acces/supprimer_contributeur",
-                  },
-                ],
-              },
-              {
-                feature: "Gestion des notifications de l'espace",
-                ref: "wks/page_espace/page_parametres/gestion_notifications",
-              },
-            ],
+            feature: "Gestion des notifications de l'organisme",
+            ref: "organisme/page_parametres/gestion_notifications",
+          },
+          {
+            feature: "Gestion clé d'api",
+            ref: "organisme/page_parametres/api_key",
           },
         ],
       },
     ],
-  },
-  {
-    feature: "Afficher un dossier",
-    ref: "dossier",
-    subFeatures: [
-      {
-        feature: "Sauvegarder un dossier",
-        ref: "dossier/sauvegarder",
-      },
-      {
-        feature: "Supprimer un dossier",
-        ref: "dossier/supprimer",
-      },
-      {
-        feature: "Voir le formulaire",
-        ref: "dossier/page_formulaire",
-      },
-      {
-        feature: "Voir les pièces justificatives",
-        ref: "dossier/page_documents",
-        subFeatures: [
-          {
-            feature: "Ajouter un document",
-            ref: "dossier/page_documents/ajouter_un_document",
-          },
-          {
-            feature: "Supprimer un document",
-            ref: "dossier/page_documents/supprimer_un_document",
-          },
-        ],
-      },
-      {
-        feature: "Voir le contrat pdf",
-        ref: "dossier/voir_contrat_pdf",
-        subFeatures: [
-          {
-            feature: "Télécharger",
-            ref: "dossier/voir_contrat_pdf/telecharger",
-          },
-        ],
-      },
-      {
-        feature: "Voir la page de signature",
-        ref: "dossier/page_signatures",
-        subFeatures: [
-          {
-            feature: "Signer",
-            ref: "dossier/page_signatures/signer",
-          },
-        ],
-      },
-      {
-        feature: "Voir la page de statut",
-        ref: "dossier/page_statut",
-      },
-      {
-        feature: "Publication dossier",
-        ref: "dossier/publication",
-      },
-      {
-        feature: "Envoyer le dossier",
-        ref: "dossier/envoyer",
-      },
-      {
-        feature: "Voir les paramètres du dossier",
-        ref: "dossier/page_parametres",
-        subFeatures: [
-          {
-            feature: "Gestion des accès de dossier",
-            ref: "dossier/page_parametres/gestion_acces",
-          },
-          {
-            feature: "Gestion des notifications du dossier",
-            ref: "dossier/page_parametres/gestion_notifications",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    feature: "Signature électronique - BETA",
-    ref: "signature_beta",
-  },
-  {
-    feature: "Télétransmettre Agecap",
-    ref: "send_agecap",
   },
 ];
 
