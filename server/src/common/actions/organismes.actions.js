@@ -1,10 +1,10 @@
 import { ObjectId } from "mongodb";
-import { FIABILISATION_MAPPINGS } from "../../jobs/fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/mapping.js";
 import { getMetiersBySirets } from "../apis/apiLba.js";
-import { fiabilisationUaiSiretDb, organismesDb } from "../model/collections.js";
+import { organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { generateKey } from "../utils/cryptoUtils.js";
+import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine/effectifsEngine.utils.js";
 import { createPermission, hasPermission } from "./permissions.actions.js";
 import { findRolePermissionById } from "./roles.actions.js";
 import { getUser } from "./users.actions.js";
@@ -12,7 +12,8 @@ import { getUser } from "./users.actions.js";
 /**
  * Méthode de création d'un organisme qui applique en entrée des filtres / rejection
  * via la collection de fiabilisation sur les couples UAI-Siret
- * ainsi qu'un filtre d'existence dans la base ACCES // TODO
+ * ainsi qu'un filtre d'existence dans la base ACCES 
+// TODO Refacto la méthode pour renvoyer notValid ou toCreate ou existant
  */
 export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) => {
   // Applique le mapping de fiabilisation
@@ -59,23 +60,6 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
 };
 
 /**
- * Renvoi le couple UAI-SIRET fiabilisé si présent dans le fichier de fiabilisation
- * @param {*} {param0}
- * @returns
- */
-export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret }) => {
-  // Construction d'un tableau de mapping à partir de la collection et du tableau mapping
-  const fiabilisationUaiSiretFromCollection = await fiabilisationUaiSiretDb().find().toArray();
-  const fiabilisationMappings = [...fiabilisationUaiSiretFromCollection, ...FIABILISATION_MAPPINGS];
-
-  const foundCouple = fiabilisationMappings
-    .filter((item) => (item.uai && item.uai === uai) || (item.siret && item.siret === siret))
-    .map(({ uai_fiable, siret_fiable }) => ({ cleanUai: uai_fiable, cleanSiret: siret_fiable }));
-
-  return foundCouple[0] || { cleanUai: uai, cleanSiret: siret }; // Take only first match
-};
-
-/**
  * Méthode de création d'un organisme
  * Checks uai format & existence
  * @param {*} organismeProps
@@ -91,6 +75,8 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
   if (Array.isArray(sirets) && sirets.length !== 0) {
     metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
   }
+
+  // TODO Call Api Entreprise to get address
 
   const { insertedId } = await organismesDb().insertOne(
     validateOrganisme({
