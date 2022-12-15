@@ -203,6 +203,7 @@ export default () => {
       const { is_lock, nouveau_statut, nouveau_contrat, ...restData } = data;
 
       // TODO CHECK IS LOCK IF COMING FROM API
+      // organisme
 
       // eslint-disable-next-line no-unused-vars
       const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =

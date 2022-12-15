@@ -19,7 +19,7 @@ export const useInitCerfa = ({ controller, modeSifa, canEdit }) => {
       if (!effectifId) return null;
       const cerfa = await _get(`/api/v1/effectif/${effectifId}?organisme_id=${organisme._id}`);
       await sleep(300); // TODO SPECIAL
-      const fields = initFields({ cerfa, schema: cerfaSchema, modeSifa, canEdit });
+      const fields = initFields({ cerfa, schema: cerfaSchema, modeSifa, canEdit, organisme });
       controller.setFields(fields);
       return cerfa;
     },

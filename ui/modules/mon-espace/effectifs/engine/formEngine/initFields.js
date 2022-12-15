@@ -29,9 +29,10 @@ const requiredApprenantAdresseFieldsSifa = [
   "apprenant.adresse.commune",
 ];
 
-export const initFields = ({ cerfa, schema, modeSifa, canEdit }) => {
+export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
   const createField = createFieldFactory({ modeSifa, schema });
   let fields = {};
+  const isAPITransmission = organisme.mode_de_transmission === "API";
 
   if (!cerfa.apprenant.adresse.complete.value)
     requiredFieldsSifa = [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa];
@@ -44,7 +45,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit }) => {
 
   let historique_statut = [];
   let showAddStatut = true;
-  if ((modeSifa && !!cerfa.apprenant.historique_statut.value.length) || !canEdit) {
+  if ((modeSifa && !!cerfa.apprenant.historique_statut.value.length) || !canEdit || isAPITransmission) {
     historique_statut = cerfa.apprenant.historique_statut.value;
     showAddStatut = false;
   } else {
@@ -91,7 +92,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit }) => {
 
   let contrats = [];
   let showAddContrat = true;
-  if ((modeSifa && !!cerfa.apprenant.contrats.value.length) || !canEdit) {
+  if ((modeSifa && !!cerfa.apprenant.contrats.value.length) || !canEdit || isAPITransmission) {
     contrats = cerfa.apprenant.contrats.value;
     showAddContrat = false;
   } else {
