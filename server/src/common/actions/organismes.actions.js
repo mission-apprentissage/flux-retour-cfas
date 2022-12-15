@@ -14,7 +14,7 @@ import { getUser } from "./users.actions.js";
  */
 export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) => {
   // Applique le mapping de fiabilisation
-  const { cleanUai, cleanSiret } = mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+  const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
 
   // Si pas de siret après fiabilisation -> KO + Log
   if (!cleanSiret) throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
@@ -22,13 +22,13 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
   // Applique les règles de rejection si pas dans la db
   const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
 
-  if (organismeFoundWithUaiSiret._id) {
+  if (organismeFoundWithUaiSiret?._id) {
     return organismeFoundWithUaiSiret;
   } else {
     const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
 
     // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO + Log
-    if (organismeFoundWithSiret._id)
+    if (organismeFoundWithSiret?._id)
       throw new Error(
         `L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai} `
       ); // TODO LOG ?
