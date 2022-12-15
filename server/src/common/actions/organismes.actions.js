@@ -10,13 +10,15 @@ import { findRolePermissionById } from "./roles.actions.js";
 import { getUser } from "./users.actions.js";
 
 /**
- * TODO Rename
+ * Méthode de création d'un organisme qui applique en entrée des filtres / rejection
+ * via la collection de fiabilisation sur les couples UAI-Siret
+ * ainsi qu'un filtre d'existence dans la base ACCES // TODO
  */
 export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) => {
   // Applique le mapping de fiabilisation
   const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
 
-  // Si pas de siret après fiabilisation -> KO + Log
+  // Si pas de siret après fiabilisation -> KO (+ Log?)
   if (!cleanSiret) throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
 
   // Applique les règles de rejection si pas dans la db
@@ -27,17 +29,17 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
   } else {
     const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
 
-    // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO + Log
+    // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO (+ Log?)
     if (organismeFoundWithSiret?._id)
       throw new Error(
-        `L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai} `
+        `L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai}`
       ); // TODO LOG ?
 
     const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
-    // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> KO + Log
-    if (organismeFoundWithUai._id)
+    // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> KO (+ Log?)
+    if (organismeFoundWithUai?._id)
       throw new Error(
-        `L'organisme ayant l'uai ${uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret} `
+        `L'organisme ayant l'uai ${uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`
       ); // TODO LOG ?
 
     // TODO CHECK BASE ACCES

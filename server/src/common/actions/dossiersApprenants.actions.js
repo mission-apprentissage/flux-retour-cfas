@@ -85,6 +85,7 @@ export const buildDossierApprenant = async ({
   // Création de l'organisme si nécessaire
   let organismeForDossierApprenant = await findOrganismeByUai(uai_etablissement);
   if (!organismeForDossierApprenant) {
+    // TODO call createAndControlOrganisme here replacing createOrganisme
     organismeForDossierApprenant = await createOrganisme({
       uai: uai_etablissement,
       siret: siret_etablissement,
