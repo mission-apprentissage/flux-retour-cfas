@@ -3,6 +3,7 @@ import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./pa
 
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part.js";
 import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part.js";
+import mongodb from "mongodb";
 
 export const collectionName = "effectifs";
 
@@ -29,16 +30,21 @@ export const schema = object(
     updated_at: date({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
     archive: boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }),
-    validation_errors: arrayOf(
-      object({
-        fieldName: string({ description: "Nom du champ en erreur" }),
-        inputValue: string({ description: "Valeur fournie en entrée" }),
-        message: string({ description: "Message de l'erreur" }),
+    validation_errors: object({
+      dossierApprenantMigrationId: objectId({
+        description: "DossierApprenant id",
       }),
-      {
-        description: "Erreurs de validation de cet effectif",
-      }
-    ),
+      errors: arrayOf(
+        object({
+          fieldName: string({ description: "Nom du champ en erreur" }),
+          inputValue: string({ description: "Valeur fournie en entrée" }),
+          message: string({ description: "Message de l'erreur" }),
+        }),
+        {
+          description: "Erreurs de validation de cet effectif",
+        }
+      ),
+    }),
   },
   {
     required: ["apprenant", "id_erp_apprenant", "organisme_id", "source", "annee_scolaire"],
@@ -52,11 +58,27 @@ export function defaultValuesEffectif({ lockAtCreate = false }) {
     apprenant: defaultValuesApprenant(),
     formation: defaultValuesFormationEffectif(),
     is_lock: defaultValuesEffectifFieldsLocker(lockAtCreate),
-    validation_errors: [],
+    validation_errors: { errors: [] },
     updated_at: new Date(),
     created_at: new Date(),
   };
 }
+
+// Empty valid effectif used to store validationErrors
+// Default null / not coherent values only for empty & validation errors
+// TODO voir comment gérer
+export const emptyValidEffectif = () => {
+  return {
+    ...defaultValuesEffectif({ lockAtCreate: false }),
+    apprenant: { ...defaultValuesApprenant, nom: "", prenom: "", historique_statut: [] },
+    formation: { ...defaultValuesFormationEffectif, cfd: "00000000" },
+    id_erp_apprenant: "",
+    organisme_id: new mongodb.ObjectId(),
+    source: "",
+    annee_scolaire: "0000-0000",
+    validation_errors: { errors: [] },
+  };
+};
 
 // TODO Extra validation
 export function validateEffectif(props) {

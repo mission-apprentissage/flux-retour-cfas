@@ -2,11 +2,14 @@ import { isObject, merge, reduce, set } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { effectifsDb } from "../model/collections.js";
 import {
+  schema as effectifSchema,
   defaultValuesEffectif,
   validateEffectif,
+  emptyValidEffectif,
 } from "../model/next.toKeep.models/effectifs.model/effectifs.model.js";
 import { defaultValuesApprenant } from "../model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
+import { getSchemaValidationErrors } from "../utils/schemaUtils.js";
 import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber.js";
 
 /**
@@ -104,18 +107,35 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant, lock
     ...(annee ? { annee } : {}),
   };
 
-  // Create effectif with lock option
-  const effectifId = await createEffectif(
-    {
-      organisme_id,
-      ...(annee_scolaire ? { annee_scolaire } : {}),
-      ...(source ? { source } : {}),
-      ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
-      apprenant: apprenantEffectif,
-      formation: formationEffectif,
-    },
-    lockAtCreate
-  );
+  const effectifData = {
+    organisme_id,
+    ...(annee_scolaire ? { annee_scolaire } : {}),
+    ...(source ? { source } : {}),
+    ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
+    apprenant: apprenantEffectif,
+    formation: formationEffectif,
+  };
+
+  let effectifId;
+
+  // Vérification si erreurs de validation sur l'effectif
+  const effectifValidationErrors = getSchemaValidationErrors(effectifData, effectifSchema);
+  if (effectifValidationErrors.length > 0) {
+    // Si erreur de format on crée un effectif vide avec l'info du dossierApprenant lié et la liste des erreurs
+    effectifId = await createEffectif(
+      {
+        ...emptyValidEffectif(),
+        validation_errors: {
+          dossierApprenantMigrationId: dossiersApprenant._id,
+          errors: effectifValidationErrors,
+        },
+      },
+      lockAtCreate
+    );
+  } else {
+    // Si pas d'erreurs on créé effectif avec lock option
+    effectifId = await createEffectif(effectifData, lockAtCreate);
+  }
 
   const effectifCreated = await effectifsDb().findOne({ _id: effectifId });
   return effectifCreated;

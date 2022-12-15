@@ -1,5 +1,8 @@
 import { strict as assert } from "assert";
-import { defaultValuesEffectif } from "../../../../src/common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
+import {
+  defaultValuesEffectif,
+  emptyValidEffectif,
+} from "../../../../src/common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
 import { getSchemaValidationErrors } from "../../../../src/common/utils/schemaUtils.js";
 import { schema as effectifSchema } from "../../../../src/common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
 import { defaultValuesApprenant } from "../../../../src/common/model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
@@ -8,16 +11,7 @@ import { defaultValuesFormationEffectif } from "../../../../src/common/model/nex
 
 describe("getSchemaValidationErrors", () => {
   it("returns [] when no validation errors", () => {
-    const dataToInsert = {
-      ...defaultValuesEffectif({ lockAtCreate: false }),
-      apprenant: { ...defaultValuesApprenant, nom: "test", prenom: "test", historique_statut: [] },
-      formation: { ...defaultValuesFormationEffectif, cfd: "50033412" },
-      id_erp_apprenant: "12345",
-      organisme_id: new mongodb.ObjectId(),
-      source: "test",
-      annee_scolaire: "2022-2022",
-    };
-    const validationErrors = getSchemaValidationErrors(dataToInsert, effectifSchema);
+    const validationErrors = getSchemaValidationErrors(emptyValidEffectif(), effectifSchema);
     assert.deepEqual(validationErrors, []);
   });
 
