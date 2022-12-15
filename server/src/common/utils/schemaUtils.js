@@ -2,7 +2,7 @@ import logger from "../logger.js";
 import Joi from "joi";
 import Enjoi from "enjoi";
 
-export function schemaValidation(entity, schema, extensions = []) {
+const applySchemaValidation = (entity, schema, extensions = [], abortEarly = true) => {
   let schemaDesc = JSON.parse(JSON.stringify(schema).replaceAll("bsonType", "type"));
 
   const ext = extensions.map(({ name, ...extension }) => {
@@ -33,7 +33,12 @@ export function schemaValidation(entity, schema, extensions = []) {
     ],
   });
 
-  const { error, value } = schemaTmp.validate(entity);
+  const { error, value } = schemaTmp.validate(entity, { abortEarly });
+  return { error, value };
+};
+
+export function schemaValidation(entity, schema, extensions = []) {
+  const { error, value } = applySchemaValidation(entity, schema, extensions);
 
   if (error) {
     logger.error(error);
@@ -42,3 +47,22 @@ export function schemaValidation(entity, schema, extensions = []) {
 
   return value;
 }
+
+/**
+ * Méthode de construction des erreurs de validation schema
+ * @param {*} entity
+ * @param {*} schema
+ * @param {*} extensions
+ * @returns
+ */
+export const getSchemaValidationErrors = (entity, schema, extensions = []) => {
+  const { error } = applySchemaValidation(entity, schema, extensions, false); // AbortEarly false pour récupération de toutes les erreurs
+
+  const errorsFormatted = error?.details?.map((item) => ({
+    fieldName: item.context.key,
+    inputValue: item.context.value,
+    message: item.message,
+  }));
+
+  return errorsFormatted || [];
+};
