@@ -32,9 +32,6 @@ export const schema = object(
     archive: boolean({ description: "Dossier apprenant est archivé (rétention maximum 5 ans)" }),
     validation_errors: arrayOf(
       object({
-        context: objectId({
-          description: "DossierApprenant id",
-        }),
         fieldName: string({ description: "Nom du champ en erreur" }),
         inputValue: string({ description: "Valeur fournie en entrée" }),
         message: string({ description: "Message de l'erreur" }),
@@ -42,6 +39,7 @@ export const schema = object(
       {
         description: "Erreurs de validation de cet effectif",
       }
+    ),
   },
   {
     required: ["apprenant", "id_erp_apprenant", "organisme_id", "source", "annee_scolaire"],
@@ -52,31 +50,18 @@ export const schema = object(
 // Default value
 export function defaultValuesEffectif({ lockAtCreate = false }) {
   return {
+    organisme_id: new mongodb.ObjectId(),
+    id_erp_apprenant: "",
+    source: "",
+    annee_scolaire: "0000-0000",
     apprenant: defaultValuesApprenant(),
     formation: defaultValuesFormationEffectif(),
     is_lock: defaultValuesEffectifFieldsLocker(lockAtCreate),
-    validation_errors: { errors: [] },
+    validation_errors: [],
     updated_at: new Date(),
     created_at: new Date(),
   };
 }
-
-// // Empty valid effectif used to store validationErrors
-// // Default null / not coherent values only for empty & validation errors
-// // TODO : a supprimer
-// // Useless : dans le traitement sur chaque field en erreur : on replace par un default / empty valide
-// export const emptyValidEffectif = () => {
-//   return {
-//     ...defaultValuesEffectif({ lockAtCreate: false }),
-//     apprenant: { ...defaultValuesApprenant, nom: "", prenom: "", historique_statut: [] },
-//     formation: { ...defaultValuesFormationEffectif, cfd: "00000000" },
-//     id_erp_apprenant: "",
-//     organisme_id: new mongodb.ObjectId(),
-//     source: "",
-//     annee_scolaire: "0000-0000",
-//     validation_errors: { errors: [] },
-//   };
-// };
 
 // TODO Extra validation
 export function validateEffectif(props) {

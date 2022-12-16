@@ -1,5 +1,9 @@
+import { defaultValuesOrganisme } from "../../model/next.toKeep.models/organismes.model.js";
+import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { findDossierApprenantByQuery } from "../dossiersApprenants.actions.js";
-import { findOrganismeByUai } from "../organismes.actions.js";
+import { findEffectifByQuery } from "../effectifs.actions.js";
+import { findOrganismeBySiret, findOrganismeByUai, findOrganismeByUaiAndSiret } from "../organismes.actions.js";
+import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
 
 /**
  * TODO en amont dossiersToEffectifs
@@ -23,7 +27,7 @@ import { findOrganismeByUai } from "../organismes.actions.js";
  * @param {*} effectifs
  * @returns
  */
-export const hydrateEffectifs = async (effectifs) => {
+export const hydrateEffectifsOLD = async (effectifs) => {
   // let dossiersApprenantsToCreate = [];
   // let dossiersApprenantsToUpdate = [];
   let organismesToCreate = [];
@@ -98,10 +102,85 @@ export const hydrateEffectifs = async (effectifs) => {
 };
 
 /**
+ *
+ * @param {*} effectifs
+ */
+export const hydrateEffectifs = async (effectifs) => {
+  let effectifsToCreate = [];
+  let effectifsToUpdate = [];
+
+  for (const currentEffectif of effectifs) {
+    // Recherche de l'effectif via sa clé d'unicité
+    const foundEffectifWithUnicityFields = await findEffectifByQuery(
+      {
+        id_erp_apprenant: currentEffectif.id_erp_apprenant,
+        organisme_id: currentEffectif.organisme_id,
+        annee_scolaire: currentEffectif.annee_scolaire,
+      },
+      { _id: 1 }
+    );
+
+    // Ajout à la liste de création ou update
+    if (!foundEffectifWithUnicityFields) {
+      // TODO build with eventuelles errors ?
+      effectifsToCreate.push(effectifs);
+    } else {
+      effectifsToUpdate.push(effectifs);
+    }
+  }
+};
+
+/**
  * Fonction de remplissage et controle des données d'un organisme
  * @param {*} organismesData
  */
-export const hydrateOrganisme = async (organismeData) => {};
+export const hydrateOrganisme = async ({ uai, siret, nom, ...data }) => {
+  let organismeToCreate = null;
+  let organismeToUpdate = null;
+
+  // Applique le mapping de fiabilisation
+  const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+
+  // Si pas de siret après fiabilisation -> KO (+ Log?)
+  if (!cleanSiret) {
+    // TODO return toUpdate avec empty siret & validation error ?
+    throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
+  }
+
+  // Applique les règles de rejection si pas dans la db
+  const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
+
+  if (organismeFoundWithUaiSiret?._id) {
+    organismeToUpdate = organismeFoundWithUaiSiret;
+  } else {
+    const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
+
+    // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO (+ Log?)
+    if (organismeFoundWithSiret?._id)
+      throw new Error(
+        `L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai}`
+      ); // TODO LOG ?
+
+    const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
+    // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> KO (+ Log?)
+    if (organismeFoundWithUai?._id)
+      throw new Error(
+        `L'organisme ayant l'uai ${uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`
+      ); // TODO LOG ?
+
+    // TODO CHECK BASE ACCES
+
+    organismeToCreate = {
+      uai,
+      siret,
+      ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
+      ...defaultValuesOrganisme(),
+      ...data,
+    };
+  }
+
+  return { organismeToCreate, organismeToUpdate };
+};
 
 /**
  * API For ligne of all => call RunEngine (split into effectifData / organismeData)
@@ -115,7 +194,15 @@ export const hydrateOrganisme = async (organismeData) => {};
  */
 export const runEngine = async (effectifData, organismeData) => {
   // TODO : dépendance sur organismes Id -> effectifs aller recup l'organisme id avant l'insert
+  // TODO : si organisme erreur on ajoute pas l'effectif ?
   // const { organismes, effectifs } = hydrateEngine(dossiersApprenants);
+  // TODO lock true api
+  // const effectifCreated = await createEffectifFromDossierApprenant(dossiersApprenantsMigrated);
+  // // Lock api fields
+  // await updateEffectifAndLock(effectifCreated._id, {
+  //   apprenant: effectifCreated.apprenant,
+  //   formation: effectifCreated.formation,
+  // });
   // TODO CRUD each collection
   // organismes toCreate call createOrganisme
   // organismes notValid to log ??

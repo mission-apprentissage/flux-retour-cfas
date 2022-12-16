@@ -5,7 +5,6 @@ import {
   schema as effectifSchema,
   defaultValuesEffectif,
   validateEffectif,
-  emptyValidEffectif,
 } from "../model/next.toKeep.models/effectifs.model/effectifs.model.js";
 import { defaultValuesApprenant } from "../model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
@@ -221,6 +220,32 @@ export const structureEffectifFromDossierApprenant = async (dossiersApprenant) =
 };
 
 /**
+ * TODO
+ * @param {*} effectif
+ * @returns
+ */
+export const structureEffectifWithEventualErrors = (effectif) => {
+  // Vérification si erreurs de validation sur l'effectif
+  const effectifValidationErrors = getSchemaValidationErrors(effectif, effectifSchema);
+  if (effectifValidationErrors.length > 0) {
+    // On remplace chaque field en erreur par un field valide default, sinon on le remove
+    const defaultValuesForEffectif = defaultValuesEffectif({ lockAtCreate: false });
+    for (const validationError of effectifValidationErrors) {
+      const defaultInError = defaultValuesForEffectif[validationError.fieldName];
+      if (defaultInError !== undefined) {
+        effectif[validationError.fieldName] = defaultInError;
+      } else {
+        delete effectif[validationError.fieldName];
+      }
+    }
+
+    return { ...effectif, validation_errors: effectifValidationErrors };
+  } else {
+    return effectif;
+  }
+};
+
+/**
  * Méthode de récupération des effectifs d'un organisme
  * @param {*} organisme_id
  * @param {*} projection
@@ -230,6 +255,16 @@ export const findEffectifs = async (organisme_id, projection = {}) => {
   return await effectifsDb()
     .find({ organisme_id: ObjectId(organisme_id) }, { projection })
     .toArray();
+};
+
+/**
+ * Méthode de récupération d'un effectif versatile par query
+ * @param {*} query
+ * @param {*} projection
+ * @returns
+ */
+export const findEffectifByQuery = async (query, projection = {}) => {
+  return await effectifsDb().findOne(query, { projection });
 };
 
 /**
@@ -309,8 +344,4 @@ export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
   );
 
   return updated.value;
-};
-
-export const buildEffectifValidationErrors = async (data) => {
-  validateEffectif(data);
 };
