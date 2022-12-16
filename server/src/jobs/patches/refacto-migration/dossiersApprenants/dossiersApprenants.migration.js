@@ -203,7 +203,7 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
         const { effectifs } = await runEngine({ effectifData }, null);
 
         nbDossiersMigrated++;
-        nbEffectifsCreated += effectifs.nbCreated;
+        nbEffectifsCreated += effectifs.created.length;
       } catch (error) {
         nbDossiersNotMigrated++;
 

@@ -1,6 +1,3 @@
-import { defaultValuesOrganisme } from "../../model/next.toKeep.models/organismes.model.js";
-import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
-// import { findDossierApprenantByQuery } from "../dossiersApprenants.actions.js";
 import {
   findEffectifById,
   findEffectifByQuery,
@@ -9,7 +6,13 @@ import {
   updateEffectif,
   updateEffectifAndLock,
 } from "../effectifs.actions.js";
-import { findOrganismeBySiret, findOrganismeByUai, findOrganismeByUaiAndSiret } from "../organismes.actions.js";
+import {
+  findOrganismeBySiret,
+  findOrganismeByUai,
+  findOrganismeByUaiAndSiret,
+  insertOrganisme,
+  updateOrganisme,
+} from "../organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
 
 /**
@@ -143,17 +146,20 @@ export const hydrateEffectifs = async (effectifs) => {
  * Fonction de remplissage et controle des données d'un organisme
  * @param {*} organismesData
  */
-export const hydrateOrganisme = async ({ uai, siret, nom, ...data }) => {
+export const hydrateOrganisme = async (organisme) => {
   let organismeToCreate = null;
   let organismeToUpdate = null;
 
   // Applique le mapping de fiabilisation
-  const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
+  const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
+    uai: organisme.uai,
+    siret: organisme.siret,
+  });
 
   // Si pas de siret après fiabilisation -> KO (+ Log?)
   if (!cleanSiret) {
     // TODO return toUpdate avec empty siret & validation error ?
-    throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un siret vide`);
+    throw new Error(`Impossible de créer l'organisme d'uai ${organisme.uai} avec un siret vide`);
   }
 
   // Applique les règles de rejection si pas dans la db
@@ -167,25 +173,20 @@ export const hydrateOrganisme = async ({ uai, siret, nom, ...data }) => {
     // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO (+ Log?)
     if (organismeFoundWithSiret?._id)
       throw new Error(
-        `L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai}`
+        `L'organisme ayant le siret ${organisme.siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai}`
       ); // TODO LOG ?
 
     const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
     // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> KO (+ Log?)
     if (organismeFoundWithUai?._id)
       throw new Error(
-        `L'organisme ayant l'uai ${uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`
+        `L'organisme ayant l'uai ${organisme.uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`
       ); // TODO LOG ?
 
     // TODO CHECK BASE ACCES
 
-    organismeToCreate = {
-      uai,
-      siret,
-      ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
-      ...defaultValuesOrganisme(),
-      ...data,
-    };
+    // Création de l'organisme avec uai / siret fiabilisés
+    organismeToCreate = { ...organisme, uai: cleanUai, siret: cleanSiret, sirets: [cleanSiret] };
   }
 
   return { organismeToCreate, organismeToUpdate };
@@ -202,17 +203,38 @@ export const hydrateOrganisme = async ({ uai, siret, nom, ...data }) => {
  * @param {*} dossiersApprenants
  */
 export const runEngine = async ({ effectifData, lockEffectif = true }, organismeData) => {
-  let nbEffectifsCreated = 0;
-  let nbEffectifsUpdated = 0;
+  let organismesCreated = [];
+  let organismesUpdated = [];
 
-  const { effectifsToCreate, effectifsToUpdate } = await hydrateEffectifs([effectifData]);
+  let effectifsCreated = [];
+  let effectifsUpdated = [];
 
-  if (effectifsToCreate.length > 0) {
-    // Gérer les cas des organismes non crées
-    // Traitement d'un item unique
-    if (!organismeData) {
+  // Gestion des organismes : hydrate et ensuite create or update
+  if (organismeData) {
+    const { organismeToCreate, organismeToUpdate } = await hydrateOrganisme(organismeData);
+
+    if (organismeToCreate) {
+      const organismeCreatedId = await insertOrganisme(organismeToCreate);
+      //  add organisme id to effectifData
+      effectifData.organisme_id = organismeCreatedId;
+      organismesCreated.push(organismeCreatedId);
+    }
+
+    if (organismeToUpdate) {
+      const organismeUpdatedId = await updateOrganisme(organismeToUpdate?._id, organismeToUpdate);
+      //  add organisme id to effectifData
+      effectifData.organisme_id = organismeUpdatedId;
+      organismesUpdated.push(organismeUpdatedId);
+    }
+  }
+
+  // Gestion des effectifs
+  if (effectifData) {
+    const { effectifsToCreate, effectifsToUpdate } = await hydrateEffectifs([effectifData]);
+
+    if (effectifsToCreate.length > 0) {
       const effectifCreatedId = await insertEffectif(effectifsToCreate[0]);
-      nbEffectifsCreated++;
+      effectifsCreated.push(effectifCreatedId);
 
       // Lock des champs API si option active
       if (lockEffectif) {
@@ -223,37 +245,30 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
         });
       }
     }
+
+    // TODO TEST
+    if (effectifsToUpdate.length > 0) {
+      if (lockEffectif) {
+        await updateEffectifAndLock(effectifsToUpdate?._id, effectifsToUpdate[0]);
+      } else {
+        await updateEffectif(effectifsToUpdate[0]?._id, effectifsToUpdate[0]);
+      }
+      effectifsUpdated.push(effectifsToUpdate[0]?._id);
+    }
+
+    // TODO : dépendance sur organismes Id -> effectifs aller recup l'organisme id avant l'insert
+    // TODO : si organisme erreur on ajoute pas l'effectif ?
+    // TODO Call Api Entreprise for organisme
   }
-
-  if (effectifsToUpdate.length > 0) {
-    // Traitement d'un item unique
-    await updateEffectif(effectifsToUpdate[0]);
-    nbEffectifsUpdated++;
-  }
-
-  // TODO : dépendance sur organismes Id -> effectifs aller recup l'organisme id avant l'insert
-  // TODO : si organisme erreur on ajoute pas l'effectif ?
-
-  // TODO lock true api
-  // const effectifCreated = await createEffectifFromDossierApprenant(dossiersApprenantsMigrated);
-  // // Lock api fields
-  // await updateEffectifAndLock(effectifCreated._id, {
-  //   apprenant: effectifCreated.apprenant,
-  //   formation: effectifCreated.formation,
-  // });
-  // TODO CRUD each collection
-  // organismes toCreate call createOrganisme
-  // organismes notValid to log ??
-  // DossiersApprenant toCreate call createDossierApprenant
-  // DossiersApprenant toUpdate call updateDossierApprenant
-  // Effectifs toCreate call createEffectifFromDossierApprenant
-  // Effectifs toUpdate call updateEffectif
-  // TODO Call Api Entreprise for organisme
 
   return {
     effectifs: {
-      nbCreated: nbEffectifsCreated,
-      nbUpdated: nbEffectifsUpdated,
+      created: effectifsCreated,
+      updated: effectifsUpdated,
+    },
+    organismes: {
+      created: organismesCreated,
+      updated: organismesUpdated,
     },
   };
 };

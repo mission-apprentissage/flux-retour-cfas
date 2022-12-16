@@ -2,8 +2,11 @@ import { ObjectId } from "mongodb";
 import { getMetiersBySirets } from "../apis/apiLba.js";
 import { organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
+import { buildAdresseFromApiEntreprise } from "../utils/adresseUtils.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { generateKey } from "../utils/cryptoUtils.js";
+import { buildAdresseFromUai } from "../utils/uaiUtils.js";
+import { siretSchema } from "../utils/validationUtils.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine/engine.organismes.utils.js";
 import { createPermission, hasPermission } from "./permissions.actions.js";
 import { findRolePermissionById } from "./roles.actions.js";
@@ -93,6 +96,16 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
 };
 
 /**
+ * Méthode d'insert d'un organisme en base
+ * @param {*} data
+ * @returns
+ */
+export const insertOrganisme = async (data) => {
+  const { insertedId } = await organismesDb().insertOne(validateOrganisme(data));
+  return insertedId;
+};
+
+/**
  * Création d'un objet organisme depuis les données d'un dossierApprenant
  * @param {*} dossierApprenant
  * @returns
@@ -100,11 +113,17 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
 export const structureOrganismeFromDossierApprenant = async (dossierApprenant) => {
   const { uai_etablissement, siret_etablissement, nom_etablissement } = dossierApprenant;
 
+  const adresseForOrganisme = await buildAdresseForOrganisme({ uai: uai_etablissement, sirets: [siret_etablissement] });
+
   return {
+    ...defaultValuesOrganisme(),
     uai: uai_etablissement,
     siret: siret_etablissement,
     sirets: [siret_etablissement],
-    nom: nom_etablissement,
+    ...adresseForOrganisme,
+    ...(nom_etablissement
+      ? { nom: nom_etablissement.trim(), nom_tokenized: buildTokenizedString(nom_etablissement.trim(), 4) }
+      : {}),
   };
 };
 
@@ -343,4 +362,26 @@ export const updateOrganismeApiKey = async (id) => {
   );
 
   return key;
+};
+
+/**
+ * Méthode de récupération de l'adresse pour un organisme via ses props
+ * Par défaut l'adresse est construite depuis l'UAI
+ * Si l'organisme a un seul siret et qu'il est valide alors on récupère l'adresse depuis l'API Entreprise
+ // TODO Voir quoi faire pour les organismes multi sirets
+ * @param {*} cfaProps
+ */
+export const buildAdresseForOrganisme = async ({ uai, sirets }) => {
+  let adresseForOrganisme = buildAdresseFromUai(uai);
+
+  // Si un seul siret et qu'il est valide on récupère l'adresse via l'API Entreprise
+  if (sirets.length === 1) {
+    const siretForOrganisme = sirets[0];
+    const validSiret = siretSchema().validate(siretForOrganisme);
+    if (!validSiret.error) {
+      adresseForOrganisme = await buildAdresseFromApiEntreprise(siretForOrganisme);
+    }
+  }
+
+  return adresseForOrganisme;
 };

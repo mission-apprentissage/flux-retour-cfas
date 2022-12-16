@@ -5,7 +5,7 @@ import { cfasDb, organismesDb } from "../../../../common/model/collections.js";
 import { getLocalisationInfoFromUai } from "../../../../common/utils/uaiUtils.js";
 import Joi from "joi";
 import { siretSchema } from "../../../../common/utils/validationUtils.js";
-import { createOrganismeFromCfa, mapCfaPropsToOrganismeProps } from "./organismes.migration.actions.js";
+import { createOrganismeFromCfa, mapCfaPropsToOrganismeProps } from "./organismes.migration.job.actions.js";
 import { updateOrganismeApiKey } from "../../../../common/actions/organismes.actions.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
