@@ -7,13 +7,13 @@ import {
   effectifsDb,
 } from "../../../../common/model/collections.js";
 import { createOrganisme, findOrganismeByUai } from "../../../../common/actions/organismes.actions.js";
+import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 import {
   createDossierApprenantMigrationFromDossierApprenant,
   createEffectifFromDossierApprenantMigrated,
   mapToDossiersApprenantsMigrationProps,
-} from "./dossiersApprenants.migration.actions.js";
-import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
-import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
+} from "../../../../common/actions/dossiersApprenants.migration.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

@@ -2,9 +2,14 @@ import { findDossierApprenantByQuery } from "../dossiersApprenants.actions.js";
 import { findOrganismeByUai } from "../organismes.actions.js";
 
 /**
+ * TODO en amont dossiersToEffectifs
+ * TODO : hydrateOrganisme (effectifsIN) & hydrateEffectifs
+ * hydrateOrganisme : controle toCreate / toUpdate (notValide included) - fiab included
+ * hydrateEffectifs : toCreate / toUpdate
+ *
  * Manip dossiers to Effectifs (TEMP) DossierToEffectif (à jeter en janvier)
  * Fonction core moteur des effectifs
- * Appelée depuis Entrée API (direct -> effectifs)
+ * Appelée depuis Entrée API (direct -> effectifs) TEMP dossierEffectifs
  * Appelée depuis Entrée Migration (dossiersApprenants puis effectifs ??) -> DossierToEffectif (à jeter en janvier)
  * Appelée depuis Entrée Upload générique (effectifs en direct)
  * A partir d'une liste de dossiersApprenant en input va effectuer tous les contrôles nécessaires pour chaque dossier
@@ -18,7 +23,7 @@ import { findOrganismeByUai } from "../organismes.actions.js";
  * @param {*} effectifs
  * @returns
  */
-export const hydrateEngine = async (effectifs) => {
+export const hydrateEffectifs = async (effectifs) => {
   // let dossiersApprenantsToCreate = [];
   // let dossiersApprenantsToUpdate = [];
   let organismesToCreate = [];
@@ -93,23 +98,29 @@ export const hydrateEngine = async (effectifs) => {
 };
 
 /**
+ * Fonction de remplissage et controle des données d'un organisme
+ * @param {*} organismesData
+ */
+export const hydrateOrganisme = async (organismeData) => {};
+
+/**
+ * API For ligne of all => call RunEngine (split into effectifData / organismeData)
+ * Migration : For ligne of all => call RunEngine (split into effectifData / organismeData)
+ * UPLOAD : hydrateEffectif uniquement
+ * Input : séparer fields relatif à l'orga & fields effectifs / dossier pour une ligne
+ * -> Hydrate org / eff
  * Fonction de run du moteur de construction des dossiersApprenant / effectifs / organismes
  * Va hydrate l'engine et pour chaque collection créer / mettre à jour les données liées
  * @param {*} dossiersApprenants
  */
-export const runEngine = async (dossiersApprenants) => {
-  const { organismes, effectifs } = hydrateEngine(dossiersApprenants);
-
+export const runEngine = async ({ effectifsData, organismesData }) => {
+  // const { organismes, effectifs } = hydrateEngine(dossiersApprenants);
   // TODO CRUD each collection
   // organismes toCreate call createOrganisme
   // organismes notValid to log ??
-
   // DossiersApprenant toCreate call createDossierApprenant
   // DossiersApprenant toUpdate call updateDossierApprenant
-
   // Effectifs toCreate call createEffectifFromDossierApprenant
   // Effectifs toUpdate call updateEffectif
-  // Effectifs notValid to log ??
-
   // TODO Call Api Entreprise for organisme
 };

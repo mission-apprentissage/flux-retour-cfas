@@ -1,14 +1,11 @@
 import Joi from "joi";
-import { transformToInternationalNumber } from "../../../../common/utils/validationsUtils/frenchTelephoneNumber.js";
-import { dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../model/collections.js";
 import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
-} from "../../../../common/model/next.toKeep.models/dossiersApprenantsMigration.model.js";
-import {
-  createEffectifFromDossierApprenant,
-  updateEffectifAndLock,
-} from "../../../../common/actions/effectifs.actions.js";
+} from "../model/next.toKeep.models/dossiersApprenantsMigration.model.js";
+import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber.js";
+import { createEffectifFromDossierApprenant, updateEffectifAndLock } from "./effectifs.actions.js";
 
 /**
  * Méthode de création d'un effectif depuis un dossierApprenant migré
@@ -81,7 +78,6 @@ export const createDossierApprenantMigrationFromDossierApprenant = async ({
   const { insertedId } = await dossiersApprenantsMigrationDb().insertOne(validateDossiersApprenantsMigration(entity));
   return await dossiersApprenantsMigrationDb().findOne({ _id: insertedId });
 };
-
 /**
  * Méthode (temp) de transformation des props d'un dossiersApprenant en props d'un dossiersApprenantMigration
  * Gestion des fields nulls à mettre en string ""
