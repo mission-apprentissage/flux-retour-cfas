@@ -200,10 +200,10 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
         // Call runEngine -> va créer les données nécessaires
         // Attention : ici l'organisme a déja été créé par createDossierApprenantMigrationFromDossierApprenant,
         // du coup l'engine n'aura pas besoin de le créer (d'ou le null)
-        const { effectifs } = await runEngine({ effectifData }, null);
+        const { effectif } = await runEngine({ effectifData }, null);
 
         nbDossiersMigrated++;
-        nbEffectifsCreated += effectifs.created.length;
+        if (effectif.created) nbEffectifsCreated++;
       } catch (error) {
         nbDossiersNotMigrated++;
 

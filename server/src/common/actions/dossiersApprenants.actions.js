@@ -6,71 +6,23 @@ import {
   validateDossiersApprenantsMigration,
 } from "../model/next.toKeep.models/dossiersApprenantsMigration.model.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
-import { createOrganisme, findOrganismeById, findOrganismeByUai } from "./organismes.actions.js";
-import { buildAdresseFromUai } from "../utils/uaiUtils.js";
-import { createEffectifFromDossierApprenant } from "./effectifs.actions.js";
 
 /**
- * TODO TO REMOVE - Replaced by buildDossierApprenant
- * Méthode de création d'un organisme
- * Checks uai format & existence
- * @param {*} organismeProps
+ * Méthode qui ajoute un dossierApprenant en base
+ * @param {*} data
  * @returns
  */
-export const createDossierApprenant = async ({
-  organisme_id,
-  nom_apprenant,
-  prenom_apprenant,
-  date_de_naissance_apprenant,
-  contrat_date_debut,
-  contrat_date_fin,
-  contrat_date_rupture,
-  ...data
-}) => {
-  const organisme = await findOrganismeById(organisme_id);
-  if (!organisme) {
-    throw new Error(`Unable to find organisme ${organisme_id.toString()}`);
-  }
-
-  const { insertedId } = await dossiersApprenantsMigrationDb().insertOne(
-    validateDossiersApprenantsMigration({
-      ...defaultValuesDossiersApprenantsMigration(),
-      organisme_id: organisme._id,
-      ...(nom_apprenant ? { nom_apprenant: nom_apprenant.toUpperCase().trim() } : {}),
-      ...(prenom_apprenant ? { prenom_apprenant: prenom_apprenant.toUpperCase().trim() } : {}),
-      ...(date_de_naissance_apprenant
-        ? {
-            date_de_naissance_apprenant:
-              date_de_naissance_apprenant instanceof Date
-                ? date_de_naissance_apprenant
-                : new Date(date_de_naissance_apprenant),
-          }
-        : {}),
-      ...(contrat_date_debut
-        ? { contrat_date_debut: contrat_date_debut instanceof Date ? contrat_date_debut : new Date(contrat_date_debut) }
-        : {}),
-      ...(contrat_date_fin
-        ? { contrat_date_fin: contrat_date_fin instanceof Date ? contrat_date_fin : new Date(contrat_date_fin) }
-        : {}),
-      ...(contrat_date_rupture
-        ? {
-            contrat_date_rupture:
-              contrat_date_rupture instanceof Date ? contrat_date_rupture : new Date(contrat_date_rupture),
-          }
-        : {}),
-      ...data,
-    })
-  );
-
-  return await dossiersApprenantsMigrationDb().findOne({ _id: insertedId });
+export const insertDossierApprenant = async (data) => {
+  const { insertedId } = await dossiersApprenantsMigrationDb().insertOne(validateDossiersApprenantsMigration(data));
+  return insertedId;
 };
 
 /**
  * Méthode qui construit un dossierApprenant et toutes les données liées
- * TODO : Rename function & à placer au bon endroit ?
  * @param {*} param0
  */
-export const buildDossierApprenant = async ({
+export const structureDossierApprenant = ({
+  organisme_id,
   nom_apprenant,
   prenom_apprenant,
   date_de_naissance_apprenant,
@@ -79,59 +31,46 @@ export const buildDossierApprenant = async ({
   contrat_date_rupture,
   uai_etablissement,
   siret_etablissement,
-  nom_etablissement,
   ...data
 }) => {
-  // Création de l'organisme si nécessaire
-  let organismeForDossierApprenant = await findOrganismeByUai(uai_etablissement);
-  if (!organismeForDossierApprenant) {
-    // TODO call createAndControlOrganisme here replacing createOrganisme
-    organismeForDossierApprenant = await createOrganisme({
-      uai: uai_etablissement,
-      siret: siret_etablissement,
-      ...buildAdresseFromUai(uai_etablissement),
-      nom: nom_etablissement,
-    });
-  }
+  // TODO Gestion de l'historique des statuts cf. createDossierApprenantLegacy
+  // [
+  //   {
+  //     valeur_statut: itemToCreate.statut_apprenant,
+  //     date_statut: new Date(itemToCreate.date_metier_mise_a_jour_statut),
+  //     date_reception: new Date(),
+  //   },
+  // ],
 
-  // Création du dossierApprenant avec organisme lié
-  const { insertedId } = await dossiersApprenantsMigrationDb().insertOne(
-    validateDossiersApprenantsMigration({
-      ...defaultValuesDossiersApprenantsMigration(),
-      organisme_id: organismeForDossierApprenant._id,
-      uai_etablissement,
-      siret_etablissement,
-      ...(nom_apprenant ? { nom_apprenant: nom_apprenant.toUpperCase().trim() } : {}),
-      ...(prenom_apprenant ? { prenom_apprenant: prenom_apprenant.toUpperCase().trim() } : {}),
-      ...(date_de_naissance_apprenant
-        ? {
-            date_de_naissance_apprenant:
-              date_de_naissance_apprenant instanceof Date
-                ? date_de_naissance_apprenant
-                : new Date(date_de_naissance_apprenant),
-          }
-        : {}),
-      ...(contrat_date_debut
-        ? { contrat_date_debut: contrat_date_debut instanceof Date ? contrat_date_debut : new Date(contrat_date_debut) }
-        : {}),
-      ...(contrat_date_fin
-        ? { contrat_date_fin: contrat_date_fin instanceof Date ? contrat_date_fin : new Date(contrat_date_fin) }
-        : {}),
-      ...(contrat_date_rupture
-        ? {
-            contrat_date_rupture:
-              contrat_date_rupture instanceof Date ? contrat_date_rupture : new Date(contrat_date_rupture),
-          }
-        : {}),
-      ...data,
-    })
-  );
-
-  // Création de l'effectif lié au dossierApprenant
-  const dossierApprenantCreated = await dossiersApprenantsMigrationDb().findOne({ _id: insertedId });
-  const effectifCreated = await createEffectifFromDossierApprenant(dossierApprenantCreated);
-
-  return { dossierApprenant: dossierApprenantCreated, effectif: effectifCreated };
+  return {
+    ...defaultValuesDossiersApprenantsMigration(),
+    organisme_id,
+    uai_etablissement,
+    siret_etablissement,
+    ...(nom_apprenant ? { nom_apprenant: nom_apprenant.toUpperCase().trim() } : {}),
+    ...(prenom_apprenant ? { prenom_apprenant: prenom_apprenant.toUpperCase().trim() } : {}),
+    ...(date_de_naissance_apprenant
+      ? {
+          date_de_naissance_apprenant:
+            date_de_naissance_apprenant instanceof Date
+              ? date_de_naissance_apprenant
+              : new Date(date_de_naissance_apprenant),
+        }
+      : {}),
+    ...(contrat_date_debut
+      ? { contrat_date_debut: contrat_date_debut instanceof Date ? contrat_date_debut : new Date(contrat_date_debut) }
+      : {}),
+    ...(contrat_date_fin
+      ? { contrat_date_fin: contrat_date_fin instanceof Date ? contrat_date_fin : new Date(contrat_date_fin) }
+      : {}),
+    ...(contrat_date_rupture
+      ? {
+          contrat_date_rupture:
+            contrat_date_rupture instanceof Date ? contrat_date_rupture : new Date(contrat_date_rupture),
+        }
+      : {}),
+    ...data,
+  };
 };
 
 /**

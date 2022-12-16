@@ -18,11 +18,13 @@ import { sendTransformedPaginatedJsonStream } from "../../../../common/utils/htt
 import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
 import { runEngine } from "../../../../common/actions/engine/engine.actions.js";
 import { structureEffectifFromDossierApprenant } from "../../../../common/actions/effectifs.actions.js";
+import { structureOrganismeFromDossierApprenant } from "../../../../common/actions/organismes.actions.js";
 import {
-  findOrganismeByUaiAndSiret,
-  structureOrganismeFromDossierApprenant,
-} from "../../../../common/actions/organismes.actions.js";
-import { createDossierApprenantMigrationFromDossierApprenant } from "../../../../common/actions/dossiersApprenants.migration.actions.js";
+  findDossierApprenantByQuery,
+  insertDossierApprenant,
+  structureDossierApprenant,
+  updateDossierApprenant,
+} from "../../../../common/actions/dossiersApprenants.actions.js";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
@@ -145,16 +147,32 @@ export default () => {
             const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenantItem);
 
             // Call runEngine -> va créer les données nécessaires (effectifs + organismes)
-            const { organismes } = await runEngine({ effectifData }, organismeData);
+            const { organisme } = await runEngine({ effectifData }, organismeData);
 
             // POST Engine création du dossierApprenantMigration avec organisme lié
             // TODO à supprimer une fois que la collection DossierApprenantMigration sera useless
-            if (organismes.created || organismes.updated) {
-              const organisme_id = organismes.created[0] || organismes.updated[0]; // Update sur l'organisme ajouté ou maj
-              await createDossierApprenantMigrationFromDossierApprenant({
-                organisme_id,
+            if (organisme.createdId || organisme.foundId) {
+              const structuredDossierApprenant = structureDossierApprenant({
                 ...dossierApprenantItem,
+                organisme_id: organisme.createdId || organisme.foundId, // Update sur l'organisme ajouté ou maj,
               });
+
+              // Recherche du dossier via sa clé d'unicité
+              const foundDossierWithUnicityFields = await findDossierApprenantByQuery(
+                {
+                  id_erp_apprenant: structuredDossierApprenant.id_erp_apprenant,
+                  uai_etablissement: structuredDossierApprenant.uai_etablissement,
+                  annee_scolaire: structuredDossierApprenant.annee_scolaire,
+                },
+                { _id: 1 }
+              );
+
+              // Création ou update
+              if (!foundDossierWithUnicityFields) {
+                await insertDossierApprenant(structuredDossierApprenant);
+              } else {
+                await updateDossierApprenant(foundDossierWithUnicityFields?._id, structuredDossierApprenant);
+              }
             }
           }
         });

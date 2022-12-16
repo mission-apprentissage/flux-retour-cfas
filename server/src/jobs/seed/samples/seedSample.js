@@ -24,7 +24,9 @@ export const seedWithSample = async (randomMode = false, nbDossiers = 10) => {
 
 export const seedSample = async () => {
   await asyncForEach(fullSampleWithUpdates, async (currentDossierToAdd) => {
-    createDossierApprenant(currentDossierToAdd);
+    // TODO Replace with insert & structure
+    console.log(currentDossierToAdd);
+    // createDossierApprenant(currentDossierToAdd);
   });
 };
 
