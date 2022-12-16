@@ -89,7 +89,7 @@ export const _post = async (path, body, signal) => {
 
 export const _postFile = async (path, data, signal) => {
   const response = await axios.post(path, data, {
-    headers: getHeaders(),
+    headers: getHeaders(null),
     validateStatus: () => true,
     signal,
     httpsAgent: getHttpsAgent(),

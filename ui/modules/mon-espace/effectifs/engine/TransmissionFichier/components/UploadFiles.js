@@ -5,10 +5,10 @@ import { useRecoilValue } from "recoil";
 
 import queryString from "query-string";
 import { useDocuments } from "../hooks/useDocuments";
-import { dossierAtom } from "../../atoms";
 import { _delete, _postFile } from "../../../../../../common/httpClient";
 import { hasContextAccessTo } from "../../../../../../common/utils/rolesUtils";
 import { Bin, DownloadLine, File } from "../../../../../../theme/components/icons";
+import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
 
 const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
 
@@ -41,12 +41,14 @@ function formatBytes(bytes, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
-const UploadFiles = ({ title, typeDocument }) => {
-  const dossier = useRecoilValue(dossierAtom);
+const UploadFiles = ({ title }) => {
+  const organisme = useRecoilValue(organismeAtom);
   const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const { documents, onDocumentsChanged } = useDocuments();
+
+  const type_document = "Foo";
 
   const maxFiles = 1;
 
@@ -59,10 +61,10 @@ const UploadFiles = ({ title, typeDocument }) => {
         const data = new FormData();
         data.append("file", acceptedFiles[0]);
         const { documents } = await _postFile(
-          `${endpoint}/v1/upload?dossierId=${dossier._id}&typeDocument=${typeDocument}`,
+          `${endpoint}/v1/upload?organisme_id=${organisme._id}&type_document=${type_document}`,
           data
         );
-        onDocumentsChanged(documents, typeDocument);
+        onDocumentsChanged(documents, type_document);
         toast({
           title: "Le fichier a bien été déposé",
           status: "success",
@@ -80,7 +82,7 @@ const UploadFiles = ({ title, typeDocument }) => {
         setIsSubmitting(false);
       }
     },
-    [dossier?._id, onDocumentsChanged, toast, typeDocument]
+    [organisme?._id, onDocumentsChanged, toast, type_document]
   );
 
   const onDropRejected = useCallback(
@@ -96,16 +98,16 @@ const UploadFiles = ({ title, typeDocument }) => {
   );
 
   const onDeleteClicked = async (file) => {
-    if (hasContextAccessTo(dossier, "dossier/page_documents/supprimer_un_document")) {
+    if (hasContextAccessTo(organisme, "dossier/page_documents/supprimer_un_document")) {
       // eslint-disable-next-line no-restricted-globals
       const remove = confirm("Voulez-vous vraiment supprimer ce document ?");
       if (remove) {
         try {
           let data = file;
           const { documents } = await _delete(
-            `${endpoint}/v1/upload?dossierId=${dossier._id}&${queryString.stringify(data)}`
+            `${endpoint}/v1/upload?organisme_id=${organisme._id}&${queryString.stringify(data)}`
           );
-          onDocumentsChanged(documents, typeDocument);
+          onDocumentsChanged(documents, type_document);
         } catch (e) {
           console.error(e);
         }
@@ -117,7 +119,11 @@ const UploadFiles = ({ title, typeDocument }) => {
     maxFiles,
     onDrop,
     onDropRejected,
-    accept: ".pdf",
+    accept: {
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+      "application/vnd.ms-excel": [".xls", ".csv"],
+      "text/csv": [".csv"],
+    },
     maxSize: 10485760,
   });
 
@@ -131,7 +137,7 @@ const UploadFiles = ({ title, typeDocument }) => {
 
   return (
     <>
-      <Heading as="h3" flexGrow="1" fontSize="1.2rem" mb={4}>
+      <Heading as="h3" flexGrow="1" fontSize="1.2rem" mb={2}>
         {title}
       </Heading>
       <Box mb={8}>
@@ -146,16 +152,14 @@ const UploadFiles = ({ title, typeDocument }) => {
                       <File boxSize="5" color="bluefrance" />
                       <Box flexGrow={1}>
                         <Link
-                          href={`/api/v1/upload?dossierId=${dossier._id}&path=${file.cheminFichier}&name=${file.nomFichier}`}
+                          href={`/api/v1/upload?organisme_id=${organisme._id}&path=${file.cheminFichier}&name=${file.nomFichier}`}
                           textDecoration={"underline"}
                           isExternal
                         >
                           {file.path || file.nomFichier} - {formatBytes(file.size || file.tailleFichier)}
                         </Link>
                       </Box>
-                      {dossier.draft && (
-                        <Bin boxSize="5" color="redmarianne" cursor="pointer" onClick={() => onDeleteClicked(file)} />
-                      )}
+                      <Bin boxSize="5" color="redmarianne" cursor="pointer" onClick={() => onDeleteClicked(file)} />
                     </HStack>
                   </ListItem>
                 );
@@ -178,7 +182,7 @@ const UploadFiles = ({ title, typeDocument }) => {
                   Glissez le fichier dans cette zone ou cliquez sur le bouton pour ajouter un document depuis votre
                   disque dur
                 </Text>
-                <Text color="mgalt">(pdf uniquement, maximum 10mb)</Text>
+                <Text color="mgalt">(Microsoft Excel (.xlsx ou .xls) ou .csv, maximum 10mb)</Text>
                 <Button size="md" variant="secondary" mt={4}>
                   Ajouter un document
                 </Button>

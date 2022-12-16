@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Flex, Text } from "@chakra-ui/react";
 import { ArrowDropRightLine } from "../../../theme/components/icons";
 import { useOrganisme } from "../../../hooks/useOrganisme";
-import UploadFiles from "./engine/PiecesJustificatives/components/UploadFiles";
+import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 
 const TransmissionFichier = () => {
   const { organisme, updateOrganisme } = useOrganisme();
@@ -14,7 +14,7 @@ const TransmissionFichier = () => {
           TODO STUFF
         </Text>
 
-        <UploadFiles title={`Téléverser vos fichiers`} typeDocument="CONVENTION_FORMATION" />
+        <UploadFiles title={`Téléverser vos fichiers`} />
 
         <Button
           onClick={() => updateOrganisme(organisme.id, { setup_step_courante: "COMPLETE" })}

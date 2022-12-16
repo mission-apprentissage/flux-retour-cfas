@@ -19,6 +19,7 @@ import * as PermissionsDescriptor from "./next.toKeep.models/permissions.model.j
 import * as OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
 import * as dossiersApprenantsMigrationModelDescriptor from "./next.toKeep.models/dossiersApprenantsMigration.model.js";
 import * as effectifsModelDescriptor from "./next.toKeep.models/effectifs.model/effectifs.model.js";
+import * as uploadsModelDescriptor from "./next.toKeep.models/uploads.model/uploads.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
@@ -39,6 +40,7 @@ export const modelDescriptors = [
   OrganismesModelDescriptor,
   dossiersApprenantsMigrationModelDescriptor,
   effectifsModelDescriptor,
+  uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
 ];
 
@@ -92,6 +94,10 @@ export function dossiersApprenantsMigrationDb() {
 
 export function effectifsDb() {
   return getDbCollection(effectifsModelDescriptor.collectionName);
+}
+
+export function uploadsDb() {
+  return getDbCollection(uploadsModelDescriptor.collectionName);
 }
 
 // TODO Collections descriptors à supprimer

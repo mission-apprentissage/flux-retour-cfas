@@ -38,7 +38,7 @@ import profile from "./routes/user.routes/profile.routes.js";
 import organisme from "./routes/specific.routes/organisme.routes.js";
 import effectif from "./routes/specific.routes/effectif.routes.js";
 import espace from "./routes/specific.routes/espace.routes.js";
-// import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
+import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
@@ -67,7 +67,7 @@ export default async (services) => {
   app.use("/api/v1/espace", checkJwtToken, espace());
   app.use("/api/v1/organisme", checkJwtToken, organisme());
   app.use("/api/v1/effectif", checkJwtToken, effectif());
-  // app.use("/api/v1/serp/upload", checkJwtToken, upload(services));
+  app.use("/api/v1/upload", checkJwtToken, upload(services));
 
   // private admin access
   app.use(

@@ -1,6 +1,6 @@
 import { atom, selector } from "recoil";
 import { cerfaStatusGetter } from "./formEngine/atoms";
-import { documentsCompletionStatusGetter } from "./PiecesJustificatives/documentsCompletionAtoms";
+import { documentsCompletionStatusGetter } from "./TransmissionFichier/documentsCompletionAtoms";
 import { signaturesCompletionSelector } from "./Signatures/atoms";
 
 export const dossierCompletionStatus = selector({
