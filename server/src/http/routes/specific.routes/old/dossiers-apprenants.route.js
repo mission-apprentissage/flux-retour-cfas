@@ -151,6 +151,7 @@ export default () => {
 
             // POST Engine création du dossierApprenantMigration avec organisme lié
             // TODO à supprimer une fois que la collection DossierApprenantMigration sera useless
+            // TODO Store userEvents
             if (organisme.createdId || organisme.foundId) {
               const structuredDossierApprenant = structureDossierApprenant({
                 ...dossierApprenantItem,

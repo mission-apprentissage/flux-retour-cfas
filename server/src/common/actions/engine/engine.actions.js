@@ -119,6 +119,8 @@ export const hydrateOrganisme = async (organisme) => {
  *     Depuis l'upload le run devra être exécuté avec organismeData vide vu que l'organisme est déja existant
  *     Idem API itérer sur un élément de l'upload et faire un runEngine
  *     Va créer / update l'effectif provenant de l'upload
+ *     lockEffectif false
+ *
  *
  *
  *
