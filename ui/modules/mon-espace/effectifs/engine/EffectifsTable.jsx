@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure, Spinner } from "@chakra-ui/react";
+import { Box, Flex, Text, HStack, Button, Tooltip, Circle, useDisclosure, Spinner, Heading } from "@chakra-ui/react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -22,6 +22,8 @@ import AjoutApprenantModal from "./AjoutApprenantModal";
 import { DateTime } from "luxon";
 import { _getBlob } from "../../../../common/httpClient";
 import useDownloadClick from "../../../../hooks/old/useDownloadClick";
+import { useRouter } from "next/router";
+import { useEspace } from "../../../../hooks/useEspace";
 
 const EffectifDetails = ({ row, modeSifa = false, canEdit = false }) => {
   const queryClient = useQueryClient();
@@ -61,6 +63,8 @@ const DownloadButton = ({ title, fileName, getFile }) => {
 };
 
 const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
+  const router = useRouter();
+  const { isMonOrganismePages, isOrganismePages } = useEspace();
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
   const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
@@ -69,6 +73,10 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
 
   return (
     <Flex flexDir="column" width="100%" my={10}>
+      <Heading textStyle="h2" color="grey.800" mb={5}>
+        {isMonOrganismePages && `Mes effectifs`}
+        {isOrganismePages && `Ses effectifs`}
+      </Heading>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Box flexBasis={{ base: "auto", md: "auto" }} flexGrow="1">
           <HStack>
@@ -118,23 +126,25 @@ const EffectifsTable = ({ organismesEffectifs, modeSifa = false }) => {
               title="Télécharger SIFA"
             />
           )}
-          {!modeSifa &&
-            hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
-            organisme.mode_de_transmission === "FICHIERS" && (
-              <>
-                <Button
-                  size="md"
-                  fontSize={{ base: "sm", md: "md" }}
-                  p={{ base: 2, md: 4 }}
-                  h={{ base: 8, md: 10 }}
-                  onClick={() => alert("TODO NOT YET")}
-                  variant="primary"
-                >
-                  Historique des téleversements
-                </Button>
-                <AjoutApprenantModal size="md" isOpen={ajoutModal.isOpen} onClose={ajoutModal.onClose} />
-              </>
-            )}
+          {hasContextAccessTo(organisme, "organisme/page_effectifs/televersement_document") && (
+            <>
+              <Button
+                size="md"
+                fontSize={{ base: "sm", md: "md" }}
+                p={{ base: 2, md: 4 }}
+                h={{ base: 8, md: 10 }}
+                onClick={() => {
+                  router.push(`${router.asPath}/televersement`);
+                }}
+                variant="secondary"
+              >
+                <DownloadLine transform="rotate(180deg)" />
+                <Text as="span" ml={2}>
+                  Téléversements
+                </Text>
+              </Button>
+            </>
+          )}
           {!modeSifa &&
             hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
             organisme.mode_de_transmission !== "API" && (

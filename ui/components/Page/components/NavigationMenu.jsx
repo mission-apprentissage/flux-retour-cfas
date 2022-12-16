@@ -65,6 +65,9 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
   let {
     navigation: { user: userNavigation },
     myOrganisme,
+    isMonOrganismePages,
+    isEffectifsPage,
+    isTeleversementPage,
   } = useEspace();
 
   return (
@@ -81,7 +84,12 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
       )}
 
       {hasContextAccessTo(myOrganisme, "organisme/page_effectifs") && userNavigation.effectifs && (
-        <NavItem to={userNavigation.effectifs.path}>{userNavigation.effectifs.navTitle}</NavItem>
+        <NavItem
+          to={userNavigation.effectifs.path}
+          isActive={isMonOrganismePages && (isEffectifsPage || isTeleversementPage)}
+        >
+          {userNavigation.effectifs.navTitle}
+        </NavItem>
       )}
       {hasContextAccessTo(myOrganisme, "organisme/page_sifa2") && userNavigation.sifa2 && (
         <NavItem to={userNavigation.sifa2.path}>{userNavigation.sifa2.navTitle}</NavItem>
@@ -102,6 +110,9 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
 const NavBarOrganisme = ({ isOpen }) => {
   let {
     navigation: { organisme: organismeNavigation },
+    isOrganismePages,
+    isEffectifsPage,
+    isTeleversementPage,
   } = useEspace();
 
   const { isloaded, organisme } = useOrganisme();
@@ -121,7 +132,11 @@ const NavBarOrganisme = ({ isOpen }) => {
         </NavItem>
       )}
       {hasContextAccessTo(organisme, "organisme/page_effectifs") && (
-        <NavItem to={organismeNavigation.effectifs.path} colorActive="dsfr_lightprimary.bluefrance_850">
+        <NavItem
+          to={organismeNavigation.effectifs.path}
+          colorActive="dsfr_lightprimary.bluefrance_850"
+          isActive={isOrganismePages && (isEffectifsPage || isTeleversementPage)}
+        >
           {organismeNavigation.effectifs.navTitle}
         </NavItem>
       )}

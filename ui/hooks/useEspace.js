@@ -38,6 +38,7 @@ export function useEspace() {
   const isMesOrganismesPages = router.asPath.includes("/mon-espace/mes-organismes");
   const isMonOrganismePage = isMonOrganismePages && !slug.length;
   const isEffectifsPage = slug.includes("effectifs");
+  const isTeleversementPage = isEffectifsPage && slug.includes("televersement");
   const isSIFA2Page = slug.includes("enquete-SIFA2");
   const isParametresPage = slug.includes("parametres");
   const contextNav = isOrganismePages ? "organisme" : "user";
@@ -78,6 +79,11 @@ export function useEspace() {
                       navTitle: "Mes effectifs",
                       path: "/mon-espace/mon-organisme/effectifs",
                     },
+                    televersement: {
+                      pageTitle: "Téversement(s) de fichier(s)",
+                      navTitle: "Téversement(s) de fichier(s)",
+                      path: "/mon-espace/mon-organisme/effectifs/televersement",
+                    },
                     sifa2: {
                       pageTitle: "Mon enquête SIFA2",
                       navTitle: "Mon enquête SIFA2",
@@ -111,6 +117,11 @@ export function useEspace() {
                 navTitle: "Ses effectifs",
                 path: `/mon-espace/organisme/${organisme_id}/effectifs`,
               },
+              televersement: {
+                pageTitle: "Téversement(s) de fichier(s)",
+                navTitle: "Téversement(s) de fichier(s)",
+                path: `/mon-espace/organisme/${organisme_id}/effectifs/televersement`,
+              },
               sifa2: {
                 pageTitle: "Son enquête SIFA2",
                 navTitle: "Son enquête SIFA2",
@@ -128,7 +139,15 @@ export function useEspace() {
             { title: navigation[contextNav].landingEspace.navTitle, to: navigation[contextNav].landingEspace.path },
           ];
 
-          if (isEffectifsPage) breadcrumbResult.push({ title: navigation[contextNav].effectifs?.navTitle });
+          if (isEffectifsPage) {
+            if (isTeleversementPage) {
+              breadcrumbResult.push({
+                title: navigation[contextNav].effectifs?.navTitle,
+                to: navigation[contextNav].effectifs?.path,
+              });
+              breadcrumbResult.push({ title: navigation[contextNav].televersement?.navTitle });
+            } else breadcrumbResult.push({ title: navigation[contextNav].effectifs?.navTitle });
+          }
           if (isSIFA2Page) breadcrumbResult.push({ title: navigation[contextNav].sifa2?.navTitle });
           if (isParametresPage) breadcrumbResult.push({ title: navigation[contextNav].parametres?.navTitle });
 
@@ -163,6 +182,7 @@ export function useEspace() {
     whoIs,
     auth.isInPendingValidation,
     auth.account_status,
+    isTeleversementPage,
   ]);
 
   if (error !== null) {
@@ -182,6 +202,7 @@ export function useEspace() {
     isMesOrganismesPages,
     isMonOrganismePage,
     isEffectifsPage,
+    isTeleversementPage,
     isSIFA2Page,
     isParametresPage,
   };

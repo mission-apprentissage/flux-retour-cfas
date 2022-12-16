@@ -105,7 +105,7 @@ export const schema = object(
 
     mode_de_transmission: string({
       description: "Mode de transmission des effectifs",
-      enum: ["API", "FICHIERS", "MANUEL"],
+      enum: ["API", "MANUEL"],
     }),
     setup_step_courante: string({
       description: "Etape d'installation courante",

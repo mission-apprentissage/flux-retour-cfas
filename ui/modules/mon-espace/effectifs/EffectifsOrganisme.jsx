@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Center, Heading, Spinner } from "@chakra-ui/react";
-import { useEspace } from "../../../hooks/useEspace";
+import { Center, Spinner } from "@chakra-ui/react";
 import EffectifsTable from "./engine/EffectifsTable.jsx";
 
 import { organismeAtom } from "../../../hooks/organismeAtoms";
@@ -9,7 +8,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import ChoixTransmission from "./ChoixTransmission";
 import TransmissionAPI from "./TransmissionAPI";
-import TransmissionFichier from "./TransmissionFichier";
+import { useRouter } from "next/router";
+import Televersements from "./Televersements";
 
 function useOrganismesEffectifs() {
   const organisme = useRecoilValue(organismeAtom);
@@ -35,11 +35,14 @@ function useOrganismesEffectifs() {
 }
 
 const EffectifsOrganisme = () => {
-  const { isMonOrganismePages, isOrganismePages } = useEspace();
+  const router = useRouter();
+  const { slug } = router.query;
+
   const organisme = useRecoilValue(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs();
+  const televersementPage = slug.includes("televersement");
 
-  if (isLoading) {
+  if (isLoading && !televersementPage) {
     return (
       <Center>
         <Spinner />
@@ -51,17 +54,10 @@ const EffectifsOrganisme = () => {
 
   return (
     <>
-      <Heading textStyle="h2" color="grey.800" mt={5}>
-        {isMonOrganismePages && `Mes effectifs`}
-        {isOrganismePages && `Ses effectifs`}
-      </Heading>
-
       {!organisme.mode_de_transmission && <ChoixTransmission />}
       {organisme.mode_de_transmission === "API" && organisme.setup_step_courante !== "COMPLETE" && <TransmissionAPI />}
-      {organisme.mode_de_transmission === "FICHIERS" && organisme.setup_step_courante !== "COMPLETE" && (
-        <TransmissionFichier />
-      )}
-      {displayEffectifs && <EffectifsTable organismesEffectifs={organismesEffectifs} />}
+      {displayEffectifs && televersementPage && <Televersements />}
+      {displayEffectifs && !televersementPage && <EffectifsTable organismesEffectifs={organismesEffectifs} />}
     </>
   );
 };

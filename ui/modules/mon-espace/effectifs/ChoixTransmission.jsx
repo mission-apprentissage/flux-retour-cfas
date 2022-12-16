@@ -66,42 +66,6 @@ const ChoixTransmission = () => {
             <Box flexGrow="1">
               <Flex flexDirection="column" alignItems="flex-start" p={0}>
                 <Heading as="h4" fontSize="1.5rem" mb={4}>
-                  Téléverser vos fichiers
-                </Heading>
-                <Heading as="h5" fontSize="1rem" mb={4}>
-                  Laissez-vous guider à partir de votre fichier. Notre outil transforme rapidement au format souhaité.
-                </Heading>
-              </Flex>
-              <UnorderedList>
-                <ListItem>(Excel, csv...)</ListItem>
-                <ListItem>Pouquoi 2 ? </ListItem>
-                <ListItem>Pouquoi 3 ?</ListItem>
-              </UnorderedList>
-            </Box>
-            <Center h="10%">
-              <Button
-                onClick={() => updateOrganisme(organisme.id, { mode_de_transmission: "FICHIERS" })}
-                size={"md"}
-                variant={"secondary"}
-              >
-                Choisir cette méthode
-                <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
-              </Button>
-            </Center>
-          </Flex>
-          <Flex
-            flexDirection="column"
-            borderWidth="1px"
-            borderColor="dgalt"
-            p={10}
-            w="33%"
-            h="40vh"
-            borderBottomWidth="4px"
-            borderBottomColor="bluefrance"
-          >
-            <Box flexGrow="1">
-              <Flex flexDirection="column" alignItems="flex-start" p={0}>
-                <Heading as="h4" fontSize="1.5rem" mb={4}>
                   Remplir à la main
                 </Heading>
                 <Heading as="h5" fontSize="1rem" mb={4}>
