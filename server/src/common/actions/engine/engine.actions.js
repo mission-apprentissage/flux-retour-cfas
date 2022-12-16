@@ -39,7 +39,7 @@ export const hydrateEffectif = async (effectif) => {
   if (!foundEffectifWithUnicityFields) {
     effectifToCreate = structureEffectifWithEventualErrors(effectif);
   } else {
-    effectifToUpdate = structureEffectifWithEventualErrors(effectif);
+    effectifToUpdate = { ...structureEffectifWithEventualErrors(effectif), _id: foundEffectifWithUnicityFields?._id };
   }
 
   return { effectifToCreate, effectifToUpdate };
@@ -91,7 +91,7 @@ export const hydrateOrganisme = async (organisme) => {
     organismeToCreate = { ...organisme, uai: cleanUai, siret: cleanSiret, sirets: [cleanSiret] };
   }
 
-  return { organismeToCreate, organismeFound: { id: organismeFoundId, error: organismeFoundError } };
+  return { organismeToCreate, organismeFound: { _id: organismeFoundId, error: organismeFoundError } };
 };
 
 /**
@@ -131,7 +131,7 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
   let effectifCreatedId = null;
   let effectifUpdatedId = null;
 
-  // Gestion des organismes : hydrate et ensuite create or update
+  // Gestion de l'organisme : hydrate et ensuite create or update
   if (organismeData) {
     const { organismeToCreate, organismeFound } = await hydrateOrganisme(organismeData);
 
@@ -149,7 +149,7 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
     }
 
     // Organisme existant sans erreur
-    if (organismeFound?.id) {
+    if (organismeFound?._id) {
       // Ajout organisme id a l'effectifData
       // Pas besoin d'update l'organisme
       organismeFoundId = organismeFound?._id;
@@ -157,7 +157,7 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
     }
   }
 
-  // Gestion des effectifs
+  // Gestion de l'effectif
   if (effectifData) {
     const { effectifToCreate, effectifToUpdate } = await hydrateEffectif(effectifData);
 
@@ -174,7 +174,7 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
       }
     }
 
-    // TODO A TESTER
+    // Gestion des maj d'effectif
     if (effectifToUpdate) {
       effectifUpdatedId = effectifToUpdate?._id;
       if (lockEffectif) {

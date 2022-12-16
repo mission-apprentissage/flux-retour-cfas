@@ -14,7 +14,7 @@ import { createUserLegacy } from "../../../src/common/actions/legacy/users.legac
 import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes.actions.js";
 import { pick } from "lodash-es";
 import { buildTokenizedString } from "../../../src/common/utils/buildTokenizedString.js";
-import { buildDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";
+import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";
 
 const user = {
   name: "userApi",
@@ -724,7 +724,7 @@ describe("Dossiers Apprenants Route", () => {
       // Create random dossiers for fixed uai & user.name as source
       const nbRandomDossiers = 10;
       for (let index = 0; index < nbRandomDossiers; index++) {
-        await buildDossierApprenant(
+        await insertDossierApprenant(
           createRandomDossierApprenant({
             uai_etablissement: uai,
             siret_etablissement: siret,
@@ -780,7 +780,7 @@ describe("Dossiers Apprenants Route", () => {
       const nbRandomDossiers = 10;
       const currentUai = "0762232N";
       for (let index = 0; index < nbRandomDossiers; index++) {
-        await buildDossierApprenant(
+        await insertDossierApprenant(
           createRandomDossierApprenant({
             uai_etablissement: currentUai,
             source: "OTHER_ERP", // Source not linked to username
@@ -835,7 +835,7 @@ describe("Dossiers Apprenants Route", () => {
       const nbRandomDossiersForUser = 20;
       const currentUai = "0762232N";
       for (let index = 0; index < nbRandomDossiersForUser; index++) {
-        await buildDossierApprenant(
+        await insertDossierApprenant(
           createRandomDossierApprenant({
             uai_etablissement: currentUai,
             source: user.name,
@@ -846,7 +846,7 @@ describe("Dossiers Apprenants Route", () => {
       // Create random dossiers for fixed uai & OTHER_ERP as source
       const nbRandomDossiersForOtherErp = 50;
       for (let index = 0; index < nbRandomDossiersForOtherErp; index++) {
-        await buildDossierApprenant(
+        await insertDossierApprenant(
           createRandomDossierApprenant({
             uai_etablissement: currentUai,
             source: "OTHER_ERP",

@@ -143,7 +143,7 @@ export default () => {
             };
 
             // Structure effectif & organisme from item
-            const effectifData = await structureEffectifFromDossierApprenant(dossierApprenantItem);
+            const effectifData = structureEffectifFromDossierApprenant(dossierApprenantItem);
             const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenantItem);
 
             // Call runEngine -> va créer les données nécessaires (effectifs + organismes)

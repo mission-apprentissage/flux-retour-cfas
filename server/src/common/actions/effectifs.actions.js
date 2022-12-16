@@ -136,7 +136,7 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant, lock
  * @param {*} dossiersApprenant
  * @returns
  */
-export const structureEffectifFromDossierApprenant = async (dossiersApprenant) => {
+export const structureEffectifFromDossierApprenant = (dossiersApprenant) => {
   const {
     annee_scolaire,
     source,
@@ -321,6 +321,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
   // Handle manually array fields
   const updatePathsFiltered = updatePaths
     .filter((item) => !item.includes("apprenant.historique_statut"))
+    .filter((item) => !item.includes("apprenant.contrats"))
     .filter((item) => !item.includes("formation.periode"));
 
   for (const path of updatePathsFiltered) {
@@ -331,6 +332,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
   // TODO Fix flattenKeys function for handling properly
   set(newLocker, "apprenant.date_de_naissance", true);
   set(newLocker, "apprenant.historique_statut", true);
+  set(newLocker, "apprenant.contrats", true);
   set(newLocker, "formation.periode", true);
 
   const updated = await effectifsDb().findOneAndUpdate(
