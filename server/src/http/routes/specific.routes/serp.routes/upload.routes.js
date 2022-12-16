@@ -2,18 +2,19 @@ import express from "express";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
 import { createWriteStream } from "fs";
-import {
-  // getFromStorage,
-  uploadToStorage,
-  deleteFromStorage,
-} from "../../../../common/utils/ovhUtils.js";
+import { getFromStorage, uploadToStorage, deleteFromStorage } from "../../../../common/utils/ovhUtils.js";
 import { oleoduc } from "oleoduc";
 import multiparty from "multiparty";
 import { EventEmitter } from "events";
 import { PassThrough } from "stream";
 import logger from "../../../../common/logger.js";
 import * as crypto from "../../../../common/utils/cryptoUtils.js";
-import { addDocument, getUploadEntryByOrgaId } from "../../../../common/actions/uploads.actions.js";
+import {
+  addDocument,
+  getDocument,
+  getUploadEntryByOrgaId,
+  removeDocument,
+} from "../../../../common/actions/uploads.actions.js";
 // import permissionsDossierMiddleware = require("../../middlewares/permissionsDossierMiddleware");
 
 function discard() {
@@ -136,65 +137,77 @@ export default ({ clamav }) => {
     })
   );
 
-  // router.get(
-  //   "/",
-  //   // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
-  //   tryCatch(async (req, res) => {
-  //     let { dossierId, path, name } = await Joi.object({
-  //       dossierId: Joi.string().required(),
-  //       path: Joi.string().required(),
-  //       name: Joi.string().required(),
-  //     }).validateAsync(req.query, { abortEarly: false });
+  router.get(
+    "/get",
+    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    tryCatch(async (req, res) => {
+      let { organisme_id } = await Joi.object({
+        organisme_id: Joi.string().required(),
+      })
+        .unknown()
+        .validateAsync(req.query, { abortEarly: false });
 
-  //     const document = await dossiers.getDocument(dossierId, name, path);
+      const result = await getUploadEntryByOrgaId(organisme_id);
+      return res.json(result);
+    })
+  );
 
-  //     const stream = await getFromStorage(document.cheminFichier);
+  router.get(
+    "/",
+    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    tryCatch(async (req, res) => {
+      let { organisme_id, path, name } = await Joi.object({
+        organisme_id: Joi.string().required(),
+        path: Joi.string().required(),
+        name: Joi.string().required(),
+      }).validateAsync(req.query, { abortEarly: false });
 
-  //     res.header("Content-Type", "application/pdf");
-  //     res.header("Content-Disposition", `attachment; filename=${document.nomFichier}`);
-  //     res.header("Content-Length", document.tailleFichier);
-  //     res.status(200);
-  //     res.type("pdf");
+      const document = await getDocument(organisme_id, name, path);
 
-  //     await oleoduc(stream, crypto.isCipherAvailable() ? crypto.decipher(dossierId) : noop(), res);
-  //   })
-  // );
+      const stream = await getFromStorage(document.chemin_fichier);
 
-  // router.delete(
-  //   "/",
-  //   // permissionsDossierMiddleware(components, ["dossier/page_documents/supprimer_un_document"]),
-  //   tryCatch(async (req, res) => {
-  //     let { dossierId, typeDocument, nomFichier, cheminFichier, tailleFichier } = await Joi.object({
-  //       dossierId: Joi.string().required(),
-  //       tailleFichier: Joi.string().required(),
-  //       cheminFichier: Joi.string().required(),
-  //       nomFichier: Joi.string().required(),
-  //       typeDocument: Joi.string()
-  //         .valid(
-  //           "CONVENTION_FORMATION",
-  //           "CONVENTION_REDUCTION_DUREE",
-  //           "CONVENTION_MOBILITE",
-  //           "FACTURE",
-  //           "CERTIFICAT_REALISATION"
-  //         )
-  //         .required(),
-  //     })
-  //       .unknown()
-  //       .validateAsync(req.query, { abortEarly: false });
+      const contentType = {
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        xls: "application/vnd.ms-excel",
+        csv: "text/csv",
+      };
+      res.header("Content-Type", contentType[document.ext_fichier]);
 
-  //     await dossiers.removeDocument(dossierId, {
-  //       typeDocument,
-  //       nomFichier,
-  //       cheminFichier,
-  //       tailleFichier,
-  //     });
+      res.header("Content-Disposition", `attachment; filename=${document.nom_fichier}`);
+      res.header("Content-Length", document.taille_fichier);
+      res.status(200);
+      res.type(document.ext_fichier);
 
-  //     await deleteFromStorage(cheminFichier);
+      await oleoduc(stream, crypto.isCipherAvailable() ? crypto.decipher(organisme_id) : noop(), res);
+    })
+  );
 
-  //     const documents = await dossiers.getDocuments(dossierId);
-  //     return res.json({ documents });
-  //   })
-  // );
+  router.delete(
+    "/",
+    // permissionsDossierMiddleware(components, ["dossier/page_documents/supprimer_un_document"]),
+    tryCatch(async (req, res) => {
+      let { organisme_id, type_document, nom_fichier, chemin_fichier, taille_fichier } = await Joi.object({
+        organisme_id: Joi.string().required(),
+        taille_fichier: Joi.number().required(),
+        chemin_fichier: Joi.string().required(),
+        nom_fichier: Joi.string().required(),
+        type_document: Joi.string(),
+      })
+        .unknown()
+        .validateAsync(req.query, { abortEarly: false });
+
+      const { documents } = await removeDocument(organisme_id, {
+        type_document,
+        nom_fichier,
+        chemin_fichier,
+        taille_fichier,
+      });
+
+      await deleteFromStorage(chemin_fichier);
+
+      return res.json({ documents });
+    })
+  );
 
   return router;
 };

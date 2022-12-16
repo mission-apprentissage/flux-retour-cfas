@@ -1,29 +1,45 @@
 import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-import { documentsGetter } from "../documentsCompletionAtoms";
-import { dossierAtom } from "../../atoms";
-import { documentsIsRequired } from "../domain/documentsIsRequired";
-import { valueSelector } from "../../formEngine/atoms";
+import { uploadsAtom } from "../../atoms";
+import { documentsGetter } from "../documentsAtoms";
+import { _get } from "../../../../../../common/httpClient";
+import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
+
+export function useFetchUploads() {
+  const [, setUploads] = useRecoilState(uploadsAtom);
+  const organisme = useRecoilValue(organismeAtom);
+
+  const { isLoading, isFetching } = useQuery(
+    ["fetchDocuments"],
+    async () => {
+      const uploads = await _get(`/api/v1/upload/get?organisme_id=${organisme._id}`);
+      setUploads(uploads);
+      return uploads;
+    },
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { isLoading: isFetching || isLoading };
+}
 
 export function useDocuments() {
   const documents = useRecoilValue(documentsGetter);
-  const [dossier, setDossier] = useRecoilState(dossierAtom);
-
-  const typeContratApp = useRecoilValue(valueSelector("contrat.typeContratApp"));
-  const required = documentsIsRequired(typeContratApp);
+  const [uploads, setUploads] = useRecoilState(uploadsAtom);
 
   const onDocumentsChanged = useCallback(
-    async (newDocumentsArray, typeDocument) => {
-      const docs = newDocumentsArray.filter((i) => i.typeDocument === typeDocument);
-      setDossier({ ...dossier, documents: docs });
+    async (newDocumentsArray) => {
+      const docs = newDocumentsArray;
+      setUploads({ ...uploads, documents: docs });
     },
-    [dossier, setDossier]
+    [uploads, setUploads]
   );
 
   return {
     documents,
     onDocumentsChanged,
-    required,
   };
 }

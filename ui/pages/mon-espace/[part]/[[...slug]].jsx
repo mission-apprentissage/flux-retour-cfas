@@ -12,7 +12,7 @@ import { useOrganisme } from "../../../hooks/useOrganisme";
 import LandingOrganisme from "../../../modules/mon-espace/landing/LandingOrganisme/LandingOrganisme";
 import LandingReseau from "../../../modules/mon-espace/landing/LandingReseau";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
-import EffectifsOrganisme from "../../../modules/mon-espace/effectifs/effectifs";
+import EffectifsOrganisme from "../../../modules/mon-espace/effectifs/EffectifsOrganisme";
 import ParametresOrganisme from "../../../modules/mon-espace/parametres/parametresOrganisme";
 import LandingPilot from "../../../modules/mon-espace/landing/LandingPilot";
 import LandingErp from "../../../modules/mon-espace/landing/LandingErp";

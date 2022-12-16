@@ -12,6 +12,7 @@ export default {
       "organisme/page_effectifs/edition",
       "organisme/page_effectifs/ajout_apprenant",
       "organisme/page_effectifs/telecharger",
+      "organisme/page_effectifs/supprimer_un_document",
 
       "organisme/page_sifa2",
       "organisme/page_sifa2/edition",
@@ -36,6 +37,8 @@ export default {
       "organisme/page_effectifs/edition",
       "organisme/page_effectifs/ajout_apprenant",
       "organisme/page_effectifs/telecharger",
+      "organisme/page_effectifs/supprimer_un_document",
+
       "organisme/page_sifa2",
       "organisme/page_sifa2/edition",
       "organisme/page_sifa2/telecharger",

@@ -115,7 +115,7 @@ export const removeDocument = async (organismeId, { type_document, nom_fichier, 
     {
       $set: {
         documents: newDocuments,
-        updated_at: Date.now(),
+        updated_at: new Date(),
       },
     },
     { returnDocument: "after" }

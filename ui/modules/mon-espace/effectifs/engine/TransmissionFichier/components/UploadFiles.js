@@ -98,7 +98,7 @@ const UploadFiles = ({ title }) => {
   );
 
   const onDeleteClicked = async (file) => {
-    if (hasContextAccessTo(organisme, "dossier/page_documents/supprimer_un_document")) {
+    if (hasContextAccessTo(organisme, "organisme/page_effectifs/supprimer_un_document")) {
       // eslint-disable-next-line no-restricted-globals
       const remove = confirm("Voulez-vous vraiment supprimer ce document ?");
       if (remove) {
@@ -137,7 +137,7 @@ const UploadFiles = ({ title }) => {
 
   return (
     <>
-      <Heading as="h3" flexGrow="1" fontSize="1.2rem" mb={2}>
+      <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
         {title}
       </Heading>
       <Box mb={8}>
@@ -147,16 +147,16 @@ const UploadFiles = ({ title }) => {
             <List>
               {documents.map((file) => {
                 return (
-                  <ListItem key={file.path || file.nomFichier} borderBottom="solid 1px" borderColor="dgalt" pb={3}>
+                  <ListItem key={file.path || file.nom_fichier} borderBottom="solid 1px" borderColor="dgalt" pb={3}>
                     <HStack>
                       <File boxSize="5" color="bluefrance" />
                       <Box flexGrow={1}>
                         <Link
-                          href={`/api/v1/upload?organisme_id=${organisme._id}&path=${file.cheminFichier}&name=${file.nomFichier}`}
+                          href={`/api/v1/upload?organisme_id=${organisme._id}&path=${file.chemin_fichier}&name=${file.nom_fichier}`}
                           textDecoration={"underline"}
                           isExternal
                         >
-                          {file.path || file.nomFichier} - {formatBytes(file.size || file.tailleFichier)}
+                          {file.path || file.nom_fichier} - {formatBytes(file.size || file.taille_fichier)}
                         </Link>
                       </Box>
                       <Bin boxSize="5" color="redmarianne" cursor="pointer" onClick={() => onDeleteClicked(file)} />
