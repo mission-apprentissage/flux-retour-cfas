@@ -73,8 +73,8 @@
 //     });
 
 //     it("Vérifie qu'on ne peut pas accéder à la route en étant authentifié mais sans le bon rôle", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const authHeader = await createAndLogUser("user", "password", {
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const authHeader = await createAndLogUserLegacy("user", "password", {
 //         permissions: [apiRoles.apiStatutsSeeder],
 //       });
 
@@ -87,8 +87,8 @@
 //     });
 
 //     it("Vérifie qu'on peut récupérer des listes de données anonymisées via API en étant authentifié", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const authHeader = await createAndLogUser("user", "password", {
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const authHeader = await createAndLogUserLegacy("user", "password", {
 //         permissions: [tdbRoles.pilot],
 //       });
 
@@ -107,8 +107,8 @@
 //     });
 
 //     it("Vérifie qu'on peut récupérer des listes de données anonymisées au national via API en étant authentifié", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const authHeader = await createAndLogUser("user", "password", {
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const authHeader = await createAndLogUserLegacy("user", "password", {
 //         permissions: [tdbRoles.pilot],
 //       });
 
@@ -132,8 +132,8 @@
 //     });
 
 //     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un département via API en étant authentifié", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const authHeader = await createAndLogUser("user", "password", {
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const authHeader = await createAndLogUserLegacy("user", "password", {
 //         permissions: [tdbRoles.pilot],
 //       });
 
@@ -158,8 +158,8 @@
 //     });
 
 //     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour une région via API en étant authentifié", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const authHeader = await createAndLogUser("user", "password", {
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const authHeader = await createAndLogUserLegacy("user", "password", {
 //         permissions: [tdbRoles.pilot],
 //       });
 
@@ -184,8 +184,8 @@
 //     });
 
 //     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un réseau via API en étant authentifié", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const authHeader = await createAndLogUser("user", "password", {
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const authHeader = await createAndLogUserLegacy("user", "password", {
 //         permissions: [tdbRoles.pilot],
 //       });
 
@@ -210,8 +210,8 @@
 //     });
 
 //     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour une formation via API en étant authentifié", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const authHeader = await createAndLogUser("user", "password", {
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const authHeader = await createAndLogUserLegacy("user", "password", {
 //         permissions: [tdbRoles.pilot],
 //       });
 
@@ -236,8 +236,8 @@
 //     });
 
 //     it("Vérifie qu'on peut récupérer des listes de données anonymisées pour un CFA via API en étant authentifié en tant que pilot", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const authHeader = await createAndLogUser("user", "password", {
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const authHeader = await createAndLogUserLegacy("user", "password", {
 //         permissions: [tdbRoles.pilot],
 //       });
 

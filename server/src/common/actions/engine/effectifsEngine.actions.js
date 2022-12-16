@@ -2,22 +2,25 @@ import { findDossierApprenantByQuery } from "../dossiersApprenants.actions.js";
 import { findOrganismeByUai } from "../organismes.actions.js";
 
 /**
+ * Manip dossiers to Effectifs (TEMP) DossierToEffectif (à jeter en janvier)
  * Fonction core moteur des effectifs
+ * Appelée depuis Entrée API (direct -> effectifs)
+ * Appelée depuis Entrée Migration (dossiersApprenants puis effectifs ??) -> DossierToEffectif (à jeter en janvier)
+ * Appelée depuis Entrée Upload générique (effectifs en direct)
  * A partir d'une liste de dossiersApprenant en input va effectuer tous les contrôles nécessaires pour chaque dossier
  * 1 - Contrôle & fiabilisation en entrée de l'organisme
  * 1 a - Construction de la liste des organismes non valides
  * 1 b - Construction de la liste des organismes à créer si nécessaire
- * 2 a - Construction de la liste des dossiersApprenants à créer
- * 2 b - Construction de la liste des dossiersApprenants à mettre à jour
- * 3 a - Construction de la liste des effectifs à créer
- * 3 a - Construction de la liste des effectifs à mettre à jour
- * 3 a - Construction de la liste des effectifs non valides
- * @param {*} dossiersApprenants
+ * 2 a - Construction de la liste des effectifs à créer
+ * 2 a - Construction de la liste des effectifs à mettre à jour (et en erreur)
+ * TODO effectifs en entrée
+ * TODO : fonction de controle des organismes mutualisée
+ * @param {*} effectifs
  * @returns
  */
-export const hydrateEngine = async (dossiersApprenants) => {
-  let dossiersApprenantsToCreate = [];
-  let dossiersApprenantsToUpdate = [];
+export const hydrateEngine = async (effectifs) => {
+  // let dossiersApprenantsToCreate = [];
+  // let dossiersApprenantsToUpdate = [];
   let organismesToCreate = [];
   let organismesNotValid = [];
   let effectifsToCreate = [];
@@ -84,7 +87,7 @@ export const hydrateEngine = async (dossiersApprenants) => {
     effectifs: {
       toCreate: [],
       toUpdate: [],
-      notValid: [],
+      // notValid: [],
     },
   };
 };
@@ -95,7 +98,7 @@ export const hydrateEngine = async (dossiersApprenants) => {
  * @param {*} dossiersApprenants
  */
 export const runEngine = async (dossiersApprenants) => {
-  const { organismes, dossiersApprenantsMigration, effectifs } = hydrateEngine(dossiersApprenants);
+  const { organismes, effectifs } = hydrateEngine(dossiersApprenants);
 
   // TODO CRUD each collection
   // organismes toCreate call createOrganisme

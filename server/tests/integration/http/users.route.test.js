@@ -25,8 +25,8 @@
 //     });
 
 //     it("sends a 403 HTTP response when user is not admin", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
 //       const response = await httpClient.get("/api/v1/admin/users", { headers: bearerToken });
 
@@ -34,8 +34,8 @@
 //     });
 
 //     it("sends a 200 HTTP response with list of users", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 
 //       await components.users.createUser({
 //         email: "test1@mail.com",
@@ -83,8 +83,8 @@
 //     });
 
 //     it("sends a 403 HTTP response when user is not admin", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
 //       const testObjectId = "random-id-39393";
 //       const response = await httpClient.get(`/api/v1/admin/user/${testObjectId}`, { headers: bearerToken }); // TODO
@@ -93,8 +93,8 @@
 //     });
 
 //     it("sends a 200 HTTP response with the users with good id", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 
 //       const username = "john-doe";
 //       await components.users.createUser({ username });
@@ -122,8 +122,8 @@
 //     });
 
 //     it("sends a 403 HTTP response when user is not admin", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
 //       const response = await httpClient.post("/api/v1/admin/user", {}, { headers: bearerToken });
 
@@ -131,8 +131,8 @@
 //     });
 
 //     it("sends a 200 HTTP response with created pilot user", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 //       const fakeNowDate = new Date();
 //       MockDate.set(fakeNowDate);
 
@@ -155,8 +155,8 @@
 //     });
 
 //     it("sends a 200 HTTP response with created network and organisme and region user", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 //       const fakeNowDate = new Date();
 //       MockDate.set(fakeNowDate);
 
@@ -195,8 +195,8 @@
 //     });
 
 //     it("sends a 403 HTTP response when user is not admin", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
 
 //       const response = await httpClient.post(
 //         "/api/v1/admin/user/generate-update-password-url", // TODO
@@ -208,8 +208,8 @@
 //     });
 
 //     it("sends a 200 HTTP response with password update url", async () => {
-//       const { httpClient, createAndLogUser, components } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, createAndLogUserLegacy, components } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 
 //       const username = "john-doe";
 //       await components.users.createUser({ username });
@@ -234,8 +234,8 @@
 
 //   describe("DELETE /users/delete/:username", () => {
 //     it("Permet de vérifier qu'on peut supprimer un utilisateur depuis son username en étant connecté en tant qu'administrateur", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 //       const username = "john-doe";
 //       await components.users.createUser({ username });
 
@@ -249,8 +249,8 @@
 //     });
 
 //     it("Permet de vérifier qu'on ne peut supprimer un utilisateur depuis son username en étant connecté en tant que non administrateur", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [tdbRoles.pilot] });
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [tdbRoles.pilot] });
 //       const username = "john-doe";
 //       await components.users.createUser({ username });
 
@@ -265,8 +265,8 @@
 //     });
 
 //     it("Permet de vérifier qu'on ne peut supprimer un utilisateur si on fournit un username inexistant en étant connecté en tant qu'administrateur", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 //       const username = "john-doe";
 //       const badUsername = "john-smith";
 //       await components.users.createUser({ username });
@@ -284,8 +284,8 @@
 
 //   describe("POST /users/search", () => {
 //     it("sends a 200 HTTP empty response when no match", async () => {
-//       const { httpClient, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 //       const response = await httpClient.post(
 //         "/api/v1/admin/users/search",
 //         { searchTerm: "blabla" },
@@ -297,8 +297,8 @@
 //     });
 
 //     it("sends a 200 HTTP response with results when match on username", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user1", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user1", "password", { permissions: [apiRoles.administrator] });
 
 //       await components.users.createUser({
 //         email: "test3@mail.com",
@@ -332,8 +332,8 @@
 //     });
 
 //     it("sends a 200 HTTP response with results when match on email", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user1", "password", {
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user1", "password", {
 //         email: "test1@mail.com",
 //         permissions: [apiRoles.administrator],
 //       });
@@ -370,8 +370,8 @@
 //     });
 
 //     it("sends a 200 HTTP response with results when match on organisme", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user1", "password", {
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user1", "password", {
 //         organisme: ORGANISMES_APPARTENANCE.ACADEMIE,
 //         permissions: [apiRoles.administrator],
 //       });
@@ -410,8 +410,8 @@
 
 //   describe("PUT /users/:id", () => {
 //     it("Permet de vérifier qu'on peut mettre à jour un utilisateur depuis son id en étant connecté en tant qu'administrateur", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 //       const username = "john-doe";
 //       await components.users.createUser({ username });
 
@@ -434,8 +434,8 @@
 //     });
 
 //     it("Permet de vérifier qu'on ne peut mettre à jour un utilisateur depuis son id en étant connecté en tant que non administrateur", async () => {
-//       const { httpClient, components, createAndLogUser } = await startServer();
-//       const bearerToken = await createAndLogUser("user", "password", { permissions: [tdbRoles.pilot] });
+//       const { httpClient, components, createAndLogUserLegacy } = await startServer();
+//       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [tdbRoles.pilot] });
 //       const username = "john-doe";
 //       await components.users.createUser({ username });
 

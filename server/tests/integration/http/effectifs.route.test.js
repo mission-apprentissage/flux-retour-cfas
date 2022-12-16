@@ -11,6 +11,10 @@ import {
 
 import { dossiersApprenantsMigrationDb } from "../../../src/common/model/collections.js";
 import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
+import { seedRoles } from "../../../src/jobs/seed/start/index.js";
+import { createUser } from "../../../src/common/actions/users.actions.js";
+import { userAfterCreate } from "../../../src/common/actions/users.afterCreate.actions.js";
+import { createOrganisme } from "../../../src/common/actions/organismes.actions.js";
 
 const createRandomDossierApprenantWithHistorique = async (props) => {
   const { _id } = await dossiersApprenants().createDossierApprenant(createRandomDossierApprenant());
@@ -19,6 +23,10 @@ const createRandomDossierApprenantWithHistorique = async (props) => {
 
 describe("Effectifs Route", () => {
   describe("/api/effectifs route", () => {
+    beforeEach(async () => {
+      await seedRoles();
+    });
+
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();
 
@@ -29,23 +37,119 @@ describe("Effectifs Route", () => {
       assert.equal(response.status, 401);
     });
 
-    // TODO Give ACL Permission for tests
-    // it("Vérifie qu'on ne peut pas accéder à la route en étant authentifié mais sans le bon rôle", async () => {
-    //   const { httpClient, createAndLogUser } = await startServer();
-    //   const authHeader = await createAndLogUser("user", "password", { permissions: [apiRoles.apiStatutsSeeder] });
+    it("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
+      const { httpClient, logUser } = await startServer();
 
-    //   const response = await httpClient.get("/api/effectifs", {
-    //     params: { date: "2020-10-10T00:00:00.000Z" },
-    //     headers: authHeader,
-    //   });
+      // Création de son organisme
+      await createOrganisme({
+        uai: "0142321X",
+        sirets: ["44492238900010"],
+        adresse: {
+          departement: "14",
+          region: "28",
+          academie: "70",
+        },
+        reseaux: ["CCI"],
+        erps: ["YMAG"],
+        nature: "responsable_formateur",
+        nom: "ADEN Formations (Caen)",
+      });
 
-    //   assert.equal(response.status, 403);
-    //   assert.equal(response.data, "Not authorized");
-    // });
+      const otherOrganisme = await createOrganisme({
+        uai: "0142322X",
+        sirets: ["44492238900010"],
+        adresse: {
+          departement: "14",
+          region: "28",
+          academie: "70",
+        },
+        reseaux: ["CCI"],
+        erps: ["YMAG"],
+        nature: "responsable_formateur",
+        nom: "ADEN Formations (Caen)",
+      });
+
+      // Create user & afterCreate actions
+      const userOf = await createUser(
+        { email: "of@test.fr", password: "Secret!Password1" },
+        {
+          nom: "of",
+          prenom: "test",
+          description: "Aden formation Caen - direction",
+          account_status: "CONFIRMED",
+          siret: "44492238900010",
+          uai: "0142321X",
+          organisation: "ORGANISME_FORMATION",
+        }
+      );
+      await userAfterCreate({ user: userOf, pending: false, notify: false });
+
+      // Log user
+      const { cookie } = await logUser("of@test.fr", "Secret!Password1");
+
+      // Get effectifs
+      const response = await httpClient.get("/api/effectifs", {
+        params: { date: "2022-10-10T00:00:00.000Z", organisme_id: otherOrganisme._id.toString() },
+        headers: { cookie },
+      });
+
+      assert.equal(response.status, 401);
+      assert.equal(response.data.message, "Accès non autorisé");
+    });
+
+    it("Vérifie qu'on peut accéder aux effectifs de son organisme", async () => {
+      const { httpClient, logUser } = await startServer();
+
+      // Création de son organisme
+      const createdOrganisme = await createOrganisme({
+        uai: "0142321X",
+        sirets: ["44492238900010"],
+        adresse: {
+          departement: "14",
+          region: "28",
+          academie: "70",
+        },
+        reseaux: ["CCI"],
+        erps: ["YMAG"],
+        nature: "responsable_formateur",
+        nom: "ADEN Formations (Caen)",
+      });
+
+      // Create user & afterCreate actions
+      const userOf = await createUser(
+        { email: "of@test.fr", password: "Secret!Password1" },
+        {
+          nom: "of",
+          prenom: "test",
+          description: "Aden formation Caen - direction",
+          account_status: "CONFIRMED",
+          siret: "44492238900010",
+          uai: "0142321X",
+          organisation: "ORGANISME_FORMATION",
+        }
+      );
+      await userAfterCreate({ user: userOf, pending: false, notify: false });
+
+      // Log user
+      const { cookie } = await logUser("of@test.fr", "Secret!Password1");
+
+      // Get effectifs
+      const response = await httpClient.get("/api/effectifs", {
+        params: { date: "2022-10-10T00:00:00.000Z", organisme_id: createdOrganisme._id.toString() },
+        headers: { cookie },
+      });
+
+      assert.equal(response.status, 200);
+      const indices = response.data;
+      assert.deepEqual(indices.apprentis, 0);
+      assert.deepEqual(indices.abandons, 0);
+      assert.deepEqual(indices.rupturants, 0);
+      assert.deepEqual(indices.inscritsSansContrat, 0);
+    });
 
     // it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts sans filtres", async () => {
-    //   const { httpClient, createAndLogUser } = await startServer();
-    //   const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+    //   const { httpClient, createAndLogUserLegacy } = await startServer();
+    //   const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 
     //   // Add 10 statuts for filter with history sequence - full
     //   for (let index = 0; index < 10; index++) {
@@ -98,8 +202,8 @@ describe("Effectifs Route", () => {
     // });
 
     // it("Vérifie qu'on peut récupérer des effectifs via API pour une séquence de statuts avec filtres", async () => {
-    //   const { httpClient, createAndLogUser } = await startServer();
-    //   const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+    //   const { httpClient, createAndLogUserLegacy } = await startServer();
+    //   const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
     //   const filterQuery = { etablissement_num_region: "84" };
 
     //   // Add 10 statuts for filter with history sequence - full
@@ -163,8 +267,8 @@ describe("Effectifs Route", () => {
 
   //   describe("/api/effectifs/niveau-formation route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux de formation via API", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
   //       const filterQuery = { etablissement_num_region: "84" };
 
   //       for (let index = 0; index < 5; index++) {
@@ -210,8 +314,8 @@ describe("Effectifs Route", () => {
 
   //   describe("/api/effectifs/total-organismes route", () => {
   //     it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une région", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
   //       const regionNumTest = "28";
 
   //       // Add 1 statut for region
@@ -249,8 +353,8 @@ describe("Effectifs Route", () => {
   //     });
 
   //     it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une formation", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
   //       const formationCfd = "abcd1234";
 
   //       // Add 1 statut for formation
@@ -277,8 +381,8 @@ describe("Effectifs Route", () => {
   //     });
 
   //     it("Vérifie qu'on ne peut pas récupérer le bon nombre d'organismes transmettant de la donnée sur une formation pour une mauvaise année scolaire", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
   //       const formationCfd = "abcd1234";
 
   //       // Add 1 statut for formation
@@ -307,8 +411,8 @@ describe("Effectifs Route", () => {
 
   //   describe("/api/effectifs/formation route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par formation via API", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
   //       const filterQuery = { etablissement_num_region: "84" };
 
   //       for (let index = 0; index < 5; index++) {
@@ -345,8 +449,8 @@ describe("Effectifs Route", () => {
 
   //   describe("/api/effectifs/annee-formation route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par annee-formation via API", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
   //       const filterQuery = { etablissement_num_region: "84" };
 
   //       for (let index = 0; index < 5; index++) {
@@ -376,8 +480,8 @@ describe("Effectifs Route", () => {
 
   //   describe("/api/effectifs/cfa route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par cfa via API", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
   //       const filterQuery = { etablissement_num_region: "84" };
 
   //       const cfaData1 = {
@@ -438,8 +542,8 @@ describe("Effectifs Route", () => {
 
   //   describe("/api/effectifs/siret route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par siret via API", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
   //       const filterQuery = { etablissement_num_region: "84" };
 
   //       for (let index = 0; index < 5; index++) {
@@ -470,8 +574,8 @@ describe("Effectifs Route", () => {
 
   //   describe("/api/effectifs/departement route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par departement via API", async () => {
-  //       const { httpClient, createAndLogUser } = await startServer();
-  //       const bearerToken = await createAndLogUser("user", "password", { permissions: [apiRoles.administrator] });
+  //       const { httpClient, createAndLogUserLegacy } = await startServer();
+  //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
 
   //       for (let index = 0; index < 5; index++) {
   //         await createRandomDossierApprenantWithHistorique({

@@ -18,7 +18,8 @@ export const startServer = async () => {
   return {
     httpClient,
     components,
-    createAndLogUser: async (username, password, options) => {
+    // Legacy auth jwt
+    createAndLogUserLegacy: async (username, password, options) => {
       await createUserLegacy({ username, password, ...options });
 
       const response = await httpClient.post("/api/login", {
@@ -29,6 +30,11 @@ export const startServer = async () => {
       return {
         Authorization: "Bearer " + response.data.access_token,
       };
+    },
+    // New auth cookie log user method
+    logUser: async (email, password) => {
+      const response = await httpClient.post("/api/v1/auth/login", { email, password });
+      return { cookie: response.headers["set-cookie"].join(";") };
     },
   };
 };
