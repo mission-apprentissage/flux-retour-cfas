@@ -5,7 +5,6 @@ import { EffectifsRupturants } from "./effectifs/rupturants.js";
 import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
 import { asyncForEach } from "../utils/asyncUtils.js";
 import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
-import { findOrganismeByUai } from "../actions/organismes.actions.js";
 
 export default () => {
   const apprentis = new EffectifsApprentis();

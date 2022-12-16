@@ -5,12 +5,12 @@ import {
   createAndControlOrganisme,
   createOrganisme,
   findOrganismeById,
-  mapFiabilizedOrganismeUaiSiretCouple,
   updateOrganisme,
 } from "../../../../src/common/actions/organismes.actions.js";
 import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
 import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
 import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/mapping.js";
+import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
 
 describe("Test des actions Organismes", () => {
   describe("createOrganisme", () => {

@@ -6,20 +6,13 @@ import {
   dossiersApprenantsMigrationDb,
   effectifsDb,
 } from "../../../../common/model/collections.js";
-import {
-  createOrganisme,
-  findOrganismeByUai,
-  structureOrganismeFromDossierApprenant,
-} from "../../../../common/actions/organismes.actions.js";
+import { createOrganisme, findOrganismeByUai } from "../../../../common/actions/organismes.actions.js";
 import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
-import {
-  createDossierApprenantMigrationFromDossierApprenant,
-  createEffectifFromDossierApprenantMigrated,
-  mapToDossiersApprenantsMigrationProps,
-} from "../../../../common/actions/dossiersApprenants.migration.actions.js";
+import { createDossierApprenantMigrationFromDossierApprenant } from "../../../../common/actions/dossiersApprenants.migration.actions.js";
 import { structureEffectifFromDossierApprenant } from "../../../../common/actions/effectifs.actions.js";
 import { runEngine } from "../../../../common/actions/engine/engine.actions.js";
+import { mapToDossiersApprenantsMigrationProps } from "./dossiersApprenants.migration.job.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
@@ -198,16 +191,19 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
           ...mappedToDossierApprenantMigration,
         });
 
-        // Structure effectif & organisme from item
-        const effectifData = await structureEffectifFromDossierApprenant(dossierApprenantCreated);
+        // On structure un object effectif avec organisme id et le dossierApprenantCreated
+        const effectifData = {
+          organisme_id: organisme._id,
+          ...(await structureEffectifFromDossierApprenant(dossierApprenantCreated)),
+        };
 
         // Call runEngine -> va créer les données nécessaires
         // Attention : ici l'organisme a déja été créé par createDossierApprenantMigrationFromDossierApprenant,
-        // du coup l'engine n'aura pas besoin de le créer
-        await runEngine(effectifData, null);
+        // du coup l'engine n'aura pas besoin de le créer (d'ou le null)
+        const { effectifs } = await runEngine(effectifData, null);
 
         nbDossiersMigrated++;
-        nbEffectifsCreated++;
+        nbEffectifsCreated += effectifs.nbCreated;
       } catch (error) {
         nbDossiersNotMigrated++;
 

@@ -1,10 +1,10 @@
 import { ObjectId } from "mongodb";
 import { getMetiersBySirets } from "../apis/apiLba.js";
-import { dossiersApprenantsDb, organismesDb } from "../model/collections.js";
+import { organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { generateKey } from "../utils/cryptoUtils.js";
-import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine/effectifsEngine.utils.js";
+import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine/engine.organismes.utils.js";
 import { createPermission, hasPermission } from "./permissions.actions.js";
 import { findRolePermissionById } from "./roles.actions.js";
 import { getUser } from "./users.actions.js";

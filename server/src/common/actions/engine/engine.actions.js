@@ -1,7 +1,12 @@
 import { defaultValuesOrganisme } from "../../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
-import { findDossierApprenantByQuery } from "../dossiersApprenants.actions.js";
-import { findEffectifByQuery } from "../effectifs.actions.js";
+// import { findDossierApprenantByQuery } from "../dossiersApprenants.actions.js";
+import {
+  findEffectifByQuery,
+  insertEffectif,
+  structureEffectifWithEventualErrors,
+  updateEffectif,
+} from "../effectifs.actions.js";
 import { findOrganismeBySiret, findOrganismeByUai, findOrganismeByUaiAndSiret } from "../organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
 
@@ -27,79 +32,79 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
  * @param {*} effectifs
  * @returns
  */
-export const hydrateEffectifsOLD = async (effectifs) => {
-  // let dossiersApprenantsToCreate = [];
-  // let dossiersApprenantsToUpdate = [];
-  let organismesToCreate = [];
-  let organismesNotValid = [];
-  let effectifsToCreate = [];
-  let effectifsNotValid = [];
+// export const hydrateEffectifsOLD = async (effectifs) => {
+//   // let dossiersApprenantsToCreate = [];
+//   // let dossiersApprenantsToUpdate = [];
+//   let organismesToCreate = [];
+//   let organismesNotValid = [];
+//   let effectifsToCreate = [];
+//   let effectifsNotValid = [];
 
-  // TODO WIP logic
-  // Traitement des dossiersApprenants
-  for (const currentDossierApprenant of dossiersApprenants) {
-    // Recherche du dossier via sa clé d'unicité
-    const foundDossierApprenantWithUnicityFields = await findDossierApprenantByQuery(
-      {
-        id_erp_apprenant: currentDossierApprenant.id_erp_apprenant,
-        uai_etablissement: currentDossierApprenant.uai_etablissement,
-        annee_scolaire: currentDossierApprenant.annee_scolaire,
-      },
-      { _id: 1 }
-    );
+//   // TODO WIP logic
+//   // Traitement des dossiersApprenants
+//   for (const currentDossierApprenant of dossiersApprenants) {
+//     // Recherche du dossier via sa clé d'unicité
+//     const foundDossierApprenantWithUnicityFields = await findDossierApprenantByQuery(
+//       {
+//         id_erp_apprenant: currentDossierApprenant.id_erp_apprenant,
+//         uai_etablissement: currentDossierApprenant.uai_etablissement,
+//         annee_scolaire: currentDossierApprenant.annee_scolaire,
+//       },
+//       { _id: 1 }
+//     );
 
-    // Création d'un nouveau dossierApprenant
-    if (!foundDossierApprenantWithUnicityFields) {
-      // Vérification de l'organisme
-      const organismeForDossierApprenant = await findOrganismeByUai(currentDossierApprenant.uai_etablissement);
-      if (!organismeForDossierApprenant) {
-        // TODO sortir ce traitement dans une fonction
-        // TODO Call controle / fiabilisation méthode si organisme valid => on l'ajout à organismesToCreate
-        // TODO si nonValid => on l'ajout à organismesNotValid
-        // TODO si déja existant : RAS
-        // organismesToCreate.push({
-        //   uai: currentDossierApprenant.uai_etablissement,
-        //   siret: currentDossierApprenant.siret_etablissement,
-        //   nom: currentDossierApprenant.nom_etablissement,
-        // });
-        //organismesNotValid.push({
-        //   uai: currentDossierApprenant.uai_etablissement,
-        //   siret: currentDossierApprenant.siret_etablissement,
-        //   nom: currentDossierApprenant.nom_etablissement,
-        // });
+//     // Création d'un nouveau dossierApprenant
+//     if (!foundDossierApprenantWithUnicityFields) {
+//       // Vérification de l'organisme
+//       const organismeForDossierApprenant = await findOrganismeByUai(currentDossierApprenant.uai_etablissement);
+//       if (!organismeForDossierApprenant) {
+//         // TODO sortir ce traitement dans une fonction
+//         // TODO Call controle / fiabilisation méthode si organisme valid => on l'ajout à organismesToCreate
+//         // TODO si nonValid => on l'ajout à organismesNotValid
+//         // TODO si déja existant : RAS
+//         // organismesToCreate.push({
+//         //   uai: currentDossierApprenant.uai_etablissement,
+//         //   siret: currentDossierApprenant.siret_etablissement,
+//         //   nom: currentDossierApprenant.nom_etablissement,
+//         // });
+//         //organismesNotValid.push({
+//         //   uai: currentDossierApprenant.uai_etablissement,
+//         //   siret: currentDossierApprenant.siret_etablissement,
+//         //   nom: currentDossierApprenant.nom_etablissement,
+//         // });
 
-        // Si organisme à créer alors dossierApprenant a créer aussi
-        // Sinon uniquement organisme en erreur
-        dossiersApprenantsToCreate.push(currentDossierApprenant);
+//         // Si organisme à créer alors dossierApprenant a créer aussi
+//         // Sinon uniquement organisme en erreur
+//         dossiersApprenantsToCreate.push(currentDossierApprenant);
 
-        // Vérification de l'effectif construit
-        // TODO Call createEffectifFromDossierApprenant si effectif valid => on l'ajout à effectifsToCreate
-        // TODO sinon => on l'ajout à effectifsNotValid
-      }
-      // MAJ d'un dossierApprenant existant
-    } else {
-      // TODO Vérification de l'organisme & construction
+//         // Vérification de l'effectif construit
+//         // TODO Call createEffectifFromDossierApprenant si effectif valid => on l'ajout à effectifsToCreate
+//         // TODO sinon => on l'ajout à effectifsNotValid
+//       }
+//       // MAJ d'un dossierApprenant existant
+//     } else {
+//       // TODO Vérification de l'organisme & construction
 
-      dossiersApprenantsToUpdate.push(currentDossierApprenant);
-    }
-  }
+//       dossiersApprenantsToUpdate.push(currentDossierApprenant);
+//     }
+//   }
 
-  return {
-    organismes: {
-      toCreate: [],
-      notValid: [],
-    },
-    dossiersApprenantsMigration: {
-      toCreate: [],
-      toUpdate: [],
-    },
-    effectifs: {
-      toCreate: [],
-      toUpdate: [],
-      // notValid: [],
-    },
-  };
-};
+//   return {
+//     organismes: {
+//       toCreate: [],
+//       notValid: [],
+//     },
+//     dossiersApprenantsMigration: {
+//       toCreate: [],
+//       toUpdate: [],
+//     },
+//     effectifs: {
+//       toCreate: [],
+//       toUpdate: [],
+//       // notValid: [],
+//     },
+//   };
+// };
 
 /**
  *
@@ -121,13 +126,15 @@ export const hydrateEffectifs = async (effectifs) => {
     );
 
     // Ajout à la liste de création ou update
+    // On ajoute un effectif structuré avec les erreurs éventuelles de validation
     if (!foundEffectifWithUnicityFields) {
-      // TODO build with eventuelles errors ?
-      effectifsToCreate.push(effectifs);
+      effectifsToCreate.push(structureEffectifWithEventualErrors(currentEffectif));
     } else {
-      effectifsToUpdate.push(effectifs);
+      effectifsToUpdate.push(structureEffectifWithEventualErrors(currentEffectif));
     }
   }
+
+  return { effectifsToCreate, effectifsToUpdate };
 };
 
 /**
@@ -193,8 +200,29 @@ export const hydrateOrganisme = async ({ uai, siret, nom, ...data }) => {
  * @param {*} dossiersApprenants
  */
 export const runEngine = async (effectifData, organismeData) => {
+  let nbEffectifsCreated = 0;
+  let nbEffectifsUpdated = 0;
+
+  const { effectifsToCreate, effectifsToUpdate } = await hydrateEffectifs([effectifData]);
+
+  if (effectifsToCreate.length > 0) {
+    // Gérer les cas des organismes non crées
+    // Traitement d'un item unique
+    if (!organismeData) {
+      await insertEffectif(effectifsToCreate[0]);
+      nbEffectifsCreated++;
+    }
+  }
+
+  if (effectifsToUpdate.length > 0) {
+    // Traitement d'un item unique
+    await updateEffectif(effectifsToUpdate[0]);
+    nbEffectifsUpdated++;
+  }
+
   // TODO : dépendance sur organismes Id -> effectifs aller recup l'organisme id avant l'insert
   // TODO : si organisme erreur on ajoute pas l'effectif ?
+
   // const { organismes, effectifs } = hydrateEngine(dossiersApprenants);
   // TODO lock true api
   // const effectifCreated = await createEffectifFromDossierApprenant(dossiersApprenantsMigrated);
@@ -211,4 +239,11 @@ export const runEngine = async (effectifData, organismeData) => {
   // Effectifs toCreate call createEffectifFromDossierApprenant
   // Effectifs toUpdate call updateEffectif
   // TODO Call Api Entreprise for organisme
+
+  return {
+    effectifs: {
+      nbCreated: nbEffectifsCreated,
+      nbUpdated: nbEffectifsUpdated,
+    },
+  };
 };

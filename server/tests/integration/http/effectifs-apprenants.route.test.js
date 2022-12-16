@@ -1,11 +1,11 @@
 import { strict as assert } from "assert";
 import { startServer } from "../../utils/testUtils.js";
 import { apiRoles } from "../../../src/common/roles.js";
-import { JOB_NAMES, jobEventStatuts } from "../../../src/common/constants/jobsConstants.js";
-import { EFFECTIF_INDICATOR_NAMES } from "../../../src/common/constants/dossierApprenantConstants.js";
-import { createRandomEffectifApprenant } from "../../data/randomizedSample.js";
-import { effectifsApprenantsDb } from "../../../src/common/model/collections.js";
-import { createJobEvent } from "../../../src/common/actions/jobEvents.actions.js";
+// import { JOB_NAMES, jobEventStatuts } from "../../../src/common/constants/jobsConstants.js";
+// import { EFFECTIF_INDICATOR_NAMES } from "../../../src/common/constants/dossierApprenantConstants.js";
+// import { createRandomEffectifApprenant } from "../../data/randomizedSample.js";
+// import { effectifsApprenantsDb } from "../../../src/common/model/collections.js";
+// import { createJobEvent } from "../../../src/common/actions/jobEvents.actions.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
 
 const user = { name: "apiConsumerUser", password: "password" };

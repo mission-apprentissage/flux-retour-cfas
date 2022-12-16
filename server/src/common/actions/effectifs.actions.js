@@ -37,6 +37,15 @@ export const createEffectif = async (
 };
 
 /**
+ * Méthode d'insertion d'un effectif en base de donnée
+ * @returns
+ */
+export const insertEffectif = async (data) => {
+  const { insertedId } = await effectifsDb().insertOne(validateEffectif(data));
+  return insertedId;
+};
+
+/**
  * Méthode de création d'un effectif depuis un dossierApprenant
  * @param {*} dossiersApprenant
  */
@@ -115,26 +124,8 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant, lock
     formation: formationEffectif,
   };
 
-  let effectifId;
-
-  // Vérification si erreurs de validation sur l'effectif
-  const effectifValidationErrors = getSchemaValidationErrors(effectifData, effectifSchema);
-  if (effectifValidationErrors.length > 0) {
-    // Si erreur de format on crée un effectif vide avec l'info du dossierApprenant lié et la liste des erreurs
-    effectifId = await createEffectif(
-      {
-        ...emptyValidEffectif(),
-        validation_errors: {
-          dossierApprenantMigrationId: dossiersApprenant._id,
-          errors: effectifValidationErrors,
-        },
-      },
-      lockAtCreate
-    );
-  } else {
-    // Si pas d'erreurs on créé effectif avec lock option
-    effectifId = await createEffectif(effectifData, lockAtCreate);
-  }
+  // Si pas d'erreurs on créé effectif avec lock option
+  const effectifId = await createEffectif(effectifData, lockAtCreate);
 
   const effectifCreated = await effectifsDb().findOne({ _id: effectifId });
   return effectifCreated;
@@ -220,29 +211,29 @@ export const structureEffectifFromDossierApprenant = async (dossiersApprenant) =
 };
 
 /**
- * TODO
+ * Création d'un object effectif avec valeurs default
+ * ajoute les valeurs corrigées et validation erreurs si erreurs présentes
  * @param {*} effectif
  * @returns
  */
 export const structureEffectifWithEventualErrors = (effectif) => {
   // Vérification si erreurs de validation sur l'effectif
   const effectifValidationErrors = getSchemaValidationErrors(effectif, effectifSchema);
+  const defaultValues = defaultValuesEffectif({ lockAtCreate: false });
+
   if (effectifValidationErrors.length > 0) {
     // On remplace chaque field en erreur par un field valide default, sinon on le remove
-    const defaultValuesForEffectif = defaultValuesEffectif({ lockAtCreate: false });
     for (const validationError of effectifValidationErrors) {
-      const defaultInError = defaultValuesForEffectif[validationError.fieldName];
+      const defaultInError = defaultValues[validationError.fieldName];
       if (defaultInError !== undefined) {
         effectif[validationError.fieldName] = defaultInError;
       } else {
         delete effectif[validationError.fieldName];
       }
     }
-
-    return { ...effectif, validation_errors: effectifValidationErrors };
-  } else {
-    return effectif;
   }
+
+  return { ...defaultValues, ...effectif, validation_errors: effectifValidationErrors };
 };
 
 /**
