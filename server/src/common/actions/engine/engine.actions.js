@@ -2,10 +2,12 @@ import { defaultValuesOrganisme } from "../../model/next.toKeep.models/organisme
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 // import { findDossierApprenantByQuery } from "../dossiersApprenants.actions.js";
 import {
+  findEffectifById,
   findEffectifByQuery,
   insertEffectif,
   structureEffectifWithEventualErrors,
   updateEffectif,
+  updateEffectifAndLock,
 } from "../effectifs.actions.js";
 import { findOrganismeBySiret, findOrganismeByUai, findOrganismeByUaiAndSiret } from "../organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
@@ -199,7 +201,7 @@ export const hydrateOrganisme = async ({ uai, siret, nom, ...data }) => {
  * Va hydrate l'engine et pour chaque collection créer / mettre à jour les données liées
  * @param {*} dossiersApprenants
  */
-export const runEngine = async (effectifData, organismeData) => {
+export const runEngine = async ({ effectifData, lockEffectif = true }, organismeData) => {
   let nbEffectifsCreated = 0;
   let nbEffectifsUpdated = 0;
 
@@ -209,8 +211,17 @@ export const runEngine = async (effectifData, organismeData) => {
     // Gérer les cas des organismes non crées
     // Traitement d'un item unique
     if (!organismeData) {
-      await insertEffectif(effectifsToCreate[0]);
+      const effectifCreatedId = await insertEffectif(effectifsToCreate[0]);
       nbEffectifsCreated++;
+
+      // Lock des champs API si option active
+      if (lockEffectif) {
+        const effectifCreated = await findEffectifById(effectifCreatedId);
+        await updateEffectifAndLock(effectifCreatedId, {
+          apprenant: effectifCreated.apprenant,
+          formation: effectifCreated.formation,
+        });
+      }
     }
   }
 
@@ -223,7 +234,6 @@ export const runEngine = async (effectifData, organismeData) => {
   // TODO : dépendance sur organismes Id -> effectifs aller recup l'organisme id avant l'insert
   // TODO : si organisme erreur on ajoute pas l'effectif ?
 
-  // const { organismes, effectifs } = hydrateEngine(dossiersApprenants);
   // TODO lock true api
   // const effectifCreated = await createEffectifFromDossierApprenant(dossiersApprenantsMigrated);
   // // Lock api fields

@@ -259,6 +259,17 @@ export const findEffectifByQuery = async (query, projection = {}) => {
 };
 
 /**
+ * Méthode de récupération d'un effectif depuis un id
+ * @param {string|ObjectId} id
+ * @param {*} projection
+ * @returns
+ */
+export const findEffectifById = async (id, projection = {}) => {
+  const found = await effectifsDb().findOne({ _id: ObjectId(id) }, { projection });
+  return found;
+};
+
+/**
  * Méthode de mise à jour d'un effectif depuis son id
  * @param {*} id
  * @returns

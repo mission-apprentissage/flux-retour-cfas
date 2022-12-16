@@ -3,21 +3,6 @@ import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
 } from "../model/next.toKeep.models/dossiersApprenantsMigration.model.js";
-import { createEffectifFromDossierApprenant, updateEffectifAndLock } from "./effectifs.actions.js";
-
-/**
- * Méthode de création d'un effectif depuis un dossierApprenant migré
- * va créer l'effectif et l'update pour locker les champs de l'API
- */
-export const createEffectifFromDossierApprenantMigrated = async (dossiersApprenantsMigrated) => {
-  const effectifCreated = await createEffectifFromDossierApprenant(dossiersApprenantsMigrated);
-
-  // Lock api fields
-  await updateEffectifAndLock(effectifCreated._id, {
-    apprenant: effectifCreated.apprenant,
-    formation: effectifCreated.formation,
-  });
-};
 
 /**
  * Méthode de création d'un dossierApprenantMigration depuis un dossier apprenant historique
