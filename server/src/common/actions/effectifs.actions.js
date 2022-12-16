@@ -142,6 +142,85 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant, lock
 };
 
 /**
+ * Création d'un objet effectif depuis les données d'un dossierApprenant
+ * @param {*} dossiersApprenant
+ * @returns
+ */
+export const structureEffectifFromDossierApprenant = async (dossiersApprenant) => {
+  const {
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
+
+    formation_cfd: cfd,
+    formation_rncp: rncp,
+    libelle_long_formation: libelle_long,
+    niveau_formation: niveau,
+    niveau_formation_libelle: niveau_libelle,
+    periode_formation: periode,
+    annee_formation: annee,
+    code_commune_insee_apprenant,
+    contrat_date_debut,
+    contrat_date_fin,
+    contrat_date_rupture,
+    nom_apprenant: nom,
+    prenom_apprenant: prenom,
+    ine_apprenant: ine,
+    date_de_naissance_apprenant: date_de_naissance,
+    email_contact: courriel,
+    telephone_apprenant: telephone,
+
+    historique_statut_apprenant: historique_statut,
+  } = dossiersApprenant;
+
+  // Construction d'une liste de contrat avec un seul élément matchant les 3 dates si nécessaire
+  const contrats =
+    contrat_date_debut || contrat_date_fin || contrat_date_rupture
+      ? [
+          {
+            ...(contrat_date_debut ? { date_debut: contrat_date_debut } : {}),
+            ...(contrat_date_fin ? { date_fin: contrat_date_fin } : {}),
+            ...(contrat_date_rupture ? { date_rupture: contrat_date_rupture } : {}),
+          },
+        ]
+      : [];
+
+  const apprenantEffectif = {
+    ...defaultValuesApprenant(),
+    ...(ine ? { ine } : {}),
+    ...(nom ? { nom } : {}),
+    ...(prenom ? { prenom } : {}),
+    ...(date_de_naissance ? { date_de_naissance } : {}),
+    ...(courriel ? { courriel } : {}),
+    ...(telephone ? { telephone: transformToInternationalNumber(telephone) } : {}),
+    ...(historique_statut ? { historique_statut } : {}),
+    // Build adresse with code_commune_insee
+    ...(code_commune_insee_apprenant ? { adresse: { code_insee: code_commune_insee_apprenant } } : {}),
+    // Build contrats si nécessaire
+    contrats,
+  };
+
+  const formationEffectif = {
+    ...defaultValuesFormationEffectif(),
+    ...(cfd ? { cfd } : {}),
+    ...(rncp ? { rncp } : {}),
+    ...(libelle_long ? { libelle_long } : {}),
+    ...(niveau ? { niveau } : {}),
+    ...(niveau_libelle ? { niveau_libelle } : {}),
+    ...(periode ? { periode } : {}),
+    ...(annee ? { annee } : {}),
+  };
+
+  return {
+    ...(annee_scolaire ? { annee_scolaire } : {}),
+    ...(source ? { source } : {}),
+    ...(id_erp_apprenant ? { id_erp_apprenant } : {}),
+    apprenant: apprenantEffectif,
+    formation: formationEffectif,
+  };
+};
+
+/**
  * Méthode de récupération des effectifs d'un organisme
  * @param {*} organisme_id
  * @param {*} projection

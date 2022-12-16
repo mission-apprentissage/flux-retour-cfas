@@ -16,11 +16,9 @@ import { USER_EVENTS_ACTIONS, USER_EVENTS_TYPES } from "../../../../common/const
 import { dossiersApprenantsApiErrorsDb, dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
 import { sendTransformedPaginatedJsonStream } from "../../../../common/utils/httpUtils.js";
 import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
-import {
-  buildDossierApprenant,
-  findDossierApprenantByQuery,
-  updateDossierApprenant,
-} from "../../../../common/actions/dossiersApprenants.actions.js";
+import { runEngine } from "../../../../common/actions/engine/engine.actions.js";
+import { structureEffectifFromDossierApprenant } from "../../../../common/actions/effectifs.actions.js";
+import { structureOrganismeFromDossierApprenant } from "../../../../common/actions/organismes.actions.js";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 100;
 
@@ -127,8 +125,8 @@ export default () => {
             logger.warn(`Could not validate item from ${user.username} at index ${index}`, prettyValidationError);
           } else {
             nbItemsValid++;
-            // Build toAddOrUpdate item
-            const itemToAddOrUpdate = {
+            // Build item & map input fields
+            const dossierApprenantItem = {
               ...currentDossierApprenant,
               formation_cfd: currentDossierApprenant.id_formation,
               // periode_formation is sent as string "year1-year2" i.e. "2020-2022", we transform it to [2020-2022]
@@ -138,21 +136,12 @@ export default () => {
               source: user.username,
             };
 
-            // Add or update item
-            const foundDossierApprenantWithUnicityFields = await findDossierApprenantByQuery(
-              {
-                id_erp_apprenant: itemToAddOrUpdate.id_erp_apprenant,
-                uai_etablissement: itemToAddOrUpdate.uai_etablissement,
-                annee_scolaire: itemToAddOrUpdate.annee_scolaire,
-              },
-              { _id: 1 }
-            );
+            // Structure effectif & organisme from item
+            const effectifData = await structureEffectifFromDossierApprenant(dossierApprenantItem);
+            const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenantItem);
 
-            if (!foundDossierApprenantWithUnicityFields) {
-              await buildDossierApprenant(itemToAddOrUpdate);
-            } else {
-              await updateDossierApprenant(foundDossierApprenantWithUnicityFields._id, itemToAddOrUpdate);
-            }
+            // Call runEngine -> va créer les données nécessaires
+            await runEngine(effectifData, organismeData);
           }
         });
 

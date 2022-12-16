@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getMetiersBySirets } from "../apis/apiLba.js";
-import { organismesDb } from "../model/collections.js";
+import { dossiersApprenantsDb, organismesDb } from "../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../model/next.toKeep.models/organismes.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { generateKey } from "../utils/cryptoUtils.js";
@@ -90,6 +90,22 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
   );
 
   return await organismesDb().findOne({ _id: insertedId });
+};
+
+/**
+ * Création d'un objet organisme depuis les données d'un dossierApprenant
+ * @param {*} dossierApprenant
+ * @returns
+ */
+export const structureOrganismeFromDossierApprenant = async (dossierApprenant) => {
+  const { uai_etablissement, siret_etablissement, nom_etablissement } = dossierApprenant;
+
+  return {
+    uai: uai_etablissement,
+    siret: siret_etablissement,
+    sirets: [siret_etablissement],
+    nom: nom_etablissement,
+  };
 };
 
 /**
