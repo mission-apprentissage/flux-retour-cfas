@@ -18,6 +18,7 @@ export const Input = memo(
     locked,
     options,
     description,
+    placeholder,
     warning,
     label,
     fieldType = "text",
@@ -45,6 +46,7 @@ export const Input = memo(
         options,
         locked,
         description,
+        placeholder,
         warning,
         label,
         fieldType,
@@ -62,6 +64,7 @@ export const Input = memo(
       }),
       [
         description,
+        placeholder,
         options,
         fieldType,
         label,

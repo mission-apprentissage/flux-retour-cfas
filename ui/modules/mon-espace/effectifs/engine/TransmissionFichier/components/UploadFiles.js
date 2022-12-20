@@ -142,10 +142,10 @@ const UploadFiles = ({ title }) => {
       </Heading>
       <Box mb={8}>
         {uploadError && <Text color="error">{uploadError}</Text>}
-        {documents?.length > 0 && (
+        {documents?.unconfirmed?.length > 0 && (
           <>
             <List>
-              {documents.map((file) => {
+              {documents?.unconfirmed?.map((file) => {
                 return (
                   <ListItem key={file.path || file.nom_fichier} borderBottom="solid 1px" borderColor="dgalt" pb={3}>
                     <HStack>

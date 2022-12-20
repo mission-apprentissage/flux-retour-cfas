@@ -1,4 +1,4 @@
-import { object, string, integer, objectId, date, any } from "../../../json-schema/jsonSchemaTypes.js";
+import { object, string, integer, objectId, date, any, boolean } from "../../../json-schema/jsonSchemaTypes.js";
 
 export const documentSchema = object(
   {
@@ -31,6 +31,7 @@ export const documentSchema = object(
     hash_fichier: string({
       description: "Checksum fichier",
     }),
+    confirm: boolean({ description: "Le document est confirmé par l'utilisateur" }),
     added_by: string({
       description: "Qui a ajouté le fichier",
     }),

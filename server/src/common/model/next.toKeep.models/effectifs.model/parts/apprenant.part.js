@@ -144,6 +144,13 @@ export const apprenantSchema = object(
         maxLength: 13,
         minLength: 8,
       }),
+      pcs: integer({
+        enum: [
+          10, 21, 22, 23, 31, 33, 34, 37, 38, 42, 43, 44, 45, 46, 47, 48, 52, 53, 54, 55, 56, 61, 66, 69, 71, 72, 73,
+          76, 81, 82, 99,
+        ],
+        description: `**Nomenclatures des professions et catégories socioprofessionnelles`,
+      }),
     }),
     contrats: arrayOf(
       object(

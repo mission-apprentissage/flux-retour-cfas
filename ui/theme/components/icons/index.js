@@ -10,6 +10,7 @@ export * from "./Exclamation-circle";
 export * from "./Cloud-slashed";
 export * from "./Download-line";
 export * from "./Arrow-right-line";
+export * from "./ArrowRightLong";
 export * from "./Parametre";
 export * from "./Map-pin-2-fill";
 export * from "./Edit-2-fill";

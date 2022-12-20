@@ -3,7 +3,7 @@ import { Select as ChakraSelect } from "@chakra-ui/react";
 import { InputWrapper } from "./InputWrapper";
 
 export const Select = (props) => {
-  const { name, locked, onChange, value, options } = props;
+  const { name, locked, onChange, value, options, placeholder } = props;
 
   const handleChange = (e) => {
     const selectedLabel = e.target.value ?? undefined;
@@ -31,7 +31,7 @@ export const Select = (props) => {
         onChange={handleChange}
         iconColor={"gray.800"}
         data-testid={`select-${name}`}
-        placeholder="Sélectionnez une option"
+        placeholder={placeholder ?? "Sélectionner une option"}
         value={selectedLabel ?? ""}
         variant="cerfa"
       >

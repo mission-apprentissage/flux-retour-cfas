@@ -65,6 +65,7 @@ export const addDocument = async (
     chemin_fichier,
     taille_fichier,
     hash_fichier,
+    confirm: false,
     created_at: new Date(),
     updated_at: new Date(),
     added_by: userEmail.toLowerCase(),
@@ -93,6 +94,10 @@ export const addDocument = async (
 
   return updated.value;
 };
+
+// export const confirmDocument = async ({ organisme_id, userEmail, pending }) => {
+//   getDocument
+// };
 
 export const removeDocument = async (organismeId, { type_document, nom_fichier, chemin_fichier, taille_fichier }) => {
   const found = await getUploadEntryByOrgaId(organismeId);

@@ -15,7 +15,24 @@ export function useFetchUploads() {
     ["fetchDocuments"],
     async () => {
       const uploads = await _get(`/api/v1/upload/get?organisme_id=${organisme._id}`);
-      setUploads(uploads);
+      if (uploads.documents.length) {
+        setUploads({
+          ...uploads,
+          documents: {
+            confirmed: uploads.documents.filter((d) => d.confirm),
+            unconfirmed: uploads.documents.filter((d) => !d.confirm),
+          },
+        });
+      } else {
+        setUploads({
+          ...uploads,
+          documents: {
+            confirmed: [],
+            unconfirmed: [],
+          },
+        });
+      }
+
       return uploads;
     },
     {
@@ -33,7 +50,13 @@ export function useDocuments() {
   const onDocumentsChanged = useCallback(
     async (newDocumentsArray) => {
       const docs = newDocumentsArray;
-      setUploads({ ...uploads, documents: docs });
+      setUploads({
+        ...uploads,
+        documents: {
+          confirmed: docs.filter((d) => d.confirm),
+          unconfirmed: docs.filter((d) => !d.confirm),
+        },
+      });
     },
     [uploads, setUploads]
   );
