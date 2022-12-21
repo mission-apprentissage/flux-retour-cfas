@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Box, Button, Flex, HStack, Spinner } from "@chakra-ui/react";
-import { ArrowDropRightLine } from "../../../theme/components/icons";
+import { Box, Button, Flex, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
+import { Alert, ArrowDropRightLine, InfoLine } from "../../../theme/components/icons";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
 import { _get, _post } from "../../../common/httpClient";
@@ -9,6 +9,7 @@ import { organismeAtom } from "../../../hooks/organismeAtoms";
 import { ArrowRightLong } from "../../../theme/components/icons";
 import { Input } from "./engine/formEngine/components/Input/Input";
 import uniq from "lodash.uniq";
+import EffectifsTable from "./engine/EffectifsTable";
 
 const Televersements = () => {
   useFetchUploads();
@@ -23,6 +24,8 @@ const Televersements = () => {
   });
   const [lines, setLines] = useState([]);
   const [requireKeysSettled, setRequireKeysSettled] = useState([]);
+
+  const [preEffictifs, setPreEffictifs] = useState({ canBeImport: [], canNotBeImport: [] });
 
   const onLineChange = useCallback(
     ({ line, part }, { value, hasError, required = false }) => {
@@ -71,15 +74,15 @@ const Televersements = () => {
   }, [organisme._id]);
 
   const onGoToImportStep = useCallback(async () => {
-    setStep("import");
+    setStep("pre-import");
     const keyToKeyMapping = lines.reduce((acc, line) => {
       return { ...acc, [line.in.value]: line.out.value };
     }, {});
-    const response = await _post(`/api/v1/upload/import`, {
+    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post(`/api/v1/upload/pre-import`, {
       organisme_id: organisme._id,
       mapping: keyToKeyMapping,
     });
-    console.log(response);
+    setPreEffictifs({ canBeImport: canBeImportEffectifs, canNotBeImport: canNotBeImportEffectifs });
     //onDocumentsChanged(documents, type_document);
   }, [lines, organisme._id]);
 
@@ -207,14 +210,52 @@ const Televersements = () => {
             </Button>
           </>
         )}
-        {step === "import" && (
-          <>
-            IMPORT
+        {step === "pre-import" && (!preEffictifs.canBeImport.length || !preEffictifs.canNotBeImport.length) && (
+          <Spinner />
+        )}
+        {step === "pre-import" && (!!preEffictifs.canBeImport.length || !!preEffictifs.canNotBeImport.length) && (
+          <Box>
+            <Heading textStyle="h2" color="grey.800" mb={5}>
+              Prévisualisation:
+            </Heading>
+            {!!preEffictifs.canNotBeImport.length && (
+              <Box my={6}>
+                <HStack color="red.500" w="full" pl={5}>
+                  <Alert boxSize={4} />
+                  <Text fontSize="1rem">
+                    Les lignes ci-dessous ne pourront pas être importées car des champs obligatoires sont erronés ou
+                    manquants:
+                  </Text>
+                </HStack>
+
+                <EffectifsTable
+                  organismesEffectifs={preEffictifs.canNotBeImport}
+                  columns={["annee_scolaire", "cfd", "nom", "prenom"]}
+                  show="errorInCell"
+                />
+              </Box>
+            )}
+            {!!preEffictifs.canBeImport.length && (
+              <Box my={10}>
+                <HStack color="bluefrance" w="full" pl={5}>
+                  <InfoLine h="14px" boxSize={4} />
+                  <Text fontSize="1rem">
+                    Les lignes ci-dessous pourront être importées. Il se peut que des champs non obligatoires sont
+                    erronés:
+                  </Text>
+                </HStack>
+                <EffectifsTable
+                  organismesEffectifs={preEffictifs.canBeImport}
+                  columns={["expander", "annee_scolaire", "cfd", "nom", "prenom", "separator", "state"]}
+                  effectifsSnapshot
+                />
+              </Box>
+            )}
             <Button onClick={() => {}} size={"md"} variant="primary">
               Étape suivante
               <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
             </Button>
-          </>
+          </Box>
         )}
       </Flex>
     </>

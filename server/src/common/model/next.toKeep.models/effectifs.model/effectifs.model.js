@@ -32,6 +32,7 @@ export const schema = object(
     validation_errors: arrayOf(
       object({
         fieldName: string({ description: "Nom du champ en erreur" }),
+        type: string({ description: "Type d'erreur" }),
         inputValue: string({ description: "Valeur fournie en entrée" }),
         message: string({ description: "Message de l'erreur" }),
       }),

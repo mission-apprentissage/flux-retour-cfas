@@ -40,6 +40,7 @@ export const EffectifApprenant = memo(({ modeSifa = false }) => {
               </Text>
               <InputController name="apprenant.representant_legal.nom" />
               <InputController name="apprenant.representant_legal.prenom" />
+              <InputController name="apprenant.representant_legal.pcs" />
               <InputController name="apprenant.representant_legal.courriel" />
               <InputController name="apprenant.representant_legal.telephone" />
               <Text fontWeight="bold" my={3}>

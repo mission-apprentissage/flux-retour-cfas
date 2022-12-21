@@ -18,6 +18,8 @@ import {
 import { getJsonFromXlsxData } from "../../../../common/utils/xlsxUtils.js";
 import { hydrateEffectif } from "../../../../common/actions/engine/engine.actions.js";
 import { set } from "lodash-es";
+import { uploadsDb } from "../../../../common/model/collections.js";
+import { ObjectId } from "mongodb";
 // import permissionsDossierMiddleware = require("../../middlewares/permissionsDossierMiddleware");
 
 function discard() {
@@ -468,7 +470,7 @@ export default ({ clamav }) => {
   );
 
   router.post(
-    "/import",
+    "/pre-import",
     // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
     tryCatch(async (req, res) => {
       let { organisme_id, mapping } = await Joi.object({
@@ -556,18 +558,75 @@ export default ({ clamav }) => {
         Object.entries(obj).reduce((acc, [key, value]) => set(acc, key, value), {})
       );
 
-      const effectifs = [];
+      const canNotBeImportEffectifs = [];
+      const canBeImportEffectifs = [];
       for (const [index, data] of convertedData.entries()) {
-        const { effectif } = await hydrateEffectif({
+        const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
           organisme_id,
           source: document.document_id.toString(),
           id_erp_apprenant: `${index}`,
-          ...data,
+          annee_scolaire: data.annee_scolaire ?? "",
+          apprenant: { nom: data.apprenant?.nom ?? "", prenom: data.apprenant?.prenom ?? "" },
+          formation: { cfd: data.formation?.cfd ?? "" },
         });
-        effectifs.push(effectif);
+        if (canNotBeImportEffectif.validation_errors.length) {
+          canNotBeImportEffectifs.push({
+            annee_scolaire: canNotBeImportEffectif.annee_scolaire,
+            validation_errors: canNotBeImportEffectif.validation_errors,
+            cfd: canNotBeImportEffectif.formation.cfd,
+            nom: canNotBeImportEffectif.apprenant.nom,
+            prenom: canNotBeImportEffectif.apprenant.prenom,
+          });
+        } else {
+          const { effectif: canBeImportEffectif } = await hydrateEffectif({
+            organisme_id,
+            source: document.document_id.toString(),
+            id_erp_apprenant: `${index}`,
+            ...data,
+          });
+          canBeImportEffectifs.push({
+            _id: new ObjectId(), // TODO OR UPDATE
+            ...canBeImportEffectif,
+          });
+        }
       }
 
-      return res.json(effectifs);
+      const uploads = await getUploadEntryByOrgaId(organisme_id);
+      await uploadsDb().findOneAndUpdate(
+        { _id: uploads._id },
+        {
+          $set: { last_snapshot_effectifs: canBeImportEffectifs, updated_at: new Date() },
+        },
+        { returnDocument: "after" }
+      );
+
+      const effectifsTable = [];
+
+      for (const {
+        _id,
+        id_erp_apprenant,
+        source,
+        annee_scolaire,
+        validation_errors,
+        apprenant,
+        formation,
+      } of canBeImportEffectifs) {
+        effectifsTable.push({
+          id: _id.toString(),
+          id_erp_apprenant,
+          organisme_id,
+          annee_scolaire,
+          source,
+          validation_errors,
+          formation,
+          cfd: formation.cfd,
+          nom: apprenant.nom,
+          prenom: apprenant.prenom,
+          historique_statut: apprenant.historique_statut,
+        });
+      }
+
+      return res.json({ canBeImportEffectifs: effectifsTable, canNotBeImportEffectifs });
     })
   );
 

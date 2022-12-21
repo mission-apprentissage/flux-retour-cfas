@@ -58,10 +58,11 @@ export function schemaValidation(entity, schema, extensions = []) {
 export const getSchemaValidationErrors = (entity, schema, extensions = []) => {
   const { error } = applySchemaValidation(entity, schema, extensions, false); // AbortEarly false pour récupération de toutes les erreurs
 
-  const errorsFormatted = error?.details?.map((item) => ({
-    fieldName: item.context.label,
-    inputValue: item.context.value,
-    message: item.message,
+  const errorsFormatted = error?.details?.map(({ context, type, message }) => ({
+    type,
+    message,
+    fieldName: context.label,
+    inputValue: context.value,
   }));
 
   return errorsFormatted || [];

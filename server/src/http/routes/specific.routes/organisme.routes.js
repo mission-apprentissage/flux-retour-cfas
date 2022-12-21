@@ -45,13 +45,22 @@ export default () => {
 
       const effectifs = [];
 
-      for (const { _id, id_erp_apprenant, source, annee_scolaire, apprenant, formation } of effectifsDb) {
+      for (const {
+        _id,
+        id_erp_apprenant,
+        source,
+        annee_scolaire,
+        validation_errors,
+        apprenant,
+        formation,
+      } of effectifsDb) {
         effectifs.push({
           id: _id.toString(),
           id_erp_apprenant,
           organisme_id,
           annee_scolaire,
           source,
+          validation_errors,
           formation,
           nom: apprenant.nom,
           prenom: apprenant.prenom,

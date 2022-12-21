@@ -41,6 +41,7 @@ export const effectifFieldsLockerSchema = object({
     representant_legal: object({
       nom: boolean(),
       prenom: boolean(),
+      pcs: boolean(),
       meme_adresse: boolean(),
       adresse: adresseLocker,
       courriel: boolean(),
@@ -104,6 +105,7 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
       representant_legal: {
         nom: lockAtCreate,
         prenom: lockAtCreate,
+        pcs: lockAtCreate,
         meme_adresse: lockAtCreate,
         adresse: defaultAdresseLock(lockAtCreate),
         courriel: lockAtCreate,

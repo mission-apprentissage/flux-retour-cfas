@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Center, Spinner } from "@chakra-ui/react";
-import EffectifsTable from "./engine/EffectifsTable.jsx";
+import EffectifsPage from "./engine/EffectifsPage.jsx";
 
 import { organismeAtom } from "../../../hooks/organismeAtoms";
 import { _get } from "../../../common/httpClient";
@@ -57,7 +57,7 @@ const EffectifsOrganisme = () => {
       {!organisme.mode_de_transmission && <ChoixTransmission />}
       {organisme.mode_de_transmission === "API" && organisme.setup_step_courante !== "COMPLETE" && <TransmissionAPI />}
       {displayEffectifs && televersementPage && <Televersements />}
-      {displayEffectifs && !televersementPage && <EffectifsTable organismesEffectifs={organismesEffectifs} />}
+      {displayEffectifs && !televersementPage && <EffectifsPage organismesEffectifs={organismesEffectifs} />}
     </>
   );
 };

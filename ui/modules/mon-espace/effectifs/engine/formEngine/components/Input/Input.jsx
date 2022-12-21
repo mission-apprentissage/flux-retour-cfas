@@ -147,8 +147,10 @@ export const InputField = memo(({ mt, mb, ml, mr, w, ...props }) => {
           </Box>
         )}
       </HStack>
-      {warning && <FormHelperText color={"warning"}>{warning}</FormHelperText>}
-      {error && <FormErrorMessage>{error}</FormErrorMessage>}
+      {warning && (
+        <FormHelperText color={"warning"}>{typeof warning !== "function" ? warning : warning()}</FormHelperText>
+      )}
+      {error && <FormErrorMessage>{typeof error !== "function" ? error : error()}</FormErrorMessage>}
     </FormControl>
   );
 });

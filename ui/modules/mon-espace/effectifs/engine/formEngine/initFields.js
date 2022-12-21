@@ -241,6 +241,20 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     };
   });
 
+  if (cerfa.validation_errors.length) {
+    for (const validation_error of cerfa.validation_errors) {
+      fields[validation_error.fieldName] = {
+        ...fields[validation_error.fieldName],
+        warning: () => (
+          <>
+            La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
+            &nbsp;n&rsquo;est pas valide pour ce champ.
+          </>
+        ),
+      };
+    }
+  }
+
   return fields;
 };
 

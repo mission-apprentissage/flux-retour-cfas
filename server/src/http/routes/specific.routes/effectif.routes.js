@@ -8,6 +8,7 @@ import { effectifsDb } from "../../../common/model/collections.js";
 import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
+import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
 
 const flattenKeys = (obj, path = []) =>
   !isObject(obj)
@@ -121,6 +122,7 @@ export default () => {
       organisme_id: effectif.organisme_id,
       id_erp_apprenant: effectif.id_erp_apprenant,
       source: effectif.source,
+      validation_errors: effectif.validation_errors,
       updated_at: effectif.updated_at,
     };
   };
@@ -136,6 +138,29 @@ export default () => {
         .validateAsync(params, { abortEarly: false });
 
       const effectif = await effectifsDb().findOne({ _id: ObjectId(id) });
+      return res.json(buildEffectifResult(effectif));
+    })
+  );
+
+  router.get(
+    "/:id/snapshot",
+    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    tryCatch(async ({ params, query }, res) => {
+      let { id, organisme_id } = await Joi.object({
+        id: Joi.string().required(),
+        organisme_id: Joi.string().required(),
+      })
+        .unknown()
+        .validateAsync({ ...params, ...query }, { abortEarly: false });
+
+      const uploads = await getUploadEntryByOrgaId(organisme_id);
+
+      const effectif = uploads.last_snapshot_effectifs.find(({ _id }) => _id.toString() === id);
+      console.log(effectif);
+      if (!effectif) {
+        throw new Error(`Unable to find effectif ${params.id}`);
+      }
+
       return res.json(buildEffectifResult(effectif));
     })
   );
@@ -230,7 +255,14 @@ export default () => {
         dataToUpdate.apprenant.contrats.push(nouveau_contrat);
       }
 
-      const effectifUpdated = await updateEffectif(effectifDb._id, dataToUpdate);
+      let validation_errors = [];
+      for (const validation_error of dataToUpdate.validation_errors) {
+        if (!inputNames.includes(validation_error.fieldName)) {
+          validation_errors.push(validation_error);
+        }
+      }
+
+      const effectifUpdated = await updateEffectif(effectifDb._id, { ...dataToUpdate, validation_errors });
 
       return res.json(buildEffectifResult(effectifUpdated));
     })

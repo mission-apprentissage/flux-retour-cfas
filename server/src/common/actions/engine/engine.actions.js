@@ -25,7 +25,8 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
  */
 export const hydrateEffectif = async (
   effectifData,
-  queryKeys = ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"]
+  queryKeys = ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"],
+  checkIfExist = false
 ) => {
   let {
     organisme_id,
@@ -40,11 +41,11 @@ export const hydrateEffectif = async (
     source: Joi.string().required(),
     id_erp_apprenant: Joi.string().required(),
     apprenant: Joi.object({
-      nom: Joi.string().required(),
-      prenom: Joi.string().required(),
+      nom: Joi.string().allow("").required(),
+      prenom: Joi.string().allow("").required(),
     }).unknown(),
     formation: Joi.object({
-      cfd: Joi.string().required(),
+      cfd: Joi.string().allow("").required(),
     }).unknown(),
   })
     .unknown()
@@ -72,9 +73,12 @@ export const hydrateEffectif = async (
 
   const validatedEffectif = validateEffectifObject(effectif);
 
-  // Recherche de l'effectif via sa clé d'unicité
-  const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
-  const foundEffectifWithUnicityFields = await findEffectifByQuery(query, { _id: 1 });
+  let foundEffectifWithUnicityFields = false;
+  if (checkIfExist) {
+    // Recherche de l'effectif via sa clé d'unicité
+    const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
+    foundEffectifWithUnicityFields = await findEffectifByQuery(query, { _id: 1 });
+  }
 
   return { effectif: validatedEffectif, action: foundEffectifWithUnicityFields ? "ToCreate" : "ToUpdate" };
 };
@@ -195,11 +199,11 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
 
   // Gestion de l'effectif
   if (effectifData) {
-    const { effectif, action } = await hydrateEffectif(effectifData, [
-      "id_erp_apprenant",
-      "organisme_id",
-      "annee_scolaire",
-    ]);
+    const { effectif, action } = await hydrateEffectif(
+      effectifData,
+      ["id_erp_apprenant", "organisme_id", "annee_scolaire"],
+      true
+    );
 
     if (action === "ToCreate") {
       effectifCreatedId = await insertEffectif(effectif);

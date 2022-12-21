@@ -9,7 +9,7 @@ import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
 // eslint-disable-next-line no-undef
 const sleep = (m) => new Promise((r) => setTimeout(r, m));
 
-export const useInitCerfa = ({ controller, modeSifa, canEdit }) => {
+export const useInitCerfa = ({ controller, modeSifa, canEdit, effectifsSnapshot = false }) => {
   const effectifId = useRecoilValue(effectifIdAtom);
   const organisme = useRecoilValue(organismeAtom);
 
@@ -17,8 +17,10 @@ export const useInitCerfa = ({ controller, modeSifa, canEdit }) => {
     ["effectif", effectifId],
     async () => {
       if (!effectifId) return null;
-      const cerfa = await _get(`/api/v1/effectif/${effectifId}?organisme_id=${organisme._id}`);
-      await sleep(300); // TODO SPECIAL
+      const cerfa = !effectifsSnapshot
+        ? await _get(`/api/v1/effectif/${effectifId}?organisme_id=${organisme._id}`)
+        : await _get(`/api/v1/effectif/${effectifId}/snapshot?organisme_id=${organisme._id}`);
+      await sleep(300); // TODO SPECIAL UX
       const fields = initFields({ cerfa, schema: cerfaSchema, modeSifa, canEdit, organisme });
       controller.setFields(fields);
       return cerfa;

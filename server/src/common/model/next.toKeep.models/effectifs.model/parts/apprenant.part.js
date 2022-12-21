@@ -7,9 +7,13 @@ import { object, string, date, integer, boolean, arrayOf } from "../../../json-s
 
 export const apprenantSchema = object(
   {
-    ine: string({ description: "N° INE de l'apprenant" }),
-    nom: string({ description: "Nom de l'apprenant" }),
-    prenom: string({ description: "Prénom de l'apprenant" }),
+    ine: string({
+      description: "N° INE de l'apprenant",
+      example: "0494004062M",
+      pattern: "^([0-9]{9}[a-zA-Z]{2}|[0-9]{10}[a-zA-Z]{1})$",
+    }),
+    nom: string({ description: "Nom de l'apprenant", pattern: "^.+$" }),
+    prenom: string({ description: "Prénom de l'apprenant", pattern: "^.+$" }),
     sexe: string({
       description: `**Sexe de l'apprenant**\r\n  M : Homme\r\n  F : Femme`,
       enum: ["M", "F"],
