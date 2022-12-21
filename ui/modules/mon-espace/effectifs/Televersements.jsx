@@ -73,7 +73,7 @@ const Televersements = () => {
   const onGoToImportStep = useCallback(async () => {
     setStep("import");
     const keyToKeyMapping = lines.reduce((acc, line) => {
-      return { ...acc, [line.out.value]: line.in.value };
+      return { ...acc, [line.in.value]: line.out.value };
     }, {});
     const response = await _post(`/api/v1/upload/import`, {
       organisme_id: organisme._id,

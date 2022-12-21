@@ -1,10 +1,13 @@
+import Joi from "joi";
+import { get } from "lodash-es";
 import {
+  buildEffectif,
   findEffectifById,
   findEffectifByQuery,
   insertEffectif,
-  structureEffectifWithEventualErrors,
   updateEffectif,
   updateEffectifAndLock,
+  validateEffectifObject,
 } from "../effectifs.actions.js";
 import {
   findOrganismeBySiret,
@@ -20,29 +23,60 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
  * Va créer un effectif structuré avec les erreurs éventuelles de modèle
  * @param {*} effectifs
  */
-export const hydrateEffectif = async (effectif) => {
-  let effectifToCreate = null;
-  let effectifToUpdate = null;
+export const hydrateEffectif = async (
+  effectifData,
+  queryKeys = ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"]
+) => {
+  let {
+    organisme_id,
+    annee_scolaire,
+    source,
+    id_erp_apprenant,
+    apprenant: { nom, prenom },
+    formation: { cfd },
+  } = await Joi.object({
+    organisme_id: Joi.string().required(),
+    annee_scolaire: Joi.string().required(),
+    source: Joi.string().required(),
+    id_erp_apprenant: Joi.string().required(),
+    apprenant: Joi.object({
+      nom: Joi.string().required(),
+      prenom: Joi.string().required(),
+    }).unknown(),
+    formation: Joi.object({
+      cfd: Joi.string().required(),
+    }).unknown(),
+  })
+    .unknown()
+    .validateAsync(effectifData, { abortEarly: false });
 
-  // Recherche de l'effectif via sa clé d'unicité
-  const foundEffectifWithUnicityFields = await findEffectifByQuery(
+  const effectif = buildEffectif(
     {
-      id_erp_apprenant: effectif.id_erp_apprenant,
-      organisme_id: effectif.organisme_id,
-      annee_scolaire: effectif.annee_scolaire,
+      organisme_id,
+      annee_scolaire,
+      source,
+      id_erp_apprenant,
+      ...effectifData,
+      apprenant: {
+        nom,
+        prenom,
+        ...effectifData.apprenant,
+      },
+      formation: {
+        cfd,
+        ...effectifData.formation,
+      },
     },
-    { _id: 1 }
+    false
   );
 
-  // Ajout à la liste de création ou update
-  // On ajoute un effectif structuré avec les erreurs éventuelles de validation
-  if (!foundEffectifWithUnicityFields) {
-    effectifToCreate = structureEffectifWithEventualErrors(effectif);
-  } else {
-    effectifToUpdate = { ...structureEffectifWithEventualErrors(effectif), _id: foundEffectifWithUnicityFields?._id };
-  }
+  const validatedEffectif = validateEffectifObject(effectif);
 
-  return { effectifToCreate, effectifToUpdate };
+  // Recherche de l'effectif via sa clé d'unicité
+  const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
+  const foundEffectifWithUnicityFields = await findEffectifByQuery(query, { _id: 1 });
+
+  return { effectif: validatedEffectif, action: foundEffectifWithUnicityFields ? "ToCreate" : "ToUpdate" };
 };
 
 /**
@@ -161,10 +195,14 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
 
   // Gestion de l'effectif
   if (effectifData) {
-    const { effectifToCreate, effectifToUpdate } = await hydrateEffectif(effectifData);
+    const { effectif, action } = await hydrateEffectif(effectifData, [
+      "id_erp_apprenant",
+      "organisme_id",
+      "annee_scolaire",
+    ]);
 
-    if (effectifToCreate) {
-      effectifCreatedId = await insertEffectif(effectifToCreate);
+    if (action === "ToCreate") {
+      effectifCreatedId = await insertEffectif(effectif);
 
       // Lock des champs API si option active
       if (lockEffectif) {
@@ -177,12 +215,12 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
     }
 
     // Gestion des maj d'effectif
-    if (effectifToUpdate) {
-      effectifUpdatedId = effectifToUpdate?._id;
+    if (action === "ToUpdate") {
+      effectifUpdatedId = effectif?._id;
       if (lockEffectif) {
-        await updateEffectifAndLock(effectifUpdatedId, effectifToUpdate);
+        await updateEffectifAndLock(effectifUpdatedId, effectif);
       } else {
-        await updateEffectif(effectifUpdatedId, effectifToUpdate);
+        await updateEffectif(effectifUpdatedId, effectif);
       }
     }
   }

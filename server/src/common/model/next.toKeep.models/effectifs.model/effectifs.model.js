@@ -3,7 +3,6 @@ import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./pa
 
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part.js";
 import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part.js";
-import { ObjectId } from "mongodb";
 
 export const collectionName = "effectifs";
 
@@ -50,10 +49,6 @@ export const schema = object(
 // Default value
 export function defaultValuesEffectif({ lockAtCreate = false }) {
   return {
-    organisme_id: new ObjectId().toString(),
-    id_erp_apprenant: "",
-    source: "",
-    annee_scolaire: "0000-0000",
     apprenant: defaultValuesApprenant(),
     formation: defaultValuesFormationEffectif(),
     is_lock: defaultValuesEffectifFieldsLocker(lockAtCreate),

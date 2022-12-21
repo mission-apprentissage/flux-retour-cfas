@@ -38,7 +38,6 @@ export const formationEffectifSchema = object(
 // Default value
 export function defaultValuesFormationEffectif() {
   return {
-    cfd: "00000000",
     periode: [],
   };
 }

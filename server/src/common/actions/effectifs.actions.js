@@ -1,4 +1,4 @@
-import { isObject, merge, reduce, set } from "lodash-es";
+import { cloneDeep, isObject, merge, reduce, set } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { effectifsDb } from "../model/collections.js";
 import {
@@ -12,28 +12,76 @@ import { getSchemaValidationErrors } from "../utils/schemaUtils.js";
 import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber.js";
 
 /**
+ * Méthode de build d'un effectif
+ * @returns
+ */
+export const buildEffectif = (
+  {
+    organisme_id,
+    annee_scolaire,
+    source,
+    id_erp_apprenant = null,
+    apprenant: { nom, prenom, ...apprenant },
+    formation: { cfd, ...formation },
+  },
+  lockAtCreate = false
+) => {
+  const _id_erp_apprenant = id_erp_apprenant ?? new ObjectId().toString();
+  const defaultValues = defaultValuesEffectif({ lockAtCreate });
+  return {
+    ...defaultValues,
+    apprenant: {
+      nom,
+      prenom,
+      ...defaultValues.apprenant,
+      ...apprenant,
+    },
+    formation: {
+      cfd,
+      ...defaultValues.formation,
+      ...formation,
+    },
+    id_erp_apprenant: _id_erp_apprenant,
+    organisme_id: ObjectId(organisme_id),
+    source,
+    annee_scolaire,
+  };
+};
+
+/**
  * Méthode de création d'un effectif
+ * // TODO SAME AS INSERT
  * @returns
  */
 export const createEffectif = async (
   { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant, formation },
   lockAtCreate = false
 ) => {
-  const _id_erp_apprenant = id_erp_apprenant ?? new ObjectId().toString();
-  const defaultValues = defaultValuesEffectif({ lockAtCreate });
-  const dataToInsert = {
-    ...defaultValues,
-    apprenant,
-    formation,
-    id_erp_apprenant: _id_erp_apprenant,
-    organisme_id: ObjectId(organisme_id),
-    source,
-    annee_scolaire,
-  };
+  const dataToInsert = buildEffectif(
+    { organisme_id, annee_scolaire, source, id_erp_apprenant, apprenant, formation },
+    lockAtCreate
+  );
 
   const { insertedId } = await effectifsDb().insertOne(validateEffectif(dataToInsert));
 
   return insertedId;
+};
+
+/**
+ * Validation d'un object effectif
+ * @param {*} effectif
+ * @returns
+ */
+export const validateEffectifObject = (effectif) => {
+  // Vérification si erreurs de validation sur l'effectif
+  const effectifValidationErrors = getSchemaValidationErrors(effectif, effectifSchema);
+
+  let effectifMandate = cloneDeep(effectif);
+  for (const validationError of effectifValidationErrors) {
+    set(effectifMandate, validationError.fieldName, undefined);
+  }
+
+  return { ...effectifMandate, validation_errors: effectifValidationErrors };
 };
 
 /**
@@ -125,7 +173,7 @@ export const createEffectifFromDossierApprenant = async (dossiersApprenant, lock
   };
 
   // Si pas d'erreurs on créé effectif avec lock option
-  const effectifId = await createEffectif(effectifData, lockAtCreate);
+  const effectifId = await createEffectif(effectifData, lockAtCreate); // TODODODODODODODODODODODODOD
 
   const effectifCreated = await effectifsDb().findOne({ _id: effectifId });
   return effectifCreated;
@@ -208,32 +256,6 @@ export const structureEffectifFromDossierApprenant = (dossiersApprenant) => {
     apprenant: apprenantEffectif,
     formation: formationEffectif,
   };
-};
-
-/**
- * Création d'un object effectif avec valeurs default
- * ajoute les valeurs corrigées et validation erreurs si erreurs présentes
- * @param {*} effectif
- * @returns
- */
-export const structureEffectifWithEventualErrors = (effectif) => {
-  // Vérification si erreurs de validation sur l'effectif
-  const effectifValidationErrors = getSchemaValidationErrors(effectif, effectifSchema);
-  const defaultValues = defaultValuesEffectif({ lockAtCreate: false });
-
-  if (effectifValidationErrors.length > 0) {
-    // On remplace chaque field en erreur par un field valide default, sinon on le remove
-    for (const validationError of effectifValidationErrors) {
-      const defaultInError = defaultValues[validationError.fieldName];
-      if (defaultInError !== undefined) {
-        effectif[validationError.fieldName] = defaultInError;
-      } else {
-        delete effectif[validationError.fieldName];
-      }
-    }
-  }
-
-  return { ...defaultValues, ...effectif, validation_errors: effectifValidationErrors };
 };
 
 /**

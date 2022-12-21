@@ -207,8 +207,6 @@ export const apprenantSchema = object(
 // Default value
 export function defaultValuesApprenant() {
   return {
-    nom: "",
-    prenom: "",
     historique_statut: [],
     contrats: [],
   };
