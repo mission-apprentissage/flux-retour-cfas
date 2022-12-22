@@ -37,8 +37,26 @@ const applySchemaValidation = (entity, schema, extensions = [], abortEarly = tru
   return { error, value };
 };
 
-export function schemaValidation(entity, schema, extensions = []) {
-  const { error, value } = applySchemaValidation(entity, schema, extensions);
+export function schemaValidation({
+  entity,
+  schema,
+  extensions = [],
+  abortEarly = true,
+  getErrors = false,
+  prefix = "",
+}) {
+  const { error, value } = applySchemaValidation(entity, schema, extensions, getErrors ? false : abortEarly);
+
+  if (getErrors) {
+    const errorsFormatted = error?.details?.map(({ context, type, message }) => ({
+      type,
+      message,
+      fieldName: `${prefix}${context.label}`,
+      inputValue: context.value,
+    }));
+
+    return errorsFormatted || [];
+  }
 
   if (error) {
     logger.error(error);
@@ -47,23 +65,3 @@ export function schemaValidation(entity, schema, extensions = []) {
 
   return value;
 }
-
-/**
- * Méthode de construction des erreurs de validation schema
- * @param {*} entity
- * @param {*} schema
- * @param {*} extensions
- * @returns
- */
-export const getSchemaValidationErrors = (entity, schema, extensions = []) => {
-  const { error } = applySchemaValidation(entity, schema, extensions, false); // AbortEarly false pour récupération de toutes les erreurs
-
-  const errorsFormatted = error?.details?.map(({ context, type, message }) => ({
-    type,
-    message,
-    fieldName: context.label,
-    inputValue: context.value,
-  }));
-
-  return errorsFormatted || [];
-};

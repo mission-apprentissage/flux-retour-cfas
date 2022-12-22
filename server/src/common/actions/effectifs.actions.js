@@ -2,13 +2,11 @@ import { cloneDeep, isObject, merge, reduce, set } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { effectifsDb } from "../model/collections.js";
 import {
-  schema as effectifSchema,
   defaultValuesEffectif,
   validateEffectif,
 } from "../model/next.toKeep.models/effectifs.model/effectifs.model.js";
 import { defaultValuesApprenant } from "../model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
 import { defaultValuesFormationEffectif } from "../model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
-import { getSchemaValidationErrors } from "../utils/schemaUtils.js";
 import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber.js";
 
 /**
@@ -74,7 +72,7 @@ export const createEffectif = async (
  */
 export const validateEffectifObject = (effectif) => {
   // Vérification si erreurs de validation sur l'effectif
-  const effectifValidationErrors = getSchemaValidationErrors(effectif, effectifSchema);
+  const effectifValidationErrors = validateEffectif(effectif, true);
 
   let effectifMandate = cloneDeep(effectif);
   for (const validationError of effectifValidationErrors) {
@@ -309,6 +307,7 @@ export const updateEffectif = async (id, data) => {
     {
       $set: {
         ...validateEffectif(data),
+        organisme_id: ObjectId(data.organisme_id),
         updated_at: new Date(),
       },
     },

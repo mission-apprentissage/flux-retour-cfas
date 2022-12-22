@@ -262,7 +262,14 @@ export default () => {
         }
       }
 
-      const effectifUpdated = await updateEffectif(effectifDb._id, { ...dataToUpdate, validation_errors });
+      const effectifUpdated = await updateEffectif(effectifDb._id, {
+        ...dataToUpdate,
+        id_erp_apprenant,
+        organisme_id,
+        annee_scolaire,
+        source,
+        validation_errors,
+      });
 
       return res.json(buildEffectifResult(effectifUpdated));
     })

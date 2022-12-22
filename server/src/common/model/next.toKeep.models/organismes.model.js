@@ -134,18 +134,22 @@ export function defaultValuesOrganisme() {
 
 // Extra validation
 export function validateOrganisme(props) {
-  return schemaValidation(props, schema, [
-    {
-      name: "uai",
-      base: uaiSchema(),
-    },
-    {
-      name: "sirets",
-      base: Joi.array().items(siretSchema()),
-    },
-    {
-      name: "siret",
-      base: siretSchema(),
-    },
-  ]);
+  return schemaValidation({
+    entity: props,
+    schema,
+    extensions: [
+      {
+        name: "uai",
+        base: uaiSchema(),
+      },
+      {
+        name: "sirets",
+        base: Joi.array().items(siretSchema()),
+      },
+      {
+        name: "siret",
+        base: siretSchema(),
+      },
+    ],
+  });
 }

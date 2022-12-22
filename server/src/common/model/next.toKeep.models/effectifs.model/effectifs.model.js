@@ -1,3 +1,5 @@
+import { uniqBy } from "lodash-es";
+import { schemaValidation } from "../../../utils/schemaUtils.js";
 import { object, objectId, string, date, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes.js";
 import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part.js";
 
@@ -60,9 +62,23 @@ export function defaultValuesEffectif({ lockAtCreate = false }) {
 }
 
 // TODO Extra validation
-export function validateEffectif(props) {
-  return {
-    ...props,
-    apprenant: validateApprenant(props.apprenant),
-  };
+export function validateEffectif(props, getErrors = false) {
+  if (getErrors) {
+    const errorsApprenant = validateApprenant(props.apprenant, getErrors);
+    const entityValidation = schemaValidation({
+      entity: props,
+      schema,
+      getErrors,
+    });
+    return uniqBy([...entityValidation, ...errorsApprenant], "fieldName");
+  }
+
+  return schemaValidation({
+    entity: {
+      ...props,
+      apprenant: validateApprenant(props.apprenant, getErrors),
+    },
+    schema,
+    getErrors,
+  });
 }

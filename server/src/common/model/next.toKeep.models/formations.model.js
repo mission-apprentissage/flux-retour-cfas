@@ -54,12 +54,16 @@ export const schema = object(
 
 // TODO Extra validation
 export function validateFormation(props) {
-  return schemaValidation(props, schema, [
-    {
-      name: "cfd",
-      base: cfdSchema(),
-    },
-  ]);
+  return schemaValidation({
+    entity: props,
+    schema,
+    extensions: [
+      {
+        name: "cfd",
+        base: cfdSchema(),
+      },
+    ],
+  });
 }
 
 export default { schema, indexes, collectionName };

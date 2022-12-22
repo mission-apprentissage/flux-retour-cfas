@@ -147,22 +147,26 @@ export function validateUser(props) {
     throw new Error(`schema not valid : reseau, erp ONLY ONE OF THEM CAN BE SET`);
   }
 
-  return schemaValidation(props, schema, [
-    {
-      name: "email",
-      base: Joi.string().email(),
-    },
-    {
-      name: "password",
-      base: passwordSchema(),
-    },
-    {
-      name: "siret",
-      base: siretSchema(),
-    },
-    {
-      name: "uai",
-      base: uaiSchema(),
-    },
-  ]);
+  return schemaValidation({
+    entity: props,
+    schema,
+    extensions: [
+      {
+        name: "email",
+        base: Joi.string().email(),
+      },
+      {
+        name: "password",
+        base: passwordSchema(),
+      },
+      {
+        name: "siret",
+        base: siretSchema(),
+      },
+      {
+        name: "uai",
+        base: uaiSchema(),
+      },
+    ],
+  });
 }

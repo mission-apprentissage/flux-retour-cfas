@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { flattenDeep } from "lodash-es";
 import { CODES_STATUT_APPRENANT } from "../../../../constants/dossierApprenantConstants.js";
 import { schemaValidation } from "../../../../utils/schemaUtils.js";
 import { siretSchema } from "../../../../utils/validationUtils.js";
@@ -217,21 +218,41 @@ export function defaultValuesApprenant() {
 }
 
 // Extra validation
-export function validateApprenant({ contrats, ...props }) {
-  return {
-    ...schemaValidation(props, apprenantSchema, [
-      {
-        name: "courriel",
-        base: Joi.string().email(),
-      },
-    ]),
-    contrats: contrats.map((contrat) => {
-      return schemaValidation(contrat, apprenantSchema.properties.contrats.items, [
+export function validateApprenant({ contrats, ...props }, getErrors = false) {
+  const contratsValidation = contrats.map((contrat, i) => {
+    return schemaValidation({
+      entity: contrat,
+      schema: apprenantSchema.properties.contrats.items,
+      extensions: [
         {
           name: "siret",
           base: siretSchema(),
         },
-      ]);
-    }),
+      ],
+      getErrors,
+      prefix: `apprenant.contrats[${i}].`,
+    });
+  });
+  const entityValidation = schemaValidation({
+    entity: props,
+    schema: apprenantSchema,
+    extensions: [
+      {
+        name: "courriel",
+        base: Joi.string().email(),
+      },
+    ],
+    getErrors,
+    prefix: "apprenant.",
+  });
+
+  if (getErrors) {
+    let errors = [...entityValidation, ...flattenDeep(contratsValidation)];
+    return errors;
+  }
+
+  return {
+    ...entityValidation,
+    contrats: contratsValidation,
   };
 }

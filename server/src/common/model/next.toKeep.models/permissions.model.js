@@ -41,10 +41,14 @@ export function defaultValuesPermission() {
 
 // Extra validation
 export function validatePermission(props) {
-  return schemaValidation(props, schema, [
-    {
-      name: "userEmail",
-      base: Joi.string().email(),
-    },
-  ]);
+  return schemaValidation({
+    entity: props,
+    schema,
+    extensions: [
+      {
+        name: "userEmail",
+        base: Joi.string().email(),
+      },
+    ],
+  });
 }

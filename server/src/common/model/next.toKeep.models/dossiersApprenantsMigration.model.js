@@ -158,22 +158,26 @@ export function defaultValuesDossiersApprenantsMigration() {
 
 // Extra validation
 export function validateDossiersApprenantsMigration(props) {
-  return schemaValidation(props, schema, [
-    {
-      name: "uai_etablissement",
-      base: uaiSchema(),
-    },
-    {
-      name: "siret_etablissement",
-      base: siretSchema(),
-    },
-    {
-      name: "employeur_siret",
-      base: siretSchema(),
-    },
-    {
-      name: "email_contact",
-      base: Joi.string().email(),
-    },
-  ]);
+  return schemaValidation({
+    entity: props,
+    schema,
+    extensions: [
+      {
+        name: "uai_etablissement",
+        base: uaiSchema(),
+      },
+      {
+        name: "siret_etablissement",
+        base: siretSchema(),
+      },
+      {
+        name: "employeur_siret",
+        base: siretSchema(),
+      },
+      {
+        name: "email_contact",
+        base: Joi.string().email(),
+      },
+    ],
+  });
 }
