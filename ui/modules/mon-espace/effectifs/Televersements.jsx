@@ -73,7 +73,7 @@ const Televersements = () => {
     setMapping(response);
   }, [organisme._id]);
 
-  const onGoToImportStep = useCallback(async () => {
+  const onGoToPreImportStep = useCallback(async () => {
     setStep("pre-import");
     const keyToKeyMapping = lines.reduce((acc, line) => {
       return { ...acc, [line.in.value]: line.out.value };
@@ -200,7 +200,7 @@ const Televersements = () => {
             </Box>
 
             <Button
-              onClick={() => onGoToImportStep()}
+              onClick={() => onGoToPreImportStep()}
               size={"md"}
               variant="primary"
               disabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length}

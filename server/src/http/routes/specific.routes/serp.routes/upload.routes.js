@@ -175,7 +175,7 @@ export default ({ clamav }) => {
       writeData((data) => {
         let tmp = getJsonFromXlsxData(data, { raw: false, header: 1 });
         headers = tmp[0];
-        rawFileJson = getJsonFromXlsxData(data, { raw: false });
+        rawFileJson = getJsonFromXlsxData(data, { raw: false, dateNF: "dd/MM/yyyy" });
       })
     );
     return { headers, rawFileJson, unconfirmedDocument: unconfirmed[0] };

@@ -1,5 +1,6 @@
 import Joi from "joi";
-import { get } from "lodash-es";
+import { cloneDeep, get } from "lodash-es";
+import { dateFormatter, dateStringToLuxon } from "../../utils/formatterUtils.js";
 import {
   buildEffectif,
   findEffectifById,
@@ -51,21 +52,27 @@ export const hydrateEffectif = async (
     .unknown()
     .validateAsync(effectifData, { abortEarly: false });
 
+  let convertedEffectif = cloneDeep(effectifData);
+  if (effectifData.apprenant.date_de_naissance) {
+    const date_de_naissance_ISO = dateStringToLuxon(dateFormatter(effectifData.apprenant.date_de_naissance)).toISO();
+    if (date_de_naissance_ISO) convertedEffectif.apprenant.date_de_naissance = date_de_naissance_ISO;
+  }
+
   const effectif = buildEffectif(
     {
       organisme_id,
       annee_scolaire,
       source,
       id_erp_apprenant,
-      ...effectifData,
+      ...convertedEffectif,
       apprenant: {
         nom,
         prenom,
-        ...effectifData.apprenant,
+        ...convertedEffectif.apprenant,
       },
       formation: {
         cfd,
-        ...effectifData.formation,
+        ...convertedEffectif.formation,
       },
     },
     false

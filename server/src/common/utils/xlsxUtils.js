@@ -1,8 +1,8 @@
 import XLSX from "xlsx";
 
-const readXLSXData = (data) => {
+const readXLSXData = (data, readOpt = { codepage: 65001, cellDates: true, dateNF: "dd/MM/yyyy" }) => {
   try {
-    const workbook = XLSX.read(data, { codepage: 65001 });
+    const workbook = XLSX.read(data, readOpt);
 
     return { sheet_name_list: workbook.SheetNames, workbook };
   } catch (error) {
@@ -10,9 +10,13 @@ const readXLSXData = (data) => {
   }
 };
 
-export const getJsonFromXlsxData = (data, opt = { raw: false }) => {
+export const getJsonFromXlsxData = (
+  data,
+  opt = { raw: false },
+  readOpt = { codepage: 65001, cellDates: true, dateNF: "dd/MM/yyyy" }
+) => {
   try {
-    const { sheet_name_list, workbook } = readXLSXData(data);
+    const { sheet_name_list, workbook } = readXLSXData(data, readOpt);
     const worksheet = workbook.Sheets[sheet_name_list[0]];
     const json = XLSX.utils.sheet_to_json(worksheet, opt);
 

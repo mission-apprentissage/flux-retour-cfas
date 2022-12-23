@@ -241,6 +241,10 @@ export function validateApprenant({ contrats, ...props }, getErrors = false) {
         name: "courriel",
         base: Joi.string().email(),
       },
+      {
+        name: "date_de_naissance",
+        base: Joi.date().iso(),
+      },
     ],
     getErrors,
     prefix: "apprenant.",
