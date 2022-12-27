@@ -7,7 +7,7 @@ import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
-import { seedWithSample } from "./seed/samples/seedSample.js";
+// import { seedWithSample } from "./seed/samples/seedSample.js";
 import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
 import { createUserAccount } from "./users/create-user.js";
 import {
@@ -59,16 +59,16 @@ cli
 /**
  * Job d'initialisation projet avec des données d'exemple
  */
-cli
-  .command("seed:sample")
-  .description("Seed projet avec des données d'exemple")
-  .option("--random", "Indique si le seed doit générer des données aléatoires")
-  .option("--nbDossiers <int>", "Indique le nombre de statuts à générer si mode random")
-  .action(async ({ random, nbDossiers }) => {
-    runScript(async () => {
-      return seedWithSample(random, nbDossiers);
-    }, "Seed-sample");
-  });
+// cli
+//   .command("seed:sample")
+//   .description("Seed projet avec des données d'exemple")
+//   .option("--random", "Indique si le seed doit générer des données aléatoires")
+//   .option("--nbDossiers <int>", "Indique le nombre de statuts à générer si mode random")
+//   .action(async ({ random, nbDossiers }) => {
+//     runScript(async () => {
+//       return seedWithSample(random, nbDossiers);
+//     }, "Seed-sample");
+//   });
 
 /**
  * Job de nettoyage de db
