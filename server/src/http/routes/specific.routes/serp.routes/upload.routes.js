@@ -157,7 +157,9 @@ export default ({ clamav }) => {
       try {
         result = await getUploadEntryByOrgaId(organisme_id);
       } catch (error) {
-        result = await createUpload({ organisme_id });
+        if (error.message.includes("Unable to find uploadEntry")) {
+          result = await createUpload({ organisme_id });
+        }
       }
       return res.json(result);
     })
