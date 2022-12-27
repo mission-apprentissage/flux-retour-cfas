@@ -2,7 +2,7 @@ import Joi from "joi";
 import { flattenDeep } from "lodash-es";
 import { CODES_STATUT_APPRENANT } from "../../../../constants/dossierApprenantConstants.js";
 import { schemaValidation } from "../../../../utils/schemaUtils.js";
-import { siretSchema } from "../../../../utils/validationUtils.js";
+import { siretSchema, uaiSchema } from "../../../../utils/validationUtils.js";
 import { adresseSchema } from "../../../json-schema/adresseSchema.js";
 import { object, string, date, integer, boolean, arrayOf } from "../../../json-schema/jsonSchemaTypes.js";
 
@@ -107,7 +107,12 @@ export const apprenantSchema = object(
       description: `**Situation de l'apprenant avant le contrat`,
     }),
     derniere_situation: integer({
-      enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // TODO
+      enum: [
+        1003, 1005, 1009, 1013, 1015, 1017, 1018, 1019, 1021, 1023, 2001, 2003, 2005, 2007, 3001, 3101, 3003, 3103,
+        3009, 3109, 3011, 3111, 3031, 3131, 3032, 3132, 3033, 3133, 3117, 3119, 3021, 3121, 3023, 3123, 4001, 4101,
+        4003, 4103, 4005, 4105, 4007, 4107, 4009, 4011, 4111, 4013, 4113, 4015, 4115, 4017, 4117, 4019, 4119, 4021,
+        4121, 5901, 5903, 5905, 5907, 5909, 9900, 9999,
+      ],
       description: `**Situation de l'apprenant n-1`,
     }),
     dernier_organisme_uai: string({
@@ -242,6 +247,10 @@ export function validateApprenant({ contrats, ...props }, getErrors = false) {
       {
         name: "date_de_naissance",
         base: Joi.date().iso(),
+      },
+      {
+        name: "dernier_organisme_uai",
+        base: uaiSchema(),
       },
     ],
     getErrors,

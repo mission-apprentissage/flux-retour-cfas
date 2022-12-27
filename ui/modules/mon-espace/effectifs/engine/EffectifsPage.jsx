@@ -1,39 +1,21 @@
 import React from "react";
-import { Box, Flex, Text, HStack, Button, Circle, useDisclosure, Spinner, Heading } from "@chakra-ui/react";
+import { Box, Flex, Text, HStack, Button, Circle, useDisclosure, Heading } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
 
 import { DownloadLine } from "../../../../theme/components/icons";
 import { hasContextAccessTo } from "../../../../common/utils/rolesUtils";
 import { organismeAtom } from "../../../../hooks/organismeAtoms";
 import AjoutApprenantModal from "./AjoutApprenantModal";
-import { _getBlob } from "../../../../common/httpClient";
-import useDownloadClick from "../../../../hooks/old/useDownloadClick";
 import { useRouter } from "next/router";
 import { useEspace } from "../../../../hooks/useEspace";
 import EffectifsTable from "./EffectifsTable";
 
-const DownloadButton = ({ title, fileName, getFile }) => {
-  const [onClick, isLoading] = useDownloadClick(getFile, fileName);
-
-  return (
-    <Button size="md" onClick={onClick} variant="secondary">
-      {isLoading && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
-      {!isLoading && <DownloadLine />}
-      <Text as="span" ml={2}>
-        {title}
-      </Text>
-    </Button>
-  );
-};
-
-const EffectifsPage = ({ organismesEffectifs, modeSifa = false }) => {
+const EffectifsPage = ({ organismesEffectifs }) => {
   const router = useRouter();
   const { isMonOrganismePages, isOrganismePages } = useEspace();
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
   const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
-
-  const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
   return (
     <Flex flexDir="column" width="100%" my={10}>
@@ -75,7 +57,7 @@ const EffectifsPage = ({ organismesEffectifs, modeSifa = false }) => {
           </HStack>
         </Box>
         <HStack spacing={4}>
-          {!modeSifa && hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
+          {hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
             <Button size="md" onClick={() => alert("TODO NOT YET")} variant="secondary">
               <DownloadLine />
               <Text as="span" ml={2}>
@@ -83,13 +65,7 @@ const EffectifsPage = ({ organismesEffectifs, modeSifa = false }) => {
               </Text>
             </Button>
           )}
-          {modeSifa && hasContextAccessTo(organisme, "organisme/page_sifa2/telecharger") && (
-            <DownloadButton
-              fileName={exportSifaFilename}
-              getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
-              title="Télécharger SIFA"
-            />
-          )}
+
           {hasContextAccessTo(organisme, "organisme/page_effectifs/televersement_document") && (
             <>
               <Button
@@ -109,8 +85,7 @@ const EffectifsPage = ({ organismesEffectifs, modeSifa = false }) => {
               </Button>
             </>
           )}
-          {!modeSifa &&
-            hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
+          {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
             organisme.mode_de_transmission !== "API" && (
               <>
                 <Button
@@ -136,7 +111,7 @@ const EffectifsPage = ({ organismesEffectifs, modeSifa = false }) => {
           </Text>
           <Text>[Code diplôme 26033206] - hardcodé TODO</Text>
         </HStack>
-        <EffectifsTable canEdit={canEdit} modeSifa={modeSifa} organismesEffectifs={organismesEffectifs} />
+        <EffectifsTable canEdit={canEdit} organismesEffectifs={organismesEffectifs} />
       </Box>
     </Flex>
   );

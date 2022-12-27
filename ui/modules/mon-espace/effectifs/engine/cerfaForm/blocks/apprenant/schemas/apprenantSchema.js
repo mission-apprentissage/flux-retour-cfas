@@ -460,54 +460,275 @@ export const apprenantSchema = {
     label: "Situation de l'apprenant n-1 :",
     options: [
       {
-        label: "1 Scolaire",
-        value: 1,
+        name: "1er cycle second degré",
+        options: [
+          {
+            label: "1003 6ème (y compris SEGPA)",
+            value: 1003,
+          },
+          {
+            label: "1005 5ème (y compris SEGPA)",
+            value: 1005,
+          },
+          {
+            label: "1009 Instituts médico-éducatifs et pédagogiques (IME, IMP)",
+            value: 1009,
+          },
+          {
+            label: "1013 DIMA de collège ou de lycée",
+            value: 1013,
+          },
+          {
+            label: "1015 DIMA de CFA",
+            value: 1015,
+          },
+          {
+            label: "1017 4ème générale",
+            value: 1017,
+          },
+          {
+            label: "1019 Autres 4ème (agricole, SEGPA...)",
+            value: 1019,
+          },
+          {
+            label: "1021 3ème générale",
+            value: 1021,
+          },
+          {
+            label: "Autres 3ème (agricole, insertion, projet professionnel,SGEPA..)",
+            value: 1023,
+          },
+        ],
       },
       {
-        label: "2 Prépa apprentissage",
-        value: 2,
+        name: "2nd cycle : enseignement général et technologique",
+        options: [
+          {
+            label: "2001 2nde générale ou technologique (y compris agricole et BT)",
+            value: 2001,
+          },
+          {
+            label: "2003 1ère générale ou technologique (y compris agricole, d'adaptation et BT)",
+            value: 2003,
+          },
+          {
+            label: "2005 Terminale générale",
+            value: 2005,
+          },
+          {
+            label: "2007 Terminale technologique (y compris agricole et BT)",
+            value: 2007,
+          },
+        ],
       },
       {
-        label: "3 Etudiant",
-        value: 3,
+        name: "2nd cycle : enseignement professionnel",
+        options: [
+          {
+            label: "3001 1A CAP 2 ans SCOLAIRE",
+            value: 3001,
+          },
+          {
+            label: "3101 1A CAP 2 ans APPRENTI",
+            value: 3101,
+          },
+          {
+            label: "3003 Année terminale de CAP SCOLAIRE",
+            value: 3003,
+          },
+          {
+            label: "3103 Année terminale de CAP APPRENTI",
+            value: 3103,
+          },
+          {
+            label: "3009 Mention complémentaire de niveau 3 (ex niveau V) SCOLAIRE",
+            value: 3009,
+          },
+          {
+            label: "3109 Mention complémentaire de niveau 3 (ex niveau V) APPRENTI",
+            value: 3109,
+          },
+          {
+            label: "3011 Autre diplôme et certification de niveau 3 (ex niveau V) SCOLAIRE",
+            value: 3011,
+          },
+          {
+            label: "3111 Autre diplôme et certification de niveau 3 (ex niveau V) APPRENTI",
+            value: 3111,
+          },
+          {
+            label: "3031 1A BAC PRO 3 ans (2nde professionnelle) SCOLAIRE",
+            value: 3031,
+          },
+          {
+            label: "3131 1A BAC PRO 3 ans (2nde professionnelle) APPRENTI",
+            value: 3131,
+          },
+          {
+            label: "3032 2A BAC PRO 3 ans (1ère professionnelle) SCOLAIRE",
+            value: 3032,
+          },
+          {
+            label: "3132 2A BAC PRO 3 ans (1ère professionnelle) APPRENTI",
+            value: 3132,
+          },
+          {
+            label: "3033 BAC PRO 3 ans (Terminale professionnelle) SCOLAIRE",
+            value: 3033,
+          },
+          {
+            label: "3133 BAC PRO 3 ans (Terminale professionnelle) APPRENTI",
+            value: 3133,
+          },
+          {
+            label: "3117 1A de Brevet Professionnel (BP)",
+            value: 3117,
+          },
+          {
+            label: "3119 Année terminale de Brevet Professionnel",
+            value: 3119,
+          },
+          {
+            label: "3021 Mention complémentaire de niveau 4 (ex niveau IV) SCOLAIRE",
+            value: 3021,
+          },
+          {
+            label: "3121 Mention complémentaire de niveau 4 (ex niveau IV) APPRENTI",
+            value: 3121,
+          },
+          {
+            label: "3023 Autre diplôme et certification de niveau 4 (y compris BP JEPS) (ex niveau IV) SCOLAIRE",
+            value: 3023,
+          },
+          {
+            label: "3123 Autre diplôme et certification de niveau 4 (y compris BP JEPS) (ex niveau IV) APPRENTI",
+            value: 3123,
+          },
+        ],
       },
       {
-        label: "4 Contrat d'apprentissage",
-        value: 4,
+        name: "Enseignement supérieur",
+        options: [
+          {
+            label: "4001 1A de BTS SCOLAIRE",
+            value: 4001,
+          },
+          {
+            label: "4101 1A de BTS APPRENTI",
+            value: 4101,
+          },
+          {
+            label: "4003 Année terminale de BTS SCOLAIRE",
+            value: 4003,
+          },
+          {
+            label: "4103 Année terminale de BTS APPRENTI",
+            value: 4103,
+          },
+          {
+            label: "4005 1A de DUT SCOLAIRE",
+            value: 4005,
+          },
+          {
+            label: "4105 1A de DUT APPRENTI",
+            value: 4105,
+          },
+          {
+            label: "4007 Année terminale de DUT SCOLAIRE",
+            value: 4007,
+          },
+          {
+            label: "4107 Année terminale de DUT APPRENTI",
+            value: 4107,
+          },
+          {
+            label: "4009 Classe Préparatoire aux Grandes Ecoles (CPGE)",
+            value: 4009,
+          },
+          {
+            label: "4011 Cursus Licence (licence LMD, licence pro, ...) SCOLAIRE",
+            value: 4011,
+          },
+          {
+            label: "4111 Cursus Licence (licence LMD, licence pro, ...) APPRENTI",
+            value: 4111,
+          },
+          {
+            label: "4013 Cursus Master (master LMD, master pro) SCOLAIRE",
+            value: 4013,
+          },
+          {
+            label: "4113 Cursus Master (master LMD, master pro) APPRENTI",
+            value: 4113,
+          },
+          {
+            label: "4015 Diplôme d'ingénieur ou d'école de commerce de niveaux 7 et 8 (ex niveau 1) SCOLAIRE",
+            value: 4015,
+          },
+          {
+            label: "4115 Diplôme d'ingénieur ou d'école de commerce de niveaux 7 et 8 (ex niveau 1) APPRENTI",
+            value: 4115,
+          },
+          {
+            label: "4017 Autre diplôme du supérieur ou certification (Bac +1 ou 2) niveau 5 (ex niveau 3) SCOLAIRE",
+            value: 4017,
+          },
+          {
+            label: "4117 Autre diplôme du supérieur ou certification (Bac +1 ou 2) niveau 5 (ex niveau 3) APPRENTI",
+            value: 4117,
+          },
+          {
+            label: "4019 Autre diplôme du supérieur ou certification (Bac +3 ou 4) niveau 6 (ex niveau 2) SCOLAIRE",
+            value: 4019,
+          },
+          {
+            label: "4119 Autre diplôme du supérieur ou certification (Bac +3 ou 4) niveau 6 (ex niveau 2) APPRENTI",
+            value: 4119,
+          },
+          {
+            label:
+              "4021 Autre diplôme du supérieur ou certification (Bac +5 ou plus) niveaux 7 et 8 (ex niveau 1) SCOLAIRE",
+            value: 4021,
+          },
+          {
+            label:
+              "4121 Autre diplôme du supérieur ou certification (Bac +5 ou plus) niveaux 7 et 8 (ex niveau 1) APPRENTI",
+            value: 4121,
+          },
+        ],
       },
       {
-        label: "5 Contrat de professionnalisation",
-        value: 5,
-      },
-      {
-        label: "6 Contrat aidé",
-        value: 6,
-      },
-      {
-        label:
-          "7 En formation au CFA sous statut de stagiaire de la formation professionnelle, avant signature d'un contrat d'apprentissage (L6222-12-1 du code du travail)",
-        value: 7,
-      },
-      {
-        label:
-          "8 En formation, au CFA sans contrat sous statut de stagiaire de la formation professionnelle, suite à rupture (5° de L6231-2 du code du travail)",
-        value: 8,
-      },
-      {
-        label: "9 Autres situations sous statut de stagiaire de la formation professionnelle",
-        value: 9,
-      },
-      {
-        label: "10 Salarié",
-        value: 10,
-      },
-      {
-        label: "11 Personne à la recherche d'un emploi (inscrite ou non à Pôle Emploi)",
-        value: 11,
-      },
-      {
-        label: "12 Inactif",
-        value: 12,
+        name: "Autres",
+        options: [
+          {
+            label: "5901 Contrat de professionnalisation",
+            value: 5901,
+          },
+          {
+            label: "5903 Emploi",
+            value: 5903,
+          },
+          {
+            label: "5905 Stage",
+            value: 5905,
+          },
+          {
+            label: "5907 Sans emploi",
+            value: 5907,
+          },
+          {
+            label: "5909 Formation continue (tous niveaux de formation)",
+            value: 5909,
+          },
+          {
+            label: "9900 Autre",
+            value: 9900,
+          },
+          {
+            label: "9999 Inconnu",
+            value: 9999,
+          },
+        ],
       },
     ],
   },
