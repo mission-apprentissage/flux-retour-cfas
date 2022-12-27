@@ -248,18 +248,21 @@ export function validateApprenant({ contrats, ...props }, getErrors = false) {
       prefix: `apprenant.contrats[${i}].`,
     });
   });
-  const representantLegalValidation = schemaValidation({
-    entity: props.representant_legal,
-    schema: apprenantSchema.properties.representant_legal,
-    extensions: [
-      {
-        name: "courriel",
-        base: Joi.string().email(),
-      },
-    ],
-    getErrors,
-    prefix: "apprenant.representant_legal.",
-  });
+  let representantLegalValidation = null;
+  if (props.representant_legal) {
+    representantLegalValidation = schemaValidation({
+      entity: props.representant_legal,
+      schema: apprenantSchema.properties.representant_legal,
+      extensions: [
+        {
+          name: "courriel",
+          base: Joi.string().email(),
+        },
+      ],
+      getErrors,
+      prefix: "apprenant.representant_legal.",
+    });
+  }
   const entityValidation = schemaValidation({
     entity: props,
     schema: apprenantSchema,
@@ -282,13 +285,13 @@ export function validateApprenant({ contrats, ...props }, getErrors = false) {
   });
 
   if (getErrors) {
-    let errors = [...entityValidation, ...representantLegalValidation, ...flattenDeep(contratsValidation)];
+    let errors = [...entityValidation, ...(representantLegalValidation ?? []), ...flattenDeep(contratsValidation)];
     return errors;
   }
 
   return {
     ...entityValidation,
-    representant_legal: representantLegalValidation,
+    ...(representantLegalValidation ? { representant_legal: representantLegalValidation } : {}),
     contrats: contratsValidation,
   };
 }
