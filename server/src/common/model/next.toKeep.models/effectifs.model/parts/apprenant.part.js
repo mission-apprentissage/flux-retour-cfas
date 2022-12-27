@@ -31,10 +31,9 @@ export const apprenantSchema = object(
       description: `Apprenant étranger, non citoyen européen`,
       enum: [1, 2, 3],
     }),
-    regime_scolaire: integer({
-      // TODO
-      description: `**Régime scolaire** :\r\n  1 : MSA\r\n  2 : URSSAF`,
-      enum: [0, 1, 2],
+    regime_scolaire: string({
+      description: `**Régime scolaire** :\r\n  I : Interne\r\n  D : Demi-pensionnaire\r\n E : Externe\r\n IE : Interne externé`,
+      enum: ["I", "D", "E", "IE"],
     }),
     handicap: boolean({
       description: "Apprenant en situation d'handicape (RQTH)",
@@ -170,7 +169,6 @@ export const apprenantSchema = object(
             description: "La dénomination sociale doit être celle de l'établissement dans lequel le contrat s'exécute.",
           }),
           type_employeur: integer({
-            // TODO
             enum: [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29],
             description: "Le type d'employeur doit être en adéquation avec son statut juridique.",
           }),

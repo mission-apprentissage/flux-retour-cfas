@@ -10,6 +10,7 @@ import { ArrowRightLong } from "../../../theme/components/icons";
 import { Input } from "./engine/formEngine/components/Input/Input";
 import uniq from "lodash.uniq";
 import EffectifsTable from "./engine/EffectifsTable";
+import { useRouter } from "next/router";
 
 const Televersements = () => {
   useFetchUploads();
@@ -17,6 +18,7 @@ const Televersements = () => {
   const [step, setStep] = useState("upload");
   const organisme = useRecoilValue(organismeAtom);
   const [mapping, setMapping] = useState(null);
+  const router = useRouter();
 
   const [availableKeys, setAvailableKeys] = useState({
     in: [{ label: "", value: "" }],
@@ -85,6 +87,16 @@ const Televersements = () => {
     setPreEffictifs({ canBeImport: canBeImportEffectifs, canNotBeImport: canNotBeImportEffectifs });
     //onDocumentsChanged(documents, type_document);
   }, [lines, organisme._id]);
+
+  const onGoToImportStep = useCallback(async () => {
+    setStep("import");
+    const response = await _post(`/api/v1/upload/import`, {
+      organisme_id: organisme._id,
+    });
+    console.log(response);
+    router.push(`${router.asPath.replace("/televersement", "")}`);
+    //onDocumentsChanged(documents, type_document);
+  }, [organisme._id, router]);
 
   return (
     <>
@@ -251,7 +263,7 @@ const Televersements = () => {
                 />
               </Box>
             )}
-            <Button onClick={() => {}} size={"md"} variant="primary">
+            <Button onClick={() => onGoToImportStep()} size={"md"} variant="primary">
               Étape suivante
               <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
             </Button>

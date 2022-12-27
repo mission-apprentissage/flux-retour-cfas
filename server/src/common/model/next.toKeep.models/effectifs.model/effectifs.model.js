@@ -17,7 +17,7 @@ export const schema = object(
     id_erp_apprenant: string({ description: "Identifiant de l'apprenant dans l'erp" }),
     source: string({
       description: "Source du dossier apprenant (Ymag, Gesti, TDB_MANUEL, TDB_FILE...)",
-    }), // TODO [tech] ENUM
+    }),
 
     annee_scolaire: string({
       description: `Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")`,

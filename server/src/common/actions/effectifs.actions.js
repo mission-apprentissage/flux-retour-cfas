@@ -19,6 +19,7 @@ export const buildEffectif = (
     annee_scolaire,
     source,
     id_erp_apprenant = null,
+    validation_errors = [],
     apprenant: { nom, prenom, ...apprenant },
     formation: { cfd, ...formation },
   },
@@ -43,6 +44,7 @@ export const buildEffectif = (
     organisme_id: ObjectId(organisme_id),
     source,
     annee_scolaire,
+    validation_errors,
   };
 };
 
@@ -52,11 +54,11 @@ export const buildEffectif = (
  * @returns
  */
 export const createEffectif = async (
-  { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant, formation },
+  { organisme_id, annee_scolaire, source, id_erp_apprenant = null, apprenant, formation, validation_errors = [] },
   lockAtCreate = false
 ) => {
   const dataToInsert = buildEffectif(
-    { organisme_id, annee_scolaire, source, id_erp_apprenant, apprenant, formation },
+    { organisme_id, annee_scolaire, source, id_erp_apprenant, apprenant, formation, validation_errors },
     lockAtCreate
   );
 
@@ -74,12 +76,22 @@ export const validateEffectifObject = (effectif) => {
   // Vérification si erreurs de validation sur l'effectif
   const effectifValidationErrors = validateEffectif(effectif, true);
 
+  const compactObject = (val) => {
+    const data = Array.isArray(val) ? val.filter(Boolean) : val;
+    return Object.keys(data).reduce((acc, key) => {
+      const value = data[key];
+      if (!(value === undefined)) acc[key] = typeof value === "object" ? compactObject(value) : value;
+      if (acc[key] === undefined) delete acc[key];
+      return acc;
+    }, val);
+  };
+
   let effectifMandate = cloneDeep(effectif);
   for (const validationError of effectifValidationErrors) {
     set(effectifMandate, validationError.fieldName, undefined);
   }
 
-  return { ...effectifMandate, validation_errors: effectifValidationErrors };
+  return { ...compactObject(effectifMandate), validation_errors: effectifValidationErrors };
 };
 
 /**

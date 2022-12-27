@@ -577,12 +577,20 @@ export const apprenantSchema = {
     label: "Régime scolaire :",
     options: [
       {
-        label: "1 MSA",
-        value: 1,
+        label: "I : Interne",
+        value: "I",
       },
       {
-        label: "2 URSSAF",
-        value: 2,
+        label: "D : Demi-pensionnaire",
+        value: "D",
+      },
+      {
+        label: "E : Externe",
+        value: "E",
+      },
+      {
+        label: "IE : Interne externé",
+        value: "IE",
       },
     ],
   },

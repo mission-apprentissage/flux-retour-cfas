@@ -20,6 +20,7 @@ import { hydrateEffectif } from "../../../../common/actions/engine/engine.action
 import { set } from "lodash-es";
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
+import { createEffectif, findEffectifs } from "../../../../common/actions/effectifs.actions.js";
 // import permissionsDossierMiddleware = require("../../middlewares/permissionsDossierMiddleware");
 
 function discard() {
@@ -584,6 +585,7 @@ export default ({ clamav }) => {
             id_erp_apprenant: `${index}`,
             ...data,
           });
+
           canBeImportEffectifs.push({
             _id: new ObjectId(), // TODO OR UPDATE
             ...canBeImportEffectif,
@@ -627,6 +629,35 @@ export default ({ clamav }) => {
       }
 
       return res.json({ canBeImportEffectifs: effectifsTable, canNotBeImportEffectifs });
+    })
+  );
+
+  router.post(
+    "/import",
+    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    tryCatch(async (req, res) => {
+      let { organisme_id } = await Joi.object({
+        organisme_id: Joi.string().required(),
+      })
+        .unknown()
+        .validateAsync(req.body, { abortEarly: false });
+
+      const uploads = await getUploadEntryByOrgaId(organisme_id);
+      const effectifsDb = await findEffectifs(organisme_id);
+
+      for (const effectif of uploads.last_snapshot_effectifs) {
+        await createEffectif(effectif);
+      }
+
+      await uploadsDb().findOneAndUpdate(
+        { _id: uploads._id },
+        {
+          $set: { last_snapshot_effectifs: effectifsDb, updated_at: new Date() },
+        },
+        { returnDocument: "after" }
+      );
+
+      return res.json({});
     })
   );
 
