@@ -231,10 +231,34 @@ export function validateApprenant({ contrats, ...props }, getErrors = false) {
           name: "siret",
           base: siretSchema(),
         },
+        {
+          name: "date_debut",
+          base: Joi.date().iso(),
+        },
+        {
+          name: "date_fin",
+          base: Joi.date().iso(),
+        },
+        {
+          name: "date_rupture",
+          base: Joi.date().iso(),
+        },
       ],
       getErrors,
       prefix: `apprenant.contrats[${i}].`,
     });
+  });
+  const representantLegalValidation = schemaValidation({
+    entity: props.representant_legal,
+    schema: apprenantSchema.properties.representant_legal,
+    extensions: [
+      {
+        name: "courriel",
+        base: Joi.string().email(),
+      },
+    ],
+    getErrors,
+    prefix: "apprenant.representant_legal.",
   });
   const entityValidation = schemaValidation({
     entity: props,
@@ -258,12 +282,13 @@ export function validateApprenant({ contrats, ...props }, getErrors = false) {
   });
 
   if (getErrors) {
-    let errors = [...entityValidation, ...flattenDeep(contratsValidation)];
+    let errors = [...entityValidation, ...representantLegalValidation, ...flattenDeep(contratsValidation)];
     return errors;
   }
 
   return {
     ...entityValidation,
+    representant_legal: representantLegalValidation,
     contrats: contratsValidation,
   };
 }

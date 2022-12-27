@@ -83,8 +83,8 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
   return {
     apprenant: {
       ine: lockAtCreate,
-      nom: lockAtCreate,
-      prenom: lockAtCreate,
+      nom: true,
+      prenom: true,
       sexe: lockAtCreate,
       date_de_naissance: lockAtCreate,
       nationalite: lockAtCreate,
@@ -113,7 +113,7 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
       },
     },
     formation: {
-      cfd: lockAtCreate,
+      cfd: true,
       rncp: lockAtCreate,
       libelle_long: lockAtCreate,
       niveau: lockAtCreate,

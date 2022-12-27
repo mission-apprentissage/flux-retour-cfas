@@ -149,7 +149,7 @@ const CustomDateInput = forwardRef(({ value, onChange, onFocus, locked, onClick,
       blocks={{
         d: { mask: IMask.MaskedRange, placeholderChar: "j", from: 1, to: 31, maxLength: 2 },
         m: { mask: IMask.MaskedRange, placeholderChar: "m", from: 1, to: 12, maxLength: 2 },
-        Y: { mask: IMask.MaskedRange, placeholderChar: "a", from: 1900, to: 2999, maxLength: 4 },
+        Y: { mask: IMask.MaskedRange, placeholderChar: "a", from: 1900, to: 4000, maxLength: 4 },
       }}
       onAccept={(val) => {
         if (val.length === 8 || !val) {

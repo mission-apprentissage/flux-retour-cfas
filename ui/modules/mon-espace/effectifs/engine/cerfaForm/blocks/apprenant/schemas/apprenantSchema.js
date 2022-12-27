@@ -30,7 +30,7 @@ export const apprenantSchema = {
       {
         name: "C",
         mask: "Pattern",
-        pattern: "^\\D*$",
+        pattern: "^.+$",
       },
     ],
   },
@@ -44,7 +44,7 @@ export const apprenantSchema = {
       {
         name: "C",
         mask: "Pattern",
-        pattern: "^\\D*$",
+        pattern: "^.+$",
       },
     ],
   },
