@@ -11,6 +11,7 @@ import logger from "../../../../common/logger.js";
 import * as crypto from "../../../../common/utils/cryptoUtils.js";
 import {
   addDocument,
+  createUpload,
   getDocument,
   getUploadEntryByOrgaId,
   removeDocument,
@@ -152,8 +153,12 @@ export default ({ clamav }) => {
       })
         .unknown()
         .validateAsync(req.query, { abortEarly: false });
-
-      const result = await getUploadEntryByOrgaId(organisme_id);
+      let result = null;
+      try {
+        result = await getUploadEntryByOrgaId(organisme_id);
+      } catch (error) {
+        result = await createUpload({ organisme_id });
+      }
       return res.json(result);
     })
   );
