@@ -139,7 +139,7 @@ export const seed = async ({ adminEmail }) => {
       organisation: "ORGANISME_FORMATION",
     }
   );
-  await userAfterCreate({ user: urserOf, pending: false, notify: false });
+  await userAfterCreate({ user: urserOf, pending: false, notify: false, asRole: "organisme.admin" });
   logger.info(`User off created`);
 
   const urserOfR = await createUser(
@@ -155,7 +155,7 @@ export const seed = async ({ adminEmail }) => {
       organisation: "ORGANISME_FORMATION",
     }
   );
-  await userAfterCreate({ user: urserOfR, pending: false, notify: false });
+  await userAfterCreate({ user: urserOfR, pending: false, notify: false, asRole: "organisme.admin" });
   await addContributeurOrganisme(organismeOFF._id, urserOfR.email, "organisme.admin", false);
   logger.info(`User ofr created`);
 
