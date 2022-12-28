@@ -24,11 +24,10 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
  * Va créer un effectif structuré avec les erreurs éventuelles de modèle
  * @param {*} effectifs
  */
-export const hydrateEffectif = async (
-  effectifData,
-  queryKeys = ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"],
-  checkIfExist = false
-) => {
+export const hydrateEffectif = async (effectifData, options) => {
+  const queryKeys = options?.queryKeys ?? ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"];
+  const checkIfExist = options?.checkIfExist ?? false;
+
   let {
     organisme_id,
     annee_scolaire,
@@ -81,14 +80,14 @@ export const hydrateEffectif = async (
 
   const validatedEffectif = validateEffectifObject(effectif);
 
-  let foundEffectifWithUnicityFields = false;
+  let found = null;
   if (checkIfExist) {
     // Recherche de l'effectif via sa clé d'unicité
     const query = queryKeys.reduce((acc, item) => ({ ...acc, [item]: get(effectif, item) }), {});
-    foundEffectifWithUnicityFields = await findEffectifByQuery(query, { _id: 1 });
+    found = await findEffectifByQuery(query);
   }
 
-  return { effectif: validatedEffectif, action: foundEffectifWithUnicityFields ? "ToCreate" : "ToUpdate" };
+  return { effectif: validatedEffectif, found };
 };
 
 /**
@@ -207,13 +206,12 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
 
   // Gestion de l'effectif
   if (effectifData) {
-    const { effectif, action } = await hydrateEffectif(
-      effectifData,
-      ["id_erp_apprenant", "organisme_id", "annee_scolaire"],
-      true
-    );
+    const { effectif, found } = await hydrateEffectif(effectifData, {
+      queryKeys: ["id_erp_apprenant", "organisme_id", "annee_scolaire"],
+      checkIfExist: true,
+    });
 
-    if (action === "ToCreate") {
+    if (!found) {
       effectifCreatedId = await insertEffectif(effectif);
 
       // Lock des champs API si option active
@@ -227,8 +225,8 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
     }
 
     // Gestion des maj d'effectif
-    if (action === "ToUpdate") {
-      effectifUpdatedId = effectif?._id;
+    if (found) {
+      effectifUpdatedId = found._id;
       if (lockEffectif) {
         await updateEffectifAndLock(effectifUpdatedId, effectif);
       } else {

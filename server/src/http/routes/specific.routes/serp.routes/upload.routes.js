@@ -21,7 +21,7 @@ import { hydrateEffectif } from "../../../../common/actions/engine/engine.action
 import { set } from "lodash-es";
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
-import { createEffectif, findEffectifs } from "../../../../common/actions/effectifs.actions.js";
+import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 // import permissionsDossierMiddleware = require("../../middlewares/permissionsDossierMiddleware");
 
 function discard() {
@@ -586,15 +586,19 @@ export default ({ clamav }) => {
             prenom: canNotBeImportEffectif.apprenant.prenom,
           });
         } else {
-          const { effectif: canBeImportEffectif } = await hydrateEffectif({
-            organisme_id,
-            source: document.document_id.toString(),
-            id_erp_apprenant: `${index}`,
-            ...data,
-          });
+          const { effectif: canBeImportEffectif, found } = await hydrateEffectif(
+            {
+              organisme_id,
+              source: document.document_id.toString(),
+              id_erp_apprenant: `${index}`,
+              ...data,
+            },
+            { checkIfExist: true }
+          );
 
           canBeImportEffectifs.push({
-            _id: new ObjectId(), // TODO OR UPDATE
+            _id: found ? found._id : new ObjectId(),
+            toUpdate: !!found,
             ...canBeImportEffectif,
           });
         }
@@ -613,6 +617,7 @@ export default ({ clamav }) => {
 
       for (const {
         _id,
+        toUpdate,
         id_erp_apprenant,
         source,
         annee_scolaire,
@@ -622,6 +627,7 @@ export default ({ clamav }) => {
       } of canBeImportEffectifs) {
         effectifsTable.push({
           id: _id.toString(),
+          toUpdate,
           id_erp_apprenant,
           organisme_id,
           annee_scolaire,
@@ -653,7 +659,11 @@ export default ({ clamav }) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
       for (const effectif of uploads.last_snapshot_effectifs) {
-        await createEffectif(effectif);
+        if (effectif.toUpdate) {
+          await updateEffectif(effectif._id, effectif);
+        } else {
+          await createEffectif(effectif);
+        }
       }
 
       await uploadsDb().findOneAndUpdate(

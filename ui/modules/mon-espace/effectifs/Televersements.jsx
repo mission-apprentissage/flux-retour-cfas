@@ -85,7 +85,6 @@ const Televersements = () => {
       mapping: keyToKeyMapping,
     });
     setPreEffictifs({ canBeImport: canBeImportEffectifs, canNotBeImport: canNotBeImportEffectifs });
-    //onDocumentsChanged(documents, type_document);
   }, [lines, organisme._id]);
 
   const onGoToImportStep = useCallback(async () => {
