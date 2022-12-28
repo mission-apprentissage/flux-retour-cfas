@@ -6,6 +6,7 @@ import { findOrganismeById, getContributeurs, updateOrganisme } from "../../../c
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa } from "../../../common/actions/sifa.actions/sifa.actions.js";
 import { updatePermissionPending } from "../../../common/actions/permissions.actions.js";
+import { compact, get } from "lodash-es";
 
 export default () => {
   const router = express.Router();
@@ -40,20 +41,31 @@ export default () => {
   router.get(
     "/effectifs",
     permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
-    tryCatch(async ({ query: { organisme_id } }, res) => {
+    tryCatch(async ({ query: { organisme_id, sifa } }, res) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
       const effectifs = [];
 
-      for (const {
-        _id,
-        id_erp_apprenant,
-        source,
-        annee_scolaire,
-        validation_errors,
-        apprenant,
-        formation,
-      } of effectifsDb) {
+      let requiredFieldsSifa = [
+        "apprenant.nom",
+        "apprenant.prenom",
+        "apprenant.date_de_naissance",
+        "apprenant.code_postal_de_naissance",
+        "apprenant.sexe",
+        "apprenant.derniere_situation",
+        "apprenant.dernier_organisme_uai",
+        "formation.duree_formation_relle",
+      ];
+
+      const requiredApprenantAdresseFieldsSifa = [
+        "apprenant.adresse.voie",
+        "apprenant.adresse.code_postal",
+        "apprenant.adresse.commune",
+      ];
+
+      for (const effectifDb of effectifsDb) {
+        const { _id, id_erp_apprenant, source, annee_scolaire, validation_errors, apprenant, formation } = effectifDb;
+
         effectifs.push({
           id: _id.toString(),
           id_erp_apprenant,
@@ -65,6 +77,19 @@ export default () => {
           nom: apprenant.nom,
           prenom: apprenant.prenom,
           historique_statut: apprenant.historique_statut,
+          ...(sifa
+            ? {
+                requiredSifa: compact(
+                  [
+                    ...(apprenant.adresse?.complete
+                      ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
+                      : requiredFieldsSifa),
+                  ].map((fieldName) =>
+                    !get(effectifDb, fieldName) || get(effectifDb, fieldName) === "" ? fieldName : undefined
+                  )
+                ),
+              }
+            : {}),
         });
       }
 

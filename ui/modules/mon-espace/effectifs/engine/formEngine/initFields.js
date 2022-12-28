@@ -241,7 +241,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     };
   });
 
-  if (cerfa.validation_errors.length) {
+  if (!modeSifa && cerfa.validation_errors.length) {
     for (const validation_error of cerfa.validation_errors) {
       fields[validation_error.fieldName] = {
         ...fields[validation_error.fieldName],

@@ -222,7 +222,7 @@ const Televersements = () => {
             </Button>
           </>
         )}
-        {step === "pre-import" && (!preEffictifs.canBeImport.length || !preEffictifs.canNotBeImport.length) && (
+        {step === "pre-import" && !preEffictifs.canBeImport.length && !preEffictifs.canNotBeImport.length && (
           <Spinner />
         )}
         {step === "pre-import" && (!!preEffictifs.canBeImport.length || !!preEffictifs.canNotBeImport.length) && (

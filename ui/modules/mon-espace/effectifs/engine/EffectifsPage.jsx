@@ -104,7 +104,7 @@ const EffectifsPage = ({ organismesEffectifs }) => {
         </HStack>
       </Flex>
 
-      <Box mt={10}>
+      <Box mt={10} mb={16}>
         <HStack>
           <Text fontWeight="bold" textDecoration="underline">
             Conseiller en économie sociale familiale

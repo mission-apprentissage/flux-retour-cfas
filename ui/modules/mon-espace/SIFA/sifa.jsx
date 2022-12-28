@@ -26,7 +26,7 @@ function useOrganismesEffectifs() {
 
   const { data, isLoading, isFetching } = useQuery(
     ["organismesEffectifs"],
-    () => _get(`/api/v1/organisme/effectifs?organisme_id=${organisme._id}`),
+    () => _get(`/api/v1/organisme/effectifs?organisme_id=${organisme._id}&sifa=true`),
     {
       refetchOnWindowFocus: false,
     }
@@ -134,7 +134,7 @@ const EnqueteSIFA = () => {
         </HStack>
       </Flex>
 
-      <Box mt={10}>
+      <Box mt={10} mb={16}>
         <HStack>
           <Text fontWeight="bold" textDecoration="underline">
             Conseiller en économie sociale familiale
