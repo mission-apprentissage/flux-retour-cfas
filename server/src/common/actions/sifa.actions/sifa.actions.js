@@ -18,6 +18,7 @@ export const generateSifa = async (organisme_id) => {
     const formationBcn = await findFormationById(effectif.formation.formation_id);
     const formationOrganisme = organisme.formations.filter((f) => f.formation_id === effectif.formation.formation_id);
 
+    // TODO REMOVE ACCENT CARACTERE SPECIAUX
     const requiredFields = {
       NUMERO_UAI: organisme.uai, // REQUIRED
       NOM: effectif.apprenant.nom, // REQUIRED
@@ -49,7 +50,7 @@ export const generateSifa = async (organisme_id) => {
 
     if (!Object.values(requiredFields).some((val) => val === undefined)) {
       const apprenantFields = {
-        INE: effectif.apprenant.ine,
+        INE: effectif.apprenant.ine ?? "ine",
         TEL_JEUNE: effectif.apprenant.telephone,
         MAIL_JEUNE: effectif.apprenant.courriel,
         HANDI: effectif.apprenant.handicap ? "1" : "0",
