@@ -67,7 +67,7 @@ const EnqueteSIFA = () => {
 
   return (
     <>
-      <Heading textStyle="h2" color="grey.800" mt={5}>
+      <Heading textStyle="h2" color="grey.800" mt={5} mb={8}>
         {isMonOrganismePages && `Mon Enquete SIFA2`}
         {isOrganismePages && `Son Enquete SIFA2`}
       </Heading>

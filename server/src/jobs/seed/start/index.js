@@ -23,6 +23,20 @@ export const seed = async ({ adminEmail }) => {
   // Create Organisme B reseau A erp B
   // Create Organisme C reseau B erp A
   // Create Organisme D pas de reseau, pas d'erp, pas de siret
+  // eslint-disable-next-line no-unused-vars
+  const KAGE_ORGANISME_TEST = await createOrganisme({
+    uai: "0333326L",
+    sirets: ["51400512300062"],
+    adresse: {
+      departement: "33",
+      region: "75",
+      academie: "4",
+      complete: "680 Cours de la Libération 33405 TALENCE CEDEX",
+    },
+    nature: "responsable_formateur",
+    nom: "Kedge Business School",
+  });
+
   const organismeOFF = await createOrganisme({
     uai: "0142321X",
     sirets: ["44492238900010"],

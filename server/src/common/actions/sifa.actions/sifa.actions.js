@@ -30,7 +30,7 @@ export const generateSifa = async (organisme_id) => {
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2", // REQUIRED
       ADRESSE: effectif.apprenant.adresse
         ? effectif.apprenant.adresse?.complete ??
-          `${effectif.apprenant.adresse?.numero} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${
+          `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${
             effectif.apprenant.adresse?.voie
           }`
         : null, // REQUIRED
