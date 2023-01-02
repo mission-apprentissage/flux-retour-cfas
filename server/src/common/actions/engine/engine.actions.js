@@ -211,7 +211,7 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
     if (organismeToCreate) {
       organismeCreatedId = await insertOrganisme(organismeToCreate);
       // Ajout organisme id a l'effectifData
-      effectifData.organisme_id = organismeCreatedId;
+      effectifData.organisme_id = organismeCreatedId.toString();
     }
 
     // Organisme existant sans erreur
@@ -219,7 +219,7 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
       // Ajout organisme id a l'effectifData
       // Pas besoin d'update l'organisme
       organismeFoundId = organismeFound?._id;
-      effectifData.organisme_id = organismeFound?._id;
+      effectifData.organisme_id = organismeFound?._id.toString();
     }
   }
 
