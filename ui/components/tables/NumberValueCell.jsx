@@ -1,8 +1,7 @@
 import { Td, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-
-import { formatNumber } from "../../utils/stringUtils";
+import { formatNumber } from "../../common/utils/stringUtils";
 
 const NumberValueCell = ({ value }) => (
   <Td>

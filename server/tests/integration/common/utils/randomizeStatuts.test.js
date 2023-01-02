@@ -7,13 +7,12 @@ import { dossiersApprenantsDb } from "../../../../src/common/model/collections.j
 describe("Randomize Statuts test", () => {
   describe("createRandomDossierApprenant", () => {
     it("Vérifie l'existence d'un DossierApprenant randomisé", async () => {
-      const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
+      const { getDossierApprenantLegacy, createDossierApprenantLegacy } = await dossiersApprenants();
 
       const randomDossierApprenantProps = createRandomDossierApprenant();
-      const result = await createDossierApprenant(randomDossierApprenantProps);
+      const result = await createDossierApprenantLegacy(randomDossierApprenantProps);
 
-      // Checks creation
-      assert.equal(result.ine_apprenant, randomDossierApprenantProps.ine_apprenant);
+      // Checks creation on mandatory fields
       assert.equal(result.nom_apprenant, randomDossierApprenantProps.nom_apprenant.toUpperCase());
       assert.equal(result.prenom_apprenant, randomDossierApprenantProps.prenom_apprenant.toUpperCase());
       assert.equal(
@@ -23,23 +22,16 @@ describe("Randomize Statuts test", () => {
 
       assert.equal(result.email_contact, randomDossierApprenantProps.email_contact);
       assert.equal(result.formation_cfd, randomDossierApprenantProps.formation_cfd);
-      assert.equal(result.libelle_long_formation, randomDossierApprenantProps.libelle_long_formation);
       assert.equal(result.uai_etablissement, randomDossierApprenantProps.uai_etablissement);
       assert.equal(result.siret_etablissement, randomDossierApprenantProps.siret_etablissement);
       assert.equal(result.nom_etablissement, randomDossierApprenantProps.nom_etablissement);
       assert.equal(result.source, randomDossierApprenantProps.source);
       assert.equal(result.annee_formation, randomDossierApprenantProps.annee_formation);
-      assert.deepEqual(result.periode_formation, randomDossierApprenantProps.periode_formation);
       assert.equal(result.annee_scolaire, randomDossierApprenantProps.annee_scolaire);
 
       // Checks exists method
-      const found = await getDossierApprenant({
-        ine_apprenant: result.ine_apprenant,
-        nom_apprenant: result.nom_apprenant,
-        prenom_apprenant: result.prenom_apprenant,
-        date_de_naissance_apprenant: result.date_de_naissance_apprenant,
-        email_contact: result.email_contact,
-        formation_cfd: result.formation_cfd,
+      const found = await getDossierApprenantLegacy({
+        id_erp_apprenant: result.id_erp_apprenant,
         uai_etablissement: result.uai_etablissement,
         annee_scolaire: result.annee_scolaire,
       });
@@ -75,14 +67,9 @@ describe("Randomize Statuts test", () => {
 
       // Checks exists method
       const found = await dossiersApprenantsDb().countDocuments({
-        ine_apprenant: result.ine_apprenant,
-        nom_apprenant: result.nom_apprenant,
-        prenom_apprenant: result.prenom_apprenant,
-        date_de_naissance_apprenant: result.date_de_naissance_apprenant,
-        email_contact: result.email_contact,
-        formation_cfd: result.formation_cfd,
+        id_erp_apprenant: result.id_erp_apprenant,
         uai_etablissement: result.uai_etablissement,
-        historique_statut_apprenant: historySequenceApprentiToAbandon,
+        annee_scolaire: result.annee_scolaire,
       });
       assert.equal(found, 1);
     });

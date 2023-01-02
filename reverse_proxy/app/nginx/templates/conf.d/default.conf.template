@@ -22,8 +22,6 @@ server {
 
     server_name ${SERVER_NAME};
 
-
-
     ssl_certificate ${PROXY_SSL_CERT};
     ssl_certificate_key ${PROXY_SSL_CERT_KEY};
     ssl_session_timeout 1d;
@@ -43,4 +41,24 @@ server {
 
     include includes/location_*.conf;
     include includes/env/location_*.conf;
+
+    # Redirect to maintenance if maintenance.on file present & not maintenance ip
+    if (-f /etc/nginx/html/maintenance.on) {
+        set $maintenance  1;
+    }
+
+    if ($maintenance_allowed_ips != 1) {
+        set $maintenance "${maintenance}1";
+    }
+
+    if ($maintenance = 11) {
+      return 503;
+    }
+
+    error_page 503 @maintenance;
+
+    location @maintenance {
+        rewrite ^(.*)$ /maintenance.html break;
+        root /etc/nginx/html;
+    }
 }

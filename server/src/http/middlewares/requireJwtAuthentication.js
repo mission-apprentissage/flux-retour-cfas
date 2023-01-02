@@ -2,16 +2,16 @@ import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import config from "../../config.js";
 import { tdbRoles } from "../../common/roles.js";
+import { getUserLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
+import { findOrganismeByUai } from "../../common/actions/organismes.actions.js";
 
-export default ({ users, cfas }) => {
+export default () => {
   const findUserOrCfa = async (usernameOrUai) => {
-    const foundUser = await users.getUser(usernameOrUai);
-
+    const foundUser = await getUserLegacy(usernameOrUai);
     if (foundUser) return foundUser;
 
-    const foundCfa = await cfas.getFromUai(usernameOrUai);
-
-    if (foundCfa) return { username: usernameOrUai, permissions: [tdbRoles.cfa] };
+    const foundOrganisme = await findOrganismeByUai(usernameOrUai);
+    if (foundOrganisme) return { username: usernameOrUai, permissions: [tdbRoles.cfa] };
 
     return null;
   };

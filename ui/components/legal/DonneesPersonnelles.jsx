@@ -12,7 +12,7 @@ const DonneesPersonnelles = () => {
   return (
     <Box pt="4w" pb={16}>
       <HStack
-        spacing={["0", "0", "0", "12w"]}
+        spacing={["0", "0", "0", "6w"]}
         flexDirection={["column", "column", "column", "row"]}
         alignItems={["normal", "normal", "normal", "center"]}
       >
