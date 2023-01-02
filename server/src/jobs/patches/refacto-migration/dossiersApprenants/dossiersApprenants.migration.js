@@ -191,9 +191,9 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
           ...mappedToDossierApprenantMigration,
         });
 
-        // On structure un object effectif avec organisme id et le dossierApprenantCreated
+        // On structure un object effectif avec organisme id en string et le dossierApprenantCreated
         const effectifData = {
-          organisme_id: organisme._id,
+          organisme_id: organisme._id.toString(),
           ...(await structureEffectifFromDossierApprenant(dossierApprenantCreated)),
         };
 

@@ -238,7 +238,7 @@ export const structureEffectifFromDossierApprenant = (dossiersApprenant) => {
     ...(ine ? { ine } : {}),
     ...(nom ? { nom } : {}),
     ...(prenom ? { prenom } : {}),
-    ...(date_de_naissance ? { date_de_naissance } : {}),
+    ...(date_de_naissance ? { date_de_naissance: date_de_naissance.toLocaleDateString() } : {}),
     ...(courriel ? { courriel } : {}),
     ...(telephone ? { telephone: transformToInternationalNumber(telephone) } : {}),
     ...(historique_statut ? { historique_statut } : {}),
