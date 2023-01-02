@@ -25,6 +25,7 @@ export const createOrganismeFromCfa = async ({ uai, sirets = [], nom, ...data })
       ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
       ...defaultValuesOrganisme(),
       sirets,
+      ...(sirets.length === 1 ? { siret: sirets[0] } : {}), // Set siret unique if sirets contains 1 element
       ...data,
     })
   );
