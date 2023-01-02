@@ -268,6 +268,15 @@ const Televersements = () => {
             </Button>
           </Box>
         )}
+        {step === "import" && (
+          <>
+            <Spinner />
+            <Text fontSize="1rem">Veuillez pattienter pendant l&rsquo;importation de votre fichier.</Text>
+            <Text fontSize="1rem">
+              Une fois cette opération terminée vous serez redirigé automatiquement sur votre tableau d&rsquo;effectif.
+            </Text>
+          </>
+        )}
       </Flex>
     </>
   );

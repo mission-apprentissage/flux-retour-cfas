@@ -229,7 +229,7 @@ export default ({ clamav }) => {
           value: "CFD",
         },
         annee_scolaire: {
-          label: "Année scolaire en cours",
+          label: "Année scolaire",
           value: "annee_scolaire",
         },
         nom: {
