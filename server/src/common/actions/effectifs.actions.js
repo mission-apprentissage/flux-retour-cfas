@@ -381,7 +381,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
     { _id: effectif._id },
     {
       $set: {
-        ...validateEffectif({ apprenant, formation }),
+        ...validateEffectif({ ...effectif, apprenant, formation }),
         is_lock: newLocker,
         updated_at: new Date(),
       },
