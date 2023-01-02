@@ -3,6 +3,7 @@ import { Box, Button, Flex, Heading, Input, Text, List, ListItem, ListIcon } fro
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import * as Yup from "yup";
+import YupPassword from "yup-password";
 import { decodeJwt } from "jose";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
@@ -10,6 +11,8 @@ import useAuth from "../../hooks/useAuth";
 import useToken from "../../hooks/useToken";
 import { _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+
+YupPassword(Yup); // extend yup
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -47,21 +50,25 @@ const ResetPasswordPage = () => {
     },
   };
 
-  const { values, handleSubmit, handleChange } = useFormik({
+  const { values, handleSubmit, handleChange, errors } = useFormik({
     initialValues: {
       newPassword: "",
     },
     validationSchema: Yup.object().shape({
       newPassword: Yup.string()
         .required("Veuillez saisir un mot de passe")
-        .matches(
-          `^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){${minLength},}$`,
-          `Le mot de passe doit contenir au moins ${minLength} caractères, une lettre en minuscule, une lettre en majuscule, un chiffre et un caractère spécial (les espaces ne sont pas acceptés)`
-        ),
+        .min(minLength, `Le mot de passe doit contenir au moins ${minLength} caractères`)
+        .minLowercase(1, "Le mot de passe doit contenir au moins une lettre minuscule")
+        .minUppercase(1, "Le mot de passe doit contenir au moins une lettre majuscule")
+        .minNumbers(1, "Le mot de passe doit contenir au moins un nombre")
+        .minSymbols(1, "Le mot de passe doit contenir au moins un caractère spécial"),
     }),
-    onSubmit: async (values) => {
+    onSubmit: async ({ newPassword }) => {
       try {
-        const result = await _post("/api/v1/password/reset-password", { ...values, passwordToken });
+        const result = await _post("/api/v1/password/reset-password", {
+          newPassword: newPassword.trim(),
+          passwordToken,
+        });
         if (result.loggedIn) {
           const user = decodeJwt(result.token);
           setAuth(user);
@@ -84,9 +91,11 @@ const ResetPasswordPage = () => {
     },
   });
 
+  console.log(errors);
+
   const onChange = async (e) => {
     handleChange(e);
-    const val = e.target.value;
+    const val = e.target.value.trim();
     const min = Yup.string().min(minLength, `Le mot de passe doit contenir au moins ${minLength} caractères`);
     const lowerCase = Yup.string().matches(/[a-z]/, "Le mot de passe doit contenir au moins une lettre minuscule");
     const upperCase = Yup.string().matches(/[A-Z]/, "Le mot de passe doit contenir au moins une lettre majuscule");
@@ -115,7 +124,7 @@ const ResetPasswordPage = () => {
             type="password"
             placeholder={isFirstSetPassword ? "Votre mot de passe..." : "Votre nouveau mot de passe..."}
             onChange={onChange}
-            value={values.newPassword}
+            value={values.newPassword.trim()}
             mb={3}
           />
           <List mb={5}>

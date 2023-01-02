@@ -55,7 +55,8 @@
     "react-router-hash-link": "2.4.3",
     "recoil": "0.7.6",
     "remixicon": "2.5.0",
-    "yup": "0.32.11"
+    "yup": "0.32.11",
+    "yup-password": "0.2.2"
   },
   "devDependencies": {
     "@testing-library/dom": "8.11.1",

@@ -51,11 +51,9 @@ const Login = (props) => {
         }
       }
     } catch (e) {
-      console.log(e.messages);
-      if (e.messages.message === "Old connection method") {
+      if (e.messages?.message === "Old connection method") {
         setStatus({ error: "Pour des raisons de sécurité, merci de vous créer un compte nominatif" });
       } else {
-        console.error(e);
         setStatus({ error: e.prettyMessage });
       }
     }

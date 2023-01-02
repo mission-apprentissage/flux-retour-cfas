@@ -72,6 +72,7 @@ export default ({ mailer }) => {
         passwordToken: Joi.string().required(),
         newPassword: passwordSchema(user.is_admin).required(),
       }).validateAsync(req.body, { abortEarly: false });
+      // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
 
       const updatedUser = await changePassword(user.email, newPassword);
 

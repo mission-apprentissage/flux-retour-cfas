@@ -1,9 +1,15 @@
 import Joi from "joi";
+import { joiPasswordExtendCore } from "joi-password";
+const joiPassword = Joi.extend(joiPasswordExtendCore);
 
 export function passwordSchema(isAdmin = false) {
-  return isAdmin
-    ? Joi.string().regex(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){20,}$/)
-    : Joi.string().regex(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){12,}$/);
+  return joiPassword
+    .string()
+    .min(isAdmin ? 20 : 12)
+    .minOfSpecialCharacters(1)
+    .minOfLowercase(1)
+    .minOfUppercase(1)
+    .minOfNumeric(1);
 }
 
 export function cfdSchema() {

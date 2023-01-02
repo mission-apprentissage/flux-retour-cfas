@@ -156,7 +156,7 @@ export default () => {
       const uploads = await getUploadEntryByOrgaId(organisme_id);
 
       const effectif = uploads.last_snapshot_effectifs.find(({ _id }) => _id.toString() === id);
-      console.log(effectif);
+
       if (!effectif) {
         throw new Error(`Unable to find effectif ${params.id}`);
       }
