@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Box, Button, Flex, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 import { Alert, ArrowDropRightLine, InfoLine } from "../../../theme/components/icons";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
@@ -14,7 +14,7 @@ import { useRouter } from "next/router";
 
 const Televersements = () => {
   useFetchUploads();
-  const { documents } = useDocuments();
+  const { documents, uploads, onDocumentsChanged } = useDocuments();
   const [step, setStep] = useState("upload");
   const organisme = useRecoilValue(organismeAtom);
   const [mapping, setMapping] = useState(null);
@@ -28,6 +28,24 @@ const Televersements = () => {
   const [requireKeysSettled, setRequireKeysSettled] = useState([]);
 
   const [preEffictifs, setPreEffictifs] = useState({ canBeImport: [], canNotBeImport: [] });
+  const [typeDocument, setTypeDocument] = useState("");
+
+  const onDefineFileType = useCallback(
+    async (type_document) => {
+      if (type_document.length > 4) {
+        const { nom_fichier, taille_fichier } = documents.unconfirmed[0];
+        const response = await _post(`/api/v1/upload/setDocumentType`, {
+          organisme_id: organisme._id,
+          type_document,
+          nom_fichier,
+          taille_fichier,
+        });
+        onDocumentsChanged(response.documents, response.typesAndMapping);
+      }
+      setTypeDocument(type_document);
+    },
+    [documents?.unconfirmed, onDocumentsChanged, organisme._id]
+  );
 
   const onLineChange = useCallback(
     ({ line, part }, { value, hasError, required = false }) => {
@@ -72,10 +90,12 @@ const Televersements = () => {
       }))
     );
     setAvailableKeys({ in: Object.values(response.inputKeys), out: Object.values(response.outputKeys) });
+    console.log(response, uploads.typesAndMapping[0].mapping_column);
     setMapping(response);
-  }, [organisme._id]);
+  }, [organisme._id, uploads?.typesAndMapping]);
 
   const onGoToPreImportStep = useCallback(async () => {
+    setPreEffictifs({ canBeImport: [], canNotBeImport: [] });
     setStep("pre-import");
     const keyToKeyMapping = lines.reduce((acc, line) => {
       return { ...acc, [line.in.value]: line.out.value };
@@ -102,14 +122,55 @@ const Televersements = () => {
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         {step === "upload" && (
           <>
-            <UploadFiles title={`Téléverser vos fichiers`} />
+            <UploadFiles title={`1. Téléverser votre fichier`} />
 
-            <Button
-              onClick={onGoToMappingStep}
-              size={"md"}
-              variant="primary"
-              disabled={!documents?.unconfirmed?.length}
-            >
+            <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
+              2. Quel est le modèle de ce fichier ?
+            </Heading>
+            <HStack justifyContent="center" spacing="4w" border="1px solid" borderColor="bluefrance" mb={8} py={4}>
+              <VStack w="33%" h="full" alignItems="baseline">
+                <Heading as="h4" fontSize="1rem">
+                  Modèle pré-défini:
+                </Heading>
+                <Text>Que vous avez déjà défini ultérieurement</Text>
+                <Input
+                  {...{
+                    name: `type_document`,
+                    fieldType: "select",
+                    placeholder: "Séléctionner un modèle de fichier",
+                    locked: !documents?.unconfirmed?.length || !uploads?.typesAndMapping?.length,
+
+                    options: uploads?.typesAndMapping?.length
+                      ? uploads?.typesAndMapping?.map(({ type_document }) => ({
+                          label: type_document,
+                          value: type_document,
+                        }))
+                      : [{ label: "", value: "" }],
+                  }}
+                  value={typeDocument}
+                  onSubmit={(value) => onDefineFileType(value)}
+                />
+              </VStack>
+
+              <Box>Ou</Box>
+              <VStack w="33%" alignItems="baseline">
+                <Heading as="h4" flexGrow="1" fontSize="1rem">
+                  Nouveau modèle de fichier :
+                </Heading>
+                <Text>vous pouvez choisir le nom que vous souhaitez</Text>
+                <Input
+                  {...{
+                    name: `type_document`,
+                    fieldType: "text",
+                    placeholder: "type de fichier service insciption",
+                    locked: !documents?.unconfirmed?.length,
+                  }}
+                  onSubmit={(value) => onDefineFileType(value)}
+                  value={typeDocument}
+                />
+              </VStack>
+            </HStack>
+            <Button onClick={onGoToMappingStep} size={"md"} variant="primary" disabled={typeDocument === ""}>
               Étape suivante
               <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
             </Button>
@@ -210,6 +271,10 @@ const Televersements = () => {
                 })}
             </Box>
 
+            <Button onClick={() => setStep("upload")} size={"md"} variant="secondary">
+              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} mr="0.5rem" transform="rotate(180deg)" />
+              Étape Précedente
+            </Button>
             <Button
               onClick={() => onGoToPreImportStep()}
               size={"md"}
@@ -262,8 +327,18 @@ const Televersements = () => {
                 />
               </Box>
             )}
+            <Button
+              onClick={() => {
+                setStep("mapping");
+              }}
+              size={"md"}
+              variant="secondary"
+            >
+              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} mr="0.5rem" transform="rotate(180deg)" />
+              Étape Précedente
+            </Button>
             <Button onClick={() => onGoToImportStep()} size={"md"} variant="primary">
-              Étape suivante
+              Importer les données
               <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
             </Button>
           </Box>
@@ -271,7 +346,7 @@ const Televersements = () => {
         {step === "import" && (
           <>
             <Spinner />
-            <Text fontSize="1rem">Veuillez pattienter pendant l&rsquo;importation de votre fichier.</Text>
+            <Text fontSize="1rem">Veuillez patienter pendant l&rsquo;importation de votre fichier.</Text>
             <Text fontSize="1rem">
               Une fois cette opération terminée vous serez redirigé automatiquement sur votre tableau d&rsquo;effectif.
             </Text>

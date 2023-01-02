@@ -18,11 +18,11 @@ export const createUpload = async ({ organisme_id }) => {
   return effectifCreated;
 };
 
-export const getUploadEntryByOrgaId = async (organismeId) => {
+export const getUploadEntryByOrgaId = async (organismeId, projection = {}) => {
   const organisme_id = typeof organismeId === "string" ? ObjectId(organismeId) : organismeId;
   if (!ObjectId.isValid(organisme_id)) throw new Error("Invalid organismeId passed");
 
-  const uploadEntry = await uploadsDb().findOne({ organisme_id });
+  const uploadEntry = await uploadsDb().findOne({ organisme_id }, { projection });
   if (!uploadEntry) {
     throw new Error(`Unable to find uploadEntry ${organisme_id.toString()}`);
   }
@@ -46,7 +46,7 @@ export const getDocument = async (organismeId, nom_fichier, chemin_fichier) => {
 
 export const addDocument = async (
   organisme_id,
-  { type_document, nom_fichier, chemin_fichier, taille_fichier, ext_fichier, hash_fichier, userEmail }
+  { nom_fichier, chemin_fichier, taille_fichier, ext_fichier, hash_fichier, userEmail }
 ) => {
   let found = null;
   try {
@@ -59,7 +59,6 @@ export const addDocument = async (
 
   const newDocument = {
     document_id: new ObjectId(),
-    type_document,
     ext_fichier,
     nom_fichier,
     chemin_fichier,
@@ -73,7 +72,6 @@ export const addDocument = async (
 
   let newDocuments = [...found.documents];
   const foundIndexDocument = findIndex(newDocuments, {
-    type_document: newDocument.type_document,
     nom_fichier: newDocument.nom_fichier,
     taille_fichier: newDocument.taille_fichier,
   });
@@ -99,12 +97,43 @@ export const addDocument = async (
 //   getDocument
 // };
 
-export const removeDocument = async (organismeId, { type_document, nom_fichier, chemin_fichier, taille_fichier }) => {
+// TODO DIRTY update, to clean
+export const updateDocument = async (organisme_id, { nom_fichier, taille_fichier, ...data }) => {
+  let found = null;
+  try {
+    found = await getUploadEntryByOrgaId(organisme_id);
+  } catch (error) {
+    if (error.message.includes("Unable to find uploadEntry")) {
+      found = await createUpload({ organisme_id });
+    }
+  }
+
+  const foundIndexDocument = findIndex(found.documents, {
+    nom_fichier: nom_fichier,
+    taille_fichier: taille_fichier,
+  });
+
+  found.documents[foundIndexDocument] = {
+    ...found.documents[foundIndexDocument],
+    ...data,
+  };
+
+  const updated = await uploadsDb().findOneAndUpdate(
+    { _id: found._id },
+    {
+      $set: { ...found, updated_at: new Date() },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
+};
+
+export const removeDocument = async (organismeId, { nom_fichier, chemin_fichier, taille_fichier }) => {
   const found = await getUploadEntryByOrgaId(organismeId);
 
   let newDocuments = [...found.documents];
   const foundIndexDocument = findIndex(newDocuments, {
-    type_document,
     nom_fichier,
     chemin_fichier,
     taille_fichier,
@@ -127,4 +156,21 @@ export const removeDocument = async (organismeId, { type_document, nom_fichier, 
   );
 
   return updated.value;
+};
+
+export const getAllUniqueDocumentsTypesAndMappings = (documents) => {
+  let documentTypes = [];
+  return documents.reduce((acc, { type_document, mapping_column }) => {
+    if (type_document && !documentTypes.includes(type_document)) {
+      documentTypes.push(type_document);
+      return [
+        ...acc,
+        {
+          type_document,
+          mapping_column,
+        },
+      ];
+    }
+    return acc;
+  }, []);
 };

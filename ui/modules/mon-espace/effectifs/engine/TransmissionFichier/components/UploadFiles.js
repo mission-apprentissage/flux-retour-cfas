@@ -48,8 +48,6 @@ const UploadFiles = ({ title }) => {
   const [uploadError, setUploadError] = useState(null);
   const { documents, onDocumentsChanged } = useDocuments();
 
-  const type_document = "Foo";
-
   const maxFiles = 1;
 
   const onDrop = useCallback(
@@ -60,11 +58,11 @@ const UploadFiles = ({ title }) => {
       try {
         const data = new FormData();
         data.append("file", acceptedFiles[0]);
-        const { documents } = await _postFile(
-          `${endpoint}/v1/upload?organisme_id=${organisme._id}&type_document=${type_document}`,
+        const { documents, typesAndMapping } = await _postFile(
+          `${endpoint}/v1/upload?organisme_id=${organisme._id}`,
           data
         );
-        onDocumentsChanged(documents, type_document);
+        onDocumentsChanged(documents, typesAndMapping);
         toast({
           title: "Le fichier a bien été déposé",
           status: "success",
@@ -82,7 +80,7 @@ const UploadFiles = ({ title }) => {
         setIsSubmitting(false);
       }
     },
-    [organisme?._id, onDocumentsChanged, toast, type_document]
+    [organisme?._id, onDocumentsChanged, toast]
   );
 
   const onDropRejected = useCallback(
@@ -107,7 +105,7 @@ const UploadFiles = ({ title }) => {
           const { documents } = await _delete(
             `${endpoint}/v1/upload?organisme_id=${organisme._id}&${queryString.stringify(data)}`
           );
-          onDocumentsChanged(documents, type_document);
+          onDocumentsChanged(documents);
         } catch (e) {
           console.error(e);
         }

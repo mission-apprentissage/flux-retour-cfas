@@ -41,7 +41,6 @@ export const documentSchema = object(
   {
     required: [
       "document_id",
-      "type_document",
       "ext_fichier",
       "nom_fichier",
       "chemin_fichier",

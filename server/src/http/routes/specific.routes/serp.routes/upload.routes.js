@@ -12,9 +12,11 @@ import * as crypto from "../../../../common/utils/cryptoUtils.js";
 import {
   addDocument,
   createUpload,
+  getAllUniqueDocumentsTypesAndMappings,
   getDocument,
   getUploadEntryByOrgaId,
   removeDocument,
+  updateDocument,
 } from "../../../../common/actions/uploads.actions.js";
 import { getJsonFromXlsxData } from "../../../../common/utils/xlsxUtils.js";
 import { hydrateEffectif } from "../../../../common/actions/engine/engine.actions.js";
@@ -51,7 +53,7 @@ export default ({ clamav }) => {
         });
       }
       const { documents } = await getUploadEntryByOrgaId(organisme_id);
-      return res.json({ documents });
+      return res.json({ documents, typesAndMapping: getAllUniqueDocumentsTypesAndMappings(documents) });
     });
 
     form.on("error", () => {
@@ -98,10 +100,9 @@ export default ({ clamav }) => {
         .validateAsync(req.query, { abortEarly: false });
 
       handleMultipartForm(req, res, organisme_id, async (part) => {
-        let { test, organisme_id, type_document } = await Joi.object({
+        let { test, organisme_id } = await Joi.object({
           test: Joi.boolean(),
           organisme_id: Joi.string().required(),
-          type_document: Joi.string().required(),
         }).validateAsync(req.query, { abortEarly: false });
 
         let path = `uploads/${organisme_id}/${part.filename}`;
@@ -133,7 +134,6 @@ export default ({ clamav }) => {
 
         await addDocument(organisme_id, {
           ext_fichier: part.filename.split(".").pop(),
-          type_document,
           hash_fichier,
           nom_fichier: part.filename,
           chemin_fichier: path,
@@ -155,13 +155,36 @@ export default ({ clamav }) => {
         .validateAsync(req.query, { abortEarly: false });
       let result = null;
       try {
-        result = await getUploadEntryByOrgaId(organisme_id);
+        result = await getUploadEntryByOrgaId(organisme_id, { last_snapshot_effectifs: 0 });
       } catch (error) {
         if (error.message.includes("Unable to find uploadEntry")) {
           result = await createUpload({ organisme_id });
         }
       }
-      return res.json(result);
+      return res.json({ ...result, typesAndMapping: getAllUniqueDocumentsTypesAndMappings(result.documents) });
+    })
+  );
+
+  router.post(
+    "/setDocumentType",
+    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    tryCatch(async (req, res) => {
+      let { organisme_id, type_document, nom_fichier, taille_fichier } = await Joi.object({
+        organisme_id: Joi.string().required(),
+        type_document: Joi.string().required(),
+        nom_fichier: Joi.string().required(),
+        taille_fichier: Joi.number().required(),
+      })
+        .unknown()
+        .validateAsync(req.body, { abortEarly: false });
+
+      const upload = await updateDocument(organisme_id, {
+        nom_fichier,
+        taille_fichier,
+        type_document,
+      });
+
+      return res.json({ ...upload, typesAndMapping: getAllUniqueDocumentsTypesAndMappings(upload.documents) });
     })
   );
 
@@ -552,6 +575,12 @@ export default ({ clamav }) => {
 
       const { rawFileJson, unconfirmedDocument: document } = await getUnconfirmedDocumentContent(organisme_id);
 
+      await updateDocument(organisme_id, {
+        nom_fichier: document.nom_fichier,
+        taille_fichier: document.taille_fichier,
+        mapping_column: mapping,
+      });
+
       const applyMapping = (arr, mapping) =>
         arr.map((obj) =>
           Object.entries(obj).reduce((acc, [key, value]) => {
@@ -712,18 +741,16 @@ export default ({ clamav }) => {
     "/",
     // permissionsDossierMiddleware(components, ["dossier/page_documents/supprimer_un_document"]),
     tryCatch(async (req, res) => {
-      let { organisme_id, type_document, nom_fichier, chemin_fichier, taille_fichier } = await Joi.object({
+      let { organisme_id, nom_fichier, chemin_fichier, taille_fichier } = await Joi.object({
         organisme_id: Joi.string().required(),
         taille_fichier: Joi.number().required(),
         chemin_fichier: Joi.string().required(),
         nom_fichier: Joi.string().required(),
-        type_document: Joi.string(),
       })
         .unknown()
         .validateAsync(req.query, { abortEarly: false });
 
       const { documents } = await removeDocument(organisme_id, {
-        type_document,
         nom_fichier,
         chemin_fichier,
         taille_fichier,
