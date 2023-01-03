@@ -4,7 +4,11 @@ import { runScript } from "../scriptWrapper.js";
 import { __dirname } from "../../common/utils/esmUtils.js";
 import { asyncForEach } from "../../common/utils/asyncUtils.js";
 import { readJsonFromCsvFile } from "../../common/utils/fileUtils.js";
-
+import {
+  findOrganismeByUaiAndSiret,
+  findOrganismesBySiret,
+  updateOrganisme,
+} from "../../common/actions/organismes.actions.js";
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",
   UAI: "UAIvalidée",
@@ -15,7 +19,11 @@ const RESEAUX_LIST_SEPARATOR = "|";
 
 const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
 
-const INPUT_FILES = ["referentiel-reseau-excellence-pro.csv", "referentiel-reseau-greta-pdl.csv"];
+const INPUT_FILES = [
+  "referentiel-reseau-excellence-pro.csv",
+  "referentiel-reseau-greta-pdl.csv",
+  "referentiel-reseau-aftral.csv",
+];
 
 /**
  * @param  {string} reseauText
@@ -52,7 +60,7 @@ const mapFileOrganisme = (organismeFromFile) => {
   };
 };
 
-runScript(async ({ db, cfas }) => {
+runScript(async () => {
   await asyncForEach(INPUT_FILES, async (filename) => {
     logger.info("Importing data from", filename);
     // read référentiel file from réseau and convert it to JSON
@@ -69,19 +77,28 @@ runScript(async ({ db, cfas }) => {
     // iterate over every line (organisme de formation) in the réseau file
     await asyncForEach(reseauFile, async (reseauFileLine) => {
       const organismeParsedFromFile = mapFileOrganisme(reseauFileLine);
-
       /*
         1 - Add réseau information to organisme in TDB, if found unique
       */
       // try to retrieve organisme in our database with UAI and SIRET if UAI is provided
       const organismeInTdb = organismeParsedFromFile.uai
-        ? await cfas.getFromUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)
-        : await cfas.getFromSiret(organismeParsedFromFile.siret);
+        ? [await findOrganismeByUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)].filter(
+            (o) => o
+          )
+        : await findOrganismesBySiret(organismeParsedFromFile.siret);
 
-      const found = organismeInTdb.length !== 0;
-      const foundUnique = found && organismeInTdb.length === 1;
+      const found = organismeInTdb?.length > 0;
+      const foundUnique = found && organismeInTdb?.length === 1;
 
       if (found) foundCount++;
+
+      logger.debug(
+        "Organisme with UAI",
+        organismeParsedFromFile.uai,
+        "and Siret",
+        organismeParsedFromFile.siret,
+        found ? "found" : "not found"
+      );
 
       // if only one result, we compare reseaux between organisme in réseau file and the one we found in our database
       // and update our organisme with the updated list of reseaux
@@ -102,7 +119,11 @@ runScript(async ({ db, cfas }) => {
             reseauxFromFile.join(", ")
           );
           try {
-            await cfas.updateCfaReseauxFromUai(uniqueOrganismeFromTdb.uai, reseauxFromFile);
+            await updateOrganisme(uniqueOrganismeFromTdb._id, {
+              // we merge reseaux from db and file, in case an organism has several "reseaux"
+              reseaux: [...new Set(...reseauxFromFile, ...organismeInTdb)],
+              updated_at: new Date(),
+            });
             organismeUpdatedCount++;
           } catch (err) {
             organismeUpdateErrorCount++;
@@ -114,17 +135,18 @@ runScript(async ({ db, cfas }) => {
       /*
         2 - Add réseau information to organisme in Référentiel SIRET-UAI, if found
       */
-      const organismeInReferentielSiretUai = await db
-        .collection("referentielSiret")
-        .findOne({ siret: organismeParsedFromFile.siret });
-      if (organismeInReferentielSiretUai && organismeParsedFromFile?.reseaux.length !== 0) {
-        await db
-          .collection("referentielSiret")
-          .updateOne(
-            { siret: organismeInReferentielSiretUai.siret },
-            { $set: { reseaux: organismeParsedFromFile.reseaux } }
-          );
-      }
+      // TODO update it with the new referentielSiret collection
+      //   const organismeInReferentielSiretUai = await db
+      //     .collection("referentielSiret")
+      //     .findOne({ siret: organismeParsedFromFile.siret });
+      //   if (organismeInReferentielSiretUai && organismeParsedFromFile?.reseaux.length !== 0) {
+      //     await db
+      //       .collection("referentielSiret")
+      //       .updateOne(
+      //         { siret: organismeInReferentielSiretUai.siret },
+      //         { $set: { reseaux: organismeParsedFromFile.reseaux } }
+      //       );
+      //   }
     });
     logger.info("Organismes du fichier", filename, "trouvés en base TDB", foundCount, "/", reseauFile.length);
     logger.info(
