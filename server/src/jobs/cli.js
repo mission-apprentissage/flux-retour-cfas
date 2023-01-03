@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
-import { seed, seedAdmin, seedRoles } from "./seed/start/index.js";
+import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
 import { clear } from "./clear/clear-all.js";
 import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
@@ -22,12 +22,11 @@ import { warmEffectifsCache } from "./warm-effectifs-cache/index.js";
  * Job d'initialisation projet
  */
 cli
-  .command("seed")
+  .command("seed:sample")
   .description("Seed projet")
-  .option("-e, --email <string>", "Email de l'utilisateur Admin")
-  .action(async ({ email }) => {
+  .action(async () => {
     runScript(async () => {
-      return seed({ adminEmail: email?.toLowerCase() });
+      return seedSample();
     }, "Seed");
   });
 
