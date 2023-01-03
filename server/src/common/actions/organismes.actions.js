@@ -76,7 +76,11 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
   // TODO [metier] really used ?
   let metiers = [];
   if (Array.isArray(sirets) && sirets.length !== 0) {
-    metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
+    try {
+      metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // TODO Call Api Entreprise to get address
@@ -221,7 +225,11 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
   // TODO [metier] really used ?
   let metiers = [];
   if (sirets && Array.isArray(sirets) && !sirets.every((newSiret) => organisme.sirets.includes(newSiret))) {
-    metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
+    try {
+      metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   const updated = await organismesDb().findOneAndUpdate(

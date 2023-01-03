@@ -50,7 +50,7 @@ const ResetPasswordPage = () => {
     },
   };
 
-  const { values, handleSubmit, handleChange, errors } = useFormik({
+  const { values, handleSubmit, handleChange } = useFormik({
     initialValues: {
       newPassword: "",
     },
@@ -90,8 +90,6 @@ const ResetPasswordPage = () => {
       }
     },
   });
-
-  console.log(errors);
 
   const onChange = async (e) => {
     handleChange(e);
