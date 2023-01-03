@@ -212,6 +212,7 @@ export default ({ clamav }) => {
     return { headers, rawFileJson, unconfirmedDocument: unconfirmed[0] };
   };
 
+  // TODO check if the current header's file matches the previously saved mapping else gracefull error
   router.get(
     "/analyse",
     // permissionsDossierMiddleware(components, ["dossier/page_documents"]),

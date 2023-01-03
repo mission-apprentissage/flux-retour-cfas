@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { Box, Button, Flex, Heading, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
-import { Alert, ArrowDropRightLine, InfoLine } from "../../../theme/components/icons";
+import { Alert, ArrowDropRightLine, Bin, InfoLine } from "../../../theme/components/icons";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
 import { _get, _post } from "../../../common/httpClient";
@@ -80,19 +80,59 @@ const Televersements = () => {
     [availableKeys.in, availableKeys.out, lines, requireKeysSettled]
   );
 
+  const removeLine = useCallback(
+    ({ lineNum }) => {
+      const currentLine = lines[lineNum];
+      let newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
+      const currentInKeyLocked = newAvailableKeys.in.find((nAK) => nAK.value === currentLine.in.value);
+      const currentOutKeyLocked = newAvailableKeys.out.find((nAK) => nAK.value === currentLine.out.value);
+      if (currentInKeyLocked) currentInKeyLocked.locked = false;
+      if (currentOutKeyLocked) currentOutKeyLocked.locked = false;
+
+      let newLines = [...lines];
+      if (lineNum > -1) {
+        newLines.splice(lineNum, 1);
+      }
+
+      setLines(newLines);
+      setAvailableKeys(newAvailableKeys);
+    },
+    [availableKeys.in, availableKeys.out, lines]
+  );
+
   const onGoToMappingStep = useCallback(async () => {
     setStep("mapping");
     const response = await _get(`/api/v1/upload/analyse?organisme_id=${organisme._id}`);
-    setLines(
-      Object.values(response.requireKeys).map((requireKey) => ({
+
+    let currentAvailableKeys = { in: Object.values(response.inputKeys), out: Object.values(response.outputKeys) };
+
+    const [mappingForThisType] = uploads.typesAndMapping.filter(({ type_document }) => type_document === typeDocument);
+    let initLines = [];
+    if (mappingForThisType) {
+      initLines = Object.entries(mappingForThisType.mapping_column).map(([key, value]) => ({
+        in: { value: key, hasError: false },
+        out: { value: value, hasError: false },
+      }));
+      const reqKeys = Object.values(mappingForThisType.mapping_column).splice(
+        0,
+        Object.keys(response.requireKeys).length
+      );
+      setRequireKeysSettled(reqKeys);
+      for (const value of reqKeys) {
+        const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
+        keyToLock.locked = true;
+      }
+    } else {
+      initLines = Object.values(response.requireKeys).map((requireKey) => ({
         in: { value: "", hasError: false },
         out: { value: requireKey.value, hasError: false },
-      }))
-    );
-    setAvailableKeys({ in: Object.values(response.inputKeys), out: Object.values(response.outputKeys) });
-    console.log(response, uploads.typesAndMapping[0].mapping_column);
+      }));
+    }
+    setAvailableKeys(currentAvailableKeys);
+    setLines(initLines);
+
     setMapping(response);
-  }, [organisme._id, uploads?.typesAndMapping]);
+  }, [organisme._id, typeDocument, uploads?.typesAndMapping]);
 
   const onGoToPreImportStep = useCallback(async () => {
     setPreEffictifs({ canBeImport: [], canNotBeImport: [] });
@@ -109,10 +149,9 @@ const Televersements = () => {
 
   const onGoToImportStep = useCallback(async () => {
     setStep("import");
-    const response = await _post(`/api/v1/upload/import`, {
+    await _post(`/api/v1/upload/import`, {
       organisme_id: organisme._id,
     });
-    console.log(response);
     router.push(`${router.asPath.replace("/televersement", "")}`);
     //onDocumentsChanged(documents, type_document);
   }, [organisme._id, router]);
@@ -162,10 +201,21 @@ const Televersements = () => {
                   {...{
                     name: `type_document`,
                     fieldType: "text",
+                    minLength: 4,
+                    mask: "C",
+                    maskBlocks: [
+                      {
+                        name: "C",
+                        mask: "Pattern",
+                        pattern: "^.*$",
+                      },
+                    ],
                     placeholder: "type de fichier service insciption",
+                    validateMessage: "le modèle de fichier doit contenir au moins 4 caractéres",
                     locked: !documents?.unconfirmed?.length,
                   }}
                   onSubmit={(value) => onDefineFileType(value)}
+                  onError={(value) => onDefineFileType(value)}
                   value={typeDocument}
                 />
               </VStack>
@@ -207,6 +257,7 @@ const Televersements = () => {
                         value={requireKey.label}
                         w="33%"
                       />
+                      <Box w="35px">&nbsp;</Box>
                     </HStack>
                   );
                 })}
@@ -237,38 +288,53 @@ const Televersements = () => {
                   + Ajouter une donnée
                 </Button>
               )}
-              {Array(lines.length - Object.keys(mapping.requireKeys).length)
-                .fill(null)
-                .map((f, i) => {
-                  const lineNum = i + Object.keys(mapping.requireKeys).length;
-                  return (
-                    <HStack justifyContent="center" spacing="4w" key={lineNum}>
-                      <Input
-                        {...{
-                          name: `line${lineNum}_in`,
-                          fieldType: "select",
-                          placeholder: "Séléctionner une de vos en-têtes",
-                          options: availableKeys.in,
-                        }}
-                        value={lines[lineNum].in.value}
-                        onSubmit={(value) => onLineChange({ line: lineNum, part: "in" }, { value, hasError: false })}
-                        w="33%"
-                      />
-                      <ArrowRightLong boxSize={10} color="bluefrance" />
-                      <Input
-                        {...{
-                          name: `line${lineNum}_out`,
-                          fieldType: "select",
-                          placeholder: "Séléctionner une de vos en-têtes",
-                          options: availableKeys.out,
-                        }}
-                        value={lines[lineNum].out.value}
-                        onSubmit={(value) => onLineChange({ line: lineNum, part: "out" }, { value, hasError: false })}
-                        w="33%"
-                      />
-                    </HStack>
-                  );
-                })}
+              <Box my={8}>
+                {Array(lines.length - Object.keys(mapping.requireKeys).length)
+                  .fill(null)
+                  .map((f, i) => {
+                    const lineNum = i + Object.keys(mapping.requireKeys).length;
+                    return (
+                      <HStack justifyContent="center" spacing="4w" key={lineNum}>
+                        <Input
+                          {...{
+                            name: `line${lineNum}_in`,
+                            fieldType: "select",
+                            placeholder: "Séléctionner une de vos en-têtes",
+                            options: availableKeys.in,
+                          }}
+                          value={lines[lineNum].in.value}
+                          onSubmit={(value) => onLineChange({ line: lineNum, part: "in" }, { value, hasError: false })}
+                          w="33%"
+                          mb={0}
+                        />
+                        <ArrowRightLong boxSize={10} color="bluefrance" />
+                        <Input
+                          {...{
+                            name: `line${lineNum}_out`,
+                            fieldType: "select",
+                            placeholder: "Séléctionner une de vos en-têtes",
+                            options: availableKeys.out,
+                          }}
+                          value={lines[lineNum].out.value}
+                          onSubmit={(value) => onLineChange({ line: lineNum, part: "out" }, { value, hasError: false })}
+                          w="33%"
+                          mb={0}
+                        />
+                        <Box
+                          border="1px solid"
+                          w="35px"
+                          p={1}
+                          mt="8px !important"
+                          _hover={{ cursor: "pointer" }}
+                          borderColor="bluefrance"
+                          onClick={() => removeLine({ lineNum })}
+                        >
+                          <Bin color="bluefrance" />
+                        </Box>
+                      </HStack>
+                    );
+                  })}
+              </Box>
             </Box>
 
             <Button onClick={() => setStep("upload")} size={"md"} variant="secondary">
