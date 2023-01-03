@@ -2,9 +2,9 @@ import { object, string, objectId, date, boolean } from "../json-schema/jsonSche
 
 export const collectionName = "notifications";
 
-export function indexes() {
-  return [[{ jwt: 1 }, { unique: true }]];
-}
+// export function indexes() {
+//   return [[{ jwt: 1 }, { unique: true }]];
+// }
 
 export const schema = object(
   {

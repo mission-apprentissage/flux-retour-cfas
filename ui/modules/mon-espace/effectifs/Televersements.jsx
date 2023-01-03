@@ -68,14 +68,17 @@ const Televersements = () => {
         }
       }
 
-      let newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
-      if (prevValue) {
-        const prevKeyLocked = newAvailableKeys[part].find((nAK) => nAK.value === prevValue);
-        prevKeyLocked.locked = false;
+      if (line !== 0) {
+        // line 0 is anne scolaire
+        let newAvailableKeys = { in: [...availableKeys.in], out: [...availableKeys.out] };
+        if (prevValue) {
+          const prevKeyLocked = newAvailableKeys[part].find((nAK) => nAK.value === prevValue);
+          prevKeyLocked.locked = false;
+        }
+        const keyToLock = newAvailableKeys[part].find((nAK) => nAK.value === value);
+        keyToLock.locked = true;
+        setAvailableKeys(newAvailableKeys);
       }
-      const keyToLock = newAvailableKeys[part].find((nAK) => nAK.value === value);
-      keyToLock.locked = true;
-      setAvailableKeys(newAvailableKeys);
     },
     [availableKeys.in, availableKeys.out, lines, requireKeysSettled]
   );
@@ -108,15 +111,24 @@ const Televersements = () => {
 
     const [mappingForThisType] = uploads.typesAndMapping.filter(({ type_document }) => type_document === typeDocument);
     let initLines = [];
-    if (mappingForThisType) {
-      initLines = Object.entries(mappingForThisType.mapping_column).map(([key, value]) => ({
-        in: { value: key, hasError: false },
-        out: { value: value, hasError: false },
-      }));
+    if (mappingForThisType && mappingForThisType.mapping_column) {
+      initLines = Object.entries(mappingForThisType.mapping_column).map(([key, value], i) =>
+        i === 0
+          ? {
+              in: { value: "", hasError: false },
+              out: { value: key, hasError: false },
+            }
+          : {
+              in: { value: key, hasError: false },
+              out: { value: value, hasError: false },
+            }
+      );
+      // TODO check if exist in current mapping
       const reqKeys = Object.values(mappingForThisType.mapping_column).splice(
         0,
         Object.keys(response.requireKeys).length
       );
+      reqKeys.shift();
       setRequireKeysSettled(reqKeys);
       for (const value of reqKeys) {
         const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
@@ -138,6 +150,7 @@ const Televersements = () => {
     setPreEffictifs({ canBeImport: [], canNotBeImport: [] });
     setStep("pre-import");
     const keyToKeyMapping = lines.reduce((acc, line) => {
+      if (line.out.value === "annee_scolaire") return { ...acc, annee_scolaire: line.in.value };
       return { ...acc, [line.in.value]: line.out.value };
     }, {});
     const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post(`/api/v1/upload/pre-import`, {
@@ -231,7 +244,55 @@ const Televersements = () => {
           <>
             <Box my={10}>
               <Box mb={8}>
+                <HStack justifyContent="center" spacing="4w">
+                  <Input
+                    {...{
+                      name: `line0_in`,
+                      fieldType: "select",
+                      placeholder: "Séléctionner l'année scolaire",
+                      options: [
+                        {
+                          label: "2020-2021",
+                          value: "2020-2021",
+                        },
+                        {
+                          label: "2021-2022",
+                          value: "2021-2022",
+                        },
+                        {
+                          label: "2022-2023",
+                          value: "2022-2023",
+                        },
+                        {
+                          label: "2023-2024",
+                          value: "2023-2024",
+                        },
+                        {
+                          label: "2024-2025",
+                          value: "2024-2025",
+                        },
+                      ],
+                    }}
+                    value={lines[0].in.value}
+                    onSubmit={(value) =>
+                      onLineChange({ line: 0, part: "in" }, { value, hasError: false, required: true })
+                    }
+                    w="33%"
+                  />
+                  <ArrowRightLong boxSize={10} color="bluefrance" />
+                  <Input
+                    {...{
+                      name: `line0_out`,
+                      fieldType: "text",
+                      locked: true,
+                    }}
+                    value="Année scolaire"
+                    w="33%"
+                  />
+                  <Box w="35px">&nbsp;</Box>
+                </HStack>
                 {Object.values(mapping.requireKeys).map((requireKey, i) => {
+                  if (i === 0) return; // First is annee_scolaire above
                   return (
                     <HStack justifyContent="center" spacing="4w" key={requireKey.value}>
                       <Input
@@ -329,7 +390,7 @@ const Televersements = () => {
                           borderColor="bluefrance"
                           onClick={() => removeLine({ lineNum })}
                         >
-                          <Bin color="bluefrance" />
+                          <Bin color="redmarianne" cursor="pointer" />
                         </Box>
                       </HStack>
                     );

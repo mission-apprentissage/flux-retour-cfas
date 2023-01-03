@@ -8,6 +8,16 @@ import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts
 
 export const collectionName = "effectifs";
 
+export const indexes = () => {
+  return [
+    [
+      { organisme_id: 1, annee_scolaire: 1, "apprenant.nom": 1, "apprenant.prenom": 1, "formation.cfd": 1 },
+      { unique: true },
+    ],
+  ];
+};
+// "id_erp_apprenant"
+
 export const schema = object(
   {
     _id: objectId(),

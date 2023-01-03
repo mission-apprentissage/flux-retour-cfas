@@ -248,13 +248,13 @@ export default ({ clamav }) => {
 
       mapping.inputKeys = headers;
       mapping.requireKeys = {
-        CFD: {
-          label: "Code Formation Diplôme",
-          value: "CFD",
-        },
         annee_scolaire: {
           label: "Année scolaire",
           value: "annee_scolaire",
+        },
+        CFD: {
+          label: "Code Formation Diplôme",
+          value: "CFD",
         },
         nom: {
           label: "Nom de l'apprenant",
@@ -505,7 +505,7 @@ export default ({ clamav }) => {
     "/pre-import",
     // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
     tryCatch(async (req, res) => {
-      let { organisme_id, mapping } = await Joi.object({
+      let { organisme_id, mapping: userMapping } = await Joi.object({
         organisme_id: Joi.string().required(),
         mapping: Joi.object().required(),
       })
@@ -513,8 +513,8 @@ export default ({ clamav }) => {
         .validateAsync(req.body, { abortEarly: false });
 
       const mappingModel = {
-        CFD: "formation.cfd",
         annee_scolaire: "annee_scolaire",
+        CFD: "formation.cfd",
         nom: "apprenant.nom",
         prenom: "apprenant.prenom",
         identifiant_unique_apprenant: "identifiant_unique_apprenant",
@@ -576,10 +576,12 @@ export default ({ clamav }) => {
 
       const { rawFileJson, unconfirmedDocument: document } = await getUnconfirmedDocumentContent(organisme_id);
 
+      const { annee_scolaire, ...mapping } = userMapping;
+
       await updateDocument(organisme_id, {
         nom_fichier: document.nom_fichier,
         taille_fichier: document.taille_fichier,
-        mapping_column: mapping,
+        mapping_column: userMapping,
       });
 
       const applyMapping = (arr, mapping) =>
@@ -603,7 +605,7 @@ export default ({ clamav }) => {
           organisme_id,
           source: document.document_id.toString(),
           id_erp_apprenant: `${index}`,
-          annee_scolaire: data.annee_scolaire ?? "",
+          annee_scolaire,
           apprenant: { nom: data.apprenant?.nom ?? "", prenom: data.apprenant?.prenom ?? "" },
           formation: { cfd: data.formation?.cfd ?? "" },
         });
@@ -621,6 +623,7 @@ export default ({ clamav }) => {
               organisme_id,
               source: document.document_id.toString(),
               id_erp_apprenant: `${index}`,
+              annee_scolaire,
               ...data,
             },
             { checkIfExist: true }
@@ -703,6 +706,13 @@ export default ({ clamav }) => {
         },
         { returnDocument: "after" }
       );
+
+      const [unconfirmedDocument] = uploads.documents.filter((d) => !d.confirm);
+      await updateDocument(organisme_id, {
+        nom_fichier: unconfirmedDocument.nom_fichier,
+        taille_fichier: unconfirmedDocument.taille_fichier,
+        confirm: true,
+      });
 
       return res.json({});
     })

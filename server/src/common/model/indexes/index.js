@@ -1,62 +1,66 @@
-import { BaseIndexer } from "./baseIndexer.js";
-import cfasModelDescriptor from "../previous.models/toRemove.models/cfas.model.js";
-import dossiersApprenantsModelDescriptor from "../previous.models/toRemove.models/dossiersApprenants.model.js";
-import formationsModelDescriptor from "../next.toKeep.models/formations.model.js";
-import userEventsModelDescriptor from "../next.toKeep.models/userEvents.model.js";
-import usersModelDescriptor from "../previous.models/users.model.js";
+import { getDbCollection } from "../../mongodb.js";
+import { doesCollectionExistInDb } from "../../utils/dbUtils.js";
+import { modelDescriptors } from "../collections.js";
 
-// TODO [tech] ADD INDEXES NEW MODEL
+/**
+ * Classe BaseIndexer de base
+ */
+export class BaseIndexer {
+  /**
+   * Constructeur
+   * @param {array} collectionName Nom de la collection
+   * @param {array} indexesList Liste des indexs à créer
+   */
+  constructor({ collectionName, indexesList }) {
+    this.indexesList = indexesList;
+    this.collectionName = collectionName;
+  }
+
+  /**
+   * Méthode de création des indexs
+   */
+  async createIndexs() {
+    const isCollectionInDb = await doesCollectionExistInDb(this.collectionName);
+    const collection = getDbCollection(this.collectionName);
+
+    if (isCollectionInDb === true) {
+      await Promise.all(
+        this.indexesList().map(([index, options]) => {
+          return collection.createIndex(index, options);
+        })
+      );
+    }
+  }
+
+  /**
+   * Méthode de destruction des indexs
+   */
+  async dropIndexs() {
+    const isCollectionInDb = await doesCollectionExistInDb(this.collectionName);
+    if (isCollectionInDb === true) {
+      getDbCollection(this.collectionName).dropIndexes();
+    }
+  }
+}
 
 export const createIndexes = async () => {
-  await new BaseIndexer({
-    collectionName: cfasModelDescriptor.collectionName,
-    indexesList: cfasModelDescriptor.indexes,
-  }).createIndexs();
-
-  await new BaseIndexer({
-    collectionName: dossiersApprenantsModelDescriptor.collectionName,
-    indexesList: dossiersApprenantsModelDescriptor.indexes,
-  }).createIndexs();
-
-  await new BaseIndexer({
-    collectionName: formationsModelDescriptor.collectionName,
-    indexesList: formationsModelDescriptor.indexes,
-  }).createIndexs();
-
-  await new BaseIndexer({
-    collectionName: userEventsModelDescriptor.collectionName,
-    indexesList: userEventsModelDescriptor.indexes,
-  }).createIndexs();
-
-  await new BaseIndexer({
-    collectionName: usersModelDescriptor.collectionName,
-    indexesList: usersModelDescriptor.indexes,
-  }).createIndexs();
+  for (const descriptor of modelDescriptors) {
+    if (descriptor.indexes) {
+      await new BaseIndexer({
+        collectionName: descriptor.collectionName,
+        indexesList: descriptor.indexes,
+      }).createIndexs();
+    }
+  }
 };
 
 export const dropIndexes = async () => {
-  await new BaseIndexer({
-    collectionName: cfasModelDescriptor.collectionName,
-    indexesList: cfasModelDescriptor.indexes,
-  }).dropIndexs();
-
-  await new BaseIndexer({
-    collectionName: dossiersApprenantsModelDescriptor.collectionName,
-    indexesList: dossiersApprenantsModelDescriptor.indexes,
-  }).dropIndexs();
-
-  await new BaseIndexer({
-    collectionName: formationsModelDescriptor.collectionName,
-    indexesList: formationsModelDescriptor.indexes,
-  }).dropIndexs();
-
-  await new BaseIndexer({
-    collectionName: userEventsModelDescriptor.collectionName,
-    indexesList: userEventsModelDescriptor.indexes,
-  }).dropIndexs();
-
-  await new BaseIndexer({
-    collectionName: usersModelDescriptor.collectionName,
-    indexesList: usersModelDescriptor.indexes,
-  }).dropIndexs();
+  for (const descriptor of modelDescriptors) {
+    if (descriptor.indexes) {
+      await new BaseIndexer({
+        collectionName: descriptor.collectionName,
+        indexesList: descriptor.indexes,
+      }).dropIndexs();
+    }
+  }
 };

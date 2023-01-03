@@ -93,10 +93,6 @@ export const addDocument = async (
   return updated.value;
 };
 
-// export const confirmDocument = async ({ organisme_id, userEmail, pending }) => {
-//   getDocument
-// };
-
 // TODO DIRTY update, to clean
 export const updateDocument = async (organisme_id, { nom_fichier, taille_fichier, ...data }) => {
   let found = null;
