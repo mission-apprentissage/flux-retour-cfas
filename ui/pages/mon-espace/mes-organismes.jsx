@@ -1,17 +1,29 @@
 import React from "react";
 import Head from "next/head";
-import { Box, Center, Container, Heading, ListItem, Spinner, Text, UnorderedList } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Container,
+  Heading,
+  Spinner,
+  Table,
+  TableCaption,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Page } from "../../components";
 import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
-
 import Link from "../../components/Links/Link";
 import withAuth from "../../components/withAuth";
 import { _get } from "../../common/httpClient";
 import { useEspace } from "../../hooks/useEspace";
-
-export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
+import { BasePagination } from "../../components/Pagination/Pagination.jsx";
+import usePaginatedItems from "../../hooks/old/usePaginatedItems.js";
 
 function useEspaceOrganismes() {
   const {
@@ -30,6 +42,8 @@ function MesOrganismes() {
   const { isLoading, organismes } = useEspaceOrganismes();
 
   let { whoIs } = useEspace();
+
+  const [current, setCurrent, itemsSliced] = usePaginatedItems(organismes ?? []);
 
   const headerTitle = {
     pilot: "Les organismes sur mon territoire",
@@ -51,24 +65,61 @@ function MesOrganismes() {
           <Heading textStyle="h2" color="grey.800" mt={5}>
             {headerTitle[whoIs ?? "global"]}
           </Heading>
+
           {isLoading && !organismes && (
             <Center>
               <Spinner />
             </Center>
           )}
+
           {!isLoading && organismes && (
-            <UnorderedList mt={5}>
-              {organismes.map((organisme) => {
-                return (
-                  <ListItem key={organisme._id} display="flex" w="70%">
-                    <Link href={`/mon-espace/organisme/${organisme._id}`} flexGrow={1}>
-                      {organisme.nom} [uai: {organisme.uai}]
-                    </Link>
-                    {!organisme.first_transmission_date && <Text color="tomato">Ne transmet pas</Text>}
-                  </ListItem>
-                );
-              })}
-            </UnorderedList>
+            <Table variant="secondary" mt={5} mb={10}>
+              <TableCaption>
+                <BasePagination
+                  current={current}
+                  onChange={(page) => {
+                    setCurrent(page);
+                  }}
+                  total={organismes?.length}
+                />
+              </TableCaption>
+              <Thead>
+                <Tr background="galt">
+                  <Th>Nom de l'organisme</Th>
+                  <Th>Nature</Th>
+                  <Th>Localisation</Th>
+                  <Th>SIRET</Th>
+                  <Th>Numéro UAI</Th>
+                  <Th>Transmission au tableau de bord</Th>
+                  <Th>Consulter</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {itemsSliced?.map((organisme) => {
+                  return (
+                    <Tr key={organisme._id}>
+                      <Td color="grey.800">{organisme.nom}</Td>
+                      <Td color="grey.800">TODO</Td>
+                      <Td color="grey.800">{organisme.adresse?.commune}</Td>
+                      <Td color="grey.800">{organisme.siret}</Td>
+                      <Td color="grey.800">{organisme.uai}</Td>
+                      <Td color="grey.800">
+                        {organisme.first_transmission_date ? (
+                          <Text color="green">Transmet</Text>
+                        ) : (
+                          <Text color="tomato">Ne transmet pas</Text>
+                        )}
+                      </Td>
+                      <Td color="grey.800">
+                        <Link href={`/mon-espace/organisme/${organisme._id}`} flexGrow={1}>
+                          LIEN
+                        </Link>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
           )}
         </Container>
       </Box>
