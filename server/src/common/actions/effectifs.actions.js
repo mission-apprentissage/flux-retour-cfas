@@ -306,7 +306,7 @@ export const findEffectifById = async (id, projection = {}) => {
  * @param {*} id
  * @returns
  */
-export const updateEffectif = async (id, data) => {
+export const updateEffectif = async (id, data, opt = { keepPreviousErrors: false }) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
@@ -320,7 +320,14 @@ export const updateEffectif = async (id, data) => {
     {
       $set: {
         ...validateEffectif(data),
-        validation_errors: uniqBy([...effectif.validation_errors, ...(data.validation_errors || [])], "fieldName"),
+        ...(opt.keepPreviousErrors
+          ? {
+              validation_errors: uniqBy(
+                [...effectif.validation_errors, ...(data.validation_errors || [])],
+                "fieldName"
+              ),
+            }
+          : {}),
         organisme_id: ObjectId(data.organisme_id),
         updated_at: new Date(),
       },

@@ -734,7 +734,11 @@ export default ({ clamav }) => {
         if (toUpdate) {
           const { validation_errors, ...rest } = effectif;
           const errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
-          await updateEffectif(effectif._id, { ...rest, validation_errors: errorsToKeep });
+          await updateEffectif(
+            effectif._id,
+            { ...rest, validation_errors: errorsToKeep },
+            { keepPreviousErrors: true }
+          );
         } else {
           await createEffectif(effectif);
         }
