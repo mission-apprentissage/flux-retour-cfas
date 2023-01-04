@@ -153,20 +153,3 @@ export const removeDocument = async (organismeId, { nom_fichier, chemin_fichier,
 
   return updated.value;
 };
-
-export const getAllUniqueDocumentsTypesAndMappings = (documents) => {
-  let documentTypes = [];
-  return documents.reduce((acc, { type_document, mapping_column }) => {
-    if (type_document && !documentTypes.includes(type_document)) {
-      documentTypes.push(type_document);
-      return [
-        ...acc,
-        {
-          type_document,
-          mapping_column,
-        },
-      ];
-    }
-    return acc;
-  }, []);
-};

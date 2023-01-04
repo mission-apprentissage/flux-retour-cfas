@@ -58,11 +58,8 @@ const UploadFiles = ({ title }) => {
       try {
         const data = new FormData();
         data.append("file", acceptedFiles[0]);
-        const { documents, typesAndMapping } = await _postFile(
-          `${endpoint}/v1/upload?organisme_id=${organisme._id}`,
-          data
-        );
-        onDocumentsChanged(documents, typesAndMapping);
+        const { documents, models } = await _postFile(`${endpoint}/v1/upload?organisme_id=${organisme._id}`, data);
+        onDocumentsChanged(documents, models);
         toast({
           title: "Le fichier a bien été déposé",
           status: "success",

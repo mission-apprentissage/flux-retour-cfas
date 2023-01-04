@@ -48,11 +48,11 @@ export function useDocuments() {
   const [uploads, setUploads] = useRecoilState(uploadsAtom);
 
   const onDocumentsChanged = useCallback(
-    async (newDocumentsArray, typesAndMappingArray) => {
+    async (newDocumentsArray, models) => {
       const docs = newDocumentsArray;
       setUploads({
         ...uploads,
-        typesAndMappingArray,
+        models,
         documents: {
           confirmed: docs.filter((d) => d.confirm),
           unconfirmed: docs.filter((d) => !d.confirm),

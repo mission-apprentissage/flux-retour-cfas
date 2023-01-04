@@ -12,7 +12,6 @@ import * as crypto from "../../../../common/utils/cryptoUtils.js";
 import {
   addDocument,
   createUpload,
-  getAllUniqueDocumentsTypesAndMappings,
   getDocument,
   getUploadEntryByOrgaId,
   removeDocument,
@@ -20,7 +19,7 @@ import {
 } from "../../../../common/actions/uploads.actions.js";
 import { getJsonFromXlsxData } from "../../../../common/utils/xlsxUtils.js";
 import { hydrateEffectif } from "../../../../common/actions/engine/engine.actions.js";
-import { cloneDeep, find, get, set } from "lodash-es";
+import { cloneDeep, find, get, set, uniqBy } from "lodash-es";
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
@@ -115,8 +114,11 @@ export default ({ clamav }) => {
               : "Le contenu du fichier est invalide",
         });
       }
-      const { documents } = await getUploadEntryByOrgaId(organisme_id);
-      return res.json({ documents, typesAndMapping: getAllUniqueDocumentsTypesAndMappings(documents) });
+      const { documents, models } = await getUploadEntryByOrgaId(organisme_id);
+      return res.json({
+        documents,
+        models,
+      });
     });
 
     form.on("error", () => {
@@ -217,15 +219,15 @@ export default ({ clamav }) => {
       })
         .unknown()
         .validateAsync(req.query, { abortEarly: false });
-      let result = null;
+      let upload = null;
       try {
-        result = await getUploadEntryByOrgaId(organisme_id, { last_snapshot_effectifs: 0 });
+        upload = await getUploadEntryByOrgaId(organisme_id, { last_snapshot_effectifs: 0 });
       } catch (error) {
         if (error.message.includes("Unable to find uploadEntry")) {
-          result = await createUpload({ organisme_id });
+          upload = await createUpload({ organisme_id });
         }
       }
-      return res.json({ ...result, typesAndMapping: getAllUniqueDocumentsTypesAndMappings(result.documents) });
+      return res.json(upload);
     })
   );
 
@@ -248,7 +250,7 @@ export default ({ clamav }) => {
         type_document,
       });
 
-      return res.json({ ...upload, typesAndMapping: getAllUniqueDocumentsTypesAndMappings(upload.documents) });
+      return res.json(upload);
     })
   );
 
@@ -566,6 +568,38 @@ export default ({ clamav }) => {
   );
 
   router.post(
+    "/setModel",
+    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    tryCatch(async (req, res) => {
+      let {
+        organisme_id,
+        type_document,
+        mapping: userMapping,
+      } = await Joi.object({
+        organisme_id: Joi.string().required(),
+        type_document: Joi.string().required(),
+        mapping: Joi.object().required(),
+      })
+        .unknown()
+        .validateAsync(req.body, { abortEarly: false });
+
+      const upload = await getUploadEntryByOrgaId(organisme_id);
+      const model = find(upload.models, { type_document });
+      model.mapping_column = userMapping;
+
+      await uploadsDb().findOneAndUpdate(
+        { _id: upload._id },
+        {
+          $set: { models: uniqBy([model, ...upload.models], "type_document"), updated_at: new Date() },
+        },
+        { returnDocument: "after" }
+      );
+
+      return res.json(upload);
+    })
+  );
+
+  router.post(
     "/pre-import",
     // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
     tryCatch(async (req, res) => {
@@ -585,7 +619,6 @@ export default ({ clamav }) => {
         taille_fichier: document.taille_fichier,
         mapping_column: userMapping,
       });
-
       const applyMapping = (arr, mapping) =>
         arr.map((obj) =>
           Object.entries(obj).reduce((acc, [key, value]) => {
@@ -675,11 +708,25 @@ export default ({ clamav }) => {
         }
       }
 
-      const uploads = await getUploadEntryByOrgaId(organisme_id);
+      const upload = await getUploadEntryByOrgaId(organisme_id);
+
+      let models = upload.models;
+      const model = find(upload.models, { type_document: document.type_document });
+      if (!model) {
+        models = [
+          ...models,
+          {
+            type_document: document.type_document,
+            mapping_column: userMapping,
+            lock: false,
+          },
+        ];
+      }
+
       await uploadsDb().findOneAndUpdate(
-        { _id: uploads._id },
+        { _id: upload._id },
         {
-          $set: { last_snapshot_effectifs: canBeImportEffectifs, updated_at: new Date() },
+          $set: { last_snapshot_effectifs: canBeImportEffectifs, models, updated_at: new Date() },
         },
         { returnDocument: "after" }
       );
