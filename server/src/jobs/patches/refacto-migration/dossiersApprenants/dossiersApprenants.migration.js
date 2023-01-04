@@ -86,8 +86,10 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (
 
   await asyncForEach(allUaisInDossiers, async (currentUai) => {
     try {
-      // Récupération des dossiers pour uai courant + migration
-      const dossiersForUai = await dossiersApprenantsDb().find({ uai_etablissement: currentUai }).toArray();
+      // Récupération des dossiers pour uai courant ayant un id_erp_apprenant non null / non vide (devenu obligatoire)
+      const dossiersForUai = await dossiersApprenantsDb()
+        .find({ uai_etablissement: currentUai, id_erp_apprenant: { $nin: [null, ""] } })
+        .toArray();
 
       // Migration de la liste des dossiers
       const { nbEffectifsCreated, nbEffectifsUpdated, nbDossiers, nbOrganismes } = await migrateDossiersApprenantsByUai(
@@ -124,7 +126,7 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (
 
   // Log & stats
   logger.info(`-> ${nbUaiHandled} uais distincts initiaux traités dans les dossiersApprenants.`);
-  logger.info(`-> ${nbDossiersToMigrate} dossiersApprenants à migrer.`);
+  logger.info(`-> ${nbDossiersToMigrate} dossiersApprenants (avec un id_erp non vide et non null) à migrer.`);
 
   logger.info(`--> ${nbDossiersMigratedTotal} dossiersApprenants migrés.`);
   logger.info(`--> ${nbDossiersNotMigratedTotal} dossiersApprenants non migrés (erreurs).`);

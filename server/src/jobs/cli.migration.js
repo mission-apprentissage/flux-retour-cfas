@@ -68,10 +68,11 @@ cli
 
 /**
  * Job de migration des dossiersApprenants
+ * ne prends en compte que les dossiersApprenants ayant un id_erp_apprenant non vide / non null
  */
 cli
   .command("migrate:dossiersApprenants")
-  .description("Migration d'un cfa vers organismes")
+  .description("Migration des dossiersApprenants vers la collection dossiersApprenantsMigration")
   .option("--sampleNbUais <int>", "Nb de dossiers à traiter")
   .option("--uai <string>", "UAI spécifique à traiter")
   .option("--numRegion <string>", "Région spécifique à traiter")
