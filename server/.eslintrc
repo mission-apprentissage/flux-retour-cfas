@@ -1,11 +1,29 @@
 {
   "root": true,
-  "extends": ["eslint:recommended", "plugin:node/recommended-module", "plugin:prettier/recommended"],
-  "plugins": ["mocha", "import"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:node/recommended-module",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": [
+    "mocha",
+    "import"
+  ],
   "rules": {
     "import/no-unresolved": 2,
     "import/no-commonjs": 2,
-    "import/extensions": [2, "ignorePackages"]
+    "import/extensions": [
+      2,
+      "ignorePackages"
+    ],
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ]
   },
   "env": {
     "es2021": true,

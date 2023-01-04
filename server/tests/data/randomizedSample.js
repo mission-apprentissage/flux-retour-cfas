@@ -35,9 +35,10 @@ const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mo
 export const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+  const isStudentPresent = isPresent();
 
   return {
-    ine_apprenant: isPresent() ? getRandomIne() : null,
+    ine_apprenant: isStudentPresent ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
     email_contact: faker.internet.email(),
@@ -45,12 +46,12 @@ export const createRandomDossierApprenant = (params = {}) => {
     formation_cfd: getRandomFormationCfd(),
     libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
-    siret_etablissement: isPresent() ? getRandomSiretEtablissement() : null,
+    siret_etablissement: isStudentPresent ? getRandomSiretEtablissement() : null,
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past(),
-    periode_formation: isPresent() ? periode_formation : null,
+    periode_formation: isStudentPresent ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
@@ -69,13 +70,14 @@ export const createRandomDossierApprenant = (params = {}) => {
 export const createRandomEffectifApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+  const isStudentPresent = isPresent();
 
   return {
     dossierApprenantId: faker.datatype.uuid(),
     uai_etablissement: getRandomUaiEtablissement(),
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
     formation_cfd: getRandomFormationCfd(),
-    periode_formation: isPresent() ? periode_formation : null,
+    periode_formation: isStudentPresent ? periode_formation : null,
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
@@ -93,9 +95,10 @@ export const createRandomEffectifApprenant = (params = {}) => {
 export const createRandomDossierApprenantApiInput = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
+  const isStudentPresent = isPresent();
 
   return {
-    ine_apprenant: isPresent() ? getRandomIne() : null,
+    ine_apprenant: isStudentPresent ? getRandomIne() : null,
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
     date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
@@ -105,13 +108,13 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
     id_formation: getRandomFormationCfd(),
     libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
     uai_etablissement: getRandomUaiEtablissement(),
-    siret_etablissement: isPresent() ? getRandomSiretEtablissement() : "",
+    siret_etablissement: isStudentPresent ? getRandomSiretEtablissement() : "",
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past().toISOString(),
     annee_formation: getRandomAnneeFormation(),
-    periode_formation: isPresent() ? periode_formation.join("-") : "",
+    periode_formation: isStudentPresent ? periode_formation.join("-") : "",
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
     tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
