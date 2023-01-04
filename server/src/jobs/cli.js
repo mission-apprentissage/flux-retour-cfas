@@ -22,6 +22,20 @@ import { warmEffectifsCache } from "./warm-effectifs-cache/index.js";
  * Job d'initialisation de données de test
  */
 cli
+  .command("seed")
+  .description("Seed global data")
+  .option("-e, --email <string>", "Email de l'utilisateur Admin")
+  .action(async ({ email }) => {
+    runScript(async () => {
+      seedRoles();
+      return seedAdmin({ adminEmail: email?.toLowerCase() });
+    }, "Seed-admin");
+  });
+
+/**
+ * Job d'initialisation de données de test
+ */
+cli
   .command("seed:sample")
   .description("Seed sample data")
   .action(async () => {
