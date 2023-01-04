@@ -20,11 +20,73 @@ import {
 } from "../../../../common/actions/uploads.actions.js";
 import { getJsonFromXlsxData } from "../../../../common/utils/xlsxUtils.js";
 import { hydrateEffectif } from "../../../../common/actions/engine/engine.actions.js";
-import { set } from "lodash-es";
+import { cloneDeep, find, get, set } from "lodash-es";
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 // import permissionsDossierMiddleware = require("../../middlewares/permissionsDossierMiddleware");
+
+const mappingModel = {
+  annee_scolaire: "annee_scolaire",
+  CFD: "formation.cfd",
+  nom: "apprenant.nom",
+  prenom: "apprenant.prenom",
+  identifiant_unique_apprenant: "identifiant_unique_apprenant",
+  RNCP: "formation.rncp",
+  annee_formation: "formation.annee",
+  INE: "apprenant.ine",
+  sexe: "apprenant.sexe",
+  date_de_naissance: "apprenant.date_de_naissance",
+  code_postal_de_naissance: "apprenant.code_postal_de_naissance",
+  nationalite: "apprenant.nationalite",
+  regime_scolaire: "apprenant.regime_scolaire",
+  handicap: "apprenant.handicap",
+  inscription_sportif_haut_niveau: "apprenant.inscription_sportif_haut_niveau",
+  courriel: "apprenant.courriel",
+  telephone: "apprenant.telephone",
+  adresse_complete: "apprenant.adresse.complete",
+  adresse_numero: "apprenant.adresse.numero",
+  adresse_repetition_voie: "apprenant.adresse.repetition_voie",
+  adresse_voie: "apprenant.adresse.voie",
+  adresse_complement: "apprenant.adresse.complement",
+  adresse_code_postal: "apprenant.adresse.code_postal",
+  adresse_code_commune_insee: "apprenant.adresse.code_insee",
+  adresse_commune: "apprenant.adresse.commune",
+  situation_avant_contrat: "apprenant.situation_avant_contrat",
+  derniere_situation: "apprenant.derniere_situation",
+  dernier_organisme_uai: "apprenant.dernier_organisme_uai",
+  dernier_diplome: "apprenant.dernier_diplome",
+  mineur_emancipe: "apprenant.mineur_emancipe",
+  representant_legal_nom: "apprenant.representant_legal.nom",
+  representant_legal_prenom: "apprenant.representant_legal.prenom",
+  representant_legal_courriel: "apprenant.representant_legal.courriel",
+  representant_legal_telephone: "apprenant.representant_legal.telephone",
+  representant_legal_pcs: "apprenant.representant_legal.pcs",
+  representant_legal_adresse_complete: "apprenant.representant_legal.adresse.complete",
+  representant_legal_adresse_numero: "apprenant.representant_legal.adresse.numero",
+  representant_legal_adresse_repetition_voie: "apprenant.representant_legal.adresse.repetition_voie",
+  representant_legal_adresse_voie: "apprenant.representant_legal.adresse.voie",
+  representant_legal_adresse_complement: "apprenant.representant_legal.adresse.complement",
+  representant_legal_adresse_code_postal: "apprenant.representant_legal.adresse.code_postal",
+  representant_legal_adresse_code_commune_insee: "apprenant.representant_legal.adresse.code_insee",
+  representant_legal_adresse_commune: "apprenant.representant_legal.adresse.commune",
+  dernier_statut: "apprenant.historique_statut.valeur_statut",
+  date_dernier_statut: "apprenant.historique_statut.date_statut",
+  dernier_contrat_siret: "apprenant.contrats.siret",
+  dernier_contrat_type_employeur: "apprenant.contrats.type_employeur",
+  dernier_contrat_nombre_de_salaries: "apprenant.contrats.nombre_de_salaries",
+  dernier_contrat_adresse_complete: "apprenant.contrats.adresse.complete",
+  dernier_contrat_adresse_numero: "apprenant.contrats.adresse.numero",
+  dernier_contrat_adresse_repetition_voie: "apprenant.contrats.adresse.repetition_voie",
+  dernier_contrat_adresse_voie: "apprenant.contrats.adresse.voie",
+  dernier_contrat_adresse_complement: "apprenant.contrats.adresse.complement",
+  dernier_contrat_adresse_code_postal: "apprenant.contrats.adresse.code_postal",
+  dernier_contrat_adresse_code_commune_insee: "apprenant.contrats.adresse.code_insee",
+  dernier_contrat_adresse_commune: "apprenant.contrats.adresse.commune",
+  dernier_contrat_date_debut: "apprenant.contrats.adresse.date_debut",
+  dernier_contrat_date_fin: "apprenant.contrats.adresse.date_fin",
+  dernier_contrat_date_rupture: "apprenant.contrats.adresse.date_rupture",
+};
 
 function discard() {
   return createWriteStream("/dev/null");
@@ -512,68 +574,6 @@ export default ({ clamav }) => {
         .unknown()
         .validateAsync(req.body, { abortEarly: false });
 
-      const mappingModel = {
-        annee_scolaire: "annee_scolaire",
-        CFD: "formation.cfd",
-        nom: "apprenant.nom",
-        prenom: "apprenant.prenom",
-        identifiant_unique_apprenant: "identifiant_unique_apprenant",
-        RNCP: "formation.rncp",
-        annee_formation: "formation.annee",
-        INE: "apprenant.ine",
-        sexe: "apprenant.sexe",
-        date_de_naissance: "apprenant.date_de_naissance",
-        code_postal_de_naissance: "apprenant.code_postal_de_naissance",
-        nationalite: "apprenant.nationalite",
-        regime_scolaire: "apprenant.regime_scolaire",
-        handicap: "apprenant.handicap",
-        inscription_sportif_haut_niveau: "apprenant.inscription_sportif_haut_niveau",
-        courriel: "apprenant.courriel",
-        telephone: "apprenant.telephone",
-        adresse_complete: "apprenant.adresse.complete",
-        adresse_numero: "apprenant.adresse.numero",
-        adresse_repetition_voie: "apprenant.adresse.repetition_voie",
-        adresse_voie: "apprenant.adresse.voie",
-        adresse_complement: "apprenant.adresse.complement",
-        adresse_code_postal: "apprenant.adresse.code_postal",
-        adresse_code_commune_insee: "apprenant.adresse.code_insee",
-        adresse_commune: "apprenant.adresse.commune",
-        situation_avant_contrat: "apprenant.situation_avant_contrat",
-        derniere_situation: "apprenant.derniere_situation",
-        dernier_organisme_uai: "apprenant.dernier_organisme_uai",
-        dernier_diplome: "apprenant.dernier_diplome",
-        mineur_emancipe: "apprenant.mineur_emancipe",
-        representant_legal_nom: "apprenant.representant_legal.nom",
-        representant_legal_prenom: "apprenant.representant_legal.prenom",
-        representant_legal_courriel: "apprenant.representant_legal.courriel",
-        representant_legal_telephone: "apprenant.representant_legal.telephone",
-        representant_legal_pcs: "apprenant.representant_legal.pcs",
-        representant_legal_adresse_complete: "apprenant.representant_legal.adresse.complete",
-        representant_legal_adresse_numero: "apprenant.representant_legal.adresse.numero",
-        representant_legal_adresse_repetition_voie: "apprenant.representant_legal.adresse.repetition_voie",
-        representant_legal_adresse_voie: "apprenant.representant_legal.adresse.voie",
-        representant_legal_adresse_complement: "apprenant.representant_legal.adresse.complement",
-        representant_legal_adresse_code_postal: "apprenant.representant_legal.adresse.code_postal",
-        representant_legal_adresse_code_commune_insee: "apprenant.representant_legal.adresse.code_insee",
-        representant_legal_adresse_commune: "apprenant.representant_legal.adresse.commune",
-        dernier_statut: "apprenant.historique_statut.valeur_statut",
-        date_dernier_statut: "apprenant.historique_statut.date_statut",
-        dernier_contrat_siret: "apprenant.contrats.siret",
-        dernier_contrat_type_employeur: "apprenant.contrats.type_employeur",
-        dernier_contrat_nombre_de_salaries: "apprenant.contrats.nombre_de_salaries",
-        dernier_contrat_adresse_complete: "apprenant.contrats.adresse.complete",
-        dernier_contrat_adresse_numero: "apprenant.contrats.adresse.numero",
-        dernier_contrat_adresse_repetition_voie: "apprenant.contrats.adresse.repetition_voie",
-        dernier_contrat_adresse_voie: "apprenant.contrats.adresse.voie",
-        dernier_contrat_adresse_complement: "apprenant.contrats.adresse.complement",
-        dernier_contrat_adresse_code_postal: "apprenant.contrats.adresse.code_postal",
-        dernier_contrat_adresse_code_commune_insee: "apprenant.contrats.adresse.code_insee",
-        dernier_contrat_adresse_commune: "apprenant.contrats.adresse.commune",
-        dernier_contrat_date_debut: "apprenant.contrats.adresse.date_debut",
-        dernier_contrat_date_fin: "apprenant.contrats.adresse.date_fin",
-        dernier_contrat_date_rupture: "apprenant.contrats.adresse.date_rupture",
-      };
-
       const { rawFileJson, unconfirmedDocument: document } = await getUnconfirmedDocumentContent(organisme_id);
 
       const { annee_scolaire, ...mapping } = userMapping;
@@ -629,10 +629,46 @@ export default ({ clamav }) => {
             { checkIfExist: true }
           );
 
+          let effectifToSave = canBeImportEffectif;
+          if (found) {
+            const fieldsToImport = Object.values(mapping)
+              .filter((fieldName) => !["CFD", "nom", "prenom"].includes(fieldName))
+              .map((fN) => mappingModel[fN]);
+            effectifToSave = cloneDeep(found);
+            [
+              "annee_scolaire",
+              "validation_errors",
+              "source",
+              // "id_erp_apprenant",
+              ...fieldsToImport,
+            ].map((fieldName) => {
+              const newValue = get(canBeImportEffectif, fieldName);
+              let value = newValue;
+              // TODO handle specific array cases historique status, contrat etc..
+              if (fieldName === "validation_errors") {
+                const buildDiffValidationErrors = (validationErrorsOnFieldsToImport, found) => {
+                  let cleanedUpErrors = [];
+                  for (const currentError of validationErrorsOnFieldsToImport) {
+                    const prevValue = get(found, currentError.fieldName);
+                    if (prevValue && !find(found.validation_errors, { fieldName: currentError.fieldName })) {
+                      // we don't want errors on previously ok field
+                      cleanedUpErrors.push({ ...currentError, willNotBeModify: true });
+                    } else {
+                      cleanedUpErrors.push(currentError);
+                    }
+                  }
+                  return cleanedUpErrors;
+                };
+                value = buildDiffValidationErrors(value, found);
+              }
+              if (value) set(effectifToSave, fieldName, value);
+            });
+          }
+
           canBeImportEffectifs.push({
             _id: found ? found._id : new ObjectId(),
             toUpdate: !!found,
-            ...canBeImportEffectif,
+            ...effectifToSave,
           });
         }
       }
@@ -689,11 +725,14 @@ export default ({ clamav }) => {
         .validateAsync(req.body, { abortEarly: false });
 
       const uploads = await getUploadEntryByOrgaId(organisme_id);
+      const [unconfirmedDocument] = uploads.documents.filter((d) => !d.confirm);
       const effectifsDb = await findEffectifs(organisme_id);
 
-      for (const effectif of uploads.last_snapshot_effectifs) {
-        if (effectif.toUpdate) {
-          await updateEffectif(effectif._id, effectif);
+      for (const { toUpdate, ...effectif } of uploads.last_snapshot_effectifs) {
+        if (toUpdate) {
+          const { validation_errors, ...rest } = effectif;
+          const errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
+          await updateEffectif(effectif._id, { ...rest, validation_errors: errorsToKeep });
         } else {
           await createEffectif(effectif);
         }
@@ -707,7 +746,6 @@ export default ({ clamav }) => {
         { returnDocument: "after" }
       );
 
-      const [unconfirmedDocument] = uploads.documents.filter((d) => !d.confirm);
       await updateDocument(organisme_id, {
         nom_fichier: unconfirmedDocument.nom_fichier,
         taille_fichier: unconfirmedDocument.taille_fichier,

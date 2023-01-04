@@ -1,4 +1,4 @@
-import { cloneDeep, isObject, merge, reduce, set } from "lodash-es";
+import { cloneDeep, isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { effectifsDb } from "../model/collections.js";
 import {
@@ -314,11 +314,13 @@ export const updateEffectif = async (id, data) => {
   if (!effectif) {
     throw new Error(`Unable to find effectif ${_id.toString()}`);
   }
+
   const updated = await effectifsDb().findOneAndUpdate(
     { _id: effectif._id },
     {
       $set: {
         ...validateEffectif(data),
+        validation_errors: uniqBy([...effectif.validation_errors, ...(data.validation_errors || [])], "fieldName"),
         organisme_id: ObjectId(data.organisme_id),
         updated_at: new Date(),
       },

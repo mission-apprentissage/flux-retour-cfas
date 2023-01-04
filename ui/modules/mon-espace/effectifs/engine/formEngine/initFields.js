@@ -245,12 +245,24 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     for (const validation_error of cerfa.validation_errors) {
       fields[validation_error.fieldName] = {
         ...fields[validation_error.fieldName],
-        warning: () => (
-          <>
-            La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
-            &nbsp;n&rsquo;est pas valide pour ce champ.
-          </>
-        ),
+        ...(validation_error.willNotBeModify
+          ? {
+              error: () => (
+                <p>
+                  La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
+                  &nbsp;n&rsquo;est&nbsp;pas&nbsp;valide&nbsp;pour&nbsp;ce&nbsp;champ.
+                  <br /> Ce champ a déjà rempli, il sera donc pas modifié.
+                </p>
+              ),
+            }
+          : {
+              warning: () => (
+                <p>
+                  La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
+                  &nbsp;n&rsquo;est pas valide pour ce champ.
+                </p>
+              ),
+            }),
       };
     }
   }
