@@ -19,19 +19,20 @@ import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-f
 import { warmEffectifsCache } from "./warm-effectifs-cache/index.js";
 
 /**
- * Job d'initialisation projet
+ * Job d'initialisation de données de test
  */
 cli
   .command("seed:sample")
-  .description("Seed projet")
+  .description("Seed sample data")
   .action(async () => {
     runScript(async () => {
       return seedSample();
-    }, "Seed");
+    }, "Seed sample");
   });
 
 /**
  * Job d'initialisation des roles
+ * Pas nécessaire de l'exécuter si on créé un admin
  */
 cli
   .command("seed:roles")
@@ -44,6 +45,7 @@ cli
 
 /**
  * Job d'initialisation d'un user admin
+ * Va initialiser les roles par défaut en plus
  */
 cli
   .command("seed:admin")
