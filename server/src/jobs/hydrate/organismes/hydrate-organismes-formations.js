@@ -11,6 +11,7 @@ import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 /**
+ * TODO : USELESS DOUBLON avec HydrateFormations ?
  * Script qui initialise les organismes
  * Va récupérer toutes les formations liés aux organismes via des dossiersApprenants présents en base
  * Sur chaque formation trouvée on va récupérer les infos de cette formation lié à cet organisme via le catalogue

@@ -201,8 +201,10 @@ const migrateDossiersApprenantsByUai = async (uai, dossiersForUai) => {
           ...(await structureEffectifFromDossierApprenant(dossierApprenantCreated)),
         };
 
-        // Force date_de_naissance format to locale string
-        effectifData.apprenant.date_de_naissance = effectifData.apprenant.date_de_naissance.toLocaleDateString();
+        // Force date_de_naissance format to locale string if apprenant.date_de_naissance existant
+        if (effectifData?.apprenant?.date_de_naissance) {
+          effectifData.apprenant.date_de_naissance = effectifData.apprenant.date_de_naissance.toLocaleDateString();
+        }
 
         // Call runEngine -> va créer les données nécessaires
         // Attention : ici l'organisme a déja été créé par createDossierApprenantMigrationFromDossierApprenant,

@@ -25,6 +25,7 @@ const REFERENTIEL_FIELDS_TO_FETCH = [
 ];
 
 /**
+ * TODO : Useless / doublon avec hydrate-organismes
  * Script qui initialise les organismes du référentiel
  * ajoute les organismes non présents (organisme stock)
  * et MAJ le champ nature des organismes déja existants

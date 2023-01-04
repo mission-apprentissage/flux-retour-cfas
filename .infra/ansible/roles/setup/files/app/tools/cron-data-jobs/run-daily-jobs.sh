@@ -8,13 +8,11 @@ set -euo pipefail
 readonly LOG_FILEPATH="/var/log/data-jobs/log_$(date +'%Y-%m-%d_%H%M%S').log"
 
 call_daily_jobs_with_logs(){
-  # Remplissage des organismes & réseaux liés
+  # Remplissage des organismes
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes" || true >> ${LOG_FILEPATH}
-  docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux" || true >> ${LOG_FILEPATH}
+  
+  # Remplissage des réseaux depuis csv fournis
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux-newFormat" || true >> ${LOG_FILEPATH}
-
-  # Remplissage des formations
-  docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:formations" || true >> ${LOG_FILEPATH}
 
   # Récupération des formations & du niveau des formations dans les dossiersApprenants
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:formations" || true >> ${LOG_FILEPATH}
