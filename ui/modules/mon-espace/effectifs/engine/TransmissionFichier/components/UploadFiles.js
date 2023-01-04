@@ -97,12 +97,14 @@ const UploadFiles = ({ title }) => {
       // eslint-disable-next-line no-restricted-globals
       const remove = confirm("Voulez-vous vraiment supprimer ce document ?");
       if (remove) {
+        setIsSubmitting(true);
         try {
           let data = file;
           const { documents } = await _delete(
             `${endpoint}/v1/upload?organisme_id=${organisme._id}&${queryString.stringify(data)}`
           );
           onDocumentsChanged(documents);
+          setIsSubmitting(false);
         } catch (e) {
           console.error(e);
         }
@@ -135,58 +137,64 @@ const UploadFiles = ({ title }) => {
       <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
         {title}
       </Heading>
-      <Box mb={8}>
-        {uploadError && <Text color="error">{uploadError}</Text>}
-        {documents?.unconfirmed?.length > 0 && (
-          <>
-            <List>
-              {documents?.unconfirmed?.map((file) => {
-                return (
-                  <ListItem key={file.path || file.nom_fichier} borderBottom="solid 1px" borderColor="dgalt" pb={3}>
-                    <HStack>
-                      <File boxSize="5" color="bluefrance" />
-                      <Box flexGrow={1}>
-                        <Link
-                          href={`/api/v1/upload?organisme_id=${organisme._id}&path=${file.chemin_fichier}&name=${file.nom_fichier}`}
-                          textDecoration={"underline"}
-                          isExternal
-                        >
-                          {file.path || file.nom_fichier} - {formatBytes(file.size || file.taille_fichier)}
-                        </Link>
-                      </Box>
-                      <Bin boxSize="5" color="redmarianne" cursor="pointer" onClick={() => onDeleteClicked(file)} />
-                    </HStack>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </>
-        )}
-      </Box>
+      {documents?.unconfirmed?.length > 0 && (
+        <Box mb={8}>
+          {uploadError && <Text color="error">{uploadError}</Text>}
 
-      <Box {...getRootProps({ style })} mb={8}>
-        {!isSubmitting && (
           <>
-            <Input {...getInputProps()} />
-            {isDragActive ? (
-              <Text>Glissez et déposez ici ...</Text>
-            ) : (
-              <>
-                <DownloadLine boxSize="4" color="bluefrance" mb={4} />
-                <Text color="mgalt">
-                  Glissez le fichier dans cette zone ou cliquez sur le bouton pour ajouter un document depuis votre
-                  disque dur
-                </Text>
-                <Text color="mgalt">(Microsoft Excel (.xlsx ou .xls) ou .csv, maximum 10mb)</Text>
-                <Button size="md" variant="secondary" mt={4}>
-                  Ajouter un document
-                </Button>
-              </>
+            {!isSubmitting && (
+              <List>
+                {documents?.unconfirmed?.map((file) => {
+                  return (
+                    <ListItem key={file.path || file.nom_fichier} borderBottom="solid 1px" borderColor="dgalt" pb={3}>
+                      <HStack>
+                        <File boxSize="5" color="bluefrance" />
+                        <Box flexGrow={1}>
+                          <Link
+                            href={`/api/v1/upload?organisme_id=${organisme._id}&path=${file.chemin_fichier}&name=${file.nom_fichier}`}
+                            textDecoration={"underline"}
+                            isExternal
+                          >
+                            {file.path || file.nom_fichier} - {formatBytes(file.size || file.taille_fichier)}
+                          </Link>
+                        </Box>
+                        <Bin boxSize="5" color="redmarianne" cursor="pointer" onClick={() => onDeleteClicked(file)} />
+                      </HStack>
+                    </ListItem>
+                  );
+                })}
+              </List>
             )}
+            {isSubmitting && <Spinner />}
           </>
-        )}
-        {isSubmitting && <Spinner />}
-      </Box>
+        </Box>
+      )}
+
+      {documents?.unconfirmed?.length === 0 && (
+        <Box {...getRootProps({ style })} mb={8} minH="200px">
+          {!isSubmitting && (
+            <>
+              <Input {...getInputProps()} />
+              {isDragActive ? (
+                <Text>Glissez et déposez ici ...</Text>
+              ) : (
+                <>
+                  <DownloadLine boxSize="4" color="bluefrance" mb={4} />
+                  <Text color="mgalt">
+                    Glissez le fichier dans cette zone ou cliquez sur le bouton pour ajouter un document depuis votre
+                    disque dur
+                  </Text>
+                  <Text color="mgalt">(Microsoft Excel (.xlsx ou .xls) ou .csv, maximum 10mb)</Text>
+                  <Button size="md" variant="secondary" mt={4}>
+                    Ajouter un document
+                  </Button>
+                </>
+              )}
+            </>
+          )}
+          {isSubmitting && <Spinner />}
+        </Box>
+      )}
     </>
   );
 };

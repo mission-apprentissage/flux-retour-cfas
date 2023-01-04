@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Box, Button, Flex, Heading, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, HStack, Link, Spinner, Text, useToast, VStack } from "@chakra-ui/react";
 import { Alert, ArrowDropRightLine, Bin, InfoLine, ValidateIcon } from "../../../theme/components/icons";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
@@ -31,8 +31,9 @@ const Televersements = () => {
   const [typeDocument, setTypeDocument] = useState("");
   const [savedAsModel, setSavedAsModel] = useState(false);
   const [modelAsChange, setModelAsChange] = useState(false);
+  const toast = useToast();
 
-  const [mappingForThisType] = uploads?.models.filter(({ type_document }) => type_document === typeDocument) || [];
+  const [mappingForThisType] = uploads?.models?.filter(({ type_document }) => type_document === typeDocument) || [];
 
   const onDefineFileType = useCallback(
     async (type_document) => {
@@ -108,6 +109,11 @@ const Televersements = () => {
     [availableKeys.in, availableKeys.out, lines]
   );
 
+  const onGoBackToUpload = useCallback(async () => {
+    setMapping(null);
+    setStep("upload");
+  }, []);
+
   const onGoToMappingStep = useCallback(async () => {
     setStep("mapping");
     const response = await _get(`/api/v1/upload/analyse?organisme_id=${organisme._id}`);
@@ -134,9 +140,24 @@ const Televersements = () => {
       );
       reqKeys.shift();
       setRequireKeysSettled(reqKeys);
+      let error = false;
       for (const value of reqKeys) {
-        const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
-        keyToLock.locked = true;
+        try {
+          const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
+          keyToLock.locked = true;
+        } catch (err) {
+          error = true;
+        }
+      }
+      if (error) {
+        // Model does not match mapping on required field so gracefully reset
+        toast({
+          title: `Le modèle que vous avez choisi ne correspond pas à ce fichier. Veuillez choisir un autre modèle ou en créer un nouveau`,
+          status: "error",
+          duration: 10000,
+          isClosable: true,
+        });
+        onGoBackToUpload();
       }
     } else {
       initLines = Object.values(response.requireKeys).map((requireKey) => ({
@@ -148,7 +169,7 @@ const Televersements = () => {
     setLines(initLines);
 
     setMapping(response);
-  }, [mappingForThisType, organisme._id]);
+  }, [mappingForThisType, onGoBackToUpload, organisme._id, toast]);
 
   const onDefineAsModel = useCallback(async () => {
     const keyToKeyMapping = lines.reduce((acc, line) => {
@@ -188,6 +209,12 @@ const Televersements = () => {
 
   return (
     <>
+      <Flex>
+        <Text>Je n&rsquo;ai pas de fichier. Vous pouvez utiliser notre fichier modèle.</Text>
+        <Link href={`/api/v1/upload/model?organisme_id=${organisme._id}`} textDecoration={"underline"} isExternal>
+          <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
+        </Link>
+      </Flex>
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         {step === "upload" && (
           <>
@@ -248,7 +275,12 @@ const Televersements = () => {
                 />
               </VStack>
             </HStack>
-            <Button onClick={onGoToMappingStep} size={"md"} variant="primary" disabled={typeDocument === ""}>
+            <Button
+              onClick={onGoToMappingStep}
+              size={"md"}
+              variant="primary"
+              disabled={typeDocument === "" || !documents?.unconfirmed?.length}
+            >
               Étape suivante
               <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
             </Button>
@@ -460,7 +492,7 @@ const Televersements = () => {
               </VStack>
             )}
             <HStack>
-              <Button onClick={() => setStep("upload")} size={"md"} variant="secondary">
+              <Button onClick={onGoBackToUpload} size={"md"} variant="secondary">
                 <ArrowDropRightLine
                   w={"0.75rem"}
                   h={"0.75rem"}

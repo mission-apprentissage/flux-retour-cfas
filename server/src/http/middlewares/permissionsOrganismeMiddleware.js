@@ -13,11 +13,16 @@ const hasRightsTo = async (role, acls) => {
 };
 
 export default (acls) =>
-  tryCatch(async ({ method, body, query, user }, res, next) => {
+  tryCatch(async ({ method, body, query, user, baseUrl, route }, res, next) => {
     if (user.account_status !== "CONFIRMED") {
       throw Boom.unauthorized("Accès non autorisé");
     }
-    const data = method === "GET" || method === "DELETE" ? query : body;
+    const data =
+      baseUrl === "/api/v1/upload" && route.path === "/" && method === "POST"
+        ? query
+        : method === "GET" || method === "DELETE"
+        ? query
+        : body;
 
     const isTransverseUser =
       user.permissions.is_cross_organismes &&

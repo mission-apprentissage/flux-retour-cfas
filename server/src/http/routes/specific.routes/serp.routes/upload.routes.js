@@ -24,7 +24,7 @@ import { uploadsDb } from "../../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
-// import permissionsDossierMiddleware = require("../../middlewares/permissionsDossierMiddleware");
+import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
 
 const mappingModel = {
   annee_scolaire: "annee_scolaire",
@@ -156,7 +156,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents/ajouter_un_document"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -212,7 +212,7 @@ export default ({ clamav }) => {
 
   router.get(
     "/get",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -233,7 +233,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/setDocumentType",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let { organisme_id, type_document, nom_fichier, taille_fichier } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -278,10 +278,9 @@ export default ({ clamav }) => {
     return { headers, rawFileJson, unconfirmedDocument: unconfirmed[0] };
   };
 
-  // TODO check if the current header's file matches the previously saved mapping else gracefull error
   router.get(
     "/analyse",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -569,7 +568,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/setModel",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let {
         organisme_id,
@@ -601,7 +600,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/pre-import",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let { organisme_id, mapping: userMapping } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -765,7 +764,7 @@ export default ({ clamav }) => {
 
   router.post(
     "/import",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -811,7 +810,7 @@ export default ({ clamav }) => {
 
   router.get(
     "/",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let { organisme_id, path, name } = await Joi.object({
         organisme_id: Joi.string().required(),
@@ -839,9 +838,30 @@ export default ({ clamav }) => {
     })
   );
 
+  router.get(
+    "/model",
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
+    tryCatch(async (req, res) => {
+      let { organisme_id } = await Joi.object({
+        organisme_id: Joi.string().required(),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const stream = await getFromStorage("modele_tableau_de_bord.xlsx");
+
+      res.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+      res.header("Content-Disposition", `attachment; filename=modele_tableau_de_bord.xlsx`);
+      res.header("Content-Length", 12759);
+      res.status(200);
+      res.type("xlsx");
+
+      await oleoduc(stream, crypto.isCipherAvailable() ? crypto.decipher(organisme_id) : noop(), res);
+    })
+  );
+
   router.delete(
     "/",
-    // permissionsDossierMiddleware(components, ["dossier/page_documents/supprimer_un_document"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
       let { organisme_id, nom_fichier, chemin_fichier, taille_fichier } = await Joi.object({
         organisme_id: Joi.string().required(),
