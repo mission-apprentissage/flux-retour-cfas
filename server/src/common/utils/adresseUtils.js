@@ -1,0 +1,65 @@
+import { defaultValuesAdresse } from "../model/json-schema/adresseSchema.js";
+import * as apiEntreprise from "../apis/ApiEntreprise.js";
+import departements from "../constants/departements.js";
+import { ACADEMIES } from "../constants/academiesConstants.js";
+
+export const buildAdresseFromApiEntreprise = async (siret) => {
+  const etablissementApiInfo = await apiEntreprise.getEtablissement(siret);
+  if (!etablissementApiInfo) return defaultValuesAdresse();
+
+  // Handle departement
+  let code_dept = etablissementApiInfo.adresse.code_insee_localite.substring(0, 2);
+  code_dept = code_dept === "97" ? etablissementApiInfo.adresse.code_insee_localite.substring(0, 3) : code_dept;
+
+  // Handle academie
+  const { nom_academie } = findDataByDepartementNum(code_dept);
+  const academieKeyMatching = Object.keys(ACADEMIES).find((key) => ACADEMIES[key].nom === nom_academie);
+  const academie = ACADEMIES[academieKeyMatching] ? `${ACADEMIES[academieKeyMatching]?.code}` : undefined;
+
+  return {
+    adresse: {
+      ...(parseInt(etablissementApiInfo.adresse.numero_voie)
+        ? { numero: parseInt(etablissementApiInfo.adresse.numero_voie) }
+        : {}),
+      ...(etablissementApiInfo.adresse.nom_voie ? { voie: etablissementApiInfo.adresse.nom_voie } : {}),
+      ...(etablissementApiInfo.adresse.complement_adresse
+        ? { complement: etablissementApiInfo.adresse.complement_adresse }
+        : {}),
+      ...(etablissementApiInfo.adresse.code_postal ? { code_postal: etablissementApiInfo.adresse.code_postal } : {}),
+      ...(etablissementApiInfo.adresse.code_insee_localite
+        ? { code_insee: etablissementApiInfo.adresse.code_insee_localite }
+        : {}),
+      ...(etablissementApiInfo.commune_implantation.value
+        ? { commune: etablissementApiInfo.commune_implantation.value }
+        : {}),
+      ...(code_dept ? { departement: code_dept } : {}),
+      ...(etablissementApiInfo.region_implantation.value
+        ? { region: etablissementApiInfo.region_implantation.code }
+        : {}),
+      ...(academie ? { academie: academie } : {}),
+      ...(buildAdresse(etablissementApiInfo.adresse) ? { complete: buildAdresse(etablissementApiInfo.adresse) } : {}),
+      ...(etablissementApiInfo.pays_implantation.code ? { pays: etablissementApiInfo.pays_implantation.code } : {}),
+    },
+  };
+};
+
+export const findDataByDepartementNum = (code_dept) => {
+  const data = departements[code_dept];
+  if (!data) {
+    return { nom_dept: null, nom_region: null, code_region: null, nom_academie: null, num_academie: null };
+  }
+
+  const { nom_dept, nom_region, code_region, nom_academie, num_academie } = data;
+  return { nom_dept, nom_region, code_region, nom_academie, num_academie };
+};
+
+export const buildAdresse = (adresse) => {
+  const l1 = adresse.l1 && adresse.l1 !== "" ? `${adresse.l1}\r\n` : "";
+  const l2 = adresse.l2 && adresse.l2 !== "" ? `${adresse.l2}\r\n` : "";
+  const l3 = adresse.l3 && adresse.l3 !== "" ? `${adresse.l3}\r\n` : "";
+  const l4 = adresse.l4 && adresse.l4 !== "" ? `${adresse.l4}\r\n` : "";
+  const l5 = adresse.l5 && adresse.l5 !== "" ? `${adresse.l5}\r\n` : "";
+  const l6 = adresse.l6 && adresse.l6 !== "" ? `${adresse.l6}\r\n` : "";
+  const l7 = adresse.l7 && adresse.l7 !== "" ? `${adresse.l7}` : "";
+  return `${l1}${l2}${l3}${l4}${l5}${l6}${l7}`;
+};

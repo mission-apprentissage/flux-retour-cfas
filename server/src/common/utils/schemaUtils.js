@@ -2,7 +2,7 @@ import logger from "../logger.js";
 import Joi from "joi";
 import Enjoi from "enjoi";
 
-export function schemaValidation(entity, schema, extensions = []) {
+const applySchemaValidation = (entity, schema, extensions = [], abortEarly = true) => {
   let schemaDesc = JSON.parse(JSON.stringify(schema).replaceAll("bsonType", "type"));
 
   const ext = extensions.map(({ name, ...extension }) => {
@@ -33,7 +33,30 @@ export function schemaValidation(entity, schema, extensions = []) {
     ],
   });
 
-  const { error, value } = schemaTmp.validate(entity);
+  const { error, value } = schemaTmp.validate(entity, { abortEarly });
+  return { error, value };
+};
+
+export function schemaValidation({
+  entity,
+  schema,
+  extensions = [],
+  abortEarly = true,
+  getErrors = false,
+  prefix = "",
+}) {
+  const { error, value } = applySchemaValidation(entity, schema, extensions, getErrors ? false : abortEarly);
+
+  if (getErrors) {
+    const errorsFormatted = error?.details?.map(({ context, type, message }) => ({
+      type,
+      message,
+      fieldName: `${prefix}${context.label}`,
+      inputValue: context.value,
+    }));
+
+    return errorsFormatted || [];
+  }
 
   if (error) {
     logger.error(error);

@@ -75,6 +75,13 @@ export const config = {
     containerName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").required().asString(),
     encryptionKey: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_ENCRYPTION_KEY").required().asString(),
   },
+  ovh: {
+    storage: {
+      encryptionKey: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_ENCRYPTION_KEY").asString(),
+      uri: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_URI").asString(),
+      storageName: env.get("FLUX_RETOUR_CFAS_OVH_STORAGE_CONTAINER_NAME").asString(),
+    },
+  },
   redis: {
     uri: env.get("FLUX_RETOUR_CFAS_REDIS_URI").default("redis://127.0.0.1:6379").asString(),
   },

@@ -2,11 +2,12 @@ import { strict as assert } from "assert";
 import config from "../../../src/config.js";
 import { startServer } from "../../utils/testUtils.js";
 import jwt from "jsonwebtoken";
+import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
 
 describe("Login Route", () => {
   it("Vérifie qu'on peut se connecter", async () => {
-    const { httpClient, components } = await startServer();
-    await components.users.createUser({ username: "user", password: "password" });
+    const { httpClient } = await startServer();
+    await createUserLegacy({ username: "user", password: "password" });
 
     const response = await httpClient.post("/api/login", {
       username: "user",
@@ -23,8 +24,8 @@ describe("Login Route", () => {
   });
 
   it("Vérifie qu'un mot de passe invalide est rejeté", async () => {
-    const { httpClient, components } = await startServer();
-    await components.users.createUser({ username: "user", password: "password" });
+    const { httpClient } = await startServer();
+    await createUserLegacy({ username: "user", password: "password" });
 
     const response = await httpClient.post("/api/login", {
       username: "user",
@@ -35,8 +36,8 @@ describe("Login Route", () => {
   });
 
   it("Vérifie qu'un login invalide est rejeté", async () => {
-    const { httpClient, components } = await startServer();
-    await components.users.createUser({ username: "user", password: "password" });
+    const { httpClient } = await startServer();
+    await createUserLegacy({ username: "user", password: "password" });
 
     const response = await httpClient.post("/api/login", {
       username: "INVALID",

@@ -9,9 +9,12 @@ import Sommaire from "../../components/Sommaire/Sommaire";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
 import { getUniquesMonthAndYearFromDatesList } from "../../common/utils/dateUtils";
 import { capitalize } from "../../common/utils/stringUtils";
-import { groupEvolutionsByDate } from "./groupEvolutionsByDate";
-import JournalDesEvolutionsTagFilter from "./JournalDesEvolutionsTagFilter";
-import { JOURNAL_DES_EVOLUTIONS_DATA, JOURNAL_DES_EVOLUTIONS_TAGS } from "./JournalEvolutionsData";
+import { groupEvolutionsByDate } from "../../modules/journal-des-evolutions/groupEvolutionsByDate";
+import JournalDesEvolutionsTagFilter from "../../modules/journal-des-evolutions/JournalDesEvolutionsTagFilter";
+import {
+  JOURNAL_DES_EVOLUTIONS_DATA,
+  JOURNAL_DES_EVOLUTIONS_TAGS,
+} from "../../modules/journal-des-evolutions/JournalEvolutionsData";
 import Head from "next/head";
 import Section from "../../components/Section/Section";
 
@@ -38,7 +41,9 @@ const JournalDesEvolutions = () => {
         <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
       </Section>
       <Section marginTop="5w">
-        <Heading as="h1">{NAVIGATION_PAGES.JournalDesEvolutions.title}</Heading>
+        <Heading as="h1" mb="2w">
+          {NAVIGATION_PAGES.JournalDesEvolutions.title}
+        </Heading>
         <HStack
           spacing={["0", "0", "4w", "2w"]}
           paddingY="1w"
@@ -58,7 +63,8 @@ const JournalDesEvolutions = () => {
       </Section>
       <Section>
         <HStack
-          spacing={["0", "0", "0", "12w"]}
+          alignItems="start"
+          spacing={["0", "0", "0", "6w"]}
           flexDirection={["column-reverse", "column-reverse", "column-reverse", "row"]}
         >
           <Box flex="1">

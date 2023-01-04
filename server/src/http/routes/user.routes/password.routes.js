@@ -6,8 +6,8 @@ import { passwordSchema } from "../../../common/utils/validationUtils.js";
 import passport from "passport";
 import { createResetPasswordToken, createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { Strategy, ExtractJwt } from "passport-jwt";
-import { changePassword, getUser, loggedInUser, structureUser } from "../../../common/components/usersComponent.js";
-import * as sessions from "../../../common/components/sessionsComponent.js";
+import { changePassword, getUser, loggedInUser, structureUser } from "../../../common/actions/users.actions.js";
+import * as sessions from "../../../common/actions/sessions.actions.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 
 const checkPasswordToken = () => {
@@ -19,7 +19,6 @@ const checkPasswordToken = () => {
         secretOrKey: config.auth.resetPasswordToken.jwtSecret,
       },
       (jwt_payload, done) => {
-        console.log(jwt_payload);
         return getUser(jwt_payload.sub)
           .then((user) => {
             if (!user) {
@@ -57,7 +56,7 @@ export default ({ mailer }) => {
         return res.json({ token });
       }
 
-      await mailer.sendEmail(user, "reset_password");
+      await mailer.sendEmail({ to: user.email, payload: user }, "reset_password");
 
       return res.json({});
     })
@@ -73,6 +72,7 @@ export default ({ mailer }) => {
         passwordToken: Joi.string().required(),
         newPassword: passwordSchema(user.is_admin).required(),
       }).validateAsync(req.body, { abortEarly: false });
+      // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
 
       const updatedUser = await changePassword(user.email, newPassword);
 

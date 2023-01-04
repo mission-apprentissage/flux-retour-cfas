@@ -66,6 +66,17 @@ export const _get = async (path, signal) => {
   return handleResponse(path, response);
 };
 
+export const _getBlob = async (path, signal) => {
+  const response = await axios.get(path, {
+    headers: getHeaders(),
+    signal,
+    validateStatus: () => true,
+    httpsAgent: getHttpsAgent(),
+    responseType: "blob",
+  });
+  return handleResponse(path, response);
+};
+
 export const _post = async (path, body, signal) => {
   const response = await axios.post(path, body, {
     headers: getHeaders(),
@@ -78,7 +89,7 @@ export const _post = async (path, body, signal) => {
 
 export const _postFile = async (path, data, signal) => {
   const response = await axios.post(path, data, {
-    headers: getHeaders(),
+    headers: getHeaders(null),
     validateStatus: () => true,
     signal,
     httpsAgent: getHttpsAgent(),

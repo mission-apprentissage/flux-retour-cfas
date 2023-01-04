@@ -3,12 +3,11 @@ import Head from "next/head";
 import { Box, Flex, Heading, HStack, Image, Text } from "@chakra-ui/react";
 import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
 import { PRODUCT_NAME } from "../common/constants/product";
-import ApercuDesDonneesSection from "./home_/sections/ApercuDesDonneesSection";
-import RgpdSection from "./home_/sections/RgpdSection";
+import ApercuDesDonneesSection from "../components/Home/sections/ApercuDesDonneesSection";
+import RgpdSection from "../components/Home/sections/RgpdSection";
 
 import LinkCard from "../components/LinkCard/LinkCard";
 import { Section, Page } from "../components";
-import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
 
 export default function Home() {
   const title = PRODUCT_NAME;
@@ -19,7 +18,6 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Section paddingY="4w">
-        <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
         <Flex pt="2w">
           <Box flex="1">
             <Heading as="h1" fontSize="2.3em" textAlign={["center", "center", "center", "initial"]}>

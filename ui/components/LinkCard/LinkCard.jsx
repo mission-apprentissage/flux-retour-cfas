@@ -35,6 +35,7 @@ const LinkCard = ({ children, linkHref, variant = "blue", ...styleProps }) => {
       background={cardVariants[variant].backgroundColor}
       height={cardVariants[variant].height}
       fontSize="gamma"
+      w="100%"
       paddingY="3w"
       _hover={{ bg: `${cardVariants[variant].hoverBackgroundColor}` }}
       border={cardVariants[variant].border}

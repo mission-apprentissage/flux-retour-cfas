@@ -47,14 +47,13 @@ const Login = (props) => {
         if (!user.account_status === "NOT_CONFIRMED") {
           router.push(`/auth/en-attente-confirmation`);
         } else {
-          router.push("/");
+          router.push("/mon-espace/mon-organisme");
         }
       }
     } catch (e) {
-      if (e.messages?.details?.message === "Mauvaise méthode de connexion") {
-        setStatus({ error: "Veuillez vous connecter avec une autre méthode." });
+      if (e.messages?.message === "Old connection method") {
+        setStatus({ error: "Pour des raisons de sécurité, merci de vous créer un compte nominatif" });
       } else {
-        console.error(e);
         setStatus({ error: e.prettyMessage });
       }
     }
@@ -68,7 +67,8 @@ const Login = (props) => {
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={Yup.object().shape({
-          email: Yup.string().email().required("Requis"),
+          email: Yup.string().required("Requis"),
+          // email: Yup.string().email().required("Requis"), // TODO TMP migration
           password: Yup.string().required("Requis"),
         })}
         onSubmit={login}
@@ -117,7 +117,7 @@ const Login = (props) => {
                 </Link>
               </HStack>
               {status.error && (
-                <Text color="error" mt={2}>
+                <Text color="error" mt={8}>
                   {status.error}
                 </Text>
               )}

@@ -1,5 +1,5 @@
 import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
-import { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } from "../../domain/effectif.js";
+import { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } from "../../utils/validationsUtils/effectif.js";
 import { Indicator } from "./indicator.js";
 import { addMonths } from "date-fns";
 
@@ -27,20 +27,7 @@ export class EffectifsRupturants extends Indicator {
       {
         $addFields: {
           previousStatutAtDate: {
-            $arrayElemAt: [
-              "$historique_statut_apprenant",
-              {
-                $subtract: [
-                  {
-                    $indexOfArray: [
-                      "$historique_statut_apprenant.date_statut",
-                      "$statut_apprenant_at_date.date_statut",
-                    ],
-                  },
-                  1,
-                ],
-              },
-            ],
+            $arrayElemAt: ["$historique_statut_apprenant", -2],
           },
         },
       },
