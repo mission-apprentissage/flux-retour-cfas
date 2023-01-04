@@ -13,7 +13,7 @@ export const indexes = () => {
       { id_erp_apprenant: 1, uai_etablissement: 1 },
       { name: "uai_id_erp", unique: true },
     ],
-    [{ organisme_id: 1 }],
+    [{ organisme_id: 1 }, { name: "organisme_id" }],
     [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
 
     [{ formation_cfd: 1 }, { name: "formation_cfd" }],
