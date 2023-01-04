@@ -115,6 +115,7 @@ const Televersements = () => {
   }, []);
 
   const onGoToMappingStep = useCallback(async () => {
+    toast.closeAll();
     setStep("mapping");
     const response = await _get(`/api/v1/upload/analyse?organisme_id=${organisme._id}`);
 
