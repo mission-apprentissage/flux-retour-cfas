@@ -85,7 +85,7 @@ function MesOrganismes() {
               </TableCaption>
               <Thead>
                 <Tr background="galt">
-                  <Th>Nom de l'organisme</Th>
+                  <Th>Nom de l&lsquo;organisme</Th>
                   <Th>Nature</Th>
                   <Th>Localisation</Th>
                   <Th>SIRET</Th>
