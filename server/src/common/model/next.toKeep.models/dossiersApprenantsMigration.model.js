@@ -10,8 +10,8 @@ export const collectionName = "dossiersApprenantsMigration";
 export const indexes = () => {
   return [
     [
-      { id_erp_apprenant: 1, uai_etablissement: 1 },
-      { name: "uai_id_erp", unique: true },
+      { id_erp_apprenant: 1, uai_etablissement: 1, annee_scolaire: 1 },
+      { name: "uai_id_erp_annee_scolaire", unique: true },
     ],
     [{ organisme_id: 1 }, { name: "organisme_id" }],
     [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
