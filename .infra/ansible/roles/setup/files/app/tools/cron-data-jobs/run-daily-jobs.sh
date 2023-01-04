@@ -5,7 +5,7 @@ set -euo pipefail
 # Script d'éxecution des jobs quotidiens
 #################################################
 
-readonly LOG_FILEPATH="/var/log/data-jobs/log_$(date +'%Y-%m-%d_%H%M%S').log"
+readonly LOG_FILEPATH="/var/log/data-jobs/run_daily_jobs_$(date +'%Y-%m-%d_%H%M%S').log"
 
 call_daily_jobs_with_logs(){
   # Remplissage des organismes
