@@ -52,10 +52,29 @@ export const hydrateEffectif = async (effectifData, options) => {
     .validateAsync(effectifData, { abortEarly: false });
 
   let convertedEffectif = cloneDeep(effectifData);
-  if (effectifData.apprenant.date_de_naissance) {
+
+  const dataConverter = (date) => {
     // TODO If more than year 4000 error
-    const date_de_naissance_ISO = dateStringToLuxon(dateFormatter(effectifData.apprenant.date_de_naissance)).toISO();
-    if (date_de_naissance_ISO) convertedEffectif.apprenant.date_de_naissance = date_de_naissance_ISO;
+    const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
+    return date_ISO ?? date;
+  };
+
+  if (effectifData.apprenant.date_de_naissance) {
+    convertedEffectif.apprenant.date_de_naissance = dataConverter(effectifData.apprenant.date_de_naissance);
+  }
+
+  if (effectifData.apprenant.contrats?.length) {
+    for (const [key, contrat] of effectifData.apprenant.contrats.entries()) {
+      if (contrat.date_debut) {
+        convertedEffectif.apprenant.contrats[key].date_debut = dataConverter(contrat.date_debut);
+      }
+      if (contrat.date_fin) {
+        convertedEffectif.apprenant.contrats[key].date_fin = dataConverter(contrat.date_fin);
+      }
+      if (contrat.date_rupture) {
+        convertedEffectif.apprenant.contrats[key].date_rupture = dataConverter(contrat.date_rupture);
+      }
+    }
   }
 
   const effectif = buildEffectif(

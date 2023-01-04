@@ -83,9 +83,9 @@ const mappingModel = {
   dernier_contrat_adresse_code_postal: "apprenant.contrats.adresse.code_postal",
   dernier_contrat_adresse_code_commune_insee: "apprenant.contrats.adresse.code_insee",
   dernier_contrat_adresse_commune: "apprenant.contrats.adresse.commune",
-  dernier_contrat_date_debut: "apprenant.contrats.adresse.date_debut",
-  dernier_contrat_date_fin: "apprenant.contrats.adresse.date_fin",
-  dernier_contrat_date_rupture: "apprenant.contrats.adresse.date_rupture",
+  dernier_contrat_date_debut: "apprenant.contrats.date_debut",
+  dernier_contrat_date_fin: "apprenant.contrats.date_fin",
+  dernier_contrat_date_rupture: "apprenant.contrats.date_rupture",
 };
 
 function discard() {
@@ -652,6 +652,8 @@ export default ({ clamav }) => {
             prenom: canNotBeImportEffectif.apprenant.prenom,
           });
         } else {
+          data.apprenant.historique_statut = data.apprenant.historique_statut ? [data.apprenant.historique_statut] : [];
+          data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
           const { effectif: canBeImportEffectif, found } = await hydrateEffectif(
             {
               organisme_id,
@@ -669,6 +671,8 @@ export default ({ clamav }) => {
               .filter((fieldName) => !["CFD", "nom", "prenom"].includes(fieldName))
               .map((fN) => mappingModel[fN]);
             effectifToSave = cloneDeep(found);
+            let tmpContrat = {};
+            // TODO HISTORIQUE STATUT
             [
               "annee_scolaire",
               "validation_errors",
@@ -695,8 +699,16 @@ export default ({ clamav }) => {
                 };
                 value = buildDiffValidationErrors(value, found);
               }
-              if (value) set(effectifToSave, fieldName, value);
+              if (fieldName.includes("apprenant.contrats.")) {
+                // TODO ADRESSE
+                const contratKey = fieldName.replace("apprenant.contrats.", "");
+                value = canBeImportEffectif.apprenant.contrats[0][contratKey];
+                if (value) tmpContrat[contratKey] = value;
+              } else if (value) set(effectifToSave, fieldName, value);
             });
+            if (Object.keys(tmpContrat).length) {
+              effectifToSave.apprenant.contrats.push(tmpContrat);
+            }
           }
 
           canBeImportEffectifs.push({

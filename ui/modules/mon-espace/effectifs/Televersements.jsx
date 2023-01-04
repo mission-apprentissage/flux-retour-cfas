@@ -15,7 +15,7 @@ import { useRouter } from "next/router";
 const Televersements = () => {
   useFetchUploads();
   const { documents, uploads, onDocumentsChanged } = useDocuments();
-  const [step, setStep] = useState("upload");
+  const [step, setStep] = useState("landing");
   const organisme = useRecoilValue(organismeAtom);
   const [mapping, setMapping] = useState(null);
   const router = useRouter();
@@ -210,12 +210,20 @@ const Televersements = () => {
 
   return (
     <>
-      <Flex>
-        <Text>Je n&rsquo;ai pas de fichier. Vous pouvez utiliser notre fichier modèle.</Text>
-        <Link href={`/api/v1/upload/model?organisme_id=${organisme._id}`} textDecoration={"underline"} isExternal>
-          <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
-        </Link>
-      </Flex>
+      {step === "landing" && (
+        <Flex alignItems="flex-start" mt={8} flexDirection="column">
+          <Text>Je n&rsquo;ai pas de fichier. Vous pouvez utiliser notre fichier modèle.</Text>
+          <Link href={`/api/v1/upload/model?organisme_id=${organisme._id}`} textDecoration={"underline"} isExternal>
+            <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
+          </Link>
+          <Box mt={10}>
+            <Button onClick={() => setStep("upload")} size={"md"} variant="primary">
+              Téléverser un fichier
+              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
+            </Button>
+          </Box>
+        </Flex>
+      )}
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         {step === "upload" && (
           <>
