@@ -23,6 +23,7 @@ import { hydrateEffectif } from "../../../../common/actions/engine/engine.action
 import { cloneDeep, find, get, set } from "lodash-es";
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { ObjectId } from "mongodb";
+import { DateTime } from "luxon";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 // import permissionsDossierMiddleware = require("../../middlewares/permissionsDossierMiddleware");
 
@@ -167,7 +168,8 @@ export default ({ clamav }) => {
           organisme_id: Joi.string().required(),
         }).validateAsync(req.query, { abortEarly: false });
 
-        let path = `uploads/${organisme_id}/${part.filename}`;
+        const fileName = `${DateTime.now().toFormat("dd-MM-yyyy-hh:mm")}_${part.filename}`;
+        let path = `uploads/${organisme_id}/${fileName}`;
         let { scanStream, getScanResults } = await clamav.getScanner();
         let { hashStream, getHash } = crypto.checksum();
 
@@ -197,7 +199,7 @@ export default ({ clamav }) => {
         await addDocument(organisme_id, {
           ext_fichier: part.filename.split(".").pop(),
           hash_fichier,
-          nom_fichier: part.filename,
+          nom_fichier: fileName,
           chemin_fichier: path,
           taille_fichier: test ? 0 : part.byteCount,
           userEmail: req.user.email,
