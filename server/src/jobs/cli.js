@@ -27,7 +27,7 @@ cli
   .option("-e, --email <string>", "Email de l'utilisateur Admin")
   .action(async ({ email }) => {
     runScript(async () => {
-      seedRoles();
+      await seedRoles();
       return seedAdmin({ adminEmail: email?.toLowerCase() });
     }, "Seed-admin");
   });

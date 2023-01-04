@@ -21,8 +21,6 @@ export const seedRoles = async () => {
 };
 
 export const seedAdmin = async ({ adminEmail }) => {
-  await seedRoles();
-
   // Create user Admin
   const aEmail = adminEmail || "admin@test.fr";
   const userAdmin = await createUser(
