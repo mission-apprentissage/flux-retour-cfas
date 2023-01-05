@@ -38,7 +38,7 @@ export const userAfterCreate = async ({
       await createPermission({
         organisme_id: null,
         userEmail,
-        role: "organisme.statsonly",
+        role: "organisme.admin",
         pending: false,
       });
     } else {
