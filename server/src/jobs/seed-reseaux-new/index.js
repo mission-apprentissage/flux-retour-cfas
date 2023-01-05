@@ -23,6 +23,7 @@ const INPUT_FILES = [
   "referentiel-reseau-excellence-pro.csv",
   "referentiel-reseau-greta-pdl.csv",
   "referentiel-reseau-aftral.csv",
+  "referentiel-reseau-cr-normandie.csv",
 ];
 
 /**
