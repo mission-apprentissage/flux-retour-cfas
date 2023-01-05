@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { DEFAULT_PAGE_SIZE } from "../components/Pagination/Pagination";
+import { DEFAULT_PAGE_SIZE } from "../../components/Pagination/Pagination";
 
 const usePaginatedItems = (items) => {
   const [current, setCurrent] = useState(1);

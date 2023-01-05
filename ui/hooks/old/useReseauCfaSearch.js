@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchSearchReseauxCfas } from "../common/api/tableauDeBord";
-import { QUERY_KEYS } from "../common/constants/queryKeys";
-import { omitNullishValues } from "../common/utils/omitNullishValues";
+import { fetchSearchReseauxCfas } from "../../common/api/tableauDeBord";
+import { QUERY_KEYS } from "../../common/constants/queryKeys";
+import { omitNullishValues } from "../../common/utils/omitNullishValues";
 import useDebounce from "./useDebounce";
 
 export const MINIMUM_CHARS_TO_PERFORM_SEARCH = 3;

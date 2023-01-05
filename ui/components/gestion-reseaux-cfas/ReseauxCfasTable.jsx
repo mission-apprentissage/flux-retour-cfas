@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteReseauCfa } from "../../common/api/tableauDeBord";
 import { BasePagination } from "../Pagination/Pagination";
 import { QUERY_KEYS } from "../../common/constants/queryKeys";
-import usePaginatedItems from "../../hooks/usePaginatedItems";
+import usePaginatedItems from "../../hooks/old/usePaginatedItems";
 
 const ReseauxCfasTable = ({ reseauxCfas }) => {
   const toast = useToast();
