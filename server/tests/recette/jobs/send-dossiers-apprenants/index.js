@@ -1,7 +1,7 @@
 const assert = require("assert");
 const { format } = require("date-fns");
 
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
+const { createRandomDossierApprenantApiInput } = require("../../../data/randomizedSample");
 const {
   getJwtForUser,
   getHttpClient,
@@ -65,17 +65,7 @@ async function main() {
       contrat_date_rupture: "2020-04-30T00:00:00.000Z",
       date_entree_formation: "2020-02-30T00:00:00.000Z",
     },
-    ...Array.from({ length: 99 })
-      .map((_undefined, idx) =>
-        createRandomDossierApprenant({
-          id_formation: "32031213",
-          email_contact: `test+${idx}@mail.com`,
-        })
-      )
-      .map((dossier) => ({
-        ...dossier,
-        periode_formation: dossier.periode_formation?.join("-"),
-      })),
+    ...Array.from({ length: 99 }).map((_undefined, _idx) => createRandomDossierApprenantApiInput()),
   ];
 
   const response = await postDossiersApprenants({
