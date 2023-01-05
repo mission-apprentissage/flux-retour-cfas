@@ -4,7 +4,11 @@ import { object, objectId, string, date, boolean, arrayOf } from "../../json-sch
 import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part.js";
 
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part.js";
-import { defaultValuesFormationEffectif, formationEffectifSchema } from "./parts/formation.effectif.part.js";
+import {
+  defaultValuesFormationEffectif,
+  formationEffectifSchema,
+  validateFormationEffectif,
+} from "./parts/formation.effectif.part.js";
 
 export const collectionName = "effectifs";
 
@@ -75,18 +79,20 @@ export function defaultValuesEffectif({ lockAtCreate = false }) {
 export function validateEffectif(props, getErrors = false) {
   if (getErrors) {
     const errorsApprenant = validateApprenant(props.apprenant, getErrors);
+    const errorsFormation = validateFormationEffectif(props.formation, getErrors);
     const entityValidation = schemaValidation({
       entity: props,
       schema,
       getErrors,
     });
-    return uniqBy([...entityValidation, ...errorsApprenant], "fieldName");
+    return uniqBy([...entityValidation, ...errorsApprenant, ...errorsFormation], "fieldName");
   }
 
   return schemaValidation({
     entity: {
       ...props,
       apprenant: validateApprenant(props.apprenant, getErrors),
+      formation: validateFormationEffectif(props.formation, getErrors),
     },
     schema,
     getErrors,

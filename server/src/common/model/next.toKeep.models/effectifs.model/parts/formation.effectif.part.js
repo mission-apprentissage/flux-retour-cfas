@@ -1,3 +1,5 @@
+import Joi from "joi";
+import { schemaValidation } from "../../../../utils/schemaUtils.js";
 import { object, string, integer, arrayOf, objectId, date } from "../../../json-schema/jsonSchemaTypes.js";
 
 export const formationEffectifSchema = object(
@@ -40,4 +42,35 @@ export function defaultValuesFormationEffectif() {
   return {
     periode: [],
   };
+}
+
+// Extra validation
+export function validateFormationEffectif(props, getErrors = false) {
+  const entityValidation = schemaValidation({
+    entity: props,
+    schema: formationEffectifSchema,
+    extensions: [
+      {
+        name: "date_debut_formation",
+        base: Joi.date().iso(),
+      },
+      {
+        name: "date_fin_formation",
+        base: Joi.date().iso(),
+      },
+      {
+        name: "date_obtention_diplome",
+        base: Joi.date().iso(),
+      },
+    ],
+    getErrors,
+    prefix: "formation.",
+  });
+
+  if (getErrors) {
+    let errors = [...entityValidation];
+    return errors;
+  }
+
+  return entityValidation;
 }

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { cloneDeep, get } from "lodash-es";
+import { capitalize, cloneDeep, get } from "lodash-es";
 import { dateFormatter, dateStringToLuxon } from "../../utils/formatterUtils.js";
 import {
   buildEffectif,
@@ -53,26 +53,26 @@ export const hydrateEffectif = async (effectifData, options) => {
 
   let convertedEffectif = cloneDeep(effectifData);
 
-  const dataConverter = (date) => {
+  const dateConverter = (date) => {
     // TODO If more than year 4000 error
     const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
     return date_ISO ?? date;
   };
 
   if (effectifData.apprenant.date_de_naissance) {
-    convertedEffectif.apprenant.date_de_naissance = dataConverter(effectifData.apprenant.date_de_naissance);
+    convertedEffectif.apprenant.date_de_naissance = dateConverter(effectifData.apprenant.date_de_naissance);
   }
 
   if (effectifData.apprenant.contrats?.length) {
     for (const [key, contrat] of effectifData.apprenant.contrats.entries()) {
       if (contrat.date_debut) {
-        convertedEffectif.apprenant.contrats[key].date_debut = dataConverter(contrat.date_debut);
+        convertedEffectif.apprenant.contrats[key].date_debut = dateConverter(contrat.date_debut);
       }
       if (contrat.date_fin) {
-        convertedEffectif.apprenant.contrats[key].date_fin = dataConverter(contrat.date_fin);
+        convertedEffectif.apprenant.contrats[key].date_fin = dateConverter(contrat.date_fin);
       }
       if (contrat.date_rupture) {
-        convertedEffectif.apprenant.contrats[key].date_rupture = dataConverter(contrat.date_rupture);
+        convertedEffectif.apprenant.contrats[key].date_rupture = dateConverter(contrat.date_rupture);
       }
     }
   }
@@ -80,10 +80,32 @@ export const hydrateEffectif = async (effectifData, options) => {
   if (effectifData.apprenant.historique_statut?.length) {
     for (const [key, contrat] of effectifData.apprenant.historique_statut.entries()) {
       if (contrat.date_statut) {
-        convertedEffectif.apprenant.historique_statut[key].date_statut = dataConverter(contrat.date_statut);
+        convertedEffectif.apprenant.historique_statut[key].date_statut = dateConverter(contrat.date_statut);
       }
     }
   }
+
+  if (effectifData.formation.date_debut_formation) {
+    convertedEffectif.formation.date_debut_formation = dateConverter(effectifData.formation.date_debut_formation);
+  }
+  if (effectifData.formation.date_fin_formation) {
+    convertedEffectif.formation.date_fin_formation = dateConverter(effectifData.formation.date_fin_formation);
+  }
+  if (effectifData.formation.date_obtention_diplome) {
+    convertedEffectif.formation.date_obtention_diplome = dateConverter(effectifData.formation.date_obtention_diplome);
+  }
+
+  const repetitionVoieConverter = (repetition_voie) => {
+    const fullRep = { Bis: "B", Ter: "T", Quater: "Q", ["Quinquiès"]: "C" };
+    console.log(capitalize(repetition_voie), fullRep[capitalize(repetition_voie)]);
+    return fullRep[capitalize(repetition_voie)] ?? repetition_voie;
+  };
+  if (effectifData.apprenant.adresse?.repetition_voie) {
+    convertedEffectif.apprenant.adresse.repetition_voie = repetitionVoieConverter(
+      effectifData.apprenant.adresse.repetition_voie.trim()
+    );
+  }
+  // TODO other repetition_voie
 
   const effectif = buildEffectif(
     {
