@@ -15,6 +15,7 @@ import {
 import { hydrateOrganismesAndFormations } from "./hydrate/organismes/hydrate-organismes-and-formations.js";
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
 import { warmEffectifsCache } from "./warm-effectifs-cache/index.js";
+import { hydrateRefreshFormations } from "./hydrate/refresh-formations/hydrate-refresh-formations.js";
 
 /**
  * Job d'initialisation de données de test
@@ -106,6 +107,19 @@ cli
     runScript(async () => {
       return hydrateOrganismesAndFormations();
     }, "hydrate-organismes-and-formations");
+  });
+
+/**
+ *  TODO ?
+ * Job de rafraichissement des formations déja présentes en base
+ */
+cli
+  .command("hydrate:refresh-formations")
+  .description("Mise à jour des formations")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateRefreshFormations();
+    }, "hydrate-refresh-formations");
   });
 
 /**

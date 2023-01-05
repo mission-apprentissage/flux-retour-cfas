@@ -85,14 +85,14 @@ export const createFormation = async ({ cfd, duree = null, annee = null }) => {
   // Call TCO Api
   const formationInfo = await getCfdInfo(cfd);
 
-  // Call LBA Api
+  // Call LBA Api // TODO Removed not useful now
   let metiersFromCfd = null;
-  try {
-    const { data } = await getMetiersByCfd(cfd);
-    metiersFromCfd = data?.metiers;
-  } catch {
-    logger.error(`createFormation / getMetiersByCfd: something went wrong while requesting cfd ${cfd}`);
-  }
+  // try {
+  //   const { data } = await getMetiersByCfd(cfd);
+  //   metiersFromCfd = data?.metiers;
+  // } catch {
+  //   logger.error(`createFormation / getMetiersByCfd: something went wrong while requesting cfd ${cfd}`);
+  // }
 
   // Libelle
   const libelleFormationBuilt = buildFormationLibelle(formationInfo);
@@ -117,6 +117,66 @@ export const createFormation = async ({ cfd, duree = null, annee = null }) => {
   );
 
   return insertedId;
+};
+
+/**
+ *
+ * @param {*} id
+ * @param {*} param1
+ * @returns
+ */
+export const updateFormation = async (id, { cfd, duree = null, annee = null, ...data }) => {
+  const _id = typeof id === "string" ? ObjectId(id) : id;
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+
+  const formation = await formationsDb().findOne({ _id });
+  if (!formation) {
+    throw new Error(`Unable to find formation ${_id.toString()}`);
+  }
+
+  if (!validateCfd(cfd)) {
+    throw Error("Invalid CFD");
+  }
+
+  // Call TCO Api
+  const formationInfo = await getCfdInfo(cfd);
+
+  // Call LBA Api // TODO Removed not useful now
+  let metiersFromCfd = null;
+  // try {
+  //   const { data } = await getMetiersByCfd(cfd);
+  //   metiersFromCfd = data?.metiers;
+  // } catch {
+  //   logger.error(`createFormation / getMetiersByCfd: something went wrong while requesting cfd ${cfd}`);
+  // }
+
+  // Libelle
+  const libelleFormationBuilt = buildFormationLibelle(formationInfo);
+  const tokenizedLibelle = buildTokenizedString(libelleFormationBuilt || "", 3);
+
+  const updated = await formationsDb().findOneAndUpdate(
+    { _id: formation._id },
+    {
+      $set: validateFormation({
+        cfd,
+        cfd_start_date: formationInfo?.date_ouverture ? new Date(formationInfo?.date_ouverture) : null, // timestamp format is returned by TCO
+        cfd_end_date: formationInfo?.date_fermeture ? new Date(formationInfo?.date_fermeture) : null, // timestamp format is returned by TCO
+        rncps: formationInfo?.rncps?.map((item) => item.code_rncp) || [], // Returned by TCO
+        libelle: libelleFormationBuilt,
+        tokenized_libelle: tokenizedLibelle,
+        niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
+        niveau_libelle: formationInfo?.niveau,
+        metiers: metiersFromCfd || [],
+        duree,
+        annee,
+        ...data,
+        updated_at: new Date(),
+      }),
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
 };
 
 /**

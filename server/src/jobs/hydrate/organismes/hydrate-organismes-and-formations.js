@@ -45,7 +45,6 @@ export const hydrateOrganismesAndFormations = async () => {
   let nbOrganismeCreated = 0;
   let nbOrganismeNotCreated = 0;
   let nbFormationsCreated = 0;
-  // let nbFormationsUpdated = 0; // TODO update ?
   let nbFormationsNotCreated = 0;
   let nbOrganismeWithoutUai = 0;
   let nbOrganismeUpdated = 0;
@@ -74,7 +73,6 @@ export const hydrateOrganismesAndFormations = async () => {
         await getFormationsTreeForOrganisme(organismeReferentiel);
 
       nbFormationsCreated += nbFormationsCreatedForOrganisme;
-      // nbFormationsUpdated += xxx; // TODO update
       nbFormationsNotCreated += nbFormationsNotCreatedForOrganisme;
 
       // Ajout de l'organisme si non existant dans le tdb
@@ -174,7 +172,6 @@ export const hydrateOrganismesAndFormations = async () => {
       nbOrganismesNonMajErreur: nbOrganismeNotUpdated,
       nbFormationsCrees: nbFormationsCreated,
       nbFormationsNonCrees: nbFormationsNotCreated,
-      // xxxxx: nbFormationsNotCreated, // TODO Update
     },
   });
 };
@@ -215,7 +212,6 @@ export const getFormationsTreeForOrganisme = async (organisme) => {
           });
         }
       } else {
-        // TODO update la formation en db ici via un reappel TCO + infos catalogue durée / année ?
         currentFormationId = formationFoundInTdb._id;
       }
 
