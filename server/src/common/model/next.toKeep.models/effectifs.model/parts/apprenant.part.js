@@ -94,7 +94,7 @@ export const apprenantSchema = object(
           date_reception: date(),
         },
         {
-          required: ["valeur_statut", "date_statut", "date_reception"],
+          required: ["valeur_statut", "date_statut"],
           additionalProperties: true,
         }
       ),
@@ -103,7 +103,7 @@ export const apprenantSchema = object(
       }
     ),
     situation_avant_contrat: integer({
-      enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // TODO
+      enum: [11, 12, 21, 31, 41, 51, 52, 53, 54, 90, 99],
       description: `**Situation de l'apprenant avant le contrat`,
     }),
     derniere_situation: integer({
@@ -124,7 +124,7 @@ export const apprenantSchema = object(
     }),
 
     dernier_diplome: integer({
-      enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // TODO
+      enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99],
       description: `**Dernier diplome obtenu`,
     }),
     mineur: boolean({

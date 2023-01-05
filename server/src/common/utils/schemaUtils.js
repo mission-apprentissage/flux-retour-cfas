@@ -52,7 +52,7 @@ export function schemaValidation({
       type,
       message,
       fieldName: `${prefix}${context.label}`,
-      inputValue: context.value,
+      inputValue: context.value ?? "",
     }));
 
     return errorsFormatted || [];

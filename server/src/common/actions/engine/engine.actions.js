@@ -77,6 +77,14 @@ export const hydrateEffectif = async (effectifData, options) => {
     }
   }
 
+  if (effectifData.apprenant.historique_statut?.length) {
+    for (const [key, contrat] of effectifData.apprenant.historique_statut.entries()) {
+      if (contrat.date_statut) {
+        convertedEffectif.apprenant.historique_statut[key].date_statut = dataConverter(contrat.date_statut);
+      }
+    }
+  }
+
   const effectif = buildEffectif(
     {
       organisme_id,

@@ -246,15 +246,26 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
       fields[validation_error.fieldName] = {
         ...fields[validation_error.fieldName],
         ...(validation_error.willNotBeModify
-          ? {
-              error: () => (
-                <p>
-                  La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
-                  &nbsp;n&rsquo;est&nbsp;pas&nbsp;valide&nbsp;pour&nbsp;ce&nbsp;champ.
-                  <br /> Ce champ a déjà rempli, il sera donc pas modifié.
-                </p>
-              ),
-            }
+          ? validation_error.isRequired
+            ? {
+                error: () => (
+                  <p>
+                    La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
+                    &nbsp;n&rsquo;est&nbsp;pas&nbsp;valide&nbsp;pour&nbsp;ce&nbsp;champ.
+                    <br />
+                    <strong>Ce champ est obligatoire.</strong>
+                  </p>
+                ),
+              }
+            : {
+                error: () => (
+                  <p>
+                    La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
+                    &nbsp;n&rsquo;est&nbsp;pas&nbsp;valide&nbsp;pour&nbsp;ce&nbsp;champ.
+                    <br /> Ce champ a déjà rempli, il sera donc pas modifié.
+                  </p>
+                ),
+              }
           : {
               warning: () => (
                 <p>

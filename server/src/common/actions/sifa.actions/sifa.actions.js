@@ -63,7 +63,7 @@ export const generateSifa = async (organisme_id) => {
         MAIL_RESP1: effectif.apprenant.representant_legal?.courriel,
         PCS: effectif.apprenant.representant_legal?.pcs,
         SIT_AV_APP: effectif.apprenant.situation_avant_contrat,
-        DIP_OBT: effectif.apprenant.dernier_diplome,
+        DIP_OBT: effectif.apprenant.dernier_diplome ? `${effectif.apprenant.dernier_diplome}`.padStart(2, "0") : "",
       };
 
       const dernierContratActif = effectif.apprenant.contrats?.[0];

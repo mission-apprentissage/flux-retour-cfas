@@ -672,17 +672,10 @@ export default ({ clamav }) => {
               .map((fN) => mappingModel[fN]);
             effectifToSave = cloneDeep(found);
             let tmpContrat = {};
-            // TODO HISTORIQUE STATUT
-            [
-              "annee_scolaire",
-              "validation_errors",
-              "source",
-              // "id_erp_apprenant",
-              ...fieldsToImport,
-            ].map((fieldName) => {
+            let tmpHistoryStatut = {};
+            ["annee_scolaire", "validation_errors", "source", ...fieldsToImport].map((fieldName) => {
               const newValue = get(canBeImportEffectif, fieldName);
               let value = newValue;
-              // TODO handle specific array cases historique status, contrat etc..
               if (fieldName === "validation_errors") {
                 const buildDiffValidationErrors = (validationErrorsOnFieldsToImport, found) => {
                   let cleanedUpErrors = [];
@@ -700,15 +693,40 @@ export default ({ clamav }) => {
                 value = buildDiffValidationErrors(value, found);
               }
               if (fieldName.includes("apprenant.contrats.")) {
-                // TODO ADRESSE
                 const contratKey = fieldName.replace("apprenant.contrats.", "");
-                value = canBeImportEffectif.apprenant.contrats[0][contratKey];
-                if (value) tmpContrat[contratKey] = value;
+                value = get(canBeImportEffectif.apprenant.contrats[0], contratKey);
+                if (value) set(tmpContrat, contratKey, value);
+              } else if (fieldName.includes("apprenant.historique_statut.")) {
+                const historyKey = fieldName.replace("apprenant.historique_statut.", "");
+                value = get(canBeImportEffectif.apprenant.historique_statut[0], historyKey);
+                if (value) set(tmpHistoryStatut, historyKey, value);
               } else if (value) set(effectifToSave, fieldName, value);
             });
             if (Object.keys(tmpContrat).length) {
-              effectifToSave.apprenant.contrats.push(tmpContrat);
+              if (tmpContrat.date_debut && tmpContrat.date_fin) {
+                effectifToSave.apprenant.contrats.push(tmpContrat);
+              }
             }
+            if (Object.keys(tmpHistoryStatut).length) {
+              if (tmpHistoryStatut.valeur_statut && tmpHistoryStatut.date_statut) {
+                effectifToSave.apprenant.historique_statut.push({ ...tmpHistoryStatut, date_reception: new Date() });
+              }
+            }
+          }
+          const contratsValidationErrors = effectifToSave.validation_errors.filter(
+            ({ fieldName }) =>
+              fieldName === "apprenant.contrats[0].date_debut" || fieldName === "apprenant.contrats[0].date_fin"
+          );
+          for (const contratsValidationError of contratsValidationErrors) {
+            contratsValidationError.willNotBeModify = true;
+            contratsValidationError.isRequired = true;
+          }
+          const historiqueStatutValidationErrors = effectifToSave.validation_errors.filter(({ fieldName }) =>
+            fieldName.includes("apprenant.historique_statut")
+          );
+          for (const historiqueStatutValidationError of historiqueStatutValidationErrors) {
+            historiqueStatutValidationError.willNotBeModify = true;
+            historiqueStatutValidationError.isRequired = true;
           }
 
           canBeImportEffectifs.push({
@@ -788,17 +806,16 @@ export default ({ clamav }) => {
       const [unconfirmedDocument] = uploads.documents.filter((d) => !d.confirm);
       const effectifsDb = await findEffectifs(organisme_id);
 
-      for (const { toUpdate, ...effectif } of uploads.last_snapshot_effectifs) {
+      for (const { toUpdate, validation_errors, ...effectif } of uploads.last_snapshot_effectifs) {
+        const errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
         if (toUpdate) {
-          const { validation_errors, ...rest } = effectif;
-          const errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
           await updateEffectif(
             effectif._id,
-            { ...rest, validation_errors: errorsToKeep },
+            { ...effectif, validation_errors: errorsToKeep },
             { keepPreviousErrors: true }
           );
         } else {
-          await createEffectif(effectif);
+          await createEffectif({ ...effectif, validation_errors: errorsToKeep });
         }
       }
 

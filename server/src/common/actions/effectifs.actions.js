@@ -89,6 +89,31 @@ export const validateEffectifObject = (effectif) => {
   let effectifMandate = cloneDeep(effectif);
   for (const validationError of effectifValidationErrors) {
     set(effectifMandate, validationError.fieldName, undefined);
+
+    if (
+      validationError.fieldName.includes("apprenant.historique_statut") &&
+      (validationError.fieldName.includes("valeur_statut") || validationError.fieldName.includes("date_statut"))
+    ) {
+      const [, index] = RegExp(/^apprenant.historique_statut\[([0-9]{1})\].(valeur_statut|date_statut)$/, "g").exec(
+        validationError.fieldName
+      );
+      effectifMandate.apprenant.historique_statut = [
+        ...effectifMandate.apprenant.historique_statut.slice(0, index),
+        ...effectifMandate.apprenant.historique_statut.slice(index + 1),
+      ];
+    }
+    if (
+      validationError.fieldName.includes("apprenant.contrats") &&
+      (validationError.fieldName.includes("date_debut") || validationError.fieldName.includes("date_fin"))
+    ) {
+      const [, index] = RegExp(/^apprenant.contrats\[([0-9]{1})\].(date_debut|date_fin)$/, "g").exec(
+        validationError.fieldName
+      );
+      effectifMandate.apprenant.contrats = [
+        ...effectifMandate.apprenant.contrats.slice(0, index),
+        ...effectifMandate.apprenant.contrats.slice(index + 1),
+      ];
+    }
   }
 
   return { ...compactObject(effectifMandate), validation_errors: effectifValidationErrors };
