@@ -27,6 +27,7 @@ const LOG_ACTIONS = {
     CREATED: "log-dossierApprenantMigration-organismeCreated",
     CREATION_ERROR: "log-dossierApprenantMigration-organismeCreated-error",
   },
+  FINISHING: "finishing",
 };
 
 /**
@@ -136,6 +137,23 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (
   logger.info(`---> ${nbOrganismeExistantTotal} organismes déja existants.`);
   logger.info(`---> ${nbOrganismeCreatedTotal} organismes crées.`);
   logger.info(`---> ${nbOrganismeCreatedErrorsTotal} organismes non créées à cause d'erreurs.`);
+
+  await createJobEvent({
+    jobname: JOBNAME,
+    date: new Date(),
+    action: LOG_ACTIONS.FINISHING,
+    data: {
+      nbUaiDistinctsTraités: nbUaiHandled,
+      nbDossiersApprenantsAMigrer: nbDossiersToMigrate,
+      nbDossiersApprenantsMigres: nbDossiersMigratedTotal,
+      nbDossiersApprenantsNonMigres: nbDossiersNotMigratedTotal,
+      nbEffectifsCrees: nbEffectifsCreatedTotal,
+      nbEffectifsMaj: nbEffectifsUpdatedTotal,
+      nbOrganismesDejaExistant: nbOrganismeExistantTotal,
+      nbOrganismesCrees: nbOrganismeCreatedTotal,
+      nbOrganismesNonCreesErreur: nbOrganismeCreatedErrorsTotal,
+    },
+  });
 };
 
 /**

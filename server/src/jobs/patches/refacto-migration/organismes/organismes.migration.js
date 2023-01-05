@@ -83,6 +83,19 @@ export const migrateCfasToOrganismes = async () => {
   logger.info(`--> ${cfasNotMigrated.length} cfas non transformés (erreur)`);
   logger.info(`---> ${cfasUaiErrors.length} cfas non transformés à cause d'un pb de localisation via UAI (erreur)`);
   logger.info(`---> ${cfasSiretsErrors.length} cfas non transformés à cause d'un pb de sirets (erreur)`);
+
+  await createJobEvent({
+    jobname: "refacto-migration-cfas-to-organismes",
+    date: new Date(),
+    action: "finishing",
+    data: {
+      nbCfasInitiaux: allCfas.length,
+      nbCfasMigres: nbCfasMigrated,
+      nbCfasNonMigres: cfasNotMigrated.length,
+      nbCfasErreursLocalisationUai: cfasUaiErrors.length,
+      nbCfasErreursSiret: cfasSiretsErrors.length,
+    },
+  });
 };
 
 /**
