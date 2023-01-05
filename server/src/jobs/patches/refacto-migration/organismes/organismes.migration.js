@@ -33,9 +33,11 @@ export const migrateCfasToOrganismes = async () => {
   loadingBar.start(allCfas.length, 0);
 
   await asyncForEach(allCfas, async (currentOldCfa) => {
-    // Pour chaque cfa on le transforme en organisme
-    const mappedToOrganisme = await mapCfaPropsToOrganismeProps(currentOldCfa);
+    let mappedToOrganisme;
+
     try {
+      // Pour chaque cfa on le transforme en organisme
+      mappedToOrganisme = await mapCfaPropsToOrganismeProps(currentOldCfa);
       const { _id } = await createOrganismeFromCfa(mappedToOrganisme);
       await updateOrganismeApiKey(_id);
       nbCfasMigrated++;

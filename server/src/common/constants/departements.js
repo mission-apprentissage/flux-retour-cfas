@@ -719,6 +719,22 @@ export default {
     nom_academie: "Mayotte",
     num_academie: 43,
   },
+  977: {
+    nom_dept: "Guadeloupe",
+    code_dept: "971",
+    nom_region: "Guadeloupe",
+    code_region: "01",
+    nom_academie: "Guadeloupe",
+    num_academie: 32,
+  },
+  978: {
+    nom_dept: "Guadeloupe",
+    code_dept: "971",
+    nom_region: "Guadeloupe",
+    code_region: "01",
+    nom_academie: "Guadeloupe",
+    num_academie: 32,
+  },
   "01": {
     nom_dept: "Ain",
     code_dept: "01",

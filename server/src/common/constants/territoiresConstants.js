@@ -82,6 +82,14 @@ export const REGIONS = [
     nom: "Corse",
     code: "94",
   },
+  {
+    nom: "Saint-Martin",
+    code: "978",
+  },
+  {
+    nom: "Saint-Barthélemy",
+    code: "977",
+  },
 ];
 
 export const DEPARTEMENTS = [

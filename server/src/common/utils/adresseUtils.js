@@ -14,7 +14,8 @@ export const buildAdresseFromApiEntreprise = async (siret) => {
   // Handle academie
   const { nom_academie } = findDataByDepartementNum(code_dept);
   const academieKeyMatching = Object.keys(ACADEMIES).find((key) => ACADEMIES[key].nom === nom_academie);
-  const academie = ACADEMIES[academieKeyMatching] ? `${ACADEMIES[academieKeyMatching]?.code}` : undefined;
+  if (!academieKeyMatching) throw new Error(`Academie not found for code ${code_dept}`);
+  const academie = `${ACADEMIES[academieKeyMatching].code}`;
 
   return {
     adresse: {
