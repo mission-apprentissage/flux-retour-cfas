@@ -16,7 +16,7 @@ const ensureInitialization = () => {
  * @returns client
  */
 export const connectToMongodb = async (uri) => {
-  logger.info("Connecting to MongoDB at", uri);
+  logger.info("Connecting to MongoDB...");
   const client = new MongoClient(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
