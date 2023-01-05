@@ -31,10 +31,10 @@ const ProfileInformation = () => {
       civility: auth.civility || "",
     },
     validationSchema: Yup.object().shape({
-      prenom: Yup.string(),
-      name: Yup.string(),
+      prenom: Yup.string().required("Champs obligatoire"),
+      nom: Yup.string().required("Champs  obligatoire"),
       telephone: Yup.string(),
-      civility: Yup.string(),
+      civility: Yup.string().required("Champs  obligatoire"),
       email: Yup.string().email("Email invalide"),
     }),
     onSubmit: ({ nom, prenom, telephone, email, civility }, { setSubmitting }) => {
@@ -66,28 +66,31 @@ const ProfileInformation = () => {
           Mes informations
         </Heading>
         <Box mt={8}>
-          <RadioGroup value={values.civility}>
-            <HStack>
-              <Radio
-                type="radio"
-                name="civility"
-                value={"Monsieur"}
-                checked={values.civility !== "Madame"}
-                onChange={handleChange}
-              >
-                Monsieur
-              </Radio>
-              <Radio
-                type="radio"
-                name="civility"
-                value="Madame"
-                checked={values.civility === "Madame"}
-                onChange={handleChange}
-              >
-                Madame
-              </Radio>
-            </HStack>
-          </RadioGroup>
+          <FormControl isRequired isInvalid={errors.civility}>
+            <RadioGroup value={values.civility}>
+              <HStack>
+                <Radio
+                  type="radio"
+                  name="civility"
+                  value={"Monsieur"}
+                  checked={values.civility !== "Madame"}
+                  onChange={handleChange}
+                >
+                  Monsieur
+                </Radio>
+                <Radio
+                  type="radio"
+                  name="civility"
+                  value="Madame"
+                  checked={values.civility === "Madame"}
+                  onChange={handleChange}
+                >
+                  Madame
+                </Radio>
+              </HStack>
+            </RadioGroup>
+            {errors.civility && <FormErrorMessage>{errors.civility}</FormErrorMessage>}
+          </FormControl>
         </Box>
         <Flex mt={2}>
           <FormControl isRequired mt={2} isInvalid={errors.prenom}>
