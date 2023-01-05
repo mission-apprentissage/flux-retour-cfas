@@ -33,7 +33,7 @@ const ProfileInformation = () => {
     validationSchema: Yup.object().shape({
       prenom: Yup.string(),
       name: Yup.string(),
-      phone: Yup.string(),
+      telephone: Yup.string(),
       civility: Yup.string(),
       email: Yup.string().email("Email invalide"),
     }),
