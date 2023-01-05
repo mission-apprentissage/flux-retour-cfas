@@ -113,7 +113,7 @@ export default ({ mailer }) => {
       rolesId = rolesId.map(({ _id }) => _id.toString());
 
       await updateUser(userid, {
-        is_cross_organismes: body.options.permissions.is_cross_organismes,
+        is_cross_organismes: !!body.options.permissions.is_cross_organismes,
         is_admin: body.options.permissions.is_admin,
         email: body.options.email,
         prenom: body.options.prenom,
