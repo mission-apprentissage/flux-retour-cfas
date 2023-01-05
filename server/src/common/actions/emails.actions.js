@@ -143,6 +143,9 @@ export const createMailer = (mailerService) => {
   return {
     async sendEmail({ to, payload }, templateName) {
       const token = uuidv4();
+      if (!mailerService.templates[templateName]) {
+        throw new Error(`No email template found for ${templateName}`);
+      }
       const template = mailerService.templates[templateName]({ to, payload }, token);
 
       try {
