@@ -1,16 +1,16 @@
 import cliProgress from "cli-progress";
-import { RESEAUX_CFAS } from "../../../common/constants/networksConstants.js";
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
+import logger from "../../../../common/logger.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import path from "path";
-import { __dirname } from "../../../common/utils/esmUtils.js";
-import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
-import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
-import { ERPS } from "../../../common/constants/erpsConstants.js";
-import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
-import { downloadIfNeededFileTo } from "../../../common/utils/ovhStorageUtils.js";
-import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
-import { updateDossiersApprenantsNetworksIfNeeded } from "./hydrate-reseaux.actions.js";
+import { __dirname } from "../../../../common/utils/esmUtils.js";
+import { readJsonFromCsvFile } from "../../../../common/utils/fileUtils.js";
+import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../../common/actions/organismes.actions.js";
+import { ERPS } from "../../../../common/constants/erpsConstants.js";
+import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
+import { downloadIfNeededFileTo } from "../../../../common/utils/ovhStorageUtils.js";
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
+import { updateDossiersApprenantsNetworksIfNeeded } from "../../reseaux/hydrate-reseaux.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOBNAME = "hydrate-organismes-reseaux";

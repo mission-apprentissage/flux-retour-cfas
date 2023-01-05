@@ -1,12 +1,16 @@
 import cliProgress from "cli-progress";
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { dossiersApprenantsMigrationDb } from "../../../common/model/collections.js";
-import { getCatalogFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
-import { findOrganismeById, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
-import { getFormationWithCfd } from "../../../common/actions/formations.actions.js";
-import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
+import logger from "../../../../common/logger.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
+import { dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
+import { getCatalogFormationsForOrganisme } from "../../../../common/apis/apiCatalogueMna.js";
+import {
+  findOrganismeById,
+  findOrganismeByUai,
+  updateOrganisme,
+} from "../../../../common/actions/organismes.actions.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
+import { getFormationWithCfd } from "../../../../common/actions/formations.actions.js";
+import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 

@@ -10,7 +10,7 @@ import { updateOrganismeApiKey } from "../../../../common/actions/organismes.act
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-
+const JOB_NAME = "refacto-migration-cfas-to-organismes";
 /**
  * Ce script effectue la migration de la collection cfas vers la nouvelle collection organismes
  */
@@ -59,7 +59,7 @@ export const migrateCfasToOrganismes = async () => {
       // Si erreur on la stocke avec l'objet cfa
       const { stack: errorStack, message: errorMessage } = error;
       await createJobEvent({
-        jobname: "refacto-migration-cfas-to-organismes",
+        jobname: JOB_NAME,
         date: new Date(),
         action: "log-cfasNotMigrated",
         data: {
@@ -85,7 +85,7 @@ export const migrateCfasToOrganismes = async () => {
   logger.info(`---> ${cfasSiretsErrors.length} cfas non transformés à cause d'un pb de sirets (erreur)`);
 
   await createJobEvent({
-    jobname: "refacto-migration-cfas-to-organismes",
+    jobname: JOB_NAME,
     date: new Date(),
     action: "finishing",
     data: {
@@ -119,7 +119,7 @@ export const migrateSingleCfaToOrganisme = async (uai) => {
     // Si erreur on la stocke avec l'objet cfa
     const { stack: errorStack, message: errorMessage } = error;
     await createJobEvent({
-      jobname: "refacto-migration-cfas-to-organismes",
+      jobname: JOB_NAME,
       date: new Date(),
       action: "log-cfasNotMigrated-unique",
       data: {

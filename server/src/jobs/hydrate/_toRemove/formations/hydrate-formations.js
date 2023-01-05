@@ -1,10 +1,14 @@
-import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { dossiersApprenantsMigrationDb, effectifsDb } from "../../../common/model/collections.js";
-import { sleep } from "../../../common/utils/miscUtils.js";
-import { createFormation, findFormationById, getFormationWithCfd } from "../../../common/actions/formations.actions.js";
-import { updateDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
-import { updateEffectif } from "../../../common/actions/effectifs.actions.js";
+import logger from "../../../../common/logger.js";
+import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
+import { dossiersApprenantsMigrationDb, effectifsDb } from "../../../../common/model/collections.js";
+import { sleep } from "../../../../common/utils/miscUtils.js";
+import {
+  createFormation,
+  findFormationById,
+  getFormationWithCfd,
+} from "../../../../common/actions/formations.actions.js";
+import { updateDossierApprenant } from "../../../../common/actions/dossiersApprenants.actions.js";
+import { updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 
 const SLEEP_TIME_BETWEEN_CREATION = 100; // 100ms to avoid flooding TCO and LBA APIs
 

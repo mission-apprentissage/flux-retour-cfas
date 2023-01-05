@@ -6,10 +6,11 @@ import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../c
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { getCatalogFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
-import { getFormationWithCfd } from "../../../common/actions/formations.actions.js";
+import { createFormation, getFormationWithCfd } from "../../../common/actions/formations.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+const JOB_NAME = "hydrate-organismes-and-formations";
 
 /**
  * Liste des champs à récupérer depuis le référentiel
@@ -34,15 +35,18 @@ const REFERENTIEL_FIELDS_TO_FETCH = [
  * 2. Pour les organismes déja présents va MAJ le champ nature et l'arbre des formations
  * TODO : Que fait-on des organismes qui sont dans le TDB mais ne sont pas dans le référentiel ? TODO faire un script spécifique pour identif ?
  */
-export const hydrateOrganismes = async () => {
+export const hydrateOrganismesAndFormations = async () => {
   // Fetch organismes from referentiel api
-  const { organismes } = await fetchOrganismes({
+  let { organismes } = await fetchOrganismes({
     champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),
     itemsPerPage: 10000,
   });
 
   let nbOrganismeCreated = 0;
   let nbOrganismeNotCreated = 0;
+  let nbFormationsCreated = 0;
+  // let nbFormationsUpdated = 0; // TODO update ?
+  let nbFormationsNotCreated = 0;
   let nbOrganismeWithoutUai = 0;
   let nbOrganismeUpdated = 0;
   let nbOrganismeNotUpdated = 0;
@@ -59,14 +63,19 @@ export const hydrateOrganismes = async () => {
       nbOrganismeWithoutUai++;
       // Log & store
       await createJobEvent({
-        jobname: "hydrate-referentiel",
+        jobname: JOB_NAME,
         date: new Date(),
         action: "no-uai-for-organisme-in-referentiel",
         data: { organisme: organismeReferentiel },
       });
     } else {
       const organisme = await findOrganismeByUai(uai);
-      const formations = await getFormationsTreeForOrganisme(organismeReferentiel);
+      const { formations, nbFormationsCreatedForOrganisme, nbFormationsNotCreatedForOrganisme } =
+        await getFormationsTreeForOrganisme(organismeReferentiel);
+
+      nbFormationsCreated += nbFormationsCreatedForOrganisme;
+      // nbFormationsUpdated += xxx; // TODO update
+      nbFormationsNotCreated += nbFormationsNotCreatedForOrganisme;
 
       // Ajout de l'organisme si non existant dans le tdb
       if (!organisme) {
@@ -85,7 +94,7 @@ export const hydrateOrganismes = async () => {
 
           // Log & store
           await createJobEvent({
-            jobname: "hydrate-referentiel",
+            jobname: JOB_NAME,
             date: new Date(),
             action: "organisme-created",
             data: { organisme: organismeReferentiel },
@@ -94,7 +103,7 @@ export const hydrateOrganismes = async () => {
           nbOrganismeNotCreated++;
           // Log & store error
           await createJobEvent({
-            jobname: "hydrate-referentiel",
+            jobname: JOB_NAME,
             date: new Date(),
             action: "organisme-not-created",
             data: { organisme: organismeReferentiel, error },
@@ -119,7 +128,7 @@ export const hydrateOrganismes = async () => {
 
           // Log & store
           await createJobEvent({
-            jobname: "hydrate-referentiel",
+            jobname: JOB_NAME,
             date: new Date(),
             action: "organisme-updated",
             data: { organisme: updatedOrganisme },
@@ -128,7 +137,7 @@ export const hydrateOrganismes = async () => {
           nbOrganismeNotUpdated++;
           // Log & store errors
           await createJobEvent({
-            jobname: "hydrate-referentiel",
+            jobname: JOB_NAME,
             date: new Date(),
             action: "organisme-notUpdated",
             data: { organisme: updatedOrganisme, error },
@@ -150,6 +159,24 @@ export const hydrateOrganismes = async () => {
   logger.info(`--> ${nbOrganismeNotCreated} organismes non créés depuis le référentiel (erreur)`);
   logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour (nature + arbre des formations)`);
   logger.info(`---> ${nbOrganismeNotUpdated} organismes non mis à jour depuis le référentiel (erreur)`);
+  logger.info(`---> ${nbFormationsCreated} formations crées via la création d'organismes`);
+  logger.info(`---> ${nbFormationsNotCreated} formations non crées (erreurs) via la création d'organismes`);
+
+  await createJobEvent({
+    jobname: JOB_NAME,
+    date: new Date(),
+    action: "finishing",
+    data: {
+      nbOrganismesSansUai: nbOrganismeWithoutUai,
+      nbOrganismesCrees: nbOrganismeCreated,
+      nbOrganismesNonCreesErreur: nbOrganismeNotCreated,
+      nbOrganismesMaj: nbOrganismeUpdated,
+      nbOrganismesNonMajErreur: nbOrganismeNotUpdated,
+      nbFormationsCrees: nbFormationsCreated,
+      nbFormationsNonCrees: nbFormationsNotCreated,
+      // xxxxx: nbFormationsNotCreated, // TODO Update
+    },
+  });
 };
 
 /**
@@ -162,19 +189,42 @@ export const getFormationsTreeForOrganisme = async (organisme) => {
 
   // Construction d'une liste de formations pour cet organisme
   let formationsForOrganismeArray = [];
+  let nbFormationsCreatedForOrganisme = 0;
+  // let nbFormationsUpdatedForOrganisme = 0;
+  let nbFormationsNotCreatedForOrganisme = 0;
 
   if (catalogFormationsForOrganisme.length > 0) {
     await asyncForEach(catalogFormationsForOrganisme, async (currentFormation) => {
-      // Récupération de la formation du catalogue dans le TDB
-      // TODO Que faire si la formation n'est pas dans le tdb ? on la créé ? on logge l'erreur ?
-      const formationFromTdb = await getFormationWithCfd(currentFormation.cfd);
+      let currentFormationId;
+
+      // Récupération de la formation du catalogue dans le TDB, si pas présente on la créé
+      // On count les formations créés / non crées (erreur)
+      const formationFoundInTdb = await getFormationWithCfd(currentFormation.cfd);
+      if (!formationFoundInTdb) {
+        try {
+          currentFormationId = await createFormation(currentFormation);
+          nbFormationsCreatedForOrganisme++;
+        } catch (error) {
+          nbFormationsNotCreatedForOrganisme++;
+          // Log & store errors
+          await createJobEvent({
+            jobname: JOB_NAME,
+            date: new Date(),
+            action: "formation-notCreated",
+            data: { currentFormation: currentFormation, error },
+          });
+        }
+      } else {
+        // TODO update la formation en db ici via un reappel TCO + infos catalogue durée / année ?
+        currentFormationId = formationFoundInTdb._id;
+      }
 
       // Ajout à la liste des formation de l'organisme d'un item contenant
       // formation_id si trouvé dans le tdb
-      // année & durée trouvé dans le catalog
+      // année & durée trouvé dans le catalog & formatted
       // ainsi que la liste des organismes construite depuis l'API Catalogue
       formationsForOrganismeArray.push({
-        ...(formationFromTdb ? { formation_id: formationFromTdb._id } : {}),
+        ...(currentFormationId ? { formation_id: currentFormationId } : {}),
         annee_formation: parseInt(currentFormation.annee) || -1,
         duree_formation_theorique: parseInt(currentFormation.duree) || -1,
         organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
@@ -183,14 +233,18 @@ export const getFormationsTreeForOrganisme = async (organisme) => {
   } else {
     // Log & store cases
     await createJobEvent({
-      jobname: "hydrate-organismes",
+      jobname: JOB_NAME,
       date: new Date(),
       action: "organisme-withoutFormations",
       data: { organisme },
     });
   }
 
-  return formationsForOrganismeArray;
+  return {
+    formations: formationsForOrganismeArray,
+    nbFormationsCreatedForOrganisme,
+    nbFormationsNotCreatedForOrganisme,
+  };
 };
 
 /**

@@ -3,18 +3,16 @@ import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
 import { clear } from "./clear/clear-all.js";
-import { hydrateFromReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
 // import { seedWithSample } from "./seed/samples/seedSample.js";
-import { hydrateFormations } from "./hydrate/formations/hydrate-formations.js";
 import { createUserAccount } from "./users/create-user.js";
 import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token.js";
-import { hydrateOrganismes } from "./hydrate/organismes/hydrate-organismes.js";
+import { hydrateOrganismesAndFormations } from "./hydrate/organismes/hydrate-organismes-and-formations.js";
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
 import { warmEffectifsCache } from "./warm-effectifs-cache/index.js";
 
@@ -99,15 +97,15 @@ cli
   });
 
 /**
- * Job de remplissage & maj des d'organismes et des dossiersApprenants depuis les fichiers réseaux
+ * Job de remplissage des organismes et des formations
  */
 cli
-  .command("hydrate:reseaux")
-  .description("MAJ des réseaux pour les organismes et dossiersApprenants")
+  .command("hydrate:organismes-and-formations")
+  .description("Remplissage des organismes et des formations")
   .action(async () => {
     runScript(async () => {
-      return hydrateFromReseaux();
-    }, "hydrate-reseaux");
+      return hydrateOrganismesAndFormations();
+    }, "hydrate-organismes-and-formations");
   });
 
 /**
@@ -145,30 +143,6 @@ cli
     runScript(async ({ effectifs }) => {
       return hydrateEffectifsApprenants(effectifs);
     }, "hydrate-effectifsApprenants");
-  });
-
-/**
- * Job de remplissage des formations
- */
-cli
-  .command("hydrate:formations")
-  .description("Remplissage des formations")
-  .action(async () => {
-    runScript(async () => {
-      return hydrateFormations();
-    }, "hydrate-formations");
-  });
-
-/**
- * Job de remplissage des organismes
- */
-cli
-  .command("hydrate:organismes")
-  .description("Remplissage des organismes")
-  .action(async () => {
-    runScript(async () => {
-      return hydrateOrganismes();
-    }, "hydrate-organismes");
   });
 
 /**

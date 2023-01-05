@@ -64,11 +64,15 @@ export const getNiveauFormationFromLibelle = (niveauFormationLibelle) => {
 };
 
 /**
- * Fetches data for given CFD in Tables de Correspondances and creates a new Formation in DB
- * @param {string} cfd
- * @return {Formation | null} The newly created Formation or null
+ * Création d'une formation à partir du cfd / durée & année optionnelles provenant du catalogue
+ * Va faire un appel API aux TCO puis à LBA pour remplir les données de la formation
+ * @param {Object} formation - Formation à créer
+ * @param {string} formation.cfd - CFD de la formation
+ * @param {string} formation.duree - Durée théorique de la formation issue du catalogue si fournie
+ * @param {string} formation.annee - Année de la formation issue du catalogue si fournie
+ * @returns {ObjectId} Id de la formation crée en base
  */
-export const createFormation = async (cfd, libelle = null) => {
+export const createFormation = async ({ cfd, duree = null, annee = null }) => {
   if (!validateCfd(cfd)) {
     throw Error("Invalid CFD");
   }
@@ -91,7 +95,7 @@ export const createFormation = async (cfd, libelle = null) => {
   }
 
   // Libelle
-  const libelleFormationBuilt = libelle || buildFormationLibelle(formationInfo);
+  const libelleFormationBuilt = buildFormationLibelle(formationInfo);
   const tokenizedLibelle = buildTokenizedString(libelleFormationBuilt || "", 3);
 
   const { insertedId } = await formationsDb().insertOne(
@@ -105,6 +109,8 @@ export const createFormation = async (cfd, libelle = null) => {
       niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
       niveau_libelle: formationInfo?.niveau,
       metiers: metiersFromCfd || [],
+      duree,
+      annee,
       created_at: new Date(),
       updated_at: null,
     })
