@@ -162,7 +162,7 @@ export const getAllUsers = async (query = {}) =>
     .toArray();
 
 /**
- * Méthode de suppresion d'un user depuis son id
+ * Méthode de suppression d'un user depuis son id
  * @param {*} _id
  * @returns
  */

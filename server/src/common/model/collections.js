@@ -14,6 +14,7 @@ import fiabilisationUaiSiretModelDescriptor from "./next.toKeep.models/fiabilisa
 
 import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
 import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
+import * as MaintenanceMessagesModelDescriptor from "./next.toKeep.models/maintenanceMessages.model.js";
 import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
 import * as PermissionsDescriptor from "./next.toKeep.models/permissions.model.js";
 import * as OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
@@ -35,6 +36,7 @@ export const modelDescriptors = [
   referentielSiretUaiModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
+  MaintenanceMessagesModelDescriptor,
   RolesModelDescriptor,
   PermissionsDescriptor,
   OrganismesModelDescriptor,
@@ -86,6 +88,10 @@ export function organismesDb() {
 
 export function permissionsDb() {
   return getDbCollection(PermissionsDescriptor.collectionName);
+}
+
+export function maintenanceMessageDb() {
+  return getDbCollection(MaintenanceMessagesModelDescriptor.collectionName);
 }
 
 export function dossiersApprenantsMigrationDb() {

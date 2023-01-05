@@ -42,6 +42,8 @@ import upload from "./routes/specific.routes/serp.routes/upload.routes.js";
 
 import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
+import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
+import maintenancesRoutes from "./routes/maintenances.routes.js";
 
 export default async (services) => {
   const app = express();
@@ -60,6 +62,7 @@ export default async (services) => {
   app.use("/api/v1/auth", auth());
   app.use("/api/v1/auth", register(services));
   app.use("/api/v1/password", password(services));
+  app.use("/api/v1/maintenanceMessage", maintenancesRoutes());
 
   // private access
   app.use("/api/v1/session", checkJwtToken, session());
@@ -82,6 +85,13 @@ export default async (services) => {
     pageAccessMiddleware(["admin/page_gestion_utilisateurs", "admin/page_gestion_roles"]),
     rolesAdmin()
   );
+  app.use(
+    "/api/v1/admin/maintenanceMessages",
+    checkJwtToken,
+    pageAccessMiddleware(["admin/page_message_maintenance"]),
+    maintenancesAdmin()
+  );
+
   app.get(
     "/api/cache",
     checkJwtToken,
