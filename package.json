@@ -10,7 +10,7 @@
     "global": "4.4.0"
   },
   "scripts": {
-    "docker:start": "docker-compose up -d --build --force-recreate",
+    "docker:start": "docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --build --force-recreate",
     "docker:start-ci": "docker-compose up -d mongodb",
     "docker:stop": "docker-compose stop",
     "docker:down": "docker-compose down",
