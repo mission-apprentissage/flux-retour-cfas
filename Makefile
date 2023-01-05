@@ -10,7 +10,7 @@ install-ui:
 	yarn --cwd ui install --frozen-lockfile
 
 start:
-	docker-compose up --build --force-recreate
+	yarn docker:start
 
 start-mongodb:
 	docker-compose up -d mongodb
