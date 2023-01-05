@@ -711,6 +711,14 @@ export default {
     nom_academie: "La Réunion",
     num_academie: 28,
   },
+  975: {
+    nom_dept: "Calvados",
+    code_dept: "14",
+    nom_region: "Normandie",
+    code_region: "28",
+    nom_academie: "Normandie",
+    num_academie: 70,
+  },
   976: {
     nom_dept: "Mayotte",
     code_dept: "976",
