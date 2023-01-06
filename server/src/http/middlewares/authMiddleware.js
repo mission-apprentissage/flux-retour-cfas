@@ -54,6 +54,7 @@ export const authMiddleware = () => {
     async (req, res, next) => {
       const activeSession = await sessions.findJwt(req.cookies[COOKIE_NAME]);
       if (!activeSession) {
+        // TDB change to 401?
         return res.status(400).json({ error: "Accès non autorisé" });
       }
       if (req.user.invalided_token) {

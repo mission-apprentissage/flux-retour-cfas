@@ -33,7 +33,7 @@ export default () => {
         time: new Date(),
       });
 
-      return res.json(newMaintenanceMessage);
+      return res.status(201).json(newMaintenanceMessage);
     })
   );
 
