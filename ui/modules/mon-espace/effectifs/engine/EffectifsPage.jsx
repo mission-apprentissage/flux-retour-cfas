@@ -88,7 +88,7 @@ const EffectifsPage = ({ organismesEffectifs }) => {
           {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
             organisme.mode_de_transmission !== "API" && (
               <>
-                <Button
+                {/* TODO TMP <Button
                   size="md"
                   fontSize={{ base: "sm", md: "md" }}
                   p={{ base: 2, md: 4 }}
@@ -97,7 +97,7 @@ const EffectifsPage = ({ organismesEffectifs }) => {
                   variant="primary"
                 >
                   + Nouvelle·au apprenant(e)
-                </Button>
+                </Button> */}
                 <AjoutApprenantModal size="md" isOpen={ajoutModal.isOpen} onClose={ajoutModal.onClose} />
               </>
             )}
