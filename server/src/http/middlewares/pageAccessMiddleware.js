@@ -6,8 +6,7 @@ export const pageAccessMiddleware = (acl = []) => {
     const current = pick(user?.permissions, Object.keys(permissions));
 
     if (!(isEqual(current, permissions) || acl.every((page) => user?.acl.includes(page)))) {
-      // TBD: change to 403 ?
-      return res.status(401).json({ message: "Accès non autorisé" });
+      return res.status(403).json({ message: "Accès non autorisé" });
     }
 
     next();
