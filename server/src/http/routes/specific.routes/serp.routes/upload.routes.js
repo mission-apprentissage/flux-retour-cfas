@@ -634,6 +634,8 @@ export default ({ clamav }) => {
 
       const canNotBeImportEffectifs = [];
       const canBeImportEffectifs = [];
+      const canBeImportEffectifsIds = [];
+      const duplicatesEffectifs = [];
       for (const [index, data] of convertedData.entries()) {
         const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
           organisme_id,
@@ -729,11 +731,25 @@ export default ({ clamav }) => {
             historiqueStatutValidationError.isRequired = true;
           }
 
-          canBeImportEffectifs.push({
-            _id: found ? found._id : new ObjectId(),
-            toUpdate: !!found,
-            ...effectifToSave,
-          });
+          const _id = found ? found._id : new ObjectId();
+
+          if (!canBeImportEffectifsIds.includes(_id.toString())) {
+            canBeImportEffectifsIds.push(_id.toString());
+            canBeImportEffectifs.push({
+              _id,
+              toUpdate: !!found,
+              ...effectifToSave,
+            });
+          } else {
+            duplicatesEffectifs.push({
+              _id,
+              toUpdate: !!found,
+              cfd: effectifToSave.formation.cfd,
+              nom: effectifToSave.apprenant.nom,
+              prenom: effectifToSave.apprenant.prenom,
+              ...effectifToSave,
+            });
+          }
         }
       }
 
@@ -788,7 +804,7 @@ export default ({ clamav }) => {
         });
       }
 
-      return res.json({ canBeImportEffectifs: effectifsTable, canNotBeImportEffectifs });
+      return res.json({ canBeImportEffectifs: effectifsTable, canNotBeImportEffectifs, duplicatesEffectifs });
     })
   );
 

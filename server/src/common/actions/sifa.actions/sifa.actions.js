@@ -27,7 +27,7 @@ export const generateSifa = async (organisme_id) => {
         .setZone("Europe/Paris")
         .setLocale("fr-FR")
         .toFormat("ddMMyyyy"), // REQUIRED
-      LIEU_NAIS: effectif.apprenant.code_postal_de_naissance, // REQUIRED
+      LIEU_NAIS: effectif.apprenant.code_postal_de_naissance, // REQUIRED // TODO CONVERT TO CODE INSEE
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2", // REQUIRED
       ADRESSE: effectif.apprenant.adresse
         ? effectif.apprenant.adresse?.complete ??

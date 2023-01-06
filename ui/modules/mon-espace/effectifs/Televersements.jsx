@@ -186,17 +186,24 @@ const Televersements = () => {
   }, [lines, organisme._id, typeDocument]);
 
   const onGoToPreImportStep = useCallback(async () => {
-    setPreEffictifs({ canBeImport: [], canNotBeImport: [] });
+    setPreEffictifs({ canBeImport: [], canNotBeImport: [], duplicate: [] });
     setStep("pre-import");
     const keyToKeyMapping = lines.reduce((acc, line) => {
       if (line.out.value === "annee_scolaire") return { ...acc, annee_scolaire: line.in.value };
       return { ...acc, [line.in.value]: line.out.value };
     }, {});
-    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post(`/api/v1/upload/pre-import`, {
-      organisme_id: organisme._id,
-      mapping: keyToKeyMapping,
+    const { canBeImportEffectifs, canNotBeImportEffectifs, duplicatesEffectifs } = await _post(
+      `/api/v1/upload/pre-import`,
+      {
+        organisme_id: organisme._id,
+        mapping: keyToKeyMapping,
+      }
+    );
+    setPreEffictifs({
+      canBeImport: canBeImportEffectifs,
+      canNotBeImport: canNotBeImportEffectifs,
+      duplicate: duplicatesEffectifs,
     });
-    setPreEffictifs({ canBeImport: canBeImportEffectifs, canNotBeImport: canNotBeImportEffectifs });
   }, [lines, organisme._id]);
 
   const onGoToImportStep = useCallback(async () => {
@@ -534,6 +541,9 @@ const Televersements = () => {
             </Heading>
             {!!preEffictifs.canNotBeImport.length && (
               <Box my={6}>
+                <Heading as="h4" flexGrow="1" fontSize="1rem" color="red.500" mb={5}>
+                  Lignes en erreurs
+                </Heading>
                 <HStack color="red.500" w="full" pl={5}>
                   <Alert boxSize={4} />
                   <Text fontSize="1rem">
@@ -544,6 +554,25 @@ const Televersements = () => {
 
                 <EffectifsTable
                   organismesEffectifs={preEffictifs.canNotBeImport}
+                  columns={["annee_scolaire", "cfd", "nom", "prenom"]}
+                  show="errorInCell"
+                />
+              </Box>
+            )}
+            {!!preEffictifs.duplicate.length && (
+              <Box my={6}>
+                <Heading as="h4" flexGrow="1" fontSize="1rem" color="red.500" mb={5}>
+                  Doublons
+                </Heading>
+                <HStack color="red.500" w="full" pl={5}>
+                  <Alert boxSize={4} />
+                  <Text fontSize="1rem">
+                    Les lignes ci-dessous sont des doublons.Elles ne pourront pas être importées.
+                  </Text>
+                </HStack>
+
+                <EffectifsTable
+                  organismesEffectifs={preEffictifs.duplicate}
                   columns={["annee_scolaire", "cfd", "nom", "prenom"]}
                   show="errorInCell"
                 />
