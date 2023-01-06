@@ -10,7 +10,7 @@ export const schema = object(
   {
     _id: objectId(),
     msg: string({ description: "Message de maintenance" }),
-    name: string({ description: "email du créteur du message" }),
+    name: string({ description: "email du créateur du message" }),
     type: string({ enum: ["alert", "info"] }),
     context: string({ enum: ["manuel", "automatique", "maintenance"] }),
     time: date({ description: "Date de mise en place du message" }),

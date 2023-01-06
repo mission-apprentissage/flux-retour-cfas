@@ -10,7 +10,7 @@ import { defaultValuesMaintenanceMessage } from "../model/next.toKeep.models/mai
  * @returns
  */
 export const createMaintenanceMessage = async ({ name, msg, type, context, time, enabled }) => {
-  const { insertedId } = await maintenanceMessageDb().insertOne({
+  const data = {
     ...defaultValuesMaintenanceMessage(),
     type,
     name,
@@ -18,9 +18,9 @@ export const createMaintenanceMessage = async ({ name, msg, type, context, time,
     msg,
     enabled: enabled || false,
     time: time,
-  });
-
-  return insertedId;
+  };
+  const { insertedId } = await maintenanceMessageDb().insertOne(data);
+  return { _id: insertedId, ...data };
 };
 
 /**

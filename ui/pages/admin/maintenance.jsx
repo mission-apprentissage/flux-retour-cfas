@@ -43,7 +43,7 @@ const Message = () => {
     data: messages,
     isLoading,
     refetch: refetchMaintenanceMessages,
-  } = useQuery(["maintenanceMessages"], () => _get(`/api/v1/maintenanceMessage`), {
+  } = useQuery(["maintenanceMessages"], () => _get(`/api/v1/maintenanceMessages`), {
     refetchOnWindowFocus: false,
   });
   const messageAutomatique = messages?.filter((d) => d.context === "automatique" && d.msg)?.[0];
