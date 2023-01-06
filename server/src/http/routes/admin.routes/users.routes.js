@@ -1,13 +1,12 @@
 import express from "express";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
-// import Boom from "boom";
-// import config from "../../../config.js";
-// import { createActivationToken } from "../../../common/utils/jwtUtils.js";
+import Boom from "boom";
+
+import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import {
-  // createUser,
+  createUser,
   getAllUsers,
-  // getUser,
+  getUser,
   removeUser,
   searchUsers,
   structureUser,
@@ -69,40 +68,38 @@ export default ({ mailer }) => {
     })
   );
 
-  // router.post(
-  //   "/user",
-  //   tryCatch(async ({ body }, res) => {
-  //     const { password, options } = await Joi.object({
-  //       password: Joi.string().required(),
-  //       options: Joi.object({
-  //         prenom: Joi.string().required(),
-  //         nom: Joi.string().required(),
-  //         email: Joi.string().required(),
-  //         roles: Joi.array().required(),
-  //         permissions: Joi.object({
-  //           is_admin: Joi.boolean().required(),
-  //         }).unknown(),
-  //       }).unknown(),
-  //     }).validateAsync(body, { abortEarly: false });
+  router.post(
+    "/user",
+    tryCatch(async ({ body }, res) => {
+      const { password, options } = await Joi.object({
+        password: Joi.string().required(),
+        options: Joi.object({
+          prenom: Joi.string().required(),
+          nom: Joi.string().required(),
+          email: Joi.string().required(),
+          roles: Joi.array().required(),
+          permissions: Joi.object({
+            is_admin: Joi.boolean().required(),
+          }).unknown(),
+        }).unknown(),
+      }).validateAsync(body, { abortEarly: false });
 
-  //     const alreadyExists = await getUser(options.email);
-  //     if (alreadyExists) {
-  //       throw Boom.conflict(`Unable to create, user ${options.email} already exists`);
-  //     }
+      const alreadyExists = await getUser(options.email);
+      if (alreadyExists) {
+        throw Boom.conflict(`Unable to create, user ${options.email} already exists`);
+      }
 
-  //     const user = await createUser(options.email, password, options);
+      const user = await createUser({ email: options.email, password }, options);
 
-  //     await mailer.sendEmail(user.email, `[${config.env} Contrat publique apprentissage] Bienvenue`, "grettings", {
-  //       username: user.username,
-  //       civility: user.civility,
-  //       tmpPwd: password,
-  //       activationToken: createActivationToken(user.email.toLowerCase(), { payload: { tmpPwd: password } }),
-  //       publicUrl: config.publicUrl,
-  //     });
-
-  //     return res.json(user);
-  //   })
-  // );
+      try {
+        await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
+        return res.json(user);
+      } catch (err) {
+        await removeUser(user._id);
+        throw Boom.internal(`Unable to send activation_user email`);
+      }
+    })
+  );
 
   router.put(
     "/user/:userid",
@@ -113,7 +110,7 @@ export default ({ mailer }) => {
       rolesId = rolesId.map(({ _id }) => _id.toString());
 
       await updateUser(userid, {
-        is_cross_organismes: body.options.permissions.is_cross_organismes,
+        is_cross_organismes: !!body.options.permissions.is_cross_organismes,
         is_admin: body.options.permissions.is_admin,
         email: body.options.email,
         prenom: body.options.prenom,

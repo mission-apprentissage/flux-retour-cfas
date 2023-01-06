@@ -30,7 +30,7 @@ export default () => {
       await updateUser(userDb._id, {
         prenom: prenom ?? user.prenom,
         nom: nom ?? user.nom,
-        civility: civility ?? user.civility,
+        ...(civility ? { civility } : {}),
         telephone: telephone ?? user.telephone,
       });
 

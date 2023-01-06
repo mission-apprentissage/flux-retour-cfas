@@ -103,11 +103,6 @@ const UserMenu = () => {
                       Gestion des rôles
                     </MenuItem>
                   )}
-                  {hasPageAccessTo(auth, "admin/page_gestion_reseaux_cfa") && (
-                    <MenuItem href="/admin/gestion-reseaux-cfas" icon={<Parametre boxSize={4} />}>
-                      Gestion des réseaux CFAS
-                    </MenuItem>
-                  )}
                   {hasPageAccessTo(auth, "admin/page_message_maintenance") && (
                     <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={4} />}>
                       Message de maintenance

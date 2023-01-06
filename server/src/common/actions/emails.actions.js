@@ -139,15 +139,18 @@ export async function checkIfEmailExists(token) {
 }
 
 //Ces actions sont construites à la volée car il est nécessaire de pouvoir injecter un mailer durant les tests
-export const createMailer = (mailerSerice) => {
+export const createMailer = (mailerService) => {
   return {
     async sendEmail({ to, payload }, templateName) {
       const token = uuidv4();
-      const template = mailerSerice.templates[templateName]({ to, payload }, token);
+      if (!mailerService.templates[templateName]) {
+        throw new Error(`No email template found for ${templateName}`);
+      }
+      const template = mailerService.templates[templateName]({ to, payload }, token);
 
       try {
         await addEmail(to, token, templateName);
-        const messageId = await mailerSerice.sendEmailMessage(to, template);
+        const messageId = await mailerService.sendEmailMessage(to, template);
         await addEmailMessageId(token, messageId);
       } catch (e) {
         await addEmailError(token, e);
@@ -160,11 +163,11 @@ export const createMailer = (mailerSerice) => {
       const previous = user.emails.find((e) => e.token === token);
 
       const nextTemplateName = options.newTemplateName || previous.templateName;
-      const template = mailerSerice.templates[nextTemplateName](user, token, { resend: !options.retry });
+      const template = mailerService.templates[nextTemplateName](user, token, { resend: !options.retry });
 
       try {
         await addEmailSendDate(token, nextTemplateName);
-        const messageId = await mailerSerice.sendEmailMessage(user.email, template);
+        const messageId = await mailerService.sendEmailMessage(user.email, template);
         await addEmailMessageId(token, messageId);
       } catch (e) {
         await addEmailError(token, e);
@@ -172,6 +175,6 @@ export const createMailer = (mailerSerice) => {
 
       return token;
     },
-    templates: mailerSerice.templates,
+    templates: mailerService.templates,
   };
 };

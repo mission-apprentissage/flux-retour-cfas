@@ -182,7 +182,7 @@ export const removeUser = async (_id) => {
  * @returns
  */
 export const updateUser = async (_id, data) => {
-  const user = await usersMigrationDb().findOne({ _id });
+  const user = await usersMigrationDb().findOne({ _id: ObjectId(_id) });
 
   if (!user) {
     throw new Error(`Unable to find user`);
