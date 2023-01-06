@@ -34,7 +34,7 @@ const ProfileInformation = () => {
       prenom: Yup.string().required("Champs obligatoire"),
       nom: Yup.string().required("Champs  obligatoire"),
       telephone: Yup.string(),
-      civility: Yup.string().required("Champs  obligatoire"),
+      civility: Yup.string(),
       email: Yup.string().email("Email invalide"),
     }),
     onSubmit: ({ nom, prenom, telephone, email, civility }, { setSubmitting }) => {
