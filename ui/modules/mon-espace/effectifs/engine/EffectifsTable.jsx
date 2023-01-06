@@ -337,7 +337,13 @@ const EffectifsTable = ({
                     return (
                       <Box textAlign="left">
                         <Tooltip
-                          label={<Text>Si les données sont suffissantes pour SIFA2</Text>}
+                          label={
+                            <Text>
+                              {modeSifa
+                                ? "Si les données sont suffissantes pour SIFA2"
+                                : "les données contiennent elles des erreurs"}
+                            </Text>
+                          }
                           aria-label="A tooltip"
                           background="bluefrance"
                           color="white"
