@@ -62,7 +62,7 @@ export default async (services) => {
   app.use("/api/v1/auth", auth());
   app.use("/api/v1/auth", register(services));
   app.use("/api/v1/password", password(services));
-  app.use("/api/v1/maintenanceMessage", maintenancesRoutes());
+  app.use("/api/v1/maintenanceMessages", maintenancesRoutes());
 
   // private access
   app.use("/api/v1/session", checkJwtToken, session());

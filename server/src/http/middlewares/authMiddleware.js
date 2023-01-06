@@ -54,7 +54,7 @@ export const authMiddleware = () => {
     async (req, res, next) => {
       const activeSession = await sessions.findJwt(req.cookies[COOKIE_NAME]);
       if (!activeSession) {
-        return res.status(400).json({ error: "Accès non autorisé" });
+        return res.status(401).json({ error: "Accès non autorisé" });
       }
       if (req.user.invalided_token) {
         await sessions.removeJwt(req.cookies[COOKIE_NAME]);
