@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createContext } from "react";
 import { useRouter } from "next/router";
-import { Box, Text, Spinner } from "@chakra-ui/react";
+import { Flex, Box, Text, Spinner } from "@chakra-ui/react";
 
 import { _get, _post, _put } from "../../common/httpClient";
 import useAuth from "../../hooks/useAuth";
@@ -140,7 +140,11 @@ const UserWrapper = ({ children, ssrAuth }) => {
   }, []);
 
   if (isLoading || isLoadingMessageMaintenance) {
-    return <Spinner />;
+    return (
+      <Flex height="100vh" alignItems="center" justifyContent="center">
+        <Spinner />
+      </Flex>
+    );
   }
 
   return (
