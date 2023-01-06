@@ -1,20 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import {
-  Box,
-  Center,
-  Container,
-  Heading,
-  Spinner,
-  Table,
-  TableCaption,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
+import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Page } from "../../components";
 import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
@@ -24,6 +10,8 @@ import { _get } from "../../common/httpClient";
 import { useEspace } from "../../hooks/useEspace";
 import { BasePagination } from "../../components/Pagination/Pagination.jsx";
 import usePaginatedItems from "../../hooks/old/usePaginatedItems.js";
+import Table from "../../components/Table/Table";
+import { ArrowDropRightLine } from "../../theme/components/icons";
 
 function useEspaceOrganismes() {
   const {
@@ -59,7 +47,7 @@ function MesOrganismes() {
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]}>
+      <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]} mb={16}>
         <Container maxW="xl">
           <Breadcrumb pages={[{ title: "Mon espace", to: "/mon-espace/mon-organisme" }, { title: title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
@@ -71,55 +59,107 @@ function MesOrganismes() {
               <Spinner />
             </Center>
           )}
-
           {!isLoading && organismes && (
-            <Table variant="secondary" mt={5} mb={10}>
-              <TableCaption>
-                <BasePagination
-                  current={current}
-                  onChange={(page) => {
-                    setCurrent(page);
-                  }}
-                  total={organismes?.length}
-                />
-              </TableCaption>
-              <Thead>
-                <Tr background="galt">
-                  <Th>Nom de l&lsquo;organisme</Th>
-                  <Th>Nature</Th>
-                  <Th>Localisation</Th>
-                  <Th>SIRET</Th>
-                  <Th>Numéro UAI</Th>
-                  <Th>Transmission au tableau de bord</Th>
-                  <Th>Consulter</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {itemsSliced?.map((organisme) => {
-                  return (
-                    <Tr key={organisme._id}>
-                      <Td color="grey.800">{organisme.nom}</Td>
-                      <Td color="grey.800">TODO</Td>
-                      <Td color="grey.800">{organisme.adresse?.commune}</Td>
-                      <Td color="grey.800">{organisme.siret}</Td>
-                      <Td color="grey.800">{organisme.uai}</Td>
-                      <Td color="grey.800">
-                        {organisme.first_transmission_date ? (
-                          <Text color="green">Transmet</Text>
-                        ) : (
-                          <Text color="tomato">Ne transmet pas</Text>
-                        )}
-                      </Td>
-                      <Td color="grey.800">
-                        <Link href={`/mon-espace/organisme/${organisme._id}`} flexGrow={1}>
-                          LIEN
+            <>
+              <Table
+                mt={4}
+                data={itemsSliced}
+                columns={{
+                  nom: {
+                    size: 200,
+                    header: () => {
+                      return <Box textAlign="left">Nom de l&rsquo;organisme</Box>;
+                    },
+                    cell: ({ row }) => {
+                      const { nom } = organismes[row.id];
+                      return <Text fontSize="1rem">{nom}</Text>;
+                    },
+                  },
+                  nature: {
+                    size: 100,
+                    header: () => {
+                      return <Box textAlign="left">Nature</Box>;
+                    },
+                    cell: ({ row }) => {
+                      const { nature } = organismes[row.id];
+                      const natures = {
+                        responsable: "Responsable",
+                        formateur: "Formateur",
+                        responsable_formateur: "Responsable Formateur",
+                        lieu_formation: "Lieu de formation",
+                        inconnue: "Inconnue",
+                      };
+                      return <Text fontSize="1rem">{natures[nature] ?? "Inconnue"}</Text>;
+                    },
+                  },
+                  localisation: {
+                    size: 100,
+                    header: () => {
+                      return <Box textAlign="left">Localisation</Box>;
+                    },
+                    cell: ({ row }) => {
+                      const { adresse } = organismes[row.id];
+                      return <Text fontSize="1rem">{adresse?.commune}</Text>;
+                    },
+                  },
+                  siret: {
+                    size: 80,
+                    header: () => {
+                      return <Box textAlign="left">SIRET</Box>;
+                    },
+                    cell: ({ row }) => {
+                      const { sirets } = organismes[row.id];
+                      return <Text fontSize="1rem">{sirets.join(",")}</Text>;
+                    },
+                  },
+                  uai: {
+                    size: 60,
+                    header: () => {
+                      return <Box textAlign="left">Numéro UAI</Box>;
+                    },
+                    cell: ({ row }) => {
+                      const { uai } = organismes[row.id];
+                      return <Text fontSize="1rem">{uai}</Text>;
+                    },
+                  },
+                  transmission: {
+                    size: 100,
+                    header: () => {
+                      return <Box textAlign="left">Transmission au tableau de bord</Box>;
+                    },
+                    cell: ({ row }) => {
+                      const { first_transmission_date } = organismes[row.id];
+                      return first_transmission_date ? (
+                        <Text color="green">Transmet</Text>
+                      ) : (
+                        <Text color="tomato">Ne transmet pas</Text>
+                      );
+                    },
+                  },
+                  goTo: {
+                    size: 25,
+                    header: () => {
+                      return <Box>&nbsp;</Box>;
+                    },
+                    cell: ({ row }) => {
+                      return (
+                        <Link href={`/mon-espace/organisme/${organismes[row.id]._id}`} flexGrow={1}>
+                          <ArrowDropRightLine />
                         </Link>
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
+                      );
+                    },
+                  },
+                }}
+              />
+
+              <BasePagination
+                current={current}
+                onChange={(page) => {
+                  setCurrent(page);
+                }}
+                total={organismes?.length}
+              />
+            </>
           )}
         </Container>
       </Box>
