@@ -46,7 +46,7 @@ const schema = object(
     updated_at: dateOrNull({ description: "Date de mise à jour en base de données" }),
     created_at: date({ description: "Date d'ajout en base de données" }),
   },
-  { required: ["uai", "created_at"] }
+  { required: ["uai", "created_at"], additionalProperties: true }
 );
 
 export default { schema, indexes, collectionName };
