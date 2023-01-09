@@ -1,3 +1,10 @@
+# [2.60.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.3...v2.60.0-beta.4) (2023-01-09)
+
+
+### Features
+
+* ajout d'un cron job pour import dossiers apprenants sur platforme recette ([#2307](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2307)) ([c4e3b5c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c4e3b5c95b830f9fe487e3cdffeeb12b84dbc0e7))
+
 # [2.60.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.2...v2.60.0-beta.3) (2022-12-13)
 
 
