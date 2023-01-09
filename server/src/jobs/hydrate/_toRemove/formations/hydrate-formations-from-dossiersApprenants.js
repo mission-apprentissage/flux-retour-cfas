@@ -15,7 +15,7 @@ const SLEEP_TIME_BETWEEN_CREATION = 100; // 100ms to avoid flooding TCO and LBA 
 /**
  * Script qui initialise les formations
  */
-export const hydrateFormations = async () => {
+export const hydrateFormationsFromDossiersApprenants = async () => {
   let createdFormationsTotal = 0;
   let alreadyPresentFormationsTotal = 0;
 
