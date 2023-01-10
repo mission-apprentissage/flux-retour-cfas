@@ -135,6 +135,5 @@ setEnv.sh
 yarn-error.log
 
 
-// TODO a remove
 **/.vault-password.gpg
 **/habilitations.yml

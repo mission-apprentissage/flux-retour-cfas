@@ -3,6 +3,8 @@ import RandExp from "randexp";
 import { sampleLibelles } from "./sampleLibelles.js";
 import { subMonths, addYears } from "date-fns";
 import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
+import departements from "../../src/common/constants/departements.js";
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -10,7 +12,23 @@ export const getRandomFormationCfd = () => new RandExp(/^[0-9]{8}$/).gen().toUpp
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
 export const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
 export const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
+export const getSampleSiretEtablissement = () => "13002526500013";
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
+const getRandomNature = () =>
+  faker.helpers.arrayElement([
+    NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+    NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
+    NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
+  ]);
+
+const getRandomAdresseObject = () => {
+  const randomDepartement = departements[faker.helpers.arrayElement(Object.keys(departements))];
+  return {
+    departement: randomDepartement.code_dept,
+    region: randomDepartement.code_region,
+    academie: randomDepartement.num_academie.toString(),
+  };
+};
 export const getRandomPeriodeFormation = (anneeScolaire) => {
   const yearToInclude = Number(anneeScolaire.slice(0, 4));
   const startYear = faker.helpers.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
@@ -31,6 +49,15 @@ const getRandomDateDebutContrat = () => faker.date.between(subMonths(new Date(),
 const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
+
+export const createRandomOrganisme = (params = {}) => ({
+  uai: getRandomUaiEtablissement(),
+  sirets: [getSampleSiretEtablissement()],
+  adresse: getRandomAdresseObject(),
+  nature: getRandomNature(),
+  nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
+  ...params,
+});
 
 export const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
@@ -58,10 +85,10 @@ export const createRandomDossierApprenant = (params = {}) => {
     tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
     date_de_naissance_apprenant: getRandomDateNaissance(),
-    contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat() : null,
-    contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat() : null,
-    contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat() : null,
-    formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
+    ...(isContratPresent ? { contrat_date_debut: getRandomDateDebutContrat() } : {}),
+    ...(isContratPresent ? { contrat_date_fin: getRandomDateFinContrat() } : {}),
+    ...(isContratPresent && faker.datatype.boolean() ? { contrat_date_rupture: getRandomDateRuptureContrat() } : {}),
+    ...(faker.datatype.boolean() ? { formation_rncp: getRandomRncpFormation() } : {}),
     source: faker.random.word(),
     ...params,
   };
@@ -119,11 +146,6 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
     id_erp_apprenant: faker.datatype.uuid(),
     tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
     code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
-
-    contrat_date_debut: faker.datatype.boolean() ? getRandomDateDebutContrat().toISOString() : null,
-    contrat_date_fin: faker.datatype.boolean() ? getRandomDateFinContrat().toISOString() : null,
-    contrat_date_rupture: faker.datatype.boolean() ? getRandomDateRuptureContrat().toISOString() : null,
-    formation_rncp: faker.datatype.boolean() ? getRandomRncpFormation() : null,
 
     ...params,
   };

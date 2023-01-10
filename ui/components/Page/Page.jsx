@@ -4,16 +4,21 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
 import ContactSection from "../ContactSection/ContactSection";
+import Section from "../Section/Section";
+import { useEspace } from "../../hooks/useEspace";
 
 export function Page({ children, ...rest }) {
+  let { isloaded, isReloaded, isMonOrganismePages, isOrganismePages, isMesOrganismesPages } = useEspace();
+
+  const espaceContextisLoading =
+    (!isloaded || !isReloaded) && (isMonOrganismePages || isOrganismePages || isMesOrganismesPages);
+
   return (
     <Container maxW="full" minH="100vh" d="flex" flexDirection="column" p={0} {...rest}>
-      <Header />
-      <NavigationMenu />
-      <Box minH={"60vh"} flexGrow="1">
-        <Box w="100%" py={[4, 8]} px={[1, 1, 12, 24]}>
-          <Container maxW="xl">{children}</Container>
-        </Box>
+      <Header espaceContextisLoading={espaceContextisLoading} />
+      <NavigationMenu espaceContextisLoading={espaceContextisLoading} />
+      <Box minH={"40vh"} flexGrow="1">
+        <Section>{!espaceContextisLoading && children}</Section>
       </Box>
       <ContactSection />
       <Footer />

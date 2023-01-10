@@ -9,7 +9,7 @@ import {
 
 import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
 import { EffectifsApprentis } from "../../../../src/common/components/effectifs/apprentis.js";
-import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
 
 describe("Components Effectifs apprentis Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -19,7 +19,7 @@ describe("Components Effectifs apprentis Test", () => {
         historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
         ...statutsProps,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
 
     // Add 5 statuts with history sequence - simple apprenti
@@ -28,7 +28,7 @@ describe("Components Effectifs apprentis Test", () => {
         historique_statut_apprenant: historySequenceApprenti,
         ...statutsProps,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
 
     // Add 15 statuts with history sequence - inscritToApprenti
@@ -37,7 +37,7 @@ describe("Components Effectifs apprentis Test", () => {
         historique_statut_apprenant: historySequenceInscritToApprenti,
         ...statutsProps,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
   };
 
@@ -158,7 +158,7 @@ describe("Components Effectifs apprentis Test", () => {
 
       // Add 5 statuts apprenti for annee_scolaire on same year
       for (let index = 0; index < 5; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: historySequenceApprenti,
             annee_scolaire: "2020-2020",
@@ -169,7 +169,7 @@ describe("Components Effectifs apprentis Test", () => {
 
       // Add 12 statuts apprenti for annee_scolaire on two years
       for (let index = 0; index < 12; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: historySequenceApprenti,
             annee_scolaire: "2021-2021",
@@ -185,7 +185,7 @@ describe("Components Effectifs apprentis Test", () => {
     });
 
     it("gets right count of apprentis for edge case where historique is not sorted by date_statut", async () => {
-      await dossiersApprenantsDb().insertOne(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 3, date_statut: new Date("2025-10-01"), date_reception: new Date("2025-09-02") },
@@ -205,7 +205,7 @@ describe("Components Effectifs apprentis Test", () => {
 
     it("gets right count of apprentis for edge case where multiple elements have the same date_statut but different date_reception", async () => {
       const sameDateStatut = new Date("2025-09-01");
-      await dossiersApprenantsDb().insertOne(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 3, date_statut: sameDateStatut, date_reception: new Date("2025-09-30") },
@@ -225,7 +225,7 @@ describe("Components Effectifs apprentis Test", () => {
 
     it("gets right count of apprentis for edge case where multiple elements have the same date_statut but different date_reception (other case, no apprenti)", async () => {
       const sameDateStatut = new Date("2025-09-01");
-      await dossiersApprenantsDb().insertOne(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 3, date_statut: sameDateStatut, date_reception: new Date("2025-08-30") },

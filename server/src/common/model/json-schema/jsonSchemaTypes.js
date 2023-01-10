@@ -13,6 +13,9 @@ export function integerOrNull(custom = {}) {
 export function objectId(custom = {}) {
   return { bsonType: "objectId", ...custom };
 }
+export function objectIdOrNull(custom = {}) {
+  return { bsonType: ["objectId", "null"], ...custom };
+}
 
 export function string(custom = {}) {
   return { bsonType: "string", ...custom };

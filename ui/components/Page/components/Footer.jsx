@@ -84,16 +84,13 @@ const Footer = () => {
                 <Link href={"/stats"}>Statistiques</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={"/assistance"}>Assistance</Link>
+                <Link href={"/questions-reponses"}>Page d&rsquo;aide</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href={"/politique-confidentialite"}>Politique de confidentialité</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link
-                  href="https://mission-apprentissage.notion.site/Documentation-32235dc713c04bbf9b44e6963e02c07e"
-                  isExternal
-                >
+                <Link href="https://beta.gouv.fr/startups/tdb-apprentissage.html" isExternal>
                   Documentation
                   <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
                 </Link>
@@ -102,7 +99,7 @@ const Footer = () => {
                 <Link href="/journal-des-evolutions">Journal des évolutions</Link>
               </ListItem>
               <ListItem _after={{ content: "''", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="https://github.com/mission-apprentissage/cerfa" isExternal>
+                <Link href="https://github.com/mission-apprentissage/flux-retour-cfas" isExternal>
                   Code source
                   <ExternalLinkLine w={"0.55rem"} h={"0.55rem"} mb={"0.125rem"} ml={1} />
                 </Link>

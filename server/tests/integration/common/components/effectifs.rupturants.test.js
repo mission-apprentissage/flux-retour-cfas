@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 import { EffectifsRupturants } from "../../../../src/common/components/effectifs/rupturants.js";
-import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
 
 describe("Components Effectifs Rupturants Test", () => {
   beforeEach(async () => {
@@ -61,7 +61,7 @@ describe("Components Effectifs Rupturants Test", () => {
       }),
     ];
     for (let index = 0; index < statuts.length; index++) {
-      await dossiersApprenantsDb().insertOne(statuts[index]);
+      await dossiersApprenantsMigrationDb().insertOne(statuts[index]);
     }
   });
 
@@ -91,7 +91,7 @@ describe("Components Effectifs Rupturants Test", () => {
 
       // Add 5 statuts rupturant for annee_scolaire on same year
       for (let index = 0; index < 5; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -105,7 +105,7 @@ describe("Components Effectifs Rupturants Test", () => {
 
       // Add 12 statuts rupturant for annee_scolaire on two years
       for (let index = 0; index < 12; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -124,7 +124,7 @@ describe("Components Effectifs Rupturants Test", () => {
     });
 
     it("gets right count of rupturants for edge case where historique is not sorted by date_statut", async () => {
-      await dossiersApprenantsDb().insertOne(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 2, date_statut: new Date("2025-10-01"), date_reception: new Date("2025-10-02") },
@@ -144,7 +144,7 @@ describe("Components Effectifs Rupturants Test", () => {
 
     it("gets right count of rupturants for edge case where multiple elements have the same date_statut but different date_reception", async () => {
       const sameDateStatut = new Date("2025-09-01");
-      await dossiersApprenantsDb().insertOne(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 2, date_statut: sameDateStatut, date_reception: new Date("2025-09-15") },
@@ -164,7 +164,7 @@ describe("Components Effectifs Rupturants Test", () => {
 
     it("gets right count of rupturants for edge case where multiple elements have the same date_statut but different date_reception (other case, no rupturant)", async () => {
       const sameDateStatut = new Date("2025-09-01");
-      await dossiersApprenantsDb().insertOne(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 3, date_statut: sameDateStatut, date_reception: new Date("2025-09-15") },

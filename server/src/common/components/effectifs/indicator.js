@@ -1,4 +1,4 @@
-import { dossiersApprenantsDb } from "../../model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../model/collections.js";
 
 export class Indicator {
   /**
@@ -40,7 +40,7 @@ export class Indicator {
     const groupedBy = options.groupedBy ?? { _id: null, count: { $sum: 1 } };
     const aggregationPipeline = this.getAtDateAggregationPipeline(searchDate, filters, options);
     const groupedAggregationPipeline = [...aggregationPipeline, { $group: groupedBy }];
-    const result = await dossiersApprenantsDb().aggregate(groupedAggregationPipeline).toArray();
+    const result = await dossiersApprenantsMigrationDb().aggregate(groupedAggregationPipeline).toArray();
 
     if (!options.groupedBy) {
       return result.length === 1 ? result[0].count : 0;
@@ -57,7 +57,7 @@ export class Indicator {
    */
   async getListAtDate(searchDate, filters = {}, options = {}) {
     const aggregationPipeline = await this.getAtDateAggregationPipeline(searchDate, filters, options);
-    const result = await dossiersApprenantsDb().aggregate(aggregationPipeline).toArray();
+    const result = await dossiersApprenantsMigrationDb().aggregate(aggregationPipeline).toArray();
     return result ?? [];
   }
 

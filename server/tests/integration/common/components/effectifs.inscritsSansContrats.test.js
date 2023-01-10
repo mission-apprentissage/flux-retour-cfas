@@ -2,7 +2,7 @@ import { strict as assert } from "assert";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 import { CODES_STATUT_APPRENANT } from "../../../../src/common/constants/dossierApprenantConstants.js";
 import { EffectifsInscritsSansContrats } from "../../../../src/common/components/effectifs/inscrits-sans-contrats.js";
-import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
 
 describe("Components Effectifs Inscrits sans contrats Test", () => {
   const inscritsSansContrats = new EffectifsInscritsSansContrats();
@@ -62,7 +62,7 @@ describe("Components Effectifs Inscrits sans contrats Test", () => {
       }),
     ];
     for (let index = 0; index < statuts.length; index++) {
-      await dossiersApprenantsDb().insertOne(statuts[index]);
+      await dossiersApprenantsMigrationDb().insertOne(statuts[index]);
     }
   });
 
@@ -90,7 +90,7 @@ describe("Components Effectifs Inscrits sans contrats Test", () => {
 
       // Add 5 statuts inscrits sans contrat for annee_scolaire on same year
       for (let index = 0; index < 5; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
@@ -103,7 +103,7 @@ describe("Components Effectifs Inscrits sans contrats Test", () => {
 
       // Add 12 statuts inscrits sans contrat for annee_scolaire on two years
       for (let index = 0; index < 12; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },

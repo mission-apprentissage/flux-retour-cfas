@@ -1,10 +1,10 @@
 import Joi from "joi";
 import { BaseFactory } from "./baseFactory.js";
-import { schema as anneeScolaireSchema } from "../../common/domain/anneeScolaire.js";
-import { historiqueSchema as historiqueStatutsSchema } from "../../common/domain/apprenant/statutApprenant.js";
-import { schema as uaiSchema } from "../../common/domain/uai.js";
-import { schema as cfdSchema } from "../../common/domain/cfd.js";
-import { schema as siretSchema } from "../../common/domain/siret.js";
+import { schema as anneeScolaireSchema } from "../../common/utils/validationsUtils/anneeScolaire.js";
+import { historiqueSchema as historiqueStatutsSchema } from "../../common/utils/validationsUtils/apprenant/statutApprenant.js";
+import { uaiSchema } from "../../common/utils/validationUtils.js";
+import { schema as cfdSchema } from "../../common/utils/validationsUtils/cfd.js";
+import { schema as siretSchema } from "../../common/utils/validationsUtils/siret.js";
 
 export class DossierApprenant extends BaseFactory {
   /**
@@ -17,7 +17,7 @@ export class DossierApprenant extends BaseFactory {
       nom_apprenant: Joi.string().required(),
       prenom_apprenant: Joi.string().required(),
       date_de_naissance_apprenant: Joi.date().required(),
-      uai_etablissement: uaiSchema.required(),
+      uai_etablissement: uaiSchema().required(),
       nom_etablissement: Joi.string().required(),
       formation_cfd: cfdSchema.required(),
       annee_scolaire: anneeScolaireSchema.required(),

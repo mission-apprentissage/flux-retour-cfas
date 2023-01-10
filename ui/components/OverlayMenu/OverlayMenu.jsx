@@ -28,7 +28,7 @@ const OverlayMenu = ({ onClose, children, width, fixedHorizon = false }) => {
         backgroundColor="rgba(0, 0, 0, 0.05)"
         onClick={onClose}
         zIndex="99"
-      ></Box>
+      />
       <Box
         position="absolute"
         background="white"
