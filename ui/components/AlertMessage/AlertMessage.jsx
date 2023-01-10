@@ -1,8 +1,9 @@
 import React from "react";
-import { Box, Alert, AlertIcon, AlertTitle, AlertDescription, Text, Link } from "@chakra-ui/react";
+import { Box, Text, Link } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import ChakraUIMarkdownRenderer from "chakra-ui-markdown-renderer";
 
+import Ribbons from "../Ribbons/Ribbons";
 import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
 
 const chakraUIMarkdownRendererTheme = {
@@ -35,22 +36,18 @@ const AlertMessage = () => {
   return (
     <Box>
       {messagesAlertEnabled.length > 0 && (
-        <Alert status="error">
-          <AlertIcon />
-          <AlertTitle mr={3}>Alerte</AlertTitle>
-          <AlertDescription>
+        <Ribbons variant="warning">
+          <Text color="grey.800">
             <Messages messages={messagesAlertEnabled} />
-          </AlertDescription>
-        </Alert>
+          </Text>
+        </Ribbons>
       )}
       {messagesInfoEnabled.length > 0 && (
-        <Alert status="info">
-          <AlertIcon />
-          <AlertTitle mr={3}>Info</AlertTitle>
-          <AlertDescription>
+        <Ribbons variant="info">
+          <Text color="grey.800">
             <Messages messages={messagesInfoEnabled} />
-          </AlertDescription>
-        </Alert>
+          </Text>
+        </Ribbons>
       )}
     </Box>
   );
