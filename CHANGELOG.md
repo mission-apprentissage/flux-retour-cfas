@@ -1,3 +1,10 @@
+# [2.60.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.4...v2.60.0-beta.5) (2023-01-10)
+
+
+### Bug Fixes
+
+* branch dans le wortkflow cron-recette.yml ([#2332](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2332)) ([144232f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/144232fb8d3fcdbcdea610de9a83857c8c855a18))
+
 # [2.60.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.3...v2.60.0-beta.4) (2023-01-09)
 
 
