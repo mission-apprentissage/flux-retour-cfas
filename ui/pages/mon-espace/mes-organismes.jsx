@@ -31,7 +31,11 @@ function MesOrganismes() {
 
   let { whoIs } = useEspace();
 
-  const [current, setCurrent, itemsSliced] = usePaginatedItems(organismes ?? []);
+  const [
+    current,
+    setCurrent,
+    // itemsSliced
+  ] = usePaginatedItems(organismes ?? []);
 
   const headerTitle = {
     pilot: "Les organismes sur mon territoire",
@@ -63,7 +67,7 @@ function MesOrganismes() {
             <>
               <Table
                 mt={4}
-                data={itemsSliced}
+                data={organismes}
                 columns={{
                   nom: {
                     size: 200,
