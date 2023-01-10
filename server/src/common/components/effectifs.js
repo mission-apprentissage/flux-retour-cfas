@@ -2,8 +2,6 @@ import { EffectifsApprentis } from "./effectifs/apprentis.js";
 import { EffectifsAbandons } from "./effectifs/abandons.js";
 import { EffectifsInscritsSansContrats } from "./effectifs/inscrits-sans-contrats.js";
 import { EffectifsRupturants } from "./effectifs/rupturants.js";
-import cfasFactory from "./cfas.js";
-const cfas = cfasFactory();
 import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
 import { asyncForEach } from "../utils/asyncUtils.js";
 import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
@@ -239,14 +237,10 @@ export default () => {
     await asyncForEach(
       effectifsCountByCfa,
       async ({ _id: uai, nom_etablissement, siret_etablissement, ...effectifs }) => {
-        const cfa = await cfas.getFromUai(uai);
-
         result.push({
           uai_etablissement: uai,
           siret_etablissement,
           nom_etablissement,
-          nature: cfa?.nature,
-          natureValidityWarning: cfa?.nature_validity_warning,
           effectifs: {
             apprentis: effectifs.apprentis || 0,
             inscritsSansContrat: effectifs.inscritsSansContrat || 0,

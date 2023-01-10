@@ -6,8 +6,7 @@ import {
   EFFECTIF_INDICATOR_NAMES,
 } from "../../../../src/common/constants/dossierApprenantConstants.js";
 import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/domain/organisme-de-formation/nature.js";
-import { dossiersApprenantsDb, cfasDb } from "../../../../src/common/model/collections.js";
+import { dossiersApprenantsMigrationDb, cfasDb } from "../../../../src/common/model/collections.js";
 
 describe("Components Effectifs Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -33,7 +32,7 @@ describe("Components Effectifs Test", () => {
         ],
         ...statutsProps,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
 
     // Add 5 statuts with simple apprenti sequence
@@ -47,7 +46,7 @@ describe("Components Effectifs Test", () => {
         ],
         ...statutsProps,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
 
     // Add 15 statuts with inscrit -> apprenti sequence
@@ -65,7 +64,7 @@ describe("Components Effectifs Test", () => {
         ],
         ...statutsProps,
       });
-      await dossiersApprenantsDb().insertOne(randomStatut);
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
   };
 
@@ -247,16 +246,14 @@ describe("Components Effectifs Test", () => {
         uai_etablissement: "0123456T",
         nom_etablissement: "CFA 1",
         siret_etablissement: "12345678900011",
-        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
       };
       const cfa2 = {
         uai_etablissement: "012345Z",
         nom_etablissement: "CFA 2",
         siret_etablissement: "12345678900099",
-        nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
       };
-      await cfasDb().insertOne({ uai: cfa1.uai_etablissement, nature: cfa1.nature, nature_validity_warning: true });
-      await cfasDb().insertOne({ uai: cfa2.uai_etablissement, nature: cfa2.nature, nature_validity_warning: true });
+      await cfasDb().insertOne({ uai: cfa1.uai_etablissement });
+      await cfasDb().insertOne({ uai: cfa2.uai_etablissement });
       await seedDossiersApprenants({ ...filterQuery, ...cfa1 });
       await seedDossiersApprenants({ formation_cfd: "12345", ...cfa1 });
       await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
@@ -267,8 +264,6 @@ describe("Components Effectifs Test", () => {
         {
           ...cfa1,
           siret_etablissement: [cfa1.siret_etablissement],
-          nature: cfa1.nature,
-          natureValidityWarning: true,
           effectifs: {
             apprentis: 5,
             inscritsSansContrat: 15,
@@ -279,8 +274,6 @@ describe("Components Effectifs Test", () => {
         {
           ...cfa2,
           siret_etablissement: [cfa2.siret_etablissement],
-          nature: cfa2.nature,
-          natureValidityWarning: true,
           effectifs: {
             apprentis: 10,
             inscritsSansContrat: 30,
@@ -465,7 +458,7 @@ describe("Components Effectifs Test", () => {
     const createApprentisForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts apprenti
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-08-30T00:00:00.000+0000") },
@@ -479,7 +472,7 @@ describe("Components Effectifs Test", () => {
     const createInscritsSansContratsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts inscrits sans contrat
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
@@ -493,7 +486,7 @@ describe("Components Effectifs Test", () => {
     const createRupturantsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts rupturant
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -508,7 +501,7 @@ describe("Components Effectifs Test", () => {
     const createAbandonsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts abandon
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await dossiersApprenantsDb().insertOne(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               {

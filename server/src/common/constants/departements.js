@@ -711,6 +711,14 @@ export default {
     nom_academie: "La Réunion",
     num_academie: 28,
   },
+  975: {
+    nom_dept: "Calvados",
+    code_dept: "14",
+    nom_region: "Normandie",
+    code_region: "28",
+    nom_academie: "Normandie",
+    num_academie: 70,
+  },
   976: {
     nom_dept: "Mayotte",
     code_dept: "976",
@@ -718,6 +726,22 @@ export default {
     code_region: "06",
     nom_academie: "Mayotte",
     num_academie: 43,
+  },
+  977: {
+    nom_dept: "Guadeloupe",
+    code_dept: "971",
+    nom_region: "Guadeloupe",
+    code_region: "01",
+    nom_academie: "Guadeloupe",
+    num_academie: 32,
+  },
+  978: {
+    nom_dept: "Guadeloupe",
+    code_dept: "971",
+    nom_region: "Guadeloupe",
+    code_region: "01",
+    nom_academie: "Guadeloupe",
+    num_academie: 32,
   },
   "01": {
     nom_dept: "Ain",

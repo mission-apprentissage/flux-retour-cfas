@@ -36,11 +36,11 @@ const PolitiqueDeConfidentialite = () => {
   return (
     <HStack
       mt="4w"
-      spacing={["0", "0", "0", "2rem"]}
+      spacing={["0", "0", "0", "6w"]}
       flexDirection={["column", "column", "column", "row"]}
       alignItems={["normal", "normal", "normal", "center"]}
     >
-      <Sommaire w="60%">
+      <Sommaire>
         <Flex flexDirection="column" fontSize="zeta">
           {SommaireData.map((item) => (
             <Link

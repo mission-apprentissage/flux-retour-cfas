@@ -12,12 +12,16 @@ import {
   structureUser,
   activateUser,
   createUser,
-  getUserById,
-} from "../../../common/components/usersComponent.js";
-import * as sessions from "../../../common/components/sessionsComponent.js";
+  finalizeUser,
+  userHasAskAccess,
+} from "../../../common/actions/users.actions.js";
+import * as sessions from "../../../common/actions/sessions.actions.js";
 import { createUserTokenSimple } from "../../../common/utils/jwtUtils.js";
 import { responseWithCookie } from "../../../common/utils/httpUtils.js";
-import { findDataFromSiret } from "../../../common/components/infoSiretComponent.js";
+import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
+import { authMiddleware } from "../../middlewares/authMiddleware.js";
+import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
+import { fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -50,7 +54,7 @@ export default ({ mailer }) => {
     "/register",
     tryCatch(async ({ body }, res) => {
       const { type, email, password, siret, nom, prenom, civility } = await Joi.object({
-        type: Joi.string().allow("entreprise", "of").required(),
+        type: Joi.string().allow("pilot", "of", "reseau_of", "erp").required(),
         email: Joi.string().required(),
         password: Joi.string().required(),
         siret: Joi.string().required(),
@@ -64,7 +68,17 @@ export default ({ mailer }) => {
         throw Boom.conflict(`Unable to create`, { message: `email already in use` });
       }
 
-      const userId = await createUser(
+      let uai = null;
+      if (type === "of") {
+        const resp = await fetchOrganismeWithSiret(siret);
+        if (resp) {
+          uai = resp.uai;
+        } else {
+          throw Boom.badRequest("Something went wrong");
+        }
+      }
+
+      const user = await createUser(
         { email, password },
         {
           roles: [type],
@@ -72,15 +86,15 @@ export default ({ mailer }) => {
           nom,
           prenom,
           civility,
+          ...(uai ? { uai } : {}),
         }
       );
 
-      if (!userId) {
+      if (!user) {
         throw Boom.badRequest("Something went wrong");
       }
 
-      const user = await getUserById(userId);
-      await mailer.sendEmail({ ...user, tmpPwd: password }, "activation_user");
+      await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
 
       return res.json({ succeeded: true });
     })
@@ -89,14 +103,23 @@ export default ({ mailer }) => {
   router.post(
     "/siret-adresse",
     tryCatch(async ({ body }, res) => {
-      const { siret } = await Joi.object({
+      const { siret, organismeFormation } = await Joi.object({
         siret: Joi.string().required(),
+        organismeFormation: Joi.boolean().default(false),
       }).validateAsync(body, { abortEarly: false });
 
       const { result, messages } = await findDataFromSiret(siret, false);
 
       if (Object.keys(result).length === 0) {
         return res.json({ result, messages });
+      }
+
+      let uai = null;
+      if (organismeFormation) {
+        const resp = await fetchOrganismeWithSiret(siret);
+        if (resp) {
+          uai = resp.uai;
+        }
       }
 
       return res.json({
@@ -110,6 +133,7 @@ export default ({ mailer }) => {
           localite: result.localite,
           ferme: result.ferme,
           secretSiret: result.secretSiret || false,
+          uai,
         },
         messages,
       });
@@ -141,6 +165,95 @@ export default ({ mailer }) => {
 
       return responseWithCookie({ res, token }).status(200).json({
         succeeded: true,
+        token,
+      });
+    })
+  );
+
+  router.post(
+    "/demande-acces",
+    authMiddleware(),
+    tryCatch(async ({ body, user }, res) => {
+      const { type } = await Joi.object({
+        type: Joi.string()
+          .valid("organisme.admin", "organisme.member", "organisme.readonly", "organisme.statsonly")
+          .required(),
+      }).validateAsync(body, { abortEarly: false });
+
+      const userDb = await getUser(user.email.toLowerCase());
+      if (!userDb) {
+        throw Boom.conflict(`Unable to retrieve user`);
+      }
+
+      if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP1") {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      await userAfterCreate({ user: userDb, mailer, asRole: type });
+
+      const updateUser = await userHasAskAccess(userDb.email, {});
+      if (!updateUser) {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      const payload = await structureUser(updateUser);
+
+      await loggedInUser(payload.email);
+
+      const token = createUserTokenSimple({ payload });
+
+      if (await sessions.findJwt(token)) {
+        await sessions.removeJwt(token);
+      }
+      await sessions.addJwt(token);
+
+      return responseWithCookie({ res, token }).status(200).json({
+        loggedIn: true,
+        token,
+      });
+    })
+  );
+
+  router.post(
+    "/finalize",
+    authMiddleware(),
+    // eslint-disable-next-line no-unused-vars
+    tryCatch(async ({ body, user }, res) => {
+      // TODO [tech]
+      // eslint-disable-next-line no-unused-vars
+      // const { compte, siret } = await Joi.object({
+      //   compte: Joi.string().required(),
+      //   siret: Joi.string().required(),
+      // }).validateAsync(body, { abortEarly: false });
+
+      const userDb = await getUser(user.email.toLowerCase());
+      if (!userDb) {
+        throw Boom.conflict(`Unable to retrieve user`);
+      }
+
+      if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP2") {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      // TODO [tech]
+      const updateUser = await finalizeUser(userDb.email, {});
+      if (!updateUser) {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      const payload = await structureUser(updateUser);
+
+      await loggedInUser(payload.email);
+
+      const token = createUserTokenSimple({ payload });
+
+      if (await sessions.findJwt(token)) {
+        await sessions.removeJwt(token);
+      }
+      await sessions.addJwt(token);
+
+      return responseWithCookie({ res, token }).status(200).json({
+        loggedIn: true,
         token,
       });
     })

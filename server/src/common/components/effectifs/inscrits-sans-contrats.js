@@ -1,5 +1,5 @@
 import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
-import { SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS } from "../../domain/effectif.js";
+import { SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS } from "../../utils/validationsUtils/effectif.js";
 import { Indicator } from "./indicator.js";
 import { addMonths } from "date-fns";
 

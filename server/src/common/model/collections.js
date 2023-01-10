@@ -1,49 +1,53 @@
-import * as usersMigrationModelDescriptor from "./usersMigration.model.js";
-import * as RolesModelDescriptor from "./roles.model.js";
-import * as JwtSessionsModelDescriptor from "./jwtSessions.model.js";
 import { getDbCollection } from "../mongodb.js";
-import usersModelDescriptor from "./users.model.js";
-import userEventsModelDescriptor from "./userEvents.model.js";
-import cfasModelDescriptor from "./cfas.model.js";
-import formationsModelDescriptor from "./formations.model.js";
-import reseauxCfasModelDescriptor from "./reseauxCfas.model.js";
-import dossiersApprenantsModelDescriptor from "./dossiersApprenants.model.js";
-import jobEventsModelDescriptor from "./jobEvents.model.js";
-import effectifsApprenantsModelDescriptor from "./effectifsApprenants.model.js";
-import demandesIdentifiantsModelDescriptor from "./demandesIdentifiants.model.js";
-import demandesBranchementErpDbModelDescriptor from "./demandesBranchementErp.model.js";
-import duplicatesEventsModelDescriptor from "./duplicatesEvents.model.js";
-import archiveDossiersApprenantsModelDescriptor from "./archiveDossiersApprenants.model.js";
-import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
-import referentielSiretUaiModelDescriptor from "./referentielSiretUai.model.js";
+import usersModelDescriptor from "./previous.models/users.model.js";
+import userEventsModelDescriptor from "./next.toKeep.models/userEvents.model.js";
+import cfasModelDescriptor from "./previous.models/toRemove.models/cfas.model.js";
+import formationsModelDescriptor from "./next.toKeep.models/formations.model.js";
+import dossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/dossiersApprenants.model.js";
+import jobEventsModelDescriptor from "./next.toKeep.models/jobEvents.model.js";
+import effectifsApprenantsModelDescriptor from "./previous.models/effectifsApprenants.model.js";
+import duplicatesEventsModelDescriptor from "./previous.models/toRemove.models/duplicatesEvents.model.js";
+import archiveDossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/archiveDossiersApprenants.model.js";
+import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
+import referentielSiretUaiModelDescriptor from "./previous.models/toRemove.models/referentielSiretUai.model.js";
+import fiabilisationUaiSiretModelDescriptor from "./next.toKeep.models/fiabilisationUaiSiret.model.js";
+
+import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
+import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
+import * as MaintenanceMessagesModelDescriptor from "./next.toKeep.models/maintenanceMessages.model.js";
+import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
+import * as PermissionsDescriptor from "./next.toKeep.models/permissions.model.js";
+import * as OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
+import * as dossiersApprenantsMigrationModelDescriptor from "./next.toKeep.models/dossiersApprenantsMigration.model.js";
+import * as effectifsModelDescriptor from "./next.toKeep.models/effectifs.model/effectifs.model.js";
+import * as uploadsModelDescriptor from "./next.toKeep.models/uploads.model/uploads.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
   userEventsModelDescriptor,
   cfasModelDescriptor,
   formationsModelDescriptor,
-  reseauxCfasModelDescriptor,
   dossiersApprenantsModelDescriptor,
   jobEventsModelDescriptor,
   effectifsApprenantsModelDescriptor,
-  demandesIdentifiantsModelDescriptor,
-  demandesBranchementErpDbModelDescriptor,
   duplicatesEventsModelDescriptor,
   archiveDossiersApprenantsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
   referentielSiretUaiModelDescriptor,
+  usersMigrationModelDescriptor,
+  JwtSessionsModelDescriptor,
+  MaintenanceMessagesModelDescriptor,
+  RolesModelDescriptor,
+  PermissionsDescriptor,
+  OrganismesModelDescriptor,
+  dossiersApprenantsMigrationModelDescriptor,
+  effectifsModelDescriptor,
+  uploadsModelDescriptor,
+  fiabilisationUaiSiretModelDescriptor,
 ];
 
 export const dossiersApprenantsDb = () => {
   return getDbCollection(dossiersApprenantsModelDescriptor.collectionName);
-};
-
-export const cfasDb = () => {
-  return getDbCollection(cfasModelDescriptor.collectionName);
-};
-
-export const reseauxCfasDb = () => {
-  return getDbCollection(reseauxCfasModelDescriptor.collectionName);
 };
 
 export const formationsDb = () => {
@@ -66,18 +70,6 @@ export const effectifsApprenantsDb = () => {
   return getDbCollection(effectifsApprenantsModelDescriptor.collectionName);
 };
 
-export const demandesIdentifiantsDb = () => {
-  return getDbCollection(demandesIdentifiantsModelDescriptor.collectionName);
-};
-
-export const demandesBranchementErpDb = () => {
-  return getDbCollection(demandesBranchementErpDbModelDescriptor.collectionName);
-};
-
-export const duplicatesEventsDb = () => {
-  return getDbCollection(duplicatesEventsModelDescriptor.collectionName);
-};
-
 export const usersMigrationDb = () => {
   return getDbCollection(usersMigrationModelDescriptor.collectionName);
 };
@@ -90,6 +82,39 @@ export const jwtSessionsDb = () => {
   return getDbCollection(JwtSessionsModelDescriptor.collectionName);
 };
 
+export function organismesDb() {
+  return getDbCollection(OrganismesModelDescriptor.collectionName);
+}
+
+export function permissionsDb() {
+  return getDbCollection(PermissionsDescriptor.collectionName);
+}
+
+export function maintenanceMessageDb() {
+  return getDbCollection(MaintenanceMessagesModelDescriptor.collectionName);
+}
+
+export function dossiersApprenantsMigrationDb() {
+  return getDbCollection(dossiersApprenantsMigrationModelDescriptor.collectionName);
+}
+
+export function effectifsDb() {
+  return getDbCollection(effectifsModelDescriptor.collectionName);
+}
+
+export function uploadsDb() {
+  return getDbCollection(uploadsModelDescriptor.collectionName);
+}
+
+// TODO Collections descriptors à supprimer
+export const cfasDb = () => {
+  return getDbCollection(cfasModelDescriptor.collectionName);
+};
+
+export const duplicatesEventsDb = () => {
+  return getDbCollection(duplicatesEventsModelDescriptor.collectionName);
+};
+
 export const archiveDossiersApprenantsDb = () => {
   return getDbCollection(archiveDossiersApprenantsModelDescriptor.collectionName);
 };
@@ -100,4 +125,8 @@ export const dossiersApprenantsApiErrorsDb = () => {
 
 export const referentielSiretUaiDb = () => {
   return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
+};
+
+export const fiabilisationUaiSiretDb = () => {
+  return getDbCollection(fiabilisationUaiSiretModelDescriptor.collectionName);
 };

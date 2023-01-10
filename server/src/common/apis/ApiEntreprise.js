@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosRetry from "axios-retry";
 import config from "../../config.js";
 import logger from "../logger.js";
 import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
@@ -47,6 +48,8 @@ export const getEntreprise = (siren, non_diffusables = true) => {
 
 export const getEtablissement = async (siret, non_diffusables = true) => {
   return executeWithRateLimiting(async (client) => {
+    axiosRetry(client, { retries: 3 });
+
     try {
       logger.debug(`[Entreprise API] Fetching etablissement ${siret}...`);
       let response = await client.get(`etablissements/${siret}`, {

@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import omitDeep from "omit-deep";
 import logger from "./logger.js";
 import { asyncForEach } from "./utils/asyncUtils.js";
 
@@ -15,7 +16,7 @@ const ensureInitialization = () => {
  * @returns client
  */
 export const connectToMongodb = async (uri) => {
-  logger.info("Connecting to MongoDB at", uri);
+  logger.info("Connecting to MongoDB...");
   const client = new MongoClient(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -74,12 +75,13 @@ export const configureDbSchemaValidation = async (modelDescriptors) => {
     if (!schema) {
       return;
     }
+
     await db.command({
       collMod: collectionName,
       validationLevel: "strict",
       validationAction: "error",
       validator: {
-        $jsonSchema: { title: `${collectionName} validation schema`, ...schema },
+        $jsonSchema: { title: `${collectionName} validation schema`, ...omitDeep(schema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
       },
     });
   });
