@@ -27,9 +27,8 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
     { anchorTitle: "Article 6", anchorName: "Sécurité", anchorLink: "securite" },
     { anchorTitle: "Article 7", anchorName: "Hyperliens", anchorLink: "hyperliens" },
     { anchorTitle: "Article 8", anchorName: "Responsabilités", anchorLink: "responsabilites" },
-    { anchorTitle: "Article 9", anchorName: "Propriété intellectuelle", anchorLink: "propriete-intellectuelle" },
     {
-      anchorTitle: "Article 10",
+      anchorTitle: "Article 9",
       anchorName: "Mise à jour des conditions d'utilisation",
       anchorLink: "mise-a-jour-des-conditions-utilisation",
     },
@@ -326,16 +325,16 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             données personnelles des autres utilisateurs.
             <br />
             <br />
-            Toute autre utilisation donne droit à la Mission interministérielle de l’apprentissage de fermer
-            l&apos;accès au service de l&apos;utilisateur, de supprimer les données et fichiers y figurant, de supprimer
-            l&apos;accès à ses données ou fichiers, ou d&apos;interdire à l&apos;utilisateur l&apos;accès de tout ou
-            partie du service, et ce sans préjudice de tous dommages-intérêts auxquels la Mission interministérielle de
-            l’apprentissage pourrait prétendre.
+            Toute utilisation frauduleuse ou hors usage initial du Tableau de bord est interdite.
             <br />
             <br />
-            Toute utilisation des services susceptible d&apos;endommager, de désactiver, de surcharger
-            l&apos;infrastructure du Tableau de bord ou encore d&apos;entraver la jouissance des services par les autres
-            Utilisateurs est interdite.
+            L&apos;Utilisateur s&apos;engage à ne pas commercialiser les données reçues et à ne pas les communiquer à
+            des tiers en dehors des cas prévus par la loi.
+            <br />
+            <br />
+            L&apos;Utilisateur s&apos;engage à ne pas mettre en ligne des contenus ou informations contraires aux
+            dispositions légales et réglementaires en vigueur susceptibles de mettre en péril le fonctionnement du
+            Tableau de bord.
             <br />
             <br />
             Toute tentative d&apos;accès non autorisé aux services, à d&apos;autres comptes, aux systèmes informatiques
@@ -343,36 +342,9 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             interdite.
           </Text>
         </Section>
-        <Section mt={4} id={currentPage.anchors.ProprieteIntellectuelle}>
-          <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 9 – Propriété intellectuelle
-          </Heading>
-          <Text>
-            L&apos;utilisateur reconnaît et accepte que le contenu du Tableau de bord et notamment mais non
-            exclusivement les textes, marques, photographies, vidéos, logiciels et programmes, sons, musiques, mise en
-            page, charte graphique, logos, logiciels, les bases de données, design ou toute autre information ou support
-            présenté par la Mission interministérielle de l’apprentissage, sont protégés par leurs droits
-            d&apos;auteurs, marque, brevet et tout autre droit de propriété intellectuelle ou industrielle qui leur sont
-            reconnus selon les lois en vigueur.
-            <br />
-            <br />
-            Toute reproduction ou représentation, totale ou partielle d&apos;un de ces droits, sans l&apos;autorisation
-            expresse de la Mission interministérielle de l’apprentissage est interdite et constituerait une contrefaçon.
-            <br />
-            <br />
-            En conséquence, l&apos;utilisateur s&apos;interdit tout agissement et tout acte susceptible de porter
-            atteinte directement ou non aux droits de propriété intellectuelle. L&apos;utilisateur ne peut en aucun cas
-            utiliser, imprimer ou reformater le contenu du Tableau de bord, sinon, pour les informations disponibles en
-            accès libre, à des fins autres que privées ou familiales.
-            <br />
-            <br />
-            Il s&apos;engage notamment à ne pas télécharger, à l&apos;exception des documents pour lesquels le
-            téléchargement est proposé, reproduire, transmettre, vendre ou distribuer, le contenu du Tableau de bord.
-          </Text>
-        </Section>
         <Section mt={4} id={currentPage.anchors.MiseAjourDesConditionsUtilisation}>
           <Heading as={"h3"} textStyle="h6" mb={5}>
-            Article 10 – Mise à jour des conditions d’utilisation
+            Article 9 – Mise à jour des conditions d’utilisation
           </Heading>
           <Text>
             Les termes des CGU doivent être acceptés au moment de la connexion. Toute modification des CGU réalisée en

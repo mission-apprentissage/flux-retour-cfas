@@ -4,6 +4,7 @@ import Link from "../Links/Link";
 import Sommaire from "../Sommaire/Sommaire.jsx";
 import { NAVIGATION_PAGES } from "../../common/constants/navigationPages.js";
 import Section from "../Section/Section.jsx";
+import { CONTACT_ADDRESS } from "../../common/constants/product";
 
 const PolitiqueDeConfidentialite = () => {
   const currentPage = NAVIGATION_PAGES.PolitiqueDeConfidentialite;
@@ -155,7 +156,10 @@ const PolitiqueDeConfidentialite = () => {
             <br />
             Pour les exercer, faites-nous parvenir une demande en précisant la date et l’heure précise de la requête –
             ces éléments sont indispensables pour nous permettre de retrouver votre recherche – par voie électronique à
-            l’adresse suivante :
+            l’adresse suivante :{" "}
+            <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance">
+              {CONTACT_ADDRESS}
+            </Link>
             <br />
             <br />
             Par voie postale :
@@ -170,7 +174,8 @@ const PolitiqueDeConfidentialite = () => {
             <br />
             En raison de l’obligation de sécurité et de confidentialité dans le traitement des données à caractère
             personnel qui incombe au responsable de traitement, votre demande ne sera traitée que si vous apportez la
-            preuve de votre identité. Pour vous aider dans votre démarche, vous trouverez ici
+            preuve de votre identité. <br />
+            Pour vous aider dans votre démarche, vous trouverez ici
             <br />
             <Link href="https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces" color="primary">
               https://www.cnil.fr/fr/modele/courrier/exercer-son-droit-dacces
@@ -188,18 +193,28 @@ const PolitiqueDeConfidentialite = () => {
           </Heading>
           <Text>
             Nous nous engageons à ce que les données à caractères personnels soient traitées par les seules personnes
-            autorisées. Ont accès aux données :
+            autorisées.
           </Text>
+          <br />
+          <Text>Ont accès aux données :</Text>
           <UnorderedList ml="30px !important" mt="1w">
             <ListItem>Les agents autorisés des DREETS, dans le cadre de leurs missions de service public ;</ListItem>
             <ListItem>Les organismes de formation ;</ListItem>
             <ListItem>Les réseaux d’organismes de formation ;</ListItem>
             <ListItem>Les Régions ;</ListItem>
             <ListItem>
-              Les personnes autorisés au seins des Rectorats, dans le cadre de leurs missions de service public ;
+              Les personnes autorisées au seins des Rectorats, dans le cadre de leurs missions de service public ;
             </ListItem>
             <ListItem>
-              Les personnes autorisés au sein des Académies, dans le cadre de leurs missions de service public.
+              Les personnes autorisées au sein des Académies, dans le cadre de leurs missions de service public ;
+            </ListItem>
+            <ListItem>
+              Les personnes autorisées travaillant pour le compte de la mission interministérielle pour l’apprentissage
+              dans le cadre de la conception des services numériques ;
+            </ListItem>
+            <ListItem>
+              Les personnes travaillant pour le compte de la mission interministérielle pour l’apprentissage dans le
+              cadre de propositions ciblées d&apos;offres d’emploi ou d’alternance ;
             </ListItem>
           </UnorderedList>
         </Section>

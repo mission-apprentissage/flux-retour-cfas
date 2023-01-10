@@ -1,3 +1,31 @@
+# [2.60.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.4...v2.60.0-beta.5) (2023-01-10)
+
+
+### Bug Fixes
+
+* branch dans le wortkflow cron-recette.yml ([#2332](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2332)) ([144232f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/144232fb8d3fcdbcdea610de9a83857c8c855a18))
+
+# [2.60.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.3...v2.60.0-beta.4) (2023-01-09)
+
+
+### Features
+
+* ajout d'un cron job pour import dossiers apprenants sur platforme recette ([#2307](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2307)) ([c4e3b5c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c4e3b5c95b830f9fe487e3cdffeeb12b84dbc0e7))
+
+# [2.60.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.2...v2.60.0-beta.3) (2022-12-13)
+
+
+### Features
+
+* **data:** ajoute un mapping à partir d'un fichier JSON pour la fiabilisation ([20e902f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/20e902f1fddd1e4e634fb4f1f101822194b871e6))
+
+# [2.60.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.1...v2.60.0-beta.2) (2022-12-13)
+
+
+### Features
+
+* **data:** fiabilisation des couples uai-siret ([a420499](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a420499572015eadf395f3118542990ca14f55b8))
+
 # [2.60.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.59.1...v2.60.0-beta.1) (2022-12-02)
 
 
