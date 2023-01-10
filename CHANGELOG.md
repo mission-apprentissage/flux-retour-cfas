@@ -1,3 +1,13 @@
+# [3.0.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.5...v3.0.0-beta.1) (2023-01-10)
+
+
+* BREAKING CHANGE: nouvelle version 2023 (#2336). ([fd13c92](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fd13c9214c241af6ae966813a84beeaf5862f311)), closes [#2336](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2336)
+
+
+### BREAKING CHANGES
+
+* nouvelle version 2023 (#2336)
+
 # [2.60.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0-beta.4...v2.60.0-beta.5) (2023-01-10)
 
 
