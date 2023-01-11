@@ -1,6 +1,6 @@
 {
   "name": "mna-flux-retour-cfas",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0-beta.4",
   "description": "[MNA] Flux retour des cfas",
   "repository": "https://github.com/mission-apprentissage/flux-retour-cfas.git",
   "private": false,
@@ -11,7 +11,7 @@
   "scripts": {
     "start": "nodemon --ignore tests/ src/index.js",
     "debug": "nodemon --inspect=0.0.0.0 --signal SIGINT --ignore tests/ src/index.js",
-    "test": "cross-env DOTENV_CONFIG_PATH=.env.example mocha --config=mocharc.json tests/integration",
+    "test": "cross-env DOTENV_CONFIG_PATH=.env.example c8 --check-coverage mocha --config=mocharc.json tests/integration",
     "test:single": "cross-env DOTENV_CONFIG_PATH=.env.example mocha --config=mocharc.json",
     "lint": "eslint src/ tests/",
     "docker:start": "cd .. && docker-compose up -d --build --force-recreate",
@@ -92,9 +92,21 @@
     "bracketSpacing": true,
     "trailingComma": "es5"
   },
+  "c8": {
+    "all": true,
+    "lines": 70,
+    "functions": 70,
+    "branches": 80,
+    "statements": 70,
+    "exclude": [
+      "tests/**",
+      "migrations/**"
+    ]
+  },
   "devDependencies": {
     "@faker-js/faker": "7.6.0",
     "axiosist": "0.10.0",
+    "c8": "7.12.0",
     "cross-env": "7.0.3",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.5.0",

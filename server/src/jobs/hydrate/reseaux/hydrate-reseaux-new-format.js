@@ -1,5 +1,6 @@
-import logger from "../../../common/logger.js";
 import path from "path";
+
+import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { readJsonFromCsvFile } from "../../../common/utils/fileUtils.js";
 import { __dirname } from "../../../common/utils/esmUtils.js";
@@ -20,7 +21,12 @@ const RESEAUX_LIST_SEPARATOR = "|";
 
 const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
 
-const INPUT_FILES = ["assets/referentiel-reseau-excellence-pro.csv", "assets/referentiel-reseau-greta-pdl.csv"];
+const INPUT_FILES = [
+  "assets/referentiel-reseau-excellence-pro.csv",
+  "assets/referentiel-reseau-greta-pdl.csv",
+  "assets/referentiel-reseau-aftral.csv",
+  "assets/referentiel-reseau-cr-normandie.csv",
+];
 
 /**
  * @param  {string} reseauText
@@ -89,6 +95,14 @@ export const hydrateReseauxNewFormat = async () => {
 
       if (found) foundCount++;
 
+      logger.debug(
+        "Organisme with UAI",
+        organismeParsedFromFile.uai,
+        "and Siret",
+        organismeParsedFromFile.siret,
+        found ? "found" : "not found"
+      );
+
       // if only one result, we compare reseaux between organisme in réseau file and the one we found in our database
       // and update our organisme with the updated list of reseaux
       if (foundUnique) {
@@ -110,6 +124,7 @@ export const hydrateReseauxNewFormat = async () => {
           try {
             await updateOrganisme(uniqueOrganismeFromTdb._id, {
               ...uniqueOrganismeFromTdb,
+              // we merge reseaux from db and file, in case an organism has several "reseaux"
               reseaux: [...reseauxFromDb, ...reseauxFromFile],
             });
             organismeUpdatedCount++;
