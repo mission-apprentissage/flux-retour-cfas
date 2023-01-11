@@ -4,7 +4,6 @@ import Head from "next/head";
 import NavLink from "next/link";
 
 import { Page } from "../components";
-import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
 import { Support } from "../theme/components/icons/Support.js";
 
 const Reinscription = () => {
