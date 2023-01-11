@@ -11,7 +11,7 @@ import { anonymous } from "../../common/anonymous";
 import { emitter } from "../../common/emitter";
 import { isUserAdmin } from "../../common/utils/rolesUtils";
 
-const AccountWrapper = ({ children, messageMaintenance }) => {
+const AccountWrapper = ({ children }) => {
   let [auth] = useAuth();
   const router = useRouter();
 
@@ -31,15 +31,11 @@ const AccountWrapper = ({ children, messageMaintenance }) => {
             router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
           } else if (auth.account_status.includes("FORCE_COMPLETE_PROFILE") && router.asPath !== "/auth/finalisation") {
             router.push(`/auth/finalisation`);
-          } else {
-            if (messageMaintenance?.enabled && router.asPath !== "/en-maintenance" && !isUserAdmin(auth)) {
-              router.push(`/en-maintenance`);
-            }
           }
         }
       }
     })();
-  }, [auth, router, messageMaintenance]);
+  }, [auth, router]);
 
   return <>{children}</>;
 };
@@ -108,8 +104,17 @@ export const AuthenticationContext = createContext({});
 const UserWrapper = ({ children, ssrAuth }) => {
   const [token, setToken] = useState();
   const [auth, setAuth] = useState(ssrAuth ?? anonymous);
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(!ssrAuth);
-  const { messageMaintenance, loading: isLoadingMessageMaintenance } = useMaintenanceMessages();
+  const { messageMaintenance } = useMaintenanceMessages();
+
+  useEffect(() => {
+    (async () => {
+      if (messageMaintenance?.enabled && router.asPath !== "/en-maintenance" && !isUserAdmin(auth)) {
+        router.push(`/en-maintenance`);
+      }
+    })();
+  }, [auth, messageMaintenance?.enabled, router]);
 
   useEffect(() => {
     async function getUser() {
@@ -139,7 +144,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
     return () => emitter.off("http:error", handler);
   }, []);
 
-  if (isLoading || isLoadingMessageMaintenance) {
+  if (isLoading) {
     return (
       <Flex height="100vh" alignItems="center" justifyContent="center">
         <Spinner />
@@ -149,7 +154,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
 
   return (
     <AuthenticationContext.Provider value={{ auth, token, setAuth, setToken }}>
-      <AccountWrapper messageMaintenance={messageMaintenance}>
+      <AccountWrapper>
         <ForceAcceptCGU>{children}</ForceAcceptCGU>
       </AccountWrapper>
     </AuthenticationContext.Provider>
