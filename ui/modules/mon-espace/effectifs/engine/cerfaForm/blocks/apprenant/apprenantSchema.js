@@ -1,13 +1,8 @@
-import { INDICE_DE_REPETITION_OPTIONS } from "../../../domain/indiceDeRepetionOptions";
-import { apprenantContratsSchema } from "./apprenantContratsSchema";
-import { apprenantStatutsSchema } from "./apprenantStatutsSchema";
+import { INDICE_DE_REPETITION_OPTIONS } from "../../domain/indiceDeRepetionOptions";
 // import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
-import { shouldAskResponsalLegalAdresse } from "../domain/shouldAskResponsalLegalAdresse";
+import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
 
 export const apprenantSchema = {
-  ...apprenantContratsSchema,
-  ...apprenantStatutsSchema,
-
   "apprenant.ine": {
     showInfo: true,
     label: "Numéro INE de l'apprenant(e) :",
@@ -822,37 +817,5 @@ export const apprenantSchema = {
         value: "IE",
       },
     ],
-  },
-
-  "formation.duree_formation_relle": {
-    fieldType: "numberStepper",
-    required: true,
-    label: "Durée de la formation réelle en mois :",
-    requiredMessage: "Le nombre d'heures de la formation est obligatoire",
-    validateMessage: " n'est pas un nombre d'heures valide",
-    mask: "C",
-    maskBlocks: [
-      {
-        name: "C",
-        mask: "Pattern",
-        pattern: "^\\d*$",
-      },
-    ],
-    min: 1,
-  },
-  "formation.date_debut_formation": {
-    fieldType: "date",
-    label: "Date de début de formation :",
-    showInfo: true,
-  },
-  "formation.date_fin_formation": {
-    fieldType: "date",
-    label: "Date de fin de formation :",
-    showInfo: true,
-  },
-  "formation.date_obtention_diplome": {
-    fieldType: "date",
-    label: "Date d'obtention du diplôme: ",
-    showInfo: true,
   },
 };

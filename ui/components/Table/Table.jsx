@@ -78,7 +78,7 @@ export default function Table({
 
   return (
     <>
-      <Box minH="23vh">
+      <Box>
         <Box as="table" flex={1} fontSize="delta" w="100%" {...props}>
           <Box as="thead">
             {table.getHeaderGroups().map((headerGroup, key) => (
@@ -174,7 +174,7 @@ export default function Table({
         <HStack className="flex items-center gap-1">
           <div>Page</div>
           <strong>
-            {table.getState().pagination.pageIndex + 1} sur {table.getPageCount()}
+            {table.getState().pagination.pageIndex + 1} sur {table.getPageCount() || 1}
           </strong>
         </HStack>
       </HStack>

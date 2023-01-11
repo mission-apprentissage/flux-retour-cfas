@@ -1,6 +1,6 @@
-import { INDICE_DE_REPETITION_OPTIONS } from "../../../domain/indiceDeRepetionOptions";
+import { INDICE_DE_REPETITION_OPTIONS } from "../../domain/indiceDeRepetionOptions";
 
-export const apprenantContratsSchema = {
+export const contratsSchema = {
   "apprenant.nouveau_contrat": {
     autosave: false,
   },
