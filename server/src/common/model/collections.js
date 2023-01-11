@@ -1,16 +1,18 @@
 import { getDbCollection } from "../mongodb.js";
 import usersModelDescriptor from "./previous.models/users.model.js";
 import userEventsModelDescriptor from "./next.toKeep.models/userEvents.model.js";
-import cfasModelDescriptor from "./previous.models/toRemove.models/cfas.model.js";
 import formationsModelDescriptor from "./next.toKeep.models/formations.model.js";
-import dossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/dossiersApprenants.model.js";
 import jobEventsModelDescriptor from "./next.toKeep.models/jobEvents.model.js";
 import effectifsApprenantsModelDescriptor from "./previous.models/effectifsApprenants.model.js";
+import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
+import fiabilisationUaiSiretModelDescriptor from "./next.toKeep.models/fiabilisationUaiSiret.model.js";
+
+// TODO: remove this model
+import cfasModelDescriptor from "./previous.models/toRemove.models/cfas.model.js";
+import dossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/dossiersApprenants.model.js";
 import duplicatesEventsModelDescriptor from "./previous.models/toRemove.models/duplicatesEvents.model.js";
 import archiveDossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/archiveDossiersApprenants.model.js";
-import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
 import referentielSiretUaiModelDescriptor from "./previous.models/toRemove.models/referentielSiretUai.model.js";
-import fiabilisationUaiSiretModelDescriptor from "./next.toKeep.models/fiabilisationUaiSiret.model.js";
 
 import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
 import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
