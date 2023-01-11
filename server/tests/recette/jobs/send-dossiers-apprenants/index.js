@@ -1,13 +1,13 @@
-const assert = require("assert");
-const { format } = require("date-fns");
+import assert from "assert";
+import { format } from "date-fns";
 
-const { createRandomDossierApprenantApiInput } = require("../../../data/randomizedSample");
-const {
+import { createRandomDossierApprenantApiInput } from "../../../data/randomizedSample.js";
+import {
   getJwtForUser,
   getHttpClient,
   postDossiersApprenantsTest,
   postDossiersApprenants,
-} = require("../../../utils/api");
+} from "../../../utils/api.js";
 
 /**
  * Ce script permet d'envoyer des dossiers apprenants de tests toutes les nuits
@@ -26,6 +26,9 @@ async function main() {
     username: process.env.API_USERNAME,
     password: process.env.API_PASSWORD,
   });
+  if (!token) {
+    throw new Error("Error token is empty");
+  }
 
   const testResponse = await postDossiersApprenantsTest({ httpClient, token });
   if (testResponse.data?.msg !== "ok") {

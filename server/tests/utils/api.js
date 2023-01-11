@@ -1,6 +1,6 @@
-const axios = require("axios");
+import axios from "axios";
 
-const getHttpClient = (baseURL) =>
+export const getHttpClient = (baseURL) =>
   axios.create({
     baseURL,
     headers: {
@@ -13,7 +13,7 @@ const getHttpClient = (baseURL) =>
 
 const getAuthorizationHeader = (token) => ({ headers: { Authorization: `Bearer ${token}` } });
 
-const getJwtForUser = async ({ httpClient, username, password }) => {
+export const getJwtForUser = async ({ httpClient, username, password }) => {
   const { data } = await httpClient.post("/api/login", {
     username,
     password,
@@ -21,12 +21,12 @@ const getJwtForUser = async ({ httpClient, username, password }) => {
   return data.access_token;
 };
 
-const postDossiersApprenantsTest = async ({ httpClient, token }) => {
+export const postDossiersApprenantsTest = async ({ httpClient, token }) => {
   const { status, data } = await httpClient.post("/api/dossiers-apprenants/test", {}, getAuthorizationHeader(token));
   return { status, data };
 };
 
-const postDossiersApprenants = async ({ httpClient, token, data: dossierApprenants }) => {
+export const postDossiersApprenants = async ({ httpClient, token, data: dossierApprenants }) => {
   const { status, data } = await httpClient.post(
     "/api/dossiers-apprenants",
     dossierApprenants,
@@ -35,7 +35,7 @@ const postDossiersApprenants = async ({ httpClient, token, data: dossierApprenan
   return { status, data };
 };
 
-module.exports = {
+export default {
   getHttpClient,
   getJwtForUser,
   postDossiersApprenantsTest,
