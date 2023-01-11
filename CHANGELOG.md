@@ -1,3 +1,17 @@
+# [3.0.0-beta.9](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.8...v3.0.0-beta.9) (2023-01-11)
+
+
+### Features
+
+* **server:** add cli job for activate/desactivate users apiSeeders ([#2364](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2364)) ([58ecf5a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/58ecf5adb72b738b83d2876b8f47e15d8c79e41e))
+
+# [3.0.0-beta.8](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.7...v3.0.0-beta.8) (2023-01-11)
+
+
+### Bug Fixes
+
+* fix nginx error "Failed to fully parse request body due to large argument count" ([#2365](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2365)) ([9d1b1f6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9d1b1f64a07a2d12477024b7ae3282f40a0c5600))
+
 # [3.0.0-beta.7](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.6...v3.0.0-beta.7) (2023-01-11)
 
 

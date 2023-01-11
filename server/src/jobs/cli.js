@@ -1,5 +1,5 @@
 import "dotenv/config.js";
-import { program as cli } from "commander";
+import { Option, program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
 import { clear } from "./clear/clear-all.js";
@@ -17,6 +17,7 @@ import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-f
 import { warmEffectifsCache } from "./warm-effectifs-cache/index.js";
 import { hydrateRefreshFormations } from "./hydrate/refresh-formations/hydrate-refresh-formations.js";
 import { hydrateFormationsFromDossiersApprenants } from "./hydrate/_toRemove/formations/hydrate-formations-from-dossiersApprenants.js";
+import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 
 /**
  * Job d'initialisation de données de test
@@ -244,5 +245,22 @@ cli
       return warmEffectifsCache();
     }, "cache-warmup");
   });
+
+/**
+ * TEMPORAIRE
+ * Job de mise à jour des utilisateurs fournisseurs de données
+ * Va modifier leur permission en mode actif / inactif pour temporairement bloquer l'envoi des données
+ */
+cli
+  .command("users:update-apiSeeders")
+  .description("Modification des utilisateurs fournisseurs de données")
+  .addOption(new Option("--mode <mode>", "Mode de mise à jour").choices(["active", "inactive"]).makeOptionMandatory())
+  .action(async ({ mode }) => {
+    runScript(async () => {
+      return updateUsersApiSeeders(mode);
+    }, "users:update-apiSeeders");
+  });
+
+cli;
 
 cli.parse(process.argv);
