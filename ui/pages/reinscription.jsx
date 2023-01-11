@@ -1,11 +1,10 @@
-import { Box, Button, Center, Container, Heading, Link, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Center, Container, Heading, Stack, Text } from "@chakra-ui/react";
 import React from "react";
+import Head from "next/head";
+import NavLink from "next/link";
 
 import { Page } from "../components";
 import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
-import { NotFound } from "../theme/components/icons";
-import Head from "next/head";
-import NavLink from "next/link";
 import { Support } from "../theme/components/icons/Support.js";
 
 const Reinscription = () => {
@@ -31,7 +30,7 @@ const Reinscription = () => {
                   vous remercions de créer votre nouveau compte.
                 </Text>
 
-                <Button variant="secondary" href={NAVIGATION_PAGES.Inscription.path} marginTop="2w" as={NavLink}>
+                <Button variant="secondary" href="/auth/inscription" marginTop="2w" as={NavLink}>
                   Créer mon nouveau compte
                 </Button>
               </Stack>
