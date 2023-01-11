@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Fonts from "../theme/Fonts";
 import theme from "../theme/index";
 import UserWrapper from "../components/UserWrapper/UserWrapper";
+import AlertMessage from "../components/AlertMessage/AlertMessage";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ function MyApp({ Component, pageProps }) {
       <ChakraProvider theme={theme} resetCSS>
         <Fonts />
         <QueryClientProvider client={queryClient}>
+          <AlertMessage />
           <UserWrapper ssrAuth={pageProps.auth}>
             <Component {...pageProps} />
           </UserWrapper>

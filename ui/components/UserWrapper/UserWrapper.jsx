@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef, createContext } from "react";
 import { useRouter } from "next/router";
-import { Box, Text, Spinner } from "@chakra-ui/react";
+import { Flex, Box, Text, Spinner } from "@chakra-ui/react";
+
 import { _get, _post, _put } from "../../common/httpClient";
 import useAuth from "../../hooks/useAuth";
+import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
 import { Cgu, cguVersion } from "../legal/Cgu";
 import AcknowledgeModal from "../../components/Modals/AcknowledgeModal";
 import { anonymous } from "../../common/anonymous";
 import { emitter } from "../../common/emitter";
+import { isUserAdmin } from "../../common/utils/rolesUtils";
 
-const AccountWrapper = ({ children }) => {
+const AccountWrapper = ({ children, messageMaintenance }) => {
   let [auth] = useAuth();
   const router = useRouter();
 
@@ -28,11 +31,15 @@ const AccountWrapper = ({ children }) => {
             router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
           } else if (auth.account_status.includes("FORCE_COMPLETE_PROFILE") && router.asPath !== "/auth/finalisation") {
             router.push(`/auth/finalisation`);
+          } else {
+            if (messageMaintenance?.enabled && router.asPath !== "/en-maintenance" && !isUserAdmin(auth)) {
+              router.push(`/en-maintenance`);
+            }
           }
         }
       }
     })();
-  }, [auth, router]);
+  }, [auth, router, messageMaintenance]);
 
   return <>{children}</>;
 };
@@ -102,6 +109,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
   const [token, setToken] = useState();
   const [auth, setAuth] = useState(ssrAuth ?? anonymous);
   const [isLoading, setIsLoading] = useState(!ssrAuth);
+  const { messageMaintenance, loading: isLoadingMessageMaintenance } = useMaintenanceMessages();
 
   useEffect(() => {
     async function getUser() {
@@ -131,13 +139,17 @@ const UserWrapper = ({ children, ssrAuth }) => {
     return () => emitter.off("http:error", handler);
   }, []);
 
-  if (isLoading) {
-    return <Spinner />;
+  if (isLoading || isLoadingMessageMaintenance) {
+    return (
+      <Flex height="100vh" alignItems="center" justifyContent="center">
+        <Spinner />
+      </Flex>
+    );
   }
 
   return (
     <AuthenticationContext.Provider value={{ auth, token, setAuth, setToken }}>
-      <AccountWrapper>
+      <AccountWrapper messageMaintenance={messageMaintenance}>
         <ForceAcceptCGU>{children}</ForceAcceptCGU>
       </AccountWrapper>
     </AuthenticationContext.Provider>
