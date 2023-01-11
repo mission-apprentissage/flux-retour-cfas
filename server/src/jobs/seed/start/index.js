@@ -55,6 +55,7 @@ export const seedSampleOrganismes = async () => {
     await createOrganisme({
       uai: "0333326L",
       sirets: ["51400512300062"],
+      siret: "51400512300062",
       adresse: {
         departement: "33",
         region: "75",
@@ -71,6 +72,7 @@ export const seedSampleOrganismes = async () => {
     await createOrganisme({
       uai: "0142321X",
       sirets: ["44492238900010"],
+      siret: "44492238900010",
       adresse: {
         departement: "14",
         region: "28",
@@ -89,6 +91,7 @@ export const seedSampleOrganismes = async () => {
     await createOrganisme({
       uai: "0611309S",
       sirets: ["44492238900044"],
+      siret: "44492238900044",
       adresse: {
         departement: "61",
         region: "28",
@@ -107,6 +110,7 @@ export const seedSampleOrganismes = async () => {
     await createOrganisme({
       uai: "0010856A",
       sirets: ["77931004400028"],
+      siret: "77931004400028",
       adresse: {
         departement: "01",
         region: "84",
@@ -140,6 +144,7 @@ export const seedSampleOrganismes = async () => {
     await createOrganisme({
       uai: "0312755B",
       sirets: ["49917930700024"],
+      siret: "49917930700024",
       adresse: {
         departement: "31",
         region: "76",
