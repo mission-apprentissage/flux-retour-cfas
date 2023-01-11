@@ -3,7 +3,7 @@ import { contratSchema } from "./blocks/contrat/contratSchema";
 // import { maitreSchema } from "./blocks/maitre/maitreSchema";
 // import { apprentiSchema } from "./blocks/apprenti/apprentiSchema";
 // import { employerSchema } from "./blocks/employer/employerSchema";
-import { apprenantSchema } from "./blocks/apprenant/schemas/apprenantSchema";
+import { apprenantSchema } from "./blocks/apprenant/apprenantSchema";
 
 import { cerfaSchema } from "../formEngine/cerfaSchema";
 import { getValues } from "../formEngine/utils/getValues";

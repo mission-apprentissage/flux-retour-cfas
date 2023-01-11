@@ -4,19 +4,14 @@ import { InputController } from "../../../formEngine/components/Input/InputContr
 import { CollapseController } from "../../../formEngine/components/CollapseController";
 import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
-import { ApprenantStatuts } from "./components/ApprenantStatuts";
-import { ApprenantContrats } from "./components/ApprenantContrats";
 import { useRecoilValue } from "recoil";
 import { valuesSelector } from "../../../formEngine/atoms";
 
 // eslint-disable-next-line react/display-name
-export const EffectifApprenant = memo(({ modeSifa = false }) => {
+export const EffectifApprenant = memo(() => {
   const values = useRecoilValue(valuesSelector);
   return (
     <Box>
-      <Box my={9} borderWidth="1px" borderColor="bluefrance">
-        <ApprenantStatuts modeSifa={modeSifa} />
-      </Box>
       <Flex borderWidth="1px" borderColor="bluefrance">
         <Box w="55%" flex="1">
           <InputController name="apprenant.ine" />
@@ -97,17 +92,6 @@ export const EffectifApprenant = memo(({ modeSifa = false }) => {
           <InputController name="apprenant.regime_scolaire" />
         </Box>
       </Flex>
-      <Box my={9} borderWidth="1px" borderColor="bluefrance">
-        <HStack spacing={2} alignItems="flex-end">
-          <InputController name="formation.date_debut_formation" w="33%" mb={0} />
-          <InputController name="formation.date_fin_formation" w="33%" mb={0} />
-          <InputController name="formation.date_obtention_diplome" w="33%" mb={0} />
-          <InputController name="formation.duree_formation_relle" w="33%" mb={0} />
-        </HStack>
-      </Box>
-      <Box my={9} borderWidth="1px" borderColor="bluefrance">
-        <ApprenantContrats modeSifa={modeSifa} />
-      </Box>
     </Box>
   );
 });

@@ -10,7 +10,20 @@ import React, { useEffect, useState } from "react";
 import { InputWrapper } from "./InputWrapper";
 
 export const NumberInput = (props) => {
-  const { name, onChange, error, example, description, locked, fieldType, minLength, maxLength, min, max } = props;
+  const {
+    name,
+    onChange,
+    error,
+    example,
+    description,
+    locked,
+    fieldType,
+    minLength,
+    maxLength,
+    min,
+    max,
+    precision = 2,
+  } = props;
 
   const [localValue, setLocalValue] = useState(props.value);
 
@@ -23,7 +36,7 @@ export const NumberInput = (props) => {
   return (
     <InputWrapper {...props}>
       <ChakraNumberInput
-        precision={2}
+        precision={precision}
         w="100%"
         variant="cerfa"
         isInvalid={!!error}

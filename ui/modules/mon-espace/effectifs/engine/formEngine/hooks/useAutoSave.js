@@ -7,6 +7,7 @@ import debounce from "lodash.debounce";
 import { effectifIdAtom } from "../../atoms";
 import setWith from "lodash.setwith";
 import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
+import { effectifStateSelector } from "../atoms";
 
 const getIsLocked = (fields) => {
   if (!fields) return undefined;
@@ -30,6 +31,7 @@ export const useAutoSave = ({ controller }) => {
     []
   );
   const effectifId = useRecoilValue(effectifIdAtom);
+  const setEffectifsState = useSetRecoilState(effectifStateSelector(effectifId));
   const inputNamesRef = useRef([]);
   const setAutoSave = useSetRecoilState(autoSaveStatusAtom);
 
@@ -58,6 +60,9 @@ export const useAutoSave = ({ controller }) => {
             effectifId,
             inputNames: inputNamesRef.current,
           });
+
+          setEffectifsState({ inputNames: inputNamesRef.current });
+
           inputNamesRef.current = [];
         } catch (e) {
           setAutoSave("ERROR");
@@ -84,5 +89,5 @@ export const useAutoSave = ({ controller }) => {
       controller.off("CHANGE", handler);
       clearTimeout(timeout);
     };
-  }, [controller, effectifId, getOrganisme, setAutoSave]);
+  }, [controller, effectifId, getOrganisme, setAutoSave, setEffectifsState]);
 };

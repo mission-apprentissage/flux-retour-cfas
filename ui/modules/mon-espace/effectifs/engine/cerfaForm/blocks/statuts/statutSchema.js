@@ -1,4 +1,4 @@
-export const apprenantStatutsSchema = {
+export const statutsSchema = {
   "apprenant.nouveau_statut": {
     autosave: false,
   },

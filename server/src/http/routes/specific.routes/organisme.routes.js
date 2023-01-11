@@ -81,7 +81,7 @@ export default () => {
             ? {
                 requiredSifa: compact(
                   [
-                    ...(apprenant.adresse?.complete
+                    ...(!apprenant.adresse?.complete
                       ? [...requiredFieldsSifa, ...requiredApprenantAdresseFieldsSifa]
                       : requiredFieldsSifa),
                   ].map((fieldName) =>

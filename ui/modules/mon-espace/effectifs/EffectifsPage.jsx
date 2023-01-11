@@ -1,18 +1,21 @@
 import React, { useEffect, useRef } from "react";
 import { Center, Spinner } from "@chakra-ui/react";
-import EffectifsPage from "./engine/EffectifsPage.jsx";
+import Effectifs from "./engine/Effectifs.jsx";
 
 import { organismeAtom } from "../../../hooks/organismeAtoms";
 import { _get } from "../../../common/httpClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRecoilValue } from "recoil";
+import { useSetRecoilState, useRecoilValue } from "recoil";
 import ChoixTransmission from "./ChoixTransmission";
 import TransmissionAPI from "./TransmissionAPI";
 import { useRouter } from "next/router";
 import Televersements from "./Televersements";
+import { effectifsStateAtom } from "./engine/atoms.js";
 
 function useOrganismesEffectifs() {
   const organisme = useRecoilValue(organismeAtom);
+  const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
+
   const queryClient = useQueryClient();
   const prevOrganismeId = useRef(null);
 
@@ -25,7 +28,18 @@ function useOrganismesEffectifs() {
 
   const { data, isLoading, isFetching } = useQuery(
     ["organismesEffectifs"],
-    () => _get(`/api/v1/organisme/effectifs?organisme_id=${organisme._id}`),
+    async () => {
+      const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organisme._id}`);
+
+      // eslint-disable-next-line no-undef
+      const newEffectifsState = new Map();
+      for (const { id, validation_errors } of organismesEffectifs) {
+        newEffectifsState.set(id, { validation_errors, requiredSifa: [] });
+      }
+      setCurrentEffectifsState(newEffectifsState);
+
+      return organismesEffectifs;
+    },
     {
       refetchOnWindowFocus: false,
     }
@@ -34,7 +48,7 @@ function useOrganismesEffectifs() {
   return { isLoading: isFetching || isLoading, organismesEffectifs: data || [] };
 }
 
-const EffectifsOrganisme = () => {
+const EffectifsPage = () => {
   const router = useRouter();
   const { slug } = router.query;
 
@@ -57,9 +71,9 @@ const EffectifsOrganisme = () => {
       {!organisme.mode_de_transmission && <ChoixTransmission />}
       {organisme.mode_de_transmission === "API" && organisme.setup_step_courante !== "COMPLETE" && <TransmissionAPI />}
       {displayEffectifs && televersementPage && <Televersements />}
-      {displayEffectifs && !televersementPage && <EffectifsPage organismesEffectifs={organismesEffectifs} />}
+      {displayEffectifs && !televersementPage && <Effectifs organismesEffectifs={organismesEffectifs} />}
     </>
   );
 };
 
-export default EffectifsOrganisme;
+export default EffectifsPage;

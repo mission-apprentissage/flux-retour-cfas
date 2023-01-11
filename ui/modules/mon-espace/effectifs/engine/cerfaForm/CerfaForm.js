@@ -1,96 +1,137 @@
-import { Box } from "@chakra-ui/react";
-import React, {
-  memo,
-  // useEffect, useRef, useState
-} from "react";
-// import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack, Text } from "@chakra-ui/react";
-// import { AddFill, StepComplete, StepWip, SubtractLine } from "../../../../../theme/components/icons";
-// import { CerfaMaitre } from "./blocks/maitre/CerfaMaitre";
+import React, { memo, useEffect, useRef, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack, Text } from "@chakra-ui/react";
 import { EffectifApprenant } from "./blocks/apprenant/EffectifApprenant";
-// import { cerfaStatusGetter } from "../formEngine/atoms";
-// import { useRecoilValue } from "recoil";
-// import { CerfaApprenti } from "./blocks/apprenti/CerfaApprenti";
-// import { CerfaContrat } from "./blocks/contrat/cerfaContrat";
-// import { CerfaFormation } from "./blocks/formation/CerfaFormation";
+import { PlainArrowRight } from "../../../../../theme/components/icons/PlainArrowRight";
+import { ApprenantStatuts } from "./blocks/statuts/EffectifStatuts";
+import { ApprenantContrats } from "./blocks/contrats/EffectifContrats";
+import { EffectifFormation } from "./blocks/formation/EffectifFormation";
+import { effectifStateSelector } from "../formEngine/atoms";
+import { ErrorPill } from "../../../../../theme/components/icons/ErrorPill";
+import { effectifIdAtom } from "../atoms";
 
-// const useOpenAccordionToLocation = () => {
-//   const scrolledRef = useRef(false);
-//   const { hash } = location;
-//   const hashRef = useRef(hash);
-//   const [accordionIndex, setAccordionIndex] = useState([]);
+const useOpenAccordionToLocation = () => {
+  const scrolledRef = useRef(false);
+  const { hash } = location;
+  const hashRef = useRef(hash);
+  const [accordionIndex, setAccordionIndex] = useState([]);
 
-//   useEffect(() => {
-//     if (hash) {
-//       // We want to reset if the hash has changed
-//       if (hashRef.current !== hash) {
-//         hashRef.current = hash;
-//         scrolledRef.current = false;
-//       }
+  useEffect(() => {
+    if (hash) {
+      // We want to reset if the hash has changed
+      if (hashRef.current !== hash) {
+        hashRef.current = hash;
+        scrolledRef.current = false;
+      }
 
-//       // only attempt to scroll if we haven't yet (this could have just reset above if hash changed)
-//       if (!scrolledRef.current) {
-//         const id = hash.replace("#", "");
+      // only attempt to scroll if we haven't yet (this could have just reset above if hash changed)
+      if (!scrolledRef.current) {
+        const id = hash.replace("#", "");
 
-//         if (id.startsWith("apprenti_")) {
-//           setAccordionIndex([1]);
-//         }
-//       }
-//     }
-//     return () => {
-//       return false;
-//     };
-//   }, [hash]);
+        if (id.startsWith("statuts_")) {
+          setAccordionIndex([1]);
+        }
+      }
+    }
+    return () => {
+      return false;
+    };
+  }, [hash]);
 
-//   return { accordionIndex, setAccordionIndex };
-// };
+  return { accordionIndex, setAccordionIndex };
+};
 
 // eslint-disable-next-line react/display-name
-export const CerfaForm = memo(() => {
-  // const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
-  // const cerfaStatus = useRecoilValue(cerfaStatusGetter);
+export const CerfaForm = memo(({ modeSifa = false }) => {
+  const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
+  const effectifId = useRecoilValue(effectifIdAtom);
+  const { validationErrorsByBlock, requiredSifaByBlock } = useRecoilValue(effectifStateSelector(effectifId));
 
   return (
-    <Box my={12} px={5}>
-      <EffectifApprenant />
-      {/* {cerfaStatus && (
-        <Accordion allowMultiple mt={12} minH="25vh" index={accordionIndex} onChange={setAccordionIndex}>
-          <AccordionItem border="none" id={`apprenant`}>
-            {({ isExpanded }) => (
-              <AccordionItemChild
-                isExpanded={isExpanded}
-                title={"Apprenant"}
-                completion={cerfaStatus.apprenant.completion}
-              >
-                <EffectifApprenant />
-              </AccordionItemChild>
-            )}
-          </AccordionItem>
-        </Accordion>
-      )} */}
+    <Box my={2} px={5}>
+      <Accordion allowMultiple mt={2} index={accordionIndex} onChange={setAccordionIndex}>
+        <AccordionItem border="none" id={`statuts`}>
+          {({ isExpanded }) => (
+            <AccordionItemChild
+              isExpanded={isExpanded}
+              title={"Statuts"}
+              validationErrors={validationErrorsByBlock.statuts}
+              requiredSifa={requiredSifaByBlock.statuts}
+            >
+              <ApprenantStatuts modeSifa={modeSifa} />
+            </AccordionItemChild>
+          )}
+        </AccordionItem>
+        <AccordionItem border="none" id={`apprenant`}>
+          {({ isExpanded }) => (
+            <AccordionItemChild
+              isExpanded={isExpanded}
+              title={"Apprenant"}
+              validationErrors={validationErrorsByBlock.apprenant}
+              requiredSifa={requiredSifaByBlock.apprenant}
+            >
+              <EffectifApprenant />
+            </AccordionItemChild>
+          )}
+        </AccordionItem>
+        <AccordionItem border="none" id={`formation`}>
+          {({ isExpanded }) => (
+            <AccordionItemChild
+              isExpanded={isExpanded}
+              title={"Formation"}
+              validationErrors={validationErrorsByBlock.formation}
+              requiredSifa={requiredSifaByBlock.formation}
+            >
+              <EffectifFormation />
+            </AccordionItemChild>
+          )}
+        </AccordionItem>
+        <AccordionItem border="none" id={`contrats`}>
+          {({ isExpanded }) => (
+            <AccordionItemChild
+              isExpanded={isExpanded}
+              title={"Contrat(s)"}
+              validationErrors={validationErrorsByBlock.contrats}
+              requiredSifa={requiredSifaByBlock.contrats}
+            >
+              <ApprenantContrats modeSifa={modeSifa} />
+            </AccordionItemChild>
+          )}
+        </AccordionItem>
+      </Accordion>
     </Box>
   );
 });
 
 // eslint-disable-next-line react/display-name
-// const AccordionItemChild = React.memo(({ title, children, completion, isExpanded }) => {
-//   return (
-//     <>
-//       <AccordionButton bg="#F9F8F6">
-//         {completion < 100 && <StepWip color={"flatwarm"} boxSize="4" mr={2} />}
-//         {completion >= 100 && <StepComplete color={"greensoft.500"} boxSize="4" mr={2} />}
-//         <Box flex="1" textAlign="left">
-//           <HStack>
-//             <Text fontWeight="bold">{title}</Text>
-//             <Text> - {Math.round(completion)}%</Text>
-//           </HStack>
-//         </Box>
-//         {isExpanded ? (
-//           <SubtractLine fontSize="12px" color="bluefrance" />
-//         ) : (
-//           <AddFill fontSize="12px" color="bluefrance" />
-//         )}
-//       </AccordionButton>
-//       <AccordionPanel pb={4}>{isExpanded && children}</AccordionPanel>
-//     </>
-//   );
-// });
+const AccordionItemChild = React.memo(({ title, children, validationErrors, requiredSifa, isExpanded }) => {
+  return (
+    <>
+      <AccordionButton bg="#F9F8F6">
+        {isExpanded ? (
+          <PlainArrowRight boxSize={7} color="bluefrance" transform="rotate(90deg)" />
+        ) : (
+          <PlainArrowRight boxSize={7} color="bluefrance" />
+        )}
+        <Box flex="1" textAlign="left">
+          <HStack>
+            <Text fontWeight="bold">{title}</Text>
+            {validationErrors.length && (
+              <HStack fontSize="0.8rem">
+                <ErrorPill color="redmarianne" boxSize="2" />
+                <Text color="redmarianne">({Math.round(validationErrors.length)})</Text>
+              </HStack>
+            )}
+            {requiredSifa.length && (
+              <HStack fontSize="0.8rem">
+                <ErrorPill color="warning" boxSize="2" />
+                <Text color="warning">({Math.round(requiredSifa.length)})</Text>
+              </HStack>
+            )}
+          </HStack>
+        </Box>
+      </AccordionButton>
+      <AccordionPanel pb={4}>{isExpanded && children}</AccordionPanel>
+    </>
+  );
+});

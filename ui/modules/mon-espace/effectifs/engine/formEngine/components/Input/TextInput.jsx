@@ -21,6 +21,7 @@ export const TextInput = (props) => {
     min,
     max,
     precision,
+    placeholder,
   } = props;
   const value = props.value + "";
 
@@ -48,7 +49,7 @@ export const TextInput = (props) => {
           disabled={locked}
           onChange={handleChange}
           value={value}
-          placeholder={example ? `Exemple : ${example}` : description}
+          placeholder={placeholder ? placeholder : example ? `Exemple : ${example}` : description}
           mask={mask}
           maskBlocks={maskBlocks}
           unmask={unmask}
@@ -68,7 +69,7 @@ export const TextInput = (props) => {
           step={1}
           onChange={handleChange}
           value={value}
-          placeholder={example ? `Exemple : ${example}` : description}
+          placeholder={placeholder ? placeholder : example ? `Exemple : ${example}` : description}
           minLength={minLength}
           maxLength={maxLength}
           min={min}
