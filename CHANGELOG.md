@@ -1,3 +1,10 @@
+# [3.0.0-beta.10](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.9...v3.0.0-beta.10) (2023-01-11)
+
+
+### Bug Fixes
+
+* temporary fix the CI by fixing or skipping broken tests ([#2342](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2342)) ([16ee7ca](https://github.com/mission-apprentissage/flux-retour-cfas/commit/16ee7ca26fc757dccf52909e25caf2d3500d9857))
+
 # [3.0.0-beta.9](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.8...v3.0.0-beta.9) (2023-01-11)
 
 
