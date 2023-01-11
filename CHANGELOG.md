@@ -1,3 +1,10 @@
+# [3.0.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.4...v3.0.0-beta.5) (2023-01-11)
+
+
+### Features
+
+* ajout code coverage coté server ([#2308](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2308)) ([142c899](https://github.com/mission-apprentissage/flux-retour-cfas/commit/142c8993d3bdaea7ef48b76a01395866deafad9e))
+
 # [3.0.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.3...v3.0.0-beta.4) (2023-01-11)
 
 
