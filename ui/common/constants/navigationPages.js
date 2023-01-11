@@ -1,4 +1,8 @@
 export const NAVIGATION_PAGES = {
+  Inscription: {
+    path: "/auth/inscription",
+    title: "Inscription",
+  },
   Login: {
     path: "/auth/connexion",
     title: "Institution ou une organisation professionnelle",

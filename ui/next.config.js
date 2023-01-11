@@ -41,6 +41,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/cfa/:path*",
+        destination: "/reinscription",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
