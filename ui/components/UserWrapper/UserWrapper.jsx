@@ -110,7 +110,12 @@ const UserWrapper = ({ children, ssrAuth }) => {
 
   useEffect(() => {
     (async () => {
-      if (messageMaintenance?.enabled && router.asPath !== "/en-maintenance" && !isUserAdmin(auth)) {
+      if (
+        messageMaintenance?.enabled &&
+        router.asPath !== "/en-maintenance" &&
+        router.asPath !== "/auth/connexion" &&
+        !isUserAdmin(auth)
+      ) {
         router.push(`/en-maintenance`);
       }
     })();
