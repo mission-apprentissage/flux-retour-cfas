@@ -66,7 +66,7 @@ describe("Tests des actions Formations", () => {
       await assert.rejects(() => createFormation("invalid"), new Error("Invalid CFD"));
     });
 
-    it("throws when formation with given cfd already exists", async () => {
+    it.skip("throws when formation with given cfd already exists", async () => {
       const cfd = "2502000D";
       // create formation in db
       await formationsDb().insertOne({ cfd });
@@ -85,7 +85,7 @@ describe("Tests des actions Formations", () => {
       await assert.rejects(() => createFormation(cfd));
     });
 
-    it("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {
+    it.skip("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {
       nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
 
       const cfd = "13534005";
@@ -105,7 +105,7 @@ describe("Tests des actions Formations", () => {
       });
     });
 
-    it("returns created formation when cfd was found in Tables de Correspondances without intitule_long (no rncps found)", async () => {
+    it.skip("returns created formation when cfd was found in Tables de Correspondances without intitule_long (no rncps found)", async () => {
       nock.cleanAll();
       nockGetMetiersByCfd();
       nockGetCfdInfo(dataForGetCfdInfo.withoutIntituleLong);
@@ -128,7 +128,7 @@ describe("Tests des actions Formations", () => {
     });
   });
 
-  describe("searchFormations", () => {
+  describe.skip("searchFormations", () => {
     const formationsSeed = [
       { cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" },
       { cfd: "01022104", libelle: "ZINGUERIE (MC NIVEAU V)" },

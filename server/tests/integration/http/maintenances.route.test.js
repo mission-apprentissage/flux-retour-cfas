@@ -15,14 +15,14 @@ describe("Maintenances Route", () => {
       assert.equal(response.status, 401);
     });
 
-    it("sends a 401 HTTP response when user is not admin", async () => {
+    it("sends a 403 HTTP response when user is not admin", async () => {
       const { httpClient, logUser } = await startServer();
 
       const { email, password } = await createSimpleUser();
       const { cookie } = await logUser(email, password);
       const response = await httpClient.post(ADMIN_MAINTENANCE_ENDPOINT, {}, { headers: { cookie } });
 
-      assert.equal(response.status, 401);
+      assert.equal(response.status, 403);
     });
 
     it("sends a 400 HTTP response if data are not valid", async () => {
@@ -91,14 +91,14 @@ describe("Maintenances Route", () => {
       assert.equal(response.status, 401);
     });
 
-    it("sends a 401 HTTP response when user is not admin", async () => {
+    it("sends a 403 HTTP response when user is not admin", async () => {
       const { httpClient, logUser } = await startServer();
 
       const { email, password } = await createSimpleUser();
       const { cookie } = await logUser(email, password);
       const response = await httpClient.post(`${ADMIN_MAINTENANCE_ENDPOINT}/1`, {}, { headers: { cookie } });
 
-      assert.equal(response.status, 401);
+      assert.equal(response.status, 403);
     });
 
     it("sends a 200 HTTP response if a message maintenance is updated", async () => {
@@ -139,14 +139,14 @@ describe("Maintenances Route", () => {
       assert.equal(response.status, 401);
     });
 
-    it("sends a 401 HTTP response when user is not admin", async () => {
+    it("sends a 403 HTTP response when user is not admin", async () => {
       const { httpClient, logUser } = await startServer();
 
       const { email, password } = await createSimpleUser();
       const { cookie } = await logUser(email, password);
-      const response = await httpClient.delete(`${ADMIN_MAINTENANCE_ENDPOINT}/1`, {}, { headers: { cookie } });
+      const response = await httpClient.delete(`${ADMIN_MAINTENANCE_ENDPOINT}/1`, { headers: { cookie } });
 
-      assert.equal(response.status, 401);
+      assert.equal(response.status, 403);
     });
 
     it("sends a 200 HTTP response if a message maintenance is deleted", async () => {

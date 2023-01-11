@@ -63,6 +63,7 @@ export const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
   const isStudentPresent = isPresent();
+  const isContratPresent = isPresent();
 
   return {
     ine_apprenant: isStudentPresent ? getRandomIne() : null,
