@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Head from "next/head";
 import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
@@ -8,10 +8,9 @@ import Link from "../../components/Links/Link";
 import withAuth from "../../components/withAuth";
 import { _get } from "../../common/httpClient";
 import { useEspace } from "../../hooks/useEspace";
-import { BasePagination } from "../../components/Pagination/Pagination.jsx";
-import usePaginatedItems from "../../hooks/old/usePaginatedItems.js";
 import Table from "../../components/Table/Table";
 import { ArrowDropRightLine } from "../../theme/components/icons";
+import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 function useEspaceOrganismes() {
   const {
@@ -31,12 +30,6 @@ function MesOrganismes() {
 
   let { whoIs } = useEspace();
 
-  const [
-    current,
-    setCurrent,
-    // itemsSliced
-  ] = usePaginatedItems(organismes ?? []);
-
   const headerTitle = {
     pilot: "Les organismes sur mon territoire",
     erp: "Les organismes connectés de mon erp",
@@ -44,6 +37,8 @@ function MesOrganismes() {
     reseau_of: "Les organismes de mon réseau",
     global: "Tous les organismes",
   };
+
+  const [searchValue, setSearchValue] = useState("");
 
   return (
     <Page>
@@ -65,6 +60,23 @@ function MesOrganismes() {
           )}
           {!isLoading && organismes && (
             <>
+              <Input
+                {...{
+                  name: `search_organisme`,
+                  fieldType: "text",
+                  mask: "C",
+                  maskBlocks: [
+                    {
+                      name: "C",
+                      mask: "Pattern",
+                      pattern: "^.*$",
+                    },
+                  ],
+                  placeholder: "Rechercher un organisme",
+                }}
+                onSubmit={(value) => setSearchValue(value)}
+                value={searchValue}
+              />
               <Table
                 mt={4}
                 data={organismes}
@@ -154,14 +166,7 @@ function MesOrganismes() {
                     },
                   },
                 }}
-              />
-
-              <BasePagination
-                current={current}
-                onChange={(page) => {
-                  setCurrent(page);
-                }}
-                total={organismes?.length}
+                searchValue={searchValue}
               />
             </>
           )}
