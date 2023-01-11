@@ -1,3 +1,10 @@
+# [3.0.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.5...v3.0.0-beta.6) (2023-01-11)
+
+
+### Bug Fixes
+
+* **server:** remove duplicate dossiers-apprenant.route.js + fixes linter ([#2339](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2339)) ([c6dd2e4](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c6dd2e4452fb7e41ecc66493ddd3d746fdb20d3f))
+
 # [3.0.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.4...v3.0.0-beta.5) (2023-01-11)
 
 
