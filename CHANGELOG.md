@@ -1,3 +1,10 @@
+# [3.0.0-beta.11](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.10...v3.0.0-beta.11) (2023-01-11)
+
+
+### Bug Fixes
+
+* **ui:** activation maintenance ([2afc2b8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/2afc2b8e2e7c2750bf6b2245a061507a319cfd93))
+
 # [3.0.0-beta.10](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.9...v3.0.0-beta.10) (2023-01-11)
 
 
