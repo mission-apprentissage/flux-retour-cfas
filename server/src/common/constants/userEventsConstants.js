@@ -21,7 +21,6 @@ export const USER_EVENTS_ACTIONS = {
     CFA_NAMED_DATA: "export-csv-effectifs-nominatifs-cfa",
   },
   LOGIN: "login",
-  LOGIN_CFA: "login-cfa",
   UPDATE_PASSWORD: "update-password",
 };
 

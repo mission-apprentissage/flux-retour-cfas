@@ -19,7 +19,6 @@ import effectifsApprenantsRouter from "./routes/specific.routes/old/effectifs-ap
 import dossierApprenantRouter from "./routes/specific.routes/old/dossiers-apprenants.route.js";
 import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.route.js";
 import loginRouter from "./routes/specific.routes/old/login.route.js";
-import loginCfaRouter from "./routes/specific.routes/old/login-cfa.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
@@ -142,8 +141,7 @@ export default async (services) => {
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     lienPriveCfaRouter(services)
-  ); // BACK !important
-  app.use("/api/login-cfa", loginCfaRouter(services)); // FRONT / BACK
+  );
 
   // @deprecated to /dossiers-apprenants
   app.use(
