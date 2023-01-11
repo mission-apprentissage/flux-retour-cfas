@@ -1,3 +1,10 @@
+# [3.0.0-beta.7](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.6...v3.0.0-beta.7) (2023-01-11)
+
+
+### Features
+
+* remove login-cfa & redirect to reinscription page ([#2340](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2340)) ([b605db8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b605db82569c222e8b853376404e891b91ecd796))
+
 # [3.0.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.5...v3.0.0-beta.6) (2023-01-11)
 
 
