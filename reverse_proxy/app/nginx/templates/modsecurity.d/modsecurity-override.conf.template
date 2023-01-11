@@ -1,0 +1,11 @@
+#
+# Note: la regle 200007 de mod-security empeche de poster des objects json 
+# avec plus de 1000 champs au total. (Par exemple, 55 dossiers apprenants avec 18 champs chacun = 990 champs)
+# du coup, on la supprime et on la remplace par une regle qui permet de poster jusqu'a 2000 champs.
+# regles par defaut: https://github.com/SpiderLabs/ModSecurity/blob/v3/master/modsecurity.conf-recommended
+#
+SecRuleRemoveById 200007
+SecArgumentsLimit 2000
+SecRule &ARGS "@ge 2000" \
+"id:'1200007', phase:2,t:none,log,deny,status:400,msg:'Failed to fully parse request body due to large argument count',severity:2"
+
