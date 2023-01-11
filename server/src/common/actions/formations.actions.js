@@ -1,8 +1,6 @@
 import { validateCfd } from "../utils/validationsUtils/cfd.js";
 import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
-import { getMetiersByCfd } from "../apis/apiLba.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
-import logger from "../logger.js";
 import { formationsDb, dossiersApprenantsMigrationDb } from "../model/collections.js";
 import { validateFormation } from "../model/next.toKeep.models/formations.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
