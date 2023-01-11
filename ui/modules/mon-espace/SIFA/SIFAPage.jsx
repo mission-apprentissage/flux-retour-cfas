@@ -5,15 +5,17 @@ import { useEspace } from "../../../hooks/useEspace";
 import { organismeAtom } from "../../../hooks/organismeAtoms";
 import { _get, _getBlob } from "../../../common/httpClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
 import useDownloadClick from "../../../hooks/old/useDownloadClick";
 import { DownloadLine } from "../../../theme/components/icons";
 import { useRouter } from "next/router";
 import EffectifsTable from "../effectifs/engine/EffectifsTable";
+import { effectifsStateAtom } from "../effectifs/engine/atoms";
 
 function useOrganismesEffectifs() {
   const organisme = useRecoilValue(organismeAtom);
+  const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const queryClient = useQueryClient();
   const prevOrganismeId = useRef(null);
 
@@ -26,7 +28,16 @@ function useOrganismesEffectifs() {
 
   const { data, isLoading, isFetching } = useQuery(
     ["organismesEffectifs"],
-    () => _get(`/api/v1/organisme/effectifs?organisme_id=${organisme._id}&sifa=true`),
+    async () => {
+      const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organisme._id}&sifa=true`);
+      // eslint-disable-next-line no-undef
+      const newEffectifsState = new Map();
+      for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
+        newEffectifsState.set(id, { validation_errors, requiredSifa });
+      }
+      setCurrentEffectifsState(newEffectifsState);
+      return organismesEffectifs;
+    },
     {
       refetchOnWindowFocus: false,
     }
@@ -49,7 +60,7 @@ const DownloadButton = ({ title, fileName, getFile }) => {
   );
 };
 
-const EnqueteSIFA = () => {
+const SIFAPage = () => {
   const { isMonOrganismePages, isOrganismePages } = useEspace();
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs();
   const organisme = useRecoilValue(organismeAtom);
@@ -147,4 +158,4 @@ const EnqueteSIFA = () => {
   );
 };
 
-export default EnqueteSIFA;
+export default SIFAPage;

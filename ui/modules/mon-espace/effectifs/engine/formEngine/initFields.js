@@ -241,7 +241,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     };
   });
 
-  if (!modeSifa && cerfa.validation_errors.length) {
+  if (cerfa.validation_errors.length) {
     for (const validation_error of cerfa.validation_errors) {
       fields[validation_error.fieldName] = {
         ...fields[validation_error.fieldName],
@@ -267,7 +267,7 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
                 ),
               }
           : {
-              warning: () => (
+              error: () => (
                 <p>
                   La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
                   &nbsp;n&rsquo;est pas valide pour ce champ.
@@ -297,7 +297,7 @@ const createFieldFactory =
 
     if (modeSifa && requiredFieldsSifa.includes(name)) {
       fieldSchema.required = true; // TODO
-      if (!value) fieldSchema.error = "Requis pour l'enquête"; // TODO
+      if (!value) fieldSchema.warning = "Requis pour l'enquête"; // TODO
     }
 
     return {

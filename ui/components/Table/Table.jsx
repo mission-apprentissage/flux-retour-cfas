@@ -9,7 +9,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Box, Button, Divider, HStack } from "@chakra-ui/react";
+import { Box, Button, Divider, HStack, Text } from "@chakra-ui/react";
 
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
@@ -142,78 +142,80 @@ export default function Table({
         </Box>
       </Box>
       <Divider />
-      <HStack spacing={2} justifyContent="center" mt={5}>
-        <Button
-          className="border rounded p-1"
-          onClick={() => table.setPageIndex(0)}
-          disabled={!table.getCanPreviousPage()}
-        >
-          <Box as="i" className="ri-skip-back-fill" />
+      <HStack spacing={3} justifyContent="center" mt={5}>
+        <Button variant="unstyled" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
+          <Box className="ri-skip-back-fill" mt="0.250rem !important" />
         </Button>
-        <Button
-          className="border rounded p-1"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          <Box as="i" className="ri-arrow-left-s-line" />
+        <Button variant="unstyled" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+          <HStack>
+            <Box as="i" className="ri-arrow-left-s-line" mt="0.250rem !important" />
+            <Text>Page précédente </Text>
+          </HStack>
         </Button>
 
-        <Button {...{ bg: "bluefrance", color: "white", pointerEvents: "none" }}>
-          {table.getState().pagination.pageIndex + 1}
-        </Button>
-        <Button className="border rounded p-1" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-          <Box as="i" className="ri-arrow-right-s-line" />
+        <Box px={5}>
+          <Button {...{ bg: "bluefrance", color: "white", pointerEvents: "none" }}>
+            {table.getState().pagination.pageIndex + 1}
+          </Button>
+        </Box>
+
+        <Button variant="unstyled" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+          <HStack>
+            <Text>Page suivante </Text>
+            <Box as="i" className="ri-arrow-right-s-line" mt="0.250rem !important" />
+          </HStack>
         </Button>
         <Button
-          className="border rounded p-1"
+          variant="unstyled"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         >
-          <Box as="i" className="ri-skip-forward-fill" />
+          <Box className="ri-skip-forward-fill" mt="0.250rem !important" />
         </Button>
-        <HStack className="flex items-center gap-1">
+        <HStack flex="1">
           <div>Page</div>
           <strong>
             {table.getState().pagination.pageIndex + 1} sur {table.getPageCount() || 1}
           </strong>
         </HStack>
-      </HStack>
-      <HStack spacing={3} justifyContent="flex-end">
-        {table.getPageCount() > 1 && (
-          <HStack className="flex items-center gap-1">
-            <Box pt={2}>Aller à la page</Box>
-            <Input
-              {...{
-                name: `page`,
-                fieldType: "numberStepper",
-                placeholder: "Aller à la page",
-                precision: 0,
-                max: table.getPageCount(),
-                min: 1,
+
+        <HStack spacing={3} justifyContent="flex-end">
+          {table.getPageCount() > 1 && (
+            <HStack>
+              <Box pt={2}>Aller à la page</Box>
+              <Input
+                {...{
+                  name: `page`,
+                  fieldType: "numberStepper",
+                  placeholder: "Aller à la page",
+                  precision: 0,
+                  max: table.getPageCount(),
+                  min: 1,
+                }}
+                onSubmit={(value) => {
+                  const page = value ? Number(value) - 1 : 0;
+                  table.setPageIndex(page);
+                }}
+                w="80px"
+                value={table.getState().pagination.pageIndex + 1}
+              />
+            </HStack>
+          )}
+          <Box pt={2}>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value));
               }}
-              onSubmit={(value) => {
-                const page = value ? Number(value) - 1 : 0;
-                table.setPageIndex(page);
-              }}
-              w="80px"
-              value={table.getState().pagination.pageIndex + 1}
-            />
-          </HStack>
-        )}
-        <Box pt={2}>
-          <select
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-          >
-            {[5, 10, 20, 30, 40, 50].map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                Voir par {pageSize}
-              </option>
-            ))}
-          </select>
-        </Box>
+            >
+              {[5, 10, 20, 30, 40, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Voir par {pageSize}
+                </option>
+              ))}
+            </select>
+          </Box>
+        </HStack>
       </HStack>
     </>
   );

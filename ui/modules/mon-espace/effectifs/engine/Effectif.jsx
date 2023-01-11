@@ -9,7 +9,6 @@ import { useAutoSave } from "./formEngine/hooks/useAutoSave";
 import { CerfaForm } from "./cerfaForm/CerfaForm";
 
 const Effectif = React.memo(function EffectifMemo({ modeSifa = false, canEdit = false, effectifsSnapshot = false }) {
-  console.log(cerfaSchema);
   const { controller: cerfaController } = useCerfa({ schema: cerfaSchema });
   const { isLoading } = useInitCerfa({ controller: cerfaController, modeSifa, canEdit, effectifsSnapshot });
   useAutoSave({ controller: cerfaController });

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import { Box, Center, Container, Heading, Spinner, Text } from "@chakra-ui/react";
+import { Box, Center, Container, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Page } from "../../components";
 import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
@@ -119,13 +119,20 @@ function MesOrganismes() {
                     },
                   },
                   siret: {
-                    size: 80,
+                    size: 70,
                     header: () => {
                       return <Box textAlign="left">SIRET</Box>;
                     },
                     cell: ({ row }) => {
                       const { sirets } = organismes[row.id];
-                      return <Text fontSize="1rem">{sirets.join(",")}</Text>;
+
+                      return (
+                        <VStack alignItems="flex-start">
+                          {sirets.map((siret) => (
+                            <Text key={siret}>{siret}</Text>
+                          ))}
+                        </VStack>
+                      );
                     },
                   },
                   uai: {

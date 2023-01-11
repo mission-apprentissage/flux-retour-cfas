@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import { useEspace } from "../../../../hooks/useEspace";
 import EffectifsTable from "./EffectifsTable";
 
-const EffectifsPage = ({ organismesEffectifs }) => {
+const Effectifs = ({ organismesEffectifs }) => {
   const router = useRouter();
   const { isMonOrganismePages, isOrganismePages } = useEspace();
   const organisme = useRecoilValue(organismeAtom);
@@ -117,4 +117,4 @@ const EffectifsPage = ({ organismesEffectifs }) => {
   );
 };
 
-export default EffectifsPage;
+export default Effectifs;

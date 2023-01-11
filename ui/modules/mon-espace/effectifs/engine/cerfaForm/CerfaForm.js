@@ -1,17 +1,14 @@
 import React, { memo, useEffect, useRef, useState } from "react";
+import { useRecoilValue } from "recoil";
 import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack, Text } from "@chakra-ui/react";
-import { StepComplete, StepWip } from "../../../../../theme/components/icons";
-// import { CerfaMaitre } from "./blocks/maitre/CerfaMaitre";
 import { EffectifApprenant } from "./blocks/apprenant/EffectifApprenant";
 import { PlainArrowRight } from "../../../../../theme/components/icons/PlainArrowRight";
 import { ApprenantStatuts } from "./blocks/statuts/EffectifStatuts";
 import { ApprenantContrats } from "./blocks/contrats/EffectifContrats";
 import { EffectifFormation } from "./blocks/formation/EffectifFormation";
-// import { cerfaStatusGetter } from "../formEngine/atoms";
-// import { useRecoilValue } from "recoil";
-// import { CerfaApprenti } from "./blocks/apprenti/CerfaApprenti";
-// import { CerfaContrat } from "./blocks/contrat/cerfaContrat";
-// import { CerfaFormation } from "./blocks/formation/CerfaFormation";
+import { effectifStateSelector } from "../formEngine/atoms";
+import { ErrorPill } from "../../../../../theme/components/icons/ErrorPill";
+import { effectifIdAtom } from "../atoms";
 
 const useOpenAccordionToLocation = () => {
   const scrolledRef = useRef(false);
@@ -47,18 +44,19 @@ const useOpenAccordionToLocation = () => {
 // eslint-disable-next-line react/display-name
 export const CerfaForm = memo(({ modeSifa = false }) => {
   const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
-  // const cerfaStatus = useRecoilValue(cerfaStatusGetter);
+  const effectifId = useRecoilValue(effectifIdAtom);
+  const { validationErrorsByBlock, requiredSifaByBlock } = useRecoilValue(effectifStateSelector(effectifId));
 
   return (
-    <Box my={12} px={5}>
-      <Accordion allowMultiple mt={12} minH="25vh" index={accordionIndex} onChange={setAccordionIndex}>
+    <Box my={2} px={5}>
+      <Accordion allowMultiple mt={2} index={accordionIndex} onChange={setAccordionIndex}>
         <AccordionItem border="none" id={`statuts`}>
           {({ isExpanded }) => (
             <AccordionItemChild
               isExpanded={isExpanded}
               title={"Statuts"}
-              // completion={cerfaStatus.statuts.completion}
-              completion={0}
+              validationErrors={validationErrorsByBlock.statuts}
+              requiredSifa={requiredSifaByBlock.statuts}
             >
               <ApprenantStatuts modeSifa={modeSifa} />
             </AccordionItemChild>
@@ -69,8 +67,8 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
             <AccordionItemChild
               isExpanded={isExpanded}
               title={"Apprenant"}
-              // completion={cerfaStatus.apprenant.completion}
-              completion={0}
+              validationErrors={validationErrorsByBlock.apprenant}
+              requiredSifa={requiredSifaByBlock.apprenant}
             >
               <EffectifApprenant />
             </AccordionItemChild>
@@ -81,8 +79,8 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
             <AccordionItemChild
               isExpanded={isExpanded}
               title={"Formation"}
-              // completion={cerfaStatus.apprenant.completion}
-              completion={0}
+              validationErrors={validationErrorsByBlock.formation}
+              requiredSifa={requiredSifaByBlock.formation}
             >
               <EffectifFormation />
             </AccordionItemChild>
@@ -93,8 +91,8 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
             <AccordionItemChild
               isExpanded={isExpanded}
               title={"Contrat(s)"}
-              // completion={cerfaStatus.contrats.completion}
-              completion={0}
+              validationErrors={validationErrorsByBlock.contrats}
+              requiredSifa={requiredSifaByBlock.contrats}
             >
               <ApprenantContrats modeSifa={modeSifa} />
             </AccordionItemChild>
@@ -106,7 +104,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
 });
 
 // eslint-disable-next-line react/display-name
-const AccordionItemChild = React.memo(({ title, children, completion, isExpanded }) => {
+const AccordionItemChild = React.memo(({ title, children, validationErrors, requiredSifa, isExpanded }) => {
   return (
     <>
       <AccordionButton bg="#F9F8F6">
@@ -115,12 +113,21 @@ const AccordionItemChild = React.memo(({ title, children, completion, isExpanded
         ) : (
           <PlainArrowRight boxSize={7} color="bluefrance" />
         )}
-        {completion < 100 && <StepWip color={"flatwarm"} boxSize="4" mr={2} />}
-        {completion >= 100 && <StepComplete color={"greensoft.500"} boxSize="4" mr={2} />}
         <Box flex="1" textAlign="left">
           <HStack>
             <Text fontWeight="bold">{title}</Text>
-            <Text> - {Math.round(completion)}%</Text>
+            {validationErrors.length && (
+              <HStack fontSize="0.8rem">
+                <ErrorPill color="redmarianne" boxSize="2" />
+                <Text color="redmarianne">({Math.round(validationErrors.length)})</Text>
+              </HStack>
+            )}
+            {requiredSifa.length && (
+              <HStack fontSize="0.8rem">
+                <ErrorPill color="warning" boxSize="2" />
+                <Text color="warning">({Math.round(requiredSifa.length)})</Text>
+              </HStack>
+            )}
           </HStack>
         </Box>
       </AccordionButton>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Box, Text, HStack, Button, Tooltip, UnorderedList, ListItem } from "@chakra-ui/react";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
 
 import Table from "../../../../components/Table/Table";
@@ -9,6 +9,7 @@ import { AddFill, Alert, ErrorIcon, InfoLine, SubtractLine, ValidateIcon } from 
 import Effectif from "./Effectif";
 import { effectifIdAtom } from "./atoms";
 import { DateTime } from "luxon";
+import { effectifStateSelector } from "./formEngine/atoms";
 
 const EffectifDetails = ({ row, modeSifa = false, canEdit = false, effectifsSnapshot = false }) => {
   const queryClient = useQueryClient();
@@ -322,7 +323,7 @@ const EffectifsTable = ({
                     };
                     return (
                       <HStack textAlign="left">
-                        <Text fontSize="1rem">{sources[source]}</Text>
+                        <Text fontSize="1rem">{sources[source] ?? "Depuis un fichier"}</Text>
                       </HStack>
                     );
                   },
@@ -332,7 +333,7 @@ const EffectifsTable = ({
           ...(columns.includes("state")
             ? {
                 state: {
-                  size: 180,
+                  size: 200,
                   header: () => {
                     return (
                       <Box textAlign="left">
@@ -360,12 +361,15 @@ const EffectifsTable = ({
                     );
                   },
                   cell: ({ row }) => {
-                    if (modeSifa) {
-                      const { requiredSifa } = organismesEffectifs[row.id];
+                    const { id } = organismesEffectifs[row.id];
+                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                    const { validation_errors, requiredSifa } = useRecoilValue(effectifStateSelector(id)); // Not the best; THIS IS AN EXCEPTION; This should not be reproduce anywhere else
+
+                    const MissingSIFA = ({ requiredSifa }) => {
                       if (!requiredSifa?.length)
                         return (
                           <HStack color="flatsuccess" w="full" pl={5}>
-                            <ValidateIcon boxSize={4} /> <Text fontSize="1rem">Complètes pour SIFA</Text>
+                            <ValidateIcon boxSize={4} /> <Text fontSize="1rem">Complète pour SIFA</Text>
                           </HStack>
                         );
 
@@ -386,37 +390,47 @@ const EffectifsTable = ({
                           color="white"
                           padding="2w"
                         >
-                          <HStack color="flatwarm" w="full" pl={5}>
-                            <Alert boxSize={4} /> <Text fontSize="1rem">Manquantes pour SIFA</Text>
+                          <HStack color="warning" w="full" pl={5}>
+                            <Alert boxSize={4} />{" "}
+                            <Text fontSize="1rem">{requiredSifa.length} manquante(s) pour SIFA</Text>
                           </HStack>
                         </Tooltip>
                       );
-                    }
-                    const { validation_errors } = organismesEffectifs[row.id];
+                    };
 
-                    if (!validation_errors?.length) return null;
+                    const ValidationsErrorsInfo = ({ validation_errors }) => {
+                      if (!validation_errors?.length) return null;
+
+                      return (
+                        <Tooltip
+                          label={
+                            <Box>
+                              <Text fontWeight="bold">Champ(s) en erreur(s) :</Text>
+                              <UnorderedList>
+                                {validation_errors.map(({ fieldName }, i) => (
+                                  <ListItem key={i}>{fieldName}</ListItem>
+                                ))}
+                              </UnorderedList>
+                            </Box>
+                          }
+                          aria-label="A tooltip"
+                          background="bluefrance"
+                          color="white"
+                          padding="2w"
+                        >
+                          <HStack color="redmarianne" w="full" pl={5}>
+                            <Alert boxSize={4} />{" "}
+                            <Text fontSize="1rem">{validation_errors.length} erreur(s) de transmission</Text>
+                          </HStack>
+                        </Tooltip>
+                      );
+                    };
 
                     return (
-                      <Tooltip
-                        label={
-                          <Box>
-                            <Text fontWeight="bold">Champ(s) en erreur(s) :</Text>
-                            <UnorderedList>
-                              {validation_errors.map(({ fieldName }, i) => (
-                                <ListItem key={i}>{fieldName}</ListItem>
-                              ))}
-                            </UnorderedList>
-                          </Box>
-                        }
-                        aria-label="A tooltip"
-                        background="bluefrance"
-                        color="white"
-                        padding="2w"
-                      >
-                        <HStack color="flatwarm" w="full" pl={5}>
-                          <Alert boxSize={4} /> <Text fontSize="1rem">Erreur(s) détectée(s)</Text>
-                        </HStack>
-                      </Tooltip>
+                      <Box py={2}>
+                        {modeSifa && <MissingSIFA requiredSifa={requiredSifa} />}
+                        <ValidationsErrorsInfo validation_errors={validation_errors} />
+                      </Box>
                     );
                   },
                 },
