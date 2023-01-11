@@ -1,3 +1,10 @@
+# [3.0.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.3...v3.0.0-beta.4) (2023-01-11)
+
+
+### Features
+
+* maj du script seed-reseaux-new pour importer reseau aftral et CR Normandie ([#2306](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2306)) ([8cfeccb](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8cfeccbb7602883f5062af67821361a72b3c939c))
+
 # [3.0.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.2...v3.0.0-beta.3) (2023-01-11)
 
 
