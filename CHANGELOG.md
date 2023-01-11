@@ -1,3 +1,10 @@
+# [3.0.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.2...v3.0.0-beta.3) (2023-01-11)
+
+
+### Bug Fixes
+
+* ajout champ manquant siret dans les données de test ([#2338](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2338)) ([62ea14d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/62ea14d0b63f3a1ddea7b390a1c20e4623106f09))
+
 # [3.0.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.1...v3.0.0-beta.2) (2023-01-11)
 
 
