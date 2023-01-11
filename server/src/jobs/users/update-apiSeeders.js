@@ -9,9 +9,7 @@ export const updateUsersApiSeeders = async (mode) => {
   if (mode === "active") {
     logger.info(`Activation de la permission des utilisateurs fournisseurs de données`);
     await usersDb().updateMany({ permissions: [inactivePermission] }, { $set: { permissions: [activePermission] } });
-  }
-
-  if (mode === "inactive") {
+  } else if (mode === "inactive") {
     logger.info(`Désactivation de la permission des utilisateurs fournisseurs de données`);
     await usersDb().updateMany({ permissions: [activePermission] }, { $set: { permissions: [inactivePermission] } });
   }
