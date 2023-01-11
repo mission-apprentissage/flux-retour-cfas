@@ -66,6 +66,7 @@ describe("Tests des actions Formations", () => {
       await assert.rejects(() => createFormation("invalid"), new Error("Invalid CFD"));
     });
 
+    // TODO : fix this test
     it.skip("throws when formation with given cfd already exists", async () => {
       const cfd = "2502000D";
       // create formation in db
@@ -85,6 +86,7 @@ describe("Tests des actions Formations", () => {
       await assert.rejects(() => createFormation(cfd));
     });
 
+    // TODO : fix this test
     it.skip("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {
       nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
 
@@ -105,6 +107,7 @@ describe("Tests des actions Formations", () => {
       });
     });
 
+    // TODO : fix this test
     it.skip("returns created formation when cfd was found in Tables de Correspondances without intitule_long (no rncps found)", async () => {
       nock.cleanAll();
       nockGetMetiersByCfd();
@@ -128,6 +131,7 @@ describe("Tests des actions Formations", () => {
     });
   });
 
+  // TODO : fix this test
   describe.skip("searchFormations", () => {
     const formationsSeed = [
       { cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" },
