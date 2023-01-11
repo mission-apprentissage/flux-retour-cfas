@@ -1,5 +1,4 @@
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import Head from "next/head";
 import NavLink from "next/link";
@@ -27,7 +26,8 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import { _post, _get, _put, _delete } from "../../common/httpClient";
+import { _post, _put, _delete } from "../../common/httpClient";
+import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
 import { ArrowDropRightLine, Trash } from "../../theme/components/icons";
 import Table from "../../components/tables/Table";
 import { Page } from "../../components/Page/Page";
@@ -40,14 +40,13 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 const Message = () => {
   const {
-    data: messages,
-    isLoading,
+    messages,
+    messageMaintenance,
+    messageAutomatique,
+    loading,
     refetch: refetchMaintenanceMessages,
-  } = useQuery(["maintenanceMessages"], () => _get(`/api/v1/maintenanceMessages`), {
-    refetchOnWindowFocus: false,
-  });
-  const messageAutomatique = messages?.filter((d) => d.context === "automatique" && d.msg)?.[0];
-  const messageMaintenance = messages?.filter((d) => d.context === "maintenance")?.[0];
+  } = useMaintenanceMessages();
+
   const toast = useToast();
   // TODO hook custom qui gère les raccourci de toasts
   const toastSuccess = (title) =>
@@ -168,7 +167,7 @@ const Message = () => {
               {messages?.length > 0 && (
                 <Table
                   headers={["Messages précédents", "Context", "Type", "Actif", "Supprimer"]}
-                  loading={isLoading}
+                  loading={loading}
                   error={null}
                 >
                   <Tbody>

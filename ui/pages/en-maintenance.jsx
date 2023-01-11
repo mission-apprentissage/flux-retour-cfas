@@ -1,0 +1,61 @@
+import React, { useEffect } from "react";
+import Head from "next/head";
+import { Heading, HStack, Link, Text } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import ReactMarkdown from "react-markdown";
+import ChakraUIMarkdownRenderer from "chakra-ui-markdown-renderer";
+
+import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
+import { Page } from "../components/Page/Page";
+import { ExternalLinkLine } from "../theme/components/icons";
+import useAuth from "../hooks/useAuth";
+import useMaintenanceMessages from "../hooks/useMaintenanceMessages";
+import { isUserAdmin } from "../common/utils/rolesUtils";
+
+export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
+
+const chakraUIMarkdownRendererTheme = {
+  // we override anchors to reformat the link (aka remove the '##') and add an icon.
+  a: ({ children, href, ...rest }) => (
+    <Link textDecoration={"underline"} isExternal {...rest} href={href.replace(/^##/, "")}>
+      {children}
+      <ExternalLinkLine w={"0.75rem"} h={"0.75rem"} mb={"0.125rem"} ml={"0.125rem"} />
+    </Link>
+  ),
+};
+
+const MaintenancePage = () => {
+  const router = useRouter();
+  let [auth] = useAuth();
+
+  const { messageMaintenance, isLoading } = useMaintenanceMessages();
+
+  useEffect(() => {
+    if (isLoading || messageMaintenance?.enabled) {
+      return;
+    }
+    router.push(`/`);
+  }, [router, isLoading, messageMaintenance]);
+
+  const title = "Maintenance en cours";
+  return (
+    <Page withoutDisplayNavigationBar={!isUserAdmin(auth)}>
+      <Head>
+        <title>{title}</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <HStack>
+        <Heading textStyle="h2" marginBottom="2w" mt={6}>
+          Maintenance
+        </Heading>
+      </HStack>
+      <Text fontSize="1.3rem" fontFamily="Marianne" fontWeight="500" marginBottom="2w" mt="8">
+        <ReactMarkdown components={ChakraUIMarkdownRenderer(chakraUIMarkdownRendererTheme)} skipHtml>
+          {messageMaintenance?.msg}
+        </ReactMarkdown>
+      </Text>
+    </Page>
+  );
+};
+
+export default MaintenancePage;
