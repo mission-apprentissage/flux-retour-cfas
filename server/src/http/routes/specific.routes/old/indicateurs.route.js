@@ -7,7 +7,7 @@ import { getCacheKeyForRoute } from "../../../../common/utils/cacheUtils.js";
 import { getNbDistinctOrganismesByUai } from "../../../../common/actions/dossiersApprenants.actions.js";
 
 const commonEffectifsFilters = {
-  organisme_id: Joi.string(),
+  organisme_id: Joi.string().allow(null, ""), // TODO Debugger et remettre l'organisme_id asap dans les filtres - desactivé temporairement pour MEP V1
   etablissement_num_region: Joi.string().allow(null, ""),
   etablissement_num_departement: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().allow(null, ""),
