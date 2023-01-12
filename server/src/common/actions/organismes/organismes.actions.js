@@ -8,9 +8,14 @@ import { generateKey } from "../../utils/cryptoUtils.js";
 import { buildAdresseFromUai } from "../../utils/uaiUtils.js";
 import { siretSchema } from "../../utils/validationUtils.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../engine/engine.organismes.utils.js";
-import { createPermission, hasPermission } from "../permissions.actions.js";
+import {
+  createPermission,
+  hasPermission,
+  removePermission,
+  findPermissionByUserEmail,
+} from "../permissions.actions.js";
 import { findRolePermissionById } from "../roles.actions.js";
-import { getUser } from "../users.actions.js";
+import { getUser, structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
 
 /**
@@ -260,8 +265,8 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
  * @param {*} organisme_id
  * @returns
  */
-export const addContributeurOrganisme = async (organisme_id, userEmail, as, pending = true, custom_acl = []) => {
-  const _id = typeof id === "string" ? ObjectId(organisme_id) : organisme_id;
+export const addContributeurOrganisme = async (organisme_id, userEmail, roleName, pending = true, custom_acl = []) => {
+  const _id = typeof organisme_id === "string" ? ObjectId(organisme_id) : organisme_id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });
@@ -272,7 +277,7 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, as, pend
   await createPermission({
     organisme_id: organisme._id,
     userEmail: userEmail.toLowerCase(),
-    role: as,
+    roleName,
     custom_acl,
     pending,
   });
@@ -296,12 +301,12 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, as, pend
 
 /**
  * TODO add to unit tests
- * Méthode de récupération des contributeurs d'un organisme
+ * Méthode de suppression d'un contributeur à un organisme
  * @param {*} organisme_id
  * @returns
  */
-export const getContributeurs = async (organisme_id) => {
-  const _id = typeof id === "string" ? ObjectId(organisme_id) : organisme_id;
+export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
+  const _id = typeof organisme_id === "string" ? ObjectId(organisme_id) : organisme_id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });
@@ -309,7 +314,40 @@ export const getContributeurs = async (organisme_id) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  const buildContributeursResult = async (contributeurEmail, organisme_id) => {
+  const userPermission = await findPermissionByUserEmail(organisme._id, userEmail.toLowerCase());
+  if (userPermission) {
+    await removePermission(userPermission._id);
+  }
+
+  const updated = await organismesDb().findOneAndUpdate(
+    { _id: organisme._id },
+    {
+      $pull: {
+        contributeurs: userEmail.toLowerCase(),
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  return updated.value;
+};
+
+/**
+ * TODO add to unit tests
+ * Méthode de récupération des contributeurs d'un organisme
+ * @param {*} organisme_id
+ * @returns
+ */
+export const getContributeurs = async (organismeId) => {
+  const _id = typeof organismeId === "string" ? ObjectId(organismeId) : organismeId;
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+
+  const organisme = await organismesDb().findOne({ _id });
+  if (!organisme) {
+    throw new Error(`Unable to find organisme ${_id.toString()}`);
+  }
+
+  const buildContributeursResult = async (contributeurEmail, orgId) => {
     const userSelectFields = { email: 1, nom: 1, prenom: 1, _id: 0 };
     const permSelectFields = { pending: 1, created_at: 1, role: 1, custom_acl: 1 };
     const roleSelectFields = { name: 1, description: 1, title: 1, _id: 1 };
@@ -320,16 +358,19 @@ export const getContributeurs = async (organisme_id) => {
       prenom: "",
     };
 
-    const currentUserPerm = await hasPermission({ organisme_id, userEmail: contributeurEmail }, permSelectFields);
+    const currentUserPerm = await hasPermission(
+      { organisme_id: orgId, userEmail: contributeurEmail },
+      permSelectFields
+    );
     if (!currentUserPerm) {
-      throw new Error("Something went wrong");
+      throw new Error(`User ${contributeurEmail} has no permission for organisme ${orgId}`);
     }
     const currentUserRole = await findRolePermissionById(currentUserPerm.role, roleSelectFields);
     if (!currentUserRole) {
       throw new Error("Something went wrong");
     }
     return {
-      user: currentUser,
+      user: await structureUser(currentUser),
       permission: {
         permId: currentUserPerm._id,
         created_at: currentUserPerm.created_at,
@@ -341,7 +382,7 @@ export const getContributeurs = async (organisme_id) => {
 
   const contributeurs = [];
   for (const contributeur of organisme.contributeurs) {
-    contributeurs.push(await buildContributeursResult(contributeur));
+    contributeurs.push(await buildContributeursResult(contributeur, organismeId));
   }
 
   return contributeurs;

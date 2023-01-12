@@ -42,7 +42,7 @@ export const userAfterCreate = async ({
       await createPermission({
         organisme_id: null,
         userEmail,
-        role: "organisme.admin",
+        roleName: "organisme.admin",
         pending: false,
       });
     } else {
