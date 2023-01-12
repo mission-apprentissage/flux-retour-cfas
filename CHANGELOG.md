@@ -1,3 +1,10 @@
+# [3.0.0-beta.13](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.12...v3.0.0-beta.13) (2023-01-12)
+
+
+### Bug Fixes
+
+* fix 2 typos in cgu and footer ([#2368](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2368)) ([548eb3a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/548eb3a1e9c0cc4ef93187b56b89a331463fb5a0))
+
 # [3.0.0-beta.12](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.11...v3.0.0-beta.12) (2023-01-12)
 
 
