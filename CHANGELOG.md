@@ -1,3 +1,10 @@
+# [3.0.0-beta.14](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.13...v3.0.0-beta.14) (2023-01-12)
+
+
+### Bug Fixes
+
+* **server:** dateConverter toIsoString in hydrateEffectifs ([#2369](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2369)) ([aa7b87f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/aa7b87f0be868bd96f0b0d53571760b3c745c0c3))
+
 # [3.0.0-beta.13](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.12...v3.0.0-beta.13) (2023-01-12)
 
 
