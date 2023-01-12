@@ -6,7 +6,7 @@ import { mapFiltersToApiFormat } from "../common/utils/mapFiltersToApiFormat";
 
 const useFetchIndicateursNational = (date) => {
   const requestFilters = mapFiltersToApiFormat({ date });
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.EFFECTIFS_NATIONAL, requestFilters], () =>
+  const { data, isLoading, error } = useQuery([QUERY_KEYS.INDICATEURS_NATIONAL, requestFilters], () =>
     fetchIndicateursNational(requestFilters)
   );
 

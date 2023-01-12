@@ -1,12 +1,11 @@
 import qs from "query-string";
 
 import { _delete, _get, _post, _put } from "../httpClient";
-import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 /* Effectifs */
 
 export const fetchIndicateurs = (filters) => {
-  const queryParameters = qs.stringify(mapFiltersToApiFormat(filters));
+  const queryParameters = qs.stringify(filters);
   const url = `/api/indicateurs?${queryParameters}`;
   return _get(url);
 };
