@@ -45,7 +45,7 @@ export function useEspace() {
   const whoIs = auth.roles.find((role) => ["pilot", "erp", "of", "reseau_of"].includes(role.name))?.name;
 
   const organisme_id = isOrganismePages
-    ? slug?.[slug.length - (isEffectifsPage || isSIFA2Page || isParametresPage ? 2 : 1)]
+    ? slug?.[slug.length - (isTeleversementPage ? 3 : isEffectifsPage || isSIFA2Page || isParametresPage ? 2 : 1)]
     : null;
   const hasAccessToOnlyOneOrganisme = auth.organisme_ids.length === 1;
   const userIsAnOrganisme = !!auth.main_organisme_id;
