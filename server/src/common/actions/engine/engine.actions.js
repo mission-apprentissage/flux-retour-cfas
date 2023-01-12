@@ -97,7 +97,6 @@ export const hydrateEffectif = async (effectifData, options) => {
 
   const repetitionVoieConverter = (repetition_voie) => {
     const fullRep = { Bis: "B", Ter: "T", Quater: "Q", ["Quinquiès"]: "C" };
-    console.log(capitalize(repetition_voie), fullRep[capitalize(repetition_voie)]);
     return fullRep[capitalize(repetition_voie)] ?? repetition_voie;
   };
   if (effectifData.apprenant.adresse?.repetition_voie) {

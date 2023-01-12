@@ -51,7 +51,10 @@ export const effectifStateSelector = selectorFamily({
     (effectifId) =>
     ({ get }) => {
       const effectifsState = get(effectifsStateAtom);
-      const { validation_errors, requiredSifa = [] } = effectifsState.get(effectifId);
+      const { validation_errors, requiredSifa } = effectifsState.get(effectifId) ?? {
+        validation_errors: [],
+        requiredSifa: [],
+      };
       const validationErrorsByBlock = {
         statuts: [],
         apprenant: [],

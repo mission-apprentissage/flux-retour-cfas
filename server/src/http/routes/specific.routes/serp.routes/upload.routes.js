@@ -2,11 +2,14 @@ import express from "express";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import Joi from "joi";
 import { createWriteStream } from "fs";
-import { getFromStorage, uploadToStorage, deleteFromStorage } from "../../../../common/utils/ovhUtils.js";
+import { ObjectId } from "mongodb";
+import { DateTime } from "luxon";
 import { accumulateData, oleoduc, writeData } from "oleoduc";
 import multiparty from "multiparty";
 import { EventEmitter } from "events";
 import { PassThrough } from "stream";
+import { cloneDeep, find, get, set, uniqBy } from "lodash-es";
+import { getFromStorage, uploadToStorage, deleteFromStorage } from "../../../../common/utils/ovhUtils.js";
 import logger from "../../../../common/logger.js";
 import * as crypto from "../../../../common/utils/cryptoUtils.js";
 import {
@@ -19,10 +22,7 @@ import {
 } from "../../../../common/actions/uploads.actions.js";
 import { getJsonFromXlsxData } from "../../../../common/utils/xlsxUtils.js";
 import { hydrateEffectif } from "../../../../common/actions/engine/engine.actions.js";
-import { cloneDeep, find, get, set, uniqBy } from "lodash-es";
 import { uploadsDb } from "../../../../common/model/collections.js";
-import { ObjectId } from "mongodb";
-import { DateTime } from "luxon";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
 
@@ -656,7 +656,7 @@ export default ({ clamav }) => {
         } else {
           data.apprenant.historique_statut = data.apprenant.historique_statut ? [data.apprenant.historique_statut] : [];
           data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
-          const { effectif: canBeImportEffectif, found } = await hydrateEffectif(
+          const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
             {
               organisme_id,
               source: document.document_id.toString(),
@@ -668,11 +668,11 @@ export default ({ clamav }) => {
           );
 
           let effectifToSave = canBeImportEffectif;
-          if (found) {
+          if (foundInDb) {
             const fieldsToImport = Object.values(mapping)
               .filter((fieldName) => !["CFD", "nom", "prenom"].includes(fieldName))
               .map((fN) => mappingModel[fN]);
-            effectifToSave = cloneDeep(found);
+            effectifToSave = cloneDeep(foundInDb);
             let tmpContrat = {};
             let tmpHistoryStatut = {};
             ["annee_scolaire", "validation_errors", "source", ...fieldsToImport].map((fieldName) => {
@@ -692,7 +692,7 @@ export default ({ clamav }) => {
                   }
                   return cleanedUpErrors;
                 };
-                value = buildDiffValidationErrors(value, found);
+                value = buildDiffValidationErrors(value, foundInDb);
               }
               if (fieldName.includes("apprenant.contrats.")) {
                 const contratKey = fieldName.replace("apprenant.contrats.", "");
@@ -715,35 +715,46 @@ export default ({ clamav }) => {
               }
             }
           }
-          const contratsValidationErrors = effectifToSave.validation_errors.filter(
-            ({ fieldName }) =>
-              fieldName === "apprenant.contrats[0].date_debut" || fieldName === "apprenant.contrats[0].date_fin"
-          );
-          for (const contratsValidationError of contratsValidationErrors) {
-            contratsValidationError.willNotBeModify = true;
-            contratsValidationError.isRequired = true;
-          }
-          const historiqueStatutValidationErrors = effectifToSave.validation_errors.filter(({ fieldName }) =>
-            fieldName.includes("apprenant.historique_statut")
-          );
-          for (const historiqueStatutValidationError of historiqueStatutValidationErrors) {
-            historiqueStatutValidationError.willNotBeModify = true;
-            historiqueStatutValidationError.isRequired = true;
+
+          // TODO look if CFD // RNCP EXIST
+          // let errorOnContratRequired = false;
+          for (const validation_error of effectifToSave.validation_errors) {
+            const { fieldName } = validation_error;
+            if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
+              validation_error.willNotBeModify = true;
+            } else if (
+              fieldName === "apprenant.contrats[0].date_debut" ||
+              fieldName === "apprenant.contrats[0].date_fin"
+            ) {
+              validation_error.willNotBeModify = true;
+              validation_error.isRequired = true;
+            } else if (fieldName.includes("apprenant.historique_statut")) {
+              validation_error.willNotBeModify = true;
+              validation_error.isRequired = true;
+            }
           }
 
-          const _id = found ? found._id : new ObjectId();
+          const buildIdFrom = (effectifs, effectif) => {
+            const foundInCollection = find(effectifs, {
+              apprenant: { nom: effectif.apprenant.nom, prenom: effectif.apprenant.prenom },
+              formation: { cfd: effectif.formation.cfd },
+            });
+            return foundInCollection?._id ?? new ObjectId();
+          };
+
+          const _id = foundInDb ? foundInDb._id : buildIdFrom(canBeImportEffectifs, effectifToSave);
 
           if (!canBeImportEffectifsIds.includes(_id.toString())) {
             canBeImportEffectifsIds.push(_id.toString());
             canBeImportEffectifs.push({
               _id,
-              toUpdate: !!found,
+              toUpdate: !!foundInDb,
               ...effectifToSave,
             });
           } else {
             duplicatesEffectifs.push({
               _id,
-              toUpdate: !!found,
+              toUpdate: !!foundInDb,
               cfd: effectifToSave.formation.cfd,
               nom: effectifToSave.apprenant.nom,
               prenom: effectifToSave.apprenant.prenom,
