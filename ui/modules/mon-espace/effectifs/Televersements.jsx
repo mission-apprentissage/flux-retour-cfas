@@ -138,24 +138,27 @@ const Televersements = () => {
     let currentAvailableKeys = { in: Object.values(response.inputKeys), out: Object.values(response.outputKeys) };
 
     let initLines = [];
+    // TODO REFACTOR THIS BELOW :vomit:
     if (mappingForThisType && mappingForThisType.mapping_column) {
       let { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
       let indexAnneSco = 0;
       userMapping[""] = typeCodeDiplome === "CFD" ? "RNCP" : "CFD";
-      // console.log(userMapping);
-      // Object.entries(userMapping)
-      // const remap = {
-      //   annee_scolaire: "2020-2021",
-      //   ...(typeCodeDiplome === "CFD"
-      //     ? {
-      //         CFD: "CFD",
-      //         "": "RNCP",
-      //       }
-      //     : { "": "CFD", RNCP: "RNCP" }),
-      //   nom: "nom",
-      //   prenom: "prenom",
-      // };
-      initLines = Object.entries(userMapping).map(([key, value], i) => {
+      let remap = Object.entries(userMapping).reduce(
+        (acc, [key, value]) => (key !== "annee_scolaire" ? { ...acc, [value]: key } : acc),
+        {}
+      );
+      remap = {
+        annee_scolaire: "",
+        ...(typeCodeDiplome === "CFD"
+          ? {
+              [remap.CFD]: "CFD",
+              "": "RNCP",
+            }
+          : { "": "CFD", [remap.RNCP]: "RNCP" }),
+        nom: "nom",
+        prenom: "prenom",
+      };
+      initLines = Object.entries(remap).map(([key, value], i) => {
         if (key === "annee_scolaire") {
           indexAnneSco = i;
           return {
@@ -172,8 +175,6 @@ const Televersements = () => {
       // TODO check if exist in current mapping
       let reqKeys = Object.values(userMapping);
       reqKeys.splice(indexAnneSco, 1);
-
-      console.log(reqKeys, initLines, currentAvailableKeys);
 
       setTypeCodeDiplome(typeCodeDiplome);
       setRequireKeysSettled(reqKeys);
@@ -504,7 +505,7 @@ const Televersements = () => {
                   </Box>
                 </>
               )}
-              {(lines[1].in.value || lines[2].in.value) && typeCodeDiplome && (
+              {lines[0].in.value && (lines[1].in.value || lines[2].in.value) && typeCodeDiplome && (
                 <>
                   <Heading as="h4" flexGrow="1" fontSize="1rem">
                     3. Choisir vos correspondances pour les colonnes obligatoires nom et prénom
@@ -550,7 +551,7 @@ const Televersements = () => {
                   </Box>
                 </>
               )}
-              {typeCodeDiplome && (
+              {lines[0].in.value && (lines[1].in.value || lines[2].in.value) && typeCodeDiplome && (
                 <>
                   {!(requireKeysSettled.length < Object.keys(mapping.requireKeys).length - 1) && (
                     <>
