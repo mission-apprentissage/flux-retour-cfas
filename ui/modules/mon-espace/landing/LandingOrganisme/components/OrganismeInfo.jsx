@@ -47,6 +47,7 @@ export default function OrganismeInfo() {
         backgroundColor="galt"
         paddingY="2w"
         mt={4}
+        mb={4}
       >
         <Box mb={"85px"}>
           <Heading color="grey.800" fontSize="1.6rem" as="h3" mb={2}>

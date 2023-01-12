@@ -4,6 +4,7 @@ import { Stack } from "@chakra-ui/react";
 import DateWithTooltipSelector from "../../../../_old/visualiser-les-indicateurs/DateWithTooltipSelector.jsx";
 import useFetchIndicateurs from "../../../../../hooks/old/useFetchIndicateurs.js";
 import { useSimpleFiltersContext } from "../SimpleFiltersContext.js";
+import IndicateursGridStack from "../../../../../components/IndicateursGridStack.jsx";
 
 export default function OrganismeIndicateursInfo() {
   const { filtersValues } = useSimpleFiltersContext();
@@ -13,11 +14,12 @@ export default function OrganismeIndicateursInfo() {
     <Stack>
       <DateWithTooltipSelector />
 
-      {/* Debug */}
-      <p>{loading}</p>
-      <p>{JSON.stringify(indicateurs)}</p>
-
-      {/* TODO add indicateur grid stack */}
+      <IndicateursGridStack
+        effectifs={indicateurs}
+        loading={loading}
+        showOrganismesCount={false}
+        effectifsDate={filtersValues.date}
+      />
     </Stack>
   );
 }
