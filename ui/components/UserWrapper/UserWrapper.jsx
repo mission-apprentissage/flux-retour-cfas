@@ -25,7 +25,8 @@ const AccountWrapper = ({ children }) => {
         } else {
           if (
             (auth.account_status === "FIRST_FORCE_RESET_PASSWORD" || auth.account_status === "FORCE_RESET_PASSWORD") &&
-            router.pathname !== "/auth/modifier-mot-de-passe"
+            router.pathname !== "/auth/modifier-mot-de-passe" &&
+            router.asPath !== "/en-maintenance"
           ) {
             let { token } = await _post("/api/v1/password/forgotten-password", { username: auth.email, noEmail: true });
             router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
