@@ -1,6 +1,19 @@
 import React, { useCallback, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { Box, Button, Flex, Heading, HStack, Link, Spinner, Text, useToast, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  HStack,
+  Link,
+  Radio,
+  RadioGroup,
+  Spinner,
+  Text,
+  useToast,
+  VStack,
+} from "@chakra-ui/react";
 import { Alert, ArrowDropRightLine, Bin, InfoLine, ValidateIcon } from "../../../theme/components/icons";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
@@ -31,6 +44,7 @@ const Televersements = () => {
 
   const [preEffictifs, setPreEffictifs] = useState({ canBeImport: [], canNotBeImport: [] });
   const [typeDocument, setTypeDocument] = useState("");
+  const [typeCodeDiplome, setTypeCodeDiplome] = useState("");
   const [savedAsModel, setSavedAsModel] = useState(false);
   const [modelAsChange, setModelAsChange] = useState(false);
   const toast = useToast();
@@ -125,23 +139,43 @@ const Televersements = () => {
 
     let initLines = [];
     if (mappingForThisType && mappingForThisType.mapping_column) {
-      initLines = Object.entries(mappingForThisType.mapping_column).map(([key, value], i) =>
-        i === 0
-          ? {
-              in: { value: "", hasError: false },
-              out: { value: key, hasError: false },
-            }
-          : {
-              in: { value: key, hasError: false },
-              out: { value: value, hasError: false },
-            }
-      );
+      let { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
+      let indexAnneSco = 0;
+      userMapping[""] = typeCodeDiplome === "CFD" ? "RNCP" : "CFD";
+      // console.log(userMapping);
+      // Object.entries(userMapping)
+      // const remap = {
+      //   annee_scolaire: "2020-2021",
+      //   ...(typeCodeDiplome === "CFD"
+      //     ? {
+      //         CFD: "CFD",
+      //         "": "RNCP",
+      //       }
+      //     : { "": "CFD", RNCP: "RNCP" }),
+      //   nom: "nom",
+      //   prenom: "prenom",
+      // };
+      initLines = Object.entries(userMapping).map(([key, value], i) => {
+        if (key === "annee_scolaire") {
+          indexAnneSco = i;
+          return {
+            in: { value: "", hasError: false },
+            out: { value: key, hasError: false },
+          };
+        }
+        return {
+          in: { value: key, hasError: false },
+          out: { value: value, hasError: false },
+        };
+      });
+
       // TODO check if exist in current mapping
-      const reqKeys = Object.values(mappingForThisType.mapping_column).splice(
-        0,
-        Object.keys(response.requireKeys).length
-      );
-      reqKeys.shift();
+      let reqKeys = Object.values(userMapping);
+      reqKeys.splice(indexAnneSco, 1);
+
+      console.log(reqKeys, initLines, currentAvailableKeys);
+
+      setTypeCodeDiplome(typeCodeDiplome);
       setRequireKeysSettled(reqKeys);
       let error = false;
       for (const value of reqKeys) {
@@ -190,10 +224,14 @@ const Televersements = () => {
   const onGoToPreImportStep = useCallback(async () => {
     setPreEffictifs({ canBeImport: [], canNotBeImport: [], duplicate: [] });
     setStep("pre-import");
-    const keyToKeyMapping = lines.reduce((acc, line) => {
-      if (line.out.value === "annee_scolaire") return { ...acc, annee_scolaire: line.in.value };
-      return { ...acc, [line.in.value]: line.out.value };
-    }, {});
+    const keyToKeyMapping = lines.reduce(
+      (acc, line) => {
+        if (!line.in.value) return acc;
+        if (line.out.value === "annee_scolaire") return { ...acc, annee_scolaire: line.in.value };
+        return { ...acc, [line.in.value]: line.out.value };
+      },
+      { typeCodeDiplome }
+    );
     const { canBeImportEffectifs, canNotBeImportEffectifs, duplicatesEffectifs } = await _post(
       `/api/v1/upload/pre-import`,
       {
@@ -214,7 +252,7 @@ const Televersements = () => {
       canNotBeImport: canNotBeImportEffectifs,
       duplicate: duplicatesEffectifs,
     });
-  }, [lines, organisme._id, setCurrentEffectifsState]);
+  }, [lines, organisme._id, setCurrentEffectifsState, typeCodeDiplome]);
 
   const onGoToImportStep = useCallback(async () => {
     setStep("import");
@@ -318,7 +356,7 @@ const Televersements = () => {
             <Box my={10}>
               <Box mb={8}>
                 <VStack alignItems="middle">
-                  <Heading as="h4" flexGrow="1" fontSize="1rem">
+                  <Heading as="h4" flexGrow="1" fontSize="1rem" mb={6}>
                     1. Préciser l&rsquo;année scolaire concernée par ce fichier
                   </Heading>
                   <HStack justifyContent="center" spacing="4w">
@@ -373,11 +411,113 @@ const Televersements = () => {
               {lines[0].in.value && (
                 <>
                   <Heading as="h4" flexGrow="1" fontSize="1rem">
-                    2. Choisir vos correspondances pour les colonnes obligatoires
+                    2. Quel est votre code de référence ?
                   </Heading>
                   <Box mb={8}>
+                    <VStack justifyContent="center">
+                      <RadioGroup value={typeCodeDiplome} w="100%" mt={8}>
+                        <VStack alignItems="flex-start">
+                          <Flex w="100%">
+                            <Radio
+                              type="radio"
+                              name="civility"
+                              value="RNCP"
+                              checked={typeCodeDiplome === "RNCP"}
+                              onChange={() => {
+                                setTypeCodeDiplome("RNCP");
+                              }}
+                            >
+                              Code RNCP de la formation (exemple: RNCP34793)
+                            </Radio>
+                          </Flex>
+                          <HStack justifyContent="center" spacing="4w" w="100%">
+                            <Input
+                              {...{
+                                name: `line${2}_in`,
+                                fieldType: "select",
+                                placeholder: "Séléctionner une de vos en-têtes",
+                                options: availableKeys.in,
+                                locked: typeCodeDiplome !== "RNCP",
+                              }}
+                              value={lines[2].in.value}
+                              onSubmit={(value) =>
+                                onLineChange({ line: 2, part: "in" }, { value, hasError: false, required: true })
+                              }
+                              w="33%"
+                            />
+                            <ArrowRightLong boxSize={10} color="bluefrance" />
+                            <Input
+                              {...{
+                                name: `line${2}_out`,
+                                fieldType: "text",
+                                locked: true,
+                              }}
+                              value="Code RNCP de la formation"
+                              w="33%"
+                            />
+                            <Box w="35px">&nbsp;</Box>
+                          </HStack>
+                          <Flex w="100%" alignItems="center">
+                            <Radio
+                              type="radio"
+                              name="civility"
+                              value="CFD"
+                              checked={typeCodeDiplome === "CFD"}
+                              onChange={() => {
+                                setTypeCodeDiplome("CFD");
+                              }}
+                            >
+                              Code Formation Diplôme (exemple: 46T32401)
+                            </Radio>
+                          </Flex>
+
+                          <HStack justifyContent="center" spacing="4w" w="100%">
+                            <Input
+                              {...{
+                                name: `line${1}_in`,
+                                fieldType: "select",
+                                placeholder: "Séléctionner une de vos en-têtes",
+                                options: availableKeys.in,
+                                locked: typeCodeDiplome !== "CFD",
+                              }}
+                              value={lines[1].in.value}
+                              onSubmit={(value) =>
+                                onLineChange({ line: 1, part: "in" }, { value, hasError: false, required: true })
+                              }
+                              w="33%"
+                            />
+                            <ArrowRightLong boxSize={10} color="bluefrance" />
+                            <Input
+                              {...{
+                                name: `line${1}_out`,
+                                fieldType: "text",
+                                locked: true,
+                              }}
+                              value="Code Formation Diplôme"
+                              w="33%"
+                            />
+                            <Box w="35px">&nbsp;</Box>
+                          </HStack>
+                        </VStack>
+                      </RadioGroup>
+                    </VStack>
+                  </Box>
+                </>
+              )}
+              {(lines[1].in.value || lines[2].in.value) && typeCodeDiplome && (
+                <>
+                  <Heading as="h4" flexGrow="1" fontSize="1rem">
+                    3. Choisir vos correspondances pour les colonnes obligatoires nom et prénom
+                  </Heading>
+                  <Box my={8}>
                     {Object.values(mapping.requireKeys).map((requireKey, i) => {
-                      if (i === 0) return; // First is annee_scolaire above
+                      if (
+                        requireKey.value === "annee_scolaire" ||
+                        requireKey.value === "CFD" ||
+                        requireKey.value === "RNCP"
+                      )
+                        return; // skip annee_scolaire because it's above
+
                       return (
                         <HStack justifyContent="center" spacing="4w" key={requireKey.value}>
                           <Input
@@ -408,20 +548,24 @@ const Televersements = () => {
                       );
                     })}
                   </Box>
-                  {!(requireKeysSettled.length < Object.keys(mapping.requireKeys).length) && (
+                </>
+              )}
+              {typeCodeDiplome && (
+                <>
+                  {!(requireKeysSettled.length < Object.keys(mapping.requireKeys).length - 1) && (
                     <>
                       <Heading as="h4" flexGrow="1" fontSize="1rem">
-                        3. Choisir vos correspondances pour d&rsquo;autres colonnes que vous souhaitez importer
+                        4. Choisir vos correspondances pour d&rsquo;autres colonnes que vous souhaitez importer
                         (optionnel)
                       </Heading>
                       {lines.length <
-                        Object.keys(mapping.requireKeys).length + mapping.numberOfNotRequiredFieldsToMap && (
+                        Object.keys(mapping.requireKeys).length - 1 + mapping.numberOfNotRequiredFieldsToMap && (
                         <Button
                           onClick={() =>
                             setLines((prevLines) => {
                               if (
                                 prevLines.length ===
-                                Object.keys(mapping.requireKeys).length + mapping.numberOfNotRequiredFieldsToMap
+                                Object.keys(mapping.requireKeys).length - 1 + mapping.numberOfNotRequiredFieldsToMap
                               )
                                 return prevLines;
                               return [
@@ -436,7 +580,7 @@ const Televersements = () => {
                           mt={3}
                           size={"md"}
                           variant="secondary"
-                          disabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length}
+                          disabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length - 1}
                         >
                           + Ajouter une donnée
                         </Button>
@@ -533,7 +677,7 @@ const Televersements = () => {
                 onClick={() => onGoToPreImportStep()}
                 size={"md"}
                 variant="primary"
-                disabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length}
+                disabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length - 1}
               >
                 Étape suivante (Prévisualiser)
                 <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
