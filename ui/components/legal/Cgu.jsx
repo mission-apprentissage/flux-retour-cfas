@@ -246,7 +246,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             provoquées par le caractère erroné ou frauduleux des informations fournies par l&apos;utilisateur.
             <br />
             <br />
-            L&apos;utilisateur reste en toutes circonstance responsable de l&apos;utilisation qu&apos;il fait des
+            L&apos;utilisateur reste en toute circonstance responsable de l&apos;utilisation qu&apos;il fait des
             services du Tableau de bord. La Mission interministérielle de l’apprentissage ne saurait être responsable de
             l&apos;impossibilité d&apos;utiliser le Tableau de bord et les services.
             <br />
