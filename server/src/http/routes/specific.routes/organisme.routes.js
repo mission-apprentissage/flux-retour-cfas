@@ -2,7 +2,11 @@ import express from "express";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
-import { findOrganismeById, getContributeurs, updateOrganisme } from "../../../common/actions/organismes.actions.js";
+import {
+  findOrganismeById,
+  getContributeurs,
+  updateOrganisme,
+} from "../../../common/actions/organismes/organismes.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa } from "../../../common/actions/sifa.actions/sifa.actions.js";
 import { updatePermissionPending } from "../../../common/actions/permissions.actions.js";

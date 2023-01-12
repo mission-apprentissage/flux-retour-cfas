@@ -5,7 +5,11 @@ import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import path from "path";
 import { __dirname } from "../../../../common/utils/esmUtils.js";
 import { readJsonFromCsvFile } from "../../../../common/utils/fileUtils.js";
-import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../../common/actions/organismes.actions.js";
+import {
+  createOrganisme,
+  findOrganismeByUai,
+  updateOrganisme,
+} from "../../../../common/actions/organismes/organismes.actions.js";
 import { ERPS } from "../../../../common/constants/erpsConstants.js";
 import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
 import { downloadIfNeededFileTo } from "../../../../common/utils/ovhStorageUtils.js";

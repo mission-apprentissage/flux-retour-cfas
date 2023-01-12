@@ -2,7 +2,11 @@ import cliProgress from "cli-progress";
 import logger from "../../../common/logger.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
-import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../common/actions/organismes.actions.js";
+import {
+  createOrganisme,
+  findOrganismeByUai,
+  updateOrganisme,
+} from "../../../common/actions/organismes/organismes.actions.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { getCatalogFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
@@ -29,6 +33,8 @@ const REFERENTIEL_FIELDS_TO_FETCH = [
 ];
 
 /**
+ * TODO : Supprimer la construction du tree formations ici et faire l'appel depuis organismes.formations.actions.js
+ * TODO : Keeping uniquement pour les log pour l'instant
  * Script qui initialise les organismes
  * 1. On va créer tous les organismes "stock" non présents dans le tdb mais existants dans le référentiel
  * sur la base de l'UAI, en ajoutant l'arbre des formations récupéré depuis le catalogue.
@@ -219,12 +225,19 @@ export const getFormationsTreeForOrganisme = async (organisme) => {
       // formation_id si trouvé dans le tdb
       // année & durée trouvé dans le catalog & formatted
       // ainsi que la liste des organismes construite depuis l'API Catalogue
-      formationsForOrganismeArray.push({
-        ...(currentFormationId ? { formation_id: currentFormationId } : {}),
-        annee_formation: parseInt(currentFormation.annee) || -1,
-        duree_formation_theorique: parseInt(currentFormation.duree) || -1,
-        organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
-      });
+
+      const formationAlreadyInOrganismeArray = formationsForOrganismeArray.some(
+        (item) => item.formation_id.toString() === currentFormationId.toString()
+      );
+
+      if (currentFormationId && !formationAlreadyInOrganismeArray) {
+        formationsForOrganismeArray.push({
+          ...(currentFormationId ? { formation_id: currentFormationId } : {}),
+          annee_formation: parseInt(currentFormation.annee) || -1,
+          duree_formation_theorique: parseInt(currentFormation.duree) || -1,
+          organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
+        });
+      }
     });
   } else {
     // Log & store cases

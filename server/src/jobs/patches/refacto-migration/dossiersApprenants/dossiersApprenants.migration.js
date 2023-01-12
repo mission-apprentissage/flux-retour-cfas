@@ -6,7 +6,7 @@ import {
   dossiersApprenantsMigrationDb,
   effectifsDb,
 } from "../../../../common/model/collections.js";
-import { createOrganisme, findOrganismeByUai } from "../../../../common/actions/organismes.actions.js";
+import { createOrganisme, findOrganismeByUai } from "../../../../common/actions/organismes/organismes.actions.js";
 import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 import { createDossierApprenantMigrationFromDossierApprenant } from "../../../../common/actions/dossiersApprenants.migration.actions.js";

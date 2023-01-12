@@ -18,7 +18,7 @@ import { sendTransformedPaginatedJsonStream } from "../../../../common/utils/htt
 import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
 import { runEngine } from "../../../../common/actions/engine/engine.actions.js";
 import { structureEffectifFromDossierApprenant } from "../../../../common/actions/effectifs.actions.js";
-import { structureOrganismeFromDossierApprenant } from "../../../../common/actions/organismes.actions.js";
+import { structureOrganismeFromDossierApprenant } from "../../../../common/actions/organismes/organismes.actions.js";
 import {
   findDossierApprenantByQuery,
   insertDossierApprenant,

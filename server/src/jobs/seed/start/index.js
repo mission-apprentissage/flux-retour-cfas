@@ -1,12 +1,12 @@
 import logger from "../../../common/logger.js";
-import { createUser } from "../../../common/actions/users.actions.js";
+import { createUser, getUser } from "../../../common/actions/users.actions.js";
 import defaultRolesAcls from "./fixtures/defaultRolesAcls.js";
 import { createRole, findRoleByName } from "../../../common/actions/roles.actions.js";
 import {
   addContributeurOrganisme,
   createOrganisme,
   findOrganismeByUai,
-} from "../../../common/actions/organismes.actions.js";
+} from "../../../common/actions/organismes/organismes.actions.js";
 import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
 
 export const seedRoles = async () => {
@@ -162,91 +162,101 @@ export const seedSampleUsers = async () => {
   await seedRoles();
 
   // Create user Pilot
-  const userPilot = await createUser(
-    { email: "pilot@test.fr", password: "Secret!Password1" },
-    {
-      nom: "pilot",
-      prenom: "test",
-      description: "DREETS AUVERGNE-RHONES-ALPES",
-      permissions: { is_cross_organismes: true },
-      roles: ["pilot"],
-      account_status: "FORCE_RESET_PASSWORD",
-      siret: "13000992100011",
-      codes_region: ["84"],
-      organisation: "DREETS",
-    }
-  );
-  await userAfterCreate({ user: userPilot, pending: false, notify: false });
-  logger.info(`User pilot created`);
+  if (!(await getUser("pilot@test.fr"))) {
+    const userPilot = await createUser(
+      { email: "pilot@test.fr", password: "Secret!Password1" },
+      {
+        nom: "pilot",
+        prenom: "test",
+        description: "DREETS AUVERGNE-RHONES-ALPES",
+        permissions: { is_cross_organismes: true },
+        roles: ["pilot"],
+        account_status: "FORCE_RESET_PASSWORD",
+        siret: "13000992100011",
+        codes_region: ["84"],
+        organisation: "DREETS",
+      }
+    );
+    await userAfterCreate({ user: userPilot, pending: false, notify: false });
+    logger.info(`User pilot created`);
+  }
 
   // Create user OF
-  const userOf = await createUser(
-    { email: "of@test.fr", password: "Secret!Password1" },
-    {
-      nom: "of",
-      prenom: "test",
-      description: "Aden formation Caen - direction",
-      roles: ["of"],
-      account_status: "FORCE_RESET_PASSWORD",
-      siret: "44492238900010",
-      uai: "0142321X",
-      organisation: "ORGANISME_FORMATION",
-    }
-  );
-  await userAfterCreate({ user: userOf, pending: false, notify: false, asRole: "organisme.admin" });
-  logger.info(`User off created`);
+  if (!(await getUser("of@test.fr"))) {
+    const userOf = await createUser(
+      { email: "of@test.fr", password: "Secret!Password1" },
+      {
+        nom: "of",
+        prenom: "test",
+        description: "Aden formation Caen - direction",
+        roles: ["of"],
+        account_status: "FORCE_RESET_PASSWORD",
+        siret: "44492238900010",
+        uai: "0142321X",
+        organisation: "ORGANISME_FORMATION",
+      }
+    );
+    await userAfterCreate({ user: userOf, pending: false, notify: false, asRole: "organisme.admin" });
+    logger.info(`User off created`);
+  }
 
   // Create user OFR
-  const userOfR = await createUser(
-    { email: "ofr@test.fr", password: "Secret!Password1" },
-    {
-      nom: "ofr",
-      prenom: "test",
-      description: "ADEN Formations (Damigny)",
-      roles: ["of"],
-      account_status: "FORCE_RESET_PASSWORD",
-      siret: "44492238900044",
-      uai: "0611309S",
-      organisation: "ORGANISME_FORMATION",
-    }
-  );
-  await userAfterCreate({ user: userOfR, pending: false, notify: false, asRole: "organisme.admin" });
-  // Get organisme id for user
-  const organismeOff = await findOrganismeByUai("0142321X");
-  await addContributeurOrganisme(organismeOff._id, userOfR.email, "organisme.admin", false);
-  logger.info(`User ofr created`);
+  if (!(await getUser("ofr@test.fr"))) {
+    const userOfR = await createUser(
+      { email: "ofr@test.fr", password: "Secret!Password1" },
+      {
+        nom: "ofr",
+        prenom: "test",
+        description: "ADEN Formations (Damigny)",
+        roles: ["of"],
+        account_status: "FORCE_RESET_PASSWORD",
+        siret: "44492238900044",
+        uai: "0611309S",
+        organisation: "ORGANISME_FORMATION",
+      }
+    );
+    await userAfterCreate({ user: userOfR, pending: false, notify: false, asRole: "organisme.admin" });
+    // Get organisme id for user
+    const organismeOff = await findOrganismeByUai("0142321X");
+    await addContributeurOrganisme(organismeOff._id, userOfR.email, "organisme.admin", false);
+    logger.info(`User ofr created`);
+  }
 
   // Create user Reseau
-  const userReseau = await createUser(
-    { email: "reseau@test.fr", password: "Secret!Password1" },
-    {
-      nom: "reseau",
-      prenom: "test",
-      description: "CCI paris",
-      roles: ["reseau_of"],
-      account_status: "FORCE_RESET_PASSWORD",
-      siret: "13001727000013",
-      reseau: "CCI",
-      organisation: "TETE_DE_RESEAU",
-    }
-  );
-  await userAfterCreate({ user: userReseau, pending: false, notify: false });
-  logger.info(`User reseau created`);
+  if (!(await getUser("reseau@test.fr"))) {
+    const userReseau = await createUser(
+      { email: "reseau@test.fr", password: "Secret!Password1" },
+      {
+        nom: "reseau",
+        prenom: "test",
+        description: "CCI paris",
+        roles: ["reseau_of"],
+        account_status: "FORCE_RESET_PASSWORD",
+        siret: "13001727000013",
+        reseau: "CCI",
+        organisation: "TETE_DE_RESEAU",
+      }
+    );
+    await userAfterCreate({ user: userReseau, pending: false, notify: false });
+    logger.info(`User reseau created`);
+  }
 
   // Create user ERP
-  const userErp = await createUser(
-    { email: "erp@test.fr", password: "Secret!Password1" },
-    {
-      nom: "erp",
-      prenom: "test",
-      description: "Erp ymag salarié",
-      roles: ["erp"],
-      account_status: "FORCE_RESET_PASSWORD",
-      siret: "31497933700081",
-      erp: "YMAG",
-      organisation: "ERP",
-    }
-  );
-  await userAfterCreate({ user: userErp, pending: false, notify: false });
-  logger.info(`User erp created`);
+  if (!(await getUser("erp@test.fr"))) {
+    const userErp = await createUser(
+      { email: "erp@test.fr", password: "Secret!Password1" },
+      {
+        nom: "erp",
+        prenom: "test",
+        description: "Erp ymag salarié",
+        roles: ["erp"],
+        account_status: "FORCE_RESET_PASSWORD",
+        siret: "31497933700081",
+        erp: "YMAG",
+        organisation: "ERP",
+      }
+    );
+    await userAfterCreate({ user: userErp, pending: false, notify: false });
+    logger.info(`User erp created`);
+  }
 };

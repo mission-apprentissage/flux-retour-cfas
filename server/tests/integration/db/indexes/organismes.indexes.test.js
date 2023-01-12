@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { createOrganisme } from "../../../../src/common/actions/organismes.actions.js";
+import { createOrganisme } from "../../../../src/common/actions/organismes/organismes.actions.js";
 import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
 import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
 import cfasModelDescriptor from "./../../../../src/common/model/previous.models/toRemove.models/cfas.model.js";

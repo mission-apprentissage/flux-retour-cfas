@@ -1,6 +1,6 @@
 import express from "express";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { findOrganismesByQuery } from "../../../common/actions/organismes.actions.js";
+import { findOrganismesByQuery } from "../../../common/actions/organismes/organismes.actions.js";
 import { pageAccessMiddleware } from "../../middlewares/pageAccessMiddleware.js";
 
 export default () => {
