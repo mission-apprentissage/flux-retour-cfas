@@ -1,4 +1,8 @@
-import { addContributeurOrganisme, findOrganismeByUai, findOrganismesByQuery } from "./organismes.actions.js";
+import {
+  addContributeurOrganisme,
+  findOrganismeByUai,
+  findOrganismesByQuery,
+} from "./organismes/organismes.actions.js";
 import {
   createPermission,
   findActivePermissionsByRoleName,

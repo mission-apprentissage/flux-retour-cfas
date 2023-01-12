@@ -8,7 +8,7 @@ import {
   findOrganismeByUaiAndSiret,
   findOrganismesBySiret,
   updateOrganisme,
-} from "../../../common/actions/organismes.actions.js";
+} from "../../../common/actions/organismes/organismes.actions.js";
 import { updateDossiersApprenantsNetworksIfNeeded } from "./hydrate-reseaux.actions.js";
 
 const INPUT_FILE_COLUMN_NAMES = {

@@ -3,7 +3,7 @@ import Boom from "boom";
 import tryCatch from "./tryCatchMiddleware.js";
 import { findRolePermissionById, hasAclsByRoleId } from "../../common/actions/roles.actions.js";
 import { hasPermission } from "../../common/actions/permissions.actions.js";
-import { findOrganismeById } from "../../common/actions/organismes.actions.js";
+import { findOrganismeById } from "../../common/actions/organismes/organismes.actions.js";
 
 const hasRightsTo = async (role, acls) => {
   const hasRight = await hasAclsByRoleId(role, acls);

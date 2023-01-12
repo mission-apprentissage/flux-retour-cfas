@@ -1,5 +1,5 @@
 import { omit } from "lodash-es";
-import { buildAdresseForOrganisme } from "../../../../common/actions/organismes.actions.js";
+import { buildAdresseForOrganisme } from "../../../../common/actions/organismes/organismes.actions.js";
 import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
 import { organismesDb } from "../../../../common/model/collections.js";
 import {

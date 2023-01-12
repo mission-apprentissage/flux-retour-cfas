@@ -3,7 +3,7 @@ import { fullSampleWithUpdates } from "../../../../tests/data/sample.js";
 import { createRandomDossierApprenantList, createRandomOrganisme } from "../../../../tests/data/randomizedSample.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { createDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
-import { createOrganisme } from "../../../common/actions/organismes.actions.js";
+import { createOrganisme } from "../../../common/actions/organismes/organismes.actions.js";
 
 /**
  * Remplissage de données de tests

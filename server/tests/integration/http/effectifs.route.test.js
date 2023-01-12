@@ -14,7 +14,7 @@ import { startServer } from "../../utils/testUtils.js";
 import { seedRoles } from "../../../src/jobs/seed/start/index.js";
 import { createUser } from "../../../src/common/actions/users.actions.js";
 import { userAfterCreate } from "../../../src/common/actions/users.afterCreate.actions.js";
-import { createOrganisme } from "../../../src/common/actions/organismes.actions.js";
+import { createOrganisme } from "../../../src/common/actions/organismes/organismes.actions.js";
 
 // const createRandomDossierApprenantWithHistorique = async (props) => {
 //   const { _id } = await dossiersApprenants().createDossierApprenant(createRandomDossierApprenant());

@@ -6,7 +6,7 @@ import {
   addContributeurOrganisme,
   createOrganisme,
   findOrganismeByUai,
-} from "../../../common/actions/organismes.actions.js";
+} from "../../../common/actions/organismes/organismes.actions.js";
 import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
 
 export const seedRoles = async () => {

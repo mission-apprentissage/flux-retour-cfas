@@ -11,7 +11,7 @@ import {
 import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd.js";
 import { dossiersApprenantsMigrationDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
-import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes.actions.js";
+import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
 import { pick } from "lodash-es";
 import { buildTokenizedString } from "../../../src/common/utils/buildTokenizedString.js";
 import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";

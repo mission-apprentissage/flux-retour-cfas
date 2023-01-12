@@ -15,7 +15,7 @@ import {
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
   insertOrganisme,
-} from "../organismes.actions.js";
+} from "../organismes/organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
 
 /**

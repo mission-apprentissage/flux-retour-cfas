@@ -2,7 +2,11 @@ import cliProgress from "cli-progress";
 import logger from "../../../../common/logger.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { fetchOrganismes } from "../../../../common/apis/apiReferentielMna.js";
-import { createOrganisme, findOrganismeByUai, updateOrganisme } from "../../../../common/actions/organismes.actions.js";
+import {
+  createOrganisme,
+  findOrganismeByUai,
+  updateOrganisme,
+} from "../../../../common/actions/organismes/organismes.actions.js";
 import { buildAdresseFromUai } from "../../../../common/utils/uaiUtils.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 

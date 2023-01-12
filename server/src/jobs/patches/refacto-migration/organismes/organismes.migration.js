@@ -6,7 +6,7 @@ import { getLocalisationInfoFromUai } from "../../../../common/utils/uaiUtils.js
 import Joi from "joi";
 import { siretSchema } from "../../../../common/utils/validationUtils.js";
 import { createOrganismeFromCfa, mapCfaPropsToOrganismeProps } from "./organismes.migration.job.actions.js";
-import { updateOrganismeApiKey } from "../../../../common/actions/organismes.actions.js";
+import { updateOrganismeApiKey } from "../../../../common/actions/organismes/organismes.actions.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);

@@ -7,7 +7,7 @@ import {
   findOrganismeById,
   findOrganismeByUai,
   updateOrganisme,
-} from "../../../../common/actions/organismes.actions.js";
+} from "../../../../common/actions/organismes/organismes.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
 import { getFormationWithCfd } from "../../../../common/actions/formations.actions.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";

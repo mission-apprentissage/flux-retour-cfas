@@ -2,7 +2,7 @@ import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { findEffectifs } from "../effectifs.actions.js";
 import { findFormationById } from "../formations.actions.js";
-import { findOrganismeById } from "../organismes.actions.js";
+import { findOrganismeById } from "../organismes/organismes.actions.js";
 import { SIFA_FIELDS } from "./sifaCsvFields.js";
 
 /**
