@@ -55,8 +55,11 @@ export const hydrateEffectif = async (effectifData, options) => {
 
   const dateConverter = (date) => {
     // TODO If more than year 4000 error
-    const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
-    return date_ISO ?? date;
+    if (date instanceof Date) return date.toISOString();
+    else {
+      const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
+      return date_ISO ?? date;
+    }
   };
 
   if (effectifData.apprenant.date_de_naissance) {
