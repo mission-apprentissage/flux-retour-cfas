@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Page, Section } from "../../../../common/components";
-import useEffectifs from "../../../../common/hooks/useEffectifs";
 import useFetchCfaInfo from "../../../../common/hooks/useFetchCfaInfo";
+import useFetchIndicateurs from "../../../../hooks/old/useFetchIndicateurs.js";
 import { useFiltersContext } from "../FiltersContext";
 import {
   CfaInformationSection,
@@ -14,7 +14,7 @@ import {
 } from "../par-organisme/sections";
 
 const CfaPrivateView = ({ cfaUai }) => {
-  const [effectifs, effectifsLoading] = useEffectifs();
+  const [effectifs, effectifsLoading] = useFetchIndicateurs();
   const { data: infosCfa, loading: infosCfaLoading, error: infosCfaError } = useFetchCfaInfo(cfaUai);
   const { state: filters } = useFiltersContext();
   const hasMultipleSirets = infosCfa?.sousEtablissements?.length > 1;

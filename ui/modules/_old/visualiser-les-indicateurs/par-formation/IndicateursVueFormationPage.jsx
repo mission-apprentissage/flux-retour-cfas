@@ -3,7 +3,7 @@ import React from "react";
 
 import { BreadcrumbNav, Page, Section, TerritoireFilter } from "../../../../common/components";
 import { NAVIGATION_PAGES } from "../../../../common/constants/navigationPages";
-import useEffectifs from "../../../../common/hooks/useEffectifs";
+import useFetchIndicateurs from "../../../../hooks/old/useFetchIndicateurs.js";
 import FormationFilter from "../components/FormationFilter/FormationFilter";
 import FormationFilterMenu from "../components/FormationFilter/FormationFilterMenu";
 import { useFiltersContext } from "../FiltersContext";
@@ -13,7 +13,7 @@ import InfosFormationSection from "./InfosFormationSection";
 
 const IndicateursVueFormationPage = () => {
   const filtersContext = useFiltersContext();
-  const [effectifs, loading] = useEffectifs();
+  const [effectifs, loading] = useFetchIndicateurs();
 
   const currentFormation = filtersContext.state.formation;
 

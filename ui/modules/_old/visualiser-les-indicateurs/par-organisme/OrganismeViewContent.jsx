@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import useEffectifs from "../../../../common/hooks/useEffectifs";
+import useFetchIndicateurs from "../../../../hooks/old/useFetchIndicateurs.js";
 import { filtersPropTypes } from "../FiltersContext";
 import { infosCfaPropType } from "./propTypes";
 import {
@@ -12,7 +12,7 @@ import {
 } from "./sections";
 
 const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
-  const [effectifs, effectifsLoading] = useEffectifs();
+  const [effectifs, effectifsLoading] = useFetchIndicateurs();
   const hasMultipleSirets = infosCfa?.sousEtablissements?.length > 1;
   const sirets = infosCfa?.sousEtablissements?.map((item) => item.siret_etablissement);
   const displaySousEtablissementDetail = filters?.sousEtablissement !== null;

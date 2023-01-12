@@ -9,14 +9,14 @@ import { Padlock } from "../theme/components/icons";
 import Link from "../components/Links/Link";
 
 import { Section } from "../components";
-import useFetchEffectifsNational from "../hooks/useFetchEffectifsNational";
+import useFetchIndicateursNational from "../hooks/useFetchIndicateursNational";
 import { formatDateDayMonthYear } from "../common/utils/dateUtils";
 import IndicateursGridStack from "../components/IndicateursGridStack";
 
 const ExplorerLesIndicateursPage = () => {
   const title = "Visualiser les indicateurs en temps réel";
   const date = startOfHour(new Date());
-  const { data: effectifsNational, loading } = useFetchEffectifsNational(date);
+  const { data: effectifsNational, loading } = useFetchIndicateursNational(date);
   return (
     <Page>
       <Head>

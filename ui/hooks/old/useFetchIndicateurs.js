@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useFiltersContext } from "../modules/visualiser-les-indicateurs/FiltersContext";
-import { fetchEffectifs } from "../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../common/constants/queryKeys";
+import { fetchIndicateurs } from "../../common/api/tableauDeBord.js";
 
 const mapEffectifsData = (effectifsData) => {
   return {
@@ -13,11 +13,11 @@ const mapEffectifsData = (effectifsData) => {
   };
 };
 
-const useEffectifs = () => {
+const useFetchIndicateurs = () => {
   const filtersContext = useFiltersContext();
   // TODO [tech] filtersContext add ==> ?organisme_id=${organismeId}
   const { status, data, error } = useQuery([QUERY_KEYS.EFFECTIFS, filtersContext.state], () =>
-    fetchEffectifs(filtersContext.state)
+    fetchIndicateurs(filtersContext.state)
   );
 
   const loading = status === "loading";
@@ -26,4 +26,4 @@ const useEffectifs = () => {
   return [effectifs, loading, error];
 };
 
-export default useEffectifs;
+export default useFetchIndicateurs;

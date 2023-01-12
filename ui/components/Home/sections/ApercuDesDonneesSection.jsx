@@ -4,9 +4,9 @@ import { startOfHour } from "date-fns";
 import { Box, Container, Divider, Flex, Heading, HStack, Skeleton, Text } from "@chakra-ui/react";
 
 import { ERPS } from "../../../common/constants/erps";
-import useFetchEffectifsNational from "../../../hooks/useFetchEffectifsNational";
 import { formatDateDayMonthYear } from "../../../common/utils/dateUtils";
 import { Checkbox } from "../../../theme/components/icons";
+import useFetchIndicateursNational from "../../../hooks/useFetchIndicateursNational.js";
 
 const Count = ({ count = 0, label }) => {
   return (
@@ -26,7 +26,7 @@ Count.propTypes = {
 
 const ApercuDesDonneesSection = () => {
   const date = startOfHour(new Date());
-  const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchEffectifsNational(date);
+  const { data: effectifsNational, loading: isEffectifsNationalLoading, error } = useFetchIndicateursNational(date);
 
   return (
     <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} background="galt" paddingY="4w">

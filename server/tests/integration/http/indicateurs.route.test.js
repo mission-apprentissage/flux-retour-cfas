@@ -22,7 +22,7 @@ import { createOrganisme } from "../../../src/common/actions/organismes/organism
 // };
 
 describe("Effectifs Route", () => {
-  describe("/api/effectifs route", () => {
+  describe("/api/indicateurs route", () => {
     beforeEach(async () => {
       await seedRoles();
     });
@@ -30,7 +30,7 @@ describe("Effectifs Route", () => {
     it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
       const { httpClient } = await startServer();
 
-      const response = await httpClient.get("/api/effectifs", {
+      const response = await httpClient.get("/api/indicateurs", {
         params: { date: "2020-10-10T00:00:00.000Z" },
       });
 
@@ -88,7 +88,7 @@ describe("Effectifs Route", () => {
       const { cookie } = await logUser("of@test.fr", "Secret!Password1");
 
       // Get effectifs
-      const response = await httpClient.get("/api/effectifs", {
+      const response = await httpClient.get("/api/indicateurs", {
         params: { date: "2022-10-10T00:00:00.000Z", organisme_id: otherOrganisme._id.toString() },
         headers: { cookie },
       });
@@ -134,7 +134,7 @@ describe("Effectifs Route", () => {
       const { cookie } = await logUser("of@test.fr", "Secret!Password1");
 
       // Get effectifs
-      const response = await httpClient.get("/api/effectifs", {
+      const response = await httpClient.get("/api/indicateurs", {
         params: { date: "2022-10-10T00:00:00.000Z", organisme_id: createdOrganisme._id.toString() },
         headers: { cookie },
       });
@@ -189,7 +189,7 @@ describe("Effectifs Route", () => {
     //   };
 
     //   // Check good api call
-    //   const response = await httpClient.get("/api/effectifs", {
+    //   const response = await httpClient.get("/api/indicateurs", {
     //     params: { date: "2020-10-10T00:00:00.000Z" },
     //     headers: bearerToken,
     //   });
@@ -241,7 +241,7 @@ describe("Effectifs Route", () => {
     //   };
 
     //   // Check good api call
-    //   const response = await httpClient.get("/api/effectifs", {
+    //   const response = await httpClient.get("/api/indicateurs", {
     //     params: { date: "2020-10-10T00:00:00.000Z", ...filterQuery },
     //     headers: bearerToken,
     //   });
@@ -252,7 +252,7 @@ describe("Effectifs Route", () => {
     //   assert.deepEqual(indices.abandons, expectedResults.nbAbandons);
 
     //   // Check bad api call
-    //   const badResponse = await httpClient.get("/api/effectifs", {
+    //   const badResponse = await httpClient.get("/api/indicateurs", {
     //     params: { date: "2020-10-10T00:00:00.000Z", etablissement_num_region: "99" },
     //     headers: bearerToken,
     //   });
@@ -265,7 +265,7 @@ describe("Effectifs Route", () => {
     // });
   });
 
-  //   describe("/api/effectifs/niveau-formation route", () => {
+  //   describe("/api/indicateurs/niveau-formation route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par niveaux de formation via API", async () => {
   //       const { httpClient, createAndLogUserLegacy } = await startServer();
   //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
@@ -290,7 +290,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
-  //       const response = await httpClient.get(`/api/effectifs/niveau-formation?${searchParams}`, {
+  //       const response = await httpClient.get(`/api/indicateurs/niveau-formation?${searchParams}`, {
   //         headers: bearerToken,
   //       });
 
@@ -312,7 +312,7 @@ describe("Effectifs Route", () => {
   //     });
   //   });
 
-  //   describe("/api/effectifs/total-organismes route", () => {
+  //   describe("/api/indicateurs/total-organismes route", () => {
   //     it("Vérifie qu'on peut récupérer le nombre d'organismes transmettant de la donnée sur une région", async () => {
   //       const { httpClient, createAndLogUserLegacy } = await startServer();
   //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
@@ -329,7 +329,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       // Check good api call
-  //       const response = await httpClient.get("/api/effectifs/total-organismes", {
+  //       const response = await httpClient.get("/api/indicateurs/total-organismes", {
   //         params: {
   //           etablissement_num_region: regionNumTest,
   //           date: "2020-10-10T00:00:00.000Z",
@@ -340,7 +340,7 @@ describe("Effectifs Route", () => {
   //       assert.equal(response.status, 200);
   //       assert.deepEqual(response.data, { nbOrganismes: 1 });
 
-  //       const badRegionResponse = await httpClient.get("/api/effectifs/total-organismes", {
+  //       const badRegionResponse = await httpClient.get("/api/indicateurs/total-organismes", {
   //         params: {
   //           etablissement_num_region: "01",
   //           date: "2020-10-10T00:00:00.000Z",
@@ -368,7 +368,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       // Check good api call
-  //       const response = await httpClient.get("/api/effectifs/total-organismes", {
+  //       const response = await httpClient.get("/api/indicateurs/total-organismes", {
   //         params: {
   //           formation_cfd: formationCfd,
   //           date: "2020-10-10T00:00:00.000Z",
@@ -396,7 +396,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       // Check good api call
-  //       const response = await httpClient.get("/api/effectifs/total-organismes", {
+  //       const response = await httpClient.get("/api/indicateurs/total-organismes", {
   //         params: {
   //           formation_cfd: formationCfd,
   //           date: "2020-10-10T00:00:00.000Z",
@@ -409,7 +409,7 @@ describe("Effectifs Route", () => {
   //     });
   //   });
 
-  //   describe("/api/effectifs/formation route", () => {
+  //   describe("/api/indicateurs/formation route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par formation via API", async () => {
   //       const { httpClient, createAndLogUserLegacy } = await startServer();
   //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
@@ -438,7 +438,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
-  //       const response = await httpClient.get(`/api/effectifs/formation?${searchParams}`, {
+  //       const response = await httpClient.get(`/api/indicateurs/formation?${searchParams}`, {
   //         headers: bearerToken,
   //       });
 
@@ -447,7 +447,7 @@ describe("Effectifs Route", () => {
   //     });
   //   });
 
-  //   describe("/api/effectifs/annee-formation route", () => {
+  //   describe("/api/indicateurs/annee-formation route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par annee-formation via API", async () => {
   //       const { httpClient, createAndLogUserLegacy } = await startServer();
   //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
@@ -469,7 +469,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
-  //       const response = await httpClient.get(`/api/effectifs/annee-formation?${searchParams}`, {
+  //       const response = await httpClient.get(`/api/indicateurs/annee-formation?${searchParams}`, {
   //         headers: bearerToken,
   //       });
 
@@ -478,7 +478,7 @@ describe("Effectifs Route", () => {
   //     });
   //   });
 
-  //   describe("/api/effectifs/cfa route", () => {
+  //   describe("/api/indicateurs/cfa route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par cfa via API", async () => {
   //       const { httpClient, createAndLogUserLegacy } = await startServer();
   //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
@@ -531,7 +531,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
-  //       const response = await httpClient.get(`/api/effectifs/cfa?${searchParams}`, {
+  //       const response = await httpClient.get(`/api/indicateurs/cfa?${searchParams}`, {
   //         headers: bearerToken,
   //       });
 
@@ -540,7 +540,7 @@ describe("Effectifs Route", () => {
   //     });
   //   });
 
-  //   describe("/api/effectifs/siret route", () => {
+  //   describe("/api/indicateurs/siret route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par siret via API", async () => {
   //       const { httpClient, createAndLogUserLegacy } = await startServer();
   //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
@@ -563,7 +563,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       const searchParams = `date=2020-10-10T00:00:00.000Z&etablissement_num_region=${filterQuery.etablissement_num_region}`;
-  //       const response = await httpClient.get(`/api/effectifs/siret?${searchParams}`, {
+  //       const response = await httpClient.get(`/api/indicateurs/siret?${searchParams}`, {
   //         headers: bearerToken,
   //       });
 
@@ -572,7 +572,7 @@ describe("Effectifs Route", () => {
   //     });
   //   });
 
-  //   describe("/api/effectifs/departement route", () => {
+  //   describe("/api/indicateurs/departement route", () => {
   //     it("Vérifie qu'on peut récupérer les effectifs répartis par departement via API", async () => {
   //       const { httpClient, createAndLogUserLegacy } = await startServer();
   //       const bearerToken = await createAndLogUserLegacy("user", "password", { permissions: [apiRoles.administrator] });
@@ -594,7 +594,7 @@ describe("Effectifs Route", () => {
   //       });
 
   //       const searchParams = `date=2020-10-10T00:00:00.000Z`;
-  //       const response = await httpClient.get(`/api/effectifs/departement?${searchParams}`, {
+  //       const response = await httpClient.get(`/api/indicateurs/departement?${searchParams}`, {
   //         headers: bearerToken,
   //       });
 
