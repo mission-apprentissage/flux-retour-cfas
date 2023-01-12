@@ -1,3 +1,10 @@
+# [3.0.0-beta.12](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.11...v3.0.0-beta.12) (2023-01-12)
+
+
+### Bug Fixes
+
+* **ui:** redirection conflict when maintenance page is active ([23c7a34](https://github.com/mission-apprentissage/flux-retour-cfas/commit/23c7a34e47b5c61bb1f10cd59124757626e560fd))
+
 # [3.0.0-beta.11](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.10...v3.0.0-beta.11) (2023-01-11)
 
 
