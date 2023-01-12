@@ -1,17 +1,17 @@
-const passport = require("passport");
-const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
-const config = require("../../../config");
-const { tdbRoles } = require("../../common/roles");
+import passport from "passport";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
+import config from "../../config.js";
+import { tdbRoles } from "../../common/roles.js";
+import { getUserLegacy } from "../../common/actions/legacy/users.legacy.actions.js";
+import { findOrganismeByUai } from "../../common/actions/organismes/organismes.actions.js";
 
-module.exports = ({ users, cfas }) => {
+export default () => {
   const findUserOrCfa = async (usernameOrUai) => {
-    const foundUser = await users.getUser(usernameOrUai);
-
+    const foundUser = await getUserLegacy(usernameOrUai);
     if (foundUser) return foundUser;
 
-    const foundCfa = await cfas.getFromUai(usernameOrUai);
-
-    if (foundCfa) return { username: usernameOrUai, permissions: [tdbRoles.cfa] };
+    const foundOrganisme = await findOrganismeByUai(usernameOrUai);
+    if (foundOrganisme) return { username: usernameOrUai, permissions: [tdbRoles.cfa] };
 
     return null;
   };
@@ -23,6 +23,7 @@ module.exports = ({ users, cfas }) => {
   };
 
   passport.use(
+    "jwtStrategy1",
     new JwtStrategy(jwtStrategyOptions, async (jwt_payload, done) => {
       try {
         const foundUser = await findUserOrCfa(jwt_payload.sub);
@@ -36,5 +37,5 @@ module.exports = ({ users, cfas }) => {
     })
   );
 
-  return passport.authenticate("jwt", { session: false });
+  return passport.authenticate("jwtStrategy1", { session: false });
 };

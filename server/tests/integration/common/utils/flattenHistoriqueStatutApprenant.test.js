@@ -1,5 +1,5 @@
-const assert = require("assert").strict;
-const { flattenHistoriqueStatutApprenant } = require("../../../../src/common/utils/flattenHistoriqueStatutApprenant");
+import { strict as assert } from "assert";
+import { flattenHistoriqueStatutApprenant } from "../../../../src/common/utils/flattenHistoriqueStatutApprenant.js";
 
 describe("flattenHistoriqueStatutApprenant", () => {
   it("Vérifie qu'un historique est renvoyé vide", async () => {

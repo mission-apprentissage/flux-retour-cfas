@@ -1,10 +1,9 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { EffectifsRupturants } from "../../../../src/common/components/effectifs/rupturants.js";
+import { dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
 
-const { DossierApprenantModel } = require("../../../../src/common/model");
-const { EffectifsRupturants } = require("../../../../src/common/components/effectifs/rupturants");
-
-describe(__filename, () => {
+describe("Components Effectifs Rupturants Test", () => {
   beforeEach(async () => {
     const statuts = [
       // following statuts are potential rupturants (depends on date)
@@ -62,8 +61,7 @@ describe(__filename, () => {
       }),
     ];
     for (let index = 0; index < statuts.length; index++) {
-      const toAdd = new DossierApprenantModel(statuts[index]);
-      await toAdd.save();
+      await dossiersApprenantsMigrationDb().insertOne(statuts[index]);
     }
   });
 
@@ -93,7 +91,7 @@ describe(__filename, () => {
 
       // Add 5 statuts rupturant for annee_scolaire on same year
       for (let index = 0; index < 5; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -102,12 +100,12 @@ describe(__filename, () => {
             annee_scolaire: "2020-2020",
             ...filters,
           })
-        ).save();
+        );
       }
 
       // Add 12 statuts rupturant for annee_scolaire on two years
       for (let index = 0; index < 12; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -116,7 +114,7 @@ describe(__filename, () => {
             annee_scolaire: "2021-2021",
             ...filters,
           })
-        ).save();
+        );
       }
 
       const date = new Date("2020-10-12T00:00:00");
@@ -126,7 +124,7 @@ describe(__filename, () => {
     });
 
     it("gets right count of rupturants for edge case where historique is not sorted by date_statut", async () => {
-      const toAdd = new DossierApprenantModel(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 2, date_statut: new Date("2025-10-01"), date_reception: new Date("2025-10-02") },
@@ -135,7 +133,6 @@ describe(__filename, () => {
           annee_scolaire: "2025-2026",
         })
       );
-      await toAdd.save();
 
       const date = new Date("2025-10-01");
       const rupturantsCountForAnneesScolaireList = await rupturants.getCountAtDate(date, {
@@ -147,7 +144,7 @@ describe(__filename, () => {
 
     it("gets right count of rupturants for edge case where multiple elements have the same date_statut but different date_reception", async () => {
       const sameDateStatut = new Date("2025-09-01");
-      const toAdd = new DossierApprenantModel(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 2, date_statut: sameDateStatut, date_reception: new Date("2025-09-15") },
@@ -156,7 +153,6 @@ describe(__filename, () => {
           annee_scolaire: "2025-2026",
         })
       );
-      await toAdd.save();
 
       const date = new Date("2025-10-01");
       const rupturantsCountForAnneesScolaireList = await rupturants.getCountAtDate(date, {
@@ -168,7 +164,7 @@ describe(__filename, () => {
 
     it("gets right count of rupturants for edge case where multiple elements have the same date_statut but different date_reception (other case, no rupturant)", async () => {
       const sameDateStatut = new Date("2025-09-01");
-      const toAdd = new DossierApprenantModel(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 3, date_statut: sameDateStatut, date_reception: new Date("2025-09-15") },
@@ -177,7 +173,6 @@ describe(__filename, () => {
           annee_scolaire: "2025-2026",
         })
       );
-      await toAdd.save();
 
       const date = new Date("2025-10-01");
       const rupturantsCountForAnneesScolaireList = await rupturants.getCountAtDate(date, {

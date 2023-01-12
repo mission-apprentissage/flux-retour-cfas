@@ -1,5 +1,3 @@
-module.exports = {
-  async up() {},
+export const up = async () => {};
 
-  async down() {},
-};
+export const down = async () => {};

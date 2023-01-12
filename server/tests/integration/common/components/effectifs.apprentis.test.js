@@ -1,15 +1,17 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const {
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+
+import {
   historySequenceInscritToApprentiToAbandon,
   historySequenceApprenti,
   historySequenceInscritToApprenti,
-} = require("../../../data/historySequenceSamples");
-const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { DossierApprenantModel } = require("../../../../src/common/model");
-const { EffectifsApprentis } = require("../../../../src/common/components/effectifs/apprentis");
+} from "../../../data/historySequenceSamples.js";
 
-describe(__filename, () => {
+import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
+import { EffectifsApprentis } from "../../../../src/common/components/effectifs/apprentis.js";
+import { dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
+
+describe("Components Effectifs apprentis Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     // Add 10 statuts with history sequence - full
     for (let index = 0; index < 10; index++) {
@@ -17,8 +19,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprentiToAbandon,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
 
     // Add 5 statuts with history sequence - simple apprenti
@@ -27,8 +28,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceApprenti,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
 
     // Add 15 statuts with history sequence - inscritToApprenti
@@ -37,8 +37,7 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceInscritToApprenti,
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
   };
 
@@ -159,24 +158,24 @@ describe(__filename, () => {
 
       // Add 5 statuts apprenti for annee_scolaire on same year
       for (let index = 0; index < 5; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: historySequenceApprenti,
             annee_scolaire: "2020-2020",
             ...filters,
           })
-        ).save();
+        );
       }
 
       // Add 12 statuts apprenti for annee_scolaire on two years
       for (let index = 0; index < 12; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: historySequenceApprenti,
             annee_scolaire: "2021-2021",
             ...filters,
           })
-        ).save();
+        );
       }
 
       const date = new Date("2020-09-30T00:00:00.000+0000");
@@ -186,7 +185,7 @@ describe(__filename, () => {
     });
 
     it("gets right count of apprentis for edge case where historique is not sorted by date_statut", async () => {
-      const toAdd = new DossierApprenantModel(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 3, date_statut: new Date("2025-10-01"), date_reception: new Date("2025-09-02") },
@@ -195,7 +194,6 @@ describe(__filename, () => {
           annee_scolaire: "2025-2026",
         })
       );
-      await toAdd.save();
 
       const date = new Date("2025-10-01");
       const apprentisCountForAnneesScolaireList = await apprentis.getCountAtDate(date, {
@@ -207,7 +205,7 @@ describe(__filename, () => {
 
     it("gets right count of apprentis for edge case where multiple elements have the same date_statut but different date_reception", async () => {
       const sameDateStatut = new Date("2025-09-01");
-      const toAdd = new DossierApprenantModel(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 3, date_statut: sameDateStatut, date_reception: new Date("2025-09-30") },
@@ -216,7 +214,6 @@ describe(__filename, () => {
           annee_scolaire: "2025-2026",
         })
       );
-      await toAdd.save();
 
       const date = new Date("2025-10-01");
       const apprentisCountForAnneesScolaireList = await apprentis.getCountAtDate(date, {
@@ -228,7 +225,7 @@ describe(__filename, () => {
 
     it("gets right count of apprentis for edge case where multiple elements have the same date_statut but different date_reception (other case, no apprenti)", async () => {
       const sameDateStatut = new Date("2025-09-01");
-      const toAdd = new DossierApprenantModel(
+      await dossiersApprenantsMigrationDb().insertOne(
         createRandomDossierApprenant({
           historique_statut_apprenant: [
             { valeur_statut: 3, date_statut: sameDateStatut, date_reception: new Date("2025-08-30") },
@@ -237,7 +234,6 @@ describe(__filename, () => {
           annee_scolaire: "2025-2026",
         })
       );
-      await toAdd.save();
 
       const date = new Date("2025-10-01");
       const apprentisCountForAnneesScolaireList = await apprentis.getCountAtDate(date, {

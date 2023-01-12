@@ -1,6 +1,6 @@
-const Boom = require("boom");
+import Boom from "boom";
 
-module.exports = () => {
+export default () => {
   // eslint-disable-next-line no-unused-vars
   return (rawError, req, res, next) => {
     req.err = rawError;

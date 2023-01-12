@@ -1,62 +1,32 @@
-const { DossierApprenantModel, CfaModel } = require("../model");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
-const { isEqual } = require("date-fns");
-const { DossierApprenant } = require("../factory/dossierApprenant");
-
-module.exports = () => ({
-  getDossierApprenant,
-  addOrUpdateDossiersApprenants,
-  createDossierApprenant,
-  updateDossierApprenant,
-});
+import { ObjectId } from "mongodb";
+import { isEqual } from "date-fns";
+import { DossierApprenant } from "../factory/dossierApprenant.js";
+import { cfasDb, dossiersApprenantsDb } from "../model/collections.js";
 
 /**
+ * TODO Remove
  * Find a dossier apprenant from unicity key params
  * @param {*} unicityFields
  * @returns
  */
-const getDossierApprenant = ({ id_erp_apprenant, uai_etablissement, annee_scolaire }) => {
-  return DossierApprenantModel.findOne({
+const getDossierApprenantLegacy = async ({ id_erp_apprenant, uai_etablissement, annee_scolaire }) => {
+  return await dossiersApprenantsDb().findOne({
     id_erp_apprenant,
     uai_etablissement,
     annee_scolaire,
-  }).lean();
+  });
 };
 
 /**
- * Add or update items in a list of DossierApprenant
- * @param {*} itemsToAddOrUpdate
+ * TODO Remove
+ * @param {*} existingItemId
+ * @param {*} toUpdate
  * @returns
  */
-const addOrUpdateDossiersApprenants = async (itemsToAddOrUpdate) => {
-  const added = [];
-  const updated = [];
-
-  await asyncForEach(itemsToAddOrUpdate, async (item) => {
-    // Search dossier apprenant with unicity fields
-    const foundItem = await getDossierApprenant({
-      id_erp_apprenant: item.id_erp_apprenant,
-      uai_etablissement: item.uai_etablissement,
-      annee_scolaire: item.annee_scolaire,
-    });
-
-    if (!foundItem) {
-      const addedItem = await createDossierApprenant(item);
-      added.push(addedItem);
-    } else {
-      const updatedItem = await updateDossierApprenant(foundItem._id, item);
-      updated.push(updatedItem);
-    }
-  });
-
-  return {
-    added,
-    updated,
-  };
-};
-
-const updateDossierApprenant = async (_id, toUpdate) => {
-  if (!_id) return null;
+const updateDossierApprenantLegacy = async (existingItemId, toUpdate) => {
+  if (!existingItemId) return null;
+  const _id = new ObjectId(existingItemId);
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const updateFieldsWhitelist = [
     "prenom_apprenant",
@@ -80,7 +50,7 @@ const updateDossierApprenant = async (_id, toUpdate) => {
   const updateQuery = {
     updated_at: new Date(),
   };
-  const existingItem = await DossierApprenantModel.findOne({ _id }).lean();
+  const existingItem = await dossiersApprenantsDb().findOne({ _id });
 
   updateFieldsWhitelist.forEach((field) => {
     updateQuery[field] = toUpdate[field];
@@ -120,14 +90,19 @@ const updateDossierApprenant = async (_id, toUpdate) => {
     updateQuery.historique_statut_apprenant = historiqueSorted.slice(0, newElementIndex + 1);
   }
 
-  await DossierApprenantModel.updateOne({ _id }, { $set: updateQuery });
+  await dossiersApprenantsDb().updateOne({ _id }, { $set: updateQuery });
   // TODO return nothing (single responsibility)
-  return await DossierApprenantModel.findOne({ _id }).lean();
+  return await dossiersApprenantsDb().findOne({ _id });
 };
 
-const createDossierApprenant = async (itemToCreate) => {
+/**
+ * TODO : Remove
+ * @param {*} itemToCreate
+ * @returns
+ */
+const createDossierApprenantLegacy = async (itemToCreate) => {
   // if dossier apprenant établissement has a VALID uai try to retrieve information in Referentiel CFAs
-  const etablissementInReferentielCfaFromUai = await CfaModel.findOne({ uai: itemToCreate.uai_etablissement });
+  const etablissementInReferentielCfaFromUai = await cfasDb().findOne({ uai: itemToCreate.uai_etablissement });
 
   const dossierApprenantEntity = DossierApprenant.create({
     ine_apprenant: itemToCreate.ine_apprenant,
@@ -165,16 +140,17 @@ const createDossierApprenant = async (itemToCreate) => {
   });
 
   if (dossierApprenantEntity) {
-    const dossierApprenantToAdd = new DossierApprenantModel(dossierApprenantEntity);
-    return (await dossierApprenantToAdd.save()).toObject();
+    const { insertedId } = await dossiersApprenantsDb().insertOne(dossierApprenantEntity);
+    // TODO return only the insertedId (single responsiblity)
+    return await dossiersApprenantsDb().findOne({ _id: insertedId });
   }
 
+  // TODO throw error if factory validation didn't pass
   return null;
 };
 
-module.exports = () => ({
-  getDossierApprenant,
-  addOrUpdateDossiersApprenants,
-  createDossierApprenant,
-  updateDossierApprenant,
+export default () => ({
+  getDossierApprenantLegacy,
+  createDossierApprenantLegacy,
+  updateDossierApprenantLegacy,
 });

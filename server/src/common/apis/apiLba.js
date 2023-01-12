@@ -1,6 +1,6 @@
-const axios = require("axios");
-const logger = require("../logger");
-const config = require("../../../config");
+import axios from "axios";
+import logger from "../logger.js";
+import config from "../../config.js";
 
 // Cf Documentation : https://labonnealternance.pole-emploi.fr/api-docs/
 
@@ -19,12 +19,12 @@ const fetchMetiersBySirets = async (sirets) => {
  * @param  {[string]} sirets
  * @returns {{data: {metiers:[string]|null}}
  */
-const getMetiersBySirets = async (sirets) => {
+export const getMetiersBySirets = async (sirets) => {
   if (!Array.isArray(sirets) || sirets.length === 0) throw new Error("sirets param must be a non-empty array");
 
   try {
     const result = await fetchMetiersBySirets(sirets);
-    return { data: result };
+    return result;
   } catch (err) {
     // 500 with specific message on this route means no métiers were found for those SIRET
     if (err.response?.status === 500 && err.response?.data?.error === NO_METIERS_FOUND_ERROR_MSG) {
@@ -48,7 +48,7 @@ const fetchMetiersByCfd = async (cfd) => {
  * @param  {string} cfd
  * @returns {{data: {metiers:[string]}|null}}
  */
-const getMetiersByCfd = async (cfd) => {
+export const getMetiersByCfd = async (cfd) => {
   if (!cfd) throw new Error("cfd param not provided");
 
   try {
@@ -64,9 +64,4 @@ const getMetiersByCfd = async (cfd) => {
       throw new Error(`An error occured while fetching métiers for CFD ${cfd}`);
     }
   }
-};
-
-module.exports = {
-  getMetiersBySirets,
-  getMetiersByCfd,
 };

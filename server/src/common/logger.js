@@ -1,8 +1,8 @@
-const util = require("util");
-const bunyan = require("bunyan");
-const PrettyStream = require("bunyan-prettystream");
-const BunyanSlack = require("bunyan-slack");
-const config = require("../../config");
+import util from "util";
+import bunyan from "bunyan";
+import PrettyStream from "bunyan-prettystream";
+import BunyanSlack from "bunyan-slack";
+import config from "../config.js";
 
 const createStreams = () => {
   const { type, level } = config.log;
@@ -63,7 +63,7 @@ const createStreams = () => {
   return streams;
 };
 
-module.exports = bunyan.createLogger({
+export default bunyan.createLogger({
   name: config.appName,
   serializers: bunyan.stdSerializers,
   streams: createStreams(),

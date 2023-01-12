@@ -1,8 +1,8 @@
-const assert = require("assert").strict;
-const config = require("../../../config");
-const { startServer } = require("../../utils/testUtils");
+import { strict as assert } from "assert";
+import config from "../../../src/config.js";
+import { startServer } from "../../utils/testUtils.js";
 
-describe(__filename, () => {
+describe("Healthcheck route", () => {
   it("Vérifie que le server fonctionne", async () => {
     const { httpClient } = await startServer();
 

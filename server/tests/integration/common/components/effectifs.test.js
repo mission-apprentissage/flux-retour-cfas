@@ -1,15 +1,14 @@
-const assert = require("assert").strict;
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const { DossierApprenantModel, CfaModel } = require("../../../../src/common/model");
-const effectifs = require("../../../../src/common/components/effectifs");
-const {
+import { strict as assert } from "assert";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import effectifs from "../../../../src/common/components/effectifs.js";
+import {
   CODES_STATUT_APPRENANT,
   EFFECTIF_INDICATOR_NAMES,
-} = require("../../../../src/common/constants/dossierApprenantConstants");
-const { RESEAUX_CFAS } = require("../../../../src/common/constants/networksConstants");
-const { NATURE_ORGANISME_DE_FORMATION } = require("../../../../src/common/domain/organisme-de-formation/nature");
+} from "../../../../src/common/constants/dossierApprenantConstants.js";
+import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
+import { dossiersApprenantsMigrationDb, cfasDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Components Effectifs Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
     const nbAbandons = 10;
     const nbApprentis = 5;
@@ -33,8 +32,7 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
 
     // Add 5 statuts with simple apprenti sequence
@@ -48,8 +46,7 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
 
     // Add 15 statuts with inscrit -> apprenti sequence
@@ -67,8 +64,7 @@ describe(__filename, () => {
         ],
         ...statutsProps,
       });
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
+      await dossiersApprenantsMigrationDb().insertOne(randomStatut);
     }
   };
 
@@ -250,16 +246,14 @@ describe(__filename, () => {
         uai_etablissement: "0123456T",
         nom_etablissement: "CFA 1",
         siret_etablissement: "12345678900011",
-        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
       };
       const cfa2 = {
         uai_etablissement: "012345Z",
         nom_etablissement: "CFA 2",
         siret_etablissement: "12345678900099",
-        nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
       };
-      await new CfaModel({ uai: cfa1.uai_etablissement, nature: cfa1.nature, nature_validity_warning: true }).save();
-      await new CfaModel({ uai: cfa2.uai_etablissement, nature: cfa2.nature, nature_validity_warning: true }).save();
+      await cfasDb().insertOne({ uai: cfa1.uai_etablissement });
+      await cfasDb().insertOne({ uai: cfa2.uai_etablissement });
       await seedDossiersApprenants({ ...filterQuery, ...cfa1 });
       await seedDossiersApprenants({ formation_cfd: "12345", ...cfa1 });
       await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
@@ -270,8 +264,6 @@ describe(__filename, () => {
         {
           ...cfa1,
           siret_etablissement: [cfa1.siret_etablissement],
-          nature: cfa1.nature,
-          natureValidityWarning: true,
           effectifs: {
             apprentis: 5,
             inscritsSansContrat: 15,
@@ -282,8 +274,6 @@ describe(__filename, () => {
         {
           ...cfa2,
           siret_etablissement: [cfa2.siret_etablissement],
-          nature: cfa2.nature,
-          natureValidityWarning: true,
           effectifs: {
             apprentis: 10,
             inscritsSansContrat: 30,
@@ -468,35 +458,35 @@ describe(__filename, () => {
     const createApprentisForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts apprenti
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: CODES_STATUT_APPRENANT.apprenti, date_statut: new Date("2020-08-30T00:00:00.000+0000") },
             ],
             ...filterQuery,
           })
-        ).save();
+        );
       }
     };
 
     const createInscritsSansContratsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts inscrits sans contrat
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: CODES_STATUT_APPRENANT.inscrit, date_statut: new Date("2020-09-01T00:00:00") },
             ],
             ...filterQuery,
           })
-        ).save();
+        );
       }
     };
 
     const createRupturantsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts rupturant
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               { valeur_statut: 3, date_statut: new Date("2020-09-13T00:00:00") },
@@ -504,14 +494,14 @@ describe(__filename, () => {
             ],
             ...filterQuery,
           })
-        ).save();
+        );
       }
     };
 
     const createAbandonsForQuery = async (nbDossiersToCreate, filterQuery) => {
       // Add statuts abandon
       for (let index = 0; index < nbDossiersToCreate; index++) {
-        await new DossierApprenantModel(
+        await dossiersApprenantsMigrationDb().insertOne(
           createRandomDossierApprenant({
             historique_statut_apprenant: [
               {
@@ -529,7 +519,7 @@ describe(__filename, () => {
             ],
             ...filterQuery,
           })
-        ).save();
+        );
       }
     };
 

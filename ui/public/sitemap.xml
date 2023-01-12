@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/stats</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/connexion</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/inscription</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/confirmation</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/auth/en-attente-confirmation</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/modifier-mot-de-passe</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/mot-de-passe-oublie</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/cookies</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/donnees-personnelles</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/mentions-legales</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/cgu</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/accessibilite</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/questions-reponses</loc> </url>
+<url> <loc>https://cfas.apprentissage.beta.gouv.fr/journal-des-evolutions</loc> </url>
+</urlset>

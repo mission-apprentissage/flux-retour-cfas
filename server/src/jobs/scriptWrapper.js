@@ -1,17 +1,22 @@
-const { closeMongoConnection } = require("../common/mongodb");
-const createComponents = require("../common/components/components");
-const logger = require("../common/logger");
-const { JobEventModel } = require("../common/model");
-const { initRedis } = require("../common/infra/redis");
-const { formatDuration, intervalToDuration } = require("date-fns");
-const { jobEventStatuts } = require("../common/constants/jobsConstants");
-const config = require("../../config");
+import { closeMongodbConnection, configureDbSchemaValidation, connectToMongodb } from "../common/mongodb.js";
+import createComponents from "../common/components/components.js";
+import logger from "../common/logger.js";
+import { formatDuration, intervalToDuration } from "date-fns";
+import { jobEventStatuts } from "../common/constants/jobsConstants.js";
+import { modelDescriptors } from "../common/model/collections.js";
+import createServices from "../services.js";
+import config from "../config.js";
+import { createJobEvent } from "../common/actions/jobEvents.actions.js";
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
 
 let redisClient;
 
+/**
+ * Fonction de sortie du script
+ * @param {*} rawError
+ */
 const exit = async (rawError) => {
   let error = rawError;
   if (rawError) {
@@ -20,7 +25,7 @@ const exit = async (rawError) => {
 
   setTimeout(() => {
     //Waiting logger to flush all logs (MongoDB)
-    closeMongoConnection()
+    closeMongodbConnection()
       .then(() => {})
       .catch((closeError) => {
         error = closeError;
@@ -33,36 +38,38 @@ const exit = async (rawError) => {
   process.exitCode = error ? 1 : 0;
 };
 
-module.exports = {
-  runScript: async (job, jobName) => {
-    try {
-      const startDate = new Date();
+/**
+ * Wrapper pour l'execution de scripts
+ * @param {*} job
+ * @param {*} jobName
+ */
+export const runScript = async (job, jobName) => {
+  try {
+    const startDate = new Date();
 
-      redisClient = await initRedis({
-        uri: config.redis.uri,
-        onError: (err) => logger.error("Redis client error", err),
-        onReady: () => logger.info("Redis client ready!"),
-      });
+    await connectToMongodb(config.mongodb.uri);
+    await configureDbSchemaValidation(modelDescriptors);
 
-      const components = await createComponents({ redisClient });
-      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.started, date: new Date() }).save();
-      await job(components);
+    const components = await createComponents();
+    const services = await createServices();
+    redisClient = services.cache;
 
-      const endDate = new Date();
-      const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
+    await createJobEvent({ jobname: jobName, action: jobEventStatuts.started });
+    await job({ ...components, ...services });
 
-      await new JobEventModel({
-        jobname: jobName,
-        created_at: new Date(),
-        action: jobEventStatuts.executed,
-        data: { startDate, endDate, duration },
-      }).save();
+    const endDate = new Date();
+    const duration = formatDuration(intervalToDuration({ start: startDate, end: endDate }));
 
-      await exit();
-    } catch (e) {
-      await exit(e);
-    } finally {
-      await new JobEventModel({ jobname: jobName, action: jobEventStatuts.ended, date: new Date() }).save();
-    }
-  },
+    await createJobEvent({
+      jobname: jobName,
+      action: jobEventStatuts.executed,
+      data: { startDate, endDate, duration },
+    });
+
+    await exit();
+  } catch (e) {
+    await exit(e);
+  } finally {
+    await createJobEvent({ jobname: jobName, action: jobEventStatuts.ended });
+  }
 };

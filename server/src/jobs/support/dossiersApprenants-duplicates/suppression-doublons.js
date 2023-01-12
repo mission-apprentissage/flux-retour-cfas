@@ -1,8 +1,9 @@
-const { runScript } = require("../../scriptWrapper.js");
-const { asyncForEach } = require("../../../common/utils/asyncUtils.js");
-const logger = require("../../../common/logger.js");
+import { runScript } from "../../scriptWrapper.js";
+import { asyncForEach } from "../../../common/utils/asyncUtils.js";
+import logger from "../../../common/logger.js";
+import { dossiersApprenantsDb } from "../../../common/model/collections.js";
 
-runScript(async ({ db }) => {
+runScript(async () => {
   const idErpApprenantNotNullStage = {
     $match: {
       id_erp_apprenant: { $ne: null },
@@ -25,8 +26,7 @@ runScript(async ({ db }) => {
     $match: { count: { $gt: 1 } },
   };
 
-  const duplicatesGroups = await db
-    .collection("dossiersApprenants")
+  const duplicatesGroups = await dossiersApprenantsDb()
     .aggregate([idErpApprenantNotNullStage, groupByUnicityKeyStage, multipleDossiersForUnicityKeyMatchStage])
     .toArray();
 
@@ -45,7 +45,7 @@ runScript(async ({ db }) => {
     logger.info("Va supprimer", toDelete.length, "doublons avec info d'unicité", duplicateGroup._id);
     await asyncForEach(toDelete, async (dossierToDelete) => {
       logger.info("Supression du dossier apprenant avec _id", dossierToDelete._id.toString());
-      const result = await db.collection("dossiersApprenants").deleteOne({ _id: dossierToDelete._id });
+      const result = await dossiersApprenantsDb().deleteOne({ _id: dossierToDelete._id });
       deletionCount += result.deletedCount;
     });
   });

@@ -1,19 +1,18 @@
-const assert = require("assert").strict;
-const dossiersApprenants = require("../../../../src/common/components/dossiersApprenants");
-const { createRandomDossierApprenant } = require("../../../data/randomizedSample");
-const { historySequenceApprentiToAbandon } = require("../../../data/historySequenceSamples");
-const { DossierApprenantModel } = require("../../../../src/common/model");
+import { strict as assert } from "assert";
+import dossiersApprenants from "../../../../src/common/components/dossiersApprenants.js";
+import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
+import { historySequenceApprentiToAbandon } from "../../../data/historySequenceSamples.js";
+import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
 
-describe(__filename, () => {
+describe("Randomize Statuts test", () => {
   describe("createRandomDossierApprenant", () => {
     it("Vérifie l'existence d'un DossierApprenant randomisé", async () => {
-      const { getDossierApprenant, createDossierApprenant } = await dossiersApprenants();
+      const { getDossierApprenantLegacy, createDossierApprenantLegacy } = await dossiersApprenants();
 
       const randomDossierApprenantProps = createRandomDossierApprenant();
-      const result = await await createDossierApprenant(randomDossierApprenantProps);
+      const result = await createDossierApprenantLegacy(randomDossierApprenantProps);
 
-      // Checks creation
-      assert.equal(result.ine_apprenant, randomDossierApprenantProps.ine_apprenant);
+      // Checks creation on mandatory fields
       assert.equal(result.nom_apprenant, randomDossierApprenantProps.nom_apprenant.toUpperCase());
       assert.equal(result.prenom_apprenant, randomDossierApprenantProps.prenom_apprenant.toUpperCase());
       assert.equal(
@@ -23,17 +22,15 @@ describe(__filename, () => {
 
       assert.equal(result.email_contact, randomDossierApprenantProps.email_contact);
       assert.equal(result.formation_cfd, randomDossierApprenantProps.formation_cfd);
-      assert.equal(result.libelle_long_formation, randomDossierApprenantProps.libelle_long_formation);
       assert.equal(result.uai_etablissement, randomDossierApprenantProps.uai_etablissement);
       assert.equal(result.siret_etablissement, randomDossierApprenantProps.siret_etablissement);
       assert.equal(result.nom_etablissement, randomDossierApprenantProps.nom_etablissement);
       assert.equal(result.source, randomDossierApprenantProps.source);
       assert.equal(result.annee_formation, randomDossierApprenantProps.annee_formation);
-      assert.deepEqual(result.periode_formation, randomDossierApprenantProps.periode_formation);
       assert.equal(result.annee_scolaire, randomDossierApprenantProps.annee_scolaire);
 
       // Checks exists method
-      const found = await getDossierApprenant({
+      const found = await getDossierApprenantLegacy({
         id_erp_apprenant: result.id_erp_apprenant,
         uai_etablissement: result.uai_etablissement,
         annee_scolaire: result.annee_scolaire,
@@ -46,9 +43,8 @@ describe(__filename, () => {
         historique_statut_apprenant: historySequenceApprentiToAbandon,
       });
 
-      const toAdd = new DossierApprenantModel(randomStatut);
-      await toAdd.save();
-      const result = toAdd.toJSON();
+      const { insertedId } = await dossiersApprenantsDb().insertOne(randomStatut);
+      const result = await dossiersApprenantsDb().findOne({ _id: insertedId });
 
       // Checks creation
       assert.deepEqual(result.ine_apprenant, randomStatut.ine_apprenant);
@@ -70,7 +66,7 @@ describe(__filename, () => {
       assert.deepEqual(result.historique_statut_apprenant, randomStatut.historique_statut_apprenant);
 
       // Checks exists method
-      const found = await DossierApprenantModel.countDocuments({
+      const found = await dossiersApprenantsDb().countDocuments({
         id_erp_apprenant: result.id_erp_apprenant,
         uai_etablissement: result.uai_etablissement,
         annee_scolaire: result.annee_scolaire,

@@ -1,12 +1,12 @@
-const Joi = require("joi");
-const { BaseFactory } = require("./baseFactory");
-const { schema: anneeScolaireSchema } = require("../../common/domain/anneeScolaire");
-const { historiqueSchema: historiqueStatutsSchema } = require("../../common/domain/apprenant/statutApprenant");
-const { schema: uaiSchema } = require("../../common/domain/uai");
-const { schema: cfdSchema } = require("../../common/domain/cfd");
-const { schema: siretSchema } = require("../../common/domain/siret");
+import Joi from "joi";
+import { BaseFactory } from "./baseFactory.js";
+import { schema as anneeScolaireSchema } from "../../common/utils/validationsUtils/anneeScolaire.js";
+import { historiqueSchema as historiqueStatutsSchema } from "../../common/utils/validationsUtils/apprenant/statutApprenant.js";
+import { uaiSchema } from "../../common/utils/validationUtils.js";
+import { schema as cfdSchema } from "../../common/utils/validationsUtils/cfd.js";
+import { schema as siretSchema } from "../../common/utils/validationsUtils/siret.js";
 
-class DossierApprenant extends BaseFactory {
+export class DossierApprenant extends BaseFactory {
   /**
    * Create a DossierApprenant Entry from props
    * @param {*} props
@@ -17,7 +17,7 @@ class DossierApprenant extends BaseFactory {
       nom_apprenant: Joi.string().required(),
       prenom_apprenant: Joi.string().required(),
       date_de_naissance_apprenant: Joi.date().required(),
-      uai_etablissement: uaiSchema.required(),
+      uai_etablissement: uaiSchema().required(),
       nom_etablissement: Joi.string().required(),
       formation_cfd: cfdSchema.required(),
       annee_scolaire: anneeScolaireSchema.required(),
@@ -51,10 +51,13 @@ class DossierApprenant extends BaseFactory {
       ...props,
       nom_apprenant: props.nom_apprenant.toUpperCase().trim(),
       prenom_apprenant: props.prenom_apprenant.toUpperCase().trim(),
+      date_de_naissance_apprenant: new Date(props.date_de_naissance_apprenant),
+      contrat_date_debut: props.contrat_date_debut && new Date(props.contrat_date_debut),
+      contrat_date_fin: props.contrat_date_fin && new Date(props.contrat_date_fin),
+      contrat_date_rupture: props.contrat_date_rupture && new Date(props.contrat_date_rupture),
+      etablissement_reseaux: props.etablissement_reseaux || [],
       created_at: new Date(),
       updated_at: null,
     });
   }
 }
-
-module.exports = { DossierApprenant };

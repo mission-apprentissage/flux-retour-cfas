@@ -1,17 +1,16 @@
-const axios = require("axios");
-const { runScript } = require("../scriptWrapper");
-const logger = require("../../common/logger");
-const config = require("../../../config");
-const { JOB_NAMES } = require("../../common/constants/jobsConstants");
-const { REGIONS } = require("../../common/constants/territoiresConstants");
-const { asyncForEach } = require("../../common/utils/asyncUtils");
+import axios from "axios";
+import logger from "../../common/logger.js";
+import config from "../../config.js";
+import { JOB_NAMES } from "../../common/constants/jobsConstants.js";
+import { REGIONS } from "../../common/constants/territoiresConstants.js";
+import { asyncForEach } from "../../common/utils/asyncUtils.js";
 
-const ROUTES_TO_WARM_UP = ["/api/effectifs", "/api/effectifs/niveau-formation", "/api/effectifs/departement"];
+const ROUTES_TO_WARM_UP = ["/api/indicateurs", "/api/effectifs/niveau-formation", "/api/effectifs/departement"];
 
 /*
     This job will perform expensive requests made by the UI to warm up the cache
 */
-runScript(async () => {
+export const warmEffectifsCache = async () => {
   logger.info("START", JOB_NAMES.warmUpCache);
 
   const response = await axios.post(`${config.publicUrl}/api/login`, {
@@ -37,7 +36,7 @@ runScript(async () => {
   logger.info(`Warming up cache for national effectifs`);
   await performRequest(ROUTES_TO_WARM_UP[0], commonParams);
   await performRequest(ROUTES_TO_WARM_UP[1], commonParams);
-  await performRequest("/api/effectifs-national", commonParams);
+  await performRequest("/api/indicateurs-national", commonParams);
 
   await asyncForEach(ROUTES_TO_WARM_UP, async (route) => {
     // warm up cache with effectifs for every regions
@@ -50,4 +49,4 @@ runScript(async () => {
     });
   });
   logger.info("END", JOB_NAMES.warmUpCache);
-}, JOB_NAMES.warmUpCache);
+};

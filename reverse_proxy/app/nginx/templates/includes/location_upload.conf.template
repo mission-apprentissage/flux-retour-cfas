@@ -1,0 +1,5 @@
+location /api/v1/upload {
+    client_max_body_size    10M;
+    set $upstream http://server:5000;
+    include includes/proxy.conf;
+}

@@ -1,0 +1,14 @@
+- name: "Deploiement de la branche {{ git_revision }}"
+  shell: "sudo /opt/flux-retour-cfas/start-app.sh {{ git_revision }}"
+  register: output
+
+# - name: "Migrations de la base mongoDb"
+#   shell: "sudo /opt/flux-retour-cfas/run-migrations.sh"
+#   register: output
+
+- name: "Création des indexs de la base mongoDb"
+  shell: "sudo /opt/flux-retour-cfas/run-indexes-creation.sh"
+  register: output
+
+- debug:
+    var: output

@@ -1,0 +1,12 @@
+---
+
+- hosts: all
+  become: true
+  roles:
+    - setup
+
+- hosts: all
+  become: true
+  roles:
+    - deploy
+  tags: app

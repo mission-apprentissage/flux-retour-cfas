@@ -1,13 +1,12 @@
-const { EffectifsApprentis } = require("./effectifs/apprentis");
-const { EffectifsAbandons } = require("./effectifs/abandons");
-const { EffectifsInscritsSansContrats } = require("./effectifs/inscrits-sans-contrats");
-const { EffectifsRupturants } = require("./effectifs/rupturants");
-const cfas = require("./cfas")();
-const { mergeObjectsBy } = require("../utils/mergeObjectsBy");
-const { asyncForEach } = require("../utils/asyncUtils");
-const { EFFECTIF_INDICATOR_NAMES } = require("../constants/dossierApprenantConstants");
+import { EffectifsApprentis } from "./effectifs/apprentis.js";
+import { EffectifsAbandons } from "./effectifs/abandons.js";
+import { EffectifsInscritsSansContrats } from "./effectifs/inscrits-sans-contrats.js";
+import { EffectifsRupturants } from "./effectifs/rupturants.js";
+import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
+import { asyncForEach } from "../utils/asyncUtils.js";
+import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
 
-module.exports = () => {
+export default () => {
   const apprentis = new EffectifsApprentis();
   const abandons = new EffectifsAbandons();
   const inscritsSansContrats = new EffectifsInscritsSansContrats();
@@ -238,14 +237,10 @@ module.exports = () => {
     await asyncForEach(
       effectifsCountByCfa,
       async ({ _id: uai, nom_etablissement, siret_etablissement, ...effectifs }) => {
-        const cfa = await cfas.getFromUai(uai);
-
         result.push({
           uai_etablissement: uai,
           siret_etablissement,
           nom_etablissement,
-          nature: cfa?.nature,
-          natureValidityWarning: cfa?.nature_validity_warning,
           effectifs: {
             apprentis: effectifs.apprentis || 0,
             inscritsSansContrat: effectifs.inscritsSansContrat || 0,

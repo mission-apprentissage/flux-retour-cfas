@@ -1,7 +1,7 @@
-node_modules
-build
 Dockerfile
-Dockerfile.dev
 .dockerignore
-.eslintcache
-.eslintrc
+node_modules/
+npm-debug.log
+README.md
+.next/
+.git

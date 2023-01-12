@@ -1,6 +1,6 @@
-const { DossierApprenantModel } = require("../../model");
+import { dossiersApprenantsMigrationDb } from "../../model/collections.js";
 
-class Indicator {
+export class Indicator {
   /**
    * Constructeur avec définition d'une projection d'export par défaut
    */
@@ -40,7 +40,7 @@ class Indicator {
     const groupedBy = options.groupedBy ?? { _id: null, count: { $sum: 1 } };
     const aggregationPipeline = this.getAtDateAggregationPipeline(searchDate, filters, options);
     const groupedAggregationPipeline = [...aggregationPipeline, { $group: groupedBy }];
-    const result = await DossierApprenantModel.aggregate(groupedAggregationPipeline);
+    const result = await dossiersApprenantsMigrationDb().aggregate(groupedAggregationPipeline).toArray();
 
     if (!options.groupedBy) {
       return result.length === 1 ? result[0].count : 0;
@@ -57,7 +57,7 @@ class Indicator {
    */
   async getListAtDate(searchDate, filters = {}, options = {}) {
     const aggregationPipeline = await this.getAtDateAggregationPipeline(searchDate, filters, options);
-    const result = await DossierApprenantModel.aggregate(aggregationPipeline);
+    const result = await dossiersApprenantsMigrationDb().aggregate(aggregationPipeline).toArray();
     return result ?? [];
   }
 
@@ -130,5 +130,3 @@ class Indicator {
     }));
   }
 }
-
-module.exports = { Indicator };
