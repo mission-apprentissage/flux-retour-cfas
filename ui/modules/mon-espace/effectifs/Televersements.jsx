@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { Box, Button, Flex, Heading, HStack, Link, Spinner, Text, useToast, VStack } from "@chakra-ui/react";
 import { Alert, ArrowDropRightLine, Bin, InfoLine, ValidateIcon } from "../../../theme/components/icons";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
@@ -11,12 +11,14 @@ import { Input } from "./engine/formEngine/components/Input/Input";
 import uniq from "lodash.uniq";
 import EffectifsTable from "./engine/EffectifsTable";
 import { useRouter } from "next/router";
+import { effectifsStateAtom } from "./engine/atoms";
 
 const Televersements = () => {
   useFetchUploads();
   const { documents, uploads, onDocumentsChanged } = useDocuments();
   const [step, setStep] = useState("landing");
   const organisme = useRecoilValue(organismeAtom);
+  const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const [mapping, setMapping] = useState(null);
   const router = useRouter();
 
@@ -199,12 +201,20 @@ const Televersements = () => {
         mapping: keyToKeyMapping,
       }
     );
+
+    // eslint-disable-next-line no-undef
+    const newEffectifsState = new Map();
+    for (const { id, validation_errors } of canBeImportEffectifs) {
+      newEffectifsState.set(id, { validation_errors, requiredSifa: [] });
+    }
+    setCurrentEffectifsState(newEffectifsState);
+
     setPreEffictifs({
       canBeImport: canBeImportEffectifs,
       canNotBeImport: canNotBeImportEffectifs,
       duplicate: duplicatesEffectifs,
     });
-  }, [lines, organisme._id]);
+  }, [lines, organisme._id, setCurrentEffectifsState]);
 
   const onGoToImportStep = useCallback(async () => {
     setStep("import");

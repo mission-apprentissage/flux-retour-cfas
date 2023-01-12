@@ -404,7 +404,7 @@ const EffectifsTable = ({
                       return (
                         <Tooltip
                           label={
-                            <Box>
+                            <Box maxW="350px">
                               <Text fontWeight="bold">Champ(s) en erreur(s) :</Text>
                               <UnorderedList>
                                 {validation_errors.map(({ fieldName }, i) => (
@@ -417,6 +417,7 @@ const EffectifsTable = ({
                           background="bluefrance"
                           color="white"
                           padding="2w"
+                          maxW="350px"
                         >
                           <HStack color="redmarianne" w="full" pl={5}>
                             <Alert boxSize={4} />{" "}
