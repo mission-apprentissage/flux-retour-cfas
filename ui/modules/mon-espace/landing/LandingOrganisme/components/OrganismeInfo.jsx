@@ -6,6 +6,8 @@ import NatureOrganismeDeFormationWarning from "./NatureOrganismeDeFormationWarni
 import { formatSiretSplitted } from "../../../../../common/utils/stringUtils";
 import { organismeAtom } from "../../../../../hooks/organismeAtoms";
 import { useRecoilValue } from "recoil";
+import { SimpleFiltersProvider } from "../SimpleFiltersContext.js";
+import OrganismeIndicateursInfo from "./OrganismeIndicateursInfos.jsx";
 
 export const mapNatureOrganismeDeFormation = (nature) => {
   switch (nature) {
@@ -32,54 +34,60 @@ export default function OrganismeInfo() {
     );
   }
 
-  const { nom, uai, nature, natureValidityWarning, sirets } = organisme;
+  const { _id: organismeId, nom, uai, nature, natureValidityWarning, sirets } = organisme;
   const siretToDisplay = formatSiretSplitted(sirets[0]);
 
   return (
-    <Section
-      borderTop="solid 1px"
-      borderTopColor="grey.300"
-      borderBottom="solid 1px"
-      borderBottomColor="grey.300"
-      backgroundColor="galt"
-      paddingY="2w"
-      mt={4}
-    >
-      <Box mb={"85px"}>
-        <Heading color="grey.800" fontSize="1.6rem" as="h3" mb={2}>
-          {nom}
-        </Heading>
-        <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
-          <HStack>
-            <Text>UAI :</Text>
-            <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
-              {uai}
-            </Badge>
-          </HStack>
+    <>
+      <Section
+        borderTop="solid 1px"
+        borderTopColor="grey.300"
+        borderBottom="solid 1px"
+        borderBottomColor="grey.300"
+        backgroundColor="galt"
+        paddingY="2w"
+        mt={4}
+      >
+        <Box mb={"85px"}>
+          <Heading color="grey.800" fontSize="1.6rem" as="h3" mb={2}>
+            {nom}
+          </Heading>
+          <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
+            <HStack>
+              <Text>UAI :</Text>
+              <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
+                {uai}
+              </Badge>
+            </HStack>
 
-          <HStack>
-            <Text>SIRET :</Text>
-            <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
-              {siretToDisplay}
-            </Badge>
-          </HStack>
+            <HStack>
+              <Text>SIRET :</Text>
+              <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
+                {siretToDisplay}
+              </Badge>
+            </HStack>
 
-          <HStack>
-            <Text>Nature :</Text>
-            <Badge
-              fontSize="epsilon"
-              textTransform="none"
-              textColor="grey.800"
-              paddingX="1w"
-              paddingY="2px"
-              backgroundColor="#ECEAE3"
-            >
-              {mapNatureOrganismeDeFormation(nature)}
-            </Badge>
-            {natureValidityWarning && <NatureOrganismeDeFormationWarning />}
+            <HStack>
+              <Text>Nature :</Text>
+              <Badge
+                fontSize="epsilon"
+                textTransform="none"
+                textColor="grey.800"
+                paddingX="1w"
+                paddingY="2px"
+                backgroundColor="#ECEAE3"
+              >
+                {mapNatureOrganismeDeFormation(nature)}
+              </Badge>
+              {natureValidityWarning && <NatureOrganismeDeFormationWarning />}
+            </HStack>
           </HStack>
-        </HStack>
-      </Box>
-    </Section>
+        </Box>
+      </Section>
+
+      <SimpleFiltersProvider initialState={{ uai, organismeId }}>
+        <OrganismeIndicateursInfo />
+      </SimpleFiltersProvider>
+    </>
   );
 }
