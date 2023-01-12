@@ -683,7 +683,10 @@ export default ({ clamav }) => {
                   let cleanedUpErrors = [];
                   for (const currentError of validationErrorsOnFieldsToImport) {
                     const prevValue = get(found, currentError.fieldName);
-                    if (prevValue && !find(found.validation_errors, { fieldName: currentError.fieldName })) {
+                    if (
+                      (prevValue || prevValue === false) &&
+                      !find(found.validation_errors, { fieldName: currentError.fieldName })
+                    ) {
                       // we don't want errors on previously ok field
                       cleanedUpErrors.push({ ...currentError, willNotBeModify: true });
                     } else {

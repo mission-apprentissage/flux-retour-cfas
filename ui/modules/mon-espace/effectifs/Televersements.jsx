@@ -572,7 +572,7 @@ const Televersements = () => {
             {!!preEffictifs.duplicate.length && (
               <Box my={6}>
                 <Heading as="h4" flexGrow="1" fontSize="1rem" color="red.500" mb={5}>
-                  Doublons
+                  Doublons dans le fichier
                 </Heading>
                 <HStack color="red.500" w="full" pl={5}>
                   <Alert boxSize={4} />
@@ -599,7 +599,7 @@ const Televersements = () => {
                 </HStack>
                 <EffectifsTable
                   organismesEffectifs={preEffictifs.canBeImport}
-                  columns={["expander", "annee_scolaire", "cfd", "nom", "prenom", "separator", "state"]}
+                  columns={["expander", "annee_scolaire", "cfd", "nom", "prenom", "separator", "action", "state"]}
                   effectifsSnapshot
                 />
               </Box>
