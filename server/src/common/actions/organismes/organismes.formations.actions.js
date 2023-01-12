@@ -18,7 +18,7 @@ export const getFormationsTreeForOrganisme = async (uai) => {
   // let nbFormationsUpdatedForOrganisme = 0;
   let nbFormationsNotCreatedForOrganisme = 0;
 
-  if (catalogFormationsForOrganisme.length > 0) {
+  if (catalogFormationsForOrganisme?.length > 0) {
     await asyncForEach(catalogFormationsForOrganisme, async (currentFormation) => {
       let currentFormationId;
 
