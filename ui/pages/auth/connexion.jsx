@@ -12,6 +12,9 @@ import {
   Link,
   Text,
   Heading,
+  Checkbox,
+  UnorderedList,
+  ListItem,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import React from "react";
@@ -26,7 +29,7 @@ import useAuth from "../../hooks/useAuth";
 import useToken from "../../hooks/useToken";
 import { _post } from "../../common/httpClient";
 
-import { ShowPassword } from "../../theme/components/icons";
+import { AlertRounded, CheckLine, ShowPassword } from "../../theme/components/icons";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 
 const Login = (props) => {
@@ -54,7 +57,7 @@ const Login = (props) => {
       if (e.messages?.message === "Old connection method") {
         setStatus({ error: "Pour des raisons de sécurité, merci de vous créer un compte nominatif" });
       } else {
-        setStatus({ error: e.prettyMessage });
+        setStatus({ error: `Votre identifiant ou votre mot de passe est incorrect` });
       }
     }
   };
@@ -62,7 +65,7 @@ const Login = (props) => {
   return (
     <Flex {...props}>
       <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
-        J&apos;ai déjà un compte
+        Connectez-vous
       </Heading>
       <Formik
         initialValues={{ email: "", password: "" }}
@@ -80,8 +83,8 @@ const Login = (props) => {
                 <Field name="email">
                   {({ field, meta }) => (
                     <FormControl isRequired isInvalid={meta.error && meta.touched} mb={5}>
-                      <FormLabel>Identifiant</FormLabel>
-                      <Input {...field} id={field.name} placeholder="Exemple : prenom.nom@mail.com" />
+                      <FormLabel>Email (votre identifiant)</FormLabel>
+                      <Input {...field} id={field.name} placeholder="prenom.nom@courriel.fr" />
                       <FormErrorMessage>{meta.error}</FormErrorMessage>
                     </FormControl>
                   )}
@@ -108,9 +111,13 @@ const Login = (props) => {
                   }}
                 </Field>
               </Box>
+              <Flex>
+                <Checkbox icon={<CheckLine />} size="lg" borderRadius="20px" />
+                <Text ml="1w">Se souvenir de moi</Text>
+              </Flex>
               <HStack spacing="4w" mt={8}>
                 <Button variant="primary" type="submit">
-                  Se connecter
+                  Connexion
                 </Button>
                 <Link href="/auth/mot-de-passe-oublie" as={NavLink} color="grey.600">
                   Mot de passe oublié
@@ -118,20 +125,28 @@ const Login = (props) => {
               </HStack>
               {status.error && (
                 <Text color="error" mt={8}>
-                  {status.error}
+                  <AlertRounded mb="0.5" /> {status.error}
                 </Text>
               )}
             </Form>
           );
         }}
       </Formik>
-      <Box mt={12}>
-        <Text fontSize="1rem">
-          <Link href="/auth/inscription" as={NavLink} color="bluefrance" ml={3}>
-            &gt; Je n&apos;ai pas encore de compte
+      <HStack ml="4w" mt="4w">
+        <Box p="2" h="5vh" borderLeft="4px solid #6A6AF4"></Box>
+        <Box>
+          <Text> Vous n’avez pas encore de compte ?</Text>
+          <Link
+            borderBottom="1px solid"
+            _hover={{ borderBottom: "1px solid" }}
+            href="/auth/inscription"
+            as={NavLink}
+            color="bluefrance"
+          >
+            Créer un compte
           </Link>
-        </Text>
-      </Box>
+        </Box>
+      </HStack>
     </Flex>
   );
 };
@@ -151,9 +166,27 @@ export default function ConnexionPage() {
         <title>Connexion</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Flex w="full" maxW="xl" mt={4}>
+      <HStack spacing="4w" w="full" maxW="xl" mt={4}>
         <Login {...styleProps} flexDirection="column" border="1px solid" borderColor="openbluefrance" />
-      </Flex>
+        <Box alignSelf="start">
+          <Text fontWeight={700} fontSize={22}>
+            Votre compte dédié
+          </Text>
+          <Text mt="2w" fontWeight={700}>
+            Le service tableau de bord de l&apos;apprentissage est porté par la Mission interministérielle pour
+            l’apprentissage.
+          </Text>
+          <Text mt="2w">Il permet de :</Text>
+          <UnorderedList ml="4w" mt="2w">
+            <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
+            <ListItem>
+              Accompagner les jeunes en situation de décrochage (et donc d&apos;influencer leur.s parcours scolaires et
+              professionnels)
+            </ListItem>
+            <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
+          </UnorderedList>
+        </Box>
+      </HStack>
     </Page>
   );
 }

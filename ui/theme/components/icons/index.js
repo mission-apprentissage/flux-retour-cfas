@@ -82,3 +82,4 @@ export * from "./UserFill";
 export * from "./ParentGroupIcon";
 export * from "./ClockIcon";
 export * from "./CrossError";
+export * from "./AlertRounded";
