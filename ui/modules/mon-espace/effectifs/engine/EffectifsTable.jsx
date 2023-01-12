@@ -330,6 +330,42 @@ const EffectifsTable = ({
                 },
               }
             : {}),
+          ...(columns.includes("action")
+            ? {
+                source: {
+                  size: 90,
+                  header: () => {
+                    return (
+                      <Box textAlign="left">
+                        <Tooltip
+                          label={<Text>Action à faire</Text>}
+                          aria-label="A tooltip"
+                          background="bluefrance"
+                          color="white"
+                          padding="2w"
+                        >
+                          <Box>
+                            Action
+                            <Text as="span" ml={1}>
+                              <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
+                            </Text>
+                          </Box>
+                        </Tooltip>
+                      </Box>
+                    );
+                  },
+                  cell: ({ row }) => {
+                    const { toUpdate } = organismesEffectifs[row.id];
+
+                    return (
+                      <HStack textAlign="left">
+                        <Text fontSize="1rem">{toUpdate ? "Mise à jour" : "Nouveau"}</Text>
+                      </HStack>
+                    );
+                  },
+                },
+              }
+            : {}),
           ...(columns.includes("state")
             ? {
                 state: {

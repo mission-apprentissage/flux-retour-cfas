@@ -109,6 +109,24 @@ export const hydrateEffectif = async (effectifData, options) => {
   }
   // TODO other repetition_voie
 
+  const telephoneConverter = (telephone, tryStartByZero = false) => {
+    let phone = telephone.replaceAll("-", "").replaceAll(".", "").replaceAll(" ", "");
+    if (phone.length === 10 && phone[0] === "0") {
+      return `+33${phone.substr(1, 9)}`;
+    }
+    if (!tryStartByZero) phone = telephoneConverter(`0${phone}`, true);
+    return phone;
+  };
+  if (effectifData.apprenant.telephone) {
+    convertedEffectif.apprenant.telephone = telephoneConverter(effectifData.apprenant.telephone);
+    console.log(convertedEffectif.apprenant.telephone);
+  }
+  if (effectifData.apprenant.representant_legal?.telephone) {
+    convertedEffectif.apprenant.representant_legal.telephone = telephoneConverter(
+      effectifData.apprenant.representant_legal.telephone
+    );
+  }
+
   const effectif = buildEffectif(
     {
       organisme_id,

@@ -4,10 +4,10 @@ export const preDefinedModels = [
     mapping_column: {
       annee_scolaire: "annee_scolaire",
       CFD: "CFD",
+      RNCP: "RNCP",
       nom: "nom",
       prenom: "prenom",
       identifiant_unique_apprenant: "identifiant_unique_apprenant",
-      RNCP: "RNCP",
       annee_formation: "annee_formation",
       INE: "INE",
       sexe: "sexe",

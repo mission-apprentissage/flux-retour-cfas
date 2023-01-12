@@ -29,10 +29,10 @@ import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrga
 const mappingModel = {
   annee_scolaire: "annee_scolaire",
   CFD: "formation.cfd",
+  RNCP: "formation.rncp",
   nom: "apprenant.nom",
   prenom: "apprenant.prenom",
   identifiant_unique_apprenant: "identifiant_unique_apprenant",
-  RNCP: "formation.rncp",
   annee_formation: "formation.annee",
   INE: "apprenant.ine",
   sexe: "apprenant.sexe",
@@ -321,6 +321,10 @@ export default ({ clamav }) => {
           label: "Code Formation Diplôme",
           value: "CFD",
         },
+        RNCP: {
+          label: "Code RNCP de la formation",
+          value: "RNCP",
+        },
         nom: {
           label: "Nom de l'apprenant",
           value: "nom",
@@ -334,10 +338,6 @@ export default ({ clamav }) => {
         identifiant_unique_apprenant: {
           label: "Identifiant unique de l'apprenant(e)",
           value: "identifiant_unique_apprenant",
-        },
-        RNCP: {
-          label: "Code RNCP de la formation",
-          value: "RNCP",
         },
         annee_formation: {
           label: "L'année de formation",
@@ -611,7 +611,8 @@ export default ({ clamav }) => {
 
       const { rawFileJson, unconfirmedDocument: document } = await getUnconfirmedDocumentContent(organisme_id);
 
-      const { annee_scolaire, ...mapping } = userMapping;
+      // eslint-disable-next-line no-unused-vars
+      const { annee_scolaire, typeCodeDiplome, ...mapping } = userMapping;
 
       await updateDocument(organisme_id, {
         nom_fichier: document.nom_fichier,
@@ -636,7 +637,11 @@ export default ({ clamav }) => {
       const canBeImportEffectifs = [];
       const canBeImportEffectifsIds = [];
       const duplicatesEffectifs = [];
-      for (const [index, data] of convertedData.entries()) {
+      for (let [index, data] of convertedData.entries()) {
+        if (typeCodeDiplome === "RNCP") {
+          // TODO
+        }
+
         const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
           organisme_id,
           source: document.document_id.toString(),
@@ -683,7 +688,10 @@ export default ({ clamav }) => {
                   let cleanedUpErrors = [];
                   for (const currentError of validationErrorsOnFieldsToImport) {
                     const prevValue = get(found, currentError.fieldName);
-                    if (prevValue && !find(found.validation_errors, { fieldName: currentError.fieldName })) {
+                    if (
+                      (prevValue || prevValue === false) &&
+                      !find(found.validation_errors, { fieldName: currentError.fieldName })
+                    ) {
                       // we don't want errors on previously ok field
                       cleanedUpErrors.push({ ...currentError, willNotBeModify: true });
                     } else {
@@ -716,8 +724,9 @@ export default ({ clamav }) => {
             }
           }
 
-          // TODO look if CFD // RNCP EXIST
-          // let errorOnContratRequired = false;
+          // TODO look if CFD // RNCP EXIST IN ORGANISME
+
+          // TODO let errorOnContratRequired = false;
           for (const validation_error of effectifToSave.validation_errors) {
             const { fieldName } = validation_error;
             if (fieldName === "formation.rncp" || fieldName === "formation.annee") {

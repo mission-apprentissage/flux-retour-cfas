@@ -14,6 +14,7 @@ export const formationSchema = {
       },
     ],
     min: 1,
+    precision: 0,
   },
   "formation.date_debut_formation": {
     fieldType: "date",
