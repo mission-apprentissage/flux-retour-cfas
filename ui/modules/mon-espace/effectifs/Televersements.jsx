@@ -141,7 +141,6 @@ const Televersements = () => {
     // TODO REFACTOR THIS BELOW :vomit:
     if (mappingForThisType && mappingForThisType.mapping_column) {
       let { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
-      let indexAnneSco = 0;
       userMapping[""] = typeCodeDiplome === "CFD" ? "RNCP" : "CFD";
       let remap = Object.entries(userMapping).reduce(
         (acc, [key, value]) => (key !== "annee_scolaire" ? { ...acc, [value]: key } : acc),
@@ -158,9 +157,8 @@ const Televersements = () => {
         nom: "nom",
         prenom: "prenom",
       };
-      initLines = Object.entries(remap).map(([key, value], i) => {
+      initLines = Object.entries(remap).map(([key, value]) => {
         if (key === "annee_scolaire") {
-          indexAnneSco = i;
           return {
             in: { value: "", hasError: false },
             out: { value: key, hasError: false },
@@ -173,8 +171,8 @@ const Televersements = () => {
       });
 
       // TODO check if exist in current mapping
-      let reqKeys = Object.values(userMapping);
-      reqKeys.splice(indexAnneSco, 1);
+
+      let reqKeys = [typeCodeDiplome, "nom", "prenom"];
 
       setTypeCodeDiplome(typeCodeDiplome);
       setRequireKeysSettled(reqKeys);
@@ -187,6 +185,7 @@ const Televersements = () => {
           error = true;
         }
       }
+
       if (error) {
         // Model does not match mapping on required field so gracefully reset
         toast({
