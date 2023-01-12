@@ -115,7 +115,7 @@ describe("Maintenances Route", () => {
 
       const updateResponse = await httpClient.put(
         `${ADMIN_MAINTENANCE_ENDPOINT}/${_id}`,
-        { ...SAMPLE_VALID_MAINTENANCE_MESSAGE, msg: "Message d'alerte MAJ" },
+        { ...SAMPLE_VALID_MAINTENANCE_MESSAGE, msg: "Message d'alerte MAJ", enabled: true },
         {
           headers: { cookie },
         }
@@ -125,6 +125,7 @@ describe("Maintenances Route", () => {
         ...SAMPLE_VALID_MAINTENANCE_MESSAGE,
         msg: "Message d'alerte MAJ",
         name: "admin@test.beta.gouv.fr",
+        enabled: true,
         _id,
         time: createResponse.data.time,
       });

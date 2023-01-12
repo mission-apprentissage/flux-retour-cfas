@@ -40,14 +40,14 @@ export default () => {
   router.put(
     "/:id",
     tryCatch(async ({ body, params }, res) => {
-      const { msg, type, context } = body;
+      const { msg, type, context, enabled } = body;
       const itemId = params.id;
 
       if (!msg || !type || !context) {
         return res.status(400).send({ error: "Erreur avec le message ou avec le nom ou le type" });
       }
 
-      const result = await updateMaintenanceMessage(itemId, { msg, type, context });
+      const result = await updateMaintenanceMessage(itemId, { msg, type, context, enabled });
 
       return res.json(result);
     })
