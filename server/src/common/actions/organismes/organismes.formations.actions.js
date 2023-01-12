@@ -40,12 +40,20 @@ export const getFormationsTreeForOrganisme = async (uai) => {
       // formation_id si trouvé dans le tdb
       // année & durée trouvé dans le catalog & formatted
       // ainsi que la liste des organismes construite depuis l'API Catalogue
-      formationsForOrganismeArray.push({
-        ...(currentFormationId ? { formation_id: currentFormationId } : {}),
-        annee_formation: parseInt(currentFormation.annee) || -1,
-        duree_formation_theorique: parseInt(currentFormation.duree) || -1,
-        organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
-      });
+      // unicité sur la formation_id
+
+      const formationAlreadyInOrganismeArray = formationsForOrganismeArray.some(
+        (item) => item.formation_id.toString() === currentFormationId.toString()
+      );
+
+      if (currentFormationId && !formationAlreadyInOrganismeArray) {
+        formationsForOrganismeArray.push({
+          ...(currentFormationId ? { formation_id: currentFormationId } : {}),
+          annee_formation: parseInt(currentFormation.annee) || -1,
+          duree_formation_theorique: parseInt(currentFormation.duree) || -1,
+          organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
+        });
+      }
     });
   }
 
