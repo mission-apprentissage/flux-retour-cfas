@@ -11,6 +11,7 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "../engine/engine.organisme
 import { createPermission, hasPermission } from "../permissions.actions.js";
 import { findRolePermissionById } from "../roles.actions.js";
 import { getUser } from "../users.actions.js";
+import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
 
 /**
  * Méthode de création d'un organisme qui applique en entrée des filtres / rejection
@@ -83,6 +84,9 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
     }
   }
 
+  // Construction de l'arbre des formations de l'organisme
+  const { formations } = await getFormationsTreeForOrganisme(uai);
+
   // TODO Call Api Entreprise to get address
 
   const { insertedId } = await organismesDb().insertOne(
@@ -92,6 +96,7 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
       ...defaultValuesOrganisme(),
       sirets,
       metiers,
+      formations,
       ...data,
     })
   );
