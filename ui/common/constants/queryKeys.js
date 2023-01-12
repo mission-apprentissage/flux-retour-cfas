@@ -1,9 +1,12 @@
+/**
+ * TODO on remove ? on keep ?
+ */
 export const QUERY_KEYS = {
   SEARCH_RESEAUX_CFA: "search-reseaux-cfas",
   SEARCH_USERS: "search-users",
   SEARCH_CFAS: "search-cfas",
   SEARCH_FORMATIONS: "search-formations",
-  EFFECTIFS: "effectifs",
+  INDICATEURS: "indicateurs",
   CFAS: "cfas",
   DEPARTEMENT: "departement",
   REGIONS: "regions",
@@ -12,7 +15,7 @@ export const QUERY_KEYS = {
   GET_USER: "user-by-id",
   TOTAL_ORGANISMES: "total-organismes",
   FORMATION: "formation",
-  EFFECTIFS_NATIONAL: "effectifs-national",
+  INDICATEURS_NATIONAL: "indicateurs-national",
   EFFECTIF_PAR: {
     CFA: "effectifs-par-cfa",
     ANNEE_FORMATION: "effectifs-par-annee-formation",

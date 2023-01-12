@@ -22,8 +22,8 @@ import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
-import effectifsNationalRouter from "./routes/specific.routes/old/effectifs-national.route.js";
-import effectifs from "./routes/specific.routes/old/effectifs.route.js";
+import indicateursNationalRouter from "./routes/specific.routes/old/indicateurs-national.route.js";
+import indicateursRouter from "./routes/specific.routes/old/indicateurs.route.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -106,13 +106,13 @@ export default async (services) => {
   app.use("/api/formations", formationRouter(services)); // FRONT
   app.use("/api/cfas", cfasRouter(services)); // FRONT
   app.use("/api/referentiel", referentielRouter(services)); // FRONT
-  app.use("/api/effectifs-national", effectifsNationalRouter(services)); // FRONT
+  app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
   app.use(
     // FRONT
-    ["/api/effectifs", "/api/v1/effectifs"],
+    ["/api/indicateurs"],
     checkJwtToken,
     permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    effectifs(services)
+    indicateursRouter(services)
   );
   app.use(
     // FRONT

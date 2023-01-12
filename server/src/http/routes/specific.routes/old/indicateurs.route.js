@@ -7,7 +7,7 @@ import { getCacheKeyForRoute } from "../../../../common/utils/cacheUtils.js";
 import { getNbDistinctOrganismesByUai } from "../../../../common/actions/dossiersApprenants.actions.js";
 
 const commonEffectifsFilters = {
-  organisme_id: Joi.string(),
+  organisme_id: Joi.string().required(),
   etablissement_num_region: Joi.string().allow(null, ""),
   etablissement_num_departement: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().allow(null, ""),
@@ -50,7 +50,12 @@ export default ({ effectifs, cache }) => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
-      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
+      const {
+        date: dateFromParams,
+        // eslint-disable-next-line no-unused-vars
+        organisme_id,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
@@ -91,7 +96,11 @@ export default ({ effectifs, cache }) => {
   router.get(
     "/niveau-formation",
     tryCatch(async (req, res) => {
-      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
+      const {
+        date: dateFromParams, // eslint-disable-next-line no-unused-vars
+        organisme_id,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
@@ -125,7 +134,11 @@ export default ({ effectifs, cache }) => {
   router.get(
     "/formation",
     tryCatch(async (req, res) => {
-      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
+      const {
+        date: dateFromParams, // eslint-disable-next-line no-unused-vars
+        organisme_id,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
         niveau_formation: Joi.string().allow(null, ""),
         ...commonEffectifsFilters,
@@ -160,7 +173,11 @@ export default ({ effectifs, cache }) => {
   router.get(
     "/annee-formation",
     tryCatch(async (req, res) => {
-      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
+      const {
+        date: dateFromParams, // eslint-disable-next-line no-unused-vars
+        organisme_id,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
         niveau_formation: Joi.string().allow(null, ""),
         ...commonEffectifsFilters,
@@ -196,7 +213,11 @@ export default ({ effectifs, cache }) => {
   router.get(
     "/cfa",
     tryCatch(async (req, res) => {
-      const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
+      const {
+        date: dateFromQuery, // eslint-disable-next-line no-unused-vars
+        organisme_id,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
@@ -231,7 +252,11 @@ export default ({ effectifs, cache }) => {
   router.get(
     "/siret",
     tryCatch(async (req, res) => {
-      const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
+      const {
+        date: dateFromQuery, // eslint-disable-next-line no-unused-vars
+        organisme_id,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
@@ -266,7 +291,11 @@ export default ({ effectifs, cache }) => {
   router.get(
     "/departement",
     tryCatch(async (req, res) => {
-      const { date: dateFromQuery, ...filtersFromBody } = await Joi.object({
+      const {
+        date: dateFromQuery, // eslint-disable-next-line no-unused-vars
+        organisme_id,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
         ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });

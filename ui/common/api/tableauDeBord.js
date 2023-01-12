@@ -1,55 +1,60 @@
 import qs from "query-string";
 
 import { _delete, _get, _post, _put } from "../httpClient";
-import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 
 /* Effectifs */
 
-export const fetchEffectifs = (filters) => {
-  const queryParameters = qs.stringify(mapFiltersToApiFormat(filters));
-  const url = `/api/effectifs?${queryParameters}`;
+export const fetchIndicateurs = (filters) => {
+  const queryParameters = qs.stringify(filters);
+  const url = `/api/indicateurs?${queryParameters}`;
   return _get(url);
 };
 
+// TODO Rename & Refacto
 export const fetchEffectifsParCfa = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs/cfa?${queryParameters}`;
   return _get(url);
 };
 
+// TODO Rename & Refacto
 export const fetchEffectifsParSiret = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs/siret?${queryParameters}`;
   return _get(url);
 };
 
+// TODO Rename & Refacto
 export const fetchEffectifsParFormation = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs/formation?${queryParameters}`;
   return _get(url);
 };
 
+// TODO Rename & Refacto
 export const fetchEffectifsParNiveauFormation = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs/niveau-formation?${queryParameters}`;
   return _get(url);
 };
 
+// TODO Rename & Refacto
 export const fetchEffectifsParAnneeFormation = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs/annee-formation?${queryParameters}`;
   return _get(url);
 };
 
+// TODO Rename & Refacto
 export const fetchEffectifsParDepartement = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs/departement?${queryParameters}`;
   return _get(url);
 };
 
-export const fetchEffectifsNational = (filters) => {
+export const fetchIndicateursNational = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs-national?${queryParameters}`;
+  const url = `/api/indicateurs-national?${queryParameters}`;
   return _get(url);
 };
 
