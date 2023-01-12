@@ -1,3 +1,10 @@
+# [3.0.0-beta.15](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.14...v3.0.0-beta.15) (2023-01-12)
+
+
+### Bug Fixes
+
+* **ui:** svg props ([#2380](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2380)) ([69eb5c0](https://github.com/mission-apprentissage/flux-retour-cfas/commit/69eb5c0e75dac0fba72824930e0cef2374aaab72))
+
 # [3.0.0-beta.14](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.13...v3.0.0-beta.14) (2023-01-12)
 
 
