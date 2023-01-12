@@ -1,13 +1,12 @@
 import React from "react";
-import { Box, Button, Heading, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import { useEspace } from "../../../hooks/useEspace";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
-import { AvatarPlus } from "../../../theme/components/icons";
-// import { InviteModal } from "./InviteModal";
+import { ArrowRightLine } from "../../../theme/components/icons";
+import OrganismeContributors from "./OrganismeContributors";
 
 const ParametresOrganisme = ({ organisme }) => {
   const { isMonOrganismePages, isOrganismePages } = useEspace();
-  const inviteModal = useDisclosure();
   return (
     <>
       <Heading textStyle="h2" color="grey.800" mt={5}>
@@ -17,18 +16,18 @@ const ParametresOrganisme = ({ organisme }) => {
       <Box mt={9}>
         {hasContextAccessTo(organisme, "organisme/page_parametres/gestion_acces") && (
           <>
-            <Button size="md" onClick={inviteModal.onOpen} variant="secondary">
-              <AvatarPlus />
-              <Text as="span" ml={2}>
-                Partages organisme
-              </Text>
-            </Button>
-            {/* <InviteModal
-            title="Partage de l'organisme"
-            size="md"
-            isOpen={inviteModal.isOpen}
-            onClose={inviteModal.onClose}
-          /> */}
+            <Heading as="h2" fontSize="1.7rem">
+              <Flex>
+                <Text as={"span"}>
+                  <ArrowRightLine boxSize={26} />
+                </Text>
+                <Text as={"span"} ml={4}>
+                  Partage de l'organisme
+                </Text>
+              </Flex>
+            </Heading>
+
+            <OrganismeContributors size="md" />
           </>
         )}
       </Box>

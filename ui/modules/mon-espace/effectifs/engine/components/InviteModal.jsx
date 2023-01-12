@@ -22,12 +22,13 @@ import { CloseIcon } from "@chakra-ui/icons";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRecoilValue } from "recoil";
-import { ArrowRightLine, Close, Question } from "../../../theme/components/icons";
+import NavLink from "next/link";
 import { useQueries, useQueryClient, useMutation } from "react-query";
+
+import { ArrowRightLine, Close, Question } from "../../../theme/components/icons";
 import { _get, _post, _put, _delete } from "../../../common/httpClient";
 import { dossierAtom } from "../atoms";
-import { Table } from "../../../components/Table/Table";
-import NavLink from "next/link";
+import Table from "../../../components/Table/Table";
 
 function useDossiersAcces() {
   const dossier = useRecoilValue(dossierAtom);
@@ -35,18 +36,20 @@ function useDossiersAcces() {
   const [
     { data: dossierContributors, isLoading: isLoadingDossiers, isFetching: isFetchingDossiers },
     { data: roles, isLoading: isLoadingRoles, isFetching: isFetchingRoles },
-  ] = useQueries([
-    {
-      queryKey: ["dossierContributors", 1],
-      queryFn: () => _get(`/api/v1/dossier/contributors?dossierId=${dossier._id}`),
-      refetchOnWindowFocus: false,
-    },
-    {
-      queryKey: ["dossierRoles", 2],
-      queryFn: () => _get(`/api/v1/dossier/roles_list?dossierId=${dossier._id}`),
-      refetchOnWindowFocus: false,
-    },
-  ]);
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ["dossierContributors", 1],
+        queryFn: () => _get(`/api/v1/dossier/contributors?dossierId=${dossier._id}`),
+        refetchOnWindowFocus: false,
+      },
+      {
+        queryKey: ["dossierRoles", 2],
+        queryFn: () => _get(`/api/v1/dossier/roles_list?dossierId=${dossier._id}`),
+        refetchOnWindowFocus: false,
+      },
+    ],
+  });
 
   return {
     dossierContributors,

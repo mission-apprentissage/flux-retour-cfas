@@ -9,9 +9,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Box, Button, Divider, HStack, Text } from "@chakra-ui/react";
-
+import { Box, Button, Divider, Flex, HStack, Text } from "@chakra-ui/react";
 import { rankItem } from "@tanstack/match-sorter-utils";
+
 import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
@@ -40,7 +40,7 @@ export default function Table({
   const data = useMemo(
     () => defaultData,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [defaultData]
   );
 
   const [globalFilter, setGlobalFilter] = useState(searchValue);
@@ -77,7 +77,7 @@ export default function Table({
   });
 
   return (
-    <>
+    <Flex flexDirection={"column"} minWidth="100% ">
       <Box>
         <Box as="table" flex={1} fontSize="delta" w="100%" {...props}>
           <Box as="thead">
@@ -222,6 +222,6 @@ export default function Table({
           </HStack>
         </>
       )}
-    </>
+    </Flex>
   );
 }
