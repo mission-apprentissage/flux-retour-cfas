@@ -1,3 +1,73 @@
+# [3.0.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v2.60.0...v3.0.0) (2023-01-12)
+
+
+### Bug Fixes
+
+* ajout champ manquant siret dans les données de test ([#2338](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2338)) ([62ea14d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/62ea14d0b63f3a1ddea7b390a1c20e4623106f09))
+* branch dans le wortkflow cron-recette.yml ([#2332](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2332)) ([144232f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/144232fb8d3fcdbcdea610de9a83857c8c855a18))
+* **data:** supprime données inutiles modele dossiersApprenants 2 ([9067007](https://github.com/mission-apprentissage/flux-retour-cfas/commit/90670078bf5659a2e7a64fa0328236d9e641167c))
+* fix 2 typos in cgu and footer ([#2368](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2368)) ([548eb3a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/548eb3a1e9c0cc4ef93187b56b89a331463fb5a0))
+* fix l'ajout de réseaux aux dossiers apprenants depuis les cfas ([e3e8679](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e3e86792c91b449cd2e4909c5f8757da3c4f65dd))
+* fix le modele cfas ([c65864f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c65864f744cca6ca6ec656af8cc0c111cf828cb4))
+* fix nginx error "Failed to fully parse request body due to large argument count" ([#2365](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2365)) ([9d1b1f6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9d1b1f64a07a2d12477024b7ae3282f40a0c5600))
+* **infra:** encrypt sh ([91ed1ac](https://github.com/mission-apprentissage/flux-retour-cfas/commit/91ed1ace2e8e8e2d7fb3dcce5185b49a8d897b90))
+* logger default export ([0321fcd](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0321fcdbf500386e511466d695a2dc2e809b65a6))
+* merge & upgrade to ESM post mongoValidation ([fe3677a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fe3677ad73fdf72bba7ece1c0296a2ea7ce6c7d1))
+* modele effectifs apprennts ([25b66d9](https://github.com/mission-apprentissage/flux-retour-cfas/commit/25b66d9f0e34fe8e04ccba85dfe417ac9093e372))
+* **server:** axios format prettier ([9ad4d01](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9ad4d012be2b509b819f1564b3769f45bcd11610))
+* **server:** create createUserTokenSimple for user token from cerfa ([4e04c7a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/4e04c7a7cb5871c095a8ff362c7e94ebdeefb26e))
+* **server:** dateConverter toIsoString in hydrateEffectifs ([#2369](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2369)) ([aa7b87f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/aa7b87f0be868bd96f0b0d53571760b3c745c0c3))
+* **server:** fix exporterUtils ([fddacae](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fddacae80ad8285fa9b4e86a9582288354a0f1e8))
+* **server:** fix le job seedReferentiel ([fc64513](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fc64513f50fd8d5e6905ca6dc5d91b5cdef501d2))
+* **server:** fix le schema de validation du modele dossiersApprenants et supprime champs inutiles (migration) ([0b64d2c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0b64d2c99da7909dfb0c70bc6ca49e32269ef11e))
+* **server:** migate-mongo using dotEnv ([0603eaa](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0603eaa6eb69b3c9a0d26693f0000f11a8cc34c9))
+* **server:** migate-mongo using dotEnv ([#2247](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2247)) ([177da9b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/177da9bf4afe0f4e0c957f1d8e2baa83c6ef95f1))
+* **server:** missing js extensions in migrations ([5777f6b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5777f6bdf36ad2e2b519c4cae1516c387b775070))
+* **server:** objectId kind of ref ([6581283](https://github.com/mission-apprentissage/flux-retour-cfas/commit/658128335e3ec9552d0ae6c41838abb15d06569e))
+* **server:** remove duplicate dossiers-apprenant.route.js + fixes linter ([#2339](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2339)) ([c6dd2e4](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c6dd2e4452fb7e41ecc66493ddd3d746fdb20d3f))
+* **server:** unit test replace differenceInHours by differenceInCalendarDays ([b4c6a40](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b4c6a405c437599f08e3a5377ae4d7a0fdf47df0))
+* temporary fix the CI by fixing or skipping broken tests ([#2342](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2342)) ([16ee7ca](https://github.com/mission-apprentissage/flux-retour-cfas/commit/16ee7ca26fc757dccf52909e25caf2d3500d9857))
+* **ui:** activation maintenance ([2afc2b8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/2afc2b8e2e7c2750bf6b2245a061507a319cfd93))
+* **ui:** ajout de la balise Link ([0dd6a6e](https://github.com/mission-apprentissage/flux-retour-cfas/commit/0dd6a6e690ef31ecd57832b36568ea9e984ab218))
+* **ui:** correction footer ([8ad166d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8ad166d33d5b77712162e46f29280c493c15b6b1))
+* **ui:** corrige lien vers la page question réponses ([#2242](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2242)) ([3f8d30f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3f8d30f834286d56b0b3e39989c4254b3329f545))
+* **ui:** redirection conflict when maintenance page is active ([23c7a34](https://github.com/mission-apprentissage/flux-retour-cfas/commit/23c7a34e47b5c61bb1f10cd59124757626e560fd))
+* **ui:** svg props ([#2380](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2380)) ([69eb5c0](https://github.com/mission-apprentissage/flux-retour-cfas/commit/69eb5c0e75dac0fba72824930e0cef2374aaab72))
+
+
+* BREAKING CHANGE: nouvelle version 2023 (#2336). ([fd13c92](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fd13c9214c241af6ae966813a84beeaf5862f311)), closes [#2336](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2336)
+
+
+### Features
+
+* add base mailer ([62209b6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/62209b6c8b50176e4a2360776fd571e24896936c))
+* ajout code coverage coté server ([#2308](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2308)) ([142c899](https://github.com/mission-apprentissage/flux-retour-cfas/commit/142c8993d3bdaea7ef48b76a01395866deafad9e))
+* ajout d'un cron job pour import dossiers apprenants sur platforme recette ([#2307](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2307)) ([c4e3b5c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c4e3b5c95b830f9fe487e3cdffeeb12b84dbc0e7))
+* ajout page /en-maintenance  ([#2337](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2337)) ([44fc664](https://github.com/mission-apprentissage/flux-retour-cfas/commit/44fc6647798fcd0b7f2a239e21a6477bb5c6d351))
+* **data:** ajoute un mapping à partir d'un fichier JSON pour la fiabilisation ([20e902f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/20e902f1fddd1e4e634fb4f1f101822194b871e6))
+* **data:** fiabilisation des couples uai-siret ([a420499](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a420499572015eadf395f3118542990ca14f55b8))
+* maj du script seed-reseaux-new pour importer reseau aftral et CR Normandie ([#2306](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2306)) ([8cfeccb](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8cfeccbb7602883f5062af67821361a72b3c939c))
+* remove login-cfa & redirect to reinscription page ([#2340](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2340)) ([b605db8](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b605db82569c222e8b853376404e891b91ecd796))
+* **server:** add cli job for activate/desactivate users apiSeeders ([#2364](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2364)) ([58ecf5a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/58ecf5adb72b738b83d2876b8f47e15d8c79e41e))
+* **server:** id_erp_apprenant est maintenant obligatoire ([ca1468c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ca1468c7ea35ad37976e1492ff94c575a5509923))
+* **ui:** add remixicon + responsive journal des evolutions ([c762c6a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c762c6a87f55aab80c038e636e7c58e70c155c0e))
+* **ui:** add table component ([ef531e3](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ef531e3f4ecf04a7ac47a8fd908f998ef6ccf42e))
+* **ui:** ajout du systeme responsive sur le tableau ([3ba2e18](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3ba2e185b3d95d09f7eb114b33381fb45cfeeeb2))
+* **ui:** ajout icon ([4b1b913](https://github.com/mission-apprentissage/flux-retour-cfas/commit/4b1b913d1dc27c89f59e44e932d32c8389cd92a2))
+* **ui:** ajout icon mode connecter ([fd9a1c4](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fd9a1c4d0abd649538fe34f27ecef11adbc0db0c))
+* **ui:** ajout page politique de confidentialite ([ffa30a5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ffa30a58958b876ae0c9d237596247852b56eb6d))
+* **ui:** ajout sommaire ([94809dc](https://github.com/mission-apprentissage/flux-retour-cfas/commit/94809dcd8436dc2682efdfb2dbad3a017a5d7721))
+* **ui:** move component  + add responsive ([355e948](https://github.com/mission-apprentissage/flux-retour-cfas/commit/355e94817e8df0c1876ddcf056bb0c0f45c9d810))
+* **ui:** responsive contact ([06ed069](https://github.com/mission-apprentissage/flux-retour-cfas/commit/06ed069f92579fd47877b9cfd84e3edb0b1ab4dd))
+* **ui:** responsive footer ([f7ba24d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f7ba24d7dfbda68d7d20582bb0d4c81175e63758))
+* **ui:** responsive tag header ([976d64a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/976d64a8b8bb2c5bb9666580a66087de39f4e740))
+* update env mechanism ([b272f9d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b272f9dd32ecfd1e9ac661c70d29ac33baa043c1))
+
+
+### BREAKING CHANGES
+
+* nouvelle version 2023 (#2336)
+
 # [3.0.0-beta.15](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0-beta.14...v3.0.0-beta.15) (2023-01-12)
 
 
