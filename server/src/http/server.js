@@ -23,7 +23,9 @@ import referentielRouter from "./routes/specific.routes/old/referentiel.route.js
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/old/indicateurs-national.route.js";
+import indicateursNationalDossiersRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.route.js";
 import indicateursRouter from "./routes/specific.routes/old/indicateurs.route.js";
+import indicateursDossiersRouter from "./routes/specific.routes/old/indicateurs.dossiers.route.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -107,12 +109,20 @@ export default async (services) => {
   app.use("/api/cfas", cfasRouter(services)); // FRONT
   app.use("/api/referentiel", referentielRouter(services)); // FRONT
   app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
+  app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
   app.use(
     // FRONT
     ["/api/indicateurs"],
     checkJwtToken,
     permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
     indicateursRouter(services)
+  );
+  app.use(
+    // FRONT
+    ["/api/indicateurs-dossiers"],
+    checkJwtToken,
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    indicateursDossiersRouter(services)
   );
   app.use(
     // FRONT
