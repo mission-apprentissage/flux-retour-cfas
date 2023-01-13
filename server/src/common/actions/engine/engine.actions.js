@@ -119,7 +119,6 @@ export const hydrateEffectif = async (effectifData, options) => {
   };
   if (effectifData.apprenant.telephone) {
     convertedEffectif.apprenant.telephone = telephoneConverter(effectifData.apprenant.telephone);
-    console.log(convertedEffectif.apprenant.telephone);
   }
   if (effectifData.apprenant.representant_legal?.telephone) {
     convertedEffectif.apprenant.representant_legal.telephone = telephoneConverter(
