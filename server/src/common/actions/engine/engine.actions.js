@@ -1,5 +1,8 @@
 import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
+import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
+import { ACADEMIES } from "../../constants/academiesConstants.js";
+import { REGIONS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
 import {
@@ -109,6 +112,50 @@ export const hydrateEffectif = async (effectifData, options) => {
     );
   }
   // TODO other repetition_voie
+
+  /**
+   * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
+   * @param {*} codePostalOrCodeInsee
+   */
+  const fillConvertedEffectifAdresseData = async (codePostalOrCodeInsee) => {
+    const adresseInfo = await getCpInfo(codePostalOrCodeInsee);
+
+    if (adresseInfo.code_postal) {
+      convertedEffectif.apprenant.adresse.code_postal = adresseInfo.code_postal;
+    }
+
+    if (adresseInfo.code_commune_insee) {
+      convertedEffectif.apprenant.adresse.code_commune_insee = adresseInfo.code_commune_insee;
+    }
+
+    if (adresseInfo.commune) {
+      convertedEffectif.apprenant.adresse.commune = adresseInfo.commune;
+    }
+
+    if (adresseInfo.num_departement) {
+      convertedEffectif.apprenant.adresse.departement = adresseInfo.num_departement;
+    }
+
+    // Lookup academie code from nom
+    if (adresseInfo.nom_academie) {
+      const academieKeyMatching = Object.keys(ACADEMIES).find((key) => ACADEMIES[key].nom === adresseInfo.nom_academie);
+      if (!academieKeyMatching) throw new Error(`Academie not found for ${adresseInfo.nom_academie}`);
+      convertedEffectif.apprenant.adresse.academie = `${ACADEMIES[academieKeyMatching].code}`;
+    }
+
+    // Lookup région code from nom
+    if (adresseInfo.region) {
+      const regionFound = REGIONS.find((item) => item.nom === adresseInfo.region);
+      if (!regionFound) throw new Error(`Region not found for ${adresseInfo.region}`);
+      convertedEffectif.apprenant.adresse.region = regionFound.code;
+    }
+  };
+
+  if (effectifData.apprenant.adresse?.code_insee) {
+    await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_insee);
+  } else if (effectifData.apprenant.adresse?.code_postal) {
+    await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_postal);
+  }
 
   if (effectifData.apprenant.telephone) {
     convertedEffectif.apprenant.telephone = telephoneConverter(effectifData.apprenant.telephone);
