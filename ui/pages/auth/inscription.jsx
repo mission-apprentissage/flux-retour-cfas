@@ -6,6 +6,7 @@ import { Page } from "../../components/Page/Page";
 import { Inscription } from "../../modules/auth/inscription/Inscription";
 
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -17,13 +18,14 @@ const RegisterPage = () => {
   };
 
   const [succeeded, setSucceeded] = useState(false);
-
+  const title = "Créer un compte";
   return (
     <Page>
       <Head>
         <title>Inscription</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
       <HStack spacing="4w" w="full" maxW="xl" mt={4}>
         {!succeeded && (
           <>
