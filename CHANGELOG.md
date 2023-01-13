@@ -1,3 +1,10 @@
+## [3.0.2-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.1...v3.0.2-beta.1) (2023-01-13)
+
+
+### Bug Fixes
+
+* **server:** remove console log useless ([#2384](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2384)) ([a6a1687](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a6a1687e7d6aa6b96bb2836f9470c02f1e3b90c5))
+
 ## [3.0.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0...v3.0.1) (2023-01-13)
 
 
