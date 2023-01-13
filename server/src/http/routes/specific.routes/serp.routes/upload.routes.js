@@ -25,6 +25,8 @@ import { hydrateEffectif } from "../../../../common/actions/engine/engine.action
 import { uploadsDb } from "../../../../common/model/collections.js";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
+import { findOrganismeFormationByCfd } from "../../../../common/actions/organismes/organismes.formations.actions.js";
+import { getFormationWithCfd, getFormationWithRNCP } from "../../../../common/actions/formations.actions.js";
 
 const mappingModel = {
   annee_scolaire: "annee_scolaire",
@@ -636,10 +638,13 @@ export default ({ clamav }) => {
       const canNotBeImportEffectifs = [];
       const canBeImportEffectifs = [];
       const canBeImportEffectifsIds = [];
-      const duplicatesEffectifs = [];
       for (let [index, data] of convertedData.entries()) {
-        if (typeCodeDiplome === "RNCP") {
-          // TODO
+        if (typeCodeDiplome === "RNCP" && data.formation?.rncp) {
+          const { cfd } = (await getFormationWithRNCP(data.formation?.rncp, { cfd: 1 })) || {};
+          data.formation.cfd = cfd ?? "Erreur";
+        } else {
+          const { rncps } = (await getFormationWithCfd(data.formation.cfd, { rncps: 1 })) || { rncps: [] };
+          data.formation.rncp = rncps[0] ?? "";
         }
 
         const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
@@ -648,127 +653,145 @@ export default ({ clamav }) => {
           id_erp_apprenant: `${index}`,
           annee_scolaire,
           apprenant: { nom: data.apprenant?.nom ?? "", prenom: data.apprenant?.prenom ?? "" },
-          formation: { cfd: data.formation?.cfd ?? "" },
+          formation: { cfd: data.formation?.cfd ?? "", rncp: data.formation?.rncp ?? "" },
         });
         if (canNotBeImportEffectif.validation_errors.length) {
           canNotBeImportEffectifs.push({
             annee_scolaire: canNotBeImportEffectif.annee_scolaire,
             validation_errors: canNotBeImportEffectif.validation_errors,
             cfd: canNotBeImportEffectif.formation.cfd,
+            rncp: canNotBeImportEffectif.formation.rncp,
             nom: canNotBeImportEffectif.apprenant.nom,
             prenom: canNotBeImportEffectif.apprenant.prenom,
+            error: "requiredMissing",
           });
         } else {
-          data.apprenant.historique_statut = data.apprenant.historique_statut ? [data.apprenant.historique_statut] : [];
-          data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
-          const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
-            {
-              organisme_id,
-              source: document.document_id.toString(),
-              id_erp_apprenant: `${index}`,
-              annee_scolaire,
-              ...data,
-            },
-            { checkIfExist: true }
-          );
-
-          let effectifToSave = canBeImportEffectif;
-          if (foundInDb) {
-            const fieldsToImport = Object.values(mapping)
-              .filter((fieldName) => !["CFD", "nom", "prenom"].includes(fieldName))
-              .map((fN) => mappingModel[fN]);
-            effectifToSave = cloneDeep(foundInDb);
-            let tmpContrat = {};
-            let tmpHistoryStatut = {};
-            ["annee_scolaire", "validation_errors", "source", ...fieldsToImport].map((fieldName) => {
-              const newValue = get(canBeImportEffectif, fieldName);
-              let value = newValue;
-              if (fieldName === "validation_errors") {
-                const buildDiffValidationErrors = (validationErrorsOnFieldsToImport, found) => {
-                  let cleanedUpErrors = [];
-                  for (const currentError of validationErrorsOnFieldsToImport) {
-                    const prevValue = get(found, currentError.fieldName);
-                    if (
-                      (prevValue || prevValue === false) &&
-                      !find(found.validation_errors, { fieldName: currentError.fieldName })
-                    ) {
-                      // we don't want errors on previously ok field
-                      cleanedUpErrors.push({ ...currentError, willNotBeModify: true });
-                    } else {
-                      cleanedUpErrors.push(currentError);
-                    }
-                  }
-                  return cleanedUpErrors;
-                };
-                value = buildDiffValidationErrors(value, foundInDb);
-              }
-              if (fieldName.includes("apprenant.contrats.")) {
-                const contratKey = fieldName.replace("apprenant.contrats.", "");
-                value = get(canBeImportEffectif.apprenant.contrats[0], contratKey);
-                if (value) set(tmpContrat, contratKey, value);
-              } else if (fieldName.includes("apprenant.historique_statut.")) {
-                const historyKey = fieldName.replace("apprenant.historique_statut.", "");
-                value = get(canBeImportEffectif.apprenant.historique_statut[0], historyKey);
-                if (value) set(tmpHistoryStatut, historyKey, value);
-              } else if (value) set(effectifToSave, fieldName, value);
-            });
-            if (Object.keys(tmpContrat).length) {
-              if (tmpContrat.date_debut && tmpContrat.date_fin) {
-                effectifToSave.apprenant.contrats.push(tmpContrat);
-              }
-            }
-            if (Object.keys(tmpHistoryStatut).length) {
-              if (tmpHistoryStatut.valeur_statut && tmpHistoryStatut.date_statut) {
-                effectifToSave.apprenant.historique_statut.push({ ...tmpHistoryStatut, date_reception: new Date() });
-              }
-            }
-          }
-
-          // TODO look if CFD // RNCP EXIST IN ORGANISME
-
-          // TODO let errorOnContratRequired = false;
-          for (const validation_error of effectifToSave.validation_errors) {
-            const { fieldName } = validation_error;
-            if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
-              validation_error.willNotBeModify = true;
-            } else if (
-              fieldName === "apprenant.contrats[0].date_debut" ||
-              fieldName === "apprenant.contrats[0].date_fin"
-            ) {
-              validation_error.willNotBeModify = true;
-              validation_error.isRequired = true;
-            } else if (fieldName.includes("apprenant.historique_statut")) {
-              validation_error.willNotBeModify = true;
-              validation_error.isRequired = true;
-            }
-          }
-
-          const buildIdFrom = (effectifs, effectif) => {
-            const foundInCollection = find(effectifs, {
-              apprenant: { nom: effectif.apprenant.nom, prenom: effectif.apprenant.prenom },
-              formation: { cfd: effectif.formation.cfd },
-            });
-            return foundInCollection?._id ?? new ObjectId();
-          };
-
-          const _id = foundInDb ? foundInDb._id : buildIdFrom(canBeImportEffectifs, effectifToSave);
-
-          if (!canBeImportEffectifsIds.includes(_id.toString())) {
-            canBeImportEffectifsIds.push(_id.toString());
-            canBeImportEffectifs.push({
-              _id,
-              toUpdate: !!foundInDb,
-              ...effectifToSave,
+          const organismeFormation = await findOrganismeFormationByCfd(organisme_id, data.formation.cfd);
+          if (!organismeFormation) {
+            canNotBeImportEffectifs.push({
+              annee_scolaire: canNotBeImportEffectif.annee_scolaire,
+              validation_errors: canNotBeImportEffectif.validation_errors,
+              cfd: data.formation.cfd,
+              rncp: data.formation.rncp,
+              nom: data.apprenant.nom,
+              prenom: data.apprenant.prenom,
+              error: "formationNotFound",
             });
           } else {
-            duplicatesEffectifs.push({
-              _id,
-              toUpdate: !!foundInDb,
-              cfd: effectifToSave.formation.cfd,
-              nom: effectifToSave.apprenant.nom,
-              prenom: effectifToSave.apprenant.prenom,
-              ...effectifToSave,
-            });
+            data.apprenant.historique_statut = data.apprenant.historique_statut
+              ? [data.apprenant.historique_statut]
+              : [];
+            data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
+            const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
+              {
+                organisme_id,
+                source: document.document_id.toString(),
+                id_erp_apprenant: `${index}`,
+                annee_scolaire,
+                ...data,
+              },
+              { checkIfExist: true }
+            );
+
+            let effectifToSave = canBeImportEffectif;
+            if (foundInDb) {
+              const fieldsToImport = Object.values(mapping)
+                .filter((fieldName) => !["CFD", "nom", "prenom"].includes(fieldName))
+                .map((fN) => mappingModel[fN]);
+              effectifToSave = cloneDeep(foundInDb);
+              let tmpContrat = {};
+              let tmpHistoryStatut = {};
+              ["annee_scolaire", "validation_errors", "source", ...fieldsToImport].map((fieldName) => {
+                const newValue = get(canBeImportEffectif, fieldName);
+                let value = newValue;
+                if (fieldName === "validation_errors") {
+                  const buildDiffValidationErrors = (validationErrorsOnFieldsToImport, found) => {
+                    let cleanedUpErrors = [];
+                    for (const currentError of validationErrorsOnFieldsToImport) {
+                      const prevValue = get(found, currentError.fieldName);
+                      if (
+                        (prevValue || prevValue === false) &&
+                        !find(found.validation_errors, { fieldName: currentError.fieldName })
+                      ) {
+                        // we don't want errors on previously ok field
+                        cleanedUpErrors.push({ ...currentError, willNotBeModify: true });
+                      } else {
+                        cleanedUpErrors.push(currentError);
+                      }
+                    }
+                    return cleanedUpErrors;
+                  };
+                  value = buildDiffValidationErrors(value, foundInDb);
+                }
+                if (fieldName.includes("apprenant.contrats.")) {
+                  const contratKey = fieldName.replace("apprenant.contrats.", "");
+                  value = get(canBeImportEffectif.apprenant.contrats[0], contratKey);
+                  if (value) set(tmpContrat, contratKey, value);
+                } else if (fieldName.includes("apprenant.historique_statut.")) {
+                  const historyKey = fieldName.replace("apprenant.historique_statut.", "");
+                  value = get(canBeImportEffectif.apprenant.historique_statut[0], historyKey);
+                  if (value) set(tmpHistoryStatut, historyKey, value);
+                } else if (value) set(effectifToSave, fieldName, value);
+              });
+              if (Object.keys(tmpContrat).length) {
+                if (tmpContrat.date_debut && tmpContrat.date_fin) {
+                  effectifToSave.apprenant.contrats.push(tmpContrat);
+                }
+              }
+              if (Object.keys(tmpHistoryStatut).length) {
+                if (tmpHistoryStatut.valeur_statut && tmpHistoryStatut.date_statut) {
+                  effectifToSave.apprenant.historique_statut.push({ ...tmpHistoryStatut, date_reception: new Date() });
+                }
+              }
+            }
+
+            // TODO look if CFD // RNCP EXIST IN ORGANISME
+
+            // TODO let errorOnContratRequired = false;
+            for (const validation_error of effectifToSave.validation_errors) {
+              const { fieldName } = validation_error;
+              if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
+                validation_error.willNotBeModify = true;
+              } else if (
+                fieldName === "apprenant.contrats[0].date_debut" ||
+                fieldName === "apprenant.contrats[0].date_fin"
+              ) {
+                validation_error.willNotBeModify = true;
+                validation_error.isRequired = true;
+              } else if (fieldName.includes("apprenant.historique_statut")) {
+                validation_error.willNotBeModify = true;
+                validation_error.isRequired = true;
+              }
+            }
+
+            const buildIdFrom = (effectifs, effectif) => {
+              const foundInCollection = find(effectifs, {
+                apprenant: { nom: effectif.apprenant.nom, prenom: effectif.apprenant.prenom },
+                formation: { cfd: effectif.formation.cfd },
+              });
+              return foundInCollection?._id ?? new ObjectId();
+            };
+
+            const _id = foundInDb ? foundInDb._id : buildIdFrom(canBeImportEffectifs, effectifToSave);
+
+            if (!canBeImportEffectifsIds.includes(_id.toString())) {
+              canBeImportEffectifsIds.push(_id.toString());
+              canBeImportEffectifs.push({
+                _id,
+                toUpdate: !!foundInDb,
+                ...effectifToSave,
+              });
+            } else {
+              canNotBeImportEffectifs.push({
+                annee_scolaire: effectifToSave.annee_scolaire,
+                validation_errors: effectifToSave.validation_errors,
+                cfd: effectifToSave.formation.cfd,
+                rncp: effectifToSave.formation.rncp,
+                nom: effectifToSave.apprenant.nom,
+                prenom: effectifToSave.apprenant.prenom,
+                error: "duplicate",
+              });
+            }
           }
         }
       }
@@ -818,13 +841,17 @@ export default ({ clamav }) => {
           validation_errors,
           formation,
           cfd: formation.cfd,
+          rncp: formation.rncp,
           nom: apprenant.nom,
           prenom: apprenant.prenom,
           historique_statut: apprenant.historique_statut,
         });
       }
 
-      return res.json({ canBeImportEffectifs: effectifsTable, canNotBeImportEffectifs, duplicatesEffectifs });
+      return res.json({
+        canBeImportEffectifs: effectifsTable,
+        canNotBeImportEffectifs,
+      });
     })
   );
 

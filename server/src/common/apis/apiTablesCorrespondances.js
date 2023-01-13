@@ -18,3 +18,19 @@ export const getCfdInfo = async (cfd) => {
     return null;
   }
 };
+export const getRncpInfo = async (rncp) => {
+  const url = `${API_ENDPOINT}/rncp`;
+  try {
+    const { data } = await axios.post(url, {
+      rncp,
+    });
+    return data.result;
+  } catch (error) {
+    logger.error(
+      `getRncpInfo: something went wrong while requesting ${url}`,
+      `${error.message} for rncp=${rncp}`,
+      error.code || error.response.status
+    );
+    return null;
+  }
+};

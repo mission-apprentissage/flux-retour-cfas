@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import Table from "../../../../components/Table/Table";
 
-import { AddFill, Alert, ErrorIcon, InfoLine, SubtractLine, ValidateIcon } from "../../../../theme/components/icons";
+import { AddFill, Alert, InfoLine, SubtractLine, ValidateIcon } from "../../../../theme/components/icons";
 import Effectif from "./Effectif";
 import { effectifIdAtom } from "./atoms";
 import { DateTime } from "luxon";
@@ -40,8 +40,7 @@ const ShowErrorInCell = ({ item, fieldName, value }) => {
   if (validation_error) {
     return (
       <HStack color="flaterror">
-        <ErrorIcon boxSize={4} />
-        <Text fontSize="1rem" color="flaterror" fontWeight="bold">
+        <Text fontSize="1rem" color="flaterror">
           {validation_error.inputValue || "VIDE"}
         </Text>
       </HStack>
@@ -57,6 +56,7 @@ const EffectifsTable = ({
   canEdit = false,
   columns = ["expander", "annee_scolaire", "statut_courant", "nom", "prenom", "separator", "source", "state"],
   show = "normal",
+  RenderErrorImport = () => {},
 }) => {
   return (
     <Box mt={4}>
@@ -124,7 +124,7 @@ const EffectifsTable = ({
           ...(columns.includes("cfd")
             ? {
                 cfd: {
-                  size: 150,
+                  size: 120,
                   header: () => {
                     return (
                       <Box textAlign="left">
@@ -141,6 +141,28 @@ const EffectifsTable = ({
                         <ShowErrorInCell
                           item={organismesEffectifs[row.id]}
                           fieldName="formation.cfd"
+                          value={getValue()}
+                        />
+                      );
+                    }
+                    return getValue();
+                  },
+                },
+              }
+            : {}),
+          ...(columns.includes("rncp")
+            ? {
+                rncp: {
+                  size: 70,
+                  header: () => {
+                    return <Box textAlign="left">Code RNCP</Box>;
+                  },
+                  cell: ({ row, getValue }) => {
+                    if (show === "errorInCell") {
+                      return (
+                        <ShowErrorInCell
+                          item={organismesEffectifs[row.id]}
+                          fieldName="formation.rncp"
                           value={getValue()}
                         />
                       );
@@ -332,7 +354,7 @@ const EffectifsTable = ({
             : {}),
           ...(columns.includes("action")
             ? {
-                source: {
+                action: {
                   size: 90,
                   header: () => {
                     return (
@@ -362,6 +384,36 @@ const EffectifsTable = ({
                         <Text fontSize="1rem">{toUpdate ? "Mise à jour" : "Nouveau"}</Text>
                       </HStack>
                     );
+                  },
+                },
+              }
+            : {}),
+          ...(columns.includes("error-import")
+            ? {
+                errorState: {
+                  size: 120,
+                  header: () => {
+                    return (
+                      <Box textAlign="left">
+                        <Tooltip
+                          label={<Text>Détails</Text>}
+                          aria-label="A tooltip"
+                          background="bluefrance"
+                          color="white"
+                          padding="2w"
+                        >
+                          <Box>
+                            Erreur(s) sur la données
+                            <Text as="span" ml={1}>
+                              <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
+                            </Text>
+                          </Box>
+                        </Tooltip>
+                      </Box>
+                    );
+                  },
+                  cell: ({ row }) => {
+                    return RenderErrorImport(organismesEffectifs[row.id]);
                   },
                 },
               }

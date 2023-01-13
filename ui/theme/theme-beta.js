@@ -9,6 +9,7 @@ const colors = {
   success: "#0d6635",
   error: "#b60000",
   warning: "#fa5c00",
+  warning2: "#E4794A",
   info: "#3a55d1",
   galt: "#f9f8f6",
   galt_hover: "#eceae3",

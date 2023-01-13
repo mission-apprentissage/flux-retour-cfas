@@ -24,8 +24,12 @@ export const existsFormation = async (cfd) => {
  * @param {string} cfd
  * @return {Formation | null} Found formation
  */
-export const getFormationWithCfd = async (cfd) => {
-  return await formationsDb().findOne({ cfd });
+export const getFormationWithCfd = async (cfd, projection = {}) => {
+  return await formationsDb().findOne({ cfd }, { projection });
+};
+
+export const getFormationWithRNCP = async (rncp, projection = {}) => {
+  return await formationsDb().findOne({ rncps: { $in: [rncp] } }, { projection });
 };
 
 /**

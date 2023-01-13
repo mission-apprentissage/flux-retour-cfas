@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Head from "next/head";
-import { Heading, HStack, Link, Text } from "@chakra-ui/react";
+import { Link, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import ReactMarkdown from "react-markdown";
 import ChakraUIMarkdownRenderer from "chakra-ui-markdown-renderer";
@@ -44,11 +44,6 @@ const MaintenancePage = () => {
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <HStack>
-        <Heading textStyle="h2" marginBottom="2w" mt={6}>
-          Maintenance
-        </Heading>
-      </HStack>
       <Text fontSize="1.3rem" fontFamily="Marianne" fontWeight="500" marginBottom="2w" mt="8">
         <ReactMarkdown components={ChakraUIMarkdownRenderer(chakraUIMarkdownRendererTheme)} skipHtml>
           {messageMaintenance?.msg}
