@@ -2,34 +2,6 @@ import { dossiersApprenantsMigrationDb } from "../../model/collections.js";
 
 export class Indicator {
   /**
-   * Constructeur avec définition d'une projection d'export par défaut
-   */
-  constructor() {
-    this.exportProjection = {
-      uai_etablissement: 1,
-      siret_etablissement: 1,
-      etablissement_nom_departement: 1,
-      etablissement_nom_region: 1,
-      etablissement_reseaux: 1,
-      nom_etablissement: 1,
-      nom_apprenant: 1,
-      prenom_apprenant: 1,
-      date_de_naissance_apprenant: 1,
-      formation_cfd: 1,
-      formation_rncp: 1,
-      libelle_long_formation: 1,
-      annee_formation: 1,
-      periode_formation: 1,
-      annee_scolaire: 1,
-      contrat_date_debut: 1,
-      contrat_date_fin: 1,
-      contrat_date_rupture: 1,
-      historique_statut_apprenant: 1,
-      statut_apprenant_at_date: 1,
-    };
-  }
-
-  /**
    * Décompte du nombre de jeunes correspondant à cet indicateur à la date donnée
    * @param {*} searchDate Date de recherche
    * @param {*} filters Filtres optionnels
@@ -46,19 +18,6 @@ export class Indicator {
       return result.length === 1 ? result[0].count : 0;
     }
     return result;
-  }
-
-  /**
-   * Liste tous les DossierApprenant correspondants à cet indicateur à la date donnée
-   * @param {*} searchDate Date de recherche
-   * @param {*} filters Filtres optionnels
-   * @param {*} options Options de regroupement / projection optionnelles
-   * @returns
-   */
-  async getListAtDate(searchDate, filters = {}, options = {}) {
-    const aggregationPipeline = await this.getAtDateAggregationPipeline(searchDate, filters, options);
-    const result = await dossiersApprenantsMigrationDb().aggregate(aggregationPipeline).toArray();
-    return result ?? [];
   }
 
   /**
@@ -110,23 +69,5 @@ export class Indicator {
         },
       },
     ];
-  }
-
-  /**
-   * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
-   * @param {*} searchDate
-   * @param {*} filters
-   * @returns
-   */
-  async getFullExportFormattedListAtDate(searchDate, filters = {}, indicateur, namedDataMode = false) {
-    return (await this.getExportFormattedListAtDate(searchDate, filters, indicateur)).map((item) => ({
-      ...item,
-      indicateur,
-      nom_apprenant: namedDataMode === true ? item.nom_apprenant : undefined,
-      prenom_apprenant: namedDataMode === true ? item.prenom_apprenant : undefined,
-      date_de_naissance_apprenant: namedDataMode === true ? item.date_de_naissance_apprenant : undefined,
-      date_debut_formation: item.periode_formation ? item.periode_formation[0] : null,
-      date_fin_formation: item.periode_formation ? item.periode_formation[1] : null,
-    }));
   }
 }
