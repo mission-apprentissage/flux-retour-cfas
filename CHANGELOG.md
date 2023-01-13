@@ -1,3 +1,10 @@
+# [3.1.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.2-beta.1...v3.1.0-beta.1) (2023-01-13)
+
+
+### Features
+
+* **server:** add force option to migration dossiersApprenants job ([#2388](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2388)) ([f4edf7f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f4edf7f84a4c0d2c8c69ff9bdcb3ba86327e7eae))
+
 ## [3.0.2-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.1...v3.0.2-beta.1) (2023-01-13)
 
 
