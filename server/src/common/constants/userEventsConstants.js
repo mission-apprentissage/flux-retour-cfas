@@ -24,7 +24,7 @@ export const USER_EVENTS_ACTIONS = {
   UPDATE_PASSWORD: "update-password",
 };
 
-export const getExportAnonymizedEventNameFromFilters = (filters, namedMode = false) => {
+export const getExportAnonymizedEventNameFromFilters = (filters) => {
   if ("etablissement_num_region" in filters) {
     return USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_REGION;
   }
@@ -38,9 +38,7 @@ export const getExportAnonymizedEventNameFromFilters = (filters, namedMode = fal
     return USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.FORMATION;
   }
   if ("uai_etablissement" in filters) {
-    return namedMode === true
-      ? USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_NAMED_DATA
-      : USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_ANONYMOUS;
+    return USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.CFA_ANONYMOUS;
   }
   return USER_EVENTS_ACTIONS.EXPORT_CSV_EFFECTIFS_LISTS.TERRITOIRE_NATIONAL;
 };

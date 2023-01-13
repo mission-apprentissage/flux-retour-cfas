@@ -3,7 +3,7 @@ import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
-import { apiRoles } from "../common/roles.js";
+import { apiRoles, tdbRoles } from "../common/roles.js";
 
 import tryCatch from "./middlewares/tryCatchMiddleware.js";
 import logMiddleware from "./middlewares/logMiddleware.js";
@@ -14,7 +14,7 @@ import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMi
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
-// import effectifsExportRouter from "./routes/specific.routes/old/effectifs-export.route.js";
+import effectifsExportRouter from "./routes/specific.routes/old/effectifs-export.route.js";
 import effectifsApprenantsRouter from "./routes/specific.routes/old/effectifs-apprenants.route.js";
 import dossierApprenantRouter from "./routes/specific.routes/old/dossiers-apprenants.route.js";
 import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.route.js";
@@ -126,13 +126,13 @@ export default async (services) => {
   );
 
   // TODO a supprimer (inutile en v3 ?)
-  // app.use(
-  //   // FRONT
-  //   "/api/effectifs-export",
-  //   requireJwtAuthentication,
-  //   permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
-  //   effectifsExportRouter(services)
-  // );
+  app.use(
+    // FRONT
+    "/api/effectifs-export",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
+    effectifsExportRouter(services)
+  );
 
   // ROUTES BACK TO KEEEP !
   app.use(

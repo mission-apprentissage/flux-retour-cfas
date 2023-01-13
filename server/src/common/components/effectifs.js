@@ -2,6 +2,7 @@ import { EffectifsApprentis } from "./effectifs/apprentis.js";
 import { EffectifsAbandons } from "./effectifs/abandons.js";
 import { EffectifsInscritsSansContrats } from "./effectifs/inscrits-sans-contrats.js";
 import { EffectifsRupturants } from "./effectifs/rupturants.js";
+import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
 // import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
 // import { asyncForEach } from "../utils/asyncUtils.js";
 // import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
@@ -352,11 +353,46 @@ export default () => {
   //   });
   // };
 
+  /**
+   * Récupération des effectifs anonymisés à une date donnée
+   * @param {*} searchDate
+   * @param {*} filters
+   * @returns
+   */
+  const getDataListEffectifsAtDate = async (searchDate, filters = {}) => {
+    const apprentisAnonymous = await apprentis.getFullExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.apprentis
+    );
+
+    const inscritsSansContratAnonymous = await inscritsSansContrats.getFullExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
+    );
+
+    const rupturantsAnonymous = await rupturants.getFullExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.rupturants
+    );
+
+    const abandonsAnonymous = await abandons.getFullExportFormattedListAtDate(
+      searchDate,
+      filters,
+      EFFECTIF_INDICATOR_NAMES.abandons
+    );
+
+    return [...apprentisAnonymous, ...inscritsSansContratAnonymous, ...rupturantsAnonymous, ...abandonsAnonymous];
+  };
+
   return {
     apprentis,
     abandons,
     inscritsSansContrats,
     rupturants,
+    getDataListEffectifsAtDate,
     // getEffectifsCountByCfaAtDate,
     // getEffectifsCountByNiveauFormationAtDate,
     // getEffectifsCountByFormationAtDate,

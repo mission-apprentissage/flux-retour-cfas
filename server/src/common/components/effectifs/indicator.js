@@ -2,6 +2,33 @@ import { effectifsDb } from "../../model/collections.js";
 
 export class Indicator {
   /**
+   * Constructeur avec définition d'une projection d'export par défaut
+   */
+  constructor() {
+    this.exportProjection = {
+      organisme_id: 1,
+
+      "apprenant.nom": 1,
+      "apprenant.prenom": 1,
+      "apprenant.date_de_naissance": 1,
+      "apprenant.historique_statut": 1,
+      "apprenant.contrats.date_debut": 1,
+      "apprenant.contrats.date_fin": 1,
+      "apprenant.contrats.date_rupture": 1,
+
+      "formation.cfd": 1,
+      "formation.rncp": 1,
+      "formation.libelle_long": 1,
+      "formation.annee": 1,
+      "formation.periode": 1,
+
+      annee_scolaire: 1,
+
+      statut_apprenant_at_date: 1,
+    };
+  }
+
+  /**
    * Décompte du nombre de jeunes correspondant à cet indicateur à la date donnée
    * @param {*} searchDate Date de recherche
    * @param {*} filters Filtres optionnels
@@ -18,6 +45,19 @@ export class Indicator {
       return result.length === 1 ? result[0].count : 0;
     }
     return result;
+  }
+
+  /**
+   * Liste tous les Effectifs correspondants à cet indicateur à la date donnée
+   * @param {*} searchDate Date de recherche
+   * @param {*} filters Filtres optionnels
+   * @param {*} options Options de regroupement / projection optionnelles
+   * @returns
+   */
+  async getListAtDate(searchDate, filters = {}, options = {}) {
+    const aggregationPipeline = await this.getAtDateAggregationPipeline(searchDate, filters, options);
+    const result = await effectifsDb().aggregate(aggregationPipeline).toArray();
+    return result ?? [];
   }
 
   /**
@@ -69,5 +109,20 @@ export class Indicator {
         },
       },
     ];
+  }
+
+  /**
+   * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
+   * @param {*} searchDate
+   * @param {*} filters
+   * @returns
+   */
+  async getFullExportFormattedListAtDate(searchDate, filters = {}, indicateur) {
+    return (await this.getExportFormattedListAtDate(searchDate, filters, indicateur)).map((item) => ({
+      ...item,
+      indicateur,
+      date_debut_formation: item.formation.periode ? item.formation.periode[0] : null,
+      date_fin_formation: item.formation.periode ? item.formation.periode[1] : null,
+    }));
   }
 }
