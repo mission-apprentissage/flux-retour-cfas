@@ -1,6 +1,6 @@
 import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
-import { dateFormatter, dateStringToLuxon } from "../../utils/formatterUtils.js";
+import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import {
   buildEffectif,
   findEffectifById,
@@ -55,7 +55,7 @@ export const hydrateEffectif = async (effectifData, options) => {
 
   const dateConverter = (date) => {
     // TODO If more than year 4000 error
-    if (date instanceof Date) return date.toISOString();
+    if (date instanceof Date) return jsDateToLuxon(date).toISO();
     else {
       const date_ISO = dateStringToLuxon(dateFormatter(date)).toISO();
       return date_ISO ?? date;

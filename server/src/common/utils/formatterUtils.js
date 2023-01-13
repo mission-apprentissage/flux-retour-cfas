@@ -7,3 +7,6 @@ export function dateFormatter(dateString) {
 export function dateStringToLuxon(dateString, format = "dd/MM/yyyy") {
   return DateTime.fromFormat(dateString, format).setLocale("fr-FR");
 }
+export function jsDateToLuxon(date) {
+  return DateTime.fromJSDate(date).setLocale("fr-FR");
+}
