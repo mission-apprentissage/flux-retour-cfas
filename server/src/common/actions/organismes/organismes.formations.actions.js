@@ -1,4 +1,6 @@
+import { ObjectId } from "mongodb";
 import { getCatalogFormationsForOrganisme } from "../../apis/apiCatalogueMna.js";
+import { organismesDb } from "../../model/collections.js";
 import { asyncForEach } from "../../utils/asyncUtils.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../utils/validationsUtils/organisme-de-formation/nature.js";
 import { createFormation, getFormationWithCfd } from "../formations.actions.js";
@@ -145,4 +147,25 @@ const getOrganismeNature = (defaultNature, formationCatalog, organismesLinkedToF
   return isResponsableEtFormateur && isNotAlreadyInOrganismesLinkedToFormation
     ? NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
     : defaultNature;
+};
+
+/**
+ * Méthode de recherche d'une formation dans un organisme depuis un cfd
+ * @param {string|ObjectId} id
+ * @param {*} projection
+ * @returns
+ */
+export const findOrganismeFormationByCfd = async (organisme_id, cfd) => {
+  const organisme = await organismesDb().findOne({ _id: ObjectId(organisme_id) });
+
+  const { _id: formationId } = await getFormationWithCfd(cfd, { _id: 1 });
+  if (!formationId) return null;
+
+  let found = null;
+  for (const formation of organisme.formations) {
+    if (formation.formation_id.toString() === formationId.toString()) {
+      found = { ...formation };
+    }
+  }
+  return found;
 };

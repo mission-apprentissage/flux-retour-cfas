@@ -11,10 +11,11 @@ import {
   RadioGroup,
   Spinner,
   Text,
+  Tooltip,
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { Alert, ArrowDropRightLine, Bin, InfoLine, ValidateIcon } from "../../../theme/components/icons";
+import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon } from "../../../theme/components/icons";
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
 import { _get, _post } from "../../../common/httpClient";
@@ -25,6 +26,7 @@ import uniq from "lodash.uniq";
 import EffectifsTable from "./engine/EffectifsTable";
 import { useRouter } from "next/router";
 import { effectifsStateAtom } from "./engine/atoms";
+import Ribbons from "../../../components/Ribbons/Ribbons";
 
 const Televersements = () => {
   useFetchUploads();
@@ -222,7 +224,7 @@ const Televersements = () => {
   }, [lines, organisme._id, typeDocument]);
 
   const onGoToPreImportStep = useCallback(async () => {
-    setPreEffictifs({ canBeImport: [], canNotBeImport: [], duplicate: [] });
+    setPreEffictifs({ canBeImport: [], canNotBeImport: [] });
     setStep("pre-import");
     const keyToKeyMapping = lines.reduce(
       (acc, line) => {
@@ -232,13 +234,10 @@ const Televersements = () => {
       },
       { typeCodeDiplome }
     );
-    const { canBeImportEffectifs, canNotBeImportEffectifs, duplicatesEffectifs } = await _post(
-      `/api/v1/upload/pre-import`,
-      {
-        organisme_id: organisme._id,
-        mapping: keyToKeyMapping,
-      }
-    );
+    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post(`/api/v1/upload/pre-import`, {
+      organisme_id: organisme._id,
+      mapping: keyToKeyMapping,
+    });
 
     // eslint-disable-next-line no-undef
     const newEffectifsState = new Map();
@@ -250,7 +249,6 @@ const Televersements = () => {
     setPreEffictifs({
       canBeImport: canBeImportEffectifs,
       canNotBeImport: canNotBeImportEffectifs,
-      duplicate: duplicatesEffectifs,
     });
   }, [lines, organisme._id, setCurrentEffectifsState, typeCodeDiplome]);
 
@@ -690,60 +688,102 @@ const Televersements = () => {
         )}
         {step === "pre-import" && (!!preEffictifs.canBeImport.length || !!preEffictifs.canNotBeImport.length) && (
           <Box>
-            <Heading textStyle="h2" color="grey.800" mb={5}>
-              Prévisualisation:
+            <Heading textStyle="h4" color="bluesoft.500" mb={5} fontSize="1.5rem">
+              Prévisualisation
             </Heading>
+            <Box>
+              <Text>
+                À cette étape, <Text as="strong">vous ne pourrez pas modifier les données</Text>, seulement les
+                visualiser.
+              </Text>
+              <Text color="grey.800" mt={4} textStyle="sm">
+                Les champs qui comportaient des informations en erreur suite à une précédente importation seront
+                remplacés par les données de l’importation présente, si elles sont détectées comme non erronées par
+                notre système.
+                <br />
+              </Text>
+            </Box>
             {!!preEffictifs.canNotBeImport.length && (
               <Box my={6}>
-                <Heading as="h4" flexGrow="1" fontSize="1rem" color="red.500" mb={5}>
-                  Lignes en erreurs
-                </Heading>
-                <HStack color="red.500" w="full" pl={5}>
-                  <Alert boxSize={4} />
-                  <Text fontSize="1rem">
-                    Les lignes ci-dessous ne pourront pas être importées car des champs obligatoires sont erronés ou
-                    manquants:
-                  </Text>
-                </HStack>
+                <Ribbons variant="alert" mt="0.5rem">
+                  <Box ml={3}>
+                    <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                      Les lignes du tableau ci-dessous ne pourront pas être importées car elles contiennent des erreurs
+                    </Text>
+                    <Text color="grey.800" mt={2} textStyle="sm">
+                      Une fois votre importation terminée, vous pourrez : importer un nouveau fichier corrigé ou ajouter
+                      une à une les lignes en question.
+                      <br />
+                    </Text>
+                  </Box>
+                </Ribbons>
 
                 <EffectifsTable
                   organismesEffectifs={preEffictifs.canNotBeImport}
-                  columns={["annee_scolaire", "cfd", "nom", "prenom"]}
-                  show="errorInCell"
-                />
-              </Box>
-            )}
-            {!!preEffictifs.duplicate.length && (
-              <Box my={6}>
-                <Heading as="h4" flexGrow="1" fontSize="1rem" color="red.500" mb={5}>
-                  Doublons dans le fichier
-                </Heading>
-                <HStack color="red.500" w="full" pl={5}>
-                  <Alert boxSize={4} />
-                  <Text fontSize="1rem">
-                    Les lignes ci-dessous sont des doublons.Elles ne pourront pas être importées.
-                  </Text>
-                </HStack>
+                  columns={["cfd", "rncp", "nom", "prenom", "separator", "error-import"]}
+                  RenderErrorImport={({ error }) => {
+                    const errorText = {
+                      requiredMissing: {
+                        label: "Champ(s) obligatoire(s)",
+                        details: "Les champs obligatoires sont erronés ou manquants. (CFD, nom, prénom)",
+                      },
+                      duplicate: {
+                        label: "Doublon",
+                        details: "Cette ligne est en double dans votre fichier",
+                      },
+                      formationNotFound: {
+                        label: "Formation non retrouvée",
+                        details: "Cette formation n'a pas été retrouvée dans les formations dispensée par l'organisme",
+                      },
+                    };
 
-                <EffectifsTable
-                  organismesEffectifs={preEffictifs.duplicate}
-                  columns={["annee_scolaire", "cfd", "nom", "prenom"]}
+                    return (
+                      <Tooltip
+                        label={
+                          <Box maxW="350px">
+                            <Text fontWeight="bold">{errorText[error].details}</Text>
+                          </Box>
+                        }
+                        aria-label="A tooltip"
+                        background="bluefrance"
+                        color="white"
+                        padding="2w"
+                        maxW="350px"
+                      >
+                        <HStack textAlign="left" color="red.500">
+                          <ErrorIcon boxSize={4} />
+                          <Text fontSize="1rem" color="red.500">
+                            {errorText[error].label}
+                          </Text>
+                        </HStack>
+                      </Tooltip>
+                    );
+                  }}
                   show="errorInCell"
                 />
               </Box>
             )}
+
             {!!preEffictifs.canBeImport.length && (
               <Box my={10}>
-                <HStack color="bluefrance" w="full" pl={5}>
-                  <InfoLine h="14px" boxSize={4} />
-                  <Text fontSize="1rem">
-                    Les lignes ci-dessous pourront être importées. Il se peut que des champs non obligatoires sont
-                    erronés:
-                  </Text>
-                </HStack>
+                <Ribbons variant="warning" mt="0.5rem">
+                  <Box ml={3}>
+                    <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                      Les lignes du tableau ci-dessous pourront être importées.
+                    </Text>
+                    <Text mt={2} fontSize="0.9rem" color="grey.800" fontWeight="bold">
+                      Attention : Il est possible que des champs non obligatoires soient erronées. Une fois votre
+                    </Text>
+                    <Text color="grey.800" textStyle="sm">
+                      importation terminée, vous pourrez : importer un nouveau fichier corrigé ou les corriger sur votre
+                      Tableau de bord
+                      <br />
+                    </Text>
+                  </Box>
+                </Ribbons>
                 <EffectifsTable
                   organismesEffectifs={preEffictifs.canBeImport}
-                  columns={["expander", "annee_scolaire", "cfd", "nom", "prenom", "separator", "action", "state"]}
+                  columns={["expander", "cfd", "rncp", "nom", "prenom", "separator", "action", "state"]}
                   effectifsSnapshot
                 />
               </Box>
