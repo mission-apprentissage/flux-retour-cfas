@@ -12,7 +12,7 @@ import {
 import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patches/refacto-migration/dossiersApprenants/dossiersApprenants.migration.js";
 import { migrateUsersToArchives } from "./patches/refacto-migration/users/users.archive.migration.js";
 import { cleanUserValidation } from "./patches/refacto-migration/users/users.clean.migration.js";
-import { reRunEngineEffectifs } from "./patches/refacto-migration/reRunEffectifsEngine/rerunEffectifs.engine.js";
+import { reRunEngineEffectifs } from "./patches/refacto-migration/rerun-engine/rerun-engine.effectifs.js";
 
 // TEMP CLI Jobs
 // TODO Remove after big refacto migration
