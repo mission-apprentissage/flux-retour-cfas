@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
+import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
 import {
   buildEffectif,
   findEffectifById,
@@ -109,14 +110,6 @@ export const hydrateEffectif = async (effectifData, options) => {
   }
   // TODO other repetition_voie
 
-  const telephoneConverter = (telephone, tryStartByZero = false) => {
-    let phone = telephone.replaceAll("-", "").replaceAll(".", "").replaceAll(" ", "");
-    if (phone.length === 10 && phone[0] === "0") {
-      return `+33${phone.substr(1, 9)}`;
-    }
-    if (!tryStartByZero) phone = telephoneConverter(`0${phone}`, true);
-    return phone;
-  };
   if (effectifData.apprenant.telephone) {
     convertedEffectif.apprenant.telephone = telephoneConverter(effectifData.apprenant.telephone);
   }

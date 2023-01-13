@@ -1,5 +1,8 @@
 import { strict as assert } from "assert";
-import { validateFrenchTelephoneNumber } from "../../../../../src/common/utils/validationsUtils/frenchTelephoneNumber.js";
+import {
+  telephoneConverter,
+  validateFrenchTelephoneNumber,
+} from "../../../../../src/common/utils/validationsUtils/frenchTelephoneNumber.js";
 
 describe("Domain French Telephone Number", () => {
   describe("validateFrenchTelephoneNumber", () => {
@@ -45,6 +48,20 @@ describe("Domain French Telephone Number", () => {
         const result = validateFrenchTelephoneNumber(validFrenchTelephoneNumber);
         assert.equal(result.error, undefined);
       });
+    });
+  });
+
+  describe("telephoneConverter", () => {
+    it("Vérifie qu'un numero de téléphone de 12 caractères commençant par 033xxxxxxxxx est transformé en +33xxxxxxxxx", () => {
+      const input = "033638424988";
+      const result = telephoneConverter(input);
+      assert.equal(result, "+33638424988");
+    });
+
+    it("Vérifie qu'un numero de téléphone de 10 caractères commençant par 06xxxxxxxx est transformé en +336xxxxxxxx", () => {
+      const input = "0638424988";
+      const result = telephoneConverter(input);
+      assert.equal(result, "+33638424988");
     });
   });
 });
