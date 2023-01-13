@@ -2,6 +2,7 @@ import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
 import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
 import { ACADEMIES } from "../../constants/academiesConstants.js";
+import { DEPARTEMENT_CODES } from "../../constants/departements.TRUELIST.js";
 import { REGIONS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
@@ -132,22 +133,32 @@ export const hydrateEffectif = async (effectifData, options) => {
       convertedEffectif.apprenant.adresse.commune = adresseInfo.commune;
     }
 
-    if (adresseInfo.num_departement) {
+    // Lookup département code in reference list
+    if (
+      adresseInfo.num_departement &&
+      DEPARTEMENT_CODES.map((code) => code.replace(/^(0){1}/, "")).includes(adresseInfo.num_departement)
+    ) {
       convertedEffectif.apprenant.adresse.departement = adresseInfo.num_departement;
     }
 
-    // Lookup academie code from nom
-    if (adresseInfo.nom_academie) {
-      const academieKeyMatching = Object.keys(ACADEMIES).find((key) => ACADEMIES[key].nom === adresseInfo.nom_academie);
-      if (!academieKeyMatching) throw new Error(`Academie not found for ${adresseInfo.nom_academie}`);
-      convertedEffectif.apprenant.adresse.academie = `${ACADEMIES[academieKeyMatching].code}`;
+    // Lookup academie code in reference list
+    if (
+      adresseInfo.num_academie &&
+      Object.values(ACADEMIES)
+        .map(({ code }) => `${code}`)
+        .includes(`${adresseInfo.num_academie}`)
+    ) {
+      convertedEffectif.apprenant.adresse.academie = `${adresseInfo.num_academie}`;
     }
 
-    // Lookup région code from nom
-    if (adresseInfo.region) {
-      const regionFound = REGIONS.find((item) => item.nom === adresseInfo.region);
-      if (!regionFound) throw new Error(`Region not found for ${adresseInfo.region}`);
-      convertedEffectif.apprenant.adresse.region = regionFound.code;
+    // Lookup région code in reference list
+    if (
+      adresseInfo.num_region &&
+      Object.values(REGIONS)
+        .map(({ code }) => code)
+        .includes(adresseInfo.num_region)
+    ) {
+      convertedEffectif.apprenant.adresse.region = adresseInfo.num_region;
     }
   };
 
