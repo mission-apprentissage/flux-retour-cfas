@@ -1,3 +1,10 @@
+# [3.1.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.1...v3.1.0-beta.2) (2023-01-13)
+
+
+### Features
+
+* sgt/feat/share organism ([#2382](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2382)) ([8ed3ae6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8ed3ae65759c680b5fd753e27b43828786be2d79))
+
 # [3.1.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.2-beta.1...v3.1.0-beta.1) (2023-01-13)
 
 
