@@ -9,7 +9,7 @@ import { RightLine } from "../../theme/components/icons";
 
 const ContactSection = () => {
   return (
-    <Section background="galt" paddingY="4w">
+    <Section background="galt" paddingY="4w" mt={8}>
       <Heading color="grey.800" as="h2" fontSize="beta">
         Une question ?
       </Heading>
