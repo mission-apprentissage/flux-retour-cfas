@@ -236,7 +236,7 @@ export const seedSampleUsers = async () => {
     await userAfterCreate({ user: userOfR, pending: false, notify: false, asRole: "organisme.admin" });
     // Get organisme id for user
     const organismeOff = await findOrganismeByUai("0142321X");
-    await addContributeurOrganisme(organismeOff._id, userOfR.email, "organisme.admin", false);
+    await addContributeurOrganisme(organismeOff._id, userOfR.email, "organisme.statsonly", false);
     logger.info(`User ofr created`);
   }
 
