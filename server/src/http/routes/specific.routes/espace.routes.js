@@ -12,7 +12,7 @@ export default () => {
     tryCatch(async ({ user }, res) => {
       const query = !user.organisme_ids.length
         ? {}
-        : { _id: { $in: user.organisme_ids.filter((id) => id.toString() !== user.main_organisme_id.toString()) } };
+        : { _id: { $in: user.organisme_ids.filter((id) => id.toString() !== user.main_organisme_id?.toString()) } };
       const organismes = await findOrganismesByQuery(query, {
         _id: 1,
         nom: 1,
