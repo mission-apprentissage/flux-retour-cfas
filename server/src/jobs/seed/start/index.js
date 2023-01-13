@@ -123,6 +123,24 @@ export const seedSampleOrganismes = async () => {
     });
     logger.info(`organisme C created`);
   }
+  const organismeZ = await findOrganismeByUai("0261098C");
+  if (!organismeZ) {
+    await createOrganisme({
+      uai: "0261098C",
+      sirets: ["34497770700027"],
+      siret: "34497770700027",
+      adresse: {
+        departement: "26",
+        region: "84",
+        academie: "8",
+      },
+      reseaux: ["MFR"],
+      erps: ["gesti"],
+      nature: "responsable_formateur",
+      nom: "MAISON FAMILIALE RURALE CFA - 26300 CHATEAUNEUF SUR ISERE",
+    });
+    logger.info(`organisme Z created`);
+  }
 
   const organismeD = await findOrganismeByUai("0780762E");
   if (!organismeD) {
