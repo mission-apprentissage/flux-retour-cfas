@@ -937,27 +937,6 @@ export default ({ clamav }) => {
     })
   );
 
-  router.get(
-    "/model",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
-      let { organisme_id } = await Joi.object({
-        organisme_id: Joi.string().required(),
-      }).validateAsync(req.query, { abortEarly: false });
-
-      const stream = await getFromStorage("modele_tableau_de_bord.xlsx");
-
-      res.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-      res.header("Content-Disposition", `attachment; filename=modele_tableau_de_bord.xlsx`);
-      res.header("Content-Length", 12759);
-      res.status(200);
-      res.type("xlsx");
-
-      await oleoduc(stream, crypto.isCipherAvailable() ? crypto.decipher(organisme_id) : noop(), res);
-    })
-  );
-
   router.delete(
     "/",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),

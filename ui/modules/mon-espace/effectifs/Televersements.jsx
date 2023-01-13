@@ -268,7 +268,7 @@ const Televersements = () => {
       {step === "landing" && (
         <Flex alignItems="flex-start" mt={8} flexDirection="column">
           <Text>Je n&rsquo;ai pas de fichier. Vous pouvez utiliser notre fichier modèle.</Text>
-          <Link href={`/api/v1/upload/model?organisme_id=${organisme._id}`} textDecoration={"underline"} isExternal>
+          <Link href={`/modele_tableau_de_bord.csv`} textDecoration={"underline"} isExternal>
             <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
           </Link>
           <Box mt={10}>
