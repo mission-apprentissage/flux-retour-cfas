@@ -746,7 +746,6 @@ export default ({ clamav }) => {
               }
             }
 
-            // TODO let errorOnContratRequired = false;
             for (const validation_error of effectifToSave.validation_errors) {
               const { fieldName } = validation_error;
               if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
@@ -869,7 +868,16 @@ export default ({ clamav }) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
       for (const { toUpdate, validation_errors, ...effectif } of uploads.last_snapshot_effectifs) {
-        const errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
+        let errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
+
+        for (const [key, validation_error] of errorsToKeep.entries()) {
+          let { fieldName } = validation_error;
+          if (fieldName.includes("apprenant.contrats[0]")) {
+            errorsToKeep[key].fieldName = fieldName.replace("contrats[0]", "contrats[1]");
+            errorsToKeep[key].message = fieldName.replace("contrats[0]", "contrats[1]");
+          }
+        }
+
         if (toUpdate) {
           await updateEffectif(
             effectif._id,
