@@ -136,11 +136,15 @@ export default () => {
         roleName: Joi.string().required(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      const organisme = await findOrganismeById(organisme_id);
+      if (!roleName.includes("organisme.")) {
+        throw Boom.unauthorized("Something went wrong");
+      }
 
+      const organisme = await findOrganismeById(organisme_id);
       if (!organisme) {
         throw Boom.unauthorized("Accès non autorisé");
       }
+
       await addContributeurOrganisme(organisme_id, userEmail, roleName);
 
       return res.json({ ok: true });
@@ -157,8 +161,11 @@ export default () => {
         roleName: Joi.string().required(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      const organisme = await findOrganismeById(organisme_id);
+      if (!roleName.includes("organisme.")) {
+        throw Boom.unauthorized("Something went wrong");
+      }
 
+      const organisme = await findOrganismeById(organisme_id);
       if (!organisme) {
         throw Boom.unauthorized("Accès non autorisé");
       }
@@ -177,6 +184,10 @@ export default () => {
         userEmail: Joi.string().email().required(),
         organisme_id: Joi.string().required(),
       }).validateAsync(req.query, { abortEarly: false });
+
+      if (req.user.email === userEmail) {
+        throw Boom.badRequest("Something went wrong");
+      }
 
       const organisme = await findOrganismeById(organisme_id);
 

@@ -12,6 +12,7 @@ import { _get, _post, _put, _delete } from "../../../common/httpClient";
 import Table from "../../../components/Table/Table";
 import { organismeAtom } from "../../../hooks/organismeAtoms";
 import useToaster from "../../../hooks/useToaster";
+import useAuth from "../../../hooks/useAuth";
 
 function useOrganismeAcces() {
   const organisme = useRecoilValue(organismeAtom);
@@ -47,7 +48,8 @@ function useOrganismeAcces() {
 }
 
 const OrganismeContributors = ({ size = "md" }) => {
-  const { toastSuccess, toastError } = useToaster();
+  let [auth] = useAuth();
+  const { toastSuccess, toastError } = useToaster(); // TODO Really useful to have a separate Hook ?
   const organisme = useRecoilValue(organismeAtom);
   const { organismeContributors, roles, isLoading, defaultRoleName, refetchContributors } = useOrganismeAcces();
 
@@ -209,7 +211,9 @@ const OrganismeContributors = ({ size = "md" }) => {
               data={organismeContributors}
               columns={{
                 "user.name": {
-                  header: "Utilisateur",
+                  header: () => {
+                    return <Box textAlign="left">Utilisateur</Box>;
+                  },
                   width: 120,
                   cell: (info) => {
                     const user = info.row.original.user;
@@ -224,61 +228,88 @@ const OrganismeContributors = ({ size = "md" }) => {
                     );
                   },
                 },
+                "user.organisation": {
+                  header: () => {
+                    return <Box textAlign="left">Organisation</Box>;
+                  },
+                  width: 100,
+                  cell: ({ row }) => {
+                    const { user } = row.original;
+                    const ORGANISMES_APPARTENANCE = {
+                      TETE_DE_RESEAU: `TÊTE DE RÉSEAU: ${user.reseau}`,
+                      ACADEMIE: `ACADÉMIE`,
+                      DRAAF: "DRAAF",
+                      CARIF_OREF: "CARIF OREF",
+                      DREETS: "DREETS",
+                      CONSEIL_REGIONAL: "CONSEIL RÉGIONAL",
+                      ERP: user.erp,
+                      AUTRE: "AUTRE",
+                      POLE_EMPLOI: "PÔLE EMPLOI",
+                      MISSION_LOCALE: "MISSION LOCALE",
+                      CELLULE_APPRENTISSAGE: "CELLULE APPRENTISSAGE",
+                      ORGANISME_FORMATION: "ORGANISME DE FORMATIONS",
+                    };
+                    return <Text fontSize="1rem">{ORGANISMES_APPARTENANCE[user.organisation].toLowerCase()}</Text>;
+                  },
+                },
                 "user.email": {
-                  header: "Courriel",
-                  width: 150,
+                  header: () => {
+                    return <Box textAlign="left">Courriel</Box>;
+                  },
+                  width: 100,
                   cell: (info) => {
                     return <Text fontSize="1rem">{info.getValue()}</Text>;
                   },
                 },
                 role: {
-                  header: "Rôle",
-                  width: 80,
+                  header: () => {
+                    return <Box textAlign="left">Rôle</Box>;
+                  },
+                  width: 100,
                   cell: (info) => {
-                    const { owner, user, permission } = info.row.original;
-
+                    const { user, permission } = info.row.original;
                     return (
-                      <Box w="full">
-                        {owner && <Text as="i">Propriétaire</Text>}
-                        {!owner && (
-                          <Select
-                            size="sm"
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={async (e) => {
-                              const roleName = e.target.value;
-                              if (roleName === "custom") {
-                                // TODO ???
-                              } else {
-                                return onChangeContributor({
-                                  userEmail: user.email,
-                                  roleName,
-                                });
-                              }
-                            }}
-                            iconColor={"gray.800"}
-                            data-testid={"actions-select"}
-                            value={permission.name}
-                          >
-                            {roles.map((role) => (
-                              <option key={role.name} value={role.name}>
-                                {role.title}
-                              </option>
-                            ))}
-                          </Select>
-                        )}
-                      </Box>
+                      <HStack w="full">
+                        <Select
+                          size="sm"
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={async (e) => {
+                            const roleName = e.target.value;
+                            if (roleName === "custom") {
+                              // TODO ??? TO DELETE ? HERE IT MAKES NO SENSE
+                            } else {
+                              return onChangeContributor({
+                                userEmail: user.email,
+                                roleName,
+                              });
+                            }
+                          }}
+                          iconColor={"gray.800"}
+                          data-testid={"actions-select"}
+                          value={permission.name}
+                        >
+                          {roles.map((role) => (
+                            <option key={role.name} value={role.name}>
+                              {role.title}
+                            </option>
+                          ))}
+                        </Select>
+                      </HStack>
                     );
                   },
                 },
                 actions: {
-                  header: "Actions",
+                  header: () => {
+                    return <Box textAlign="center">Actions</Box>;
+                  },
                   width: 40,
                   cell: (info) => {
-                    // const { owner } = info.row.original;
-                    const owner = true;
+                    const { user } = info.row.original;
+                    // TODO should not be able to remove pilot ["TETE_DE_RESEAU", "ERP"].includes(user.organisation);
+                    const you = auth.email === user.email;
                     return (
-                      <Center pl={5}>
-                        {owner && (
+                      <Center>
+                        {!you && (
                           <CloseIcon
                             color="bluefrance"
                             data-email={info.row.original.user.email}

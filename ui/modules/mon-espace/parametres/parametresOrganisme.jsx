@@ -22,7 +22,7 @@ const ParametresOrganisme = ({ organisme }) => {
                   <ArrowRightLine boxSize={26} />
                 </Text>
                 <Text as={"span"} ml={4}>
-                  Partage de l'organisme
+                  Partage de l&rsquo;organisme
                 </Text>
               </Flex>
             </Heading>
