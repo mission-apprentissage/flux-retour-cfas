@@ -490,7 +490,6 @@ const EffectifsTable = ({
 
                     const ValidationsErrorsInfo = ({ validation_errors }) => {
                       if (!validation_errors?.length) return null;
-
                       return (
                         <Tooltip
                           label={

@@ -148,16 +148,18 @@ const Televersements = () => {
         (acc, [key, value]) => (key !== "annee_scolaire" ? { ...acc, [value]: key } : acc),
         {}
       );
+      const { CFD, RNCP, ...rest } = remap;
       remap = {
         annee_scolaire: "",
         ...(typeCodeDiplome === "CFD"
           ? {
-              [remap.CFD]: "CFD",
+              [CFD]: "CFD",
               "": "RNCP",
             }
-          : { "": "CFD", [remap.RNCP]: "RNCP" }),
+          : { "": "CFD", [RNCP]: "RNCP" }),
         nom: "nom",
         prenom: "prenom",
+        ...rest,
       };
       initLines = Object.entries(remap).map(([key, value]) => {
         if (key === "annee_scolaire") {
@@ -703,6 +705,23 @@ const Televersements = () => {
                 <br />
               </Text>
             </Box>
+            <Ribbons variant="info" mt="0.5rem">
+              <Box ml={3}>
+                <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                  Vos données seront importées, selon vos choix ci-dessous :
+                </Text>
+                <Text color="grey.800" mt={2} textStyle="sm">
+                  Pour l&rsquo;année annéé scolaire : <Text as="strong">{lines[0].in.value}</Text>
+                  <br />
+                </Text>
+                <Text color="grey.800" mt={2} textStyle="sm">
+                  Code de référence pour les diplôme :{" "}
+                  <Text as="strong">{typeCodeDiplome === "CFD" ? "Code Formation Diplôme (CFD)" : "Code RNCP"}</Text>
+                  <br />
+                </Text>
+              </Box>
+            </Ribbons>
+
             {!!preEffictifs.canNotBeImport.length && (
               <Box my={6}>
                 <Ribbons variant="alert" mt="0.5rem">

@@ -644,7 +644,7 @@ export default ({ clamav }) => {
           data.formation.cfd = cfd ?? "Erreur";
         } else {
           const { rncps } = (await getFormationWithCfd(data.formation.cfd, { rncps: 1 })) || { rncps: [] };
-          data.formation.rncp = rncps[0] ?? "";
+          data.formation.rncp = rncps[0] ?? data.formation?.rncp;
         }
 
         const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
@@ -682,6 +682,7 @@ export default ({ clamav }) => {
               ? [data.apprenant.historique_statut]
               : [];
             data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
+            data.formation.annee = organismeFormation.annee;
             const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
               {
                 organisme_id,
@@ -744,8 +745,6 @@ export default ({ clamav }) => {
                 }
               }
             }
-
-            // TODO look if CFD // RNCP EXIST IN ORGANISME
 
             // TODO let errorOnContratRequired = false;
             for (const validation_error of effectifToSave.validation_errors) {
