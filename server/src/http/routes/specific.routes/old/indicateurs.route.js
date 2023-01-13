@@ -5,14 +5,13 @@ import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../../common/utils/anneeScolaireUtils.js";
 import { getCacheKeyForRoute } from "../../../../common/utils/cacheUtils.js";
 import { getNbDistinctOrganismesByUai } from "../../../../common/actions/dossiersApprenants.actions.js";
+import { ObjectId } from "mongodb";
 
 const commonEffectifsFilters = {
   organisme_id: Joi.string().required(),
-  etablissement_num_region: Joi.string().allow(null, ""),
-  etablissement_num_departement: Joi.string().allow(null, ""),
+  // etablissement_num_region: Joi.string().allow(null, ""),
+  // etablissement_num_departement: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().allow(null, ""),
-  uai_etablissement: Joi.string().allow(null, ""),
-  siret_etablissement: Joi.string().allow(null, ""),
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
@@ -52,7 +51,6 @@ export default ({ effectifs, cache }) => {
     tryCatch(async (req, res) => {
       const {
         date: dateFromParams,
-        // eslint-disable-next-line no-unused-vars
         organisme_id,
         ...filtersFromBody
       } = await Joi.object({
@@ -63,6 +61,7 @@ export default ({ effectifs, cache }) => {
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
+        organisme_id: ObjectId(organisme_id),
         annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
@@ -83,6 +82,7 @@ export default ({ effectifs, cache }) => {
           inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
           abandons: await effectifs.abandons.getCountAtDate(date, filters),
         };
+
         // cache the result
         await cache.set(cacheKey, JSON.stringify(response));
         return res.json(response);

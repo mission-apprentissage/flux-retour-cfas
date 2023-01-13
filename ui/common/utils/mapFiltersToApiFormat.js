@@ -20,7 +20,6 @@ export const mapFiltersToApiFormat = (filters) => {
 export const mapSimpleFiltersToApiFormat = (filtersValues) => {
   return {
     date: filtersValues?.date.toISOString(),
-    ...(filtersValues?.uai ? { uai_etablissement: filtersValues.uai } : {}),
     ...(filtersValues?.organismeId ? { organisme_id: filtersValues.organismeId } : {}),
   };
 };

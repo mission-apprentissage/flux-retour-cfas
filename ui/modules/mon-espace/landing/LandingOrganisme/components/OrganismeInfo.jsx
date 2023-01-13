@@ -86,7 +86,7 @@ export default function OrganismeInfo() {
         </Box>
       </Section>
 
-      <SimpleFiltersProvider initialState={{ uai, organismeId }}>
+      <SimpleFiltersProvider initialState={{ organismeId }}>
         <OrganismeIndicateursInfo />
       </SimpleFiltersProvider>
     </>

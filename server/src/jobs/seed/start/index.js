@@ -240,6 +240,25 @@ export const seedSampleUsers = async () => {
     logger.info(`User ofr created`);
   }
 
+  // Create user OF2
+  if (!(await getUser("of2@test.fr"))) {
+    const userOf = await createUser(
+      { email: "of2@test.fr", password: "Secret!Password1" },
+      {
+        nom: "of1",
+        prenom: "test",
+        description: "BTP CFA 16 - CHASSENEUIL SUR BONNIEURE",
+        roles: ["of"],
+        account_status: "FORCE_RESET_PASSWORD",
+        siret: "30107533900061",
+        uai: "0161212F",
+        organisation: "ORGANISME_FORMATION",
+      }
+    );
+    await userAfterCreate({ user: userOf, pending: false, notify: false, asRole: "organisme.admin" });
+    logger.info(`User of2 created`);
+  }
+
   // Create user Reseau
   if (!(await getUser("reseau@test.fr"))) {
     const userReseau = await createUser(
