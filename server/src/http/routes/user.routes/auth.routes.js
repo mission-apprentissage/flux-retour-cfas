@@ -1,5 +1,4 @@
 import express from "express";
-import Boom from "boom";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getUser, authenticate, loggedInUser, structureUser } from "../../../common/actions/users.actions.js";
@@ -22,8 +21,7 @@ export default () => {
       }).validateAsync(req.body, { abortEarly: false });
 
       if (USERNAMES_TO_FORCE_PERSONAL_ACCOUNT_CREATION.includes(emailOrUsername)) {
-        // TODO List of old username
-        throw Boom.conflict(`Old connection method`, { message: `Ancienne méthode de connexion` });
+        return res.status(200).redirect("/reinscription");
       }
       const { value: email } = Joi.string().email().validate(emailOrUsername, { abortEarly: false });
 

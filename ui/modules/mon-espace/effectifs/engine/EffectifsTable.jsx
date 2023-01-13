@@ -195,15 +195,18 @@ const EffectifsTable = ({
                         </Text>
                       );
                     }
+                    const historiqueSorted = historique_statut.sort((a, b) => {
+                      return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
+                    });
+                    const current = [...historiqueSorted].pop();
+
                     return (
                       <HStack textAlign="left">
                         <Text fontSize="1rem" fontWeight="bold">
-                          {statut_text[historique_statut[0].valeur_statut]}
+                          {statut_text[current.valeur_statut]}
                         </Text>
                         <Text fontSize="0.8rem">
-                          (depuis{" "}
-                          {DateTime.fromISO(historique_statut[0].date_statut).setLocale("fr-FR").toFormat("dd/MM/yyyy")}
-                          )
+                          (depuis {DateTime.fromISO(current.date_statut).setLocale("fr-FR").toFormat("dd/MM/yyyy")})
                         </Text>
                       </HStack>
                     );
@@ -490,7 +493,6 @@ const EffectifsTable = ({
 
                     const ValidationsErrorsInfo = ({ validation_errors }) => {
                       if (!validation_errors?.length) return null;
-
                       return (
                         <Tooltip
                           label={

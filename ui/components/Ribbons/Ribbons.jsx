@@ -6,7 +6,7 @@ const stylesMap = {
   success: { color: "flatsuccess", bg: "galt2" },
   error: { color: "flaterror", bg: "galt2" },
   warning: { color: "warning2", bg: "white", borderColor: "warning2", borderWidth: 1 },
-  info: { color: "plaininfo", bg: "galt2" },
+  info: { color: "plaininfo", bg: "white", borderColor: "plaininfo", borderWidth: 1 },
   info_clear: { color: "bluefrance", bg: "white" },
   loading: { color: "bluefrance", bg: "white" },
   alert_clear: { color: "flaterror", bg: "white" },

@@ -644,7 +644,7 @@ export default ({ clamav }) => {
           data.formation.cfd = cfd ?? "Erreur";
         } else {
           const { rncps } = (await getFormationWithCfd(data.formation.cfd, { rncps: 1 })) || { rncps: [] };
-          data.formation.rncp = rncps[0] ?? "";
+          data.formation.rncp = rncps[0] ?? data.formation?.rncp;
         }
 
         const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
@@ -682,6 +682,7 @@ export default ({ clamav }) => {
               ? [data.apprenant.historique_statut]
               : [];
             data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
+            data.formation.annee = organismeFormation.annee;
             const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
               {
                 organisme_id,
@@ -745,9 +746,6 @@ export default ({ clamav }) => {
               }
             }
 
-            // TODO look if CFD // RNCP EXIST IN ORGANISME
-
-            // TODO let errorOnContratRequired = false;
             for (const validation_error of effectifToSave.validation_errors) {
               const { fieldName } = validation_error;
               if (fieldName === "formation.rncp" || fieldName === "formation.annee") {
@@ -870,7 +868,16 @@ export default ({ clamav }) => {
       const effectifsDb = await findEffectifs(organisme_id);
 
       for (const { toUpdate, validation_errors, ...effectif } of uploads.last_snapshot_effectifs) {
-        const errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
+        let errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
+
+        for (const [key, validation_error] of errorsToKeep.entries()) {
+          let { fieldName } = validation_error;
+          if (fieldName.includes("apprenant.contrats[0]")) {
+            errorsToKeep[key].fieldName = fieldName.replace("contrats[0]", "contrats[1]");
+            errorsToKeep[key].message = fieldName.replace("contrats[0]", "contrats[1]");
+          }
+        }
+
         if (toUpdate) {
           await updateEffectif(
             effectif._id,
@@ -925,27 +932,6 @@ export default ({ clamav }) => {
       res.header("Content-Length", document.taille_fichier);
       res.status(200);
       res.type(document.ext_fichier);
-
-      await oleoduc(stream, crypto.isCipherAvailable() ? crypto.decipher(organisme_id) : noop(), res);
-    })
-  );
-
-  router.get(
-    "/model",
-    permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
-    tryCatch(async (req, res) => {
-      let { organisme_id } = await Joi.object({
-        organisme_id: Joi.string().required(),
-      }).validateAsync(req.query, { abortEarly: false });
-
-      const stream = await getFromStorage("modele_tableau_de_bord.xlsx");
-
-      res.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-      res.header("Content-Disposition", `attachment; filename=modele_tableau_de_bord.xlsx`);
-      res.header("Content-Length", 12759);
-      res.status(200);
-      res.type("xlsx");
 
       await oleoduc(stream, crypto.isCipherAvailable() ? crypto.decipher(organisme_id) : noop(), res);
     })
