@@ -11,12 +11,12 @@ export class EffectifsInscritsSansContrats extends Indicator {
    */
   getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
     return [
-      { $match: { ...filters, "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
+      { $match: { ...filters, "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       {
         $match: {
           "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-          "historique_statut_apprenant.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
+          "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
         },
       },
     ];

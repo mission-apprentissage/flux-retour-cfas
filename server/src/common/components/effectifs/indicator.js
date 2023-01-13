@@ -1,4 +1,4 @@
-import { dossiersApprenantsMigrationDb } from "../../model/collections.js";
+import { effectifsDb } from "../../model/collections.js";
 
 export class Indicator {
   /**
@@ -12,7 +12,7 @@ export class Indicator {
     const groupedBy = options.groupedBy ?? { _id: null, count: { $sum: 1 } };
     const aggregationPipeline = this.getAtDateAggregationPipeline(searchDate, filters, options);
     const groupedAggregationPipeline = [...aggregationPipeline, { $group: groupedBy }];
-    const result = await dossiersApprenantsMigrationDb().aggregate(groupedAggregationPipeline).toArray();
+    const result = await effectifsDb().aggregate(groupedAggregationPipeline).toArray();
 
     if (!options.groupedBy) {
       return result.length === 1 ? result[0].count : 0;
@@ -32,9 +32,9 @@ export class Indicator {
       {
         $project: {
           ...projection,
-          historique_statut_apprenant: {
+          "apprenant.historique_statut": {
             $filter: {
-              input: "$historique_statut_apprenant",
+              input: "$apprenant.historique_statut",
               as: "result",
               // Filtre dans l'historique sur les valeurs ayant une date antérieure à la date de recherche
               cond: {
@@ -46,15 +46,15 @@ export class Indicator {
       },
       // on élimine les historique vides (un dossier sur lequel on aurait un seul élément à une date ultérieure à celle donnée)
       {
-        $match: { historique_statut_apprenant: { $not: { $size: 0 } } },
+        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
       },
       // on trie les historique par date_statut puis par date_reception si date_statut identiques (cas régulier)
       {
         $project: {
           ...projection,
-          historique_statut_apprenant: {
+          "apprenant.historique_statut": {
             $sortArray: {
-              input: "$historique_statut_apprenant",
+              input: "$apprenant.historique_statut",
               sortBy: { date_statut: 1, date_reception: 1 },
             },
           },
@@ -64,7 +64,7 @@ export class Indicator {
       {
         $addFields: {
           statut_apprenant_at_date: {
-            $last: "$historique_statut_apprenant",
+            $last: "$apprenant.historique_statut",
           },
         },
       },

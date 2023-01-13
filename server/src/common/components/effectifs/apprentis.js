@@ -11,7 +11,9 @@ export class EffectifsApprentis extends Indicator {
    */
   getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
     return [
-      { $match: { ...filters, "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
+      {
+        $match: { ...filters, "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.apprenti },
+      },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
     ];

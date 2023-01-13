@@ -15,17 +15,17 @@ export class EffectifsRupturants extends Indicator {
       {
         $match: {
           ...filters,
-          "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-          "historique_statut_apprenant.1": { $exists: true },
+          "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
+          "apprenant.historique_statut.1": { $exists: true },
         },
       },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
-      // set previousStatutAtDate to be the element in historique_statut_apprenant juste before statut_apprenant_at_date
+      // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
       {
         $addFields: {
           previousStatutAtDate: {
-            $arrayElemAt: ["$historique_statut_apprenant", -2],
+            $arrayElemAt: ["$apprenant.historique_statut", -2],
           },
         },
       },
