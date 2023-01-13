@@ -341,7 +341,9 @@ const EffectifsTable = ({
                     const sources = {
                       TDB_MANUEL: "Saisie maunelle",
                       TDB_FILE: "Depuis un fichier",
-                      ERP: "Transfet automatique",
+                      ymag: "Transmis depuis Ypareo",
+                      gesti: "Transmis depuis Gesti",
+                      scform: "Transmis depuis SC form",
                     };
                     return (
                       <HStack textAlign="left">
