@@ -36,17 +36,17 @@ export const getRncpInfo = async (rncp) => {
   }
 };
 
-export const getCpInfo = async (codePostalOrCodeCommuneInsee) => {
-  const url = `${API_ENDPOINT}/codePostal`;
+export const getCpInfo = async (codePostal) => {
+  const url = `${API_ENDPOINT}/code-postal`;
   try {
     const { data } = await axios.post(url, {
-      codePostalOrCodeCommuneInsee,
+      codePostal,
     });
     return data.result;
   } catch (error) {
     logger.error(
       `getCpInfo: something went wrong while requesting ${url}`,
-      `${error.message} for code=${codePostalOrCodeCommuneInsee}`,
+      `${error.message} for code=${codePostal}`,
       error.code || error.response.status
     );
     return null;
