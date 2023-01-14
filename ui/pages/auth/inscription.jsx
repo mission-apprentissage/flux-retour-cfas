@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import { Text, Center, Heading, Box, ListItem, UnorderedList, HStack } from "@chakra-ui/react";
+import { Text, Center, Heading, Box, ListItem, UnorderedList, Flex } from "@chakra-ui/react";
 
 import { Page } from "../../components/Page/Page";
 import { Inscription } from "../../modules/auth/inscription/Inscription";
@@ -26,20 +26,19 @@ const RegisterPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
-      <HStack spacing="4w" w="full" maxW="xl" mt={8} h="40vh">
+      <Flex w="100%" border="1px solid" mt={8} minH="40vh">
         {!succeeded && (
-          <>
-            <Inscription
-              {...styleProps}
-              flexDirection="column"
-              border="1px solid"
-              h="100%"
-              borderColor="openbluefrance"
-              onSucceeded={() => {
-                setSucceeded(true);
-              }}
-            />
-          </>
+          <Inscription
+            {...styleProps}
+            flexDirection="column"
+            border="1px solid"
+            h="100%"
+            flexGrow={1}
+            borderColor="openbluefrance"
+            onSucceeded={() => {
+              setSucceeded(true);
+            }}
+          />
         )}
         {succeeded && (
           <Center w="full" flexDirection="column" border="1px solid" borderColor="openbluefrance" p={12}>
@@ -55,25 +54,27 @@ const RegisterPage = () => {
             </Text>
           </Center>
         )}
-        <Box alignSelf="start">
-          <Text fontWeight={700} fontSize={22}>
-            Votre compte dédié
-          </Text>
-          <Text mt="2w" fontWeight={700}>
-            Le service tableau de bord de l&apos;apprentissage est porté par la Mission interministérielle pour
-            l’apprentissage.
-          </Text>
-          <Text mt="2w">Il permet de :</Text>
-          <UnorderedList ml="4w" mt="2w">
-            <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
-            <ListItem>
-              Accompagner les jeunes en situation de décrochage (et donc d&apos;influencer leur.s parcours scolaires et
-              professionnels)
-            </ListItem>
-            <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
-          </UnorderedList>
-        </Box>
-      </HStack>
+        {!succeeded && (
+          <Box border="1px solid" w="45%" p={10}>
+            <Text fontWeight={700} fontSize={22}>
+              Votre compte dédié
+            </Text>
+            <Text mt="2w" fontWeight={700}>
+              Le service tableau de bord de l&apos;apprentissage est porté par la Mission interministérielle pour
+              l’apprentissage.
+            </Text>
+            <Text mt="2w">Il permet de :</Text>
+            <UnorderedList ml="4w" mt="2w">
+              <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
+              <ListItem>
+                Accompagner les jeunes en situation de décrochage (et donc d&apos;influencer leur.s parcours scolaires
+                et professionnels)
+              </ListItem>
+              <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
+            </UnorderedList>
+          </Box>
+        )}
+      </Flex>
     </Page>
   );
 };

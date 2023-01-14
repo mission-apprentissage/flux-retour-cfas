@@ -104,7 +104,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
     },
   });
   return (
-    <Box {...props} mb="4w">
+    <Box {...props}>
       <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
         Créer votre compte
       </Heading>

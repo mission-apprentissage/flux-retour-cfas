@@ -17,7 +17,7 @@ export function Page({ children, ...rest }) {
     <Container maxW="full" minH="100vh" d="flex" flexDirection="column" p={0} {...rest}>
       <Header espaceContextisLoading={espaceContextisLoading} />
       <NavigationMenu espaceContextisLoading={espaceContextisLoading} />
-      <Box minH={"45vh"} flexGrow="1">
+      <Box minH={"40vh"} flexGrow="1">
         <Section>{!espaceContextisLoading && children}</Section>
       </Box>
       <ContactSection />
