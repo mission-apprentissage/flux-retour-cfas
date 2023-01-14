@@ -308,7 +308,7 @@ export const UaiBlock = ({ values, errors, touched, setFieldValue, onFetched }) 
         <>
           {state === "manyUaiDetected" ? (
             <>
-              <Accordion allowToggle>
+              <Accordion allowToggle variant="withBorder">
                 {entrepriseData.data.map((item, index) => (
                   <AccordionItem key={index}>
                     <AccordionButton color="bluefrance">
