@@ -26,13 +26,14 @@ const RegisterPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
-      <HStack spacing="4w" w="full" maxW="xl" mt={4}>
+      <HStack spacing="4w" w="full" maxW="xl" mt={8} h="40vh">
         {!succeeded && (
           <>
             <Inscription
               {...styleProps}
               flexDirection="column"
               border="1px solid"
+              h="100%"
               borderColor="openbluefrance"
               onSucceeded={() => {
                 setSucceeded(true);
