@@ -1,15 +1,32 @@
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import Head from "next/head";
-import { Page } from "../../components";
-import { Support } from "../../theme/components/icons";
 import NavLink from "next/link";
-import { useRouter } from "next/router";
+import { Page } from "../../components";
+import { Support } from "../../theme/components/icons"; // TODO wtf this is an image !
 
 const RedirectionPage = () => {
   const router = useRouter();
-  setTimeout(function () {
-    router.push("/mon-espace/mon-organisme");
-  }, 5000);
+
+  const [timeLeft, setTimeLeft] = useState(4);
+  const intervalRef = useRef();
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setTimeLeft((t) => t - 1);
+    }, 1000);
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
+  // Add a listener to `timeLeft`
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      clearInterval(intervalRef.current);
+      router.push("/mon-espace/mon-organisme");
+    }
+  }, [router, timeLeft]);
+
   return (
     <Page>
       <Head>
@@ -24,7 +41,9 @@ const RedirectionPage = () => {
             <Text fontSize={28} fontWeight={700}>
               Heureux de vous revoir !
             </Text>
-            <Text>Cliquez sur le bouton “Accéder à mon Espace” si vous n’êtes pas redirigé dans les [5] secondes.</Text>
+            <Text>
+              Cliquez sur le bouton “Accéder à mon Espace” si vous n’êtes pas redirigé dans les [{timeLeft}] secondes.
+            </Text>
             <Button as={NavLink} href="/mon-espace/mon-organisme" mt="4w" variant="secondary">
               Accéder à mon Espace
             </Button>

@@ -5,6 +5,10 @@ import { Page } from "../../components";
 import Login from "../../modules/auth/connexion/Connexion";
 import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
 
+import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+
+export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
+
 export default function ConnexionPage() {
   const styleProps = {
     flexBasis: "50%",

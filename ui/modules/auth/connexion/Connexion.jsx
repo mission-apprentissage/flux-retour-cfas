@@ -12,8 +12,6 @@ import {
   Link,
   Text,
   Heading,
-  Checkbox,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import React from "react";
@@ -24,15 +22,12 @@ import NavLink from "next/link";
 import useAuth from "../../../hooks/useAuth";
 import useToken from "../../../hooks/useToken";
 import { _post } from "../../../common/httpClient";
-import { AlertRounded, CheckLine, ShowPassword } from "../../../theme/components/icons";
-import MotDePasseOublierModal from "./MotDePasseOublierModal";
+import { AlertRounded, ShowPassword } from "../../../theme/components/icons";
 
 const Login = (props) => {
   const [, setAuth] = useAuth();
   const [, setToken] = useToken();
   const router = useRouter();
-  const forgotPassword = useDisclosure();
-  const [step, setStep] = React.useState(0);
 
   const [show, setShow] = React.useState(false);
   const handleClick = () => setShow(!show);
@@ -108,24 +103,13 @@ const Login = (props) => {
                   }}
                 </Field>
               </Box>
-              <Flex>
-                <Checkbox icon={<CheckLine />} size="lg" borderRadius="20px" />
-                <Text ml="1w">Se souvenir de moi</Text>
-              </Flex>
               <HStack spacing="4w" mt={8}>
                 <Button variant="primary" type="submit">
                   Connexion
                 </Button>
-                <MotDePasseOublierModal
-                  step={step}
-                  setStep={setStep}
-                  isOpen={forgotPassword.isOpen}
-                  onClose={forgotPassword.onClose}
-                  color="grey.600"
-                />
-                <Box _hover={{ cursor: "pointer" }} color="#666666" onClick={forgotPassword.onOpen} marginLeft="2w">
+                <Link href="/auth/mot-de-passe-oublie" as={NavLink} color="grey.600">
                   Mot de passe oublié
-                </Box>
+                </Link>
               </HStack>
               {status.error && (
                 <Text color="error" mt={8}>
@@ -138,14 +122,7 @@ const Login = (props) => {
       </Formik>
       <HStack fontSize={14} mt="4w">
         <Text>Vous n’avez pas encore de compte ? </Text>
-        <Link
-          _hover={{ textDecoration: "none", borderBottom: "2px solid" }}
-          borderBottom="1px solid"
-          borderColor="bluefrance"
-          color="bluefrance"
-          as={NavLink}
-          href="/auth/inscription"
-        >
+        <Link color="bluefrance" as={NavLink} href="/auth/inscription">
           Crée un compte
         </Link>
       </HStack>

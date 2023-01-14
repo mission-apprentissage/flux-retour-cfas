@@ -14,7 +14,7 @@ const ForgottenPasswordPage = () => {
   const resetPassword = async (values, { setStatus }) => {
     try {
       await _post("/api/v1/password/forgotten-password", { ...values });
-      setStatus({ message: "Un email vous a été envoyé." });
+      setStatus({ message: "Vous allez recevoir un lien vous permettant de réinitialiser votre mot de passe." });
       setTimeout(() => router.push("/"), 1500);
     } catch (e) {
       console.error(e);
@@ -46,15 +46,15 @@ const ForgottenPasswordPage = () => {
                   {({ field, meta }) => {
                     return (
                       <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                        <FormLabel>Identifiant</FormLabel>
-                        <Input {...field} id={field.name} placeholder="Votre email ou identifiant..." />
+                        <FormLabel>Votre email :</FormLabel>
+                        <Input {...field} id={field.name} placeholder="prenom.nom@courriel.fr" />
                         <FormErrorMessage>{meta.error}</FormErrorMessage>
                       </FormControl>
                     );
                   }}
                 </Field>
-                <Button variant="primary" type={"submit"}>
-                  Demander un nouveau mot de passe
+                <Button variant="primary" type={"submit"} w="100%">
+                  Recevoir un courriel de ré-initialisation
                 </Button>
                 {status.error && (
                   <Text color="error" mt={2}>
