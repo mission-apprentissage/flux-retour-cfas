@@ -1,3 +1,10 @@
+# [3.1.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.3...v3.1.0-beta.4) (2023-01-15)
+
+
+### Features
+
+* created floating button ([#2391](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2391)) ([ffa28c6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ffa28c6bfc014d90d04a094be5043696552a8410))
+
 # [3.1.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.2...v3.1.0-beta.3) (2023-01-15)
 
 
