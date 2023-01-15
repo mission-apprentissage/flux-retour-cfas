@@ -1,3 +1,10 @@
+# [3.1.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.2...v3.1.0-beta.3) (2023-01-15)
+
+
+### Features
+
+* **fs:** base parcours d'inscription et de connexion ([#2385](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2385)) ([d9f14c5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/d9f14c51ca42f24245472ccf38c25fcaf4cf9404))
+
 # [3.1.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.1...v3.1.0-beta.2) (2023-01-13)
 
 
