@@ -274,7 +274,7 @@ export const structureUser = async (user) => {
     codes_academie: user.codes_academie, // TODO [tech] send full académie
     codes_departement: user.codes_departement, // TODO [tech] send full department
     account_status: user.account_status,
-    roles: rolesList,
+    roles: rolesList.map(({ name }) => name),
     acl: uniq([...rolesAcl, ...(user?.custom_acl ? user.custom_acl : []), ...specialAcl]),
     orign_register: user.orign_register,
     has_accept_cgu_version: user.has_accept_cgu_version,

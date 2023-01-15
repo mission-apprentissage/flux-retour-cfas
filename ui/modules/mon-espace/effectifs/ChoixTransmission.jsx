@@ -66,10 +66,10 @@ const ChoixTransmission = () => {
             <Box flexGrow="1">
               <Flex flexDirection="column" alignItems="flex-start" p={0}>
                 <Heading as="h4" fontSize="1.5rem" mb={4}>
-                  Remplir à la main
+                  Vous n&rsquo;avez pas d&rsquo;ERP ?
                 </Heading>
                 <Heading as="h5" fontSize="1rem" mb={4}>
-                  Astuce : Copiez / collez directement vos nouveaux contacts dans l’outil.
+                  Téléverser vos effectifs via fichier (Excel, csv)
                 </Heading>
               </Flex>
               <UnorderedList>

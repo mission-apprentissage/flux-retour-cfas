@@ -1,4 +1,4 @@
-import { Box, HStack, Text, UnorderedList, ListItem } from "@chakra-ui/react";
+import { Box, Flex, Text, UnorderedList, ListItem } from "@chakra-ui/react";
 import React from "react";
 import Head from "next/head";
 import { Page } from "../../components";
@@ -24,9 +24,16 @@ export default function ConnexionPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
-      <HStack spacing="4w" mt={4} mb="8w">
-        <Login {...styleProps} flexDirection="column" border="1px solid" borderColor="openbluefrance" />
-        <Box alignSelf="start">
+      <Flex w="100%" mt={8} minH="40vh">
+        <Login
+          {...styleProps}
+          flexDirection="column"
+          flexGrow={1}
+          h="100%"
+          border="1px solid"
+          borderColor="openbluefrance"
+        />
+        <Box w="50%" p={10}>
           <Text fontWeight={700} fontSize={22}>
             Votre compte dédié
           </Text>
@@ -44,7 +51,7 @@ export default function ConnexionPage() {
             <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
           </UnorderedList>
         </Box>
-      </HStack>
+      </Flex>
     </Page>
   );
 }

@@ -27,6 +27,7 @@ import { _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import Link from "../../components/Links/Link";
 import Ribbons from "../../components/Ribbons/Ribbons";
+import { CONTACT_ADDRESS } from "../../common/constants/product";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -92,6 +93,7 @@ const Finalize = () => {
     },
   });
 
+  console.log(auth);
   return (
     <Page>
       <Head>
@@ -104,30 +106,41 @@ const Finalize = () => {
           {title}
         </Heading>
         <Box mt={5}>
-          {auth.isInPendingValidation && auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" && (
-            <>
-              <FormControl py={2} isRequired isInvalid={errors.type && touched.type}>
-                <FormLabel>Votre accès</FormLabel>
-                <RadioGroup id="type" name="type" value={valuesAccess.type} mt={8}>
-                  <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
-                    <Radio value={"organisme.readonly"} onChange={handleChange} size="lg">
-                      Lecture
-                    </Radio>
-                    <Radio value={"organisme.member"} onChange={handleChange} size="lg">
-                      Écriture
-                    </Radio>
-                    <Radio value={"organisme.admin"} onChange={handleChange} size="lg">
-                      Gestion
-                    </Radio>
-                  </VStack>
-                </RadioGroup>
-                {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
-              </FormControl>
-              <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
-                Demander l&rsquo;accès
-              </Button>
-            </>
-          )}
+          {auth.isInPendingValidation &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            auth.roles.includes("of") && (
+              <>
+                <FormControl py={2} isRequired isInvalid={errors.type && touched.type}>
+                  <FormLabel>Votre accès</FormLabel>
+                  <RadioGroup id="type" name="type" value={valuesAccess.type} mt={8}>
+                    <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
+                      <Radio value={"organisme.readonly"} onChange={handleChange} size="lg">
+                        Lecture
+                      </Radio>
+                      <Radio value={"organisme.member"} onChange={handleChange} size="lg">
+                        Écriture
+                      </Radio>
+                      <Radio value={"organisme.admin"} onChange={handleChange} size="lg">
+                        Gestion
+                      </Radio>
+                    </VStack>
+                  </RadioGroup>
+                  {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
+                </FormControl>
+                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                  Demander l&rsquo;accès
+                </Button>
+              </>
+            )}
+          {auth.isInPendingValidation &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            !auth.roles.includes("of") && (
+              <>
+                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                  Demander l&rsquo;accès
+                </Button>
+              </>
+            )}
 
           {auth.isInPendingValidation &&
             !auth.hasAtLeastOneUserToValidate &&
@@ -180,7 +193,7 @@ const Finalize = () => {
           <Flex flexGrow={1} alignItems="end" mt={8}>
             <Text mt={8} fontSize="1rem">
               Vous rencontrez des difficultés à passer cette étape ?{" "}
-              <Link href="/questions-reponses" color="bluefrance" ml={3}>
+              <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" ml={3}>
                 Contacter l&apos;assistance
               </Link>
             </Text>

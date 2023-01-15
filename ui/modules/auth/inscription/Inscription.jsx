@@ -65,6 +65,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
           excludeEmptyString: true,
         })
         .required("Le siret est obligatoire"),
+      uai: Yup.string(),
       nom: Yup.string().required("Votre nom est obligatoire"),
       civility: Yup.string().required("Votre civilité est obligatoire"),
       prenom: Yup.string().required("Votre prénom est obligatoire"),
@@ -85,7 +86,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
             onSucceeded();
           }
         } catch (e) {
-          if (e.messages?.details?.message === "email already in use") {
+          if (e.messages?.message === "email already in use") {
             setErrors({ email: "Ce courriel est déjà utilisé." });
           } else {
             console.error(e);
@@ -142,25 +143,26 @@ export const Inscription = ({ onSucceeded, ...props }) => {
             <>
               {values.type === "of" && (
                 <InscriptionOF
-                  onEndOfSpecific={({ siret, ...rest }) => {
-                    setFieldValue("siret", siret);
-                    setEntrepriseData(rest);
+                  onEndOfSpecific={(result) => {
+                    setFieldValue("uai", result.data.uai);
+                    setFieldValue("siret", result.data.siret);
+                    setEntrepriseData(result);
                   }}
                 />
               )}
               {values.type === "pilot" && (
                 <InscriptionPilot
-                  onEndOfSpecific={({ siret, ...rest }) => {
-                    setFieldValue("siret", siret);
-                    setEntrepriseData(rest);
+                  onEndOfSpecific={(result) => {
+                    setFieldValue("siret", result.data.siret);
+                    setEntrepriseData(result);
                   }}
                 />
               )}
               {values.type === "reseau_of" && (
                 <InscriptionReseau
-                  onEndOfSpecific={({ siret, ...rest }) => {
-                    setFieldValue("siret", siret);
-                    setEntrepriseData(rest);
+                  onEndOfSpecific={(result) => {
+                    setFieldValue("siret", result.data.siret);
+                    setEntrepriseData(result);
                   }}
                 />
               )}
@@ -245,7 +247,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
             <Button onClick={() => setStep(step - 1)} color="bluefrance" variant="secondary">
               Revenir
             </Button>
-            {step === 1 && entrepriseData?.state !== "manyUaiDetected" && (
+            {step === 1 && (
               <Button
                 size="md"
                 variant="primary"
@@ -265,7 +267,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
                 px={6}
                 isDisabled={!entrepriseData || !entrepriseData?.successed}
               >
-                Suivant
+                S&rsquo;inscrire
               </Button>
             )}
           </HStack>

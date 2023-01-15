@@ -6,36 +6,29 @@
     <mj-wrapper padding="10px 20px">
       <mj-section background-color="#ffffff" padding-top="0">
         <mj-column>
-          <mj-text> Bonjour <%= data.user.civility || "Madame, Monsieur" %>, </mj-text>
+          <mj-text>
+            Bonjour <strong><%= data.user.civility || "Madame, Monsieur" %> <%= data.user.nom %></strong>,
+          </mj-text>
           <mj-text>
             <div>
-              <br />
-              Votre compte utilisateur (<%= data.user.email %>) vient d'être créé sur la plateforme XXXX. <br /><br />Si
-              vous êtes bien à l'origine de cette demande, merci de cliquer sur le lien ci-dessous afin d'activer votre
-              compte.
+              Vous venez de créer votre compte (<%= data.user.email %>) sur le
+              <strong>tableau de bord de l'apprentissage</strong> et nous vous en remercions. <br /><br />Si vous êtes
+              bien à l'origine de cette demande, merci de cliquer sur le lien ci-dessous afin d'activer votre compte.
+              Votre identifiant est votre courriel.
             </div>
-            L'activation de votre compte vous permettra d'accéder à votre espace personnel. Depuis cet espace vous
-            pourrez réaliser les opérations suivantes :
-            <ul>
-              <li>Opé 1</li>
-              <li>Opé 2</li>
-              <li>Opé 3</li>
-              <li>Opé 4</li>
-            </ul>
           </mj-text>
-
-          <mj-text>
-            En cas de difficultés, n'hésitez pas à contacter notre équipe support à l'adresse suivante :
-            <a href="mailto:<%= data.email %>"><%= data.email %></a>
-          </mj-text>
-
           <mj-button
             href="<%= utils.getPublicUrl(`/auth/confirmation?activationToken=${data.activationToken}`) %>"
             background-color="#0e4194"
             color="white"
           >
-            J'active mon compte
+            Je valide mon compte
           </mj-button>
+
+          <mj-text>
+            En cas de difficultés, n'hésitez pas à contacter notre équipe support à l'adresse suivante :
+            <a href="mailto:<%= data.email %>"><%= data.email %></a>
+          </mj-text>
 
           <%- include('./common/signature.ejs'); %>
         </mj-column>

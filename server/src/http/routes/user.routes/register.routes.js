@@ -24,6 +24,7 @@ import { userAfterCreate } from "../../../common/actions/users.afterCreate.actio
 import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
+import logger from "../../../common/logger.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -55,11 +56,21 @@ export default ({ mailer }) => {
   router.post(
     "/register",
     tryCatch(async ({ body }, res) => {
-      const { type, email, password, siret, nom, prenom, civility } = await Joi.object({
+      const {
+        type,
+        email,
+        password,
+        siret,
+        uai: userUai,
+        nom,
+        prenom,
+        civility,
+      } = await Joi.object({
         type: Joi.string().allow("pilot", "of", "reseau_of").required(),
         email: Joi.string().required(),
         password: Joi.string().required(),
         siret: Joi.string().required(),
+        uai: Joi.string(),
         nom: Joi.string().required(),
         prenom: Joi.string().required(),
         civility: Joi.string().required(),
@@ -67,7 +78,7 @@ export default ({ mailer }) => {
 
       const alreadyExists = await getUser(email.toLowerCase());
       if (alreadyExists) {
-        throw Boom.conflict(`Unable to create`, { message: `email already in use` });
+        throw Boom.conflict(`email already in use`, { message: `email already in use` });
       }
 
       let uai = null;
@@ -78,7 +89,19 @@ export default ({ mailer }) => {
         } else {
           throw Boom.badRequest("Something went wrong");
         }
+        if (userUai !== uai) {
+          // TODO FIABILISATION
+          logger.error(
+            `POSSIBLE FIABILISATION PAR UN UTILISATUER ${email} : uai referentiel ${uai} - uai utilisateur ${uai} - siret ${siret}`
+          );
+        }
+        uai = userUai;
       }
+
+      const { result } = await findDataFromSiret(siret, false); // TODO NOW
+      const codes_region = [result.num_region];
+      const codes_academie = [result.num_academie];
+      const codes_departement = [result.num_departement];
 
       const user = await createUser(
         { email, password },
@@ -88,6 +111,9 @@ export default ({ mailer }) => {
           nom,
           prenom,
           civility,
+          codes_region,
+          codes_academie,
+          codes_departement,
           ...(uai ? { uai } : {}),
         }
       );
