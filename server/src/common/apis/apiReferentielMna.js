@@ -39,12 +39,24 @@ export const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "
 
 export const fetchOrganismeWithSiret = async (siret) => {
   const url = `${API_ENDPOINT}/organismes/${siret}`;
-  const { data } = await axios.get(url);
-  return data;
+  try {
+    const { data } = await axios.get(url);
+    return data;
+  } catch (err) {
+    const errorMessage = err.response?.data || err.code;
+    logger.error(`API REFERENTIEL fetchOrganismeWithSiret something went wrong:`, errorMessage);
+    return null;
+  }
 };
 
 export const fetchOrganismesWithUai = async (uai) => {
   const url = `${API_ENDPOINT}/organismes`;
-  const { data } = await axios.get(url, { params: { uais: uai } });
-  return data;
+  try {
+    const { data } = await axios.get(url, { params: { uais: uai } });
+    return data;
+  } catch (err) {
+    const errorMessage = err.response?.data || err.code;
+    logger.error(`API REFERENTIEL fetchOrganismesWithUai something went wrong:`, errorMessage);
+    return null;
+  }
 };

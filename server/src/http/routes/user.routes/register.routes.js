@@ -21,7 +21,9 @@ import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { authMiddleware } from "../../middlewares/authMiddleware.js";
 import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
-import { fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna.js";
+import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
+import { siretSchema } from "../../../common/utils/validationUtils.js";
+import { algoUAI } from "../../../common/utils/uaiUtils.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -54,7 +56,7 @@ export default ({ mailer }) => {
     "/register",
     tryCatch(async ({ body }, res) => {
       const { type, email, password, siret, nom, prenom, civility } = await Joi.object({
-        type: Joi.string().allow("pilot", "of", "reseau_of", "erp").required(),
+        type: Joi.string().allow("pilot", "of", "reseau_of").required(),
         email: Joi.string().required(),
         password: Joi.string().required(),
         siret: Joi.string().required(),
@@ -101,28 +103,35 @@ export default ({ mailer }) => {
   );
 
   router.post(
-    "/siret-adresse",
+    "/uai-siret-adresse",
     tryCatch(async ({ body }, res) => {
-      const { siret, organismeFormation } = await Joi.object({
-        siret: Joi.string().required(),
+      const {
+        uai: userUai,
+        siret: userSiret,
+        organismeFormation,
+      } = await Joi.object({
+        siret: Joi.string(),
+        uai: Joi.string(),
         organismeFormation: Joi.boolean().default(false),
       }).validateAsync(body, { abortEarly: false });
 
-      const { result, messages } = await findDataFromSiret(siret, false);
-
-      if (Object.keys(result).length === 0) {
-        return res.json({ result, messages });
+      let siret = null;
+      if (userSiret) {
+        const { value, error: errorOnUserSiret } = siretSchema().validate(userSiret);
+        if (errorOnUserSiret)
+          return res.json([
+            { uai, siret: null, result: [], messages: { error: `Le siret ${siret} n'est pas valide` } },
+          ]);
+        siret = value;
       }
-
       let uai = null;
-      if (organismeFormation) {
-        const resp = await fetchOrganismeWithSiret(siret);
-        if (resp) {
-          uai = resp.uai;
-        }
+      if (userUai) {
+        if (!algoUAI(userUai))
+          return res.json([{ uai, siret: null, result: [], messages: { error: `L'UAI ${userUai} n'est pas valide` } }]);
+        uai = userUai;
       }
 
-      return res.json({
+      const buildPublicResponse = ({ uai, siret, result, messages }) => ({
         result: {
           enseigne: result.enseigne,
           entreprise_raison_sociale: result.entreprise_raison_sociale,
@@ -133,10 +142,43 @@ export default ({ mailer }) => {
           localite: result.localite,
           ferme: result.ferme,
           secretSiret: result.secretSiret || false,
+          siret,
           uai,
         },
         messages,
       });
+
+      if (organismeFormation) {
+        if (uai) {
+          const { organismes: organismesResp } = await fetchOrganismesWithUai(uai);
+          if (!organismesResp.length)
+            return res.json([
+              { uai, siret: null, result: [], messages: { error: `L'uai ${uai} n'a pas été retrouvé` } },
+            ]);
+
+          const organismes = organismesResp.map(({ siret, uai }) => ({ siret, uai }));
+          const result = [];
+          for (const organisme of organismes) {
+            const responseFromApiEntreprise = await findDataFromSiret(organisme.siret, false);
+            result.push(
+              buildPublicResponse({ uai: organisme.uai, siret: organisme.siret, ...responseFromApiEntreprise })
+            );
+          }
+          return res.json(result);
+        } else {
+          const resp = await fetchOrganismeWithSiret(siret);
+          if (resp) {
+            uai = resp.uai;
+          }
+        }
+      }
+
+      const responseFromApiEntreprise = await findDataFromSiret(siret, false);
+      if (Object.keys(responseFromApiEntreprise.result).length === 0) {
+        return res.json([{ uai, siret, ...responseFromApiEntreprise }]);
+      }
+
+      return res.json([buildPublicResponse({ uai, siret, ...responseFromApiEntreprise })]);
     })
   );
 

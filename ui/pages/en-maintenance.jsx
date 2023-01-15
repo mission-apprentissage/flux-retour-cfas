@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Head from "next/head";
-import { Link, Text } from "@chakra-ui/react";
+import { Box, Center, HStack, Heading, Link, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import ReactMarkdown from "react-markdown";
 import ChakraUIMarkdownRenderer from "chakra-ui-markdown-renderer";
@@ -37,18 +37,34 @@ const MaintenancePage = () => {
     router.push(`/`);
   }, [router, isLoading, messageMaintenance]);
 
-  const title = "Maintenance en cours";
+  const title = "Site en cours de maintenance";
   return (
     <Page withoutDisplayNavigationBar={!isUserAdmin(auth)}>
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Text fontSize="1.3rem" fontFamily="Marianne" fontWeight="500" marginBottom="2w" mt="8">
-        <ReactMarkdown components={ChakraUIMarkdownRenderer(chakraUIMarkdownRendererTheme)} skipHtml>
-          {messageMaintenance?.msg}
-        </ReactMarkdown>
-      </Text>
+      <Center mt={16} h="full" pt={[4, 6]} paddingY="2w" color="grey.800" flexDirection="column">
+        <HStack spacing={10}>
+          <Box pr={8}>
+            <Heading textStyle="h2" color="grey.800" mt={5}>
+              {title}
+            </Heading>
+            <Text fontSize="1.3rem" fontFamily="Marianne" fontWeight="500" marginBottom="2w" mt="8">
+              Nous nous excusons pour la gêne occasionnée.
+            </Text>
+            <Text fontSize="1.3rem" fontFamily="Marianne" fontWeight="500" marginBottom="2w" mt="8">
+              <ReactMarkdown components={ChakraUIMarkdownRenderer(chakraUIMarkdownRendererTheme)} skipHtml>
+                {messageMaintenance?.msg}
+              </ReactMarkdown>
+            </Text>
+          </Box>
+          <Box>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/maintenance.svg" alt="maintenance" width="400px" />
+          </Box>
+        </HStack>
+      </Center>
     </Page>
   );
 };

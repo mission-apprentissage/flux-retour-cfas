@@ -3,7 +3,7 @@ import { Flex, Box, Spinner } from "@chakra-ui/react";
 import { ErrorIcon, ValidateIcon, Alert, InfoCircle, Warning } from "../../theme/components/icons/index";
 
 const stylesMap = {
-  success: { color: "flatsuccess", bg: "galt2" },
+  success: { color: "flatsuccess", bg: "white", borderColor: "flatsuccess", borderWidth: 1 },
   error: { color: "flaterror", bg: "galt2" },
   warning: { color: "warning2", bg: "white", borderColor: "warning2", borderWidth: 1 },
   info: { color: "plaininfo", bg: "white", borderColor: "plaininfo", borderWidth: 1 },
