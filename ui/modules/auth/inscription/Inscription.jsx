@@ -18,14 +18,13 @@ import {
   RadioGroup,
   Radio,
   Heading,
-  CloseButton,
 } from "@chakra-ui/react";
 import { _post } from "../../../common/httpClient";
-import { SiretBlock } from "./SiretBlock";
-import { UaiBlock } from "./UaiBlock";
-import { Checkbox } from "../../../theme/components/icons";
 import { CONTACT_ADDRESS } from "../../../common/constants/product";
-import { useEffect } from "react";
+import { InscriptionOF } from "./InscriptionOF";
+import { InscriptionPilot } from "./InscriptionPilot";
+import { InscriptionReseau } from "./InscriptionReseau";
+import Ribbons from "../../../components/Ribbons/Ribbons";
 
 const typeCompte = {
   of: {
@@ -49,11 +48,6 @@ const typeCompte = {
 export const Inscription = ({ onSucceeded, ...props }) => {
   const [step, setStep] = useState(0);
   const [entrepriseData, setEntrepriseData] = useState(null);
-  const [isOpen, setIsOpen] = useState(true);
-
-  useEffect(() => {
-    if (entrepriseData?.step === 2) setStep(2);
-  }, [entrepriseData]);
 
   const { values, handleChange, handleSubmit, errors, touched, setFieldValue, setErrors } = useFormik({
     initialValues: {
@@ -192,27 +186,27 @@ export const Inscription = ({ onSucceeded, ...props }) => {
           )}
           {step === 1 && (
             <>
-              <Text fontWeight="bold">
-                {values.type === "of" ? (
-                  <> Vous êtes un CFA ou organisme de formation.</>
-                ) : (
-                  <>Vous représentez {typeCompte[values.type].text.toLowerCase()}</>
-                )}
-              </Text>
-              {values.type === "of" ? (
-                <UaiBlock
-                  {...{ values, errors, touched, setFieldValue }}
-                  organismeFormation={values.type === "of"}
-                  onFetched={(result) => {
-                    setEntrepriseData(result);
+              {values.type === "of" && (
+                <InscriptionOF
+                  onEndOfSpecific={({ siret, ...rest }) => {
+                    setFieldValue("siret", siret);
+                    setEntrepriseData(rest);
                   }}
                 />
-              ) : (
-                <SiretBlock
-                  {...{ values, errors, touched, setFieldValue }}
-                  organismeFormation={values.type === "of"}
-                  onFetched={(result) => {
-                    setEntrepriseData(result);
+              )}
+              {values.type === "pilot" && (
+                <InscriptionPilot
+                  onEndOfSpecific={({ siret, ...rest }) => {
+                    setFieldValue("siret", siret);
+                    setEntrepriseData(rest);
+                  }}
+                />
+              )}
+              {values.type === "reseau_of" && (
+                <InscriptionReseau
+                  onEndOfSpecific={({ siret, ...rest }) => {
+                    setFieldValue("siret", siret);
+                    setEntrepriseData(rest);
                   }}
                 />
               )}
@@ -220,22 +214,19 @@ export const Inscription = ({ onSucceeded, ...props }) => {
           )}
           {step === 2 && (
             <>
-              <HStack spacing="2" border="1px solid" borderColor="flatsuccess" display={isOpen ? "flex" : "none"}>
-                <Box p="2" h="12vh" bg="flatsuccess">
-                  <Checkbox color="white" />
-                </Box>
-                <Box flex="1" alignSelf="start">
-                  <Text fontSize="20px" fontWeight="bold" mt="2w">
+              <Ribbons variant="success" mt="0.5rem">
+                <Box ml={3} color="grey.800">
+                  <Text fontSize="20px" fontWeight="bold">
                     {entrepriseData.data.enseigne || entrepriseData.data.entreprise_raison_sociale}
                   </Text>
-                  <Text>
-                    Uai : {entrepriseData.data.uai} - SIRET : {entrepriseData.data.siret} (en activite)
-                  </Text>
+                  {values.type === "of" && (
+                    <Text>
+                      Uai : {entrepriseData.data.uai} - SIRET : {entrepriseData.data.siret} (en activité)
+                    </Text>
+                  )}
+                  {values.type !== "of" && <Text>SIRET : {entrepriseData.data.siret} (en activité)</Text>}
                 </Box>
-                <Box alignSelf="start" p="2">
-                  <CloseButton size="sm" onClick={() => setIsOpen(false)} />
-                </Box>
-              </HStack>
+              </Ribbons>
 
               <FormControl mt={4} py={2} isRequired isInvalid={errors.email && touched.email}>
                 <FormLabel>Votre courriel</FormLabel>

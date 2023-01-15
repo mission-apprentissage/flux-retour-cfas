@@ -26,7 +26,7 @@ const RegisterPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
-      <Flex w="100%" border="1px solid" mt={8} minH="40vh">
+      <Flex w="100%" mt={8} minH="40vh">
         {!succeeded && (
           <Inscription
             {...styleProps}
@@ -55,7 +55,7 @@ const RegisterPage = () => {
           </Center>
         )}
         {!succeeded && (
-          <Box border="1px solid" w="45%" p={10}>
+          <Box w="45%" p={10}>
             <Text fontWeight={700} fontSize={22}>
               Votre compte dédié
             </Text>
