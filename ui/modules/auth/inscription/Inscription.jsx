@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import NavLink from "next/link";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import generator from "generate-password-browser";
 import {
-  Flex,
   Box,
   Button,
   FormControl,
@@ -140,50 +138,6 @@ export const Inscription = ({ onSucceeded, ...props }) => {
               </Box>
             </HStack>
           )}
-          {step === "dontRecognizeUaiSiret" && (
-            <Box mt="2w">
-              <Text fontWeight={700}>Vous ne connaissez ni l’UAI ni le Siret de votre organisme.</Text>
-              <Text>
-                Vous pouvez le retrouver facilement en consultant le{" "}
-                <Link
-                  href={`https://referentiel.apprentissage.onisep.fr/`}
-                  fontWeight={700}
-                  color="bluefrance"
-                  whiteSpace="nowrap"
-                >
-                  Référentiel{" "}
-                </Link>
-                de l’apprentissage ou{" "}
-                <Link
-                  href={`https://annuaire-entreprises.data.gouv.fr/`}
-                  fontWeight={700}
-                  color="bluefrance"
-                  whiteSpace="nowrap"
-                >
-                  l’Annuaire{" "}
-                </Link>
-                des entreprises. Vous pouvez aussi consulter la{" "}
-                <Link
-                  href={`https://www.notion.so/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0`}
-                  fontWeight={700}
-                  color="bluefrance"
-                  whiteSpace="nowrap"
-                >
-                  FAQ
-                </Link>{" "}
-                du tableau de bord.
-              </Text>
-              <br />
-              <Link
-                onClick={() => setStep(0)}
-                color="bluefrance"
-                borderBottom="1px solid"
-                _hover={{ cursor: "pointer", textDecoration: "none", borderBottom: "2px solid" }}
-              >
-                Retour à l’étape précédente
-              </Link>
-            </Box>
-          )}
           {step === 1 && (
             <>
               {values.type === "of" && (
@@ -317,28 +271,6 @@ export const Inscription = ({ onSucceeded, ...props }) => {
           </HStack>
         )}
       </Box>
-      <Flex flexGrow={1}>
-        <Text mt={8} fontSize="1rem">
-          <Link
-            href="#"
-            borderBottom="1px solid"
-            as={NavLink}
-            onClick={() => setStep("dontRecognizeUaiSiret")}
-            color="bluefrance"
-            ml={3}
-            _hover={{ textDecoration: "none" }}
-          >
-            {step !== "dontRecognizeUaiSiret" &&
-              entrepriseData?.state === "manyUaiDetected" &&
-              "Je ne reconnais pas mon organisme"}
-            {values.type === "of" &&
-              step !== "dontRecognizeUaiSiret" &&
-              entrepriseData?.state !== "manyUaiDetected" &&
-              "Je ne connais ni mon UAI ni mon Siret"}
-            {values.type === "reseau_of" && "Je connais pas mon Réseau"}
-          </Link>
-        </Text>
-      </Flex>
     </Box>
   );
 };
