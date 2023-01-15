@@ -30,7 +30,7 @@ export class EffectifsAbandons extends Indicator {
       statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
       date_abandon: item.statut_apprenant_at_date.date_statut,
       historique_statut_apprenant: JSON.stringify(
-        item.historique_statut_apprenant.map((item) => ({
+        item.apprenant.historique_statut.map((item) => ({
           date: item.date_statut,
           statut: getStatutApprenantNameFromCode(item.valeur_statut),
         }))

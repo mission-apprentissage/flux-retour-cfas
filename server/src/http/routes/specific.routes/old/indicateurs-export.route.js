@@ -3,41 +3,19 @@ import { Parser } from "json2csv";
 import Joi from "joi";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../../common/utils/anneeScolaireUtils.js";
-import { tdbRoles } from "../../../../common/roles.js";
 import {
   getExportAnonymizedEventNameFromFilters,
   USER_EVENTS_TYPES,
 } from "../../../../common/constants/userEventsConstants.js";
 import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
-
-const filterQueryForNetworkRole = (req) => {
-  if (req.user?.permissions.includes(tdbRoles.network)) {
-    req.query.etablissement_reseaux = req.user.network;
-  }
-};
-
-const filterQueryForCfaRole = (req) => {
-  if (req.user?.permissions.includes(tdbRoles.cfa)) {
-    req.query.uai_etablissement = req.user?.username;
-  }
-};
-
-const applyUserRoleFilter = (req, _res, next) => {
-  // users with network role should not be able to see data for other reseau
-  filterQueryForNetworkRole(req);
-
-  // users with cfa role should not be able to see data for other cfas
-  filterQueryForCfaRole(req);
-
-  next();
-};
+import { ObjectId } from "mongodb";
+import { findOrganismeById } from "../../../../common/actions/organismes/organismes.actions.js";
 
 const commonEffectifsFilters = {
+  organisme_id: Joi.string().required(),
   etablissement_num_region: Joi.string().allow(null, ""),
   etablissement_num_departement: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().allow(null, ""),
-  uai_etablissement: Joi.string().allow(null, ""),
-  siret_etablissement: Joi.string().allow(null, ""),
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
@@ -48,18 +26,23 @@ export default ({ effectifs }) => {
    * Export the anonymized effectifs lists for input period & query
    */
   router.get(
-    "/export-csv-list",
-    applyUserRoleFilter,
+    "/",
     tryCatch(async (req, res) => {
-      const { date: dateFromParams, ...filtersFromBody } = await Joi.object({
+      const {
+        date: dateFromParams,
+        organisme_id,
+        ...filtersFromBody
+      } = await Joi.object({
         date: Joi.date().required(),
-        namedDataMode: Joi.boolean(),
         ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
 
-      //   const namedDataListMode = namedDataMode ? Boolean(namedDataMode) : false;
       const date = new Date(dateFromParams);
-      const filters = { ...filtersFromBody, annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } };
+      const filters = {
+        ...filtersFromBody,
+        organisme_id: ObjectId(organisme_id),
+        annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
+      };
 
       // create user event
       await createUserEvent({
@@ -69,7 +52,18 @@ export default ({ effectifs }) => {
         data: req.query,
       });
 
+      const organisme = await findOrganismeById(organisme_id);
       const dataList = await effectifs.getDataListEffectifsAtDate(date, filters);
+
+      const dataListWithOrganismeInfo = dataList.map((item) => ({
+        ...item,
+        organisme_uai: organisme?.uai,
+        organisme_siret: organisme?.siret,
+        organisme_nom: organisme?.nom,
+        organisme_reseaux: organisme?.reseaux?.join(", "),
+        organisme_region: organisme?.adresse?.region,
+        organisme_departement: organisme?.adresse?.departement,
+      }));
 
       // Parse to french localized CSV with specific fields order & labels (; as delimiter and UTF8 using withBOM)
       const DEFAULT_FIELDS = [
@@ -79,19 +73,19 @@ export default ({ effectifs }) => {
         },
         {
           label: "Intitulé de la formation",
-          value: "libelle_long_formation",
+          value: "formation.libelle_long",
         },
         {
           label: "Code formation diplôme",
-          value: "formation_cfd",
+          value: "formation.cfd",
         },
         {
           label: "RNCP",
-          value: "formation_rncp",
+          value: "formation.rncp",
         },
         {
           label: "Année de la formation",
-          value: "annee_formation",
+          value: "formation.annee",
         },
         {
           label: "Date de début de la formation",
@@ -103,60 +97,45 @@ export default ({ effectifs }) => {
         },
         {
           label: "UAI de l’organisme de formation",
-          value: "uai_etablissement",
+          value: "organisme_uai",
         },
         {
           label: "SIRET de l’organisme de formation",
-          value: "siret_etablissement",
+          value: "organisme_siret",
         },
         {
           label: "Dénomination de l'organisme",
-          value: "nom_etablissement",
+          value: "organisme_nom",
         },
         {
           label: "Réseau(x)",
-          value: "etablissement_reseaux",
+          value: "organisme_reseaux",
         },
         {
           label: "Région de l'organisme",
-          value: "etablissement_nom_region",
+          value: "organisme_region",
         },
         {
           label: "Département de l'organisme",
-          value: "etablissement_nom_departement",
+          value: "organisme_departement",
         },
-        {
-          label: "Date de début du contrat en apprentissage",
-          value: "contrat_date_debut",
-        },
-        {
-          label: "Date de fin du contrat en apprentissage",
-          value: "contrat_date_fin",
-        },
-        {
-          label: "Date de rupture de contrat",
-          value: "contrat_date_rupture",
-        },
+        // TODO Voir sous quelle forme sortir la listes contrats en V3 (versus un seul contrat dans la V2)
+        // {
+        //   label: "Date de début du contrat en apprentissage",
+        //   value: "apprenants.contrats.date_debut",
+        // },
+        // {
+        //   label: "Date de fin du contrat en apprentissage",
+        //   value: "apprenants.contrats.date_fin",
+        // },
+        // {
+        //   label: "Date de rupture de contrat",
+        //   value: "apprenants.contrats.date_rupture",
+        // },
       ];
 
-      // TODO remove named fields
-      //   const NAMED_FIELDS = [
-      //     {
-      //       label: "Nom apprenant",
-      //       value: "nom_apprenant",
-      //     },
-      //     {
-      //       label: "Prénom apprenant",
-      //       value: "prenom_apprenant",
-      //     },
-      //     {
-      //       label: "Date de naissance apprenant",
-      //       value: "date_de_naissance_apprenant",
-      //     },
-      //   ];
-
       const json2csvParser = new Parser({ fields: DEFAULT_FIELDS, delimiter: ";", withBOM: true });
-      const csv = await json2csvParser.parse(dataList);
+      const csv = await json2csvParser.parse(dataListWithOrganismeInfo);
       return res.attachment("export-csv-effectifs-anonymized-list.csv").send(csv);
     })
   );

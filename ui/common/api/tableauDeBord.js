@@ -129,7 +129,7 @@ export const fetchSearchFormations = async (filters) => {
 /* CSV export of effectifs anonymized data list  */
 export const fetchEffectifsDataListCsvExport = (filters) => {
   const queryParameters = qs.stringify(filters);
-  const url = `/api/effectifs-export/export-csv-list?${queryParameters}`;
+  const url = `/api/indicateurs-export?${queryParameters}`;
   return _get(url, { jsonResponse: false });
 };
 
