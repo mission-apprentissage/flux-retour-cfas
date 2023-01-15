@@ -126,7 +126,7 @@ export const hydrateEffectif = async (effectifData, options) => {
     }
 
     if (adresseInfo.code_commune_insee) {
-      convertedEffectif.apprenant.adresse.code_commune_insee = adresseInfo.code_commune_insee;
+      convertedEffectif.apprenant.adresse.code_insee = adresseInfo.code_commune_insee;
     }
 
     if (adresseInfo.commune) {

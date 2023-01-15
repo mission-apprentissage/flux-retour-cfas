@@ -116,6 +116,8 @@ export const validateEffectifObject = (effectif) => {
     }
   }
 
+  // TODO Suppression des erreurs sur date de naissance si nécéssaire
+
   return { ...compactObject(effectifMandate), validation_errors: effectifValidationErrors };
 };
 
@@ -369,7 +371,7 @@ export const updateEffectif = async (id, data, opt = { keepPreviousErrors: false
  * @param {*} id
  * @returns
  */
-export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
+export const updateEffectifAndLock = async (id, { apprenant, formation, validation_errors }) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
@@ -408,6 +410,7 @@ export const updateEffectifAndLock = async (id, { apprenant, formation }) => {
     {
       $set: {
         ...validateEffectif({ ...effectif, apprenant, formation }),
+        validation_errors,
         is_lock: newLocker,
         updated_at: new Date(),
       },
