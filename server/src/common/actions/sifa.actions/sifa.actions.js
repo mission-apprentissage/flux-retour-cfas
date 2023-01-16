@@ -38,9 +38,9 @@ export const generateSifa = async (organisme_id) => {
       SIT_N_1: effectif.apprenant.derniere_situation, // REQUIRED
       ETAB_N_1: effectif.apprenant.dernier_organisme_uai, // REQUIRED
       DIPLOME: formationBcn?.cfd || effectif.formation.cfd, // REQUIRED
-      DUR_FORM_THEO: formationOrganisme?.duree_formation_theorique ?? "TODO", // REQUIRED
+      DUR_FORM_THEO: formationOrganisme?.duree_formation_theorique, // REQUIRED  // TODO TO CONVERT TO MONTH
       DUR_FORM_REELLE: effectif.formation.duree_formation_relle, // REQUIRED
-      AN_FORM: effectif.formation.annee ?? "TODO", // REQUIRED
+      AN_FORM: effectif.formation.annee, // REQUIRED
       SIT_FORM: "", // REQUIRED //RESPONSABLE / FORMATEUR / RESPONSABLE_FORMATEUR / LIEU
       STATUT: "APP", // REQUIRED // STATUT courant // TODO
       OG: 24, // Unknown for now    // REQUIRED

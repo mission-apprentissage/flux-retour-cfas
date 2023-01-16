@@ -1,7 +1,7 @@
 import { defaultValuesAdresse } from "../model/json-schema/adresseSchema.js";
 import * as apiEntreprise from "../apis/ApiEntreprise.js";
-import departements from "../constants/departements.js";
-import { ACADEMIES } from "../constants/academiesConstants.js";
+import { ACADEMIES, DEPARTEMENTS } from "../constants/territoiresConstants.js";
+import { find } from "lodash-es";
 
 export const buildAdresseFromApiEntreprise = async (siret) => {
   const etablissementApiInfo = await apiEntreprise.getEtablissement(siret);
@@ -45,13 +45,19 @@ export const buildAdresseFromApiEntreprise = async (siret) => {
 };
 
 export const findDataByDepartementNum = (code_dept) => {
-  const data = departements[code_dept];
+  const data = find(DEPARTEMENTS, (departement) => departement.code === code_dept);
   if (!data) {
     return { nom_dept: null, nom_region: null, code_region: null, nom_academie: null, num_academie: null };
   }
 
-  const { nom_dept, nom_region, code_region, nom_academie, num_academie } = data;
-  return { nom_dept, nom_region, code_region, nom_academie, num_academie };
+  const { nom, region, academie } = data;
+  return {
+    nom_dept: nom,
+    nom_region: region.nom,
+    code_region: region.code,
+    nom_academie: academie.nom,
+    num_academie: academie.code,
+  };
 };
 
 export const buildAdresse = (adresse) => {

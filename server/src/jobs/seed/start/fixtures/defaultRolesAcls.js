@@ -63,8 +63,8 @@ export default {
   "organisme.statsonly": {
     name: "organisme.statsonly",
     type: "permission",
-    title: "Lecteur stats",
-    description: "Permission lecteur de stats d'organisme",
+    title: "Lecteur indicateurs",
+    description: "Permet de voir seulement les indicateurs d'organisme",
     acl: ["organisme", "organisme/tableau_de_bord"],
   },
   support: {

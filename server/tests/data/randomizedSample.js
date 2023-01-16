@@ -4,7 +4,7 @@ import { sampleLibelles } from "./sampleLibelles.js";
 import { subMonths, addYears } from "date-fns";
 import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
-import departements from "../../src/common/constants/departements.js";
+import { DEPARTEMENTS } from "../../src/common/constants/territoiresConstants.js";
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
@@ -22,11 +22,12 @@ const getRandomNature = () =>
   ]);
 
 const getRandomAdresseObject = () => {
-  const randomDepartement = departements[faker.helpers.arrayElement(Object.keys(departements))];
+  const DEPT_ARR = Object.values(DEPARTEMENTS);
+  const randomDepartement = DEPT_ARR[faker.helpers.arrayElement(DEPT_ARR)];
   return {
-    departement: randomDepartement.code_dept,
-    region: randomDepartement.code_region,
-    academie: randomDepartement.num_academie.toString(),
+    departement: randomDepartement.code,
+    region: randomDepartement.region.code,
+    academie: randomDepartement.academie.code,
   };
 };
 export const getRandomPeriodeFormation = (anneeScolaire) => {

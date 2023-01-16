@@ -8,8 +8,14 @@ import { findRoleByName } from "./roles.actions.js";
  * @param {*} permissionProps
  * @returns
  */
-export const createPermission = async ({ organisme_id = null, userEmail, role, pending = true, custom_acl = [] }) => {
-  const roleDb = await findRoleByName(role);
+export const createPermission = async ({
+  organisme_id = null,
+  userEmail,
+  roleName,
+  pending = true,
+  custom_acl = [],
+}) => {
+  const roleDb = await findRoleByName(roleName);
   if (!roleDb) {
     throw new Error("Role doesn't exist");
   }
@@ -58,6 +64,14 @@ export const findActivePermissionsByRoleName = async (organisme_id, roleName, pr
   return await findPermissionsByQuery({ organisme_id, role: roleDb._id, pending: false }, projection);
 };
 
+export const findPermissionByUserEmail = async (organisme_id, userEmail, projection = {}) => {
+  return permissionsDb().findOne({ organisme_id, userEmail: userEmail.toLowerCase() }, { projection });
+};
+
+export const findPermissionsByUserEmail = async ({ userEmail }, projection = {}) => {
+  return await permissionsDb().find({ userEmail: userEmail.toLowerCase() }, { projection }).toArray();
+};
+
 export const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName = "organisme.admin") => {
   const roleDb = await findRoleByName(roleName, { _id: 1 });
   if (!roleDb) {
@@ -73,20 +87,22 @@ export const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName
  * @param {*} permissionProps
  * @returns
  */
-export const updatePermission = async ({ organisme_id, userEmail, roleId, custom_acl = [] }) => {
-  const permission = await permissionsDb().findOne({ organisme_id, userEmail: userEmail.toLowerCase() });
-  if (!permission) {
-    throw new Error(`Unable to find permission`);
+export const updatePermission = async ({ organisme_id, userEmail, roleName, custom_acl = [] }) => {
+  const roleDb = await findRoleByName(roleName);
+  if (!roleDb) {
+    throw new Error("Role doesn't exist");
   }
 
-  const role = typeof id === "string" ? ObjectId(roleId) : roleId;
-  if (!ObjectId.isValid(role)) throw new Error("Invalid role id passed");
+  const permission = await findPermissionByUserEmail(organisme_id, userEmail.toLowerCase());
+  if (!permission) {
+    throw new Error(`Unable to find permission for userEmail ${userEmail} and organisme_id ${organisme_id}`);
+  }
 
   const updated = await permissionsDb().findOneAndUpdate(
     { _id: permission._id },
     {
       $set: {
-        role,
+        role: roleDb._id,
         custom_acl,
         updated_at: new Date(),
       },
@@ -103,12 +119,11 @@ export const updatePermission = async ({ organisme_id, userEmail, roleId, custom
  * @returns
  */
 export const updatePermissionPending = async ({ organisme_id, userEmail, pending }) => {
-  const permission = await permissionsDb().findOne({
-    organisme_id: ObjectId(organisme_id),
-    userEmail: userEmail.toLowerCase(),
-  });
+  const permission = await findPermissionByUserEmail(ObjectId(organisme_id), userEmail.toLowerCase());
   if (!permission) {
-    throw new Error(`Unable to find permission`);
+    throw new Error(
+      `Unable to find permission for userEmail ${userEmail.toLowerCase()} and organisme_id ${organisme_id}`
+    );
   }
 
   const updated = await permissionsDb().findOneAndUpdate(
@@ -126,15 +141,37 @@ export const updatePermissionPending = async ({ organisme_id, userEmail, pending
 };
 
 /**
- * Méthode de suppression de permission
+ * Méthode de mise à jour d'activation d'acces
  * @param {*} permissionProps
  * @returns
  */
-export const removePermission = async ({ _id }) => {
-  const permission = await permissionsDb().findOne({ _id });
-  if (!permission) {
-    throw new Error(`Unable to find permission`);
+export const updatePermissionsPending = async ({ userEmail, pending }) => {
+  const permissions = await findPermissionsByUserEmail({ userEmail: userEmail.toLowerCase() }, { _id: 1 });
+  if (!permissions && !permissions.length) {
+    throw new Error(`Unable to find permissions for userEmail ${userEmail.toLowerCase()}`);
   }
 
-  await permissionsDb().deleteOne({ _id });
+  await permissionsDb().updateMany(
+    { _id: { $in: [permissions.map(({ _id }) => _id)] } },
+    {
+      $set: {
+        pending,
+        updated_at: new Date(),
+      },
+    },
+    { returnDocument: "after" }
+  );
+};
+
+/**
+ * Méthode de suppression de permission
+ * @param {ObjectId} _id
+ * @returns
+ */
+export const removePermission = async (_id) => {
+  const permission = await permissionsDb().findOne({ _id });
+  if (!permission) {
+    throw new Error(`Unable to find permission ${_id}`);
+  }
+  return permissionsDb().deleteOne({ _id });
 };

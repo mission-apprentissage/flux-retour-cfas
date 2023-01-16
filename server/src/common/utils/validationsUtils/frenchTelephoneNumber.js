@@ -13,4 +13,21 @@ export const validateFrenchTelephoneNumber = (value) => {
   return schema.validate(value);
 };
 
+// TODO a remove et remplacer par telephoneConverter partout ?
 export const transformToInternationalNumber = (value) => `33${value.replace(/^0/, "")}`;
+
+export const telephoneConverter = (telephone, tryStartByZero = false) => {
+  let phone = telephone.replaceAll("-", "").replaceAll(".", "").replaceAll(" ", "");
+
+  if (phone.length === 10 && phone[0] === "0") {
+    return `+33${phone.substr(1, 9)}`;
+  }
+
+  // Gestion des téléphones au format 033xxxxxxxxx
+  if (phone.length === 12 && phone[0] === "0") {
+    return `+33${phone.substr(3, 12)}`;
+  }
+
+  if (!tryStartByZero) phone = telephoneConverter(`0${phone}`, true);
+  return phone;
+};

@@ -34,7 +34,7 @@ runScript(async () => {
         $set: {
           etablissement_num_departement: info.uaiCode,
           etablissement_nom_departement: info.nom,
-          etablissement_num_region: info.codeRegion,
+          etablissement_num_region: info.region?.code,
           etablissement_nom_region: info.region?.nom,
         },
       }

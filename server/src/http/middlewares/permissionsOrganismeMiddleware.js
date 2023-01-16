@@ -49,8 +49,8 @@ export default (acls) =>
 
       if (user.permissions.is_cross_organismes) {
         if (
-          !user.codes_region.includes(organisme.adresse.region) ||
-          !user.codes_academie.includes(organisme.adresse.academie) ||
+          !user.codes_region.includes(organisme.adresse.region) &&
+          !user.codes_academie.includes(organisme.adresse.academie) &&
           !user.codes_departement.includes(organisme.adresse.departement)
         ) {
           throw Boom.unauthorized("Accès non autorisé");

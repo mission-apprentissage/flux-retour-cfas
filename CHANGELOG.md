@@ -1,3 +1,53 @@
+# [3.1.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.5...v3.1.0-beta.6) (2023-01-16)
+
+
+### Bug Fixes
+
+* oops explode dept code ([74c911f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/74c911fb7b0ea24e8bc8d650854da8c6b18d7a78))
+* test ([7d24565](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7d24565ecac1f2ac34c768125adc54c3c410b3fd))
+
+# [3.1.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.4...v3.1.0-beta.5) (2023-01-16)
+
+
+### Bug Fixes
+
+* **server:** add reRunEngine effectifs job & fixes on adresse / telephone in hydrate effectifs ([#2390](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2390)) ([f662d47](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f662d473e9f72133b4882d8a709cba9937722a79))
+
+# [3.1.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.3...v3.1.0-beta.4) (2023-01-15)
+
+
+### Features
+
+* created floating button ([#2391](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2391)) ([ffa28c6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ffa28c6bfc014d90d04a094be5043696552a8410))
+
+# [3.1.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.2...v3.1.0-beta.3) (2023-01-15)
+
+
+### Features
+
+* **fs:** base parcours d'inscription et de connexion ([#2385](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2385)) ([d9f14c5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/d9f14c51ca42f24245472ccf38c25fcaf4cf9404))
+
+# [3.1.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.1...v3.1.0-beta.2) (2023-01-13)
+
+
+### Features
+
+* sgt/feat/share organism ([#2382](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2382)) ([8ed3ae6](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8ed3ae65759c680b5fd753e27b43828786be2d79))
+
+# [3.1.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.2-beta.1...v3.1.0-beta.1) (2023-01-13)
+
+
+### Features
+
+* **server:** add force option to migration dossiersApprenants job ([#2388](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2388)) ([f4edf7f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f4edf7f84a4c0d2c8c69ff9bdcb3ba86327e7eae))
+
+## [3.0.2-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.1...v3.0.2-beta.1) (2023-01-13)
+
+
+### Bug Fixes
+
+* **server:** remove console log useless ([#2384](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2384)) ([a6a1687](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a6a1687e7d6aa6b96bb2836f9470c02f1e3b90c5))
+
 ## [3.0.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.0...v3.0.1) (2023-01-13)
 
 

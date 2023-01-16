@@ -3,10 +3,8 @@ import { integer, object, objectId, string, boolean, arrayOf, date } from "../js
 import { schemaValidation } from "../../utils/schemaUtils.js";
 import { siretSchema, passwordSchema, uaiSchema } from "../../utils/validationUtils.js";
 import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
-import { REGIONS } from "../../constants/territoiresConstants.js";
-import { ACADEMIES } from "../../constants/academiesConstants.js";
+import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { ORGANISMES_APPARTENANCE, USER_ACCOUNT_STATUS } from "../../constants/usersConstants.js";
-import { DEPARTEMENT_CODES } from "../../constants/departements.TRUELIST.js";
 
 export const collectionName = "usersMigration";
 
@@ -61,7 +59,7 @@ export const schema = object(
       string({
         example: "1 Ain, 99 Étranger",
         pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789])$",
-        enum: DEPARTEMENT_CODES.map((code) => code.replace(/^(0){1}/, "")),
+        enum: DEPARTEMENTS.map(({ code }) => code),
         maxLength: 3,
         minLength: 1,
       }),

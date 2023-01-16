@@ -123,6 +123,24 @@ export const seedSampleOrganismes = async () => {
     });
     logger.info(`organisme C created`);
   }
+  const organismeZ = await findOrganismeByUai("0261098C");
+  if (!organismeZ) {
+    await createOrganisme({
+      uai: "0261098C",
+      sirets: ["34497770700027"],
+      siret: "34497770700027",
+      adresse: {
+        departement: "26",
+        region: "84",
+        academie: "8",
+      },
+      reseaux: ["MFR"],
+      erps: ["gesti"],
+      nature: "responsable_formateur",
+      nom: "MAISON FAMILIALE RURALE CFA - 26300 CHATEAUNEUF SUR ISERE",
+    });
+    logger.info(`organisme Z created`);
+  }
 
   const organismeD = await findOrganismeByUai("0780762E");
   if (!organismeD) {
@@ -218,8 +236,27 @@ export const seedSampleUsers = async () => {
     await userAfterCreate({ user: userOfR, pending: false, notify: false, asRole: "organisme.admin" });
     // Get organisme id for user
     const organismeOff = await findOrganismeByUai("0142321X");
-    await addContributeurOrganisme(organismeOff._id, userOfR.email, "organisme.admin", false);
+    await addContributeurOrganisme(organismeOff._id, userOfR.email, "organisme.statsonly", false);
     logger.info(`User ofr created`);
+  }
+
+  // Create user OF2
+  if (!(await getUser("of2@test.fr"))) {
+    const userOf = await createUser(
+      { email: "of2@test.fr", password: "Secret!Password1" },
+      {
+        nom: "of1",
+        prenom: "test",
+        description: "BTP CFA 16 - CHASSENEUIL SUR BONNIEURE",
+        roles: ["of"],
+        account_status: "FORCE_RESET_PASSWORD",
+        siret: "30107533900061",
+        uai: "0161212F",
+        organisation: "ORGANISME_FORMATION",
+      }
+    );
+    await userAfterCreate({ user: userOf, pending: false, notify: false, asRole: "organisme.admin" });
+    logger.info(`User of2 created`);
   }
 
   // Create user Reseau

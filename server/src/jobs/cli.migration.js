@@ -12,6 +12,7 @@ import {
 import { migrateDossiersApprenantsToDossiersApprenantsMigration } from "./patches/refacto-migration/dossiersApprenants/dossiersApprenants.migration.js";
 import { migrateUsersToArchives } from "./patches/refacto-migration/users/users.archive.migration.js";
 import { cleanUserValidation } from "./patches/refacto-migration/users/users.clean.migration.js";
+import { reRunEngineEffectifs } from "./patches/refacto-migration/rerun-engine/rerun-engine.effectifs.js";
 
 // TEMP CLI Jobs
 // TODO Remove after big refacto migration
@@ -73,14 +74,27 @@ cli
 cli
   .command("migrate:dossiersApprenants")
   .description("Migration des dossiersApprenants vers la collection dossiersApprenantsMigration")
+  .option("--force [bool]", "Force la suppression des dossiersApprenantsMigration et des effectifs déja existants")
   .option("--sampleNbUais <int>", "Nb de dossiers à traiter")
   .option("--uai <string>", "UAI spécifique à traiter")
   .option("--numRegion <string>", "Région spécifique à traiter")
   .option("--numAcademie <string>", "Académie spécifique à traiter")
-  .action(async ({ sampleNbUais, uai, numRegion, numAcademie }) => {
+  .action(async ({ force, sampleNbUais, uai, numRegion, numAcademie }) => {
     runScript(async () => {
-      return migrateDossiersApprenantsToDossiersApprenantsMigration(sampleNbUais, uai, numRegion, numAcademie);
+      return migrateDossiersApprenantsToDossiersApprenantsMigration(force, sampleNbUais, uai, numRegion, numAcademie);
     }, "refacto-migration-dossiersApprenants");
+  });
+
+/**
+ * Job de relancement du moteur pour update des effectifs
+ */
+cli
+  .command("reRunEngine:effectifs")
+  .description("Relancement de l'engine pour les effectifs")
+  .action(async () => {
+    runScript(async () => {
+      return reRunEngineEffectifs();
+    }, "refacto-migration-rerun-effectifs-engine");
   });
 
 /**

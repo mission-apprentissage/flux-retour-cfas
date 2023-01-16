@@ -21,7 +21,11 @@ import { responseWithCookie } from "../../../common/utils/httpUtils.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { authMiddleware } from "../../middlewares/authMiddleware.js";
 import { userAfterCreate } from "../../../common/actions/users.afterCreate.actions.js";
-import { fetchOrganismeWithSiret } from "../../../common/apis/apiReferentielMna.js";
+import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
+import { siretSchema } from "../../../common/utils/validationUtils.js";
+import { algoUAI } from "../../../common/utils/uaiUtils.js";
+import logger from "../../../common/logger.js";
+import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -53,19 +57,33 @@ export default ({ mailer }) => {
   router.post(
     "/register",
     tryCatch(async ({ body }, res) => {
-      const { type, email, password, siret, nom, prenom, civility } = await Joi.object({
-        type: Joi.string().allow("pilot", "of", "reseau_of", "erp").required(),
+      const {
+        type,
+        email,
+        password,
+        siret,
+        uai: userUai,
+        nom,
+        prenom,
+        civility,
+        organismes_appartenance,
+      } = await Joi.object({
+        type: Joi.string().valid("pilot", "of", "reseau_of").required(),
         email: Joi.string().required(),
         password: Joi.string().required(),
         siret: Joi.string().required(),
+        uai: Joi.string().allow(null, ""),
         nom: Joi.string().required(),
         prenom: Joi.string().required(),
         civility: Joi.string().required(),
+        organismes_appartenance: Joi.string()
+          .valid(...Object.keys(ORGANISMES_APPARTENANCE))
+          .required(),
       }).validateAsync(body, { abortEarly: false });
 
       const alreadyExists = await getUser(email.toLowerCase());
       if (alreadyExists) {
-        throw Boom.conflict(`Unable to create`, { message: `email already in use` });
+        throw Boom.conflict(`email already in use`, { message: `email already in use` });
       }
 
       let uai = null;
@@ -76,6 +94,13 @@ export default ({ mailer }) => {
         } else {
           throw Boom.badRequest("Something went wrong");
         }
+        if (userUai !== uai) {
+          // TODO FIABILISATION
+          logger.error(
+            `POSSIBLE FIABILISATION PAR UN UTILISATUER ${email} : uai referentiel ${uai} - uai utilisateur ${uai} - siret ${siret}`
+          );
+        }
+        uai = userUai;
       }
 
       const user = await createUser(
@@ -86,6 +111,7 @@ export default ({ mailer }) => {
           nom,
           prenom,
           civility,
+          organisation: organismes_appartenance,
           ...(uai ? { uai } : {}),
         }
       );
@@ -101,28 +127,35 @@ export default ({ mailer }) => {
   );
 
   router.post(
-    "/siret-adresse",
+    "/uai-siret-adresse",
     tryCatch(async ({ body }, res) => {
-      const { siret, organismeFormation } = await Joi.object({
-        siret: Joi.string().required(),
+      const {
+        uai: userUai,
+        siret: userSiret,
+        organismeFormation,
+      } = await Joi.object({
+        siret: Joi.string(),
+        uai: Joi.string(),
         organismeFormation: Joi.boolean().default(false),
       }).validateAsync(body, { abortEarly: false });
 
-      const { result, messages } = await findDataFromSiret(siret, false);
-
-      if (Object.keys(result).length === 0) {
-        return res.json({ result, messages });
+      let siret = null;
+      if (userSiret) {
+        const { value, error: errorOnUserSiret } = siretSchema().validate(userSiret);
+        if (errorOnUserSiret)
+          return res.json([
+            { uai, siret: null, result: [], messages: { error: `Le siret ${siret} n'est pas valide` } },
+          ]);
+        siret = value;
       }
-
       let uai = null;
-      if (organismeFormation) {
-        const resp = await fetchOrganismeWithSiret(siret);
-        if (resp) {
-          uai = resp.uai;
-        }
+      if (userUai) {
+        if (!algoUAI(userUai))
+          return res.json([{ uai, siret: null, result: [], messages: { error: `L'UAI ${userUai} n'est pas valide` } }]);
+        uai = userUai;
       }
 
-      return res.json({
+      const buildPublicResponse = ({ uai, siret, result, messages }) => ({
         result: {
           enseigne: result.enseigne,
           entreprise_raison_sociale: result.entreprise_raison_sociale,
@@ -133,10 +166,43 @@ export default ({ mailer }) => {
           localite: result.localite,
           ferme: result.ferme,
           secretSiret: result.secretSiret || false,
+          siret,
           uai,
         },
         messages,
       });
+
+      if (organismeFormation) {
+        if (uai) {
+          const { organismes: organismesResp } = await fetchOrganismesWithUai(uai);
+          if (!organismesResp.length)
+            return res.json([
+              { uai, siret: null, result: [], messages: { error: `L'uai ${uai} n'a pas été retrouvé` } },
+            ]);
+
+          const organismes = organismesResp.map(({ siret, uai }) => ({ siret, uai }));
+          const result = [];
+          for (const organisme of organismes) {
+            const responseFromApiEntreprise = await findDataFromSiret(organisme.siret, false);
+            result.push(
+              buildPublicResponse({ uai: organisme.uai, siret: organisme.siret, ...responseFromApiEntreprise })
+            );
+          }
+          return res.json(result);
+        } else {
+          const resp = await fetchOrganismeWithSiret(siret);
+          if (resp) {
+            uai = resp.uai;
+          }
+        }
+      }
+
+      const responseFromApiEntreprise = await findDataFromSiret(siret, false);
+      if (Object.keys(responseFromApiEntreprise.result).length === 0) {
+        return res.json([{ uai, siret, ...responseFromApiEntreprise }]);
+      }
+
+      return res.json([buildPublicResponse({ uai, siret, ...responseFromApiEntreprise })]);
     })
   );
 
@@ -188,6 +254,10 @@ export default ({ mailer }) => {
       if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP1") {
         throw Boom.badRequest("Something went wrong");
       }
+
+      // const codes_region = [result.num_region];
+      // const codes_academie = [result.num_academie];
+      // const codes_departement = [result.num_departement];
 
       await userAfterCreate({ user: userDb, mailer, asRole: type });
 

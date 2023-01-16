@@ -1,8 +1,8 @@
 import { HStack, Text, Tooltip } from "@chakra-ui/react";
 import React from "react";
-import { MonthSelect } from "../../../components/index.jsx";
-import { InfoLine } from "../../../theme/components/icons/InfoLine.js";
-import { useSimpleFiltersContext } from "../../mon-espace/landing/LandingOrganisme/SimpleFiltersContext.js";
+import { MonthSelect } from "../index.jsx";
+import { InfoLine } from "../../theme/components/icons/InfoLine.js";
+import { useSimpleFiltersContext } from "../../modules/mon-espace/landing/LandingOrganisme/SimpleFiltersContext.js";
 
 const DateWithTooltipSelector = ({ ...props }) => {
   const { filtersValues, filtersSetters } = useSimpleFiltersContext();

@@ -1,13 +1,9 @@
 import React from "react";
-import { Heading, Button, Badge, HStack, Text, useDisclosure, Flex, Box, Spinner } from "@chakra-ui/react";
-
-import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
+import { Heading, Badge, HStack, Text, Flex, Box, Spinner } from "@chakra-ui/react";
 
 import { StatusBadge } from "../../../components/StatusBadge/StatusBadge";
 import LivePeopleAvatar from "./LivePeopleAvatar";
-import { InviteModal } from "./InviteModal";
 
-import { AvatarPlus } from "../../../theme/components/icons";
 import { useRecoilValue } from "recoil";
 import { autoSaveStatusAtom } from "../formEngine/hooks/useAutoSave";
 import { CheckIcon } from "@chakra-ui/icons";
@@ -35,7 +31,6 @@ const AutoSaveBadge = () => {
 };
 
 const DossierHeader = ({ dossier }) => {
-  const inviteModal = useDisclosure();
   return (
     <Flex mt={6} flexDirection="column">
       <HStack w="full">
@@ -46,22 +41,6 @@ const DossierHeader = ({ dossier }) => {
         </Heading>
         <HStack>
           <LivePeopleAvatar />
-          {hasContextAccessTo(dossier, "dossier/page_parametres/gestion_acces") && (
-            <>
-              <Button size="md" onClick={inviteModal.onOpen} variant="secondary">
-                <AvatarPlus />
-                <Text as="span" ml={2}>
-                  Partager
-                </Text>
-              </Button>
-              <InviteModal
-                title="Partager le dossier"
-                size="md"
-                isOpen={inviteModal.isOpen}
-                onClose={inviteModal.onClose}
-              />
-            </>
-          )}
         </HStack>
       </HStack>
       <Box>

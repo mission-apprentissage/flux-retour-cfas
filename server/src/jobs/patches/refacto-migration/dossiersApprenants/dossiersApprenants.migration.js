@@ -34,17 +34,20 @@ const LOG_ACTIONS = {
  * Ce script effectue la migration de la collection dossiersApprenants vers la nouvelle collection DossiersApprenantsMigration
  */
 export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (
+  force = false,
   sample = 0,
   uai = null,
   numRegion = null,
   numAcademie = null
 ) => {
-  // Clear
-  logger.info(`Suppression des dossiersApprenantsMigration et effectifs existants...`);
-  await dossiersApprenantsMigrationDb().deleteMany();
-  await effectifsDb().deleteMany();
+  // Clear des dossiersMigration et effectifs existants
+  if (force) {
+    logger.info(`Suppression des dossiersApprenantsMigration et effectifs existants...`);
+    await dossiersApprenantsMigrationDb().deleteMany();
+    await effectifsDb().deleteMany();
+  }
 
-  logger.info("Migration des dossiersApprenants vers la collection dossiersApprenantsMigration");
+  logger.info("Migration des dossiersApprenants vers la collection dossiersApprenantsMigration et effectifs");
 
   // Parse all distinct uais in dossiersApprenants
   let allUaisInDossiers = await dossiersApprenantsDb().distinct("uai_etablissement");

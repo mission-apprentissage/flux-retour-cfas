@@ -232,9 +232,11 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
 
 export const structureUser = async (user) => {
   const permissions = pick(user, ["is_admin", "is_cross_organismes"]);
-  const rolesList = await rolesDb()
-    .find({ _id: { $in: user.roles } })
-    .toArray();
+  const rolesList = user.roles?.length
+    ? await rolesDb()
+        .find({ _id: { $in: user.roles } })
+        .toArray()
+    : [];
   const rolesAcl = rolesList.reduce((acc, { acl }) => [...acc, ...acl], []);
 
   const activePermissions = await findActivePermissionsForUser({ userEmail: user.email }, { organisme_id: 1, _id: 0 });
@@ -272,8 +274,8 @@ export const structureUser = async (user) => {
     codes_academie: user.codes_academie, // TODO [tech] send full académie
     codes_departement: user.codes_departement, // TODO [tech] send full department
     account_status: user.account_status,
-    roles: rolesList,
-    acl: uniq([...rolesAcl, ...user.custom_acl, ...specialAcl]),
+    roles: rolesList.map(({ name }) => name),
+    acl: uniq([...rolesAcl, ...(user?.custom_acl ? user.custom_acl : []), ...specialAcl]),
     orign_register: user.orign_register,
     has_accept_cgu_version: user.has_accept_cgu_version,
   };

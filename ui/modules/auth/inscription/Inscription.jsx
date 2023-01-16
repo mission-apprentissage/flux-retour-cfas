@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import NavLink from "next/link";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import generator from "generate-password-browser";
 import {
-  Flex,
   Box,
   Button,
   FormControl,
@@ -20,24 +18,28 @@ import {
   Heading,
 } from "@chakra-ui/react";
 import { _post } from "../../../common/httpClient";
-import { SiretBlock } from "./SiretBlock";
+import { CONTACT_ADDRESS } from "../../../common/constants/product";
+import { InscriptionOF } from "./InscriptionOF";
+import { InscriptionPilot } from "./InscriptionPilot";
+import { InscriptionReseau } from "./InscriptionReseau";
+import Ribbons from "../../../components/Ribbons/Ribbons";
 
 const typeCompte = {
   of: {
-    text: "Un Organisme de Formation",
+    text: "Un CFA ou organisme de formation",
     value: "of",
   },
   pilot: {
-    text: "Un Pilot (Dreets, Draaf, Académie, Conseil régional, Mission locale)",
+    text: "Un opérateur public (DREETS, DEETS, DRAAF, Académie, Conseil régional...)",
     value: "pilot",
   },
   reseau_of: {
-    text: "Une tête de réseau OF",
+    text: "Un réseau d'organismes de formation",
     value: "reseau_of",
   },
-  erp: {
-    text: " Un logiciel de gestion",
-    value: "erp",
+  autre: {
+    text: "Autre",
+    value: "autre",
   },
 };
 
@@ -50,9 +52,11 @@ export const Inscription = ({ onSucceeded, ...props }) => {
       type: "",
       email: "",
       siret: "",
+      uai: "",
       nom: "",
       civility: "",
       prenom: "",
+      organismes_appartenance: "",
     },
     validationSchema: Yup.object().shape({
       type: Yup.string().required("Requis"),
@@ -63,6 +67,8 @@ export const Inscription = ({ onSucceeded, ...props }) => {
           excludeEmptyString: true,
         })
         .required("Le siret est obligatoire"),
+      uai: Yup.string(),
+      organismes_appartenance: Yup.string(),
       nom: Yup.string().required("Votre nom est obligatoire"),
       civility: Yup.string().required("Votre civilité est obligatoire"),
       prenom: Yup.string().required("Votre prénom est obligatoire"),
@@ -83,7 +89,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
             onSucceeded();
           }
         } catch (e) {
-          if (e.messages?.details?.message === "email already in use") {
+          if (e.messages?.message === "email already in use") {
             setErrors({ email: "Ce courriel est déjà utilisé." });
           } else {
             console.error(e);
@@ -93,11 +99,10 @@ export const Inscription = ({ onSucceeded, ...props }) => {
       });
     },
   });
-
   return (
-    <Flex {...props}>
+    <Box {...props}>
       <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
-        Je n&apos;ai pas encore de compte
+        Créer votre compte
       </Heading>
       <Box>
         <Box>
@@ -112,7 +117,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
                         key={i}
                         value={item.value}
                         onChange={(e) => {
-                          setStep(1);
+                          setStep(item.value === "autre" ? 0 : 1);
                           handleChange(e);
                         }}
                         size="lg"
@@ -126,22 +131,65 @@ export const Inscription = ({ onSucceeded, ...props }) => {
               {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
             </FormControl>
           )}
-
+          {values.type === "autre" && (
+            <HStack ml="4w" mt="2w">
+              <Box p="2" h="7vh" borderLeft="4px solid #6A6AF4"></Box>
+              <Box>
+                <Text>Contacter l&apos;équipe :</Text>
+                <Link fontWeight={700} href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
+                  {CONTACT_ADDRESS}
+                </Link>{" "}
+              </Box>
+            </HStack>
+          )}
           {step === 1 && (
             <>
-              <Text fontWeight="bold">Vous représentez {typeCompte[values.type].text.toLowerCase()}</Text>
-              <SiretBlock
-                {...{ values, errors, touched, setFieldValue }}
-                organismeFormation={values.type === "of"}
-                onFetched={(result) => {
-                  setEntrepriseData(result);
-                }}
-              />
+              {values.type === "of" && (
+                <InscriptionOF
+                  onEndOfSpecific={(result) => {
+                    setFieldValue("uai", result.data.uai);
+                    setFieldValue("siret", result.data.siret);
+                    setFieldValue("organismes_appartenance", "ORGANISME_FORMATION");
+                    setEntrepriseData(result);
+                  }}
+                />
+              )}
+              {values.type === "pilot" && (
+                <InscriptionPilot
+                  onEndOfSpecific={({ organismes_appartenance, result }) => {
+                    setFieldValue("siret", result.data.siret);
+                    setFieldValue("organismes_appartenance", organismes_appartenance);
+                    setEntrepriseData(result);
+                  }}
+                />
+              )}
+              {values.type === "reseau_of" && (
+                <InscriptionReseau
+                  onEndOfSpecific={(result) => {
+                    setFieldValue("siret", result.data.siret);
+                    setFieldValue("organismes_appartenance", "TETE_DE_RESEAU");
+                    setEntrepriseData(result);
+                  }}
+                />
+              )}
             </>
           )}
           {step === 2 && (
             <>
-              <Text fontWeight="bold">Vous représentez {typeCompte[values.type].text.toLowerCase()}</Text>
+              <Ribbons variant="success" mt="0.5rem">
+                <Box ml={3} color="grey.800">
+                  <Text fontSize="20px" fontWeight="bold">
+                    {entrepriseData.data.enseigne || entrepriseData.data.entreprise_raison_sociale}
+                  </Text>
+                  {values.type === "of" && (
+                    <Text>
+                      Uai : {entrepriseData.data.uai} - SIRET : {entrepriseData.data.siret} (en activité)
+                    </Text>
+                  )}
+                  {values.type !== "of" && <Text>SIRET : {entrepriseData.data.siret} (en activité)</Text>}
+                </Box>
+              </Ribbons>
+
               <FormControl mt={4} py={2} isRequired isInvalid={errors.email && touched.email}>
                 <FormLabel>Votre courriel</FormLabel>
                 <Input
@@ -180,12 +228,6 @@ export const Inscription = ({ onSucceeded, ...props }) => {
                 </RadioGroup>
               </FormControl>
               <HStack spacing={8}>
-                <FormControl py={2} isRequired isInvalid={errors.nom && touched.nom}>
-                  <FormLabel>Votre Nom</FormLabel>
-                  <Input id="nom" name="nom" onChange={handleChange} placeholder="Ex : Dupont" value={values.nom} />
-                  {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
-                </FormControl>
-
                 <FormControl py={2} isRequired isInvalid={errors.prenom && touched.prenom}>
                   <FormLabel>Votre Prénom</FormLabel>
                   <Input
@@ -197,16 +239,20 @@ export const Inscription = ({ onSucceeded, ...props }) => {
                   />
                   {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
                 </FormControl>
+                <FormControl py={2} isRequired isInvalid={errors.nom && touched.nom}>
+                  <FormLabel>Votre Nom</FormLabel>
+                  <Input id="nom" name="nom" onChange={handleChange} placeholder="Ex : Dupont" value={values.nom} />
+                  {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
+                </FormControl>
               </HStack>
             </>
           )}
         </Box>
         {step > 0 && (
           <HStack spacing="4w" mt={5}>
-            <Link onClick={() => setStep(step - 1)} color="bluefrance">
-              {"< Précedent"}
-            </Link>
-
+            <Button onClick={() => setStep(step - 1)} color="bluefrance" variant="secondary">
+              Revenir
+            </Button>
             {step === 1 && (
               <Button
                 size="md"
@@ -219,20 +265,20 @@ export const Inscription = ({ onSucceeded, ...props }) => {
               </Button>
             )}
             {step === 2 && (
-              <Button size="lg" type="submit" variant="primary" onClick={handleSubmit} px={6}>
-                S&apos;inscrire
+              <Button
+                size="md"
+                type="submit"
+                variant="primary"
+                onClick={handleSubmit}
+                px={6}
+                isDisabled={!entrepriseData || !entrepriseData?.successed}
+              >
+                S&rsquo;inscrire
               </Button>
             )}
           </HStack>
         )}
       </Box>
-      <Flex flexGrow={1}>
-        <Text mt={8} fontSize="1rem">
-          <Link href="/auth/connexion" as={NavLink} color="bluefrance" ml={3}>
-            &gt; J&apos;ai déjà un compte
-          </Link>
-        </Text>
-      </Flex>
-    </Flex>
+    </Box>
   );
 };

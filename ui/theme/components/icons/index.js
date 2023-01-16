@@ -81,3 +81,7 @@ export * from "./NotificationFill";
 export * from "./UserFill";
 export * from "./ParentGroupIcon";
 export * from "./ClockIcon";
+export * from "./CrossError";
+export * from "./Support";
+export * from "./AlertRounded";
+export * from "./Interrogation";

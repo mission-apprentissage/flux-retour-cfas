@@ -1,5 +1,6 @@
-import departements from "../constants/departements.js";
+import { find } from "lodash-es";
 import { validateUai } from "./validationUtils.js";
+import { DEPARTEMENTS } from "../constants/territoiresConstants.js";
 
 const SPECIFIC_UAI_CODES_CORSE1 = { code: "2A", uaiCode: "620" };
 const SPECIFIC_UAI_CODES_CORSE2 = { code: "2B", uaiCode: "720" };
@@ -9,9 +10,9 @@ export const buildAdresseFromUai = (uai) => {
   if (!localisationInfo) return {};
   return {
     adresse: {
-      departement: localisationInfo.code_dept,
-      region: localisationInfo.code_region,
-      academie: localisationInfo.num_academie.toString(),
+      departement: localisationInfo.code,
+      region: localisationInfo.region.code,
+      academie: localisationInfo.academie.code.toString(),
     },
   };
 };
@@ -20,10 +21,12 @@ export const getLocalisationInfoFromUai = (uai) => {
   const infoCodeFromUai = getDepartementCodeFromUai(uai);
 
   // TODO [tech] : gérer proprement les cas de la corse
-  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE1.uaiCode) return departements[SPECIFIC_UAI_CODES_CORSE1.code];
-  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE2.uaiCode) return departements[SPECIFIC_UAI_CODES_CORSE2.code];
+  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE1.uaiCode)
+    return find(DEPARTEMENTS, (departement) => departement.code === SPECIFIC_UAI_CODES_CORSE1.code);
+  if (infoCodeFromUai === SPECIFIC_UAI_CODES_CORSE2.uaiCode)
+    return find(DEPARTEMENTS, (departement) => departement.code === SPECIFIC_UAI_CODES_CORSE2.code);
 
-  return departements[infoCodeFromUai];
+  return find(DEPARTEMENTS, (departement) => departement.code === infoCodeFromUai);
 };
 
 export const getDepartementCodeFromUai = (uai) => {

@@ -10,8 +10,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Box, Button, Divider, HStack, Text } from "@chakra-ui/react";
-
 import { rankItem } from "@tanstack/match-sorter-utils";
+
 import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
@@ -37,11 +37,7 @@ export default function Table({
   pageSize = 5,
   ...props
 }) {
-  const data = useMemo(
-    () => defaultData,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const data = useMemo(() => defaultData, [defaultData]); // TODO TO CHECK RE-RENDERER WITH [defaultData] instead of []
 
   const [globalFilter, setGlobalFilter] = useState(searchValue);
 
@@ -78,67 +74,65 @@ export default function Table({
 
   return (
     <>
-      <Box>
-        <Box as="table" flex={1} fontSize="delta" w="100%" {...props}>
-          <Box as="thead">
-            {table.getHeaderGroups().map((headerGroup, key) => (
-              <Box as="tr" key={key} borderBottom="3px solid" borderColor="bluefrance">
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <Box
-                      as="th"
-                      key={header.id}
-                      fontWeight="bold"
-                      fontSize="0.9rem"
-                      overflow="hidden"
-                      borderColor="grey.800"
-                      color="grey.800"
-                      {...{
-                        colSpan: header.colSpan,
-                        style: {
-                          width: header.getSize(),
-                        },
-                      }}
-                    >
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </Box>
-                  );
-                })}
-              </Box>
-            ))}
-          </Box>
-          <Box as="tbody">
-            {table.getRowModel().rows.map((row, j) => {
-              return (
-                <Fragment key={row.id}>
+      <Box as="table" flex={1} fontSize="delta" w="100%" {...props}>
+        <Box as="thead">
+          {table.getHeaderGroups().map((headerGroup, key) => (
+            <Box as="tr" key={key} borderBottom="3px solid" borderColor="bluefrance">
+              {headerGroup.headers.map((header) => {
+                return (
                   <Box
-                    as="tr"
-                    bg={j % 2 === 0 ? "galt" : "white"}
-                    py="3"
-                    data-rowindex={row.id}
-                    onClick={() => onRowClick?.(row.id)}
+                    as="th"
+                    key={header.id}
+                    fontWeight="bold"
+                    fontSize="0.9rem"
+                    overflow="hidden"
+                    borderColor="grey.800"
+                    color="grey.800"
+                    {...{
+                      colSpan: header.colSpan,
+                      style: {
+                        width: header.getSize(),
+                      },
+                    }}
                   >
-                    {/* first row is a normal row */}
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <Box as="td" key={cell.id} overflow="hidden">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </Box>
-                      );
-                    })}
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </Box>
-                  {row.getIsExpanded() && renderSubComponent && (
-                    <Box as="tr">
-                      {/* 2nd row is a custom 1 cell row */}
-                      <Box as="td" colSpan={row.getVisibleCells().length}>
-                        {renderSubComponent({ row })}
+                );
+              })}
+            </Box>
+          ))}
+        </Box>
+        <Box as="tbody">
+          {table.getRowModel().rows.map((row, j) => {
+            return (
+              <Fragment key={row.id}>
+                <Box
+                  as="tr"
+                  bg={j % 2 === 0 ? "galt" : "white"}
+                  py="3"
+                  data-rowindex={row.id}
+                  onClick={() => onRowClick?.(row.id)}
+                >
+                  {/* first row is a normal row */}
+                  {row.getVisibleCells().map((cell) => {
+                    return (
+                      <Box as="td" key={cell.id} overflow="hidden">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </Box>
+                    );
+                  })}
+                </Box>
+                {row.getIsExpanded() && renderSubComponent && (
+                  <Box as="tr">
+                    {/* 2nd row is a custom 1 cell row */}
+                    <Box as="td" colSpan={row.getVisibleCells().length}>
+                      {renderSubComponent({ row })}
                     </Box>
-                  )}
-                </Fragment>
-              );
-            })}
-          </Box>
+                  </Box>
+                )}
+              </Fragment>
+            );
+          })}
         </Box>
       </Box>
       {data.length > 5 && (

@@ -1,16 +1,21 @@
 import express from "express";
 import Joi from "joi";
+import { compact, get } from "lodash-es";
+import Boom from "boom";
+
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import {
   findOrganismeById,
   getContributeurs,
+  addContributeurOrganisme,
+  removeContributeurOrganisme,
   updateOrganisme,
 } from "../../../common/actions/organismes/organismes.actions.js";
+import { findRolePermission } from "../../../common/actions/roles.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa } from "../../../common/actions/sifa.actions/sifa.actions.js";
-import { updatePermissionPending } from "../../../common/actions/permissions.actions.js";
-import { compact, get } from "lodash-es";
+import { updatePermission, updatePermissionPending } from "../../../common/actions/permissions.actions.js";
 
 export default () => {
   const router = express.Router();
@@ -118,6 +123,89 @@ export default () => {
       const contributors = await getContributeurs(organisme_id);
 
       return res.json(contributors);
+    })
+  );
+
+  router.post(
+    "/contributors",
+    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    tryCatch(async (req, res) => {
+      const { userEmail, roleName, organisme_id } = await Joi.object({
+        userEmail: Joi.string().email().required(),
+        organisme_id: Joi.string().required(),
+        roleName: Joi.string().required(),
+      }).validateAsync(req.body, { abortEarly: false });
+
+      if (!roleName.includes("organisme.")) {
+        throw Boom.unauthorized("Something went wrong");
+      }
+
+      const organisme = await findOrganismeById(organisme_id);
+      if (!organisme) {
+        throw Boom.unauthorized("Accès non autorisé");
+      }
+
+      await addContributeurOrganisme(organisme_id, userEmail, roleName);
+
+      return res.json({ ok: true });
+    })
+  );
+
+  router.put(
+    "/contributors",
+    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    tryCatch(async (req, res) => {
+      const { userEmail, roleName, organisme_id } = await Joi.object({
+        userEmail: Joi.string().email().required(),
+        organisme_id: Joi.string().required(),
+        roleName: Joi.string().required(),
+      }).validateAsync(req.body, { abortEarly: false });
+
+      if (!roleName.includes("organisme.")) {
+        throw Boom.unauthorized("Something went wrong");
+      }
+
+      const organisme = await findOrganismeById(organisme_id);
+      if (!organisme) {
+        throw Boom.unauthorized("Accès non autorisé");
+      }
+
+      await updatePermission({ organisme_id: organisme._id, userEmail, roleName });
+
+      return res.json({ ok: true });
+    })
+  );
+
+  router.delete(
+    "/contributors",
+    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    tryCatch(async (req, res) => {
+      const { userEmail, organisme_id } = await Joi.object({
+        userEmail: Joi.string().email().required(),
+        organisme_id: Joi.string().required(),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      if (req.user.email === userEmail) {
+        throw Boom.badRequest("Something went wrong");
+      }
+
+      const organisme = await findOrganismeById(organisme_id);
+
+      if (!organisme) {
+        throw Boom.unauthorized("Accès non autorisé");
+      }
+      await removeContributeurOrganisme(organisme_id, userEmail);
+
+      return res.json({ ok: true });
+    })
+  );
+
+  router.get(
+    "/roles_list",
+    permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
+    tryCatch(async (_req, res) => {
+      const roles = await findRolePermission({}, { description: 1, title: 1, name: 1 });
+      return res.json(roles);
     })
   );
 

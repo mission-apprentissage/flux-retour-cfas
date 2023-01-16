@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, Flex, Heading, Input, Text, List, ListItem, ListIcon } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Input, Text, List, ListItem, ListIcon, UnorderedList } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import * as Yup from "yup";
@@ -109,10 +109,10 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <Flex height="100vh" justifyContent="center" mt="10">
-      <Box width={["auto", "40rem"]}>
+    <Flex height="100vh" justifyContent="flex-start" flexDirection="column" p={10}>
+      <Box width={"auto"}>
         <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          {isFirstSetPassword && "Merci de créer votre mot de passe"}
+          {isFirstSetPassword && "Veuillez créer votre mot de passe"}
           {!isFirstSetPassword && "Une mise à jour de votre mot de passe est obligatoire"}
         </Heading>
         <form onSubmit={handleSubmit}>
@@ -163,7 +163,7 @@ const ResetPasswordPage = () => {
               Le mot de passe doit contenir <strong>au moins un chiffre</strong>
             </ListItem>
           </List>
-          <Button variant="primary" type="submit">
+          <Button variant="primary" type="submit" w="full">
             {isFirstSetPassword && "Créer le mot de passe"}
             {!isFirstSetPassword && "Réinitialiser le mot de passe"}
           </Button>
@@ -174,6 +174,26 @@ const ResetPasswordPage = () => {
           )}
         </form>
       </Box>
+      {isFirstSetPassword && (
+        <Box mt={10}>
+          <Text fontWeight={700} fontSize={22}>
+            Votre compte dédié
+          </Text>
+          <Text mt="2w" fontWeight={700}>
+            Le service tableau de bord de l&apos;apprentissage est porté par la Mission interministérielle pour
+            l’apprentissage.
+          </Text>
+          <Text mt="2w">Il permet de :</Text>
+          <UnorderedList ml="4w" mt="2w">
+            <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
+            <ListItem>
+              Accompagner les jeunes en situation de décrochage (et donc d&apos;influencer leur.s parcours scolaires et
+              professionnels)
+            </ListItem>
+            <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
+          </UnorderedList>
+        </Box>
+      )}
     </Flex>
   );
 };

@@ -11,6 +11,8 @@ import {
   VStack,
   Radio,
   FormErrorMessage,
+  Checkbox,
+  Center,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -27,6 +29,10 @@ import { _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import Link from "../../components/Links/Link";
 import Ribbons from "../../components/Ribbons/Ribbons";
+import { CONTACT_ADDRESS } from "../../common/constants/product";
+import { ACADEMIES } from "../../common/constants/territoiresConstants";
+
+const ACADEMIES_SORTED = Object.values(ACADEMIES).sort((a, b) => Number(a.code) - Number(b.code));
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -104,30 +110,62 @@ const Finalize = () => {
           {title}
         </Heading>
         <Box mt={5}>
-          {auth.isInPendingValidation && auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" && (
-            <>
-              <FormControl py={2} isRequired isInvalid={errors.type && touched.type}>
-                <FormLabel>Votre accès</FormLabel>
-                <RadioGroup id="type" name="type" value={valuesAccess.type} mt={8}>
-                  <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
-                    <Radio value={"organisme.readonly"} onChange={handleChange} size="lg">
-                      Lecture
-                    </Radio>
-                    <Radio value={"organisme.member"} onChange={handleChange} size="lg">
-                      Écriture
-                    </Radio>
-                    <Radio value={"organisme.admin"} onChange={handleChange} size="lg">
-                      Gestion
-                    </Radio>
-                  </VStack>
-                </RadioGroup>
-                {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
-              </FormControl>
-              <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
-                Demander l&rsquo;accès
-              </Button>
-            </>
-          )}
+          {auth.isInPendingValidation &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            auth.roles.includes("of") && (
+              <>
+                <FormControl py={2} isRequired isInvalid={errors.type && touched.type}>
+                  <FormLabel>Votre accès</FormLabel>
+                  <RadioGroup id="type" name="type" value={valuesAccess.type} mt={8}>
+                    <VStack alignItems="baseline" fontSize="1.2rem" spacing={8}>
+                      <Radio value={"organisme.readonly"} onChange={handleChange} size="lg">
+                        Lecture
+                      </Radio>
+                      <Radio value={"organisme.member"} onChange={handleChange} size="lg">
+                        Écriture
+                      </Radio>
+                      <Radio value={"organisme.admin"} onChange={handleChange} size="lg">
+                        Gestion
+                      </Radio>
+                    </VStack>
+                  </RadioGroup>
+                  {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
+                </FormControl>
+                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                  Demander l&rsquo;accès
+                </Button>
+              </>
+            )}
+          {auth.isInPendingValidation &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            auth.roles.includes("pilot") && (
+              <>
+                <FormControl py={2}>
+                  <FormLabel>Académies</FormLabel>
+                  <Center border="1px solid">
+                    <HStack wrap="wrap" spacing={5}>
+                      {ACADEMIES_SORTED.map((academie, i) => {
+                        return (
+                          <Checkbox
+                            key={i}
+                            name="accessAcademieList"
+                            // onChange={handleChange}
+                            // value={num}
+                            // isChecked={values.accessAcademieList.includes(num)}
+                            mb={3}
+                          >
+                            {academie.nom} ({academie.code})
+                          </Checkbox>
+                        );
+                      })}
+                    </HStack>
+                  </Center>
+                </FormControl>
+                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                  Demander l&rsquo;accès
+                </Button>
+              </>
+            )}
 
           {auth.isInPendingValidation &&
             !auth.hasAtLeastOneUserToValidate &&
@@ -180,7 +218,7 @@ const Finalize = () => {
           <Flex flexGrow={1} alignItems="end" mt={8}>
             <Text mt={8} fontSize="1rem">
               Vous rencontrez des difficultés à passer cette étape ?{" "}
-              <Link href="/questions-reponses" color="bluefrance" ml={3}>
+              <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" ml={3}>
                 Contacter l&apos;assistance
               </Link>
             </Text>

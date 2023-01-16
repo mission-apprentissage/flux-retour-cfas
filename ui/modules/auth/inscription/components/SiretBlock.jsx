@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Box, FormControl, FormErrorMessage, FormLabel, Input, Spinner, Center } from "@chakra-ui/react";
-import { _post } from "../../../common/httpClient";
+import { _post } from "../../../../common/httpClient";
 
 const validate = async (validationSchema, obj) => {
   let isValid = false;
@@ -15,9 +16,11 @@ const validate = async (validationSchema, obj) => {
   return { isValid, error };
 };
 
-export const SiretBlock = ({ values, errors, touched, setFieldValue, onFetched, organismeFormation = false }) => {
+export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
   const [isFetching, setIsFetching] = useState(false);
   const [entrepriseData, setEntrepriseData] = useState(null);
+
+  const { values, errors, touched, setFieldValue } = useFormik({ initialValues: { siret: "" } });
 
   const siretLookUp = async (e) => {
     const siret = e.target.value;
@@ -38,7 +41,7 @@ export const SiretBlock = ({ values, errors, touched, setFieldValue, onFetched, 
 
     setFieldValue("siret", siret);
     setIsFetching(true);
-    const response = await _post(`/api/v1/auth/siret-adresse`, {
+    const [response] = await _post(`/api/v1/auth/uai-siret-adresse`, {
       siret,
       organismeFormation,
     });
@@ -63,7 +66,7 @@ export const SiretBlock = ({ values, errors, touched, setFieldValue, onFetched, 
       };
     }
     setEntrepriseData(ret);
-    onFetched(ret);
+    onSiretFetched(ret);
   };
 
   return (
@@ -92,13 +95,13 @@ export const SiretBlock = ({ values, errors, touched, setFieldValue, onFetched, 
         {isFetching && <Spinner />}
         {!isFetching && entrepriseData && (
           <>
-            {organismeFormation && entrepriseData.data.uai && (
-              <Box mb={5} fontWeight="bold">
-                Votre UAI: {entrepriseData.data.uai}
-              </Box>
-            )}
             {entrepriseData.data && (
               <>
+                {organismeFormation && entrepriseData.data.uai && (
+                  <Box mb={5} fontWeight="bold">
+                    Votre UAI: {entrepriseData.data.uai}
+                  </Box>
+                )}
                 <Box fontWeight="bold">Votre adresse:</Box>
                 {!entrepriseData.data.secretSiret && (
                   <>
