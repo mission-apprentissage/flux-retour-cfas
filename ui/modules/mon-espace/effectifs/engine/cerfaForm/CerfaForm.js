@@ -49,7 +49,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
 
   return (
     <Box my={2} px={5}>
-      <Accordion allowMultiple mt={2} index={accordionIndex} onChange={setAccordionIndex}>
+      <Accordion allowMultiple mt={2} index={accordionIndex} onChange={setAccordionIndex} reduceMotion>
         <AccordionItem border="none" id={`statuts`}>
           {({ isExpanded }) => (
             <AccordionItemChild
