@@ -14,7 +14,7 @@ import LandingReseau from "../../../modules/mon-espace/landing/LandingReseau";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
 import EffectifsPage from "../../../modules/mon-espace/effectifs/EffectifsPage";
 import ParametresOrganisme from "../../../modules/mon-espace/parametres/parametresOrganisme";
-import LandingPilot from "../../../modules/mon-espace/landing/LandingPilot";
+import LandingPilot from "../../../modules/mon-espace/landing/LandingPilot/LandingPilot";
 import LandingErp from "../../../modules/mon-espace/landing/LandingErp";
 import LandingTransverse from "../../../modules/mon-espace/landing/LandingTransverse";
 
