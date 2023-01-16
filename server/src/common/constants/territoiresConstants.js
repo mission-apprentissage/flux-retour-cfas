@@ -1406,13 +1406,107 @@ export const DEPARTEMENTS = [
       nom: "Mayotte",
     },
   },
-  // "977",
-  // "978",
-  // "984",
-  // "986",
-  // "987",
-  // "988",
-  // "989",
+  {
+    nom: "St Barthelemy",
+    code: "977",
+    uaiCode: "977",
+    region: {
+      code: "01",
+      nom: "Guadeloupe",
+    },
+    academie: {
+      code: "32",
+      nom: "Guadeloupe",
+    },
+  },
+  {
+    nom: "St Martin",
+    code: "978",
+    uaiCode: "978",
+    region: {
+      code: "01",
+      nom: "Guadeloupe",
+    },
+    academie: {
+      code: "32",
+      nom: "Guadeloupe",
+    },
+  },
+  {
+    nom: "Terres australes et antarctique",
+    code: "984",
+    uaiCode: "984",
+    region: {
+      // TODO
+      code: "01",
+      nom: "Guadeloupe",
+    },
+    academie: {
+      // TODO
+      code: "32",
+      nom: "Guadeloupe",
+    },
+  },
+  {
+    nom: "Wallis et Futuna",
+    code: "986",
+    uaiCode: "986",
+    region: {
+      // TODO
+      code: "01",
+      nom: "Guadeloupe",
+    },
+    academie: {
+      // TODO
+      code: "32",
+      nom: "Guadeloupe",
+    },
+  },
+  {
+    nom: "Polynésie française",
+    code: "987",
+    uaiCode: "987",
+    region: {
+      // TODO
+      code: "01",
+      nom: "Guadeloupe",
+    },
+    academie: {
+      // TODO
+      code: "32",
+      nom: "Guadeloupe",
+    },
+  },
+  {
+    nom: "Nouvelle Calédonie",
+    code: "988",
+    uaiCode: "988",
+    region: {
+      // TODO
+      code: "01",
+      nom: "Guadeloupe",
+    },
+    academie: {
+      // TODO
+      code: "32",
+      nom: "Guadeloupe",
+    },
+  },
+  {
+    nom: "Ile de Clipperton",
+    code: "989",
+    uaiCode: "989",
+    region: {
+      // TODO
+      code: "01",
+      nom: "Guadeloupe",
+    },
+    academie: {
+      // TODO
+      code: "32",
+      nom: "Guadeloupe",
+    },
+  },
 ];
 
 export const ACADEMIES = {

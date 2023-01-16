@@ -11,6 +11,8 @@ import {
   VStack,
   Radio,
   FormErrorMessage,
+  Checkbox,
+  Center,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -28,6 +30,9 @@ import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps"
 import Link from "../../components/Links/Link";
 import Ribbons from "../../components/Ribbons/Ribbons";
 import { CONTACT_ADDRESS } from "../../common/constants/product";
+import { ACADEMIES } from "../../common/constants/territoiresConstants";
+
+const ACADEMIES_SORTED = Object.values(ACADEMIES).sort((a, b) => Number(a.code) - Number(b.code));
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -93,7 +98,6 @@ const Finalize = () => {
     },
   });
 
-  console.log(auth);
   return (
     <Page>
       <Head>
@@ -136,6 +140,27 @@ const Finalize = () => {
             auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
             auth.roles.includes("pilot") && (
               <>
+                <FormControl py={2}>
+                  <FormLabel>Académies</FormLabel>
+                  <Center border="1px solid">
+                    <HStack wrap="wrap" spacing={5}>
+                      {ACADEMIES_SORTED.map((academie, i) => {
+                        return (
+                          <Checkbox
+                            key={i}
+                            name="accessAcademieList"
+                            // onChange={handleChange}
+                            // value={num}
+                            // isChecked={values.accessAcademieList.includes(num)}
+                            mb={3}
+                          >
+                            {academie.nom} ({academie.code})
+                          </Checkbox>
+                        );
+                      })}
+                    </HStack>
+                  </Center>
+                </FormControl>
                 <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
                   Demander l&rsquo;accès
                 </Button>
