@@ -64,12 +64,14 @@ const EffectifsPage = () => {
     );
   }
 
-  const displayEffectifs = organisme.mode_de_transmission && organisme.setup_step_courante === "COMPLETE";
+  const displayEffectifs =
+    (organisme.mode_de_transmission === "API" && organisme.erps?.length > 0) ||
+    organisme.mode_de_transmission === "MANUEL";
 
   return (
     <>
       {!organisme.mode_de_transmission && <ChoixTransmission />}
-      {organisme.mode_de_transmission === "API" && organisme.setup_step_courante !== "COMPLETE" && <TransmissionAPI />}
+      {organisme.mode_de_transmission === "API" && !organisme.erps && <TransmissionAPI />}
       {displayEffectifs && televersementPage && <Televersements />}
       {displayEffectifs && !televersementPage && <Effectifs organismesEffectifs={organismesEffectifs} />}
     </>

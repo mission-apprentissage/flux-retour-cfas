@@ -23,7 +23,7 @@ const ChoixTransmission = () => {
             borderColor="dgalt"
             p={10}
             w="33%"
-            h="40vh"
+            h="30vh"
             borderBottomWidth="4px"
             borderBottomColor="bluefrance"
           >
@@ -36,11 +36,6 @@ const ChoixTransmission = () => {
                   Lié votre ou vos ERP au tableau de bord
                 </Heading>
               </Flex>
-              <UnorderedList>
-                <ListItem>Pouquoi 1 ?</ListItem>
-                <ListItem>Pouquoi 2 ? </ListItem>
-                <ListItem>Pouquoi 3 ?</ListItem>
-              </UnorderedList>
             </Box>
             <Center h="10%">
               <Button
@@ -59,7 +54,7 @@ const ChoixTransmission = () => {
             borderColor="dgalt"
             p={10}
             w="33%"
-            h="40vh"
+            h="30vh"
             borderBottomWidth="4px"
             borderBottomColor="bluefrance"
           >
@@ -72,11 +67,6 @@ const ChoixTransmission = () => {
                   Téléverser vos effectifs via fichier (Excel, csv)
                 </Heading>
               </Flex>
-              <UnorderedList>
-                <ListItem>Pouquoi 1 ?</ListItem>
-                <ListItem>Pouquoi 2 ? </ListItem>
-                <ListItem>Pouquoi 3 ?</ListItem>
-              </UnorderedList>
             </Box>
             <Center h="10%">
               <Button
