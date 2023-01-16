@@ -33,6 +33,8 @@ import Ribbons from "../../components/Ribbons/Ribbons";
 import { CONTACT_ADDRESS } from "../../common/constants/product";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../common/constants/territoiresConstants";
 import { Check } from "../../theme/components/icons";
+import { RESEAUX_CFAS } from "../../common/constants/networksConstants";
+import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 const ACADEMIES_SORTED = Object.values(ACADEMIES).sort((a, b) => Number(a.code) - Number(b.code));
 const REGIONS_SORTED = REGIONS.sort((a, b) => Number(a.code) - Number(b.code));
@@ -188,6 +190,36 @@ const Finalize = () => {
                   {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
                 </FormControl>
                 <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                  Demander l&rsquo;accès
+                </Button>
+              </>
+            )}
+
+          {auth.isInPendingValidation &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            auth.roles.includes("reseau_of") && (
+              <>
+                <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
+                  Quel est votre réseau ?
+                </Heading>
+                <Input
+                  {...{
+                    name: `reseau`,
+                    fieldType: "select",
+                    placeholder: "Séléctionner votre réseau",
+                    options: Object.values(RESEAUX_CFAS).map(({ nomReseau }) => ({
+                      label: `${nomReseau}`,
+                      value: nomReseau,
+                    })),
+                  }}
+                  value={valuesAccess.reseau}
+                  onSubmit={(value) => {
+                    setFieldValue("type", "organisme.statsonly");
+                    setFieldValue("reseau", value);
+                  }}
+                  w="100%"
+                />
+                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6} mt={8}>
                   Demander l&rsquo;accès
                 </Button>
               </>

@@ -245,6 +245,7 @@ export default ({ mailer }) => {
         codes_region: wantedRegions,
         codes_academie: wantedAcademnie,
         codes_departement: wantedDepartements,
+        reseau: wantedReseau,
       } = await Joi.object({
         type: Joi.string()
           .valid("organisme.admin", "organisme.member", "organisme.readonly", "organisme.statsonly")
@@ -252,6 +253,7 @@ export default ({ mailer }) => {
         codes_region: Joi.string().allow(null, ""),
         codes_academie: Joi.string().allow(null, ""),
         codes_departement: Joi.string().allow(null, ""),
+        reseau: Joi.string().allow(null, ""),
       }).validateAsync(body, { abortEarly: false });
 
       const userDb = await getUser(user.email.toLowerCase());
@@ -277,6 +279,7 @@ export default ({ mailer }) => {
         ...(codes_academie ? { codes_academie } : {}),
         ...(codes_departement ? { codes_departement } : {}),
         ...(is_cross_organismes ? { is_cross_organismes } : {}),
+        ...(wantedReseau ? { reseau: wantedReseau } : {}),
       });
 
       if (!updateUser) {
