@@ -1,3 +1,10 @@
+## [3.1.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.1-beta.1...v3.1.1-beta.2) (2023-01-16)
+
+
+### Bug Fixes
+
+* display accordion reduce motion ([2243890](https://github.com/mission-apprentissage/flux-retour-cfas/commit/2243890d53bcf8872609901a413e59db6ff84a9d))
+
 ## [3.1.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0...v3.1.1-beta.1) (2023-01-16)
 
 
