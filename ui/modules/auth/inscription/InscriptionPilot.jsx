@@ -6,7 +6,6 @@ import { Input } from "../../mon-espace/effectifs/engine/formEngine/components/I
 
 export const InscriptionPilot = ({ onEndOfSpecific }) => {
   const [typePilot, setTypePilot] = useState({ value: "", hasError: false, required: true });
-  console.log(typePilot.value);
   return (
     <>
       <Text fontWeight="bold">Vous représentez :</Text>

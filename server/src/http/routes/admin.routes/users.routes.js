@@ -64,7 +64,7 @@ export default ({ mailer }) => {
           await updatePermissionPending({ organisme_id, userEmail, pending: false });
           return res.json({ ok: true });
         } else {
-          // TODO NOW REJECTED PERM
+          // TODO NOW REJECTED PERM !
           return res.json({ ok: false });
         }
       } else {

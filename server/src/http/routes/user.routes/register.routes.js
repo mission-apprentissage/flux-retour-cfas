@@ -240,10 +240,18 @@ export default ({ mailer }) => {
     "/demande-acces",
     authMiddleware(),
     tryCatch(async ({ body, user }, res) => {
-      const { type } = await Joi.object({
+      const {
+        type,
+        codes_region: wantedRegions,
+        codes_academie: wantedAcademnie,
+        codes_departement: wantedDepartements,
+      } = await Joi.object({
         type: Joi.string()
           .valid("organisme.admin", "organisme.member", "organisme.readonly", "organisme.statsonly")
           .required(),
+        codes_region: Joi.string().allow(null, ""),
+        codes_academie: Joi.string().allow(null, ""),
+        codes_departement: Joi.string().allow(null, ""),
       }).validateAsync(body, { abortEarly: false });
 
       const userDb = await getUser(user.email.toLowerCase());
@@ -255,16 +263,27 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      // const codes_region = [result.num_region];
-      // const codes_academie = [result.num_academie];
-      // const codes_departement = [result.num_departement];
+      let codes_region = wantedRegions?.split(",") ?? null;
+      let codes_academie = wantedAcademnie?.split(",") ?? null;
+      let codes_departement = wantedDepartements?.split(",") ?? null;
 
-      await userAfterCreate({ user: userDb, mailer, asRole: type });
+      let is_cross_organismes = null;
+      if (codes_region || codes_academie || codes_departement) {
+        is_cross_organismes = true;
+      }
 
-      const updateUser = await userHasAskAccess(userDb.email, {});
+      const updateUser = await userHasAskAccess(userDb.email, {
+        ...(codes_region ? { codes_region } : {}),
+        ...(codes_academie ? { codes_academie } : {}),
+        ...(codes_departement ? { codes_departement } : {}),
+        ...(is_cross_organismes ? { is_cross_organismes } : {}),
+      });
+
       if (!updateUser) {
         throw Boom.badRequest("Something went wrong");
       }
+
+      await userAfterCreate({ user: updateUser, mailer, asRole: type });
 
       const payload = await structureUser(updateUser);
 

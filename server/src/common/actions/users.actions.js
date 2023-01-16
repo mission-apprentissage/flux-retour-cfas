@@ -249,7 +249,7 @@ export const structureUser = async (user) => {
     : false;
 
   let specialAcl = [];
-  if (!hasAccessToOnlyOneOrganisme) {
+  if (!hasAccessToOnlyOneOrganisme || permissions.is_cross_organismes) {
     specialAcl = ["page/mes-organismes"];
   }
 
