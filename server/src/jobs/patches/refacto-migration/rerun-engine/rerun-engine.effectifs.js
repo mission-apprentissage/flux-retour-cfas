@@ -4,7 +4,6 @@ import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js"
 import { dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
 import { runEngine } from "../../../../common/actions/engine/engine.actions.js";
 import { structureEffectifFromDossierApprenant } from "../../../../common/actions/effectifs.actions.js";
-import { findOrganismeByUai } from "../../../../common/actions/organismes/organismes.actions.js";
 
 const JOB_NAME = "refacto-migration-rerun-effectifs-engine";
 /**
