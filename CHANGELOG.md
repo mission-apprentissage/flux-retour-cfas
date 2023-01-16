@@ -1,3 +1,10 @@
+# [3.1.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.4...v3.1.0-beta.5) (2023-01-16)
+
+
+### Bug Fixes
+
+* **server:** add reRunEngine effectifs job & fixes on adresse / telephone in hydrate effectifs ([#2390](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2390)) ([f662d47](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f662d473e9f72133b4882d8a709cba9937722a79))
+
 # [3.1.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.3...v3.1.0-beta.4) (2023-01-15)
 
 
