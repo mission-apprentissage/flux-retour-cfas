@@ -77,7 +77,12 @@ export const userAfterCreate = async ({
       for (const { _id } of organismes) {
         await addContributeurOrganisme(_id, userEmail, "organisme.statsonly", pending);
       }
-      // TODO [metier] VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
+      if (notify) {
+        await mailer.sendEmail(
+          { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, type: "reseau" } },
+          "validation_user_by_tdb_team"
+        ); // Notif TDB_admin or whatever who
+      }
     } else if (erp) {
       // user is scoped erp
       const organismes = await findOrganismesByQuery({ erps: { $in: [erp] } });

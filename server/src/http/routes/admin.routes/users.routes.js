@@ -64,7 +64,7 @@ export default ({ mailer }) => {
           await updatePermissionPending({ organisme_id, userEmail, pending: false });
           return res.json({ ok: true });
         } else {
-          // TODO NOW REJECTED PERM !
+          // TODO REJECTED PERM !
           return res.json({ ok: false });
         }
       } else {
@@ -72,9 +72,15 @@ export default ({ mailer }) => {
           await updatePermissionsPending({ userEmail, pending: false });
           return res.json({ ok: true });
         } else {
-          // TODO NOW
+          // TODO REJECTED PERM !
+          return res.json({ ok: false });
         }
       }
+      // TODO
+      // await mailer.sendEmail(
+      //   { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, type: "reseau" } },
+      //   "NOTIFY"
+      // );
     })
   );
 
