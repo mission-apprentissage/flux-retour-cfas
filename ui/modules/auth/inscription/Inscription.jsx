@@ -52,9 +52,11 @@ export const Inscription = ({ onSucceeded, ...props }) => {
       type: "",
       email: "",
       siret: "",
+      uai: "",
       nom: "",
       civility: "",
       prenom: "",
+      organismes_appartenance: "",
     },
     validationSchema: Yup.object().shape({
       type: Yup.string().required("Requis"),
@@ -66,6 +68,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
         })
         .required("Le siret est obligatoire"),
       uai: Yup.string(),
+      organismes_appartenance: Yup.string(),
       nom: Yup.string().required("Votre nom est obligatoire"),
       civility: Yup.string().required("Votre civilité est obligatoire"),
       prenom: Yup.string().required("Votre prénom est obligatoire"),
@@ -146,14 +149,16 @@ export const Inscription = ({ onSucceeded, ...props }) => {
                   onEndOfSpecific={(result) => {
                     setFieldValue("uai", result.data.uai);
                     setFieldValue("siret", result.data.siret);
+                    setFieldValue("organismes_appartenance", "ORGANISME_FORMATION");
                     setEntrepriseData(result);
                   }}
                 />
               )}
               {values.type === "pilot" && (
                 <InscriptionPilot
-                  onEndOfSpecific={(result) => {
+                  onEndOfSpecific={({ organismes_appartenance, result }) => {
                     setFieldValue("siret", result.data.siret);
+                    setFieldValue("organismes_appartenance", organismes_appartenance);
                     setEntrepriseData(result);
                   }}
                 />
@@ -162,6 +167,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
                 <InscriptionReseau
                   onEndOfSpecific={(result) => {
                     setFieldValue("siret", result.data.siret);
+                    setFieldValue("organismes_appartenance", "TETE_DE_RESEAU");
                     setEntrepriseData(result);
                   }}
                 />

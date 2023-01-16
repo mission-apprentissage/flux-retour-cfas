@@ -25,6 +25,7 @@ import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import logger from "../../../common/logger.js";
+import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -65,15 +66,19 @@ export default ({ mailer }) => {
         nom,
         prenom,
         civility,
+        organismes_appartenance,
       } = await Joi.object({
-        type: Joi.string().allow("pilot", "of", "reseau_of").required(),
+        type: Joi.string().valid("pilot", "of", "reseau_of").required(),
         email: Joi.string().required(),
         password: Joi.string().required(),
         siret: Joi.string().required(),
-        uai: Joi.string(),
+        uai: Joi.string().allow(null, ""),
         nom: Joi.string().required(),
         prenom: Joi.string().required(),
         civility: Joi.string().required(),
+        organismes_appartenance: Joi.string()
+          .valid(...Object.keys(ORGANISMES_APPARTENANCE))
+          .required(),
       }).validateAsync(body, { abortEarly: false });
 
       const alreadyExists = await getUser(email.toLowerCase());
@@ -98,11 +103,6 @@ export default ({ mailer }) => {
         uai = userUai;
       }
 
-      const { result } = await findDataFromSiret(siret, false); // TODO NOW
-      const codes_region = [result.num_region];
-      const codes_academie = [result.num_academie];
-      const codes_departement = [result.num_departement];
-
       const user = await createUser(
         { email, password },
         {
@@ -111,9 +111,7 @@ export default ({ mailer }) => {
           nom,
           prenom,
           civility,
-          codes_region,
-          codes_academie,
-          codes_departement,
+          organisation: organismes_appartenance,
           ...(uai ? { uai } : {}),
         }
       );
@@ -256,6 +254,10 @@ export default ({ mailer }) => {
       if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP1") {
         throw Boom.badRequest("Something went wrong");
       }
+
+      // const codes_region = [result.num_region];
+      // const codes_academie = [result.num_academie];
+      // const codes_departement = [result.num_departement];
 
       await userAfterCreate({ user: userDb, mailer, asRole: type });
 

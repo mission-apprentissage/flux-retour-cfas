@@ -134,7 +134,7 @@ const Finalize = () => {
             )}
           {auth.isInPendingValidation &&
             auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
-            !auth.roles.includes("of") && (
+            auth.roles.includes("pilot") && (
               <>
                 <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
                   Demander l&rsquo;accès
