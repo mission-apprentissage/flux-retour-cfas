@@ -132,7 +132,7 @@ export const hydrateEffectif = async (effectifData, options) => {
     }
 
     // Lookup département code in reference list
-    if (adresseInfo.num_departement && DEPARTEMENTS.map((code) => code).includes(adresseInfo.num_departement)) {
+    if (adresseInfo.num_departement && DEPARTEMENTS.map(({ code }) => code).includes(adresseInfo.num_departement)) {
       convertedEffectif.apprenant.adresse.departement = adresseInfo.num_departement;
     }
 
