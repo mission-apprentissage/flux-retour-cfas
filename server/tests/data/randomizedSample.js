@@ -22,8 +22,7 @@ const getRandomNature = () =>
   ]);
 
 const getRandomAdresseObject = () => {
-  const DEPT_ARR = Object.values(DEPARTEMENTS);
-  const randomDepartement = DEPT_ARR[faker.helpers.arrayElement(DEPT_ARR)];
+  const randomDepartement = faker.helpers.arrayElement(DEPARTEMENTS);
   return {
     departement: randomDepartement.code,
     region: randomDepartement.region.code,
