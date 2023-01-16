@@ -1452,14 +1452,12 @@ export const DEPARTEMENTS = [
     code: "986",
     uaiCode: "986",
     region: {
-      // TODO
-      code: "01",
-      nom: "Guadeloupe",
+      code: "02",
+      nom: "Martinique",
     },
     academie: {
-      // TODO
-      code: "32",
-      nom: "Guadeloupe",
+      code: "31",
+      nom: "Martinique",
     },
   },
   {
