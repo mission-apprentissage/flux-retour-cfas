@@ -1,3 +1,10 @@
+## [3.1.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0...v3.1.1-beta.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* reduce token payload to avoid over sizing it ([b16ed40](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b16ed40d92cb28069c7d2efe342b226085c720b7))
+
 # [3.1.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.1...v3.1.0) (2023-01-16)
 
 
