@@ -1,9 +1,9 @@
-import { addMonths } from "date-fns";
 import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
 import { SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS } from "../../utils/validationsUtils/effectif.js";
-import { Indicator } from "./indicator.js";
+import { IndicatorFromDossiers } from "./indicator.dossiers.js";
+import { addMonths } from "date-fns";
 
-export class EffectifsInscritsSansContrats extends Indicator {
+export class EffectifsInscritsSansContratsFromDossiers extends IndicatorFromDossiers {
   /**
    * Pipeline de récupération des inscrits sans contrats à une date donnée
    * @param {*} searchDate
@@ -13,12 +13,12 @@ export class EffectifsInscritsSansContrats extends Indicator {
    */
   getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
     return [
-      { $match: { ...filters, "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
+      { $match: { ...filters, "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       {
         $match: {
           "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-          "apprenant.historique_statut.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
+          "historique_statut_apprenant.valeur_statut": { $ne: CODES_STATUT_APPRENANT.apprenti },
         },
       },
     ];
@@ -37,7 +37,7 @@ export class EffectifsInscritsSansContrats extends Indicator {
       statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
       date_inscription: item.statut_apprenant_at_date.date_statut, // Specific for inscrits sans contrats indicateur
       historique_statut_apprenant: JSON.stringify(
-        item.apprenant.historique_statut.map((item) => ({
+        item.historique_statut_apprenant.map((item) => ({
           date: item.date_statut,
           statut: getStatutApprenantNameFromCode(item.valeur_statut),
         }))

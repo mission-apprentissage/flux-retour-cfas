@@ -1,29 +1,30 @@
-import { effectifsDb } from "../../model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../model/collections.js";
 
-export class Indicator {
+export class IndicatorFromDossiers {
   /**
    * Constructeur avec définition d'une projection d'export par défaut
    */
   constructor() {
     this.exportProjection = {
-      organisme_id: 1,
-
-      "apprenant.nom": 1,
-      "apprenant.prenom": 1,
-      "apprenant.date_de_naissance": 1,
-      "apprenant.historique_statut": 1,
-      "apprenant.contrats.date_debut": 1,
-      "apprenant.contrats.date_fin": 1,
-      "apprenant.contrats.date_rupture": 1,
-
-      "formation.cfd": 1,
-      "formation.rncp": 1,
-      "formation.libelle_long": 1,
-      "formation.annee": 1,
-      "formation.periode": 1,
-
+      uai_etablissement: 1,
+      siret_etablissement: 1,
+      etablissement_nom_departement: 1,
+      etablissement_nom_region: 1,
+      etablissement_reseaux: 1,
+      nom_etablissement: 1,
+      nom_apprenant: 1,
+      prenom_apprenant: 1,
+      date_de_naissance_apprenant: 1,
+      formation_cfd: 1,
+      formation_rncp: 1,
+      libelle_long_formation: 1,
+      annee_formation: 1,
+      periode_formation: 1,
       annee_scolaire: 1,
-
+      contrat_date_debut: 1,
+      contrat_date_fin: 1,
+      contrat_date_rupture: 1,
+      historique_statut_apprenant: 1,
       statut_apprenant_at_date: 1,
     };
   }
@@ -39,7 +40,7 @@ export class Indicator {
     const groupedBy = options.groupedBy ?? { _id: null, count: { $sum: 1 } };
     const aggregationPipeline = this.getAtDateAggregationPipeline(searchDate, filters, options);
     const groupedAggregationPipeline = [...aggregationPipeline, { $group: groupedBy }];
-    const result = await effectifsDb().aggregate(groupedAggregationPipeline).toArray();
+    const result = await dossiersApprenantsMigrationDb().aggregate(groupedAggregationPipeline).toArray();
 
     if (!options.groupedBy) {
       return result.length === 1 ? result[0].count : 0;
@@ -48,7 +49,7 @@ export class Indicator {
   }
 
   /**
-   * Liste tous les Effectifs correspondants à cet indicateur à la date donnée
+   * Liste tous les DossierApprenant correspondants à cet indicateur à la date donnée
    * @param {*} searchDate Date de recherche
    * @param {*} filters Filtres optionnels
    * @param {*} options Options de regroupement / projection optionnelles
@@ -56,7 +57,7 @@ export class Indicator {
    */
   async getListAtDate(searchDate, filters = {}, options = {}) {
     const aggregationPipeline = await this.getAtDateAggregationPipeline(searchDate, filters, options);
-    const result = await effectifsDb().aggregate(aggregationPipeline).toArray();
+    const result = await dossiersApprenantsMigrationDb().aggregate(aggregationPipeline).toArray();
     return result ?? [];
   }
 
@@ -72,9 +73,9 @@ export class Indicator {
       {
         $project: {
           ...projection,
-          "apprenant.historique_statut": {
+          historique_statut_apprenant: {
             $filter: {
-              input: "$apprenant.historique_statut",
+              input: "$historique_statut_apprenant",
               as: "result",
               // Filtre dans l'historique sur les valeurs ayant une date antérieure à la date de recherche
               cond: {
@@ -86,15 +87,15 @@ export class Indicator {
       },
       // on élimine les historique vides (un dossier sur lequel on aurait un seul élément à une date ultérieure à celle donnée)
       {
-        $match: { "apprenant.historique_statut": { $not: { $size: 0 } } },
+        $match: { historique_statut_apprenant: { $not: { $size: 0 } } },
       },
       // on trie les historique par date_statut puis par date_reception si date_statut identiques (cas régulier)
       {
         $project: {
           ...projection,
-          "apprenant.historique_statut": {
+          historique_statut_apprenant: {
             $sortArray: {
-              input: "$apprenant.historique_statut",
+              input: "$historique_statut_apprenant",
               sortBy: { date_statut: 1, date_reception: 1 },
             },
           },
@@ -104,7 +105,7 @@ export class Indicator {
       {
         $addFields: {
           statut_apprenant_at_date: {
-            $last: "$apprenant.historique_statut",
+            $last: "$historique_statut_apprenant",
           },
         },
       },
@@ -117,12 +118,15 @@ export class Indicator {
    * @param {*} filters
    * @returns
    */
-  async getFullExportFormattedListAtDate(searchDate, filters = {}, indicateur) {
+  async getFullExportFormattedListAtDate(searchDate, filters = {}, indicateur, namedDataMode = false) {
     return (await this.getExportFormattedListAtDate(searchDate, filters, indicateur)).map((item) => ({
       ...item,
       indicateur,
-      date_debut_formation: item.formation.periode ? item.formation.periode[0] : null,
-      date_fin_formation: item.formation.periode ? item.formation.periode[1] : null,
+      nom_apprenant: namedDataMode === true ? item.nom_apprenant : undefined,
+      prenom_apprenant: namedDataMode === true ? item.prenom_apprenant : undefined,
+      date_de_naissance_apprenant: namedDataMode === true ? item.date_de_naissance_apprenant : undefined,
+      date_debut_formation: item.periode_formation ? item.periode_formation[0] : null,
+      date_fin_formation: item.periode_formation ? item.periode_formation[1] : null,
     }));
   }
 }

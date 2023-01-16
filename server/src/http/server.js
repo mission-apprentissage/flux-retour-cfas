@@ -3,7 +3,7 @@ import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
-import { apiRoles, tdbRoles } from "../common/roles.js";
+import { apiRoles } from "../common/roles.js";
 
 import tryCatch from "./middlewares/tryCatchMiddleware.js";
 import logMiddleware from "./middlewares/logMiddleware.js";
@@ -14,7 +14,7 @@ import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMi
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
-import effectifsExportRouter from "./routes/specific.routes/old/effectifs-export.route.js";
+import indicateursExportRouter from "./routes/specific.routes/old/indicateurs-export.route.js";
 import effectifsApprenantsRouter from "./routes/specific.routes/old/effectifs-apprenants.route.js";
 import dossierApprenantRouter from "./routes/specific.routes/old/dossiers-apprenants.route.js";
 import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.route.js";
@@ -23,7 +23,9 @@ import referentielRouter from "./routes/specific.routes/old/referentiel.route.js
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/old/indicateurs-national.route.js";
+import indicateursNationalDossiersRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.route.js";
 import indicateursRouter from "./routes/specific.routes/old/indicateurs.route.js";
+import indicateursDossiersRouter from "./routes/specific.routes/old/indicateurs.dossiers.route.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -107,6 +109,7 @@ export default async (services) => {
   app.use("/api/cfas", cfasRouter(services)); // FRONT
   app.use("/api/referentiel", referentielRouter(services)); // FRONT
   app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
+  app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
   app.use(
     // FRONT
     ["/api/indicateurs"],
@@ -116,10 +119,18 @@ export default async (services) => {
   );
   app.use(
     // FRONT
-    "/api/effectifs-export",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.administrator, tdbRoles.pilot, tdbRoles.network, tdbRoles.cfa]),
-    effectifsExportRouter(services)
+    ["/api/indicateurs-dossiers"],
+    checkJwtToken,
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    indicateursDossiersRouter(services)
+  );
+
+  app.use(
+    // FRONT
+    "/api/indicateurs-export",
+    checkJwtToken,
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    indicateursExportRouter(services)
   );
 
   // ROUTES BACK TO KEEEP !

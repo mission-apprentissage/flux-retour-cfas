@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchIndicateurs } from "../../common/api/tableauDeBord.js";
-import { QUERY_KEYS } from "../../common/constants/queryKeys.js";
-import { mapSimpleFiltersToApiFormat } from "../../common/utils/mapFiltersToApiFormat.js";
+import { fetchIndicateurs } from "../common/api/tableauDeBord.js";
+import { QUERY_KEYS } from "../common/constants/queryKeys.js";
+import { mapSimpleFiltersToApiFormat } from "../common/utils/mapFiltersToApiFormat.js";
 
 const mapIndicateursData = (effectifsData) => ({
   apprentis: effectifsData.apprentis,

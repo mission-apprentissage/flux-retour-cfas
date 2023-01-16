@@ -1,10 +1,10 @@
 import React from "react";
 import { Stack } from "@chakra-ui/react";
 
-import DateWithTooltipSelector from "../../../../_old/visualiser-les-indicateurs/DateWithTooltipSelector.jsx";
-import useFetchIndicateurs from "../../../../../hooks/old/useFetchIndicateurs.js";
 import { useSimpleFiltersContext } from "../SimpleFiltersContext.js";
 import IndicateursGridStack from "../../../../../components/IndicateursGridStack.jsx";
+import useFetchIndicateurs from "../../../../../hooks/useFetchIndicateurs.js";
+import DateWithTooltipSelector from "../../../../../components/Filters/DateWithTooltipSelector.jsx";
 
 export default function OrganismeIndicateursInfo() {
   const { filtersValues } = useSimpleFiltersContext();

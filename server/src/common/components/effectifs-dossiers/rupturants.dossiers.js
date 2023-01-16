@@ -1,9 +1,9 @@
-import { addMonths } from "date-fns";
 import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
 import { SEUIL_ALERTE_NB_MOIS_RUPTURANTS } from "../../utils/validationsUtils/effectif.js";
-import { Indicator } from "./indicator.js";
+import { IndicatorFromDossiers } from "./indicator.dossiers.js";
+import { addMonths } from "date-fns";
 
-export class EffectifsRupturants extends Indicator {
+export class EffectifsRupturantsFromDossiers extends IndicatorFromDossiers {
   /**
    * Pipeline de récupération des rupturants à une date donnée
    * @param {*} searchDate
@@ -17,17 +17,17 @@ export class EffectifsRupturants extends Indicator {
       {
         $match: {
           ...filters,
-          "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
-          "apprenant.historique_statut.1": { $exists: true },
+          "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
+          "historique_statut_apprenant.1": { $exists: true },
         },
       },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
-      // set previousStatutAtDate to be the element in apprenant.historique_statut juste before statut_apprenant_at_date
+      // set previousStatutAtDate to be the element in historique_statut_apprenant juste before statut_apprenant_at_date
       {
         $addFields: {
           previousStatutAtDate: {
-            $arrayElemAt: ["$apprenant.historique_statut", -2],
+            $arrayElemAt: ["$historique_statut_apprenant", -2],
           },
         },
       },
@@ -47,7 +47,7 @@ export class EffectifsRupturants extends Indicator {
       ...item,
       statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
       historique_statut_apprenant: JSON.stringify(
-        item.apprenant.historique_statut.map((item) => ({
+        item.historique_statut_apprenant.map((item) => ({
           date: item.date_statut,
           statut: getStatutApprenantNameFromCode(item.valeur_statut),
         }))

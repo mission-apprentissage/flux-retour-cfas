@@ -1,7 +1,7 @@
 import { CODES_STATUT_APPRENANT, getStatutApprenantNameFromCode } from "../../constants/dossierApprenantConstants.js";
-import { Indicator } from "./indicator.js";
+import { IndicatorFromDossiers } from "./indicator.dossiers.js";
 
-export class EffectifsAbandons extends Indicator {
+export class EffectifsAbandonsFromDossiers extends IndicatorFromDossiers {
   /**
    * Pipeline de récupération des abandons à une date donnée
    * @param {*} searchDate
@@ -11,7 +11,7 @@ export class EffectifsAbandons extends Indicator {
    */
   getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
     return [
-      { $match: { ...filters, "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.abandon } },
+      { $match: { ...filters, "historique_statut_apprenant.valeur_statut": CODES_STATUT_APPRENANT.abandon } },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon } },
     ];
@@ -30,7 +30,7 @@ export class EffectifsAbandons extends Indicator {
       statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
       date_abandon: item.statut_apprenant_at_date.date_statut,
       historique_statut_apprenant: JSON.stringify(
-        item.apprenant.historique_statut.map((item) => ({
+        item.historique_statut_apprenant.map((item) => ({
           date: item.date_statut,
           statut: getStatutApprenantNameFromCode(item.valeur_statut),
         }))
