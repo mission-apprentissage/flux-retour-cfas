@@ -1,3 +1,11 @@
+# [3.1.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.5...v3.1.0-beta.6) (2023-01-16)
+
+
+### Bug Fixes
+
+* oops explode dept code ([74c911f](https://github.com/mission-apprentissage/flux-retour-cfas/commit/74c911fb7b0ea24e8bc8d650854da8c6b18d7a78))
+* test ([7d24565](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7d24565ecac1f2ac34c768125adc54c3c410b3fd))
+
 # [3.1.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0-beta.4...v3.1.0-beta.5) (2023-01-16)
 
 
