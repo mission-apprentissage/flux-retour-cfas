@@ -1,6 +1,11 @@
 import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
+import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
+import { ACADEMIES } from "../../constants/academiesConstants.js";
+import { DEPARTEMENT_CODES } from "../../constants/departements.TRUELIST.js";
+import { REGIONS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
+import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
 import {
   buildEffectif,
   findEffectifById,
@@ -109,14 +114,60 @@ export const hydrateEffectif = async (effectifData, options) => {
   }
   // TODO other repetition_voie
 
-  const telephoneConverter = (telephone, tryStartByZero = false) => {
-    let phone = telephone.replaceAll("-", "").replaceAll(".", "").replaceAll(" ", "");
-    if (phone.length === 10 && phone[0] === "0") {
-      return `+33${phone.substr(1, 9)}`;
+  /**
+   * Fonction de remplissage des données de l'adresse depuis un code_postal / code_insee via appel aux TCO
+   * @param {*} codePostalOrCodeInsee
+   */
+  const fillConvertedEffectifAdresseData = async (codePostalOrCodeInsee) => {
+    const adresseInfo = await getCpInfo(codePostalOrCodeInsee);
+
+    if (adresseInfo.code_postal) {
+      convertedEffectif.apprenant.adresse.code_postal = adresseInfo.code_postal;
     }
-    if (!tryStartByZero) phone = telephoneConverter(`0${phone}`, true);
-    return phone;
+
+    if (adresseInfo.code_commune_insee) {
+      convertedEffectif.apprenant.adresse.code_insee = adresseInfo.code_commune_insee;
+    }
+
+    if (adresseInfo.commune) {
+      convertedEffectif.apprenant.adresse.commune = adresseInfo.commune;
+    }
+
+    // Lookup département code in reference list
+    if (
+      adresseInfo.num_departement &&
+      DEPARTEMENT_CODES.map((code) => code.replace(/^(0){1}/, "")).includes(adresseInfo.num_departement)
+    ) {
+      convertedEffectif.apprenant.adresse.departement = adresseInfo.num_departement;
+    }
+
+    // Lookup academie code in reference list
+    if (
+      adresseInfo.num_academie &&
+      Object.values(ACADEMIES)
+        .map(({ code }) => `${code}`)
+        .includes(`${adresseInfo.num_academie}`)
+    ) {
+      convertedEffectif.apprenant.adresse.academie = `${adresseInfo.num_academie}`;
+    }
+
+    // Lookup région code in reference list
+    if (
+      adresseInfo.num_region &&
+      Object.values(REGIONS)
+        .map(({ code }) => code)
+        .includes(adresseInfo.num_region)
+    ) {
+      convertedEffectif.apprenant.adresse.region = adresseInfo.num_region;
+    }
   };
+
+  if (effectifData.apprenant.adresse?.code_insee) {
+    await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_insee);
+  } else if (effectifData.apprenant.adresse?.code_postal) {
+    await fillConvertedEffectifAdresseData(effectifData.apprenant.adresse?.code_postal);
+  }
+
   if (effectifData.apprenant.telephone) {
     convertedEffectif.apprenant.telephone = telephoneConverter(effectifData.apprenant.telephone);
   }

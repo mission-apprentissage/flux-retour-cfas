@@ -18,6 +18,7 @@ export const getCfdInfo = async (cfd) => {
     return null;
   }
 };
+
 export const getRncpInfo = async (rncp) => {
   const url = `${API_ENDPOINT}/rncp`;
   try {
@@ -29,6 +30,23 @@ export const getRncpInfo = async (rncp) => {
     logger.error(
       `getRncpInfo: something went wrong while requesting ${url}`,
       `${error.message} for rncp=${rncp}`,
+      error.code || error.response.status
+    );
+    return null;
+  }
+};
+
+export const getCpInfo = async (codePostal) => {
+  const url = `${API_ENDPOINT}/code-postal`;
+  try {
+    const { data } = await axios.post(url, {
+      codePostal,
+    });
+    return data.result;
+  } catch (error) {
+    logger.error(
+      `getCpInfo: something went wrong while requesting ${url}`,
+      `${error.message} for code=${codePostal}`,
       error.code || error.response.status
     );
     return null;
