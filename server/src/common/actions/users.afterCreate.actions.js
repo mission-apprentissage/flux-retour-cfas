@@ -63,7 +63,12 @@ export const userAfterCreate = async ({
         await addContributeurOrganisme(_id, userEmail, "organisme.statsonly", pending);
       }
 
-      // TODO [metier] VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
+      if (notify) {
+        await mailer.sendEmail(
+          { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, type: "pilot" } },
+          "validation_user_by_tdb_team"
+        ); // Notif TDB_admin or whatever who
+      }
     }
   } else {
     if (reseau) {
@@ -96,7 +101,6 @@ export const userAfterCreate = async ({
         // is the first user on this organisme
         await addContributeurOrganisme(organisme._id, userEmail, "organisme.admin", pending);
         await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
-        // TODO [metier] VALIDATION FLOW [1] => BE SURE HE IS WHO IS PRETEND TO BE
         if (notify) {
           await mailer.sendEmail(
             { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, organisme } },

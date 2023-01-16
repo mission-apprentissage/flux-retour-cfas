@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
-import { usersDb } from "../model/collections.js";
+import { usersMigrationDb } from "../model/collections.js";
 import { generateHtml } from "../utils/emailsUtils.js";
 
 export function addEmail(userEmail, token, templateName) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { email: userEmail },
     {
       $push: {
@@ -19,7 +19,7 @@ export function addEmail(userEmail, token, templateName) {
 }
 
 export function addEmailMessageId(token, messageId) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
       $addToSet: {
@@ -34,7 +34,7 @@ export function addEmailMessageId(token, messageId) {
 }
 
 export function addEmailError(token, e) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
       $set: {
@@ -49,7 +49,7 @@ export function addEmailError(token, e) {
 }
 
 export function addEmailSendDate(token, templateName) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
       $set: {
@@ -64,7 +64,7 @@ export function addEmailSendDate(token, templateName) {
 }
 
 export async function markEmailAsDelivered(messageId) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { "emails.messageIds": messageId },
     {
       $unset: {
@@ -76,7 +76,7 @@ export async function markEmailAsDelivered(messageId) {
 }
 
 export async function markEmailAsFailed(messageId, type) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { "emails.messageIds": messageId },
     {
       $set: {
@@ -90,7 +90,7 @@ export async function markEmailAsFailed(messageId, type) {
 }
 
 export async function markEmailAsOpened(token) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
       $set: {
@@ -102,7 +102,7 @@ export async function markEmailAsOpened(token) {
 }
 
 export async function cancelUnsubscription(email) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { email },
     {
       $set: {
@@ -114,7 +114,7 @@ export async function cancelUnsubscription(email) {
 }
 
 export async function unsubscribeUser(id) {
-  return usersDb().findOneAndUpdate(
+  return usersMigrationDb().findOneAndUpdate(
     { $or: [{ email: id }, { "emails.token": id }] },
     {
       $set: {
@@ -126,15 +126,15 @@ export async function unsubscribeUser(id) {
 }
 
 export async function renderEmail({ templates }, token) {
-  const user = await usersDb().findOne({ "emails.token": token });
+  const user = await usersMigrationDb().findOne({ "emails.token": token });
   const { templateName } = user.emails.find((e) => e.token === token);
-  const template = templates[templateName](user, token);
+  const template = templates[templateName]({ to: user.email, payload: user }, token);
 
   return generateHtml(user.email, template);
 }
 
 export async function checkIfEmailExists(token) {
-  const count = await usersDb().countDocuments({ "emails.token": token });
+  const count = await usersMigrationDb().countDocuments({ "emails.token": token });
   return count > 0;
 }
 
@@ -159,7 +159,7 @@ export const createMailer = (mailerService) => {
       return token;
     },
     async resendEmail(token, options = {}) {
-      const user = await usersDb().findOne({ "emails.token": token });
+      const user = await usersMigrationDb().findOne({ "emails.token": token });
       const previous = user.emails.find((e) => e.token === token);
 
       const nextTemplateName = options.newTemplateName || previous.templateName;

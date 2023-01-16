@@ -34,6 +34,19 @@ export function validation_first_organisme_user_by_tdb_team({ payload }, token, 
   };
 }
 
+export function validation_user_by_tdb_team({ payload }, token, options = {}) {
+  const prefix = options.resend ? "[Rappel] " : "";
+  return {
+    subject: `${prefix} [ADMIN] Demande d'accès ${payload.user.email}`,
+    templateFile: getTemplateFile("validation_user_by_tdb_team"),
+    data: {
+      user: payload.user,
+      type: payload.type,
+      token,
+    },
+  };
+}
+
 export function validation_user_by_orga_admin({ payload }, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   return {

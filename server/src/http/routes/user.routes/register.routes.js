@@ -24,6 +24,8 @@ import { userAfterCreate } from "../../../common/actions/users.afterCreate.actio
 import { fetchOrganismeWithSiret, fetchOrganismesWithUai } from "../../../common/apis/apiReferentielMna.js";
 import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
+import logger from "../../../common/logger.js";
+import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -55,19 +57,33 @@ export default ({ mailer }) => {
   router.post(
     "/register",
     tryCatch(async ({ body }, res) => {
-      const { type, email, password, siret, nom, prenom, civility } = await Joi.object({
-        type: Joi.string().allow("pilot", "of", "reseau_of").required(),
+      const {
+        type,
+        email,
+        password,
+        siret,
+        uai: userUai,
+        nom,
+        prenom,
+        civility,
+        organismes_appartenance,
+      } = await Joi.object({
+        type: Joi.string().valid("pilot", "of", "reseau_of").required(),
         email: Joi.string().required(),
         password: Joi.string().required(),
         siret: Joi.string().required(),
+        uai: Joi.string().allow(null, ""),
         nom: Joi.string().required(),
         prenom: Joi.string().required(),
         civility: Joi.string().required(),
+        organismes_appartenance: Joi.string()
+          .valid(...Object.keys(ORGANISMES_APPARTENANCE))
+          .required(),
       }).validateAsync(body, { abortEarly: false });
 
       const alreadyExists = await getUser(email.toLowerCase());
       if (alreadyExists) {
-        throw Boom.conflict(`Unable to create`, { message: `email already in use` });
+        throw Boom.conflict(`email already in use`, { message: `email already in use` });
       }
 
       let uai = null;
@@ -78,6 +94,13 @@ export default ({ mailer }) => {
         } else {
           throw Boom.badRequest("Something went wrong");
         }
+        if (userUai !== uai) {
+          // TODO FIABILISATION
+          logger.error(
+            `POSSIBLE FIABILISATION PAR UN UTILISATUER ${email} : uai referentiel ${uai} - uai utilisateur ${uai} - siret ${siret}`
+          );
+        }
+        uai = userUai;
       }
 
       const user = await createUser(
@@ -88,6 +111,7 @@ export default ({ mailer }) => {
           nom,
           prenom,
           civility,
+          organisation: organismes_appartenance,
           ...(uai ? { uai } : {}),
         }
       );
@@ -230,6 +254,10 @@ export default ({ mailer }) => {
       if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP1") {
         throw Boom.badRequest("Something went wrong");
       }
+
+      // const codes_region = [result.num_region];
+      // const codes_academie = [result.num_academie];
+      // const codes_departement = [result.num_departement];
 
       await userAfterCreate({ user: userDb, mailer, asRole: type });
 

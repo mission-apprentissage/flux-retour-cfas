@@ -55,7 +55,7 @@ const RegisterPage = () => {
           </Center>
         )}
         {!succeeded && (
-          <Box w="45%" p={10}>
+          <Box w="50%" p={10}>
             <Text fontWeight={700} fontSize={22}>
               Votre compte dédié
             </Text>

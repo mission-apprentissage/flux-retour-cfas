@@ -68,6 +68,10 @@ export const findPermissionByUserEmail = async (organisme_id, userEmail, project
   return permissionsDb().findOne({ organisme_id, userEmail: userEmail.toLowerCase() }, { projection });
 };
 
+export const findPermissionsByUserEmail = async ({ userEmail }, projection = {}) => {
+  return await permissionsDb().find({ userEmail: userEmail.toLowerCase() }, { projection }).toArray();
+};
+
 export const hasAtLeastOneContributeurNotPending = async (organisme_id, roleName = "organisme.admin") => {
   const roleDb = await findRoleByName(roleName, { _id: 1 });
   if (!roleDb) {
@@ -134,6 +138,29 @@ export const updatePermissionPending = async ({ organisme_id, userEmail, pending
   );
 
   return updated.value;
+};
+
+/**
+ * Méthode de mise à jour d'activation d'acces
+ * @param {*} permissionProps
+ * @returns
+ */
+export const updatePermissionsPending = async ({ userEmail, pending }) => {
+  const permissions = await findPermissionsByUserEmail({ userEmail: userEmail.toLowerCase() }, { _id: 1 });
+  if (!permissions && !permissions.length) {
+    throw new Error(`Unable to find permissions for userEmail ${userEmail.toLowerCase()}`);
+  }
+
+  await permissionsDb().updateMany(
+    { _id: { $in: [permissions.map(({ _id }) => _id)] } },
+    {
+      $set: {
+        pending,
+        updated_at: new Date(),
+      },
+    },
+    { returnDocument: "after" }
+  );
 };
 
 /**

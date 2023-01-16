@@ -1,9 +1,7 @@
 import Joi from "joi";
 import { capitalize, cloneDeep, get } from "lodash-es";
 import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
-import { ACADEMIES } from "../../constants/academiesConstants.js";
-import { DEPARTEMENT_CODES } from "../../constants/departements.TRUELIST.js";
-import { REGIONS } from "../../constants/territoiresConstants.js";
+import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
 import {
@@ -134,10 +132,7 @@ export const hydrateEffectif = async (effectifData, options) => {
     }
 
     // Lookup département code in reference list
-    if (
-      adresseInfo.num_departement &&
-      DEPARTEMENT_CODES.map((code) => code.replace(/^(0){1}/, "")).includes(adresseInfo.num_departement)
-    ) {
+    if (adresseInfo.num_departement && DEPARTEMENTS.map((code) => code).includes(adresseInfo.num_departement)) {
       convertedEffectif.apprenant.adresse.departement = adresseInfo.num_departement;
     }
 

@@ -13,7 +13,7 @@ import {
   updateUser,
 } from "../../../common/actions/users.actions.js";
 import { findRoleById, findRolesByNames } from "../../../common/actions/roles.actions.js";
-import { updatePermissionPending } from "../../../common/actions/permissions.actions.js";
+import { updatePermissionPending, updatePermissionsPending } from "../../../common/actions/permissions.actions.js";
 
 // TODO [tech]
 // eslint-disable-next-line no-unused-vars
@@ -56,15 +56,25 @@ export default ({ mailer }) => {
     tryCatch(async ({ query }, res) => {
       const { userEmail, organisme_id, validate } = await Joi.object({
         userEmail: Joi.string().email().required(),
-        organisme_id: Joi.string().required(),
+        organisme_id: Joi.string(),
         validate: Joi.boolean().required(),
       }).validateAsync(query, { abortEarly: false });
-      if (validate) {
-        await updatePermissionPending({ organisme_id, userEmail, pending: false });
+      if (organisme_id) {
+        if (validate) {
+          await updatePermissionPending({ organisme_id, userEmail, pending: false });
+          return res.json({ ok: true });
+        } else {
+          // TODO NOW REJECTED PERM
+          return res.json({ ok: false });
+        }
       } else {
-        // TODO REJECTED PERM
+        if (validate) {
+          await updatePermissionsPending({ userEmail, pending: false });
+          return res.json({ ok: true });
+        } else {
+          // TODO NOW
+        }
       }
-      return res.json({ ok: true });
     })
   );
 
