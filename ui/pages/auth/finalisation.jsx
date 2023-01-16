@@ -20,14 +20,13 @@ import * as Yup from "yup";
 import React, { useCallback } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import { decodeJwt } from "jose";
 import uniq from "lodash.uniq";
 
 import { Page } from "../../components/Page/Page";
 
 import useToken from "../../hooks/useToken";
 import useAuth from "../../hooks/useAuth";
-import { _post } from "../../common/httpClient";
+import { _get, _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import Link from "../../components/Links/Link";
 import Ribbons from "../../components/Ribbons/Ribbons";
@@ -122,7 +121,7 @@ const Finalize = () => {
         try {
           const result = await _post("/api/v1/auth/demande-acces", values);
           if (result.loggedIn) {
-            const user = decodeJwt(result.token);
+            const user = await _get("/api/v1/session/current");
             setAuth(user);
             setToken(result.token);
           }
@@ -142,7 +141,7 @@ const Finalize = () => {
         try {
           const result = await _post("/api/v1/auth/finalize", values);
           if (result.loggedIn) {
-            const user = decodeJwt(result.token);
+            const user = await _get("/api/v1/session/current");
             setAuth(user);
             setToken(result.token);
             router.push("/mon-espace/mon-organisme");

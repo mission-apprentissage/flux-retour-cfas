@@ -38,7 +38,7 @@ export default () => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserTokenSimple({ payload });
+      const token = createUserTokenSimple({ payload: { email: payload.email } });
 
       if (await sessions.findJwt(token)) {
         await sessions.removeJwt(token);

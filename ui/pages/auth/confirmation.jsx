@@ -2,9 +2,8 @@ import { Box, Flex, Heading, HStack, Spinner } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { _post } from "../../common/httpClient";
+import { _get, _post } from "../../common/httpClient";
 import decodeJWT from "../../common/utils/decodeJWT";
-import { decodeJwt } from "jose";
 import useAuth from "../../hooks/useAuth";
 import useToken from "../../hooks/useToken";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
@@ -42,7 +41,7 @@ const Confirmed = () => {
     const run = async () => {
       if (!isLoading && data) {
         if (data.succeeded) {
-          const user = decodeJwt(data.token);
+          const user = await _get("/api/v1/session/current");
           setAuth(user);
           setToken(data.token);
         }

@@ -4,12 +4,11 @@ import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import * as Yup from "yup";
 import YupPassword from "yup-password";
-import { decodeJwt } from "jose";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 import useAuth from "../../hooks/useAuth";
 import useToken from "../../hooks/useToken";
-import { _post } from "../../common/httpClient";
+import { _get, _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 
 YupPassword(Yup); // extend yup
@@ -70,7 +69,7 @@ const ResetPasswordPage = () => {
           passwordToken,
         });
         if (result.loggedIn) {
-          const user = decodeJwt(result.token);
+          const user = await _get("/api/v1/session/current");
           setAuth(user);
           setToken(result.token);
           router.push("/mon-espace/mon-organisme");

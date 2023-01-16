@@ -226,7 +226,7 @@ export default ({ mailer }) => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserTokenSimple({ payload });
+      const token = createUserTokenSimple({ payload: { email: payload.email } });
       await sessions.addJwt(token);
 
       return responseWithCookie({ res, token }).status(200).json({
@@ -289,7 +289,7 @@ export default ({ mailer }) => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserTokenSimple({ payload });
+      const token = createUserTokenSimple({ payload: { email: payload.email } });
 
       if (await sessions.findJwt(token)) {
         await sessions.removeJwt(token);
@@ -334,7 +334,7 @@ export default ({ mailer }) => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserTokenSimple({ payload });
+      const token = createUserTokenSimple({ payload: { email: payload.email } });
 
       if (await sessions.findJwt(token)) {
         await sessions.removeJwt(token);
