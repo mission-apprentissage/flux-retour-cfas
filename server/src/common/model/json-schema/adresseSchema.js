@@ -1,4 +1,4 @@
-import { object, string, integer } from "./jsonSchemaTypes.js";
+import { object, string, stringOrNull, integer } from "./jsonSchemaTypes.js";
 import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { PAYS } from "../../constants/paysConstant.js";
 
@@ -8,7 +8,7 @@ export const adresseSchema = object({
     example: 13,
     pattern: "^(?!0{1})[0-9]*$",
   }),
-  repetition_voie: string({
+  repetition_voie: stringOrNull({
     description: "Indice de répétition du numéro de voie",
     example: "B",
     enum: [null, "B", "T", "Q", "C"],
@@ -57,7 +57,7 @@ export const adresseSchema = object({
     description: "Adresse complète",
     example: "13 Bis Boulevard de la liberté 75000 PARIS",
   }),
-  pays: string({
+  pays: stringOrNull({
     enum: [null, ...PAYS.map(({ code }) => code)],
     description: "Pays",
   }),
