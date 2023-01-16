@@ -1,9 +1,7 @@
 import express from "express";
-import { format } from "date-fns";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { getCacheKeyForRoute } from "../../../common/utils/cacheUtils.js";
 import { getNbDistinctOrganismesByUai } from "../../../common/actions/dossiersApprenants.actions.js";
 import { ObjectId } from "mongodb";
 
@@ -15,7 +13,7 @@ const commonEffectifsFilters = {
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
 
-export default ({ effectifs, cache }) => {
+export default ({ effectifs }) => {
   const router = express.Router();
 
   /**
@@ -65,28 +63,15 @@ export default ({ effectifs, cache }) => {
         annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
-      // try to retrieve from cache
-      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
-        date: format(date, "yyyy-MM-dd"),
-        filters,
-      });
-      const fromCache = await cache.get(cacheKey);
+      const response = {
+        date,
+        apprentis: await effectifs.apprentis.getCountAtDate(date, filters),
+        rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
+        inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
+        abandons: await effectifs.abandons.getCountAtDate(date, filters),
+      };
 
-      if (fromCache) {
-        return res.json(JSON.parse(fromCache));
-      } else {
-        const response = {
-          date,
-          apprentis: await effectifs.apprentis.getCountAtDate(date, filters),
-          rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
-          inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
-          abandons: await effectifs.abandons.getCountAtDate(date, filters),
-        };
-
-        // cache the result
-        await cache.set(cacheKey, JSON.stringify(response));
-        return res.json(response);
-      }
+      return res.json(response);
     })
   );
 
