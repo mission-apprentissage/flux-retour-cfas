@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import ACL from "../common/constants/acl";
+import { Check } from "../theme/components/icons";
 
 const specialsAcls = {
   "wks/page_espace/page_dossiers/voir_liste_dossiers": [
@@ -56,6 +57,7 @@ const rendreACL = (feature, deepth, handleChange, values) => {
                 isChecked={values.newAcl.includes(item.ref)}
                 isDisabled={shouldBeDisabled}
                 fontWeight={deepth < 2 ? "bold" : "none"}
+                icon={<Check />}
               >
                 {item.feature}
               </Checkbox>
@@ -79,6 +81,7 @@ const rendreACL = (feature, deepth, handleChange, values) => {
                         value={subitem.ref}
                         isChecked={values.newAcl.includes(subitem.ref)}
                         isDisabled={shouldBeDisabled || !values.newAcl.includes(item.ref)}
+                        icon={<Check />}
                       >
                         {subitem.feature}
                       </Checkbox>

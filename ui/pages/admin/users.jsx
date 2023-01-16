@@ -29,6 +29,7 @@ import withAuth from "../../components/withAuth";
 
 import Acl from "../../components/Acl";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { Check } from "../../theme/components/icons";
 
 const buildRolesAcl = (newRoles, roles) => {
   let acl = [];
@@ -205,6 +206,7 @@ const UserLine = ({ user, roles }) => {
           value="on"
           fontWeight={values.accessAllCheckbox.length > 0 ? "bold" : "normal"}
           color={"bluefrance"}
+          icon={<Check />}
         >
           Admin
         </Checkbox>
@@ -223,6 +225,7 @@ const UserLine = ({ user, roles }) => {
                   onChange={() => handleRoleChange(role.name)}
                   value={role.name}
                   isChecked={values.roles.includes(role.name)}
+                  icon={<Check />}
                 >
                   {role.name}
                 </Checkbox>

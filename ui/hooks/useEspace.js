@@ -42,7 +42,7 @@ export function useEspace() {
   const isSIFA2Page = slug.includes("enquete-SIFA2");
   const isParametresPage = slug.includes("parametres");
   const contextNav = isOrganismePages ? "organisme" : "user";
-  const whoIs = auth.roles.find((role) => ["pilot", "erp", "of", "reseau_of"].includes(role.name))?.name;
+  const whoIs = auth.roles.find((role) => ["pilot", "erp", "of", "reseau_of"].includes(role));
 
   const organisme_id = isOrganismePages
     ? slug?.[slug.length - (isTeleversementPage ? 3 : isEffectifsPage || isSIFA2Page || isParametresPage ? 2 : 1)]
@@ -96,15 +96,15 @@ export function useEspace() {
                     },
                   }
                 : {}),
-              ...(hasAccessToOnlyOneOrganisme
-                ? {}
-                : {
+              ...(!hasAccessToOnlyOneOrganisme || auth.permissions.is_cross_organismes
+                ? {
                     mesOrganismes: {
                       pageTitle: mesOrganismesNames[whoIs] ?? mesOrganismesNames.global,
                       navTitle: mesOrganismesNames[whoIs] ?? mesOrganismesNames.global,
                       path: "/mon-espace/mes-organismes",
                     },
-                  }),
+                  }
+                : {}),
             },
             organisme: {
               landingEspace: {
@@ -183,6 +183,7 @@ export function useEspace() {
     auth.isInPendingValidation,
     auth.account_status,
     isTeleversementPage,
+    auth.permissions.is_cross_organismes,
   ]);
 
   if (error !== null) {

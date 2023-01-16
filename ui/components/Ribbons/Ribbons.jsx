@@ -8,7 +8,7 @@ const stylesMap = {
   warning: { color: "warning2", bg: "white", borderColor: "warning2", borderWidth: 1 },
   info: { color: "plaininfo", bg: "white", borderColor: "plaininfo", borderWidth: 1 },
   info_clear: { color: "bluefrance", bg: "white" },
-  loading: { color: "bluefrance", bg: "white" },
+  loading: { color: "bluefrance", bg: "white", borderColor: "bluefrance", borderWidth: 1 },
   alert_clear: { color: "flaterror", bg: "white" },
   alert: { color: "flaterror", bg: "white", borderColor: "flaterror", borderWidth: 1 },
   unstyled: { color: "grey", bg: "galt2" },
