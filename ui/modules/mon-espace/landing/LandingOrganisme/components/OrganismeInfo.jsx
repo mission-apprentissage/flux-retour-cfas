@@ -6,8 +6,8 @@ import NatureOrganismeDeFormationWarning from "./NatureOrganismeDeFormationWarni
 import { formatSiretSplitted } from "../../../../../common/utils/stringUtils";
 import { organismeAtom } from "../../../../../hooks/organismeAtoms";
 import { useRecoilValue } from "recoil";
-import { SimpleFiltersProvider } from "../SimpleFiltersContext.js";
-import OrganismeIndicateursInfo from "./OrganismeIndicateursInfos.jsx";
+import IndicateursInfo from "../../common/IndicateursInfos.jsx";
+import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
 
 export const mapNatureOrganismeDeFormation = (nature) => {
   switch (nature) {
@@ -86,9 +86,11 @@ export default function OrganismeInfo() {
         </Box>
       </Section>
 
-      <SimpleFiltersProvider initialState={{ organismeId }}>
-        <OrganismeIndicateursInfo />
-      </SimpleFiltersProvider>
+      {organismeId && (
+        <SimpleFiltersProvider initialState={{ organismeId }}>
+          <IndicateursInfo />
+        </SimpleFiltersProvider>
+      )}
     </>
   );
 }

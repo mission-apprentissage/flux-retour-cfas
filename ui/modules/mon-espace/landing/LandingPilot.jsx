@@ -1,13 +1,13 @@
 import React from "react";
 import { Heading, Stack } from "@chakra-ui/react";
-import { SimpleFiltersProvider } from "./common/SimpleFiltersContext.js";
 import IndicateursInfo from "./common/IndicateursInfos.jsx";
+import { SimpleFiltersProvider } from "./common/SimpleFiltersContext.js";
 
-const LandingErp = () => {
+const LandingPilot = () => {
   return (
     <Stack spacing="2w">
       <Heading textStyle="h2" color="grey.800">
-        Bienvenue sur votre tableau de bord [ERP]
+        Bienvenue sur votre tableau de bord [PILOT]
       </Heading>
 
       <SimpleFiltersProvider>
@@ -17,4 +17,4 @@ const LandingErp = () => {
   );
 };
 
-export default LandingErp;
+export default LandingPilot;
