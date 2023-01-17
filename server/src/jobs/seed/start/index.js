@@ -54,7 +54,6 @@ export const seedSampleOrganismes = async () => {
   if (!organismeK) {
     await createOrganisme({
       uai: "0333326L",
-      sirets: ["51400512300062"],
       siret: "51400512300062",
       nature: "responsable_formateur",
     });

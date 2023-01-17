@@ -89,6 +89,14 @@ export const createOrganisme = async ({
     throw new Error(`Un organisme avec l'uai ${uai} existe déjà`);
   }
 
+  let siret = siretIn;
+  if (Array.isArray(sirets) && sirets.length !== 0 && !siretIn) {
+    siret = sirets[0];
+  }
+  if (Array.isArray(sirets) && sirets.length === 0 && siretIn) {
+    sirets[0] = siretIn;
+  }
+
   // TODO [metier] really used ?
   let metiers = [];
   if (Array.isArray(sirets) && sirets.length !== 0) {
@@ -97,11 +105,6 @@ export const createOrganisme = async ({
     } catch (error) {
       console.log(error);
     }
-  }
-
-  let siret = siretIn;
-  if (Array.isArray(sirets) && sirets.length !== 0 && !siretIn) {
-    siret = sirets[0];
   }
 
   let nom = nomIn;
@@ -132,7 +135,6 @@ export const createOrganisme = async ({
     } else {
       // TODO Find adresse somewhere else
       logger.error(`createOrganisme > Erreur sur l'etablissement ${siret} via API Entreprise`);
-      // throw new Error(`createOrganisme > Impossible de retrouver l'etablissement via API Entreprise`);
     }
   }
 

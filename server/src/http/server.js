@@ -69,7 +69,7 @@ export default async (services) => {
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
   app.use("/api/v1/espace", checkJwtToken, espace());
-  app.use("/api/v1/organisme", checkJwtToken, organisme());
+  app.use("/api/v1/organisme", checkJwtToken, organisme(services));
   app.use("/api/v1/effectif", checkJwtToken, effectif());
   app.use("/api/v1/upload", checkJwtToken, upload(services));
 
