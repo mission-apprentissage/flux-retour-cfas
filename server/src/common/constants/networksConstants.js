@@ -2,6 +2,10 @@
  * Noms des réseaux de CFAS
  */
 export const RESEAUX_CFAS = {
+  ADEN: {
+    nomReseau: "ADEN",
+    nomFichier: "cfas-aden",
+  },
   CMA: {
     nomReseau: "CMA",
     nomFichier: "cfas-cma",
