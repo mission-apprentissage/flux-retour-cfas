@@ -1,17 +1,20 @@
-import React, { useEffect, useRef } from "react";
-import { Center, Heading, Spinner, Box, Flex, Text, HStack, Button, Circle } from "@chakra-ui/react";
-import { useEspace } from "../../../hooks/useEspace";
-
-import { organismeAtom } from "../../../hooks/organismeAtoms";
-import { _get, _getBlob } from "../../../common/httpClient";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Center, Heading, Spinner, Box, Flex, Text, HStack, Button, VStack, Switch } from "@chakra-ui/react";
+import groupBy from "lodash.groupby";
+import { useRouter } from "next/router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue, useSetRecoilState } from "recoil";
+
+import { useEspace } from "../../../hooks/useEspace";
+import { organismeAtom } from "../../../hooks/organismeAtoms";
+import { _get, _getBlob } from "../../../common/httpClient";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
 import useDownloadClick from "../../../hooks/old/useDownloadClick";
 import { DownloadLine } from "../../../theme/components/icons";
-import { useRouter } from "next/router";
 import EffectifsTable from "../effectifs/engine/EffectifsTable";
 import { effectifsStateAtom } from "../effectifs/engine/atoms";
+import { Input } from "../effectifs/engine/formEngine/components/Input/Input";
+import { DoubleChevrons } from "../../../theme/components/icons/DoubleChevrons";
 
 function useOrganismesEffectifs() {
   const organisme = useRecoilValue(organismeAtom);
@@ -60,6 +63,32 @@ const DownloadButton = ({ title, fileName, getFile }) => {
   );
 };
 
+const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, ...props }) => {
+  const [count, setCount] = useState(effectifs.length);
+  return (
+    <Box {...props}>
+      {count !== 0 && (
+        <HStack>
+          <DoubleChevrons />
+          <Text fontWeight="bold" textDecoration="underline">
+            {formation.libelle_long}
+          </Text>
+          <Text>
+            [Code diplôme {formation.cfd}] - [Code RNCP {formation.rncp}]
+          </Text>
+        </HStack>
+      )}
+      <EffectifsTable
+        canEdit={canEdit}
+        organismesEffectifs={effectifs}
+        searchValue={searchValue}
+        onCountItemsChange={(count) => setCount(count)}
+        modeSifa
+      />
+    </Box>
+  );
+};
+
 const SIFAPage = () => {
   const { isMonOrganismePages, isOrganismePages } = useEspace();
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs();
@@ -68,6 +97,15 @@ const SIFAPage = () => {
   const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
   const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
+  const [searchValue, setSearchValue] = useState("");
+
+  const organismesEffectifsGroupedBySco = useMemo(
+    () => groupBy(organismesEffectifs, "annee_scolaire"),
+    [organismesEffectifs]
+  );
+  const anneScolaire = "2022-2023";
+  const [showOnlyMissingSifa, setShowOnlyMissingSifa] = useState(false);
+
   if (isLoading) {
     return (
       <Center>
@@ -75,46 +113,14 @@ const SIFAPage = () => {
       </Center>
     );
   }
-
+  // historique_statut.date_statut <= "31/12/202"
   return (
-    <>
-      <Heading textStyle="h2" color="grey.800" mt={5} mb={8}>
-        {isMonOrganismePages && `Mon Enquete SIFA`}
-        {isOrganismePages && `Son Enquete SIFA`}
-      </Heading>
+    <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
-        <Box flexBasis={{ base: "auto", md: "auto" }} flexGrow="1">
-          <HStack>
-            <Text>Grouper par :</Text>
-            <Button onClick={() => alert("TODO NOT YET")} variant="badgeSelected">
-              par formations
-              <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">
-                <Box as="i" className="ri-checkbox-circle-line" fontSize="gamma" />
-              </Circle>
-            </Button>
-            <Button onClick={() => alert("TODO NOT YET")} variant="badge">
-              par années scolaire
-            </Button>
-          </HStack>
-          <HStack mt={10}>
-            <Text>Voir :</Text>
-            <Button onClick={() => alert("TODO NOT YET")} variant="badgeSelected">
-              Tous les effectifs
-              <Circle size="15px" background="white" color="bluefrance" position="absolute" bottom="18px" right="-5px">
-                <Box as="i" className="ri-checkbox-circle-line" fontSize="gamma" />
-              </Circle>
-            </Button>
-            <Button
-              onClick={() => alert("TODO NOT YET")}
-              variant="badge"
-              bg="none"
-              borderWidth="1px"
-              borderColor="bluefrance"
-            >
-              Seulement les erreurs
-            </Button>
-          </HStack>
-        </Box>
+        <Heading textStyle="h2" color="grey.800" mt={5} mb={8}>
+          {isMonOrganismePages && `Mon Enquete SIFA`}
+          {isOrganismePages && `Son Enquete SIFA`}
+        </Heading>
         <HStack spacing={4}>
           {hasContextAccessTo(organisme, "organisme/page_sifa/telecharger") && (
             <DownloadButton
@@ -135,26 +141,91 @@ const SIFAPage = () => {
                 }}
                 variant="secondary"
               >
-                <DownloadLine transform="rotate(180deg)" />
-                <Text as="span" ml={2}>
-                  Téléversements
-                </Text>
+                <Text as="span">+ Ajouter</Text>
               </Button>
             </>
           )}
         </HStack>
       </Flex>
 
-      <Box mt={10} mb={16}>
-        <HStack>
-          <Text fontWeight="bold" textDecoration="underline">
-            Conseiller en économie sociale familiale
-          </Text>
-          <Text>[Code diplôme 26033206] - hardcodé TODO</Text>
+      <VStack alignItems="flex-start">
+        <Text fontWeight="bold">
+          Vous avez [{organismesEffectifs.length}] effectifs au total, pour plus de facilité veuillez sélectionner une
+          option ci-dessous :
+        </Text>
+        <Input
+          {...{
+            name: `search_effectifs`,
+            fieldType: "text",
+            mask: "C",
+            maskBlocks: [
+              {
+                name: "C",
+                mask: "Pattern",
+                pattern: "^.*$",
+              },
+            ],
+            placeholder: "Recherche",
+          }}
+          onSubmit={(value) => {
+            setSearchValue(value.trim());
+          }}
+          value={searchValue}
+          w="35%"
+        />
+      </VStack>
+
+      <VStack alignItems="flex-start" mt={8}>
+        <HStack w="full">
+          <Box fontWeight="bold" flexGrow={1}>
+            Filtrer:
+          </Box>
+          <HStack>
+            <Switch
+              variant="icon"
+              isChecked={showOnlyMissingSifa}
+              onChange={(e) => {
+                setShowOnlyMissingSifa(e.target.checked);
+              }}
+            />
+            <Text flexGrow={1}>Afficher uniquement les données manquantes pour SIFA</Text>
+          </HStack>
         </HStack>
-        <EffectifsTable canEdit={canEdit} modeSifa organismesEffectifs={organismesEffectifs} />
+      </VStack>
+
+      <Box mt={10} mb={16}>
+        {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]) => {
+          if (anneScolaire !== "all" && anneScolaire !== anneSco) return null;
+          const orgaEffectifs = showOnlyMissingSifa ? orgaE.filter((ef) => ef.requiredSifa.length) : orgaE;
+          const effectifsByCfd = groupBy(orgaEffectifs, "formation.cfd");
+          const borderStyle = { borderColor: "dgalt", borderWidth: 1 }; //anneScolaire === "all" ? { borderColor: "bluefrance", borderWidth: 1 } : {};
+          return (
+            <Box key={anneSco} mb={5}>
+              <Text>
+                {anneSco} {!searchValue ? `- ${orgaEffectifs.length} apprenant(es) total` : ""}
+              </Text>
+              <Box p={4} {...borderStyle}>
+                {Object.entries(effectifsByCfd).map(([cfd, effectifs], i) => {
+                  const { formation } = effectifs[0];
+                  return (
+                    <EffectifsTableContainer
+                      key={anneSco + cfd}
+                      canEdit={canEdit}
+                      effectifs={effectifs}
+                      formation={formation}
+                      searchValue={searchValue}
+                      {...{
+                        ...(i === 0 ? {} : { mt: 14 }),
+                      }}
+                    />
+                  );
+                })}
+              </Box>
+            </Box>
+          );
+        })}
       </Box>
-    </>
+    </Flex>
   );
 };
 

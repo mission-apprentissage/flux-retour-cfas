@@ -14,7 +14,7 @@ import {
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { findRolePermission } from "../../../common/actions/roles.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
-import { generateSifa } from "../../../common/actions/sifa.actions/sifa.actions.js";
+import { generateSifa, isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
 import { updatePermission, updatePermissionPending } from "../../../common/actions/permissions.actions.js";
 import { getUser } from "../../../common/actions/users.actions.js";
 
@@ -76,7 +76,8 @@ export default ({ mailer }) => {
       for (const effectifDb of effectifsDb) {
         const { _id, id_erp_apprenant, source, annee_scolaire, validation_errors, apprenant, formation } = effectifDb;
 
-        effectifs.push({
+        let historique_statut = apprenant.historique_statut;
+        const effectif = {
           id: _id.toString(),
           id_erp_apprenant,
           organisme_id,
@@ -86,7 +87,7 @@ export default ({ mailer }) => {
           formation,
           nom: apprenant.nom,
           prenom: apprenant.prenom,
-          historique_statut: apprenant.historique_statut,
+          historique_statut,
           ...(sifa
             ? {
                 requiredSifa: compact(
@@ -100,7 +101,15 @@ export default ({ mailer }) => {
                 ),
               }
             : {}),
-        });
+        };
+
+        if (sifa) {
+          if (isEligibleSIFA({ historique_statut })) {
+            effectifs.push(effectif);
+          }
+        } else {
+          effectifs.push(effectif);
+        }
       }
 
       return res.json(effectifs);

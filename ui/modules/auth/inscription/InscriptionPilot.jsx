@@ -24,10 +24,10 @@ export const InscriptionPilot = ({ onEndOfSpecific }) => {
                 label: "DEETS",
                 value: "DEETS",
               },
-              {
-                label: "DDETS",
-                value: "DDETS",
-              },
+              // {
+              //   label: "DDETS",
+              //   value: "DDETS",
+              // },
               {
                 label: "DRAAF",
                 value: "DRAAF",

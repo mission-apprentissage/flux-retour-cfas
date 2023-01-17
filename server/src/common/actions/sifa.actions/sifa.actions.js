@@ -5,6 +5,33 @@ import { findFormationById } from "../formations.actions.js";
 import { findOrganismeById } from "../organismes/organismes.actions.js";
 import { SIFA_FIELDS } from "./sifaCsvFields.js";
 import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
+import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
+
+export const isEligibleSIFA = ({ historique_statut }) => {
+  const filtered = historique_statut.filter(({ date_statut }) => {
+    const dateStatut = DateTime.fromJSDate(new Date(date_statut)).setZone("Europe/Paris").setLocale("fr-FR");
+    const endOfyear = DateTime.fromFormat("31/12/2022", "dd/MM/yyyy").setLocale("fr-FR");
+    return dateStatut <= endOfyear;
+  });
+  const historiqueSorted = filtered.sort((a, b) => {
+    return new Date(a.date_statut).getTime() - new Date(b.date_statut).getTime();
+  });
+  const current = [...historiqueSorted].pop();
+  if (current?.valeur_statut === CODES_STATUT_APPRENANT.apprenti) {
+    let aEteInscrit = false;
+    for (let index = 0; index < historiqueSorted.length - 1; index++) {
+      const element = historiqueSorted[index];
+      if (element.valeur_statut === CODES_STATUT_APPRENANT.inscrit) {
+        aEteInscrit = true;
+        break;
+      }
+    }
+    if (aEteInscrit) {
+      return true;
+    }
+  }
+  return false;
+};
 
 /**
  * Méthode
@@ -12,7 +39,11 @@ import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
  */
 export const generateSifa = async (organisme_id) => {
   const organisme = await findOrganismeById(organisme_id);
-  const effectifs = await findEffectifs(organisme_id);
+  const effectifsDb = await findEffectifs(organisme_id);
+  let effectifs = [];
+  for (const effectif of effectifsDb) {
+    if (isEligibleSIFA({ historique_statut: effectif.apprenant.historique_statut })) effectifs.push(effectif);
+  }
 
   const items = [];
   for (const effectif of effectifs) {
