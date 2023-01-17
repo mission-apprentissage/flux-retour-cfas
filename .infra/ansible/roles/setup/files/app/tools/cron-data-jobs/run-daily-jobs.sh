@@ -20,9 +20,6 @@ call_daily_jobs_with_logs(){
 
   # TODO : a réactiver - Purge des données inutiles
   # docker exec flux_retour_cfas_server bash -c "yarn cli purge:events" || true
-
-  # TODO : job à fixer - Warm-up cache avec calculs effectifs coûteux
-  # docker exec flux_retour_cfas_server bash -c "yarn cli cache:warmup" || true 
 } 
 
 call_daily_jobs_with_logs >> ${LOG_FILEPATH}
