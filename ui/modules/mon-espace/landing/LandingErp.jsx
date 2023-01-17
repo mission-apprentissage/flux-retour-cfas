@@ -10,6 +10,7 @@ const LandingErp = () => {
         Bienvenue sur votre tableau de bord [ERP]
       </Heading>
 
+      {/* TODO Voir si on peut récupérer les organismes_id lié à l'ERP comme pour les réseau pour filtrer correctement */}
       <SimpleFiltersProvider>
         <IndicateursInfo />
       </SimpleFiltersProvider>
