@@ -51,7 +51,7 @@ export const schema = object(
     ),
     codes_academie: arrayOf(
       string({
-        enum: Object.values(ACADEMIES).map(({ code }) => code),
+        enum: Object.values(ACADEMIES).map(({ code }) => `${code}`),
       }),
       { description: "Si l'utilisateur est scopé à une ou des académie(s), lesquelles ?" }
     ),
