@@ -94,6 +94,7 @@ const Effectifs = ({ organismesEffectifs }) => {
     [organismesEffectifs]
   );
   const [anneScolaire, setAnneScolaire] = useState("all");
+  const [showOnlyErrors, setShowOnlyErrors] = useState(false);
 
   return (
     <Flex flexDir="column" width="100%" my={10}>
@@ -179,7 +180,12 @@ const Effectifs = ({ organismesEffectifs }) => {
             Filtrer:
           </Box>
           <HStack>
-            <Switch variant="icon" />
+            <Switch
+              variant="icon"
+              onChange={(e) => {
+                setShowOnlyErrors(e.target.checked);
+              }}
+            />
             <Text flexGrow={1}>Afficher uniquement les données en erreur</Text>
           </HStack>
         </HStack>
@@ -199,8 +205,9 @@ const Effectifs = ({ organismesEffectifs }) => {
       </VStack>
 
       <Box mt={10} mb={16}>
-        {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaEffectifs]) => {
+        {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]) => {
           if (anneScolaire !== "all" && anneScolaire !== anneSco) return null;
+          const orgaEffectifs = showOnlyErrors ? orgaE.filter((ef) => ef.validation_errors.length) : orgaE;
           const effectifsByCfd = groupBy(orgaEffectifs, "formation.cfd");
           const borderStyle = { borderColor: "dgalt", borderWidth: 1 }; //anneScolaire === "all" ? { borderColor: "bluefrance", borderWidth: 1 } : {};
           return (
