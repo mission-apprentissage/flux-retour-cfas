@@ -26,7 +26,11 @@ import { uploadsDb } from "../../../../common/model/collections.js";
 import { createEffectif, findEffectifs, updateEffectif } from "../../../../common/actions/effectifs.actions.js";
 import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
 import { findOrganismeFormationByCfd } from "../../../../common/actions/organismes/organismes.formations.actions.js";
-import { getFormationWithCfd, getFormationWithRNCP } from "../../../../common/actions/formations.actions.js";
+import {
+  getFormationWithCfd,
+  getFormationWithRNCP,
+  findFormationById,
+} from "../../../../common/actions/formations.actions.js";
 import { setOrganismeFirstDateTransmissionIfNeeded } from "../../../../common/actions/organismes/organismes.actions.js";
 
 const mappingModel = {
@@ -683,7 +687,11 @@ export default ({ clamav }) => {
               ? [data.apprenant.historique_statut]
               : [];
             data.apprenant.contrats = data.apprenant.contrats ? [data.apprenant.contrats] : [];
-            data.formation.annee = organismeFormation.annee;
+
+            const formationDb = await findFormationById(organismeFormation.formation_id);
+            data.formation.formation_id = organismeFormation.formation_id;
+            data.formation.annee = formationDb.annee;
+            data.formation.libelle_long = formationDb.libelle;
             const { effectif: canBeImportEffectif, found: foundInDb } = await hydrateEffectif(
               {
                 organisme_id,

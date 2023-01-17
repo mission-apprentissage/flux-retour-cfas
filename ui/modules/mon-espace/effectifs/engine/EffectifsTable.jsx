@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Text, HStack, Button, Tooltip, UnorderedList, ListItem } from "@chakra-ui/react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
@@ -56,14 +56,23 @@ const EffectifsTable = ({
   canEdit = false,
   columns = ["expander", "annee_scolaire", "statut_courant", "nom", "prenom", "separator", "source", "state"],
   show = "normal",
+  searchValue,
   RenderErrorImport = () => {},
+  onCountItemsChange = () => {},
 }) => {
+  const [count, setCount] = useState(organismesEffectifs.length);
+
   return (
     <Box mt={4}>
-      <Text>Nombre total d&rsquo;effectifs : {organismesEffectifs.length}</Text>
+      {count > 0 && <Text>{count} apprenant(es)</Text>}
       <Table
         mt={4}
         data={organismesEffectifs}
+        searchValue={searchValue}
+        onCountItemsChange={(count) => {
+          setCount(count);
+          onCountItemsChange(count);
+        }}
         columns={{
           ...(columns.includes("expander")
             ? {
