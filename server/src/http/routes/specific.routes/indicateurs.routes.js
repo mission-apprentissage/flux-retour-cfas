@@ -6,9 +6,7 @@ import { getNbDistinctOrganismesByUai } from "../../../common/actions/dossiersAp
 import { ObjectId } from "mongodb";
 
 const commonEffectifsFilters = {
-  organisme_id: Joi.string().required(),
-  // etablissement_num_region: Joi.string().allow(null, ""),
-  // etablissement_num_departement: Joi.string().allow(null, ""),
+  organisme_id: Joi.string().allow(null, ""),
   formation_cfd: Joi.string().allow(null, ""),
   etablissement_reseaux: Joi.string().allow(null, ""),
 };
@@ -56,10 +54,15 @@ export default ({ effectifs }) => {
         ...commonEffectifsFilters,
       }).validateAsync(req.query, { abortEarly: false });
 
+      const { organisme_ids } = req.user;
+
       const date = new Date(dateFromParams);
+
       const filters = {
         ...filtersFromBody,
-        organisme_id: ObjectId(organisme_id),
+        // Gestion des filtres sur un ou plusieurs organisme.s id
+        ...(organisme_ids.length > 0 ? { organisme_id: { $in: organisme_ids } } : {}),
+        ...(organisme_id ? { organisme_id: ObjectId(organisme_id) } : {}),
         annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 

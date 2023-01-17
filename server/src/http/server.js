@@ -108,7 +108,8 @@ export default async (services) => {
     // FRONT
     ["/api/indicateurs"],
     checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    // TODO Réactiver le middleware modifié ou en créer un spécifique ?
+    // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
     indicateursRouter(services)
   );
 
