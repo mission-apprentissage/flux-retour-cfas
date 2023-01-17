@@ -115,7 +115,7 @@ export const userAfterCreate = async ({
       } else {
         await addContributeurOrganisme(organisme._id, userEmail, asRole, pending); // "organisme.statsonly"
         await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
-        // TODO [metier] VALIDATION FLOW [2] => organisme.admin Validate people that wants to join is organisme
+
         // Notif organisme.admin
         if (notify) {
           const usersToNotify = (

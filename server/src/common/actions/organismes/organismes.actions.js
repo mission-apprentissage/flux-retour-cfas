@@ -17,6 +17,8 @@ import {
 import { findRolePermissionById } from "../roles.actions.js";
 import { getUser, structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
+import { findDataFromSiret } from "../infoSiret.actions.js";
+import logger from "../../logger.js";
 
 /**
  * Méthode de création d'un organisme qui applique en entrée des filtres / rejection
@@ -24,6 +26,7 @@ import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.j
  * ainsi qu'un filtre d'existence dans la base ACCES 
 // TODO Refacto la méthode pour renvoyer notValid ou toCreate ou existant
  */
+// TODO abd: ??? DUPLICATE OF hydrateOrganisme ?
 export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) => {
   // Applique le mapping de fiabilisation
   const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
@@ -74,7 +77,14 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
  * @param {*} organismeProps
  * @returns
  */
-export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
+export const createOrganisme = async ({
+  uai,
+  sirets = [],
+  siret: siretIn,
+  nom: nomIn,
+  adresse: adresseIn,
+  ...data
+}) => {
   if (await organismesDb().countDocuments({ uai })) {
     throw new Error(`Un organisme avec l'uai ${uai} existe déjà`);
   }
@@ -89,10 +99,46 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
     }
   }
 
+  let siret = siretIn;
+  if (Array.isArray(sirets) && sirets.length !== 0 && !siretIn) {
+    siret = sirets[0];
+  }
+
+  let nom = nomIn;
+  let adresse = adresseIn;
+  let ferme = false;
+  let enseigne = null;
+  let raison_sociale = null;
+  if (siret) {
+    const dataSiret = await findDataFromSiret(siret, true, false);
+    if (dataSiret.messages.api_entreprise === "Ok") {
+      ferme = dataSiret.result.ferme;
+      if (dataSiret.result.enseigne) enseigne = dataSiret.result.enseigne;
+      if (dataSiret.result.entreprise_raison_sociale) raison_sociale = dataSiret.result.entreprise_raison_sociale;
+      if (!nom) nom = dataSiret.result.enseigne;
+      adresse = {
+        ...(adresse ?? {}),
+        ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
+        ...(dataSiret.result.voie_complete ? { voie: dataSiret.result.voie_complete } : {}),
+        ...(dataSiret.result.complement_adresse ? { complement: dataSiret.result.complement_adresse } : {}),
+        ...(dataSiret.result.code_postal ? { code_postal: dataSiret.result.code_postal } : {}),
+        ...(dataSiret.result.code_insee_localite ? { code_insee: dataSiret.result.code_insee_localite } : {}),
+        ...(dataSiret.result.localite ? { commune: dataSiret.result.localite } : {}),
+        ...(dataSiret.result.num_departement ? { departement: dataSiret.result.num_departement } : {}),
+        ...(dataSiret.result.num_region ? { region: dataSiret.result.num_region } : {}),
+        ...(dataSiret.result.num_academie ? { academie: dataSiret.result.num_academie } : {}),
+        ...(dataSiret.result.adresse ? { complete: dataSiret.result.adresse } : {}),
+      };
+    } else {
+      // TODO Find adresse somewhere else
+      logger.error(`createOrganisme > Erreur sur l'etablissement ${siret} via API Entreprise`);
+      // throw new Error(`createOrganisme > Impossible de retrouver l'etablissement via API Entreprise`);
+    }
+  }
+
   // Construction de l'arbre des formations de l'organisme
   const { formations } = await getFormationsTreeForOrganisme(uai);
-
-  // TODO Call Api Entreprise to get address
+  // TODO abd: hydrate other organismes from formations
 
   const { insertedId } = await organismesDb().insertOne(
     validateOrganisme({
@@ -100,9 +146,14 @@ export const createOrganisme = async ({ uai, sirets = [], nom, ...data }) => {
       ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
       ...defaultValuesOrganisme(),
       sirets,
+      ...(siret ? { siret } : {}),
       metiers,
       formations,
+      ...(adresse ? { adresse } : {}),
       ...data,
+      ferme,
+      ...(enseigne ? { enseigne } : {}),
+      ...(raison_sociale ? { raison_sociale } : {}),
     })
   );
 

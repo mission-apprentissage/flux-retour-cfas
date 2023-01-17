@@ -56,14 +56,7 @@ export const seedSampleOrganismes = async () => {
       uai: "0333326L",
       sirets: ["51400512300062"],
       siret: "51400512300062",
-      adresse: {
-        departement: "33",
-        region: "75",
-        academie: "4",
-        complete: "680 Cours de la Libération 33405 TALENCE CEDEX",
-      },
       nature: "responsable_formateur",
-      nom: "Kedge Business School",
     });
   }
 
@@ -73,11 +66,6 @@ export const seedSampleOrganismes = async () => {
       uai: "0142321X",
       sirets: ["44492238900010"],
       siret: "44492238900010",
-      adresse: {
-        departement: "14",
-        region: "28",
-        academie: "70",
-      },
       reseaux: ["CCI"],
       erps: ["YMAG"],
       nature: "responsable_formateur",
@@ -92,11 +80,6 @@ export const seedSampleOrganismes = async () => {
       uai: "0611309S",
       sirets: ["44492238900044"],
       siret: "44492238900044",
-      adresse: {
-        departement: "61",
-        region: "28",
-        academie: "70",
-      },
       reseaux: ["CCI"],
       erps: ["GESTI"],
       nature: "inconnue",
@@ -111,11 +94,6 @@ export const seedSampleOrganismes = async () => {
       uai: "0010856A",
       sirets: ["77931004400028"],
       siret: "77931004400028",
-      adresse: {
-        departement: "01",
-        region: "84",
-        academie: "10",
-      },
       reseaux: ["UIMM"],
       erps: ["YMAG"],
       nature: "responsable_formateur",
@@ -129,11 +107,6 @@ export const seedSampleOrganismes = async () => {
       uai: "0261098C",
       sirets: ["34497770700027"],
       siret: "34497770700027",
-      adresse: {
-        departement: "26",
-        region: "84",
-        academie: "8",
-      },
       reseaux: ["MFR"],
       erps: ["gesti"],
       nature: "responsable_formateur",
@@ -163,11 +136,6 @@ export const seedSampleOrganismes = async () => {
       uai: "0312755B",
       sirets: ["49917930700024"],
       siret: "49917930700024",
-      adresse: {
-        departement: "31",
-        region: "76",
-        academie: "16",
-      },
       nature: "responsable_formateur",
       nom: "MIDISUP",
     });
