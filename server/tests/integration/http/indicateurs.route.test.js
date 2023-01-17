@@ -38,65 +38,65 @@ describe("Effectifs Route", () => {
     });
 
     // TODO Remettre le test une fois middleware réactivé
-    // it("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
-    //   const { httpClient, logUser } = await startServer();
+    it.skip("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
+      const { httpClient, logUser } = await startServer();
 
-    //   // Création de son organisme
-    //   await createOrganisme({
-    //     uai: "0142321X",
-    //     sirets: ["44492238900010"],
-    //     adresse: {
-    //       departement: "14",
-    //       region: "28",
-    //       academie: "70",
-    //     },
-    //     reseaux: ["CCI"],
-    //     erps: ["YMAG"],
-    //     nature: "responsable_formateur",
-    //     nom: "ADEN Formations (Caen)",
-    //   });
+      // Création de son organisme
+      await createOrganisme({
+        uai: "0142321X",
+        sirets: ["44492238900010"],
+        adresse: {
+          departement: "14",
+          region: "28",
+          academie: "70",
+        },
+        reseaux: ["CCI"],
+        erps: ["YMAG"],
+        nature: "responsable_formateur",
+        nom: "ADEN Formations (Caen)",
+      });
 
-    //   const otherOrganisme = await createOrganisme({
-    //     uai: "0142322X",
-    //     sirets: ["44492238900010"],
-    //     adresse: {
-    //       departement: "14",
-    //       region: "28",
-    //       academie: "70",
-    //     },
-    //     reseaux: ["CCI"],
-    //     erps: ["YMAG"],
-    //     nature: "responsable_formateur",
-    //     nom: "ADEN Formations (Caen)",
-    //   });
+      const otherOrganisme = await createOrganisme({
+        uai: "0142322X",
+        sirets: ["44492238900010"],
+        adresse: {
+          departement: "14",
+          region: "28",
+          academie: "70",
+        },
+        reseaux: ["CCI"],
+        erps: ["YMAG"],
+        nature: "responsable_formateur",
+        nom: "ADEN Formations (Caen)",
+      });
 
-    //   // Create user & afterCreate actions
-    //   const userOf = await createUser(
-    //     { email: "of@test.fr", password: "Secret!Password1" },
-    //     {
-    //       nom: "of",
-    //       prenom: "test",
-    //       description: "Aden formation Caen - direction",
-    //       account_status: "CONFIRMED",
-    //       siret: "44492238900010",
-    //       uai: "0142321X",
-    //       organisation: "ORGANISME_FORMATION",
-    //     }
-    //   );
-    //   await userAfterCreate({ user: userOf, pending: false, notify: false });
+      // Create user & afterCreate actions
+      const userOf = await createUser(
+        { email: "of@test.fr", password: "Secret!Password1" },
+        {
+          nom: "of",
+          prenom: "test",
+          description: "Aden formation Caen - direction",
+          account_status: "CONFIRMED",
+          siret: "44492238900010",
+          uai: "0142321X",
+          organisation: "ORGANISME_FORMATION",
+        }
+      );
+      await userAfterCreate({ user: userOf, pending: false, notify: false });
 
-    //   // Log user
-    //   const { cookie } = await logUser("of@test.fr", "Secret!Password1");
+      // Log user
+      const { cookie } = await logUser("of@test.fr", "Secret!Password1");
 
-    //   // Get effectifs
-    //   const response = await httpClient.get("/api/indicateurs", {
-    //     params: { date: "2022-10-10T00:00:00.000Z", organisme_id: otherOrganisme._id.toString() },
-    //     headers: { cookie },
-    //   });
+      // Get effectifs
+      const response = await httpClient.get("/api/indicateurs", {
+        params: { date: "2022-10-10T00:00:00.000Z", organisme_id: otherOrganisme._id.toString() },
+        headers: { cookie },
+      });
 
-    //   assert.equal(response.status, 401);
-    //   assert.equal(response.data.message, "Accès non autorisé");
-    // });
+      assert.equal(response.status, 401);
+      assert.equal(response.data.message, "Accès non autorisé");
+    });
 
     it("Vérifie qu'on peut accéder aux effectifs de son organisme", async () => {
       const { httpClient, logUser } = await startServer();

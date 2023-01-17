@@ -60,7 +60,7 @@ export default ({ effectifs }) => {
 
       const filters = {
         ...filtersFromBody,
-        // Gestion des filtres sur un ou plusieurs organisme.s id
+        // Gestion des filtres sur un ou plusieurs organismes id
         ...(organisme_ids.length > 0 ? { organisme_id: { $in: organisme_ids } } : {}),
         ...(organisme_id ? { organisme_id: ObjectId(organisme_id) } : {}),
         annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },

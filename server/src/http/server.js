@@ -93,17 +93,7 @@ export default async (services) => {
     maintenancesAdmin()
   );
 
-  app.get(
-    "/api/cache",
-    checkJwtToken,
-    pageAccessMiddleware(["_ADMIN"]), // TODO [tech]
-    tryCatch(async (req, res) => {
-      await services.cache.flushAll();
-      return res.json({});
-    })
-  );
-
-  // INDICATEURS
+  // Routes de calcul & export des indicateurs
   app.use(
     // FRONT
     ["/api/indicateurs"],
@@ -123,11 +113,27 @@ export default async (services) => {
     indicateursExportRouter(services)
   );
 
-  // TODO TDB OLD PREVIOUS [tech]
-  //// TODO
-  app.use("/api/formations", formationRouter(services)); // FRONT
-  app.use("/api/cfas", cfasRouter(services)); // FRONT
-  app.use("/api/referentiel", referentielRouter(services)); // FRONT
+  // Route dédiée à RCO
+  app.use(
+    "/api/effectifs-apprenants",
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
+    effectifsApprenantsRouter(services)
+  );
+  app.use("/api/healthcheck", healthcheckRouter(services));
+
+  // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
+  app.use("/api/login", loginRouter(services));
+
+  // @deprecated to /dossiers-apprenants
+  app.use(
+    ["/api/statut-candidats", "/api/dossiers-apprenants"],
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    dossierApprenantRouter(services)
+  );
+
+  // TODO : Routes à conserver temporairement le temps de la recette indicateurs via effectifs
   app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
   app.use(
     // FRONT
@@ -137,34 +143,26 @@ export default async (services) => {
     indicateursDossiersRouter(services)
   );
 
-  // ROUTES BACK TO KEEEP !
-  app.use(
-    // BACK RCO
-    "/api/effectifs-apprenants",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
-    effectifsApprenantsRouter(services)
-  );
-  app.use("/api/healthcheck", healthcheckRouter(services));
+  // TODO : Route à corriger / transformer pour le filtre par formations
+  app.use("/api/formations", formationRouter(services)); // FRONT
 
-  app.use("/api/login", loginRouter(services)); // BACK
-  // ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
-
-  // requires JWT auth
+  // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
+  app.use("/api/cfas", cfasRouter(services)); // FRONT
+  app.use("/api/referentiel", referentielRouter(services)); // FRONT
   app.use(
     "/api/liens-prives-cfas",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     lienPriveCfaRouter(services)
   );
-
-  // @deprecated to /dossiers-apprenants
-  app.use(
-    // BACK !important
-    ["/api/statut-candidats", "/api/dossiers-apprenants"],
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    dossierApprenantRouter(services)
+  app.get(
+    "/api/cache",
+    checkJwtToken,
+    pageAccessMiddleware(["_ADMIN"]),
+    tryCatch(async (req, res) => {
+      await services.cache.flushAll();
+      return res.json({});
+    })
   );
 
   app.use(errorMiddleware());
