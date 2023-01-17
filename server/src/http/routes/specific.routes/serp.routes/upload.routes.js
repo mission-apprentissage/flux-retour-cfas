@@ -27,6 +27,7 @@ import { createEffectif, findEffectifs, updateEffectif } from "../../../../commo
 import permissionsOrganismeMiddleware from "../../../middlewares/permissionsOrganismeMiddleware.js";
 import { findOrganismeFormationByCfd } from "../../../../common/actions/organismes/organismes.formations.actions.js";
 import { getFormationWithCfd, getFormationWithRNCP } from "../../../../common/actions/formations.actions.js";
+import { setOrganismeFirstDateTransmissionIfNeeded } from "../../../../common/actions/organismes/organismes.actions.js";
 
 const mappingModel = {
   annee_scolaire: "annee_scolaire",
@@ -902,6 +903,8 @@ export default ({ clamav }) => {
         taille_fichier: unconfirmedDocument.taille_fichier,
         confirm: true,
       });
+
+      await setOrganismeFirstDateTransmissionIfNeeded(organisme_id);
 
       return res.json({});
     })

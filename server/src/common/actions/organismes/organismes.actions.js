@@ -471,6 +471,29 @@ export const updateOrganismeApiKey = async (id) => {
   return key;
 };
 
+export const setOrganismeFirstDateTransmissionIfNeeded = async (id) => {
+  const _id = typeof id === "string" ? ObjectId(id) : id;
+  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+
+  const organisme = await organismesDb().findOne({ _id });
+  if (!organisme) {
+    throw new Error(`Unable to find organisme ${_id.toString()}`);
+  }
+  if (organisme.first_transmission_date) return organisme.first_transmission_date;
+
+  const first_transmission_date = new Date();
+  await organismesDb().findOneAndUpdate(
+    { _id: organisme._id },
+    {
+      $set: {
+        first_transmission_date,
+        updated_at: new Date(),
+      },
+    }
+  );
+  return first_transmission_date;
+};
+
 /**
  * Méthode de récupération de l'adresse pour un organisme via ses props
  * Par défaut l'adresse est construite depuis l'UAI
