@@ -42,6 +42,8 @@ export const schema = object(
     }),
     nature_validity_warning: boolean({ description: "Y a-t-il un doute sur la validité de la nature" }),
     nom: string({ description: "Nom de l'organisme de formation" }),
+    enseigne: string({ description: "Enseigne de l'organisme de formation" }),
+    raison_sociale: string({ description: "Raison sociale de l'organisme de formation" }),
     nom_tokenized: string({
       description: "Nom de l'organisme de formation tokenized pour la recherche textuelle",
     }),
@@ -98,6 +100,7 @@ export const schema = object(
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     date_derniere_transmission: date({ description: "Date de la dernière transmission de données" }),
     est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
+    ferme: boolean({ description: "Le siret est fermé" }),
 
     // TODO [tech] TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),

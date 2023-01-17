@@ -69,7 +69,7 @@ export default async (services) => {
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
   app.use("/api/v1/espace", checkJwtToken, espace());
-  app.use("/api/v1/organisme", checkJwtToken, organisme());
+  app.use("/api/v1/organisme", checkJwtToken, organisme(services));
   app.use("/api/v1/effectif", checkJwtToken, effectif());
   app.use("/api/v1/upload", checkJwtToken, upload(services));
 
@@ -127,9 +127,9 @@ export default async (services) => {
 
   app.use(
     // FRONT
-    "/api/indicateurs-export",
+    "/api/v1/indicateurs-export",
     checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
     indicateursExportRouter(services)
   );
 

@@ -62,6 +62,8 @@ export default ({ mailer }) => {
       if (organisme_id) {
         if (validate) {
           await updatePermissionPending({ organisme_id, userEmail, pending: false });
+          const user = await getUser(userEmail);
+          await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
           return res.json({ ok: true });
         } else {
           // TODO REJECTED PERM !
@@ -70,17 +72,14 @@ export default ({ mailer }) => {
       } else {
         if (validate) {
           await updatePermissionsPending({ userEmail, pending: false });
+          const user = await getUser(userEmail);
+          await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
           return res.json({ ok: true });
         } else {
           // TODO REJECTED PERM !
           return res.json({ ok: false });
         }
       }
-      // TODO
-      // await mailer.sendEmail(
-      //   { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, type: "reseau" } },
-      //   "NOTIFY"
-      // );
     })
   );
 

@@ -11,7 +11,7 @@ const executeWithRateLimiting = apiRateLimiter("apiEntreprise", {
   durationInSeconds: 1,
   client: axios.create({
     baseURL: "https://entreprise.api.gouv.fr/v2",
-    timeout: 5000,
+    // timeout: 5000,
   }),
 });
 
@@ -35,7 +35,7 @@ export const getEntreprise = (siren, non_diffusables = true) => {
       }
       return response.data.entreprise;
     } catch (e) {
-      if (e.message === "timeout of 5000ms exceeded") {
+      if (e.message.includes("timeout")) {
         return null;
       }
       if (e.response.status === 404) {

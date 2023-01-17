@@ -16,8 +16,9 @@ import { findRolePermission } from "../../../common/actions/roles.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa } from "../../../common/actions/sifa.actions/sifa.actions.js";
 import { updatePermission, updatePermissionPending } from "../../../common/actions/permissions.actions.js";
+import { getUser } from "../../../common/actions/users.actions.js";
 
-export default () => {
+export default ({ mailer }) => {
   const router = express.Router();
 
   router.get(
@@ -220,10 +221,13 @@ export default () => {
       }).validateAsync(query, { abortEarly: false });
       if (validate) {
         await updatePermissionPending({ organisme_id, userEmail, pending: false });
+        const user = await getUser(userEmail);
+        await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
+        return res.json({ ok: true });
       } else {
         // TODO REJECTED PERM
+        return res.json({ ok: false });
       }
-      return res.json({ ok: true });
     })
   );
 

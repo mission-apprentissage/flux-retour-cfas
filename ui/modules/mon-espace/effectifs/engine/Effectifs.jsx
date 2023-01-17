@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Flex, Text, HStack, Button, Circle, useDisclosure, Heading } from "@chakra-ui/react";
+import { Box, Flex, Text, HStack, Button, Circle, useDisclosure, Heading, Spinner } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
 
 import { DownloadLine } from "../../../../theme/components/icons";
@@ -9,6 +9,22 @@ import AjoutApprenantModal from "./AjoutApprenantModal";
 import { useRouter } from "next/router";
 import { useEspace } from "../../../../hooks/useEspace";
 import EffectifsTable from "./EffectifsTable";
+import useDownloadClick from "../../../../hooks/old/useDownloadClick";
+import { _getBlob } from "../../../../common/httpClient";
+
+const DownloadButton = ({ title, fileName, getFile }) => {
+  const [onClick, isLoading] = useDownloadClick(getFile, fileName);
+
+  return (
+    <Button size="md" onClick={onClick} variant="secondary">
+      {isLoading && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
+      {!isLoading && <DownloadLine />}
+      <Text as="span" ml={2}>
+        {title}
+      </Text>
+    </Button>
+  );
+};
 
 const Effectifs = ({ organismesEffectifs }) => {
   const router = useRouter();
@@ -16,6 +32,7 @@ const Effectifs = ({ organismesEffectifs }) => {
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
   const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
+  const exportFilename = `tdb-données-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
   return (
     <Flex flexDir="column" width="100%" my={10}>
@@ -58,12 +75,11 @@ const Effectifs = ({ organismesEffectifs }) => {
         </Box>
         <HStack spacing={4}>
           {hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
-            <Button size="md" onClick={() => alert("TODO NOT YET")} variant="secondary">
-              <DownloadLine />
-              <Text as="span" ml={2}>
-                Télécharger
-              </Text>
-            </Button>
+            <DownloadButton
+              fileName={exportFilename}
+              getFile={() => _getBlob(`/api/v1/indicateurs-export?organisme_id=${organisme._id}&date=${Date.now()}`)}
+              title="Télécharger rapport"
+            />
           )}
 
           {hasContextAccessTo(organisme, "organisme/page_effectifs/televersement_document") && (
