@@ -1,3 +1,10 @@
+# [3.2.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.1-beta.2...v3.2.0-beta.1) (2023-01-17)
+
+
+### Features
+
+* import du reseau aden ([#2401](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2401)) ([5c397d2](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5c397d26b78ac4a926d64667711473be2d698768))
+
 ## [3.1.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.1-beta.1...v3.1.1-beta.2) (2023-01-16)
 
 
