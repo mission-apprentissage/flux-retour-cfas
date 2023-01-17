@@ -1,3 +1,10 @@
+# [3.2.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.2...v3.2.0-beta.3) (2023-01-17)
+
+
+### Bug Fixes
+
+* user pilot academie ([6d22bb2](https://github.com/mission-apprentissage/flux-retour-cfas/commit/6d22bb2d07bf429c6acb1dcc2dba86a4688761e4))
+
 # [3.2.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.1...v3.2.0-beta.2) (2023-01-17)
 
 
