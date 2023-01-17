@@ -1,3 +1,10 @@
+# [3.2.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.1...v3.2.0-beta.2) (2023-01-17)
+
+
+### Features
+
+* v0 page effectif ([#2404](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2404)) ([8e3fb41](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8e3fb41f3f42ec6bce0d56f70a7266f4b95df1fe))
+
 # [3.2.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.1-beta.2...v3.2.0-beta.1) (2023-01-17)
 
 
