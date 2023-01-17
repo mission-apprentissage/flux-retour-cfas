@@ -10,13 +10,13 @@ import { useEspace } from "../../../hooks/useEspace";
 import SIFAPage from "../../../modules/mon-espace/SIFA/SIFAPage";
 import { useOrganisme } from "../../../hooks/useOrganisme";
 import LandingOrganisme from "../../../modules/mon-espace/landing/LandingOrganisme/LandingOrganisme";
-import LandingReseau from "../../../modules/mon-espace/landing/LandingReseau";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
 import EffectifsPage from "../../../modules/mon-espace/effectifs/EffectifsPage";
 import ParametresOrganisme from "../../../modules/mon-espace/parametres/parametresOrganisme";
-import LandingPilot from "../../../modules/mon-espace/landing/LandingPilot/LandingPilot";
 import LandingErp from "../../../modules/mon-espace/landing/LandingErp";
 import LandingTransverse from "../../../modules/mon-espace/landing/LandingTransverse";
+import LandingReseau from "../../../modules/mon-espace/landing/LandingReseau.jsx";
+import LandingPilot from "../../../modules/mon-espace/landing/LandingPilot.jsx";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

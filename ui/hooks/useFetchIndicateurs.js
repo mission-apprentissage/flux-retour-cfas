@@ -18,10 +18,8 @@ const mapIndicateursData = (effectifsData) => ({
 const useFetchIndicateurs = (filtersValues) => {
   const requestFilters = mapSimpleFiltersToApiFormat(filtersValues);
 
-  const { status, data, error } = useQuery(
-    [QUERY_KEYS.INDICATEURS, requestFilters],
-    () => fetchIndicateurs(requestFilters),
-    { enabled: requestFilters.organisme_id !== undefined }
+  const { status, data, error } = useQuery([QUERY_KEYS.INDICATEURS, requestFilters], () =>
+    fetchIndicateurs(requestFilters)
   );
 
   const loading = status === "loading";

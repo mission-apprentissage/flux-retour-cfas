@@ -52,8 +52,8 @@ const ExplorerLesIndicateursPage = () => {
           Aperçu des données au national le {formatDateDayMonthYear(date)}
         </Heading>
         <Text marginTop="1w" marginBottom="2w" fontStyle="italic" color="grey.800">
-          Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
-          En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
+          Ces chiffres reflètent partiellement les effectifs de l’apprentissage : une partie des organismes de formation
+          ne transmettent pas encore leurs données au tableau de bord.
         </Text>
         <IndicateursGridStack
           effectifs={effectifsNational}
