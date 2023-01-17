@@ -1,3 +1,10 @@
+# [3.2.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.3...v3.2.0-beta.4) (2023-01-17)
+
+
+### Features
+
+* sifa filtering ([7fc801a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7fc801a8359f3177e945a90859c566412c297a6e))
+
 # [3.2.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.2...v3.2.0-beta.3) (2023-01-17)
 
 
