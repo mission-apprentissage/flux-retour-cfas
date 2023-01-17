@@ -22,10 +22,11 @@ const RESEAUX_LIST_SEPARATOR = "|";
 const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
 
 const INPUT_FILES = [
-  "assets/referentiel-reseau-excellence-pro.csv",
-  "assets/referentiel-reseau-greta-pdl.csv",
+  "assets/referentiel-reseaux_aden.csv",
   "assets/referentiel-reseau-aftral.csv",
   "assets/referentiel-reseau-cr-normandie.csv",
+  "assets/referentiel-reseau-excellence-pro.csv",
+  "assets/referentiel-reseau-greta-pdl.csv",
 ];
 
 /**
@@ -87,7 +88,9 @@ export const hydrateReseauxNewFormat = async () => {
       */
       // try to retrieve organisme in our database with UAI and SIRET if UAI is provided
       const organismeInTdb = organismeParsedFromFile.uai
-        ? await findOrganismeByUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)
+        ? [await findOrganismeByUaiAndSiret(organismeParsedFromFile.uai, organismeParsedFromFile.siret)].filter(
+            (o) => o
+          )
         : await findOrganismesBySiret(organismeParsedFromFile.siret);
 
       const found = organismeInTdb?.length !== 0;
@@ -100,7 +103,8 @@ export const hydrateReseauxNewFormat = async () => {
         organismeParsedFromFile.uai,
         "and Siret",
         organismeParsedFromFile.siret,
-        found ? "found" : "not found"
+        found ? "found" : "not found",
+        found && !foundUnique ? "multiple times" : ""
       );
 
       // if only one result, we compare reseaux between organisme in réseau file and the one we found in our database

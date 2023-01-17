@@ -1,7 +1,12 @@
 /**
  * Noms des réseaux de CFAS
  */
+// TODO remove property nomFichier with the file jobs/hydrate/_toRemove/reseaux/hydrate-reseaux.js
 export const RESEAUX_CFAS = {
+  ADEN: {
+    nomReseau: "ADEN",
+    nomFichier: "",
+  },
   CMA: {
     nomReseau: "CMA",
     nomFichier: "cfas-cma",
