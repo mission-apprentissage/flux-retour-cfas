@@ -114,10 +114,14 @@ export const employerSiretLogic = [
               denomination: values.apprenant.contrats[0].denomination,
               naf: values.apprenant.contrats[0].naf,
               nombre_de_salaries: values.apprenant.contrats[0].nombre_de_salaries ?? 0,
-              type_employeur: values.apprenant.contrats[0].type_employeur,
+              ...(values.apprenant.contrats[0].type_employeur
+                ? { type_employeur: values.apprenant.contrats[0].type_employeur }
+                : {}),
               date_debut: values.apprenant.contrats[0].date_debut,
               date_fin: values.apprenant.contrats[0].date_fin,
-              date_rupture: values.apprenant.contrats[0].date_rupture,
+              ...(values.apprenant.contrats[0].date_rupture
+                ? { date_rupture: values.apprenant.contrats[0].date_rupture }
+                : {}),
               adresse: {
                 numero: values.apprenant.contrats[0].adresse.numero,
                 repetition_voie: values.apprenant.contrats[0].adresse.repetition_voie,
