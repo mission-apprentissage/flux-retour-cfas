@@ -39,13 +39,13 @@ export function useEspace() {
   const isMonOrganismePage = isMonOrganismePages && !slug.length;
   const isEffectifsPage = slug.includes("effectifs");
   const isTeleversementPage = isEffectifsPage && slug.includes("televersement");
-  const isSIFA2Page = slug.includes("enquete-SIFA2");
+  const isSIFAPage = slug.includes("enquete-SIFA");
   const isParametresPage = slug.includes("parametres");
   const contextNav = isOrganismePages ? "organisme" : "user";
   const whoIs = auth.roles.find((role) => ["pilot", "erp", "of", "reseau_of"].includes(role));
 
   const organisme_id = isOrganismePages
-    ? slug?.[slug.length - (isTeleversementPage ? 3 : isEffectifsPage || isSIFA2Page || isParametresPage ? 2 : 1)]
+    ? slug?.[slug.length - (isTeleversementPage ? 3 : isEffectifsPage || isSIFAPage || isParametresPage ? 2 : 1)]
     : null;
   const hasAccessToOnlyOneOrganisme = auth.organisme_ids.length === 1;
   const userIsAnOrganisme = !!auth.main_organisme_id;
@@ -85,9 +85,9 @@ export function useEspace() {
                       path: "/mon-espace/mon-organisme/effectifs/televersement",
                     },
                     sifa2: {
-                      pageTitle: "Mon enquête SIFA2",
-                      navTitle: "Mon enquête SIFA2",
-                      path: "/mon-espace/mon-organisme/enquete-SIFA2",
+                      pageTitle: "Mon enquête SIFA",
+                      navTitle: "Mon enquête SIFA",
+                      path: "/mon-espace/mon-organisme/enquete-SIFA",
                     },
                     parametres: {
                       pageTitle: "Mes paramètres",
@@ -123,9 +123,9 @@ export function useEspace() {
                 path: `/mon-espace/organisme/${organisme_id}/effectifs/televersement`,
               },
               sifa2: {
-                pageTitle: "Son enquête SIFA2",
-                navTitle: "Son enquête SIFA2",
-                path: `/mon-espace/organisme/${organisme_id}/enquete-SIFA2`,
+                pageTitle: "Son enquête SIFA",
+                navTitle: "Son enquête SIFA",
+                path: `/mon-espace/organisme/${organisme_id}/enquete-SIFA`,
               },
               parametres: {
                 pageTitle: "Ses paramètres",
@@ -148,7 +148,7 @@ export function useEspace() {
               breadcrumbResult.push({ title: navigation[contextNav].televersement?.navTitle });
             } else breadcrumbResult.push({ title: navigation[contextNav].effectifs?.navTitle });
           }
-          if (isSIFA2Page) breadcrumbResult.push({ title: navigation[contextNav].sifa2?.navTitle });
+          if (isSIFAPage) breadcrumbResult.push({ title: navigation[contextNav].sifa2?.navTitle });
           if (isParametresPage) breadcrumbResult.push({ title: navigation[contextNav].parametres?.navTitle });
 
           setBreadcrumb(breadcrumbResult);
@@ -174,7 +174,7 @@ export function useEspace() {
     hasAccessToOnlyOneOrganisme,
     isEffectifsPage,
     isParametresPage,
-    isSIFA2Page,
+    isSIFAPage,
     organisme_id,
     setNavigation,
     setMyOrganisme,
@@ -204,7 +204,7 @@ export function useEspace() {
     isMonOrganismePage,
     isEffectifsPage,
     isTeleversementPage,
-    isSIFA2Page,
+    isSIFAPage,
     isParametresPage,
   };
 }

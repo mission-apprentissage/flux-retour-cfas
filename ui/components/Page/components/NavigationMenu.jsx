@@ -91,7 +91,7 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
           {userNavigation.effectifs.navTitle}
         </NavItem>
       )}
-      {hasContextAccessTo(myOrganisme, "organisme/page_sifa2") && userNavigation.sifa2 && (
+      {hasContextAccessTo(myOrganisme, "organisme/page_sifa") && userNavigation.sifa2 && (
         <NavItem to={userNavigation.sifa2.path}>{userNavigation.sifa2.navTitle}</NavItem>
       )}
 
@@ -140,7 +140,7 @@ const NavBarOrganisme = ({ isOpen }) => {
           {organismeNavigation.effectifs.navTitle}
         </NavItem>
       )}
-      {hasContextAccessTo(organisme, "organisme/page_sifa2") && (
+      {hasContextAccessTo(organisme, "organisme/page_sifa") && (
         <NavItem to={organismeNavigation.sifa2.path} colorActive="dsfr_lightprimary.bluefrance_850">
           {organismeNavigation.sifa2.navTitle}
         </NavItem>

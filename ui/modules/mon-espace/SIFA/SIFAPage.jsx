@@ -79,8 +79,8 @@ const SIFAPage = () => {
   return (
     <>
       <Heading textStyle="h2" color="grey.800" mt={5} mb={8}>
-        {isMonOrganismePages && `Mon Enquete SIFA2`}
-        {isOrganismePages && `Son Enquete SIFA2`}
+        {isMonOrganismePages && `Mon Enquete SIFA`}
+        {isOrganismePages && `Son Enquete SIFA`}
       </Heading>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Box flexBasis={{ base: "auto", md: "auto" }} flexGrow="1">
@@ -116,7 +116,7 @@ const SIFAPage = () => {
           </HStack>
         </Box>
         <HStack spacing={4}>
-          {hasContextAccessTo(organisme, "organisme/page_sifa2/telecharger") && (
+          {hasContextAccessTo(organisme, "organisme/page_sifa/telecharger") && (
             <DownloadButton
               fileName={exportSifaFilename}
               getFile={() => _getBlob(`/api/v1/organisme/sifa/export-csv-list?organisme_id=${organisme._id}`)}
@@ -131,7 +131,7 @@ const SIFAPage = () => {
                 p={{ base: 2, md: 4 }}
                 h={{ base: 8, md: 10 }}
                 onClick={() => {
-                  router.push(`${router.asPath.replace("/enquete-SIFA2", "/effectifs/televersement")}`);
+                  router.push(`${router.asPath.replace("/enquete-SIFA", "/effectifs/televersement")}`);
                 }}
                 variant="secondary"
               >

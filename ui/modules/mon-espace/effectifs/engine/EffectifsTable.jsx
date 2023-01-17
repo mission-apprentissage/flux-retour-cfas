@@ -443,7 +443,7 @@ const EffectifsTable = ({
                           label={
                             <Text>
                               {modeSifa
-                                ? "Si les données sont suffissantes pour SIFA2"
+                                ? "Si les données sont suffissantes pour SIFA"
                                 : "les données contiennent elles des erreurs"}
                             </Text>
                           }

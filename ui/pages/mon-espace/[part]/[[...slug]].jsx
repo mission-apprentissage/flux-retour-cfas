@@ -26,7 +26,7 @@ const MonEspace = () => {
     isMonOrganismePages,
     isOrganismePages,
     isEffectifsPage,
-    isSIFA2Page,
+    isSIFAPage,
     isParametresPage,
     breadcrumb,
     myOrganisme,
@@ -55,13 +55,13 @@ const MonEspace = () => {
             {(isMonOrganismePage || isOrganismePages) &&
               currentOrganisme &&
               !isEffectifsPage &&
-              !isSIFA2Page &&
+              !isSIFAPage &&
               !isParametresPage &&
               hasContextAccessTo(currentOrganisme, "organisme/tableau_de_bord") && <LandingOrganisme />}
             {isEffectifsPage &&
               currentOrganisme &&
               hasContextAccessTo(currentOrganisme, "organisme/page_effectifs") && <EffectifsPage />}
-            {isSIFA2Page && currentOrganisme && hasContextAccessTo(currentOrganisme, "organisme/page_sifa2") && (
+            {isSIFAPage && currentOrganisme && hasContextAccessTo(currentOrganisme, "organisme/page_sifa") && (
               <SIFAPage />
             )}
             {isParametresPage &&

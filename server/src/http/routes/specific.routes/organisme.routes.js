@@ -109,7 +109,7 @@ export default ({ mailer }) => {
 
   router.get(
     "/sifa/export-csv-list",
-    permissionsOrganismeMiddleware(["organisme/page_sifa2/telecharger"]),
+    permissionsOrganismeMiddleware(["organisme/page_sifa/telecharger"]),
     tryCatch(async ({ query: { organisme_id } }, res) => {
       const sifaCsv = await generateSifa(organisme_id);
 
