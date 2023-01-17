@@ -228,7 +228,7 @@ const Finalize = () => {
             auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
             auth.roles.includes("pilot") && (
               <>
-                {auth.organisation === "DEETS" && (
+                {auth.organisation === "DDETS" && (
                   <>
                     <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
                       À quel(s) département(s) souhaitez-vous accéder?
@@ -245,6 +245,7 @@ const Finalize = () => {
                   </>
                 )}
                 {(auth.organisation === "DREETS" ||
+                  auth.organisation === "DEETS" ||
                   auth.organisation === "DRAAF" ||
                   auth.organisation === "CONSEIL_REGIONAL") && (
                   <>
