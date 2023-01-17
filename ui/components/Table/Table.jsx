@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -11,7 +11,6 @@ import {
 } from "@tanstack/react-table";
 import { Box, Button, Divider, HStack, Text } from "@chakra-ui/react";
 import { rankItem } from "@tanstack/match-sorter-utils";
-
 import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
@@ -35,15 +34,20 @@ export default function Table({
   getRowCanExpand,
   searchValue,
   pageSize = 5,
+  onCountItemsChange = () => {},
   ...props
 }) {
   const data = useMemo(() => defaultData, [defaultData]); // TODO TO CHECK RE-RENDERER WITH [defaultData] instead of []
 
   const [globalFilter, setGlobalFilter] = useState(searchValue);
+  const countItems = useRef(data.length);
 
   useEffect(() => {
     setGlobalFilter(searchValue);
-  }, [searchValue]);
+    if (searchValue === "") {
+      onCountItemsChange(data.length);
+    }
+  }, [data.length, onCountItemsChange, searchValue]);
 
   const columnHelper = createColumnHelper();
 
@@ -71,6 +75,15 @@ export default function Table({
       },
     },
   });
+
+  useEffect(() => {
+    if (countItems.current !== table.getPrePaginationRowModel().rows.length) {
+      countItems.current = table.getPrePaginationRowModel().rows.length;
+      onCountItemsChange(countItems.current);
+    }
+  }, [onCountItemsChange, table]);
+
+  if (table.getPrePaginationRowModel().rows.length === 0) return null;
 
   return (
     <>
