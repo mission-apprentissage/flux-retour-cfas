@@ -119,13 +119,22 @@ export const UaiBlock = ({ onUaiFetched }) => {
     };
 
     if (results.length > 1) {
-      const formatedResults = results.map((response) => formatItemResponse(response));
-      setEntrepriseData({
-        successed: true,
-        data: formatedResults,
-        multiple: true,
-        message: `Plusieurs Siret sont identifiés pour cette UAI. Choisissez votre établissement.`,
-      });
+      let formatedResults = [];
+      for (const result of results) {
+        const response = formatItemResponse(result);
+        if (response.successed) formatedResults.push(response);
+      }
+      if (formatedResults.length > 1) {
+        setEntrepriseData({
+          successed: true,
+          data: formatedResults,
+          multiple: true,
+          message: `Plusieurs Siret sont identifiés pour cette UAI. Choisissez votre établissement.`,
+        });
+      } else {
+        setEntrepriseData(formatedResults[0]);
+        onUaiFetched(formatedResults[0]);
+      }
     } else {
       const [response] = results;
       const result = formatItemResponse(response);

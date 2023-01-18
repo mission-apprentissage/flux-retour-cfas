@@ -46,7 +46,7 @@ function MesOrganismes() {
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]} mb={16}>
+      <Box w="100%" pt={[4, 6]} px={[1, 1, 4, 4]} mb={16}>
         <Container maxW="xl">
           <Breadcrumb pages={[{ title: "Mon espace", to: "/mon-espace/mon-organisme" }, { title: title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
@@ -145,8 +145,25 @@ function MesOrganismes() {
                       return <Text fontSize="1rem">{uai}</Text>;
                     },
                   },
+                  state: {
+                    size: 60,
+                    header: () => {
+                      return <Box textAlign="left">État</Box>;
+                    },
+                    cell: ({ row }) => {
+                      const { ferme } = organismes[row.id];
+                      if (ferme) {
+                        return (
+                          <Text fontSize="1rem" color="redmarianne" fontWeight="bold">
+                            Fermé
+                          </Text>
+                        );
+                      }
+                      return <Text fontSize="1rem">Actif</Text>;
+                    },
+                  },
                   transmission: {
-                    size: 100,
+                    size: 120,
                     header: () => {
                       return <Box textAlign="left">Transmission au tableau de bord</Box>;
                     },
