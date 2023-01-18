@@ -15,6 +15,7 @@ const insertInFiabilisationMappingIfNotExist = async (mapping) => {
   return await fiabilisationUaiSiretDb().insertOne({ created_at: new Date(), ...mapping });
 };
 
+// TODO : a déplacer ?
 const REFERENTIEL_FIELDS_TO_FETCH = [
   "siret",
   "uai",
