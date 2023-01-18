@@ -18,17 +18,19 @@ export const isEligibleSIFA = ({ historique_statut }) => {
   });
   const current = [...historiqueSorted].pop();
   if (current?.valeur_statut === CODES_STATUT_APPRENANT.apprenti) {
-    let aEteInscrit = false;
-    for (let index = 0; index < historiqueSorted.length - 1; index++) {
-      const element = historiqueSorted[index];
-      if (element.valeur_statut === CODES_STATUT_APPRENANT.inscrit) {
-        aEteInscrit = true;
-        break;
-      }
-    }
-    if (aEteInscrit) {
-      return true;
-    }
+    // Décision 18/01/2023 - Les CFAs connectés en API ne renseigne pas tjrs la date d'inscription de l'apprenant
+    // let aEteInscrit = false;
+    // for (let index = 0; index < historiqueSorted.length - 1; index++) {
+    //   const element = historiqueSorted[index];
+    //   if (element.valeur_statut === CODES_STATUT_APPRENANT.inscrit) {
+    //     aEteInscrit = true;
+    //     break;
+    //   }
+    // }
+    // if (aEteInscrit) {
+    //   return true;
+    // }
+    return true;
   }
   return false;
 };
