@@ -113,7 +113,7 @@ export const generateSifa = async (organisme_id) => {
         DATE_RUPT_CONT: dernierContratActif?.date_rupture,
         NAF_ETAB: dernierContratActif?.naf,
         NBSAL_EMP: dernierContratActif?.nombre_de_salaries,
-        COM_ETAB: dernierContratActif?.adresse.code_postal,
+        COM_ETAB: dernierContratActif?.adresse?.code_postal,
       };
 
       // date_debut_formation
