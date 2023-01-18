@@ -67,7 +67,7 @@ export const createFiabilisationUaiSiretMapping = async () => {
   let couplesFiablesFound = 0;
   let fiabilisationMappingInsertedCount = 0;
   await asyncForEach(allCouplesUaiSiretTdb, async (coupleUaiSiretTdb) => {
-    const organismeFoundInReferentielViaSiret = await organismesFromReferentiel.find(
+    const organismeFoundInReferentielViaSiret = organismesFromReferentiel.find(
       (item) => item.siret === coupleUaiSiretTdb.siret
     );
 
@@ -82,7 +82,7 @@ export const createFiabilisationUaiSiretMapping = async () => {
     // - n'est pas le même dans le référentiel
     // alors on remplace le SIRET par celui trouvé dans le référentiel si l'UAI n'est pas présent
     // dans un autre couple TDB
-    const organismesFoundInReferentielViaUai = await organismesFromReferentiel.filter(
+    const organismesFoundInReferentielViaUai = organismesFromReferentiel.filter(
       (item) => item.uai === coupleUaiSiretTdb.uai
     );
     const organismeUniqueFoundInReferentielViaUai =
