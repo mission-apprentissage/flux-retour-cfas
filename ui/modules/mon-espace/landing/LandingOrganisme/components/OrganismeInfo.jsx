@@ -37,7 +37,7 @@ export default function OrganismeInfo() {
     );
   }
 
-  const { _id: organismeId, nom, uai, nature, natureValidityWarning, sirets } = organisme;
+  const { _id: organismeId, nom, uai, nature, natureValidityWarning, sirets, ferme } = organisme;
   const siretToDisplay = formatSiretSplitted(sirets[0]);
 
   return (
@@ -52,7 +52,7 @@ export default function OrganismeInfo() {
         mt={4}
         mb={4}
       >
-        <Box mb={"85px"}>
+        <Box>
           <Heading color="grey.800" fontSize="1.6rem" as="h3" mb={2}>
             {nom}
           </Heading>
@@ -86,6 +86,16 @@ export default function OrganismeInfo() {
               {natureValidityWarning && <NatureOrganismeDeFormationWarning />}
             </HStack>
           </HStack>
+
+          {ferme && (
+            <Ribbons variant="alert" mt={10}>
+              <Box ml={3}>
+                <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                  Ce siret est connu comme correspondant à un établissement fermé.
+                </Text>
+              </Box>
+            </Ribbons>
+          )}
         </Box>
       </Section>
 
