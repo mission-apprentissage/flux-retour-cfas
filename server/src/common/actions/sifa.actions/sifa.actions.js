@@ -66,7 +66,7 @@ export const generateSifa = async (organisme_id) => {
         .setLocale("fr-FR")
         .toFormat("ddMMyyyy"), // REQUIRED
 
-      LIEU_NAIS: cpNaissanceInfo.code_commune_insee, // REQUIRED
+      LIEU_NAIS: cpNaissanceInfo?.code_commune_insee, // REQUIRED
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2", // REQUIRED
       ADRESSE: effectif.apprenant.adresse
         ? effectif.apprenant.adresse?.complete ??
