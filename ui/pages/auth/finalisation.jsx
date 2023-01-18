@@ -107,6 +107,7 @@ const Finalize = () => {
     touched,
     values: valuesAccess,
     setFieldValue,
+    setErrors,
   } = useFormik({
     initialValues: {
       type: "",
@@ -131,7 +132,13 @@ const Finalize = () => {
             setToken(result.token);
           }
         } catch (e) {
-          console.error(e);
+          if (e.messages.message === "No organisme found") {
+            setErrors({
+              type: `Une erreur technique est survenue. Nous n'avons pas pu retrouver l'organisme. Merci de bien vouloir contacter l'équipe du tableau de bord ${CONTACT_ADDRESS}`,
+            });
+          } else {
+            console.error(e);
+          }
         }
         setIsSubmitting(false);
         resolve("onSubmitHandler publish complete");

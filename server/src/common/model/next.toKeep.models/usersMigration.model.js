@@ -87,7 +87,7 @@ export const schema = object(
         {
           token: string(),
           templateName: string(),
-          payload: object(),
+          // payload: object(),
           sendDates: arrayOf(date()),
           openDate: date(),
           messageIds: arrayOf(string()),
@@ -100,7 +100,7 @@ export const schema = object(
             })
           ),
         },
-        { required: ["token", "templateName", "sendDates"] }
+        { required: ["token", "templateName", "sendDates"], additionalProperties: true }
       )
     ),
     unsubscribe: boolean({ description: "unsubscribe email" }),

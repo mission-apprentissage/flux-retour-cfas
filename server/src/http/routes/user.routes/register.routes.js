@@ -27,6 +27,7 @@ import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import logger from "../../../common/logger.js";
 import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
 import { uniq } from "lodash-es";
+import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -274,6 +275,14 @@ export default ({ mailer }) => {
       let is_cross_organismes = null;
       if (codes_region || codes_academie || codes_departement) {
         is_cross_organismes = true;
+      }
+
+      if (!is_cross_organismes && !wantedReseau) {
+        let organisme = await findOrganismeByUai(userDb.uai);
+        if (!organisme) {
+          organisme = await findOrganismeBySiret(userDb.siret);
+          throw Boom.badRequest(`No organisme found`);
+        }
       }
 
       const updateUser = await userHasAskAccess(userDb.email, {
