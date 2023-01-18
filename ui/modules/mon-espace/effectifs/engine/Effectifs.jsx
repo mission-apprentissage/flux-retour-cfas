@@ -27,6 +27,7 @@ import { _getBlob } from "../../../../common/httpClient";
 import { Input } from "./formEngine/components/Input/Input";
 import { useMemo } from "react";
 import { DoubleChevrons } from "../../../../theme/components/icons/DoubleChevrons";
+import Ribbons from "../../../../components/Ribbons/Ribbons";
 
 const DownloadButton = ({ title, fileName, getFile }) => {
   const [onClick, isLoading] = useDownloadClick(getFile, fileName);
@@ -104,7 +105,7 @@ const Effectifs = ({ organismesEffectifs }) => {
           {isOrganismePages && `Ses effectifs`}
         </Heading>
         <HStack spacing={4}>
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
+          {organismesEffectifs.length > 0 && hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
             <DownloadButton
               fileName={exportFilename}
               getFile={() => _getBlob(`/api/v1/indicateurs-export?organisme_id=${organisme._id}&date=${Date.now()}`)}
@@ -112,22 +113,23 @@ const Effectifs = ({ organismesEffectifs }) => {
             />
           )}
 
-          {hasContextAccessTo(organisme, "organisme/page_effectifs/televersement_document") && (
-            <>
-              <Button
-                size="md"
-                fontSize={{ base: "sm", md: "md" }}
-                p={{ base: 2, md: 4 }}
-                h={{ base: 8, md: 10 }}
-                onClick={() => {
-                  router.push(`${router.asPath}/televersement`);
-                }}
-                variant="secondary"
-              >
-                <Text as="span">+ Ajouter</Text>
-              </Button>
-            </>
-          )}
+          {!(organisme.mode_de_transmission === "API" && organismesEffectifs.length === 0) &&
+            hasContextAccessTo(organisme, "organisme/page_effectifs/televersement_document") && (
+              <>
+                <Button
+                  size="md"
+                  fontSize={{ base: "sm", md: "md" }}
+                  p={{ base: 2, md: 4 }}
+                  h={{ base: 8, md: 10 }}
+                  onClick={() => {
+                    router.push(`${router.asPath}/televersement`);
+                  }}
+                  variant="secondary"
+                >
+                  <Text as="span">+ Ajouter</Text>
+                </Button>
+              </>
+            )}
           {hasContextAccessTo(organisme, "organisme/page_effectifs/ajout_apprenant") &&
             organisme.mode_de_transmission !== "API" && (
               <>
@@ -147,62 +149,93 @@ const Effectifs = ({ organismesEffectifs }) => {
         </HStack>
       </Flex>
 
-      <VStack alignItems="flex-start">
-        <Text fontWeight="bold">
-          Vous avez [{organismesEffectifs.length}] effectifs au total, pour plus de facilité veuillez sélectionner une
-          option ci-dessous :
-        </Text>
-        <Input
-          {...{
-            name: `search_effectifs`,
-            fieldType: "text",
-            mask: "C",
-            maskBlocks: [
-              {
-                name: "C",
-                mask: "Pattern",
-                pattern: "^.*$",
-              },
-            ],
-            placeholder: "Recherche",
-          }}
-          onSubmit={(value) => {
-            setSearchValue(value.trim());
-          }}
-          value={searchValue}
-          w="35%"
-        />
-      </VStack>
-
-      <VStack alignItems="flex-start" mt={8}>
-        <HStack w="full">
-          <Box fontWeight="bold" flexGrow={1}>
-            Filtrer:
+      {organisme.mode_de_transmission === "MANUEL" && organismesEffectifs.length === 0 && (
+        <Ribbons variant="info" mt={5}>
+          <Box ml={3}>
+            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+              {isMonOrganismePages && `Vous n'avez pas encore ajouté d'effectifs`}
+              {isOrganismePages && `Aucuns effectifs n'ont encore été ajoutés pour cet organisme.`}
+            </Text>
+            <Text color="grey.800" mt={4} textStyle="sm">
+              Vous pouvez ajouter des effectifs à l&rsquo;aide du bouton ci-dessus.
+              <br />
+            </Text>
           </Box>
-          <HStack>
-            <Switch
-              variant="icon"
-              onChange={(e) => {
-                setShowOnlyErrors(e.target.checked);
+        </Ribbons>
+      )}
+      {organisme.mode_de_transmission === "API" && organismesEffectifs.length === 0 && (
+        <Ribbons variant="info" mt={5}>
+          <Box ml={3}>
+            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+              Aucuns effectifs n&rsquo;ont encore été reçus depuis votre ERP.
+            </Text>
+            <Text color="grey.800" mt={4} textStyle="sm">
+              Merci de revenir ultérieurement. Si vous venez de configurer votre ERP, la transmission de vos effectifs
+              sera active demain matin.
+              <br />
+            </Text>
+          </Box>
+        </Ribbons>
+      )}
+      {organismesEffectifs.length > 0 && (
+        <>
+          <VStack alignItems="flex-start">
+            <Text fontWeight="bold">
+              Vous avez [{organismesEffectifs.length}] effectifs au total, pour plus de facilité veuillez sélectionner
+              une option ci-dessous :
+            </Text>
+            <Input
+              {...{
+                name: `search_effectifs`,
+                fieldType: "text",
+                mask: "C",
+                maskBlocks: [
+                  {
+                    name: "C",
+                    mask: "Pattern",
+                    pattern: "^.*$",
+                  },
+                ],
+                placeholder: "Recherche",
               }}
+              onSubmit={(value) => {
+                setSearchValue(value.trim());
+              }}
+              value={searchValue}
+              w="35%"
             />
-            <Text flexGrow={1}>Afficher uniquement les données en erreur</Text>
-          </HStack>
-        </HStack>
-        <HStack w="full" mt={2}>
-          <Text>Par année scolaire</Text>
-          <BadgeButton onClick={() => setAnneScolaire("all")} active={anneScolaire === "all"}>
-            Toutes
-          </BadgeButton>
-          {Object.keys(organismesEffectifsGroupedBySco).map((anneSco) => {
-            return (
-              <BadgeButton onClick={() => setAnneScolaire(anneSco)} key={anneSco} active={anneScolaire === anneSco}>
-                {anneSco}
+          </VStack>
+          <VStack alignItems="flex-start" mt={8}>
+            <HStack w="full">
+              <Box fontWeight="bold" flexGrow={1}>
+                Filtrer:
+              </Box>
+              <HStack>
+                <Switch
+                  variant="icon"
+                  onChange={(e) => {
+                    setShowOnlyErrors(e.target.checked);
+                  }}
+                />
+                <Text flexGrow={1}>Afficher uniquement les données en erreur</Text>
+              </HStack>
+            </HStack>
+            <HStack w="full" mt={2}>
+              <Text>Par année scolaire</Text>
+              <BadgeButton onClick={() => setAnneScolaire("all")} active={anneScolaire === "all"}>
+                Toutes
               </BadgeButton>
-            );
-          })}
-        </HStack>
-      </VStack>
+              {Object.keys(organismesEffectifsGroupedBySco).map((anneSco) => {
+                return (
+                  <BadgeButton onClick={() => setAnneScolaire(anneSco)} key={anneSco} active={anneScolaire === anneSco}>
+                    {anneSco}
+                  </BadgeButton>
+                );
+              })}
+            </HStack>
+          </VStack>
+        </>
+      )}
 
       <Box mt={10} mb={16}>
         {Object.entries(organismesEffectifsGroupedBySco).map(([anneSco, orgaE]) => {

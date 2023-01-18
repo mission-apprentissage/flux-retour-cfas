@@ -11,7 +11,7 @@ export const adresseSchema = object({
   repetition_voie: string({
     description: "Indice de répétition du numéro de voie",
     example: "B",
-    enum: [null, "B", "T", "Q", "C"],
+    enum: ["B", "T", "Q", "C"],
   }),
   voie: string({
     description: "Nom de voie",
@@ -58,7 +58,7 @@ export const adresseSchema = object({
     example: "13 Bis Boulevard de la liberté 75000 PARIS",
   }),
   pays: string({
-    enum: [null, ...PAYS.map(({ code }) => code)],
+    enum: PAYS.map(({ code }) => code),
     description: "Pays",
   }),
 });

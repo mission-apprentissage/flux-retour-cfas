@@ -66,7 +66,6 @@ export const seedSampleOrganismes = async () => {
       sirets: ["44492238900010"],
       siret: "44492238900010",
       reseaux: ["CCI"],
-      erps: ["YMAG"],
       nature: "responsable_formateur",
       nom: "ADEN Formations (Caen)",
     });
@@ -107,7 +106,7 @@ export const seedSampleOrganismes = async () => {
       sirets: ["34497770700027"],
       siret: "34497770700027",
       reseaux: ["MFR"],
-      erps: ["gesti"],
+      erps: ["GESTI"],
       nature: "responsable_formateur",
       nom: "MAISON FAMILIALE RURALE CFA - 26300 CHATEAUNEUF SUR ISERE",
     });

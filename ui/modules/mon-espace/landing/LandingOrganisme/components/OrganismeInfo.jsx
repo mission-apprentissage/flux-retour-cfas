@@ -8,6 +8,8 @@ import { organismeAtom } from "../../../../../hooks/organismeAtoms";
 import { useRecoilValue } from "recoil";
 import IndicateursInfo from "../../common/IndicateursInfos.jsx";
 import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
+import Ribbons from "../../../../../components/Ribbons/Ribbons";
+import { useEspace } from "../../../../../hooks/useEspace";
 
 export const mapNatureOrganismeDeFormation = (nature) => {
   switch (nature) {
@@ -23,6 +25,7 @@ export const mapNatureOrganismeDeFormation = (nature) => {
 };
 
 export default function OrganismeInfo() {
+  const { isMonOrganismePages, isOrganismePages } = useEspace();
   const organisme = useRecoilValue(organismeAtom);
 
   if (!organisme) {
@@ -86,7 +89,29 @@ export default function OrganismeInfo() {
         </Box>
       </Section>
 
-      {organismeId && (
+      <Box mt={5}>
+        {!organisme.first_transmission_date && !organisme.mode_de_transmission && (
+          <Ribbons variant="warning" mt="0.5rem">
+            <Box ml={3}>
+              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                {isMonOrganismePages && `Vous ne nous transmettez pas encore vos effectifs.`}
+                {isOrganismePages && ` Cet organisme ne nous transmet pas encore ses effectifs.`}
+              </Text>
+            </Box>
+          </Ribbons>
+        )}
+        {!organisme.first_transmission_date && organisme.mode_de_transmission && (
+          <Ribbons variant="warning" mt="0.5rem">
+            <Box ml={3}>
+              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                {isMonOrganismePages && `Vos effectifs sont en cours de transmission.`}
+                {isOrganismePages && `Les effectifs de cet organisme sont en cours de transmission.`}
+              </Text>
+            </Box>
+          </Ribbons>
+        )}
+      </Box>
+      {organisme.first_transmission_date && (
         <SimpleFiltersProvider initialState={{ organismeId }}>
           <IndicateursInfo />
         </SimpleFiltersProvider>

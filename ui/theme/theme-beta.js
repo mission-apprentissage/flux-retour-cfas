@@ -5,6 +5,7 @@ const colors = {
   white: "#ffffff",
   redmarianne: "#e1000f",
   openbluefrance: "#E3E3FD",
+  bluefrance_light: "#5770BE",
   bluefrance_hover: "#1414B2",
   success: "#0d6635",
   error: "#b60000",

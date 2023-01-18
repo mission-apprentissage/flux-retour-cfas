@@ -129,7 +129,12 @@ const OrganismeContributors = ({ size = "md" }) => {
         <Box px={[4, 8]} mb={5}>
           <Text textStyle="xs">
             <Question w="10px" h="10px" mt="-0.2rem" /> Une question sur un rôle ? Consulter la{" "}
-            <Link color="bluefrance" as={NavLink} href={"/assistance/faq#31d725e0aa704c11b7b3e02534b2c971"} isExternal>
+            <Link
+              color="bluefrance"
+              as={NavLink}
+              href={"https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"}
+              isExternal
+            >
               FAQ
             </Link>
           </Text>
@@ -217,12 +222,16 @@ const OrganismeContributors = ({ size = "md" }) => {
                   width: 120,
                   cell: (info) => {
                     const user = info.row.original.user;
+                    const you = auth.email === user.email;
                     const hasAccount = user.prenom && user.nom;
                     const username = hasAccount ? `${user.prenom} ${user.nom}` : `Invité non vérifié`;
                     return (
                       <HStack>
                         <Avatar size="sm" name={hasAccount ? username : ""} />
-                        <Text>{username}</Text>
+                        <Text>
+                          {username}
+                          {you ? " (vous)" : ""}
+                        </Text>
                         {user.type && <Text fontWeight="bold">{`(${user.type})`}</Text>}
                       </HStack>
                     );
@@ -300,16 +309,20 @@ const OrganismeContributors = ({ size = "md" }) => {
                 },
                 actions: {
                   header: () => {
-                    return <Box textAlign="center">Actions</Box>;
+                    return <Box textAlign="center">Retirer l&rsquo;accès</Box>;
                   },
                   width: 40,
                   cell: (info) => {
                     const { user } = info.row.original;
+                    const isAnOverheadUser = true;
+                    // user.roles.some((role) => ["reseau_of", "pilot", "erp"].includes(role));
                     // TODO should not be able to remove pilot ["TETE_DE_RESEAU", "ERP"].includes(user.organisation);
+                    // TODO edit: can only remove the ones invited to join by someone in the current organisme
+
                     const you = auth.email === user.email;
                     return (
                       <Center>
-                        {!you && (
+                        {!you && !isAnOverheadUser && (
                           <CloseIcon
                             color="bluefrance"
                             data-email={info.row.original.user.email}
