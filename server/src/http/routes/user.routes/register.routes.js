@@ -161,6 +161,7 @@ export default ({ mailer }) => {
           enseigne: result.enseigne,
           entreprise_raison_sociale: result.entreprise_raison_sociale,
           numero_voie: result.numero_voie,
+          type_voie: result.type_voie,
           nom_voie: result.nom_voie,
           complement_adresse: result.complement_adresse,
           code_postal: result.code_postal,
