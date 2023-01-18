@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Center, Flex, Heading, HStack, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { Box, Button, Center, Flex, Heading, HStack, Text } from "@chakra-ui/react";
 import { ArrowDropRightLine } from "../../../theme/components/icons";
 import { useOrganisme } from "../../../hooks/useOrganisme";
 

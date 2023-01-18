@@ -1,14 +1,5 @@
 import Joi from "joi";
-import {
-  object,
-  objectId,
-  string,
-  stringOrNull,
-  date,
-  arrayOf,
-  boolean,
-  integer,
-} from "../json-schema/jsonSchemaTypes.js";
+import { object, objectId, string, date, arrayOf, boolean, integer } from "../json-schema/jsonSchemaTypes.js";
 import { adresseSchema } from "../json-schema/adresseSchema.js";
 import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
 import { ERPS } from "../../constants/erpsConstants.js";
@@ -118,9 +109,9 @@ export const schema = object(
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
     api_key: string({ description: "API key pour envoi de données" }),
 
-    mode_de_transmission: stringOrNull({
+    mode_de_transmission: string({
       description: "Mode de transmission des effectifs",
-      enum: [null, "API", "MANUEL"],
+      enum: ["API", "MANUEL"],
     }),
     setup_step_courante: string({
       description: "Etape d'installation courante",

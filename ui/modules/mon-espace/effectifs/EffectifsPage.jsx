@@ -71,7 +71,7 @@ const EffectifsPage = () => {
   return (
     <>
       {!organisme.mode_de_transmission && <ChoixTransmission />}
-      {organisme.mode_de_transmission === "API" && !organisme.erps && <TransmissionAPI />}
+      {organisme.mode_de_transmission === "API" && organisme.erps?.length === 0 && <TransmissionAPI />}
       {displayEffectifs && televersementPage && <Televersements />}
       {displayEffectifs && !televersementPage && <Effectifs organismesEffectifs={organismesEffectifs} />}
     </>

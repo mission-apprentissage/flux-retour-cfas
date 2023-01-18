@@ -912,7 +912,7 @@ export default ({ clamav }) => {
         confirm: true,
       });
 
-      await setOrganismeFirstDateTransmissionIfNeeded(organisme_id);
+      if (uploads.last_snapshot_effectifs.length > 0) await setOrganismeFirstDateTransmissionIfNeeded(organisme_id);
 
       return res.json({});
     })

@@ -22,7 +22,7 @@ export const ERPS = [
   },
   {
     id: "YMAG",
-    name: "Ymag",
+    name: "Ypareo",
     state: ERP_STATE.ready,
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/ypareo.pdf",
     helpFileSize: "1.7Mb",

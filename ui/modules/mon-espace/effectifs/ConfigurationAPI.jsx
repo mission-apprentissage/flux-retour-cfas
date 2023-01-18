@@ -91,30 +91,33 @@ const ConfigurationAPI = () => {
               <VStack alignItems={"baseline"}>
                 <Box backgroundColor="white" border="1px" p={3} w={300}>
                   <Radio value="no" onChange={handleChange}>
-                    Non, SC Form est mon unique outil de gestion
+                    Non, {erpName} est mon unique outil de gestion
                   </Radio>
                 </Box>
                 {values.doYouUseAnotherService === "no" && (
                   <HStack color="flatsuccess" alignItems={"baseline"}>
-                    <i class="ri-checkbox-circle-line"></i>
+                    <i className="ri-checkbox-circle-line"></i>
                     <Text>Vous pouvez télécharger le pas-à-pas disponible ci-dessus.</Text>
                   </HStack>
                 )}
               </VStack>
             </VStack>
           </RadioGroup>
-
-          <Button
-            onClick={async () => {
-              await updateOrganisme(organisme.id, { mode_de_transmission: null });
-              router.push("/mon-espace/effectifs");
-            }}
-            variant="secondary"
-            padding={2}
-          >
-            Précédent
-          </Button>
         </VStack>
+        <Button
+          onClick={async () => {
+            await updateOrganisme(organisme.id, {
+              erps: [erpIdSelected],
+              setup_step_courante: "COMPLETE",
+              mode_de_transmission: "API",
+            });
+            router.push("/mon-espace/mon-organisme/effectifs");
+          }}
+          variant="secondary"
+          padding={2}
+        >
+          J&rsquo;ai terminé de configurer mon {erpName}
+        </Button>
       </Flex>
     </form>
   );
