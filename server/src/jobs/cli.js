@@ -2,7 +2,7 @@ import "dotenv/config.js";
 import { Option, program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
-import { clear } from "./clear/clear-all.js";
+import { clear, clearRoles } from "./clear/clear-all.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
@@ -94,6 +94,15 @@ cli
   .action(({ all }) => {
     runScript(async () => {
       return clear({ clearAll: all });
+    }, "Clear");
+  });
+
+cli
+  .command("clear:roles")
+  .description("Clear roles")
+  .action(() => {
+    runScript(async () => {
+      return clearRoles();
     }, "Clear");
   });
 

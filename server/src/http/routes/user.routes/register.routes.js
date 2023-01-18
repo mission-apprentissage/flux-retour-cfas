@@ -266,7 +266,7 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      let codes_region = uniq(wantedRegions?.split(",")) ?? null;
+      let codes_region = wantedRegions?.split(",") ?? null;
       let codes_academie = wantedAcademnie?.split(",") ?? null;
       let codes_departement = wantedDepartements?.split(",") ?? null;
 
@@ -276,7 +276,7 @@ export default ({ mailer }) => {
       }
 
       const updateUser = await userHasAskAccess(userDb.email, {
-        ...(codes_region ? { codes_region } : {}),
+        ...(codes_region ? { codes_region: uniq(codes_region) } : {}),
         ...(codes_academie ? { codes_academie } : {}),
         ...(codes_departement ? { codes_departement } : {}),
         ...(is_cross_organismes ? { is_cross_organismes } : {}),
