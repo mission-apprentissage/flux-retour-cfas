@@ -121,6 +121,8 @@ export const hydrateOrganismesAndFormations = async () => {
           organisme.sirets.length === 1 && organisme.sirets[0] === organismeReferentiel.siret;
         const updatedOrganisme = {
           ...organisme,
+          ...(siret ? { siret } : {}),
+          ...(siret ? { sirets: [siret] } : {}),
           nature: organismeReferentiel.nature,
           natureValidityWarning: !perfectUaiSiretMatch,
           est_dans_le_referentiel: true,
