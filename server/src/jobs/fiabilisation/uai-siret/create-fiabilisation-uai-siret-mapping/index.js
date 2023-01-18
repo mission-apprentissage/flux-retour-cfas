@@ -1,9 +1,6 @@
+import { fetchOrganismes } from "../../../../common/apis/apiReferentielMna.js";
 import logger from "../../../../common/logger.js";
-import {
-  dossiersApprenantsDb,
-  fiabilisationUaiSiretDb,
-  referentielSiretUaiDb,
-} from "../../../../common/model/collections.js";
+import { dossiersApprenantsDb, fiabilisationUaiSiretDb } from "../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { FIABILISATION_MAPPINGS as manualMapping } from "./mapping.js";
 
@@ -18,10 +15,28 @@ const insertInFiabilisationMappingIfNotExist = async (mapping) => {
   return await fiabilisationUaiSiretDb().insertOne({ created_at: new Date(), ...mapping });
 };
 
+const REFERENTIEL_FIELDS_TO_FETCH = [
+  "siret",
+  "uai",
+  "etat_administratif",
+  "qualiopi",
+  "raison_sociale",
+  "enseigne",
+  "nature",
+  "qualiopi",
+  "adresse",
+  "numero_declaration_activite",
+];
+
 /**
  * Méthode de création de la collection de mapping pour fiabilisation couples UAI SIRET
  */
 export const createFiabilisationUaiSiretMapping = async () => {
+  const { organismes: organismesFromReferentiel } = await fetchOrganismes({
+    champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),
+    itemsPerPage: 10000,
+  });
+
   // on récupère tous les couples UAI/SIRET depuis les dossiers apprenants
   const allCouplesUaiSiretTdb = await dossiersApprenantsDb()
     .aggregate([
@@ -51,9 +66,9 @@ export const createFiabilisationUaiSiretMapping = async () => {
   let couplesFiablesFound = 0;
   let fiabilisationMappingInsertedCount = 0;
   await asyncForEach(allCouplesUaiSiretTdb, async (coupleUaiSiretTdb) => {
-    const organismeFoundInReferentielViaSiret = await referentielSiretUaiDb().findOne({
-      siret: coupleUaiSiretTdb.siret,
-    });
+    const organismeFoundInReferentielViaSiret = await organismesFromReferentiel.find(
+      (item) => item.siret === coupleUaiSiretTdb.siret
+    );
 
     // si le SIRET et l'UAI lié trouvés dans le référentiel sont ok, rien à faire
     if (organismeFoundInReferentielViaSiret && organismeFoundInReferentielViaSiret.uai === coupleUaiSiretTdb.uai) {
@@ -66,11 +81,9 @@ export const createFiabilisationUaiSiretMapping = async () => {
     // - n'est pas le même dans le référentiel
     // alors on remplace le SIRET par celui trouvé dans le référentiel si l'UAI n'est pas présent
     // dans un autre couple TDB
-    const organismesFoundInReferentielViaUai = await referentielSiretUaiDb()
-      .find({
-        uai: coupleUaiSiretTdb.uai,
-      })
-      .toArray();
+    const organismesFoundInReferentielViaUai = await organismesFromReferentiel.filter(
+      (item) => item.uai === coupleUaiSiretTdb.uai
+    );
     const organismeUniqueFoundInReferentielViaUai =
       organismesFoundInReferentielViaUai.length === 1 ? organismesFoundInReferentielViaUai[0] : null;
 
