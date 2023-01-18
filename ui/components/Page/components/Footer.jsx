@@ -106,7 +106,7 @@ const Footer = () => {
               </ListItem>
             </List>
             <Text textStyle="xs" mt={[2, 2, 0]}>
-              {APP_VERSION && `v.${APP_VERSION} `}© République française 2022
+              {APP_VERSION && `v.${APP_VERSION} `}© République française {new Date().getFullYear()}
             </Text>
           </Flex>
         </Container>
