@@ -138,6 +138,9 @@ const Finalize = () => {
             });
           } else {
             console.error(e);
+            setErrors({
+              type: `Une erreur technique est survenue.`,
+            });
           }
         }
         setIsSubmitting(false);
