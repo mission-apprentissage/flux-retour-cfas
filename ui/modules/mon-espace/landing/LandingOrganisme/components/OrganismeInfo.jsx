@@ -37,7 +37,7 @@ export default function OrganismeInfo() {
     );
   }
 
-  const { _id: organismeId, nom, uai, nature, natureValidityWarning, sirets, ferme } = organisme;
+  const { _id: organismeId, uai, nature, natureValidityWarning, sirets, ferme, enseigne, raison_sociale } = organisme;
   const siretToDisplay = formatSiretSplitted(sirets[0]);
 
   return (
@@ -54,7 +54,7 @@ export default function OrganismeInfo() {
       >
         <Box>
           <Heading color="grey.800" fontSize="1.6rem" as="h3" mb={2}>
-            {nom}
+            {enseigne || raison_sociale}
           </Heading>
           <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
             <HStack>

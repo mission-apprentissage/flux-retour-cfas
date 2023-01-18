@@ -87,8 +87,8 @@ function MesOrganismes() {
                       return <Box textAlign="left">Nom de l&rsquo;organisme</Box>;
                     },
                     cell: ({ row }) => {
-                      const { nom } = organismes[row.id];
-                      return <Text fontSize="1rem">{nom}</Text>;
+                      const { nomOrga } = organismes[row.id];
+                      return <Text fontSize="1rem">{nomOrga}</Text>;
                     },
                   },
                   nature: {
