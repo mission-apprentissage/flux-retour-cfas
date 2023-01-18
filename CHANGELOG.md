@@ -1,3 +1,10 @@
+# [3.2.0-beta.7](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.6...v3.2.0-beta.7) (2023-01-18)
+
+
+### Bug Fixes
+
+* **server:** update siret & sirets in hydrate-organismes-and-formations ([#2407](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2407)) ([72bab29](https://github.com/mission-apprentissage/flux-retour-cfas/commit/72bab29b8393fdb9a33d627d21917659cb90f727))
+
 # [3.2.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.5...v3.2.0-beta.6) (2023-01-18)
 
 
