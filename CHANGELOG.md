@@ -1,3 +1,66 @@
+# [3.2.0-beta.7](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.6...v3.2.0-beta.7) (2023-01-18)
+
+
+### Bug Fixes
+
+* **server:** update siret & sirets in hydrate-organismes-and-formations ([#2407](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2407)) ([72bab29](https://github.com/mission-apprentissage/flux-retour-cfas/commit/72bab29b8393fdb9a33d627d21917659cb90f727))
+
+# [3.2.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.5...v3.2.0-beta.6) (2023-01-18)
+
+
+### Bug Fixes
+
+* **server:** create fiabilisation mapping using referentiel api ([#2406](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2406)) ([fa64c30](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fa64c30ff307e248e41d329dcc9ba13b572b82df))
+
+# [3.2.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.4...v3.2.0-beta.5) (2023-01-18)
+
+
+### Features
+
+* un organisme peut configurer l'ERP utilisé ([#2402](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2402)) ([c167e05](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c167e0516ebbfe42b1fe8962ee6aed672b97bb9a))
+
+# [3.2.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.3...v3.2.0-beta.4) (2023-01-17)
+
+
+### Features
+
+* sifa filtering ([7fc801a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/7fc801a8359f3177e945a90859c566412c297a6e))
+
+# [3.2.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.2...v3.2.0-beta.3) (2023-01-17)
+
+
+### Bug Fixes
+
+* user pilot academie ([6d22bb2](https://github.com/mission-apprentissage/flux-retour-cfas/commit/6d22bb2d07bf429c6acb1dcc2dba86a4688761e4))
+
+# [3.2.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.1...v3.2.0-beta.2) (2023-01-17)
+
+
+### Features
+
+* v0 page effectif ([#2404](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2404)) ([8e3fb41](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8e3fb41f3f42ec6bce0d56f70a7266f4b95df1fe))
+
+# [3.2.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.1-beta.2...v3.2.0-beta.1) (2023-01-17)
+
+
+### Features
+
+* import du reseau aden ([#2401](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2401)) ([5c397d2](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5c397d26b78ac4a926d64667711473be2d698768))
+
+## [3.1.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.1-beta.1...v3.1.1-beta.2) (2023-01-16)
+
+
+### Bug Fixes
+
+* display accordion reduce motion ([2243890](https://github.com/mission-apprentissage/flux-retour-cfas/commit/2243890d53bcf8872609901a413e59db6ff84a9d))
+
+## [3.1.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0...v3.1.1-beta.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* reduce token payload to avoid over sizing it ([b16ed40](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b16ed40d92cb28069c7d2efe342b226085c720b7))
+
 # [3.1.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.0.1...v3.1.0) (2023-01-16)
 
 

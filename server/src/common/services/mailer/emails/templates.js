@@ -61,6 +61,18 @@ export function validation_user_by_orga_admin({ payload }, token, options = {}) 
   };
 }
 
+export function notify_access_granted({ payload }, token, options = {}) {
+  const prefix = options.resend ? "[Rappel] " : "";
+  return {
+    subject: `${prefix} Votre demande d'accès a été acceptée`,
+    templateFile: getTemplateFile("notify_access_granted"),
+    data: {
+      user: payload.user,
+      token,
+    },
+  };
+}
+
 // TODO [metier]
 // export function notification(cfa, token, options = {}) {
 //   const prefix = options.resend ? "[Rappel] " : "";

@@ -16,12 +16,11 @@ import {
 import { Field, Form, Formik } from "formik";
 import React from "react";
 import * as Yup from "yup";
-import { decodeJwt } from "jose";
 import { useRouter } from "next/router";
 import NavLink from "next/link";
 import useAuth from "../../../hooks/useAuth";
 import useToken from "../../../hooks/useToken";
-import { _post } from "../../../common/httpClient";
+import { _get, _post } from "../../../common/httpClient";
 import { AlertRounded, ShowPassword } from "../../../theme/components/icons";
 
 const Login = (props) => {
@@ -36,7 +35,7 @@ const Login = (props) => {
     try {
       const result = await _post("/api/v1/auth/login", values);
       if (result.loggedIn) {
-        const user = decodeJwt(result.token);
+        const user = await _get("/api/v1/session/current");
         setAuth(user);
         setToken(result.token);
         if (!user.account_status === "NOT_CONFIRMED") {

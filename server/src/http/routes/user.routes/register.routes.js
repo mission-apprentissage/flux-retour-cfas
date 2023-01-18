@@ -26,6 +26,8 @@ import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import logger from "../../../common/logger.js";
 import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
+import { uniq } from "lodash-es";
+import { findOrganismeBySiret, findOrganismeByUai } from "../../../common/actions/organismes/organismes.actions.js";
 
 const checkActivationToken = () => {
   passport.use(
@@ -160,6 +162,7 @@ export default ({ mailer }) => {
           enseigne: result.enseigne,
           entreprise_raison_sociale: result.entreprise_raison_sociale,
           numero_voie: result.numero_voie,
+          type_voie: result.type_voie,
           nom_voie: result.nom_voie,
           complement_adresse: result.complement_adresse,
           code_postal: result.code_postal,
@@ -226,7 +229,7 @@ export default ({ mailer }) => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserTokenSimple({ payload });
+      const token = createUserTokenSimple({ payload: { email: payload.email } });
       await sessions.addJwt(token);
 
       return responseWithCookie({ res, token }).status(200).json({
@@ -240,10 +243,20 @@ export default ({ mailer }) => {
     "/demande-acces",
     authMiddleware(),
     tryCatch(async ({ body, user }, res) => {
-      const { type } = await Joi.object({
+      const {
+        type,
+        codes_region: wantedRegions,
+        codes_academie: wantedAcademnie,
+        codes_departement: wantedDepartements,
+        reseau: wantedReseau,
+      } = await Joi.object({
         type: Joi.string()
           .valid("organisme.admin", "organisme.member", "organisme.readonly", "organisme.statsonly")
           .required(),
+        codes_region: Joi.string().allow(null, ""),
+        codes_academie: Joi.string().allow(null, ""),
+        codes_departement: Joi.string().allow(null, ""),
+        reseau: Joi.string().allow(null, ""),
       }).validateAsync(body, { abortEarly: false });
 
       const userDb = await getUser(user.email.toLowerCase());
@@ -255,22 +268,42 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      // const codes_region = [result.num_region];
-      // const codes_academie = [result.num_academie];
-      // const codes_departement = [result.num_departement];
+      let codes_region = wantedRegions?.split(",") ?? null;
+      let codes_academie = wantedAcademnie?.split(",") ?? null;
+      let codes_departement = wantedDepartements?.split(",") ?? null;
 
-      await userAfterCreate({ user: userDb, mailer, asRole: type });
+      let is_cross_organismes = null;
+      if (codes_region || codes_academie || codes_departement) {
+        is_cross_organismes = true;
+      }
 
-      const updateUser = await userHasAskAccess(userDb.email, {});
+      if (!is_cross_organismes && !wantedReseau) {
+        let organisme = await findOrganismeByUai(userDb.uai);
+        if (!organisme) {
+          organisme = await findOrganismeBySiret(userDb.siret);
+          throw Boom.badRequest(`No organisme found`);
+        }
+      }
+
+      const updateUser = await userHasAskAccess(userDb.email, {
+        ...(codes_region ? { codes_region: uniq(codes_region) } : {}),
+        ...(codes_academie ? { codes_academie } : {}),
+        ...(codes_departement ? { codes_departement } : {}),
+        ...(is_cross_organismes ? { is_cross_organismes } : {}),
+        ...(wantedReseau ? { reseau: wantedReseau } : {}),
+      });
+
       if (!updateUser) {
         throw Boom.badRequest("Something went wrong");
       }
+
+      await userAfterCreate({ user: updateUser, mailer, asRole: type });
 
       const payload = await structureUser(updateUser);
 
       await loggedInUser(payload.email);
 
-      const token = createUserTokenSimple({ payload });
+      const token = createUserTokenSimple({ payload: { email: payload.email } });
 
       if (await sessions.findJwt(token)) {
         await sessions.removeJwt(token);
@@ -315,7 +348,7 @@ export default ({ mailer }) => {
 
       await loggedInUser(payload.email);
 
-      const token = createUserTokenSimple({ payload });
+      const token = createUserTokenSimple({ payload: { email: payload.email } });
 
       if (await sessions.findJwt(token)) {
         await sessions.removeJwt(token);

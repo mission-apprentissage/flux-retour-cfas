@@ -152,7 +152,7 @@ export const updatePermissionsPending = async ({ userEmail, pending }) => {
   }
 
   await permissionsDb().updateMany(
-    { _id: { $in: [permissions.map(({ _id }) => _id)] } },
+    { _id: { $in: permissions.map(({ _id }) => _id) } },
     {
       $set: {
         pending,

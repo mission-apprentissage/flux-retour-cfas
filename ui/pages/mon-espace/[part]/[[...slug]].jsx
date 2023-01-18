@@ -10,13 +10,13 @@ import { useEspace } from "../../../hooks/useEspace";
 import SIFAPage from "../../../modules/mon-espace/SIFA/SIFAPage";
 import { useOrganisme } from "../../../hooks/useOrganisme";
 import LandingOrganisme from "../../../modules/mon-espace/landing/LandingOrganisme/LandingOrganisme";
-import LandingReseau from "../../../modules/mon-espace/landing/LandingReseau";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
 import EffectifsPage from "../../../modules/mon-espace/effectifs/EffectifsPage";
 import ParametresOrganisme from "../../../modules/mon-espace/parametres/parametresOrganisme";
-import LandingPilot from "../../../modules/mon-espace/landing/LandingPilot";
 import LandingErp from "../../../modules/mon-espace/landing/LandingErp";
 import LandingTransverse from "../../../modules/mon-espace/landing/LandingTransverse";
+import LandingReseau from "../../../modules/mon-espace/landing/LandingReseau.jsx";
+import LandingPilot from "../../../modules/mon-espace/landing/LandingPilot.jsx";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -26,7 +26,7 @@ const MonEspace = () => {
     isMonOrganismePages,
     isOrganismePages,
     isEffectifsPage,
-    isSIFA2Page,
+    isSIFAPage,
     isParametresPage,
     breadcrumb,
     myOrganisme,
@@ -55,13 +55,13 @@ const MonEspace = () => {
             {(isMonOrganismePage || isOrganismePages) &&
               currentOrganisme &&
               !isEffectifsPage &&
-              !isSIFA2Page &&
+              !isSIFAPage &&
               !isParametresPage &&
               hasContextAccessTo(currentOrganisme, "organisme/tableau_de_bord") && <LandingOrganisme />}
             {isEffectifsPage &&
               currentOrganisme &&
               hasContextAccessTo(currentOrganisme, "organisme/page_effectifs") && <EffectifsPage />}
-            {isSIFA2Page && currentOrganisme && hasContextAccessTo(currentOrganisme, "organisme/page_sifa2") && (
+            {isSIFAPage && currentOrganisme && hasContextAccessTo(currentOrganisme, "organisme/page_sifa") && (
               <SIFAPage />
             )}
             {isParametresPage &&

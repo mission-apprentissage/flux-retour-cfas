@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { usersMigrationDb } from "../model/collections.js";
 import { generateHtml } from "../utils/emailsUtils.js";
 
-export function addEmail(userEmail, token, templateName) {
+export function addEmail(userEmail, token, templateName, payload) {
   return usersMigrationDb().findOneAndUpdate(
     { email: userEmail },
     {
@@ -10,6 +10,7 @@ export function addEmail(userEmail, token, templateName) {
         emails: {
           token,
           templateName,
+          payload,
           sendDates: [new Date()],
         },
       },
@@ -127,8 +128,8 @@ export async function unsubscribeUser(id) {
 
 export async function renderEmail({ templates }, token) {
   const user = await usersMigrationDb().findOne({ "emails.token": token });
-  const { templateName } = user.emails.find((e) => e.token === token);
-  const template = templates[templateName]({ to: user.email, payload: user }, token);
+  const { templateName, payload } = user.emails.find((e) => e.token === token);
+  const template = templates[templateName]({ to: user.email, payload }, token);
 
   return generateHtml(user.email, template);
 }
@@ -149,7 +150,7 @@ export const createMailer = (mailerService) => {
       const template = mailerService.templates[templateName]({ to, payload }, token);
 
       try {
-        await addEmail(to, token, templateName);
+        await addEmail(to, token, templateName, payload);
         const messageId = await mailerService.sendEmailMessage(to, template);
         await addEmailMessageId(token, messageId);
       } catch (e) {

@@ -16,6 +16,9 @@ export default () => {
       const organismes = await findOrganismesByQuery(query, {
         _id: 1,
         nom: 1,
+        enseigne: 1,
+        raison_sociale: 1,
+        ferme: 1,
         nature: 1,
         adresse: 1,
         sirets: 1,
@@ -23,7 +26,10 @@ export default () => {
         uai: 1,
         first_transmission_date: 1,
       });
-      return res.json(organismes);
+
+      return res.json(
+        organismes.map((organisme) => ({ ...organisme, nomOrga: organisme.enseigne || organisme.raison_sociale }))
+      );
     })
   );
 

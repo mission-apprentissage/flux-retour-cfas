@@ -34,7 +34,14 @@ export const schema = object(
     }),
     siret: string({ description: "N° SIRET fiabilisé", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
     reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS) }), { description: "Réseaux du CFA, s'ils existent" }),
-    erps: arrayOf(string(), { description: "ERPs rattachés au CFA, s'ils existent" }),
+    erps: arrayOf(
+      string(),
+      // TODO because legacy
+      // { enum: Object.values(ERPS).map(({ nomErp }) => nomErp) }
+      {
+        description: "ERPs rattachés au CFA, s'ils existent",
+      }
+    ),
 
     nature: string({
       description: "Nature de l'organisme de formation",
@@ -42,6 +49,8 @@ export const schema = object(
     }),
     nature_validity_warning: boolean({ description: "Y a-t-il un doute sur la validité de la nature" }),
     nom: string({ description: "Nom de l'organisme de formation" }),
+    enseigne: string({ description: "Enseigne de l'organisme de formation" }),
+    raison_sociale: string({ description: "Raison sociale de l'organisme de formation" }),
     nom_tokenized: string({
       description: "Nom de l'organisme de formation tokenized pour la recherche textuelle",
     }),
@@ -98,6 +107,7 @@ export const schema = object(
     first_transmission_date: date({ description: "Date de la première transmission de données" }),
     date_derniere_transmission: date({ description: "Date de la dernière transmission de données" }),
     est_dans_le_referentiel: boolean({ description: "Est dans le referentiel onisep des organismes" }),
+    ferme: boolean({ description: "Le siret est fermé" }),
 
     // TODO [tech] TO REMOVE LATER
     access_token: string({ description: "Le token permettant l'accès au CFA à sa propre page" }),
@@ -109,7 +119,7 @@ export const schema = object(
     }),
     setup_step_courante: string({
       description: "Etape d'installation courante",
-      // enum: ["STEP1", "STEP2", "STEP3"], // TODO "COMPLETE"
+      enum: ["STEP1", "STEP2", "STEP3", "COMPLETE"],
     }),
     contributeurs: arrayOf(string(), { description: "Emails des contributeurs de cet organisme" }),
     updated_at: date({ description: "Date de mise à jour en base de données" }),

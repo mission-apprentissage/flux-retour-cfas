@@ -2,11 +2,10 @@ import "dotenv/config.js";
 import { Option, program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
-import { clear } from "./clear/clear-all.js";
+import { clear, clearRoles, clearUsers } from "./clear/clear-all.js";
 import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
-// import { seedWithSample } from "./seed/samples/seedSample.js";
 import { createUserAccount } from "./users/create-user.js";
 import {
   generatePasswordUpdateTokenForUser,
@@ -14,7 +13,6 @@ import {
 } from "./users/generate-password-update-token.js";
 import { hydrateOrganismesAndFormations } from "./hydrate/organismes/hydrate-organismes-and-formations.js";
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
-import { warmEffectifsCache } from "./warm-effectifs-cache/index.js";
 import { hydrateRefreshFormations } from "./hydrate/refresh-formations/hydrate-refresh-formations.js";
 import { hydrateFormationsFromDossiersApprenants } from "./hydrate/_toRemove/formations/hydrate-formations-from-dossiersApprenants.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
@@ -96,6 +94,24 @@ cli
   .action(({ all }) => {
     runScript(async () => {
       return clear({ clearAll: all });
+    }, "Clear");
+  });
+
+cli
+  .command("clear:users")
+  .description("Clear users")
+  .action(() => {
+    runScript(async () => {
+      return clearUsers();
+    }, "Clear");
+  });
+
+cli
+  .command("clear:roles")
+  .description("Clear roles")
+  .action(() => {
+    runScript(async () => {
+      return clearRoles();
     }, "Clear");
   });
 
@@ -232,18 +248,6 @@ cli
     runScript(async () => {
       return generatePasswordUpdateTokenForUserLegacy(username);
     }, "generate-password-update-token-legacy");
-  });
-
-/**
- * Job de warm up du cache des requêtes des calcul d'effectifs
- */
-cli
-  .command("cache:warmup")
-  .description("Appel des requêtes des calcul d'effectifs pour warmup du cache")
-  .action(async () => {
-    runScript(async () => {
-      return warmEffectifsCache();
-    }, "cache-warmup");
   });
 
 /**

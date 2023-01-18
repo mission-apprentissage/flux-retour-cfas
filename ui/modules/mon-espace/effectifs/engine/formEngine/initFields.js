@@ -243,38 +243,40 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
 
   if (cerfa.validation_errors.length) {
     for (const validation_error of cerfa.validation_errors) {
-      fields[validation_error.fieldName] = {
-        ...fields[validation_error.fieldName],
-        ...(validation_error.willNotBeModify
-          ? validation_error.isRequired
-            ? {
-                error: () => (
-                  <p>
-                    La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
-                    &nbsp;n&rsquo;est&nbsp;pas&nbsp;valide&nbsp;pour&nbsp;ce&nbsp;champ.
-                    <br />
-                    <strong>Ce champ est obligatoire.</strong>
-                  </p>
-                ),
-              }
+      if (fields[validation_error.fieldName]) {
+        fields[validation_error.fieldName] = {
+          ...fields[validation_error.fieldName],
+          ...(validation_error.willNotBeModify
+            ? validation_error.isRequired
+              ? {
+                  error: () => (
+                    <p>
+                      La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
+                      &nbsp;n&rsquo;est&nbsp;pas&nbsp;valide&nbsp;pour&nbsp;ce&nbsp;champ.
+                      <br />
+                      <strong>Ce champ est obligatoire.</strong>
+                    </p>
+                  ),
+                }
+              : {
+                  error: () => (
+                    <p>
+                      La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
+                      &nbsp;n&rsquo;est&nbsp;pas&nbsp;valide&nbsp;pour&nbsp;ce&nbsp;champ.
+                      <br /> Ce champ a déjà rempli, il sera donc pas modifié.
+                    </p>
+                  ),
+                }
             : {
                 error: () => (
                   <p>
                     La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
-                    &nbsp;n&rsquo;est&nbsp;pas&nbsp;valide&nbsp;pour&nbsp;ce&nbsp;champ.
-                    <br /> Ce champ a déjà rempli, il sera donc pas modifié.
+                    &nbsp;n&rsquo;est pas valide pour ce champ.
                   </p>
                 ),
-              }
-          : {
-              error: () => (
-                <p>
-                  La donnée transmise&nbsp;<strong>&quot;{validation_error.inputValue}&quot;</strong>
-                  &nbsp;n&rsquo;est pas valide pour ce champ.
-                </p>
-              ),
-            }),
-      };
+              }),
+        };
+      }
     }
   }
 

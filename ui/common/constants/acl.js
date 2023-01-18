@@ -203,7 +203,7 @@ const acl = [
       },
       {
         feature: "Voir la page sifa2",
-        ref: "organisme/page_sifa2",
+        ref: "organisme/page_sifa",
       },
       {
         feature: "Voir la page des paramètres d'organisme",

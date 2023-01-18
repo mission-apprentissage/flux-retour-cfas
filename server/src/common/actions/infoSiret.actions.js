@@ -2,7 +2,7 @@ import * as apiEntreprise from "../apis/ApiEntreprise.js";
 import * as apiCfaDock from "../apis/ApiCfaDock.js";
 import { buildAdresse, findDataByDepartementNum } from "../utils/adresseUtils.js";
 
-export const findDataFromSiret = async (providedSiret, non_diffusables = true) => {
+export const findDataFromSiret = async (providedSiret, non_diffusables = true, getConventionCollective = true) => {
   if (!providedSiret || !/^[0-9]{14}$/g.test(providedSiret.trim())) {
     return {
       result: {},
@@ -70,17 +70,18 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true) =
     };
   }
 
-  let conventionCollective = null;
-  try {
-    conventionCollective = await apiCfaDock.getOpcoData(siret);
-  } catch (e) {
-    console.log(e);
-    conventionCollective = {
-      idcc: null,
-      opco_nom: null,
-      opco_siren: null,
-      status: "ERROR",
-    };
+  let conventionCollective = {
+    idcc: null,
+    opco_nom: null,
+    opco_siren: null,
+    status: "ERROR",
+  };
+  if (getConventionCollective) {
+    try {
+      conventionCollective = await apiCfaDock.getOpcoData(siret);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   const siren = siret.substring(0, 9);
@@ -97,7 +98,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true) =
     };
   }
 
-  if (conventionCollective.status === "ERROR") {
+  if (getConventionCollective && conventionCollective.status === "ERROR") {
     try {
       conventionCollective = await apiCfaDock.getOpcoData(siren);
     } catch (e) {
@@ -119,7 +120,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true) =
     titre: null,
     url: null,
   };
-  if (conventionCollective.status !== "ERROR") {
+  if (getConventionCollective && conventionCollective.status !== "ERROR") {
     try {
       const { active, date_publication, etat, titre_court, titre, url } = await apiEntreprise.getConventionCollective(
         siret,
@@ -153,6 +154,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true) =
       numero_voie: etablissementApiInfo.adresse.numero_voie,
       type_voie: etablissementApiInfo.adresse.type_voie,
       nom_voie: etablissementApiInfo.adresse.nom_voie,
+      voie_complete: (etablissementApiInfo.adresse.type_voie ?? "") + (etablissementApiInfo.adresse.nom_voie ?? ""),
       complement_adresse: etablissementApiInfo.adresse.complement_adresse,
       code_postal: etablissementApiInfo.adresse.code_postal,
       num_departement: code_dept,

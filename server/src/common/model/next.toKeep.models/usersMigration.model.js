@@ -51,7 +51,7 @@ export const schema = object(
     ),
     codes_academie: arrayOf(
       string({
-        enum: Object.values(ACADEMIES).map(({ code }) => code),
+        enum: Object.values(ACADEMIES).map(({ code }) => `${code}`),
       }),
       { description: "Si l'utilisateur est scopé à une ou des académie(s), lesquelles ?" }
     ),
@@ -87,6 +87,7 @@ export const schema = object(
         {
           token: string(),
           templateName: string(),
+          // payload: object(),
           sendDates: arrayOf(date()),
           openDate: date(),
           messageIds: arrayOf(string()),
@@ -99,7 +100,7 @@ export const schema = object(
             })
           ),
         },
-        { required: ["token", "templateName", "sendDates"] }
+        { required: ["token", "templateName", "sendDates"], additionalProperties: true }
       )
     ),
     unsubscribe: boolean({ description: "unsubscribe email" }),

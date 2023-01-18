@@ -107,7 +107,7 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
                   <>
                     <Box>{entrepriseData.data.enseigne || entrepriseData.data.entreprise_raison_sociale}</Box>
                     <Box>
-                      {entrepriseData.data.numero_voie} {entrepriseData.data.nom_voie}
+                      {entrepriseData.data.numero_voie} {entrepriseData.data.type_voie} {entrepriseData.data.nom_voie}
                     </Box>
                     {entrepriseData.data.complement_adresse && <Box>{entrepriseData.data.complement_adresse}</Box>}
                     <Box>

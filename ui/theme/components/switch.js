@@ -6,8 +6,6 @@ const Switch = {
       borderRight: "1px",
       borderBottom: "1px",
       borderLeft: "1px",
-
-      // border: "1px",
       borderColor: "bluefrance",
       ml: "-3px",
       mt: "-3px",
@@ -33,7 +31,6 @@ const Switch = {
             height: "var(--slider-track-height)",
             content: '"✓"',
             position: "absolute",
-            mt: "-10px",
             ml: "-5px",
             fontSize: "0.8em",
           },

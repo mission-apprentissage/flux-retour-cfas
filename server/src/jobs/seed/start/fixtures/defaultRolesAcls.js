@@ -15,9 +15,9 @@ export default {
       "organisme/page_effectifs/televersement_document",
       "organisme/page_effectifs/supprimer_un_document",
 
-      "organisme/page_sifa2",
-      "organisme/page_sifa2/edition",
-      "organisme/page_sifa2/telecharger",
+      "organisme/page_sifa",
+      "organisme/page_sifa/edition",
+      "organisme/page_sifa/telecharger",
 
       "organisme/page_parametres",
       "organisme/page_parametres/gestion_acces",
@@ -41,9 +41,9 @@ export default {
       "organisme/page_effectifs/televersement_document",
       "organisme/page_effectifs/supprimer_un_document",
 
-      "organisme/page_sifa2",
-      "organisme/page_sifa2/edition",
-      "organisme/page_sifa2/telecharger",
+      "organisme/page_sifa",
+      "organisme/page_sifa/edition",
+      "organisme/page_sifa/telecharger",
     ],
   },
   "organisme.readonly": {
@@ -56,8 +56,8 @@ export default {
       "organisme/tableau_de_bord",
       "organisme/page_effectifs",
       "organisme/page_effectifs/telecharger",
-      "organisme/page_sifa2",
-      "organisme/page_sifa2/telecharger",
+      "organisme/page_sifa",
+      "organisme/page_sifa/telecharger",
     ],
   },
   "organisme.statsonly": {

@@ -8,7 +8,7 @@ import { EffectifsRupturantsFromDossiers } from "./effectifs-dossiers/rupturants
 
 /**
  * TODO : A Supprimer une fois passé sur le modèle effectifs
- * Gestion des effectifs depuis les dossiersApprenants
+ * Gestion des effectifs depuis les dossiersApprenantsMigration
  */
 export default () => {
   const apprentis = new EffectifsApprentisFromDossiers();

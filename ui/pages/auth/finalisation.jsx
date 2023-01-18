@@ -11,35 +11,92 @@ import {
   VStack,
   Radio,
   FormErrorMessage,
-  Checkbox,
   Center,
+  Grid,
+  Checkbox,
+  Spinner,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import { Page } from "../../components/Page/Page";
+import uniq from "lodash.uniq";
 
-import { decodeJwt } from "jose";
+import { Page } from "../../components/Page/Page";
 
 import useToken from "../../hooks/useToken";
 import useAuth from "../../hooks/useAuth";
-import { _post } from "../../common/httpClient";
+import { _get, _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import Link from "../../components/Links/Link";
 import Ribbons from "../../components/Ribbons/Ribbons";
 import { CONTACT_ADDRESS } from "../../common/constants/product";
-import { ACADEMIES } from "../../common/constants/territoiresConstants";
+import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../common/constants/territoiresConstants";
+import { Check } from "../../theme/components/icons";
+import { RESEAUX_CFAS } from "../../common/constants/networksConstants";
+import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 const ACADEMIES_SORTED = Object.values(ACADEMIES).sort((a, b) => Number(a.code) - Number(b.code));
+const REGIONS_SORTED = REGIONS.sort((a, b) => Number(a.code) - Number(b.code));
+const DEPARTEMENTS_SORTED = DEPARTEMENTS.sort((a, b) => Number(a.code) - Number(b.code));
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
+
+const MultipleCheckBox = ({ title, name, choices, onChange }) => {
+  const { values, handleChange } = useFormik({
+    initialValues: {
+      [name]: [],
+    },
+  });
+
+  const handleChanges = useCallback(
+    (e) => {
+      handleChange(e);
+      const {
+        target: { value },
+      } = e;
+      let newValues = values[name];
+      if (newValues.includes(value)) {
+        newValues.splice(newValues.indexOf(value), 1);
+      } else {
+        newValues = uniq([...newValues, value]);
+      }
+      onChange(newValues);
+    },
+    [handleChange, name, onChange, values]
+  );
+
+  return (
+    <FormControl py={2}>
+      <FormLabel>{title}</FormLabel>
+      <Center w="100%">
+        <Grid templateColumns="repeat(6, 1fr)" gap={2} border="1px solid" borderColor="bluefrance" p={2} w="100%">
+          {choices.map((choice, i) => {
+            return (
+              <Checkbox
+                key={i}
+                name={name}
+                onChange={handleChanges}
+                value={`${choice.value}`}
+                isChecked={values[name].includes(`${choice.value}`)}
+                icon={<Check />}
+              >
+                {choice.label}
+              </Checkbox>
+            );
+          })}
+        </Grid>
+      </Center>
+    </FormControl>
+  );
+};
 
 const Finalize = () => {
   const [auth, setAuth] = useAuth();
   const [, setToken] = useToken();
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const title = "Finalisation de votre inscription";
 
@@ -49,28 +106,44 @@ const Finalize = () => {
     errors,
     touched,
     values: valuesAccess,
+    setFieldValue,
+    setErrors,
   } = useFormik({
     initialValues: {
       type: "",
+      // codes_region: "",
+      // codes_academie: "",
+      // codes_departement: "",
     },
     validationSchema: Yup.object().shape({
       type: Yup.string()
-        .matches(/(organisme.admin|organisme.member|organisme.readonly)/)
+        .matches(/(organisme.admin|organisme.member|organisme.readonly|organisme.statsonly)/)
         .required("Requis"),
     }),
     onSubmit: (values) => {
+      setIsSubmitting(true);
       // eslint-disable-next-line no-undef, no-async-promise-executor
       return new Promise(async (resolve) => {
         try {
           const result = await _post("/api/v1/auth/demande-acces", values);
           if (result.loggedIn) {
-            const user = decodeJwt(result.token);
+            const user = await _get("/api/v1/session/current");
             setAuth(user);
             setToken(result.token);
           }
         } catch (e) {
-          console.error(e);
+          if (e.messages.message === "No organisme found") {
+            setErrors({
+              type: `Une erreur technique est survenue. Nous n'avons pas pu retrouver l'organisme. Merci de bien vouloir contacter l'équipe du tableau de bord ${CONTACT_ADDRESS}`,
+            });
+          } else {
+            console.error(e);
+            setErrors({
+              type: `Une erreur technique est survenue.`,
+            });
+          }
         }
+        setIsSubmitting(false);
         resolve("onSubmitHandler publish complete");
       });
     },
@@ -78,14 +151,13 @@ const Finalize = () => {
 
   const { handleSubmit } = useFormik({
     initialValues: {},
-
     onSubmit: (values) => {
       // eslint-disable-next-line no-undef, no-async-promise-executor
       return new Promise(async (resolve) => {
         try {
           const result = await _post("/api/v1/auth/finalize", values);
           if (result.loggedIn) {
-            const user = decodeJwt(result.token);
+            const user = await _get("/api/v1/session/current");
             setAuth(user);
             setToken(result.token);
             router.push("/mon-espace/mon-organisme");
@@ -131,7 +203,46 @@ const Finalize = () => {
                   </RadioGroup>
                   {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
                 </FormControl>
-                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6} isDisabled={isSubmitting}>
+                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
+                  Demander l&rsquo;accès
+                </Button>
+              </>
+            )}
+
+          {auth.isInPendingValidation &&
+            auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
+            auth.roles.includes("reseau_of") && (
+              <>
+                <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
+                  Quel est votre réseau ?
+                </Heading>
+                <Input
+                  {...{
+                    name: `reseau`,
+                    fieldType: "select",
+                    placeholder: "Séléctionner votre réseau",
+                    options: Object.values(RESEAUX_CFAS).map(({ nomReseau }) => ({
+                      label: `${nomReseau}`,
+                      value: nomReseau,
+                    })),
+                  }}
+                  value={valuesAccess.reseau}
+                  onSubmit={(value) => {
+                    setFieldValue("type", "organisme.statsonly");
+                    setFieldValue("reseau", value);
+                  }}
+                  w="100%"
+                />
+                <Button
+                  size="md"
+                  variant="primary"
+                  onClick={handleDemandeAcces}
+                  px={6}
+                  mt={8}
+                  isDisabled={isSubmitting}
+                >
+                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
                   Demander l&rsquo;accès
                 </Button>
               </>
@@ -140,28 +251,66 @@ const Finalize = () => {
             auth.account_status === "FORCE_COMPLETE_PROFILE_STEP1" &&
             auth.roles.includes("pilot") && (
               <>
-                <FormControl py={2}>
-                  <FormLabel>Académies</FormLabel>
-                  <Center border="1px solid">
-                    <HStack wrap="wrap" spacing={5}>
-                      {ACADEMIES_SORTED.map((academie, i) => {
-                        return (
-                          <Checkbox
-                            key={i}
-                            name="accessAcademieList"
-                            // onChange={handleChange}
-                            // value={num}
-                            // isChecked={values.accessAcademieList.includes(num)}
-                            mb={3}
-                          >
-                            {academie.nom} ({academie.code})
-                          </Checkbox>
-                        );
-                      })}
-                    </HStack>
-                  </Center>
-                </FormControl>
-                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                {auth.organisation === "DDETS" && (
+                  <>
+                    <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
+                      À quel(s) département(s) souhaitez-vous accéder?
+                    </Heading>
+                    <MultipleCheckBox
+                      title=""
+                      name="accessDepartementList"
+                      choices={DEPARTEMENTS_SORTED.map(({ nom, code }) => ({ label: `${nom} (${code})`, value: code }))}
+                      onChange={(selected) => {
+                        setFieldValue("type", "organisme.statsonly");
+                        setFieldValue("codes_departement", selected.join(","));
+                      }}
+                    />
+                  </>
+                )}
+                {(auth.organisation === "DREETS" ||
+                  auth.organisation === "DEETS" ||
+                  auth.organisation === "DRAAF" ||
+                  auth.organisation === "CONSEIL_REGIONAL") && (
+                  <>
+                    <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
+                      À quelle(s) région(s) souhaitez-vous accéder?
+                    </Heading>
+                    <MultipleCheckBox
+                      title=""
+                      name="accessRegionList"
+                      choices={REGIONS_SORTED.map(({ nom, code }) => ({ label: `${nom} (${code})`, value: code }))}
+                      onChange={(selected) => {
+                        setFieldValue("type", "organisme.statsonly");
+                        setFieldValue("codes_region", selected.join(","));
+                      }}
+                    />
+                  </>
+                )}
+                {auth.organisation === "ACADEMIE" && (
+                  <>
+                    <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
+                      À quelle(s) académie(s) souhaitez-vous accéder?
+                    </Heading>
+                    <MultipleCheckBox
+                      title=""
+                      name="accessAcademieList"
+                      choices={ACADEMIES_SORTED.map(({ nom, code }) => ({ label: `${nom} (${code})`, value: code }))}
+                      onChange={(selected) => {
+                        setFieldValue("type", "organisme.statsonly");
+                        setFieldValue("codes_academie", selected.join(","));
+                      }}
+                    />
+                  </>
+                )}
+                <Button
+                  size="md"
+                  variant="primary"
+                  onClick={handleDemandeAcces}
+                  px={6}
+                  mt={8}
+                  isDisabled={isSubmitting}
+                >
+                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
                   Demander l&rsquo;accès
                 </Button>
               </>
@@ -178,11 +327,9 @@ const Finalize = () => {
                   <Text color="bleufrance" mt={4} fontSize="0.9rem">
                     Vous serez notifié dès que votre demander aura été validée.
                   </Text>
-                  <Text color="grey.800" mt={4}>
-                    <Text textStyle="sm">
-                      Vous êtes la premieres personne a demander une accès à cet organisme. <br />
-                      Pour des raisons de sécurité, un de nos administrateurs va examiner votre demande. <br />
-                    </Text>
+                  <Text color="grey.800" mt={4} textStyle="sm">
+                    Vous êtes la premieres personne a demander une accès à cet organisme. <br />
+                    Pour des raisons de sécurité, un de nos administrateurs va examiner votre demande. <br />
                   </Text>
                 </Box>
               </Ribbons>

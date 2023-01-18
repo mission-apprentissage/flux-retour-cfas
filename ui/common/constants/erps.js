@@ -14,39 +14,49 @@ export const ERP_STATE_COLOR = {
 
 export const ERPS = [
   {
+    id: "GESTI",
     name: "Gesti",
     state: ERP_STATE.ready,
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/gesti.pdf",
+    helpFileSize: "352kb",
   },
   {
-    name: "Ymag",
+    id: "YMAG",
+    name: "Ypareo",
     state: ERP_STATE.ready,
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/ypareo.pdf",
+    helpFileSize: "1.7Mb",
   },
   {
+    id: "SCFORM",
     name: "SC Form",
     state: ERP_STATE.ready,
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/scform.pdf",
+    helpFileSize: "734Kb",
   },
   {
+    id: "FORMASUP",
     name: "Formasup",
     state: ERP_STATE.ready,
   },
   {
+    id: "FCAMANAGER",
     name: "FCA Manager",
     state: ERP_STATE.ready,
     helpFilePath: "https://files.tableau-de-bord.apprentissage.beta.gouv.fr/pas-a-pas/fcamanager.pdf",
+    helpFileSize: "288Kb",
   },
   {
+    id: "AURIGA",
     name: "Auriga",
     state: ERP_STATE.ready,
     helpFilePath: "https://wiki.auriga.fr/index.php?title=Connecteur_Tableau_de_bord_de_l%27apprentissage",
   },
-  { name: "CNAM (Gessic@)", state: ERP_STATE.coming },
-  { name: "Alcuin Software", state: ERP_STATE.coming },
-  { name: "Hyperplanning", state: ERP_STATE.coming },
-  { name: "Valsoftware", state: ERP_STATE.coming },
-  { name: "Agate", state: ERP_STATE.coming },
+  { id: "CNAM", name: "CNAM (Gessic@)", state: ERP_STATE.coming },
+  { id: "ALCUINSOFTWARE", name: "Alcuin Software", state: ERP_STATE.coming },
+  { id: "HYPERPLANNING", name: "Hyperplanning", state: ERP_STATE.coming },
+  { id: "VALSOFTWARE", name: "Valsoftware", state: ERP_STATE.coming },
+  { id: "AGATE", name: "Agate", state: ERP_STATE.coming },
 ];
 
 export const ERPS_FORM_CASES = [

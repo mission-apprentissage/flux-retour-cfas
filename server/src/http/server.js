@@ -14,18 +14,21 @@ import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMi
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
-import indicateursExportRouter from "./routes/specific.routes/old/indicateurs-export.route.js";
+import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes.js";
 import effectifsApprenantsRouter from "./routes/specific.routes/old/effectifs-apprenants.route.js";
-import dossierApprenantRouter from "./routes/specific.routes/old/dossiers-apprenants.route.js";
+import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.route.js";
 import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
-import indicateursNationalRouter from "./routes/specific.routes/old/indicateurs-national.route.js";
+import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursNationalDossiersRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.route.js";
-import indicateursRouter from "./routes/specific.routes/old/indicateurs.route.js";
+import indicateursNationalDossiersOldRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.old.route.js";
+
+import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
 import indicateursDossiersRouter from "./routes/specific.routes/old/indicateurs.dossiers.route.js";
+import indicateursDossiersOldRouter from "./routes/specific.routes/old/indicateurs.dossiers.old.route.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -69,7 +72,7 @@ export default async (services) => {
   app.use("/api/v1/session", checkJwtToken, session());
   app.use("/api/v1/profile", checkJwtToken, profile());
   app.use("/api/v1/espace", checkJwtToken, espace());
-  app.use("/api/v1/organisme", checkJwtToken, organisme());
+  app.use("/api/v1/organisme", checkJwtToken, organisme(services));
   app.use("/api/v1/effectif", checkJwtToken, effectif());
   app.use("/api/v1/upload", checkJwtToken, upload(services));
 
@@ -93,37 +96,17 @@ export default async (services) => {
     maintenancesAdmin()
   );
 
-  app.get(
-    "/api/cache",
-    checkJwtToken,
-    pageAccessMiddleware(["_ADMIN"]), // TODO [tech]
-    tryCatch(async (req, res) => {
-      await services.cache.flushAll();
-      return res.json({});
-    })
-  );
-
-  // TODO TDB OLD PREVIOUS [tech]
-  //// TODO
-  app.use("/api/formations", formationRouter(services)); // FRONT
-  app.use("/api/cfas", cfasRouter(services)); // FRONT
-  app.use("/api/referentiel", referentielRouter(services)); // FRONT
-  app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
-  app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
+  // Routes de calcul & export des indicateurs
   app.use(
     // FRONT
     ["/api/indicateurs"],
     checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    // TODO Réactiver le middleware modifié ou en créer un spécifique ?
+    // permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
     indicateursRouter(services)
   );
-  app.use(
-    // FRONT
-    ["/api/indicateurs-dossiers"],
-    checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    indicateursDossiersRouter(services)
-  );
+
+  app.use("/api/indicateurs-national", indicateursNationalRouter(services)); // FRONT
 
   app.use(
     // FRONT
@@ -133,9 +116,8 @@ export default async (services) => {
     indicateursExportRouter(services)
   );
 
-  // ROUTES BACK TO KEEEP !
+  // Route dédiée à RCO
   app.use(
-    // BACK RCO
     "/api/effectifs-apprenants",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
@@ -143,24 +125,55 @@ export default async (services) => {
   );
   app.use("/api/healthcheck", healthcheckRouter(services));
 
-  app.use("/api/login", loginRouter(services)); // BACK
-  // ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
+  // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
+  app.use("/api/login", loginRouter(services));
 
-  // requires JWT auth
+  // @deprecated to /dossiers-apprenants
+  app.use(
+    ["/api/statut-candidats", "/api/dossiers-apprenants"],
+    requireJwtAuthentication,
+    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
+    dossierApprenantRouter(services)
+  );
+
+  // TODO : Routes à conserver temporairement le temps de la recette indicateurs via effectifs
+  app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
+  app.use(
+    // FRONT
+    ["/api/indicateurs-dossiers"],
+    checkJwtToken,
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    indicateursDossiersRouter(services)
+  );
+  app.use("/api/indicateurs-national-dossiers-old", indicateursNationalDossiersOldRouter(services)); // FRONT
+  app.use(
+    // FRONT
+    ["/api/indicateurs-dossiers-old"],
+    checkJwtToken,
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    indicateursDossiersOldRouter(services)
+  );
+
+  // TODO : Route à corriger / transformer pour le filtre par formations
+  app.use("/api/formations", formationRouter(services)); // FRONT
+
+  // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
+  app.use("/api/cfas", cfasRouter(services)); // FRONT
+  app.use("/api/referentiel", referentielRouter(services)); // FRONT
   app.use(
     "/api/liens-prives-cfas",
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     lienPriveCfaRouter(services)
   );
-
-  // @deprecated to /dossiers-apprenants
-  app.use(
-    // BACK !important
-    ["/api/statut-candidats", "/api/dossiers-apprenants"],
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    dossierApprenantRouter(services)
+  app.get(
+    "/api/cache",
+    checkJwtToken,
+    pageAccessMiddleware(["_ADMIN"]),
+    tryCatch(async (req, res) => {
+      await services.cache.flushAll();
+      return res.json({});
+    })
   );
 
   app.use(errorMiddleware());

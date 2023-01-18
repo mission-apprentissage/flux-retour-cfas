@@ -8,23 +8,40 @@ import { useEspace } from "../../../hooks/useEspace";
 import { hasContextAccessTo, hasPageAccessTo } from "../../../common/utils/rolesUtils";
 import { useOrganisme } from "../../../hooks/useOrganisme";
 
-const NavItem = ({ children, to = "/", colorActive = "bluefrance", isActive = false, ...rest }) => {
+const NavItem = ({
+  children,
+  to = "/",
+  colorActive = "bluefrance",
+  isActive = false,
+  isDisabled = false,
+  colorDisabled = "dgalt",
+  ...rest
+}) => {
   const router = useRouter();
   const isActiveInternal = isActive || router.pathname === to || router.asPath === to;
 
+  const hasState = isActiveInternal || isDisabled;
+  const colorCurrentState = isActiveInternal ? colorActive : isDisabled ? colorDisabled : "";
+
+  const Component = isDisabled ? Box : Link;
+
   return (
-    <Link
+    <Component
       p={4}
       href={to}
-      color={isActiveInternal ? colorActive : "grey.800"}
-      _hover={{ textDecoration: "none", color: "grey.800", bg: "grey.200" }}
+      color={hasState ? colorCurrentState : "grey.800"}
       borderBottom="3px solid"
-      borderColor={isActiveInternal ? colorActive : "transparent"}
+      borderColor={isActiveInternal ? colorCurrentState : "transparent"}
       bg={"transparent"}
+      {...{
+        ...(isDisabled
+          ? { cursor: "not-allowed" }
+          : { _hover: { textDecoration: "none", color: "grey.800", bg: "grey.200" } }),
+      }}
       {...rest}
     >
       <Text display="block">{children}</Text>
-    </Link>
+    </Component>
   );
 };
 
@@ -69,7 +86,6 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
     isEffectifsPage,
     isTeleversementPage,
   } = useEspace();
-
   return (
     <NavContainer isOpen={isOpen}>
       <Box p={4} bg={"transparent"}>
@@ -91,8 +107,10 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
           {userNavigation.effectifs.navTitle}
         </NavItem>
       )}
-      {hasContextAccessTo(myOrganisme, "organisme/page_sifa2") && userNavigation.sifa2 && (
-        <NavItem to={userNavigation.sifa2.path}>{userNavigation.sifa2.navTitle}</NavItem>
+      {hasContextAccessTo(myOrganisme, "organisme/page_sifa") && userNavigation.sifa2 && (
+        <NavItem to={userNavigation.sifa2.path} isDisabled={!myOrganisme.first_transmission_date}>
+          {userNavigation.sifa2.navTitle}
+        </NavItem>
       )}
 
       {hasContextAccessTo(myOrganisme, "organisme/page_parametres") && userNavigation.parametres && (
@@ -140,8 +158,12 @@ const NavBarOrganisme = ({ isOpen }) => {
           {organismeNavigation.effectifs.navTitle}
         </NavItem>
       )}
-      {hasContextAccessTo(organisme, "organisme/page_sifa2") && (
-        <NavItem to={organismeNavigation.sifa2.path} colorActive="dsfr_lightprimary.bluefrance_850">
+      {hasContextAccessTo(organisme, "organisme/page_sifa") && (
+        <NavItem
+          to={organismeNavigation.sifa2.path}
+          colorActive="dsfr_lightprimary.bluefrance_850"
+          isDisabled={!organisme.first_transmission_date}
+        >
           {organismeNavigation.sifa2.navTitle}
         </NavItem>
       )}

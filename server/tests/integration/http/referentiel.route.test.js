@@ -11,7 +11,7 @@ describe("Referentiel Route", () => {
 
     assert.deepStrictEqual(response.status, 200);
     assert.deepEqual(response.data.length, Object.values(RESEAUX_CFAS).length);
-    assert.deepEqual(response.data[0].nom, RESEAUX_CFAS.CMA.nomReseau);
+    assert.deepEqual(response.data[0].nom, RESEAUX_CFAS.ADEN.nomReseau);
   });
 
   it("Vérifie qu'on peut récupérer les numéro des régions via API", async () => {

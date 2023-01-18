@@ -1,15 +1,15 @@
 import express from "express";
 import { Parser } from "json2csv";
 import Joi from "joi";
-import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
-import { getAnneesScolaireListFromDate } from "../../../../common/utils/anneeScolaireUtils.js";
+import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
 import {
   getExportAnonymizedEventNameFromFilters,
   USER_EVENTS_TYPES,
-} from "../../../../common/constants/userEventsConstants.js";
-import { createUserEvent } from "../../../../common/actions/userEvents.actions.js";
+} from "../../../common/constants/userEventsConstants.js";
+import { createUserEvent } from "../../../common/actions/userEvents.actions.js";
 import { ObjectId } from "mongodb";
-import { findOrganismeById } from "../../../../common/actions/organismes/organismes.actions.js";
+import { findOrganismeById } from "../../../common/actions/organismes/organismes.actions.js";
 
 const commonEffectifsFilters = {
   organisme_id: Joi.string().required(),
