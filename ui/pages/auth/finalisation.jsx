@@ -14,10 +14,11 @@ import {
   Center,
   Grid,
   Checkbox,
+  Spinner,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import uniq from "lodash.uniq";
@@ -95,6 +96,7 @@ const Finalize = () => {
   const [auth, setAuth] = useAuth();
   const [, setToken] = useToken();
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const title = "Finalisation de votre inscription";
 
@@ -118,6 +120,7 @@ const Finalize = () => {
         .required("Requis"),
     }),
     onSubmit: (values) => {
+      setIsSubmitting(true);
       // eslint-disable-next-line no-undef, no-async-promise-executor
       return new Promise(async (resolve) => {
         try {
@@ -130,6 +133,7 @@ const Finalize = () => {
         } catch (e) {
           console.error(e);
         }
+        setIsSubmitting(false);
         resolve("onSubmitHandler publish complete");
       });
     },
@@ -189,7 +193,8 @@ const Finalize = () => {
                   </RadioGroup>
                   {errors.type && touched.type && <FormErrorMessage>{errors.type}</FormErrorMessage>}
                 </FormControl>
-                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6}>
+                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6} isDisabled={isSubmitting}>
+                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
                   Demander l&rsquo;accès
                 </Button>
               </>
@@ -219,7 +224,15 @@ const Finalize = () => {
                   }}
                   w="100%"
                 />
-                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6} mt={8}>
+                <Button
+                  size="md"
+                  variant="primary"
+                  onClick={handleDemandeAcces}
+                  px={6}
+                  mt={8}
+                  isDisabled={isSubmitting}
+                >
+                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
                   Demander l&rsquo;accès
                 </Button>
               </>
@@ -279,7 +292,15 @@ const Finalize = () => {
                     />
                   </>
                 )}
-                <Button size="md" variant="primary" onClick={handleDemandeAcces} px={6} mt={8}>
+                <Button
+                  size="md"
+                  variant="primary"
+                  onClick={handleDemandeAcces}
+                  px={6}
+                  mt={8}
+                  isDisabled={isSubmitting}
+                >
+                  {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
                   Demander l&rsquo;accès
                 </Button>
               </>

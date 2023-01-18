@@ -26,6 +26,7 @@ import { siretSchema } from "../../../common/utils/validationUtils.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
 import logger from "../../../common/logger.js";
 import { ORGANISMES_APPARTENANCE } from "../../../common/constants/usersConstants.js";
+import { uniq } from "lodash-es";
 
 const checkActivationToken = () => {
   passport.use(
@@ -265,7 +266,7 @@ export default ({ mailer }) => {
         throw Boom.badRequest("Something went wrong");
       }
 
-      let codes_region = wantedRegions?.split(",") ?? null;
+      let codes_region = uniq(wantedRegions?.split(",")) ?? null;
       let codes_academie = wantedAcademnie?.split(",") ?? null;
       let codes_departement = wantedDepartements?.split(",") ?? null;
 
