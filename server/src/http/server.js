@@ -24,8 +24,11 @@ import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursNationalDossiersRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.route.js";
+import indicateursNationalDossiersOldRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.old.route.js";
+
 import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
 import indicateursDossiersRouter from "./routes/specific.routes/old/indicateurs.dossiers.route.js";
+import indicateursDossiersOldRouter from "./routes/specific.routes/old/indicateurs.dossiers.old.route.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -141,6 +144,14 @@ export default async (services) => {
     checkJwtToken,
     permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
     indicateursDossiersRouter(services)
+  );
+  app.use("/api/indicateurs-national-dossiers-old", indicateursNationalDossiersOldRouter(services)); // FRONT
+  app.use(
+    // FRONT
+    ["/api/indicateurs-dossiers-old"],
+    checkJwtToken,
+    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
+    indicateursDossiersOldRouter(services)
   );
 
   // TODO : Route à corriger / transformer pour le filtre par formations

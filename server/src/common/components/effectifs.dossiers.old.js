@@ -1,20 +1,21 @@
 import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
 import { asyncForEach } from "../utils/asyncUtils.js";
 import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
-import { EffectifsApprentisFromDossiers } from "./effectifs-dossiers/apprentis.dossiers.js";
-import { EffectifsAbandonsFromDossiers } from "./effectifs-dossiers/abandons.dossiers.js";
-import { EffectifsInscritsSansContratsFromDossiers } from "./effectifs-dossiers/inscrits-sans-contrats.dossiers.js";
-import { EffectifsRupturantsFromDossiers } from "./effectifs-dossiers/rupturants.dossiers.js";
+import { EffectifsApprentisFromDossiersOld } from "./effectifs-dossiers-old/apprentis.dossiers.js";
+import { EffectifsAbandonsFromDossiersOld } from "./effectifs-dossiers-old/abandons.dossiers.js";
+import { EffectifsInscritsSansContratsFromDossiersOld } from "./effectifs-dossiers-old/inscrits-sans-contrats.dossiers.js";
+import { EffectifsRupturantsFromDossiersOld } from "./effectifs-dossiers-old/rupturants.dossiers.js";
 
 /**
  * TODO : A Supprimer une fois passé sur le modèle effectifs
- * Gestion des effectifs depuis les dossiersApprenantsMigration
+ * Permets de faire la comparaison avant migration
+ * Gestion des effectifs depuis les dossiersApprenants
  */
 export default () => {
-  const apprentis = new EffectifsApprentisFromDossiers();
-  const abandons = new EffectifsAbandonsFromDossiers();
-  const inscritsSansContrats = new EffectifsInscritsSansContratsFromDossiers();
-  const rupturants = new EffectifsRupturantsFromDossiers();
+  const apprentis = new EffectifsApprentisFromDossiersOld();
+  const abandons = new EffectifsAbandonsFromDossiersOld();
+  const inscritsSansContrats = new EffectifsInscritsSansContratsFromDossiersOld();
+  const rupturants = new EffectifsRupturantsFromDossiersOld();
 
   /**
    * Récupération des effectifs pour tous les indicateurs du TdB
@@ -23,7 +24,7 @@ export default () => {
    * @param {*} param2
    * @returns
    */
-  const getEffectifsCountAtDateFromDossiers = async (searchDate, filters = {}, { groupedBy, projection }) => {
+  const getEffectifsCountAtDateFromDossiersOld = async (searchDate, filters = {}, { groupedBy, projection }) => {
     // compute number of apprentis, abandons, inscrits sans contrat and rupturants
     const apprentisCountByCfa = await apprentis.getCountAtDate(searchDate, filters, {
       groupedBy: { ...groupedBy, apprentis: { $sum: 1 } },
@@ -64,11 +65,11 @@ export default () => {
    *  }
    * }]
    */
-  const getEffectifsCountByNiveauFormationAtDateFromDossiers = async (searchDate, filters = {}) => {
+  const getEffectifsCountByNiveauFormationAtDateFromDossiersOld = async (searchDate, filters = {}) => {
     const projection = { niveau_formation: 1, niveau_formation_libelle: 1 };
     const groupedBy = { _id: "$niveau_formation", niveau_libelle: { $first: "$niveau_formation_libelle" } };
     // compute number of apprentis, abandons, inscrits sans contrat and rupturants
-    const effectifsByNiveauFormation = await getEffectifsCountAtDateFromDossiers(
+    const effectifsByNiveauFormation = await getEffectifsCountAtDateFromDossiersOld(
       searchDate,
       // compute effectifs with a niveau_formation
       { ...filters, niveau_formation: { $ne: null } },
@@ -104,14 +105,14 @@ export default () => {
    *  }
    * }]
    */
-  const getEffectifsCountByFormationAtDateFromDossiers = async (searchDate, filters = {}) => {
+  const getEffectifsCountByFormationAtDateFromDossiersOld = async (searchDate, filters = {}) => {
     const projection = { formation_cfd: 1, libelle_long_formation: 1 };
     const groupedBy = {
       _id: "$formation_cfd",
       // we will send libelle_long_formation along with the grouped effectifs so we need to project it
       libelle_long_formation: { $first: "$libelle_long_formation" },
     };
-    const effectifsByFormation = await getEffectifsCountAtDateFromDossiers(searchDate, filters, {
+    const effectifsByFormation = await getEffectifsCountAtDateFromDossiersOld(searchDate, filters, {
       groupedBy,
       projection,
     });
@@ -146,7 +147,7 @@ export default () => {
    *  }
    * }]
    */
-  const getEffectifsCountByFormationAndDepartementAtDateFromDossiers = async (searchDate, filters = {}) => {
+  const getEffectifsCountByFormationAndDepartementAtDateFromDossiersOld = async (searchDate, filters = {}) => {
     const projection = {
       formation_cfd: 1,
       etablissement_num_departement: 1,
@@ -157,7 +158,7 @@ export default () => {
       // we will send libelle_long_formation along with the grouped effectifs so we need to project it
       libelle_long_formation: { $first: "$libelle_long_formation" },
     };
-    const effectifsByFormationAndDepartement = await getEffectifsCountAtDateFromDossiers(searchDate, filters, {
+    const effectifsByFormationAndDepartement = await getEffectifsCountAtDateFromDossiersOld(searchDate, filters, {
       groupedBy,
       projection,
     });
@@ -191,10 +192,10 @@ export default () => {
    *  }
    * }]
    */
-  const getEffectifsCountByAnneeFormationAtDateFromDossiers = async (searchDate, filters = {}) => {
+  const getEffectifsCountByAnneeFormationAtDateFromDossiersOld = async (searchDate, filters = {}) => {
     const projection = { annee_formation: 1 };
     const groupedBy = { _id: "$annee_formation" };
-    const effectifsByAnneeFormation = await getEffectifsCountAtDateFromDossiers(searchDate, filters, {
+    const effectifsByAnneeFormation = await getEffectifsCountAtDateFromDossiersOld(searchDate, filters, {
       groupedBy,
       projection,
     });
@@ -227,7 +228,7 @@ export default () => {
    *  }
    * }]
    */
-  const getEffectifsCountByCfaAtDateFromDossiers = async (searchDate, filters = {}) => {
+  const getEffectifsCountByCfaAtDateFromDossiersOld = async (searchDate, filters = {}) => {
     // we need to project these fields to give information about the CFAs
     const projection = {
       uai_etablissement: 1,
@@ -240,7 +241,7 @@ export default () => {
       nom_etablissement: { $first: "$nom_etablissement" },
       siret_etablissement: { $addToSet: "$siret_etablissement" },
     };
-    const effectifsCountByCfa = await getEffectifsCountAtDateFromDossiers(searchDate, filters, {
+    const effectifsCountByCfa = await getEffectifsCountAtDateFromDossiersOld(searchDate, filters, {
       groupedBy,
       projection,
     });
@@ -282,7 +283,7 @@ export default () => {
    *  }
    * }]
    */
-  const getEffectifsCountBySiretAtDateFromDossiers = async (searchDate, filters = {}) => {
+  const getEffectifsCountBySiretAtDateFromDossiersOld = async (searchDate, filters = {}) => {
     // we need to project these fields to give information about the CFAs
     const projection = {
       siret_etablissement: 1,
@@ -293,7 +294,7 @@ export default () => {
       // we will send information about the organisme along with the grouped effectifs so we project it
       nom_etablissement: { $first: "$nom_etablissement" },
     };
-    const effectifsCountByCfa = await getEffectifsCountAtDateFromDossiers(
+    const effectifsCountByCfa = await getEffectifsCountAtDateFromDossiersOld(
       searchDate,
       // compute effectifs with a siret_etablissement
       { ...filters, siret_etablissement: { $ne: null } },
@@ -330,7 +331,7 @@ export default () => {
    *  }
    * }]
    */
-  const getEffectifsCountByDepartementAtDateFromDossiers = async (searchDate, filters = {}) => {
+  const getEffectifsCountByDepartementAtDateFromDossiersOld = async (searchDate, filters = {}) => {
     // we need to project these fields to give information about the departement
     const projection = {
       etablissement_nom_departement: 1,
@@ -340,7 +341,7 @@ export default () => {
       _id: "$etablissement_num_departement",
       etablissement_nom_departement: { $first: "$etablissement_nom_departement" },
     };
-    const effectifsCountByDepartement = await getEffectifsCountAtDateFromDossiers(searchDate, filters, {
+    const effectifsCountByDepartement = await getEffectifsCountAtDateFromDossiersOld(searchDate, filters, {
       groupedBy,
       projection,
     });
@@ -366,7 +367,7 @@ export default () => {
    * @param {*} filters
    * @returns
    */
-  const getDataListEffectifsAtDateFromDossiers = async (searchDate, filters = {}, namedDataMode = false) => {
+  const getDataListEffectifsAtDateFromDossiersOld = async (searchDate, filters = {}, namedDataMode = false) => {
     const apprentisAnonymous = await apprentis.getFullExportFormattedListAtDate(
       searchDate,
       filters,
@@ -400,13 +401,13 @@ export default () => {
     abandons,
     inscritsSansContrats,
     rupturants,
-    getEffectifsCountByCfaAtDateFromDossiers,
-    getEffectifsCountByNiveauFormationAtDateFromDossiers,
-    getEffectifsCountByFormationAtDateFromDossiers,
-    getEffectifsCountByAnneeFormationAtDateFromDossiers,
-    getEffectifsCountByDepartementAtDateFromDossiers,
-    getEffectifsCountByFormationAndDepartementAtDateFromDossiers,
-    getEffectifsCountBySiretAtDateFromDossiers,
-    getDataListEffectifsAtDateFromDossiers,
+    getEffectifsCountByCfaAtDateFromDossiersOld,
+    getEffectifsCountByNiveauFormationAtDateFromDossiersOld,
+    getEffectifsCountByFormationAtDateFromDossiersOld,
+    getEffectifsCountByAnneeFormationAtDateFromDossiersOld,
+    getEffectifsCountByDepartementAtDateFromDossiersOld,
+    getEffectifsCountByFormationAndDepartementAtDateFromDossiersOld,
+    getEffectifsCountBySiretAtDateFromDossiersOld,
+    getDataListEffectifsAtDateFromDossiersOld,
   };
 };
