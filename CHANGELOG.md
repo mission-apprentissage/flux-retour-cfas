@@ -1,3 +1,10 @@
+# [3.2.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.5...v3.2.0-beta.6) (2023-01-18)
+
+
+### Bug Fixes
+
+* **server:** create fiabilisation mapping using referentiel api ([#2406](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2406)) ([fa64c30](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fa64c30ff307e248e41d329dcc9ba13b572b82df))
+
 # [3.2.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.4...v3.2.0-beta.5) (2023-01-18)
 
 
