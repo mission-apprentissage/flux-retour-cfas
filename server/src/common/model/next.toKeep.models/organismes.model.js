@@ -2,7 +2,6 @@ import Joi from "joi";
 import { object, objectId, string, date, arrayOf, boolean, integer } from "../json-schema/jsonSchemaTypes.js";
 import { adresseSchema } from "../json-schema/adresseSchema.js";
 import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
-import { ERPS } from "../../constants/erpsConstants.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../utils/validationsUtils/organisme-de-formation/nature.js";
 import { schemaValidation } from "../../utils/schemaUtils.js";
 import { siretSchema, uaiSchema } from "../../utils/validationUtils.js";
@@ -35,9 +34,14 @@ export const schema = object(
     }),
     siret: string({ description: "N° SIRET fiabilisé", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
     reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS) }), { description: "Réseaux du CFA, s'ils existent" }),
-    erps: arrayOf(string({ enum: Object.keys(ERPS) }), {
-      description: "ERPs rattachés au CFA, s'ils existent",
-    }),
+    erps: arrayOf(
+      string(),
+      // TODO because legacy
+      // { enum: Object.values(ERPS).map(({ nomErp }) => nomErp) }
+      {
+        description: "ERPs rattachés au CFA, s'ils existent",
+      }
+    ),
 
     nature: string({
       description: "Nature de l'organisme de formation",
