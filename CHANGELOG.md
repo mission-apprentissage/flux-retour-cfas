@@ -1,3 +1,10 @@
+# [3.2.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.4...v3.2.0-beta.5) (2023-01-18)
+
+
+### Features
+
+* un organisme peut configurer l'ERP utilisé ([#2402](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2402)) ([c167e05](https://github.com/mission-apprentissage/flux-retour-cfas/commit/c167e0516ebbfe42b1fe8962ee6aed672b97bb9a))
+
 # [3.2.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0-beta.3...v3.2.0-beta.4) (2023-01-17)
 
 
