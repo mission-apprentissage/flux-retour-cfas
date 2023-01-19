@@ -176,18 +176,24 @@ const Televersements = () => {
 
       // TODO check if exist in current mapping
 
-      let reqKeys = [typeCodeDiplome, "nom", "prenom"];
+      // TODO DO REFACTO RUSH LAST MINUTE
+      let reqKeys = Object.values(remap).splice(0, Object.keys(response.requireKeys).length);
+      reqKeys.shift();
+      reqKeys.shift();
+      reqKeys.shift();
+      reqKeys = [typeCodeDiplome, ...reqKeys];
 
       setTypeCodeDiplome(typeCodeDiplome);
       setRequireKeysSettled(reqKeys);
       let error = false;
       for (const value of reqKeys) {
-        try {
-          const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
-          keyToLock.locked = true;
-        } catch (err) {
-          error = true;
-        }
+        if (value !== "RNCP" && value !== "CFD")
+          try {
+            const keyToLock = currentAvailableKeys.in.find((nAK) => nAK.value === value);
+            keyToLock.locked = true;
+          } catch (err) {
+            error = true;
+          }
       }
 
       if (error) {
