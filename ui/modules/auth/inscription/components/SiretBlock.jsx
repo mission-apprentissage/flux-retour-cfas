@@ -1,7 +1,19 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Box, FormControl, FormErrorMessage, FormLabel, Input, Spinner, Center } from "@chakra-ui/react";
+import {
+  Box,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
+  Input,
+  Spinner,
+  Center,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+
 import { _post } from "../../../../common/httpClient";
 
 const validate = async (validationSchema, obj) => {
@@ -72,7 +84,8 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
   return (
     <>
       <FormControl mt={4} py={2} isRequired isInvalid={errors.siret && touched.siret}>
-        <FormLabel>Votre Siret</FormLabel>
+        <FormLabel>SIRET de votre organisme</FormLabel>
+        <FormHelperText mb={2}>Un SIRET au format valide est composé de 14 chiffres</FormHelperText>
         <Input
           id="siret"
           name="siret"
@@ -83,57 +96,59 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
         />
         {errors.siret && touched.siret && <FormErrorMessage>{errors.siret}</FormErrorMessage>}
       </FormControl>
-      <Center
-        borderWidth="2px"
-        borderStyle="dashed"
-        borderColor={entrepriseData ? (entrepriseData.successed ? "green.500" : "error") : "grey.400"}
-        rounded="md"
-        minH="50"
-        flexDirection="column"
-        p={4}
-      >
-        {isFetching && <Spinner />}
-        {!isFetching && entrepriseData && (
-          <>
-            {entrepriseData.data && (
-              <>
-                {organismeFormation && entrepriseData.data.uai && (
-                  <Box mb={5} fontWeight="bold">
-                    Votre UAI: {entrepriseData.data.uai}
-                  </Box>
-                )}
-                <Box fontWeight="bold">Votre adresse:</Box>
-                {!entrepriseData.data.secretSiret && (
-                  <>
-                    <Box>{entrepriseData.data.enseigne || entrepriseData.data.entreprise_raison_sociale}</Box>
-                    <Box>
-                      {entrepriseData.data.numero_voie} {entrepriseData.data.type_voie} {entrepriseData.data.nom_voie}
-                    </Box>
-                    {entrepriseData.data.complement_adresse && <Box>{entrepriseData.data.complement_adresse}</Box>}
-                    <Box>
-                      {entrepriseData.data.code_postal} {entrepriseData.data.localite}
-                    </Box>
-                  </>
-                )}
-                {entrepriseData.data.secretSiret && (
-                  <>
-                    <Box>Votre siret est valide.</Box>
-                    <Box>
-                      En revanche, en raison de sa nature, nous ne pourrons pas récupérer les informations reliées.
-                      (telles que l&apos;adresse et autres données)
-                    </Box>
-                  </>
-                )}
-              </>
-            )}
-            {entrepriseData.message && (
-              <Box color="error" my={2}>
-                {entrepriseData.message}
-              </Box>
-            )}
-          </>
-        )}
-      </Center>
+      {values.siret && (
+        <Center
+          borderWidth="2px"
+          borderStyle="dashed"
+          borderColor={entrepriseData ? (entrepriseData.successed ? "green.500" : "error") : "grey.400"}
+          rounded="md"
+          minH="50"
+          flexDirection="column"
+          p={4}
+        >
+          {isFetching && <Spinner />}
+          {!isFetching && entrepriseData && (
+            <>
+              {entrepriseData.data && (
+                <VStack alignItems={"baseline"} spacing={1}>
+                  {organismeFormation && entrepriseData.data.uai && (
+                    <Text mb={5}>
+                      <b>Votre UAI :</b> {entrepriseData.data.uai}
+                    </Text>
+                  )}
+                  <Text fontWeight="bold">Votre adresse :</Text>
+                  {!entrepriseData.data.secretSiret && (
+                    <>
+                      <Text>{entrepriseData.data.enseigne || entrepriseData.data.entreprise_raison_sociale}</Text>
+                      <Text>
+                        {entrepriseData.data.numero_voie} {entrepriseData.data.type_voie} {entrepriseData.data.nom_voie}
+                      </Text>
+                      {entrepriseData.data.complement_adresse && <Text>{entrepriseData.data.complement_adresse}</Text>}
+                      <Text>
+                        {entrepriseData.data.code_postal} {entrepriseData.data.localite}
+                      </Text>
+                    </>
+                  )}
+                  {entrepriseData.data.secretSiret && (
+                    <>
+                      <Text>Votre siret est valide.</Text>
+                      <Text>
+                        En revanche, en raison de sa nature, nous ne pourrons pas récupérer les informations reliées.
+                        (telles que l&apos;adresse et autres données)
+                      </Text>
+                    </>
+                  )}
+                </VStack>
+              )}
+              {entrepriseData.message && (
+                <Box color="error" my={2}>
+                  {entrepriseData.message}
+                </Box>
+              )}
+            </>
+          )}
+        </Center>
+      )}
     </>
   );
 };

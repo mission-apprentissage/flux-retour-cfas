@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Center, Spinner } from "@chakra-ui/react";
+import { Box, Center, Flex, Link, Spinner, Text } from "@chakra-ui/react";
 import Effectifs from "./engine/Effectifs.jsx";
 
 import { organismeAtom } from "../../../hooks/organismeAtoms";
@@ -11,6 +11,11 @@ import TransmissionAPI from "./TransmissionAPI";
 import { useRouter } from "next/router";
 import Televersements from "./Televersements";
 import { effectifsStateAtom } from "./engine/atoms.js";
+import { hasContextAccessTo } from "../../../common/utils/rolesUtils.js";
+import useAuth from "../../../hooks/useAuth.js";
+import Ribbons from "../../../components/Ribbons/Ribbons.jsx";
+import { useEspace } from "../../../hooks/useEspace.js";
+import { CONTACT_ADDRESS } from "../../../common/constants/product.js";
 
 function useOrganismesEffectifs() {
   const organisme = useRecoilValue(organismeAtom);
@@ -50,8 +55,9 @@ function useOrganismesEffectifs() {
 
 const EffectifsPage = () => {
   const router = useRouter();
+  let [auth] = useAuth();
   const { slug } = router.query;
-
+  const { isMonOrganismePages, isOrganismePages } = useEspace();
   const organisme = useRecoilValue(organismeAtom);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs();
   const televersementPage = slug.includes("televersement");
@@ -68,14 +74,44 @@ const EffectifsPage = () => {
     (organisme.mode_de_transmission === "API" && organisme.first_transmission_date) ||
     organisme.mode_de_transmission === "MANUEL";
 
+  const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
+
   return (
     <>
-      {!organisme.mode_de_transmission && <ChoixTransmission />}
-      {organisme.mode_de_transmission === "API" &&
-        organisme.erps?.length === 0 &&
-        !organisme.first_transmission_date && <TransmissionAPI />}
-      {displayEffectifs && televersementPage && <Televersements />}
-      {displayEffectifs && !televersementPage && <Effectifs organismesEffectifs={organismesEffectifs} />}
+      {!canEdit && !auth.hasAtLeastOneUserToValidate && (
+        <Box mt={12}>
+          <Ribbons variant="warning" mt="0.5rem">
+            <Box ml={3}>
+              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+                {isMonOrganismePages && `Vous ne nous transmettez pas encore vos effectifs.`}
+                {isOrganismePages && ` Cet organisme ne nous transmet pas encore ses effectifs.`}
+              </Text>
+              <Text color="grey.800" fontSize="0.9rem">
+                Veuillez vous rapprocher d&rsquo;un collaborateur qui aurait des droits de gestion ou d&rsquo;écriture
+                dans {isMonOrganismePages ? "votre " : "cet "} organisme
+              </Text>
+            </Box>
+          </Ribbons>
+          <Flex flexGrow={1} alignItems="end" mt={2}>
+            <Text mt={8} fontSize="1rem">
+              Vous rencontrez des difficultés à passer cette étape ?{" "}
+              <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" ml={3}>
+                Contacter l&apos;assistance
+              </Link>
+            </Text>
+          </Flex>
+        </Box>
+      )}
+      {auth.hasAtLeastOneUserToValidate && (
+        <>
+          {!organisme.mode_de_transmission && <ChoixTransmission />}
+          {organisme.mode_de_transmission === "API" &&
+            organisme.erps?.length === 0 &&
+            !organisme.first_transmission_date && <TransmissionAPI />}
+          {displayEffectifs && televersementPage && <Televersements />}
+          {displayEffectifs && !televersementPage && <Effectifs organismesEffectifs={organismesEffectifs} />}
+        </>
+      )}
     </>
   );
 };

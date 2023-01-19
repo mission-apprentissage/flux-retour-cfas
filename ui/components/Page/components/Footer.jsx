@@ -17,7 +17,7 @@ const Footer = () => {
           <Box alignSelf="center" flex="1">
             <Text>
               Mandatée par le Ministère du Travail, de l&apos;Emploi et de l&apos;Insertion, le Ministère de la
-              Transformation et de la Fonction publiques, le Ministère de l&apos;Education Nationale, de la Jeunesse et
+              Transformation et de la Fonction publiques, le Ministère de l&apos;Éducation Nationale, de la Jeunesse et
               des Sports, le Ministère de la Recherche, de l&apos;Enseignement Supérieur et de l&apos;Innovation, la{" "}
               <Link
                 href={"https://beta.gouv.fr/startups/?incubateur=mission-apprentissage"}
@@ -106,7 +106,7 @@ const Footer = () => {
               </ListItem>
             </List>
             <Text textStyle="xs" mt={[2, 2, 0]}>
-              {APP_VERSION && `v.${APP_VERSION} `}© République française 2022
+              {APP_VERSION && `v.${APP_VERSION} `}© République française {new Date().getFullYear()}
             </Text>
           </Flex>
         </Container>

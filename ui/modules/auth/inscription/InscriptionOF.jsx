@@ -36,7 +36,6 @@ export const InscriptionOF = ({ onEndOfSpecific }) => {
               as={NavLink}
               onClick={() => setHelp("dontKnowMyUaiNorMySiret")}
               color="bluefrance"
-              ml={3}
               _hover={{ textDecoration: "none" }}
             >
               Je ne connais ni mon UAI ni mon Siret

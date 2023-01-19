@@ -9,6 +9,8 @@ import { createEffectif, updateEffectif } from "../../../common/actions/effectif
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
+import { algoUAI } from "../../../common/utils/uaiUtils.js";
+import { getCpInfo } from "../../../common/apis/apiTablesCorrespondances.js";
 
 const flattenKeys = (obj, path = []) =>
   !isObject(obj)
@@ -291,6 +293,47 @@ export default () => {
       const data = await findDataFromSiret(siret);
 
       return res.json(data);
+    })
+  );
+
+  router.post(
+    "/recherche-uai",
+    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    tryCatch(async ({ body }, res) => {
+      const { uai: userUai } = await Joi.object({
+        uai: Joi.string(),
+      })
+        .unknown()
+        .validateAsync(body, { abortEarly: false });
+
+      let uai = null;
+      if (userUai) {
+        if (!algoUAI(userUai)) return res.json({ uai, error: `L'UAI ${userUai} n'est pas valide` });
+        uai = userUai;
+      }
+
+      // if (uai) {
+      //   const { organismes: organismesResp } = await fetchOrganismesWithUai(uai);
+      //   if (!organismesResp.length) return res.json({ uai, error: `L'uai ${uai} n'a pas été retrouvé` });
+      // }
+
+      return res.json({ uai });
+    })
+  );
+
+  router.post(
+    "/recherche-code-postal",
+    permissionsOrganismeMiddleware(["organisme/page_effectifs"]),
+    tryCatch(async ({ body }, res) => {
+      const { codePostal } = await Joi.object({
+        codePostal: Joi.string().pattern(new RegExp("^[0-9]{5}$")),
+      })
+        .unknown()
+        .validateAsync(body, { abortEarly: false });
+
+      const result = await getCpInfo(codePostal);
+
+      return res.json(result);
     })
   );
 

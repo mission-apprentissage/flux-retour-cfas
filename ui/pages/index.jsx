@@ -50,7 +50,7 @@ export default function Home() {
             </strong>
             (OPCO, branche, etc...)
           </LinkCard>
-          <LinkCard linkHref={NAVIGATION_PAGES.OrganismeFormation.path}>
+          <LinkCard linkHref={NAVIGATION_PAGES.Login.path}>
             Vous êtes un{" "}
             <strong>
               organisme de formation <br />

@@ -22,9 +22,18 @@ const fetchSiret = async ({ siret, organisme_id, organismeFormation = false, sig
   }
 };
 
-const fetchCodePostal = async ({ codePostal, dossierId, signal }) => {
+const fetchUAI = async ({ uai, organisme_id, signal }) => {
   try {
-    return await _post(`/api/v1/geo/cp`, { codePostal, dossierId }, signal);
+    return await _post(`/api/v1/effectif/recherche-uai`, { uai, organisme_id }, signal);
+  } catch (e) {
+    if (e.name === "AbortError") throw e;
+    return { error: e.prettyMessage ?? "Une erreur technique est survenue" };
+  }
+};
+
+const fetchCodePostal = async ({ codePostal, organisme_id, signal }) => {
+  try {
+    return await _post(`/api/v1/effectif/recherche-code-postal`, { codePostal, organisme_id }, signal);
   } catch (e) {
     if (e.name === "AbortError") throw e;
     return { error: e.prettyMessage ?? "Une erreur technique est survenue" };
@@ -52,6 +61,7 @@ const fetchCfdrncp = async ({ rncp, cfd, dossierId, signal }) => {
 export const apiService = {
   saveCerfa,
   fetchSiret,
+  fetchUAI,
   fetchCodePostal,
   fetchNaf,
   fetchCfdrncp,

@@ -117,7 +117,7 @@ export const hydrateEffectif = async (effectifData, options) => {
    * @param {*} codePostalOrCodeInsee
    */
   const fillConvertedEffectifAdresseData = async (codePostalOrCodeInsee) => {
-    const adresseInfo = await getCpInfo(codePostalOrCodeInsee);
+    const { result: adresseInfo } = await getCpInfo(codePostalOrCodeInsee);
 
     if (adresseInfo.code_postal) {
       convertedEffectif.apprenant.adresse.code_postal = adresseInfo.code_postal;

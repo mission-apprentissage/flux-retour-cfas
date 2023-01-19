@@ -105,7 +105,7 @@ export const contratsSchema = {
         options: [
           {
             label:
-              "21 Service de l'Etat (administrations centrales et leurs services déconcentrés de la fonction publique d'Etat)",
+              "21 Service de l'État (administrations centrales et leurs services déconcentrés de la fonction publique d'État)",
             value: 21,
           },
           {
@@ -129,7 +129,7 @@ export const contratsSchema = {
             value: 26,
           },
           {
-            label: "27 Etablissement public administratif de l'Etat",
+            label: "27 Etablissement public administratif de l'État",
             value: 27,
           },
           {

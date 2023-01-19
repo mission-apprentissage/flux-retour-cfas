@@ -1,7 +1,7 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { findEffectifs } from "../effectifs.actions.js";
-import { findFormationById } from "../formations.actions.js";
+import { findFormationById, getFormationWithCfd } from "../formations.actions.js";
 import { findOrganismeById } from "../organismes/organismes.actions.js";
 import { SIFA_FIELDS } from "./sifaCsvFields.js";
 import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
@@ -49,71 +49,100 @@ export const generateSifa = async (organisme_id) => {
 
   const items = [];
   for (const effectif of effectifs) {
-    const formationBcn = await findFormationById(effectif.formation.formation_id);
+    const formationBcn =
+      (await findFormationById(effectif.formation.formation_id)) || (await getFormationWithCfd(effectif.formation.cfd));
     const [formationOrganisme] = organisme.formations.filter(
-      (f) => f.formation_id.toString() === effectif.formation.formation_id.toString()
+      (f) => f.formation_id?.toString() === effectif.formation.formation_id?.toString()
     );
-    const cpNaissanceInfo = await getCpInfo(effectif.apprenant.code_postal_de_naissance);
+    const { result: cpNaissanceInfo } = await getCpInfo(effectif.apprenant.code_postal_de_naissance);
 
     const formatStringForSIFA = (str) => str.replaceAll(/[^0-9a-zA-Z\- ]/g, "") ?? undefined;
+
+    const wrapNumString = (str) => {
+      if (!str) return str;
+      return `="${str}"`;
+    };
 
     const requiredFields = {
       NUMERO_UAI: organisme.uai, // REQUIRED
       NOM: formatStringForSIFA(effectif.apprenant.nom), // REQUIRED
       PRENOM1: formatStringForSIFA(effectif.apprenant.prenom), // REQUIRED
-      DATE_NAIS: DateTime.fromJSDate(new Date(effectif.apprenant.date_de_naissance))
-        .setZone("Europe/Paris")
-        .setLocale("fr-FR")
-        .toFormat("ddMMyyyy"), // REQUIRED
+      DATE_NAIS: effectif.apprenant.date_de_naissance
+        ? wrapNumString(
+            DateTime.fromJSDate(new Date(effectif.apprenant.date_de_naissance))
+              .setZone("Europe/Paris")
+              .setLocale("fr-FR")
+              .toFormat("ddMMyyyy")
+          )
+        : undefined, // REQUIRED
 
-      LIEU_NAIS: cpNaissanceInfo?.code_commune_insee, // REQUIRED
+      LIEU_NAIS: wrapNumString(cpNaissanceInfo.code_commune_insee), // REQUIRED
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2", // REQUIRED
       ADRESSE: effectif.apprenant.adresse
         ? effectif.apprenant.adresse?.complete ??
           `${effectif.apprenant.adresse?.numero ?? ""} ${effectif.apprenant.adresse?.repetition_voie ?? ""} ${
             effectif.apprenant.adresse?.voie
           }`
-        : null, // REQUIRED
+        : undefined, // REQUIRED
       SIT_N_1: effectif.apprenant.derniere_situation, // REQUIRED
       ETAB_N_1: effectif.apprenant.dernier_organisme_uai, // REQUIRED
-      DIPLOME: formationBcn?.cfd || effectif.formation.cfd, // REQUIRED
-      DUR_FORM_THEO: formationOrganisme?.duree_formation_theorique * 12, // REQUIRED
+      DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd), // REQUIRED
+      DUR_FORM_THEO:
+        formationOrganisme?.duree_formation_theorique || formationBcn?.duree
+          ? (formationOrganisme?.duree_formation_theorique || formationBcn?.duree) * 12
+          : undefined, // REQUIRED
       DUR_FORM_REELLE: effectif.formation.duree_formation_relle, // REQUIRED
       AN_FORM: effectif.formation.annee, // REQUIRED
       SIT_FORM: "", // REQUIRED //RESPONSABLE / FORMATEUR / RESPONSABLE_FORMATEUR / LIEU
-      STATUT: "APP", // REQUIRED // STATUT courant // TODO
-      OG: 24, // Unknown for now    // REQUIRED
+      STATUT: "APP", // REQUIRED // STATUT courant
+      OG: effectif.apprenant.organisme_gestionnaire, // REQUIRED
       UAI_EPLE: "NC", // Unknown for now // REQUIRED
       NAT_STR_JUR: "NC", // Unknown for now // REQUIRED
     };
 
     if (!Object.values(requiredFields).some((val) => val === undefined)) {
       const apprenantFields = {
-        INE: effectif.apprenant.ine ?? "ine",
-        TEL_JEUNE: effectif.apprenant.telephone,
+        INE: wrapNumString(effectif.apprenant.ine) ?? "ine",
+        TEL_JEUNE: wrapNumString(effectif.apprenant.telephone?.replace("+33", "0")),
         MAIL_JEUNE: effectif.apprenant.courriel,
         HANDI: effectif.apprenant.handicap ? "1" : "0",
         NATIO: effectif.apprenant.nationalite,
-        COD_POST: effectif.apprenant.adresse?.code_postal,
-        COM_RESID: effectif.apprenant.adresse?.code_insee,
+        COD_POST: wrapNumString(effectif.apprenant.adresse?.code_postal),
+        COM_RESID: wrapNumString(effectif.apprenant.adresse?.code_insee),
         REGIME_SCO: effectif.apprenant.regime_scolaire,
-        TEL_RESP1_PERSO: effectif.apprenant.representant_legal?.telephone,
-        TEL_RESP1_PRO: effectif.apprenant.representant_legal?.telephone,
+        TEL_RESP1_PERSO: wrapNumString(effectif.apprenant.representant_legal?.telephone?.replace("+33", "0")),
+        TEL_RESP1_PRO: wrapNumString(effectif.apprenant.representant_legal?.telephone?.replace("+33", "0")),
         MAIL_RESP1: effectif.apprenant.representant_legal?.courriel,
         PCS: effectif.apprenant.representant_legal?.pcs,
         SIT_AV_APP: effectif.apprenant.situation_avant_contrat,
-        DIP_OBT: effectif.apprenant.dernier_diplome ? `${effectif.apprenant.dernier_diplome}`.padStart(2, "0") : "",
+        DIP_OBT: effectif.apprenant.dernier_diplome
+          ? wrapNumString(`${effectif.apprenant.dernier_diplome}`.padStart(2, "0"))
+          : "",
       };
 
       const dernierContratActif = effectif.apprenant.contrats?.[0];
       const employeurFields = {
         SIRET_EMP: dernierContratActif?.siret,
         TYPE_EMP: dernierContratActif?.type_employeur,
-        DATE_DEB_CONT: dernierContratActif?.date_debut,
-        DATE_RUPT_CONT: dernierContratActif?.date_rupture,
+        DATE_DEB_CONT: dernierContratActif?.date_debut
+          ? wrapNumString(
+              DateTime.fromJSDate(new Date(dernierContratActif.date_debut))
+                .setZone("Europe/Paris")
+                .setLocale("fr-FR")
+                .toFormat("ddMMyyyy")
+            )
+          : undefined,
+        DATE_RUPT_CONT: dernierContratActif?.date_rupture
+          ? wrapNumString(
+              DateTime.fromJSDate(new Date(dernierContratActif.date_rupture))
+                .setZone("Europe/Paris")
+                .setLocale("fr-FR")
+                .toFormat("ddMMyyyy")
+            )
+          : undefined,
         NAF_ETAB: dernierContratActif?.naf,
         NBSAL_EMP: dernierContratActif?.nombre_de_salaries,
-        COM_ETAB: dernierContratActif?.adresse?.code_postal,
+        COM_ETAB: wrapNumString(dernierContratActif?.adresse?.code_postal),
       };
 
       // date_debut_formation

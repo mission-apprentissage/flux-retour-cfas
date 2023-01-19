@@ -1,3 +1,31 @@
+## [3.4.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.4.0...v3.4.1) (2023-01-19)
+
+
+### Bug Fixes
+
+* **upload:** mapping model + locked fields ([f914fd5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f914fd51de04a4c1a3f97048e515b128c4072d48))
+
+## [3.4.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.4.0...v3.4.1-beta.1) (2023-01-19)
+
+
+### Bug Fixes
+
+* **upload:** mapping model + locked fields ([f914fd5](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f914fd51de04a4c1a3f97048e515b128c4072d48))
+
+# [3.4.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.3.0...v3.4.0) (2023-01-19)
+
+
+### Features
+
+* next ([590176b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/590176bf9d71af4da1b46eb3df54d71788de371c))
+
+# [3.3.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0...v3.3.0) (2023-01-19)
+
+
+### Features
+
+* next ([3d1aa29](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3d1aa2935cf38162acae139099872ee9f6286653))
+
 # [3.2.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0...v3.2.0) (2023-01-18)
 
 

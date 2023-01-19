@@ -134,7 +134,7 @@ export const questions = [
       <Stack>
         <Text>
           L&apos;UAI (unité administrative immatriculée) est le code d&apos;immatriculation qu&apos;utilise
-          l&apos;Education Nationale pour enregistrer votre organisme dans le répertoire national des établissement
+          l&apos;Éducation Nationale pour enregistrer votre organisme dans le répertoire national des établissement
           (RNE). Elle est composée de sept chiffres et une lettre.
         </Text>
         <Text>

@@ -1,8 +1,21 @@
-import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Heading,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import React from "react";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
+import NavLink from "next/link";
+
 import { _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 
@@ -53,9 +66,6 @@ const ForgottenPasswordPage = () => {
                     );
                   }}
                 </Field>
-                <Button variant="primary" type={"submit"} w="100%">
-                  Recevoir un courriel de ré-initialisation
-                </Button>
                 {status.error && (
                   <Text color="error" mt={2}>
                     {status.error}
@@ -66,6 +76,14 @@ const ForgottenPasswordPage = () => {
                     {status.message}
                   </Text>
                 )}
+                <VStack>
+                  <Button variant="primary" type={"submit"} w="100%">
+                    Recevoir un courriel de ré-initialisation
+                  </Button>
+                  <NavLink type={"submit"} w="100%" href="/auth/connexion">
+                    Annuler
+                  </NavLink>
+                </VStack>
               </Form>
             );
           }}
