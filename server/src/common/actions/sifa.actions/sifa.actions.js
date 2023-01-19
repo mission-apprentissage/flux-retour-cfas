@@ -1,7 +1,7 @@
 import { Parser } from "json2csv";
 import { DateTime } from "luxon";
 import { findEffectifs } from "../effectifs.actions.js";
-import { findFormationById } from "../formations.actions.js";
+import { findFormationById, getFormationWithCfd } from "../formations.actions.js";
 import { findOrganismeById } from "../organismes/organismes.actions.js";
 import { SIFA_FIELDS } from "./sifaCsvFields.js";
 import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
@@ -49,9 +49,10 @@ export const generateSifa = async (organisme_id) => {
 
   const items = [];
   for (const effectif of effectifs) {
-    const formationBcn = await findFormationById(effectif.formation.formation_id);
+    const formationBcn =
+      (await findFormationById(effectif.formation.formation_id)) || (await getFormationWithCfd(effectif.formation.cfd));
     const [formationOrganisme] = organisme.formations.filter(
-      (f) => f.formation_id?.toString() === effectif.formation.formation_id.toString()
+      (f) => f.formation_id?.toString() === effectif.formation.formation_id?.toString()
     );
     const { result: cpNaissanceInfo } = await getCpInfo(effectif.apprenant.code_postal_de_naissance);
 
