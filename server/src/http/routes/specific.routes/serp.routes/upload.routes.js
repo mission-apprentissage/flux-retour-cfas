@@ -705,12 +705,21 @@ export default ({ clamav }) => {
 
             let effectifToSave = canBeImportEffectif;
             if (foundInDb) {
-              const fieldsToImport = Object.values(mapping)
+              const fieldsToImportTmp = Object.values(mapping)
                 .filter((fieldName) => !["CFD", "nom", "prenom"].includes(fieldName))
                 .map((fN) => mappingModel[fN]);
               effectifToSave = cloneDeep(foundInDb);
               let tmpContrat = {};
               let tmpHistoryStatut = {};
+
+              const fieldsToImport = [];
+              for (const fieldToImport of fieldsToImportTmp) {
+                const isLocked = get(effectifToSave.is_lock, fieldToImport);
+                if (!isLocked && fieldToImport) {
+                  fieldsToImport.push(fieldToImport);
+                }
+              }
+
               ["annee_scolaire", "validation_errors", "source", ...fieldsToImport].map((fieldName) => {
                 const newValue = get(canBeImportEffectif, fieldName);
                 let value = newValue;
