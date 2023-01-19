@@ -51,7 +51,7 @@ export const generateSifa = async (organisme_id) => {
   for (const effectif of effectifs) {
     const formationBcn = await findFormationById(effectif.formation.formation_id);
     const [formationOrganisme] = organisme.formations.filter(
-      (f) => f.formation_id.toString() === effectif.formation.formation_id.toString()
+      (f) => f.formation_id?.toString() === effectif.formation.formation_id.toString()
     );
     const { result: cpNaissanceInfo } = await getCpInfo(effectif.apprenant.code_postal_de_naissance);
 
@@ -86,9 +86,10 @@ export const generateSifa = async (organisme_id) => {
       SIT_N_1: effectif.apprenant.derniere_situation, // REQUIRED
       ETAB_N_1: effectif.apprenant.dernier_organisme_uai, // REQUIRED
       DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd), // REQUIRED
-      DUR_FORM_THEO: formationOrganisme?.duree_formation_theorique
-        ? formationOrganisme?.duree_formation_theorique * 12
-        : undefined, // REQUIRED
+      DUR_FORM_THEO:
+        formationOrganisme?.duree_formation_theorique || formationBcn?.duree
+          ? (formationOrganisme?.duree_formation_theorique || formationBcn?.duree) * 12
+          : undefined, // REQUIRED
       DUR_FORM_REELLE: effectif.formation.duree_formation_relle, // REQUIRED
       AN_FORM: effectif.formation.annee, // REQUIRED
       SIT_FORM: "", // REQUIRED //RESPONSABLE / FORMATEUR / RESPONSABLE_FORMATEUR / LIEU
