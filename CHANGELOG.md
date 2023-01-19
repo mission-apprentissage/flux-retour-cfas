@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.2.0...v3.3.0) (2023-01-19)
+
+
+### Features
+
+* next ([3d1aa29](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3d1aa2935cf38162acae139099872ee9f6286653))
+
 # [3.2.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.1.0...v3.2.0) (2023-01-18)
 
 
