@@ -43,7 +43,7 @@ const typeCompte = {
   },
 };
 
-export const Inscription = ({ onSucceeded, ...props }) => {
+const Inscription = ({ onSucceeded, ...props }) => {
   const [step, setStep] = useState(0);
   const [entrepriseData, setEntrepriseData] = useState(null);
 
@@ -282,3 +282,5 @@ export const Inscription = ({ onSucceeded, ...props }) => {
     </Box>
   );
 };
+
+export default Inscription;
