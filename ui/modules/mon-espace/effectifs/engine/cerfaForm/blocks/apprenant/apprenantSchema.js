@@ -726,6 +726,28 @@ export const apprenantSchema = {
     showInfo: true,
     label: "Établissement fréquenté l’année dernière (N-1):",
   },
+  "apprenant.organisme_gestionnaire": {
+    fieldType: "select",
+    label: "Organisme gestionnaire de l’établissement :",
+    options: [
+      { value: 11, label: "EPLE (Établissement Public Local d’Enseignement)" },
+      {
+        value: 12,
+        label: "EPLEFPA (Établissement Public Local d’Enseignement et de Formation Professionnelle Agricole)",
+      },
+      { value: 13, label: "Établissement scolaire privé sous contrat" },
+      { value: 14, label: "Établissement de formation ou de recherche (université, école d’ingénieur...)" },
+      { value: 15, label: "Municipalité (collectivités locales et territoriales)" },
+      { value: 16, label: "Chambre de Commerce et de l’industrie" },
+      { value: 17, label: "Chambre de Métiers" },
+      { value: 18, label: "Association mixte consulaire" },
+      { value: 19, label: "Chambre d’agriculture" },
+      { value: 21, label: "État (CFA à recrutement national)" },
+      { value: 23, label: "Groupement d’Intérêt Public" },
+      { value: 24, label: "Association" },
+      { value: 25, label: "Organisation professionnelle, entreprise ou groupement d’entreprises" },
+    ],
+  },
   "apprenant.dernier_diplome": {
     fieldType: "select",
     label: "Dernier diplôme obtenu :",

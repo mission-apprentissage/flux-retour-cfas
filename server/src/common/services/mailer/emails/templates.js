@@ -29,6 +29,7 @@ export function validation_first_organisme_user_by_tdb_team({ payload }, token, 
     data: {
       user: payload.user,
       organisme: payload.organisme,
+      type: payload.type,
       token,
     },
   };

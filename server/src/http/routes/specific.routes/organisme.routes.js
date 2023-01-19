@@ -15,7 +15,7 @@ import {
 import { findRolePermission } from "../../../common/actions/roles.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa, isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
-import { updatePermission, updatePermissionPending } from "../../../common/actions/permissions.actions.js";
+import { updatePermission, updatePermissionsPending } from "../../../common/actions/permissions.actions.js";
 import { getUser } from "../../../common/actions/users.actions.js";
 
 export default ({ mailer }) => {
@@ -64,6 +64,7 @@ export default ({ mailer }) => {
         "apprenant.sexe",
         "apprenant.derniere_situation",
         "apprenant.dernier_organisme_uai",
+        "apprenant.organisme_gestionnaire",
         "formation.duree_formation_relle",
       ];
 
@@ -223,15 +224,16 @@ export default ({ mailer }) => {
     "/contributors/confirm-access",
     permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
     tryCatch(async ({ query }, res) => {
-      const { userEmail, organisme_id, validate } = await Joi.object({
+      const { userEmail, validate } = await Joi.object({
         userEmail: Joi.string().email().required(),
         organisme_id: Joi.string().required(),
         validate: Joi.boolean().required(),
       }).validateAsync(query, { abortEarly: false });
       if (validate) {
-        await updatePermissionPending({ organisme_id, userEmail, pending: false });
+        await updatePermissionsPending({ userEmail, pending: false });
         const user = await getUser(userEmail);
         await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
+
         return res.json({ ok: true });
       } else {
         // TODO REJECTED PERM

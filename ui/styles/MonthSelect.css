@@ -32,9 +32,7 @@
 }
 
 .react-datepicker__header {
-  color: white !important;
   text-align: center !important;
-  background-color: #000091 !important;
   padding-top: 8px !important;
   padding-bottom: 8px !important;
   border-bottom-color: #e7e7e7 !important;

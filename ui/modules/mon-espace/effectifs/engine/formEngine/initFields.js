@@ -11,6 +11,7 @@ let requiredFieldsSifa = [
   "apprenant.sexe",
   "apprenant.derniere_situation",
   "apprenant.dernier_organisme_uai",
+  "apprenant.organisme_gestionnaire",
 
   "formation.duree_formation_relle",
 

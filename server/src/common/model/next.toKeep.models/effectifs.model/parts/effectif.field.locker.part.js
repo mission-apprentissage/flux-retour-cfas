@@ -36,6 +36,7 @@ export const effectifFieldsLockerSchema = object({
     situation_avant_contrat: boolean(),
     derniere_situation: boolean(),
     dernier_organisme_uai: boolean(),
+    organisme_gestionnaire: boolean(),
     dernier_diplome: boolean(),
     mineur_emancipe: boolean(),
     representant_legal: object({
@@ -100,6 +101,7 @@ export function defaultValuesEffectifFieldsLocker(lockAtCreate = false) {
       situation_avant_contrat: lockAtCreate,
       derniere_situation: lockAtCreate,
       dernier_organisme_uai: lockAtCreate,
+      organisme_gestionnaire: lockAtCreate,
       dernier_diplome: lockAtCreate,
       mineur_emancipe: lockAtCreate,
       representant_legal: {
