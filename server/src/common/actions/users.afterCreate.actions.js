@@ -1,5 +1,6 @@
 import {
   addContributeurOrganisme,
+  findOrganismeBySiret,
   findOrganismeByUai,
   findOrganismesByQuery,
 } from "./organismes/organismes.actions.js";
@@ -9,6 +10,8 @@ import {
   hasAtLeastOneContributeurNotPending,
 } from "./permissions.actions.js";
 import { updateMainOrganismeUser } from "./users.actions.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature.js";
+import { uniq } from "lodash-es";
 
 /**
  * Méthode d'ajouts des permissions en fonction de l'utilisateur
@@ -97,10 +100,33 @@ export const userAfterCreate = async ({
         throw new Error(`No organisme found for this uai ${uai}`);
       }
 
+      const giveAccessToSubOrganismes = async (organisme) => {
+        let subOrganismesIds = [];
+        if (
+          organisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ||
+          organisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
+        ) {
+          for (const { organismes } of organisme.formations) {
+            for (const subOrganismes of organismes) {
+              if (
+                subOrganismes.nature !== NATURE_ORGANISME_DE_FORMATION.LIEU &&
+                subOrganismes.nature !== NATURE_ORGANISME_DE_FORMATION.INCONNUE &&
+                organisme.siret !== subOrganismes.siret
+              ) {
+                const subOrganismesDb = await findOrganismeBySiret(subOrganismes.siret);
+                if (subOrganismesDb && !subOrganismesIds.includes(subOrganismesDb._id.toString())) {
+                  await addContributeurOrganisme(subOrganismesDb._id, userEmail, "organisme.statsonly", pending);
+                  subOrganismesIds = uniq([...subOrganismesIds, subOrganismesDb._id.toString()]);
+                }
+              }
+            }
+          }
+        }
+      };
+
       const hasAtLeastOneUserToValidate = await hasAtLeastOneContributeurNotPending(organisme._id, "organisme.admin");
 
-      // TODO pour les organismes RESPONSABLE ou RESPONSABLE_FORMATEUR => Multiple Permissions
-      // organisme.nature RESPONSABLE, FORMATEUR, RESPONSABLE_FORMATEUR
+      await giveAccessToSubOrganismes(organisme);
 
       if (!hasAtLeastOneUserToValidate && asRole === "organisme.admin") {
         // is the first user on this organisme

@@ -13,7 +13,7 @@ import {
   updateUser,
 } from "../../../common/actions/users.actions.js";
 import { findRoleById, findRolesByNames } from "../../../common/actions/roles.actions.js";
-import { updatePermissionPending, updatePermissionsPending } from "../../../common/actions/permissions.actions.js";
+import { updatePermissionsPending } from "../../../common/actions/permissions.actions.js";
 
 // TODO [tech]
 // eslint-disable-next-line no-unused-vars
@@ -54,31 +54,19 @@ export default ({ mailer }) => {
   router.get(
     "/users/confirm-user",
     tryCatch(async ({ query }, res) => {
-      const { userEmail, organisme_id, validate } = await Joi.object({
+      const { userEmail, validate } = await Joi.object({
         userEmail: Joi.string().email().required(),
         organisme_id: Joi.string(),
         validate: Joi.boolean().required(),
       }).validateAsync(query, { abortEarly: false });
-      if (organisme_id) {
-        if (validate) {
-          await updatePermissionPending({ organisme_id, userEmail, pending: false });
-          const user = await getUser(userEmail);
-          await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
-          return res.json({ ok: true });
-        } else {
-          // TODO REJECTED PERM !
-          return res.json({ ok: false });
-        }
+      if (validate) {
+        await updatePermissionsPending({ userEmail, pending: false });
+        const user = await getUser(userEmail);
+        await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
+        return res.json({ ok: true });
       } else {
-        if (validate) {
-          await updatePermissionsPending({ userEmail, pending: false });
-          const user = await getUser(userEmail);
-          await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
-          return res.json({ ok: true });
-        } else {
-          // TODO REJECTED PERM !
-          return res.json({ ok: false });
-        }
+        // TODO REJECTED PERM !
+        return res.json({ ok: false });
       }
     })
   );
