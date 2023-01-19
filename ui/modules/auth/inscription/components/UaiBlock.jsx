@@ -5,6 +5,7 @@ import {
   Box,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   FormLabel,
   Input,
   Spinner,
@@ -15,7 +16,10 @@ import {
   AccordionIcon,
   AccordionPanel,
   Button,
+  Text,
+  VStack,
 } from "@chakra-ui/react";
+
 import { _post } from "../../../../common/httpClient";
 
 const validate = async (validationSchema, obj) => {
@@ -32,23 +36,42 @@ const validate = async (validationSchema, obj) => {
 
 const EntrepriseDetails = ({ data }) => {
   return (
-    <>
+    <VStack alignItems={"baseline"} spacing={1} paddingX={4}>
       {data.uai && (
-        <Box mb={5} fontWeight="bold">
-          Votre UAI: {data.uai} - Votre SIRET: {data.siret}
-        </Box>
+        <Text>
+          UAI: <b>{data.uai}</b>
+        </Text>
       )}
-      <Box fontWeight="bold">Votre adresse:</Box>
+      {data.siren && (
+        <Text>
+          SIREN: <b>{data.siren}</b>
+        </Text>
+      )}
+      {data.siret && (
+        <Text>
+          SIRET: <b>{data.siret}</b>
+        </Text>
+      )}
       {!data.secretSiret && (
         <>
-          <Box>{data.enseigne || data.entreprise_raison_sociale}</Box>
-          <Box>
-            {data.numero_voie} {data.nom_voie}
-          </Box>
-          {data.complement_adresse && <Box>{data.complement_adresse}</Box>}
-          <Box>
-            {data.code_postal} {data.localite}
-          </Box>
+          <Text>
+            Raison sociale : <b>{data.enseigne || data.entreprise_raison_sociale}</b>
+          </Text>
+          <Text>
+            Adresse :{" "}
+            <b>
+              {[
+                data.numero_voie,
+                data.type_voie,
+                data.nom_voie,
+                data.complement_adresse,
+                data.code_postal,
+                data.localite,
+              ]
+                .filter((o) => o)
+                .join(" ")}
+            </b>
+          </Text>
         </>
       )}
       {data.secretSiret && (
@@ -60,7 +83,7 @@ const EntrepriseDetails = ({ data }) => {
           </Box>
         </>
       )}
-    </>
+    </VStack>
   );
 };
 
@@ -146,7 +169,8 @@ export const UaiBlock = ({ onUaiFetched }) => {
   return (
     <>
       <FormControl mt={4} py={2} isRequired isInvalid={errors.uai && touched.uai}>
-        <FormLabel>Votre UAI</FormLabel>
+        <FormLabel>UAI de votre organisme</FormLabel>
+        <FormHelperText mb={2}>Une UAI au format valide est composée de 7 chiffres et 1 lettre</FormHelperText>
         <Input
           id="uai"
           name="uai"
@@ -157,68 +181,72 @@ export const UaiBlock = ({ onUaiFetched }) => {
         />
         {errors.uai && touched.uai && <FormErrorMessage>{errors.uai}</FormErrorMessage>}
       </FormControl>
-      <Center
-        borderWidth="2px"
-        borderStyle="dashed"
-        borderColor={
-          entrepriseData
-            ? entrepriseData.multiple
-              ? "white"
-              : entrepriseData.successed
-              ? "green.500"
-              : "error"
-            : "grey.400"
-        }
-        rounded="md"
-        minH="50"
-        flexDirection="column"
-        p={4}
-        w="100%"
-      >
-        {isFetching && <Spinner />}
-        {!isFetching && entrepriseData && (
-          <>
-            {entrepriseData.data && !entrepriseData.multiple && <EntrepriseDetails data={entrepriseData.data} />}
-            {entrepriseData.message && (
-              <Box color="error" my={2}>
-                {entrepriseData.message}
-              </Box>
-            )}
-            {entrepriseData.data && entrepriseData.multiple && (
-              <Accordion allowToggle variant="withBorder" w="100%">
-                {entrepriseData.data.map((item, index) => {
-                  return (
-                    <AccordionItem key={index}>
-                      <AccordionButton color="bluefrance" w="full">
-                        <Box flex="1" textAlign="left">
-                          {item.data.enseigne || item.data.entreprise_raison_sociale}
-                        </Box>
-                        <AccordionIcon />
-                      </AccordionButton>
-                      <AccordionPanel pb={4}>
-                        <EntrepriseDetails data={item.data} />
-
-                        <Button
-                          mt="2w"
-                          size="md"
-                          variant="primary"
-                          px={6}
-                          onClick={() => {
-                            setEntrepriseData(entrepriseData.data[index]);
-                            onUaiFetched(entrepriseData.data[index]);
-                          }}
-                        >
-                          Ceci est mon organisme
-                        </Button>
-                      </AccordionPanel>
-                    </AccordionItem>
-                  );
-                })}
-              </Accordion>
-            )}
-          </>
-        )}
-      </Center>
+      {values.uai && (
+        <Center
+          borderWidth="2px"
+          borderStyle="dashed"
+          borderColor={
+            entrepriseData
+              ? entrepriseData.multiple
+                ? "white"
+                : entrepriseData.successed
+                ? "green.500"
+                : "error"
+              : "grey.400"
+          }
+          rounded="md"
+          minH="50"
+          flexDirection="column"
+          py={4}
+          w="100%"
+        >
+          {isFetching && <Spinner />}
+          {!isFetching && entrepriseData && (
+            <>
+              {entrepriseData.data && !entrepriseData.multiple && <EntrepriseDetails data={entrepriseData.data} />}
+              {entrepriseData.message && (
+                <>
+                  <Box color="error" my={2}>
+                    <Box as="i" className="ri-alert-fill" color="warning" marginRight="1v" />
+                    {entrepriseData.message}
+                  </Box>
+                </>
+              )}
+              {entrepriseData.data && entrepriseData.multiple && (
+                <Accordion allowToggle variant="withBorder" w="100%">
+                  {entrepriseData.data.map((item, index) => {
+                    return (
+                      <AccordionItem key={index}>
+                        <AccordionButton color="bluefrance" w="full">
+                          <Box flex="1" textAlign="left">
+                            {item.data.enseigne || item.data.entreprise_raison_sociale}
+                          </Box>
+                          <AccordionIcon />
+                        </AccordionButton>
+                        <AccordionPanel pb={4}>
+                          <EntrepriseDetails data={item.data} />
+                          <Button
+                            mt="2w"
+                            size="md"
+                            variant="primary"
+                            px={6}
+                            onClick={() => {
+                              setEntrepriseData(entrepriseData.data[index]);
+                              onUaiFetched(entrepriseData.data[index]);
+                            }}
+                          >
+                            Ceci est mon organisme
+                          </Button>
+                        </AccordionPanel>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              )}
+            </>
+          )}
+        </Center>
+      )}
     </>
   );
 };

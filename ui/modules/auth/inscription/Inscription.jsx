@@ -249,7 +249,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
           )}
         </Box>
         {step > 0 && (
-          <HStack spacing="4w" mt={5}>
+          <HStack gap="24px" mt={5}>
             <Button onClick={() => setStep(step - 1)} color="bluefrance" variant="secondary">
               Revenir
             </Button>
