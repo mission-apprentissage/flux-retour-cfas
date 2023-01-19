@@ -49,7 +49,7 @@ export const ERPS = [
   {
     id: "AURIGA",
     name: "Auriga",
-    state: ERP_STATE.ready,
+    state: ERP_STATE.coming,
     helpFilePath: "https://wiki.auriga.fr/index.php?title=Connecteur_Tableau_de_bord_de_l%27apprentissage",
   },
   { id: "CNAM", name: "CNAM (Gessic@)", state: ERP_STATE.coming },

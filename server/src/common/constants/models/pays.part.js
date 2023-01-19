@@ -249,8 +249,8 @@ export const paysEnum = [
   { code: "PW", label: "PALAOS (ILES)", value: "PALAOS (ILES)", libelle: "RÉPUBLIQUE DES ÎLES PALAOS", actif: "Oui" },
   {
     code: "PS",
-    label: "PALESTINE (Etat de)",
-    value: "PALESTINE (Etat de)",
+    label: "PALESTINE (État de)",
+    value: "PALESTINE (État de)",
     libelle: "ÉTAT DE PALESTINE",
     actif: "Oui",
   },

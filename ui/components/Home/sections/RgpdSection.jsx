@@ -29,7 +29,7 @@ const RgpdSection = (props) => {
           <Box flex="2">
             <Text fontSize="gamma">
               Le {PRODUCT_NAME} est construit dans le <strong>respect de la vie privée des personnes</strong> et{" "}
-              <strong>applique les standards de sécurité de l&apos;Etat</strong>. Il est construit selon trois grands
+              <strong>applique les standards de sécurité de l&apos;État</strong>. Il est construit selon trois grands
               principes :
             </Text>
             <UnorderedList paddingY="3w" marginLeft="3w" fontSize="gamma">

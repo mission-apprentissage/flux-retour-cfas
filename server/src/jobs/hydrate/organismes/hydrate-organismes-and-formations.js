@@ -12,6 +12,8 @@ import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { getCatalogFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
 import { createFormation, getFormationWithCfd } from "../../../common/actions/formations.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
+import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
+import { buildTokenizedString } from "../../../common/utils/buildTokenizedString.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOB_NAME = "hydrate-organismes-and-formations";
@@ -115,14 +117,55 @@ export const hydrateOrganismesAndFormations = async () => {
         }
       } else {
         // Update de l'organisme si existant
+        // TODO à refacto / simplifier & mutualiser code avec createOrganisme
+        // On update toutes les infos depuis l'API Entreprise
         // Set de la nature et un flag natureValidityWarning = perfectMatch
         // Set de l'arbre des formations
         const perfectUaiSiretMatch =
           organisme.sirets.length === 1 && organisme.sirets[0] === organismeReferentiel.siret;
+
+        let adresse = null;
+        let ferme = false;
+        let enseigne = null;
+        let raison_sociale = null;
+        let nom = null;
+
+        // Appel API Entreprise si siret dans le référentiel
+        if (siret) {
+          const dataSiret = await findDataFromSiret(siret, true, false);
+          if (dataSiret.messages.api_entreprise === "Ok") {
+            ferme = dataSiret.result.ferme;
+            if (dataSiret.result.enseigne) enseigne = dataSiret.result.enseigne;
+            if (dataSiret.result.entreprise_raison_sociale) raison_sociale = dataSiret.result.entreprise_raison_sociale;
+            if (!nom) nom = dataSiret.result.enseigne;
+            adresse = {
+              ...(adresse ?? {}),
+              ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
+              ...(dataSiret.result.voie_complete ? { voie: dataSiret.result.voie_complete } : {}),
+              ...(dataSiret.result.complement_adresse ? { complement: dataSiret.result.complement_adresse } : {}),
+              ...(dataSiret.result.code_postal ? { code_postal: dataSiret.result.code_postal } : {}),
+              ...(dataSiret.result.code_insee_localite ? { code_insee: dataSiret.result.code_insee_localite } : {}),
+              ...(dataSiret.result.localite ? { commune: dataSiret.result.localite } : {}),
+              ...(dataSiret.result.num_departement ? { departement: dataSiret.result.num_departement } : {}),
+              ...(dataSiret.result.num_region ? { region: dataSiret.result.num_region } : {}),
+              ...(dataSiret.result.num_academie ? { academie: dataSiret.result.num_academie } : {}),
+              ...(dataSiret.result.adresse ? { complete: dataSiret.result.adresse } : {}),
+            };
+          } else {
+            // TODO Find adresse somewhere else
+            logger.error(`hydrateOrganismeAndFormations > Erreur sur l'etablissement ${siret} via API Entreprise`);
+          }
+        }
+
         const updatedOrganisme = {
           ...organisme,
+          ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
           ...(siret ? { siret } : {}),
-          ...(siret ? { sirets: [siret] } : {}),
+          ...(siret ? { sirets: [siret] } : {}), // TODO : bien analyser si c'est pertinent de faire ça ?
+          ...(adresse ? { adresse } : {}),
+          ...(enseigne ? { enseigne } : {}),
+          ...(raison_sociale ? { raison_sociale } : {}),
+          ferme,
           nature: organismeReferentiel.nature,
           natureValidityWarning: !perfectUaiSiretMatch,
           est_dans_le_referentiel: true,

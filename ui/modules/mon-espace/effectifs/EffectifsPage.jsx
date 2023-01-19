@@ -74,12 +74,11 @@ const EffectifsPage = () => {
     (organisme.mode_de_transmission === "API" && organisme.first_transmission_date) ||
     organisme.mode_de_transmission === "MANUEL";
 
-  const isReadyToBeRead =
-    !auth.hasAtLeastOneUserToValidate && hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
+  const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
 
   return (
     <>
-      {!isReadyToBeRead && (
+      {!canEdit && !auth.hasAtLeastOneUserToValidate && (
         <Box mt={12}>
           <Ribbons variant="warning" mt="0.5rem">
             <Box ml={3}>
@@ -103,7 +102,7 @@ const EffectifsPage = () => {
           </Flex>
         </Box>
       )}
-      {isReadyToBeRead && (
+      {auth.hasAtLeastOneUserToValidate && (
         <>
           {!organisme.mode_de_transmission && <ChoixTransmission />}
           {organisme.mode_de_transmission === "API" &&

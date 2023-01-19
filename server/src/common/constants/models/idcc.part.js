@@ -1032,7 +1032,7 @@ export const idccEnum = [
   {
     code: "2329",
     libelle:
-      "Accord professionnel national de travail entre les avocats au Conseil d'Etat et à la Cour de Cassation et leur personnel salarié -non avocat-",
+      "Accord professionnel national de travail entre les avocats au Conseil d'État et à la Cour de Cassation et leur personnel salarié -non avocat-",
   },
   { code: "2332", libelle: "Convention collective nationale des entreprises d'architecture" },
   { code: "2335", libelle: "Convention collective nationale du personnel des agences générales d'assurances" },
