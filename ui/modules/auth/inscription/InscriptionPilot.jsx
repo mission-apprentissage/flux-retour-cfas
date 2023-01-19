@@ -14,7 +14,7 @@ export const InscriptionPilot = ({ onEndOfSpecific }) => {
           {...{
             name: `typePilot`,
             fieldType: "select",
-            placeholder: "Séléctionner un opérateur public",
+            placeholder: "Sélectionner un opérateur public",
             options: [
               {
                 label: "DREETS",

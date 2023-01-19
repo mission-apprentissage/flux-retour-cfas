@@ -29,7 +29,7 @@ const Login = (props) => {
   const router = useRouter();
 
   const [show, setShow] = React.useState(false);
-  const handleClick = () => setShow(!show);
+  const onShowPassword = () => setShow(!show);
 
   const login = async (values, { setStatus }) => {
     try {
@@ -93,7 +93,7 @@ const Login = (props) => {
                             placeholder="************************"
                           />
                           <InputRightElement width="2.5rem">
-                            <ShowPassword boxSize={5} onClick={handleClick} cursor="pointer" />
+                            <ShowPassword boxSize={5} onClick={onShowPassword} cursor="pointer" />
                           </InputRightElement>
                         </InputGroup>
                         <FormErrorMessage>{meta.error}</FormErrorMessage>

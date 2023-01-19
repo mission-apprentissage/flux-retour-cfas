@@ -303,7 +303,7 @@ const Televersements = () => {
                   {...{
                     name: `type_document`,
                     fieldType: "select",
-                    placeholder: "Séléctionner un modèle de fichier",
+                    placeholder: "Sélectionner un modèle de fichier",
                     locked: !documents?.unconfirmed?.length || !uploads?.models?.length,
 
                     options: uploads?.models?.length
@@ -371,7 +371,7 @@ const Televersements = () => {
                       {...{
                         name: `line0_in`,
                         fieldType: "select",
-                        placeholder: "Séléctionner l'année scolaire",
+                        placeholder: "Sélectionner l'année scolaire",
                         options: [
                           {
                             label: "2020-2021",
@@ -442,7 +442,7 @@ const Televersements = () => {
                               {...{
                                 name: `line${2}_in`,
                                 fieldType: "select",
-                                placeholder: "Séléctionner une de vos en-têtes",
+                                placeholder: "Sélectionner une de vos en-têtes",
                                 options: availableKeys.in,
                                 locked: typeCodeDiplome !== "RNCP",
                               }}
@@ -483,7 +483,7 @@ const Televersements = () => {
                               {...{
                                 name: `line${1}_in`,
                                 fieldType: "select",
-                                placeholder: "Séléctionner une de vos en-têtes",
+                                placeholder: "Sélectionner une de vos en-têtes",
                                 options: availableKeys.in,
                                 locked: typeCodeDiplome !== "CFD",
                               }}
@@ -531,7 +531,7 @@ const Televersements = () => {
                             {...{
                               name: `line${i}_in`,
                               fieldType: "select",
-                              placeholder: "Séléctionner une de vos en-têtes",
+                              placeholder: "Sélectionner une de vos en-têtes",
                               options: availableKeys.in,
                             }}
                             value={lines[i].in.value}
@@ -603,7 +603,7 @@ const Televersements = () => {
                                   {...{
                                     name: `line${lineNum}_in`,
                                     fieldType: "select",
-                                    placeholder: "Séléctionner une de vos en-têtes",
+                                    placeholder: "Sélectionner une de vos en-têtes",
                                     options: availableKeys.in,
                                   }}
                                   value={lines[lineNum].in.value}
@@ -618,7 +618,7 @@ const Televersements = () => {
                                   {...{
                                     name: `line${lineNum}_out`,
                                     fieldType: "select",
-                                    placeholder: "Séléctionner une de vos en-têtes",
+                                    placeholder: "Sélectionner une de vos en-têtes",
                                     options: availableKeys.out,
                                   }}
                                   value={lines[lineNum].out.value}
