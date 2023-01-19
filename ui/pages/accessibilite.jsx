@@ -14,7 +14,6 @@ const AccessibilitePage = () => {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box w="100%" pt={[4, 8]} px={[1, 1, 12, 24]}>
         <Container maxW="xl">

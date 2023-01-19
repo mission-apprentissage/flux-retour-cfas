@@ -35,7 +35,6 @@ const JournalDesEvolutions = () => {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Section paddingTop="3w">
         <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />

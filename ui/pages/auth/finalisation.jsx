@@ -173,7 +173,6 @@ const Finalize = () => {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <Flex w="full" flexDirection="column" h="full" mt={4}>

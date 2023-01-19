@@ -15,7 +15,6 @@ export default function Home() {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Section paddingY="4w">
         <Flex pt="2w">

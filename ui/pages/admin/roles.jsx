@@ -105,7 +105,6 @@ const Roles = () => {
     <Page>
       <Head>
         <title>Gestion des rôles</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
 
