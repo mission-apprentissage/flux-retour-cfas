@@ -42,13 +42,16 @@ export const getCpInfo = async (codePostal) => {
     const { data } = await axios.post(url, {
       codePostal,
     });
-    return data.result;
+    return data;
   } catch (error) {
     logger.error(
       `getCpInfo: something went wrong while requesting ${url}`,
       `${error.message} for code=${codePostal}`,
       error.code || error.response.status
     );
-    return null;
+    return {
+      result: {},
+      messages: { error: "Erreur techinque" },
+    };
   }
 };

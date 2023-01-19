@@ -74,7 +74,7 @@ const DateInputIn = (props) => {
           variant="unstyled"
           onClick={decreaseMonth}
           minW={2}
-          icon={<IoArrowBackward olor={"disablegrey"} boxSize="4" />}
+          icon={<IoArrowBackward color={"disablegrey"} boxSize="4" />}
           size="sm"
           mt={-2}
         />
