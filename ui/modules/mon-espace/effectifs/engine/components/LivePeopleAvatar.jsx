@@ -7,7 +7,7 @@ import {
 import { useRouter } from "next/router";
 
 import { io } from "socket.io-client";
-import { useQueryClient, useQuery } from "react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 
 const useWebSocketSubscription = () => {
   const queryClient = useQueryClient();
@@ -16,7 +16,7 @@ const useWebSocketSubscription = () => {
   const dossierIdParam = slug?.[slug.length - 2];
 
   // eslint-disable-next-line no-undef
-  const { data: liveUsers } = useQuery("dossier:live_users", () => Promise.resolve([]), {
+  const { data: liveUsers } = useQuery(["dossier:live_users"], () => Promise.resolve([]), {
     refetchOnWindowFocus: false,
   });
 
