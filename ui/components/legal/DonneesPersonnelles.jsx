@@ -54,7 +54,7 @@ const DonneesPersonnelles = () => {
               Le Tableau de Bord de l’Apprentissage est{" "}
               <strong>
                 construit dans le respect de la vie privée des personnes et applique les standards de sécurité de
-                l&apos;Etat.
+                l&apos;État.
               </strong>
             </Text>
           </Section>
@@ -138,8 +138,7 @@ const DonneesPersonnelles = () => {
             </Box>
             <Box marginTop="1w" marginBottom="15w">
               <Text marginBottom="2w" fontSize="epsilon" color="grey.800">
-                Dans le respect du RGPD, seules les données utiles à la construction du {title}
-                sont collectées.
+                Dans le respect du RGPD, seules les données utiles à la construction du {title} sont collectées.
               </Text>
               <Text fontSize="epsilon" color="grey.800">
                 Données concernant l’apprenant :

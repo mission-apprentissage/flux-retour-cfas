@@ -122,7 +122,7 @@ const Login = (props) => {
       <HStack fontSize={14} mt="4w">
         <Text>Vous n’avez pas encore de compte ? </Text>
         <Link color="bluefrance" as={NavLink} href="/auth/inscription">
-          Crée un compte
+          Créer un compte
         </Link>
       </HStack>
     </Flex>

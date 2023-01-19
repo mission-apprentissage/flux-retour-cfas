@@ -10,7 +10,7 @@ const WaitingConfirmationPage = () => {
       <HStack>
         <Spinner mr={3} />
         <Heading fontSize="1rem" fontFamily="Marianne" fontWeight="500" marginBottom="2w">
-          En attente de confirmation votre compte utilisateur. Merci de vérifier vos emails.
+          En attente de confirmation de votre compte utilisateur. Merci de vérifier vos emails.
         </Heading>
       </HStack>
     </Flex>

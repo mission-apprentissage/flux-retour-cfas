@@ -36,7 +36,7 @@ const ApercuDesDonneesSection = () => {
           <Text fontStyle="italic" color="grey.800">
             Au national le {formatDateDayMonthYear(date)}. <br />
             Ces chiffres ne reflètent pas la réalité des effectifs de l’apprentissage. <br />
-            En période estivale les organismes de formation constituent les effectifs pour la rentrée suivante.
+            En période estivale, les organismes de formation constituent les effectifs pour la rentrée suivante.
           </Text>
 
           {isEffectifsNationalLoading && (
