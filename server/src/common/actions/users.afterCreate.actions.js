@@ -134,7 +134,7 @@ export const userAfterCreate = async ({
         await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
         if (notify) {
           await mailer.sendEmail(
-            { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, organisme } },
+            { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, organisme, type: "Gestionnaire" } },
             "validation_first_organisme_user_by_tdb_team"
           ); // Notif TDB_admin or whatever who
         }
@@ -144,21 +144,27 @@ export const userAfterCreate = async ({
 
         // Notif organisme.admin
         if (notify) {
-          const usersToNotify = (
-            await findActivePermissionsByRoleName(organisme._id, "organisme.admin", { userEmail: 1 })
-          ).map(({ userEmail }) => userEmail);
-
           const accessType = {
             "organisme.admin": "Gestionnaire",
             "organisme.member": "Éditeur",
             "organisme.readonly": "Lecteur",
           };
 
-          for (const userToNotify of usersToNotify) {
+          if (!hasAtLeastOneUserToValidate) {
             await mailer.sendEmail(
-              { to: userToNotify, payload: { user, organisme, type: accessType[asRole] } },
-              "validation_user_by_orga_admin"
-            );
+              { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, organisme, type: accessType[asRole] } },
+              "validation_first_organisme_user_by_tdb_team"
+            ); // Notif TDB_admin or whatever who
+          } else {
+            const usersToNotify = (
+              await findActivePermissionsByRoleName(organisme._id, "organisme.admin", { userEmail: 1 })
+            ).map(({ userEmail }) => userEmail);
+            for (const userToNotify of usersToNotify) {
+              await mailer.sendEmail(
+                { to: userToNotify, payload: { user, organisme, type: accessType[asRole] } },
+                "validation_user_by_orga_admin"
+              );
+            }
           }
         }
       }
