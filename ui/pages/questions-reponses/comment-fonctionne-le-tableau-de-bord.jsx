@@ -287,7 +287,7 @@ export default function CommentFonctionneLeTdb() {
                   content: (
                     <Box>
                       <Text>
-                        L’UAI (unité administrative immatriculée) est le code d’immatriculation qu’utilise l’Education
+                        L’UAI (unité administrative immatriculée) est le code d’immatriculation qu’utilise l’Éducation
                         Nationale pour enregistrer un organisme dans le Répertoire National des Etablissements (RNE).
                         Elle est composée de sept chiffres et une lettre.
                         <br />

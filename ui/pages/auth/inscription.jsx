@@ -48,7 +48,7 @@ const RegisterPage = () => {
               Félicitations, vous venez de créer votre compte !
             </Heading>
             <Text textAlign="center">
-              Vous allez recevoir un courriel de confirmation à l&apos;adresse renseignée.
+              Vous allez recevoir un courriel de confirmation à l&apos;adresse renseignée
               <br />
               (n&apos;oubliez pas de vérifier vos indésirables).
             </Text>
@@ -66,10 +66,7 @@ const RegisterPage = () => {
             <Text mt="2w">Il permet de :</Text>
             <UnorderedList ml="4w" mt="2w">
               <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
-              <ListItem>
-                Accompagner les jeunes en situation de décrochage (et donc d&apos;influencer leur.s parcours scolaires
-                et professionnels)
-              </ListItem>
+              <ListItem>Accompagner les jeunes en situation de décrochage</ListItem>
               <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
             </UnorderedList>
           </Box>

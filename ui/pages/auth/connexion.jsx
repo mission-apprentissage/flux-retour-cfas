@@ -44,10 +44,7 @@ export default function ConnexionPage() {
           <Text mt="2w">Il permet de :</Text>
           <UnorderedList ml="4w" mt="2w">
             <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
-            <ListItem>
-              Accompagner les jeunes en situation de décrochage (et donc d&apos;influencer leur.s parcours scolaires et
-              professionnels)
-            </ListItem>
+            <ListItem>Accompagner les jeunes en situation de décrochage</ListItem>
             <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
           </UnorderedList>
         </Box>
