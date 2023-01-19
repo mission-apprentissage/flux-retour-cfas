@@ -153,14 +153,15 @@ const Televersements = () => {
         annee_scolaire: "",
         ...(typeCodeDiplome === "CFD"
           ? {
-              [CFD]: "CFD",
+              CFD: CFD,
               "": "RNCP",
             }
-          : { "": "CFD", [RNCP]: "RNCP" }),
+          : { "": "CFD", RNCP: RNCP }),
         nom: "nom",
         prenom: "prenom",
         ...rest,
       };
+
       initLines = Object.entries(remap).map(([key, value]) => {
         if (key === "annee_scolaire") {
           return {
@@ -169,8 +170,8 @@ const Televersements = () => {
           };
         }
         return {
-          in: { value: key, hasError: false },
-          out: { value: value, hasError: false },
+          in: { value: value, hasError: false },
+          out: { value: key, hasError: false },
         };
       });
 
