@@ -72,7 +72,6 @@ const NavBarPublic = ({ isOpen }) => {
       <NavItem to="/">Accueil</NavItem>
       <NavItem to="/explorer-les-indicateurs">Indicateurs en temps réel</NavItem>
       <NavItem to="/comprendre-les-donnees">Comprendre les données</NavItem>
-      <NavItem to="/organisme-formation">Organisme de formation</NavItem>
     </NavContainer>
   );
 };
