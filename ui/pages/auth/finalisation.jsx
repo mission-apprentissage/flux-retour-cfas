@@ -253,7 +253,7 @@ const Finalize = () => {
                   {...{
                     name: `reseau`,
                     fieldType: "select",
-                    placeholder: "Séléctionner votre réseau",
+                    placeholder: "Sélectionner votre réseau",
                     options: Object.values(RESEAUX_CFAS).map(({ nomReseau }) => ({
                       label: `${nomReseau}`,
                       value: nomReseau,

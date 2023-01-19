@@ -114,7 +114,7 @@ export const updatePermission = async ({ organisme_id, userEmail, roleName, cust
 };
 
 /**
- * Méthode de mise à jour d'activation d'acces
+ * Méthode de mise à jour d'activation d'accès
  * @param {*} permissionProps
  * @returns
  */
@@ -141,7 +141,7 @@ export const updatePermissionPending = async ({ organisme_id, userEmail, pending
 };
 
 /**
- * Méthode de mise à jour d'activation d'acces
+ * Méthode de mise à jour d'activation d'accès
  * @param {*} permissionProps
  * @returns
  */

@@ -229,7 +229,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
               </FormControl>
               <HStack spacing={8}>
                 <FormControl py={2} isRequired isInvalid={errors.prenom && touched.prenom}>
-                  <FormLabel>Votre Prénom</FormLabel>
+                  <FormLabel>Votre prénom</FormLabel>
                   <Input
                     id="prenom"
                     name="prenom"
@@ -240,7 +240,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
                   {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
                 </FormControl>
                 <FormControl py={2} isRequired isInvalid={errors.nom && touched.nom}>
-                  <FormLabel>Votre Nom</FormLabel>
+                  <FormLabel>Votre nom</FormLabel>
                   <Input id="nom" name="nom" onChange={handleChange} placeholder="Ex : Dupont" value={values.nom} />
                   {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
                 </FormControl>

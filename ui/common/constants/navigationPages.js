@@ -13,7 +13,7 @@ export const NAVIGATION_PAGES = {
   },
   DemandeAcces: {
     path: "/demande-acces",
-    title: "Demande d'acces",
+    title: "Demande d'accès",
   },
   ComprendreLesDonnees: {
     path: "/comprendre-les-donnees",
