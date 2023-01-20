@@ -44,7 +44,7 @@ const Televersements = () => {
   const [lines, setLines] = useState([]);
   const [requireKeysSettled, setRequireKeysSettled] = useState([]);
 
-  const [preEffictifs, setPreEffictifs] = useState({ canBeImport: [], canNotBeImport: [] });
+  const [preEffectifs, setPreEffectifs] = useState({ canBeImport: [], canNotBeImport: [] });
   const [typeDocument, setTypeDocument] = useState("");
   const [typeCodeDiplome, setTypeCodeDiplome] = useState("");
   const [savedAsModel, setSavedAsModel] = useState(false);
@@ -233,7 +233,7 @@ const Televersements = () => {
   }, [lines, organisme._id, typeDocument]);
 
   const onGoToPreImportStep = useCallback(async () => {
-    setPreEffictifs({ canBeImport: [], canNotBeImport: [] });
+    setPreEffectifs({ canBeImport: [], canNotBeImport: [] });
     setStep("pre-import");
     const keyToKeyMapping = lines.reduce(
       (acc, line) => {
@@ -255,7 +255,7 @@ const Televersements = () => {
     }
     setCurrentEffectifsState(newEffectifsState);
 
-    setPreEffictifs({
+    setPreEffectifs({
       canBeImport: canBeImportEffectifs,
       canNotBeImport: canNotBeImportEffectifs,
     });
@@ -274,13 +274,13 @@ const Televersements = () => {
     <>
       {step === "landing" && (
         <Flex alignItems="flex-start" mt={8} flexDirection="column">
-          <Text>Je n&rsquo;ai pas de fichier. Vous pouvez utiliser notre fichier modèle.</Text>
+          <Text>Vous n&rsquo;avez pas de fichier ? Utilisez notre fichier modèle</Text>
           <Link href={`/modele_tableau_de_bord.csv`} textDecoration={"underline"} isExternal>
             <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
           </Link>
           <Box mt={10}>
             <Button onClick={() => setStep("upload")} size={"md"} variant="primary">
-              Téléverser un fichier
+              Importer un fichier
               <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
             </Button>
           </Box>
@@ -289,7 +289,7 @@ const Televersements = () => {
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         {step === "upload" && (
           <>
-            <UploadFiles title={`1. Téléverser votre fichier`} />
+            <UploadFiles title={`1. Importer votre fichier`} />
 
             <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
               2. Quel est le modèle de correspondance de ce fichier ?
@@ -297,7 +297,7 @@ const Televersements = () => {
             <HStack justifyContent="center" spacing="4w" border="1px solid" borderColor="bluefrance" mb={8} py={4}>
               <VStack w="33%" h="full" alignItems="baseline">
                 <Heading as="h4" fontSize="1rem">
-                  Modèle existants:
+                  Modèle existant :
                 </Heading>
                 <Input
                   {...{
@@ -336,8 +336,8 @@ const Televersements = () => {
                         pattern: "^.*$",
                       },
                     ],
-                    placeholder: "type de fichier service insciption",
-                    validateMessage: "le modèle de fichier doit contenir au moins 4 caractéres",
+                    placeholder: "Nommez votre fichier",
+                    validateMessage: "le modèle de fichier doit contenir au moins 4 caractères",
                     locked: !documents?.unconfirmed?.length,
                   }}
                   onSubmit={(value) => onDefineFileType(value)}
@@ -514,7 +514,7 @@ const Televersements = () => {
               {lines[0].in.value && (lines[1].in.value || lines[2].in.value) && typeCodeDiplome && (
                 <>
                   <Heading as="h4" flexGrow="1" fontSize="1rem">
-                    3. Choisir vos correspondances pour les colonnes obligatoires nom et prénom
+                    3. Choisir vos correspondances pour les colonnes obligatoires Nom et Prénom
                   </Heading>
                   <Box my={8}>
                     {Object.values(mapping.requireKeys).map((requireKey, i) => {
@@ -653,7 +653,7 @@ const Televersements = () => {
                 </Heading>
                 <Text>
                   Sauvegarder ces correspondances comme modèle pour les prochains téléversements.
-                  <br /> Cette action remplacera le précedente modèle sauvegarder.
+                  <br /> Cette action remplacera le précédente modèle sauvegarder.
                 </Text>
                 <HStack>
                   <Button
@@ -677,7 +677,7 @@ const Televersements = () => {
                   mr="0.5rem"
                   transform="rotate(180deg)"
                 />
-                Étape précedente
+                Étape précédente
               </Button>
 
               <Button
@@ -692,10 +692,10 @@ const Televersements = () => {
             </HStack>
           </>
         )}
-        {step === "pre-import" && !preEffictifs.canBeImport.length && !preEffictifs.canNotBeImport.length && (
+        {step === "pre-import" && !preEffectifs.canBeImport.length && !preEffectifs.canNotBeImport.length && (
           <Spinner />
         )}
-        {step === "pre-import" && (!!preEffictifs.canBeImport.length || !!preEffictifs.canNotBeImport.length) && (
+        {step === "pre-import" && (!!preEffectifs.canBeImport.length || !!preEffectifs.canNotBeImport.length) && (
           <Box>
             <Heading textStyle="h4" color="bluesoft.500" mb={5} fontSize="1.5rem">
               Prévisualisation
@@ -729,7 +729,7 @@ const Televersements = () => {
               </Box>
             </Ribbons>
 
-            {!!preEffictifs.canNotBeImport.length && (
+            {!!preEffectifs.canNotBeImport.length && (
               <Box my={6}>
                 <Ribbons variant="alert" mt="0.5rem">
                   <Box ml={3}>
@@ -745,7 +745,7 @@ const Televersements = () => {
                 </Ribbons>
 
                 <EffectifsTable
-                  organismesEffectifs={preEffictifs.canNotBeImport}
+                  organismesEffectifs={preEffectifs.canNotBeImport}
                   columns={["cfd", "rncp", "nom", "prenom", "separator", "error-import"]}
                   RenderErrorImport={({ error }) => {
                     const errorText = {
@@ -790,7 +790,7 @@ const Televersements = () => {
               </Box>
             )}
 
-            {!!preEffictifs.canBeImport.length && (
+            {!!preEffectifs.canBeImport.length && (
               <Box my={10}>
                 <Ribbons variant="warning" mt="0.5rem">
                   <Box ml={3}>
@@ -808,7 +808,7 @@ const Televersements = () => {
                   </Box>
                 </Ribbons>
                 <EffectifsTable
-                  organismesEffectifs={preEffictifs.canBeImport}
+                  organismesEffectifs={preEffectifs.canBeImport}
                   columns={["expander", "cfd", "rncp", "nom", "prenom", "separator", "action", "state"]}
                   effectifsSnapshot
                 />
@@ -822,7 +822,7 @@ const Televersements = () => {
               variant="secondary"
             >
               <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} mr="0.5rem" transform="rotate(180deg)" />
-              Étape Précedente
+              Étape précédente
             </Button>
             <Button onClick={() => onGoToImportStep()} size={"md"} variant="primary">
               Importer les données

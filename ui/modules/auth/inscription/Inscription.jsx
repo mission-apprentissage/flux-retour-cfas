@@ -147,8 +147,8 @@ const Inscription = ({ onSucceeded, ...props }) => {
               {values.type === "of" && (
                 <InscriptionOF
                   onEndOfSpecific={(result) => {
-                    setFieldValue("uai", result.data.uai);
-                    setFieldValue("siret", result.data.siret);
+                    result.data?.uai && setFieldValue("uai", result.data.uai);
+                    result.data?.siret && setFieldValue("siret", result.data.siret);
                     setFieldValue("organismes_appartenance", "ORGANISME_FORMATION");
                     setEntrepriseData(result);
                   }}
@@ -157,7 +157,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
               {values.type === "pilot" && (
                 <InscriptionPilot
                   onEndOfSpecific={({ organismes_appartenance, result }) => {
-                    setFieldValue("siret", result.data.siret);
+                    result.data?.siret && setFieldValue("siret", result.data.siret);
                     setFieldValue("organismes_appartenance", organismes_appartenance);
                     setEntrepriseData(result);
                   }}
@@ -166,7 +166,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
               {values.type === "reseau_of" && (
                 <InscriptionReseau
                   onEndOfSpecific={(result) => {
-                    setFieldValue("siret", result.data.siret);
+                    result.data?.siret && setFieldValue("siret", result.data.siret);
                     setFieldValue("organismes_appartenance", "TETE_DE_RESEAU");
                     setEntrepriseData(result);
                   }}
