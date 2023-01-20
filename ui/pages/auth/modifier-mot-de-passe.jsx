@@ -11,7 +11,6 @@ import {
   List,
   ListItem,
   ListIcon,
-  UnorderedList,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
