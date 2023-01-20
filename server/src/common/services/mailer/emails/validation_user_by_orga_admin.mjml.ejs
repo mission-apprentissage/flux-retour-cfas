@@ -1,56 +1,69 @@
 <mjml>
   <%- include('./common/head.ejs'); %>
 
-  <mj-body background-color="#f9fafc">
-    <%- include('./common/header.ejs'); %>
-    <mj-wrapper padding="10px 20px">
-      <mj-section background-color="#ffffff" padding-top="0">
-        <mj-column>
-          <mj-text> Bonjour, </mj-text>
-          <mj-text>
-            <div>
-              <br />
-              L'utilisateur <strong><%= data.user.email %></strong> souhaite accèder à votre organisme <br />
-              en tant que <strong><%= data.type %></strong>
-            </div>
-            <ul>
-              <li><%= data.organisme.nom %></li>
-              <li>Uai : <%= data.organisme.uai %></li>
-              <li>Siret : <%= data.organisme.siret %> (<%= data.organisme.sirets.join(',') %>)</li>
-              <li>Nature :<%= data.organisme.nature %></li>
-              <li>Reseaux :<%= data.organisme.reseaux.join(',') %></li>
-              <li>Erps: <%= data.organisme.erps.join(',') %></li>
-
-              <li>
-                Adresse :
+    <mj-body background-color="#f9fafc">
+      <%- include('./common/header.ejs'); %>
+        <mj-wrapper padding="10px 20px">
+          <mj-section background-color="#ffffff" padding-top="0">
+            <mj-column>
+              <mj-text> Bonjour, </mj-text>
+              <mj-text>
+                <div>
+                  <br />
+                  L'utilisateur <strong>
+                    <%= data.user.email %>
+                  </strong> souhaite accèder à votre organisme <br />
+                  en tant que <strong>
+                    <%= data.type %>
+                  </strong>
+                </div>
                 <ul>
-                  <li>code_postal : <%= data.organisme.adresse.code_postal %></li>
-                  <li>code_insee : <%= data.organisme.adresse.code_insee %></li>
-                  <li>commune: <%= data.organisme.adresse.commune %></li>
-                  <li>departement: <%= data.organisme.adresse.departement %></li>
-                  <li>region: <%= data.organisme.adresse.region %></li>
-                  <li>academie: <%= data.organisme.adresse.academie %></li>
-                  <li>complete: <%= data.organisme.adresse.complete %></li>
+                  <li>
+                    <%= data.organisme.nom %>
+                  </li>
+                  <li>Uai : <%= data.organisme.uai %>
+                  </li>
+                  <li>Siret : <%= data.organisme.siret %> (<%= data.organisme.sirets.join(',') %>)</li>
+                  <li>Nature :<%= data.organisme.nature %>
+                  </li>
+                  <li>Reseaux :<%= data.organisme.reseaux.join(',') %>
+                  </li>
+                  <li>Erps: <%= data.organisme.erps.join(',') %>
+                  </li>
+
+                  <li>
+                    Adresse :
+                    <ul>
+                      <li>code_postal : <%= data.organisme.adresse.code_postal %>
+                      </li>
+                      <li>code_insee : <%= data.organisme.adresse.code_insee %>
+                      </li>
+                      <li>commune: <%= data.organisme.adresse.commune %>
+                      </li>
+                      <li>departement: <%= data.organisme.adresse.departement %>
+                      </li>
+                      <li>region: <%= data.organisme.adresse.region %>
+                      </li>
+                      <li>academie: <%= data.organisme.adresse.academie %>
+                      </li>
+                      <li>complete: <%= data.organisme.adresse.complete %>
+                      </li>
+                    </ul>
+                  </li>
                 </ul>
-              </li>
-            </ul>
-          </mj-text>
-          <mj-button
-            href="<%= utils.getPublicUrl(`/api/v1/organisme/contributors/confirm-access?userEmail=${data.user.email}&organisme_id=${data.organisme._id}&validate=true`) %>"
-            background-color="#0e4194"
-            color="white"
-          >
-            Ok je confirme cet utilisateur
-          </mj-button>
-          <mj-button
-            href="<%= utils.getPublicUrl(`/api/v1/organisme/contributors/confirm-access?userEmail=${data.user.email}&organisme_id=${data.organisme._id}&validate=false`) %>"
-            background-color="#ff0000"
-            color="white"
-          >
-            Cet utilisateur n'a pas le droit d'accéder à mon organisme
-          </mj-button>
-        </mj-column>
-      </mj-section>
-    </mj-wrapper>
-  </mj-body>
+              </mj-text>
+              <mj-button
+                href="<%= utils.getPublicUrl(`/api/v1/organisme/contributors/confirm-access?userEmail=${encodeURIComponent(data.user.email)}&organisme_id=${data.organisme._id}&validate=true`) %>"
+                background-color="#0e4194" color="white">
+                Ok je confirme cet utilisateur
+              </mj-button>
+              <mj-button
+                href="<%= utils.getPublicUrl(`/api/v1/organisme/contributors/confirm-access?userEmail=${encodeURIComponent(data.user.email)}&organisme_id=${data.organisme._id}&validate=false`) %>"
+                background-color="#ff0000" color="white">
+                Cet utilisateur n'a pas le droit d'accéder à mon organisme
+              </mj-button>
+            </mj-column>
+          </mj-section>
+        </mj-wrapper>
+    </mj-body>
 </mjml>
