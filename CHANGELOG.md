@@ -1,3 +1,10 @@
+## [3.5.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.5.0...v3.5.1-beta.1) (2023-01-23)
+
+
+### Bug Fixes
+
+* display effectifs table when admin ([99b0bd3](https://github.com/mission-apprentissage/flux-retour-cfas/commit/99b0bd359f4dc7f2f166d90ef756ca97fd2533a1))
+
 # [3.5.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.4.2...v3.5.0) (2023-01-23)
 
 
