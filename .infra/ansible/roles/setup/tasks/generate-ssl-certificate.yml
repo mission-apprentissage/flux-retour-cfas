@@ -13,8 +13,8 @@
 
 - name: Add cron to ensure SSL certificate will be renewed
   ansible.builtin.cron:
-    name: "renew-certificate"
+    name: "renew ssl certificate each monday at 02h00"
     minute: "0"
     hour: "2"
     weekday: "1"
-    job: "bash /opt/flux-retour-cfas/tools/ssl/renew-certificate.sh {{dns_name}} >> /var/log/cron.log 2>&1"
+    job: "bash /opt/flux-retour-cfas/tools/ssl/renew-certificate.sh {{dns_name}} >> /var/log/renew-ssl.log 2>&1"
