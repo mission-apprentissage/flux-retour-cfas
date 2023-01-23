@@ -15,7 +15,11 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 function useActivation(activationToken) {
   const { data, isLoading, isFetching, isError } = useQuery(
     ["useActivation"],
-    () => _post("/api/v1/auth/activation", { activationToken }),
+    async () => {
+      if (!activationToken) throw new Error("Missing activation token");
+      const response = await _post("/api/v1/auth/activation", { activationToken });
+      return response;
+    },
     {
       refetchOnWindowFocus: false,
     }
@@ -34,7 +38,7 @@ const Confirmed = () => {
   const [, setAuth] = useAuth();
   const [, setToken] = useToken();
   const { activationToken } = router.query;
-  const email = decodeJWT(activationToken).sub;
+  const email = activationToken ? decodeJWT(activationToken).sub : "";
 
   const { isLoading, isError, data } = useActivation(activationToken);
 
