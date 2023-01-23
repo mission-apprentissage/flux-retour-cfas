@@ -1,3 +1,10 @@
+## [3.4.2-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.4.2-beta.2...v3.4.2-beta.3) (2023-01-23)
+
+
+### Bug Fixes
+
+* fix divers bugs ([#2427](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2427)) ([fd1f4ac](https://github.com/mission-apprentissage/flux-retour-cfas/commit/fd1f4ac4e9b946aa2a433159a7110eb2e8956781))
+
 ## [3.4.2-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.4.2-beta.1...v3.4.2-beta.2) (2023-01-19)
 
 
