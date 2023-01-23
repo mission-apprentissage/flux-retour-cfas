@@ -11,7 +11,7 @@ import TransmissionAPI from "./TransmissionAPI";
 import { useRouter } from "next/router";
 import Televersements from "./Televersements";
 import { effectifsStateAtom } from "./engine/atoms.js";
-import { hasContextAccessTo } from "../../../common/utils/rolesUtils.js";
+import { hasContextAccessTo, isUserAdmin } from "../../../common/utils/rolesUtils.js";
 import useAuth from "../../../hooks/useAuth.js";
 import Ribbons from "../../../components/Ribbons/Ribbons.jsx";
 import { useEspace } from "../../../hooks/useEspace.js";
@@ -102,7 +102,7 @@ const EffectifsPage = () => {
           </Flex>
         </Box>
       )}
-      {auth.hasAtLeastOneUserToValidate && (
+      {(auth.hasAtLeastOneUserToValidate || isUserAdmin(auth)) && (
         <>
           {!organisme.mode_de_transmission && <ChoixTransmission />}
           {organisme.mode_de_transmission === "API" &&
