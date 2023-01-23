@@ -76,7 +76,7 @@ services:
     networks:
       - flux_retour_cfas_network
     healthcheck:
-      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      test: [ "CMD", "/usr/local/bin/clamdcheck.sh" ]
       interval: 60s
       retries: 3
       start_period: 120s
@@ -87,6 +87,7 @@ services:
     # https://redis.io/docs/manual/persistence/#snapshotting
     command: redis-server --save 60 1 --loglevel warning
     container_name: flux_retour_cfas_redis
+    mem_limit: 512m
     networks:
       - flux_retour_cfas_network
 
