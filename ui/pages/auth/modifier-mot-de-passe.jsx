@@ -1,5 +1,17 @@
 import React, { useState } from "react";
-import { Box, Button, Flex, Heading, Input, Text, List, ListItem, ListIcon, UnorderedList } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Text,
+  List,
+  ListItem,
+  ListIcon,
+} from "@chakra-ui/react";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import * as Yup from "yup";
@@ -10,6 +22,8 @@ import useAuth from "../../hooks/useAuth";
 import useToken from "../../hooks/useToken";
 import { _get, _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { ShowPassword } from "../../theme/components/icons";
+import InformationBlock from "../../modules/auth/inscription/components/InformationBlock";
 
 YupPassword(Yup); // extend yup
 
@@ -20,6 +34,9 @@ const ResetPasswordPage = () => {
   const [, setToken] = useToken();
   const router = useRouter();
   const { passwordToken } = router.query;
+
+  const [show, setShow] = React.useState(false);
+  const onShowPassword = () => setShow(!show);
 
   const minLength = auth.permissions.is_admin ? 20 : 12;
 
@@ -115,15 +132,20 @@ const ResetPasswordPage = () => {
           {!isFirstSetPassword && "Une mise à jour de votre mot de passe est obligatoire"}
         </Heading>
         <form onSubmit={handleSubmit}>
-          <Input
-            id="newPassword"
-            name="newPassword"
-            type="password"
-            placeholder={isFirstSetPassword ? "Votre mot de passe..." : "Votre nouveau mot de passe..."}
-            onChange={onChange}
-            value={values.newPassword.trim()}
-            mb={3}
-          />
+          <InputGroup size="md">
+            <Input
+              id="newPassword"
+              name="newPassword"
+              type={show ? "text" : "password"}
+              placeholder={isFirstSetPassword ? "Votre mot de passe..." : "Votre nouveau mot de passe..."}
+              onChange={onChange}
+              value={values.newPassword.trim()}
+              mb={3}
+            />
+            <InputRightElement width="2.5rem">
+              <ShowPassword boxSize={5} onClick={onShowPassword} cursor="pointer" />
+            </InputRightElement>
+          </InputGroup>
           <List mb={5}>
             <ListItem color={variant[conditions.min].color}>
               <ListIcon aria-hidden={true} as={variant[conditions.min].icon} color={variant[conditions.min].color} />
@@ -173,23 +195,7 @@ const ResetPasswordPage = () => {
           )}
         </form>
       </Box>
-      {isFirstSetPassword && (
-        <Box mt={10}>
-          <Text fontWeight={700} fontSize={22}>
-            Votre compte dédié
-          </Text>
-          <Text mt="2w" fontWeight={700}>
-            Le service tableau de bord de l&apos;apprentissage est porté par la Mission interministérielle pour
-            l’apprentissage.
-          </Text>
-          <Text mt="2w">Il permet de :</Text>
-          <UnorderedList ml="4w" mt="2w">
-            <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
-            <ListItem>Accompagner les jeunes en situation de décrochage</ListItem>
-            <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
-          </UnorderedList>
-        </Box>
-      )}
+      {isFirstSetPassword && <InformationBlock mt={10} />}
     </Flex>
   );
 };

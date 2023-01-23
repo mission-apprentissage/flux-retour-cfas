@@ -25,7 +25,6 @@ export default function QuestCeQueLeTdb() {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 6, 8]}>
         <Container maxW="xl">

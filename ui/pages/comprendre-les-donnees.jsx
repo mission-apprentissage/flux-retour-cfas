@@ -13,7 +13,6 @@ const ComprendreLesDonneesPage = () => {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Section>
         <Box paddingTop="3w">

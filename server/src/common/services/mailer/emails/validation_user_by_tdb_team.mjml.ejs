@@ -1,48 +1,57 @@
 <mjml>
   <%- include('./common/head.ejs'); %>
 
-  <mj-body background-color="#f9fafc">
-    <%- include('./common/header.ejs'); %>
-    <mj-wrapper padding="10px 20px">
-      <mj-section background-color="#ffffff" padding-top="0">
-        <mj-column>
-          <mj-text> Bonjour, </mj-text>
-          <mj-text>
-            <div>
-              <br />
-              L'utilisateur <strong><%= data.user.email %></strong> demande un accès <strong><%= data.type %></strong> :
-            </div>
-            <ul>
-              <li><%= data.user.nom %> <%= data.user.prenom %></li>
-              <li>Organisation : <%= data.user.organisation %></li>
-              <li>Siret : <%= data.user.siret %></li>
-              <li>RESEAU : <%= data.user.reseau %></li>
-              <li>
-                TERRITOIRES :
+    <mj-body background-color="#f9fafc">
+      <%- include('./common/header.ejs'); %>
+        <mj-wrapper padding="10px 20px">
+          <mj-section background-color="#ffffff" padding-top="0">
+            <mj-column>
+              <mj-text> Bonjour, </mj-text>
+              <mj-text>
+                <div>
+                  <br />
+                  L'utilisateur <strong>
+                    <%= data.user.email %>
+                  </strong> demande un accès <strong>
+                    <%= data.type %>
+                  </strong> :
+                </div>
                 <ul>
-                  <li>codes_region : <%= data.user.codes_region.join(',') %></li>
-                  <li>codes_academie : <%= data.user.codes_academie.join(',') %></li>
-                  <li>codes_departement: <%= data.user.codes_departement.join(',') %></li>
+                  <li>
+                    <%= data.user.nom %>
+                      <%= data.user.prenom %>
+                  </li>
+                  <li>Organisation : <%= data.user.organisation %>
+                  </li>
+                  <li>Siret : <%= data.user.siret %>
+                  </li>
+                  <li>RESEAU : <%= data.user.reseau %>
+                  </li>
+                  <li>
+                    TERRITOIRES :
+                    <ul>
+                      <li>codes_region : <%= data.user.codes_region.join(',') %>
+                      </li>
+                      <li>codes_academie : <%= data.user.codes_academie.join(',') %>
+                      </li>
+                      <li>codes_departement: <%= data.user.codes_departement.join(',') %>
+                      </li>
+                    </ul>
+                  </li>
                 </ul>
-              </li>
-            </ul>
-          </mj-text>
-          <mj-button
-            href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${data.user.email}&validate=true`) %>"
-            background-color="#0e4194"
-            color="white"
-          >
-            Ok je confirme cet utilisateur
-          </mj-button>
-          <mj-button
-            href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${data.user.email}&validate=false`) %>"
-            background-color="#ff0000"
-            color="white"
-          >
-            Cet utilisateur n'a pas le droit d'accéder à cet organisme
-          </mj-button>
-        </mj-column>
-      </mj-section>
-    </mj-wrapper>
-  </mj-body>
+              </mj-text>
+              <mj-button
+                href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(data.user.email)}&validate=true`) %>"
+                background-color="#0e4194" color="white">
+                Ok je confirme cet utilisateur
+              </mj-button>
+              <mj-button
+                href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(data.user.email)}&validate=false`) %>"
+                background-color="#ff0000" color="white">
+                Cet utilisateur n'a pas le droit d'accéder à cet organisme
+              </mj-button>
+            </mj-column>
+          </mj-section>
+        </mj-wrapper>
+    </mj-body>
 </mjml>

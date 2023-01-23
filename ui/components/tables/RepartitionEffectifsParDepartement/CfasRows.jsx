@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useHistory } from "react-router-dom";
 
 import { useFiltersContext } from "../../../modules/visualiser-les-indicateurs/FiltersContext";

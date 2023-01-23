@@ -15,7 +15,6 @@ export default function CommentConsulterEtVerifierLesDonnees() {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Section>
         <Breadcrumb

@@ -8,6 +8,7 @@ import useAuth from "../../hooks/useAuth";
 import useToken from "../../hooks/useToken";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import { useQuery } from "@tanstack/react-query";
+import { CONTACT_ADDRESS } from "../../common/constants/product";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -76,7 +77,7 @@ const Confirmed = () => {
           </Heading>
           <Box>
             {/* TODO */}
-            <a href="mailto:cerfa@apprentissage.beta.gouv.fr">support-contrat@apprentissage.beta.gouv.fr</a>
+            <a href={`mailto:${CONTACT_ADDRESS}`}>{CONTACT_ADDRESS}</a>
           </Box>
         </HStack>
       )}

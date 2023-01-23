@@ -1,4 +1,4 @@
-import { Box, Flex, Text, UnorderedList, ListItem } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import React from "react";
 import Head from "next/head";
 import { Page } from "../../components";
@@ -6,6 +6,7 @@ import Login from "../../modules/auth/connexion/Connexion";
 import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
 
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import InformationBlock from "../../modules/auth/inscription/components/InformationBlock";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -21,7 +22,6 @@ export default function ConnexionPage() {
     <Page>
       <Head>
         <title>Connexion</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
       <Flex w="100%" mt={8} minH="40vh">
@@ -33,21 +33,8 @@ export default function ConnexionPage() {
           border="1px solid"
           borderColor="openbluefrance"
         />
-        <Box w="50%" p={10}>
-          <Text fontWeight={700} fontSize={22}>
-            Votre compte dédié
-          </Text>
-          <Text mt="2w" fontWeight={700}>
-            Le service tableau de bord de l&apos;apprentissage est porté par la Mission interministérielle pour
-            l’apprentissage.
-          </Text>
-          <Text mt="2w">Il permet de :</Text>
-          <UnorderedList ml="4w" mt="2w">
-            <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
-            <ListItem>Accompagner les jeunes en situation de décrochage</ListItem>
-            <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
-          </UnorderedList>
-        </Box>
+
+        <InformationBlock w="50%" p={10} />
       </Flex>
     </Page>
   );

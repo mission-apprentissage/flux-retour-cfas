@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { fetchReseaux } from "../../../../../common/api/tableauDeBord";
 import { QUERY_KEYS } from "../../../../../common/constants/queryKeys";
@@ -6,7 +6,7 @@ import { sortAlphabeticallyBy } from "../../../../../common/utils/sortAlphabetic
 
 const useReseauxData = () => {
   // reseaux are very unlikely during the user's session, thus the infinite staleTime
-  const { data } = useQuery(QUERY_KEYS.RESEAUX, () => fetchReseaux(), { staleTime: Infinity });
+  const { data } = useQuery([QUERY_KEYS.RESEAUX], () => fetchReseaux(), { staleTime: Infinity });
 
   const reseauxSorted = sortAlphabeticallyBy("nom", data || []);
 

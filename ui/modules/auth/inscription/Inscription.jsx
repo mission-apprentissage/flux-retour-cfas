@@ -43,7 +43,7 @@ const typeCompte = {
   },
 };
 
-export const Inscription = ({ onSucceeded, ...props }) => {
+const Inscription = ({ onSucceeded, ...props }) => {
   const [step, setStep] = useState(0);
   const [entrepriseData, setEntrepriseData] = useState(null);
 
@@ -147,8 +147,8 @@ export const Inscription = ({ onSucceeded, ...props }) => {
               {values.type === "of" && (
                 <InscriptionOF
                   onEndOfSpecific={(result) => {
-                    setFieldValue("uai", result.data.uai);
-                    setFieldValue("siret", result.data.siret);
+                    result.data?.uai && setFieldValue("uai", result.data.uai);
+                    result.data?.siret && setFieldValue("siret", result.data.siret);
                     setFieldValue("organismes_appartenance", "ORGANISME_FORMATION");
                     setEntrepriseData(result);
                   }}
@@ -157,7 +157,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
               {values.type === "pilot" && (
                 <InscriptionPilot
                   onEndOfSpecific={({ organismes_appartenance, result }) => {
-                    setFieldValue("siret", result.data.siret);
+                    result.data?.siret && setFieldValue("siret", result.data.siret);
                     setFieldValue("organismes_appartenance", organismes_appartenance);
                     setEntrepriseData(result);
                   }}
@@ -166,7 +166,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
               {values.type === "reseau_of" && (
                 <InscriptionReseau
                   onEndOfSpecific={(result) => {
-                    setFieldValue("siret", result.data.siret);
+                    result.data?.siret && setFieldValue("siret", result.data.siret);
                     setFieldValue("organismes_appartenance", "TETE_DE_RESEAU");
                     setEntrepriseData(result);
                   }}
@@ -229,7 +229,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
               </FormControl>
               <HStack spacing={8}>
                 <FormControl py={2} isRequired isInvalid={errors.prenom && touched.prenom}>
-                  <FormLabel>Votre Prénom</FormLabel>
+                  <FormLabel>Votre prénom</FormLabel>
                   <Input
                     id="prenom"
                     name="prenom"
@@ -240,7 +240,7 @@ export const Inscription = ({ onSucceeded, ...props }) => {
                   {errors.prenom && touched.prenom && <FormErrorMessage>{errors.prenom}</FormErrorMessage>}
                 </FormControl>
                 <FormControl py={2} isRequired isInvalid={errors.nom && touched.nom}>
-                  <FormLabel>Votre Nom</FormLabel>
+                  <FormLabel>Votre nom</FormLabel>
                   <Input id="nom" name="nom" onChange={handleChange} placeholder="Ex : Dupont" value={values.nom} />
                   {errors.nom && touched.nom && <FormErrorMessage>{errors.nom}</FormErrorMessage>}
                 </FormControl>
@@ -282,3 +282,5 @@ export const Inscription = ({ onSucceeded, ...props }) => {
     </Box>
   );
 };
+
+export default Inscription;

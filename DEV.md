@@ -161,6 +161,12 @@ La structure principale du serveur Node Express est définie dans `server/src/ht
 
 Il est possible de tester en local le server express via `http://localhost/api`
 
+## Mailer
+
+Le server SMTP de test mailhog est utilisé localement pour prendre en charge l'envoi d'emails.
+
+Web UI: http://localhost/smtp
+
 ### Logger
 
 Pour la gestion des logs nous utilisons la librairie bunyan _cf : https://www.npmjs.com/package/bunyan_

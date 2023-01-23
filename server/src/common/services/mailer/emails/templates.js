@@ -38,7 +38,7 @@ export function validation_first_organisme_user_by_tdb_team({ payload }, token, 
 export function validation_user_by_tdb_team({ payload }, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   return {
-    subject: `${prefix} [ADMIN] Demande d'accès ${payload.user.email}`,
+    subject: `${prefix} [ADMIN] Demande d'accès`,
     templateFile: getTemplateFile("validation_user_by_tdb_team"),
     data: {
       user: payload.user,
