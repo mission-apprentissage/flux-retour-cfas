@@ -68,7 +68,13 @@ export function notify_access_granted({ payload }, token, options = {}) {
     subject: `${prefix} Votre demande d'accès a été acceptée`,
     templateFile: getTemplateFile("notify_access_granted"),
     data: {
-      user: payload.user,
+      userCivility: payload.user.civility,
+      userName: payload.user.nom,
+      organismeName: payload.organisme.nom,
+    },
+  };
+}
+
 export function notify_access_rejected({ payload }, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   return {
