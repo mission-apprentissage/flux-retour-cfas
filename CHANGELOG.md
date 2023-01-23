@@ -1,3 +1,15 @@
+# [3.5.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.4.2...v3.5.0) (2023-01-23)
+
+
+### Bug Fixes
+
+* **ui:** activation token missing ([01af6ba](https://github.com/mission-apprentissage/flux-retour-cfas/commit/01af6ba12958519fae2a23ffb3ffd6b450ed80c6))
+
+
+### Features
+
+* import reseaux Agri et MFR ([#2435](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2435)) ([00fd696](https://github.com/mission-apprentissage/flux-retour-cfas/commit/00fd696f21ef2623269fb8512174a8ffcf65559f))
+
 # [3.5.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.5.0-beta.1...v3.5.0-beta.2) (2023-01-23)
 
 
