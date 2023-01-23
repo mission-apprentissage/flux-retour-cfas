@@ -166,9 +166,6 @@ export const updatePasswordLegacy = async (updateToken, password) => {
       },
     }
   );
-
-  // TODO return nothing (single responsibility)
-  return user.username;
 };
 
 /**

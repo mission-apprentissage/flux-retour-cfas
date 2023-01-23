@@ -7,15 +7,13 @@ import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydra
 import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
 import { createUserAccount } from "./users/create-user.js";
-import {
-  generatePasswordUpdateTokenForUser,
-  generatePasswordUpdateTokenForUserLegacy,
-} from "./users/generate-password-update-token.js";
+import { generatePasswordUpdateTokenForUser } from "./users/generate-password-update-token.js";
 import { hydrateOrganismesAndFormations } from "./hydrate/organismes/hydrate-organismes-and-formations.js";
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
 import { hydrateRefreshFormations } from "./hydrate/refresh-formations/hydrate-refresh-formations.js";
 import { hydrateFormationsFromDossiersApprenants } from "./hydrate/_toRemove/formations/hydrate-formations-from-dossiersApprenants.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
+import { generatePasswordUpdateTokenForUserLegacy, updatePasswordForUserLegacy } from "./users/legacy/index.js";
 
 /**
  * Job d'initialisation de données de test
@@ -241,13 +239,28 @@ cli
  * Job de génération d'un token de MAJ de mot de passe pour un utilisateur legacy (ancien modèle)
  */
 cli
-  .command("generate-legacy:password-update-token")
+  .command("users-legacy:generate-password-update-token")
   .description("Génération d'un token de MAJ de mot de passe pour un utilisateur legacy")
   .requiredOption("--username <string>", "username de l'utilisateur")
   .action(async ({ username }) => {
     runScript(async () => {
       return generatePasswordUpdateTokenForUserLegacy(username);
-    }, "generate-password-update-token-legacy");
+    }, "users-legacy-generate-password");
+  });
+
+/**
+ * Job de modification du mot de passe d'un utilisateur legacy (ancien modèle)
+ * à partir d'un token de MAJ de mot de passe
+ */
+cli
+  .command("users-legacy:update-password")
+  .description("Modification du mot de passe pour un utilisateur legacy")
+  .requiredOption("--token <string>", "Token d'update de mot de passe de l'utilisateur")
+  .requiredOption("--newPassword <string>", "Nouveau mot de passe")
+  .action(async ({ token, newPassword }) => {
+    runScript(async () => {
+      return updatePasswordForUserLegacy(token, newPassword);
+    }, "users-legacy-update-password");
   });
 
 /**
