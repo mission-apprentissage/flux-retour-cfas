@@ -22,7 +22,9 @@ const RESEAUX_LIST_SEPARATOR = "|";
 const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
 
 const INPUT_FILES = [
-  "assets/referentiel-reseaux_aden.csv",
+  "assets/referentiel-reseau_aden.csv",
+  "assets/referentiel-reseau_agri.csv",
+  "assets/referentiel-reseau_mfr.csv",
   "assets/referentiel-reseau-aftral.csv",
   "assets/referentiel-reseau-cr-normandie.csv",
   "assets/referentiel-reseau-excellence-pro.csv",
