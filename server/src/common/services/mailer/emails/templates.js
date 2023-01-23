@@ -69,6 +69,15 @@ export function notify_access_granted({ payload }, token, options = {}) {
     templateFile: getTemplateFile("notify_access_granted"),
     data: {
       user: payload.user,
+export function notify_access_rejected({ payload }, token, options = {}) {
+  const prefix = options.resend ? "[Rappel] " : "";
+  return {
+    subject: `${prefix} Votre demande d'accès a été refusée`,
+    templateFile: getTemplateFile("notify_access_rejected"),
+    data: {
+      userCivility: payload.user.civility,
+      userName: payload.user.nom,
+      organismeName: payload.organisme.nom,
       token,
     },
   };

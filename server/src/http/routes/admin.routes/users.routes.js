@@ -3,6 +3,7 @@ import Joi from "joi";
 import Boom from "boom";
 
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
+import { findOrganismeById } from "../../../common/actions/organismes/organismes.actions.js";
 import {
   createUser,
   getAllUsers,
@@ -12,8 +13,12 @@ import {
   structureUser,
   updateUser,
 } from "../../../common/actions/users.actions.js";
-import { findRoleById, findRolesByNames } from "../../../common/actions/roles.actions.js";
-import { updatePermissionsPending } from "../../../common/actions/permissions.actions.js";
+import { getAllRoles, findRolesByNames } from "../../../common/actions/roles.actions.js";
+import {
+  getAllPermissions,
+  updatePermissionsPending,
+  removePermissions,
+} from "../../../common/actions/permissions.actions.js";
 
 // TODO [tech]
 // eslint-disable-next-line no-unused-vars
@@ -24,13 +29,21 @@ export default ({ mailer }) => {
     "/users",
     tryCatch(async (req, res) => {
       let usersList = await getAllUsers();
+      let roleNamesById = (await getAllRoles()).reduce((acc, role) => ({ ...acc, [role._id]: role.name }), {});
+      let permissionsByEmail = (await getAllPermissions()).reduce(
+        (acc, permission) => ({
+          ...acc,
+          [permission.userEmail]: [...(acc?.[permission.userEmail] || []), permission],
+        }),
+        {}
+      );
+
       for (let index = 0; index < usersList.length; index++) {
         const user = usersList[index];
+        user.permissions = permissionsByEmail[user.email] || [];
         for (let j = 0; j < user.roles.length; j++) {
           const roleId = user.roles[j];
-
-          const roleName = await findRoleById(roleId, { name: 1 });
-          user.roles[j] = roleName.name;
+          user.roles[j] = roleNamesById[roleId];
         }
       }
 
@@ -54,20 +67,30 @@ export default ({ mailer }) => {
   router.get(
     "/users/confirm-user",
     tryCatch(async ({ query }, res) => {
-      const { userEmail, validate } = await Joi.object({
+      const { userEmail, organisme_id, validate } = await Joi.object({
         userEmail: Joi.string().email().required(),
-        organisme_id: Joi.string(),
+        organisme_id: Joi.string().required(),
         validate: Joi.boolean().required(),
       }).validateAsync(query, { abortEarly: false });
-      if (validate) {
-        await updatePermissionsPending({ userEmail, pending: false });
-        const user = await getUser(userEmail);
-        await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
-        return res.json({ ok: true });
-      } else {
-        // TODO REJECTED PERM !
-        return res.json({ ok: false });
+
+      const user = await getUser(userEmail);
+      const organisme = await findOrganismeById(organisme_id);
+
+      if (!user) {
+        Boom.notFound(`User ${userEmail} not found`);
       }
+      if (!organisme) {
+        Boom.notFound(`Organisme ${organisme_id} not found`);
+      }
+
+      if (validate) {
+        await updatePermissionsPending({ userEmail, organisme_id, pending: false });
+        await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_granted");
+      } else {
+        await removePermissions({ organisme_id: organisme_id, userEmail });
+        await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_rejected");
+      }
+      return res.json({ ok: true });
     })
   );
 
@@ -123,7 +146,7 @@ export default ({ mailer }) => {
         invalided_token: true,
       });
 
-      res.json({ message: `User ${userid} updated !` });
+      res.json({ ok: true, message: `User ${userid} updated !` });
     })
   );
 
@@ -134,7 +157,7 @@ export default ({ mailer }) => {
 
       await removeUser(userid);
 
-      res.json({ message: `User ${userid} deleted !` });
+      res.json({ ok: true, message: `User ${userid} deleted !` });
     })
   );
 

@@ -11,7 +11,7 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "../engine/engine.organisme
 import {
   createPermission,
   hasPermission,
-  removePermission,
+  removePermissions,
   findPermissionByUserEmail,
 } from "../permissions.actions.js";
 import { findRolePermissionById } from "../roles.actions.js";
@@ -367,10 +367,7 @@ export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  const userPermission = await findPermissionByUserEmail(organisme._id, userEmail.toLowerCase());
-  if (userPermission) {
-    await removePermission(userPermission._id);
-  }
+  await removePermissions({ organisme_id: organisme._id, userEmail });
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },

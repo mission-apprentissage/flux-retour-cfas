@@ -154,6 +154,7 @@ export const createMailer = (mailerService) => {
         const messageId = await mailerService.sendEmailMessage(to, template);
         await addEmailMessageId(token, messageId);
       } catch (e) {
+        console.error(`Error sending email template "${templateName}"`, e);
         await addEmailError(token, e);
       }
 
@@ -171,6 +172,7 @@ export const createMailer = (mailerService) => {
         const messageId = await mailerService.sendEmailMessage(user.email, template);
         await addEmailMessageId(token, messageId);
       } catch (e) {
+        console.error(`Error resending email with token "${token}"`, e);
         await addEmailError(token, e);
       }
 
