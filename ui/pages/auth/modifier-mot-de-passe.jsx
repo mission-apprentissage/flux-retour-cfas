@@ -11,7 +11,6 @@ import {
   List,
   ListItem,
   ListIcon,
-  UnorderedList,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
@@ -24,6 +23,7 @@ import useToken from "../../hooks/useToken";
 import { _get, _post } from "../../common/httpClient";
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import { ShowPassword } from "../../theme/components/icons";
+import InformationBlock from "../../modules/auth/inscription/components/InformationBlock";
 
 YupPassword(Yup); // extend yup
 
@@ -195,23 +195,7 @@ const ResetPasswordPage = () => {
           )}
         </form>
       </Box>
-      {isFirstSetPassword && (
-        <Box mt={10}>
-          <Text fontWeight={700} fontSize={22}>
-            Votre compte dédié
-          </Text>
-          <Text mt="2w" fontWeight={700}>
-            Le service tableau de bord de l&apos;apprentissage est porté par la Mission interministérielle pour
-            l’apprentissage.
-          </Text>
-          <Text mt="2w">Il permet de :</Text>
-          <UnorderedList ml="4w" mt="2w">
-            <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
-            <ListItem>Accompagner les jeunes en situation de décrochage</ListItem>
-            <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
-          </UnorderedList>
-        </Box>
-      )}
+      {isFirstSetPassword && <InformationBlock mt={10} />}
     </Flex>
   );
 };

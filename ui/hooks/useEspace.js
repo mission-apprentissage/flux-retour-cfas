@@ -80,8 +80,8 @@ export function useEspace() {
                       path: "/mon-espace/mon-organisme/effectifs",
                     },
                     televersement: {
-                      pageTitle: "Téversement(s) de fichier(s)",
-                      navTitle: "Téversement(s) de fichier(s)",
+                      pageTitle: "Import de fichier(s)",
+                      navTitle: "Import de fichier(s)",
                       path: "/mon-espace/mon-organisme/effectifs/televersement",
                     },
                     sifa2: {
@@ -118,8 +118,8 @@ export function useEspace() {
                 path: `/mon-espace/organisme/${organisme_id}/effectifs`,
               },
               televersement: {
-                pageTitle: "Téversement(s) de fichier(s)",
-                navTitle: "Téversement(s) de fichier(s)",
+                pageTitle: "Import de fichier(s)",
+                navTitle: "Import de fichier(s)",
                 path: `/mon-espace/organisme/${organisme_id}/effectifs/televersement`,
               },
               sifa2: {

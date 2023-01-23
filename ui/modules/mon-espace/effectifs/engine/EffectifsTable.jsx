@@ -417,7 +417,7 @@ const EffectifsTable = ({
                           padding="2w"
                         >
                           <Box>
-                            Erreur(s) sur la données
+                            Erreur(s) sur la donnée
                             <Text as="span" ml={1}>
                               <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
                             </Text>
@@ -453,7 +453,7 @@ const EffectifsTable = ({
                           padding="2w"
                         >
                           <Box pl={5}>
-                            État de la données
+                            État de la donnée
                             <Text as="span" ml={1}>
                               <InfoLine h="14px" w="14px" color="grey.500" ml="1v" mb="1v" />
                             </Text>
