@@ -1,3 +1,10 @@
+## [3.4.2-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.4.2-beta.1...v3.4.2-beta.2) (2023-01-19)
+
+
+### Bug Fixes
+
+* email admin ([5490f12](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5490f1222a28936d43bd8b0fb001b572f84c7fb9))
+
 ## [3.4.2-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.4.1...v3.4.2-beta.1) (2023-01-19)
 
 

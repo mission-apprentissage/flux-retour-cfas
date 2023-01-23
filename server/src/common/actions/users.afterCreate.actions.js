@@ -68,7 +68,7 @@ export const userAfterCreate = async ({
 
       if (notify) {
         await mailer.sendEmail(
-          { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, type: "pilot" } },
+          { to: "tableau-de-bord@apprentissage.beta.gouv.fr", payload: { user, type: "pilot" } },
           "validation_user_by_tdb_team"
         ); // Notif TDB_admin or whatever who
       }
@@ -82,7 +82,7 @@ export const userAfterCreate = async ({
       }
       if (notify) {
         await mailer.sendEmail(
-          { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, type: "reseau" } },
+          { to: "tableau-de-bord@apprentissage.beta.gouv.fr", payload: { user, type: "reseau" } },
           "validation_user_by_tdb_team"
         ); // Notif TDB_admin or whatever who
       }
@@ -134,7 +134,7 @@ export const userAfterCreate = async ({
         await updateMainOrganismeUser({ organisme_id: organisme._id, userEmail });
         if (notify) {
           await mailer.sendEmail(
-            { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, organisme, type: "Gestionnaire" } },
+            { to: "tableau-de-bord@apprentissage.beta.gouv.fr", payload: { user, organisme, type: "Gestionnaire" } },
             "validation_first_organisme_user_by_tdb_team"
           ); // Notif TDB_admin or whatever who
         }
@@ -152,7 +152,10 @@ export const userAfterCreate = async ({
 
           if (!hasAtLeastOneUserToValidate) {
             await mailer.sendEmail(
-              { to: "no-reply@tdb.apprentissage.beta.gouv.fr", payload: { user, organisme, type: accessType[asRole] } },
+              {
+                to: "tableau-de-bord@apprentissage.beta.gouv.fr",
+                payload: { user, organisme, type: accessType[asRole] },
+              },
               "validation_first_organisme_user_by_tdb_team"
             ); // Notif TDB_admin or whatever who
           } else {
