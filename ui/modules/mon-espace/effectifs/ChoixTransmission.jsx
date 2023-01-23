@@ -33,7 +33,7 @@ const ChoixTransmission = () => {
                   Vous avez un ERP ?
                 </Heading>
                 <Heading as="h5" fontSize="1rem" mb={4}>
-                  Lié votre ou vos ERP au tableau de bord
+                  Liez votre ou vos ERP au tableau de bord
                 </Heading>
               </Flex>
             </Box>
@@ -64,7 +64,7 @@ const ChoixTransmission = () => {
                   Vous n&rsquo;avez pas d&rsquo;ERP ?
                 </Heading>
                 <Heading as="h5" fontSize="1rem" mb={4}>
-                  Téléverser vos effectifs via fichier (Excel, csv)
+                  Importez vos effectifs avec un fichier (excel, csv)
                 </Heading>
               </Flex>
             </Box>

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import { Text, Center, Heading, Box, ListItem, UnorderedList, Flex } from "@chakra-ui/react";
+import { Text, Center, Heading, Flex } from "@chakra-ui/react";
 
 import { Page } from "../../components/Page/Page";
-import { Inscription } from "../../modules/auth/inscription/Inscription";
+import Inscription from "../../modules/auth/inscription/Inscription";
+import InformationBlock from "../../modules/auth/inscription/components/InformationBlock";
 
 import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
 import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
@@ -23,7 +24,6 @@ const RegisterPage = () => {
     <Page>
       <Head>
         <title>Inscription</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
       <Flex w="100%" mt={8} minH="40vh">
@@ -54,23 +54,7 @@ const RegisterPage = () => {
             </Text>
           </Center>
         )}
-        {!succeeded && (
-          <Box w="50%" p={10}>
-            <Text fontWeight={700} fontSize={22}>
-              Votre compte dédié
-            </Text>
-            <Text mt="2w" fontWeight={700}>
-              Le service tableau de bord de l&apos;apprentissage est porté par la Mission interministérielle pour
-              l’apprentissage.
-            </Text>
-            <Text mt="2w">Il permet de :</Text>
-            <UnorderedList ml="4w" mt="2w">
-              <ListItem>Faciliter le pilotage des politiques publiques</ListItem>
-              <ListItem>Accompagner les jeunes en situation de décrochage</ListItem>
-              <ListItem>Simplifier les déclarations des organismes de formation auprès des pouvoirs publics</ListItem>
-            </UnorderedList>
-          </Box>
-        )}
+        {!succeeded && <InformationBlock w="50%" p={10} />}
       </Flex>
     </Page>
   );

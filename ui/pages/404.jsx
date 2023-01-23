@@ -12,7 +12,6 @@ const Page404 = () => {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box w="100%" pt={[4, 8]} px={[1, 1, 6, 8]} color="grey.800" paddingY="4w">
         <Container maxW="xl">

@@ -141,7 +141,6 @@ const Message = () => {
     <Page>
       <Head>
         <title>Messages de maintenance</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box w="100%" pt={[4, 8]} color="grey.800">
         <Container maxW="xl">

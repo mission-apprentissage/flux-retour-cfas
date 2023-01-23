@@ -31,7 +31,6 @@ const ProfilePage = () => {
     <Page>
       <Head>
         <title>Mon compte</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <Breadcrumb pages={[{ title: "Mon Compte", to: "/" }, { title: "Mon compte" }]} />

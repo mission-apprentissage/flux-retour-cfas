@@ -166,7 +166,8 @@ export const getAllUsers = async (query = {}) =>
  * @param {*} _id
  * @returns
  */
-export const removeUser = async (_id) => {
+export const removeUser = async (_idStr) => {
+  const _id = ObjectId(_idStr);
   const user = await usersMigrationDb().findOne({ _id });
 
   if (!user) {

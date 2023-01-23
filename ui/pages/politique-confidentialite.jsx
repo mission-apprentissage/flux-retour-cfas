@@ -13,7 +13,6 @@ const PolitiqueDeConfidentialitePage = () => {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Section>
         <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />

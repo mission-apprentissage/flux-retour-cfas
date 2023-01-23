@@ -23,7 +23,6 @@ export default function Aide() {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Section>
         <Breadcrumb

@@ -173,7 +173,6 @@ const Finalize = () => {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <Flex w="full" flexDirection="column" h="full" mt={4}>
@@ -272,7 +271,7 @@ const Finalize = () => {
                   onClick={handleDemandeAcces}
                   px={6}
                   mt={8}
-                  isDisabled={isSubmitting}
+                  isDisabled={isSubmitting || !valuesAccess.reseau}
                 >
                   {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
                   Demander l&rsquo;accès
@@ -340,7 +339,10 @@ const Finalize = () => {
                   onClick={handleDemandeAcces}
                   px={6}
                   mt={8}
-                  isDisabled={isSubmitting}
+                  isDisabled={
+                    isSubmitting ||
+                    (!valuesAccess.codes_region && !valuesAccess.codes_departement && !valuesAccess.codes_academie)
+                  }
                 >
                   {isSubmitting && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" />}
                   Demander l&rsquo;accès

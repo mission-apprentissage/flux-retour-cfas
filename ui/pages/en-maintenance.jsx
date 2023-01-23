@@ -42,7 +42,6 @@ const MaintenancePage = () => {
     <Page withoutDisplayNavigationBar={!isUserAdmin(auth)}>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Center mt={16} h="full" pt={[4, 6]} paddingY="2w" color="grey.800" flexDirection="column">
         <HStack spacing={10}>
