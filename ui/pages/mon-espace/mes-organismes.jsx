@@ -44,7 +44,6 @@ function MesOrganismes() {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 4, 4]} mb={16}>
         <Container maxW="xl">

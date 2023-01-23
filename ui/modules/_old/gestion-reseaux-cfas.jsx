@@ -23,7 +23,6 @@ const GestionReseauxCfas = () => {
     <Page>
       <Head>
         <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title: title }]} />
 

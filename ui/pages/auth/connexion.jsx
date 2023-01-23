@@ -21,7 +21,6 @@ export default function ConnexionPage() {
     <Page>
       <Head>
         <title>Connexion</title>
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
       <Flex w="100%" mt={8} minH="40vh">
