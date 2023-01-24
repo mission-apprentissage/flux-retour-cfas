@@ -8,12 +8,7 @@ import { generateKey } from "../../utils/cryptoUtils.js";
 import { buildAdresseFromUai } from "../../utils/uaiUtils.js";
 import { siretSchema } from "../../utils/validationUtils.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../engine/engine.organismes.utils.js";
-import {
-  createPermission,
-  hasPermission,
-  removePermissions,
-  findPermissionByUserEmail,
-} from "../permissions.actions.js";
+import { createPermission, hasPermission, removePermissions } from "../permissions.actions.js";
 import { findRolePermissionById } from "../roles.actions.js";
 import { getUser, structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
