@@ -45,7 +45,7 @@ export default () => {
       );
 
       return res.json({
-        cfas: omittedData,
+        organismes: omittedData,
         pagination: {
           page,
           resultats_par_page: limit,
