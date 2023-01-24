@@ -133,7 +133,7 @@ export default ({ mailer }) => {
       const userid = params.userid;
 
       let rolesId = await findRolesByNames(body.options.roles, { _id: 1 });
-      rolesId = rolesId.map(({ _id }) => _id.toString());
+      rolesId = rolesId.map(({ _id }) => _id);
 
       await updateUser(userid, {
         is_cross_organismes: !!body.options.permissions.is_cross_organismes,
