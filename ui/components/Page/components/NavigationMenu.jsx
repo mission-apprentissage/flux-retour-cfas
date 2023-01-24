@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { Box, Container, Flex, Skeleton, Text } from "@chakra-ui/react";
+import { Box, Container, Flex, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+
 import useAuth from "../../../hooks/useAuth";
 import { MenuFill, Close, Settings4Fill, UserFill, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
@@ -14,6 +15,7 @@ const NavItem = ({
   colorActive = "bluefrance",
   isActive = false,
   isDisabled = false,
+  disabledReason = "",
   colorDisabled = "dgalt",
   ...rest
 }) => {
@@ -24,6 +26,7 @@ const NavItem = ({
   const colorCurrentState = isActiveInternal ? colorActive : isDisabled ? colorDisabled : "";
 
   const Component = isDisabled ? Box : Link;
+  const TextComponent = isDisabled && disabledReason ? Tooltip : Text;
 
   return (
     <Component
@@ -40,7 +43,17 @@ const NavItem = ({
       }}
       {...rest}
     >
-      <Text display="block">{children}</Text>
+      <TextComponent
+        display="block"
+        {...(isDisabled && disabledReason
+          ? {
+              label: disabledReason,
+              "aria-label": disabledReason,
+            }
+          : {})}
+      >
+        <>{children}</>
+      </TextComponent>
     </Component>
   );
 };
@@ -106,7 +119,13 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
         </NavItem>
       )}
       {hasContextAccessTo(myOrganisme, "organisme/page_sifa") && userNavigation.sifa2 && (
-        <NavItem to={userNavigation.sifa2.path} isDisabled={!myOrganisme.first_transmission_date}>
+        <NavItem
+          to={userNavigation.sifa2.path}
+          isDisabled={!myOrganisme.first_transmission_date}
+          disabledReason={
+            !myOrganisme.first_transmission_date ? "Désactivé car votre organisme n'a encore rien transmis" : ""
+          }
+        >
           {userNavigation.sifa2.navTitle}
         </NavItem>
       )}
@@ -161,6 +180,9 @@ const NavBarOrganisme = ({ isOpen }) => {
           to={organismeNavigation.sifa2.path}
           colorActive="dsfr_lightprimary.bluefrance_850"
           isDisabled={!organisme.first_transmission_date}
+          disabledReason={
+            !organisme.first_transmission_date ? "Désactivé car cet organisme n'a encore rien transmis" : ""
+          }
         >
           {organismeNavigation.sifa2.navTitle}
         </NavItem>
