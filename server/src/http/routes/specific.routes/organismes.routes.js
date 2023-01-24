@@ -11,7 +11,7 @@ export default () => {
    * Gets organismes paginated list
    * Consumed by Referentiel SIRET-UAI
    */
-  router.get(
+  router.post(
     "/",
     tryCatch(async (req, res) => {
       const params = await Joi.object({

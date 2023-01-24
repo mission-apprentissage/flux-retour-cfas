@@ -9,6 +9,7 @@ import tryCatch from "./middlewares/tryCatchMiddleware.js";
 import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
+import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
 import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
 import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
@@ -137,7 +138,11 @@ export default async (services) => {
     dossierApprenantRouter(services)
   );
 
-  app.use("/api/organismes", organismesRouter(services)); // EXPOSED TO REFERENTIEL
+  app.use(
+    "/api/organismes",
+    requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
+    organismesRouter(services)
+  ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
 
   // TODO : Routes à conserver temporairement le temps de la recette indicateurs via effectifs
   app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
