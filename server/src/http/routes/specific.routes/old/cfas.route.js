@@ -11,6 +11,7 @@ export default ({ cfas }) => {
 
   /**
    * Gets cfas paginated list
+   * TODO : A supprimer (+ suppression appels & pages coté UI)
    */
   router.get(
     "/",
