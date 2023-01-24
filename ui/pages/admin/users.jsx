@@ -1,5 +1,5 @@
 // TODO [tech]
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
@@ -73,7 +73,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
     initialValues: {
       accessAllCheckbox: user?.is_admin ? ["on"] : [],
       roles: user?.roles || [],
-      acl: user?.acl || [],
+      acl: user?.custom_acl || [],
       newNom: user?.nom || "",
       newPrenom: user?.prenom || "",
       newEmail: user?.email || "",
@@ -209,6 +209,13 @@ const UserLine = ({ user, roles, refetchUsers }) => {
     setRolesAcl(newRolesAcl);
   };
 
+  const onAclChanged = useCallback(
+    (newAcl) => {
+      setFieldValue("acl", newAcl);
+    },
+    [setFieldValue]
+  );
+
   return (
     <form onSubmit={handleSubmit}>
       <Text>Compte créé sur: {user?.orign_register}</Text>
@@ -341,11 +348,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
         </Accordion>
       )}
 
-      <Acl
-        acl={values.acl}
-        title=" Droits d'accès Supplémentaire"
-        onChanged={(newAcl) => setFieldValue("acl", newAcl)}
-      />
+      <Acl acl={values.acl} title=" Droits d'accès Supplémentaire" onChanged={onAclChanged} />
 
       {user && (
         <Box>
