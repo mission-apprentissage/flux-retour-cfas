@@ -41,12 +41,12 @@
                 </ul>
               </mj-text>
               <mj-button
-                href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(data.user.email)}&validate=true`) %>"
+                href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(data.user.email)}&organisme_id=all&validate=true`) %>"
                 background-color="#0e4194" color="white">
                 Ok je confirme cet utilisateur
               </mj-button>
               <mj-button
-                href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(data.user.email)}&validate=false`) %>"
+                href="<%= utils.getPublicUrl(`/api/v1/admin/users/confirm-user?userEmail=${encodeURIComponent(data.user.email)}&organisme_id=all&validate=false`) %>"
                 background-color="#ff0000" color="white">
                 Cet utilisateur n'a pas le droit d'accéder à cet organisme
               </mj-button>

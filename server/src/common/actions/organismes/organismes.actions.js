@@ -8,12 +8,7 @@ import { generateKey } from "../../utils/cryptoUtils.js";
 import { buildAdresseFromUai } from "../../utils/uaiUtils.js";
 import { siretSchema } from "../../utils/validationUtils.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../engine/engine.organismes.utils.js";
-import {
-  createPermission,
-  hasPermission,
-  removePermission,
-  findPermissionByUserEmail,
-} from "../permissions.actions.js";
+import { createPermission, hasPermission, removePermissions } from "../permissions.actions.js";
 import { findRolePermissionById } from "../roles.actions.js";
 import { getUser, structureUser } from "../users.actions.js";
 import { getFormationsTreeForOrganisme } from "./organismes.formations.actions.js";
@@ -367,10 +362,7 @@ export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  const userPermission = await findPermissionByUserEmail(organisme._id, userEmail.toLowerCase());
-  if (userPermission) {
-    await removePermission(userPermission._id);
-  }
+  await removePermissions({ organisme_id: organisme._id, userEmail });
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },

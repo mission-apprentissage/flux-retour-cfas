@@ -132,7 +132,17 @@ export const authenticate = async (email, password) => {
  * @returns
  */
 export const getUser = async (email) => {
-  const user = await usersMigrationDb().findOne({ email });
+  const user = await usersMigrationDb().findOne(
+    { email },
+    {
+      projection: {
+        emails: 0,
+        connection_history: 0,
+        password: 0,
+        __v: 0,
+      },
+    }
+  );
   return user;
 };
 

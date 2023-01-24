@@ -150,33 +150,3 @@ const Badge = {
 };
 
 export { Badge };
-
-// BROUILLON: "draft",  //  text: "Brouillon",
-
-// DOSSIER_FINALISE_EN_ATTENTE_ACTION: "waitingSignature",//  text: "En cours de signature",
-// EN_ATTENTE_DECLENCHEMENT_SIGNATURES: "waitingSignature",//  text: "En cours de signature",
-// EN_ATTENTE_SIGNATURE: "waitingSignature",  //  text: "En attente de signature",
-// EN_ATTENTE_SIGNATURES: "waitingSignature",// text: "En cours de signature",
-// SIGNATURES_EN_COURS: "waitingSignature",  //text: "En cours de signature",
-
-// SIGNE: "sign", //  text: "Signé",
-
-// DOSSIER_TERMINE_AVEC_SIGNATURE: "aTeletransmettre", //   text: "À télétransmettre",
-// DOSSIER_TERMINE_SANS_SIGNATURE: "aTeletransmettre", //   text: "À télétransmettre",
-
-// TRANSMIS: "draft", //  text: "Transmis",
-
-// EN_COURS_INSTRUCTION: "draft",  // text: "En cours d'instruction",
-
-// INCOMPLET: "nonConforme", // text: "À modifier",
-
-// DEPOSE: "published", //  text: "Validé",
-
-// REFUSE: "nonConforme", // text: "Non déposable",
-
-// ENGAGE: "draft",//  text: "Contrat en cours",
-
-// ANNULE: "unknown", //  text: "Annulé",
-// RUTPURE: "unknown", //  text: "Rupture",
-
-// SOLDE: "termine",// text: "Terminé",
