@@ -14,7 +14,12 @@ export function activation_user({ payload }, token, options = {}) {
     templateFile: getTemplateFile("activation_user"),
     data: {
       email: config.email,
-      user: payload,
+      user: {
+        civility: payload.civility,
+        nom: payload.nom,
+        prenom: payload.prenom,
+        email: payload.email,
+      },
       token,
       activationToken: createActivationToken(payload.email, { payload: { tmpPwd: payload.tmpPwd } }),
     },
