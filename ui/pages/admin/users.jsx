@@ -279,7 +279,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
         </HStack>
       </FormControl>
 
-      {user?.permissions?.length && (
+      {user?.permissions?.length > 0 && (
         <Accordion bg="white" mt={3} allowToggle>
           <AccordionItem>
             <AccordionButton _expanded={{ bg: "grey.200" }} border={"none"}>
