@@ -4,6 +4,7 @@ import Joi from "joi";
 import { createWriteStream } from "fs";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
+import csvToJson from "convert-csv-to-json";
 import { accumulateData, oleoduc, writeData } from "oleoduc";
 import multiparty from "multiparty";
 import { EventEmitter } from "events";
@@ -276,10 +277,16 @@ export default ({ clamav }) => {
         },
         { accumulator: Buffer.from(new Uint8Array()) }
       ),
-      writeData((data) => {
-        let tmp = getJsonFromXlsxData(data, { raw: false, header: 1 });
-        headers = tmp[0];
-        rawFileJson = getJsonFromXlsxData(data, { raw: false, dateNF: "dd/MM/yyyy" });
+      writeData(async (data) => {
+        if (unconfirmed[0].ext_fichier === "csv") {
+          const content = csvToJson.latin1Encoding().csvStringToJson(data.toString());
+          headers = Object.keys(content[0]);
+          rawFileJson = content;
+        } else {
+          let tmp = getJsonFromXlsxData(data, { raw: false, header: 1 });
+          headers = tmp[0];
+          rawFileJson = getJsonFromXlsxData(data, { raw: false, dateNF: "dd/MM/yyyy" });
+        }
       })
     );
     return { headers, rawFileJson, unconfirmedDocument: unconfirmed[0] };
