@@ -17,12 +17,7 @@ import { useFormik } from "formik";
 import ACL from "../common/constants/acl";
 import { Check } from "../theme/components/icons";
 
-const specialsAcls = {
-  "wks/page_espace/page_dossiers/voir_liste_dossiers": [
-    "wks/page_espace/page_dossiers/voir_liste_dossiers/tous",
-    "wks/page_espace/page_dossiers/voir_liste_dossiers/instruction_en_cours",
-  ],
-};
+const specialsAcls = {};
 
 const shouldBeNotAllowed = (acl, ref) => {
   const isAncestorsAllowed = (acl, ref) => {

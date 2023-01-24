@@ -353,7 +353,7 @@ const Finalize = () => {
           {auth.isInPendingValidation &&
             !auth.hasAtLeastOneUserToValidate &&
             auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
-              <Ribbons variant="loading" mt="0.5rem">
+              <Ribbons variant="info" mt="0.5rem">
                 <Box ml={3}>
                   <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
                     Votre demande est en cours d&rsquo;étude par nos services.
@@ -370,7 +370,7 @@ const Finalize = () => {
           {auth.isInPendingValidation &&
             auth.hasAtLeastOneUserToValidate &&
             auth.account_status === "FORCE_COMPLETE_PROFILE_STEP2" && (
-              <Ribbons variant="loading" mt="0.5rem">
+              <Ribbons variant="info" mt="0.5rem">
                 <Box ml={3}>
                   <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
                     Votre demande d&rsquo;accès est en cours d&rsquo;étude par un gestionnaire de cet organisme.

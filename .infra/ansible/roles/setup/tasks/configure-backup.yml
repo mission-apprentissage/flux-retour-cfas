@@ -22,15 +22,15 @@
   - name: Add mongodb backup cron
     when: backup_cron|bool == true
     cron:
-      name: "backup"
+      name: "backup mongodb each day at 04h00"
       minute: "0"
       hour: "4"
-      job: "bash /opt/flux-retour-cfas/tools/backup-mongodb.sh>> /var/log/cron.log 2>&1"
+      job: "bash /opt/flux-retour-cfas/tools/backup-mongodb.sh >> /var/log/backup-mongodb.log 2>&1"
 
   - name: Add metabase backup cron"
     become: true
     cron:
-      name: "backup metabase"
+      name: "backup metabase each day at 00h20"
       minute: "20"
       hour: "0"
       job: "bash /opt/flux-retour-cfas/tools/backup-metabase.sh >> /var/log/backup-metabase.log 2>&1"
@@ -42,4 +42,3 @@
     path: /mnt/backups
     state: directory
     mode: 700
-

@@ -15,7 +15,11 @@ import {
 import { findRolePermission } from "../../../common/actions/roles.actions.js";
 import { findEffectifs } from "../../../common/actions/effectifs.actions.js";
 import { generateSifa, isEligibleSIFA } from "../../../common/actions/sifa.actions/sifa.actions.js";
-import { updatePermission, updatePermissionsPending } from "../../../common/actions/permissions.actions.js";
+import {
+  removePermissions,
+  updatePermission,
+  updatePermissionsPending,
+} from "../../../common/actions/permissions.actions.js";
 import { getUser } from "../../../common/actions/users.actions.js";
 
 export default ({ mailer }) => {
@@ -224,21 +228,24 @@ export default ({ mailer }) => {
     "/contributors/confirm-access",
     permissionsOrganismeMiddleware(["organisme/page_parametres", "organisme/page_parametres/gestion_acces"]),
     tryCatch(async ({ query }, res) => {
-      const { userEmail, validate } = await Joi.object({
+      const { userEmail, organisme_id, validate } = await Joi.object({
         userEmail: Joi.string().email().required(),
         organisme_id: Joi.string().required(),
         validate: Joi.boolean().required(),
       }).validateAsync(query, { abortEarly: false });
-      if (validate) {
-        await updatePermissionsPending({ userEmail, pending: false });
-        const user = await getUser(userEmail);
-        await mailer.sendEmail({ to: userEmail, payload: { user } }, "notify_access_granted");
 
-        return res.json({ ok: true });
+      const user = await getUser(userEmail);
+      const organisme = await findOrganismeById(organisme_id);
+
+      if (validate) {
+        await updatePermissionsPending({ userEmail, organisme_id, pending: false });
+        await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_granted");
       } else {
-        // TODO REJECTED PERM
-        return res.json({ ok: false });
+        await removePermissions({ organisme_id: organisme_id, userEmail });
+        await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_rejected");
       }
+
+      return res.json({ ok: true });
     })
   );
 

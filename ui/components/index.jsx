@@ -1,4 +1,3 @@
-export { default as Badge } from "./Badge/Badge";
 export { default as SearchInput } from "./SearchInput/SearchInput";
 export { default as PrimarySelectButton } from "./SelectButton/PrimarySelectButton";
 export { default as SecondarySelectButton } from "./SelectButton/SecondarySelectButton";

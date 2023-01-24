@@ -1,6 +1,8 @@
+import { ObjectId } from "mongodb";
+
 import { rolesDb } from "../model/collections.js";
 import { defaultValuesRole } from "../model/next.toKeep.models/roles.model.js";
-import { ObjectId } from "mongodb";
+
 /**
  * Méthode de création d'un rôle
  * @param {*} roleProps
@@ -18,6 +20,17 @@ export const createRole = async ({ name, type, acl, title, description }) => {
 
   return insertedId;
 };
+
+/**
+ * Méthode de récupération de la liste des roles en base
+ *
+ * @param {*} query
+ * @returns
+ */
+export const getAllRoles = async (query = {}) =>
+  await rolesDb()
+    .find(query, { projection: { __v: 0 } })
+    .toArray();
 
 export const findRolePermission = async (query, projection = {}) => {
   const roles = await rolesDb()

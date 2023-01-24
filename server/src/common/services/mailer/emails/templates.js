@@ -14,7 +14,12 @@ export function activation_user({ payload }, token, options = {}) {
     templateFile: getTemplateFile("activation_user"),
     data: {
       email: config.email,
-      user: payload,
+      user: {
+        civility: payload.civility,
+        nom: payload.nom,
+        prenom: payload.prenom,
+        email: payload.email,
+      },
       token,
       activationToken: createActivationToken(payload.email, { payload: { tmpPwd: payload.tmpPwd } }),
     },
@@ -68,8 +73,22 @@ export function notify_access_granted({ payload }, token, options = {}) {
     subject: `${prefix} Votre demande d'accès a été acceptée`,
     templateFile: getTemplateFile("notify_access_granted"),
     data: {
-      user: payload.user,
-      token,
+      userCivility: payload.user.civility,
+      userName: payload.user.nom,
+      organismeName: payload.organisme?.nom,
+    },
+  };
+}
+
+export function notify_access_rejected({ payload }, token, options = {}) {
+  const prefix = options.resend ? "[Rappel] " : "";
+  return {
+    subject: `${prefix} Votre demande d'accès a été refusée`,
+    templateFile: getTemplateFile("notify_access_rejected"),
+    data: {
+      userCivility: payload.user.civility,
+      userName: payload.user.nom,
+      organismeName: payload.organisme?.nom,
     },
   };
 }
