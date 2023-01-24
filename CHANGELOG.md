@@ -1,3 +1,10 @@
+# [3.6.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.5.2-beta.1...v3.6.0-beta.1) (2023-01-24)
+
+
+### Features
+
+* admin can manage user permissions management ([#2445](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2445)) ([ab4db36](https://github.com/mission-apprentissage/flux-retour-cfas/commit/ab4db3627fe24aafe2e4f95b2b76ce1d99d003fd))
+
 ## [3.5.2-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.5.1...v3.5.2-beta.1) (2023-01-24)
 
 
