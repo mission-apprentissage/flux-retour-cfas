@@ -79,54 +79,64 @@ const UserLine = ({ user, roles, refetchUsers }) => {
       newEmail: user?.email || "",
       newTmpPassword,
     },
-    onSubmit: ({ accessAllCheckbox, newNom, newPrenom, newEmail, newTmpPassword, roles, acl }, { setSubmitting }) => {
-      // eslint-disable-next-line no-undef, no-async-promise-executor
-      return new Promise(async (resolve) => {
-        const accessAll = accessAllCheckbox.includes("on");
-        try {
-          if (user) {
-            const body = {
-              options: {
-                prenom: newPrenom,
-                nom: newNom,
-                email: newEmail,
-                roles,
-                acl,
-                permissions: {
-                  is_admin: accessAll,
-                },
+    onSubmit: async (
+      { accessAllCheckbox, newNom, newPrenom, newEmail, newTmpPassword, roles, acl },
+      { setSubmitting }
+    ) => {
+      const accessAll = accessAllCheckbox.includes("on");
+      try {
+        if (user) {
+          const body = {
+            options: {
+              prenom: newPrenom,
+              nom: newNom,
+              email: newEmail,
+              roles,
+              acl,
+              permissions: {
+                is_admin: accessAll,
               },
-            };
-            await _put(`/api/v1/admin/user/${user._id}`, body);
-            document.location.reload(true);
+            },
+          };
+          const result = await _put(`/api/v1/admin/user/${user._id}`, body);
+          if (result?.ok) {
+            toastSuccess("Utilisateur mis à jour");
           } else {
-            const body = {
-              password: newTmpPassword,
-              options: {
-                prenom: newPrenom,
-                nom: newNom,
-                email: newEmail,
-                roles,
-                acl,
-                permissions: {
-                  is_admin: accessAll,
-                },
-              },
-            };
-            await _post(`/api/v1/admin/user/`, body);
-            document.location.reload(true);
+            toastError("Erreur lors de la mise à jour de l'utilisateur.", {
+              description: " Merci de réessayer plus tard",
+            });
           }
-        } catch (e) {
-          console.error(e);
-          const response = await (e?.json ?? {});
-          const message = response?.message ?? e?.message;
-
-          toastError(message);
+        } else {
+          const body = {
+            password: newTmpPassword,
+            options: {
+              prenom: newPrenom,
+              nom: newNom,
+              email: newEmail,
+              roles,
+              acl,
+              permissions: {
+                is_admin: accessAll,
+              },
+            },
+          };
+          await _post(`/api/v1/admin/user/`, body);
+          if (result?.ok) {
+            toastSuccess("Utilisateur créé");
+          } else {
+            toastError("Erreur lors de la création de l'utilisateur.", {
+              description: " Merci de réessayer plus tard",
+            });
+          }
         }
-
-        setSubmitting(false);
-        resolve("onSubmitHandler complete");
-      });
+      } catch (e) {
+        console.error(e);
+        const response = await (e?.json ?? {});
+        const message = response?.message ?? e?.message;
+        toastError(message);
+      }
+      await refetchUsers();
+      setSubmitting(false);
     },
   });
 
