@@ -120,7 +120,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
               },
             },
           };
-          await _post(`/api/v1/admin/user/`, body);
+          const result = await _post(`/api/v1/admin/user/`, body);
           if (result?.ok) {
             toastSuccess("Utilisateur créé");
           } else {
@@ -155,17 +155,17 @@ const UserLine = ({ user, roles, refetchUsers }) => {
     }
   };
 
-  const onConfirmUser = async ({ currentTarget }) => {
+  const onConfirmUserPermission = async ({ currentTarget }) => {
     const organismeId = currentTarget.getAttribute("data-organisme-id");
     const organismeName = currentTarget.getAttribute("data-organisme-name");
     const validate = currentTarget.getAttribute("data-validate");
 
+    const actionStr = validate === "true" ? "valider" : "rejeter";
+
     if (
-      !confirm(
-        `Voulez-vous vraiment ${
-          validate === "true" ? "valider" : "rejeter"
-        } l'accès de cet utilisateur sur l'organisme ${organismeName}?`
-      )
+      (organismeId !== "all" &&
+        !confirm(`Voulez-vous vraiment ${actionStr} l'accès de cet utilisateur sur l'organisme ${organismeName}? ?`)) ||
+      (organismeId === "all" && !confirm(`Voulez-vous vraiment ${actionStr} toutes les permissions ?`))
     ) {
       return;
     }
@@ -328,7 +328,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
                               <Button
                                 type="button"
                                 variant="primary"
-                                onClick={onConfirmUser}
+                                onClick={onConfirmUserPermission}
                                 data-organisme-id={permission.organisme?._id}
                                 data-organisme-name={permission.organisme?.nom}
                                 data-validate="true"
@@ -338,7 +338,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
                               <Button
                                 type="button"
                                 variant="secondary"
-                                onClick={onConfirmUser}
+                                onClick={onConfirmUserPermission}
                                 data-organisme-id={permission.organisme?._id}
                                 data-organisme-name={permission.organisme?.nom}
                                 data-validate="false"
@@ -352,6 +352,29 @@ const UserLine = ({ user, roles, refetchUsers }) => {
                     );
                   })}
                 </Table>
+
+                {user?.permissions?.some((permission) => permission.pending) && (
+                  <HStack spacing={8} alignSelf="start">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={onConfirmUserPermission}
+                      data-organisme-id="all"
+                      data-validate="true"
+                    >
+                      Confirmer tous les accès en attente
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={onConfirmUserPermission}
+                      data-organisme-id="all"
+                      data-validate="false"
+                    >
+                      Rejeter tous les accès en attente
+                    </Button>
+                  </HStack>
+                )}
               </VStack>
             </AccordionPanel>
           </AccordionItem>

@@ -75,7 +75,7 @@ export function notify_access_granted({ payload }, token, options = {}) {
     data: {
       userCivility: payload.user.civility,
       userName: payload.user.nom,
-      organismeName: payload.organisme.nom,
+      organismeName: payload.organisme?.nom,
     },
   };
 }
@@ -88,8 +88,7 @@ export function notify_access_rejected({ payload }, token, options = {}) {
     data: {
       userCivility: payload.user.civility,
       userName: payload.user.nom,
-      organismeName: payload.organisme.nom,
-      token,
+      organismeName: payload.organisme?.nom,
     },
   };
 }

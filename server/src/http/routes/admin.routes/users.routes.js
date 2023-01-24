@@ -64,30 +64,39 @@ export default ({ mailer }) => {
     })
   );
 
+  /**
+   * Cette route confirme toutes les permissions d'un utilisateur pour un organisme.
+   * Si organisme_id === "all", alors toutes les permissions de l'utilisateur sont confirmées.
+   */
   router.get(
     "/users/confirm-user",
     tryCatch(async ({ query }, res) => {
       const { userEmail, organisme_id, validate } = await Joi.object({
         userEmail: Joi.string().email().required(),
-        organisme_id: Joi.string().required(),
+        organisme_id: Joi.string()
+          .regex(/^[0-9a-fA-F]{24}|all$/, "invalid organisme_id")
+          .required(),
         validate: Joi.boolean().required(),
       }).validateAsync(query, { abortEarly: false });
 
       const user = await getUser(userEmail);
-      const organisme = await findOrganismeById(organisme_id);
-
       if (!user) {
         Boom.notFound(`User ${userEmail} not found`);
       }
-      if (!organisme) {
-        Boom.notFound(`Organisme ${organisme_id} not found`);
+
+      let organisme = null;
+      if (organisme_id !== "all") {
+        organisme = await findOrganismeById(organisme_id);
+        if (organisme_id && !organisme) {
+          Boom.notFound(`Organisme ${organisme_id} not found`);
+        }
       }
 
       if (validate) {
-        await updatePermissionsPending({ userEmail, organisme_id, pending: false });
+        await updatePermissionsPending({ userEmail, organisme_id: organisme?._id, pending: false });
         await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_granted");
       } else {
-        await removePermissions({ organisme_id: organisme_id, userEmail });
+        await removePermissions({ organisme_id: organisme?._id, userEmail });
         await mailer.sendEmail({ to: userEmail, payload: { user, organisme } }, "notify_access_rejected");
       }
       return res.json({ ok: true });

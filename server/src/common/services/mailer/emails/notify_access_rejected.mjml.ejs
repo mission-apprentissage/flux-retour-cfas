@@ -14,9 +14,8 @@
               </mj-text>
               <mj-text>
                 <div>
-                  Votre demande d'accès sur le
-                  <strong>tableau de bord de l'apprentissage</strong> pour l'organisme "<%= data.organismeName %>" a
-                    été rejetée.
+                  Votre demande d'accès sur le <strong>tableau de bord de l'apprentissage</strong>
+                  <% if (data.organismeName) {%> pour l'organisme "<%= data.organismeName %>" <%}%> a été rejetée.
                 </div>
               </mj-text>
               <%- include('./common/signature.ejs'); %>

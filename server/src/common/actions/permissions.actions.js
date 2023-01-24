@@ -112,7 +112,13 @@ export const findPermissionByUserEmail = async (organisme_id, userEmail, project
 
 export const findPermissionsByUserEmail = async (organisme_id, userEmail, projection = {}) => {
   return await permissionsDb()
-    .find({ organisme_id: ObjectId(organisme_id), userEmail: userEmail.toLowerCase() }, { projection })
+    .find(
+      {
+        ...(organisme_id ? { organisme_id: ObjectId(organisme_id) } : {}),
+        userEmail: userEmail.toLowerCase(),
+      },
+      { projection }
+    )
     .toArray();
 };
 
