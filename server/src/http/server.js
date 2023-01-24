@@ -21,6 +21,7 @@ import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.rout
 import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
+import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursNationalDossiersRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.route.js";
@@ -135,6 +136,8 @@ export default async (services) => {
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
     dossierApprenantRouter(services)
   );
+
+  app.use("/api/organismes", organismesRouter(services)); // EXPOSED TO REFERENTIEL
 
   // TODO : Routes à conserver temporairement le temps de la recette indicateurs via effectifs
   app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
