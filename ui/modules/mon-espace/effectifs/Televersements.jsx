@@ -266,7 +266,8 @@ const Televersements = () => {
     await _post(`/api/v1/upload/import`, {
       organisme_id: organisme._id,
     });
-    router.push(`${router.asPath.replace("/televersement", "")}`);
+    window.location.href = `${router.asPath.replace("/televersement", "")}`;
+    // router.push(`${router.asPath.replace("/televersement", "")}`);
     //onDocumentsChanged(documents, type_document);
   }, [organisme._id, router]);
 

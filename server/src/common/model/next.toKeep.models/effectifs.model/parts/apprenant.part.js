@@ -2,7 +2,7 @@ import Joi from "joi";
 import { flattenDeep } from "lodash-es";
 import { CODES_STATUT_APPRENANT } from "../../../../constants/dossierApprenantConstants.js";
 import { schemaValidation } from "../../../../utils/schemaUtils.js";
-import { siretSchema, uaiSchema } from "../../../../utils/validationUtils.js";
+import { siretSchema } from "../../../../utils/validationUtils.js";
 import { adresseSchema } from "../../../json-schema/adresseSchema.js";
 import { object, string, date, integer, boolean, arrayOf } from "../../../json-schema/jsonSchemaTypes.js";
 
@@ -117,10 +117,8 @@ export const apprenantSchema = object(
     }),
     dernier_organisme_uai: string({
       description:
-        "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation",
-      pattern: "^[0-9]{7}[a-zA-Z]$",
-      maxLength: 8,
-      minLength: 8,
+        "Numéro UAI de l’établissement fréquenté l’année dernière (N-1), si déjà en apprentissage, mettre l’UAI du site de formation ou departement",
+      pattern: "^([0-9][0-9]|2[AB]|9[012345]|97[1234678]|98[46789]|[0-9]{7}[a-zA-Z])$",
     }),
     organisme_gestionnaire: integer({
       enum: [11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 24, 25],
@@ -278,10 +276,6 @@ export function validateApprenant({ contrats, ...props }, getErrors = false) {
       {
         name: "date_de_naissance",
         base: Joi.date().iso(),
-      },
-      {
-        name: "dernier_organisme_uai",
-        base: uaiSchema(),
       },
     ],
     getErrors,

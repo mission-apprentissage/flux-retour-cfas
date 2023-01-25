@@ -117,8 +117,9 @@ const UploadFiles = ({ title }) => {
     onDrop,
     onDropRejected,
     accept: {
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-      "application/vnd.ms-excel": [".xls", ".csv"],
+      // TODO [Métier] RUSH SIFA 2022
+      // "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+      // "application/vnd.ms-excel": [".xls", ".csv"],
       "text/csv": [".csv"],
     },
     maxSize: 10485760,
@@ -184,7 +185,7 @@ const UploadFiles = ({ title }) => {
                     Glissez le fichier dans cette zone ou cliquez sur le bouton pour ajouter un document depuis votre
                     disque dur
                   </Text>
-                  <Text color="mgalt">(Microsoft Excel (.xlsx ou .xls) ou .csv, maximum 10mb)</Text>
+                  <Text color="mgalt">(.csv, maximum 10mb)</Text>
                   <Button size="md" variant="secondary" mt={4}>
                     Ajouter un document
                   </Button>

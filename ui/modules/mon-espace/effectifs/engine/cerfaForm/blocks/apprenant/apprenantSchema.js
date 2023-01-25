@@ -725,6 +725,7 @@ export const apprenantSchema = {
     fieldType: "text",
     showInfo: true,
     label: "Établissement fréquenté l’année dernière (N-1):",
+    placeholder: "Numéro UAI ou département",
   },
   "apprenant.organisme_gestionnaire": {
     fieldType: "select",

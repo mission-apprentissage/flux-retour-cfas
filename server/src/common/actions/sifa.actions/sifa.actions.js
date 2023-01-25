@@ -85,7 +85,11 @@ export const generateSifa = async (organisme_id) => {
           }`
         : undefined, // REQUIRED
       SIT_N_1: effectif.apprenant.derniere_situation, // REQUIRED
-      ETAB_N_1: effectif.apprenant.dernier_organisme_uai, // REQUIRED
+      ETAB_N_1: effectif.apprenant.dernier_organisme_uai
+        ? effectif.apprenant.dernier_organisme_uai.length === 8
+          ? effectif.apprenant.dernier_organisme_uai
+          : effectif.apprenant.dernier_organisme_uai.padStart(3, "0")
+        : undefined, // REQUIRED
       DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd), // REQUIRED
       DUR_FORM_THEO:
         formationOrganisme?.duree_formation_theorique || formationBcn?.duree
