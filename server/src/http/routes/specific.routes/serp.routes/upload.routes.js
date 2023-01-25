@@ -662,7 +662,7 @@ export default ({ clamav }) => {
         const { effectif: canNotBeImportEffectif } = await hydrateEffectif({
           organisme_id,
           source: document.document_id.toString(),
-          id_erp_apprenant: `${index}`,
+          id_erp_apprenant: new ObjectId().toString(),
           annee_scolaire,
           apprenant: { nom: data.apprenant?.nom ?? "", prenom: data.apprenant?.prenom ?? "" },
           formation: { cfd: data.formation?.cfd ?? "", rncp: data.formation?.rncp ?? "" },
