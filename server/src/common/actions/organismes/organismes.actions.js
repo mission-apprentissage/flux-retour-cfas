@@ -408,7 +408,8 @@ export const getContributeurs = async (organismeId) => {
       permSelectFields
     );
     if (!currentUserPerm) {
-      throw new Error(`User ${contributeurEmail} has no permission for organisme ${orgId}`);
+      logger.error(`Contributor ${contributeurEmail} has no permission for organisme ${orgId}. This should not happen`);
+      return null;
     }
     const currentUserRole = await findRolePermissionById(currentUserPerm.role, roleSelectFields);
     if (!currentUserRole) {
@@ -430,7 +431,7 @@ export const getContributeurs = async (organismeId) => {
     contributeurs.push(await buildContributeursResult(contributeur, organismeId));
   }
 
-  return contributeurs;
+  return contributeurs.filter((o) => o);
 };
 
 /**
