@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Box, Container, Flex, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 
 import useAuth from "../../../hooks/useAuth";
-import { MenuFill, Close, Settings4Fill, UserFill, ParentGroupIcon } from "../../../theme/components/icons";
+import { MenuFill, Close, Settings4Fill, ParentGroupIcon } from "../../../theme/components/icons";
 import Link from "../../Links/Link";
 import { useEspace } from "../../../hooks/useEspace";
 import { hasContextAccessTo, hasPageAccessTo } from "../../../common/utils/rolesUtils";
@@ -99,9 +99,6 @@ const NavBarUser = ({ isOpen, mesOrganismesActive = false }) => {
   } = useEspace();
   return (
     <NavContainer isOpen={isOpen}>
-      <Box p={4} bg={"transparent"}>
-        <UserFill mt="-0.3rem" boxSize={4} />
-      </Box>
       <NavItem to={userNavigation.landingEspace.path}>{userNavigation.landingEspace.navTitle}</NavItem>
 
       {userNavigation.mesOrganismes && hasPageAccessTo(auth, "page/mes-organismes") && (
