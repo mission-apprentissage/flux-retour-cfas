@@ -39,17 +39,17 @@ const EntrepriseDetails = ({ data }) => {
     <VStack alignItems={"baseline"} spacing={1} paddingX={4}>
       {data.uai && (
         <Text>
-          UAI: <b>{data.uai}</b>
+          UAI : <b>{data.uai}</b>
         </Text>
       )}
       {data.siren && (
         <Text>
-          SIREN: <b>{data.siren}</b>
+          SIREN : <b>{data.siren}</b>
         </Text>
       )}
       {data.siret && (
         <Text>
-          SIRET: <b>{data.siret}</b>
+          SIRET : <b>{data.siret}</b>
         </Text>
       )}
       {!data.secretSiret && (
@@ -58,7 +58,7 @@ const EntrepriseDetails = ({ data }) => {
             Raison sociale : <b>{data.enseigne || data.entreprise_raison_sociale}</b>
           </Text>
           <Text>
-            Adresse :{" "}
+            Adresse :
             <b>
               {[
                 data.numero_voie,
@@ -182,7 +182,8 @@ export const UaiBlock = ({ onUaiFetched }) => {
         {errors.uai && touched.uai && <FormErrorMessage>{errors.uai}</FormErrorMessage>}
       </FormControl>
       {values.uai && (
-        <Center
+        <VStack
+          alignItems="baseline"
           borderWidth="2px"
           borderStyle="dashed"
           borderColor={
@@ -200,7 +201,7 @@ export const UaiBlock = ({ onUaiFetched }) => {
           py={4}
           w="100%"
         >
-          {isFetching && <Spinner />}
+          {isFetching && <Spinner alignSelf="center" />}
           {!isFetching && entrepriseData && (
             <>
               {entrepriseData.data && !entrepriseData.multiple && <EntrepriseDetails data={entrepriseData.data} />}
@@ -245,7 +246,7 @@ export const UaiBlock = ({ onUaiFetched }) => {
               )}
             </>
           )}
-        </Center>
+        </VStack>
       )}
     </>
   );
