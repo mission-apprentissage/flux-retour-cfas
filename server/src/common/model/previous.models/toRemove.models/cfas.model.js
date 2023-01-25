@@ -27,7 +27,7 @@ const schema = object(
   {
     _id: objectId(),
     uai: string({ description: "Code UAI de l'établissement" }),
-    sirets: arrayOf(string(), { description: "Liste des sirets reliés à l'établissement" }),
+    sirets: arrayOf(string(), { description: "Liste des SIRETs reliés à l'établissement" }),
     nature: stringOrNull({ description: "Nature de l'organisme de formation" }),
     nature_validity_warning: boolean({ description: "Y a-t-il un doute sur la validié de la nature" }),
     nom: stringOrNull({ description: "Nom de l'organisme de formation" }),

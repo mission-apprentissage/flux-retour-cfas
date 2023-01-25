@@ -97,7 +97,7 @@ const CreateReseauCfaForm = ({ createReseauCfa, networkList }) => {
             <Input name="siret" value={values.siret} onChange={handleChange} />
             {listSirets?.length > 1 && (
               <Box color="redmarianne">
-                <Text>Plusieurs sirets ont été trouvés</Text>
+                <Text>Plusieurs SIRETs ont été trouvés</Text>
                 <UnorderedList>
                   {listSirets?.map((siret) => (
                     <ListItem key={siret}>{siret}</ListItem>

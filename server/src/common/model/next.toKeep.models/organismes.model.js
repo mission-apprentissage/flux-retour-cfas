@@ -30,7 +30,7 @@ export const schema = object(
       minLength: 8,
     }),
     sirets: arrayOf(string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }), {
-      description: "Liste des sirets reliés à l'établissement",
+      description: "Liste des SIRETs reliés à l'établissement",
     }),
     siret: string({ description: "N° SIRET fiabilisé", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
     reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS) }), { description: "Réseaux du CFA, s'ils existent" }),

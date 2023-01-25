@@ -40,7 +40,7 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
     const validationSchema = Yup.object().shape({
       siret: Yup.string()
         .matches(new RegExp("^([0-9]{14}|[0-9]{9} [0-9]{4})$"), {
-          message: `n'est pas un siret valide`,
+          message: `n'est pas un SIRET valide`,
           excludeEmptyString: true,
         })
         .required("Le siret est obligatoire"),

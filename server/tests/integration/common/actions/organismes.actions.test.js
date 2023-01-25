@@ -277,7 +277,7 @@ describe("Test des actions Organismes", () => {
       // Création & control d'un organisme avec uai et siret
       await assert.rejects(
         () => createAndControlOrganisme({ uai: sampleUai, siret: sampleSiret }),
-        new Error(`Impossible de créer l'organisme d'uai ${sampleUai} avec un siret vide`)
+        new Error(`Impossible de créer l'organisme d'uai ${sampleUai} avec un SIRET vide`)
       );
     });
 
@@ -293,7 +293,7 @@ describe("Test des actions Organismes", () => {
       const otherUai = "0611175W";
       await assert.rejects(
         () => createAndControlOrganisme({ uai: otherUai, siret }),
-        new Error(`L'organisme ayant le siret ${siret} existe déja en base avec un UAI différent : ${uai}`)
+        new Error(`L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${uai}`)
       );
     });
 
@@ -305,11 +305,11 @@ describe("Test des actions Organismes", () => {
       const randomOrganisme = createRandomOrganisme({ uai, siret });
       await createOrganisme(randomOrganisme);
 
-      // Création & control d'un organisme avec le même uai mais un siret différent
+      // Création & control d'un organisme avec le même uai mais un SIRET différent
       const otherSiret = "78354361400029";
       await assert.rejects(
         () => createAndControlOrganisme({ uai, siret: otherSiret }),
-        new Error(`L'organisme ayant l'UAI ${uai} existe déja en base avec un siret différent : ${siret}`)
+        new Error(`L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${siret}`)
       );
     });
 

@@ -63,7 +63,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
       email: Yup.string().email("Format d'email invalide").required("Votre email est obligatoire"),
       siret: Yup.string()
         .matches(new RegExp("^([0-9]{14}|[0-9]{9} [0-9]{4})$"), {
-          message: `n'est pas un siret valide`,
+          message: `n'est pas un SIRET valide`,
           excludeEmptyString: true,
         })
         .required("Le siret est obligatoire"),

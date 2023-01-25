@@ -50,7 +50,7 @@ export const analyseFiabilisationCfas = async () => {
 /**
  * Ce script analyse la fiabilisation d'un cfa
  * Analyse sur l'UAI : algo & localisation
- * Analyse sur le siret : siretSchema validation
+ * Analyse sur le SIRET : siretSchema validation
  */
 export const analyseFiabilisationCfa = async ({ uai, sirets }) => {
   const isValidCfaUaiAlgo = await analyseCfaUaiAlgo(uai);
@@ -108,7 +108,7 @@ const analyseCfaUaiLocalisation = async (uai) => {
 };
 
 /**
- * Analyse du format des sirets de cfa
+ * Analyse du format des SIRETs de cfa
  * @param {*} currentSiret
  * @returns
  */

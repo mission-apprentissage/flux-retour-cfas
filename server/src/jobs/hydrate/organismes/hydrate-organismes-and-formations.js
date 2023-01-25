@@ -347,7 +347,7 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
     nature: NATURE_ORGANISME_DE_FORMATION.LIEU,
     // uai: formationCatalog.XXXX, // TODO non récupérée par RCO donc pas présent dans le catalogue (vu avec Quentin)
     ...(formationCatalog.lieu_formation_siret ? { siret: formationCatalog.lieu_formation_siret } : {}),
-    // TODO On récupère l'adresse depuis le référentiel en appelant avec le siret ?
+    // TODO On récupère l'adresse depuis le référentiel en appelant avec le SIRET ?
   });
 
   return organismesLinkedToFormation;
