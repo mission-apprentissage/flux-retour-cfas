@@ -1,3 +1,10 @@
+## [3.6.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.1...v3.6.1-beta.2) (2023-01-25)
+
+
+### Bug Fixes
+
+* **server:** update effectifs unique index using id_erp_apprenant ([#2452](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2452)) ([78b74ef](https://github.com/mission-apprentissage/flux-retour-cfas/commit/78b74ef090ddf73baa3876b19ab0828310f52a89))
+
 ## [3.6.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.0...v3.6.1-beta.1) (2023-01-25)
 
 
