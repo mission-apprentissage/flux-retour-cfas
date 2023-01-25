@@ -46,6 +46,7 @@ const typeCompte = {
 const Inscription = ({ onSucceeded, ...props }) => {
   const [step, setStep] = useState(0);
   const [entrepriseData, setEntrepriseData] = useState(null);
+  const [typeOfSearch, setTypeOfSearch] = useState("");
 
   const { values, handleChange, handleSubmit, errors, touched, setFieldValue, setErrors } = useFormik({
     initialValues: {
@@ -146,6 +147,8 @@ const Inscription = ({ onSucceeded, ...props }) => {
             <>
               {values.type === "of" && (
                 <InscriptionOF
+                  typeOfSearch={typeOfSearch}
+                  setTypeOfSearch={setTypeOfSearch}
                   onEndOfSpecific={(result) => {
                     result.data?.uai && setFieldValue("uai", result.data.uai);
                     result.data?.siret && setFieldValue("siret", result.data.siret);
@@ -250,7 +253,20 @@ const Inscription = ({ onSucceeded, ...props }) => {
         </Box>
         {step > 0 && (
           <HStack gap="24px" mt={5}>
-            <Button onClick={() => setStep(step - 1)} color="bluefrance" variant="secondary">
+            <Button
+              onClick={() => {
+                if (typeOfSearch) {
+                  setTypeOfSearch("");
+                  return;
+                }
+                if (step === 1) {
+                  setFieldValue("type", "");
+                }
+                setStep(step - 1);
+              }}
+              color="bluefrance"
+              variant="secondary"
+            >
               Revenir
             </Button>
             {step === 1 && (

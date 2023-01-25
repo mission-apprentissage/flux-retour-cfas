@@ -4,8 +4,7 @@ import { Box, Text, Radio, RadioGroup, Stack, Flex, Link } from "@chakra-ui/reac
 import { SiretBlock } from "./components/SiretBlock";
 import { UaiBlock } from "./components/UaiBlock";
 
-export const InscriptionOF = ({ onEndOfSpecific }) => {
-  const [typeOfSearch, setTypeOfSearch] = useState("");
+export const InscriptionOF = ({ onEndOfSpecific, typeOfSearch, setTypeOfSearch }) => {
   const [help, setHelp] = useState("");
 
   return (
