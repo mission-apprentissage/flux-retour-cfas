@@ -35,7 +35,7 @@ const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => 
     <div>
       <Text fontSize="epsilon">Rechercher l&apos;organisme par UAI ou par SIRET :</Text>
       <Text fontSize="omega" color="grey.600">
-        Format valide d’une UAI : 7 chiffres et 1 lettre, et d’un SIRET : 14 chiffres
+        Format valide d’un UAI : 7 chiffres et 1 lettre, et d’un SIRET : 14 chiffres
       </Text>
       <Input
         marginTop="1w"

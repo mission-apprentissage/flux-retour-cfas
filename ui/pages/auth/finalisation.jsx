@@ -380,7 +380,7 @@ const Finalize = () => {
                   </Text>
                   <Text color="grey.800" mt={4}>
                     <Text textStyle="sm">
-                      Pour des raisons de sécurité, un des gestionnaire de cet organisme va examiner votre demande.
+                      Pour des raisons de sécurité, un des gestionnaires de cet organisme va examiner votre demande.
                       <br />
                     </Text>
                   </Text>

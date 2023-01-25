@@ -30,7 +30,7 @@ const CfaPrivateView = ({ cfaUai }) => {
       </Section>
       <CfaInformationSection infosCfa={infosCfa} loading={infosCfaLoading} error={infosCfaError} />
 
-      {/* Filtre sur le siret pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs sirets */}
+      {/* Filtre sur le SIRET pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs SIRETs */}
       {displaySousEtablissementDetail && <MultiSiretDetailInformationSection sirets={sirets} />}
 
       {/* Répartition par Siret pour un établissement multi-siret */}
@@ -38,7 +38,7 @@ const CfaPrivateView = ({ cfaUai }) => {
         <RepartitionEffectifsParSiretSection namedDataDownloadMode={true} filters={filters} />
       )}
 
-      {/* Vue Globale & Repartition pour un établissement sans sirets multiple ou dans la vue détail d'un sous établissement */}
+      {/* Vue Globale & Repartition pour un établissement sans SIRETs multiple ou dans la vue détail d'un sous établissement */}
       {(displaySousEtablissementDetail || !hasMultipleSirets) && (
         <IndicateursAndRepartionCfaNiveauAnneesSection
           filters={filters}

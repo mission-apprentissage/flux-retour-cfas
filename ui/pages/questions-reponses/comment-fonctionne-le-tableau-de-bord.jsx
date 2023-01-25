@@ -282,7 +282,7 @@ export default function CommentFonctionneLeTdb() {
                   ),
                 },
                 {
-                  title: "Qu’est-ce qu’une UAI ? Comment retrouver l’UAI de votre organisme ?",
+                  title: "Qu’est-ce qu’un UAI ? Comment retrouver l’UAI de votre organisme ?",
                   content: (
                     <Box>
                       <Text>

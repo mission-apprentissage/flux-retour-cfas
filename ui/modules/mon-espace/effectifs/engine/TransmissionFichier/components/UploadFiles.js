@@ -138,6 +138,8 @@ const UploadFiles = ({ title }) => {
       <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
         {title}
       </Heading>
+      <Text>Veuillez privilégier le format .csv</Text>
+
       {documents?.unconfirmed?.length > 0 && (
         <Box mb={8}>
           {uploadError && <Text color="error">{uploadError}</Text>}

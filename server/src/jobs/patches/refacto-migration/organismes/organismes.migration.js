@@ -103,10 +103,10 @@ export const migrateCfasToOrganismes = async () => {
  * @param {*} uai
  */
 export const migrateSingleCfaToOrganisme = async (uai) => {
-  logger.info(`Migration du cfas avec uai ${uai} vers la collection organismes`);
+  logger.info(`Migration du cfas avec UAI ${uai} vers la collection organismes`);
 
   // Clear des organismes existants
-  logger.info(`Suppression de l'organisme avec uai ${uai} si existant...`);
+  logger.info(`Suppression de l'organisme avec UAI ${uai} si existant...`);
   await organismesDb().deleteMany({ uai });
 
   const currentCfa = await cfasDb().findOne({ uai });

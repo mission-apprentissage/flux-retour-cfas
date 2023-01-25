@@ -14,7 +14,7 @@ export const collectionName = "effectifsApprenants";
 export const schema = object({
   _id: objectId(),
   dossierApprenantId: string({ description: "Identifiant du dossier apprenant d'origine" }),
-  uai_etablissement: string({ description: "Code uai de l'établissement d'origine" }),
+  uai_etablissement: string({ description: "Code UAI de l'établissement d'origine" }),
   nom_etablissement: stringOrNull({ description: "Nom de l'établissement d'origine" }),
   formation_cfd: string({ description: "CFD de la formation du dossierApprenant" }),
   periode_formation: arrayOfOrNull(integer(), { description: "Date debut & date de fin de la formation" }),

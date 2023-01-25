@@ -81,7 +81,7 @@ export default ({ cfas }) => {
       const cfaFound = await cfas.getFromUai(uai);
 
       if (!cfaFound) {
-        return res.status(404).json({ message: `No cfa found for uai ${uai}` });
+        return res.status(404).json({ message: `No cfa found for UAI ${uai}` });
       } else {
         const sousEtablissements = await cfas.getSousEtablissementsForUai(uai);
 

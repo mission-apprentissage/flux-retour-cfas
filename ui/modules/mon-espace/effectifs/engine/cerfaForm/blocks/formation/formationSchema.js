@@ -28,7 +28,7 @@ export const formationSchema = {
   },
   "formation.date_obtention_diplome": {
     fieldType: "date",
-    label: "Date d'obtention du diplôme: ",
+    label: "Date d'obtention du diplôme :",
     showInfo: true,
   },
 };

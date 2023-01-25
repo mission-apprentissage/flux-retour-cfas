@@ -118,8 +118,8 @@ const SIFAPage = () => {
     <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Heading textStyle="h2" color="grey.800" mt={5} mb={8}>
-          {isMonOrganismePages && `Mon Enquete SIFA`}
-          {isOrganismePages && `Son Enquete SIFA`}
+          {isMonOrganismePages && `Mon Enquête SIFA`}
+          {isOrganismePages && `Son Enquête SIFA`}
         </Heading>
         <HStack spacing={4}>
           {hasContextAccessTo(organisme, "organisme/page_sifa/telecharger") && (
@@ -150,8 +150,8 @@ const SIFAPage = () => {
 
       <VStack alignItems="flex-start">
         <Text fontWeight="bold">
-          Vous avez [{organismesEffectifs.length}] effectifs au total, pour plus de facilité veuillez sélectionner une
-          option ci-dessous :
+          Vous avez {organismesEffectifs.length} effectifs au total. Pour plus de facilité, vous pouvez effectuer une
+          recherche, ou filtrer par année.
         </Text>
         <Input
           {...{

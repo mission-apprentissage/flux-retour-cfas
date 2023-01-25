@@ -97,7 +97,7 @@ export const userAfterCreate = async ({
       // user is NOT cross_organismes and NOT scoped -> example OF
       const organisme = await findOrganismeByUai(uai); // uai
       if (!organisme) {
-        throw new Error(`No organisme found for this uai ${uai}`);
+        throw new Error(`No organisme found for this UAI ${uai}`);
       }
 
       const giveAccessToSubOrganismes = async (organisme) => {
