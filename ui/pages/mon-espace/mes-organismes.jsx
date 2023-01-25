@@ -25,7 +25,7 @@ function useEspaceOrganismes() {
 }
 
 function MesOrganismes() {
-  const title = "Mes Organismes";
+  const title = "Mes organismes";
   const { isLoading, organismes } = useEspaceOrganismes();
 
   let { whoIs } = useEspace();

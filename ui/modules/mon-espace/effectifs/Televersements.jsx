@@ -275,7 +275,7 @@ const Televersements = () => {
     <>
       {step === "landing" && (
         <Flex alignItems="flex-start" mt={8} flexDirection="column">
-          <Text>Vous n&rsquo;avez pas de fichier ? Utilisez notre fichier modèle</Text>
+          <Text>Vous n&rsquo;avez pas de fichier ? Utilisez notre fichier modèle.</Text>
           <Link href={`/modele_tableau_de_bord.csv`} textDecoration={"underline"} isExternal>
             <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
           </Link>
@@ -735,7 +735,7 @@ const Televersements = () => {
                 <Ribbons variant="alert" mt="0.5rem">
                   <Box ml={3}>
                     <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                      Les lignes du tableau ci-dessous ne pourront pas être importées car elles contiennent des erreurs
+                      Les lignes du tableau ci-dessous ne pourront pas être importées car elles contiennent des erreurs.
                     </Text>
                     <Text color="grey.800" mt={2} textStyle="sm">
                       Une fois votre importation terminée, vous pourrez : importer un nouveau fichier corrigé ou ajouter
@@ -799,7 +799,7 @@ const Televersements = () => {
                       Les lignes du tableau ci-dessous pourront être importées.
                     </Text>
                     <Text mt={2} fontSize="0.9rem" color="grey.800" fontWeight="bold">
-                      Attention : Il est possible que des champs non obligatoires soient erronées. Une fois votre
+                      Attention : Il est possible que des champs non obligatoires soient erronés. Une fois votre
                     </Text>
                     <Text color="grey.800" textStyle="sm">
                       importation terminée, vous pourrez : importer un nouveau fichier corrigé ou les corriger sur votre
@@ -815,20 +815,28 @@ const Televersements = () => {
                 />
               </Box>
             )}
-            <Button
-              onClick={() => {
-                setStep("mapping");
-              }}
-              size={"md"}
-              variant="secondary"
-            >
-              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} mr="0.5rem" transform="rotate(180deg)" />
-              Étape précédente
-            </Button>
-            <Button onClick={() => onGoToImportStep()} size={"md"} variant="primary">
-              Importer les données
-              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
-            </Button>
+            <HStack spacing={4}>
+              <Button
+                onClick={() => {
+                  setStep("mapping");
+                }}
+                size={"md"}
+                variant="secondary"
+              >
+                <ArrowDropRightLine
+                  w={"0.75rem"}
+                  h={"0.75rem"}
+                  mt={"0.250rem"}
+                  mr="0.5rem"
+                  transform="rotate(180deg)"
+                />
+                Étape précédente
+              </Button>
+              <Button onClick={() => onGoToImportStep()} size={"md"} variant="primary">
+                Importer les données
+                <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
+              </Button>
+            </HStack>
           </Box>
         )}
         {step === "import" && (

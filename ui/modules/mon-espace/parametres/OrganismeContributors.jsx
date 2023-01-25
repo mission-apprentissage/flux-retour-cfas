@@ -127,17 +127,7 @@ const OrganismeContributors = ({ size = "md" }) => {
         <Spinner />
       ) : (
         <Box px={[4, 8]} mb={5}>
-          <Text textStyle="xs">
-            <Question w="10px" h="10px" mt="-0.2rem" /> Une question sur un rôle ? Consulter la{" "}
-            <Link
-              color="bluefrance"
-              as={NavLink}
-              href={"https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"}
-              isExternal
-            >
-              FAQ
-            </Link>
-          </Text>
+          <Text>Inviter un membre de votre organisme</Text>
           <Flex flexDirection="column" py={5} minWidth="max-content">
             <Flex gap={4} minWidth="max-content">
               <Box flex="1">
@@ -210,6 +200,17 @@ const OrganismeContributors = ({ size = "md" }) => {
                 </Button>
               </Box>
             </Flex>
+            <Text textStyle="xs">
+              <Question w="10px" h="10px" mt="-0.2rem" /> Une question sur un rôle ? Consulter la{" "}
+              <Link
+                color="bluefrance"
+                as={NavLink}
+                href={"https://www.notion.so/mission-apprentissage/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"}
+                isExternal
+              >
+                FAQ
+              </Link>
+            </Text>
           </Flex>
           <Flex mt={8}>
             <Table
@@ -256,7 +257,7 @@ const OrganismeContributors = ({ size = "md" }) => {
                       POLE_EMPLOI: "PÔLE EMPLOI",
                       MISSION_LOCALE: "MISSION LOCALE",
                       CELLULE_APPRENTISSAGE: "CELLULE APPRENTISSAGE",
-                      ORGANISME_FORMATION: "ORGANISME DE FORMATIONS",
+                      ORGANISME_FORMATION: "ORGANISME DE FORMATION",
                     };
                     return <Text fontSize="1rem">{ORGANISMES_APPARTENANCE[user.organisation].toLowerCase()}</Text>;
                   },

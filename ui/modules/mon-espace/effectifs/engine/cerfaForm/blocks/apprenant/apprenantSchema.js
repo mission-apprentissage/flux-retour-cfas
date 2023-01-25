@@ -237,7 +237,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.representant_legal.nom": {
-    label: "Nom du représentant légal:",
+    label: "Nom du représentant légal :",
     mask: "C",
     maskBlocks: [
       {
@@ -248,7 +248,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.representant_legal.prenom": {
-    label: "Prénom du représentant légal:",
+    label: "Prénom du représentant légal :",
     mask: "C",
     maskBlocks: [
       {
