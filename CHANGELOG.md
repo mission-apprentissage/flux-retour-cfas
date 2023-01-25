@@ -1,3 +1,10 @@
+## [3.6.1-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.2...v3.6.1-beta.3) (2023-01-25)
+
+
+### Bug Fixes
+
+* **server:** csv networks names ([#2449](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2449)) ([9830649](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9830649af580ff0b0abebcfc8aa3685e666fd56d))
+
 ## [3.6.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.1...v3.6.1-beta.2) (2023-01-25)
 
 
