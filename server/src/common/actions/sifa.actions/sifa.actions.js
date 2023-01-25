@@ -88,7 +88,7 @@ export const generateSifa = async (organisme_id) => {
       ETAB_N_1: effectif.apprenant.dernier_organisme_uai
         ? effectif.apprenant.dernier_organisme_uai.length === 8
           ? effectif.apprenant.dernier_organisme_uai
-          : effectif.apprenant.dernier_organisme_uai.padStart(3, "0")
+          : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
         : undefined, // REQUIRED
       DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd), // REQUIRED
       DUR_FORM_THEO:
