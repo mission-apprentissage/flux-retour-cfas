@@ -235,14 +235,14 @@ export const hydrateOrganisme = async (organisme) => {
     organismeFoundId = organismeFoundWithUaiSiret?._id;
   } else {
     const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
-    // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> erreur
+    // Si pour le couple uai-siret IN on trouve le siret mais un UAI différent -> erreur
     if (organismeFoundWithSiret?._id)
-      organismeFoundError = `L'organisme ayant le siret ${organisme.siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai}`;
+      organismeFoundError = `L'organisme ayant le siret ${organisme.siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`;
 
     const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
-    // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> erreur
+    // Si pour le couple uai-siret IN on trouve l'UAI mais un siret différent -> erreur
     if (organismeFoundWithUai?._id)
-      organismeFoundError = `L'organisme ayant l'uai ${organisme.uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`;
+      organismeFoundError = `L'organisme ayant l'UAI ${organisme.uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`;
 
     // TODO CHECK BASE ACCES
 

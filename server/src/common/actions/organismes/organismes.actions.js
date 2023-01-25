@@ -37,17 +37,17 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
   } else {
     const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
 
-    // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> KO (+ Log?)
+    // Si pour le couple uai-siret IN on trouve le siret mais un UAI différent -> KO (+ Log?)
     if (organismeFoundWithSiret?._id)
       throw new Error(
-        `L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai}`
+        `L'organisme ayant le siret ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`
       ); // TODO LOG ?
 
     const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
-    // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> KO (+ Log?)
+    // Si pour le couple uai-siret IN on trouve l'UAI mais un siret différent -> KO (+ Log?)
     if (organismeFoundWithUai?._id)
       throw new Error(
-        `L'organisme ayant l'uai ${uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`
+        `L'organisme ayant l'UAI ${uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`
       ); // TODO LOG ?
 
     // TODO CHECK BASE ACCES
@@ -81,7 +81,7 @@ export const createOrganisme = async ({
   ...data
 }) => {
   if (await organismesDb().countDocuments({ uai })) {
-    throw new Error(`Un organisme avec l'uai ${uai} existe déjà`);
+    throw new Error(`Un organisme avec l'UAI ${uai} existe déjà`);
   }
 
   let siret = siretIn;
@@ -224,7 +224,7 @@ export const findOrganismeBySiret = async (siret, projection = {}) => {
 };
 
 /**
- * Méthode de récupération d'un organisme depuis un uai et un siret
+ * Méthode de récupération d'un organisme depuis un UAI et un siret
  * Previously getFromUaiAndSiret
  * @param {string} uai
  * @param {string} siret

@@ -100,7 +100,7 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
         if (updatedCfa !== null) {
           nbUpdate++;
         } else {
-          logger.error(`Cfas with uai ${currentUai} not updated !`);
+          logger.error(`Cfas with UAI ${currentUai} not updated !`);
           nbUpdateErrors++;
         }
         nbUpdate++;
@@ -109,7 +109,7 @@ const seedCfasFromDossiersApprenantsUaisValid = async (cfas) => {
         if (createdCfa !== null) {
           nbCreation++;
         } else {
-          logger.error(`Cfas with uai ${currentUai} not created !`);
+          logger.error(`Cfas with UAI ${currentUai} not created !`);
           nbCreationErrors++;
         }
       }

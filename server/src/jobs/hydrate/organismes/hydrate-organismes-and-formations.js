@@ -64,7 +64,7 @@ export const hydrateOrganismesAndFormations = async () => {
   await asyncForEach(organismes, async (organismeReferentiel) => {
     const { uai, siret, raison_sociale, nature } = organismeReferentiel;
 
-    // Si aucun uai on ne peut pas effectuer de traitement
+    // Si aucun UAI on ne peut pas effectuer de traitement
     if (!uai) {
       // TODO voir coté métier comment gérer la récupération d'organismes sans uai dans le référentiel
       nbOrganismeWithoutUai++;
@@ -354,7 +354,7 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
 };
 
 /**
- * Vérifie la nature, si on détecte un uai formateur = responsable alors on est dans le cas d'un responsable_formateur
+ * Vérifie la nature, si on détecte un UAI formateur = responsable alors on est dans le cas d'un responsable_formateur
  * sinon on renvoi la nature default
  * @param {*} defaultNature
  * @param {*} formationCatalog

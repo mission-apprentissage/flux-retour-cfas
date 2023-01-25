@@ -138,7 +138,7 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
 };
 
 /**
- * Vérifie la nature, si on détecte un uai formateur = reponsable alors on est dans le cas d'un responsable_formateur
+ * Vérifie la nature, si on détecte un UAI formateur = reponsable alors on est dans le cas d'un responsable_formateur
  * sinon on renvoi la nature default
  * @param {*} defaultNature
  * @param {*} formationCatalog

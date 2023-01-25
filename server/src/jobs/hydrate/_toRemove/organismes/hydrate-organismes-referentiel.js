@@ -53,7 +53,7 @@ export const hydrateOrganismesReferentiel = async () => {
   await asyncForEach(organismes, async (organismeReferentiel) => {
     const { uai, siret, raison_sociale, nature } = organismeReferentiel;
 
-    // Si aucun uai on ne peut pas effectuer de traitement
+    // Si aucun UAI on ne peut pas effectuer de traitement
     if (!uai) {
       // TODO voir coté métier comment gérer la récupération d'organismes sans uai dans le référentiel
       nbOrganismeWithoutUai++;

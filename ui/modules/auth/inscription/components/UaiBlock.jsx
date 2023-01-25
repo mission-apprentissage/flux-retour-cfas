@@ -99,7 +99,7 @@ export const UaiBlock = ({ onUaiFetched }) => {
     const validationSchema = Yup.object().shape({
       uai: Yup.string()
         .matches(new RegExp("^([0-9]{7}[A-Z]{1})$"), {
-          message: `n'est pas un uai valide`,
+          message: `n'est pas un UAI valide`,
           excludeEmptyString: true,
         })
         .required("L'uai est obligatoire"),

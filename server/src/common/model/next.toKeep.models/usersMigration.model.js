@@ -24,7 +24,7 @@ export const schema = object(
     description: string({ description: "Description de l'utilisateur" }),
     siret: string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
     uai: string({
-      description: "Code uai de l'organisme (seulement pour les utilisateurs OF)",
+      description: "Code UAI de l'organisme (seulement pour les utilisateurs OF)",
       pattern: "^[0-9]{7}[a-zA-Z]$",
       maxLength: 8,
       minLength: 8,

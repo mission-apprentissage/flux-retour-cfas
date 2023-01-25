@@ -129,7 +129,7 @@ export const questions = [
   // },
   {
     question:
-      "Qu'est-ce qu'une UAI ? Comment retrouver l'UAI de votre organisme ? Vous avez plusieurs UAI, laquelle devez-vous renseigner ?",
+      "Qu'est-ce qu'un UAI ? Comment retrouver l'UAI de votre organisme ? Vous avez plusieurs UAI, lequel devez-vous renseigner ?",
     answer: (
       <Stack>
         <Text>

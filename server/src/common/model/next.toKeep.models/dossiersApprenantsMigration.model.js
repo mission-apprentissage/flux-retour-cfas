@@ -38,7 +38,7 @@ export const schema = object(
     }),
 
     // Etablissement
-    uai_etablissement: string({ description: "Code uai de l'établissement formateur" }),
+    uai_etablissement: string({ description: "Code UAI de l'établissement formateur" }),
     siret_etablissement: string({ description: "Siret de l'établissement d'origine" }),
     etablissement_reseaux: arrayOf(string(), {
       description: "Réseaux auxquels appartient l'organisme de formation de l'apprenant",

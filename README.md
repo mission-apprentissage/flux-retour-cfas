@@ -436,7 +436,7 @@ Ce script prend en arguments :
 
 - duplicatesTypeCode : types de doublons à identifier : 1/2/3/4
 - mode : forAll / forUai le script va se lancer pour toute la base ou un uai
-- uai : si mode forUai actif, permet de préciser l'uai souhaité
+- uai : si mode forUai actif, permet de préciser l'UAI souhaité
 - allowDiskUseMode : si mode allowDiskUseMode actif, permet d'utiliser l'option d'aggregation MongoDb allowDiskUse https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
 Exemple, identifier les doublons de type 1 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement/formation_cfd) sur toute la base :
@@ -459,7 +459,7 @@ Ce script prend les mêmes arguments que le script d'identification :
 
 - duplicatesTypeCode : types de doublons à identifier : 1/2/3/4
 - mode : forAll / forUai le script va se lancer pour toute la base ou un uai
-- uai : si mode forUai actif, permet de préciser l'uai souhaité
+- uai : si mode forUai actif, permet de préciser l'UAI souhaité
 - allowDiskUseMode : si mode allowDiskUseMode actif, permet d'utiliser l'option d'aggregation MongoDb allowDiskUse https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
 Exemple, supprimer les doublons de type 1 (même combinaison prenom_apprenant/nom_apprenant/uai_etablissement/formation_cfd) sur toute la base :

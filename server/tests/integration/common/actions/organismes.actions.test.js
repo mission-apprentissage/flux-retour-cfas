@@ -231,7 +231,7 @@ describe("Test des actions Organismes", () => {
       const randomOrganisme = createRandomOrganisme({ uai: uaiFiable, siret: siretFiable });
       const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
 
-      // Création & control d'un organisme avec l'uai et siret non fiabilisés
+      // Création & control d'un organisme avec l'UAI et siret non fiabilisés
       const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret });
 
       assert.deepEqual(createdOrganismeId, foundOrganismeId);
@@ -255,7 +255,7 @@ describe("Test des actions Organismes", () => {
       const randomOrganisme = createRandomOrganisme({ uai: sampleUaiFiable, siret: sampleSiretFiable });
       const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
 
-      // Création & control d'un organisme avec l'uai et siret non fiabilisés
+      // Création & control d'un organisme avec l'UAI et siret non fiabilisés
       const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai: sampleUai, siret: sampleSiret });
 
       assert.deepEqual(createdOrganismeId, foundOrganismeId);
@@ -289,11 +289,11 @@ describe("Test des actions Organismes", () => {
       const randomOrganisme = createRandomOrganisme({ uai, siret });
       await createOrganisme(randomOrganisme);
 
-      // Création & control d'un organisme avec le même siret mais un uai différent
+      // Création & control d'un organisme avec le même siret mais un UAI différent
       const otherUai = "0611175W";
       await assert.rejects(
         () => createAndControlOrganisme({ uai: otherUai, siret }),
-        new Error(`L'organisme ayant le siret ${siret} existe déja en base avec un uai différent : ${uai}`)
+        new Error(`L'organisme ayant le siret ${siret} existe déja en base avec un UAI différent : ${uai}`)
       );
     });
 
@@ -309,7 +309,7 @@ describe("Test des actions Organismes", () => {
       const otherSiret = "78354361400029";
       await assert.rejects(
         () => createAndControlOrganisme({ uai, siret: otherSiret }),
-        new Error(`L'organisme ayant l'uai ${uai} existe déja en base avec un siret différent : ${siret}`)
+        new Error(`L'organisme ayant l'UAI ${uai} existe déja en base avec un siret différent : ${siret}`)
       );
     });
 

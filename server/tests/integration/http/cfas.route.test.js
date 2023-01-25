@@ -108,7 +108,7 @@
 //   });
 
 //   describe("GET /cfas/url-access-token/:token", () => {
-//     it("Vérifie qu'on peut récupérer l'uai d'un CFA via un Token Url", async () => {
+//     it("Vérifie qu'on peut récupérer l'UAI d'un CFA via un Token Url", async () => {
 //       const { httpClient } = await startServer();
 
 //       const nomTest = "TEST NOM";

@@ -38,7 +38,7 @@ const schema = object(
     niveau_formation_libelle: stringOrNull({
       description: "Libellé du niveau de la formation (ex: '3 (BTS, DUT...)')",
     }),
-    uai_etablissement: string({ description: "Code uai de l'établissement formateur" }),
+    uai_etablissement: string({ description: "Code UAI de l'établissement formateur" }),
     siret_etablissement: stringOrNull({ description: "Siret de l'établissement d'origine" }),
     nom_etablissement: string({ description: "Nom de l'établissement d'origine" }),
     etablissement_reseaux: arrayOfOrNull(string(), {
