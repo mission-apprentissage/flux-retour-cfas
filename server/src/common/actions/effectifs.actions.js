@@ -371,7 +371,7 @@ export const updateEffectif = async (id, data, opt = { keepPreviousErrors: false
  * @param {*} id
  * @returns
  */
-export const updateEffectifAndLock = async (id, { apprenant, formation, validation_errors }) => {
+export const updateEffectifAndLock = async (id, { apprenant, formation, validation_errors = [] }) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
