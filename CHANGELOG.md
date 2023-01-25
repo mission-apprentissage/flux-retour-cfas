@@ -1,3 +1,10 @@
+## [3.6.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.0...v3.6.1-beta.1) (2023-01-25)
+
+
+### Bug Fixes
+
+* **server:** add default value for validationErrors on updateEffectifsAndLock ([#2451](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2451)) ([1da8a1e](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1da8a1efd6eae461d6e5f63db9e69fe87e851369))
+
 # [3.6.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.5.1...v3.6.0) (2023-01-24)
 
 
