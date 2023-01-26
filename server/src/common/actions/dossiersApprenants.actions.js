@@ -124,7 +124,15 @@ export function findDossierApprenantByApprenant({
  */
 export const updateDossierApprenant = async (
   id,
-  { contrat_date_debut, contrat_date_fin, contrat_date_rupture, formation_id, ...data }
+  {
+    contrat_date_debut,
+    contrat_date_fin,
+    contrat_date_rupture,
+    formation_id,
+    statut_apprenant,
+    date_metier_mise_a_jour_statut,
+    ...data
+  }
 ) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
@@ -139,8 +147,6 @@ export const updateDossierApprenant = async (
     prenom_apprenant: dossiersApprenant.prenom_apprenant, // required
     formation_cfd: dossiersApprenant.formation_cfd, // required
     annee_scolaire: dossiersApprenant.annee_scolaire, // required
-    historique_statut_apprenant: dossiersApprenant.historique_statut_apprenant, // required
-
     ...(contrat_date_debut
       ? { contrat_date_debut: contrat_date_debut instanceof Date ? contrat_date_debut : new Date(contrat_date_debut) }
       : {}),
@@ -162,11 +168,19 @@ export const updateDossierApprenant = async (
     source: dossiersApprenant.source, // required do not modify ever
   };
 
+  // Construction de l'historique mis à jour
+  const updatedHistorique = await buildNewHistoriqueStatutApprenant(
+    dossiersApprenant.historique_statut_apprenant,
+    statut_apprenant,
+    date_metier_mise_a_jour_statut
+  );
+
   const updated = await dossiersApprenantsMigrationDb().findOneAndUpdate(
     { _id: dossiersApprenant._id },
     {
       $set: validateDossiersApprenantsMigration({
         ...updateQuery,
+        historique_statut_apprenant: updatedHistorique,
         updated_at: new Date(),
       }),
     },
@@ -176,38 +190,42 @@ export const updateDossierApprenant = async (
   return updated.value;
 };
 
-export async function buildNewHistoriqueStatutApprenantFromId(
-  id,
-  { statut_apprenant, date_metier_mise_a_jour_statut }
-) {
-  const _id = typeof id === "string" ? ObjectId(id) : id;
-  if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
+/**
+ * Méthode de construction d'un nouveau tableau d'historique de statut
+ * a partir d'un nouveau couple statut / date_metier
+ * Va append au tableau un nouvel élément si nécessaire
+ * @param {*} historique_statut_apprenant_existant
+ * @param {*} updated_statut_apprenant
+ * @param {*} updated_date_metier_mise_a_jour_statut
+ * @returns
+ */
+export const buildNewHistoriqueStatutApprenant = (
+  historique_statut_apprenant_existant,
+  updated_statut_apprenant,
+  updated_date_metier_mise_a_jour_statut
+) => {
+  let newHistoriqueStatutApprenant = historique_statut_apprenant_existant;
 
-  const dossiersApprenant = await dossiersApprenantsMigrationDb().findOne({ _id });
-  if (!dossiersApprenant) {
-    throw new Error(`Unable to find dossiersApprenant ${_id.toString()}`);
-  }
-
-  let newHistoriqueStatutApprenant = dossiersApprenant.historique_statut_apprenant;
-
-  // TODO [metier] new statut_apprenant to add ?
-  const statutExistsInHistorique = dossiersApprenant.historique_statut_apprenant.find((historiqueItem) => {
+  // Vérification si le nouveau statut existe déja dans l'historique actuel
+  const statutExistsInHistorique = historique_statut_apprenant_existant.find((historiqueItem) => {
     return (
-      historiqueItem.valeur_statut === statut_apprenant &&
-      isEqual(new Date(historiqueItem.date_statut), new Date(date_metier_mise_a_jour_statut))
+      historiqueItem.valeur_statut === updated_statut_apprenant &&
+      isEqual(new Date(historiqueItem.date_statut), new Date(updated_date_metier_mise_a_jour_statut))
     );
   });
 
+  // Si le statut n'existe pas déja on l'ajoute
   if (!statutExistsInHistorique) {
     const newHistoriqueElement = {
-      valeur_statut: statut_apprenant,
-      date_statut: new Date(date_metier_mise_a_jour_statut),
+      valeur_statut: updated_statut_apprenant,
+      date_statut: new Date(updated_date_metier_mise_a_jour_statut),
       date_reception: new Date(),
     };
 
     // add new element to historique
-    const historique = dossiersApprenant.historique_statut_apprenant.slice();
+    const historique = historique_statut_apprenant_existant.slice();
     historique.push(newHistoriqueElement);
+
     // sort historique chronologically
     const historiqueSorted = historique.sort((a, b) => {
       return a.date_statut.getTime() - b.date_statut.getTime();
@@ -215,12 +233,11 @@ export async function buildNewHistoriqueStatutApprenantFromId(
 
     // find new element index in sorted historique to remove subsequent ones
     const newElementIndex = historiqueSorted.findIndex((el) => el.date_statut === newHistoriqueElement.date_statut);
-
     newHistoriqueStatutApprenant = historiqueSorted.slice(0, newElementIndex + 1);
   }
 
   return newHistoriqueStatutApprenant;
-}
+};
 
 /**
  * Récupération du nb distinct d'organismes via leurs UAI
