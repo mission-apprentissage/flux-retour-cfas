@@ -1,7 +1,6 @@
 import logger from "../../../../common/logger.js";
 import cliProgress from "cli-progress";
 import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../common/model/collections.js";
-import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { findOrganismeByQuery } from "../../../../common/actions/organismes/organismes.actions.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
 
@@ -28,7 +27,7 @@ export const cleanOrganismesNonFiables = async () => {
   logger.info(`Traitement de ${allFiabilisationCouples.length} couples dans la collection fiabilisation ...`);
   loadingBar.start(allFiabilisationCouples.length, 0);
 
-  await asyncForEach(allFiabilisationCouples, async ({ uai, siret, uai_fiable, siret_fiable }) => {
+  for (const { uai, siret, uai_fiable, siret_fiable } of allFiabilisationCouples) {
     try {
       // On cherche dans le tdb la présence de l'organisme non fiable pour le couple uai-siret
       const organismeNonFiable = await findOrganismeByQuery({ uai, siret });
@@ -96,7 +95,7 @@ export const cleanOrganismesNonFiables = async () => {
         data: { error },
       });
     }
-  });
+  }
 
   loadingBar.stop();
 
@@ -129,31 +128,30 @@ export const cleanOrganismesNonFiables = async () => {
  * @returns
  */
 const switchEffectifsBetweenOrganismes = async (organismeNonFiableId, organismeFiableId) => {
-  let updatedCount = 0;
-  const effectifsForOrganismeNonFiable = await effectifsDb().find({ organisme_id: organismeNonFiableId }).toArray();
+  let switchedCount = 0;
 
-  await asyncForEach(effectifsForOrganismeNonFiable, async (currentEffectifNonFiable) => {
-    // Si l'effectif existe déja pour l'organisme fiable sur la base de la clé d'unicité on ne le transfère pas
-    const existantEffectif = await effectifsDb().count({
-      organisme_id: organismeFiableId,
-      annee_scolaire: currentEffectifNonFiable.annee_scolaire,
-      id_erp_apprenant: currentEffectifNonFiable.id_erp_apprenant,
-      "apprenant.nom": currentEffectifNonFiable.apprenant.nom,
-      "apprenant.prenom": currentEffectifNonFiable.apprenant.prenom,
-      "formation.cfd": currentEffectifNonFiable.formation.cfd,
+  try {
+    const updated = await effectifsDb().updateMany(
+      { organisme_id: organismeNonFiableId },
+      { $set: { organisme_id: organismeFiableId } }
+    );
+    switchedCount = updated.modifiedCount;
+  } catch (error) {
+    await createJobEvent({
+      jobname: JOB_NAME,
+      date: new Date(),
+      action: "switchEffectifsBetweenOrganismes-error",
+      data: {
+        error,
+        organismeNonFiableId,
+        organismeFiableId,
+      },
     });
 
-    if (existantEffectif === 0) {
-      // S'il n'existe pas déja on le transfère vers l'organisme fiable
-      await effectifsDb().updateOne(
-        { _id: currentEffectifNonFiable._id },
-        { $set: { organisme_id: organismeFiableId } }
-      );
-      updatedCount++;
-    }
-  });
+    // TODO : Analyse des effectifs non switchés mais qui devraient se rattacher dès le lendemain
+  }
 
-  return updatedCount;
+  return switchedCount;
 };
 
 /**
@@ -168,7 +166,7 @@ const appendContributeurFromOrganisme = async (organismeToUpdateId, contributeur
     {
       $addToSet: {
         // https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/#value-to-add-is-an-array
-        etablissement_reseaux: { $contributeurs: contributeursToAppend },
+        contributeurs: { $each: contributeursToAppend },
       },
     },
     { returnDocument: "after" }
