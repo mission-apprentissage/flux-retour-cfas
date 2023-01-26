@@ -139,7 +139,7 @@ export const InputField = memo(({ mt, mb, ml, mr, w, ...props }) => {
       w={w}
       id={name.replaceAll(".", "_")}
     >
-      {!NoLabel[fieldType] && <FormLabel color={locked ? "disablegrey" : "labelgrey"}>{label}</FormLabel>}
+      {!NoLabel[fieldType] && label && <FormLabel color={locked ? "disablegrey" : "labelgrey"}>{label}</FormLabel>}
       <HStack align="center">
         <InputGroup id={`${name}_group_input`} isolation="auto">
           <Component {...props} />
