@@ -141,7 +141,7 @@ export const InputField = memo(({ mt, mb, ml, mr, w, ...props }) => {
     >
       {!NoLabel[fieldType] && <FormLabel color={locked ? "disablegrey" : "labelgrey"}>{label}</FormLabel>}
       <HStack align="center">
-        <InputGroup id={`${name}_group_input`}>
+        <InputGroup id={`${name}_group_input`} isolation="auto">
           <Component {...props} />
         </InputGroup>
         {description && (
