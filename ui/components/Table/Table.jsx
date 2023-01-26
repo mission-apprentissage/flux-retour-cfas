@@ -33,7 +33,7 @@ export default function Table({
   renderSubComponent,
   getRowCanExpand,
   searchValue,
-  pageSize = 5,
+  pageSize = 10,
   onCountItemsChange = () => {},
   ...props
 }) {
