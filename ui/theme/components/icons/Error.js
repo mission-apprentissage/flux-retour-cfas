@@ -1,7 +1,7 @@
 import { Icon } from "@chakra-ui/react";
 import React from "react";
 
-export function Error(props) {
+export function ErrorIcon(props) {
   return (
     <Icon viewBox="0 0 24 24" {...props}>
       <path
