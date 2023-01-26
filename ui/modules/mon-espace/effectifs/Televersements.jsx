@@ -760,7 +760,7 @@ const Televersements = () => {
                       },
                       formationNotFound: {
                         label: "Formation non retrouvée",
-                        details: "Cette formation n'a pas été retrouvée dans les formations dispensée par l'organisme",
+                        details: "Cette formation n'a pas été retrouvée dans les formations dispensées par l'organisme",
                       },
                     };
 

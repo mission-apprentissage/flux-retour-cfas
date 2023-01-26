@@ -150,8 +150,9 @@ const SIFAPage = () => {
 
       <VStack alignItems="flex-start">
         <Text fontWeight="bold">
-          Vous avez {organismesEffectifs.length} effectifs au total. Pour plus de facilité, vous pouvez effectuer une
-          recherche, ou filtrer par année.
+          Vous avez {organismesEffectifs.length} effectifs au total, en contrat au 31 décembre{" "}
+          {new Date().getFullYear() - 1}. Pour plus de facilité, vous pouvez effectuer une recherche, ou filtrer par
+          année.
         </Text>
         <Input
           {...{

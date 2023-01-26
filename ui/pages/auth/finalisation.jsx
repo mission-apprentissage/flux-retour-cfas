@@ -400,7 +400,7 @@ const Finalize = () => {
           {auth.isInPendingValidation && (
             <Flex flexGrow={1} alignItems="end" my={8}>
               <Text mt={8} fontSize="1rem">
-                Vous rencontrez des difficultés à passer cette étape ?{" "}
+                Votre réseau n’apparaît pas dans la liste ?{" "}
                 <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" ml={3}>
                   Contacter l&apos;assistance
                 </Link>
