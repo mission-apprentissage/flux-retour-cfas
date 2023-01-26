@@ -50,16 +50,15 @@ import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import maintenancesRoutes from "./routes/maintenances.routes.js";
-
-const SENTRY_DNS = process.env.FLUX_RETOUR_CFAS_SENTRY_DNS;
+import config from "../config.js";
 
 export default async (services) => {
   const app = express();
 
   // Configure Sentry
   Sentry.init({
-    dsn: SENTRY_DNS,
-    enabled: !!SENTRY_DNS,
+    dsn: config.sentry.dsn,
+    enabled: !!config.sentry.dsn,
     integrations: [
       // enable HTTP calls tracing
       new Sentry.Integrations.Http({ tracing: true }),
@@ -69,7 +68,7 @@ export default async (services) => {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: process.env.FLUX_RETOUR_CFAS_ENV !== "production" ? 1.0 : 0.2,
+    tracesSampleRate: config.env !== "production" ? 1.0 : 0.2,
   });
   // RequestHandler creates a separate execution context using domains, so that every
   // transaction/span/breadcrumb is attached to its own Hub instance
