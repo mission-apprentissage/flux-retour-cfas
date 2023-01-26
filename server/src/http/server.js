@@ -2,6 +2,8 @@ import express from "express";
 import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
 
 import { apiRoles } from "../common/roles.js";
 
@@ -49,8 +51,31 @@ import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import maintenancesRoutes from "./routes/maintenances.routes.js";
 
+const SENTRY_DNS = process.env.FLUX_RETOUR_CFAS_SENTRY_DNS;
+
 export default async (services) => {
   const app = express();
+
+  // Configure Sentry
+  Sentry.init({
+    dsn: SENTRY_DNS,
+    enabled: !!SENTRY_DNS,
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({ tracing: true }),
+      // enable Express.js middleware tracing
+      new Tracing.Integrations.Express({ app }),
+    ],
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: process.env.FLUX_RETOUR_CFAS_ENV !== "production" ? 1.0 : 0.2,
+  });
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
 
   const requireJwtAuthentication = requireJwtAuthenticationMiddleware(services);
 
@@ -175,6 +200,9 @@ export default async (services) => {
       return res.json({});
     })
   );
+
+  // The error handler must be before any other error middleware and after all controllers
+  app.use(Sentry.Handlers.errorHandler());
 
   app.use(errorMiddleware());
 
