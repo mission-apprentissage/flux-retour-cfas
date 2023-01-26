@@ -1,3 +1,10 @@
+# [3.7.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.1...v3.7.0-beta.2) (2023-01-26)
+
+
+### Bug Fixes
+
+* **server:** missing & empty historique_statut ([#2461](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2461)) ([f3c77c1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f3c77c121eff0f04d8f53aa1faee2a449d473161))
+
 # [3.7.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.4...v3.7.0-beta.1) (2023-01-26)
 
 
