@@ -66,7 +66,7 @@ const Footer = () => {
               // css={{ "li:not(:last-child):after": { content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" } }}
             >
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href={`/sitemap.xml`}>Plan du site</Link>
+                <Link href={"/sitemap.xml"}>Plan du site</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link href={"/accessibilite"}>Accessibilité : Non conforme</Link>

@@ -134,7 +134,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
           )}
           {values.type === "autre" && (
             <HStack ml="4w" mt="2w">
-              <Box p="2" h="7vh" borderLeft="4px solid #6A6AF4"></Box>
+              <Box p="2" h="7vh" borderLeft="4px solid #6A6AF4" />
               <Box>
                 <Text>Contacter l&apos;équipe :</Text>
                 <Link fontWeight={700} href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
@@ -275,7 +275,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
                 variant="primary"
                 onClick={() => setStep(2)}
                 px={6}
-                isDisabled={!entrepriseData || !entrepriseData?.successed}
+                isDisabled={!(entrepriseData?.successed)}
               >
                 Suivant
               </Button>
@@ -287,7 +287,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
                 variant="primary"
                 onClick={handleSubmit}
                 px={6}
-                isDisabled={!entrepriseData || !entrepriseData?.successed}
+                isDisabled={!(entrepriseData?.successed)}
               >
                 S&rsquo;inscrire
               </Button>

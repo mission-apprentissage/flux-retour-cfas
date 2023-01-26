@@ -195,7 +195,7 @@ export default function Table({
                   <Box pt={2}>Aller à la page</Box>
                   <Input
                     {...{
-                      name: `page`,
+                      name: "page",
                       fieldType: "numberStepper",
                       placeholder: "Aller à la page",
                       precision: 0,

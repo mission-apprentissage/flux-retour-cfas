@@ -54,7 +54,7 @@ const OrganismeContributors = ({ size = "md" }) => {
   const { organismeContributors, roles, isLoading, defaultRoleName, refetchContributors } = useOrganismeAcces();
 
   const { mutateAsync: addContributor } = useMutation(({ userEmail, roleName }) =>
-    _post(`/api/v1/organisme/contributors`, {
+    _post("/api/v1/organisme/contributors", {
       organisme_id: organisme._id,
       userEmail,
       roleName,
@@ -62,7 +62,7 @@ const OrganismeContributors = ({ size = "md" }) => {
   );
 
   const { mutateAsync: changeContributorRole } = useMutation(({ userEmail, roleName }) =>
-    _put(`/api/v1/organisme/contributors`, {
+    _put("/api/v1/organisme/contributors", {
       organisme_id: organisme._id,
       userEmail,
       roleName,
@@ -225,7 +225,7 @@ const OrganismeContributors = ({ size = "md" }) => {
                     const user = info.row.original.user;
                     const you = auth.email === user.email;
                     const hasAccount = user.prenom && user.nom;
-                    const username = hasAccount ? `${user.prenom} ${user.nom}` : `Invité non vérifié`;
+                    const username = hasAccount ? `${user.prenom} ${user.nom}` : "Invité non vérifié";
                     return (
                       <HStack>
                         <Avatar size="sm" name={hasAccount ? username : ""} />
@@ -247,7 +247,7 @@ const OrganismeContributors = ({ size = "md" }) => {
                     const { user } = row.original;
                     const ORGANISMES_APPARTENANCE = {
                       TETE_DE_RESEAU: `TÊTE DE RÉSEAU: ${user.reseau}`,
-                      ACADEMIE: `ACADÉMIE`,
+                      ACADEMIE: "ACADÉMIE",
                       DRAAF: "DRAAF",
                       CARIF_OREF: "CARIF OREF",
                       DREETS: "DREETS",
@@ -323,7 +323,7 @@ const OrganismeContributors = ({ size = "md" }) => {
                     const you = auth.email === user.email;
                     return (
                       <Center>
-                        {!you && !isAnOverheadUser && (
+                        {!(you || isAnOverheadUser ) && (
                           <CloseIcon
                             color="bluefrance"
                             data-email={info.row.original.user.email}

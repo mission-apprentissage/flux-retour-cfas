@@ -41,7 +41,7 @@ const ProfileInformation = () => {
       // eslint-disable-next-line no-undef, no-async-promise-executor
       return new Promise(async (resolve) => {
         try {
-          await _put(`/api/v1/profile/user`, {
+          await _put("/api/v1/profile/user", {
             nom: nom || "",
             prenom: prenom || "",
             telephone: telephone ? `+${telephone}` : "",

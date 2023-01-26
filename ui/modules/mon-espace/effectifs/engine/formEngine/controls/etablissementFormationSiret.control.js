@@ -28,7 +28,7 @@ export const etablissementFormationSiretControl = [
 
       if (result.api_entreprise === "KO") {
         return {
-          warning: `Le service de récupération des informations Siret est momentanément indisponible. Nous ne pouvons pas pre-remplir le formulaire.`,
+          warning: "Le service de récupération des informations Siret est momentanément indisponible. Nous ne pouvons pas pre-remplir le formulaire.",
           cascade: unlockAllCascade,
         };
       }
@@ -39,7 +39,7 @@ export const etablissementFormationSiretControl = [
 
       if (result.secretSiret) {
         return {
-          warning: `Votre siret est valide. En revanche, en raison de sa nature, nous ne pouvons pas récupérer les informations reliées.`,
+          warning: "Votre siret est valide. En revanche, en raison de sa nature, nous ne pouvons pas récupérer les informations reliées.",
           cascade: unlockAllCascade,
         };
       }

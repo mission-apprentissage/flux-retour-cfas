@@ -38,7 +38,7 @@ const RepartitionEffectifsParCfa = ({ repartitionEffectifsParCfa, loading, error
             effectifs,
           } = item;
           return (
-            <Tr key={"headerRow_" + index}>
+            <Tr key={`headerRow_${index}`}>
               <Td color="grey.800">
                 <Link
                   onClick={() => {

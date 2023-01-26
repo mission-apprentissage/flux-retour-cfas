@@ -87,7 +87,7 @@ export const RemunerationsControl = [
           dateDebutContrat,
           dateFinContrat,
           employeurAdresseDepartement,
-          selectedTaux: { [remunerationsAnnee.ordre + ""]: remunerationsAnnee.taux },
+          selectedTaux: { [`${remunerationsAnnee.ordre}`]: remunerationsAnnee.taux },
         });
 
         return {

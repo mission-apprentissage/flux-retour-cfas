@@ -118,8 +118,8 @@ const SIFAPage = () => {
     <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Heading textStyle="h2" color="grey.800" mt={5} mb={8}>
-          {isMonOrganismePages && `Mon Enquête SIFA`}
-          {isOrganismePages && `Son Enquête SIFA`}
+          {isMonOrganismePages && "Mon Enquête SIFA"}
+          {isOrganismePages && "Son Enquête SIFA"}
         </Heading>
         <HStack spacing={4}>
           {hasContextAccessTo(organisme, "organisme/page_sifa/telecharger") && (
@@ -155,7 +155,7 @@ const SIFAPage = () => {
         </Text>
         <Input
           {...{
-            name: `search_effectifs`,
+            name: "search_effectifs",
             fieldType: "text",
             mask: "C",
             maskBlocks: [

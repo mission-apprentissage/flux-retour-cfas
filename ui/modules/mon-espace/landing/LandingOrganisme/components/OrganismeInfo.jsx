@@ -100,12 +100,12 @@ export default function OrganismeInfo() {
       </Section>
 
       <Box mt={5}>
-        {!organisme.first_transmission_date && !organisme.mode_de_transmission && (
+        {!(organisme.first_transmission_date || organisme.mode_de_transmission ) && (
           <Ribbons variant="warning" mt="0.5rem">
             <Box ml={3}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                {isMonOrganismePages && `Vous ne nous transmettez pas encore vos effectifs.`}
-                {isOrganismePages && ` Cet organisme ne nous transmet pas encore ses effectifs.`}
+                {isMonOrganismePages && "Vous ne nous transmettez pas encore vos effectifs."}
+                {isOrganismePages && " Cet organisme ne nous transmet pas encore ses effectifs."}
               </Text>
             </Box>
           </Ribbons>
@@ -114,8 +114,8 @@ export default function OrganismeInfo() {
           <Ribbons variant="warning" mt="0.5rem">
             <Box ml={3}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                {isMonOrganismePages && `Vos effectifs sont en cours de transmission.`}
-                {isOrganismePages && `Les effectifs de cet organisme sont en cours de transmission.`}
+                {isMonOrganismePages && "Vos effectifs sont en cours de transmission."}
+                {isOrganismePages && "Les effectifs de cet organisme sont en cours de transmission."}
               </Text>
             </Box>
           </Ribbons>

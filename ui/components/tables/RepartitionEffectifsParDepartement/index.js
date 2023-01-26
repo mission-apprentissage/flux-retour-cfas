@@ -28,7 +28,7 @@ const RepartitionEffectifsParDepartement = ({ effectifs, loading, error }) => {
           const { etablissement_num_departement, etablissement_nom_departement, effectifs } = item;
           return (
             <DepartementRow
-              key={"departement_" + etablissement_num_departement}
+              key={`departement_${etablissement_num_departement}`}
               departementCode={etablissement_num_departement}
               departementNom={etablissement_nom_departement}
               effectifs={effectifs}

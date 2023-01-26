@@ -120,7 +120,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
               },
             },
           };
-          const result = await _post(`/api/v1/admin/user/`, body);
+          const result = await _post("/api/v1/admin/user/", body);
           if (result?.ok) {
             toastSuccess("Utilisateur créé");
           } else {
@@ -405,9 +405,9 @@ const UserLine = ({ user, roles, refetchUsers }) => {
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const Users = () => {
-  const { data: roles } = useQuery(["roles"], () => _get(`/api/v1/admin/roles/`));
+  const { data: roles } = useQuery(["roles"], () => _get("/api/v1/admin/roles/"));
 
-  const { data: users, refetch: refetchUsers } = useQuery(["users"], () => _get(`/api/v1/admin/users/`));
+  const { data: users, refetch: refetchUsers } = useQuery(["users"], () => _get("/api/v1/admin/users/"));
 
   const title = "Gestion des utilisateurs";
 

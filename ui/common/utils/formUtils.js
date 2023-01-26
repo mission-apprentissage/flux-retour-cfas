@@ -124,7 +124,7 @@ export const normalizeInputNumberForDb = (data) => (data && !isNaN(data) && pars
 
 export const doAsyncCodePostalActions = async (value, data, dossierId) => {
   try {
-    const response = await _post(`/api/v1/geo/cp`, {
+    const response = await _post("/api/v1/geo/cp", {
       codePostal: value,
       dossierId,
     });

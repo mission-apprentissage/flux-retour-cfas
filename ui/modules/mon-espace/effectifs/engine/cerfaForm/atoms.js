@@ -9,7 +9,7 @@ export const atoms = selector({
     const fields = get(cerfaAtom);
     const values = get(valuesSelector);
     const dossier = get(dossierAtom);
-    if (!fields || !values) return;
+    if (!(fields && values)) return;
     return getFormStatus({ fields, values, dossier });
   },
 });

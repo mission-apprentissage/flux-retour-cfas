@@ -28,7 +28,7 @@ const EffectifCard = ({
       borderColor={accentColor}
     >
       <HStack>
-        <Box as="i" color={accentColor} className={iconClassName}></Box>
+        <Box as="i" color={accentColor} className={iconClassName} />
         <Box as="strong" fontSize="gamma" marginRight="1v">
           {hideCount ? "_" : formatNumber(count)}
         </Box>

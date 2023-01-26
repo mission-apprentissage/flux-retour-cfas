@@ -39,7 +39,7 @@ const Login = (props) => {
         setAuth(user);
         setToken(result.token);
         if (!user.account_status === "NOT_CONFIRMED") {
-          router.push(`/auth/en-attente-confirmation`);
+          router.push("/auth/en-attente-confirmation");
         } else {
           router.push("/auth/redirection");
         }
@@ -48,7 +48,7 @@ const Login = (props) => {
       if (e.messages?.message === "Old connection method") {
         setStatus({ error: "Pour des raisons de sécurité, merci de vous créer un compte nominatif" });
       } else {
-        setStatus({ error: `Votre identifiant ou votre mot de passe est incorrect` });
+        setStatus({ error: "Votre identifiant ou votre mot de passe est incorrect" });
       }
     }
   };

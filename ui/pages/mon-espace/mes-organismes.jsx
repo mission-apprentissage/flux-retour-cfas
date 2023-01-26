@@ -17,7 +17,7 @@ function useEspaceOrganismes() {
     data: organismes,
     isLoading,
     isFetching,
-  } = useQuery(["espace/organismes"], () => _get(`/api/v1/espace/organismes`), {
+  } = useQuery(["espace/organismes"], () => _get("/api/v1/espace/organismes"), {
     refetchOnWindowFocus: false,
   });
 
@@ -61,7 +61,7 @@ function MesOrganismes() {
             <>
               <Input
                 {...{
-                  name: `search_organisme`,
+                  name: "search_organisme",
                   fieldType: "text",
                   mask: "C",
                   maskBlocks: [
