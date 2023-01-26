@@ -5,7 +5,7 @@ import { InputController } from "../../../formEngine/components/Input/InputContr
 // eslint-disable-next-line react/display-name, no-unused-vars
 export const EffectifFormation = memo(() => {
   return (
-    <Box my={9} borderWidth="1px" borderColor="bluefrance">
+    <Box my={9}>
       <HStack spacing={2} alignItems="flex-end">
         <InputController name="formation.date_debut_formation" w="33%" mb={0} />
         <InputController name="formation.date_fin_formation" w="33%" mb={0} />
