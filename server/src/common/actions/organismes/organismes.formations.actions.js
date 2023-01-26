@@ -157,9 +157,10 @@ const getOrganismeNature = (defaultNature, formationCatalog, organismesLinkedToF
  */
 export const findOrganismeFormationByCfd = async (organisme_id, cfd) => {
   const organisme = await organismesDb().findOne({ _id: ObjectId(organisme_id) });
+  const formationFound = await getFormationWithCfd(cfd, { _id: 1 });
 
-  const { _id: formationId } = await getFormationWithCfd(cfd, { _id: 1 });
-  if (!formationId) return null;
+  if (!formationFound) return null;
+  const formationId = formationFound._id;
 
   let found = null;
   for (const formation of organisme.formations) {
