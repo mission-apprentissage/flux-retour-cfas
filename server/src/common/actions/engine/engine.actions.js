@@ -18,6 +18,7 @@ import {
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
   insertOrganisme,
+  setOrganismeFirstDateTransmissionIfNeeded,
 } from "../organismes/organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
 
@@ -314,6 +315,11 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
       // Ajout organisme id a l'effectifData
       // Pas besoin d'update l'organisme
       organismeFoundId = organismeFound?._id;
+
+      // Si l'organisme provient de la fiabilisation et qu'il n'est pas flaggé comme transmettant,
+      // on ajoute la date de première transmission
+      await setOrganismeFirstDateTransmissionIfNeeded(organismeFoundId);
+
       effectifData.organisme_id = organismeFound?._id.toString();
     }
   }
