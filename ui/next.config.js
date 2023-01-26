@@ -1,5 +1,3 @@
-const { withSentryConfig } = require('@sentry/nextjs');
-
 function inline(value) {
   return value.replace(/\s{2,}/g, " ").trim();
 }
@@ -55,9 +53,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-
-module.exports = withSentryConfig(
-  module.exports,
-  { silent: true },
-  { hideSourcemaps: true },
-);

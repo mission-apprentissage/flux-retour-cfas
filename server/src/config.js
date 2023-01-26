@@ -86,9 +86,6 @@ export const config = {
   redis: {
     uri: env.get("FLUX_RETOUR_CFAS_REDIS_URI").default("redis://127.0.0.1:6379").asString(),
   },
-  sentry: {
-    dsn: env.get("FLUX_RETOUR_CFAS_SENTRY_DSN").asString(),
-  },
   apiEntreprise: env.get("FLUX_RETOUR_CFAS_API_ENTREPRISE_KEY").asString(),
 };
 
