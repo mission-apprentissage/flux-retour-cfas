@@ -1,3 +1,10 @@
+## [3.6.1-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.3...v3.6.1-beta.4) (2023-01-26)
+
+
+### Bug Fixes
+
+* **server:** mapFiabilizedOrganismeUaiSiretCouple & setFirstTransmissionDate ([#2454](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2454)) ([b7475c1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b7475c15a7080aa5b43790b91cd0696fbbc108f0))
+
 ## [3.6.1-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.2...v3.6.1-beta.3) (2023-01-25)
 
 
