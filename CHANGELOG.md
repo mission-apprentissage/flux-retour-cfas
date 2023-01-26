@@ -1,3 +1,10 @@
+# [3.7.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.4...v3.7.0-beta.1) (2023-01-26)
+
+
+### Features
+
+* add Sentry ([#2458](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2458)) ([8fd2d64](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8fd2d64170ee85d22b80f00429fc6e7c8a743fdb))
+
 ## [3.6.1-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.3...v3.6.1-beta.4) (2023-01-26)
 
 
