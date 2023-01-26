@@ -18,6 +18,7 @@ import React from "react";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
 import NavLink from "next/link";
+
 import useAuth from "../../../hooks/useAuth";
 import useToken from "../../../hooks/useToken";
 import { _get, _post } from "../../../common/httpClient";
@@ -54,7 +55,7 @@ const Login = (props) => {
   };
 
   return (
-    <Flex {...props}>
+    <Flex flexDirection="column" p={12} {...props}>
       <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
         Connectez-vous
       </Heading>

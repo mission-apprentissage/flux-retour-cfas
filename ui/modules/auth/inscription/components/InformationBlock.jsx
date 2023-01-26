@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Text, UnorderedList, ListItem } from "@chakra-ui/react";
 
 const InformationBlock = (props) => (
-  <Box {...props}>
+  <Box {...props} p={10}>
     <Text fontWeight={700} fontSize={22}>
       Votre compte dédié
     </Text>
