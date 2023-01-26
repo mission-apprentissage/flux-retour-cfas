@@ -1,3 +1,10 @@
+# [3.7.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.2...v3.7.0-beta.3) (2023-01-26)
+
+
+### Bug Fixes
+
+* disable sentry on recette ([#2464](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2464)) ([9300aa1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9300aa112bf4a9888905b16b232a1d064f555a44))
+
 # [3.7.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.1...v3.7.0-beta.2) (2023-01-26)
 
 
