@@ -25,7 +25,7 @@ const seedCfaPrivateUrls = async () => {
   await asyncForEach(cfasWithoutPrivateUrls, async (cfaWithoutAccessToken) => {
     loadingBar.increment();
 
-    const privateUrl = config.publicUrl + "/cfa/" + cfaWithoutAccessToken.access_token;
+    const privateUrl = `${config.publicUrl}/cfa/${cfaWithoutAccessToken.access_token}`;
 
     await cfasDb().updateOne({ _id: cfaWithoutAccessToken._id }, { $set: { private_url: privateUrl } });
   });

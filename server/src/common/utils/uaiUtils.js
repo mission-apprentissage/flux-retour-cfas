@@ -63,7 +63,7 @@ const ALPHABET_23_LETTERS = [
 
 function computeChecksumUAI(numbers) {
   if (!numbers || numbers.length !== 7) {
-    throw new Error(`Le code ne doit contenir que 7 caractères sans le checksum`);
+    throw new Error("Le code ne doit contenir que 7 caractères sans le checksum");
   }
 
   return ALPHABET_23_LETTERS[numbers % 23];

@@ -179,14 +179,14 @@ export default () => {
         });
 
         res.json({
-          status: validationErrors.length > 0 ? `WARNING` : "OK",
+          status: validationErrors.length > 0 ? "WARNING" : "OK",
           message: validationErrors.length > 0 ? `Warning : ${validationErrors.length} items not valid` : "Success",
           ok: nbItemsValid,
           ko: validationErrors.length,
           validationErrors,
         });
       } catch (err) {
-        logger.error("POST /dossiers-apprenants error : " + err);
+        logger.error(`POST /dossiers-apprenants error : ${err}`);
         res.status(400).json({
           status: "ERROR",
           message: err.message,
@@ -234,7 +234,7 @@ export default () => {
         // Return JSON transformed Stream
         return sendTransformedPaginatedJsonStream(find.stream(), "dossiersApprenants", pagination, res);
       } catch (err) {
-        logger.error("GET DossierApprenants error : " + err);
+        logger.error(`GET DossierApprenants error : ${err}`);
         res.status(500).json({
           status: "ERROR",
           message: err.message,

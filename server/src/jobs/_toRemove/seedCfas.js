@@ -35,7 +35,7 @@ runScript(async ({ cfas }) => {
  * Clear all cfas from Cfas collection which are not found in DossierApprenant collection
  */
 const clearCfasNotInDossierApprenants = async () => {
-  logger.info(`Removing Cfas from Cfas collection which are not found in DossierApprenant collection`);
+  logger.info("Removing Cfas from Cfas collection which are not found in DossierApprenant collection");
   const cfasIdsToDelete = await getCfasIdsNotInDossierApprenants();
   loadingBar.start(cfasIdsToDelete.length, 0);
 
@@ -56,7 +56,7 @@ const getCfasIdsNotInDossierApprenants = async () => {
   const cfasIdsNotInDossierApprenants = new Set();
 
   await asyncForEach(await cfasDb().find({}).toArray(), async (currentCfa) => {
-    if ((await dossiersApprenantsDb().countDocuments({ uai_etablissement: currentCfa.uai })) == 0) {
+    if ((await dossiersApprenantsDb().countDocuments({ uai_etablissement: currentCfa.uai })) === 0) {
       cfasIdsNotInDossierApprenants.add(currentCfa._id);
     }
   });

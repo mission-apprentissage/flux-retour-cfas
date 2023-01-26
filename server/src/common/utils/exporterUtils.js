@@ -17,7 +17,7 @@ export const toXlsx = async (data, outputDirectoryFileName, workbookName = "", o
 export const toCsv = async (data, outputDirectoryFileName, options = {}) => {
   const csvData = parse(data, { delimiter: options.delimiter || ",", quote: "" });
 
-  await writeFile(outputDirectoryFileName, options.utf8Bom === true ? "\ufeff" + csvData : csvData, "utf8");
+  await writeFile(outputDirectoryFileName, options.utf8Bom === true ? `\ufeff${csvData}` : csvData, "utf8");
 
   if (options.owner) {
     await chown(outputDirectoryFileName, options.owner.uid, options.owner.gid);

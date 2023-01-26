@@ -104,8 +104,8 @@ export function findDossierApprenantByApprenant({
   date_de_naissance_apprenant,
   ...query
 }) {
-  const nomApprenantRegexp = new RegExp("^" + escapeRegExp(nom_apprenant.trim()) + "$", "i");
-  const prenomApprenantRegexp = new RegExp("^" + escapeRegExp(prenom_apprenant.trim()) + "$", "i");
+  const nomApprenantRegexp = new RegExp(`^${escapeRegExp(nom_apprenant.trim())}$`, "i");
+  const prenomApprenantRegexp = new RegExp(`^${escapeRegExp(prenom_apprenant.trim())}$`, "i");
 
   return dossiersApprenantsMigrationDb().findOne({
     nom_apprenant: { $regex: nomApprenantRegexp },

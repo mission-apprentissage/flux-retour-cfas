@@ -75,7 +75,7 @@ export const addDocument = async (
     nom_fichier: newDocument.nom_fichier,
     taille_fichier: newDocument.taille_fichier,
   });
-  if (foundIndexDocument != -1) {
+  if (foundIndexDocument !== -1) {
     newDocuments.splice(foundIndexDocument, 1);
   }
   newDocuments = [...newDocuments, newDocument];

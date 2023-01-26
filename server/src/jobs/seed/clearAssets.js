@@ -10,6 +10,6 @@ import { __dirname } from "../../common/utils/esmUtils.js";
  */
 runScript(async () => {
   logger.info("Clearing assets from seed job ...");
-  await fs.emptyDir(path.join(__dirname(import.meta.url), `./assets`));
+  await fs.emptyDir(path.join(__dirname(import.meta.url), "./assets"));
   logger.info("All assets from seed job deleted !");
 }, JOB_NAMES.clearSeedAssets);

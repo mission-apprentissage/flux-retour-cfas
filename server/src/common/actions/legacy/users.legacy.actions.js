@@ -58,7 +58,7 @@ export const getUserLegacyById = async (id) => {
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
   const user = await usersDb().findOne({ _id });
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
   return user;
 };
@@ -234,7 +234,7 @@ export const updateUserLegacy = async (id, { username, email, network, region, o
   const user = await usersDb().findOne({ _id });
 
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   await usersDb().updateOne(
