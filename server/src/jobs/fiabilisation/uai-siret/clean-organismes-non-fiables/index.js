@@ -3,6 +3,7 @@ import cliProgress from "cli-progress";
 import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../common/model/collections.js";
 import { findOrganismeByQuery } from "../../../../common/actions/organismes/organismes.actions.js";
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
+import { ObjectId } from "mongodb";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOB_NAME = "fiabilisation-clean-organismes-non-fiables";
@@ -131,6 +132,7 @@ const switchEffectifsBetweenOrganismes = async (organismeNonFiableId, organismeF
   let switchedCount = 0;
 
   try {
+    await cleanEffectifsDuplicatesBetweenOrganismes(organismeNonFiableId, organismeFiableId);
     const updated = await effectifsDb().updateMany(
       { organisme_id: organismeNonFiableId },
       { $set: { organisme_id: organismeFiableId } }
@@ -147,11 +149,63 @@ const switchEffectifsBetweenOrganismes = async (organismeNonFiableId, organismeF
         organismeFiableId,
       },
     });
-
-    // TODO : Analyse des effectifs non switchés mais qui devraient se rattacher dès le lendemain
   }
 
   return switchedCount;
+};
+
+/**
+ * Fonction de suppression des doublons d'effectifs présents sur un organisme fiable et un non fiable
+ * @param {*} organismeNonFiableId
+ * @param {*} organismeFiableId
+ */
+const cleanEffectifsDuplicatesBetweenOrganismes = async (organismeNonFiableId, organismeFiableId) => {
+  try {
+    const effectifsDuplicatesBetweenOrganismes = await effectifsDb()
+      .aggregate([
+        // Filtre sur les effectifs des 2 organismes (fiable / non fiable)
+        { $match: { organisme_id: { $in: [new ObjectId(organismeFiableId), new ObjectId(organismeNonFiableId)] } } },
+        {
+          $group: {
+            _id: {
+              annee_scolaire: "$annee_scolaire",
+              id_erp_apprenant: "$id_erp_apprenant",
+              apprenant_nom: "$apprenant.nom",
+              apprenant_prenom: "$apprenant.prenom",
+              formation_cfd: "$formation.cfd",
+            },
+            effectifsCount: { $sum: 1 },
+            effectifs: { $addToSet: "$$ROOT" },
+          },
+        },
+        { $match: { effectifsCount: { $gt: 1 } } },
+        { $project: { effectifs: "$effectifs", _id: 0 } },
+        { $unwind: "$effectifs" },
+        { $replaceRoot: { newRoot: "$effectifs" } },
+        { $match: { organisme_id: new ObjectId(organismeFiableId) } },
+        { $project: { effectifId: "$_id", _id: 0 } },
+        { $unwind: "$effectifId" },
+      ])
+      .toArray();
+
+    // Si on trouve des doublons on les supprime de l'organisme fiable
+    if (effectifsDuplicatesBetweenOrganismes.length > 0) {
+      await effectifsDb().deleteMany({
+        _id: { $in: effectifsDuplicatesBetweenOrganismes.map((item) => item.effectifId) },
+      });
+    }
+  } catch (error) {
+    await createJobEvent({
+      jobname: JOB_NAME,
+      date: new Date(),
+      action: "cleanEffectifsDuplicatesBetweenOrganismes-error",
+      data: {
+        error,
+        organismeNonFiableId,
+        organismeFiableId,
+      },
+    });
+  }
 };
 
 /**
