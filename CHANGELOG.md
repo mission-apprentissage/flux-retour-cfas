@@ -1,3 +1,10 @@
+# [3.7.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.3...v3.7.0-beta.4) (2023-01-26)
+
+
+### Bug Fixes
+
+* revert sentry ([#2463](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2463)) ([54d99fd](https://github.com/mission-apprentissage/flux-retour-cfas/commit/54d99fdacd2c9a0fe3ca4690eeb0b32a153302af))
+
 # [3.7.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.2...v3.7.0-beta.3) (2023-01-26)
 
 
