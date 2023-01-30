@@ -495,7 +495,7 @@ const Televersements = () => {
                             <Input
                               name={`line${1}_out`}
                               fieldType="text"
-                              locked={true}
+                              locked
                               value="Code Formation Diplôme"
                               w="33%"
                             />
@@ -535,13 +535,7 @@ const Televersements = () => {
                             w="33%"
                           />
                           <ArrowRightLong boxSize={10} color="bluefrance" />
-                          <Input
-                            name={`line${i}_out`}
-                            fieldType="text"
-                            locked={true}
-                            value={requireKey.label}
-                            w="33%"
-                          />
+                          <Input name={`line${i}_out`} fieldType="text" locked value={requireKey.label} w="33%" />
                           <Box w="35px">&nbsp;</Box>
                         </HStack>
                       );
