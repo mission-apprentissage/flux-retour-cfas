@@ -181,8 +181,8 @@ const Effectifs = ({ organismesEffectifs }) => {
         <>
           <VStack alignItems="flex-start">
             <Text fontWeight="bold">
-              Vous avez [{organismesEffectifs.length}] effectifs au total, pour plus de facilité veuillez sélectionner
-              une option ci-dessous :
+              Vous avez {organismesEffectifs.length} effectifs au total. Pour plus de facilité, vous pouvez effectuer
+              une recherche, ou filtrer par année.
             </Text>
             <Input
               {...{

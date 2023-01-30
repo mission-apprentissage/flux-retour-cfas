@@ -31,7 +31,7 @@ export const getFormations = async (options) => {
 
 /**
  * TODO : Optim fetching & pagination récupération
- * Méthode de récupération depuis l'API Catalogue des formations lié à un uai d'organisme
+ * Méthode de récupération depuis l'API Catalogue des formations lié à un UAI d'organisme
  * @param {*} uai
  * @param {*} cfd
  * @returns
@@ -39,7 +39,7 @@ export const getFormations = async (options) => {
 export const getCatalogFormationsForOrganisme = async (uai) => {
   const url = `${API_ENDPOINT}/entity/formations`;
   try {
-    // On cherche parmi les formations publiées ayant soit l'uai formateur soit l'uai gestionnaire
+    // On cherche parmi les formations publiées ayant soit l'UAI formateur soit l'UAI gestionnaire
     const query = {
       published: true,
       catalogue_published: true,

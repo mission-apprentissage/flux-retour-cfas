@@ -100,7 +100,7 @@ export const JOURNAL_DES_EVOLUTIONS_DATA = [
   {
     title: "Vue multi SIRET",
     explication:
-      "Possibilité de rechercher par SIRET ou de visualiser les différents SIRET liés à une UAI. Pour le cas où les établissements n’auraient pas transmis leur UAI mais l’UAI responsable uniquement.",
+      "Possibilité de rechercher par SIRET ou de visualiser les différents SIRET liés à un UAI. Pour le cas où les établissements n’auraient pas transmis leur UAI mais l’UAI responsable uniquement.",
     correctif: "Non",
     date: "2022/06/13",
     type: JOURNAL_DES_EVOLUTIONS_TAGS.Fonctionnalite,

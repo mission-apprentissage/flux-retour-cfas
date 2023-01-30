@@ -15,10 +15,20 @@ export const updateDossiersApprenantsNetworksIfNeeded = async (organisme, reseau
     .toArray();
 
   await asyncForEach(dossiersApprenantsForOrganismeWithoutThisNetwork, async (dossierToUpdate) => {
-    await updateDossierApprenant(dossierToUpdate._id, {
-      ...dossierToUpdate,
-      etablissement_reseaux: [...dossierToUpdate.etablissement_reseaux, reseau],
-    });
+    try {
+      await updateDossierApprenant(dossierToUpdate._id, {
+        ...dossierToUpdate,
+        etablissement_reseaux: [...dossierToUpdate.etablissement_reseaux, reseau],
+      });
+    } catch (err) {
+      // Log error
+      await createJobEvent({
+        jobname: JOBNAME,
+        date: new Date(),
+        action: "update-dossierApprenant-error",
+        data: { dossierToUpdate },
+      });
+    }
 
     // Log update
     await createJobEvent({

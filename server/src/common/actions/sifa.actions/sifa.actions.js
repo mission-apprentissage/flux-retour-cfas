@@ -56,7 +56,32 @@ export const generateSifa = async (organisme_id) => {
     );
     const { result: cpNaissanceInfo } = await getCpInfo(effectif.apprenant.code_postal_de_naissance);
 
-    const formatStringForSIFA = (str) => str.replaceAll(/[^0-9a-zA-Z\- ]/g, "") ?? undefined;
+    const formatStringForSIFA = (str) => {
+      if (!str) return undefined;
+      const accent = [
+        /[\300-\306]/g,
+        /[\340-\346]/g, // A, a
+        /[\310-\313]/g,
+        /[\350-\353]/g, // E, e
+        /[\314-\317]/g,
+        /[\354-\357]/g, // I, i
+        /[\322-\330]/g,
+        /[\362-\370]/g, // O, o
+        /[\331-\334]/g,
+        /[\371-\374]/g, // U, u
+        /[\321]/g,
+        /[\361]/g, // N, n
+        /[\307]/g,
+        /[\347]/g, // C, c
+      ];
+      const noaccent = ["A", "a", "E", "e", "I", "i", "O", "o", "U", "u", "N", "n", "C", "c"];
+
+      for (var i = 0; i < accent.length; i++) {
+        str = str.replace(accent[i], noaccent[i]);
+      }
+
+      return str.replaceAll(/[^0-9a-zA-Z\- ]/g, "") ?? undefined;
+    };
 
     const wrapNumString = (str) => {
       if (!str) return str;
@@ -85,7 +110,11 @@ export const generateSifa = async (organisme_id) => {
           }`
         : undefined, // REQUIRED
       SIT_N_1: effectif.apprenant.derniere_situation, // REQUIRED
-      ETAB_N_1: effectif.apprenant.dernier_organisme_uai, // REQUIRED
+      ETAB_N_1: effectif.apprenant.dernier_organisme_uai
+        ? effectif.apprenant.dernier_organisme_uai.length === 8
+          ? effectif.apprenant.dernier_organisme_uai
+          : wrapNumString(effectif.apprenant.dernier_organisme_uai.padStart(3, "0"))
+        : undefined, // REQUIRED
       DIPLOME: wrapNumString(formationBcn?.cfd || effectif.formation.cfd), // REQUIRED
       DUR_FORM_THEO:
         formationOrganisme?.duree_formation_theorique || formationBcn?.duree

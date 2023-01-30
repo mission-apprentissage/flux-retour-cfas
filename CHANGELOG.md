@@ -1,3 +1,73 @@
+# [3.7.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.5...v3.7.0-beta.6) (2023-01-30)
+
+
+### Bug Fixes
+
+* **server:** hydrate new reseaux anomalie on update dossiers ([#2475](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2475)) ([580ef03](https://github.com/mission-apprentissage/flux-retour-cfas/commit/580ef03e34fd2b155aefb6926091093acd7b0bf3))
+
+# [3.7.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.4...v3.7.0-beta.5) (2023-01-30)
+
+
+### Features
+
+* ajout reseaux UIMM et Compagnons du devoir  ([#2473](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2473)) ([29c979a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/29c979afdf887cc642211eb39cca3f6357b64e30))
+
+# [3.7.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.3...v3.7.0-beta.4) (2023-01-26)
+
+
+### Bug Fixes
+
+* revert sentry ([#2463](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2463)) ([54d99fd](https://github.com/mission-apprentissage/flux-retour-cfas/commit/54d99fdacd2c9a0fe3ca4690eeb0b32a153302af))
+
+# [3.7.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.2...v3.7.0-beta.3) (2023-01-26)
+
+
+### Bug Fixes
+
+* disable sentry on recette ([#2464](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2464)) ([9300aa1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9300aa112bf4a9888905b16b232a1d064f555a44))
+
+# [3.7.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.1...v3.7.0-beta.2) (2023-01-26)
+
+
+### Bug Fixes
+
+* **server:** missing & empty historique_statut ([#2461](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2461)) ([f3c77c1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f3c77c121eff0f04d8f53aa1faee2a449d473161))
+
+# [3.7.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.4...v3.7.0-beta.1) (2023-01-26)
+
+
+### Features
+
+* add Sentry ([#2458](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2458)) ([8fd2d64](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8fd2d64170ee85d22b80f00429fc6e7c8a743fdb))
+
+## [3.6.1-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.3...v3.6.1-beta.4) (2023-01-26)
+
+
+### Bug Fixes
+
+* **server:** mapFiabilizedOrganismeUaiSiretCouple & setFirstTransmissionDate ([#2454](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2454)) ([b7475c1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b7475c15a7080aa5b43790b91cd0696fbbc108f0))
+
+## [3.6.1-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.2...v3.6.1-beta.3) (2023-01-25)
+
+
+### Bug Fixes
+
+* **server:** csv networks names ([#2449](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2449)) ([9830649](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9830649af580ff0b0abebcfc8aa3685e666fd56d))
+
+## [3.6.1-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.1...v3.6.1-beta.2) (2023-01-25)
+
+
+### Bug Fixes
+
+* **server:** update effectifs unique index using id_erp_apprenant ([#2452](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2452)) ([78b74ef](https://github.com/mission-apprentissage/flux-retour-cfas/commit/78b74ef090ddf73baa3876b19ab0828310f52a89))
+
+## [3.6.1-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.0...v3.6.1-beta.1) (2023-01-25)
+
+
+### Bug Fixes
+
+* **server:** add default value for validationErrors on updateEffectifsAndLock ([#2451](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2451)) ([1da8a1e](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1da8a1efd6eae461d6e5f63db9e69fe87e851369))
+
 # [3.6.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.5.1...v3.6.0) (2023-01-24)
 
 

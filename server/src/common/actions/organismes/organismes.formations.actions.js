@@ -120,14 +120,14 @@ const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => 
     nature: NATURE_ORGANISME_DE_FORMATION.LIEU,
     // uai: formationCatalog.XXXX, // TODO non récupérée par RCO donc pas présent dans le catalogue (vu avec Quentin)
     ...(formationCatalog.lieu_formation_siret ? { siret: formationCatalog.lieu_formation_siret } : {}),
-    // TODO On récupère l'adresse depuis le référentiel en appelant avec le siret ?
+    // TODO On récupère l'adresse depuis le référentiel en appelant avec le SIRET ?
   });
 
   return organismesLinkedToFormation;
 };
 
 /**
- * Vérifie la nature, si on détecte un uai formateur = responsable alors on est dans le cas d'un responsable_formateur
+ * Vérifie la nature, si on détecte un UAI formateur = responsable alors on est dans le cas d'un responsable_formateur
  * sinon on renvoi la nature default
  * @param {*} defaultNature
  * @param {*} formationCatalog

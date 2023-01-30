@@ -9,6 +9,7 @@ import { removeDossierApprenantsDuplicates } from "./fiabilisation/duplicates/do
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
 import { createFiabilisationUaiSiretMapping } from "./fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/index.js";
 import { updateDossiersApprenantWithFiabilisationUaiSiret } from "./fiabilisation/uai-siret/update-dossiers-apprenants-with-fiabilisation-uai-siret/index.js";
+import { cleanOrganismesNonFiables } from "./fiabilisation/uai-siret/clean-organismes-non-fiables/index.js";
 
 /**
  * Job d'identification des doublons dans les fichiers CSV de réseaux
@@ -108,6 +109,18 @@ cli
     runScript(async () => {
       return updateDossiersApprenantWithFiabilisationUaiSiret();
     }, "apply-fiabilisation-uai-siret");
+  });
+
+/**
+ * Job de suppression des organismes non fiables et déplacement des contributeurs & effectifs liés
+ */
+cli
+  .command("clean:organismes-non-fiables")
+  .description("Suppression des organismes non fiables et déplacement des contributeurs & effectifs liés")
+  .action(() => {
+    runScript(async () => {
+      return cleanOrganismesNonFiables();
+    }, "fiabilisation-clean-organismes-non-fiables");
   });
 
 cli.parse(process.argv);

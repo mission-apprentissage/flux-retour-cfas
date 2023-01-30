@@ -16,7 +16,7 @@ import { buildTokenizedString } from "../../../../common/utils/buildTokenizedStr
  */
 export const createOrganismeFromCfa = async ({ uai, sirets = [], nom, ...data }) => {
   if (await organismesDb().countDocuments({ uai })) {
-    throw new Error(`Un organisme avec l'uai ${uai} existe déjà`);
+    throw new Error(`Un organisme avec l'UAI ${uai} existe déjà`);
   }
 
   const { insertedId } = await organismesDb().insertOne(
@@ -43,7 +43,7 @@ const RESEAUX_NAMES_TO_KEY = Object.keys(RESEAUX_CFAS).reduce(
 
 /**
  * Méthode (temp) de transformation des props d'un cfa en props d'un organisme
- * Récupération de l'adresse depuis l'uai
+ * Récupération de l'adresse depuis l'UAI
  * Suppression des champs inutiles
  */
 export const mapCfaPropsToOrganismeProps = async (cfaProps) => {

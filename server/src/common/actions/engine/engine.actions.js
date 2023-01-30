@@ -4,6 +4,7 @@ import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
+import { buildNewHistoriqueStatutApprenant } from "../dossiersApprenants.actions.js";
 import {
   buildEffectif,
   findEffectifById,
@@ -18,6 +19,7 @@ import {
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
   insertOrganisme,
+  setOrganismeFirstDateTransmissionIfNeeded,
 } from "../organismes/organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
 
@@ -226,7 +228,7 @@ export const hydrateOrganisme = async (organisme) => {
   });
 
   // Si pas de siret après fiabilisation -> erreur
-  if (!cleanSiret) organismeFoundError = `Impossible de créer l'organisme d'uai ${organisme.uai} avec un siret vide`;
+  if (!cleanSiret) organismeFoundError = `Impossible de créer l'organisme d'uai ${organisme.uai} avec un SIRET vide`;
 
   // Applique les règles de rejection si pas dans la db
   const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
@@ -235,14 +237,14 @@ export const hydrateOrganisme = async (organisme) => {
     organismeFoundId = organismeFoundWithUaiSiret?._id;
   } else {
     const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
-    // Si pour le couple uai-siret IN on trouve le siret mais un uai différent -> erreur
+    // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> erreur
     if (organismeFoundWithSiret?._id)
-      organismeFoundError = `L'organisme ayant le siret ${organisme.siret} existe déja en base avec un uai différent : ${organismeFoundWithSiret.uai}`;
+      organismeFoundError = `L'organisme ayant le SIRET ${organisme.siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`;
 
     const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
-    // Si pour le couple uai-siret IN on trouve l'uai mais un siret différent -> erreur
+    // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> erreur
     if (organismeFoundWithUai?._id)
-      organismeFoundError = `L'organisme ayant l'uai ${organisme.uai} existe déja en base avec un siret différent : ${organismeFoundWithUai.siret}`;
+      organismeFoundError = `L'organisme ayant l'UAI ${organisme.uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`;
 
     // TODO CHECK BASE ACCES
 
@@ -314,6 +316,11 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
       // Ajout organisme id a l'effectifData
       // Pas besoin d'update l'organisme
       organismeFoundId = organismeFound?._id;
+
+      // Si l'organisme provient de la fiabilisation et qu'il n'est pas flaggé comme transmettant,
+      // on ajoute la date de première transmission
+      await setOrganismeFirstDateTransmissionIfNeeded(organismeFoundId);
+
       effectifData.organisme_id = organismeFound?._id.toString();
     }
   }
@@ -341,6 +348,14 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
     // Gestion des maj d'effectif
     if (found) {
       effectifUpdatedId = found._id;
+
+      // Update de historique
+      effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
+        found.apprenant.historique_statut,
+        effectifData.apprenant?.historique_statut[0]?.valeur_statut,
+        effectifData.apprenant?.historique_statut[0]?.date_statut
+      );
+
       if (lockEffectif) {
         await updateEffectifAndLock(effectifUpdatedId, effectif);
       } else {

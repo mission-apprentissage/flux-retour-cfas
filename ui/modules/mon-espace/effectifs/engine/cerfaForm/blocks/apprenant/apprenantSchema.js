@@ -237,7 +237,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.representant_legal.nom": {
-    label: "Nom du représentant légal:",
+    label: "Nom du représentant légal :",
     mask: "C",
     maskBlocks: [
       {
@@ -248,7 +248,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.representant_legal.prenom": {
-    label: "Prénom du représentant légal:",
+    label: "Prénom du représentant légal :",
     mask: "C",
     maskBlocks: [
       {
@@ -725,6 +725,7 @@ export const apprenantSchema = {
     fieldType: "text",
     showInfo: true,
     label: "Établissement fréquenté l’année dernière (N-1):",
+    placeholder: "Numéro UAI ou département",
   },
   "apprenant.organisme_gestionnaire": {
     fieldType: "select",

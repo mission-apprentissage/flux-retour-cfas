@@ -24,13 +24,13 @@ export const schema = object(
   {
     _id: objectId(),
     uai: string({
-      description: "Code uai de l'établissement",
+      description: "Code UAI de l'établissement",
       pattern: "^[0-9]{7}[a-zA-Z]$",
       maxLength: 8,
       minLength: 8,
     }),
     sirets: arrayOf(string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }), {
-      description: "Liste des sirets reliés à l'établissement",
+      description: "Liste des SIRETs reliés à l'établissement",
     }),
     siret: string({ description: "N° SIRET fiabilisé", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
     reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS) }), { description: "Réseaux du CFA, s'ils existent" }),
@@ -73,7 +73,7 @@ export const schema = object(
                   enum: Object.values(NATURE_ORGANISME_DE_FORMATION),
                 }),
                 uai: string({
-                  description: "Code uai du lieu de formation (optionnel)",
+                  description: "Code UAI du lieu de formation (optionnel)",
                   pattern: "^[0-9]{7}[a-zA-Z]$",
                   maxLength: 8,
                   minLength: 8,

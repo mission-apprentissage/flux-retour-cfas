@@ -40,7 +40,7 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
     const validationSchema = Yup.object().shape({
       siret: Yup.string()
         .matches(new RegExp("^([0-9]{14}|[0-9]{9} [0-9]{4})$"), {
-          message: `n'est pas un siret valide`,
+          message: `n'est pas un SIRET valide`,
           excludeEmptyString: true,
         })
         .required("Le siret est obligatoire"),
@@ -97,7 +97,8 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
         {errors.siret && touched.siret && <FormErrorMessage>{errors.siret}</FormErrorMessage>}
       </FormControl>
       {values.siret && (
-        <Center
+        <VStack
+          alignItems="baseline"
           borderWidth="2px"
           borderStyle="dashed"
           borderColor={entrepriseData ? (entrepriseData.successed ? "green.500" : "error") : "grey.400"}
@@ -106,7 +107,7 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
           flexDirection="column"
           p={4}
         >
-          {isFetching && <Spinner />}
+          {isFetching && <Spinner alignSelf="center" />}
           {!isFetching && entrepriseData && (
             <>
               {entrepriseData.data && (
@@ -147,7 +148,7 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
               )}
             </>
           )}
-        </Center>
+        </VStack>
       )}
     </>
   );

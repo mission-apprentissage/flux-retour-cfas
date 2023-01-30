@@ -21,7 +21,7 @@ const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
     <>
       <CfaInformationSection infosCfa={infosCfa} loading={loading} error={error} />
 
-      {/* Filtre sur le siret pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs sirets */}
+      {/* Filtre sur le SIRET pour la vue détail d'un sous établissement rattaché à un établissement avec plusieurs SIRETs */}
       {displaySousEtablissementDetail && <MultiSiretDetailInformationSection sirets={sirets} />}
 
       {/* Répartition par Siret pour un établissement multi-siret */}
@@ -29,7 +29,7 @@ const OrganismeViewContent = ({ infosCfa, loading, error, filters }) => {
         <RepartitionEffectifsParSiretSection filters={filters} />
       )}
 
-      {/* Vue Globale & Repartition pour un établissement sans sirets multiple ou dans la vue détail d'un sous établissement */}
+      {/* Vue Globale & Repartition pour un établissement sans SIRETs multiple ou dans la vue détail d'un sous établissement */}
       {(displaySousEtablissementDetail || !hasMultipleSirets) && (
         <IndicateursAndRepartionCfaNiveauAnneesSection
           filters={filters}

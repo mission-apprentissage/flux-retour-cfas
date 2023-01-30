@@ -28,7 +28,7 @@ const OrganismeDeFormationReseauAndAdresse = ({ reseaux, adresse, multipleSirets
   return (
     <Text fontSize="epsilon" textColor="grey.800" marginTop="3w">
       {getOrganismeReseauxAndAdresseText()}
-      {multipleSirets && <strong> Il est identifié par une UAI qui utilise {nbEtablissements} numéros SIRET.</strong>}
+      {multipleSirets && <strong> Il est identifié par un UAI qui utilise {nbEtablissements} numéros SIRET.</strong>}
     </Text>
   );
 };
