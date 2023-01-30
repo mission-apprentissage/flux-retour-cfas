@@ -2,7 +2,7 @@
 set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly ANSIBLE_DIR="${SCRIPT_DIR}/../../ansible"
+readonly ANSIBLE_DIR="$(realpath ${SCRIPT_DIR}/../../ansible)"
 readonly HABILITATIONS_FILE="${ANSIBLE_DIR}/roles/setup/vars/main/habilitations.yml"
 readonly VAULT_PASSWORD_FILE="${ANSIBLE_DIR}/.vault-password.gpg"
 
@@ -10,6 +10,11 @@ function create_password_file() {
   local recipients=()
   local password
   password="$(pwgen -n 71 -C | head -n1)"
+
+  if ! test -f "${HABILITATIONS_FILE}"; then
+    echo "Le fichier ${HABILITATIONS_FILE} doit etre créé (voir dans 1password)"
+    exit 1
+  fi
 
   if test -f "${VAULT_PASSWORD_FILE}"; then
     echo "Le fichier ${VAULT_PASSWORD_FILE} a déjà été créé."
