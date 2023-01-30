@@ -15,3 +15,19 @@ export const generateRandomAlphanumericPhrase = (length = 20) => {
     .map((x) => alphanumeric[x % alphanumeric.length])
     .join("");
 };
+
+/**
+ * @param  {[any]} array1
+ * @param  {[any]} array2
+ * @returns  {boolean}
+ */
+export const arraysContainSameValues = (array1, array2) => {
+  if (!Array.isArray(array1) || !Array.isArray(array2) || array1.length !== array2.length) {
+    return false;
+  }
+
+  array1.forEach((item) => {
+    if (!array2.includes(item)) return false;
+  });
+  return true;
+};
