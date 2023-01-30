@@ -47,10 +47,35 @@ export default function OrganismeInfo() {
     enseigne,
     raison_sociale,
     reseaux,
+    adresse,
   } = organisme;
+
   const siretToDisplay = formatSiretSplitted(sirets[0]);
+
+  // TODO Fix coté back
   // eslint-disable-next-line no-undef
   const uniqReseaux = [...new Set(reseaux)];
+
+  const getOrganismeReseauxAndAdresseText = (reseaux, adresseComplete) => {
+    if (reseaux) {
+      return (
+        <>
+          Cet organisme fait partie du réseau <strong>{reseaux[0]}</strong>{" "}
+          {reseaux.slice(1, reseaux.length)?.map((item) => (
+            <>
+              et du réseau <strong>{item}</strong>
+            </>
+          ))}
+          . {adresseComplete ? `Sa domiciliation est ${adresseComplete}.` : ""}
+        </>
+      );
+    } else {
+      if (adresseComplete) {
+        return <>La domiciliation de cet organisme est {adresseComplete}</>;
+      }
+      return null;
+    }
+  };
 
   return (
     <>
@@ -103,14 +128,7 @@ export default function OrganismeInfo() {
           {uniqReseaux?.length > 0 && (
             <HStack fontSize="epsilon" textColor="grey.800" mt={4} spacing="2w">
               <HStack>
-                <Text>
-                  Cet organisme fait partie
-                  <>
-                    {uniqReseaux?.length == 1
-                      ? ` du réseau ${(<b>uniqReseaux[0]</b>)}`
-                      : ` des réseaux </b>${uniqReseaux.join(", ")}</b>`}
-                  </>
-                </Text>
+                <Text>{getOrganismeReseauxAndAdresseText(uniqReseaux, adresse?.complete)}</Text>
               </HStack>
             </HStack>
           )}
