@@ -12,6 +12,10 @@
       "performance": {
         "noDelete": "off"
       },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noAsyncPromiseExecutor": "off"
+      },
       "complexity": {
         "useSimplifiedLogicExpression": "off"
       }
