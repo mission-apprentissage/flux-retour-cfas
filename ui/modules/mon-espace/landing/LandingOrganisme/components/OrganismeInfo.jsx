@@ -180,12 +180,12 @@ export default function OrganismeInfo() {
       </Section>
 
       <Box mt={5}>
-        {!(organisme.first_transmission_date || organisme.mode_de_transmission ) && (
+        {!(organisme.first_transmission_date || organisme.mode_de_transmission) && (
           <Ribbons variant="warning" mt="0.5rem">
             <Box ml={3}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
                 {isMonOrganismePages &&
-                  "Vous ne nous transmettez pas encore vos effectifs. Veuillez cliquer dans l’onglet "Mes effectifs" pour démarrer l’import."}
+                  'Vous ne nous transmettez pas encore vos effectifs. Veuillez cliquer dans l’onglet "Mes effectifs" pour démarrer l’import.'}
                 {isOrganismePages && "Cet organisme ne nous transmet pas encore ses effectifs."}
               </Text>
             </Box>
