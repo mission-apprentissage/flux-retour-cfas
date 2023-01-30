@@ -153,10 +153,10 @@ export default function Table({
           {" "}
           <Divider my={2} />
           <HStack spacing={3} justifyContent="center">
-            <Button variant="unstyled" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
+            <Button variant="unstyled" onClick={() => table.setPageIndex(0)} isDisabled={!table.getCanPreviousPage()}>
               <Box className="ri-skip-back-fill" mt="0.250rem !important" />
             </Button>
-            <Button variant="unstyled" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+            <Button variant="unstyled" onClick={() => table.previousPage()} isDisabled={!table.getCanPreviousPage()}>
               <HStack>
                 <Box as="i" className="ri-arrow-left-s-line" mt="0.250rem !important" />
                 <Text>Page précédente </Text>
@@ -169,7 +169,7 @@ export default function Table({
               </Button>
             </Box>
 
-            <Button variant="unstyled" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            <Button variant="unstyled" onClick={() => table.nextPage()} isDisabled={!table.getCanNextPage()}>
               <HStack>
                 <Text>Page suivante </Text>
                 <Box as="i" className="ri-arrow-right-s-line" mt="0.250rem !important" />
@@ -178,7 +178,7 @@ export default function Table({
             <Button
               variant="unstyled"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
+              isDisabled={!table.getCanNextPage()}
             >
               <Box className="ri-skip-forward-fill" mt="0.250rem !important" />
             </Button>

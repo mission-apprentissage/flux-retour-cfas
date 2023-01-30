@@ -204,6 +204,8 @@ export const buildNewHistoriqueStatutApprenant = (
   updated_statut_apprenant,
   updated_date_metier_mise_a_jour_statut
 ) => {
+  if (!updated_statut_apprenant) return historique_statut_apprenant_existant;
+
   let newHistoriqueStatutApprenant = historique_statut_apprenant_existant;
 
   // Vérification si le nouveau statut existe déja dans l'historique actuel
