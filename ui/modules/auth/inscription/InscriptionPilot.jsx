@@ -17,17 +17,13 @@ export const InscriptionPilot = ({ onEndOfSpecific }) => {
             placeholder: "Sélectionner un opérateur public",
             options: [
               {
-                label: "DREETS",
+                label: "D(R)EETS",
                 value: "DREETS",
               },
               {
-                label: "DEETS",
-                value: "DEETS",
+                label: "DDETS",
+                value: "DDETS",
               },
-              // {
-              //   label: "DDETS",
-              //   value: "DDETS",
-              // },
               {
                 label: "DRAAF",
                 value: "DRAAF",
