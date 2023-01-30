@@ -351,7 +351,7 @@ const Televersements = () => {
               onClick={onGoToMappingStep}
               size={"md"}
               variant="primary"
-              disabled={typeDocument === "" || !documents?.unconfirmed?.length}
+              isDisabled={typeDocument === "" || !documents?.unconfirmed?.length}
             >
               Étape suivante
               <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
@@ -588,7 +588,7 @@ const Televersements = () => {
                           mt={3}
                           size={"md"}
                           variant="secondary"
-                          disabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length - 1}
+                          isDisabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length - 1}
                         >
                           + Ajouter une donnée
                         </Button>
@@ -661,7 +661,7 @@ const Televersements = () => {
                     onClick={() => onDefineAsModel()}
                     size={"md"}
                     variant="primary"
-                    disabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length || savedAsModel}
+                    isDisabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length || savedAsModel}
                   >
                     Sauvegarder
                   </Button>
@@ -685,7 +685,7 @@ const Televersements = () => {
                 onClick={() => onGoToPreImportStep()}
                 size={"md"}
                 variant="primary"
-                disabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length - 1}
+                isDisabled={requireKeysSettled.length < Object.keys(mapping.requireKeys).length - 1}
               >
                 Étape suivante (Prévisualiser)
                 <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
