@@ -4,6 +4,7 @@ import { getCpInfo } from "../../apis/apiTablesCorrespondances.js";
 import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
 import { dateFormatter, dateStringToLuxon, jsDateToLuxon } from "../../utils/formatterUtils.js";
 import { telephoneConverter } from "../../utils/validationsUtils/frenchTelephoneNumber.js";
+import { buildNewHistoriqueStatutApprenant } from "../dossiersApprenants.actions.js";
 import {
   buildEffectif,
   findEffectifById,
@@ -18,6 +19,7 @@ import {
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
   insertOrganisme,
+  setOrganismeFirstDateTransmissionIfNeeded,
 } from "../organismes/organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
 
@@ -314,6 +316,11 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
       // Ajout organisme id a l'effectifData
       // Pas besoin d'update l'organisme
       organismeFoundId = organismeFound?._id;
+
+      // Si l'organisme provient de la fiabilisation et qu'il n'est pas flaggé comme transmettant,
+      // on ajoute la date de première transmission
+      await setOrganismeFirstDateTransmissionIfNeeded(organismeFoundId);
+
       effectifData.organisme_id = organismeFound?._id.toString();
     }
   }
@@ -341,6 +348,14 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
     // Gestion des maj d'effectif
     if (found) {
       effectifUpdatedId = found._id;
+
+      // Update de historique
+      effectif.apprenant.historique_statut = buildNewHistoriqueStatutApprenant(
+        found.apprenant.historique_statut,
+        effectifData.apprenant?.historique_statut[0]?.valeur_statut,
+        effectifData.apprenant?.historique_statut[0]?.date_statut
+      );
+
       if (lockEffectif) {
         await updateEffectifAndLock(effectifUpdatedId, effectif);
       } else {

@@ -12,7 +12,7 @@ export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret }) => {
   const fiabilisationMappings = [...fiabilisationUaiSiretFromCollection, ...FIABILISATION_MAPPINGS];
 
   const foundCouple = fiabilisationMappings
-    .filter((item) => (item.uai && item.uai === uai) || (item.siret && item.siret === siret))
+    .filter((item) => item.uai === uai && item.siret === siret)
     .map(({ uai_fiable, siret_fiable }) => ({ cleanUai: uai_fiable, cleanSiret: siret_fiable }));
 
   return foundCouple[0] || { cleanUai: uai, cleanSiret: siret }; // Take only first match

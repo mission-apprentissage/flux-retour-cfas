@@ -1,3 +1,38 @@
+# [3.7.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.3...v3.7.0-beta.4) (2023-01-26)
+
+
+### Bug Fixes
+
+* revert sentry ([#2463](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2463)) ([54d99fd](https://github.com/mission-apprentissage/flux-retour-cfas/commit/54d99fdacd2c9a0fe3ca4690eeb0b32a153302af))
+
+# [3.7.0-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.2...v3.7.0-beta.3) (2023-01-26)
+
+
+### Bug Fixes
+
+* disable sentry on recette ([#2464](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2464)) ([9300aa1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/9300aa112bf4a9888905b16b232a1d064f555a44))
+
+# [3.7.0-beta.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.1...v3.7.0-beta.2) (2023-01-26)
+
+
+### Bug Fixes
+
+* **server:** missing & empty historique_statut ([#2461](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2461)) ([f3c77c1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/f3c77c121eff0f04d8f53aa1faee2a449d473161))
+
+# [3.7.0-beta.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.4...v3.7.0-beta.1) (2023-01-26)
+
+
+### Features
+
+* add Sentry ([#2458](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2458)) ([8fd2d64](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8fd2d64170ee85d22b80f00429fc6e7c8a743fdb))
+
+## [3.6.1-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.3...v3.6.1-beta.4) (2023-01-26)
+
+
+### Bug Fixes
+
+* **server:** mapFiabilizedOrganismeUaiSiretCouple & setFirstTransmissionDate ([#2454](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2454)) ([b7475c1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b7475c15a7080aa5b43790b91cd0696fbbc108f0))
+
 ## [3.6.1-beta.3](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.1-beta.2...v3.6.1-beta.3) (2023-01-25)
 
 

@@ -140,9 +140,16 @@ export default () => {
                 ? currentDossierApprenant.periode_formation.split("-").map(Number)
                 : [],
               source: user.username,
+              historique_statut_apprenant: [
+                {
+                  valeur_statut: currentDossierApprenant.statut_apprenant,
+                  date_statut: new Date(currentDossierApprenant.date_metier_mise_a_jour_statut),
+                  date_reception: new Date(),
+                },
+              ],
             };
 
-            // Structure effectif & organisme from item
+            // Construction d'un historique à partir du statut et de la date_metier_mise_a_jour_statut
             const effectifData = structureEffectifFromDossierApprenant(dossierApprenantItem);
             const organismeData = await structureOrganismeFromDossierApprenant(dossierApprenantItem);
 
