@@ -22,13 +22,14 @@ const RESEAUX_LIST_SEPARATOR = "|";
 const RESEAU_NULL_VALUES = ["Hors réseau CFA EC", "", null];
 
 const INPUT_FILES = [
-  "assets/referentiel-reseau_aden.csv",
-  "assets/referentiel-reseau_agri.csv",
-  "assets/referentiel-reseau_mfr.csv",
+  "assets/referentiel-reseau-aden.csv",
   "assets/referentiel-reseau-aftral.csv",
+  "assets/referentiel-reseau-agri.csv",
   "assets/referentiel-reseau-cr-normandie.csv",
   "assets/referentiel-reseau-excellence-pro.csv",
   "assets/referentiel-reseau-greta-pdl.csv",
+  "assets/referentiel-reseau-mfr.csv",
+  "assets/referentiel-reseau-uimm.csv",
 ];
 
 /**
@@ -81,6 +82,10 @@ export const hydrateReseauxNewFormat = async () => {
     let nbDossiersApprenantsUpdated = 0;
 
     logger.info(reseauFile.length, "lines in", filename);
+    if (reseauFile.length === 0) {
+      throw new Error(`file ${filename} is empty`);
+    }
+
     // iterate over every line (organisme de formation) in the réseau file
     await asyncForEach(reseauFile, async (reseauFileLine) => {
       const organismeParsedFromFile = mapFileOrganisme(reseauFileLine);
