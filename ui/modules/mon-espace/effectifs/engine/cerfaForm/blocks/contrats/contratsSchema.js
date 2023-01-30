@@ -146,17 +146,17 @@ export const contratsSchema = {
     ],
   },
   "apprenant.contrats[].date_debut": {
-    label: "Date de début du contrat",
+    label: "Date de début du contrat :",
     fieldType: "date",
     locked: true,
   },
   "apprenant.contrats[].date_fin": {
-    label: "Date de fin du contrat",
+    label: "Date de fin du contrat :",
     fieldType: "date",
     locked: true,
   },
   "apprenant.contrats[].date_rupture": {
-    label: "Date de rupture du contrat",
+    label: "Date de rupture du contrat :",
     fieldType: "date",
     locked: true,
   },
@@ -178,7 +178,7 @@ export const contratsSchema = {
   "apprenant.contrats[].adresse.repetition_voie": {
     locked: true,
     fieldType: "select",
-    label: "Indice de répétition",
+    label: "Indice de répétition :",
     validateMessage: `n'est pas un indice de répétition valide`,
     options: INDICE_DE_REPETITION_OPTIONS,
   },

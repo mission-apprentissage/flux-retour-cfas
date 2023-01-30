@@ -170,7 +170,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.adresse.complement": {
-    label: "Complément d'adresse:",
+    label: "Complément d'adresse :",
   },
   "apprenant.adresse.code_postal": {
     label: "Code postal :",
@@ -199,7 +199,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.adresse.commune": {
-    label: "Commune: ",
+    label: "Commune :",
     mask: "C",
     maskBlocks: [
       {
@@ -210,7 +210,7 @@ export const apprenantSchema = {
     ],
   },
   "apprenant.adresse.complete": {
-    label: "Complete: ",
+    label: "Complete :",
     locked: true,
     mask: "C",
     maskBlocks: [
@@ -446,7 +446,7 @@ export const apprenantSchema = {
   },
   "apprenant.derniere_situation": {
     fieldType: "select",
-    label: "Situation de l'apprenant n-1 :",
+    label: "Situation de l'apprenant l’année dernière (N-1) :",
     options: [
       {
         name: "1er cycle second degré",
@@ -724,7 +724,7 @@ export const apprenantSchema = {
   "apprenant.dernier_organisme_uai": {
     fieldType: "text",
     showInfo: true,
-    label: "Établissement fréquenté l’année dernière (N-1):",
+    label: "Établissement fréquenté l’année dernière (N-1) :",
     placeholder: "Numéro UAI ou département",
   },
   "apprenant.organisme_gestionnaire": {
