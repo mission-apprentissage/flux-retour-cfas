@@ -27,6 +27,9 @@ export const RESEAUX_CFAS = {
     nomReseau: "CFA EC",
     nomFichier: "",
   },
+  COMP_DU_DEVOIR: {
+    nomReseau: "Compagnons du devoir",
+  },
   GRETA: {
     nomReseau: "GRETA",
     nomFichier: "cfas-greta",

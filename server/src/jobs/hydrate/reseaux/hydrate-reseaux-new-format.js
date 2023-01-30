@@ -25,6 +25,7 @@ const INPUT_FILES = [
   "assets/referentiel-reseau-aden.csv",
   "assets/referentiel-reseau-aftral.csv",
   "assets/referentiel-reseau-agri.csv",
+  "assets/referentiel-reseau-compagnons-du-devoir.csv",
   "assets/referentiel-reseau-cr-normandie.csv",
   "assets/referentiel-reseau-excellence-pro.csv",
   "assets/referentiel-reseau-greta-pdl.csv",
