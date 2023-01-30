@@ -66,7 +66,7 @@ export default function QuestCeQueLeTdb() {
                           color="bluefrance"
                           textDecoration="underLine"
                         >
-                          https://cfas.apprentissage.beta.gouv.fr <Box as="i" className="ri--link-line" />
+                          https://cfas.apprentissage.beta.gouv.fr <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -91,7 +91,7 @@ export default function QuestCeQueLeTdb() {
                         color="bluefrance"
                         textDecoration="underLine"
                       >
-                        consulter le Gitbook de la mission. <Box as="i" className="ri--link-line" />
+                        consulter le Gitbook de la mission. <Box as="i" className="ri-links-line" />
                       </Link>
                     </Box>
                   ),
@@ -107,7 +107,7 @@ export default function QuestCeQueLeTdb() {
                         Pour en savoir plus sur les utilisateurs du le {PRODUCT_NAME} , <br />
                         consultez{" "}
                         <Link href="/organisme-formation/aide" color="bluefrance" textDecoration="underLine">
-                          Qui peut consulter les données de votre organisme ? <Box as="i" className="ri--link-line" />
+                          Qui peut consulter les données de votre organisme ? <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -145,7 +145,7 @@ export default function QuestCeQueLeTdb() {
                         <br />
                         Pour en savoir plus, consulter la rubrique{" "}
                         <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
-                          Comprendre les données <Box as="i" className="ri--link-line" />
+                          Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -262,7 +262,7 @@ export default function QuestCeQueLeTdb() {
                       <Text>
                         Vous pouvez effectuer une demande via le{" "}
                         <Link href="/auth/connexion" color="bluefrance" textDecoration="underLine">
-                          formulaire dédié <Box as="i" className="ri--link-line" />
+                          formulaire dédié <Box as="i" className="ri-links-line" />
                         </Link>{" "}
                         ou envoyer un courriel à{" "}
                         <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
@@ -272,7 +272,7 @@ export default function QuestCeQueLeTdb() {
                         <br />
                         Si vous êtes un organisme de formation,{" "}
                         <Link href="/organisme-formation" color="bluefrance" textDecoration="underLine">
-                          consultez la page dédiée <Box as="i" className="ri--link-line" />
+                          consultez la page dédiée <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>

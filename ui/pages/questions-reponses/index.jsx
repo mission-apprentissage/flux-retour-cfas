@@ -80,7 +80,7 @@ export default function QuestionsReponses() {
                       <br />
                       Pour en savoir plus sur les utilisateurs du Tableau de bord de l’apprentissage, consultez{" "}
                       <Link href="/organisme-formation/aide" color="bluefrance" textDecoration="underLine">
-                        Qui peut consulter les données de votre organisme ? <Box as="i" className="ri--link-line" />{" "}
+                        Qui peut consulter les données de votre organisme ? <Box as="i" className="ri-links-line" />{" "}
                       </Link>
                     </Text>
                   </Box>
@@ -109,7 +109,7 @@ export default function QuestionsReponses() {
                         utilisez] et
                         <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
                           {" "}
-                          téléchargez le pas à pas correspondant <Box as="i" className="ri--link-line" />
+                          téléchargez le pas à pas correspondant <Box as="i" className="ri-links-line" />
                         </Link>
                       </ListItem>
                       <ListItem marginTop="1v">

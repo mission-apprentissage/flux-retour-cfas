@@ -86,7 +86,7 @@ export default function CommentFonctionneLeTdb() {
                         Pour en savoir plus, consultez{" "}
                         <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
                           Comment transmettre les données de mon organisme au Tableau de bord de l’apprentissage ?
-                          <Box as="i" className="ri--link-line" />
+                          <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -108,7 +108,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         Pour en savoir plus, consultez le détail sur la rubrique{" "}
                         <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
-                          Comprendre les données <Box as="i" className="ri--link-line" />
+                          Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                         <br />
                         <br />
@@ -140,7 +140,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         Pour en savoir plus, consulter la rubrique{" "}
                         <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
-                          Comprendre les données <Box as="i" className="ri--link-line" />
+                          Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -165,7 +165,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         Pour en savoir plus, consulter la rubrique{" "}
                         <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
-                          Comprendre les données <Box as="i" className="ri--link-line" />
+                          Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -219,7 +219,7 @@ export default function CommentFonctionneLeTdb() {
                           utilisez] et téléchargez le pas à pas correspondant :{" "}
                           <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
                             Comment transmettre les données de mon organisme au Tableau de bord de l’apprentissage ?
-                            <Box as="i" className="ri--link-line" />
+                            <Box as="i" className="ri-links-line" />
                           </Link>
                         </ListItem>
                         <ListItem>
@@ -253,7 +253,7 @@ export default function CommentFonctionneLeTdb() {
                       <Text>
                         <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
                           Consultez le pas à pas pour vous accompagner dans le paramétrage de votre ERP.
-                          <Box as="i" className="ri--link-line" />
+                          <Box as="i" className="ri-links-line" />
                         </Link>
                         <br />
                         <br />
@@ -298,7 +298,7 @@ export default function CommentFonctionneLeTdb() {
                           color="bluefrance"
                           textDecoration="underLine"
                         >
-                          https://referentiel.apprentissage.beta.gouv.fr <Box as="i" className="ri--link-line" />
+                          https://referentiel.apprentissage.beta.gouv.fr <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -326,7 +326,7 @@ export default function CommentFonctionneLeTdb() {
                           color="bluefrance"
                           textDecoration="underLine"
                         >
-                          https://referentiel.apprentissage.beta.gouv.fr <Box as="i" className="ri--link-line" />
+                          https://referentiel.apprentissage.beta.gouv.fr <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -381,7 +381,7 @@ export default function CommentFonctionneLeTdb() {
                         Pour en savoir plus consulter{" "}
                         <Link href="/organisme-formation/transmettre" color="bluefrance" textDecoration="underLine">
                           Comment transmettre les données de mon organisme au Tableau de bord de l’apprentissage ?
-                          <Box as="i" className="ri--link-line" />
+                          <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -429,7 +429,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         Pour plus d’informations, consultez la rubrique{" "}
                         <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
-                          Comprendre les données <Box as="i" className="ri--link-line" />
+                          Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
@@ -478,7 +478,7 @@ export default function CommentFonctionneLeTdb() {
                         <br />
                         Pour en savoir plus, consulter la rubrique{" "}
                         <Link href="/comprendre-les-donnees" color="bluefrance" textDecoration="underLine">
-                          Comprendre les données <Box as="i" className="ri--link-line" />
+                          Comprendre les données <Box as="i" className="ri-links-line" />
                         </Link>
                       </Text>
                     </Box>
