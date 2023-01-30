@@ -50,6 +50,7 @@ import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import maintenancesRoutes from "./routes/maintenances.routes.js";
+import config from "../config.js";
 
 export default async (services) => {
   const app = express();
