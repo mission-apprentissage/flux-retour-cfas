@@ -131,7 +131,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
           )}
           {values.type === "autre" && (
             <HStack ml="4w" mt="2w">
-              <Box p="2" h="7vh" borderLeft="4px solid #6A6AF4" />
+              <Box p="2" h="7vh" borderLeft="4px solid bluefrances.525" />
               <Box>
                 <Text>Contacter l&apos;équipe :</Text>
                 <Link fontWeight={700} href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">

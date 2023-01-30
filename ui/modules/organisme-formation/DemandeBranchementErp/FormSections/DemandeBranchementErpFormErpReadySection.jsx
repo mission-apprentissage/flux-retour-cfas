@@ -8,7 +8,7 @@ const DemandeBranchementErpFormErpReadySection = ({ helpFilePath }) => {
   return (
     <>
       <Stack marginTop="3w" marginBottom="3w" direction="row">
-        <Box borderLeftWidth="5px" borderRadius="0" borderLeftColor="#6A6AF4">
+        <Box borderLeftWidth="5px" borderRadius="0" borderLeftColor="bluefrances.525">
           <Text fontSize="epsilon" marginLeft="4w" color="grey.800">
             <strong>Le {PRODUCT_NAME} est interfacé avec cet ERP.</strong> Vous pouvez l&apos;autoriser à transmettre
             vos données en 2 clics via une fonctionnalité disponible dans l&apos;interface de votre logiciel de gestion.

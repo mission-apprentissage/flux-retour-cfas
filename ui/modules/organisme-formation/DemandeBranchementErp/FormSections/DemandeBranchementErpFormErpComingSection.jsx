@@ -8,7 +8,7 @@ const DemandeBranchementErpFormErpComingSection = ({ isSubmitting }) => {
   return (
     <>
       <Stack marginTop="3w" marginBottom="3w" direction="row">
-        <Box borderLeftWidth="5px" borderRadius="0" borderLeftColor="#6A6AF4">
+        <Box borderLeftWidth="5px" borderRadius="0" borderLeftColor="bluefrances.525">
           <Text fontSize="epsilon" marginLeft="4w" color="grey.800">
             <strong>L&apos;interfaçage du {PRODUCT_NAME} avec cet ERP n’a pas encore démarré.</strong>
             &nbsp;Nous vous invitons à lui faire part de votre besoin de transmettre vos données au {PRODUCT_NAME}.
