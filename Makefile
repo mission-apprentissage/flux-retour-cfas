@@ -1,4 +1,5 @@
 install: install-root install-server install-ui
+build: build-ui
 
 install-root:
 	yarn install
@@ -8,6 +9,9 @@ install-server:
 
 install-ui:
 	yarn --cwd ui install --frozen-lockfile
+
+build-ui: 
+	yarn --cwd ui build
 
 start:
 	docker-compose up --build --force-recreate
@@ -30,4 +34,4 @@ lint:
 clean:
 	docker-compose down
 
-ci: install lint test
+ci: install lint test build
