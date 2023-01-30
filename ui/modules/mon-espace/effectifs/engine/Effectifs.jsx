@@ -101,8 +101,8 @@ const Effectifs = ({ organismesEffectifs }) => {
     <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Heading textStyle="h2" color="grey.800" mb={5}>
-          {isMonOrganismePages && `Mes effectifs`}
-          {isOrganismePages && `Ses effectifs`}
+          {isMonOrganismePages && "Mes effectifs"}
+          {isOrganismePages && "Ses effectifs"}
         </Heading>
         <HStack spacing={4}>
           {organismesEffectifs.length > 0 && hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
@@ -186,7 +186,7 @@ const Effectifs = ({ organismesEffectifs }) => {
             </Text>
             <Input
               {...{
-                name: `search_effectifs`,
+                name: "search_effectifs",
                 fieldType: "text",
                 mask: "C",
                 maskBlocks: [

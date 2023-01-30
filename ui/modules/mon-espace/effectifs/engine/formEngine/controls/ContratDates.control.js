@@ -4,7 +4,7 @@ export const ContratDatesControl = [
   {
     deps: ["contrat.dateDebutContrat", "contrat.dateEffetAvenant"],
     process: ({ values }) => {
-      if (!values.contrat.dateDebutContrat || !values.contrat.dateEffetAvenant) return;
+      if (!(values.contrat.dateDebutContrat && values.contrat.dateEffetAvenant)) return;
       const dateDebutContrat = DateTime.fromISO(values.contrat.dateDebutContrat).setLocale("fr-FR");
       const dateEffetAvenant = DateTime.fromISO(values.contrat.dateEffetAvenant).setLocale("fr-FR");
       if (dateDebutContrat > dateEffetAvenant) {
@@ -17,7 +17,7 @@ export const ContratDatesControl = [
   {
     deps: ["contrat.dateFinContrat", "contrat.dateEffetAvenant"],
     process: ({ values }) => {
-      if (!values.contrat.dateFinContrat || !values.contrat.dateEffetAvenant) return;
+      if (!(values.contrat.dateFinContrat && values.contrat.dateEffetAvenant)) return;
       const dateFinContrat = DateTime.fromISO(values.contrat.dateFinContrat).setLocale("fr-FR");
       const dateEffetAvenant = DateTime.fromISO(values.contrat.dateEffetAvenant).setLocale("fr-FR");
       if (dateEffetAvenant > dateFinContrat) {
@@ -30,7 +30,7 @@ export const ContratDatesControl = [
   {
     deps: ["contrat.dateDebutContrat", "formation.dateDebutFormation"],
     process: ({ values }) => {
-      if (!values.contrat.dateDebutContrat || !values.formation.dateDebutFormation) return;
+      if (!(values.contrat.dateDebutContrat && values.formation.dateDebutFormation)) return;
       const dateDebutContrat = DateTime.fromISO(values.contrat.dateDebutContrat).setLocale("fr-FR");
       const dateDebutFormation = DateTime.fromISO(values.formation.dateDebutFormation).setLocale("fr-FR");
 
@@ -44,7 +44,7 @@ export const ContratDatesControl = [
   {
     deps: ["contrat.dateDebutContrat", "formation.dateDebutFormation"],
     process: ({ values }) => {
-      if (!values.contrat.dateDebutContrat || !values.formation.dateDebutFormation) return;
+      if (!(values.contrat.dateDebutContrat && values.formation.dateDebutFormation)) return;
       const dateDebutContrat = DateTime.fromISO(values.contrat.dateDebutContrat).setLocale("fr-FR");
       const dateDebutFormation = DateTime.fromISO(values.formation.dateDebutFormation).setLocale("fr-FR");
 
@@ -58,7 +58,7 @@ export const ContratDatesControl = [
   {
     deps: ["contrat.dateFinContrat", "formation.dateFinFormation"],
     process: ({ values }) => {
-      if (!values.contrat.dateFinContrat || !values.formation.dateFinFormation) return;
+      if (!(values.contrat.dateFinContrat && values.formation.dateFinFormation)) return;
       const dateFinContrat = DateTime.fromISO(values.contrat.dateFinContrat).setLocale("fr-FR");
       const dateFinFormation = DateTime.fromISO(values.formation.dateFinFormation).setLocale("fr-FR");
 
@@ -72,7 +72,7 @@ export const ContratDatesControl = [
   {
     deps: ["contrat.dateDebutContrat", "contrat.dateFinContrat"],
     process: ({ values }) => {
-      if (!values.contrat.dateDebutContrat || !values.contrat.dateFinContrat) return;
+      if (!(values.contrat.dateDebutContrat && values.contrat.dateFinContrat)) return;
       const dateDebutContrat = DateTime.fromISO(values.contrat.dateDebutContrat).setLocale("fr-FR");
       const dateFinContrat = DateTime.fromISO(values.contrat.dateFinContrat).setLocale("fr-FR");
       const dureeContrat = dateFinContrat.diff(dateDebutContrat, "months").months;
@@ -86,7 +86,7 @@ export const ContratDatesControl = [
   {
     deps: ["contrat.dateDebutContrat", "contrat.dateFinContrat"],
     process: ({ values }) => {
-      if (!values.contrat.dateDebutContrat || !values.contrat.dateFinContrat) return;
+      if (!(values.contrat.dateDebutContrat && values.contrat.dateFinContrat)) return;
       const dateDebutContrat = DateTime.fromISO(values.contrat.dateDebutContrat).setLocale("fr-FR");
       const dateFinContrat = DateTime.fromISO(values.contrat.dateFinContrat).setLocale("fr-FR");
       const dureeContrat = dateFinContrat.diff(dateDebutContrat, "months").months;
@@ -110,7 +110,7 @@ export const ContratDatesControl = [
   {
     deps: ["contrat.dateDebutContrat", "contrat.dateFinContrat"],
     process: ({ values }) => {
-      if (!values.contrat.dateDebutContrat || !values.contrat.dateFinContrat) return;
+      if (!(values.contrat.dateDebutContrat && values.contrat.dateFinContrat)) return;
       const dateDebutContrat = DateTime.fromISO(values.contrat.dateDebutContrat).setLocale("fr-FR");
       const dateFinContrat = DateTime.fromISO(values.contrat.dateFinContrat).setLocale("fr-FR");
       const dureeContrat = dateFinContrat.diff(dateDebutContrat, "months").months;

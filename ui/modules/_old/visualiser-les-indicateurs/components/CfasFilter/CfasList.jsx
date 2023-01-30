@@ -21,8 +21,7 @@ const CfasList = ({ cfas, onCfaClick, selectedValue }) => {
           </Tr>
         </Thead>
         <Tbody>
-          {cfas &&
-            cfas.map((cfa, index) => {
+          {cfas?.map((cfa, index) => {
               const isRowSelected = selectedValue?.uai_etablissement === cfa.uai_etablissement;
               const departementFromData = data?.departements?.find((item) => item.code === cfa.departement);
               const departementFormatted = departementFromData

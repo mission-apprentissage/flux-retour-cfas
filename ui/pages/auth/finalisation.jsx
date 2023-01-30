@@ -138,7 +138,7 @@ const Finalize = () => {
           } else {
             console.error(e);
             setErrors({
-              type: `Une erreur technique est survenue.`,
+              type: "Une erreur technique est survenue.",
             });
           }
         }
@@ -250,7 +250,7 @@ const Finalize = () => {
                 </Heading>
                 <Input
                   {...{
-                    name: `reseau`,
+                    name: "reseau",
                     fieldType: "select",
                     placeholder: "Sélectionner votre réseau",
                     options: Object.values(RESEAUX_CFAS).map(({ nomReseau }) => ({

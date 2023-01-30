@@ -39,7 +39,7 @@ export const analyseFiabiliteDossierApprenantsRecus = async () => {
   await getDbCollection("dossiersApprenantsApiInputFiabilite").deleteMany();
 
   // build map of non unique apprenants to mark them as such in fiabilité analysis
-  logger.info(`Building Map of unique apprenants received in the last 24h`);
+  logger.info("Building Map of unique apprenants received in the last 24h");
   const nonUniqueApprenants = await buildMapOfNonUniqueApprenants(latestReceivedDossiersApprenantsCursor);
 
   // rewind cursor so we can use it again to iterate over dossier apprenants and analyze them
@@ -71,7 +71,7 @@ export const analyseFiabiliteDossierApprenantsRecus = async () => {
   };
 
   // iterate over data and create an entry for each dossier apprenant sent with fiabilité metadata
-  logger.info(`Iterating over all dossiers apprenants received in the last 24h to analyse their data`);
+  logger.info("Iterating over all dossiers apprenants received in the last 24h to analyse their data");
   while (await latestReceivedDossiersApprenantsCursor.hasNext()) {
     const { data, username, date } = await latestReceivedDossiersApprenantsCursor.next();
     latestReceivedDossiersApprenantsCount++;

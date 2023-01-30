@@ -50,8 +50,8 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     historique_statut = cerfa.apprenant.historique_statut.value;
     showAddStatut = false;
   } else {
-    fields[`apprenant.nouveau_statut`] = createField({
-      name: `apprenant.nouveau_statut`,
+    fields["apprenant.nouveau_statut"] = createField({
+      name: "apprenant.nouveau_statut",
       data: "",
     });
     historique_statut = [
@@ -97,8 +97,8 @@ export const initFields = ({ cerfa, schema, modeSifa, canEdit, organisme }) => {
     contrats = cerfa.apprenant.contrats.value;
     showAddContrat = false;
   } else {
-    fields[`apprenant.nouveau_contrat`] = createField({
-      name: `apprenant.nouveau_contrat`,
+    fields["apprenant.nouveau_contrat"] = createField({
+      name: "apprenant.nouveau_contrat",
       data: "",
     });
     contrats = [
@@ -295,7 +295,7 @@ const createFieldFactory =
     if (type === "date") {
       value = value ? DateTime.fromISO(data.value).setLocale("fr-FR").toFormat("yyyy-MM-dd") : "";
     } else if (type === "number") {
-      value = value ? value + "" : "";
+      value = value ? `${value}` : "";
     }
 
     if (modeSifa && requiredFieldsSifa.includes(name)) {

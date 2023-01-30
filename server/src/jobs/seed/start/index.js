@@ -36,7 +36,7 @@ export const seedAdmin = async ({ adminEmail }) => {
   await userAfterCreate({ user: userAdmin, pending: false, notify: false });
   logger.info(`User ${aEmail} with password 'Secret!Password1' and admin is successfully created `);
 
-  logger.info(`Seed admin created`);
+  logger.info("Seed admin created");
 };
 
 export const seedSample = async () => {
@@ -69,7 +69,7 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "ADEN Formations (Caen)",
     });
-    logger.info(`organisme A created`);
+    logger.info("organisme A created");
   }
 
   const organismeB = await findOrganismeByUai("0611309S");
@@ -83,7 +83,7 @@ export const seedSampleOrganismes = async () => {
       nature: "inconnue",
       nom: "ADEN Formations (Damigny)",
     });
-    logger.info(`organisme B created`);
+    logger.info("organisme B created");
   }
 
   const organismeC = await findOrganismeByUai("0010856A");
@@ -97,7 +97,7 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "AFPMA APPRENTISSAGE - Site de Peronnas",
     });
-    logger.info(`organisme C created`);
+    logger.info("organisme C created");
   }
   const organismeZ = await findOrganismeByUai("0261098C");
   if (!organismeZ) {
@@ -110,7 +110,7 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "MAISON FAMILIALE RURALE CFA - 26300 CHATEAUNEUF SUR ISERE",
     });
-    logger.info(`organisme Z created`);
+    logger.info("organisme Z created");
   }
 
   const organismeD = await findOrganismeByUai("0780762E");
@@ -125,7 +125,7 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "AFTRAL CFA TL LE TREMBLAY EPT",
     });
-    logger.info(`organisme D created`);
+    logger.info("organisme D created");
   }
 
   const organismeE = await findOrganismeByUai("0312755B");
@@ -137,7 +137,7 @@ export const seedSampleOrganismes = async () => {
       nature: "responsable_formateur",
       nom: "MIDISUP",
     });
-    logger.info(`organisme E created`);
+    logger.info("organisme E created");
   }
 };
 
@@ -162,7 +162,7 @@ export const seedSampleUsers = async () => {
       }
     );
     await userAfterCreate({ user: userPilot, pending: false, notify: false });
-    logger.info(`User pilot created`);
+    logger.info("User pilot created");
   }
 
   // Create user OF
@@ -181,7 +181,7 @@ export const seedSampleUsers = async () => {
       }
     );
     await userAfterCreate({ user: userOf, pending: false, notify: false, asRole: "organisme.admin" });
-    logger.info(`User off created`);
+    logger.info("User off created");
   }
 
   // Create user OFR
@@ -203,7 +203,7 @@ export const seedSampleUsers = async () => {
     // Get organisme id for user
     const organismeOff = await findOrganismeByUai("0142321X");
     await addContributeurOrganisme(organismeOff._id, userOfR.email, "organisme.statsonly", false);
-    logger.info(`User ofr created`);
+    logger.info("User ofr created");
   }
 
   // Create user Reseau
@@ -222,7 +222,7 @@ export const seedSampleUsers = async () => {
       }
     );
     await userAfterCreate({ user: userReseau, pending: false, notify: false });
-    logger.info(`User reseau created`);
+    logger.info("User reseau created");
   }
 
   // Create user ERP
@@ -241,6 +241,6 @@ export const seedSampleUsers = async () => {
       }
     );
     await userAfterCreate({ user: userErp, pending: false, notify: false });
-    logger.info(`User erp created`);
+    logger.info("User erp created");
   }
 };

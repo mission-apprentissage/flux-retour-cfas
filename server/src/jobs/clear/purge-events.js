@@ -20,7 +20,7 @@ export const purgeEvents = async (NB_DAYS_TO_KEEP = 15) => {
  * @param {*} lastDateToKeep
  */
 const purgeJobEvents = async (lastDateToKeep) => {
-  logger.info(`... Purging JobEvent data ...`);
+  logger.info("... Purging JobEvent data ...");
   await jobEventsDb().deleteMany({ date: { $lte: lastDateToKeep } });
   logger.info("... Purged JobEvent done !");
 };
@@ -30,7 +30,7 @@ const purgeJobEvents = async (lastDateToKeep) => {
  * @param {*} lastDateToKeep
  */
 const purgeDossiersImportsUserEvents = async (lastDateToKeep) => {
-  logger.info(`... Purging dossiersApprenants Imports UserEvents ...`);
+  logger.info("... Purging dossiersApprenants Imports UserEvents ...");
   await userEventsDb().deleteMany({
     date: { $lte: lastDateToKeep },
     type: USER_EVENTS_TYPES.POST,

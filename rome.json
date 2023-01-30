@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/rome/configuration_schema.json",
+  "files": {
+    "ignore": [
+      "ui/.next"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "performance": {
+        "noDelete": "off"
+      },
+      "complexity": {
+        "useSimplifiedLogicExpression": "off"
+      }
+    }
+  }
+}

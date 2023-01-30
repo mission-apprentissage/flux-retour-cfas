@@ -57,7 +57,7 @@ const Televersements = () => {
     async (type_document) => {
       if (type_document.length >= 4) {
         const { nom_fichier, taille_fichier } = documents.unconfirmed[0];
-        const response = await _post(`/api/v1/upload/setDocumentType`, {
+        const response = await _post("/api/v1/upload/setDocumentType", {
           organisme_id: organisme._id,
           type_document,
           nom_fichier,
@@ -141,7 +141,7 @@ const Televersements = () => {
 
     let initLines = [];
     // TODO REFACTOR THIS BELOW :vomit:
-    if (mappingForThisType && mappingForThisType.mapping_column) {
+    if (mappingForThisType?.mapping_column) {
       let { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
       userMapping[""] = typeCodeDiplome === "CFD" ? "RNCP" : "CFD";
       let remap = Object.entries(userMapping).reduce(
@@ -200,7 +200,7 @@ const Televersements = () => {
       if (error) {
         // Model does not match mapping on required field so gracefully reset
         toast({
-          title: `Le modèle que vous avez choisi ne correspond pas à ce fichier. Veuillez choisir un autre modèle ou en créer un nouveau`,
+          title: "Le modèle que vous avez choisi ne correspond pas à ce fichier. Veuillez choisir un autre modèle ou en créer un nouveau",
           status: "error",
           duration: 10000,
           isClosable: true,
@@ -224,7 +224,7 @@ const Televersements = () => {
       if (line.out.value === "annee_scolaire") return { ...acc, annee_scolaire: line.in.value };
       return { ...acc, [line.in.value]: line.out.value };
     }, {});
-    await _post(`/api/v1/upload/setModel`, {
+    await _post("/api/v1/upload/setModel", {
       organisme_id: organisme._id,
       type_document: typeDocument,
       mapping: keyToKeyMapping,
@@ -243,7 +243,7 @@ const Televersements = () => {
       },
       { typeCodeDiplome }
     );
-    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post(`/api/v1/upload/pre-import`, {
+    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post("/api/v1/upload/pre-import", {
       organisme_id: organisme._id,
       mapping: keyToKeyMapping,
     });
@@ -263,7 +263,7 @@ const Televersements = () => {
 
   const onGoToImportStep = useCallback(async () => {
     setStep("import");
-    await _post(`/api/v1/upload/import`, {
+    await _post("/api/v1/upload/import", {
       organisme_id: organisme._id,
     });
     window.location.href = `${router.asPath.replace("/televersement", "")}`;
@@ -276,7 +276,7 @@ const Televersements = () => {
       {step === "landing" && (
         <Flex alignItems="flex-start" mt={8} flexDirection="column">
           <Text>Vous n&rsquo;avez pas de fichier ? Utilisez notre fichier modèle.</Text>
-          <Link href={`/modele_tableau_de_bord.csv`} textDecoration={"underline"} isExternal>
+          <Link href={"/modele_tableau_de_bord.csv"} textDecoration={"underline"} isExternal>
             <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
           </Link>
           <Box mt={10}>
@@ -290,7 +290,7 @@ const Televersements = () => {
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         {step === "upload" && (
           <>
-            <UploadFiles title={`1. Importer votre fichier`} />
+            <UploadFiles title={"1. Importer votre fichier"} />
 
             <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
               2. Quel est le modèle de correspondance de ce fichier ?
@@ -302,10 +302,10 @@ const Televersements = () => {
                 </Heading>
                 <Input
                   {...{
-                    name: `type_document`,
+                    name: "type_document",
                     fieldType: "select",
                     placeholder: "Sélectionner un modèle de fichier",
-                    locked: !documents?.unconfirmed?.length || !uploads?.models?.length,
+                    locked: !(documents?.unconfirmed?.length && uploads?.models?.length),
 
                     options: uploads?.models?.length
                       ? uploads?.models?.map(({ type_document }) => ({
@@ -326,7 +326,7 @@ const Televersements = () => {
                 </Heading>
                 <Input
                   {...{
-                    name: `type_document`,
+                    name: "type_document",
                     fieldType: "text",
                     minLength: 4,
                     mask: "C",
@@ -370,7 +370,7 @@ const Televersements = () => {
                   <HStack justifyContent="center" spacing="4w">
                     <Input
                       {...{
-                        name: `line0_in`,
+                        name: "line0_in",
                         fieldType: "select",
                         placeholder: "Sélectionner l'année scolaire",
                         options: [
@@ -405,7 +405,7 @@ const Televersements = () => {
                     <ArrowRightLong boxSize={10} color="bluefrance" />
                     <Input
                       {...{
-                        name: `line0_out`,
+                        name: "line0_out",
                         fieldType: "text",
                         locked: true,
                       }}

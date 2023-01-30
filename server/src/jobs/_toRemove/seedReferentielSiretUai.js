@@ -31,7 +31,7 @@ runScript(async ({ cfas }) => {
     const reseaux = new Set();
 
     const organismesTdb = await cfas.getFromSiret(organismeReferentiel.siret);
-    const reseauxFromTdb = organismesTdb.map((organisme) => organisme.reseaux).flat();
+    const reseauxFromTdb = organismesTdb.flatMap((organisme) => organisme.reseaux);
     reseauxFromTdb.forEach((reseau) => {
       reseaux.add(reseau);
     });

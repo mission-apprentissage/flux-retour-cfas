@@ -5,7 +5,7 @@ export const maitresControl = [
   {
     deps: ["maitre1.dateNaissance"],
     process: ({ values }) => {
-      if (!values.maitre1.dateNaissance || !values.contrat.dateDebutContrat) {
+      if (!(values.maitre1.dateNaissance && values.contrat.dateDebutContrat)) {
         return;
       }
       const maitreDateNaissance = DateTime.fromISO(values.maitre1.dateNaissance).setLocale("fr-FR");
@@ -18,7 +18,7 @@ export const maitresControl = [
   {
     deps: ["maitre1.dateNaissance", "contrat.dateDebutContrat"],
     process: ({ values }) => {
-      if (!values.maitre1.dateNaissance || !values.contrat.dateDebutContrat) {
+      if (!(values.maitre1.dateNaissance && values.contrat.dateDebutContrat)) {
         return;
       }
       const { age: ageDebutContrat } = caclAgeAtDate(values.maitre1.dateNaissance, values.contrat.dateDebutContrat);
@@ -33,7 +33,7 @@ export const maitresControl = [
   {
     deps: ["maitre2.dateNaissance"],
     process: ({ values }) => {
-      if (!values.maitre2.dateNaissance || !values.contrat.dateDebutContrat) {
+      if (!(values.maitre2.dateNaissance && values.contrat.dateDebutContrat)) {
         return;
       }
       const maitreDateNaissance = DateTime.fromISO(values.maitre2.dateNaissance).setLocale("fr-FR");
@@ -46,7 +46,7 @@ export const maitresControl = [
   {
     deps: ["maitre2.dateNaissance", "contrat.dateDebutContrat"],
     process: ({ values }) => {
-      if (!values.maitre2.dateNaissance || !values.contrat.dateDebutContrat) {
+      if (!(values.maitre2.dateNaissance && values.contrat.dateDebutContrat)) {
         return;
       }
       const { age: ageDebutContrat } = caclAgeAtDate(values.maitre2.dateNaissance, values.contrat.dateDebutContrat);

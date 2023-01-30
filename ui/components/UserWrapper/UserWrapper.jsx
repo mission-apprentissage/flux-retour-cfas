@@ -20,7 +20,7 @@ const AccountWrapper = ({ children }) => {
       if (auth.sub !== "anonymous") {
         if (auth.account_status === "NOT_CONFIRMED") {
           if (router.pathname !== "/auth/en-attente-confirmation" && router.pathname !== "/auth/confirmation") {
-            router.push(`/auth/en-attente-confirmation`);
+            router.push("/auth/en-attente-confirmation");
           }
         } else {
           if (
@@ -31,7 +31,7 @@ const AccountWrapper = ({ children }) => {
             let { token } = await _post("/api/v1/password/forgotten-password", { username: auth.email, noEmail: true });
             router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
           } else if (auth.account_status.includes("FORCE_COMPLETE_PROFILE") && router.asPath !== "/auth/finalisation") {
-            router.push(`/auth/finalisation`);
+            router.push("/auth/finalisation");
           }
         }
       }
@@ -47,7 +47,7 @@ const ForceAcceptCGU = ({ children }) => {
 
   const onAcceptCguClicked = async () => {
     try {
-      let user = await _put(`/api/v1/profile/acceptCgu`, {
+      let user = await _put("/api/v1/profile/acceptCgu", {
         has_accept_cgu_version: cguVersion(),
       });
       setAuth(user);
@@ -117,7 +117,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
         router.asPath !== "/auth/connexion" &&
         !isUserAdmin(auth)
       ) {
-        router.push(`/en-maintenance`);
+        router.push("/en-maintenance");
       }
     })();
   }, [auth, messageMaintenance?.enabled, router]);
@@ -126,7 +126,7 @@ const UserWrapper = ({ children, ssrAuth }) => {
     async function getUser() {
       try {
         let user = ssrAuth ?? (await _get("/api/v1/session/current"));
-        if (user && user.loggedIn) {
+        if (user?.loggedIn) {
           setAuth(user);
         }
       } catch (error) {

@@ -3,9 +3,9 @@ export const Maitre2Control = {
   target: "dd",
   blocCompletion: "maitre",
   process: ({ values }) => {
-    if (!values.maitre2.prenom && !values.maitre2.nom && !values.maitre2.dateNaissance) return;
+    if (!((values.maitre2.prenom || values.maitre2.nom ) || values.maitre2.dateNaissance)) return;
 
-    if (!values.maitre2.prenom || !values.maitre2.nom || !values.maitre2.dateNaissance) {
+    if (!((values.maitre2.prenom && values.maitre2.nom ) && values.maitre2.dateNaissance)) {
       return { error: "Le maitre est incomplet" };
     }
   },

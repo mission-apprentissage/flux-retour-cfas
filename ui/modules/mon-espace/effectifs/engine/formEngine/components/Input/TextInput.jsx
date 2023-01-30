@@ -23,7 +23,7 @@ export const TextInput = (props) => {
     precision,
     placeholder,
   } = props;
-  const value = props.value + "";
+  const value = `${props.value}`;
 
   const handleChange = (e) => {
     const val = e.target.value;
@@ -162,7 +162,7 @@ const MaskedInput = (props) => {
       onAccept={(currentValue) => (valueRef.current = currentValue)}
       onComplete={(va) => handle(va)}
       ref={inputRef}
-      value={value + ""}
+      value={`${value}`}
       onBlur={() => {
         handle(valueRef.current);
         focusRef.current = false;

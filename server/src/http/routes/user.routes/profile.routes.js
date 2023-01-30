@@ -34,7 +34,7 @@ export default () => {
         telephone: telephone ?? user.telephone,
       });
 
-      res.json({ message: `Profile updated` });
+      res.json({ message: "Profile updated" });
     })
   );
 

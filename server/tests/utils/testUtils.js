@@ -29,7 +29,7 @@ export const startServer = async () => {
       });
 
       return {
-        Authorization: "Bearer " + response.data.access_token,
+        Authorization: `Bearer ${response.data.access_token}`,
       };
     },
     // New auth cookie log user method

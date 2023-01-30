@@ -12,7 +12,7 @@ export const InscriptionPilot = ({ onEndOfSpecific }) => {
       <Box mt="2w">
         <Input
           {...{
-            name: `typePilot`,
+            name: "typePilot",
             fieldType: "select",
             placeholder: "Sélectionner un opérateur public",
             options: [

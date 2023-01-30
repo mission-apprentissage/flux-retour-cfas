@@ -78,13 +78,13 @@ const EffectifsPage = () => {
 
   return (
     <>
-      {!canEdit && !auth.hasAtLeastOneUserToValidate && (
+      {!(canEdit || auth.hasAtLeastOneUserToValidate ) && (
         <Box mt={12}>
           <Ribbons variant="warning" mt="0.5rem">
             <Box ml={3}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                {isMonOrganismePages && `Vous ne nous transmettez pas encore vos effectifs.`}
-                {isOrganismePages && ` Cet organisme ne nous transmet pas encore ses effectifs.`}
+                {isMonOrganismePages && "Vous ne nous transmettez pas encore vos effectifs."}
+                {isOrganismePages && " Cet organisme ne nous transmet pas encore ses effectifs."}
               </Text>
               <Text color="grey.800" fontSize="0.9rem">
                 Veuillez vous rapprocher d&rsquo;un collaborateur qui aurait des droits de gestion ou d&rsquo;écriture

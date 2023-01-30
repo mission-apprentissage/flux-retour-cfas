@@ -112,7 +112,7 @@ export const UaiBlock = ({ onUaiFetched }) => {
 
     setFieldValue("uai", uai);
     setIsFetching(true);
-    const results = await _post(`/api/v1/auth/uai-siret-adresse`, {
+    const results = await _post("/api/v1/auth/uai-siret-adresse", {
       uai,
       organismeFormation: true,
     });
@@ -152,7 +152,7 @@ export const UaiBlock = ({ onUaiFetched }) => {
           successed: true,
           data: formatedResults,
           multiple: true,
-          message: `Plusieurs Siret sont identifiés pour cette UAI. Choisissez votre établissement.`,
+          message: "Plusieurs Siret sont identifiés pour cette UAI. Choisissez votre établissement.",
         });
       } else {
         setEntrepriseData(formatedResults[0]);

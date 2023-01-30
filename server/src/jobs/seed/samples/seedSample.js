@@ -18,7 +18,7 @@ export const seedWithSample = async (randomMode = false, nbDossiers = 10) => {
   } else {
     logger.info("Seeding data with sample...");
     await seedSample();
-    logger.info(`Sample dossiersApprenants inserted !`);
+    logger.info("Sample dossiersApprenants inserted !");
   }
 };
 

@@ -10,7 +10,7 @@ import { COOKIE_NAME } from "../../common/constants/cookieName.js";
 const cookieExtractor = (req) => {
   let jwt = null;
 
-  if (req && req.cookies) {
+  if (req?.cookies) {
     jwt = req.cookies[COOKIE_NAME];
   }
 

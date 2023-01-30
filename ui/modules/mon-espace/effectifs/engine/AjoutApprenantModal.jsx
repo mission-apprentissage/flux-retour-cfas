@@ -9,7 +9,7 @@ const AjoutApprenantModal = (modal) => {
   const organisme = useRecoilValue(organismeAtom);
   let onCreateEffectifClicked = useCallback(async () => {
     try {
-      await _post(`/api/v1/effectif`, {
+      await _post("/api/v1/effectif", {
         organisme_id: organisme._id,
         annee_scolaire: "2020-2021",
         source: "TDB_MANUEL",

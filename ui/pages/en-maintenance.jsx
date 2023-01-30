@@ -34,7 +34,7 @@ const MaintenancePage = () => {
     if (isLoading || messageMaintenance?.enabled) {
       return;
     }
-    router.push(`/`);
+    router.push("/");
   }, [router, isLoading, messageMaintenance]);
 
   const title = "Site en cours de maintenance";

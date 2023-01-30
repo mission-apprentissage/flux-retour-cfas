@@ -18,7 +18,7 @@ export const migrateCfasToOrganismes = async () => {
   logger.info("Migration des cfas vers la collection organismes");
 
   // Clear des organismes existants
-  logger.info(`Suppression des organismes existants...`);
+  logger.info("Suppression des organismes existants...");
   await organismesDb().deleteMany();
 
   // Parse toute la collection cfas

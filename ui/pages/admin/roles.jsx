@@ -37,7 +37,7 @@ const RoleLine = ({ role }) => {
           if (role) {
             await _put(`/api/v1/admin/role/${role.name}`, res);
           } else {
-            await _post(`/api/v1/admin/role/`, res);
+            await _post("/api/v1/admin/role/", res);
           }
           document.location.reload(true);
         } catch (e) {
@@ -93,7 +93,7 @@ const Roles = () => {
   const [roles, setRoles] = useState([]);
   useEffect(() => {
     async function run() {
-      const rolesList = await _get(`/api/v1/admin/roles/`);
+      const rolesList = await _get("/api/v1/admin/roles/");
       setRoles(rolesList);
     }
     run();
