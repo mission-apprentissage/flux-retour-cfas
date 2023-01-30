@@ -202,6 +202,17 @@ export default function OrganismeInfo() {
           </Ribbons>
         )}
       </Box>
+      <Ribbons variant="info">
+        <Box ml={3}>
+          <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+            Service d’import de vos effectifs en version bêta.
+          </Text>
+          <Text color="grey.800" mt={4} textStyle="sm">
+            Nous listons actuellement toutes les informations qui peuvent empêcher l'import de fichier afin de permettre
+            par la suite une meilleure prise en charge de tout type de fichier.
+          </Text>
+        </Box>
+      </Ribbons>
       {organisme.first_transmission_date && (
         <SimpleFiltersProvider initialState={{ organismeId }}>
           <IndicateursInfo />
