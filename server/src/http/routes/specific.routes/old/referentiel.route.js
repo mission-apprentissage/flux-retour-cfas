@@ -3,7 +3,6 @@ import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
 import { REGIONS, DEPARTEMENTS } from "../../../../common/constants/territoiresConstants.js";
 import { ORGANISMES_APPARTENANCE } from "../../../../common/constants/usersConstants.js";
-import { referentielSiretUaiDb } from "../../../../common/model/collections.js";
 
 export default () => {
   const router = express.Router();
@@ -13,27 +12,6 @@ export default () => {
     tryCatch(async (req, res) => {
       const networks = Object.keys(RESEAUX_CFAS).map((id) => ({ id, nom: RESEAUX_CFAS[id].nomReseau }));
       return res.json(networks);
-    })
-  );
-
-  // consumed by Referentiel SIRET-UAI
-  router.get(
-    "/siret-uai-reseaux",
-    tryCatch(async (req, res) => {
-      const referentielSiretUaiCursor = referentielSiretUaiDb().find();
-
-      const mappingResult = [];
-
-      while (await referentielSiretUaiCursor.hasNext()) {
-        const organismeReferentiel = await referentielSiretUaiCursor.next();
-        mappingResult.push({
-          siret: organismeReferentiel.siret,
-          uai: organismeReferentiel.uai,
-          reseaux: organismeReferentiel.reseaux,
-        });
-      }
-
-      return res.json({ organismes: mappingResult });
     })
   );
 
