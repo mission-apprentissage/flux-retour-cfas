@@ -1,3 +1,10 @@
+# [3.7.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.4...v3.7.0-beta.5) (2023-01-30)
+
+
+### Features
+
+* ajout reseaux UIMM et Compagnons du devoir  ([#2473](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2473)) ([29c979a](https://github.com/mission-apprentissage/flux-retour-cfas/commit/29c979afdf887cc642211eb39cca3f6357b64e30))
+
 # [3.7.0-beta.4](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.3...v3.7.0-beta.4) (2023-01-26)
 
 
