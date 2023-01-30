@@ -37,8 +37,20 @@ export default function OrganismeInfo() {
     );
   }
 
-  const { _id: organismeId, uai, nature, natureValidityWarning, sirets, ferme, enseigne, raison_sociale } = organisme;
+  const {
+    _id: organismeId,
+    uai,
+    nature,
+    natureValidityWarning,
+    sirets,
+    ferme,
+    enseigne,
+    raison_sociale,
+    reseaux,
+  } = organisme;
   const siretToDisplay = formatSiretSplitted(sirets[0]);
+  // eslint-disable-next-line no-undef
+  const uniqReseaux = [...new Set(reseaux)];
 
   return (
     <>
@@ -56,6 +68,7 @@ export default function OrganismeInfo() {
           <Heading color="grey.800" fontSize="1.6rem" as="h3" mb={2}>
             {enseigne || raison_sociale}
           </Heading>
+
           <HStack fontSize="epsilon" textColor="grey.800" spacing="2w">
             <HStack>
               <Text>UAI :</Text>
@@ -86,6 +99,21 @@ export default function OrganismeInfo() {
               {natureValidityWarning && <NatureOrganismeDeFormationWarning />}
             </HStack>
           </HStack>
+
+          {uniqReseaux?.length > 0 && (
+            <HStack fontSize="epsilon" textColor="grey.800" mt={4} spacing="2w">
+              <HStack>
+                <Text>
+                  Cet organisme fait partie
+                  <>
+                    {uniqReseaux?.length == 1
+                      ? ` du réseau ${(<b>uniqReseaux[0]</b>)}`
+                      : ` des réseaux </b>${uniqReseaux.join(", ")}</b>`}
+                  </>
+                </Text>
+              </HStack>
+            </HStack>
+          )}
 
           {ferme && (
             <Ribbons variant="alert" mt={10}>
