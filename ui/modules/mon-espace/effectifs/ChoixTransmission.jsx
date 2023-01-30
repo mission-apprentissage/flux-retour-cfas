@@ -1,7 +1,9 @@
 import React from "react";
 import { Box, Button, Center, Flex, Heading, HStack, Text } from "@chakra-ui/react";
-import { ArrowDropRightLine } from "../../../theme/components/icons";
-import { useOrganisme } from "../../../hooks/useOrganisme";
+
+import { ArrowDropRightLine } from "@/theme/components/icons";
+import { useOrganisme } from "@/hooks/useOrganisme";
+import Ribbons from "@/components/Ribbons/Ribbons";
 
 const ChoixTransmission = () => {
   const { organisme, updateOrganisme } = useOrganisme();
@@ -9,7 +11,9 @@ const ChoixTransmission = () => {
   return (
     <>
       <Box my={9} color="bluesoft.500" fontWeight="700">
-        Vous n’avez pas encore transmis de données
+        <Ribbons variant="warning" mt={5}>
+          <Box pl={3}>Vous n’avez pas encore transmis de données</Box>
+        </Ribbons>
       </Box>
 
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">

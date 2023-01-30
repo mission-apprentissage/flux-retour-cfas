@@ -265,6 +265,9 @@ export default ({ mailer }) => {
       }
 
       if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP1") {
+        logger.error(
+          `User ${userDb.email} is not in the right status to ask for access (status : ${userDb.account_status})`
+        );
         throw Boom.badRequest("Something went wrong");
       }
 
@@ -281,6 +284,7 @@ export default ({ mailer }) => {
         let organisme = await findOrganismeByUai(userDb.uai);
         if (!organisme) {
           organisme = await findOrganismeBySiret(userDb.siret);
+          logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
           throw Boom.badRequest("No organisme found");
         }
       }

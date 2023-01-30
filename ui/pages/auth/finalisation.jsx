@@ -358,7 +358,7 @@ const Finalize = () => {
                   <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
                     Votre demande est en cours d&rsquo;étude par nos services.
                   </Text>
-                  <Text color="bleufrance" mt={4} fontSize="0.9rem">
+                  <Text color="bluefrance" mt={4} fontSize="0.9rem">
                     Vous serez notifié par courriel dès que votre demande aura été validée.
                   </Text>
                   <Text color="grey.800" mt={4} textStyle="sm">
@@ -375,7 +375,7 @@ const Finalize = () => {
                   <Text color="grey.800" fontSize="1.2rem" fontWeight="bold">
                     Votre demande d&rsquo;accès est en cours d&rsquo;étude par un gestionnaire de cet organisme.
                   </Text>
-                  <Text color="bleufrance" mt={4} fontSize="0.9rem">
+                  <Text color="bluefrance" mt={4} fontSize="0.9rem">
                     Vous serez notifié par courriel dès que votre demande aura été validée.
                   </Text>
                   <Text color="grey.800" mt={4}>
@@ -400,7 +400,7 @@ const Finalize = () => {
           {auth.isInPendingValidation && (
             <Flex flexGrow={1} alignItems="end" my={8}>
               <Text mt={8} fontSize="1rem">
-                Vous rencontrez des difficultés à passer cette étape ?{" "}
+                Votre réseau n’apparaît pas dans la liste ?{" "}
                 <Link href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" ml={3}>
                   Contacter l&apos;assistance
                 </Link>
