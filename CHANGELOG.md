@@ -1,3 +1,10 @@
+# [3.7.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.5...v3.7.0-beta.6) (2023-01-30)
+
+
+### Bug Fixes
+
+* **server:** hydrate new reseaux anomalie on update dossiers ([#2475](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2475)) ([580ef03](https://github.com/mission-apprentissage/flux-retour-cfas/commit/580ef03e34fd2b155aefb6926091093acd7b0bf3))
+
 # [3.7.0-beta.5](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.4...v3.7.0-beta.5) (2023-01-30)
 
 
