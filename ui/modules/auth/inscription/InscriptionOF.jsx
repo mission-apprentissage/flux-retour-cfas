@@ -48,7 +48,7 @@ export const InscriptionOF = ({ onEndOfSpecific, typeOfSearch, setTypeOfSearch }
           <Text>
             Vous pouvez le retrouver facilement en consultant le{" "}
             <Link
-              href={`https://referentiel.apprentissage.onisep.fr/`}
+              href={"https://referentiel.apprentissage.onisep.fr/"}
               fontWeight={700}
               color="bluefrance"
               whiteSpace="nowrap"
@@ -57,7 +57,7 @@ export const InscriptionOF = ({ onEndOfSpecific, typeOfSearch, setTypeOfSearch }
             </Link>
             de l’apprentissage ou{" "}
             <Link
-              href={`https://annuaire-entreprises.data.gouv.fr/`}
+              href={"https://annuaire-entreprises.data.gouv.fr/"}
               fontWeight={700}
               color="bluefrance"
               whiteSpace="nowrap"
@@ -66,7 +66,7 @@ export const InscriptionOF = ({ onEndOfSpecific, typeOfSearch, setTypeOfSearch }
             </Link>
             des entreprises. Vous pouvez aussi consulter la{" "}
             <Link
-              href={`https://www.notion.so/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0`}
+              href={"https://www.notion.so/Documentation-dbb1eddc954441eaa0ba7f5c6404bdc0"}
               fontWeight={700}
               color="bluefrance"
               whiteSpace="nowrap"

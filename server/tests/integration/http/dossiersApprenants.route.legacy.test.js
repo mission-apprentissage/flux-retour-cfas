@@ -147,7 +147,7 @@ describe("Dossiers Apprenants Route", () => {
         // check response
         assert.equal(response.status, 200);
         assert.equal(response.data.status, "WARNING");
-        assert.equal(response.data.message.includes(`Warning : 1 items not valid`), true);
+        assert.equal(response.data.message.includes("Warning : 1 items not valid"), true);
         assert.equal(response.data.ok, 0);
         assert.equal(response.data.ko, 1);
         assert.equal(response.data.validationErrors.length, 1);
@@ -402,7 +402,7 @@ describe("Dossiers Apprenants Route", () => {
       // Check Api Route data
       assert.deepEqual(response.status, 200);
       assert.equal(response.data.status, "WARNING");
-      assert.equal(response.data.message.includes(`Warning : 3 items not valid`), true);
+      assert.equal(response.data.message.includes("Warning : 3 items not valid"), true);
       assert.deepEqual(response.data.ok, 10);
       assert.deepEqual(response.data.ko, 3);
       assert.equal(response.data.validationErrors.length, 3);

@@ -97,7 +97,7 @@ export const Cgu = ({ onLoad = () => {}, isWrapped }) => {
             Les termes ci-dessous définis ont entre les parties la signification suivante :
             <br />
             <br />
-            <strong>« Utilisateur »</strong> : toute personne ayant accès à aux services du Tableau de bord
+            <strong>« Utilisateur »</strong> : toute personne ayant accès aux services du Tableau de bord
             <br />
             <br />
             <strong>« Authentification » </strong> : fonctionnalité qui permet aux utilisateurs titulaires d&apos;un

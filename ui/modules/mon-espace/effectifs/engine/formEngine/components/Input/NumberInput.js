@@ -28,7 +28,7 @@ export const NumberInput = (props) => {
   const [localValue, setLocalValue] = useState(props.value);
 
   useEffect(() => {
-    if (localValue && parseFloat(props.value) === parseFloat(localValue + "")) return;
+    if (localValue && parseFloat(props.value) === parseFloat(`${localValue}`)) return;
     setLocalValue(props.value);
     // eslint-disable-next-line
   }, [setLocalValue, props.value]);

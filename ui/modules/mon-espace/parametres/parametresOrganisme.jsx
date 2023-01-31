@@ -9,8 +9,8 @@ const ParametresOrganisme = ({ organisme }) => {
   return (
     <>
       <Heading textStyle="h2" color="grey.800" mt={5}>
-        {isMonOrganismePages && `Paramètres de mon organisme`}
-        {isOrganismePages && `Paramètres de son organisme`}
+        {isMonOrganismePages && "Paramètres de mon organisme"}
+        {isOrganismePages && "Paramètres de son organisme"}
       </Heading>
       <Box mt={9}>
         {hasContextAccessTo(organisme, "organisme/page_parametres/gestion_acces") && (

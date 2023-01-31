@@ -12,12 +12,6 @@ import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const RegisterPage = () => {
-  const styleProps = {
-    flexBasis: "50%",
-    p: 12,
-    justifyContent: "center",
-  };
-
   const [succeeded, setSucceeded] = useState(false);
   const title = "Créer un compte";
   return (
@@ -26,21 +20,8 @@ const RegisterPage = () => {
         <title>Inscription</title>
       </Head>
       <Breadcrumb pages={[{ title: "Accueil", to: "/" }, { title }]} />
-      <Flex w="100%" mt={8} minH="40vh">
-        {!succeeded && (
-          <Inscription
-            {...styleProps}
-            flexDirection="column"
-            border="1px solid"
-            h="100%"
-            flexGrow={1}
-            borderColor="openbluefrance"
-            onSucceeded={() => {
-              setSucceeded(true);
-            }}
-          />
-        )}
-        {succeeded && (
+      <Flex w="100%" mt={8} minH="40vh" direction={{ base: "column", md: "row" }}>
+        {succeeded ? (
           <Center w="full" flexDirection="column" border="1px solid" borderColor="openbluefrance" p={12}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/advancedOutline.svg" alt="felicitation" />
@@ -53,8 +34,21 @@ const RegisterPage = () => {
               (n&apos;oubliez pas de vérifier vos indésirables).
             </Text>
           </Center>
+        ) : (
+          <>
+            <Inscription
+              flexDirection="column"
+              border="1px solid"
+              h="100%"
+              flexGrow={1}
+              borderColor="openbluefrance"
+              onSucceeded={() => {
+                setSucceeded(true);
+              }}
+            />
+            <InformationBlock w={{ base: "100%", md: "50%" }} />
+          </>
         )}
-        {!succeeded && <InformationBlock w="50%" p={10} />}
       </Flex>
     </Page>
   );

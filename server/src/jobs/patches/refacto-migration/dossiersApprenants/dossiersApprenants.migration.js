@@ -42,7 +42,7 @@ export const migrateDossiersApprenantsToDossiersApprenantsMigration = async (
 ) => {
   // Clear des dossiersMigration et effectifs existants
   if (force) {
-    logger.info(`Suppression des dossiersApprenantsMigration et effectifs existants...`);
+    logger.info("Suppression des dossiersApprenantsMigration et effectifs existants...");
     await dossiersApprenantsMigrationDb().deleteMany();
     await effectifsDb().deleteMany();
   }

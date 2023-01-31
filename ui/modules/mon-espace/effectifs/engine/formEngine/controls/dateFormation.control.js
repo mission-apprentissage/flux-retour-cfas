@@ -4,7 +4,7 @@ export const dateFormationControl = [
   {
     deps: ["formation.dateDebutFormation", "formation.dateFinFormation"],
     process: ({ values }) => {
-      if (!values.formation.dateDebutFormation || !values.formation.dateFinFormation) return;
+      if (!(values.formation.dateDebutFormation && values.formation.dateFinFormation)) return;
       const dateDebutFormation = DateTime.fromISO(values.formation.dateDebutContrat).setLocale("fr-FR");
       const dateFinFormation = DateTime.fromISO(values.formation.dateDebutContrat).setLocale("fr-FR");
 

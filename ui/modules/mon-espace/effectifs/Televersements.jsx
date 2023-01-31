@@ -57,7 +57,7 @@ const Televersements = () => {
     async (type_document) => {
       if (type_document.length >= 4) {
         const { nom_fichier, taille_fichier } = documents.unconfirmed[0];
-        const response = await _post(`/api/v1/upload/setDocumentType`, {
+        const response = await _post("/api/v1/upload/setDocumentType", {
           organisme_id: organisme._id,
           type_document,
           nom_fichier,
@@ -141,7 +141,7 @@ const Televersements = () => {
 
     let initLines = [];
     // TODO REFACTOR THIS BELOW :vomit:
-    if (mappingForThisType && mappingForThisType.mapping_column) {
+    if (mappingForThisType?.mapping_column) {
       let { typeCodeDiplome, ...userMapping } = mappingForThisType.mapping_column;
       userMapping[""] = typeCodeDiplome === "CFD" ? "RNCP" : "CFD";
       let remap = Object.entries(userMapping).reduce(
@@ -200,7 +200,8 @@ const Televersements = () => {
       if (error) {
         // Model does not match mapping on required field so gracefully reset
         toast({
-          title: `Le modèle que vous avez choisi ne correspond pas à ce fichier. Veuillez choisir un autre modèle ou en créer un nouveau`,
+          title:
+            "Le modèle que vous avez choisi ne correspond pas à ce fichier. Veuillez choisir un autre modèle ou en créer un nouveau",
           status: "error",
           duration: 10000,
           isClosable: true,
@@ -224,7 +225,7 @@ const Televersements = () => {
       if (line.out.value === "annee_scolaire") return { ...acc, annee_scolaire: line.in.value };
       return { ...acc, [line.in.value]: line.out.value };
     }, {});
-    await _post(`/api/v1/upload/setModel`, {
+    await _post("/api/v1/upload/setModel", {
       organisme_id: organisme._id,
       type_document: typeDocument,
       mapping: keyToKeyMapping,
@@ -243,7 +244,7 @@ const Televersements = () => {
       },
       { typeCodeDiplome }
     );
-    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post(`/api/v1/upload/pre-import`, {
+    const { canBeImportEffectifs, canNotBeImportEffectifs } = await _post("/api/v1/upload/pre-import", {
       organisme_id: organisme._id,
       mapping: keyToKeyMapping,
     });
@@ -263,7 +264,7 @@ const Televersements = () => {
 
   const onGoToImportStep = useCallback(async () => {
     setStep("import");
-    await _post(`/api/v1/upload/import`, {
+    await _post("/api/v1/upload/import", {
       organisme_id: organisme._id,
     });
     window.location.href = `${router.asPath.replace("/televersement", "")}`;
@@ -276,7 +277,7 @@ const Televersements = () => {
       {step === "landing" && (
         <Flex alignItems="flex-start" mt={8} flexDirection="column">
           <Text>Vous n&rsquo;avez pas de fichier ? Utilisez notre fichier modèle.</Text>
-          <Link href={`/modele_tableau_de_bord.csv`} textDecoration={"underline"} isExternal>
+          <Link href={"/modele_tableau_de_bord.csv"} textDecoration={"underline"} isExternal>
             <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
           </Link>
           <Box mt={10}>
@@ -290,7 +291,7 @@ const Televersements = () => {
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         {step === "upload" && (
           <>
-            <UploadFiles title={`1. Importer votre fichier`} />
+            <UploadFiles title={"1. Importer votre fichier"} />
 
             <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
               2. Quel est le modèle de correspondance de ce fichier ?
@@ -302,10 +303,10 @@ const Televersements = () => {
                 </Heading>
                 <Input
                   {...{
-                    name: `type_document`,
+                    name: "type_document",
                     fieldType: "select",
                     placeholder: "Sélectionner un modèle de fichier",
-                    locked: !documents?.unconfirmed?.length || !uploads?.models?.length,
+                    locked: !(documents?.unconfirmed?.length && uploads?.models?.length),
 
                     options: uploads?.models?.length
                       ? uploads?.models?.map(({ type_document }) => ({
@@ -326,7 +327,7 @@ const Televersements = () => {
                 </Heading>
                 <Input
                   {...{
-                    name: `type_document`,
+                    name: "type_document",
                     fieldType: "text",
                     minLength: 4,
                     mask: "C",
@@ -367,35 +368,33 @@ const Televersements = () => {
                   <Heading as="h4" flexGrow="1" fontSize="1rem" mb={6}>
                     1. Préciser l&rsquo;année scolaire concernée par ce fichier
                   </Heading>
-                  <HStack justifyContent="center" spacing="4w">
+                  <HStack justifyContent="center" spacing="4w" alignItems="start">
                     <Input
-                      {...{
-                        name: `line0_in`,
-                        fieldType: "select",
-                        placeholder: "Sélectionner l'année scolaire",
-                        options: [
-                          {
-                            label: "2020-2021",
-                            value: "2020-2021",
-                          },
-                          {
-                            label: "2021-2022",
-                            value: "2021-2022",
-                          },
-                          {
-                            label: "2022-2023",
-                            value: "2022-2023",
-                          },
-                          {
-                            label: "2023-2024",
-                            value: "2023-2024",
-                          },
-                          {
-                            label: "2024-2025",
-                            value: "2024-2025",
-                          },
-                        ],
-                      }}
+                      name="line0_in"
+                      fieldType="select"
+                      placeholder="Sélectionner l'année scolaire"
+                      options={[
+                        {
+                          label: "2020-2021",
+                          value: "2020-2021",
+                        },
+                        {
+                          label: "2021-2022",
+                          value: "2021-2022",
+                        },
+                        {
+                          label: "2022-2023",
+                          value: "2022-2023",
+                        },
+                        {
+                          label: "2023-2024",
+                          value: "2023-2024",
+                        },
+                        {
+                          label: "2024-2025",
+                          value: "2024-2025",
+                        },
+                      ]}
                       value={lines[0].in.value}
                       onSubmit={(value) =>
                         onLineChange({ line: 0, part: "in" }, { value, hasError: false, required: true })
@@ -405,7 +404,7 @@ const Televersements = () => {
                     <ArrowRightLong boxSize={10} color="bluefrance" />
                     <Input
                       {...{
-                        name: `line0_out`,
+                        name: "line0_out",
                         fieldType: "text",
                         locked: true,
                       }}
@@ -438,7 +437,7 @@ const Televersements = () => {
                               Code RNCP de la formation (exemple: RNCP34793)
                             </Radio>
                           </Flex>
-                          <HStack justifyContent="center" spacing="4w" w="100%">
+                          <HStack justifyContent="center" spacing="4w" w="100%" alignItems="start">
                             <Input
                               {...{
                                 name: `line${2}_in`,
@@ -479,15 +478,13 @@ const Televersements = () => {
                             </Radio>
                           </Flex>
 
-                          <HStack justifyContent="center" spacing="4w" w="100%">
+                          <HStack justifyContent="center" spacing="4w" w="100%" alignItems="start">
                             <Input
-                              {...{
-                                name: `line${1}_in`,
-                                fieldType: "select",
-                                placeholder: "Sélectionner une de vos en-têtes",
-                                options: availableKeys.in,
-                                locked: typeCodeDiplome !== "CFD",
-                              }}
+                              name={`line${1}_in`}
+                              fieldType="select"
+                              placeholder="Sélectionner une de vos en-têtes"
+                              options={availableKeys.in}
+                              locked={typeCodeDiplome !== "CFD"}
                               value={lines[1].in.value}
                               onSubmit={(value) =>
                                 onLineChange({ line: 1, part: "in" }, { value, hasError: false, required: true })
@@ -496,11 +493,9 @@ const Televersements = () => {
                             />
                             <ArrowRightLong boxSize={10} color="bluefrance" />
                             <Input
-                              {...{
-                                name: `line${1}_out`,
-                                fieldType: "text",
-                                locked: true,
-                              }}
+                              name={`line${1}_out`}
+                              fieldType="text"
+                              locked
                               value="Code Formation Diplôme"
                               w="33%"
                             />
@@ -529,12 +524,10 @@ const Televersements = () => {
                       return (
                         <HStack justifyContent="center" spacing="4w" key={requireKey.value}>
                           <Input
-                            {...{
-                              name: `line${i}_in`,
-                              fieldType: "select",
-                              placeholder: "Sélectionner une de vos en-têtes",
-                              options: availableKeys.in,
-                            }}
+                            name={`line${i}_in`}
+                            fieldType="select"
+                            placeholder="Sélectionner une de vos en-têtes"
+                            options={availableKeys.in}
                             value={lines[i].in.value}
                             onSubmit={(value) =>
                               onLineChange({ line: i, part: "in" }, { value, hasError: false, required: true })
@@ -542,15 +535,7 @@ const Televersements = () => {
                             w="33%"
                           />
                           <ArrowRightLong boxSize={10} color="bluefrance" />
-                          <Input
-                            {...{
-                              name: `line${i}_out`,
-                              fieldType: "text",
-                              locked: true,
-                            }}
-                            value={requireKey.label}
-                            w="33%"
-                          />
+                          <Input name={`line${i}_out`} fieldType="text" locked value={requireKey.label} w="33%" />
                           <Box w="35px">&nbsp;</Box>
                         </HStack>
                       );
@@ -601,12 +586,10 @@ const Televersements = () => {
                             return (
                               <HStack justifyContent="center" spacing="4w" key={lineNum}>
                                 <Input
-                                  {...{
-                                    name: `line${lineNum}_in`,
-                                    fieldType: "select",
-                                    placeholder: "Sélectionner une de vos en-têtes",
-                                    options: availableKeys.in,
-                                  }}
+                                  name={`line${lineNum}_in`}
+                                  fieldType="select"
+                                  placeholder="Sélectionner une de vos en-têtes"
+                                  options={availableKeys.in}
                                   value={lines[lineNum].in.value}
                                   onSubmit={(value) =>
                                     onLineChange({ line: lineNum, part: "in" }, { value, hasError: false })
@@ -760,7 +743,7 @@ const Televersements = () => {
                       },
                       formationNotFound: {
                         label: "Formation non retrouvée",
-                        details: "Cette formation n'a pas été retrouvée dans les formations dispensée par l'organisme",
+                        details: "Cette formation n'a pas été retrouvée dans les formations dispensées par l'organisme",
                       },
                     };
 

@@ -155,7 +155,7 @@ export const getUserById = async (_id, projection = {}) => {
   const user = await usersMigrationDb().findOne({ _id }, { projection });
 
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   return user;
@@ -181,7 +181,7 @@ export const removeUser = async (_idStr) => {
   const user = await usersMigrationDb().findOne({ _id });
 
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   return await usersMigrationDb().deleteOne({ _id });
@@ -196,7 +196,7 @@ export const updateUser = async (_id, data) => {
   const user = await usersMigrationDb().findOne({ _id: ObjectId(_id) });
 
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   const updated = await usersMigrationDb().findOneAndUpdate(
@@ -222,7 +222,7 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
   const user = await usersMigrationDb().findOne({ email: userEmail });
 
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   const main_organisme_id = typeof id === "string" ? ObjectId(organisme_id) : organisme_id;
@@ -307,7 +307,7 @@ export const loggedInUser = async (email) => {
 export const activateUser = async (email) => {
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   const updated = await usersMigrationDb().findOneAndUpdate(
@@ -326,7 +326,7 @@ export const activateUser = async (email) => {
 export const userHasAskAccess = async (email, data) => {
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   const updated = await usersMigrationDb().findOneAndUpdate(
@@ -346,7 +346,7 @@ export const userHasAskAccess = async (email, data) => {
 export const finalizeUser = async (email, data) => {
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   const updated = await usersMigrationDb().findOneAndUpdate(
@@ -371,7 +371,7 @@ export const finalizeUser = async (email, data) => {
 export const changePassword = async (email, newPassword) => {
   const user = await usersMigrationDb().findOne({ email });
   if (!user) {
-    throw new Error(`Unable to find user`);
+    throw new Error("Unable to find user");
   }
 
   if (passwordSchema(user.is_admin).required().validate(newPassword).error) {

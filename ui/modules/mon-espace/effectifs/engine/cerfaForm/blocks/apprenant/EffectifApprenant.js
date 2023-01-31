@@ -12,7 +12,7 @@ export const EffectifApprenant = memo(() => {
   const values = useRecoilValue(valuesSelector);
   return (
     <Box>
-      <Flex borderWidth="1px" borderColor="bluefrance">
+      <Flex>
         <Box w="55%" flex="1">
           <InputController name="apprenant.ine" />
           <InputController name="apprenant.sexe" />

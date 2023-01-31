@@ -18,7 +18,7 @@ const Message = ({ iconClassName, title, message }) => {
         {message}
       </Text>
       <HStack marginTop="10w" spacing="1w">
-        <Box as="i" className="ri-arrow-left-line"></Box>
+        <Box as="i" className="ri-arrow-left-line" />
         <NavLink href="/">Retourner à la page d&apos;accueil</NavLink>
       </HStack>
     </>

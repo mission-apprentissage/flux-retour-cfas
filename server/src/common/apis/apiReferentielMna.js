@@ -32,7 +32,7 @@ export const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "
     return data;
   } catch (err) {
     const errorMessage = err.response?.data || err.code;
-    logger.error(`API REFERENTIEL fetchOrganismesContactsFromSirets something went wrong:`, errorMessage);
+    logger.error("API REFERENTIEL fetchOrganismesContactsFromSirets something went wrong:", errorMessage);
     return null;
   }
 };
@@ -44,7 +44,7 @@ export const fetchOrganismeWithSiret = async (siret) => {
     return data;
   } catch (err) {
     const errorMessage = err.response?.data || err.code;
-    logger.error(`API REFERENTIEL fetchOrganismeWithSiret something went wrong:`, errorMessage);
+    logger.error("API REFERENTIEL fetchOrganismeWithSiret something went wrong:", errorMessage);
     return null;
   }
 };
@@ -56,7 +56,7 @@ export const fetchOrganismesWithUai = async (uai) => {
     return data;
   } catch (err) {
     const errorMessage = err.response?.data || err.code;
-    logger.error(`API REFERENTIEL fetchOrganismesWithUai something went wrong:`, errorMessage);
+    logger.error("API REFERENTIEL fetchOrganismesWithUai something went wrong:", errorMessage);
     return null;
   }
 };

@@ -108,7 +108,7 @@ export default function OrganismeFormation() {
                 {ERPS.map(({ name, state }) => {
                   return (
                     <Fragment key={name}>
-                      {state != "coming" && (
+                      {state !== "coming" && (
                         <Box fontSize="epsilon" color="grey.800" alignItems="center">
                           <Checkbox color="#03053D" />
                           <Text marginLeft="1w" as="span">
@@ -136,7 +136,7 @@ export default function OrganismeFormation() {
                 {ERPS.map(({ name, state }) => {
                   return (
                     <Fragment key={name}>
-                      {state == "coming" && (
+                      {state === "coming" && (
                         <Box fontSize="epsilon" color="grey.800" alignItems="center" marginLeft="1v">
                           <Checkbox
                             color="white"

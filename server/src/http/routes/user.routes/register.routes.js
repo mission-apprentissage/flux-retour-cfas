@@ -85,7 +85,7 @@ export default ({ mailer }) => {
 
       const alreadyExists = await getUser(email.toLowerCase());
       if (alreadyExists) {
-        throw Boom.conflict(`email already in use`, { message: `email already in use` });
+        throw Boom.conflict("email already in use", { message: "email already in use" });
       }
 
       let uai = null;
@@ -261,10 +261,13 @@ export default ({ mailer }) => {
 
       const userDb = await getUser(user.email.toLowerCase());
       if (!userDb) {
-        throw Boom.conflict(`Unable to retrieve user`);
+        throw Boom.conflict("Unable to retrieve user");
       }
 
       if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP1") {
+        logger.error(
+          `User ${userDb.email} is not in the right status to ask for access (status : ${userDb.account_status})`
+        );
         throw Boom.badRequest("Something went wrong");
       }
 
@@ -281,7 +284,8 @@ export default ({ mailer }) => {
         let organisme = await findOrganismeByUai(userDb.uai);
         if (!organisme) {
           organisme = await findOrganismeBySiret(userDb.siret);
-          throw Boom.badRequest(`No organisme found`);
+          logger.error(`No organisme found for user ${userDb.email} with siret ${userDb.siret}`);
+          throw Boom.badRequest("No organisme found");
         }
       }
 
@@ -331,7 +335,7 @@ export default ({ mailer }) => {
 
       const userDb = await getUser(user.email.toLowerCase());
       if (!userDb) {
-        throw Boom.conflict(`Unable to retrieve user`);
+        throw Boom.conflict("Unable to retrieve user");
       }
 
       if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP2") {

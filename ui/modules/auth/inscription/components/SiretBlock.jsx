@@ -53,7 +53,7 @@ export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
 
     setFieldValue("siret", siret);
     setIsFetching(true);
-    const [response] = await _post(`/api/v1/auth/uai-siret-adresse`, {
+    const [response] = await _post("/api/v1/auth/uai-siret-adresse", {
       siret,
       organismeFormation,
     });

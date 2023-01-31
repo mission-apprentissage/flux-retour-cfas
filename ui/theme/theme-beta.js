@@ -1,10 +1,19 @@
 const rootFontSizePx = 16;
 
 const colors = {
-  bluefrance: "#000091",
+  // doc https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-identite-de-l-etat/couleurs-palette/
+  bluefrance: "#000091", // TODO replace by bluefrances.sun
+  bluefrances: {
+    main: "#000091",
+    113: "#000091",
+    sun: "#000091",
+    525: "#6A6AF4",
+    900: "#000091",
+    925: "#E3E3FD",
+  },
   white: "#ffffff",
   redmarianne: "#e1000f",
-  openbluefrance: "#E3E3FD",
+  openbluefrance: "#E3E3FD", // TODO replace by bluefrances.925
   bluefrance_light: "#5770BE",
   bluefrance_hover: "#1414B2",
   success: "#0d6635",

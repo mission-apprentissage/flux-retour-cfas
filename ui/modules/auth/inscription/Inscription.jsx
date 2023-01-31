@@ -74,34 +74,31 @@ const Inscription = ({ onSucceeded, ...props }) => {
       civility: Yup.string().required("Votre civilité est obligatoire"),
       prenom: Yup.string().required("Votre prénom est obligatoire"),
     }),
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       // eslint-disable-next-line no-undef, no-async-promise-executor
-      return new Promise(async (resolve) => {
-        try {
-          const newTmpPassword = generator.generate({
-            length: 12,
-            numbers: true,
-            lowercase: true,
-            uppercase: true,
-            strict: true,
-          });
-          const result = await _post("/api/v1/auth/register", { ...values, password: newTmpPassword });
-          if (result.succeeded) {
-            onSucceeded();
-          }
-        } catch (e) {
-          if (e.messages?.message === "email already in use") {
-            setErrors({ email: "Ce courriel est déjà utilisé." });
-          } else {
-            console.error(e);
-          }
+      try {
+        const newTmpPassword = generator.generate({
+          length: 12,
+          numbers: true,
+          lowercase: true,
+          uppercase: true,
+          strict: true,
+        });
+        const result = await _post("/api/v1/auth/register", { ...values, password: newTmpPassword });
+        if (result.succeeded) {
+          onSucceeded();
         }
-        resolve("onSubmitHandler publish complete");
-      });
+      } catch (e) {
+        if (e.messages?.message === "email already in use") {
+          setErrors({ email: "Ce courriel est déjà utilisé." });
+        } else {
+          console.error(e);
+        }
+      }
     },
   });
   return (
-    <Box {...props}>
+    <Box {...props} flexDirection="column" p={12}>
       <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
         Créer votre compte
       </Heading>
@@ -134,7 +131,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
           )}
           {values.type === "autre" && (
             <HStack ml="4w" mt="2w">
-              <Box p="2" h="7vh" borderLeft="4px solid #6A6AF4"></Box>
+              <Box p="2" h="7vh" borderLeft="4px solid bluefrances.525" />
               <Box>
                 <Text>Contacter l&apos;équipe :</Text>
                 <Link fontWeight={700} href={`mailto:${CONTACT_ADDRESS}`} color="bluefrance" whiteSpace="nowrap">
@@ -275,7 +272,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
                 variant="primary"
                 onClick={() => setStep(2)}
                 px={6}
-                isDisabled={!entrepriseData || !entrepriseData?.successed}
+                isDisabled={!(entrepriseData?.successed)}
               >
                 Suivant
               </Button>
@@ -287,7 +284,7 @@ const Inscription = ({ onSucceeded, ...props }) => {
                 variant="primary"
                 onClick={handleSubmit}
                 px={6}
-                isDisabled={!entrepriseData || !entrepriseData?.successed}
+                isDisabled={!(entrepriseData?.successed)}
               >
                 S&rsquo;inscrire
               </Button>

@@ -7,7 +7,8 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "global": "4.4.0"
+    "global": "4.4.0",
+    "rome": "^11.0.0"
   },
   "scripts": {
     "docker:start": "docker-compose up -d --build --force-recreate",
@@ -20,7 +21,8 @@
     "prettier:fix": "prettier --write ./ui ./server",
     "prettier:check": "prettier --check ./ui ./server",
     "npm:release": "semantic-release",
-    "npm:release:local": "CI=true LOCAL_RELEASE=true semantic-release"
+    "npm:release:local": "CI=true LOCAL_RELEASE=true semantic-release",
+    "postinstall": "husky install"
   },
   "devDependencies": {
     "@commitlint/cli": "16.2.4",
@@ -38,8 +40,8 @@
     "eslint-plugin-prettier": "4.0.0",
     "eslint-plugin-react": "7.27.1",
     "eslint-plugin-react-hooks": "4.3.0",
-    "husky": "8.0.1",
-    "lint-staged": "12.4.1",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.1.0",
     "prettier": "2.6.2",
     "semantic-release": "19.0.2",
     "semantic-release-slack-bot": "3.5.2",
@@ -50,22 +52,9 @@
     "bracketSpacing": true,
     "trailingComma": "es5"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "./scripts/preventSensibleFilesCommit.sh && lint-staged",
-      "commit-msg": "[[ -n $HUSKY_BYPASS ]] || commitlint --config ./config/commitlint.config.js -E HUSKY_GIT_PARAMS"
-    }
-  },
   "lint-staged": {
-    "./server/*.{js,jsx}": [
-      "eslint --cache --fix ./server/src ./server/tests"
-    ],
-    "./ui/*.{jsx}": [
-      "yarn --cwd ui lint"
-    ],
-    "*.{js,jsx}": [
-      "prettier --write ./ui ./server"
-    ],
-    "*.{md,json,html}": "prettier --write ./ui ./server"
+    "*.{js,jsx,ts,tsx}": [
+      "npx rome check"
+    ]
   }
 }

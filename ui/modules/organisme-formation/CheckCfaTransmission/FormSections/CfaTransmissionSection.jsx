@@ -24,7 +24,7 @@ const CfaTransmissionSection = ({ setOrganismeFound, setOrganismeNotFound }) => 
 
     const data = await queryClient.fetchQuery(QUERY_KEYS.SEARCH_CFAS, () => fetchSearchCfas({ searchTerm }));
 
-    if (data && data[0]) {
+    if (data?.[0]) {
       setOrganismeFound();
     } else {
       setOrganismeNotFound();

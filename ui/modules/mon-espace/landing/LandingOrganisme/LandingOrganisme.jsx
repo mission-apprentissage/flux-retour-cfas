@@ -9,8 +9,8 @@ const LandingOrganisme = () => {
   return (
     <Stack spacing="2w">
       <Heading textStyle="h2" color="grey.800">
-        {isMonOrganismePages && `Bienvenue sur votre tableau de bord`}
-        {isOrganismePages && `Bienvenue sur le tableau de bord de :`}
+        {isMonOrganismePages && "Bienvenue sur votre tableau de bord"}
+        {isOrganismePages && "Bienvenue sur le tableau de bord de :"}
       </Heading>
 
       <OrganismeInfo />

@@ -3,7 +3,7 @@ export const statutsSchema = {
     autosave: false,
   },
   "apprenant.historique_statut[].date_statut": {
-    label: "Date de changement de statut",
+    label: "Date de changement de statut :",
     fieldType: "date",
     locked: true,
   },
@@ -27,7 +27,7 @@ export const statutsSchema = {
     ],
   },
   "apprenant.historique_statut[].date_reception": {
-    label: "Date de reception du statut",
+    label: "Date de réception du statut :",
     fieldType: "date",
     locked: true,
   },

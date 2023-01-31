@@ -2,6 +2,8 @@ import express from "express";
 import passport from "passport";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
 
 import { apiRoles } from "../common/roles.js";
 
@@ -9,6 +11,7 @@ import tryCatch from "./middlewares/tryCatchMiddleware.js";
 import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
+import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication.js";
 import permissionsMiddleware from "./middlewares/permissionsMiddleware.js";
 import permissionsOrganismeMiddleware from "./middlewares/permissionsOrganismeMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
@@ -21,6 +24,7 @@ import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.rout
 import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
+import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursNationalDossiersRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.route.js";
@@ -48,9 +52,31 @@ import usersAdmin from "./routes/admin.routes/users.routes.js";
 import rolesAdmin from "./routes/admin.routes/roles.routes.js";
 import maintenancesAdmin from "./routes/admin.routes/maintenances.routes.js";
 import maintenancesRoutes from "./routes/maintenances.routes.js";
+import config from "../config.js";
 
 export default async (services) => {
   const app = express();
+
+  // Configure Sentry
+  Sentry.init({
+    dsn: config.sentry.dsn,
+    enabled: !!config.sentry.dsn,
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({ tracing: true }),
+      // enable Express.js middleware tracing
+      new Tracing.Integrations.Express({ app }),
+    ],
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: config.env !== "production" ? 1.0 : 0.2,
+  });
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
 
   const requireJwtAuthentication = requireJwtAuthenticationMiddleware(services);
 
@@ -136,6 +162,12 @@ export default async (services) => {
     dossierApprenantRouter(services)
   );
 
+  app.use(
+    "/api/organismes",
+    requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
+    organismesRouter(services)
+  ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
+
   // TODO : Routes à conserver temporairement le temps de la recette indicateurs via effectifs
   app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
   app.use(
@@ -175,6 +207,9 @@ export default async (services) => {
       return res.json({});
     })
   );
+
+  // The error handler must be before any other error middleware and after all controllers
+  app.use(Sentry.Handlers.errorHandler());
 
   app.use(errorMiddleware());
 

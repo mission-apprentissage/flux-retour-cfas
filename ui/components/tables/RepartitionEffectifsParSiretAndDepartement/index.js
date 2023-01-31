@@ -37,7 +37,7 @@ const RepartitionEffectifsParSiret = ({ effectifs, loading, error }) => {
               const { siret_etablissement, nom_etablissement, effectifs } = item;
               return (
                 <EffectifBySiretRow
-                  key={"siret_" + siret_etablissement}
+                  key={`siret_${siret_etablissement}`}
                   siret_etablissement={siret_etablissement}
                   nom_etablissement={nom_etablissement}
                   effectifs={effectifs}

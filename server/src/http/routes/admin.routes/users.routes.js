@@ -131,7 +131,7 @@ export default ({ mailer }) => {
         return res.json(user);
       } catch (err) {
         await removeUser(user._id);
-        throw Boom.internal(`Unable to send activation_user email`);
+        throw Boom.internal("Unable to send activation_user email");
       }
     })
   );

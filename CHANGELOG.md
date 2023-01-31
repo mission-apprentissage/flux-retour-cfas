@@ -4,6 +4,12 @@
 ### Features
 
 * next ([#2462](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2462)) ([e1e542d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e1e542da7e3254809216c47a7eba694e512aaa5f))
+# [3.7.0-beta.7](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.6...v3.7.0-beta.7) (2023-01-30)
+
+
+### Bug Fixes
+
+* fix la branche develop ([#2480](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2480)) ([b8e85c1](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b8e85c15f5c1ac81baae87c8bef4411733831716))
 
 # [3.7.0-beta.6](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0-beta.5...v3.7.0-beta.6) (2023-01-30)
 

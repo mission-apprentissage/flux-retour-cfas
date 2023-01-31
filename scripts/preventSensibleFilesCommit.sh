@@ -5,11 +5,17 @@
 sensible_files_pattern="\.(csv|xls|xls(x?)|json|env)$"
 exception="(package.json|custom-environment-variables.json"
 exception="$exception|manifest.json"
-exception="$exception|eslintrc.json|app.json|jsconfig.json"
+exception="$exception|eslintrc.json|app.json|jsconfig.json|rome.json"
 exception="$exception)$"
+
+if grep -q vault ".infra/ansible/roles/setup/vars/main/vault.yml"; then
+  echo "Oh no! Your vault.yml is not encryted!"
+  exit 1
+fi
 
 files=$(git diff --cached --name-only | grep -v -E "$exception" | grep -E "$sensible_files_pattern")
 if [ -z "$files" ]; then
+  echo "No sensible files in commit. Good job!"
   exit 0
 fi
 

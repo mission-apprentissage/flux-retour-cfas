@@ -22,7 +22,7 @@ const DepartementRow = ({ departementCode, departementNom, effectifs, isPeriodIn
           </Box>
         </Td>
         {/* Add empty cell to fill "Nature" (responsable, formateur...) column which does not make sense for a departement */}
-        <Td></Td>
+        <Td />
         <NumberValueCell value={effectifs.apprentis} />
         <NumberValueCell value={effectifs.inscritsSansContrat} />
         {!isPeriodInvalid && (

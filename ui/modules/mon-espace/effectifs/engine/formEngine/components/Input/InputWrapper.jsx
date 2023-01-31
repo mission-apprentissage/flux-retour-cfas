@@ -13,7 +13,7 @@ export const InputWrapper = (props) => {
   const { name, success, loading = false, locked, children } = props;
   const rightIcon = getRightIcon({ loading, success, locked });
   return (
-    <InputGroup id={`${name}_group_input`}>
+    <InputGroup id={`${name}_group_input`} isolation="auto">
       {children}
       {rightIcon && (
         <InputRightElement>

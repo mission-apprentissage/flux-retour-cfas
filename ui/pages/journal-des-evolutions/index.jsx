@@ -102,7 +102,7 @@ const JournalDesEvolutions = () => {
               const dateFormatLink = dateFormatIso.replace(regex, "/");
               return (
                 <Flex flexDirection="column" key={newDate} paddingRight="150px" fontSize="zeta">
-                  <Link padding="1w" href={"#" + dateFormatLink} _hover={{ textDecoration: "none", bg: "grey.200" }}>
+                  <Link padding="1w" href={`#${dateFormatLink}`} _hover={{ textDecoration: "none", bg: "grey.200" }}>
                     {capitalize(newDate)}
                   </Link>
                 </Flex>

@@ -31,7 +31,7 @@ const AlertMessage = () => {
   const messagesAlertEnabled = messagesAlert?.filter((message) => message.enabled);
   const messagesInfoEnabled = messagesInfo?.filter((message) => message.enabled);
 
-  if (loading || (!messagesAlertEnabled.length && !messagesInfoEnabled.length)) return null;
+  if (loading || (!messagesAlertEnabled?.length && !messagesInfoEnabled?.length)) return null;
   return (
     <Box>
       {messagesAlertEnabled.length > 0 && (

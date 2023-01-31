@@ -18,6 +18,7 @@ import React from "react";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
 import NavLink from "next/link";
+
 import useAuth from "../../../hooks/useAuth";
 import useToken from "../../../hooks/useToken";
 import { _get, _post } from "../../../common/httpClient";
@@ -39,7 +40,7 @@ const Login = (props) => {
         setAuth(user);
         setToken(result.token);
         if (!user.account_status === "NOT_CONFIRMED") {
-          router.push(`/auth/en-attente-confirmation`);
+          router.push("/auth/en-attente-confirmation");
         } else {
           router.push("/auth/redirection");
         }
@@ -48,13 +49,13 @@ const Login = (props) => {
       if (e.messages?.message === "Old connection method") {
         setStatus({ error: "Pour des raisons de sécurité, merci de vous créer un compte nominatif" });
       } else {
-        setStatus({ error: `Votre identifiant ou votre mot de passe est incorrect` });
+        setStatus({ error: "Votre identifiant ou votre mot de passe est incorrect" });
       }
     }
   };
 
   return (
-    <Flex {...props}>
+    <Flex flexDirection="column" p={12} {...props}>
       <Heading as="h2" fontSize="2xl" mb={[3, 6]}>
         Connectez-vous
       </Heading>

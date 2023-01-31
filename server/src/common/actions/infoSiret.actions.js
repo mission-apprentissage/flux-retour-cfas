@@ -58,7 +58,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
           api_entreprise: "KO",
         },
         messages: {
-          api_entreprise: `Le service de récupération des informations Siret est momentanément indisponible`,
+          api_entreprise: "Le service de récupération des informations Siret est momentanément indisponible",
         },
       };
     }

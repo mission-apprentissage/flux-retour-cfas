@@ -28,9 +28,9 @@ export const questions = [
           pourrez y consulter des données personnelles.
         </Text>
         <Text>Si vous utilisez Ymag :</Text>
-        <Img src="https://files.tableau-de-bord.apprentissage.beta.gouv.fr/liens-prives/Ypareo.png"></Img>
+        <Img src="https://files.tableau-de-bord.apprentissage.beta.gouv.fr/liens-prives/Ypareo.png" />
         <Text>Si vous utilisez Gesti :</Text>
-        <Img src="https://files.tableau-de-bord.apprentissage.beta.gouv.fr/liens-prives/Gesti.png"></Img>
+        <Img src="https://files.tableau-de-bord.apprentissage.beta.gouv.fr/liens-prives/Gesti.png" />
         <Text>En attente des visuels pour FCA Manager et SC Form.</Text>
       </Stack>
     ),

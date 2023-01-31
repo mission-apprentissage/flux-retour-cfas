@@ -12,22 +12,18 @@ export const InscriptionPilot = ({ onEndOfSpecific }) => {
       <Box mt="2w">
         <Input
           {...{
-            name: `typePilot`,
+            name: "typePilot",
             fieldType: "select",
             placeholder: "Sélectionner un opérateur public",
             options: [
               {
-                label: "DREETS",
+                label: "D(R)EETS",
                 value: "DREETS",
               },
               {
-                label: "DEETS",
-                value: "DEETS",
+                label: "DDETS",
+                value: "DDETS",
               },
-              // {
-              //   label: "DDETS",
-              //   value: "DDETS",
-              // },
               {
                 label: "DRAAF",
                 value: "DRAAF",

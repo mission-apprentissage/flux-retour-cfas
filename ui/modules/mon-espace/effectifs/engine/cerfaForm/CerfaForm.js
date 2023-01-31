@@ -50,7 +50,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
   return (
     <Box my={2} px={5}>
       <Accordion allowMultiple mt={2} index={accordionIndex} onChange={setAccordionIndex} reduceMotion>
-        <AccordionItem border="none" id={`statuts`}>
+        <AccordionItem border="none" id={"statuts"}>
           {({ isExpanded }) => (
             <AccordionItemChild
               isExpanded={isExpanded}
@@ -62,7 +62,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
             </AccordionItemChild>
           )}
         </AccordionItem>
-        <AccordionItem border="none" id={`apprenant`}>
+        <AccordionItem border="none" id={"apprenant"}>
           {({ isExpanded }) => (
             <AccordionItemChild
               isExpanded={isExpanded}
@@ -74,7 +74,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
             </AccordionItemChild>
           )}
         </AccordionItem>
-        <AccordionItem border="none" id={`formation`}>
+        <AccordionItem border="none" id={"formation"}>
           {({ isExpanded }) => (
             <AccordionItemChild
               isExpanded={isExpanded}
@@ -86,7 +86,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
             </AccordionItemChild>
           )}
         </AccordionItem>
-        <AccordionItem border="none" id={`contrats`}>
+        <AccordionItem border="none" id={"contrats"}>
           {({ isExpanded }) => (
             <AccordionItemChild
               isExpanded={isExpanded}

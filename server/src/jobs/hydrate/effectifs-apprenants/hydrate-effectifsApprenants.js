@@ -14,7 +14,7 @@ export const hydrateEffectifsApprenants = async (effectifs) => {
   logger.info("Create Effectifs Apprenants Collection");
 
   // Supprime les données précédentes
-  logger.info(`Clearing existing Effectifs Apprenants Collection ...`);
+  logger.info("Clearing existing Effectifs Apprenants Collection ...");
   await effectifsApprenantsDb().deleteMany({});
 
   const currentAnneeScolaireFilter = { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } };
@@ -34,7 +34,7 @@ export const hydrateEffectifsApprenants = async (effectifs) => {
   };
 
   // Récupère la liste des données pour chaque indicateur du TdB et ajoute l'id original + un flag d'indicateur concerné
-  logger.info(`Building Effectifs Apprenants Collection ...`);
+  logger.info("Building Effectifs Apprenants Collection ...");
 
   const apprentis = (
     await effectifs.apprentis.getListAtDate(new Date(), currentAnneeScolaireFilter, { projection })

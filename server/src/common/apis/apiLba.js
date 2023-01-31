@@ -31,8 +31,8 @@ export const getMetiersBySirets = async (sirets) => {
       return { data: null };
     } else {
       const errorMessage = err.response?.data || err.code;
-      logger.error(`API LBA getMetiersBySirets something went wrong:`, errorMessage);
-      throw new Error(`An error occured while fetching métiers for list of SIRET`, sirets.join(","));
+      logger.error("API LBA getMetiersBySirets something went wrong:", errorMessage);
+      throw new Error("An error occured while fetching métiers for list of SIRET", sirets.join(","));
     }
   }
 };
@@ -60,7 +60,7 @@ export const getMetiersByCfd = async (cfd) => {
       return { data: null };
     } else {
       const errorMessage = err.response?.data || err.code;
-      logger.error(`API LBA getMetiersByCfd something went wrong:`, errorMessage);
+      logger.error("API LBA getMetiersByCfd something went wrong:", errorMessage);
       throw new Error(`An error occured while fetching métiers for CFD ${cfd}`);
     }
   }

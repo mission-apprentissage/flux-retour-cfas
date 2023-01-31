@@ -33,7 +33,7 @@ const ConfigurationAPI = () => {
               borderBottomStyle="solid"
               borderBottomWidth={1.5}
               borderRadius={0}
-              display={`flex`}
+              display={"flex"}
               padding={"2px"}
               alignItems="end"
               onClick={async () => {
@@ -79,7 +79,7 @@ const ConfigurationAPI = () => {
                 </Box>
                 {values.doYouUseAnotherService === "yes" && (
                   <HStack color="flatsuccess" alignItems={"baseline"}>
-                    <i class="ri-checkbox-circle-line"></i>
+                    <i class="ri-checkbox-circle-line" />
                     <Text>
                       Il est possible de transmettre une partie de vos effectifs via votre ERP et d’importer l’autre
                       partie via l’onglet “Mes effectifs”. Si vous utilisez deux ERP connectés au tableau de bord
@@ -96,7 +96,7 @@ const ConfigurationAPI = () => {
                 </Box>
                 {values.doYouUseAnotherService === "no" && (
                   <HStack color="flatsuccess" alignItems={"baseline"}>
-                    <i className="ri-checkbox-circle-line"></i>
+                    <i className="ri-checkbox-circle-line" />
                     <Text>Vous pouvez télécharger le pas-à-pas disponible ci-dessus.</Text>
                   </HStack>
                 )}

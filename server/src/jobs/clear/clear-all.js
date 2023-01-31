@@ -7,7 +7,7 @@ import { findOrganismesByQuery, updateOrganisme } from "../../common/actions/org
 
 export const clearRoles = async () => {
   await clearCollection(RolesModelDescriptor.collectionName);
-  logger.info(`Clear roles done !`);
+  logger.info("Clear roles done !");
 };
 
 export const clearUsers = async () => {
@@ -17,12 +17,12 @@ export const clearUsers = async () => {
   }
   await clearCollection(PermissionsDescriptor.collectionName);
   await clearCollection(usersMigrationModelDescriptor.collectionName);
-  logger.info(`Clear users done !`);
+  logger.info("Clear users done !");
 };
 
 export const clear = async ({ clearAll }) => {
   if (clearAll) {
     await clearAllCollections();
-    logger.info(`Clear flux-retour-cfas done !`);
+    logger.info("Clear flux-retour-cfas done !");
   }
 };

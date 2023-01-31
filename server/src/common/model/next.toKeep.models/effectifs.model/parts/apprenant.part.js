@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { flattenDeep } from "lodash-es";
+
 import { CODES_STATUT_APPRENANT } from "../../../../constants/dossierApprenantConstants.js";
 import { schemaValidation } from "../../../../utils/schemaUtils.js";
 import { siretSchema } from "../../../../utils/validationUtils.js";
@@ -28,11 +29,12 @@ export const apprenantSchema = object(
       minLength: 5,
     }),
     nationalite: integer({
-      description: `Apprenant étranger, non citoyen européen`,
+      description: "Apprenant étranger, non citoyen européen",
       enum: [1, 2, 3],
     }),
     regime_scolaire: string({
-      description: `**Régime scolaire** :\r\n  I : Interne\r\n  D : Demi-pensionnaire\r\n E : Externe\r\n IE : Interne externé`,
+      description:
+        "**Régime scolaire** :\r\n  I : Interne\r\n  D : Demi-pensionnaire\r\n E : Externe\r\n IE : Interne externé",
       enum: ["I", "D", "E", "IE"],
     }),
     handicap: boolean({
@@ -122,12 +124,12 @@ export const apprenantSchema = object(
     }),
     organisme_gestionnaire: integer({
       enum: [11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 24, 25],
-      description: `**Organisme gestionnaire de l’établissement`,
+      description: "**Organisme gestionnaire de l’établissement",
     }),
 
     dernier_diplome: integer({
       enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99],
-      description: `**Dernier diplome obtenu`,
+      description: "**Dernier diplome obtenu",
     }),
     mineur: boolean({
       description: "l'apprenant(e) sera-t-il(elle) mineur(e) ? (calc)",
@@ -160,7 +162,7 @@ export const apprenantSchema = object(
           10, 21, 22, 23, 31, 33, 34, 37, 38, 42, 43, 44, 45, 46, 47, 48, 52, 53, 54, 55, 56, 61, 66, 69, 71, 72, 73,
           76, 81, 82, 99,
         ],
-        description: `**Nomenclatures des professions et catégories socioprofessionnelles`,
+        description: "**Nomenclatures des professions et catégories socioprofessionnelles",
       }),
     }),
     contrats: arrayOf(
