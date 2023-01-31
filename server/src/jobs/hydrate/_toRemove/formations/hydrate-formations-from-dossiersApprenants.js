@@ -34,7 +34,7 @@ export const hydrateFormationsFromDossiersApprenants = async () => {
     if (!formationFound) {
       try {
         // Crée une formation
-        const createdFormationId = await createFormation(cfd);
+        const createdFormationId = await createFormation({ cfd });
         createdFormationsTotal++;
 
         // MAJ les dossiers liés à cette nouvelle formation créé

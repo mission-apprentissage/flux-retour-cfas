@@ -5,10 +5,13 @@ import { API_ENDPOINT } from "../../../src/common/apis/apiTablesCorrespondances.
 import { dataForGetCfdInfo, dataForGetSiretInfo } from "../../data/apiTablesDeCorrespondances.js";
 import { DEPARTEMENTS } from "../../../src/common/constants/territoiresConstants.js";
 
-export const nockGetCfdInfo = (data = dataForGetCfdInfo.withIntituleLong) => {
-  nock(API_ENDPOINT).persist().post("/cfd").reply(200, {
-    result: data,
-  });
+export const nockGetCfdInfo = (callback) => {
+  nock(API_ENDPOINT)
+    .persist()
+    .post("/cfd")
+    .reply(200, (_uri, requestBody) => ({
+      result: callback ? callback(requestBody.cfd) : dataForGetCfdInfo.withIntituleLong,
+    }));
 };
 
 export const nockGetSiretInfo = (data = dataForGetSiretInfo) => {
