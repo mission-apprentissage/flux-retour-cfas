@@ -1,8 +1,4 @@
 {
   "root": true,
-  "env": {
-    "jest/globals": true
-  },
-  "extends": ["eslint:recommended", "next", "next/core-web-vitals", "plugin:prettier/recommended"],
-  "plugins": ["jest"]
+  "extends": ["eslint:recommended", "next", "next/core-web-vitals", "plugin:prettier/recommended"]
 }
