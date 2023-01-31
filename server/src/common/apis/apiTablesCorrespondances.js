@@ -4,7 +4,7 @@ import config from "../../config.js";
 
 // Cf Documentation : https://tables-correspondances.apprentissage.beta.gouv.fr/api/v1/docs/
 
-const API_ENDPOINT = config.tablesCorrespondances.endpoint;
+export const API_ENDPOINT = config.tablesCorrespondances.endpoint;
 
 export const getCfdInfo = async (cfd) => {
   const url = `${API_ENDPOINT}/cfd`;
@@ -36,7 +36,7 @@ export const getRncpInfo = async (rncp) => {
   }
 };
 
-export const getCpInfo = async (codePostal) => {
+export const getCodePostalInfo = async (codePostal) => {
   const url = `${API_ENDPOINT}/code-postal`;
   try {
     const { data } = await axios.post(url, {
@@ -45,7 +45,7 @@ export const getCpInfo = async (codePostal) => {
     return data;
   } catch (error) {
     logger.error(
-      `getCpInfo: something went wrong while requesting ${url}`,
+      `getCodePostalInfo: something went wrong while requesting ${url}`,
       `${error.message} for code=${codePostal}`,
       error.code || error.response?.status
     );
