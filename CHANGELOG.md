@@ -1,3 +1,10 @@
+## [3.7.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0...v3.7.1) (2023-01-31)
+
+
+### Bug Fixes
+
+* remove eslint-plugin-jest ([#2489](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2489)) ([6043f6d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/6043f6d982db7e8021be057e5f32bcb72f1445de))
+
 # [3.7.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.6.0...v3.7.0) (2023-01-30)
 
 
