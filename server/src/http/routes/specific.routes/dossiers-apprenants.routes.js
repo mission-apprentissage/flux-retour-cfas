@@ -160,7 +160,7 @@ export default () => {
             // TODO à supprimer une fois que la collection DossierApprenantMigration sera useless
             // TODO Store userEvents
             if (organisme.createdId || organisme.foundId) {
-              const structuredDossierApprenant = structureDossierApprenant({
+              const structuredDossierApprenant = await structureDossierApprenant({
                 ...dossierApprenantItem,
                 organisme_id: organisme.createdId || organisme.foundId, // Update sur l'organisme ajouté ou maj,
               });
