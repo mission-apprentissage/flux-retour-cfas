@@ -11,7 +11,7 @@ const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase()
 export const getRandomFormationCfd = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
 export const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
-export const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase();
+export const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase(); // TODO: this doesn't follow the luhn algorithm. To fix.
 export const getSampleSiretEtablissement = () => "13002526500013";
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
 const getRandomNature = () =>
@@ -66,25 +66,24 @@ export const createRandomDossierApprenant = (params = {}) => {
   const isContratPresent = isPresent();
 
   return {
-    ine_apprenant: isStudentPresent ? getRandomIne() : null,
+    ine_apprenant: getRandomIne(),
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
     email_contact: faker.internet.email(),
-
     formation_cfd: getRandomFormationCfd(),
-    libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
+    libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isStudentPresent ? getRandomSiretEtablissement() : null,
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-
+    historique_statut_apprenant: [],
     statut_apprenant: getRandomStatutApprenant(),
     date_metier_mise_a_jour_statut: faker.date.past(),
-    periode_formation: isStudentPresent ? periode_formation : null,
+    periode_formation: isStudentPresent ? periode_formation : [],
     annee_formation: getRandomAnneeFormation(),
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
     tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
-    code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
+    code_commune_insee_apprenant: faker.address.zipCode("#####"),
     date_de_naissance_apprenant: getRandomDateNaissance(),
     ...(isContratPresent ? { contrat_date_debut: getRandomDateDebutContrat() } : {}),
     ...(isContratPresent ? { contrat_date_fin: getRandomDateFinContrat() } : {}),
@@ -126,7 +125,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
   const isStudentPresent = isPresent();
 
   return {
-    ine_apprenant: isStudentPresent ? getRandomIne() : null,
+    ine_apprenant: getRandomIne(),
     nom_apprenant: faker.name.lastName().toUpperCase(),
     prenom_apprenant: faker.name.firstName(),
     date_de_naissance_apprenant: getRandomDateNaissance().toISOString().slice(0, -5),
@@ -134,7 +133,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
     email_contact: faker.internet.email(),
 
     id_formation: getRandomFormationCfd(),
-    libelle_long_formation: faker.datatype.boolean() ? faker.helpers.arrayElement(sampleLibelles).intitule_long : null,
+    libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long,
     uai_etablissement: getRandomUaiEtablissement(),
     siret_etablissement: isStudentPresent ? getRandomSiretEtablissement() : "",
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
@@ -146,7 +145,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
     annee_scolaire,
     id_erp_apprenant: faker.datatype.uuid(),
     tel_apprenant: faker.datatype.boolean() ? faker.phone.number() : null,
-    code_commune_insee_apprenant: faker.datatype.boolean() ? faker.address.zipCode() : null,
+    code_commune_insee_apprenant: faker.address.zipCode(),
 
     ...params,
   };

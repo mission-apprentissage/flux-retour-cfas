@@ -22,7 +22,7 @@ export function siretSchema() {
     .creditCard()
     .error(
       (errors) =>
-        new Error(`Error: schema not valid : ValidationError: ${errors[0].local.key} must be follow Luhn algorithm`)
+        new Error(`Error: schema not valid : ValidationError: ${errors[0].local.key} must follow Luhn algorithm`)
     );
 }
 // const UAI_REGEX = /^[0-9_]{7}[a-zA-Z]{1}$/;

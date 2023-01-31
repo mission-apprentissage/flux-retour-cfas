@@ -89,7 +89,10 @@ export const config = {
   sentry: {
     dsn: env.get("FLUX_RETOUR_CFAS_SENTRY_DSN").asString(),
   },
-  apiEntreprise: env.get("FLUX_RETOUR_CFAS_API_ENTREPRISE_KEY").asString(),
+  apiEntreprise: {
+    key: env.get("FLUX_RETOUR_CFAS_API_ENTREPRISE_KEY").asString(),
+    endpoint: "https://entreprise.api.gouv.fr/v2",
+  },
   organismesConsultationApiKey: env.get("FLUX_RETOUR_CFAS_ORGANISMES_CONSULTATION_API_KEY").asString(),
 };
 

@@ -1,8 +1,11 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
+
 import config from "../../config.js";
 import logger from "../logger.js";
 import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
+
+export const API_ENDPOINT = config.apiEntreprise.endpoint;
 
 // Cf Documentation : https://doc.entreprise.api.gouv.fr/#param-tres-obligatoires
 const executeWithRateLimiting = apiRateLimiter("apiEntreprise", {
@@ -10,13 +13,12 @@ const executeWithRateLimiting = apiRateLimiter("apiEntreprise", {
   nbRequests: 2,
   durationInSeconds: 1,
   client: axios.create({
-    baseURL: "https://entreprise.api.gouv.fr/v2",
-    // timeout: 5000,
+    baseURL: API_ENDPOINT,
   }),
 });
 
 const apiParams = {
-  token: config.apiEntreprise,
+  token: config.apiEntreprise.key,
   context: "MNA",
   recipient: "13002526500013", // Siret Dinum
   object: "Consolidation des données",

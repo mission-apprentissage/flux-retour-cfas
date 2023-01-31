@@ -4,7 +4,7 @@ import config from "../../config.js";
 
 // Cf Documentation : https://catalogue.apprentissage.beta.gouv.fr/api/v1/docs
 
-const API_ENDPOINT = config.mnaCatalogApi.endpoint;
+export const API_ENDPOINT = config.mnaCatalogApi.endpoint;
 
 export const getFormations = async (options) => {
   const url = `${API_ENDPOINT}/entity/formations`;
