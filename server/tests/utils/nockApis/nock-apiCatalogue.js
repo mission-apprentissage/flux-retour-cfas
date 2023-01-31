@@ -1,4 +1,3 @@
-/* eslint-disable node/no-unpublished-require */
 import nock from "nock";
 
 import { API_ENDPOINT } from "../../../src/common/apis/apiCatalogueMna.js";

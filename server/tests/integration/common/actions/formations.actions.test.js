@@ -1,13 +1,10 @@
 import { strict as assert } from "assert";
 import omit from "lodash.omit";
-
-// eslint-disable-next-line node/no-unpublished-require
 import nock from "nock";
 
 import { nockGetCfdInfo } from "../../../utils/nockApis/nock-tablesCorrespondances.js";
 import { asyncForEach } from "../../../../src/common/utils/asyncUtils.js";
 import { dataForGetCfdInfo } from "../../../data/apiTablesDeCorrespondances.js";
-import { dataForGetMetiersByCfd } from "../../../data/apiLba.js";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 import { nockGetMetiersByCfd } from "../../../utils/nockApis/nock-Lba.js";
 import { formationsDb, dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
