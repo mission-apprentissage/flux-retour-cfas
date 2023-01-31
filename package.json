@@ -53,7 +53,7 @@
     "trailingComma": "es5"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md,mdx,html,css,scss}": [
+    "*.{js,jsx,ts,tsx}": [
       "npx rome check"
     ]
   }
