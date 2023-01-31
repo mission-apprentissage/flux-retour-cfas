@@ -38,10 +38,10 @@ export const getEntreprise = (siren, non_diffusables = true) => {
       if (e.message.includes("timeout")) {
         return null;
       }
-      if (e.response.status === 404) {
+      if (e.response?.status === 404) {
         return null;
       }
-      throw new ApiError("Api Entreprise getEntreprise", e.message, e.code || e.response.status);
+      throw new ApiError("Api Entreprise getEntreprise", e.message, e.code || e.response?.status);
     }
   });
 };
@@ -60,7 +60,7 @@ export const getEtablissement = async (siret, non_diffusables = true) => {
       }
       return response.data.etablissement;
     } catch (e) {
-      throw new ApiError("Api Entreprise getEtablissement", e.message, e.code || e.response.status);
+      throw new ApiError("Api Entreprise getEtablissement", e.message, e.code || e.response?.status);
     }
   });
 };
@@ -77,10 +77,10 @@ export const getConventionCollective = async (siret, non_diffusables = true) => 
       }
       return response.data.conventions[0];
     } catch (e) {
-      if (e.response.status === 404) {
+      if (e.response?.status === 404) {
         return { active: null, date_publication: null, etat: null, titre_court: null, titre: null, url: null };
       } else {
-        throw new ApiError("Api Entreprise ConventionCollective", e.message, e.code || e.response.status);
+        throw new ApiError("Api Entreprise ConventionCollective", e.message, e.code || e.response?.status);
       }
     }
   });

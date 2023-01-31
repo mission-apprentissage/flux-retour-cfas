@@ -14,7 +14,7 @@ export const getCfdInfo = async (cfd) => {
     });
     return data.result;
   } catch (error) {
-    logger.error(`getCfdInfo: something went wrong while requesting ${url}`, error.response.data);
+    logger.error(`getCfdInfo: something went wrong while requesting ${url}`, error.response?.data || error.message);
     return null;
   }
 };
@@ -30,7 +30,7 @@ export const getRncpInfo = async (rncp) => {
     logger.error(
       `getRncpInfo: something went wrong while requesting ${url}`,
       `${error.message} for rncp=${rncp}`,
-      error.code || error.response.status
+      error.code || error.response?.status
     );
     return null;
   }
@@ -47,7 +47,7 @@ export const getCpInfo = async (codePostal) => {
     logger.error(
       `getCpInfo: something went wrong while requesting ${url}`,
       `${error.message} for code=${codePostal}`,
-      error.code || error.response.status
+      error.code || error.response?.status
     );
     return {
       result: {},
