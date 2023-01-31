@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+./scripts/preventSensibleFilesCommit.sh && ./node_modules/.bin/lint-staged -q
