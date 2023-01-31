@@ -38,7 +38,7 @@ describe("Effectifs Route", () => {
     });
 
     // TODO Remettre le test une fois middleware réactivé
-    it.skip("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
+    it("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
       const { httpClient, logUser } = await startServer();
 
       // Création de son organisme
