@@ -6,7 +6,7 @@ import { fiabilisationUaiSiretDb } from "../../model/collections.js";
  * @param {*} {param0}
  * @returns
  */
-export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret }) => {
+export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret = null }) => {
   // Construction d'un tableau de mapping à partir de la collection et du tableau mapping
   const fiabilisationUaiSiretFromCollection = await fiabilisationUaiSiretDb().find().toArray();
   const fiabilisationMappings = [...fiabilisationUaiSiretFromCollection, ...FIABILISATION_MAPPINGS];

@@ -175,13 +175,15 @@ export const insertOrganisme = async (data) => {
 export const structureOrganismeFromDossierApprenant = async (dossierApprenant) => {
   const { uai_etablissement, siret_etablissement, nom_etablissement } = dossierApprenant;
 
-  const adresseForOrganisme = await buildAdresseForOrganisme({ uai: uai_etablissement, sirets: [siret_etablissement] });
+  const adresseForOrganisme = siret_etablissement
+    ? await buildAdresseForOrganisme({ uai: uai_etablissement, sirets: [siret_etablissement] })
+    : {};
 
   return {
     ...defaultValuesOrganisme(),
     uai: uai_etablissement,
     siret: siret_etablissement,
-    sirets: [siret_etablissement],
+    sirets: siret_etablissement ? [siret_etablissement] : [],
     ...adresseForOrganisme,
     ...(nom_etablissement
       ? { nom: nom_etablissement.trim(), nom_tokenized: buildTokenizedString(nom_etablissement.trim(), 4) }

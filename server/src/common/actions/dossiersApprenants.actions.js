@@ -6,6 +6,7 @@ import {
   validateDossiersApprenantsMigration,
 } from "../model/next.toKeep.models/dossiersApprenantsMigration.model.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
+import { findOrganismeById } from "./organismes/organismes.actions.js";
 
 /**
  * Méthode qui ajoute un dossierApprenant en base
@@ -21,7 +22,7 @@ export const insertDossierApprenant = async (data) => {
  * Méthode qui construit un dossierApprenant et toutes les données liées
  * @param {*} param0
  */
-export const structureDossierApprenant = ({
+export const structureDossierApprenant = async ({
   organisme_id,
   nom_apprenant,
   prenom_apprenant,
@@ -41,6 +42,12 @@ export const structureDossierApprenant = ({
   //     date_reception: new Date(),
   //   },
   // ],
+
+  // Si on nous fourni un organisme_id existant on récupère le siret pour la structure
+  if (organisme_id) {
+    const organismeExistant = await findOrganismeById(organisme_id);
+    siret_etablissement = organismeExistant?.siret;
+  }
 
   return {
     ...defaultValuesDossiersApprenantsMigration(),
