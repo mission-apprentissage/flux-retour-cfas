@@ -1,8 +1,8 @@
 name: Release version production
 on:
-  push:
-    branches: [master]
-
+  # push:
+  #   branches: [master]
+  workflow_dispatch:
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -82,27 +82,6 @@ jobs:
       - name: Run Lint
         run: yarn lint
 
-      # # Run mocha tests
-      # - name: Run Tests
-      #   run: |
-      #     yarn --cwd server test:coverage
-      #   env:
-      #     FLUX_RETOUR_CFAS_API_KEY: ${{ secrets.FLUX_RETOUR_CFAS_API_KEY }}
-      #     FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_PASSWORD_HASH_ROUNDS }}
-      #     FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_USER_JWT_SECRET }}
-      #     FLUX_RETOUR_CFAS_AUTH_PDS_JWT_SECRET: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_PDS_JWT_SECRET }}
-      #     FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET }}
-      #     FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET: ${{ secrets.FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET }}
-
-      # # codecov
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v2
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     directory: ./server/coverage
-      #     name: codecov-server
-      #     verbose: true
-
   ciui:
     needs: release
     # avoids buggy Github Actions behaviour triggering infinite loop of release commits
@@ -116,17 +95,3 @@ jobs:
       - name: Run Yarn Install
         run: |
           yarn --cwd ui install
-
-      # Run tests
-      # - name: Run Tests
-      #   run: |
-      #     yarn --cwd ui test:coverage
-
-      # codecov
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v2
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     directory: ./ui/coverage
-      #     name: codecov-ui
-      #     verbose: true
