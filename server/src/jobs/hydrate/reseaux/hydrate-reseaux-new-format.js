@@ -7,9 +7,9 @@ import { __dirname } from "../../../common/utils/esmUtils.js";
 import {
   findOrganismeByUaiAndSiret,
   findOrganismesBySiret,
-  updateOrganisme,
 } from "../../../common/actions/organismes/organismes.actions.js";
-import { updateDossiersApprenantsNetworksIfNeeded } from "./hydrate-reseaux.actions.js";
+import { arraysContainSameValues } from "../../../common/utils/miscUtils.js";
+import { organismesDb } from "../../../common/model/collections.js";
 
 const INPUT_FILE_COLUMN_NAMES = {
   SIRET: "Siret",
@@ -44,22 +44,12 @@ const parseReseauxTextFromCsv = (reseauText) => {
   const reseaux = reseauText.split(RESEAUX_LIST_SEPARATOR).map((reseau) => reseau.toUpperCase());
   return reseaux;
 };
+
 /**
- * @param  {[any]} array1
- * @param  {[any]} array2
- * @returns  {boolean}
+ *
+ * @param {*} organismeFromFile
+ * @returns
  */
-const arraysContainSameValues = (array1, array2) => {
-  if (!Array.isArray(array1) || !Array.isArray(array2) || array1.length !== array2.length) {
-    return false;
-  }
-
-  array1.forEach((item) => {
-    if (!array2.includes(item)) return false;
-  });
-  return true;
-};
-
 const mapFileOrganisme = (organismeFromFile) => {
   return {
     siret: organismeFromFile[INPUT_FILE_COLUMN_NAMES.SIRET],
@@ -68,9 +58,24 @@ const mapFileOrganisme = (organismeFromFile) => {
   };
 };
 
+const clearReseauxInOrganismes = async () => {
+  await organismesDb().updateMany(
+    {},
+    {
+      $set: {
+        reseaux: [],
+      },
+    }
+  );
+};
+
 export const hydrateReseauxNewFormat = async () => {
+  logger.info("Clearing all reseaux for organismes...");
+  await clearReseauxInOrganismes();
+
   await asyncForEach(INPUT_FILES, async (filename) => {
-    logger.info("Importing data from", filename);
+    logger.info("Importing data from ", filename);
+
     // read référentiel file from réseau and convert it to JSON
     const filePath = path.join(__dirname(import.meta.url), filename);
     const reseauFile = readJsonFromCsvFile(filePath, ";");
@@ -80,7 +85,6 @@ export const hydrateReseauxNewFormat = async () => {
     let foundUniqueCount = 0;
     let organismeUpdatedCount = 0;
     let organismeUpdateErrorCount = 0;
-    let nbDossiersApprenantsUpdated = 0;
 
     logger.info(reseauFile.length, "lines in", filename);
     if (reseauFile.length === 0) {
@@ -134,22 +138,19 @@ export const hydrateReseauxNewFormat = async () => {
             reseauxFromFile.join(", ")
           );
           try {
-            await updateOrganisme(uniqueOrganismeFromTdb._id, {
-              ...uniqueOrganismeFromTdb,
-              // we merge reseaux from db and file, in case an organism has several "reseaux"
-              reseaux: [...reseauxFromDb, ...reseauxFromFile],
-            });
-            organismeUpdatedCount++;
+            const reseauxToUpdate = [...reseauxFromDb, ...reseauxFromFile];
+            await organismesDb().updateOne(
+              { _id: uniqueOrganismeFromTdb._id },
+              {
+                // we merge reseaux from db and file, in case an organism has several "reseaux"
+                $addToSet: {
+                  // https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/#value-to-add-is-an-array
+                  reseaux: { $each: reseauxToUpdate },
+                },
+              }
+            );
 
-            // MAJ des dossiersApprenants liés à chacun des réseaux issus du fichier
-            await asyncForEach(reseauxFromFile, async (currentReseau) => {
-              const nbDossierUpdatedForOrganisme = await updateDossiersApprenantsNetworksIfNeeded(
-                uniqueOrganismeFromTdb,
-                currentReseau,
-                "hydrate-reseaux-newFormat"
-              );
-              nbDossiersApprenantsUpdated += nbDossierUpdatedForOrganisme;
-            });
+            organismeUpdatedCount++;
           } catch (err) {
             organismeUpdateErrorCount++;
             logger.error(err);
@@ -168,7 +169,6 @@ export const hydrateReseauxNewFormat = async () => {
       reseauFile.length
     );
     logger.info("Organismes en base TDB dont les réseaux ont été mis à jour :", organismeUpdatedCount);
-    logger.info(`${nbDossiersApprenantsUpdated} dossiersApprenants dont la liste des réseaux a été mis à jour`);
     logger.info("Organismes en base TDB n'ont pas pu être mis à jour :", organismeUpdateErrorCount);
   });
 };

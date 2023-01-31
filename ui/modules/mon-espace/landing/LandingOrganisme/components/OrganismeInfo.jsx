@@ -21,6 +21,7 @@ import IndicateursInfo from "../../common/IndicateursInfos.jsx";
 import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
 import Ribbons from "../../../../../components/Ribbons/Ribbons";
 import { useEspace } from "../../../../../hooks/useEspace";
+import { getReseauDisplayNameFromKey, RESEAUX_CFAS } from "@/common/constants/networksConstants.js";
 
 export const natureOrganismeDeFormationLabel = {
   responsable: "Responsable",
@@ -90,8 +91,20 @@ export default function OrganismeInfo() {
     );
   }
 
-  const { _id: organismeId, uai, nature, natureValidityWarning, sirets, ferme, enseigne, raison_sociale } = organisme;
+  const {
+    _id: organismeId,
+    uai,
+    nature,
+    natureValidityWarning,
+    sirets,
+    ferme,
+    enseigne,
+    raison_sociale,
+    reseaux,
+  } = organisme;
+
   const siretToDisplay = formatSiretSplitted(sirets[0]);
+  const reseauxToDisplay = reseaux.map((item) => getReseauDisplayNameFromKey(item));
 
   return (
     <>
@@ -158,10 +171,10 @@ export default function OrganismeInfo() {
           </HStack>
 
           <VStack mt={10} alignItems={"baseline"}>
-            {organisme.reseaux?.length > 0 && (
+            {reseauxToDisplay?.length > 0 && (
               <Text>
-                Cet organisme fait partie {organisme.reseaux?.length === 1 ? "du réseau" : "des réseaux"}{" "}
-                <b>{organisme.reseaux?.join(", ")}</b>
+                Cet organisme fait partie {reseauxToDisplay?.length === 1 ? "du réseau" : "des réseaux"}{" "}
+                <b>{reseauxToDisplay?.join(", ")}</b>
               </Text>
             )}
             {organisme.adresse?.complete && <Text>Sa domiciliation est : {organisme.adresse.complete}</Text>}
