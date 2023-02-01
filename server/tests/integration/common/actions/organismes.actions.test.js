@@ -9,8 +9,9 @@ import {
 } from "../../../../src/common/actions/organismes/organismes.actions.js";
 import { buildTokenizedString } from "../../../../src/common/utils/buildTokenizedString.js";
 import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collections.js";
-import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/mapping.js";
+import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/mapping.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
+import { FIABILISATION_TYPES } from "../../../../src/common/constants/fiabilisationConstants.js";
 
 describe("Test des actions Organismes", () => {
   describe("createOrganisme", () => {
@@ -135,12 +136,13 @@ describe("Test des actions Organismes", () => {
       const sampleUaiFiable = "0755805C";
       const sampleSiretFiable = "77568013501089";
 
-      // Create entry in fiabilisation collection
+      // Create entry A_FIABILISER in fiabilisation collection
       await fiabilisationUaiSiretDb().insertOne({
         uai: sampleUai,
         siret: sampleSiret,
         uai_fiable: sampleUaiFiable,
         siret_fiable: sampleSiretFiable,
+        type: FIABILISATION_TYPES.A_FIABILISER,
       });
 
       const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
@@ -157,12 +159,13 @@ describe("Test des actions Organismes", () => {
       const sampleUaiFiable = "0802004U";
       const sampleSiretFiable = "77568013501139";
 
-      // Create entry in fiabilisation collection
+      // Create entry A_FIABILISER in fiabilisation collection
       await fiabilisationUaiSiretDb().insertOne({
         uai: sampleUai,
         siret: sampleSiret,
         uai_fiable: sampleUaiFiable,
         siret_fiable: sampleSiretFiable,
+        type: FIABILISATION_TYPES.A_FIABILISER,
       });
 
       const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
@@ -179,12 +182,13 @@ describe("Test des actions Organismes", () => {
       const sampleUaiFiable = "0755805C";
       const sampleSiretFiable = "77568013501139";
 
-      // Create entry in fiabilisation collection
+      // Create entry A_FIABILISER in fiabilisation collection
       await fiabilisationUaiSiretDb().insertOne({
         uai: sampleUai,
         siret: sampleSiret,
         uai_fiable: sampleUaiFiable,
         siret_fiable: sampleSiretFiable,
+        type: FIABILISATION_TYPES.A_FIABILISER,
       });
 
       const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({
@@ -243,12 +247,13 @@ describe("Test des actions Organismes", () => {
       const sampleUaiFiable = "0755805C";
       const sampleSiretFiable = "77568013501089";
 
-      // Create entry in fiabilisation collection
+      // Create entry A_FIABILISER in fiabilisation collection
       await fiabilisationUaiSiretDb().insertOne({
         uai: sampleUai,
         siret: sampleSiret,
         uai_fiable: sampleUaiFiable,
         siret_fiable: sampleSiretFiable,
+        type: FIABILISATION_TYPES.A_FIABILISER,
       });
 
       // Création d'un organisme clean avec uai - siret fiables issus de la collection
@@ -266,12 +271,13 @@ describe("Test des actions Organismes", () => {
       const sampleSiret = "77568013501139";
       const sampleUaiFiable = "0755805C";
 
-      // Create entry in fiabilisation collection
+      // Create entry A_FIABILISER in fiabilisation collection
       await fiabilisationUaiSiretDb().insertOne({
         uai: sampleUai,
         siret: sampleSiret,
         uai_fiable: sampleUaiFiable,
         siret_fiable: null,
+        type: FIABILISATION_TYPES.A_FIABILISER,
       });
 
       // Création & control d'un organisme avec uai et siret

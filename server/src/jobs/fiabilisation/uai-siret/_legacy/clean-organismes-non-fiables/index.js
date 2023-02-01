@@ -1,8 +1,8 @@
-import logger from "../../../../common/logger.js";
+import logger from "../../../../../common/logger.js";
 import cliProgress from "cli-progress";
-import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../common/model/collections.js";
-import { findOrganismeByQuery } from "../../../../common/actions/organismes/organismes.actions.js";
-import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
+import { effectifsDb, fiabilisationUaiSiretDb, organismesDb } from "../../../../../common/model/collections.js";
+import { findOrganismeByQuery } from "../../../../../common/actions/organismes/organismes.actions.js";
+import { createJobEvent } from "../../../../../common/actions/jobEvents.actions.js";
 import { ObjectId } from "mongodb";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
