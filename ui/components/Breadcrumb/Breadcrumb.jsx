@@ -3,6 +3,12 @@ import { ArrowDropRightLine } from "../../theme/components/icons";
 import { BreadcrumbItem, BreadcrumbLink, Breadcrumb as ChakraBreadcrumb } from "@chakra-ui/react";
 import NavLink from "next/link";
 
+export const PAGES = {
+  monEspace: () => ({ title: "Mon espace", to: "/mon-espace/mon-organisme" }),
+  mesEffectifs: () => ({ title: "Mes effectifs", to: "/mon-espace/mon-organisme/effectifs" }),
+  sesEffectifs: (organismeId) => ({ title: "Ses effectifs", to: `/mon-espace/organisme/${organismeId}/effectifs` }),
+};
+
 const Breadcrumb = ({ pages }) => {
   return (
     <ChakraBreadcrumb

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useRecoilState } from "recoil";
+
 import { _get } from "../common/httpClient";
 import useAuth from "./useAuth";
-import { useRecoilState } from "recoil";
 import { organismeMineAtom, organismeNavigationAtom } from "./organismeAtoms";
 
 const fetchMyOrganisme = async (my_organisme_id, accountIsNotReady = false) => {
@@ -14,7 +15,7 @@ const fetchMyOrganisme = async (my_organisme_id, accountIsNotReady = false) => {
     if (e.statusCode === 404) {
       return { myOrganisme: null };
     } else {
-      console.log({ e });
+      console.error(e);
     }
     return { myOrganisme: null };
   }

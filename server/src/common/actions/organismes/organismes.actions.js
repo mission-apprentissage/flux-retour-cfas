@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+
 import { getMetiersBySirets } from "../../apis/apiLba.js";
 import { organismesDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/next.toKeep.models/organismes.model.js";
@@ -98,7 +99,7 @@ export const createOrganisme = async ({
     try {
       metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -288,7 +289,7 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
     try {
       metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -406,9 +407,10 @@ export const getContributeurs = async (organismeId) => {
     };
 
     const currentUserPerm = await hasPermission(
-      { organisme_id: orgId, userEmail: contributeurEmail },
+      { organisme_id: ObjectId(orgId), userEmail: contributeurEmail },
       permSelectFields
     );
+
     if (!currentUserPerm) {
       logger.error(`Contributor ${contributeurEmail} has no permission for organisme ${orgId}. This should not happen`);
       return null;

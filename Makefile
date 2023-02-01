@@ -14,7 +14,7 @@ build-ui:
 	yarn --cwd ui build
 
 start:
-	docker-compose up --build --force-recreate
+	docker-compose up --build --force-recreate -d
 
 start-mongodb:
 	docker-compose up -d mongodb

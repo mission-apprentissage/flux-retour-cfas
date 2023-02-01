@@ -1,15 +1,13 @@
 import React, { memo } from "react";
 import { Box, Flex, FormLabel, HStack, Text } from "@chakra-ui/react";
+
 import { InputController } from "../../../formEngine/components/Input/InputController";
 import { CollapseController } from "../../../formEngine/components/CollapseController";
 import { shouldAskRepresentantLegal } from "./domain/shouldAskRepresentantLegal";
 import { shouldAskResponsalLegalAdresse } from "./domain/shouldAskResponsalLegalAdresse";
-import { useRecoilValue } from "recoil";
-import { valuesSelector } from "../../../formEngine/atoms";
 
 // eslint-disable-next-line react/display-name
-export const EffectifApprenant = memo(() => {
-  const values = useRecoilValue(valuesSelector);
+export const EffectifApprenant = memo(({ apprenant }) => {
   return (
     <Box>
       <Flex>
@@ -60,18 +58,17 @@ export const EffectifApprenant = memo(() => {
             Adresse de l&apos;apprenant(e) :
           </FormLabel>
           <Flex fontStyle="italic" fontSize="0.9rem" borderWidth="1px" borderColor="dgalt" alignItems="center" mb={4}>
-            {values.apprenant.adresse?.complete && (
-              <Box fontWeight="bold">Infomation ERP/API: {values.apprenant.adresse.complete}</Box>
+            {apprenant.adresse?.complete && (
+              <Box fontWeight="bold">Infomation ERP/API: {apprenant.adresse.complete}</Box>
             )}
-            {!values.apprenant.adresse?.complete && (
+            {!apprenant.adresse?.complete && (
               <HStack>
                 <Text>
-                  {values.apprenant.adresse.numero} {values.apprenant.adresse.repetition_voie}{" "}
-                  {values.apprenant.adresse.voie}
+                  {apprenant.adresse.numero} {apprenant.adresse.repetition_voie} {apprenant.adresse.voie}
                 </Text>
-                <Text>{values.apprenant.adresse.complement}</Text>
+                <Text>{apprenant.adresse.complement}</Text>
                 <Text>
-                  {values.apprenant.adresse.code_postal} {values.apprenant.adresse.commune}
+                  {apprenant.adresse.code_postal} {apprenant.adresse.commune}
                 </Text>
               </HStack>
             )}

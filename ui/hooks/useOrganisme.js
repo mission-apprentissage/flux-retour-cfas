@@ -13,7 +13,7 @@ const fetchOrganisme = async (organisme_id) => {
     if (e.statusCode === 404) {
       return { organisme: null };
     } else {
-      console.log({ e });
+      console.error(e);
     }
     return { organisme: null };
   }

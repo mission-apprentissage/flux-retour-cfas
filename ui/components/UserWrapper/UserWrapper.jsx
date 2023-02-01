@@ -30,7 +30,11 @@ const AccountWrapper = ({ children }) => {
           ) {
             let { token } = await _post("/api/v1/password/forgotten-password", { username: auth.email, noEmail: true });
             router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
-          } else if (auth.account_status.includes("FORCE_COMPLETE_PROFILE") && router.asPath !== "/auth/finalisation") {
+          } else if (
+            auth.account_status.includes("FORCE_COMPLETE_PROFILE") &&
+            router.asPath !== "/auth/finalisation" &&
+            !isUserAdmin(auth)
+          ) {
             router.push("/auth/finalisation");
           }
         }

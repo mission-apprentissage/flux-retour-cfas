@@ -67,6 +67,7 @@ const UploadFiles = ({ title }) => {
         });
       } catch (e) {
         const messages = e.messages;
+        console.error(e);
         setUploadError(`Une erreur est survenue : ${messages?.error ?? e.message}`);
         toast({
           title: `Une erreur est survenue : ${messages?.error ?? e.message}`,
@@ -140,12 +141,13 @@ const UploadFiles = ({ title }) => {
       </Heading>
       <Text>Veuillez privilégier le format .csv</Text>
 
-      {documents?.unconfirmed?.length > 0 && (
+      {documents?.unconfirmed?.length > 0 ? (
         <Box mb={8}>
           {uploadError && <Text color="error">{uploadError}</Text>}
-
           <>
-            {!isSubmitting && (
+            {isSubmitting ? (
+              <Spinner />
+            ) : (
               <List>
                 {documents?.unconfirmed?.map((file) => {
                   return (
@@ -168,14 +170,13 @@ const UploadFiles = ({ title }) => {
                 })}
               </List>
             )}
-            {isSubmitting && <Spinner />}
           </>
         </Box>
-      )}
-
-      {documents?.unconfirmed?.length === 0 && (
+      ) : (
         <Box {...getRootProps({ style })} mb={8} minH="200px">
-          {!isSubmitting && (
+          {isSubmitting ? (
+            <Spinner />
+          ) : (
             <>
               <Input {...getInputProps()} />
               {isDragActive ? (
@@ -195,7 +196,6 @@ const UploadFiles = ({ title }) => {
               )}
             </>
           )}
-          {isSubmitting && <Spinner />}
         </Box>
       )}
     </>

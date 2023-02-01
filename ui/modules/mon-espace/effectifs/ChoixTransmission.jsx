@@ -1,4 +1,6 @@
 import React from "react";
+import { useRouter } from "next/router";
+
 import { Box, Button, Center, Flex, Heading, HStack, Text } from "@chakra-ui/react";
 
 import { ArrowDropRightLine } from "@/theme/components/icons";
@@ -7,6 +9,7 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 
 const ChoixTransmission = () => {
   const { organisme, updateOrganisme } = useOrganisme();
+  const router = useRouter();
 
   return (
     <>
@@ -43,7 +46,10 @@ const ChoixTransmission = () => {
             </Box>
             <Center h="10%">
               <Button
-                onClick={() => updateOrganisme(organisme.id, { mode_de_transmission: "API" })}
+                onClick={() => {
+                  updateOrganisme(organisme.id, { mode_de_transmission: "API" });
+                  router.reload();
+                }}
                 size={"md"}
                 variant={"secondary"}
               >
@@ -74,9 +80,10 @@ const ChoixTransmission = () => {
             </Box>
             <Center h="10%">
               <Button
-                onClick={() =>
-                  updateOrganisme(organisme.id, { mode_de_transmission: "MANUEL", setup_step_courante: "COMPLETE" })
-                }
+                onClick={() => {
+                  updateOrganisme(organisme.id, { mode_de_transmission: "MANUEL", setup_step_courante: "COMPLETE" });
+                  router.reload();
+                }}
                 size={"md"}
                 variant={"secondary"}
               >

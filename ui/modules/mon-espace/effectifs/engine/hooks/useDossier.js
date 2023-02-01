@@ -13,7 +13,7 @@ const hydrate = async (dossierId) => {
     if (e.statusCode === 404) {
       return { dossier: null };
     } else {
-      console.log({ e });
+      console.error(e);
     }
     return { dossier: null };
   }

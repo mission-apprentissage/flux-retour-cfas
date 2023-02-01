@@ -8,8 +8,8 @@ import createServices from "../services.js";
 import config from "../config.js";
 import { createJobEvent } from "../common/actions/jobEvents.actions.js";
 
-process.on("unhandledRejection", (e) => console.log(e));
-process.on("uncaughtException", (e) => console.log(e));
+process.on("unhandledRejection", (e) => console.error(e));
+process.on("uncaughtException", (e) => console.error(e));
 
 let redisClient;
 
@@ -29,7 +29,7 @@ const exit = async (rawError) => {
       .then(() => {})
       .catch((closeError) => {
         error = closeError;
-        console.log(error);
+        console.error(error);
       });
   }, 500);
 

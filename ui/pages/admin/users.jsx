@@ -120,9 +120,15 @@ const UserLine = ({ user, roles, refetchUsers }) => {
               },
             },
           };
-          const result = await _post("/api/v1/admin/user/", body);
-          if (result?.ok) {
+          const result = await _post("/api/v1/admin/user/", body).catch((err) => {
+            if (err.statusCode === 409) {
+              return { error: "Cet utilisateur existe déjà" };
+            }
+          });
+          if (result?._id) {
             toastSuccess("Utilisateur créé");
+          } else if (result.error) {
+            toastError(result.error);
           } else {
             toastError("Erreur lors de la création de l'utilisateur.", {
               description: " Merci de réessayer plus tard",
