@@ -1,6 +1,6 @@
-import logger from "../../../../common/logger.js";
-import { dossiersApprenantsDb, fiabilisationUaiSiretDb } from "../../../../common/model/collections.js";
-import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
+import logger from "../../../../../common/logger.js";
+import { dossiersApprenantsDb, fiabilisationUaiSiretDb } from "../../../../../common/model/collections.js";
+import { asyncForEach } from "../../../../../common/utils/asyncUtils.js";
 
 const filters = {
   annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },

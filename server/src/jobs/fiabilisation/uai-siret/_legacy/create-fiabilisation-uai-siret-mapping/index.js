@@ -1,8 +1,8 @@
-import { fetchOrganismes } from "../../../../common/apis/apiReferentielMna.js";
-import logger from "../../../../common/logger.js";
-import { dossiersApprenantsDb, fiabilisationUaiSiretDb } from "../../../../common/model/collections.js";
-import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
-import { FIABILISATION_MAPPINGS as manualMapping } from "./mapping.js";
+import { fetchOrganismes } from "../../../../../common/apis/apiReferentielMna.js";
+import logger from "../../../../../common/logger.js";
+import { dossiersApprenantsDb, fiabilisationUaiSiretDb } from "../../../../../common/model/collections.js";
+import { asyncForEach } from "../../../../../common/utils/asyncUtils.js";
+import { FIABILISATION_MAPPINGS as manualMapping } from "../../mapping.js";
 
 const filters = {
   annee_scolaire: { $in: ["2022-2022", "2022-2023", "2023-2023"] },

@@ -1,4 +1,4 @@
-import { FIABILISATION_MAPPINGS } from "../../../jobs/fiabilisation/uai-siret/create-fiabilisation-uai-siret-mapping/mapping.js";
+import { FIABILISATION_MAPPINGS } from "../../../jobs/fiabilisation/uai-siret/mapping.js";
 import { fiabilisationUaiSiretDb } from "../../model/collections.js";
 
 /**
