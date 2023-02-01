@@ -3,13 +3,17 @@ import * as apiEntreprise from "../apis/ApiEntreprise.js";
 import { ACADEMIES, DEPARTEMENTS } from "../constants/territoiresConstants.js";
 import { find } from "lodash-es";
 
+export const getDepartementCodeFromCodeInsee = (codeInsee) => {
+  let code_dept = codeInsee.substring(0, 2);
+  return ["97", "98"].includes(code_dept) ? codeInsee.substring(0, 3) : code_dept;
+};
+
 export const buildAdresseFromApiEntreprise = async (siret) => {
   const etablissementApiInfo = await apiEntreprise.getEtablissement(siret);
   if (!etablissementApiInfo) return defaultValuesAdresse();
 
   // Handle departement
-  let code_dept = etablissementApiInfo.adresse.code_insee_localite.substring(0, 2);
-  code_dept = code_dept === "97" ? etablissementApiInfo.adresse.code_insee_localite.substring(0, 3) : code_dept;
+  let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_insee_localite);
 
   // Handle academie
   const { nom_academie } = findDataByDepartementNum(code_dept);

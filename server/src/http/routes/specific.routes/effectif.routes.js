@@ -10,7 +10,7 @@ import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganis
 import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { getUploadEntryByOrgaId } from "../../../common/actions/uploads.actions.js";
 import { algoUAI } from "../../../common/utils/uaiUtils.js";
-import { getCpInfo } from "../../../common/apis/apiTablesCorrespondances.js";
+import { getCodePostalInfo } from "../../../common/apis/apiTablesCorrespondances.js";
 
 const flattenKeys = (obj, path = []) =>
   !isObject(obj)
@@ -331,7 +331,7 @@ export default () => {
         .unknown()
         .validateAsync(body, { abortEarly: false });
 
-      const result = await getCpInfo(codePostal);
+      const result = await getCodePostalInfo(codePostal);
 
       return res.json(result);
     })

@@ -1,6 +1,6 @@
 import * as apiEntreprise from "../apis/ApiEntreprise.js";
 import * as apiCfaDock from "../apis/ApiCfaDock.js";
-import { buildAdresse, findDataByDepartementNum } from "../utils/adresseUtils.js";
+import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "../utils/adresseUtils.js";
 
 export const findDataFromSiret = async (providedSiret, non_diffusables = true, getConventionCollective = true) => {
   if (!providedSiret || !/^[0-9]{14}$/g.test(providedSiret.trim())) {
@@ -133,8 +133,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   }
   conventionCollective = { ...conventionCollective, ...complement_conventionCollective };
 
-  let code_dept = etablissementApiInfo.adresse.code_insee_localite.substring(0, 2);
-  code_dept = code_dept === "97" ? etablissementApiInfo.adresse.code_insee_localite.substring(0, 3) : code_dept;
+  let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_insee_localite);
   const { nom_dept, nom_region, code_region, nom_academie, num_academie } = findDataByDepartementNum(code_dept);
 
   return {

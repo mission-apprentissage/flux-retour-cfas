@@ -31,7 +31,7 @@ runScript(async ({ formations }) => {
   // create a formation for every "new" CFD and update related dossiers apprenants
   await asyncForEach(formationsCfdToCreate, async (cfd) => {
     try {
-      const createdFormation = await formations.createFormation(cfd);
+      const createdFormation = await formations.createFormation({ cfd });
       createdFormationsCount++;
       const dossiersApprenantsUpdateResults = await dossiersApprenantsDb().updateMany(
         { formation_cfd: cfd },

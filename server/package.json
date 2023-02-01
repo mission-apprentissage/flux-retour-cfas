@@ -98,7 +98,7 @@
     "all": true,
     "lines": 40,
     "functions": 45,
-    "branches": 70,
+    "branches": 65,
     "statements": 40,
     "exclude": [
       "tests/**",

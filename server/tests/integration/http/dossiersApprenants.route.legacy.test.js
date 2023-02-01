@@ -1,20 +1,23 @@
 import { strict as assert } from "assert";
+import nock from "nock";
+import { pick } from "lodash-es";
+
 import { startServer } from "../../utils/testUtils.js";
 import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
-
 import {
   createRandomDossierApprenantApiInput,
   createRandomDossierApprenant,
   createRandomOrganisme,
 } from "../../data/randomizedSample.js";
-
 import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd.js";
 import { dossiersApprenantsMigrationDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
 import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
-import { pick } from "lodash-es";
 import { buildTokenizedString } from "../../../src/common/utils/buildTokenizedString.js";
 import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";
+import { nockGetEntreprise, nockGetEtablissement } from "../../utils/nockApis/nock-apiEntreprise.js";
+import { nockGetFormations } from "../../utils/nockApis/nock-apiCatalogue.js";
+import { nockGetCodePostalInfo } from "../../utils/nockApis/nock-tablesCorrespondances.js";
 
 const user = {
   name: "userApi",
@@ -38,6 +41,56 @@ const getJwtForUser = async (httpClient) => {
 };
 
 describe("Dossiers Apprenants Route", () => {
+  const uai = "0802004U";
+  const siret = "77937827200016";
+  let randomOrganisme;
+  let createdOrganisme;
+  beforeEach(async () => {
+    // Create organisme
+    randomOrganisme = createRandomOrganisme({ uai, siret });
+    // randomOrganisme.adresse.departement = "974";
+    // nock API entreprise
+    nockGetEtablissement(siret, {
+      etablissement: {
+        uai,
+        adresse: {
+          code_insee_localite: randomOrganisme.adresse.departement.padEnd(5, "0"),
+          num_departement: randomOrganisme.adresse.departement,
+        },
+        region_implantation: {
+          code: randomOrganisme.adresse.region,
+        },
+        commune_implantation: {},
+        pays_implantation: { code: "FR" },
+        etat_administratif: {
+          value: "A",
+          date_fermeture: null,
+        },
+      },
+    });
+    nockGetEntreprise(siret.substring(0, 9), {
+      entreprise: {
+        etat_administratif: {
+          value: "A",
+          date_fermeture: null,
+        },
+      },
+    });
+    nockGetFormations({
+      formations: [],
+      pagination: { page: 1, nombre_par_page: 1000 },
+    });
+    nockGetCodePostalInfo();
+
+    try {
+      const { _id } = await createOrganisme(randomOrganisme);
+      createdOrganisme = await findOrganismeById(_id);
+    } catch (err) {
+      console.error("Error with the following randomOrganisme", randomOrganisme);
+      throw new Error(err);
+    }
+  });
+
   describe("POST dossiers-apprenants/test", () => {
     it("Vérifie que la route /dossiers-apprenants/test fonctionne avec un jeton JWT", async () => {
       const { httpClient } = await startServer();
@@ -62,7 +115,29 @@ describe("Dossiers Apprenants Route", () => {
   });
 
   describe("POST dossiers-apprenants/", () => {
+    it("Vérifie la création d'un organisme", async () => {
+      await startServer();
+      await createApiUser();
+
+      // Test organisme creation
+      assert.deepEqual(pick(createdOrganisme, ["uai", "sirets", "nom", "adresse", "nature"]), {
+        uai: randomOrganisme.uai,
+        sirets: randomOrganisme.sirets,
+        nom: randomOrganisme.nom,
+        adresse: { ...randomOrganisme.adresse, code_insee: randomOrganisme.adresse.departement.padEnd(5, "0") },
+        nature: randomOrganisme.nature,
+      });
+
+      assert.equal(createdOrganisme.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
+      assert.equal(createdOrganisme.private_url !== null, true);
+      assert.equal(createdOrganisme.accessToken !== null, true);
+      assert.equal(createdOrganisme.created_at !== null, true);
+      assert.equal(createdOrganisme.updated_at !== null, true);
+    });
+
     it("Vérifie que la route /dossiers-apprenants fonctionne avec un tableau vide", async () => {
+      nock("https://entreprise.api.gouv.fr:443");
+
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
@@ -95,7 +170,6 @@ describe("Dossiers Apprenants Route", () => {
       const { httpClient } = await startServer();
 
       // Create a normal user
-
       const createdId = await createUserLegacy({
         username: "normal-user",
         password: "password",
@@ -244,41 +318,18 @@ describe("Dossiers Apprenants Route", () => {
       });
     });
 
-    // TODO : fix this test
-    it.skip("Vérifie l'ajout via route /dossiers-apprenants de 20 données randomisées", async () => {
+    it("Vérifie l'ajout via route /dossiers-apprenants de 20 données randomisées", async function () {
+      this.timeout(20000);
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
-
       const nbItemsToTest = 20;
-
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
 
       // Create input list with uai / siret for organisme created
       let inputList = [];
       for (let index = 0; index < nbItemsToTest; index++) {
-        inputList.push(createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret }));
+        const dossier = createRandomDossierApprenantApiInput({ uai_etablissement: uai, siret_etablissement: siret });
+        inputList.push(dossier);
       }
 
       // Call Api Route
@@ -305,29 +356,6 @@ describe("Dossiers Apprenants Route", () => {
 
       const nbItemsToTest = 200;
 
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
-
       // Create input list with uai / siret for organisme created
       let inputList = [];
       for (let index = 0; index < nbItemsToTest; index++) {
@@ -346,34 +374,11 @@ describe("Dossiers Apprenants Route", () => {
       assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
     });
 
-    // TODO : fix this test
-    it.skip("Vérifie l'ajout via route /dossiers-apprenants de 10 statuts valides et 3 statuts invalides", async () => {
+    it("Vérifie l'ajout via route /dossiers-apprenants de 10 statuts valides et 3 statuts invalides", async function () {
+      this.timeout(10000);
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
-
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
 
       // Generate random valid & invalid data
       const nbValidItems = 10;
@@ -411,61 +416,10 @@ describe("Dossiers Apprenants Route", () => {
       assert.deepEqual(await dossiersApprenantsMigrationDb().countDocuments({}), nbValidItems);
     });
 
-    // OLD Test : n'est plus pertinent dans la nouvelle structure
-    // it("Vérifie l'ajout via route /dossiers-apprenants d'un statut avec champs non renseignés dans le schéma mais ignorés en base", async () => {
-    //   const { httpClient } = await startServer();
-    //   await createApiUser();
-    //   const accessToken = await getJwtForUser(httpClient);
-
-    //   // Generate random statut and add unknown key
-    //   const unknownKeyName = "prenom_apprenant2";
-    //   const payload = [{ ...createRandomDossierApprenantApiInput(), [unknownKeyName]: "should not be stored" }];
-
-    //   // Call Api Route
-    //   const response = await httpClient.post("/api/dossiers-apprenants", payload, {
-    //     headers: {
-    //       Authorization: `Bearer ${accessToken}`,
-    //     },
-    //   });
-
-    //   // Check Api Route data
-    //   assert.equal(response.status, 200);
-    //   assert.equal(response.data.status, "OK");
-    //   assert.equal(response.data.ok, 1);
-
-    //   const allStatuts = await dossiersApprenantsMigrationDb().find().toArray();
-    //   const createdStatut = allStatuts[0];
-    //   assert.equal(createdStatut[unknownKeyName], undefined);
-    // });
-
-    // TODO : fix this test
-    it.skip("Vérifie l'ajout via route /dossiers-apprenants pour un statut avec bon code CFD (id_formation)", async () => {
+    it("Vérifie l'ajout via route /dossiers-apprenants pour un statut avec bon code CFD (id_formation)", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
-
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
 
       const goodCfd = "50033610";
 
@@ -491,34 +445,10 @@ describe("Dossiers Apprenants Route", () => {
       assert.deepEqual(await dossiersApprenantsMigrationDb().countDocuments({}), 1);
     });
 
-    // TODO : fix this test
-    it.skip("Vérifie qu'on ne peut créer un dossier apprenant avec des espaces en début/fin de prenom_apprenant et nom_apprenant", async () => {
+    it("Vérifie qu'on ne peut créer un dossier apprenant avec des espaces en début/fin de prenom_apprenant et nom_apprenant", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
-
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
 
       // Generate random data with good cfd
       const simpleStatutWithGoodCfd = {
@@ -559,29 +489,6 @@ describe("Dossiers Apprenants Route", () => {
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
-
       const badCfd = "abc123456";
 
       // Generate random data with bad cfd
@@ -608,34 +515,10 @@ describe("Dossiers Apprenants Route", () => {
       assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
     });
 
-    // TODO : fix this test
-    it.skip("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec un SIRET au mauvais format", async () => {
+    it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec un SIRET au mauvais format", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
-
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
 
       const badSiret = "abc123456";
 
@@ -697,43 +580,20 @@ describe("Dossiers Apprenants Route", () => {
       assert.deepEqual(response.status, 403);
     });
 
-    // TODO : fix this test
-    it.skip("Vérifie que la récupération via GET /dossiers-apprenants renvoie tous les dossiersApprenants ayant pour source le username d'un user appelant", async () => {
+    it("Vérifie que la récupération via GET /dossiers-apprenants renvoie tous les dossiersApprenants ayant pour source le username d'un user appelant", async () => {
       const { httpClient } = await startServer();
 
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
-
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
 
       // Create random dossiers for fixed uai & user.name as source
       const nbRandomDossiers = 10;
       for (let index = 0; index < nbRandomDossiers; index++) {
         await insertDossierApprenant(
           createRandomDossierApprenant({
-            uai_etablissement: uai,
-            siret_etablissement: siret,
+            uai_etablissement: createdOrganisme.uai,
+            siret_etablissement: createdOrganisme.siret,
+            organisme_id: createdOrganisme._id,
             source: user.name,
           })
         );
@@ -754,34 +614,10 @@ describe("Dossiers Apprenants Route", () => {
       assert.equal(response.data.pagination.total, nbRandomDossiers);
     });
 
-    // TODO : fix this test
-    it.skip("Vérifie que la récupération via GET /dossiers-apprenants/ ne renvoie aucun dossiersApprenants si aucun n'a pour source le username du user appelant", async () => {
+    it("Vérifie que la récupération via GET /dossiers-apprenants/ ne renvoie aucun dossiersApprenants si aucun n'a pour source le username du user appelant", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
-
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
 
       // Create random dossiers for fixed uai & OTHER_ERP as source
       const nbRandomDossiers = 10;
@@ -790,6 +626,8 @@ describe("Dossiers Apprenants Route", () => {
         await insertDossierApprenant(
           createRandomDossierApprenant({
             uai_etablissement: currentUai,
+            siret_etablissement: createdOrganisme.siret,
+            organisme_id: createdOrganisme._id,
             source: "OTHER_ERP", // Source not linked to username
           })
         );
@@ -810,43 +648,22 @@ describe("Dossiers Apprenants Route", () => {
       assert.equal(response.data.pagination.total, 0);
     });
 
-    // TODO : fix this test
-    it.skip("Vérifie que la récupération via GET /dossiers-apprenants/ renvoie uniquement les bons dossiersApprenants pour un user ayant la permission", async () => {
+    it("Vérifie que la récupération via GET /dossiers-apprenants/ renvoie uniquement les bons dossiersApprenants pour un user ayant la permission", async () => {
       const { httpClient } = await startServer();
       await createApiUser();
       const accessToken = await getJwtForUser(httpClient);
 
-      // Create organisme
-      const uai = "0802004U";
-      const siret = "77937827200016";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id } = await createOrganisme(randomOrganisme);
-      const created = await findOrganismeById(_id);
-
-      // Test organisme creation
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(created.private_url !== null, true);
-      assert.equal(created.accessToken !== null, true);
-      assert.equal(created.created_at !== null, true);
-      assert.equal(created.updated_at !== null, true);
-
       // Create random dossiers for fixed uai & user.name as source
       const nbRandomDossiersForUser = 20;
       const currentUai = "0762232N";
+
       for (let index = 0; index < nbRandomDossiersForUser; index++) {
         await insertDossierApprenant(
           createRandomDossierApprenant({
             uai_etablissement: currentUai,
             source: user.name,
+            organisme_id: createdOrganisme._id,
+            siret_etablissement: createdOrganisme.siret,
           })
         );
       }
@@ -858,6 +675,8 @@ describe("Dossiers Apprenants Route", () => {
           createRandomDossierApprenant({
             uai_etablissement: currentUai,
             source: "OTHER_ERP",
+            organisme_id: createdOrganisme._id,
+            siret_etablissement: createdOrganisme.siret,
           })
         );
       }

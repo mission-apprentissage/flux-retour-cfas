@@ -1,13 +1,10 @@
 import { strict as assert } from "assert";
 import omit from "lodash.omit";
-
-// eslint-disable-next-line node/no-unpublished-require
 import nock from "nock";
 
 import { nockGetCfdInfo } from "../../../utils/nockApis/nock-tablesCorrespondances.js";
 import { asyncForEach } from "../../../../src/common/utils/asyncUtils.js";
 import { dataForGetCfdInfo } from "../../../data/apiTablesDeCorrespondances.js";
-import { dataForGetMetiersByCfd } from "../../../data/apiLba.js";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 import { nockGetMetiersByCfd } from "../../../utils/nockApis/nock-Lba.js";
 import { formationsDb, dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
@@ -63,35 +60,33 @@ describe("Tests des actions Formations", () => {
 
   describe("createFormation", () => {
     it("throws when given cfd is invalid", async () => {
-      await assert.rejects(() => createFormation("invalid"), new Error("Invalid CFD"));
+      await assert.rejects(() => createFormation({ cfd: "invalid" }), new Error("Invalid CFD"));
     });
 
-    // TODO : fix this test
-    it.skip("throws when formation with given cfd already exists", async () => {
+    it("throws when formation with given cfd already exists", async () => {
       const cfd = "2502000D";
       // create formation in db
       await formationsDb().insertOne({ cfd });
 
-      await assert.rejects(() => createFormation(cfd), new Error("A Formation with CFD 2502000D already exists"));
+      await assert.rejects(() => createFormation({ cfd }), new Error("A Formation with CFD 2502000D already exists"));
     });
 
     it("throws when formation data is not valid", async () => {
       nock.cleanAll();
-      nockGetCfdInfo({
+      nockGetCfdInfo(() => ({
         ...dataForGetCfdInfo.withIntituleLong,
         date_ouverture: "invalid",
-      });
+      }));
 
       const cfd = "2502000D";
-      await assert.rejects(() => createFormation(cfd));
+      await assert.rejects(() => createFormation({ cfd }));
     });
 
-    // TODO : fix this test
-    it.skip("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {
-      nockGetCfdInfo(dataForGetCfdInfo.withIntituleLong);
+    it("returns created formation when cfd was found in Tables de Correspondances with intitule_long", async () => {
+      nockGetCfdInfo(() => dataForGetCfdInfo.withIntituleLong);
 
       const cfd = "13534005";
-      const insertedId = await createFormation(cfd);
+      const insertedId = await createFormation({ cfd });
       const created = await findFormationById(insertedId);
 
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
@@ -102,19 +97,22 @@ describe("Tests des actions Formations", () => {
         libelle: "HYGIENISTE DU TRAVAIL ET DE L'ENVIRONNEMENT (CNAM)",
         niveau: "7",
         niveau_libelle: "7 (Master, titre ingénieur...)",
-        metiers: dataForGetMetiersByCfd.metiers,
+        metiers: [], // previously dataForGetMetiersByCfd.metiers, // using Call LBA Api // TODO Removed not useful now
         updated_at: null,
+        annee: null,
+        duree: null,
       });
     });
 
-    // TODO : fix this test
-    it.skip("returns created formation when cfd was found in Tables de Correspondances without intitule_long (no rncps found)", async () => {
+    it("returns created formation when cfd was found in Tables de Correspondances without intitule_long (no rncps found)", async () => {
       nock.cleanAll();
       nockGetMetiersByCfd();
-      nockGetCfdInfo(dataForGetCfdInfo.withoutIntituleLong);
+      nockGetCfdInfo(() => {
+        return dataForGetCfdInfo.withoutIntituleLong;
+      });
 
       const cfd = "13534005";
-      const insertedId = await createFormation(cfd);
+      const insertedId = await createFormation({ cfd });
       const created = await findFormationById(insertedId);
 
       assert.deepEqual(omit(created, ["created_at", "_id", "tokenized_libelle"]), {
@@ -125,14 +123,15 @@ describe("Tests des actions Formations", () => {
         libelle: "",
         niveau: "7",
         niveau_libelle: "7 (Master, titre ingénieur...)",
-        metiers: dataForGetMetiersByCfd.metiers,
+        metiers: [], // previously dataForGetMetiersByCfd.metiers, // using Call LBA Api // TODO Removed not useful now
         updated_at: null,
+        annee: null,
+        duree: null,
       });
     });
   });
 
-  // TODO : fix this test
-  describe.skip("searchFormations", () => {
+  describe("searchFormations", () => {
     const formationsSeed = [
       { cfd: "01022103", libelle: "EMPLOYE TRAITEUR (CAP)" },
       { cfd: "01022104", libelle: "ZINGUERIE (MC NIVEAU V)" },
@@ -143,8 +142,20 @@ describe("Tests des actions Formations", () => {
     ];
 
     beforeEach(async () => {
+      nock.cleanAll();
+      nockGetCfdInfo((cfd) =>
+        formationsSeed
+          .filter((f) => f.cfd === cfd)
+          .map((o) => ({
+            cfd: o.cfd,
+            intitule_long: o.libelle,
+            intitule_court: o.libelle,
+          }))
+          .pop()
+      );
+
       await asyncForEach(formationsSeed, async ({ cfd, libelle }) => {
-        await createFormation(cfd, libelle);
+        await createFormation({ cfd }, libelle);
 
         await dossiersApprenantsMigrationDb().insertOne({
           ...createRandomDossierApprenant(),
