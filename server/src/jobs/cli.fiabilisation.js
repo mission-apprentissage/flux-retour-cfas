@@ -8,30 +8,8 @@ import { identifyCfdDuplicates } from "./fiabilisation/duplicates/dossiersAppren
 import { removeDossierApprenantsDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates/remove-duplicates.js";
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
 import { updateFiabilisationUaiSiretAFiabiliser } from "./fiabilisation/uai-siret/update-fiabilisation-type/index.js";
-
-// /**
-//  * Job de création de la collection de mapping fiabilisation UAI SIRET
-//  */
-// cli
-//   .command("create:mapping-fiabilisation-uai-siret")
-//   .description("Création de la collection de mapping pour fiabilisation des UAI SIRET")
-//   .action(() => {
-//     runScript(async () => {
-//       return createFiabilisationUaiSiretMapping();
-//     }, "create-mapping-fiabilisation-uai-siret");
-//   });
-
-// /**
-//  * Job d'application de la fiabilisation UAI SIRET
-//  */
-// cli
-//   .command("apply:fiabilisation-uai-siret")
-//   .description("Application du mapping de fiabilisation des UAI SIRET")
-//   .action(() => {
-//     runScript(async () => {
-//       return updateDossiersApprenantWithFiabilisationUaiSiret();
-//     }, "apply-fiabilisation-uai-siret");
-//   });
+import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
+import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
 
 // /**
 //  * Job de suppression des organismes non fiables et déplacement des contributeurs & effectifs liés
@@ -46,11 +24,38 @@ import { updateFiabilisationUaiSiretAFiabiliser } from "./fiabilisation/uai-sire
 //   });
 
 /**
- * Job d'identification des doublons dans les fichiers CSV de réseaux
+ * Job de création de la collection fiabilisation UAI SIRET
  */
 cli
-  .command("updateFiabilisation:type-afiabiliser")
-  .description("MAJ des entrées fiabilisationUaiSiretDb avec le type = A FIABILISER")
+  .command("build:fiabilisation-uai-siret")
+  .description("Création de la collection pour fiabilisation des UAI SIRET")
+  .action(() => {
+    runScript(async () => {
+      return buildFiabilisationUaiSiret();
+    }, "build-fiabilisation-uai-siret");
+  });
+
+/**
+ * Job d'application de la fiabilisation UAI SIRET
+ */
+cli
+  .command("apply:fiabilisation-uai-siret")
+  .description("Application du mapping de fiabilisation des UAI SIRET")
+  .action(() => {
+    runScript(async () => {
+      return applyFiabilisationUaiSiret();
+    }, "apply-fiabilisation-uai-siret");
+  });
+
+/**
+ * Job d'initialisation des valeurs defaut pour la fiabilisation
+ * Job temporaire nécessaire suite à la modification du modèle
+ */
+cli
+  .command("migration:fiabilisation-default-values")
+  .description(
+    "MAJ des entrées fiabilisationUaiSiretDb avec le type = A FIABILISER et des statuts de fiabilisation des organismes"
+  )
   .action(() => {
     runScript(async () => {
       return updateFiabilisationUaiSiretAFiabiliser();

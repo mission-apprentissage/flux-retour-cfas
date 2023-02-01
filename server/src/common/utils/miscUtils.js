@@ -31,3 +31,14 @@ export const arraysContainSameValues = (array1, array2) => {
   });
   return true;
 };
+
+/**
+ * Méthode de calcul de pourcentage
+ * @param {*} count
+ * @param {*} total
+ * @returns
+ */
+export const getPercentage = (count, total) => {
+  if (total === 0) return 0;
+  return Math.round((count * 100) / total);
+};

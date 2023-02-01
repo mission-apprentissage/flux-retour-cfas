@@ -60,3 +60,16 @@ export const fetchOrganismesWithUai = async (uai) => {
     return null;
   }
 };
+
+export const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
+  "siret",
+  "uai",
+  "etat_administratif",
+  "qualiopi",
+  "raison_sociale",
+  "enseigne",
+  "nature",
+  "qualiopi",
+  "adresse",
+  "numero_declaration_activite",
+];
