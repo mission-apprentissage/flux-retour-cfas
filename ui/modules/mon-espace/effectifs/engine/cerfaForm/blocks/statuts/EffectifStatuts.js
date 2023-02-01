@@ -1,13 +1,13 @@
 import React, { memo } from "react";
 import { Box, Button, HStack } from "@chakra-ui/react";
-import { InputController } from "../../../formEngine/components/Input/InputController";
-import { fieldSelector, valuesSelector } from "../../../formEngine/atoms";
 import { useRecoilValue } from "recoil";
+
+import { InputController } from "../../../formEngine/components/Input/InputController";
+import { fieldSelector } from "../../../formEngine/atoms";
 import { useCerfaController } from "../../../formEngine/CerfaControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
-export const ApprenantStatuts = memo(({ modeSifa = false }) => {
-  const values = useRecoilValue(valuesSelector);
+export const ApprenantStatuts = memo(({ values, modeSifa = false }) => {
   const nouveaStatutField = useRecoilValue(fieldSelector("apprenant.nouveau_statut"));
   const cerfaController = useCerfaController();
   return (

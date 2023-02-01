@@ -1,12 +1,13 @@
 import React, { memo, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack, Text } from "@chakra-ui/react";
+
 import { EffectifApprenant } from "./blocks/apprenant/EffectifApprenant";
 import { PlainArrowRight } from "../../../../../theme/components/icons/PlainArrowRight";
 import { ApprenantStatuts } from "./blocks/statuts/EffectifStatuts";
 import { ApprenantContrats } from "./blocks/contrats/EffectifContrats";
 import { EffectifFormation } from "./blocks/formation/EffectifFormation";
-import { effectifStateSelector } from "../formEngine/atoms";
+import { effectifStateSelector, valuesSelector } from "../formEngine/atoms";
 import { ErrorPill } from "../../../../../theme/components/icons/ErrorPill";
 import { effectifIdAtom } from "../atoms";
 
@@ -44,8 +45,10 @@ const useOpenAccordionToLocation = () => {
 // eslint-disable-next-line react/display-name
 export const CerfaForm = memo(({ modeSifa = false }) => {
   const { accordionIndex, setAccordionIndex } = useOpenAccordionToLocation();
+
   const effectifId = useRecoilValue(effectifIdAtom);
   const { validationErrorsByBlock, requiredSifaByBlock } = useRecoilValue(effectifStateSelector(effectifId));
+  const values = useRecoilValue(valuesSelector);
 
   return (
     <Box my={2} px={5}>
@@ -58,7 +61,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
               validationErrors={validationErrorsByBlock.statuts}
               requiredSifa={requiredSifaByBlock.statuts}
             >
-              <ApprenantStatuts modeSifa={modeSifa} />
+              <ApprenantStatuts modeSifa={modeSifa} values={values} />
             </AccordionItemChild>
           )}
         </AccordionItem>
@@ -70,7 +73,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
               validationErrors={validationErrorsByBlock.apprenant}
               requiredSifa={requiredSifaByBlock.apprenant}
             >
-              <EffectifApprenant />
+              <EffectifApprenant apprenant={values.apprenant} />
             </AccordionItemChild>
           )}
         </AccordionItem>
@@ -94,7 +97,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
               validationErrors={validationErrorsByBlock.contrats}
               requiredSifa={requiredSifaByBlock.contrats}
             >
-              <ApprenantContrats modeSifa={modeSifa} />
+              <ApprenantContrats contrats={values.apprenant.contrats} modeSifa={modeSifa} />
             </AccordionItemChild>
           )}
         </AccordionItem>

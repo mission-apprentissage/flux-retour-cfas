@@ -2,17 +2,16 @@ import React, { memo } from "react";
 import { Box, Button, Flex, FormLabel, HStack } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
 import { InputController } from "../../../formEngine/components/Input/InputController";
-import { fieldSelector, valuesSelector } from "../../../formEngine/atoms";
+import { fieldSelector } from "../../../formEngine/atoms";
 import { useCerfaController } from "../../../formEngine/CerfaControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
-export const ApprenantContrats = memo(({ modeSifa = false }) => {
-  const values = useRecoilValue(valuesSelector);
+export const ApprenantContrats = memo(({ contrats, modeSifa = false }) => {
   const nouveaContratField = useRecoilValue(fieldSelector("apprenant.nouveau_contrat"));
   const cerfaController = useCerfaController();
   return (
     <>
-      {values.apprenant.contrats?.map((contrat, i) => {
+      {contrats?.map((contrat, i) => {
         return (
           <Box key={i} borderBottomWidth="1px" borderColor="grey.700">
             <HStack spacing={2} alignItems="flex-end" mb={3}>
