@@ -7,6 +7,7 @@ import { cleanUaisDuplicates } from "./fiabilisation/duplicates/dossiersApprenan
 import { identifyCfdDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates-cfd/identify.js";
 import { removeDossierApprenantsDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates/remove-duplicates.js";
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
+import { updateFiabilisationUaiSiretAFiabiliser } from "./fiabilisation/uai-siret/update-fiabilisation-type/index.js";
 
 // /**
 //  * Job de création de la collection de mapping fiabilisation UAI SIRET
@@ -43,6 +44,18 @@ import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiers
 //       return cleanOrganismesNonFiables();
 //     }, "fiabilisation-clean-organismes-non-fiables");
 //   });
+
+/**
+ * Job d'identification des doublons dans les fichiers CSV de réseaux
+ */
+cli
+  .command("updateFiabilisation:type-afiabiliser")
+  .description("MAJ des entrées fiabilisationUaiSiretDb avec le type = A FIABILISER")
+  .action(() => {
+    runScript(async () => {
+      return updateFiabilisationUaiSiretAFiabiliser();
+    }, "fiabilisation-update-fiabilisation-type-aFiabiliser");
+  });
 
 /**
  * Job d'identification des doublons dans les fichiers CSV de réseaux
