@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { Box, Center, Container, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { Page } from "../../components";
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
-import Link from "../../components/Links/Link";
-import withAuth from "../../components/withAuth";
-import { _get } from "../../common/httpClient";
-import { useEspace } from "../../hooks/useEspace";
-import Table from "../../components/Table/Table";
-import { ArrowDropRightLine } from "../../theme/components/icons";
-import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import { Page } from "@/components";
+import { Breadcrumb, PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import Link from "@/components/Links/Link";
+import withAuth from "@/components/withAuth";
+import { _get } from "@/common/httpClient";
+import { useEspace } from "@/hooks/useEspace";
+import Table from "@/components/Table/Table";
+import { ArrowDropRightLine } from "@/theme/components/icons";
+import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 function useEspaceOrganismes() {
   const {
@@ -28,7 +28,7 @@ function MesOrganismes() {
   const title = "Mes organismes";
   const { isLoading, organismes } = useEspaceOrganismes();
 
-  let { whoIs } = useEspace();
+  const { whoIs } = useEspace();
 
   const headerTitle = {
     pilot: "Les organismes sur mon territoire",
@@ -47,7 +47,7 @@ function MesOrganismes() {
       </Head>
       <Box w="100%" pt={[4, 6]} px={[1, 1, 4, 4]} mb={16}>
         <Container maxW="xl">
-          <Breadcrumb pages={[{ title: "Mon espace", to: "/mon-espace/mon-organisme" }, { title: title }]} />
+          <Breadcrumb pages={[PAGES.monEspace(), { title: title }]} />
           <Heading textStyle="h2" color="grey.800" mt={5}>
             {headerTitle[whoIs ?? "global"]}
           </Heading>
