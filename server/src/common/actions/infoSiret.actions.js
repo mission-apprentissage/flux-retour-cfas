@@ -18,7 +18,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   try {
     etablissementApiInfo = await apiEntreprise.getEtablissement(siret, non_diffusables);
   } catch (e) {
-    console.log({ e });
+    console.error(e);
     if (e.reason === 451) {
       return {
         result: {
@@ -80,7 +80,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
     try {
       conventionCollective = await apiCfaDock.getOpcoData(siret);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -89,7 +89,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   try {
     entrepriseApiInfo = await apiEntreprise.getEntreprise(siren, non_diffusables);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return {
       result: {},
       messages: {
@@ -102,7 +102,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
     try {
       conventionCollective = await apiCfaDock.getOpcoData(siren);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       conventionCollective = {
         idcc: null,
         opco_nom: null,
@@ -128,7 +128,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
       );
       complement_conventionCollective = { active, date_publication, etat, titre_court, titre, url };
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
   conventionCollective = { ...conventionCollective, ...complement_conventionCollective };

@@ -9,7 +9,7 @@ const saveCerfa = async ({ organisme_id, effectifId, data, inputNames }) => {
       inputNames,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 

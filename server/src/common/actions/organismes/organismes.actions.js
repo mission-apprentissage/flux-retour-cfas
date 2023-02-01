@@ -99,7 +99,7 @@ export const createOrganisme = async ({
     try {
       metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -289,7 +289,7 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
     try {
       metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
