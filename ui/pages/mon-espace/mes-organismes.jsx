@@ -2,16 +2,17 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { Box, Center, Container, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { Page } from "../../components";
-import Link from "../../components/Links/Link";
-import withAuth from "../../components/withAuth";
-import { _get } from "../../common/httpClient";
-import { useEspace } from "../../hooks/useEspace";
-import Table from "../../components/Table/Table";
-import { ArrowDropRightLine } from "../../theme/components/icons";
-import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
-import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
+
+import { _get } from "@/common/httpClient";
+import { ArrowDropRightLine } from "@/theme/components/icons";
 import { Breadcrumb, PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
+import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import { Page } from "@/components";
+import { useEspace } from "@/hooks/useEspace";
+import Link from "@/components/Links/Link";
+import Table from "@/components/Table/Table";
+import withAuth from "@/components/withAuth";
 
 function useEspaceOrganismes() {
   const {
