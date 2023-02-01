@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { Box, Center, Container, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { Page } from "@/components";
+import { Page } from "../../components";
+import Link from "../../components/Links/Link";
+import withAuth from "../../components/withAuth";
+import { _get } from "../../common/httpClient";
+import { useEspace } from "../../hooks/useEspace";
+import Table from "../../components/Table/Table";
+import { ArrowDropRightLine } from "../../theme/components/icons";
+import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
 import { Breadcrumb, PAGES } from "@/components/Breadcrumb/Breadcrumb";
-import Link from "@/components/Links/Link";
-import withAuth from "@/components/withAuth";
-import { _get } from "@/common/httpClient";
-import { useEspace } from "@/hooks/useEspace";
-import Table from "@/components/Table/Table";
-import { ArrowDropRightLine } from "@/theme/components/icons";
-import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 function useEspaceOrganismes() {
   const {
@@ -159,6 +160,20 @@ function MesOrganismes() {
                         );
                       }
                       return <Text fontSize="1rem">Actif</Text>;
+                    },
+                  },
+                  fiabilisation: {
+                    size: 120,
+                    header: () => {
+                      return <Box textAlign="left">Fiabilisation</Box>;
+                    },
+                    cell: ({ row }) => {
+                      const { fiabilisation_statut } = organismes[row.id];
+                      return fiabilisation_statut ? (
+                        <Text>{FIABILISATION_LABEL[fiabilisation_statut]}</Text>
+                      ) : (
+                        <Text>{FIABILISATION_LABEL.INCONNUE}</Text>
+                      );
                     },
                   },
                   transmission: {
