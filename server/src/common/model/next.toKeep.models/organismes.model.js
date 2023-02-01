@@ -139,7 +139,7 @@ export function defaultValuesOrganisme() {
     erps: [],
     formations: [],
     contributeurs: [],
-    fiabilisation_statut: FIABILISATION_TYPES.INCONNUE,
+    fiabilisation_statut: FIABILISATION_TYPES.INCONNU,
     created_at: new Date(),
     updated_at: new Date(),
   };

@@ -169,11 +169,7 @@ function MesOrganismes() {
                     },
                     cell: ({ row }) => {
                       const { fiabilisation_statut } = organismes[row.id];
-                      return fiabilisation_statut ? (
-                        <Text>{FIABILISATION_LABEL[fiabilisation_statut]}</Text>
-                      ) : (
-                        <Text>{FIABILISATION_LABEL.INCONNUE}</Text>
-                      );
+                      return <Text>{FIABILISATION_LABEL[fiabilisation_statut] || FIABILISATION_LABEL.INCONNUE}</Text>;
                     },
                   },
                   transmission: {

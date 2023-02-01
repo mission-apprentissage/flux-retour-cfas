@@ -16,7 +16,7 @@ export const updateFiabilisationUaiSiretAFiabiliser = async () => {
   logger.info(`MAJ des fiabilisationUaiSiret en type = ${FIABILISATION_TYPES.A_FIABILISER} réalisée avec succès !`);
 
   // MaJ de tous les organismes - fiabilisation inconnue par défaut
-  await organismesDb().updateMany({}, { $set: { fiabilisation_statut: FIABILISATION_TYPES.INCONNUE } });
+  await organismesDb().updateMany({}, { $set: { fiabilisation_statut: FIABILISATION_TYPES.INCONNU } });
   logger.info(`MAJ des organismes avec fiabilisation INCONNUE par défault réalisée avec succès !`);
 
   await createJobEvent({

@@ -9,6 +9,7 @@ const schema = object({
   type: string({
     description: "Type de fiabilisation",
     enum: Object.values(FIABILISATION_TYPES),
+    // TODO ajouter un champ reason
   }),
   uai: string({ description: "L'UAI du couple à fiabiliser" }),
   siret: stringOrNull({ description: "Le SIRET du couple à fiabiliser" }),

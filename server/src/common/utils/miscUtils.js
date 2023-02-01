@@ -38,7 +38,7 @@ export const arraysContainSameValues = (array1, array2) => {
  * @param {*} total
  * @returns
  */
-export const getPercentage = (count, total) => {
+export const getPercentage = (count = 0, total = 0) => {
   if (total === 0) return 0;
   return Math.round((count * 100) / total);
 };

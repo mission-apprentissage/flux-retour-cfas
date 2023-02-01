@@ -31,6 +31,7 @@ const insertInFiabilisationIfNotExist = async (fiabilisation) => {
 
 /**
  * Méthode de création de la collection pour fiabilisation couples UAI SIRET
+ * TODO : optims upsert
  */
 export const buildFiabilisationUaiSiret = async () => {
   await createJobEvent({

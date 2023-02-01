@@ -18,15 +18,10 @@ const filters = {
  *  Données à fiabiliser (depuis les couples construits) : MAJ des dossiersApprenantsMigration ainsi que le champ fiabilisation_statut des organismes concernés
  *  Données déja identifiées comme fiables : MAJ le champ fiabilisation_statut des organismes concernés
  *  Données identifiées comme non fiabilisables : MAJ le champ fiabilisation_statut des organismes concernés
+ * TODO : optim query lookup possibles & promise.all
  *
  */
 export const applyFiabilisationUaiSiret = async () => {
-  await createJobEvent({
-    jobname: JOB_NAME,
-    date: new Date(),
-    action: "beginning",
-  });
-
   await updateDossiersApprenantAndOrganismesAFiabiliser();
   await updateOrganismesFiabilisationStatut(FIABILISATION_TYPES.DEJA_FIABLE);
   await updateOrganismesFiabilisationStatut(FIABILISATION_TYPES.NON_FIABILISABLE);

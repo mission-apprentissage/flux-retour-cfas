@@ -3,5 +3,5 @@ export const FIABILISATION_LABEL = {
   FIABILISE: "fiabilisé",
   DEJA_FIABLE: "déja fiable",
   NON_FIABILISABLE: "non fiabilisable",
-  INCONNUE: "inconnue",
+  INCONNU: "inconnu",
 };
