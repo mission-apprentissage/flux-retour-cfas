@@ -3,7 +3,7 @@ version: "2.4"
 services:
   reverse_proxy:
     volumes:
-      - flux_retour_cfas_nginx_data:/data
+      - ./.data/nginx:/data
       - ./reverse_proxy/dev/includes:/etc/nginx/templates/includes/env
 
   ui:
@@ -29,9 +29,8 @@ services:
     ports:
       - "127.0.0.1:9229:9229" # Allows remote debugging
     volumes:
-      - ./server/src:/app/src:z # Allows source folders to be watched
-      - ./server/config:/app/config:z
-      - flux_retour_cfas_server_data:/data:z
+      - ./server:/app:z # Allows source folders to be watched
+      - ./.data/server:/data:z
     environment:
       - FLUX_RETOUR_CFAS_ENV=dev
       - FLUX_RETOUR_CFAS_LOG_LEVEL=debug
@@ -49,7 +48,7 @@ services:
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
-      - flux_retour_cfas_mongodb_data:/data
+      - ./.data/mongodb:/data
 
   clamav:
     image: clamav/clamav
@@ -77,18 +76,4 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - flux_retour_cfas_redis_data:/data
-
-volumes:
-  flux_retour_cfas_mongodb_data:
-    driver: local
-    name: flux_retour_cfas_mongodb_data
-  flux_retour_cfas_nginx_data:
-    driver: local
-    name: flux_retour_cfas_nginx_data
-  flux_retour_cfas_server_data:
-    driver: local
-    name: flux_retour_cfas_server_data
-  flux_retour_cfas_redis_data:
-    driver: local
-    name: flux_retour_cfas_redis_data
+      - ./.data/redis:/data
