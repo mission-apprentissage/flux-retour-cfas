@@ -9,7 +9,7 @@ import { useEspace } from "../../../hooks/useEspace";
 import { organismeAtom } from "../../../hooks/organismeAtoms";
 import { _get, _getBlob } from "../../../common/httpClient";
 import { hasContextAccessTo } from "../../../common/utils/rolesUtils";
-import useDownloadClick from "../../../hooks/old/useDownloadClick";
+import useDownloadClick from "../../../hooks/useDownloadClick";
 import { DownloadLine } from "../../../theme/components/icons";
 import EffectifsTable from "../effectifs/engine/EffectifsTable";
 import { effectifsStateAtom } from "../effectifs/engine/atoms";
