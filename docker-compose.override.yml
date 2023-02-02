@@ -25,7 +25,7 @@ services:
         - SKIP_PREFLIGHT_CHECK=true
 
   server:
-    command: ["yarn", "debug"]
+    command: ["yarn", "start:dev"]
     ports:
       - "127.0.0.1:9229:9229" # Allows remote debugging
     volumes:
