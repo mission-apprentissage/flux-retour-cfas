@@ -4,10 +4,8 @@ WORKDIR /app
 
 COPY package.json yarn.lock .
 
-RUN yarn install --production --frozen-lockfile
-
-COPY ./src .
+RUN yarn install
 
 VOLUME /data
 EXPOSE 5000
-CMD ["yarn", "start"]
+CMD ["yarn", "start:dev"]

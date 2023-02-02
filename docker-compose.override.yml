@@ -25,7 +25,9 @@ services:
         - SKIP_PREFLIGHT_CHECK=true
 
   server:
-    command: ["yarn", "start:dev"]
+    build:
+      context: ./server
+      dockerfile: Dockerfile-local
     ports:
       - "127.0.0.1:9229:9229" # Allows remote debugging
     volumes:
