@@ -27,7 +27,7 @@ services:
   server:
     build:
       context: ./server
-      dockerfile: Dockerfile-local
+      dockerfile: Dockerfile.dev
     ports:
       - "127.0.0.1:9229:9229" # Allows remote debugging
     volumes:
