@@ -2,7 +2,7 @@ FROM node:16.15.0-stretch
 
 WORKDIR /app
 
-COPY package.json yarn.lock .
+COPY package.json yarn.lock ./
 
 RUN yarn install --production --frozen-lockfile
 
