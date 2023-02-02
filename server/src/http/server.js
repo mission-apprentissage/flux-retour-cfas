@@ -20,7 +20,6 @@ import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes.js";
 import effectifsApprenantsRouter from "./routes/specific.routes/old/effectifs-apprenants.route.js";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
-import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.route.js";
 import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
@@ -28,11 +27,9 @@ import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursNationalDossiersRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.route.js";
-import indicateursNationalDossiersOldRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.old.route.js";
 
 import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
 import indicateursDossiersRouter from "./routes/specific.routes/old/indicateurs.dossiers.route.js";
-import indicateursDossiersOldRouter from "./routes/specific.routes/old/indicateurs.dossiers.old.route.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -176,14 +173,6 @@ export default async (services) => {
     permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
     indicateursDossiersRouter(services)
   );
-  app.use("/api/indicateurs-national-dossiers-old", indicateursNationalDossiersOldRouter(services)); // FRONT
-  app.use(
-    // FRONT
-    ["/api/indicateurs-dossiers-old"],
-    checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    indicateursDossiersOldRouter(services)
-  );
 
   // TODO : Route à corriger / transformer pour le filtre par formations
   app.use("/api/formations", formationRouter(services)); // FRONT
@@ -191,12 +180,6 @@ export default async (services) => {
   // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
   app.use("/api/cfas", cfasRouter(services)); // FRONT
   app.use("/api/referentiel", referentielRouter(services)); // FRONT
-  app.use(
-    "/api/liens-prives-cfas",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    lienPriveCfaRouter(services)
-  );
   app.get(
     "/api/cache",
     checkJwtToken,

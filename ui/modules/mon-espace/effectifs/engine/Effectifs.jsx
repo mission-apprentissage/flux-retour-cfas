@@ -22,7 +22,7 @@ import { organismeAtom } from "../../../../hooks/organismeAtoms";
 import AjoutApprenantModal from "./AjoutApprenantModal";
 import { useEspace } from "../../../../hooks/useEspace";
 import EffectifsTable from "./EffectifsTable";
-import useDownloadClick from "../../../../hooks/old/useDownloadClick";
+import useDownloadClick from "../../../../hooks/useDownloadClick";
 import { _getBlob } from "../../../../common/httpClient";
 import { Input } from "./formEngine/components/Input/Input";
 import { useMemo } from "react";
