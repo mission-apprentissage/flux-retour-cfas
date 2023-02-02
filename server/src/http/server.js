@@ -20,7 +20,6 @@ import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes.js";
 import effectifsApprenantsRouter from "./routes/specific.routes/old/effectifs-apprenants.route.js";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
-import lienPriveCfaRouter from "./routes/specific.routes/old/lien-prive-cfa.route.js";
 import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
 import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
@@ -181,12 +180,6 @@ export default async (services) => {
   // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
   app.use("/api/cfas", cfasRouter(services)); // FRONT
   app.use("/api/referentiel", referentielRouter(services)); // FRONT
-  app.use(
-    "/api/liens-prives-cfas",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    lienPriveCfaRouter(services)
-  );
   app.get(
     "/api/cache",
     checkJwtToken,
