@@ -1,3 +1,14 @@
+## [3.7.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.1...v3.7.2) (2023-02-02)
+
+
+### Bug Fixes
+
+* fix source path in Dockerfile ([#2500](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2500)) ([724ec12](https://github.com/mission-apprentissage/flux-retour-cfas/commit/724ec12fc74807181057bab5d88a93d59d20ec49))
+* fixe de quelques bugs mineurs ([#2495](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2495)) ([4426f88](https://github.com/mission-apprentissage/flux-retour-cfas/commit/4426f8813cf78cb8a19f792ccd52d47d31c6125f))
+* remove nodemon from production ([#2497](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2497)) ([8453963](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8453963c2aa45180cbf150499c74e97fc49bd408))
+* **server:** handle organismes without siret in post ([#2494](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2494)) ([8d3d181](https://github.com/mission-apprentissage/flux-retour-cfas/commit/8d3d1814c364d3a75aa7e5955971a6f6f2162aef))
+* tests dossier apprenants ([#2493](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2493)) ([63b111d](https://github.com/mission-apprentissage/flux-retour-cfas/commit/63b111d53d5a196a1e0a03e67287aa71df09d86d))
+
 ## [3.7.1](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.0...v3.7.1) (2023-01-31)
 
 
