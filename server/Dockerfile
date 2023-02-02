@@ -6,7 +6,7 @@ COPY package.json yarn.lock .
 
 RUN yarn install --production --frozen-lockfile
 
-COPY ./src .
+COPY ./src ./src
 
 VOLUME /data
 EXPOSE 5000
