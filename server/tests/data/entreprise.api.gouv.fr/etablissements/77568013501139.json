@@ -1,0 +1,53 @@
+{
+    "etablissement": {
+        "siege_social": false,
+        "siret": "77568013501139",
+        "naf": "8542Z",
+        "libelle_naf": "Enseignement supérieur",
+        "date_mise_a_jour": 1637234911,
+        "tranche_effectif_salarie_etablissement": {
+            "de": null,
+            "a": null,
+            "code": null,
+            "date_reference": null,
+            "intitule": null
+        },
+        "date_creation_etablissement": 1638313200,
+        "region_implantation": {
+            "code": "11",
+            "value": "Île-de-France"
+        },
+        "commune_implantation": {
+            "code": "92026",
+            "value": "Courbevoie"
+        },
+        "pays_implantation": {
+            "code": "FR",
+            "value": "FRANCE"
+        },
+        "diffusable_commercialement": true,
+        "enseigne": null,
+        "adresse": {
+            "l1": "ASSOCIATION POUR LA PROMOTION SOCIALE ET LA FORMATION PROFESSIONNELLE DANS LES TRANSPORTS ROUTIERS",
+            "l2": null,
+            "l3": "WORKSTATION",
+            "l4": "25 QUAI DU PRESIDENT PAUL DOUMER",
+            "l5": null,
+            "l6": "92400 COURBEVOIE",
+            "l7": "FRANCE",
+            "numero_voie": "25",
+            "type_voie": "QUAI",
+            "nom_voie": "DU PRESIDENT PAUL DOUMER",
+            "complement_adresse": "WORKSTATION",
+            "code_postal": "92400",
+            "localite": "COURBEVOIE",
+            "code_insee_localite": "92026",
+            "cedex": null
+        },
+        "etat_administratif": {
+            "value": "A",
+            "date_fermeture": null
+        }
+    },
+    "gateway_error": false
+}
