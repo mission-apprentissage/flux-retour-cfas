@@ -23,6 +23,7 @@ services:
         - NEXT_PUBLIC_METABASE_URL=https://localhost/metabase
         - NEXT_PUBLIC_METABASE_SECRET_KEY=
         - SKIP_PREFLIGHT_CHECK=true
+        - NEXT_PUBLIC_SENTRY_DSN=
 
   server:
     build:
