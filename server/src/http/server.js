@@ -58,6 +58,7 @@ export default async (services) => {
   Sentry.init({
     dsn: config.sentry.dsn,
     enabled: !!config.sentry.dsn,
+    environment: config.env,
     integrations: [
       // enable HTTP calls tracing
       new Sentry.Integrations.Http({ tracing: true }),

@@ -41,6 +41,7 @@ services:
       - server
     environment:
       - SERVER_URI=http://server:5000
+      - NEXT_PUBLIC_SENTRY_DSN=https://362c29c6acbe4a599640109d87e77beb@o4504570758561792.ingest.sentry.io/4504570760265728
 
   server:
     image: flux_retour_cfas_server
@@ -59,6 +60,7 @@ services:
       - FLUX_RETOUR_CFAS_MONGODB_URI=mongodb://mongodb:27017/flux-retour-cfas?retryWrites=true&w=majority
       - FLUX_RETOUR_CFAS_REDIS_URI=redis://redis:6379
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
+      - FLUX_RETOUR_CFAS_SENTRY_DSN=https://2c67929155a24fe2bdc16f61a67dab8e@o4504570758561792.ingest.sentry.io/4504570802798592
 
   mongodb:
     image: mongo:6.0.2-focal
