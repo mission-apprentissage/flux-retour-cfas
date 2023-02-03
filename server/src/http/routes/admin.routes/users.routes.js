@@ -18,6 +18,7 @@ import {
   getAllPermissions,
   updatePermissionsPending,
   removePermissions,
+  createPermission,
 } from "../../../common/actions/permissions.actions.js";
 
 // TODO [tech]
@@ -126,6 +127,16 @@ export default ({ mailer }) => {
 
       const user = await createUser({ email: options.email, password }, options);
 
+      // create the permission for admins only
+      if (options.permissions?.is_admin) {
+        await createPermission({
+          organisme_id: null,
+          userEmail: options.email,
+          roleName: "organisme.admin",
+          pending: false,
+        });
+      }
+
       try {
         await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
         return res.json(user);
@@ -144,14 +155,19 @@ export default ({ mailer }) => {
       let rolesId = await findRolesByNames(body.options.roles, { _id: 1 });
       rolesId = rolesId.map(({ _id }) => _id);
 
+      const options = body.options;
+
       await updateUser(userid, {
-        is_cross_organismes: !!body.options.permissions.is_cross_organismes,
-        is_admin: body.options.permissions.is_admin,
-        email: body.options.email,
-        prenom: body.options.prenom,
-        nom: body.options.nom,
+        is_cross_organismes:
+          options.permissions.is_cross_organismes !== undefined
+            ? !!options.permissions.is_cross_organismes
+            : !!options.permissions.is_admin,
+        is_admin: options.permissions.is_admin,
+        email: options.email,
+        prenom: options.prenom,
+        nom: options.nom,
         roles: rolesId,
-        acl: body.options.acl,
+        acl: options.acl,
         invalided_token: true,
       });
 

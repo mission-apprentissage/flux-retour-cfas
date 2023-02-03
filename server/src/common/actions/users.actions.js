@@ -1,6 +1,7 @@
 import { addHours } from "date-fns";
 import { compact, pick, uniq } from "lodash-es";
 import { ObjectId } from "mongodb";
+import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
 import { defaultValuesUser, validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
@@ -17,6 +18,10 @@ import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } fro
 export const createUser = async ({ email, password }, options = {}) => {
   const passwordHash = options.hash || hashUtil(password);
   const permissions = options.permissions || {};
+  // bypass profile completion for admins
+  const account_status = permissions.is_admin
+    ? options.account_status || USER_ACCOUNT_STATUS.FORCE_RESET_PASSWORD
+    : options.account_status;
 
   const {
     civility,
@@ -26,7 +31,6 @@ export const createUser = async ({ email, password }, options = {}) => {
     siret,
     uai,
     organisation,
-    account_status,
     custom_acl,
     orign_register,
     roles,
@@ -59,7 +63,8 @@ export const createUser = async ({ email, password }, options = {}) => {
       email: email.toLowerCase(),
       password: passwordHash,
       is_admin: !!permissions.is_admin,
-      is_cross_organismes: !!permissions.is_cross_organismes,
+      is_cross_organismes:
+        permissions.is_cross_organismes !== undefined ? !!permissions.is_cross_organismes : !!permissions.is_admin,
       ...(civility ? { civility } : {}),
       ...(nom ? { nom } : {}),
       ...(prenom ? { prenom } : {}),
