@@ -10,6 +10,7 @@ import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiers
 import { updateFiabilisationUaiSiretAFiabiliser } from "./fiabilisation/uai-siret/update-fiabilisation-type/index.js";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
 import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
+import { identifySirenDuplicates } from "./fiabilisation/duplicates/dossiersApprenants-duplicates-siren/identify.js";
 
 // /**
 //  * Job de suppression des organismes non fiables et déplacement des contributeurs & effectifs liés
@@ -108,6 +109,18 @@ cli
     runScript(async ({ effectifs }) => {
       return identifyCfdDuplicates(effectifs);
     }, "duplicates-identify-cfd");
+  });
+
+/**
+ * Job d'identification des doublons par siren sur les dossiersApprenants
+ */
+cli
+  .command("duplicates:identify-siren")
+  .description("Identification des doublons par siren sur les dossiersApprenants")
+  .action(() => {
+    runScript(async ({ effectifs }) => {
+      return identifySirenDuplicates(effectifs);
+    }, "duplicates-identify-siren");
   });
 
 /**

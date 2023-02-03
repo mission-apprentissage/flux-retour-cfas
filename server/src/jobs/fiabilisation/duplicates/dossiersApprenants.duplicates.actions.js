@@ -3,6 +3,7 @@ import { dossiersApprenantsMigrationDb } from "../../../common/model/collections
 export const DUPLICATE_COLLECTION_NAMES = {
   dossiersApprenantsDoublonsUais: "dossiersApprenantsDoublonsUais",
   dossiersApprenantsDoublonsCfd: "dossiersApprenantsDoublonsCfd",
+  dossiersApprenantsDoublonsSiren: "dossiersApprenantsDoublonsSiren",
   dossiersApprenantsDuplicatesRemoved: "dossiersApprenantsDuplicatesRemoved",
 };
 
@@ -29,6 +30,10 @@ export const DUPLICATE_TYPE_CODES = {
   uai_etablissement: {
     name: "Uai",
     code: "5",
+  },
+  siren: {
+    name: "Siren",
+    code: "6",
   },
 };
 
@@ -136,6 +141,24 @@ const findDossiersApprenantsDuplicates = async (
         etablissement_num_region: { $addToSet: "$etablissement_num_region" },
         // Ajout des différents nom_apprenant en doublon potentiel
         nom_apprenants: { $addToSet: "$nom_apprenant" },
+        // ajout des différents statut_apprenant
+        statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
+        count: { $sum: 1 },
+      };
+      break;
+
+    case DUPLICATE_TYPE_CODES.siren.code:
+      unicityQueryGroup = {
+        _id: {
+          nom_apprenant: "$nom_apprenant",
+          prenom_apprenant: "$prenom_apprenant",
+          date_de_naissance_apprenant: "$date_de_naissance_apprenant",
+          siren: { $substrCP: ["$siret_etablissement", 0, 9] },
+        },
+        // Ajout des ids unique de chaque doublons
+        duplicatesIds: { $addToSet: "$_id" },
+        // Ajout des différents siret en doublon potentiel
+        sirets: { $addToSet: "$siret_etablissement" },
         // ajout des différents statut_apprenant
         statut_apprenants: { $addToSet: "$historique_statut_apprenant.valeur_statut" },
         count: { $sum: 1 },
