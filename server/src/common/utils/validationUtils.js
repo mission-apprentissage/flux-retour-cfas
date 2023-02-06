@@ -20,10 +20,16 @@ export function siretSchema() {
   return Joi.string()
     .regex(/^[0-9]{14}$/)
     .creditCard()
-    .error(
-      (errors) =>
-        new Error(`Error: schema not valid : ValidationError: ${errors[0].local.key} must follow Luhn algorithm`)
-    );
+    .error((errors) => {
+      const error = errors[0].local;
+      return new Error(
+        error.code === "string.base"
+          ? `Error: schema not valid : ValidationError: ${error.key} must be a string`
+          : error.value
+          ? `Error: schema not valid : ValidationError: ${error.key} must follow Luhn algorithm`
+          : `Error: schema not valid : ValidationError: empty ${error.key}`
+      );
+    });
 }
 // const UAI_REGEX = /^[0-9_]{7}[a-zA-Z]{1}$/;
 export function uaiSchema() {
