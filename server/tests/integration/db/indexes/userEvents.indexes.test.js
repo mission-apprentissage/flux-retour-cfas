@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
 import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
-import userEventsModelDescriptor from "../../../../src/common/model/next.toKeep.models/userEvents.model.js";
+import userEventsModelDescriptor from "../../../../src/common/model/userEvents.model.js";
 import { createUserEvent } from "../../../../src/common/actions/userEvents.actions.js";
 
 describe("UserEvents Indexes", () => {

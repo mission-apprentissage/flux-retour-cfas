@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
 import { maintenanceMessageDb } from "../model/collections.js";
-import { defaultValuesMaintenanceMessage } from "../model/next.toKeep.models/maintenanceMessages.model.js";
+import { defaultValuesMaintenanceMessage } from "../model/maintenanceMessages.model.js";
 
 /**
  * Méthode de création d'un message de maintenance

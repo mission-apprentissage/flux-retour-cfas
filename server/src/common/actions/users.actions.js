@@ -2,7 +2,7 @@ import { addHours } from "date-fns";
 import { compact, pick, uniq } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
-import { defaultValuesUser, validateUser } from "../model/next.toKeep.models/usersMigration.model.js";
+import { defaultValuesUser, validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
 import { hash as hashUtil, compare, isTooWeak } from "../utils/passwordUtils.js";
 import { escapeRegExp } from "../utils/regexUtils.js";

@@ -1,11 +1,11 @@
 import Joi from "joi";
 import { flattenDeep } from "lodash-es";
 
-import { CODES_STATUT_APPRENANT } from "../../../../constants/dossierApprenantConstants.js";
-import { schemaValidation } from "../../../../utils/schemaUtils.js";
-import { siretSchema } from "../../../../utils/validationUtils.js";
-import { adresseSchema } from "../../../json-schema/adresseSchema.js";
-import { object, string, date, integer, boolean, arrayOf } from "../../../json-schema/jsonSchemaTypes.js";
+import { CODES_STATUT_APPRENANT } from "../../../constants/dossierApprenantConstants.js";
+import { schemaValidation } from "../../../utils/schemaUtils.js";
+import { siretSchema } from "../../../utils/validationUtils.js";
+import { adresseSchema } from "../../json-schema/adresseSchema.js";
+import { object, string, date, integer, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes.js";
 
 export const apprenantSchema = object(
   {

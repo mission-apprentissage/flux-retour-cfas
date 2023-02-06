@@ -1,8 +1,8 @@
 import { clearAllCollections, clearCollection } from "../../common/mongodb.js";
 import logger from "../../common/logger.js";
-import * as RolesModelDescriptor from "../../common/model/next.toKeep.models/roles.model.js";
-import * as PermissionsDescriptor from "../../common/model/next.toKeep.models/permissions.model.js";
-import * as usersMigrationModelDescriptor from "../../common/model/next.toKeep.models/usersMigration.model.js";
+import * as RolesModelDescriptor from "../../common/model/roles.model.js";
+import * as PermissionsDescriptor from "../../common/model/permissions.model.js";
+import * as usersMigrationModelDescriptor from "../../common/model/usersMigration.model.js";
 import { findOrganismesByQuery, updateOrganisme } from "../../common/actions/organismes/organismes.actions.js";
 
 export const clearRoles = async () => {

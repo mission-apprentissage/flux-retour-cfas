@@ -1,4 +1,4 @@
-import { object, string, integer, objectId, date, any, boolean } from "../../../json-schema/jsonSchemaTypes.js";
+import { object, string, integer, objectId, date, any, boolean } from "../../json-schema/jsonSchemaTypes.js";
 
 export const documentSchema = object(
   {

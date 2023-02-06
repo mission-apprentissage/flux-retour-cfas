@@ -1,9 +1,9 @@
 import Joi from "joi";
-import { object, string, objectId, date, integer, arrayOf, boolean } from "../json-schema/jsonSchemaTypes.js";
-import { schemaValidation } from "../../utils/schemaUtils.js";
-import { siretSchema, uaiSchema } from "../../utils/validationUtils.js";
-import { CODES_STATUT_APPRENANT } from "../../constants/dossierApprenantConstants.js";
-import { REGIONS } from "../../constants/territoiresConstants.js";
+import { object, string, objectId, date, integer, arrayOf, boolean } from "./json-schema/jsonSchemaTypes.js";
+import { schemaValidation } from "../utils/schemaUtils.js";
+import { siretSchema, uaiSchema } from "../utils/validationUtils.js";
+import { CODES_STATUT_APPRENANT } from "../constants/dossierApprenantConstants.js";
+import { REGIONS } from "../constants/territoiresConstants.js";
 
 export const collectionName = "dossiersApprenantsMigration";
 

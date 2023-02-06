@@ -1,4 +1,4 @@
-import { object, string, objectId, date, boolean } from "../json-schema/jsonSchemaTypes.js";
+import { object, string, objectId, date, boolean } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "notifications";
 

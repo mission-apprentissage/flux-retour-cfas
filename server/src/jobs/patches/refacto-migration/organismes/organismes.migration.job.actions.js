@@ -2,10 +2,7 @@ import { omit } from "lodash-es";
 import { buildAdresseForOrganisme } from "../../../../common/actions/organismes/organismes.actions.js";
 import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
 import { organismesDb } from "../../../../common/model/collections.js";
-import {
-  defaultValuesOrganisme,
-  validateOrganisme,
-} from "../../../../common/model/next.toKeep.models/organismes.model.js";
+import { defaultValuesOrganisme, validateOrganisme } from "../../../../common/model/organismes.model.js";
 import { buildTokenizedString } from "../../../../common/utils/buildTokenizedString.js";
 
 /**

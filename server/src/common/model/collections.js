@@ -1,20 +1,20 @@
 import { getDbCollection } from "../mongodb.js";
-import usersModelDescriptor from "./previous.models/users.model.js";
-import userEventsModelDescriptor from "./next.toKeep.models/userEvents.model.js";
-import formationsModelDescriptor from "./next.toKeep.models/formations.model.js";
-import jobEventsModelDescriptor from "./next.toKeep.models/jobEvents.model.js";
-import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
-import fiabilisationUaiSiretModelDescriptor from "./next.toKeep.models/fiabilisationUaiSiret.model.js";
+import usersModelDescriptor from "./users.model.js";
+import userEventsModelDescriptor from "./userEvents.model.js";
+import formationsModelDescriptor from "./formations.model.js";
+import jobEventsModelDescriptor from "./jobEvents.model.js";
+import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
+import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model.js";
 import dossiersApprenantsModelDescriptor from "./dossiersApprenants.model.js";
-import usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
-import JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
-import MaintenanceMessagesModelDescriptor from "./next.toKeep.models/maintenanceMessages.model.js";
-import RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
-import PermissionsDescriptor from "./next.toKeep.models/permissions.model.js";
-import OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
-import dossiersApprenantsMigrationModelDescriptor from "./next.toKeep.models/dossiersApprenantsMigration.model.js";
-import effectifsModelDescriptor from "./next.toKeep.models/effectifs.model/effectifs.model.js";
-import uploadsModelDescriptor from "./next.toKeep.models/uploads.model/uploads.model.js";
+import usersMigrationModelDescriptor from "./usersMigration.model.js";
+import JwtSessionsModelDescriptor from "./jwtSessions.model.js";
+import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model.js";
+import RolesModelDescriptor from "./roles.model.js";
+import PermissionsDescriptor from "./permissions.model.js";
+import OrganismesModelDescriptor from "./organismes.model.js";
+import dossiersApprenantsMigrationModelDescriptor from "./dossiersApprenantsMigration.model.js";
+import effectifsModelDescriptor from "./effectifs.model/effectifs.model.js";
+import uploadsModelDescriptor from "./uploads.model/uploads.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
