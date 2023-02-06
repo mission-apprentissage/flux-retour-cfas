@@ -1,4 +1,4 @@
-import { object, date, objectId, integer, arrayOf, string } from "../../json-schema/jsonSchemaTypes.js";
+import { object, date, objectId, integer, arrayOf, string } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "duplicatesEvents";
 

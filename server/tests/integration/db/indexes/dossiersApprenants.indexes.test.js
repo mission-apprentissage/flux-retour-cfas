@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { createIndexes, dropIndexes } from "../../../../src/common/model/indexes/index.js";
 import { getDbCollectionIndexes } from "../../../../src/common/mongodb.js";
-import dossiersApprenantsModelDescriptor from "../../../../src/common/model/previous.models/toRemove.models/dossiersApprenants.model.js";
+import dossiersApprenantsModelDescriptor from "../../../../src/common/model/dossiersApprenants.model.js";
 import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 
 describe("DossiersApprenants Indexes", () => {

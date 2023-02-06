@@ -9,7 +9,7 @@ import {
   dateOrNull,
   arrayOfOrNull,
   integerOrNull,
-} from "../../json-schema/jsonSchemaTypes.js";
+} from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "dossiersApprenants";
 
