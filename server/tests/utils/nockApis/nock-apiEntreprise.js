@@ -1,17 +1,36 @@
 import nock from "nock";
+import { readdirSync, readFileSync } from "fs";
 
 import { API_ENDPOINT } from "../../../src/common/apis/ApiEntreprise.js";
 
-export const nockGetEtablissement = (siret, responseData) => {
+const jsonEtablissementDataDir = `${process.cwd()}/tests/data/entreprise.api.gouv.fr/etablissements`;
+const realEtablissementDataBySiret = readdirSync(jsonEtablissementDataDir).reduce((acc, jsonFilename) => {
+  acc[jsonFilename.replace(".json", "")] = JSON.parse(readFileSync(`${jsonEtablissementDataDir}/${jsonFilename}`));
+  return acc;
+}, {});
+
+const jsonEntrepriseDataDir = `${process.cwd()}/tests/data/entreprise.api.gouv.fr/entreprises`;
+const realEnterpriseDataBySiret = readdirSync(jsonEntrepriseDataDir).reduce((acc, jsonFilename) => {
+  acc[jsonFilename.replace(".json", "")] = JSON.parse(readFileSync(`${jsonEntrepriseDataDir}/${jsonFilename}`));
+  return acc;
+}, {});
+
+export const nockGetEtablissement = (callback) => {
   nock(API_ENDPOINT)
     .persist()
-    .get(new RegExp(`\\/etablissements\\/${siret}.*`))
-    .reply(200, responseData);
+    .get(/\/etablissements\/.*/)
+    .reply(200, (uri) => {
+      const siret = uri.replace(/(\/v2\/etablissements\/)([0-9]*).*/, "$2");
+      return callback ? callback(siret) : realEtablissementDataBySiret[siret];
+    });
 };
 
-export const nockGetEntreprise = (siren, responseData) => {
+export const nockGetEntreprise = (callback) => {
   nock(API_ENDPOINT)
     .persist()
-    .get(new RegExp(`\\/entreprises\\/${siren}.*`))
-    .reply(200, responseData);
+    .get(/\/entreprises\/.*/)
+    .reply(200, (uri) => {
+      const siren = uri.replace(/(\/v2\/entreprises\/)([0-9]*).*/, "$2");
+      return callback ? callback(siren) : realEnterpriseDataBySiret[siren];
+    });
 };

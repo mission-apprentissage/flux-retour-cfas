@@ -3,10 +3,10 @@
 # A hook script to verify that we don't commit files that could contain sensible data or credentials like json, csv, xls(x) or .env
 
 sensible_files_pattern="\.(csv|xls|xls(x?)|json|env)$"
-exception="(package.json|custom-environment-variables.json"
+exception="((package.json|custom-environment-variables.json"
 exception="$exception|manifest.json"
 exception="$exception|eslintrc.json|app.json|jsconfig.json|rome.json"
-exception="$exception)$"
+exception="$exception)$|^server/tests)"
 
 if grep -q vault ".infra/ansible/roles/setup/vars/main/vault.yml"; then
   echo "Oh no! Your vault.yml is not encryted!"

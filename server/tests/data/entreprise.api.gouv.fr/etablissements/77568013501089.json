@@ -1,0 +1,53 @@
+{
+    "etablissement": {
+        "siege_social": false,
+        "siret": "77568013501089",
+        "naf": "8542Z",
+        "libelle_naf": "Enseignement supérieur",
+        "date_mise_a_jour": 1661759075,
+        "tranche_effectif_salarie_etablissement": {
+            "de": 10,
+            "a": 19,
+            "code": "11",
+            "date_reference": "2020",
+            "intitule": "10 à 19 salariés"
+        },
+        "date_creation_etablissement": 1435701600,
+        "region_implantation": {
+            "code": "11",
+            "value": "Île-de-France"
+        },
+        "commune_implantation": {
+            "code": "75109",
+            "value": "Paris 9e Arrondissement"
+        },
+        "pays_implantation": {
+            "code": "FR",
+            "value": "FRANCE"
+        },
+        "diffusable_commercialement": true,
+        "enseigne": null,
+        "adresse": {
+            "l1": "ASSOCIATION POUR LA PROMOTION SOCIALE ET LA FORMATION PROFESSIONNELLE DANS LES TRANSPORTS ROUTIERS",
+            "l2": null,
+            "l3": "5-7",
+            "l4": "5 RUE MONCEY",
+            "l5": null,
+            "l6": "75009 PARIS 9",
+            "l7": "FRANCE",
+            "numero_voie": "5",
+            "type_voie": "RUE",
+            "nom_voie": "MONCEY",
+            "complement_adresse": "5-7",
+            "code_postal": "75009",
+            "localite": "PARIS 9",
+            "code_insee_localite": "75109",
+            "cedex": null
+        },
+        "etat_administratif": {
+            "value": "F",
+            "date_fermeture": 1638313200
+        }
+    },
+    "gateway_error": false
+}

@@ -15,9 +15,6 @@ import { createUserLegacy } from "../../../src/common/actions/legacy/users.legac
 import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
 import { buildTokenizedString } from "../../../src/common/utils/buildTokenizedString.js";
 import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";
-import { nockGetEntreprise, nockGetEtablissement } from "../../utils/nockApis/nock-apiEntreprise.js";
-import { nockGetFormations } from "../../utils/nockApis/nock-apiCatalogue.js";
-import { nockGetCodePostalInfo } from "../../utils/nockApis/nock-tablesCorrespondances.js";
 
 const user = {
   name: "userApi",
@@ -48,39 +45,6 @@ describe("Dossiers Apprenants Route", () => {
   beforeEach(async () => {
     // Create organisme
     randomOrganisme = createRandomOrganisme({ uai, siret });
-    // randomOrganisme.adresse.departement = "974";
-    // nock API entreprise
-    nockGetEtablissement(siret, {
-      etablissement: {
-        uai,
-        adresse: {
-          code_insee_localite: randomOrganisme.adresse.departement.padEnd(5, "0"),
-          num_departement: randomOrganisme.adresse.departement,
-        },
-        region_implantation: {
-          code: randomOrganisme.adresse.region,
-        },
-        commune_implantation: {},
-        pays_implantation: { code: "FR" },
-        etat_administratif: {
-          value: "A",
-          date_fermeture: null,
-        },
-      },
-    });
-    nockGetEntreprise(siret.substring(0, 9), {
-      entreprise: {
-        etat_administratif: {
-          value: "A",
-          date_fermeture: null,
-        },
-      },
-    });
-    nockGetFormations({
-      formations: [],
-      pagination: { page: 1, nombre_par_page: 1000 },
-    });
-    nockGetCodePostalInfo();
 
     try {
       const { _id } = await createOrganisme(randomOrganisme);
@@ -124,7 +88,21 @@ describe("Dossiers Apprenants Route", () => {
         uai: randomOrganisme.uai,
         sirets: randomOrganisme.sirets,
         nom: randomOrganisme.nom,
-        adresse: { ...randomOrganisme.adresse, code_insee: randomOrganisme.adresse.departement.padEnd(5, "0") },
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+          numero: 10,
+          voie: "PLDE LA HALLE",
+          code_postal: "01150",
+          code_insee: "01386",
+          commune: "SAINT-SORLIN-EN-BUGEY",
+          complete:
+            "ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN\r\n" +
+            "10 PL DE LA HALLE\r\n" +
+            "01150 SAINT-SORLIN-EN-BUGEY\r\n" +
+            "FRANCE",
+        },
         nature: randomOrganisme.nature,
       });
 
