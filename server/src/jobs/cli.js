@@ -13,7 +13,6 @@ import {
 import { hydrateOrganismesAndFormations } from "./hydrate/organismes/hydrate-organismes-and-formations.js";
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
 import { hydrateRefreshFormations } from "./hydrate/refresh-formations/hydrate-refresh-formations.js";
-import { hydrateFormationsFromDossiersApprenants } from "./hydrate/_toRemove/formations/hydrate-formations-from-dossiersApprenants.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 
 /**
@@ -137,18 +136,6 @@ cli
     runScript(async () => {
       return hydrateRefreshFormations();
     }, "hydrate-refresh-formations");
-  });
-
-/**
- * Job de remplissage des organismes et des formations
- */
-cli
-  .command("hydrate:formations-from-dossiersApprenants")
-  .description("Remplissage des formations depuis les dossiersApprenants")
-  .action(async () => {
-    runScript(async () => {
-      return hydrateFormationsFromDossiersApprenants();
-    }, "hydrate-formations-from-dossiersApprenants");
   });
 
 /**
