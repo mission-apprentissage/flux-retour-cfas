@@ -6,7 +6,7 @@ import {
   EFFECTIF_INDICATOR_NAMES,
 } from "../../../../src/common/constants/dossierApprenantConstants.js";
 import { RESEAUX_CFAS } from "../../../../src/common/constants/networksConstants.js";
-import { dossiersApprenantsMigrationDb, cfasDb } from "../../../../src/common/model/collections.js";
+import { dossiersApprenantsMigrationDb, organismesDb } from "../../../../src/common/model/collections.js";
 
 describe("Components Effectifs Test", () => {
   const seedDossiersApprenants = async (statutsProps) => {
@@ -252,8 +252,8 @@ describe("Components Effectifs Test", () => {
         nom_etablissement: "CFA 2",
         siret_etablissement: "12345678900099",
       };
-      await cfasDb().insertOne({ uai: cfa1.uai_etablissement });
-      await cfasDb().insertOne({ uai: cfa2.uai_etablissement });
+      await organismesDb().insertOne({ uai: cfa1.uai_etablissement });
+      await organismesDb().insertOne({ uai: cfa2.uai_etablissement });
       await seedDossiersApprenants({ ...filterQuery, ...cfa1 });
       await seedDossiersApprenants({ formation_cfd: "12345", ...cfa1 });
       await seedDossiersApprenants({ ...filterQuery, ...cfa2 });
