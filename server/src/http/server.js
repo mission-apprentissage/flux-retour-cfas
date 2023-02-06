@@ -25,10 +25,7 @@ import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
-import indicateursNationalDossiersRouter from "./routes/specific.routes/old/indicateurs-national.dossiers.route.js";
-
 import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
-import indicateursDossiersRouter from "./routes/specific.routes/old/indicateurs.dossiers.route.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -156,16 +153,6 @@ export default async (services) => {
     requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
     organismesRouter(services)
   ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
-
-  // TODO : Routes à conserver temporairement le temps de la recette indicateurs via effectifs
-  app.use("/api/indicateurs-national-dossiers", indicateursNationalDossiersRouter(services)); // FRONT
-  app.use(
-    // FRONT
-    ["/api/indicateurs-dossiers"],
-    checkJwtToken,
-    permissionsOrganismeMiddleware(["organisme/tableau_de_bord"]),
-    indicateursDossiersRouter(services)
-  );
 
   // TODO : Route à corriger / transformer pour le filtre par formations
   app.use("/api/formations", formationRouter(services)); // FRONT
