@@ -6,10 +6,12 @@ export function indexes() {
   return [[{ jwt: 1 }, { unique: true }]];
 }
 
-export const schema = object(
+const schema = object(
   {
     _id: objectId(),
     jwt: string({ description: "Session token" }),
   },
   { required: ["jwt"], additionalProperties: false }
 );
+
+export default { schema, indexes, collectionName };

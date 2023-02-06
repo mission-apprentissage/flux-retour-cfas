@@ -104,3 +104,5 @@ export function validateEffectif(props, getErrors = false) {
     getErrors,
   });
 }
+
+export default { schema, indexes, collectionName };

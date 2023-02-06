@@ -25,3 +25,5 @@ export function defaultValuesMaintenanceMessage() {
     time: new Date(),
   };
 }
+
+export default { schema, indexes, collectionName };

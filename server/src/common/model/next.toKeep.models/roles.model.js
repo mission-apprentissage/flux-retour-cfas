@@ -28,3 +28,5 @@ export function defaultValuesRole() {
     acl: [],
   };
 }
+
+export default { schema, indexes, collectionName };

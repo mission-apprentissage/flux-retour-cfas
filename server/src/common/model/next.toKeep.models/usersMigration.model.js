@@ -169,3 +169,5 @@ export function validateUser(props) {
     ],
   });
 }
+
+export default { schema, indexes, collectionName };
