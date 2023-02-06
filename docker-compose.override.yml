@@ -23,7 +23,8 @@ services:
         - NEXT_PUBLIC_METABASE_URL=https://localhost/metabase
         - NEXT_PUBLIC_METABASE_SECRET_KEY=
         - SKIP_PREFLIGHT_CHECK=true
-        - NEXT_PUBLIC_SENTRY_DSN=
+    environment:
+      - NEXT_PUBLIC_SENTRY_DSN=
 
   server:
     build:
@@ -44,6 +45,7 @@ services:
       - FLUX_RETOUR_CFAS_AUTH_ACTIVATION_JWT_SECRET=secret
       - FLUX_RETOUR_CFAS_AUTH_API_TOKEN_JWT_SECRET=secret
       - FLUX_RETOUR_CFAS_AUTH_PASSWORD_JWT_SECRET=secret
+      - FLUX_RETOUR_CFAS_SENTRY_DSN=
 
     depends_on:
       - smtp
