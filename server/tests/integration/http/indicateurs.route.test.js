@@ -491,7 +491,7 @@ describe("Effectifs Route", () => {
   //         nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
   //         nature_validity_warning: true,
   //       };
-  //       await cfasDb().insertOne({
+  //       await organismesDb().insertOne({
   //         uai: cfaData1.uai_etablissement,
   //         nom: "aaaa",
   //         nature: cfaData1.nature,
@@ -505,7 +505,7 @@ describe("Effectifs Route", () => {
   //         nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
   //         nature_validity_warning: false,
   //       };
-  //       await cfasDb().insertOne({
+  //       await organismesDb().insertOne({
   //         uai: cfaData2.uai_etablissement,
   //         nom: "bbbb",
   //         nature: cfaData2.nature,

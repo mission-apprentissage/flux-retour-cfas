@@ -2,7 +2,7 @@ import express from "express";
 import Joi from "joi";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import pick from "lodash.pick";
-import { cfasDb, dossiersApprenantsMigrationDb, organismesDb } from "../../../../common/model/collections.js";
+import { organismesDb, dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
 import { escapeRegExp } from "../../../../common/utils/regexUtils.js";
 import { getDepartementCodeFromUai } from "../../../../common/utils/uaiUtils.js";
 
@@ -28,8 +28,8 @@ export default ({ cfas }) => {
       const skip = (page - 1) * limit;
 
       const jsonQuery = JSON.parse(query);
-      const allData = await cfasDb().find(jsonQuery).skip(skip).limit(limit).toArray();
-      const count = await cfasDb().countDocuments(jsonQuery);
+      const allData = await organismesDb().find(jsonQuery).skip(skip).limit(limit).toArray();
+      const count = await organismesDb().countDocuments(jsonQuery);
       const omittedData = allData.map((item) =>
         pick(item, [
           "uai",

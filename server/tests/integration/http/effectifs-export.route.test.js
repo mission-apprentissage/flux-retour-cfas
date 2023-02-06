@@ -13,7 +13,7 @@
 // } from "../../data/historySequenceSamples.js";
 // import { RESEAUX_CFAS } from "../../../src/common/constants/networksConstants.js";
 // import { USER_EVENTS_ACTIONS } from "../../../src/common/constants/userEventsConstants.js";
-// import { userEventsDb, cfasDb } from "../../../src/common/model/collections.js";
+// import { userEventsDb, organismesDb } from "../../../src/common/model/collections.js";
 // import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
 // import { Cfa } from "../../../src/common/factory/cfa.js";
 
@@ -266,13 +266,13 @@
 
 //       // create cfa in db
 //       const uai_etablissement = "0762232N";
-//       await cfasDb().insertOne(
+//       await organismesDb().insertOne(
 //         Cfa.create({
 //           uai: uai_etablissement,
 //           nom: "cfa",
 //         })
 //       );
-//       const { access_token } = await cfasDb().findOne({ uai: uai_etablissement });
+//       const { access_token } = await organismesDb().findOne({ uai: uai_etablissement });
 
 //       // Authent cfa
 //       const authentResponse = await httpClient.post("/api/login-cfa", {
