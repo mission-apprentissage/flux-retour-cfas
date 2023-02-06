@@ -1,6 +1,6 @@
 import { uniqBy } from "lodash-es";
-import { schemaValidation } from "../../../utils/schemaUtils.js";
-import { object, objectId, string, date, boolean, arrayOf } from "../../json-schema/jsonSchemaTypes.js";
+import { schemaValidation } from "../../utils/schemaUtils.js";
+import { object, objectId, string, date, boolean, arrayOf } from "../json-schema/jsonSchemaTypes.js";
 import { apprenantSchema, defaultValuesApprenant, validateApprenant } from "./parts/apprenant.part.js";
 
 import { effectifFieldsLockerSchema, defaultValuesEffectifFieldsLocker } from "./parts/effectif.field.locker.part.js";

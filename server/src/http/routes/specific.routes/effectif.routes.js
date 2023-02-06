@@ -3,7 +3,7 @@ import Joi from "joi";
 import { ObjectId } from "mongodb";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
-import { schema } from "../../../common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
+import { schema } from "../../../common/model/effectifs.model/effectifs.model.js";
 import { effectifsDb } from "../../../common/model/collections.js";
 import { createEffectif, updateEffectif } from "../../../common/actions/effectifs.actions.js";
 import permissionsOrganismeMiddleware from "../../middlewares/permissionsOrganismeMiddleware.js";

@@ -1,5 +1,5 @@
-import { schemaValidation } from "../../utils/schemaUtils.js";
-import { cfdSchema } from "../../utils/validationUtils.js";
+import { schemaValidation } from "../utils/schemaUtils.js";
+import { cfdSchema } from "../utils/validationUtils.js";
 import {
   object,
   string,
@@ -8,7 +8,7 @@ import {
   dateOrNull,
   stringOrNull,
   arrayOfOrNull,
-} from "../json-schema/jsonSchemaTypes.js";
+} from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "formations";
 

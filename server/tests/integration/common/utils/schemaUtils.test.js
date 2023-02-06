@@ -1,10 +1,10 @@
 // import { strict as assert } from "assert";
-// import { defaultValuesEffectif } from "../../../../src/common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
+// import { defaultValuesEffectif } from "../../../../src/common/model/effectifs.model/effectifs.model.js";
 // import { getSchemaValidationErrors } from "../../../../src/common/utils/schemaUtils.js";
-// import { schema as effectifSchema } from "../../../../src/common/model/next.toKeep.models/effectifs.model/effectifs.model.js";
-// import { defaultValuesApprenant } from "../../../../src/common/model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
+// import { schema as effectifSchema } from "../../../../src/common/model/effectifs.model/effectifs.model.js";
+// import { defaultValuesApprenant } from "../../../../src/common/model/effectifs.model/parts/apprenant.part.js";
 // import mongodb from "mongodb";
-// import { defaultValuesFormationEffectif } from "../../../../src/common/model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
+// import { defaultValuesFormationEffectif } from "../../../../src/common/model/effectifs.model/parts/formation.effectif.part.js";
 
 // describe("getSchemaValidationErrors", () => {
 //   it("returns [] when no validation errors", () => {

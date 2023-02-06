@@ -2,7 +2,7 @@ import { dossiersApprenantsMigrationDb } from "../model/collections.js";
 import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
-} from "../model/next.toKeep.models/dossiersApprenantsMigration.model.js";
+} from "../model/dossiersApprenantsMigration.model.js";
 
 /**
  * Méthode de création d'un dossierApprenantMigration depuis un dossier apprenant historique

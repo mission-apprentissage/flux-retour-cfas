@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
 import { rolesDb } from "../model/collections.js";
-import { defaultValuesRole } from "../model/next.toKeep.models/roles.model.js";
+import { defaultValuesRole } from "../model/roles.model.js";
 
 /**
  * Méthode de création d'un rôle

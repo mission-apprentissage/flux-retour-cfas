@@ -2,7 +2,7 @@ import { validateCfd } from "../utils/validationsUtils/cfd.js";
 import { getCfdInfo } from "../apis/apiTablesCorrespondances.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { formationsDb, dossiersApprenantsMigrationDb } from "../model/collections.js";
-import { validateFormation } from "../model/next.toKeep.models/formations.model.js";
+import { validateFormation } from "../model/formations.model.js";
 import { buildTokenizedString } from "../utils/buildTokenizedString.js";
 import { ObjectId } from "mongodb";
 

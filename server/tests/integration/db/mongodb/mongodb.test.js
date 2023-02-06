@@ -4,7 +4,7 @@ import { createUserEvent } from "../../../../src/common/actions/userEvents.actio
 import { jobEventStatuts } from "../../../../src/common/constants/jobsConstants.js";
 import { jobEventsDb, userEventsDb } from "../../../../src/common/model/collections.js";
 import { clearAllCollections, clearCollection } from "../../../../src/common/mongodb.js";
-import jobEventsModelDescriptor from "../../../../src/common/model/next.toKeep.models/jobEvents.model.js";
+import jobEventsModelDescriptor from "../../../../src/common/model/jobEvents.model.js";
 
 describe("Mongodb Tests", () => {
   describe("clearAllCollections", () => {

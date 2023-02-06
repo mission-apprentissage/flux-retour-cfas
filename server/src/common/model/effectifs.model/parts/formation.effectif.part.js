@@ -1,6 +1,6 @@
 import Joi from "joi";
-import { schemaValidation } from "../../../../utils/schemaUtils.js";
-import { object, string, integer, arrayOf, objectId, date } from "../../../json-schema/jsonSchemaTypes.js";
+import { schemaValidation } from "../../../utils/schemaUtils.js";
+import { object, string, integer, arrayOf, objectId, date } from "../../json-schema/jsonSchemaTypes.js";
 
 export const formationEffectifSchema = object(
   {

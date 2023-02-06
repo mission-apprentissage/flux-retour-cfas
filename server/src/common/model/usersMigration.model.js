@@ -1,10 +1,10 @@
 import Joi from "joi";
-import { integer, object, objectId, string, boolean, arrayOf, date } from "../json-schema/jsonSchemaTypes.js";
-import { schemaValidation } from "../../utils/schemaUtils.js";
-import { siretSchema, passwordSchema, uaiSchema } from "../../utils/validationUtils.js";
-import { RESEAUX_CFAS } from "../../constants/networksConstants.js";
-import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../../constants/territoiresConstants.js";
-import { ORGANISMES_APPARTENANCE, USER_ACCOUNT_STATUS } from "../../constants/usersConstants.js";
+import { integer, object, objectId, string, boolean, arrayOf, date } from "./json-schema/jsonSchemaTypes.js";
+import { schemaValidation } from "../utils/schemaUtils.js";
+import { siretSchema, passwordSchema, uaiSchema } from "../utils/validationUtils.js";
+import { RESEAUX_CFAS } from "../constants/networksConstants.js";
+import { REGIONS, ACADEMIES, DEPARTEMENTS } from "../constants/territoiresConstants.js";
+import { ORGANISMES_APPARTENANCE, USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
 
 export const collectionName = "usersMigration";
 

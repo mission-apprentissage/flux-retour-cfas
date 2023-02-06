@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { getMetiersBySirets } from "../../apis/apiLba.js";
 import { organismesDb } from "../../model/collections.js";
-import { defaultValuesOrganisme, validateOrganisme } from "../../model/next.toKeep.models/organismes.model.js";
+import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
 import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { generateKey } from "../../utils/cryptoUtils.js";

@@ -4,7 +4,7 @@ import { dossiersApprenantsMigrationDb } from "../model/collections.js";
 import {
   defaultValuesDossiersApprenantsMigration,
   validateDossiersApprenantsMigration,
-} from "../model/next.toKeep.models/dossiersApprenantsMigration.model.js";
+} from "../model/dossiersApprenantsMigration.model.js";
 import { escapeRegExp } from "../utils/regexUtils.js";
 import { findOrganismeById } from "./organismes/organismes.actions.js";
 

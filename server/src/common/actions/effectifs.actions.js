@@ -1,12 +1,9 @@
 import { cloneDeep, isObject, merge, reduce, set, uniqBy } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { effectifsDb } from "../model/collections.js";
-import {
-  defaultValuesEffectif,
-  validateEffectif,
-} from "../model/next.toKeep.models/effectifs.model/effectifs.model.js";
-import { defaultValuesApprenant } from "../model/next.toKeep.models/effectifs.model/parts/apprenant.part.js";
-import { defaultValuesFormationEffectif } from "../model/next.toKeep.models/effectifs.model/parts/formation.effectif.part.js";
+import { defaultValuesEffectif, validateEffectif } from "../model/effectifs.model/effectifs.model.js";
+import { defaultValuesApprenant } from "../model/effectifs.model/parts/apprenant.part.js";
+import { defaultValuesFormationEffectif } from "../model/effectifs.model/parts/formation.effectif.part.js";
 import { transformToInternationalNumber } from "../utils/validationsUtils/frenchTelephoneNumber.js";
 
 /**

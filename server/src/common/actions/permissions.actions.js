@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { permissionsDb } from "../model/collections.js";
-import { defaultValuesPermission, validatePermission } from "../model/next.toKeep.models/permissions.model.js";
+import { defaultValuesPermission, validatePermission } from "../model/permissions.model.js";
 import { findRoleByName } from "./roles.actions.js";
 
 /**
