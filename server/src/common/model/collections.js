@@ -5,7 +5,6 @@ import formationsModelDescriptor from "./formations.model.js";
 import jobEventsModelDescriptor from "./jobEvents.model.js";
 import dossiersApprenantsApiErrorsModelDescriptor from "./dossiersApprenantsApiErrors.model.js";
 import fiabilisationUaiSiretModelDescriptor from "./fiabilisationUaiSiret.model.js";
-import dossiersApprenantsModelDescriptor from "./dossiersApprenants.model.js";
 import usersMigrationModelDescriptor from "./usersMigration.model.js";
 import JwtSessionsModelDescriptor from "./jwtSessions.model.js";
 import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model.js";
@@ -20,7 +19,6 @@ export const modelDescriptors = [
   usersModelDescriptor,
   userEventsModelDescriptor,
   formationsModelDescriptor,
-  dossiersApprenantsModelDescriptor,
   jobEventsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
   usersMigrationModelDescriptor,
@@ -34,10 +32,6 @@ export const modelDescriptors = [
   uploadsModelDescriptor,
   fiabilisationUaiSiretModelDescriptor,
 ];
-
-export const dossiersApprenantsDb = () => {
-  return getDbCollection(dossiersApprenantsModelDescriptor.collectionName);
-};
 
 export const formationsDb = () => {
   return getDbCollection(formationsModelDescriptor.collectionName);

@@ -1,5 +1,5 @@
 import logger from "../../../../../common/logger.js";
-import { dossiersApprenantsDb, fiabilisationUaiSiretDb } from "../../../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb, fiabilisationUaiSiretDb } from "../../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../../common/utils/asyncUtils.js";
 
 const filters = {
@@ -15,7 +15,7 @@ export const updateDossiersApprenantWithFiabilisationUaiSiret = async () => {
   let dossiersApprenantModifiedCount = 0;
   await asyncForEach(allCouplesToMakeFiable, async (fiabilisationMapping) => {
     try {
-      const { modifiedCount } = await dossiersApprenantsDb().updateMany(
+      const { modifiedCount } = await dossiersApprenantsMigrationDb().updateMany(
         { ...filters, uai_etablissement: fiabilisationMapping.uai, siret_etablissement: fiabilisationMapping.siret },
         {
           $set: {

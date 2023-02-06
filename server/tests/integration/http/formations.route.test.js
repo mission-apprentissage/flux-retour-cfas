@@ -3,7 +3,7 @@
 // import { asyncForEach } from "../../../src/common/utils/asyncUtils.js";
 // import { Formation } from "../../../src/common/factory/formation.js";
 // import { createRandomDossierApprenant } from "../../data/randomizedSample.js";
-// import { formationsDb, dossiersApprenantsDb } from "../../../src/common/model/collections.js";
+// import { formationsDb, dossiersApprenantsMigrationDb } from "../../../src/common/model/collections.js";
 
 // describe("Formations Route", () => {
 //   const formationsSeed = [
@@ -20,7 +20,7 @@
 //     await asyncForEach(formationsSeed, async (formationSeed) => {
 //       const formation = Formation.create(formationSeed);
 //       await formationsDb().insertOne(formation);
-//       await dossiersApprenantsDb().insertOne(
+//       await dossiersApprenantsMigrationDb().insertOne(
 //         {
 //           ...createRandomDossierApprenant(),
 //           formation_cfd: formation.cfd,

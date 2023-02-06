@@ -5,6 +5,7 @@ export const up = async (db) => {
   await db.collection("duplicatesEvents").drop();
   await db.collection("cfas").drop();
   await db.collection("archiveDossiersApprenants").drop();
+  await db.collection("dossiersApprenants").drop();
 };
 
 export const down = async () => {};

@@ -1,7 +1,7 @@
 import cliProgress from "cli-progress";
 import logger from "../../../../common/logger.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
-import { dossiersApprenantsDb } from "../../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb } from "../../../../common/model/collections.js";
 import {
   DUPLICATE_COLLECTION_NAMES,
   DUPLICATE_TYPE_CODES,
@@ -41,7 +41,7 @@ export const cleanUaisDuplicates = async () => {
 
     // Delete each ancient duplicates
     await asyncForEach(duplicatesIdToRemove, async (currentIdToRemove) => {
-      await dossiersApprenantsDb().deleteOne({ _id: currentIdToRemove });
+      await dossiersApprenantsMigrationDb().deleteOne({ _id: currentIdToRemove });
     });
   });
 
