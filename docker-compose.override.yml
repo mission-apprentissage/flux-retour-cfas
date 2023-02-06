@@ -33,8 +33,7 @@ services:
     ports:
       - "127.0.0.1:9229:9229" # Allows remote debugging
     volumes:
-      - ./server/src:/app/src:z # Allows source folders to be watched
-      - ./server/config:/app/config:z
+      - ./server:/app:z # Allows source folders to be watched
       - flux_retour_cfas_server_data:/data:z
     environment:
       - FLUX_RETOUR_CFAS_ENV=dev
