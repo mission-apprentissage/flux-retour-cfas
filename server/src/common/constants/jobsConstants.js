@@ -14,7 +14,6 @@ export const JOB_NAMES = {
   dossiersApprenantsRetrieveFormateurGestionnairesCatalog: "dossiersApprenants-retrieve-formateur-gestionnaire-catalog",
   dossiersApprenantsBadHistoryIdentifyAntidated: "dossiersApprenants-bad-history-identify-antidated",
   createIndexes: "create-indexes",
-  createEffectifsApprenantsCollection: "create-effectifs-apprenants-collection",
   clearUsers: "clear-users",
   clearCfas: "clear-cfas",
   clearDossiersApprenants: "clear-dossiersApprenants",

@@ -3,7 +3,6 @@ import { Option, program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { seedSample, seedAdmin, seedRoles } from "./seed/start/index.js";
 import { clear, clearRoles, clearUsers } from "./clear/clear-all.js";
-import { hydrateEffectifsApprenants } from "./hydrate/effectifs-apprenants/hydrate-effectifsApprenants.js";
 import { hydrateArchivesDossiersApprenantsAndEffectifs } from "./hydrate/archive-dossiers-apprenants/hydrate-archive-dossiersApprenants.js";
 import { purgeEvents } from "./clear/purge-events.js";
 import { createUserAccount } from "./users/create-user.js";
@@ -175,18 +174,6 @@ cli
     runScript(async () => {
       return hydrateArchivesDossiersApprenantsAndEffectifs(limit);
     }, "hydrate-archive-dossiersApprenants-effectifs");
-  });
-
-/**
- * Job de remplissage des effectifs apprenants
- */
-cli
-  .command("hydrate:effectifsApprenants")
-  .description("Remplissage des effectifs apprenants")
-  .action(async () => {
-    runScript(async ({ effectifs }) => {
-      return hydrateEffectifsApprenants(effectifs);
-    }, "hydrate-effectifsApprenants");
   });
 
 /**

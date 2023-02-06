@@ -15,9 +15,6 @@ call_daily_jobs_with_logs(){
   # TODO : a lancer en manuel ou sur un timing différent (chaque semaine) ? - Remplissage des réseaux depuis csv fournis
   # docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux-newFormat" || true
 
-  # TODO : a réactiver - Remplissage de la collection EffectifsApprenants
-  # docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:effectifsApprenants" || true
-
   # TODO : TEMPORARY DESACTIVATED - Purge des données inutiles
   # docker exec flux_retour_cfas_server bash -c "yarn cli purge:events" || true
 } 
