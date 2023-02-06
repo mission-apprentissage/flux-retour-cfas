@@ -181,3 +181,5 @@ export function validateDossiersApprenantsMigration(props) {
     ],
   });
 }
+
+export default { schema, indexes, collectionName };

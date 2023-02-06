@@ -166,3 +166,5 @@ export function validateOrganisme(props) {
     ],
   });
 }
+
+export default { schema, indexes, collectionName };

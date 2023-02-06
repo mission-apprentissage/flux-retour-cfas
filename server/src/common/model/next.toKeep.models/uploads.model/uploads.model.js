@@ -54,3 +54,5 @@ export function defaultValuesUpload() {
     created_at: new Date(),
   };
 }
+
+export default { schema, indexes, collectionName };

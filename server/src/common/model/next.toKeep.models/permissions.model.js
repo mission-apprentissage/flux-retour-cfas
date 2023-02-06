@@ -52,3 +52,5 @@ export function validatePermission(props) {
     ],
   });
 }
+
+export default { schema, indexes, collectionName };
