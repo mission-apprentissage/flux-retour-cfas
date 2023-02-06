@@ -7,7 +7,6 @@ import * as Tracing from "@sentry/tracing";
 
 import { apiRoles } from "../common/roles.js";
 
-import tryCatch from "./middlewares/tryCatchMiddleware.js";
 import logMiddleware from "./middlewares/logMiddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import requireJwtAuthenticationMiddleware from "./middlewares/requireJwtAuthentication.js";
@@ -160,15 +159,6 @@ export default async (services) => {
   // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
   app.use("/api/cfas", cfasRouter(services)); // FRONT
   app.use("/api/referentiel", referentielRouter(services)); // FRONT
-  app.get(
-    "/api/cache",
-    checkJwtToken,
-    pageAccessMiddleware(["_ADMIN"]),
-    tryCatch(async (req, res) => {
-      await services.cache.flushAll();
-      return res.json({});
-    })
-  );
 
   // The error handler must be before any other error middleware and after all controllers
   app.use(Sentry.Handlers.errorHandler());
