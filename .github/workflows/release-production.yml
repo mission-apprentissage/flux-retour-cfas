@@ -32,21 +32,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.G_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  back-merge:
-    needs: release
-    # avoids buggy Github Actions behaviour triggering infinite loop of release commits
-    if: "startsWith(github.event.head_commit.message, 'chore(release')"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-
-      - name: Merge master -> develop
-        uses: devmasx/merge-branch@v1.3.1
-        with:
-          type: now
-          from_branch: master
-          target_branch: develop
-          github_token: ${{ secrets.GH_TOKEN }}
   ciserver:
     needs: release
     # avoids buggy Github Actions behaviour triggering infinite loop of release commits
