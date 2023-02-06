@@ -5,35 +5,24 @@ import formationsModelDescriptor from "./next.toKeep.models/formations.model.js"
 import jobEventsModelDescriptor from "./next.toKeep.models/jobEvents.model.js";
 import dossiersApprenantsApiErrorsModelDescriptor from "./previous.models/dossiersApprenantsApiErrors.model.js";
 import fiabilisationUaiSiretModelDescriptor from "./next.toKeep.models/fiabilisationUaiSiret.model.js";
-
-// TODO: remove this model
-import cfasModelDescriptor from "./previous.models/toRemove.models/cfas.model.js";
-import dossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/dossiersApprenants.model.js";
-import duplicatesEventsModelDescriptor from "./previous.models/toRemove.models/duplicatesEvents.model.js";
-import archiveDossiersApprenantsModelDescriptor from "./previous.models/toRemove.models/archiveDossiersApprenants.model.js";
-import referentielSiretUaiModelDescriptor from "./previous.models/toRemove.models/referentielSiretUai.model.js";
-
-import * as usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
-import * as JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
-import * as MaintenanceMessagesModelDescriptor from "./next.toKeep.models/maintenanceMessages.model.js";
-import * as RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
-import * as PermissionsDescriptor from "./next.toKeep.models/permissions.model.js";
-import * as OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
-import * as dossiersApprenantsMigrationModelDescriptor from "./next.toKeep.models/dossiersApprenantsMigration.model.js";
-import * as effectifsModelDescriptor from "./next.toKeep.models/effectifs.model/effectifs.model.js";
-import * as uploadsModelDescriptor from "./next.toKeep.models/uploads.model/uploads.model.js";
+import dossiersApprenantsModelDescriptor from "./dossiersApprenants.model.js";
+import usersMigrationModelDescriptor from "./next.toKeep.models/usersMigration.model.js";
+import JwtSessionsModelDescriptor from "./next.toKeep.models/jwtSessions.model.js";
+import MaintenanceMessagesModelDescriptor from "./next.toKeep.models/maintenanceMessages.model.js";
+import RolesModelDescriptor from "./next.toKeep.models/roles.model.js";
+import PermissionsDescriptor from "./next.toKeep.models/permissions.model.js";
+import OrganismesModelDescriptor from "./next.toKeep.models/organismes.model.js";
+import dossiersApprenantsMigrationModelDescriptor from "./next.toKeep.models/dossiersApprenantsMigration.model.js";
+import effectifsModelDescriptor from "./next.toKeep.models/effectifs.model/effectifs.model.js";
+import uploadsModelDescriptor from "./next.toKeep.models/uploads.model/uploads.model.js";
 
 export const modelDescriptors = [
   usersModelDescriptor,
   userEventsModelDescriptor,
-  cfasModelDescriptor,
   formationsModelDescriptor,
   dossiersApprenantsModelDescriptor,
   jobEventsModelDescriptor,
-  duplicatesEventsModelDescriptor,
-  archiveDossiersApprenantsModelDescriptor,
   dossiersApprenantsApiErrorsModelDescriptor,
-  referentielSiretUaiModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
   MaintenanceMessagesModelDescriptor,
@@ -102,25 +91,8 @@ export function uploadsDb() {
   return getDbCollection(uploadsModelDescriptor.collectionName);
 }
 
-// TODO Collections descriptors à supprimer
-export const cfasDb = () => {
-  return getDbCollection(cfasModelDescriptor.collectionName);
-};
-
-export const duplicatesEventsDb = () => {
-  return getDbCollection(duplicatesEventsModelDescriptor.collectionName);
-};
-
-export const archiveDossiersApprenantsDb = () => {
-  return getDbCollection(archiveDossiersApprenantsModelDescriptor.collectionName);
-};
-
 export const dossiersApprenantsApiErrorsDb = () => {
   return getDbCollection(dossiersApprenantsApiErrorsModelDescriptor.collectionName);
-};
-
-export const referentielSiretUaiDb = () => {
-  return getDbCollection(referentielSiretUaiModelDescriptor.collectionName);
 };
 
 export const fiabilisationUaiSiretDb = () => {
