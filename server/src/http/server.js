@@ -18,7 +18,6 @@ import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { pageAccessMiddleware } from "./middlewares/pageAccessMiddleware.js";
 
 import indicateursExportRouter from "./routes/specific.routes/indicateurs-export.routes.js";
-import effectifsApprenantsRouter from "./routes/specific.routes/old/effectifs-apprenants.route.js";
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
@@ -139,13 +138,6 @@ export default async (services) => {
     indicateursExportRouter(services)
   );
 
-  // Route dédiée à RCO
-  app.use(
-    "/api/effectifs-apprenants",
-    requireJwtAuthentication,
-    permissionsMiddleware([apiRoles.apiStatutsConsumer.anonymousDataConsumer]),
-    effectifsApprenantsRouter(services)
-  );
   app.use("/api/healthcheck", healthcheckRouter(services));
 
   // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
