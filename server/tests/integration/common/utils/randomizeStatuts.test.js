@@ -1,7 +1,7 @@
 // import { strict as assert } from "assert";
 // import { createRandomDossierApprenant } from "../../../data/randomizedSample.js";
 // import { historySequenceApprentiToAbandon } from "../../../data/historySequenceSamples.js";
-// import { dossiersApprenantsDb } from "../../../../src/common/model/collections.js";
+// import { dossiersApprenantsMigrationDb } from "../../../../src/common/model/collections.js";
 
 // describe("Randomize Statuts test", () => {
 //   describe("createRandomDossierApprenant", () => {
@@ -42,8 +42,8 @@
 //         historique_statut_apprenant: historySequenceApprentiToAbandon,
 //       });
 
-//       const { insertedId } = await dossiersApprenantsDb().insertOne(randomStatut);
-//       const result = await dossiersApprenantsDb().findOne({ _id: insertedId });
+//       const { insertedId } = await dossiersApprenantsMigrationDb().insertOne(randomStatut);
+//       const result = await dossiersApprenantsMigrationDb().findOne({ _id: insertedId });
 
 //       // Checks creation
 //       assert.deepEqual(result.ine_apprenant, randomStatut.ine_apprenant);
@@ -65,7 +65,7 @@
 //       assert.deepEqual(result.historique_statut_apprenant, randomStatut.historique_statut_apprenant);
 
 //       // Checks exists method
-//       const found = await dossiersApprenantsDb().countDocuments({
+//       const found = await dossiersApprenantsMigrationDb().countDocuments({
 //         id_erp_apprenant: result.id_erp_apprenant,
 //         uai_etablissement: result.uai_etablissement,
 //         annee_scolaire: result.annee_scolaire,

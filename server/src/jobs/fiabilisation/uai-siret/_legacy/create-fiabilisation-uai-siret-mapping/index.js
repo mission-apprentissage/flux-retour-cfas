@@ -1,6 +1,6 @@
 import { fetchOrganismes } from "../../../../../common/apis/apiReferentielMna.js";
 import logger from "../../../../../common/logger.js";
-import { dossiersApprenantsDb, fiabilisationUaiSiretDb } from "../../../../../common/model/collections.js";
+import { dossiersApprenantsMigrationDb, fiabilisationUaiSiretDb } from "../../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../../common/utils/asyncUtils.js";
 import { FIABILISATION_MAPPINGS as manualMapping } from "../../mapping.js";
 
@@ -39,7 +39,7 @@ export const createFiabilisationUaiSiretMapping = async () => {
   });
 
   // on récupère tous les couples UAI/SIRET depuis les dossiers apprenants
-  const allCouplesUaiSiretTdb = await dossiersApprenantsDb()
+  const allCouplesUaiSiretTdb = await dossiersApprenantsMigrationDb()
     .aggregate([
       {
         $match: filters,

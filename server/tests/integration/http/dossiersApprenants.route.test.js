@@ -12,7 +12,7 @@
 
 // import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd.js";
 // import dossiersApprenants from "../../../src/common/components/dossiersApprenants.js";
-// import { dossiersApprenantsDb } from "../../../src/common/model/collections.js";
+// import { dossiersApprenantsMigrationDb } from "../../../src/common/model/collections.js";
 
 // const user = {
 //   name: "userApi",
@@ -138,7 +138,7 @@ describe("Dossiers Apprenants Route", () => {
   //           true
   //         );
   //         // check that no data was created
-  //         assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
+  //         assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
   //       });
   //     });
   //     it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ annee_scolaire ne respecte pas le format", async () => {
@@ -163,7 +163,7 @@ describe("Dossiers Apprenants Route", () => {
   //         true
   //       );
   //       // check that no data was created
-  //       assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
+  //       assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
   //     });
   //     it("Vérifie qu'on ne crée pas de donnée et renvoie une 400 lorsque le champ uai_etablissement ne respecte pas le format", async () => {
   //       const { httpClient } = await startServer();
@@ -186,7 +186,7 @@ describe("Dossiers Apprenants Route", () => {
   //         true
   //       );
   //       // check that no data was created
-  //       assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
+  //       assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
   //     });
   //     const invalidDates = ["2020", "2020-10", "2020-10-", "2020-10-1", "13/11/2020", "abc", true];
   //     invalidDates.forEach((invalidDate) => {
@@ -214,7 +214,7 @@ describe("Dossiers Apprenants Route", () => {
   //           true
   //         );
   //         // check that no data was created
-  //         assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
+  //         assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
   //       });
   //     });
   //     it("Vérifie l'ajout via route /dossiers-apprenants de données complètes", async () => {
@@ -252,7 +252,7 @@ describe("Dossiers Apprenants Route", () => {
   //       assert.ok(response.data.message);
   //       assert.deepEqual(response.data.status, "OK");
   //       // Check Nb Items added
-  //       assert.deepEqual(await dossiersApprenantsDb().countDocuments({}), nbItemsToTest);
+  //       assert.deepEqual(await dossiersApprenantsMigrationDb().countDocuments({}), nbItemsToTest);
   //     });
   //     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un trop grande nb de données randomisées (>100)", async () => {
   //       const { httpClient } = await startServer();
@@ -268,7 +268,7 @@ describe("Dossiers Apprenants Route", () => {
   //       });
   //       // Check Api Route data & Data not added
   //       assert.deepEqual(response.status, 413);
-  //       assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
+  //       assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
   //     });
   //     it("Vérifie l'ajout via route /dossiers-apprenants de 10 statuts valides et 3 statuts invalides", async () => {
   //       const { httpClient } = await startServer();
@@ -298,7 +298,7 @@ describe("Dossiers Apprenants Route", () => {
   //       assert.deepEqual(response.data.ko, 3);
   //       assert.equal(response.data.validationErrors.length, 3);
   //       // Check Nb Items added
-  //       assert.deepEqual(await dossiersApprenantsDb().countDocuments({}), nbValidItems);
+  //       assert.deepEqual(await dossiersApprenantsMigrationDb().countDocuments({}), nbValidItems);
   //     });
   //     it("Vérifie l'ajout via route /dossiers-apprenants d'un statut avec champs non renseignés dans le schéma mais ignorés en base", async () => {
   //       const { httpClient } = await startServer();
@@ -317,7 +317,7 @@ describe("Dossiers Apprenants Route", () => {
   //       assert.equal(response.status, 200);
   //       assert.equal(response.data.status, "OK");
   //       assert.equal(response.data.ok, 1);
-  //       const allStatuts = await dossiersApprenantsDb().find().toArray();
+  //       const allStatuts = await dossiersApprenantsMigrationDb().find().toArray();
   //       const createdStatut = allStatuts[0];
   //       assert.equal(createdStatut[unknownKeyName], undefined);
   //     });
@@ -339,7 +339,7 @@ describe("Dossiers Apprenants Route", () => {
   //       assert.ok(response.data.message);
   //       assert.deepEqual(response.data.status, "OK");
   //       // Check Nb Items added
-  //       assert.deepEqual(await dossiersApprenantsDb().countDocuments({}), 1);
+  //       assert.deepEqual(await dossiersApprenantsMigrationDb().countDocuments({}), 1);
   //     });
   //     it("Vérifie qu'on ne peut créer un dossier apprenant avec des espaces en début/fin de prenom_apprenant et nom_apprenant", async () => {
   //       const { httpClient } = await startServer();
@@ -372,7 +372,7 @@ describe("Dossiers Apprenants Route", () => {
   //       assert.deepEqual(responseGet.data.dossiersApprenants[0].nom_apprenant, "TEST");
   //       assert.deepEqual(responseGet.data.dossiersApprenants[0].prenom_apprenant, "TEST");
   //       // Check Nb Items added
-  //       assert.deepEqual(await dossiersApprenantsDb().countDocuments({}), 1);
+  //       assert.deepEqual(await dossiersApprenantsMigrationDb().countDocuments({}), 1);
   //     });
   //     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec mauvais code CFD (id_formation)", async () => {
   //       const { httpClient } = await startServer();
@@ -395,7 +395,7 @@ describe("Dossiers Apprenants Route", () => {
   //         ),
   //         true
   //       );
-  //       assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
+  //       assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
   //     });
   //     it("Vérifie l'erreur d'ajout via route /dossiers-apprenants pour un statut avec un SIRET au mauvais format", async () => {
   //       const { httpClient } = await startServer();
@@ -412,7 +412,7 @@ describe("Dossiers Apprenants Route", () => {
   //       // check response & validation errors
   //       assert.equal(response.data.status, "WARNING");
   //       assert.equal(response.data.validationErrors.length, 1);
-  //       assert.equal(await dossiersApprenantsDb().countDocuments({}), 0);
+  //       assert.equal(await dossiersApprenantsMigrationDb().countDocuments({}), 0);
   //     });
   //   });
   //   describe("GET dossiers-apprenants/", () => {
