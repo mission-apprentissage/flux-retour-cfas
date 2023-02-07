@@ -11,7 +11,14 @@ const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase()
 export const getRandomFormationCfd = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
 export const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
-export const getRandomSiretEtablissement = () => new RandExp(/^[0-9]{14}$/).gen().toUpperCase(); // TODO: this doesn't follow the luhn algorithm. To fix.
+export const getRandomSiretEtablissement = () =>
+  faker.helpers.arrayElement([
+    "41461021200014", // CENTR FORMATION TECHNICIENS AGRICOLES
+    "77568013501089", // etablissement fermé
+    "77568013501139", // ASSOCIATION POUR LA PROMOTION SOCIALE ET LA FORMATION PROFESSIONNELLE DANS LES TRANSPORTS ROUTIERS
+    "77937827200016", // ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN
+    "78354361400029", // OGEC ST LUC CAMBRAI
+  ]);
 export const getSampleSiretEtablissement = () => "13002526500013";
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
 const getRandomNature = () =>
@@ -39,9 +46,9 @@ const getRandomAnneeFormation = () => faker.helpers.arrayElement([0, 1, 2, 3]);
 export const getRandomAnneeScolaire = () => {
   const currentYear = new Date().getFullYear();
   const anneeScolaire = faker.helpers.arrayElement([
-    [currentYear - 1, currentYear], // [2020, 2021]
-    [currentYear, currentYear + 1], // [2021, 2022]
-    [currentYear + 1, currentYear + 2], // [2022, 2023]
+    [currentYear - 1, currentYear],
+    [currentYear, currentYear + 1],
+    [currentYear + 1, currentYear + 2],
   ]);
   return anneeScolaire.join("-");
 };
