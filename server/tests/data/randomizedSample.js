@@ -10,14 +10,13 @@ const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
 export const getRandomFormationCfd = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
-export const getRandomUaiEtablissement = () => new RandExp(/^[0-9]{7}[A-Z]{1}$/).gen().toUpperCase();
-export const getRandomSiretEtablissement = () =>
+export const getRandomEtablissement = () =>
   faker.helpers.arrayElement([
-    "41461021200014", // CENTR FORMATION TECHNICIENS AGRICOLES
-    "77568013501089", // etablissement fermé
-    "77568013501139", // ASSOCIATION POUR LA PROMOTION SOCIALE ET LA FORMATION PROFESSIONNELLE DANS LES TRANSPORTS ROUTIERS
-    "77937827200016", // ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN
-    "78354361400029", // OGEC ST LUC CAMBRAI
+    { uai: "0611175W", siret: "41461021200014" }, // CENTR FORMATION TECHNICIENS AGRICOLES
+    { uai: "0755805C", siret: "77568013501089" }, // etablissement fermé
+    { uai: "0755805C", siret: "77568013501139" }, // ASSOCIATION POUR LA PROMOTION SOCIALE ET LA FORMATION PROFESSIONNELLE DANS LES TRANSPORTS ROUTIERS
+    { uai: "0011058V", siret: "77937827200016" }, // ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN
+    { uai: "0596055L", siret: "78354361400029" }, // OGEC ST LUC CAMBRAI
   ]);
 export const getSampleSiretEtablissement = () => "13002526500013";
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
@@ -57,20 +56,25 @@ const getRandomDateFinContrat = () => faker.date.between(addYears(new Date(), 1)
 const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(), 1), addYears(new Date(), 2));
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
-export const createRandomOrganisme = (params = {}) => ({
-  uai: getRandomUaiEtablissement(),
-  sirets: [getSampleSiretEtablissement()],
-  adresse: getRandomAdresseObject(),
-  nature: getRandomNature(),
-  nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
-  ...params,
-});
+export const createRandomOrganisme = (params = {}) => {
+  const { siret, uai } = getRandomEtablissement();
+  return {
+    uai,
+    sirets: [siret],
+    adresse: getRandomAdresseObject(),
+    nature: getRandomNature(),
+    nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
+    ...params,
+  };
+};
 
 export const createRandomDossierApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
   const isStudentPresent = isPresent();
   const isContratPresent = isPresent();
+
+  const { siret, uai } = getRandomEtablissement();
 
   return {
     ine_apprenant: getRandomIne(),
@@ -79,8 +83,8 @@ export const createRandomDossierApprenant = (params = {}) => {
     email_contact: faker.internet.email(),
     formation_cfd: getRandomFormationCfd(),
     libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long,
-    uai_etablissement: getRandomUaiEtablissement(),
-    siret_etablissement: isStudentPresent ? getRandomSiretEtablissement() : null,
+    uai_etablissement: uai,
+    siret_etablissement: isStudentPresent ? siret : null,
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
     historique_statut_apprenant: [],
     statut_apprenant: getRandomStatutApprenant(),
@@ -105,10 +109,11 @@ export const createRandomEffectifApprenant = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
   const isStudentPresent = isPresent();
+  const { uai } = getRandomEtablissement();
 
   return {
     dossierApprenantId: faker.datatype.uuid(),
-    uai_etablissement: getRandomUaiEtablissement(),
+    uai_etablissement: uai,
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
     formation_cfd: getRandomFormationCfd(),
     periode_formation: isStudentPresent ? periode_formation : null,
@@ -130,6 +135,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
   const annee_scolaire = getRandomAnneeScolaire();
   const periode_formation = getRandomPeriodeFormation(annee_scolaire);
   const isStudentPresent = isPresent();
+  const { uai, siret } = getRandomEtablissement();
 
   return {
     ine_apprenant: getRandomIne(),
@@ -141,8 +147,8 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
 
     id_formation: getRandomFormationCfd(),
     libelle_long_formation: faker.helpers.arrayElement(sampleLibelles).intitule_long,
-    uai_etablissement: getRandomUaiEtablissement(),
-    siret_etablissement: isStudentPresent ? getRandomSiretEtablissement() : "",
+    uai_etablissement: uai,
+    siret_etablissement: siret,
     nom_etablissement: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
 
     statut_apprenant: getRandomStatutApprenant(),
