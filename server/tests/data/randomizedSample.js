@@ -3,38 +3,15 @@ import RandExp from "randexp";
 import { sampleLibelles } from "./sampleLibelles.js";
 import { subMonths, addYears } from "date-fns";
 import { CODES_STATUT_APPRENANT } from "../../src/common/constants/dossierApprenantConstants.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
-import { DEPARTEMENTS } from "../../src/common/constants/territoiresConstants.js";
+import sampleEtablissements from "./sampleEtablissements.js";
 
 const isPresent = () => Math.random() < 0.66;
 const getRandomIne = () => new RandExp(/^[0-9]{9}[A-Z]{2}$/).gen().toUpperCase();
 export const getRandomFormationCfd = () => new RandExp(/^[0-9]{8}$/).gen().toUpperCase();
 const getRandomRncpFormation = () => `RNCP${new RandExp(/^[0-9]{5}$/).gen()}`;
-export const getRandomEtablissement = () =>
-  faker.helpers.arrayElement([
-    { uai: "0611175W", siret: "41461021200014" }, // CENTR FORMATION TECHNICIENS AGRICOLES
-    { uai: "0755805C", siret: "77568013501089" }, // etablissement fermé
-    { uai: "0755805C", siret: "77568013501139" }, // ASSOCIATION POUR LA PROMOTION SOCIALE ET LA FORMATION PROFESSIONNELLE DANS LES TRANSPORTS ROUTIERS
-    { uai: "0011058V", siret: "77937827200016" }, // ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN
-    { uai: "0596055L", siret: "78354361400029" }, // OGEC ST LUC CAMBRAI
-  ]);
-export const getSampleSiretEtablissement = () => "13002526500013";
+export const getRandomEtablissement = () => faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomStatutApprenant = () => faker.helpers.arrayElement(Object.values(CODES_STATUT_APPRENANT));
-const getRandomNature = () =>
-  faker.helpers.arrayElement([
-    NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
-    NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
-    NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
-  ]);
 
-const getRandomAdresseObject = () => {
-  const randomDepartement = faker.helpers.arrayElement(DEPARTEMENTS);
-  return {
-    departement: randomDepartement.code,
-    region: randomDepartement.region.code,
-    academie: randomDepartement.academie.code,
-  };
-};
 export const getRandomPeriodeFormation = (anneeScolaire) => {
   const yearToInclude = Number(anneeScolaire.slice(0, 4));
   const startYear = faker.helpers.arrayElement([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
@@ -57,13 +34,10 @@ const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
 export const createRandomOrganisme = (params = {}) => {
-  const { siret, uai } = getRandomEtablissement();
+  const { siret, ...etablissement } = getRandomEtablissement();
   return {
-    uai,
     sirets: [siret],
-    adresse: getRandomAdresseObject(),
-    nature: getRandomNature(),
-    nom: `ETABLISSEMENT ${faker.random.word()}`.toUpperCase(),
+    ...etablissement,
     ...params,
   };
 };
