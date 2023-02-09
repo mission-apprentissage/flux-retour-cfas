@@ -157,7 +157,7 @@ export const getUser = async (email) => {
  * @returns
  */
 export const getUserById = async (_id, projection = {}) => {
-  const user = await usersMigrationDb().findOne({ _id }, { projection });
+  const user = await usersMigrationDb().findOne({ _id: ObjectId(_id) }, { projection });
 
   if (!user) {
     throw new Error("Unable to find user");

@@ -8,6 +8,7 @@ import {
   createUser,
   getAllUsers,
   getUser,
+  getUserById,
   removeUser,
   searchUsers,
   structureUser,
@@ -18,8 +19,8 @@ import {
   getAllPermissions,
   updatePermissionsPending,
   removePermissions,
-  createPermission,
 } from "../../../common/actions/permissions.actions.js";
+import { refreshUserPermissions } from "../../../common/actions/users.afterCreate.actions.js";
 
 // TODO [tech]
 // eslint-disable-next-line no-unused-vars
@@ -126,16 +127,7 @@ export default ({ mailer }) => {
       }
 
       const user = await createUser({ email: options.email, password }, options);
-
-      // create the permission for admins only
-      if (options.permissions?.is_admin) {
-        await createPermission({
-          organisme_id: null,
-          userEmail: options.email,
-          roleName: "organisme.admin",
-          pending: false,
-        });
-      }
+      await refreshUserPermissions(user);
 
       try {
         await mailer.sendEmail({ to: user.email, payload: { ...user, tmpPwd: password } }, "activation_user");
@@ -170,6 +162,8 @@ export default ({ mailer }) => {
         acl: options.acl,
         invalided_token: true,
       });
+      const user = await getUserById(userid);
+      refreshUserPermissions(user);
 
       res.json({ ok: true, message: `User ${userid} updated !` });
     })
