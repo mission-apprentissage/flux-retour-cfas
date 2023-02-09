@@ -7,7 +7,7 @@ import { Page } from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useEspace } from "@/hooks/useEspace";
-import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/Components/OrganismeInfo";
+import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/components/OrganismeInfo";
 import { hasContextAccessTo } from "@/common/utils/rolesUtils";
 import LandingErp from "@/modules/mon-espace/landing/LandingErp";
 import LandingTransverse from "@/modules/mon-espace/landing/LandingTransverse";
