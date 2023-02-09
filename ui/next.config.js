@@ -1,4 +1,5 @@
 const { withSentryConfig } = require("@sentry/nextjs");
+const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
 
 function inline(value) {
   return value.replace(/\s{2,}/g, " ").trim();
@@ -30,6 +31,10 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   output: "standalone",
+  webpack: (config) => {
+    config.plugins.push(new CaseSensitivePathsPlugin());
+    return config;
+  },
   async headers() {
     return [
       {
