@@ -1,5 +1,5 @@
 import { addHours } from "date-fns";
-import { compact, pick, uniq } from "lodash-es";
+import { uniq } from "lodash-es";
 import { ObjectId } from "mongodb";
 import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
@@ -247,7 +247,6 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
 };
 
 export const structureUser = async (user) => {
-  const permissions = pick(user, ["is_admin", "is_cross_organismes"]);
   const rolesList = user.roles?.length
     ? await rolesDb()
         .find({ _id: { $in: user.roles } })
@@ -256,7 +255,7 @@ export const structureUser = async (user) => {
   const rolesAcl = rolesList.reduce((acc, { acl }) => [...acc, ...acl], []);
 
   const activePermissions = await findActivePermissionsForUser({ userEmail: user.email }, { organisme_id: 1, _id: 0 });
-  const organisme_ids = compact(activePermissions.map(({ organisme_id }) => organisme_id));
+  const organisme_ids = activePermissions.map(({ organisme_id }) => organisme_id).filter((v) => !!v);
 
   const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
   const isInPendingValidation = !organisme_ids.length && !activePermissions.length;
@@ -265,14 +264,17 @@ export const structureUser = async (user) => {
     : false;
 
   let specialAcl = [];
-  if (!hasAccessToOnlyOneOrganisme || permissions.is_cross_organismes) {
+  if (!hasAccessToOnlyOneOrganisme || user.is_cross_organismes || user.is_admin) {
     specialAcl = ["page/mes-organismes"];
   }
 
   return {
     organisme_ids,
     main_organisme_id: user.main_organisme_id,
-    permissions,
+    permissions: {
+      is_admin: user.is_admin,
+      is_cross_organismes: user.is_cross_organismes || user.is_admin,
+    },
     isInPendingValidation,
     hasAtLeastOneUserToValidate,
     email: user.email,
