@@ -1,18 +1,18 @@
 import React, { memo } from "react";
-import { Box, Button, HStack } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
+import { Box, Button, HStack } from "@chakra-ui/react";
 
-import { InputController } from "../../../formEngine/components/Input/InputController";
 import { fieldSelector } from "../../../formEngine/atoms";
+import { InputController } from "../../../formEngine/components/Input/InputController";
 import { useCerfaController } from "../../../formEngine/CerfaControllerContext";
 
 // eslint-disable-next-line react/display-name, no-unused-vars
-export const ApprenantStatuts = memo(({ values, modeSifa = false }) => {
+const EffectifStatuts = memo(({ values, modeSifa = false }) => {
   const nouveaStatutField = useRecoilValue(fieldSelector("apprenant.nouveau_statut"));
   const cerfaController = useCerfaController();
   return (
     <>
-      {values.apprenant.historique_statut?.map((statut, i) => {
+      {values?.apprenant?.historique_statut?.map((statut, i) => {
         return (
           <Box key={i}>
             <HStack spacing={2} key={i} alignItems="flex-end">
@@ -42,3 +42,5 @@ export const ApprenantStatuts = memo(({ values, modeSifa = false }) => {
     </>
   );
 });
+
+export default EffectifStatuts;

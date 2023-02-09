@@ -20,7 +20,6 @@ import { DownloadLine } from "../../../../theme/components/icons";
 import { hasContextAccessTo } from "../../../../common/utils/rolesUtils";
 import { organismeAtom } from "../../../../hooks/organismeAtoms";
 import AjoutApprenantModal from "./AjoutApprenantModal";
-import { useEspace } from "../../../../hooks/useEspace";
 import EffectifsTable from "./EffectifsTable";
 import useDownloadClick from "../../../../hooks/useDownloadClick";
 import { _getBlob } from "../../../../common/httpClient";
@@ -81,9 +80,8 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
   );
 };
 
-const Effectifs = ({ organismesEffectifs }) => {
+const Effectifs = ({ organismesEffectifs, isMine }) => {
   const router = useRouter();
-  const { isMonOrganismePages, isOrganismePages } = useEspace();
   const organisme = useRecoilValue(organismeAtom);
   const ajoutModal = useDisclosure();
   const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
@@ -101,8 +99,7 @@ const Effectifs = ({ organismesEffectifs }) => {
     <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Heading textStyle="h2" color="grey.800" mb={5}>
-          {isMonOrganismePages && "Mes effectifs"}
-          {isOrganismePages && "Ses effectifs"}
+          {isMine ? "Mes effectifs" : "Ses effectifs"}
         </Heading>
         <HStack spacing={4}>
           {organismesEffectifs.length > 0 && hasContextAccessTo(organisme, "organisme/page_effectifs/telecharger") && (
@@ -148,27 +145,26 @@ const Effectifs = ({ organismesEffectifs }) => {
             )}
         </HStack>
 
-        {isMonOrganismePages && (
-          <Ribbons variant="info" mb={6}>
-            <Box ml={3} fle>
-              <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                Service d’import de vos effectifs en version bêta.
-              </Text>
-              <Text color="grey.800" mt={4} textStyle="sm">
-                Nous listons actuellement toutes les informations qui peuvent empêcher l'import de fichier afin de
-                permettre par la suite une meilleure prise en charge de tout type de fichier.
-              </Text>
-            </Box>
-          </Ribbons>
-        )}
+        <Ribbons variant="info" mb={6}>
+          <Box ml={3} fle>
+            <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
+              Service d’import de vos effectifs en version bêta.
+            </Text>
+            <Text color="grey.800" mt={4} textStyle="sm">
+              Nous listons actuellement toutes les informations qui peuvent empêcher l'import de fichier afin de
+              permettre par la suite une meilleure prise en charge de tout type de fichier.
+            </Text>
+          </Box>
+        </Ribbons>
       </Flex>
 
       {organisme.mode_de_transmission === "MANUEL" && organismesEffectifs.length === 0 && (
         <Ribbons variant="info" mt={5}>
           <Box ml={3}>
             <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-              {isMonOrganismePages && `Vous n'avez pas encore ajouté d'effectifs`}
-              {isOrganismePages && `Aucuns effectifs n'ont encore été ajoutés pour cet organisme.`}
+              {isMine
+                ? `Vous n'avez pas encore ajouté d'effectifs`
+                : `Aucuns effectifs n'ont encore été ajoutés pour cet organisme.`}
             </Text>
             <Text color="grey.800" mt={4} textStyle="sm">
               Vous pouvez ajouter des effectifs à l&rsquo;aide du bouton ci-dessus.

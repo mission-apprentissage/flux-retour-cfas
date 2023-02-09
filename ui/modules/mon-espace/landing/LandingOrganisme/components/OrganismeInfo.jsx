@@ -13,15 +13,14 @@ import {
 } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
 
-import { Section } from "../../../../../components/index";
+import { Section } from "@/components/index";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import NatureOrganismeDeFormationWarning from "./NatureOrganismeDeFormationWarning";
-import { formatSiretSplitted } from "../../../../../common/utils/stringUtils";
-import { organismeAtom } from "../../../../../hooks/organismeAtoms";
+import { formatSiretSplitted } from "@/common/utils/stringUtils";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import { getReseauDisplayNameFromKey } from "@/common/constants/networksConstants.js";
 import IndicateursInfo from "../../common/IndicateursInfos.jsx";
 import { SimpleFiltersProvider } from "../../common/SimpleFiltersContext.js";
-import Ribbons from "../../../../../components/Ribbons/Ribbons";
-import { useEspace } from "../../../../../hooks/useEspace";
-import { getReseauDisplayNameFromKey, RESEAUX_CFAS } from "@/common/constants/networksConstants.js";
 
 export const natureOrganismeDeFormationLabel = {
   responsable: "Responsable",
@@ -78,8 +77,7 @@ export const natureOrganismeDeFormationTooltip = {
   ),
 };
 
-export default function OrganismeInfo() {
-  const { isMonOrganismePages, isOrganismePages } = useEspace();
+export default function OrganismeInfo({ isMine }) {
   const organisme = useRecoilValue(organismeAtom);
 
   if (!organisme) {
@@ -197,9 +195,9 @@ export default function OrganismeInfo() {
           <Ribbons variant="warning" mt="0.5rem">
             <Box ml={3}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                {isMonOrganismePages &&
-                  'Vous ne nous transmettez pas encore vos effectifs. Veuillez cliquer dans l’onglet "Mes effectifs" pour démarrer l’import.'}
-                {isOrganismePages && "Cet organisme ne nous transmet pas encore ses effectifs."}
+                {isMine
+                  ? 'Vous ne nous transmettez pas encore vos effectifs. Veuillez cliquer dans l’onglet "Mes effectifs" pour démarrer l’import.'
+                  : "Cet organisme ne nous transmet pas encore ses effectifs."}
               </Text>
             </Box>
           </Ribbons>
@@ -208,8 +206,9 @@ export default function OrganismeInfo() {
           <Ribbons variant="warning" mt="0.5rem">
             <Box ml={3}>
               <Text color="grey.800" fontSize="1.1rem" fontWeight="bold">
-                {isMonOrganismePages && "Vos effectifs sont en cours de transmission."}
-                {isOrganismePages && "Les effectifs de cet organisme sont en cours de transmission."}
+                {isMine
+                  ? "Vos effectifs sont en cours de transmission."
+                  : "Les effectifs de cet organisme sont en cours de transmission."}
               </Text>
             </Box>
           </Ribbons>

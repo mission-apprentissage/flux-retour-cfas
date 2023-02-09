@@ -55,7 +55,7 @@ const Televersements = () => {
 
   const onDefineFileType = useCallback(
     async (type_document) => {
-      if (type_document.length >= 4) {
+      if (type_document?.length >= 4) {
         const { nom_fichier, taille_fichier } = documents.unconfirmed[0];
         const response = await _post("/api/v1/upload/setDocumentType", {
           organisme_id: organisme._id,
@@ -402,15 +402,7 @@ const Televersements = () => {
                       w="33%"
                     />
                     <ArrowRightLong boxSize={10} color="bluefrance" />
-                    <Input
-                      {...{
-                        name: "line0_out",
-                        fieldType: "text",
-                        locked: true,
-                      }}
-                      value="Année scolaire"
-                      w="33%"
-                    />
+                    <Input name="line0_out" fieldType="text" locked={true} value="Année scolaire" w="33%" mt={0} />
                     <Box w="35px">&nbsp;</Box>
                   </HStack>
                 </VStack>

@@ -4,7 +4,7 @@ import { useRecoilState } from "recoil";
 
 import { _get } from "../common/httpClient";
 import useAuth from "./useAuth";
-import { organismeMineAtom, organismeNavigationAtom } from "./organismeAtoms";
+import { organismeAtom, organismeNavigationAtom } from "./organismeAtoms";
 
 const fetchMyOrganisme = async (my_organisme_id, accountIsNotReady = false) => {
   if (!my_organisme_id || accountIsNotReady) return { myOrganisme: null };
@@ -28,12 +28,14 @@ export function useEspace() {
   const [isloaded, setIsLoaded] = useState(false);
   const [isReloaded, setIsReloaded] = useState(false);
   const [error, setError] = useState(null);
-  const [breadcrumb, setBreadcrumb] = useState([]);
 
-  const [myOrganisme, setMyOrganisme] = useRecoilState(organismeMineAtom);
+  const [myOrganisme, setMyOrganisme] = useRecoilState(organismeAtom);
   const [navigation, setNavigation] = useRecoilState(organismeNavigationAtom);
 
-  const { part, slug = [] } = router.query;
+  const match = router.asPath.match(/mon-espace\/(?<part>[0-9a-zA-Z-_]+)(\/(?<slug>[0-9a-zA-Z-_/]+))?/);
+  const part = match?.groups?.part;
+  const slug = match?.groups?.slug?.split("/") || [];
+
   const isMonOrganismePages = part === "mon-organisme";
   const isOrganismePages = part === "organisme";
   const isMesOrganismesPages = router.asPath.includes("/mon-espace/mes-organismes");
@@ -136,23 +138,6 @@ export function useEspace() {
             },
           };
 
-          let breadcrumbResult = [
-            { title: navigation[contextNav].landingEspace.navTitle, to: navigation[contextNav].landingEspace.path },
-          ];
-
-          if (isEffectifsPage) {
-            if (isTeleversementPage) {
-              breadcrumbResult.push({
-                title: navigation[contextNav].effectifs?.navTitle,
-                to: navigation[contextNav].effectifs?.path,
-              });
-              breadcrumbResult.push({ title: navigation[contextNav].televersement?.navTitle });
-            } else breadcrumbResult.push({ title: navigation[contextNav].effectifs?.navTitle });
-          }
-          if (isSIFAPage) breadcrumbResult.push({ title: navigation[contextNav].sifa2?.navTitle });
-          if (isParametresPage) breadcrumbResult.push({ title: navigation[contextNav].parametres?.navTitle });
-
-          setBreadcrumb(breadcrumbResult);
           setNavigation(navigation);
           setMyOrganisme(myOrganisme);
           setIsReloaded(true);
@@ -194,11 +179,10 @@ export function useEspace() {
   return {
     organisme_id,
     whoIs,
-    navigation,
+    navigation: navigation || {},
     isloaded,
     isReloaded,
     myOrganisme,
-    breadcrumb,
     isMonOrganismePages,
     isOrganismePages,
     isMesOrganismesPages,

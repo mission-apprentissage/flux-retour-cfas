@@ -20,7 +20,7 @@ const TransmissionAPI = () => {
       erp: Yup.string().required("Requis"),
     }),
     onSubmit: async (submittedValues) => {
-      router.push(`/mon-espace/mon-organisme/effectifs-configuration-erp?erp=${submittedValues.erp}`);
+      router.push(`/mon-espace/mon-organisme/effectifs/aide-configuration-erp?erp=${submittedValues.erp}`);
     },
   });
   return (

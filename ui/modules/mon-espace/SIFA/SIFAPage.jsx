@@ -16,23 +16,22 @@ import { effectifsStateAtom } from "../effectifs/engine/atoms";
 import { Input } from "../effectifs/engine/formEngine/components/Input/Input";
 import { DoubleChevrons } from "../../../theme/components/icons/DoubleChevrons";
 
-function useOrganismesEffectifs() {
-  const organisme = useRecoilValue(organismeAtom);
+function useOrganismesEffectifs(organismeId) {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const queryClient = useQueryClient();
   const prevOrganismeId = useRef(null);
 
   useEffect(() => {
-    if (prevOrganismeId.current !== organisme._id) {
-      prevOrganismeId.current = organisme._id;
+    if (prevOrganismeId.current !== organismeId) {
+      prevOrganismeId.current = organismeId;
       queryClient.resetQueries("organismesEffectifs", { exact: true });
     }
-  }, [queryClient, organisme._id]);
+  }, [queryClient, organismeId]);
 
   const { data, isLoading, isFetching } = useQuery(
     ["organismesEffectifs"],
     async () => {
-      const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organisme._id}&sifa=true`);
+      const organismesEffectifs = await _get(`/api/v1/organisme/effectifs?organisme_id=${organismeId}&sifa=true`);
       // eslint-disable-next-line no-undef
       const newEffectifsState = new Map();
       for (const { id, validation_errors, requiredSifa } of organismesEffectifs) {
@@ -89,11 +88,10 @@ const EffectifsTableContainer = ({ effectifs, formation, canEdit, searchValue, .
   );
 };
 
-const SIFAPage = () => {
-  const { isMonOrganismePages, isOrganismePages } = useEspace();
-  const { isLoading, organismesEffectifs } = useOrganismesEffectifs();
-  const organisme = useRecoilValue(organismeAtom);
+const SIFAPage = ({ isMine }) => {
   const router = useRouter();
+  const organisme = useRecoilValue(organismeAtom);
+  const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme._id);
   const canEdit = hasContextAccessTo(organisme, "organisme/page_effectifs/edition");
   const exportSifaFilename = `tdb-données-sifa-${organisme.nom}-${new Date().toLocaleDateString()}.csv`;
 
@@ -118,8 +116,7 @@ const SIFAPage = () => {
     <Flex flexDir="column" width="100%" my={10}>
       <Flex as="nav" align="center" justify="space-between" wrap="wrap" w="100%" alignItems="flex-start">
         <Heading textStyle="h2" color="grey.800" mt={5} mb={8}>
-          {isMonOrganismePages && "Mon Enquête SIFA"}
-          {isOrganismePages && "Son Enquête SIFA"}
+          {isMine ? "Mon Enquête SIFA" : "Son Enquête SIFA"}
         </Heading>
         <HStack spacing={4}>
           {hasContextAccessTo(organisme, "organisme/page_sifa/telecharger") && (

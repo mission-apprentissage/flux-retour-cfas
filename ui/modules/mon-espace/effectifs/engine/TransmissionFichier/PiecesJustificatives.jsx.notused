@@ -7,7 +7,7 @@ import { valueSelector } from "../formEngine/atoms";
 import { documentsIsRequired } from "./domain/documentsIsRequired";
 import UploadFiles from "./components/UploadFiles";
 
-const PiecesJustificatives = () => {
+const PiecesJustificatives = ({ organisme }) => {
   const typeContratApp = useRecoilValue(valueSelector("contrat.typeContratApp"));
   const documentsRequired = documentsIsRequired(typeContratApp);
 
@@ -26,6 +26,7 @@ const PiecesJustificatives = () => {
       {typeContratApp && (
         <>
           <UploadFiles
+            organisme={organisme}
             title={`Convention de formation${!documentsRequired ? " (Optionnel)" : " (Obligatoire)"}`}
             typeDocument="CONVENTION_FORMATION"
           />
