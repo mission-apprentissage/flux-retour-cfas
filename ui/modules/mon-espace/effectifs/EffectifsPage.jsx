@@ -53,7 +53,6 @@ function useOrganismesEffectifs(organismeId) {
 const EffectifsPage = ({ isMine }) => {
   let [auth] = useAuth();
   const organisme = useRecoilValue(organismeAtom);
-  console.log("EffectifsPage", organisme);
   const { isLoading, organismesEffectifs } = useOrganismesEffectifs(organisme?._id);
 
   if (isLoading) {
@@ -80,7 +79,6 @@ const EffectifsPage = ({ isMine }) => {
     } else if (organisme.mode_de_transmission === "MANUAL") {
       return <Televersements organisme={organisme} />;
     } else {
-      // TBD que faire dans cet état ?
       return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} organisme={organisme} />;
     }
   } else if (canEdit) {
