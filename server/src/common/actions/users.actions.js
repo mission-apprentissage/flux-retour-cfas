@@ -209,6 +209,7 @@ export const updateUser = async (_id, data) => {
     {
       $set: validateUser({
         email: user.email,
+        is_cross_organismes: user.is_cross_organismes,
         ...data,
       }),
     },

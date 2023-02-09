@@ -150,10 +150,6 @@ export default ({ mailer }) => {
       const options = body.options;
 
       await updateUser(userid, {
-        is_cross_organismes:
-          options.permissions.is_cross_organismes !== undefined
-            ? !!options.permissions.is_cross_organismes
-            : !!options.permissions.is_admin,
         is_admin: options.permissions.is_admin,
         email: options.email,
         prenom: options.prenom,
