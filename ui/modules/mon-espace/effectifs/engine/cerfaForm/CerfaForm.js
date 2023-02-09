@@ -4,7 +4,7 @@ import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, HStack,
 
 import { EffectifApprenant } from "./blocks/apprenant/EffectifApprenant";
 import { PlainArrowRight } from "../../../../../theme/components/icons/PlainArrowRight";
-import { ApprenantStatuts } from "./blocks/statuts/EffectifStatuts";
+import EffectifStatuts from "./blocks/statuts/EffectifStatuts";
 import { ApprenantContrats } from "./blocks/contrats/EffectifContrats";
 import { EffectifFormation } from "./blocks/formation/EffectifFormation";
 import { effectifStateSelector, valuesSelector } from "../formEngine/atoms";
@@ -61,7 +61,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
               validationErrors={validationErrorsByBlock.statuts}
               requiredSifa={requiredSifaByBlock.statuts}
             >
-              <ApprenantStatuts modeSifa={modeSifa} values={values} />
+              <EffectifStatuts modeSifa={modeSifa} values={values} />
             </AccordionItemChild>
           )}
         </AccordionItem>
@@ -73,7 +73,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
               validationErrors={validationErrorsByBlock.apprenant}
               requiredSifa={requiredSifaByBlock.apprenant}
             >
-              <EffectifApprenant apprenant={values.apprenant} />
+              <EffectifApprenant apprenant={values?.apprenant} />
             </AccordionItemChild>
           )}
         </AccordionItem>
@@ -97,7 +97,7 @@ export const CerfaForm = memo(({ modeSifa = false }) => {
               validationErrors={validationErrorsByBlock.contrats}
               requiredSifa={requiredSifaByBlock.contrats}
             >
-              <ApprenantContrats contrats={values.apprenant.contrats} modeSifa={modeSifa} />
+              <ApprenantContrats contrats={values?.apprenant.contrats} modeSifa={modeSifa} />
             </AccordionItemChild>
           )}
         </AccordionItem>

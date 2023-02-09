@@ -5,16 +5,13 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { uploadsAtom } from "../../atoms";
 import { documentsGetter } from "../documentsAtoms";
 import { _get } from "../../../../../../common/httpClient";
-import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
 
-export function useFetchUploads() {
+export function useFetchUploads(organismeId) {
   const [, setUploads] = useRecoilState(uploadsAtom);
-  const organisme = useRecoilValue(organismeAtom);
-
   const { isLoading, isFetching } = useQuery(
-    ["fetchDocuments"],
+    ["fetchDocuments", organismeId],
     async () => {
-      const uploads = await _get(`/api/v1/upload/get?organisme_id=${organisme._id}`);
+      const uploads = await _get(`/api/v1/upload/get?organisme_id=${organismeId}`);
       if (uploads.documents.length) {
         setUploads({
           ...uploads,

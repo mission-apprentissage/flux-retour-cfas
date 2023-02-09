@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { _get, _put } from "../common/httpClient";
 import { useRecoilState } from "recoil";
 import { organismeAtom } from "./organismeAtoms";
-import { useEspace } from "./useEspace";
 
 const fetchOrganisme = async (organisme_id) => {
   if (!organisme_id) return { organisme: null };
@@ -19,9 +18,7 @@ const fetchOrganisme = async (organisme_id) => {
   }
 };
 
-export function useOrganisme() {
-  let { organisme_id, myOrganisme } = useEspace();
-
+export function useOrganisme(organisme_id) {
   const [isloaded, setIsLoaded] = useState(false);
   const [isReloaded, setIsReloaded] = useState(false);
   const [error, setError] = useState(null);
@@ -48,14 +45,14 @@ export function useOrganisme() {
   );
 
   useEffect(() => {
+    if (!organisme_id) return;
     // TODO A lot of re-render ~15 - Maybe add Ref ?
     const abortController = new AbortController();
     setIsReloaded(false);
     fetchOrganisme(organisme_id)
       .then(({ organisme }) => {
-        // console.log("fetching", organisme_id);
         if (!abortController.signal.aborted) {
-          setOrganisme(organisme || myOrganisme);
+          setOrganisme(organisme);
           setIsReloaded(true);
           setIsLoaded(true);
         }
@@ -70,7 +67,7 @@ export function useOrganisme() {
     return () => {
       abortController.abort();
     };
-  }, [myOrganisme, organisme_id, setOrganisme]);
+  }, [organisme_id, setOrganisme]);
 
   if (error !== null) {
     throw error;
