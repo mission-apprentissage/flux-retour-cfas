@@ -15,7 +15,7 @@ function createTransporter(smtp) {
 export function createMailerService(transporter = createTransporter({ ...config.smtp, secure: false })) {
   async function sendEmailMessage(to, template) {
     const { from, subject, data, replyTo } = template;
-    const address = from || "no-reply@apprentissage.beta.gouv.fr";
+    const address = from || "tableau-de-bord@apprentissage.beta.gouv.fr";
 
     const { messageId } = await transporter.sendMail({
       from: address,
