@@ -125,13 +125,11 @@ function MesOrganismes() {
                       return <Box textAlign="left">SIRET</Box>;
                     },
                     cell: ({ row }) => {
-                      const { sirets } = organismes[row.id];
+                      const { siret } = organismes[row.id];
 
                       return (
                         <VStack alignItems="flex-start">
-                          {sirets.map((siret) => (
-                            <Text key={siret}>{siret}</Text>
-                          ))}
+                          <Text>{siret || "SIRET INCONNU"}</Text>
                         </VStack>
                       );
                     },

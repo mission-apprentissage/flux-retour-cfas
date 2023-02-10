@@ -16,7 +16,6 @@ import { useRecoilValue } from "recoil";
 import { Section } from "@/components/index";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import NatureOrganismeDeFormationWarning from "./NatureOrganismeDeFormationWarning";
-import { formatSiretSplitted } from "@/common/utils/stringUtils";
 import { organismeAtom } from "@/hooks/organismeAtoms";
 import { getReseauDisplayNameFromKey } from "@/common/constants/networksConstants.js";
 import IndicateursInfo from "../../common/IndicateursInfos.jsx";
@@ -94,14 +93,13 @@ export default function OrganismeInfo({ isMine }) {
     uai,
     nature,
     natureValidityWarning,
-    sirets,
+    siret,
     ferme,
     enseigne,
     raison_sociale,
     reseaux,
   } = organisme;
 
-  const siretToDisplay = formatSiretSplitted(sirets[0]);
   const reseauxToDisplay = reseaux.map((item) => getReseauDisplayNameFromKey(item));
 
   return (
@@ -131,7 +129,7 @@ export default function OrganismeInfo({ isMine }) {
             <HStack>
               <Text>SIRET :</Text>
               <Badge fontSize="epsilon" textColor="grey.800" paddingX="1w" paddingY="2px" backgroundColor="#ECEAE3">
-                {siretToDisplay}
+                {siret || "SIRET INCONNU"}
               </Badge>
             </HStack>
 
