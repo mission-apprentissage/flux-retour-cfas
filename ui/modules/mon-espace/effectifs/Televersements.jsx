@@ -15,18 +15,21 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon } from "../../../theme/components/icons";
+import { useRouter } from "next/router";
+import uniq from "lodash.uniq";
+
+import { ArrowDropRightLine, Bin, ErrorIcon, ValidateIcon } from "@/theme/components/icons";
+import { _get, _post } from "@/common/httpClient";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import useServerEvents from "@/hooks/useServerEvents";
+import { ArrowRightLong } from "@/theme/components/icons";
+import { Input } from "./engine/formEngine/components/Input/Input";
+import Ribbons from "@/components/Ribbons/Ribbons";
+
 import UploadFiles from "./engine/TransmissionFichier/components/UploadFiles";
 import { useDocuments, useFetchUploads } from "./engine/TransmissionFichier/hooks/useDocuments";
-import { _get, _post } from "../../../common/httpClient";
-import { organismeAtom } from "../../../hooks/organismeAtoms";
-import { ArrowRightLong } from "../../../theme/components/icons";
-import { Input } from "./engine/formEngine/components/Input/Input";
-import uniq from "lodash.uniq";
 import EffectifsTable from "./engine/EffectifsTable";
-import { useRouter } from "next/router";
 import { effectifsStateAtom } from "./engine/atoms";
-import Ribbons from "../../../components/Ribbons/Ribbons";
 
 const Televersements = () => {
   const { documents, uploads, onDocumentsChanged } = useDocuments();
@@ -36,6 +39,7 @@ const Televersements = () => {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const [mapping, setMapping] = useState(null);
   const router = useRouter();
+  const { lastMessage, reset: resetServerEvent } = useServerEvents();
 
   const [availableKeys, setAvailableKeys] = useState({
     in: [{ label: "", value: "" }],
@@ -128,12 +132,15 @@ const Televersements = () => {
   );
 
   const onGoBackToUpload = useCallback(async () => {
+    resetServerEvent();
     setMapping(null);
     setStep("upload");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onGoToMappingStep = useCallback(async () => {
     toast.closeAll();
+    resetServerEvent();
     setStep("mapping");
     const response = await _get(`/api/v1/upload/analyse?organisme_id=${organisme._id}`);
 
@@ -218,7 +225,8 @@ const Televersements = () => {
     setLines(initLines);
 
     setMapping(response);
-  }, [mappingForThisType, onGoBackToUpload, organisme._id, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mappingForThisType, organisme._id, toast]);
 
   const onDefineAsModel = useCallback(async () => {
     const keyToKeyMapping = lines.reduce((acc, line) => {
@@ -264,12 +272,14 @@ const Televersements = () => {
 
   const onGoToImportStep = useCallback(async () => {
     setStep("import");
+    resetServerEvent();
     await _post("/api/v1/upload/import", {
       organisme_id: organisme._id,
     });
     window.location.href = `${router.asPath.replace("/televersement", "")}`;
     // router.push(`${router.asPath.replace("/televersement", "")}`);
     //onDocumentsChanged(documents, type_document);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organisme._id, router]);
 
   return (
@@ -291,7 +301,7 @@ const Televersements = () => {
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
         {step === "upload" && (
           <>
-            <UploadFiles title={"1. Importer votre fichier"} />
+            <UploadFiles title="1. Importer votre fichier" />
 
             <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
               2. Quel est le modèle de correspondance de ce fichier ?
@@ -359,7 +369,12 @@ const Televersements = () => {
             </Button>
           </>
         )}
-        {step === "mapping" && !mapping && <Spinner />}
+        {step === "mapping" && !mapping && (
+          <Box textAlign="center" flex="1" flexDirection="column">
+            <Spinner />
+            <Text mt={2}>{lastMessage}</Text>
+          </Box>
+        )}
         {step === "mapping" && mapping && lines.length && (
           <>
             <Box my={10}>
@@ -669,7 +684,10 @@ const Televersements = () => {
           </>
         )}
         {step === "pre-import" && !preEffectifs.canBeImport.length && !preEffectifs.canNotBeImport.length && (
-          <Spinner />
+          <Box textAlign="center" flex="1" flexDirection="column">
+            <Spinner />
+            <Text mt={2}>{lastMessage}</Text>
+          </Box>
         )}
         {step === "pre-import" && (!!preEffectifs.canBeImport.length || !!preEffectifs.canNotBeImport.length) && (
           <Box>
@@ -815,13 +833,14 @@ const Televersements = () => {
           </Box>
         )}
         {step === "import" && (
-          <>
+          <Box textAlign="center" flex="1" flexDirection="column">
             <Spinner />
+            <Text my={2}>{lastMessage}</Text>
             <Text fontSize="1rem">Veuillez patienter pendant l&rsquo;importation de votre fichier.</Text>
             <Text fontSize="1rem">
               Une fois cette opération terminée vous serez redirigé automatiquement sur votre tableau d&rsquo;effectif.
             </Text>
-          </>
+          </Box>
         )}
       </Flex>
     </>
