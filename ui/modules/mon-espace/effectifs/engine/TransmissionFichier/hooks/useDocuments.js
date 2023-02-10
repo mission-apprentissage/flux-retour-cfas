@@ -11,6 +11,9 @@ export function useFetchUploads(organismeId) {
   const { isLoading, isFetching } = useQuery(
     ["fetchDocuments", organismeId],
     async () => {
+      if (!organismeId) {
+        return;
+      }
       const uploads = await _get(`/api/v1/upload/get?organisme_id=${organismeId}`);
       if (uploads.documents.length) {
         setUploads({
