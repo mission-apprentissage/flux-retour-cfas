@@ -2,7 +2,6 @@ import "dotenv/config.js";
 import { program as cli } from "commander";
 import { runScript } from "./scriptWrapper.js";
 import { analyseFiabiliteDossierApprenantsRecus } from "./fiabilisation/dossiersApprenants/analyse-fiabilite-dossiers-apprenants-recus.js";
-import { updateFiabilisationUaiSiretAFiabiliser } from "./fiabilisation/uai-siret/update-fiabilisation-type/index.js";
 import { buildFiabilisationUaiSiret } from "./fiabilisation/uai-siret/build-fiabilisation/index.js";
 import { applyFiabilisationUaiSiret } from "./fiabilisation/uai-siret/apply-fiabilisation/index.js";
 
@@ -40,21 +39,6 @@ cli
     runScript(async () => {
       return applyFiabilisationUaiSiret();
     }, "apply-fiabilisation-uai-siret");
-  });
-
-/**
- * Job d'initialisation des valeurs defaut pour la fiabilisation
- * Job temporaire nécessaire suite à la modification du modèle
- */
-cli
-  .command("migration:fiabilisation-default-values")
-  .description(
-    "MAJ des entrées fiabilisationUaiSiretDb avec le type = A FIABILISER et des statuts de fiabilisation des organismes"
-  )
-  .action(() => {
-    runScript(async () => {
-      return updateFiabilisationUaiSiretAFiabiliser();
-    }, "fiabilisation-update-fiabilisation-type-aFiabiliser");
   });
 
 /**
