@@ -29,10 +29,10 @@ import { effectifsStateAtom } from "./engine/atoms";
 import Ribbons from "../../../components/Ribbons/Ribbons";
 
 const Televersements = () => {
-  useFetchUploads();
   const { documents, uploads, onDocumentsChanged } = useDocuments();
   const [step, setStep] = useState("landing");
   const organisme = useRecoilValue(organismeAtom);
+  useFetchUploads(organisme._id);
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const [mapping, setMapping] = useState(null);
   const router = useRouter();
