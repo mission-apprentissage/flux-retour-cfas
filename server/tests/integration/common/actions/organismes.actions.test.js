@@ -40,9 +40,9 @@ describe("Test des actions Organismes", () => {
       const { _id } = await createOrganisme(randomOrganisme);
       const created = await findOrganismeById(_id);
 
-      assert.deepEqual(pick(created, ["uai", "sirets", "nom", "adresse", "nature"]), {
+      assert.deepEqual(pick(created, ["uai", "siret", "nom", "adresse", "nature"]), {
         uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
+        siret: randomOrganisme.siret,
         nom: randomOrganisme.nom,
         adresse: randomOrganisme.adresse,
         nature: randomOrganisme.nature,
@@ -92,9 +92,9 @@ describe("Test des actions Organismes", () => {
       const toUpdateOrganisme = { ...randomOrganisme, nom: "UPDATED" };
       const updatedOrganisme = await updateOrganisme(_id, toUpdateOrganisme);
 
-      assert.deepEqual(pick(updatedOrganisme, ["uai", "sirets", "nom", "adresse", "nature"]), {
+      assert.deepEqual(pick(updatedOrganisme, ["uai", "siret", "nom", "adresse", "nature"]), {
         uai: updatedOrganisme.uai,
-        sirets: updatedOrganisme.sirets,
+        siret: updatedOrganisme.siret,
         nom: "UPDATED",
         adresse: updatedOrganisme.adresse,
         nature: updatedOrganisme.nature,

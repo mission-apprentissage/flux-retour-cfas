@@ -1,4 +1,3 @@
-import Joi from "joi";
 import { object, objectId, string, date, arrayOf, boolean, integer } from "./json-schema/jsonSchemaTypes.js";
 import { adresseSchema } from "./json-schema/adresseSchema.js";
 import { RESEAUX_CFAS } from "../constants/networksConstants.js";
@@ -31,9 +30,6 @@ export const schema = object(
       pattern: "^[0-9]{7}[a-zA-Z]$",
       maxLength: 8,
       minLength: 8,
-    }),
-    sirets: arrayOf(string({ description: "N° SIRET", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }), {
-      description: "Liste des SIRETs reliés à l'établissement",
     }),
     siret: string({ description: "N° SIRET fiabilisé", pattern: "^[0-9]{14}$", maxLength: 14, minLength: 14 }),
     reseaux: arrayOf(string({ enum: Object.keys(RESEAUX_CFAS) }), { description: "Réseaux du CFA, s'ils existent" }),
@@ -135,7 +131,6 @@ export const schema = object(
 // Default value
 export function defaultValuesOrganisme() {
   return {
-    sirets: [],
     metiers: [],
     reseaux: [],
     erps: [],
@@ -156,10 +151,6 @@ export function validateOrganisme(props) {
       {
         name: "uai",
         base: uaiSchema(),
-      },
-      {
-        name: "sirets",
-        base: Joi.array().items(siretSchema()),
       },
       {
         name: "siret",

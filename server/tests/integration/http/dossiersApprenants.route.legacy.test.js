@@ -84,9 +84,9 @@ describe("Dossiers Apprenants Route", () => {
       await createApiUser();
 
       // Test organisme creation
-      assert.deepEqual(pick(createdOrganisme, ["uai", "sirets", "nom", "adresse", "nature"]), {
+      assert.deepEqual(pick(createdOrganisme, ["uai", "siret", "nom", "adresse", "nature"]), {
         uai: randomOrganisme.uai,
-        sirets: randomOrganisme.sirets,
+        siret: randomOrganisme.siret,
         nom: randomOrganisme.nom,
         adresse: randomOrganisme.adresse,
         nature: randomOrganisme.nature,

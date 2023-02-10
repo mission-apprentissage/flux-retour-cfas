@@ -249,7 +249,7 @@ export const hydrateOrganisme = async (organisme) => {
     // TODO CHECK BASE ACCES
 
     // Création de l'organisme avec uai / siret fiabilisés
-    organismeToCreate = { ...organisme, uai: cleanUai, siret: cleanSiret, sirets: [cleanSiret] };
+    organismeToCreate = { ...organisme, uai: cleanUai, siret: cleanSiret };
   }
 
   return { organismeToCreate, organismeFound: { _id: organismeFoundId, error: organismeFoundError } };
