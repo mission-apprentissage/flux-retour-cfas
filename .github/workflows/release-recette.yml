@@ -1,7 +1,7 @@
 name: Deploy on recette
 on:
   push:
-    branches: [master, sgt/feat/deploy-recette]
+    branches: [master]
 
 jobs:
   tests:
