@@ -1,6 +1,7 @@
 import { addHours } from "date-fns";
-import { compact, pick, uniq } from "lodash-es";
+import { uniq } from "lodash-es";
 import { ObjectId } from "mongodb";
+import { USER_ACCOUNT_STATUS } from "../constants/usersConstants.js";
 import { rolesDb, usersMigrationDb } from "../model/collections.js";
 import { defaultValuesUser, validateUser } from "../model/usersMigration.model.js";
 import { generateRandomAlphanumericPhrase } from "../utils/miscUtils.js";
@@ -17,6 +18,10 @@ import { findActivePermissionsForUser, hasAtLeastOneContributeurNotPending } fro
 export const createUser = async ({ email, password }, options = {}) => {
   const passwordHash = options.hash || hashUtil(password);
   const permissions = options.permissions || {};
+  // bypass profile completion for admins
+  const account_status = permissions.is_admin
+    ? options.account_status || USER_ACCOUNT_STATUS.FORCE_RESET_PASSWORD
+    : options.account_status;
 
   const {
     civility,
@@ -26,7 +31,6 @@ export const createUser = async ({ email, password }, options = {}) => {
     siret,
     uai,
     organisation,
-    account_status,
     custom_acl,
     orign_register,
     roles,
@@ -59,7 +63,8 @@ export const createUser = async ({ email, password }, options = {}) => {
       email: email.toLowerCase(),
       password: passwordHash,
       is_admin: !!permissions.is_admin,
-      is_cross_organismes: !!permissions.is_cross_organismes,
+      is_cross_organismes:
+        permissions.is_cross_organismes !== undefined ? !!permissions.is_cross_organismes : !!permissions.is_admin,
       ...(civility ? { civility } : {}),
       ...(nom ? { nom } : {}),
       ...(prenom ? { prenom } : {}),
@@ -152,7 +157,7 @@ export const getUser = async (email) => {
  * @returns
  */
 export const getUserById = async (_id, projection = {}) => {
-  const user = await usersMigrationDb().findOne({ _id }, { projection });
+  const user = await usersMigrationDb().findOne({ _id: ObjectId(_id) }, { projection });
 
   if (!user) {
     throw new Error("Unable to find user");
@@ -204,6 +209,7 @@ export const updateUser = async (_id, data) => {
     {
       $set: validateUser({
         email: user.email,
+        is_cross_organismes: user.is_cross_organismes,
         ...data,
       }),
     },
@@ -242,7 +248,6 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
 };
 
 export const structureUser = async (user) => {
-  const permissions = pick(user, ["is_admin", "is_cross_organismes"]);
   const rolesList = user.roles?.length
     ? await rolesDb()
         .find({ _id: { $in: user.roles } })
@@ -251,7 +256,7 @@ export const structureUser = async (user) => {
   const rolesAcl = rolesList.reduce((acc, { acl }) => [...acc, ...acl], []);
 
   const activePermissions = await findActivePermissionsForUser({ userEmail: user.email }, { organisme_id: 1, _id: 0 });
-  const organisme_ids = compact(activePermissions.map(({ organisme_id }) => organisme_id));
+  const organisme_ids = activePermissions.map(({ organisme_id }) => organisme_id).filter((v) => !!v);
 
   const hasAccessToOnlyOneOrganisme = organisme_ids.length === 1;
   const isInPendingValidation = !organisme_ids.length && !activePermissions.length;
@@ -260,14 +265,17 @@ export const structureUser = async (user) => {
     : false;
 
   let specialAcl = [];
-  if (!hasAccessToOnlyOneOrganisme || permissions.is_cross_organismes) {
+  if (!hasAccessToOnlyOneOrganisme || user.is_cross_organismes || user.is_admin) {
     specialAcl = ["page/mes-organismes"];
   }
 
   return {
     organisme_ids,
     main_organisme_id: user.main_organisme_id,
-    permissions,
+    permissions: {
+      is_admin: user.is_admin,
+      is_cross_organismes: user.is_cross_organismes || user.is_admin,
+    },
     isInPendingValidation,
     hasAtLeastOneUserToValidate,
     email: user.email,

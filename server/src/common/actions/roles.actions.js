@@ -73,3 +73,11 @@ export const hasAclsByRoleId = async (id, acl) => {
 
   return acl.every((page) => roleDb.acl.includes(page));
 };
+
+export const getRoleByName = async (name, projection = {}) => {
+  const role = await rolesDb().findOne({ name }, { projection });
+  if (!role) {
+    throw new Error(`Role ${name} doesn't exist`);
+  }
+  return role;
+};

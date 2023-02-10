@@ -12,6 +12,9 @@ import {
 import { updateMainOrganismeUser } from "./users.actions.js";
 import { NATURE_ORGANISME_DE_FORMATION } from "../utils/validationsUtils/organisme-de-formation/nature.js";
 import { uniq } from "lodash-es";
+import { permissionsDb } from "../model/collections.js";
+import { getRoleByName } from "./roles.actions.js";
+import { defaultValuesPermission, validatePermission } from "../model/permissions.model.js";
 
 /**
  * Méthode d'ajouts des permissions en fonction de l'utilisateur
@@ -172,5 +175,33 @@ export const userAfterCreate = async ({
         }
       }
     }
+  }
+};
+
+/**
+ * Met à jour la permission `organisme.admin` d'un utilisateur selon qu'il est admin ou non.
+ *
+ * @param {*} user
+ * @returns
+ */
+export const refreshUserPermissions = async (user) => {
+  const adminRole = await getRoleByName("organisme.admin");
+
+  if (user.is_admin) {
+    await permissionsDb().insertOne(
+      validatePermission({
+        ...defaultValuesPermission(),
+        organisme_id: null,
+        userEmail: user.email.toLowerCase(),
+        role: adminRole._id,
+        pending: false,
+      })
+    );
+  } else {
+    await permissionsDb().deleteOne({
+      organisme_id: null,
+      userEmail: user.email,
+      role: adminRole._id,
+    });
   }
 };

@@ -4,6 +4,7 @@ import tryCatch from "./tryCatchMiddleware.js";
 import { findRolePermissionById, hasAclsByRoleId } from "../../common/actions/roles.actions.js";
 import { hasPermission } from "../../common/actions/permissions.actions.js";
 import { findOrganismeById } from "../../common/actions/organismes/organismes.actions.js";
+import { USER_ACCOUNT_STATUS } from "../../common/constants/usersConstants.js";
 
 const hasRightsTo = async (role, acls) => {
   const hasRight = await hasAclsByRoleId(role, acls);
@@ -14,7 +15,12 @@ const hasRightsTo = async (role, acls) => {
 
 export default (acls) =>
   tryCatch(async ({ method, body, query, user, baseUrl, route }, res, next) => {
-    if (user.account_status !== "CONFIRMED") {
+    const validAccountStatus = [
+      USER_ACCOUNT_STATUS.FORCE_COMPLETE_PROFILE_STEP1,
+      USER_ACCOUNT_STATUS.FORCE_COMPLETE_PROFILE_STEP2,
+      USER_ACCOUNT_STATUS.CONFIRMED,
+    ];
+    if (!validAccountStatus.includes(user.account_status)) {
       throw Boom.unauthorized("Accès non autorisé");
     }
     const data =
@@ -25,10 +31,11 @@ export default (acls) =>
         : body;
 
     const isTransverseUser =
-      user.permissions.is_cross_organismes &&
-      !user.codes_region.length &&
-      !user.codes_academie.length &&
-      !user.codes_departement.length;
+      user.permissions.is_admin ||
+      (user.permissions.is_cross_organismes &&
+        !user.codes_region.length &&
+        !user.codes_academie.length &&
+        !user.codes_departement.length);
 
     let permission = null;
     if (isTransverseUser) {
