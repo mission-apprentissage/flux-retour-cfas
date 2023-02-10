@@ -12,6 +12,9 @@ import { fiabilisationUaiSiretDb } from "../../../../src/common/model/collection
 import { FIABILISATION_MAPPINGS } from "../../../../src/jobs/fiabilisation/uai-siret/mapping.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "../../../../src/common/actions/engine/engine.organismes.utils.js";
 import { FIABILISATION_TYPES } from "../../../../src/common/constants/fiabilisationConstants.js";
+import { NATURE_ORGANISME_DE_FORMATION } from "../../../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
+import { SAMPLES_ETABLISSEMENTS_API_ENTREPRISE } from "../../../data/entreprise.api.gouv.fr/sampleDataApiEntreprise.js";
+import { DEPARTEMENTS } from "../../../../src/common/constants/territoiresConstants.js";
 
 describe("Test des actions Organismes", () => {
   describe("createOrganisme", () => {
@@ -36,19 +39,46 @@ describe("Test des actions Organismes", () => {
     });
 
     it("returns created organisme when valid", async () => {
-      const randomOrganisme = createRandomOrganisme();
-      const { _id } = await createOrganisme(randomOrganisme);
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+      const { _id } = await createOrganisme(sampleOrganisme);
       const created = await findOrganismeById(_id);
 
       assert.deepEqual(pick(created, ["uai", "siret", "nom", "nature"]), {
-        uai: randomOrganisme.uai,
-        siret: randomOrganisme.siret,
-        nom: randomOrganisme.nom,
-        nature: randomOrganisme.nature,
+        uai: sampleOrganisme.uai,
+        siret: sampleOrganisme.siret,
+        nom: sampleOrganisme.nom,
+        nature: sampleOrganisme.nature,
       });
 
-      assert.equal(created.adresse !== null, true); // TODO Meilleure gestion du test & adresse
-      assert.equal(created.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
+      // Vérification de l'adresse construite depuis l'appel API Entreprise
+      const { adresse, region_implantation } = SAMPLES_ETABLISSEMENTS_API_ENTREPRISE.sample41461021200014.etablissement;
+      const academieFromRegion = DEPARTEMENTS.find((o) => o.region?.code === region_implantation?.code);
+      const adresseBuildFromApiEntreprise = {
+        academie: academieFromRegion?.academie?.code,
+        code_insee: adresse?.code_insee_localite,
+        code_postal: adresse?.code_postal,
+        commune: adresse?.localite,
+        complete: `${adresse?.l1}\r\n${adresse?.l2}\r\n${adresse?.l4}\r\n${adresse?.l6}\r\n${adresse?.l7}`,
+        departement: adresse?.code_postal.substring(0, 2),
+        numero: parseInt(adresse?.numero_voie),
+        region: region_implantation?.code,
+        voie: `${adresse?.type_voie}${adresse.nom_voie}`,
+      };
+
+      assert.deepEqual(created.adresse, adresseBuildFromApiEntreprise);
+
+      // Vérification des autres champs
+      assert.equal(created.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
       assert.equal(created.private_url !== null, true);
       assert.equal(created.accessToken !== null, true);
       assert.equal(created.created_at !== null, true);
