@@ -1,9 +1,3 @@
-- name: Install pip dependencies, to encrypt mailhog password
-  ansible.builtin.pip:
-    name:
-      - passlib
-      - bcrypt
-
 - name: "Deploiement de la branche {{ git_revision }}"
   shell: "sudo /opt/flux-retour-cfas/start-app.sh {{ git_revision }}"
   register: output

@@ -1,1 +1,1 @@
-user:{{ vault.dev.MAILHOG_BCRYPT_PASSWORD | password_hash('bcrypt') }}
+user:$2y$10$E8grniiPObkWXZHp8PziReXaHCYHy.dEBk1QwwpSW8xxWsJ0mO1qq
