@@ -1,0 +1,1 @@
+user:{{ vault.recette.MAILHOG_BCRYPT_PASSWORD | password_hash('bcrypt') }}

@@ -1,3 +1,11 @@
+- name: Install latest passlib with pip
+  ansible.builtin.pip:
+    name: passlib
+
+- name: Install latest bcrypt with pip
+  ansible.builtin.pip:
+    name: bcrypt
+
 - name: "Deploiement de la branche {{ git_revision }}"
   shell: "sudo /opt/flux-retour-cfas/start-app.sh {{ git_revision }}"
   register: output
