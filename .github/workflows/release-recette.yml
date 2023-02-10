@@ -1,0 +1,23 @@
+name: Deploy on recette
+on:
+  push:
+    branches: [master]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+      - run: make ci
+
+  deploy:
+    needs: ["tests"]
+    uses: "./.github/workflows/_deploy.yml"
+    with:
+      environment: recette
+      server_ip: 146.59.226.69
+      user: sven
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
