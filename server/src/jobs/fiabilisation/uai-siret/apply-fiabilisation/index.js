@@ -40,6 +40,7 @@ const updateDossiersApprenantAndOrganismesAFiabiliser = async () => {
 
   for (const fiabilisation of allCouplesAFiabiliser) {
     try {
+      // Update de tous les dossiersApprenantsMigration qui étaient sur le mauvais couple UAI-SIRET
       const { modifiedCount: dossiersApprenantModifiedCount } = await dossiersApprenantsMigrationDb().updateMany(
         { ...filters, uai_etablissement: fiabilisation.uai, siret_etablissement: fiabilisation.siret },
         {
@@ -51,8 +52,9 @@ const updateDossiersApprenantAndOrganismesAFiabiliser = async () => {
       );
       dossiersApprenantAfiabiliserModifiedCount += dossiersApprenantModifiedCount;
 
-      const { modifiedCount: organismesModifiedCount } = await organismesDb().updateMany(
-        { uai: fiabilisation.uai, siret: fiabilisation.siret },
+      // Update de l'organisme lié à un couple UAI-SIRET marqué comme A_FIABILISER en FIABILISE
+      const { modifiedCount: organismesModifiedCount } = await organismesDb().update(
+        { uai: fiabilisation.uai_fiable, siret: fiabilisation.siret_fiable },
         { $set: { fiabilisation_statut: FIABILISATION_TYPES.FIABILISE } }
       );
       organismesAFiabiliserModifiedCount += organismesModifiedCount;
