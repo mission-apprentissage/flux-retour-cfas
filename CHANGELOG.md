@@ -1,3 +1,28 @@
+# [3.8.0](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.2...v3.8.0) (2023-02-13)
+
+
+### Bug Fixes
+
+* correction droits utilisateur admin ([#2507](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2507)) ([19a22b4](https://github.com/mission-apprentissage/flux-retour-cfas/commit/19a22b424b4debdf882872756a096be3f5254fad))
+* corrige une requête en erreur sur la page téléversement ([#2563](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2563)) ([e7c7802](https://github.com/mission-apprentissage/flux-retour-cfas/commit/e7c7802b1dfb8a9bfff50f4aea89a6d52f21dc8b))
+* disable Sentry in development by default ([#2505](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2505)) ([43a8625](https://github.com/mission-apprentissage/flux-retour-cfas/commit/43a8625b6dc15ace7707e29553a9dd19b81ec45c))
+* export missing attributes in some models ([b9f30be](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b9f30be0354ee70cd894825f0daa63c8d4b0f5c7))
+* fix error on random sirets not following Luhn algorithm  ([#2508](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2508)) ([1aebf9c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/1aebf9cd1b6127b71d28bac0729f131baf6b8a50))
+* fix mailhog password file path ([#2561](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2561)) ([b5d5378](https://github.com/mission-apprentissage/flux-retour-cfas/commit/b5d537825d613cd4d81053d9d300ba4ae2f7e7cd))
+* installe pip sur le server pour ajout pwd sur mailhog ([#2559](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2559)) ([4e1a060](https://github.com/mission-apprentissage/flux-retour-cfas/commit/4e1a060eb206b68516edda8855ad153b2f99b122))
+* liste des utilisateurs invités sans organisation ([#2573](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2573)) ([24c0248](https://github.com/mission-apprentissage/flux-retour-cfas/commit/24c0248cfd0d1688dbf2a7b1032b5eddeab767ec))
+* map locally the whole server folder ([244fd0b](https://github.com/mission-apprentissage/flux-retour-cfas/commit/244fd0b47106322ad41e69da4ef6645f4923b1ab))
+* revert Dockerfile on server ([#2525](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2525)) ([97c8321](https://github.com/mission-apprentissage/flux-retour-cfas/commit/97c832185e5731601f8829d366e00d3611d251cd))
+* server Dockerfile{,.dev} syntax ([3d739a2](https://github.com/mission-apprentissage/flux-retour-cfas/commit/3d739a27c0a16ecaafe4c5edddb81b068532cbb3))
+* simplifie la gestion du password mailhog ([#2560](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2560)) ([16e79ed](https://github.com/mission-apprentissage/flux-retour-cfas/commit/16e79edbc88cbf20ebf88c0324e81d347b16b66b))
+* update certbot docker image ([#2569](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2569)) ([a4b310c](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a4b310c4aed3a8b12239c3ddae257c0b953776d0))
+
+
+### Features
+
+* deploiement automatique recette ([#2531](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2531)) ([5983196](https://github.com/mission-apprentissage/flux-retour-cfas/commit/5983196f878f5a701be33c0ee54a55392d6bb403))
+* use real data to nock entreprise.api.gouv.fr ([#2503](https://github.com/mission-apprentissage/flux-retour-cfas/issues/2503)) ([a21a4fa](https://github.com/mission-apprentissage/flux-retour-cfas/commit/a21a4fa305860f0c9e6996cac17a7e1a80e006d2))
+
 ## [3.7.2](https://github.com/mission-apprentissage/flux-retour-cfas/compare/v3.7.1...v3.7.2) (2023-02-02)
 
 
