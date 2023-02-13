@@ -259,7 +259,11 @@ const OrganismeContributors = ({ size = "md" }) => {
                       CELLULE_APPRENTISSAGE: "CELLULE APPRENTISSAGE",
                       ORGANISME_FORMATION: "ORGANISME DE FORMATION",
                     };
-                    return <Text fontSize="1rem">{ORGANISMES_APPARTENANCE[user.organisation].toLowerCase()}</Text>;
+                    return (
+                      <Text fontSize="1rem">
+                        {ORGANISMES_APPARTENANCE[user.organisation]?.toLowerCase() || user.organisation}
+                      </Text>
+                    );
                   },
                 },
                 "user.email": {
@@ -323,7 +327,7 @@ const OrganismeContributors = ({ size = "md" }) => {
                     const you = auth.email === user.email;
                     return (
                       <Center>
-                        {!(you || isAnOverheadUser ) && (
+                        {!(you || isAnOverheadUser) && (
                           <CloseIcon
                             color="bluefrance"
                             data-email={info.row.original.user.email}
