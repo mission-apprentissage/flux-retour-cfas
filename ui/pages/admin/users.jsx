@@ -69,7 +69,7 @@ const UserLine = ({ user, roles, afterSubmit }) => {
     strict: true,
   });
 
-  const { values, handleSubmit, handleChange, setFieldValue } = useFormik({
+  const { values, handleSubmit, handleChange, setFieldValue, resetForm } = useFormik({
     initialValues: {
       accessAllCheckbox: user?.is_admin ? ["on"] : [],
       roles: user?.roles || [],
@@ -127,6 +127,7 @@ const UserLine = ({ user, roles, afterSubmit }) => {
           });
           if (result?._id) {
             toastSuccess("Utilisateur créé");
+            resetForm();
           } else if (result?.error) {
             toastError(result.error);
           } else {
@@ -451,9 +452,7 @@ const Users = () => {
                   user={null}
                   roles={roles}
                   afterSubmit={async () => {
-                    const response = await refetchUsers();
-                    // scroll to last user
-                    router.push(`#${response.data.length}`);
+                    await refetchUsers();
                   }}
                 />
               </AccordionPanel>
