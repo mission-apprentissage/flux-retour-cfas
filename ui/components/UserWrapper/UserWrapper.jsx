@@ -28,7 +28,7 @@ const AccountWrapper = ({ children }) => {
             router.pathname !== "/auth/modifier-mot-de-passe" &&
             router.asPath !== "/en-maintenance"
           ) {
-            let { token } = await _post("/api/v1/password/forgotten-password", { username: auth.email, noEmail: true });
+            let { token } = await _post("/api/v1/password/forgotten-password", { email: auth.email, noEmail: true });
             router.push(`/auth/modifier-mot-de-passe?passwordToken=${token}`);
           } else if (
             auth.account_status.includes("FORCE_COMPLETE_PROFILE") &&

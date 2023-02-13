@@ -40,12 +40,12 @@ export default ({ mailer }) => {
   router.post(
     "/forgotten-password",
     tryCatch(async (req, res) => {
-      const { username, noEmail } = await Joi.object({
-        username: Joi.string().email().required(),
+      const { email, noEmail } = await Joi.object({
+        email: Joi.string().email().required().lowercase().trim(),
         noEmail: Joi.boolean(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      const user = await getUser(username);
+      const user = await getUser(email);
       if (!user) {
         return res.json({});
       }
