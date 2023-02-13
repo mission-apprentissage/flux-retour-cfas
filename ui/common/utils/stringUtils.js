@@ -29,3 +29,12 @@ export const capitalize = (str) => {
   const firstLetter = str.charAt(0);
   return `${firstLetter.toUpperCase()}${str.substr(1)}`;
 };
+
+export function normalize(string) {
+  return string == null
+    ? ""
+    : string
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
