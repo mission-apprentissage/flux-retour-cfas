@@ -103,36 +103,8 @@ export const createOrganisme = async ({
     }
   }
 
-  let nom = nomIn;
-  let adresse = adresseIn;
-  let ferme = false;
-  let enseigne = null;
-  let raison_sociale = null;
-  if (siret) {
-    const dataSiret = await findDataFromSiret(siret, true, false);
-    if (dataSiret.messages.api_entreprise === "Ok") {
-      ferme = dataSiret.result.ferme;
-      if (dataSiret.result.enseigne) enseigne = dataSiret.result.enseigne;
-      if (dataSiret.result.entreprise_raison_sociale) raison_sociale = dataSiret.result.entreprise_raison_sociale;
-      if (!nom) nom = dataSiret.result.enseigne;
-      adresse = {
-        ...(adresse ?? {}),
-        ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
-        ...(dataSiret.result.voie_complete ? { voie: dataSiret.result.voie_complete } : {}),
-        ...(dataSiret.result.complement_adresse ? { complement: dataSiret.result.complement_adresse } : {}),
-        ...(dataSiret.result.code_postal ? { code_postal: dataSiret.result.code_postal } : {}),
-        ...(dataSiret.result.code_insee_localite ? { code_insee: dataSiret.result.code_insee_localite } : {}),
-        ...(dataSiret.result.localite ? { commune: dataSiret.result.localite } : {}),
-        ...(dataSiret.result.num_departement ? { departement: dataSiret.result.num_departement } : {}),
-        ...(dataSiret.result.num_region ? { region: dataSiret.result.num_region } : {}),
-        ...(dataSiret.result.num_academie ? { academie: dataSiret.result.num_academie } : {}),
-        ...(dataSiret.result.adresse ? { complete: dataSiret.result.adresse } : {}),
-      };
-    } else {
-      // TODO Find adresse somewhere else
-      logger.error(`createOrganisme > Erreur sur l'etablissement ${siret} via API Entreprise`);
-    }
-  }
+  // Récupération des infos depuis API Entreprise
+  const { adresse, ferme, enseigne, raison_sociale, nom } = await getOrganismeInfosFromSiret(siret, nomIn, adresseIn);
 
   // Construction de l'arbre des formations de l'organisme
   const { formations } = await getFormationsTreeForOrganisme(uai);
@@ -156,6 +128,51 @@ export const createOrganisme = async ({
   );
 
   return await organismesDb().findOne({ _id: insertedId });
+};
+
+/**
+ * Fonction de récupération d'informations depuis SIRET via API Entreprise via siret
+ * @param {*} siret
+ * @param {*} nomIn
+ * @param {*} adresseIn
+ * @returns
+ */
+export const getOrganismeInfosFromSiret = async (siret, nomIn = null, adresseIn = null) => {
+  let nom = nomIn;
+  let adresse = adresseIn;
+  let ferme = false;
+  let enseigne = null;
+  let raison_sociale = null;
+
+  if (siret) {
+    const dataSiret = await findDataFromSiret(siret, true, false);
+
+    if (dataSiret.messages.api_entreprise === "Ok") {
+      ferme = dataSiret.result.ferme;
+
+      if (dataSiret.result.enseigne) enseigne = dataSiret.result.enseigne;
+      if (dataSiret.result.entreprise_raison_sociale) raison_sociale = dataSiret.result.entreprise_raison_sociale;
+      if (!nom) nom = dataSiret.result.enseigne;
+
+      adresse = {
+        ...(adresse ?? {}),
+        ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
+        ...(dataSiret.result.voie_complete ? { voie: dataSiret.result.voie_complete } : {}),
+        ...(dataSiret.result.complement_adresse ? { complement: dataSiret.result.complement_adresse } : {}),
+        ...(dataSiret.result.code_postal ? { code_postal: dataSiret.result.code_postal } : {}),
+        ...(dataSiret.result.code_insee_localite ? { code_insee: dataSiret.result.code_insee_localite } : {}),
+        ...(dataSiret.result.localite ? { commune: dataSiret.result.localite } : {}),
+        ...(dataSiret.result.num_departement ? { departement: dataSiret.result.num_departement } : {}),
+        ...(dataSiret.result.num_region ? { region: dataSiret.result.num_region } : {}),
+        ...(dataSiret.result.num_academie ? { academie: dataSiret.result.num_academie } : {}),
+        ...(dataSiret.result.adresse ? { complete: dataSiret.result.adresse } : {}),
+      };
+    } else {
+      // TODO Find adresse somewhere else
+      logger.error(`createOrganisme > Erreur sur l'etablissement ${siret} via API Entreprise`);
+    }
+  }
+  return { adresse, ferme, enseigne, raison_sociale, nom };
 };
 
 /**
