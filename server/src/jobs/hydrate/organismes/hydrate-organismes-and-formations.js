@@ -33,7 +33,7 @@ export const hydrateOrganismesAndFormations = async () => {
   let nbOrganismeNotCreated = 0;
   let nbFormationsCreated = 0;
   let nbFormationsNotCreated = 0;
-  let nbOrganismeWithoutUai = 0;
+  let nbOrganismeWithoutUaiOrSiret = 0;
   let nbOrganismeUpdated = 0;
   let nbOrganismeNotUpdated = 0;
 
@@ -46,7 +46,7 @@ export const hydrateOrganismesAndFormations = async () => {
     // Si aucun UAI ou siret on ne peut pas effectuer de traitement
     if (!uai || !siret) {
       // TODO voir coté métier comment gérer la récupération d'organismes sans uai ou siret dans le référentiel
-      nbOrganismeWithoutUai++;
+      nbOrganismeWithoutUaiOrSiret++;
       loadingBar.increment();
       continue;
     }
@@ -119,7 +119,9 @@ export const hydrateOrganismesAndFormations = async () => {
   loadingBar.stop();
 
   // Log & stats
-  logger.info(`-> ${nbOrganismeWithoutUai} organismes sans UAI / Siret dans le référentiel (pas de traitement)`);
+  logger.info(
+    `-> ${nbOrganismeWithoutUaiOrSiret} organismes sans UAI ou Siret dans le référentiel (pas de traitement)`
+  );
   logger.info(
     `--> ${nbOrganismeCreated} organismes créés depuis le référentiel (avec ajout de l'arbre des formations)`
   );
@@ -134,7 +136,7 @@ export const hydrateOrganismesAndFormations = async () => {
     date: new Date(),
     action: "finishing",
     data: {
-      nbOrganismesSansUai: nbOrganismeWithoutUai,
+      nbOrganismesSansUaiOuSiret: nbOrganismeWithoutUaiOrSiret,
       nbOrganismesCrees: nbOrganismeCreated,
       nbOrganismesNonCreesErreur: nbOrganismeNotCreated,
       nbOrganismesMaj: nbOrganismeUpdated,
