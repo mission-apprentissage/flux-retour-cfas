@@ -1,6 +1,6 @@
-// TODO [tech]
 import React, { useCallback, useEffect, useState } from "react";
 import { useFormik } from "formik";
+import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import generator from "generate-password-browser";
@@ -50,7 +50,7 @@ const buildRolesAcl = (newRoles, roles) => {
   return acl;
 };
 
-const UserLine = ({ user, roles, refetchUsers }) => {
+const UserLine = ({ user, roles, afterSubmit }) => {
   const [, setRolesAcl] = useState(buildRolesAcl(user?.roles || [], roles));
   const { toastSuccess, toastError } = useToaster();
 
@@ -69,7 +69,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
     strict: true,
   });
 
-  const { values, handleSubmit, handleChange, setFieldValue } = useFormik({
+  const { values, handleSubmit, handleChange, setFieldValue, resetForm } = useFormik({
     initialValues: {
       accessAllCheckbox: user?.is_admin ? ["on"] : [],
       roles: user?.roles || [],
@@ -127,7 +127,8 @@ const UserLine = ({ user, roles, refetchUsers }) => {
           });
           if (result?._id) {
             toastSuccess("Utilisateur créé");
-          } else if (result.error) {
+            resetForm();
+          } else if (result?.error) {
             toastError(result.error);
           } else {
             toastError("Erreur lors de la création de l'utilisateur.", {
@@ -141,7 +142,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
         const message = response?.message ?? e?.message;
         toastError(message);
       }
-      await refetchUsers();
+      await afterSubmit();
       setSubmitting(false);
     },
   });
@@ -157,7 +158,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
           description: " Merci de réessayer plus tard",
         });
       }
-      return refetchUsers();
+      return afterSubmit();
     }
   };
 
@@ -188,7 +189,7 @@ const UserLine = ({ user, roles, refetchUsers }) => {
           description: " Merci de réessayer plus tard",
         });
       }
-      return refetchUsers();
+      return afterSubmit();
     } catch (e) {
       console.error(e);
       toastError("Erreur lors de la validation de l'accès.", {
@@ -240,16 +241,16 @@ const UserLine = ({ user, roles, refetchUsers }) => {
       </Box>
       <FormControl py={2}>
         <FormLabel>Nom</FormLabel>
-        <Input type="text" id="newNom" name="newNom" value={values.newNom} onChange={handleChange} />
+        <Input type="text" id="newNom" name="newNom" value={values.newNom} onChange={handleChange} required />
       </FormControl>
       <FormControl py={2}>
         <FormLabel>Prenom</FormLabel>
-        <Input type="text" id="newPrenom" name="newPrenom" value={values.newPrenom} onChange={handleChange} />
+        <Input type="text" id="newPrenom" name="newPrenom" value={values.newPrenom} onChange={handleChange} required />
       </FormControl>
 
       <FormControl py={2}>
         <FormLabel>Email</FormLabel>
-        <Input type="email" id="newEmail" name="newEmail" value={values.newEmail} onChange={handleChange} />
+        <Input type="email" id="newEmail" name="newEmail" value={values.newEmail} onChange={handleChange} required />
       </FormControl>
 
       {!user && (
@@ -412,7 +413,9 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 const Users = () => {
   const { data: roles } = useQuery(["roles"], () => _get("/api/v1/admin/roles/"));
+  const router = useRouter();
 
+  const tabIndex = parseInt(new URL(`http://domain/${router.asPath}`)?.hash.replace("#", "") ?? -1, 10) ?? -1;
   const { data: users, refetch: refetchUsers } = useQuery(["users"], () => _get("/api/v1/admin/users/"));
 
   const title = "Gestion des utilisateurs";
@@ -429,7 +432,13 @@ const Users = () => {
         {title}
       </Heading>
       <Stack spacing={2}>
-        <Accordion bg="white" allowToggle>
+        <Accordion
+          defaultIndex={tabIndex}
+          index={tabIndex}
+          bg="white"
+          allowToggle
+          onChange={(value) => router.push(`#${value}`, null, { shallow: false, scroll: false })}
+        >
           {roles && (
             <AccordionItem mb={12}>
               <AccordionButton bg="bluefrance" color="white" _hover={{ bg: "blue.700" }}>
@@ -439,20 +448,32 @@ const Users = () => {
                 <AccordionIcon />
               </AccordionButton>
               <AccordionPanel pb={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
-                <UserLine user={null} roles={roles} />
+                <UserLine
+                  user={null}
+                  roles={roles}
+                  afterSubmit={async () => {
+                    await refetchUsers();
+                  }}
+                />
               </AccordionPanel>
             </AccordionItem>
           )}
 
           {roles &&
-            users?.map((user) => {
+            users?.map((user, idx) => {
               const pendingPermissionsCount = user?.permissions?.filter((p) => p.pending).length;
               return (
                 <AccordionItem key={user.email}>
                   {({ isExpanded }) => (
                     <>
                       <AccordionButton _expanded={{ bg: "grey.200" }} border={"1px solid"} borderColor={"bluefrance"}>
-                        <Flex fontSize="gamma" flexGrow={1} justifyContent="space-between" alignItems="center">
+                        <Flex
+                          fontSize="gamma"
+                          flexGrow={1}
+                          justifyContent="space-between"
+                          alignItems="center"
+                          id={idx + 1 /* anchor */}
+                        >
                           <Text>
                             {user.email} - {user.prenom} {user.nom}
                           </Text>
@@ -473,7 +494,15 @@ const Users = () => {
                         <AccordionIcon />
                       </AccordionButton>
                       <AccordionPanel pb={4} border={"1px solid"} borderTop={0} borderColor={"bluefrance"}>
-                        {isExpanded && <UserLine user={user} roles={roles} refetchUsers={refetchUsers} />}
+                        {isExpanded && (
+                          <UserLine
+                            user={user}
+                            roles={roles}
+                            afterSubmit={async () => {
+                              await refetchUsers();
+                            }}
+                          />
+                        )}
                       </AccordionPanel>
                     </>
                   )}
