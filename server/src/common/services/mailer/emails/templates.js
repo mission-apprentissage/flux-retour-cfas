@@ -2,6 +2,7 @@ import path from "path";
 import config from "../../../../config.js";
 import { createResetPasswordToken, createActivationToken } from "../../../utils/jwtUtils.js";
 import { __dirname } from "../../../utils/esmUtils.js";
+import { ACADEMIES_BY_ID, REGIONS_BY_ID, DEPARTEMENTS_BY_ID } from "../../../constants/territoiresConstants.js";
 
 function getTemplateFile(name) {
   return path.join(__dirname(import.meta.url), `${name}.mjml.ejs`);
@@ -42,12 +43,36 @@ export function validation_first_organisme_user_by_tdb_team({ payload }, token, 
 
 export function validation_user_by_tdb_team({ payload }, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
+  const regions_as_string = payload.user.codes_region
+    .map((code) => {
+      const region = REGIONS_BY_ID[code];
+      return region ? `${region.nom} (${region.code})` : code;
+    })
+    .join(", ");
+
+  const departements_as_string = payload.user.codes_departement
+    .map((code) => {
+      const dep = DEPARTEMENTS_BY_ID[code];
+      return dep ? `${dep.nom} (${dep.code})` : code;
+    })
+    .join(", ");
+
+  const academies_as_string = payload.user.codes_academie
+    .map((code) => {
+      const academie = ACADEMIES_BY_ID[code];
+      return academie ? `${academie.nom} (${academie.code})` : code;
+    })
+    .join(", ");
+
   return {
     subject: `${prefix} [ADMIN] Demande d'accès`,
     templateFile: getTemplateFile("validation_user_by_tdb_team"),
     data: {
       user: payload.user,
       type: payload.type,
+      regions_as_string,
+      academies_as_string,
+      departements_as_string,
       token,
     },
   };

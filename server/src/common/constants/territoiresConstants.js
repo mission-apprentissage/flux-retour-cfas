@@ -91,6 +91,10 @@ export const REGIONS = [
     code: "977",
   },
 ];
+export const REGIONS_BY_ID = REGIONS.reduce((acc, region) => {
+  acc[region.code] = region;
+  return acc;
+}, {});
 
 export const DEPARTEMENTS = [
   {
@@ -1506,6 +1510,10 @@ export const DEPARTEMENTS = [
     },
   },
 ];
+export const DEPARTEMENTS_BY_ID = DEPARTEMENTS.reduce((acc, departement) => {
+  acc[departement.code] = departement;
+  return acc;
+}, {});
 
 export const ACADEMIES = {
   "01": { nom: "Paris", code: 1 },
@@ -1539,3 +1547,8 @@ export const ACADEMIES = {
   43: { nom: "Mayotte", code: 43 },
   70: { nom: "Normandie", code: 70 },
 };
+
+export const ACADEMIES_BY_ID = Object.values(ACADEMIES).reduce((acc, academie) => {
+  acc[academie.code] = academie;
+  return acc;
+});
