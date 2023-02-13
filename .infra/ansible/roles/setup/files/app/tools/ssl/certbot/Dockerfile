@@ -1,4 +1,4 @@
-FROM node:12.16.1-stretch
+FROM node:16-stretch
 
 RUN apt update && apt install -y certbot curl
 RUN yarn global add serve
