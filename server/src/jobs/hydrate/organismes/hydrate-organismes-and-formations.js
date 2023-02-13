@@ -1,54 +1,33 @@
 import cliProgress from "cli-progress";
 import logger from "../../../common/logger.js";
-import { asyncForEach } from "../../../common/utils/asyncUtils.js";
 import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
 import {
   createOrganisme,
-  findOrganismeByUai,
+  findOrganismeByUaiAndSiret,
+  getOrganismeInfosFromSiret,
   updateOrganisme,
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
-import { getCatalogFormationsForOrganisme } from "../../../common/apis/apiCatalogueMna.js";
-import { createFormation, getFormationWithCfd } from "../../../common/actions/formations.actions.js";
-import { NATURE_ORGANISME_DE_FORMATION } from "../../../common/utils/validationsUtils/organisme-de-formation/nature.js";
-import { findDataFromSiret } from "../../../common/actions/infoSiret.actions.js";
 import { buildTokenizedString } from "../../../common/utils/buildTokenizedString.js";
+import { getFormationsTreeForOrganisme } from "../../../common/actions/organismes/organismes.formations.actions.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOB_NAME = "hydrate-organismes-and-formations";
 
 /**
- * Liste des champs à récupérer depuis le référentiel
- */
-const REFERENTIEL_FIELDS_TO_FETCH = [
-  "siret",
-  "uai",
-  "etat_administratif",
-  "qualiopi",
-  "raison_sociale",
-  "enseigne",
-  "nature",
-  "qualiopi",
-  "adresse",
-  "numero_declaration_activite",
-];
-
-/**
- * TODO : Supprimer la construction du tree formations ici et faire l'appel depuis organismes.formations.actions.js
- * TODO : Keeping uniquement pour les log pour l'instant
- * Script qui initialise les organismes
+ * Script qui initialise les organismes et les formations liées.
+ * Pour le moment on n'optimise pas via un Promise.all avec appels en // car on a besoin de limiter les appels API Catalogue & Entreprise
+ * et on a besoin temporairement de décompter les ajouts / update pour suivre la fiab.
  * 1. On va créer tous les organismes "stock" non présents dans le tdb mais existants dans le référentiel
- * sur la base de l'UAI, en ajoutant l'arbre des formations récupéré depuis le catalogue.
+ * sur la base du couple UAI SIRET, en ajoutant l'arbre des formations récupéré depuis le catalogue.
  * 2. Pour les organismes déja présents va MAJ le champ nature et l'arbre des formations
+ * En cas d'erreurs on log via un createJobEvent()
  * TODO : Que fait-on des organismes qui sont dans le TDB mais ne sont pas dans le référentiel ? TODO faire un script spécifique pour identif ?
  */
 export const hydrateOrganismesAndFormations = async () => {
-  // Fetch organismes from referentiel api
-  let { organismes } = await fetchOrganismes({
-    champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),
-    itemsPerPage: 10000,
-  });
+  // On récupère l'intégralité des organismes depuis le référentiel
+  let { organismes } = await fetchOrganismes();
 
   let nbOrganismeCreated = 0;
   let nbOrganismeNotCreated = 0;
@@ -61,147 +40,86 @@ export const hydrateOrganismesAndFormations = async () => {
   logger.info(`Traitement de ${organismes.length} organismes provenant du référentiel...`);
   loadingBar.start(organismes.length, 0);
 
-  await asyncForEach(organismes, async (organismeReferentiel) => {
+  for (const organismeReferentiel of organismes) {
     const { uai, siret, raison_sociale, nature } = organismeReferentiel;
 
-    // Si aucun UAI on ne peut pas effectuer de traitement
-    if (!uai) {
-      // TODO voir coté métier comment gérer la récupération d'organismes sans uai dans le référentiel
+    // Si aucun UAI ou siret on ne peut pas effectuer de traitement
+    if (!uai || !siret) {
+      // TODO voir coté métier comment gérer la récupération d'organismes sans uai ou siret dans le référentiel
       nbOrganismeWithoutUai++;
-      // Log & store
-      await createJobEvent({
-        jobname: JOB_NAME,
-        date: new Date(),
-        action: "no-uai-for-organisme-in-referentiel",
-        data: { organisme: organismeReferentiel },
-      });
-    } else {
-      const organisme = await findOrganismeByUai(uai);
-      const { formations, nbFormationsCreatedForOrganisme, nbFormationsNotCreatedForOrganisme } =
-        await getFormationsTreeForOrganisme(organismeReferentiel);
+      loadingBar.increment();
+      continue;
+    }
 
-      nbFormationsCreated += nbFormationsCreatedForOrganisme;
-      nbFormationsNotCreated += nbFormationsNotCreatedForOrganisme;
+    // Recherche de l'organisme via le couple UAI - SIRET
+    const organismeInTdb = await findOrganismeByUaiAndSiret(uai, siret);
 
-      // Ajout de l'organisme si non existant dans le tdb
-      if (!organisme) {
-        try {
-          await createOrganisme({
-            uai,
-            ...buildAdresseFromUai(uai),
-            nature,
-            siret,
-            sirets: [siret],
-            nom: raison_sociale,
-            est_dans_le_referentiel: true,
-            formations,
-          });
-          nbOrganismeCreated++;
+    // Récupération de l'arbre des formations pour l'organisme
+    const { formations, nbFormationsCreatedForOrganisme, nbFormationsNotCreatedForOrganisme } =
+      await getFormationsTreeForOrganisme(uai);
+    nbFormationsCreated += nbFormationsCreatedForOrganisme;
+    nbFormationsNotCreated += nbFormationsNotCreatedForOrganisme;
 
-          // Log & store
-          await createJobEvent({
-            jobname: JOB_NAME,
-            date: new Date(),
-            action: "organisme-created",
-            data: { organisme: organismeReferentiel },
-          });
-        } catch (error) {
-          nbOrganismeNotCreated++;
-          // Log & store error
-          await createJobEvent({
-            jobname: JOB_NAME,
-            date: new Date(),
-            action: "organisme-not-created",
-            data: { organisme: organismeReferentiel, error },
-          });
-        }
-      } else {
-        // Update de l'organisme si existant
-        // TODO à refacto / simplifier & mutualiser code avec createOrganisme
-        // On update toutes les infos depuis l'API Entreprise
-        // Set de la nature et un flag natureValidityWarning = perfectMatch
-        // Set de l'arbre des formations
-        const perfectUaiSiretMatch =
-          organisme.sirets.length === 1 && organisme.sirets[0] === organismeReferentiel.siret;
-
-        let adresse = null;
-        let ferme = false;
-        let enseigne = null;
-        let raison_sociale = null;
-        let nom = null;
-
-        // Appel API Entreprise si siret dans le référentiel
-        if (siret) {
-          const dataSiret = await findDataFromSiret(siret, true, false);
-          if (dataSiret.messages.api_entreprise === "Ok") {
-            ferme = dataSiret.result.ferme;
-            if (dataSiret.result.enseigne) enseigne = dataSiret.result.enseigne;
-            if (dataSiret.result.entreprise_raison_sociale) raison_sociale = dataSiret.result.entreprise_raison_sociale;
-            if (!nom) nom = dataSiret.result.enseigne;
-            adresse = {
-              ...(adresse ?? {}),
-              ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
-              ...(dataSiret.result.voie_complete ? { voie: dataSiret.result.voie_complete } : {}),
-              ...(dataSiret.result.complement_adresse ? { complement: dataSiret.result.complement_adresse } : {}),
-              ...(dataSiret.result.code_postal ? { code_postal: dataSiret.result.code_postal } : {}),
-              ...(dataSiret.result.code_insee_localite ? { code_insee: dataSiret.result.code_insee_localite } : {}),
-              ...(dataSiret.result.localite ? { commune: dataSiret.result.localite } : {}),
-              ...(dataSiret.result.num_departement ? { departement: dataSiret.result.num_departement } : {}),
-              ...(dataSiret.result.num_region ? { region: dataSiret.result.num_region } : {}),
-              ...(dataSiret.result.num_academie ? { academie: dataSiret.result.num_academie } : {}),
-              ...(dataSiret.result.adresse ? { complete: dataSiret.result.adresse } : {}),
-            };
-          } else {
-            // TODO Find adresse somewhere else
-            logger.error(`hydrateOrganismeAndFormations > Erreur sur l'etablissement ${siret} via API Entreprise`);
-          }
-        }
-
-        const updatedOrganisme = {
-          ...organisme,
-          ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
-          ...(siret ? { siret } : {}),
-          ...(siret ? { sirets: [siret] } : {}), // TODO : bien analyser si c'est pertinent de faire ça ?
-          ...(adresse ? { adresse } : {}),
-          ...(enseigne ? { enseigne } : {}),
-          ...(raison_sociale ? { raison_sociale } : {}),
-          ferme,
-          nature: organismeReferentiel.nature,
-          natureValidityWarning: !perfectUaiSiretMatch,
+    // Ajout de l'organisme si non existant dans le tdb
+    if (!organismeInTdb) {
+      try {
+        await createOrganisme({
+          uai,
+          ...buildAdresseFromUai(uai),
+          nature,
+          siret,
+          nom: raison_sociale,
           est_dans_le_referentiel: true,
           formations,
-        };
-        try {
-          await updateOrganisme(organisme._id, updatedOrganisme);
-          nbOrganismeUpdated++;
+        });
+        nbOrganismeCreated++;
+      } catch (error) {
+        nbOrganismeNotCreated++;
+        await createJobEvent({
+          jobname: JOB_NAME,
+          date: new Date(),
+          action: "organisme-not-created",
+          data: { organisme: organismeReferentiel, error },
+        });
+      }
+    } else {
+      // Update de l'organisme si existant
 
-          // Log & store
-          await createJobEvent({
-            jobname: JOB_NAME,
-            date: new Date(),
-            action: "organisme-updated",
-            data: { organisme: updatedOrganisme },
-          });
-        } catch (error) {
-          nbOrganismeNotUpdated++;
-          // Log & store errors
-          await createJobEvent({
-            jobname: JOB_NAME,
-            date: new Date(),
-            action: "organisme-notUpdated",
-            data: { organisme: updatedOrganisme, error },
-          });
-        }
+      const { adresse, ferme, enseigne, raison_sociale, nom } = await getOrganismeInfosFromSiret(siret); // Récupération des infos depuis API Entreprise
+      const updatedOrganisme = {
+        ...organismeInTdb,
+        ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
+        ...(siret ? { siret } : {}),
+        ...(adresse ? { adresse } : {}),
+        ...(enseigne ? { enseigne } : {}),
+        ...(raison_sociale ? { raison_sociale } : {}),
+        ferme,
+        nature: organismeReferentiel.nature,
+        natureValidityWarning: false, // pas de warning car on a un match uai siret sur le référentiel
+        est_dans_le_referentiel: true,
+        formations,
+      };
+      try {
+        await updateOrganisme(organismeInTdb._id, updatedOrganisme);
+        nbOrganismeUpdated++;
+      } catch (error) {
+        nbOrganismeNotUpdated++;
+        await createJobEvent({
+          jobname: JOB_NAME,
+          date: new Date(),
+          action: "organisme-notUpdated",
+          data: { organisme: updatedOrganisme, error },
+        });
       }
     }
 
     loadingBar.increment();
-  });
+  }
 
   loadingBar.stop();
 
   // Log & stats
-  logger.info(`-> ${nbOrganismeWithoutUai} organismes sans UAI dans le référentiel (pas de traitement)`);
+  logger.info(`-> ${nbOrganismeWithoutUai} organismes sans UAI / Siret dans le référentiel (pas de traitement)`);
   logger.info(
     `--> ${nbOrganismeCreated} organismes créés depuis le référentiel (avec ajout de l'arbre des formations)`
   );
@@ -225,153 +143,4 @@ export const hydrateOrganismesAndFormations = async () => {
       nbFormationsNonCrees: nbFormationsNotCreated,
     },
   });
-};
-
-/**
- * Méthode de récupération de l'arbre des formations issues du catalogue liées à un organisme
- * @param {*} uai
- */
-export const getFormationsTreeForOrganisme = async (organisme) => {
-  // Récupération des formations liés à l'organisme
-  const catalogFormationsForOrganisme = await getCatalogFormationsForOrganisme(organisme.uai);
-
-  // Construction d'une liste de formations pour cet organisme
-  let formationsForOrganismeArray = [];
-  let nbFormationsCreatedForOrganisme = 0;
-  // let nbFormationsUpdatedForOrganisme = 0;
-  let nbFormationsNotCreatedForOrganisme = 0;
-
-  if (catalogFormationsForOrganisme?.length > 0) {
-    await asyncForEach(catalogFormationsForOrganisme, async (currentFormation) => {
-      let currentFormationId;
-
-      // Récupération de la formation du catalogue dans le TDB, si pas présente on la créé
-      // On count les formations créés / non crées (erreur)
-      const formationFoundInTdb = await getFormationWithCfd(currentFormation.cfd);
-      if (!formationFoundInTdb) {
-        try {
-          currentFormationId = await createFormation(currentFormation);
-          nbFormationsCreatedForOrganisme++;
-        } catch (error) {
-          nbFormationsNotCreatedForOrganisme++;
-          // Log & store errors
-          await createJobEvent({
-            jobname: JOB_NAME,
-            date: new Date(),
-            action: "formation-notCreated",
-            data: { currentFormation: currentFormation, error },
-          });
-        }
-      } else {
-        currentFormationId = formationFoundInTdb._id;
-      }
-
-      // Ajout à la liste des formation de l'organisme d'un item contenant
-      // formation_id si trouvé dans le tdb
-      // année & durée trouvé dans le catalog & formatted
-      // ainsi que la liste des organismes construite depuis l'API Catalogue
-
-      const formationAlreadyInOrganismeArray = formationsForOrganismeArray.some(
-        (item) => item.formation_id.toString() === currentFormationId.toString()
-      );
-
-      if (currentFormationId && !formationAlreadyInOrganismeArray) {
-        formationsForOrganismeArray.push({
-          ...(currentFormationId ? { formation_id: currentFormationId } : {}),
-          annee_formation: parseInt(currentFormation.annee) || -1,
-          duree_formation_theorique: parseInt(currentFormation.duree) || -1,
-          organismes: await buildOrganismesListFromFormationFromCatalog(currentFormation),
-        });
-      }
-    });
-  } else {
-    // Log & store cases
-    await createJobEvent({
-      jobname: JOB_NAME,
-      date: new Date(),
-      action: "organisme-withoutFormations",
-      data: { organisme },
-    });
-  }
-
-  return {
-    formations: formationsForOrganismeArray,
-    nbFormationsCreatedForOrganisme,
-    nbFormationsNotCreatedForOrganisme,
-  };
-};
-
-/**
- * Méthode de construction de la liste des organismes avec leur nature, rattachés à une formation du catalogue
- * @param {*} formationCatalog
- * @returns
- */
-const buildOrganismesListFromFormationFromCatalog = async (formationCatalog) => {
-  let organismesLinkedToFormation = [];
-
-  // Récupération du responsable (gestionnaire)
-  if (formationCatalog.etablissement_gestionnaire_uai) {
-    const organismeInTdb = await findOrganismeByUai(formationCatalog.etablissement_gestionnaire_uai);
-
-    organismesLinkedToFormation.push({
-      ...(organismeInTdb ? { organisme_id: organismeInTdb._id } : {}), // Si organisme trouvé dans le tdb
-      ...(organismeInTdb ? { adresse: organismeInTdb.adresse } : {}), // Si organisme trouvé dans le tdb on son adresse
-      nature: getNature(NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, formationCatalog, organismesLinkedToFormation),
-      uai: formationCatalog.etablissement_gestionnaire_uai,
-      siret: formationCatalog.etablissement_gestionnaire_siret,
-    });
-
-    // TODO Voir ce qu'on fait si on ne trouve pas l'OF dans le tdb ? on le créé ? on logge l'anomalie ?
-    // TODO Si pas d'organisme depuis le Tdb on récupère l'adresse from référentiel ?
-  }
-
-  // Gestion du formateur si nécessaire
-  if (formationCatalog.etablissement_formateur_uai) {
-    const organismeInTdb = await findOrganismeByUai(formationCatalog.etablissement_formateur_uai);
-
-    organismesLinkedToFormation.push({
-      ...(organismeInTdb ? { organisme_id: organismeInTdb._id } : {}), // Si organisme trouvé dans le tdb
-      ...(organismeInTdb ? { adresse: organismeInTdb.adresse } : {}), // Si organisme trouvé dans le tdb on son adresse
-      nature: getNature(NATURE_ORGANISME_DE_FORMATION.FORMATEUR, formationCatalog, organismesLinkedToFormation),
-      uai: formationCatalog.etablissement_formateur_uai,
-      siret: formationCatalog.etablissement_formateur_siret,
-    });
-
-    // TODO Voir ce qu'on fait si on ne trouve pas l'OF dans le tdb ? on le créé ? on logge l'anomalie ?
-    // TODO Si pas d'organisme depuis le Tdb on récupère l'adresse from référentiel ?
-  }
-
-  // Gestion du lieu de formation
-  // TODO WIP
-  organismesLinkedToFormation.push({
-    nature: NATURE_ORGANISME_DE_FORMATION.LIEU,
-    // uai: formationCatalog.XXXX, // TODO non récupérée par RCO donc pas présent dans le catalogue (vu avec Quentin)
-    ...(formationCatalog.lieu_formation_siret ? { siret: formationCatalog.lieu_formation_siret } : {}),
-    // TODO On récupère l'adresse depuis le référentiel en appelant avec le SIRET ?
-  });
-
-  return organismesLinkedToFormation;
-};
-
-/**
- * Vérifie la nature, si on détecte un UAI formateur = responsable alors on est dans le cas d'un responsable_formateur
- * sinon on renvoi la nature default
- * @param {*} defaultNature
- * @param {*} formationCatalog
- * @param {*} organismesLinkedToFormation
- * @returns
- */
-const getNature = (defaultNature, formationCatalog, organismesLinkedToFormation) => {
-  // Vérification si OF a la fois identifié gestionnaire (responsable) & formateur
-  const isResponsableEtFormateur =
-    formationCatalog.etablissement_gestionnaire_uai === formationCatalog.etablissement_formateur_uai;
-
-  // Vérification s'il n'est pas déja dans la liste
-  const isNotAlreadyInOrganismesLinkedToFormation = !organismesLinkedToFormation.some(
-    (item) => item.uai === formationCatalog.etablissement_gestionnaire_uai
-  );
-
-  return isResponsableEtFormateur && isNotAlreadyInOrganismesLinkedToFormation
-    ? NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR
-    : defaultNature;
 };
