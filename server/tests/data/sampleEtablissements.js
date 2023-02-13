@@ -1,6 +1,23 @@
 import { NATURE_ORGANISME_DE_FORMATION } from "../../src/common/utils/validationsUtils/organisme-de-formation/nature.js";
 
 export default {
+  19040492100016: {
+    uai: "0040533H",
+    siret: "19040492100016",
+    nom: "LYCEE POLYVALENT LES ISCLES",
+    nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+    adresse: {
+      academie: "2",
+      code_insee: "04112",
+      code_postal: "04100",
+      commune: "MANOSQUE",
+      complete: "LYCEE POLYVALENT LES ISCLES\r\n" + "116 AV REGIS RYCKEBUSH\r\n" + "04100 MANOSQUE\r\n" + "FRANCE",
+      departement: "04",
+      numero: 116,
+      region: "93",
+      voie: "AVREGIS RYCKEBUSH",
+    },
+  },
   41461021200014: {
     uai: "0611175W",
     siret: "41461021200014",
@@ -75,6 +92,27 @@ export default {
     siret: "77937827200016",
     nom: "ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN",
     nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
+    adresse: {
+      academie: "10",
+      code_insee: "01386",
+      code_postal: "01150",
+      commune: "SAINT-SORLIN-EN-BUGEY",
+      complete:
+        "ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN\r\n" +
+        "10 PL DE LA HALLE\r\n" +
+        "01150 SAINT-SORLIN-EN-BUGEY\r\n" +
+        "FRANCE",
+      departement: "01",
+      numero: 10,
+      region: "84",
+      voie: "PLDE LA HALLE",
+    },
+  },
+  78370584100063: {
+    uai: "0922672E",
+    siret: "78370584100063",
+    nom: "SKEMA  BUSINESS SCHOOL",
+    nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
     adresse: {
       academie: "10",
       code_insee: "01386",
