@@ -11,12 +11,14 @@ export const collectionName = "organismes";
 
 export const indexes = () => {
   return [
-    [{ uai: 1 }, { name: "uai", unique: true }],
+    [
+      { uai: 1, siret: 1 },
+      { name: "uai_siret", unique: true },
+    ],
     [
       { nom: "text", nom_tokenized: "text" },
       { name: "nom_tokenized_text", default_language: "french" },
     ],
-    [{ sirets: 1 }, { name: "sirets" }],
   ];
 };
 

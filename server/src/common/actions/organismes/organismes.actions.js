@@ -73,34 +73,17 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
  * @param {*} organismeProps
  * @returns
  */
-export const createOrganisme = async ({
-  uai,
-  sirets = [],
-  siret: siretIn,
-  nom: nomIn,
-  adresse: adresseIn,
-  ...data
-}) => {
-  if (await organismesDb().countDocuments({ uai })) {
-    throw new Error(`Un organisme avec l'UAI ${uai} existe déjà`);
-  }
-
-  let siret = siretIn;
-  if (Array.isArray(sirets) && sirets.length !== 0 && !siretIn) {
-    siret = sirets[0];
-  }
-  if (Array.isArray(sirets) && sirets.length === 0 && siretIn) {
-    sirets[0] = siretIn;
+export const createOrganisme = async ({ uai, siret, nom: nomIn, adresse: adresseIn, ...data }) => {
+  if (await organismesDb().countDocuments({ uai, siret })) {
+    throw new Error(`Un organisme avec l'UAI ${uai} et le siret ${siret} existe déjà`);
   }
 
   // TODO [metier] really used ?
   let metiers = [];
-  if (Array.isArray(sirets) && sirets.length !== 0) {
-    try {
-      metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
-    } catch (error) {
-      console.error(error);
-    }
+  try {
+    metiers = (await getMetiersBySirets([siret]))?.metiers ?? [];
+  } catch (error) {
+    console.error(error);
   }
 
   // Récupération des infos depuis API Entreprise
@@ -115,7 +98,6 @@ export const createOrganisme = async ({
       uai,
       ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
       ...defaultValuesOrganisme(),
-      sirets,
       ...(siret ? { siret } : {}),
       metiers,
       formations,
