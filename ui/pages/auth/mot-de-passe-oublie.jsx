@@ -45,17 +45,17 @@ const ForgottenPasswordPage = () => {
         </Heading>
         <Formik
           initialValues={{
-            username: "",
+            email: "",
           }}
           validationSchema={Yup.object().shape({
-            username: Yup.string().required("Veuillez saisir un identifiant"),
+            email: Yup.string().email("Veuillez saisir un email valide").required("Veuillez saisir un identifiant"),
           })}
           onSubmit={resetPassword}
         >
           {({ status = {} }) => {
             return (
               <Form>
-                <Field name="username">
+                <Field name="email">
                   {({ field, meta }) => {
                     return (
                       <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
