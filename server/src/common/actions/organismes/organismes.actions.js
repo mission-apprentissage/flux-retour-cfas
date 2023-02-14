@@ -78,7 +78,6 @@ export const createOrganisme = async ({ uai, siret, nom: nomIn, adresse: adresse
     throw new Error(`Un organisme avec l'UAI ${uai} et le siret ${siret} existe déjà`);
   }
 
-  // TODO [metier] really used ?
   let metiers = [];
   try {
     metiers = (await getMetiersBySirets([siret]))?.metiers ?? [];
@@ -282,7 +281,6 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  // TODO [metier] really used ?
   let metiers = [];
   if (sirets && Array.isArray(sirets) && !sirets.every((newSiret) => organisme.sirets.includes(newSiret))) {
     try {
