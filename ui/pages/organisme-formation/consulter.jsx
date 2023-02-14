@@ -3,11 +3,11 @@ import Head from "next/head";
 import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
 
 import { Page, Section } from "../../components";
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
-import Link from "../../components/Links/Link";
+import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
+import Link from "@/components/Links/Link";
 
-import OrganismeFormationPagesMenu from "../../modules/organisme-formation/OrganismeFormationPagesMenu";
-import CheckCfaTransmissionContent from "../../modules/organisme-formation/CheckCfaTransmission/CheckCfaTransmissionContent";
+import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
+import CheckCfaTransmissionContent from "@/modules/organisme-formation/CheckCfaTransmission/CheckCfaTransmissionContent";
 
 export default function CommentConsulterEtVerifierLesDonnees() {
   const title = "Comment vérifier les données que vous transmettez ?";

@@ -26,13 +26,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import { _post, _put, _delete } from "../../common/httpClient";
-import useMaintenanceMessages from "../../hooks/useMaintenanceMessages";
+import { _post, _put, _delete } from "@/common/httpClient";
+import useMaintenanceMessages from "@/hooks/useMaintenanceMessages";
 import { ArrowDropRightLine, Trash } from "../../theme/components/icons";
-import Table from "../../components/tables/Table";
-import { Page } from "../../components/Page/Page";
-import withAuth from "../../components/withAuth";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import Table from "@/components/tables/Table";
+import { Page } from "@/components/Page/Page";
+import withAuth from "@/components/withAuth";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
 const ADMIN_MAINTENANCE_ENDPOINT = "/api/v1/admin/maintenanceMessages";
 

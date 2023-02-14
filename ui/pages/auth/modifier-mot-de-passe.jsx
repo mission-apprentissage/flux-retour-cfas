@@ -18,12 +18,12 @@ import * as Yup from "yup";
 import YupPassword from "yup-password";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
-import useAuth from "../../hooks/useAuth";
-import useToken from "../../hooks/useToken";
-import { _get, _post } from "../../common/httpClient";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import useAuth from "@/hooks/useAuth";
+import useToken from "@/hooks/useToken";
+import { _get, _post } from "@/common/httpClient";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { ShowPassword } from "../../theme/components/icons";
-import InformationBlock from "../../modules/auth/inscription/components/InformationBlock";
+import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 
 YupPassword(Yup); // extend yup
 

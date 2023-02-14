@@ -16,8 +16,8 @@ import * as Yup from "yup";
 import { useRouter } from "next/router";
 import NavLink from "next/link";
 
-import { _post } from "../../common/httpClient";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { _post } from "@/common/httpClient";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

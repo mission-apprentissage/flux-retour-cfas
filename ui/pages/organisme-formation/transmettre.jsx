@@ -3,10 +3,10 @@ import React from "react";
 import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
 
 import { Page, Section } from "../../components";
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import OrganismeFormationPagesMenu from "../../modules/organisme-formation/OrganismeFormationPagesMenu";
-import DemandeBranchementErpFormBlock from "../../modules/organisme-formation/DemandeBranchementErp/DemandeBranchementErpFormBlock";
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
+import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
+import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
+import DemandeBranchementErpFormBlock from "@/modules/organisme-formation/DemandeBranchementErp/DemandeBranchementErpFormBlock";
+import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
 
 const CommentTransmettreVosDonneesPage = () => {
   const title = "Comment transmettre les données de votre organisme ?";
