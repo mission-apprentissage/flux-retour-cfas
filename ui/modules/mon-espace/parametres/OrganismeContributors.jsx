@@ -28,11 +28,11 @@ function useOrganismeAcces() {
   ] = useQueries({
     queries: [
       {
-        queryKey: ["organismeContributors", 1],
+        queryKey: ["organismeContributors", organisme._id],
         queryFn: () => _get(`/api/v1/organisme/contributors?organisme_id=${organisme._id}`),
       },
       {
-        queryKey: ["organismeRoles", 2],
+        queryKey: ["organismeRoles", organisme._id],
         queryFn: () => _get(`/api/v1/organisme/roles_list?organisme_id=${organisme._id}`),
       },
     ],
