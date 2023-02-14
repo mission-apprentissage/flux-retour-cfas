@@ -20,7 +20,6 @@ import indicateursExportRouter from "./routes/specific.routes/indicateurs-export
 import dossierApprenantRouter from "./routes/specific.routes/dossiers-apprenants.routes.js";
 import loginRouter from "./routes/specific.routes/old/login.route.js";
 import referentielRouter from "./routes/specific.routes/old/referentiel.route.js";
-import cfasRouter from "./routes/specific.routes/old/cfas.route.js";
 import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
@@ -157,7 +156,6 @@ export default async (services) => {
   app.use("/api/formations", formationRouter(services)); // FRONT
 
   // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
-  app.use("/api/cfas", cfasRouter(services)); // FRONT
   app.use("/api/referentiel", referentielRouter(services)); // FRONT
 
   // The error handler must be before any other error middleware and after all controllers

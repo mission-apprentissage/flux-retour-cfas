@@ -1,6 +1,6 @@
 import qs from "query-string";
 
-import { _delete, _get, _post, _put } from "../httpClient";
+import { _delete, _get, _post } from "../httpClient";
 
 /* Effectifs */
 
@@ -48,11 +48,6 @@ export const deleteReseauCfa = (body) => {
 /* Reseaux */
 export const fetchReseaux = () => {
   return _get("/api/referentiel/networks");
-};
-
-/* CFA Search */
-export const fetchSearchCfas = async (filters) => {
-  return await _post("/api/cfas/search", filters);
 };
 
 /* Utilisateurs */
