@@ -1,23 +1,19 @@
 import { useEffect, useState } from "react";
 
-export default function useServerEvent() {
-  const [messages, setMessages] = useState([]);
-  const [listening, setListening] = useState(false);
+export default function useServerEvents() {
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    if (!listening) {
-      setListening(true);
-      const events = new EventSource(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/server-events`);
-      events.onmessage = (event) => {
-        const parsedData = JSON.parse(event.data);
-        setMessages((messages) => messages.concat(parsedData));
-      };
-    }
-  }, [listening, messages]);
+    const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/server-events`);
+    eventSource.onmessage = (event) => {
+      const parsedData = JSON.parse(event.data);
+      setData(parsedData);
+    };
 
-  return {
-    messages,
-    lastMessage: messages[messages.length - 1],
-    reset: () => setMessages([]),
-  };
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
+  return [data, setData];
 }

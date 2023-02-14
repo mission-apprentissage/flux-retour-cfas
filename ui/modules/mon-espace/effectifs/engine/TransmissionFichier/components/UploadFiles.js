@@ -49,7 +49,7 @@ const UploadFiles = ({ title }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const { documents, onDocumentsChanged } = useDocuments();
-  const { lastMessage, reset: resetServerEvent } = useServerEvents();
+  const [lastMessage, resetServerEvent] = useServerEvents();
 
   const maxFiles = 1;
 

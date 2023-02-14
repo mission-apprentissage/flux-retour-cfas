@@ -39,7 +39,7 @@ const Televersements = () => {
   const setCurrentEffectifsState = useSetRecoilState(effectifsStateAtom);
   const [mapping, setMapping] = useState(null);
   const router = useRouter();
-  const { lastMessage, reset: resetServerEvent } = useServerEvents();
+  const [lastMessage, resetServerEvent] = useServerEvents();
 
   const [availableKeys, setAvailableKeys] = useState({
     in: [{ label: "", value: "" }],
