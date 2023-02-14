@@ -2,13 +2,15 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Box, HStack, Button, Heading, Input, ListItem, Text, List, useToast, Spinner, Link } from "@chakra-ui/react";
 import { useDropzone } from "react-dropzone";
 import { useRecoilValue } from "recoil";
-
 import queryString from "query-string";
+
+import { _delete, _postFile } from "@/common/httpClient";
+import { hasContextAccessTo } from "@/common/utils/rolesUtils";
+import { Bin, DownloadLine, File } from "@/theme/components/icons";
+import { organismeAtom } from "@/hooks/organismeAtoms";
+import useServerEvents from "@/hooks/useServerEvents";
+
 import { useDocuments } from "../hooks/useDocuments";
-import { _delete, _postFile } from "../../../../../../common/httpClient";
-import { hasContextAccessTo } from "../../../../../../common/utils/rolesUtils";
-import { Bin, DownloadLine, File } from "../../../../../../theme/components/icons";
-import { organismeAtom } from "../../../../../../hooks/organismeAtoms";
 
 const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
 
@@ -47,6 +49,7 @@ const UploadFiles = ({ title }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const { documents, onDocumentsChanged } = useDocuments();
+  const [lastMessage, resetServerEvent] = useServerEvents();
 
   const maxFiles = 1;
 
@@ -94,6 +97,7 @@ const UploadFiles = ({ title }) => {
   );
 
   const onDeleteClicked = async (file) => {
+    resetServerEvent();
     if (hasContextAccessTo(organisme, "organisme/page_effectifs/supprimer_un_document")) {
       // eslint-disable-next-line no-restricted-globals
       const remove = confirm("Voulez-vous vraiment supprimer ce document ?");
@@ -146,7 +150,10 @@ const UploadFiles = ({ title }) => {
           {uploadError && <Text color="error">{uploadError}</Text>}
           <>
             {isSubmitting ? (
-              <Spinner />
+              <Box textAlign="center" flex="1" flexDirection="column">
+                <Spinner />
+                <Text mt={2}>{lastMessage}</Text>{" "}
+              </Box>
             ) : (
               <List>
                 {documents?.unconfirmed?.map((file) => {
@@ -175,7 +182,10 @@ const UploadFiles = ({ title }) => {
       ) : (
         <Box {...getRootProps({ style })} mb={8} minH="200px">
           {isSubmitting ? (
-            <Spinner />
+            <Box textAlign="center" flex="1" flexDirection="column">
+              <Spinner />
+              <Text mt={2}>{lastMessage}</Text>
+            </Box>
           ) : (
             <>
               <Input {...getInputProps()} />

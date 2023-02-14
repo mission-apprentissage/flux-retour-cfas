@@ -25,6 +25,7 @@ import organismesRouter from "./routes/specific.routes/organismes.routes.js";
 import formationRouter from "./routes/specific.routes/old/formations.route.js";
 import indicateursNationalRouter from "./routes/specific.routes/indicateurs-national.routes.js";
 import indicateursRouter from "./routes/specific.routes/indicateurs.routes.js";
+import serverEvents from "./routes/specific.routes/server-events.routes.js";
 
 import emails from "./routes/emails.routes.js";
 import session from "./routes/session.routes.js";
@@ -94,6 +95,7 @@ export default async (services) => {
   app.use("/api/v1/organisme", checkJwtToken, organisme(services));
   app.use("/api/v1/effectif", checkJwtToken, effectif());
   app.use("/api/v1/upload", checkJwtToken, upload(services));
+  app.use("/api/v1/server-events", checkJwtToken, serverEvents());
 
   // private admin access
   app.use(

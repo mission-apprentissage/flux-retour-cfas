@@ -33,6 +33,7 @@ import {
   findFormationById,
 } from "../../../../common/actions/formations.actions.js";
 import { setOrganismeFirstDateTransmissionIfNeeded } from "../../../../common/actions/organismes/organismes.actions.js";
+import { sendServerEventsForUser } from "../server-events.routes.js";
 
 const mappingModel = {
   annee_scolaire: "annee_scolaire",
@@ -166,6 +167,8 @@ export default ({ clamav }) => {
     "/",
     permissionsOrganismeMiddleware(["organisme/page_effectifs/televersement_document"]),
     tryCatch(async (req, res) => {
+      sendServerEventsForUser(req.user._id, "Fichier en cours de téléversement...");
+
       let { organisme_id } = await Joi.object({
         organisme_id: Joi.string().required(),
       })
@@ -192,6 +195,8 @@ export default ({ clamav }) => {
         );
 
         if (part.byteCount > 10485760) {
+          sendServerEventsForUser(req.user._id, "Fichier trop volumineux");
+
           throw new Error("Le fichier est trop volumineux");
         }
 
@@ -214,6 +219,7 @@ export default ({ clamav }) => {
           taille_fichier: test ? 0 : part.byteCount,
           userEmail: req.user.email,
         });
+        sendServerEventsForUser(req.user._id, "Fichier téléversé avec succès");
       });
     })
   );
@@ -309,6 +315,8 @@ export default ({ clamav }) => {
         numberOfNotRequiredFieldsToMap: 0,
         whichOneIsTheSmallest: "out",
       };
+
+      sendServerEventsForUser(req.user._id, "Fichier en cours d'analyse...");
 
       // eslint-disable-next-line no-unused-vars
       const { headers: rawHeaders, rawFileJson } = await getUnconfirmedDocumentContent(organisme_id);
@@ -651,6 +659,10 @@ export default ({ clamav }) => {
       const canBeImportEffectifs = [];
       const canBeImportEffectifsIds = [];
       for (let [index, data] of convertedData.entries()) {
+        sendServerEventsForUser(
+          req.user._id,
+          `Vérification en cours: ${index + 1} sur ${convertedData.length} effectifs`
+        );
         if (typeCodeDiplome === "RNCP" && data.formation?.rncp) {
           const { cfd } = (await getFormationWithRNCP(data.formation?.rncp, { cfd: 1 })) || {};
           data.formation.cfd = cfd ?? "Erreur";
@@ -892,7 +904,14 @@ export default ({ clamav }) => {
       const [unconfirmedDocument] = uploads.documents.filter((d) => !d.confirm);
       const effectifsDb = await findEffectifs(organisme_id);
 
-      for (const { toUpdate, validation_errors, ...effectif } of uploads.last_snapshot_effectifs) {
+      for (let index = 0; index < uploads.last_snapshot_effectifs.length; index++) {
+        const { toUpdate, validation_errors, ...effectif } = uploads.last_snapshot_effectifs[index];
+
+        sendServerEventsForUser(
+          req.user._id,
+          `Import en cours: ${index + 1} sur ${uploads.last_snapshot_effectifs.length} effectifs`
+        );
+
         let errorsToKeep = validation_errors.filter(({ willNotBeModify }) => !willNotBeModify);
 
         for (const [key, validation_error] of errorsToKeep.entries()) {
