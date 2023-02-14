@@ -20,7 +20,6 @@ const PageEffectifsDeMonOrganisme = () => {
   const { organisme, isloaded } = useOrganisme(router.query.id);
   const { title } = PAGES.sesEffectifs(organisme?._id);
 
-  console.log("router.query.id", { id: router.query.id, organisme });
   return (
     <Page>
       <Head>
