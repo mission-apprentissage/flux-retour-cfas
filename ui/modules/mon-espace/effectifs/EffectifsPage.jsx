@@ -71,8 +71,6 @@ const EffectifsPage = ({ isMine }) => {
     } else if (organisme.mode_de_transmission === "API") {
       if (organisme.erps?.length === 0 && !organisme.first_transmission_date) {
         return <TransmissionAPI />;
-      } else if (organisme.first_transmission_date) {
-        return <Televersements organisme={organisme} />;
       } else {
         return <Effectifs isMine={isMine} organismesEffectifs={organismesEffectifs} organisme={organisme} />;
       }
