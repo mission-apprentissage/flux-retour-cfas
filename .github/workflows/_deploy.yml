@@ -37,7 +37,7 @@ jobs:
           persist-credentials: false
 
       - name: Install SSH key
-        uses: shimataro/ssh-key-action@v3
+        uses: shimataro/ssh-key-action@v2
         with:
           name: github_actions
           key: ${{ secrets.SSH_PRIVATE_KEY }}
