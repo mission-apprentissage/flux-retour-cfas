@@ -33,7 +33,6 @@ describe("Routes Organismes", () => {
     // const expected = pick(created, [
     //   "uai",
     //   "siret",
-    //   "sirets",
     //   "nom",
     //   "nature",
     //   "nature_validity_warning",

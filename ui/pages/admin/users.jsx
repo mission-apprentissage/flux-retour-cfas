@@ -325,7 +325,7 @@ const UserLine = ({ user, roles, afterSubmit }) => {
                             UAI : <b>{permission.organisme?.uai}</b>
                           </Text>
                           <Text fontSize="xs" color="gray.600">
-                            SIRET : <b>{permission.organisme?.sirets?.join(" ")}</b>
+                            SIRET : <b>{permission.organisme?.siret}</b>
                           </Text>
                         </Td>
                         <Td>

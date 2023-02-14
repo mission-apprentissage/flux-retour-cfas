@@ -67,7 +67,7 @@ export const getAllPermissions = async () =>
             _id: "$organisme._id",
             nom: "$organisme.nom",
             uai: "$organisme.uai",
-            sirets: "$organisme.sirets",
+            siret: "$organisme.siret",
           },
         },
       },

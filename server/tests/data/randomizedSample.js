@@ -35,9 +35,8 @@ const getRandomDateRuptureContrat = () => faker.date.between(subMonths(new Date(
 const getRandomDateNaissance = () => faker.date.birthdate({ min: 18, max: 25, mode: "age" });
 
 export const createRandomOrganisme = (params = {}) => {
-  const { siret, ...etablissement } = getRandomEtablissement(params?.siret);
+  const { ...etablissement } = getRandomEtablissement(params?.siret);
   return {
-    sirets: [siret],
     ...etablissement,
     ...params,
   };

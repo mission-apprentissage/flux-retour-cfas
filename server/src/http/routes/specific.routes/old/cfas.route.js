@@ -33,7 +33,7 @@ export default ({ cfas }) => {
       const omittedData = allData.map((item) =>
         pick(item, [
           "uai",
-          "sirets",
+          "siret",
           "nom",
           "nature",
           "nature_validity_warning",
@@ -131,7 +131,7 @@ export default ({ cfas }) => {
       matchStage.$or = [
         { $text: { $search: searchTerm } },
         { uai: new RegExp(escapeRegExp(searchTerm), "g") },
-        { sirets: new RegExp(escapeRegExp(searchTerm), "g") },
+        { siret: new RegExp(escapeRegExp(searchTerm), "g") },
       ];
     }
     // if other criteria have been provided, find the list of uai matching those criteria in the DossierApprenant collection
@@ -154,7 +154,7 @@ export default ({ cfas }) => {
     return found.map((cfa) => {
       return {
         uai: cfa.uai,
-        sirets: cfa.sirets,
+        siret: cfa.siret,
         nom: cfa.nom,
         nature: cfa.nature,
         departement: getDepartementCodeFromUai(cfa.uai),

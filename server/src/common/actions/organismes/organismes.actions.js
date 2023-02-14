@@ -175,14 +175,13 @@ export const structureOrganismeFromDossierApprenant = async (dossierApprenant) =
   const { uai_etablissement, siret_etablissement, nom_etablissement } = dossierApprenant;
 
   const adresseForOrganisme = siret_etablissement
-    ? await buildAdresseForOrganisme({ uai: uai_etablissement, sirets: [siret_etablissement] })
+    ? await buildAdresseForOrganisme({ uai: uai_etablissement, siret: siret_etablissement })
     : {};
 
   return {
     ...defaultValuesOrganisme(),
     uai: uai_etablissement,
     siret: siret_etablissement,
-    sirets: siret_etablissement ? [siret_etablissement] : [],
     ...adresseForOrganisme,
     ...(nom_etablissement
       ? { nom: nom_etablissement.trim(), nom_tokenized: buildTokenizedString(nom_etablissement.trim(), 4) }
@@ -198,9 +197,7 @@ export const structureOrganismeFromDossierApprenant = async (dossierApprenant) =
  * @returns
  */
 export const findOrganismesBySiret = async (siret, projection = {}) => {
-  return await organismesDb()
-    .find({ sirets: { $in: [siret] } }, { projection })
-    .toArray();
+  return await organismesDb().find({ siret }, { projection }).toArray();
 };
 
 /**
@@ -272,7 +269,7 @@ export const findOrganismesByQuery = async (query, projection = {}) => {
  * @param {*} id
  * @returns
  */
-export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
+export const updateOrganisme = async (id, { nom, siret, ...data }) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
@@ -282,12 +279,10 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
   }
 
   let metiers = [];
-  if (sirets && Array.isArray(sirets) && !sirets.every((newSiret) => organisme.sirets.includes(newSiret))) {
-    try {
-      metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
-    } catch (error) {
-      console.error(error);
-    }
+  try {
+    metiers = (await getMetiersBySirets([siret]))?.metiers ?? [];
+  } catch (error) {
+    console.error(error);
   }
 
   const updated = await organismesDb().findOneAndUpdate(
@@ -491,20 +486,16 @@ export const setOrganismeFirstDateTransmissionIfNeeded = async (id) => {
 /**
  * Méthode de récupération de l'adresse pour un organisme via ses props
  * Par défaut l'adresse est construite depuis l'UAI
- * Si l'organisme a un seul siret et qu'il est valide alors on récupère l'adresse depuis l'API Entreprise
- // TODO Voir quoi faire pour les organismes multi sirets
+ * Si l'organisme a un siret valide alors on récupère l'adresse depuis l'API Entreprise
  * @param {*} cfaProps
  */
-export const buildAdresseForOrganisme = async ({ uai, sirets }) => {
+export const buildAdresseForOrganisme = async ({ uai, siret }) => {
   let adresseForOrganisme = buildAdresseFromUai(uai);
 
-  // Si un seul siret et qu'il est valide on récupère l'adresse via l'API Entreprise
-  if (sirets.length === 1) {
-    const siretForOrganisme = sirets[0];
-    const validSiret = siretSchema().validate(siretForOrganisme);
-    if (!validSiret.error) {
-      adresseForOrganisme = await buildAdresseFromApiEntreprise(siretForOrganisme);
-    }
+  // Si siret est valide on récupère l'adresse via l'API Entreprise
+  const validSiret = siretSchema().validate(siret);
+  if (!validSiret.error) {
+    adresseForOrganisme = await buildAdresseFromApiEntreprise(siret);
   }
 
   return adresseForOrganisme;

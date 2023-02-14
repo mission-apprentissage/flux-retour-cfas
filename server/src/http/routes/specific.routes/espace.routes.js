@@ -21,7 +21,6 @@ export default () => {
         ferme: 1,
         nature: 1,
         adresse: 1,
-        sirets: 1,
         siret: 1,
         uai: 1,
         first_transmission_date: 1,

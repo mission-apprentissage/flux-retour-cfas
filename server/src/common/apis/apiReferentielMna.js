@@ -21,22 +21,6 @@ export const fetchOrganismes = async (options = {}) => {
   return data;
 };
 
-export const fetchOrganismesContactsFromSirets = async (sirets, itemsPerPage = "10", champs = "contacts,uai,siret") => {
-  const url = `${API_ENDPOINT}/organismes`;
-  try {
-    const { data } = await axios.post(url, {
-      sirets: sirets,
-      champs: champs,
-      items_par_page: itemsPerPage,
-    });
-    return data;
-  } catch (err) {
-    const errorMessage = err.response?.data || err.code;
-    logger.error("API REFERENTIEL fetchOrganismesContactsFromSirets something went wrong:", errorMessage);
-    return null;
-  }
-};
-
 export const fetchOrganismeWithSiret = async (siret) => {
   const url = `${API_ENDPOINT}/organismes/${siret}`;
   try {

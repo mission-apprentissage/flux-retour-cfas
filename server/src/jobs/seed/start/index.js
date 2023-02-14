@@ -63,7 +63,6 @@ export const seedSampleOrganismes = async () => {
   if (!organismeA) {
     await createOrganisme({
       uai: "0142321X",
-      sirets: ["44492238900010"],
       siret: "44492238900010",
       reseaux: ["CCI"],
       nature: "responsable_formateur",
@@ -76,7 +75,6 @@ export const seedSampleOrganismes = async () => {
   if (!organismeB) {
     await createOrganisme({
       uai: "0611309S",
-      sirets: ["44492238900044"],
       siret: "44492238900044",
       reseaux: ["CCI"],
       erps: ["GESTI"],
@@ -90,7 +88,6 @@ export const seedSampleOrganismes = async () => {
   if (!organismeC) {
     await createOrganisme({
       uai: "0010856A",
-      sirets: ["77931004400028"],
       siret: "77931004400028",
       reseaux: ["UIMM"],
       erps: ["YMAG"],
@@ -103,7 +100,6 @@ export const seedSampleOrganismes = async () => {
   if (!organismeZ) {
     await createOrganisme({
       uai: "0261098C",
-      sirets: ["34497770700027"],
       siret: "34497770700027",
       reseaux: ["MFR"],
       erps: ["GESTI"],
@@ -132,7 +128,6 @@ export const seedSampleOrganismes = async () => {
   if (!organismeE) {
     await createOrganisme({
       uai: "0312755B",
-      sirets: ["49917930700024"],
       siret: "49917930700024",
       nature: "responsable_formateur",
       nom: "MIDISUP",

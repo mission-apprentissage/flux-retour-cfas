@@ -44,7 +44,7 @@ describe("Effectifs Route", () => {
       // Création de son organisme
       await createOrganisme({
         uai: "0142321X",
-        sirets: ["44492238900010"],
+        siret: "44492238900010",
         adresse: {
           departement: "14",
           region: "28",
@@ -58,7 +58,7 @@ describe("Effectifs Route", () => {
 
       const otherOrganisme = await createOrganisme({
         uai: "0142322X",
-        sirets: ["44492238900010"],
+        siret: "44492238900010",
         adresse: {
           departement: "14",
           region: "28",
@@ -104,7 +104,7 @@ describe("Effectifs Route", () => {
       // Création de son organisme
       const createdOrganisme = await createOrganisme({
         uai: "0142321X",
-        sirets: ["44492238900010"],
+        siret: "44492238900010",
         adresse: {
           departement: "14",
           region: "28",

@@ -32,7 +32,6 @@ export default () => {
         pick(item, [
           "uai",
           "siret",
-          "sirets",
           "nom",
           "nature",
           "nature_validity_warning",
