@@ -88,21 +88,7 @@ describe("Dossiers Apprenants Route", () => {
         uai: randomOrganisme.uai,
         sirets: randomOrganisme.sirets,
         nom: randomOrganisme.nom,
-        adresse: {
-          departement: "01",
-          region: "84",
-          academie: "10",
-          numero: 10,
-          voie: "PLDE LA HALLE",
-          code_postal: "01150",
-          code_insee: "01386",
-          commune: "SAINT-SORLIN-EN-BUGEY",
-          complete:
-            "ASSOC FAMIL GEST DU L.E.A.P. ST SORLIN\r\n" +
-            "10 PL DE LA HALLE\r\n" +
-            "01150 SAINT-SORLIN-EN-BUGEY\r\n" +
-            "FRANCE",
-        },
+        adresse: randomOrganisme.adresse,
         nature: randomOrganisme.nature,
       });
 

@@ -218,7 +218,7 @@ describe("Test des actions Organismes", () => {
       const uai = "0611175W";
       const siret = "41461021200014";
 
-      const randomOrganisme = createRandomOrganisme({ uai, siret, sirets: [siret] });
+      const randomOrganisme = createRandomOrganisme({ uai, siret });
       const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
       const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret, nom: randomOrganisme.nom });
 
