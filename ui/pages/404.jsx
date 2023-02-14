@@ -1,10 +1,10 @@
 import { Box, Center, Container, Heading, Link, Stack, Text } from "@chakra-ui/react";
 import React from "react";
-
-import { Page } from "../components";
-import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
-import { NotFound } from "../theme/components/icons";
 import Head from "next/head";
+
+import Page from "@/components/Page/Page";
+import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
+import { NotFound } from "@/theme/components/icons";
 
 const Page404 = () => {
   const title = "404";

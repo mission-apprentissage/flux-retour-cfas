@@ -1,9 +1,12 @@
 import React from "react";
 import Head from "next/head";
 import { Box, Heading, HStack, Text, UnorderedList, ListItem } from "@chakra-ui/react";
-import { Page, Section, Tuile } from "../../components";
-import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
-import { DataVisualisation, Notification, TechnicalError } from "../../theme/components/icons";
+
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import Tuile from "@/components/Tuile/Tuile";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import { DataVisualisation, Notification, TechnicalError } from "@/theme/components/icons";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Link from "@/components/Links/Link";
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";

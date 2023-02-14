@@ -2,7 +2,7 @@ import { Box, Table as ChakraTable, Text, Th, Thead, Tr } from "@chakra-ui/react
 import PropTypes from "prop-types";
 import React from "react";
 
-import { TableSkeleton } from "..";
+import TableSkeleton from "../skeletons/TableSkeleton";
 
 const Table = ({ headers, loading, error, children }) => {
   if (loading) {

@@ -3,8 +3,8 @@ import { Box, Container } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import { Breadcrumb, PAGES } from "@/components/Breadcrumb/Breadcrumb";
-import { Page } from "@/components/Page/Page";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { hasContextAccessTo } from "@/common/utils/rolesUtils";

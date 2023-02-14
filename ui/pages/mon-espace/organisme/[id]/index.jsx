@@ -3,8 +3,8 @@ import { Box, Container, Stack, Heading } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import { Breadcrumb, PAGES } from "@/components/Breadcrumb/Breadcrumb";
-import { Page } from "@/components/Page/Page";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useOrganisme } from "@/hooks/useOrganisme";
@@ -15,7 +15,7 @@ import RibbonsUnauthorizedAccessToOrganisme from "@/components/Ribbons/RibbonsUn
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const PageMonOrganisme = () => {
+const Organisme = () => {
   const router = useRouter();
   const { organisme } = useOrganisme(router.query.id);
 
@@ -50,4 +50,4 @@ const PageMonOrganisme = () => {
   );
 };
 
-export default withAuth(PageMonOrganisme);
+export default withAuth(Organisme);

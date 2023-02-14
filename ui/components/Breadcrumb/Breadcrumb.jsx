@@ -46,4 +46,4 @@ const Breadcrumb = ({ pages }) => {
   );
 };
 
-export { Breadcrumb };
+export default Breadcrumb;

@@ -1,11 +1,12 @@
 import React from "react";
 import Head from "next/head";
 import { Box, Container, Heading, Text } from "@chakra-ui/react";
-import { Page, Section } from "../../components";
-import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
+
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 import Link from "@/components/Links/Link";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-
 import { BaseAccordionGroup } from "@/components/BaseAccordionGroup/BaseAccordionGroup";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 

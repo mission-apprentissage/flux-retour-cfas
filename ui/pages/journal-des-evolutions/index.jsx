@@ -3,8 +3,8 @@ import { Badge, Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-
 import { format, formatISO } from "date-fns";
 import fr from "date-fns/locale/fr";
 
-import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
-import { Page } from "@/components/Page/Page";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import Sommaire from "@/components/Sommaire/Sommaire";
 import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import { getUniquesMonthAndYearFromDatesList } from "@/common/utils/dateUtils";

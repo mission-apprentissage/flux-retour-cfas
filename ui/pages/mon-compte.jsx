@@ -1,11 +1,11 @@
 import React from "react";
 import { Box, Flex, Heading } from "@chakra-ui/react";
-import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
-import { Page } from "../components/Page/Page";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import Head from "next/head";
-import withAuth from "../components/withAuth";
-import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
-import ProfileInformation from "../components/Profile/ProfileInformation";
+import withAuth from "@/components/withAuth";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import ProfileInformation from "@/components/Profile/ProfileInformation";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

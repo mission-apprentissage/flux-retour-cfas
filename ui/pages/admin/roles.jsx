@@ -15,8 +15,8 @@ import {
   Input,
   Stack,
 } from "@chakra-ui/react";
-import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
-import { Page } from "@/components/Page/Page";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import Head from "next/head";
 import withAuth from "@/components/withAuth";
 

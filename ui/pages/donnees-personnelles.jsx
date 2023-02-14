@@ -1,9 +1,11 @@
 import React from "react";
 import Head from "next/head";
-import { Page, Section } from "../components";
-import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
-import DonneesPersonnelles from "../components/legal/DonneesPersonnelles";
-import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
+
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import DonneesPersonnelles from "@/components/legal/DonneesPersonnelles";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
 export const getServerSideProps = async (context) => {
   return { props: { ...(await getAuthServerSideProps(context)) } };

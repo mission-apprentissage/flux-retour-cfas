@@ -8,8 +8,8 @@ import { RecoilRoot } from "recoil";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Fonts from "../theme/Fonts";
 import theme from "../theme/index";
-import UserWrapper from "../components/UserWrapper/UserWrapper";
-import AlertMessage from "../components/AlertMessage/AlertMessage";
+import UserWrapper from "@/components/UserWrapper/UserWrapper";
+import AlertMessage from "@/components/AlertMessage/AlertMessage";
 
 const queryClient = new QueryClient();
 

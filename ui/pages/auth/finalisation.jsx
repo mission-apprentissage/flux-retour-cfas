@@ -22,7 +22,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import uniq from "lodash.uniq";
 
-import { Page } from "@/components/Page/Page";
+import Page from "@/components/Page/Page";
 
 import useToken from "@/hooks/useToken";
 import useAuth from "@/hooks/useAuth";

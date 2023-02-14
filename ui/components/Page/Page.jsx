@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Container } from "@chakra-ui/react";
+
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavigationMenu from "./components/NavigationMenu";
@@ -9,7 +10,7 @@ import { useEspace } from "../../hooks/useEspace";
 import { Interrogation } from "../../theme/components/icons";
 import Link from "../Links/Link";
 
-export function Page({ children, ...rest }) {
+function Page({ children, ...rest }) {
   let { isloaded, isReloaded, isMonOrganismePages, isOrganismePages, isMesOrganismesPages } = useEspace();
 
   const espaceContextisLoading =
@@ -40,3 +41,5 @@ export function Page({ children, ...rest }) {
     </Container>
   );
 }
+
+export default Page;

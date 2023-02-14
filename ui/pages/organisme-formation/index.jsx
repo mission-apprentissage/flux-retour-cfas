@@ -5,10 +5,11 @@ import { Box, Heading, HStack, Link, Text } from "@chakra-ui/react";
 import { ERPS } from "@/common/constants/erps";
 import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
-
-import { LinkCard, Page, Section } from "../../components";
-import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
-import { Checkbox } from "../../theme/components/icons";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
+import LinkCard from "@/components/LinkCard/LinkCard";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import { Checkbox } from "@/theme/components/icons";
 import AcquisitionCfaBarGraph from "@/modules/organisme-formation/AcquisitionCfaBarGraph";
 
 export default function OrganismeFormation() {

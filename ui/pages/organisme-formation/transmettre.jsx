@@ -2,11 +2,12 @@ import Head from "next/head";
 import React from "react";
 import { Box, Divider, Heading, HStack, Text } from "@chakra-ui/react";
 
-import { Page, Section } from "../../components";
+import Page from "@/components/Page/Page";
+import Section from "@/components/Section/Section";
 import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 import OrganismeFormationPagesMenu from "@/modules/organisme-formation/OrganismeFormationPagesMenu";
 import DemandeBranchementErpFormBlock from "@/modules/organisme-formation/DemandeBranchementErp/DemandeBranchementErpFormBlock";
-import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 const CommentTransmettreVosDonneesPage = () => {
   const title = "Comment transmettre les données de votre organisme ?";
