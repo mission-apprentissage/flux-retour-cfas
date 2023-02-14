@@ -7,13 +7,12 @@ export class EffectifsInscritsSansContrats extends Indicator {
   /**
    * Pipeline de récupération des inscrits sans contrats à une date donnée
    * @param {*} searchDate
-   * @param {*} filters
    * @param {*} options
    * @returns
    */
-  getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
+  getAtDateAggregationPipeline(searchDate, options = {}) {
     return [
-      { $match: { ...filters, "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
+      { $match: { "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.inscrit } },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       {
         $match: {
@@ -25,14 +24,12 @@ export class EffectifsInscritsSansContrats extends Indicator {
   }
 
   /**
-   * Function de récupération de la liste des inscrits sans contrats formatée pour un export à une date donnée
-   * @param {*} searchDate
-   * @param {*} filters
+   * Fonction de formattage d'une ligne d'un inscrit sans constrats
+   * @param {*} item
    * @returns
    */
-  async getExportFormattedListAtDate(searchDate, filters = {}) {
-    const projection = this.exportProjection;
-    return (await this.getListAtDate(searchDate, filters, { projection })).map((item) => ({
+  async formatRow(item) {
+    return {
       ...item,
       statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
       date_inscription: item.statut_apprenant_at_date.date_statut, // Specific for inscrits sans contrats indicateur
@@ -49,6 +46,6 @@ export class EffectifsInscritsSansContrats extends Indicator {
         ).getTime() > Date.now()
           ? `Moins de ${SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS} mois`
           : `Plus de ${SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS} mois`,
-    }));
+    };
   }
 }

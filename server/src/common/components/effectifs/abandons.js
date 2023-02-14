@@ -5,27 +5,24 @@ export class EffectifsAbandons extends Indicator {
   /**
    * Pipeline de récupération des abandons à une date donnée
    * @param {*} searchDate
-   * @param {*} filters
    * @param {*} options
    * @returns
    */
-  getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
+  getAtDateAggregationPipeline(searchDate, options = {}) {
     return [
-      { $match: { ...filters, "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.abandon } },
+      { $match: { "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.abandon } },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.abandon } },
     ];
   }
 
   /**
-   * Function de récupération de la liste des abandons formatée pour un export à une date donnée
-   * @param {*} searchDate
-   * @param {*} filters
+   * Fonction de formattage d'une ligne d'un abandon
+   * @param {*} item
    * @returns
    */
-  async getExportFormattedListAtDate(searchDate, filters = {}) {
-    const projection = this.exportProjection;
-    return (await this.getListAtDate(searchDate, filters, { projection })).map((item) => ({
+  async formatRow(item) {
+    return {
       ...item,
       statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
       date_abandon: item.statut_apprenant_at_date.date_statut,
@@ -35,6 +32,6 @@ export class EffectifsAbandons extends Indicator {
           statut: getStatutApprenantNameFromCode(item.valeur_statut),
         }))
       ),
-    }));
+    };
   }
 }

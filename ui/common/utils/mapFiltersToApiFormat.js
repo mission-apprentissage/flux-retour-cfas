@@ -11,15 +11,3 @@ export const mapFiltersToApiFormat = (filters) => {
     etablissement_reseaux: filters.reseau?.nom ?? null,
   });
 };
-
-/**
- * TODO Refacto ? Placer ailleurs ?
- * @param {*} filters
- * @returns
- */
-export const mapSimpleFiltersToApiFormat = (filtersValues) => {
-  return {
-    date: filtersValues?.date.toISOString(),
-    ...(filtersValues?.organismeId ? { organisme_id: filtersValues.organismeId } : {}),
-  };
-};

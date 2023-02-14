@@ -7,16 +7,13 @@ export class EffectifsRupturants extends Indicator {
   /**
    * Pipeline de récupération des rupturants à une date donnée
    * @param {*} searchDate
-   * @param {*} filters
    * @param {*} options
    * @returns
    */
-  getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
+  getAtDateAggregationPipeline(searchDate, options = {}) {
     return [
-      // Filtrage sur les filtres passés en paramètres
       {
         $match: {
-          ...filters,
           "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.inscrit,
           "apprenant.historique_statut.1": { $exists: true },
         },
@@ -36,14 +33,12 @@ export class EffectifsRupturants extends Indicator {
   }
 
   /**
-   * Function de récupération de la liste des rupturants formatée pour un export à une date donnée
-   * @param {*} searchDate
-   * @param {*} filters
+   * Fonction de formattage d'une ligne d'un rupturant
+   * @param {*} item
    * @returns
    */
-  async getExportFormattedListAtDate(searchDate, filters = {}) {
-    const projection = this.exportProjection;
-    return (await this.getListAtDate(searchDate, filters, { projection })).map((item) => ({
+  async formatRow(item) {
+    return {
       ...item,
       statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
       historique_statut_apprenant: JSON.stringify(
@@ -57,6 +52,6 @@ export class EffectifsRupturants extends Indicator {
         Date.now()
           ? `Moins de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`
           : `Plus de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`,
-    }));
+    };
   }
 }

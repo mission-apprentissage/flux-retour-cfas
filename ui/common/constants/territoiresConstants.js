@@ -1,3 +1,8 @@
+// données à synchroniser avec /server/src/common/constants/territoiresConstants.js
+// en attendant un import partagé
+
+import { sortAlphabeticallyBy } from "../utils/sortAlphabetically";
+
 /**
  * Liste des régions du territoire national
  * TODO : Rationaliser la liste des régions (point transverse tech ?)
@@ -97,6 +102,10 @@ export const REGIONS = [
     code: "00",
   },
 ];
+export const REGIONS_BY_ID = REGIONS.reduce((acc, region) => {
+  acc[region.code] = region;
+  return acc;
+}, {});
 
 export const DEPARTEMENTS = [
   {
@@ -1512,6 +1521,10 @@ export const DEPARTEMENTS = [
     },
   },
 ];
+export const DEPARTEMENTS_BY_ID = DEPARTEMENTS.reduce((acc, departement) => {
+  acc[departement.code] = departement;
+  return acc;
+}, {});
 
 /**
  * TODO Rationaliser / construire le référentiel des académies
@@ -1550,3 +1563,21 @@ export const ACADEMIES = {
   77: { nom: "Saint-Barthélemy", code: 77 },
   78: { nom: "Saint-Martin", code: 78 },
 };
+
+export const ACADEMIES_BY_ID = Object.values(ACADEMIES).reduce((acc, academie) => {
+  acc[academie.code] = academie;
+  return acc;
+});
+
+export const TERRITOIRE_TYPE = {
+  REGION: "region",
+  DEPARTEMENT: "departement",
+};
+
+export const REGIONS_SORTED = sortAlphabeticallyBy("nom", REGIONS).map((region) => {
+  return { ...region, type: TERRITOIRE_TYPE.REGION };
+});
+
+export const DEPARTEMENTS_SORTED = sortAlphabeticallyBy("nom", DEPARTEMENTS).map((departement) => {
+  return { ...departement, type: TERRITOIRE_TYPE.DEPARTEMENT };
+});

@@ -1,7 +1,6 @@
 import express from "express";
 import tryCatch from "../../../middlewares/tryCatchMiddleware.js";
 import { RESEAUX_CFAS } from "../../../../common/constants/networksConstants.js";
-import { REGIONS, DEPARTEMENTS } from "../../../../common/constants/territoiresConstants.js";
 import { ORGANISMES_APPARTENANCE } from "../../../../common/constants/usersConstants.js";
 
 export default () => {
@@ -12,20 +11,6 @@ export default () => {
     tryCatch(async (req, res) => {
       const networks = Object.keys(RESEAUX_CFAS).map((id) => ({ id, nom: RESEAUX_CFAS[id].nomReseau }));
       return res.json(networks);
-    })
-  );
-
-  router.get(
-    "/regions",
-    tryCatch(async (req, res) => {
-      return res.json(REGIONS);
-    })
-  );
-
-  router.get(
-    "/departements",
-    tryCatch(async (req, res) => {
-      return res.json(DEPARTEMENTS);
     })
   );
 

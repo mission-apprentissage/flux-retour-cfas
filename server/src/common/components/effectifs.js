@@ -3,58 +3,72 @@ import { EffectifsAbandons } from "./effectifs/abandons.js";
 import { EffectifsInscritsSansContrats } from "./effectifs/inscrits-sans-contrats.js";
 import { EffectifsRupturants } from "./effectifs/rupturants.js";
 import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
-// import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
-// import { asyncForEach } from "../utils/asyncUtils.js";
-// import { EFFECTIF_INDICATOR_NAMES } from "../constants/dossierApprenantConstants.js";
+import { buildMongoPipelineFilterStages, organismeLookup } from "./filters.js";
+import { mergeObjectsBy } from "../utils/mergeObjectsBy.js";
+import { DEPARTEMENTS_BY_ID } from "../constants/territoiresConstants.js";
 
 export default () => {
-  const apprentis = new EffectifsApprentis();
-  const abandons = new EffectifsAbandons();
-  const inscritsSansContrats = new EffectifsInscritsSansContrats();
-  const rupturants = new EffectifsRupturants();
+  const apprentisIndicator = new EffectifsApprentis();
+  const abandonsIndicator = new EffectifsAbandons();
+  const inscritsSansContratsIndicator = new EffectifsInscritsSansContrats();
+  const rupturantsIndicator = new EffectifsRupturants();
+
+  // FIXME peut-être à supprimer pour conserver getEffectifsCountAtDate
+  async function getIndicateurs(filters) {
+    const filterStages = buildMongoPipelineFilterStages(filters);
+    const [apprentis, inscritsSansContrat, rupturants, abandons] = await Promise.all([
+      apprentisIndicator.getCountAtDate(filters.date, filterStages),
+      inscritsSansContratsIndicator.getCountAtDate(filters.date, filterStages),
+      rupturantsIndicator.getCountAtDate(filters.date, filterStages),
+      abandonsIndicator.getCountAtDate(filters.date, filterStages),
+    ]);
+    return {
+      date: filters.date,
+      apprentis,
+      inscritsSansContrat,
+      rupturants,
+      abandons,
+    };
+  }
 
   /**
-   * TODO : A réintégrer lors de la réintégration des filtres manquants
    * Récupération des effectifs pour tous les indicateurs du TdB
-   * @param {*} searchDate
    * @param {*} filters
-   * @param {*} param2
+   * @param {*} options
    * @returns
    */
-  // const getEffectifsCountAtDate = async (searchDate, filters = {}, { groupedBy, projection }) => {
-  //   // compute number of apprentis, abandons, inscrits sans contrat and rupturants
-  //   const apprentisCountByCfa = await apprentis.getCountAtDate(searchDate, filters, {
-  //     groupedBy: { ...groupedBy, apprentis: { $sum: 1 } },
-  //     projection,
-  //   });
-  //   const abandonsCountByCfa = await abandons.getCountAtDate(searchDate, filters, {
-  //     groupedBy: { ...groupedBy, abandons: { $sum: 1 } },
-  //     projection,
-  //   });
-  //   const inscritsSansContratCountByCfa = await inscritsSansContrats.getCountAtDate(searchDate, filters, {
-  //     groupedBy: { ...groupedBy, inscritsSansContrat: { $sum: 1 } },
-  //     projection,
-  //   });
-  //   const rupturantsCountByCfa = await rupturants.getCountAtDate(searchDate, filters, {
-  //     groupedBy: { ...groupedBy, rupturants: { $sum: 1 } },
-  //     projection,
-  //   });
+  const getEffectifsCountAtDate = async (filters, { additionalFilterStages = [], groupedBy, projection }) => {
+    const filterStages = [...buildMongoPipelineFilterStages(filters), ...additionalFilterStages];
+    // compute number of apprentis, abandons, inscrits sans contrat and rupturants
+    const [apprentis, rupturants, inscritsSansContrat, abandons] = await Promise.all([
+      apprentisIndicator.getCountAtDate(filters.date, filterStages, {
+        projection,
+        groupedBy: { ...groupedBy, apprentis: { $sum: 1 } },
+      }),
+      inscritsSansContratsIndicator.getCountAtDate(filters.date, filterStages, {
+        projection,
+        groupedBy: { ...groupedBy, inscritsSansContrat: { $sum: 1 } },
+      }),
+      rupturantsIndicator.getCountAtDate(filters.date, filterStages, {
+        projection,
+        groupedBy: { ...groupedBy, rupturants: { $sum: 1 } },
+      }),
+      abandonsIndicator.getCountAtDate(filters.date, filterStages, {
+        projection,
+        groupedBy: { ...groupedBy, abandons: { $sum: 1 } },
+      }),
+    ]);
 
-  //   // merge apprentis, abandons, inscrits sans contrat and rupturants with same _id to have them grouped
-  //   return mergeObjectsBy(
-  //     [...apprentisCountByCfa, ...abandonsCountByCfa, ...inscritsSansContratCountByCfa, ...rupturantsCountByCfa],
-  //     "_id"
-  //   );
-  // };
+    // merge apprentis, abandons, inscrits sans contrat and rupturants with same _id to have them grouped
+    return mergeObjectsBy([...apprentis, ...inscritsSansContrat, ...rupturants, ...abandons], "_id");
+  };
 
   /**
-   * TODO : A réintégrer lors de la réintégration des filtres manquants
    * Récupération des effectifs par niveau de formation à une date donnée
-   * @param {Date} searchDate
    * @param {*} filters
    * @returns [{
-   *  niveau: string
-   *  niveau_libelle: string
+   *  niveau_formation: string
+   *  niveau_formation_libelle: string
    *  effectifs: {
    *    apprentis: number
    *    inscritsSansContrat: number
@@ -63,78 +77,31 @@ export default () => {
    *  }
    * }]
    */
-  // const getEffectifsCountByNiveauFormationAtDate = async (searchDate, filters = {}) => {
-  //   const projection = { niveau_formation: 1, niveau_formation_libelle: 1 };
-  //   const groupedBy = { _id: "$niveau_formation", niveau_libelle: { $first: "$niveau_formation_libelle" } };
-  //   // compute number of apprentis, abandons, inscrits sans contrat and rupturants
-  //   const effectifsByNiveauFormation = await getEffectifsCountAtDate(
-  //     searchDate,
-  //     // compute effectifs with a niveau_formation
-  //     { ...filters, niveau_formation: { $ne: null } },
-  //     { groupedBy, projection }
-  //   );
+  const getEffectifsCountByNiveauFormationAtDate = async (filters) => {
+    // compute number of apprentis, abandons, inscrits sans contrat and rupturants
+    const effectifsByNiveauFormation = await getEffectifsCountAtDate(filters, {
+      additionalFilterStages: [{ $match: { "formation.niveau": { $ne: null } } }],
+      projection: { "formation.niveau": 1, "formation.niveau_libelle": 1 },
+      groupedBy: { _id: "$formation.niveau", niveau_libelle: { $first: "$formation.niveau_libelle" } },
+    });
 
-  //   return effectifsByNiveauFormation.map(({ _id, niveau_libelle, ...effectifs }) => {
-  //     return {
-  //       niveau_formation: _id,
-  //       niveau_formation_libelle: niveau_libelle,
-  //       effectifs: {
-  //         apprentis: effectifs.apprentis || 0,
-  //         inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-  //         rupturants: effectifs.rupturants || 0,
-  //         abandons: effectifs.abandons || 0,
-  //       },
-  //     };
-  //   });
-  // };
+    return effectifsByNiveauFormation.map(({ _id: niveauFormation, niveau_libelle, ...effectifs }) => ({
+      niveau_formation: niveauFormation,
+      niveau_formation_libelle: niveau_libelle,
+      effectifs: {
+        apprentis: effectifs.apprentis || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+        rupturants: effectifs.rupturants || 0,
+        abandons: effectifs.abandons || 0,
+      },
+    }));
+  };
 
   /**
-   * TODO : A réintégrer lors de la réintégration des filtres manquants
    * Récupération des effectifs par formation à une date donnée
-   * @param {Date} searchDate
-   * @param {*} filters
-   * @returns [{
-   *  cfd: string
-   *  intitule: string
-   *  effectifs: {
-   *    apprentis: number
-   *    inscritsSansContrat: number
-   *    rupturants: number
-   *    abandons: number
-   *  }
-   * }]
-   */
-  // const getEffectifsCountByFormationAtDate = async (searchDate, filters = {}) => {
-  //   const projection = { formation_cfd: 1, libelle_long_formation: 1 };
-  //   const groupedBy = {
-  //     _id: "$formation_cfd",
-  //     // we will send libelle_long_formation along with the grouped effectifs so we need to project it
-  //     libelle_long_formation: { $first: "$libelle_long_formation" },
-  //   };
-  //   const effectifsByFormation = await getEffectifsCountAtDate(searchDate, filters, { groupedBy, projection });
-
-  //   return effectifsByFormation.map(({ _id, libelle_long_formation, ...effectifs }) => {
-  //     return {
-  //       formation_cfd: _id,
-  //       intitule: libelle_long_formation,
-  //       effectifs: {
-  //         apprentis: effectifs.apprentis || 0,
-  //         inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-  //         rupturants: effectifs.rupturants || 0,
-  //         abandons: effectifs.abandons || 0,
-  //       },
-  //     };
-  //   });
-  // };
-
-  /**
-   * TODO : A réintégrer lors de la réintégration des filtres manquants
-   * Récupération des effectifs par formation et département à une date donnée
-   * @param {Date} searchDate
    * @param {*} filters
    * @returns [{
    *  formation_cfd: string
-   *  departement: string
    *  intitule: string
    *  effectifs: {
    *    apprentis: number
@@ -144,41 +111,30 @@ export default () => {
    *  }
    * }]
    */
-  // const getEffectifsCountByFormationAndDepartementAtDate = async (searchDate, filters = {}) => {
-  //   const projection = {
-  //     formation_cfd: 1,
-  //     etablissement_num_departement: 1,
-  //     libelle_long_formation: 1,
-  //   };
-  //   const groupedBy = {
-  //     _id: { formation_cfd: "$formation_cfd", departement: "$etablissement_num_departement" },
-  //     // we will send libelle_long_formation along with the grouped effectifs so we need to project it
-  //     libelle_long_formation: { $first: "$libelle_long_formation" },
-  //   };
-  //   const effectifsByFormationAndDepartement = await getEffectifsCountAtDate(searchDate, filters, {
-  //     groupedBy,
-  //     projection,
-  //   });
+  const getEffectifsCountByFormationAtDate = async (filters) => {
+    const effectifsByFormation = await getEffectifsCountAtDate(filters, {
+      projection: { "formation.cfd": 1, "formation.libelle_long": 1 },
+      groupedBy: {
+        _id: "$formation.cfd",
+        // we will send formation.libelle_long along with the grouped effectifs so we need to project it
+        libelle_long_formation: { $first: "$formation.libelle_long" },
+      },
+    });
 
-  //   return effectifsByFormationAndDepartement.map(({ _id, libelle_long_formation, ...effectifs }) => {
-  //     return {
-  //       formation_cfd: _id.formation_cfd,
-  //       departement: _id.departement,
-  //       intitule: libelle_long_formation,
-  //       effectifs: {
-  //         apprentis: effectifs.apprentis || 0,
-  //         inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-  //         rupturants: effectifs.rupturants || 0,
-  //         abandons: effectifs.abandons || 0,
-  //       },
-  //     };
-  //   });
-  // };
+    return effectifsByFormation.map(({ _id: cfd, libelle_long_formation, ...effectifs }) => ({
+      formation_cfd: cfd,
+      intitule: libelle_long_formation,
+      effectifs: {
+        apprentis: effectifs.apprentis || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+        rupturants: effectifs.rupturants || 0,
+        abandons: effectifs.abandons || 0,
+      },
+    }));
+  };
 
   /**
-   * TODO : A réintégrer lors de la réintégration des filtres manquants
    * Récupération des effectifs par annee_formation à une date donnée
-   * @param {Date} searchDate
    * @param {*} filters
    * @returns [{
    *  annee_formation: string
@@ -190,31 +146,29 @@ export default () => {
    *  }
    * }]
    */
-  // const getEffectifsCountByAnneeFormationAtDate = async (searchDate, filters = {}) => {
-  //   const projection = { annee_formation: 1 };
-  //   const groupedBy = { _id: "$annee_formation" };
-  //   const effectifsByAnneeFormation = await getEffectifsCountAtDate(searchDate, filters, { groupedBy, projection });
+  const getEffectifsCountByAnneeFormationAtDate = async (filters) => {
+    const effectifsByAnneeFormation = await getEffectifsCountAtDate(filters, {
+      projection: { "formation.annee": 1 },
+      groupedBy: { _id: "$formation.annee" },
+    });
 
-  //   return effectifsByAnneeFormation.map(({ _id, ...effectifs }) => {
-  //     return {
-  //       annee_formation: _id,
-  //       effectifs: {
-  //         apprentis: effectifs.apprentis || 0,
-  //         inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-  //         rupturants: effectifs.rupturants || 0,
-  //         abandons: effectifs.abandons || 0,
-  //       },
-  //     };
-  //   });
-  // };
+    return effectifsByAnneeFormation.map(({ _id: anneeFormation, ...effectifs }) => ({
+      annee_formation: anneeFormation,
+      effectifs: {
+        apprentis: effectifs.apprentis || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+        rupturants: effectifs.rupturants || 0,
+        abandons: effectifs.abandons || 0,
+      },
+    }));
+  };
 
   /**
-   * TODO : A réintégrer lors de la réintégration des filtres manquants
    * Récupération des effectifs par uai_etablissement à une date donnée
-   * @param {Date} searchDate
    * @param {*} filters
    * @returns [{
    *  uai_etablissement: string
+   *  siret_etablissement: string
    *  nom_etablissement: string
    *  effectifs: {
    *    apprentis: number
@@ -224,47 +178,37 @@ export default () => {
    *  }
    * }]
    */
-  // const getEffectifsCountByCfaAtDate = async (searchDate, filters = {}) => {
-  //   // we need to project these fields to give information about the CFAs
-  //   const projection = {
-  //     uai_etablissement: 1,
-  //     siret_etablissement: 1,
-  //     nom_etablissement: 1,
-  //   };
-  //   const groupedBy = {
-  //     _id: "$uai_etablissement",
-  //     // we will send information about the organisme along with the grouped effectifs so we project it
-  //     nom_etablissement: { $first: "$nom_etablissement" },
-  //     siret_etablissement: { $addToSet: "$siret_etablissement" },
-  //   };
-  //   const effectifsCountByCfa = await getEffectifsCountAtDate(searchDate, filters, { groupedBy, projection });
-
-  //   const result = [];
-
-  //   await asyncForEach(
-  //     effectifsCountByCfa,
-  //     async ({ _id: uai, nom_etablissement, siret_etablissement, ...effectifs }) => {
-  //       result.push({
-  //         uai_etablissement: uai,
-  //         siret_etablissement,
-  //         nom_etablissement,
-  //         effectifs: {
-  //           apprentis: effectifs.apprentis || 0,
-  //           inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-  //           rupturants: effectifs.rupturants || 0,
-  //           abandons: effectifs.abandons || 0,
-  //         },
-  //       });
-  //     }
-  //   );
-
-  //   return result;
-  // };
+  const getEffectifsCountByCfaAtDate = async (filters) => {
+    const effectifsCountByCfa = await getEffectifsCountAtDate(filters, {
+      // we need to project these fields to give information about the CFAs
+      additionalFilterStages: [{ $lookup: organismeLookup }],
+      projection: {
+        "organisme.uai": 1,
+        "organisme.siret": 1,
+        "organisme.nom": 1,
+      },
+      groupedBy: {
+        _id: { $first: "$organisme.uai" },
+        // we will send information about the organisme along with the grouped effectifs so we project it
+        nom_etablissement: { $first: { $first: "$organisme.nom" } },
+        siret_etablissement: { $first: { $first: "$organisme.siret" } },
+      },
+    });
+    return effectifsCountByCfa.map(({ _id: uai, nom_etablissement, siret_etablissement, ...effectifs }) => ({
+      uai_etablissement: uai,
+      siret_etablissement,
+      nom_etablissement,
+      effectifs: {
+        apprentis: effectifs.apprentis || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+        rupturants: effectifs.rupturants || 0,
+        abandons: effectifs.abandons || 0,
+      },
+    }));
+  };
 
   /**
-   * TODO : A réintégrer lors de la réintégration des filtres manquants
    * Récupération des effectifs par siret_etablissement à une date donnée
-   * @param {Date} searchDate
    * @param {*} filters
    * @returns [{
    *  siret_etablissement: string
@@ -277,43 +221,35 @@ export default () => {
    *  }
    * }]
    */
-  // const getEffectifsCountBySiretAtDate = async (searchDate, filters = {}) => {
-  //   // we need to project these fields to give information about the CFAs
-  //   const projection = {
-  //     siret_etablissement: 1,
-  //     nom_etablissement: 1,
-  //   };
-  //   const groupedBy = {
-  //     _id: "$siret_etablissement",
-  //     // we will send information about the organisme along with the grouped effectifs so we project it
-  //     nom_etablissement: { $first: "$nom_etablissement" },
-  //   };
-  //   const effectifsCountByCfa = await getEffectifsCountAtDate(
-  //     searchDate,
-  //     // compute effectifs with a siret_etablissement
-  //     { ...filters, siret_etablissement: { $ne: null } },
-  //     { groupedBy, projection }
-  //   );
+  const getEffectifsCountBySiretAtDate = async (filters) => {
+    const effectifsCountByCfa = await getEffectifsCountAtDate(filters, {
+      additionalFilterStages: [{ $lookup: organismeLookup }, { $match: { "organisme.siret": { $ne: null } } }],
+      // we need to project these fields to give information about the CFAs
+      projection: {
+        "organisme.siret": 1,
+        "organisme.nom": 1,
+      },
+      groupedBy: {
+        _id: { $first: "$organisme.siret" },
+        // we will send information about the organisme along with the grouped effectifs so we project it
+        nom_etablissement: { $first: { $first: "$organisme.nom" } },
+      },
+    });
 
-  //   return effectifsCountByCfa.map((effectifForCfa) => {
-  //     const { _id, nom_etablissement, ...effectifs } = effectifForCfa;
-  //     return {
-  //       siret_etablissement: _id,
-  //       nom_etablissement,
-  //       effectifs: {
-  //         apprentis: effectifs.apprentis || 0,
-  //         inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-  //         rupturants: effectifs.rupturants || 0,
-  //         abandons: effectifs.abandons || 0,
-  //       },
-  //     };
-  //   });
-  // };
+    return effectifsCountByCfa.map(({ _id: siret, nom_etablissement, ...effectifs }) => ({
+      siret_etablissement: siret,
+      nom_etablissement,
+      effectifs: {
+        apprentis: effectifs.apprentis || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+        rupturants: effectifs.rupturants || 0,
+        abandons: effectifs.abandons || 0,
+      },
+    }));
+  };
 
   /**
-   * TODO : A réintégrer lors de la réintégration des filtres manquants
    * Récupération des effectifs par etablissement_num_departement à une date donnée
-   * @param {Date} searchDate
    * @param {*} filters
    * @returns [{
    *  etablissement_num_departement: string
@@ -326,32 +262,28 @@ export default () => {
    *  }
    * }]
    */
-  // const getEffectifsCountByDepartementAtDate = async (searchDate, filters = {}) => {
-  //   // we need to project these fields to give information about the departement
-  //   const projection = {
-  //     etablissement_nom_departement: 1,
-  //     etablissement_num_departement: 1,
-  //   };
-  //   const groupedBy = {
-  //     _id: "$etablissement_num_departement",
-  //     etablissement_nom_departement: { $first: "$etablissement_nom_departement" },
-  //   };
-  //   const effectifsCountByDepartement = await getEffectifsCountAtDate(searchDate, filters, { groupedBy, projection });
+  const getEffectifsCountByDepartementAtDate = async (filters) => {
+    const effectifsCountByDepartement = await getEffectifsCountAtDate(filters, {
+      additionalFilterStages: [{ $lookup: organismeLookup }],
+      projection: {
+        "organisme.adresse.departement": 1,
+      },
+      groupedBy: {
+        _id: { $first: "$organisme.adresse.departement" },
+      },
+    });
 
-  //   return effectifsCountByDepartement.map((effectifForDepartement) => {
-  //     const { _id, etablissement_nom_departement, ...effectifs } = effectifForDepartement;
-  //     return {
-  //       etablissement_num_departement: _id,
-  //       etablissement_nom_departement,
-  //       effectifs: {
-  //         apprentis: effectifs.apprentis || 0,
-  //         inscritsSansContrat: effectifs.inscritsSansContrat || 0,
-  //         rupturants: effectifs.rupturants || 0,
-  //         abandons: effectifs.abandons || 0,
-  //       },
-  //     };
-  //   });
-  // };
+    return effectifsCountByDepartement.map(({ _id: codeDepartement, ...effectifs }) => ({
+      etablissement_num_departement: codeDepartement,
+      etablissement_nom_departement: DEPARTEMENTS_BY_ID[codeDepartement]?.nom || "Inconnu",
+      effectifs: {
+        apprentis: effectifs.apprentis || 0,
+        inscritsSansContrat: effectifs.inscritsSansContrat || 0,
+        rupturants: effectifs.rupturants || 0,
+        abandons: effectifs.abandons || 0,
+      },
+    }));
+  };
 
   /**
    * Récupération des effectifs anonymisés à une date donnée
@@ -360,25 +292,25 @@ export default () => {
    * @returns
    */
   const getDataListEffectifsAtDate = async (searchDate, filters = {}) => {
-    const apprentisAnonymous = await apprentis.getFullExportFormattedListAtDate(
+    const apprentisAnonymous = await apprentisIndicator.getFullExportFormattedListAtDate(
       searchDate,
       filters,
       EFFECTIF_INDICATOR_NAMES.apprentis
     );
 
-    const inscritsSansContratAnonymous = await inscritsSansContrats.getFullExportFormattedListAtDate(
+    const inscritsSansContratAnonymous = await inscritsSansContratsIndicator.getFullExportFormattedListAtDate(
       searchDate,
       filters,
       EFFECTIF_INDICATOR_NAMES.inscritsSansContrats
     );
 
-    const rupturantsAnonymous = await rupturants.getFullExportFormattedListAtDate(
+    const rupturantsAnonymous = await rupturantsIndicator.getFullExportFormattedListAtDate(
       searchDate,
       filters,
       EFFECTIF_INDICATOR_NAMES.rupturants
     );
 
-    const abandonsAnonymous = await abandons.getFullExportFormattedListAtDate(
+    const abandonsAnonymous = await abandonsIndicator.getFullExportFormattedListAtDate(
       searchDate,
       filters,
       EFFECTIF_INDICATOR_NAMES.abandons
@@ -388,17 +320,18 @@ export default () => {
   };
 
   return {
-    apprentis,
-    abandons,
-    inscritsSansContrats,
-    rupturants,
+    apprentis: apprentisIndicator,
+    abandons: abandonsIndicator,
+    inscritsSansContrats: inscritsSansContratsIndicator,
+    rupturants: rupturantsIndicator,
     getDataListEffectifsAtDate,
-    // getEffectifsCountByCfaAtDate,
-    // getEffectifsCountByNiveauFormationAtDate,
-    // getEffectifsCountByFormationAtDate,
-    // getEffectifsCountByAnneeFormationAtDate,
-    // getEffectifsCountByDepartementAtDate,
-    // getEffectifsCountByFormationAndDepartementAtDate,
-    // getEffectifsCountBySiretAtDate,
+    getIndicateurs,
+    getEffectifsCountAtDate,
+    getEffectifsCountByCfaAtDate,
+    getEffectifsCountByNiveauFormationAtDate,
+    getEffectifsCountByFormationAtDate,
+    getEffectifsCountByAnneeFormationAtDate,
+    getEffectifsCountByDepartementAtDate,
+    getEffectifsCountBySiretAtDate,
   };
 };

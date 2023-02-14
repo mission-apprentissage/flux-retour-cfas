@@ -28,6 +28,7 @@ export default ({ effectifs }) => {
   router.get(
     "/",
     tryCatch(async (req, res) => {
+      // FIXME simplifier
       const {
         date: dateFromParams,
         organisme_id,

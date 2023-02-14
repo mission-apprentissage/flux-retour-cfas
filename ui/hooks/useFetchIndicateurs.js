@@ -1,25 +1,33 @@
+import { omitNullishValues } from "@/common/utils/omitNullishValues.js";
+import { useSimpleFiltersContext } from "@/modules/mon-espace/landing/common/SimpleFiltersContext.js";
 import { useQuery } from "@tanstack/react-query";
 
 import { _get } from "@/common/httpClient";
-import { mapSimpleFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat.js";
 
-const mapIndicateursData = (effectifsData) => ({
-  apprentis: effectifsData.apprentis,
-  inscritsSansContrat: effectifsData.inscritsSansContrat,
-  rupturants: effectifsData.rupturants,
-  abandons: effectifsData.abandons,
-});
+/**
+ * TODO Refacto ? Placer ailleurs ?
+ * harmoniser si besoin avec @/common/utils/mapFiltersToApiFormat.js
+ * @param {*} filters
+ * @returns
+ */
+function mapSimpleFiltersToApiFormat(filtersValues) {
+  return omitNullishValues({
+    date: filtersValues?.date.toISOString(),
+    organisme_id: filtersValues.organismeId,
+    etablissement_num_departement: filtersValues?.departement?.code,
+    etablissement_num_region: filtersValues?.region?.code,
+  });
+}
 
-const useFetchIndicateurs = (filtersValues) => {
+const useFetchIndicateurs = () => {
+  const { filtersValues } = useSimpleFiltersContext();
   const requestFilters = mapSimpleFiltersToApiFormat(filtersValues);
 
-  const { status, data, error } = useQuery(["indicateurs", requestFilters], () =>
+  const { status, indicateurs, error } = useQuery(["indicateurs", requestFilters], () =>
     _get("/api/indicateurs", { params: requestFilters })
   );
 
   const loading = status === "loading";
-  const indicateurs = data && mapIndicateursData(data);
-
   return [indicateurs, loading, error];
 };
 

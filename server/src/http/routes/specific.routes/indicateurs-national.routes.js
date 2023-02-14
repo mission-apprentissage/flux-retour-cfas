@@ -1,41 +1,41 @@
 import express from "express";
 import { format } from "date-fns";
 import Joi from "joi";
-import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { getCacheKeyForRoute } from "../../../common/utils/cacheUtils.js";
 import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
+import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
+import { returnResult } from "../../middlewares/helpers.js";
+
+// would be simpler to put this helper function into the cache structure
+async function tryCachedExecution(cache, cacheKey, serviceFunc) {
+  const cachedResult = await cache.get(cacheKey);
+  if (cachedResult) {
+    return JSON.parse(cachedResult);
+  } else {
+    const result = await serviceFunc();
+    await cache.set(cacheKey, JSON.stringify(result));
+    return result;
+  }
+}
 
 export default ({ effectifs, cache }) => {
   const router = express.Router();
   router.get(
     "/",
-    tryCatch(async (req, res) => {
-      const { date: dateFromQuery } = await Joi.object({
+    returnResult(async (req) => {
+      const { date } = await validateFullObjectSchema(req.query, {
         date: Joi.date().required(),
-      }).validateAsync(req.query, { abortEarly: false });
-
-      const date = new Date(dateFromQuery);
-      const filters = { annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } };
-      const cacheKey = getCacheKeyForRoute(`${req.baseUrl}${req.path}`, {
-        date: format(date, "yyyy-MM-dd"),
-        filters,
       });
-      const fromCache = await cache.get(cacheKey);
-
-      if (fromCache) return res.json(JSON.parse(fromCache));
-
-      const response = {
-        date,
-        totalOrganismes: await getNbDistinctOrganismes(filters),
-        apprentis: await effectifs.apprentis.getCountAtDate(date, filters),
-        rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
-        inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
-        abandons: await effectifs.abandons.getCountAtDate(date, filters),
-      };
-
-      await cache.set(cacheKey, JSON.stringify(response));
-      return res.json(response);
+      const filters = { annee_scolaire: { $in: getAnneesScolaireListFromDate(date) } };
+      const cacheKey = `${req.baseUrl}${req.path}:${format(date, "yyyy-MM-dd")}`;
+      return tryCachedExecution(cache, cacheKey, async () => {
+        const [indicateurs, totalOrganismes] = await Promise.all([
+          effectifs.getIndicateurs({ date }),
+          getNbDistinctOrganismes(filters), // reads from dossiersApprenantsMigration, does not use EffectifsFilters yet
+        ]);
+        indicateurs.totalOrganismes = totalOrganismes;
+        return indicateurs;
+      });
     })
   );
   return router;

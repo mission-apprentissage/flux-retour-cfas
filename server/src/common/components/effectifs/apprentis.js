@@ -5,14 +5,13 @@ export class EffectifsApprentis extends Indicator {
   /**
    * Pipeline de récupération des apprentis à une date donnée
    * @param {*} searchDate
-   * @param {*} filters
    * @param {*} options
    * @returns
    */
-  getAtDateAggregationPipeline(searchDate, filters = {}, options = {}) {
+  getAtDateAggregationPipeline(searchDate, options = {}) {
     return [
       {
-        $match: { ...filters, "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.apprenti },
+        $match: { "apprenant.historique_statut.valeur_statut": CODES_STATUT_APPRENANT.apprenti },
       },
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
       { $match: { "statut_apprenant_at_date.valeur_statut": CODES_STATUT_APPRENANT.apprenti } },
@@ -20,14 +19,12 @@ export class EffectifsApprentis extends Indicator {
   }
 
   /**
-   * Function de récupération de la liste des apprentis formatée pour un export à une date donnée
-   * @param {*} searchDate
-   * @param {*} filters
+   * Fonction de formattage d'une ligne d'un apprenti
+   * @param {*} item
    * @returns
    */
-  async getExportFormattedListAtDate(searchDate, filters = {}) {
-    const projection = this.exportProjection;
-    return (await this.getListAtDate(searchDate, filters, { projection })).map((item) => ({
+  async formatRow(item) {
+    return {
       ...item,
       statut: getStatutApprenantNameFromCode(item.statut_apprenant_at_date.valeur_statut),
       historique_statut_apprenant: JSON.stringify(
@@ -36,6 +33,6 @@ export class EffectifsApprentis extends Indicator {
           statut: getStatutApprenantNameFromCode(item.valeur_statut),
         }))
       ),
-    }));
+    };
   }
 }

@@ -18,6 +18,8 @@ export const indexes = () => {
       { nom: "text", nom_tokenized: "text" },
       { name: "nom_tokenized_text", default_language: "french" },
     ],
+    [{ "adresse.departement": 1 }, { name: "departement" }], // FIXME n'a pas l'air d'améliorer les performances
+    [{ "adresse.region": 1 }, { name: "region" }],
   ];
 };
 

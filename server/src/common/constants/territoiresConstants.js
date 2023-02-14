@@ -1,3 +1,6 @@
+// données à synchroniser avec /ui/common/constants/territoiresConstants.js
+// en attendant un import partagé
+
 /**
  * Liste des régions du territoire national
  * TODO : Rationaliser la liste des régions (point transverse tech ?)
