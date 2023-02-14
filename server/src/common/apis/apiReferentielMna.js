@@ -7,7 +7,7 @@ import config from "../../config.js";
 const API_ENDPOINT = config.mnaReferentielApi.endpoint;
 
 export const fetchOrganismes = async (options = {}) => {
-  const { itemsPerPage = 100, champs } = options;
+  const { itemsPerPage = 10000, champs = DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(",") } = options;
 
   const { data } = await axios({
     method: "GET",

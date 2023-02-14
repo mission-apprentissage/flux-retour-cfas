@@ -9,14 +9,14 @@ readonly LOG_FILEPATH="/var/log/data-jobs/run_daily_jobs_$(date +'%Y-%m-%d_%H%M%
 
 call_daily_jobs_with_logs(){
 
-  # TODO : TEMPORARY DESACTIVATED - Remplissage des organismes et des formations liées
-  # docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes-and-formations" || true
+  # Remplissage des organismes et des formations liées
+  docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes-and-formations" || true
   
-  # TODO : a lancer en manuel ou sur un timing différent (chaque semaine) ? - Remplissage des réseaux depuis csv fournis
-  # docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux-newFormat" || true
+  # Remplissage des réseaux depuis csv fournis
+  docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux-newFormat" || true
 
-  # TODO : TEMPORARY DESACTIVATED - Purge des données inutiles
-  # docker exec flux_retour_cfas_server bash -c "yarn cli purge:events" || true
+  # Purge des données inutiles
+  docker exec flux_retour_cfas_server bash -c "yarn cli purge:events" || true
 } 
 
 call_daily_jobs_with_logs >> ${LOG_FILEPATH}

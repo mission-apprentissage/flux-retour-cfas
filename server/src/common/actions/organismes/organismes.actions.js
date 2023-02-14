@@ -73,48 +73,68 @@ export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) =>
  * @param {*} organismeProps
  * @returns
  */
-export const createOrganisme = async ({
-  uai,
-  sirets = [],
-  siret: siretIn,
-  nom: nomIn,
-  adresse: adresseIn,
-  ...data
-}) => {
-  if (await organismesDb().countDocuments({ uai })) {
-    throw new Error(`Un organisme avec l'UAI ${uai} existe déjà`);
+export const createOrganisme = async ({ uai, siret, nom: nomIn, adresse: adresseIn, ...data }) => {
+  if (await organismesDb().countDocuments({ uai, siret })) {
+    throw new Error(`Un organisme avec l'UAI ${uai} et le siret ${siret} existe déjà`);
   }
 
-  let siret = siretIn;
-  if (Array.isArray(sirets) && sirets.length !== 0 && !siretIn) {
-    siret = sirets[0];
-  }
-  if (Array.isArray(sirets) && sirets.length === 0 && siretIn) {
-    sirets[0] = siretIn;
-  }
-
-  // TODO [metier] really used ?
   let metiers = [];
-  if (Array.isArray(sirets) && sirets.length !== 0) {
-    try {
-      metiers = (await getMetiersBySirets(sirets))?.metiers ?? [];
-    } catch (error) {
-      console.error(error);
-    }
+  try {
+    metiers = (await getMetiersBySirets([siret]))?.metiers ?? [];
+  } catch (error) {
+    console.error(error);
   }
 
+  // Récupération des infos depuis API Entreprise
+  const { adresse, ferme, enseigne, raison_sociale, nom } = await getOrganismeInfosFromSiret(siret, nomIn, adresseIn);
+
+  // Construction de l'arbre des formations de l'organisme
+  const { formations } = await getFormationsTreeForOrganisme(uai);
+  // TODO abd: hydrate other organismes from formations
+
+  const { insertedId } = await organismesDb().insertOne(
+    validateOrganisme({
+      uai,
+      ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
+      ...defaultValuesOrganisme(),
+      ...(siret ? { siret } : {}),
+      metiers,
+      formations,
+      ...(adresse ? { adresse } : {}),
+      ...data,
+      ferme,
+      ...(enseigne ? { enseigne } : {}),
+      ...(raison_sociale ? { raison_sociale } : {}),
+    })
+  );
+
+  return await organismesDb().findOne({ _id: insertedId });
+};
+
+/**
+ * Fonction de récupération d'informations depuis SIRET via API Entreprise via siret
+ * @param {*} siret
+ * @param {*} nomIn
+ * @param {*} adresseIn
+ * @returns
+ */
+export const getOrganismeInfosFromSiret = async (siret, nomIn = null, adresseIn = null) => {
   let nom = nomIn;
   let adresse = adresseIn;
   let ferme = false;
   let enseigne = null;
   let raison_sociale = null;
+
   if (siret) {
     const dataSiret = await findDataFromSiret(siret, true, false);
+
     if (dataSiret.messages.api_entreprise === "Ok") {
       ferme = dataSiret.result.ferme;
+
       if (dataSiret.result.enseigne) enseigne = dataSiret.result.enseigne;
       if (dataSiret.result.entreprise_raison_sociale) raison_sociale = dataSiret.result.entreprise_raison_sociale;
       if (!nom) nom = dataSiret.result.enseigne;
+
       adresse = {
         ...(adresse ?? {}),
         ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
@@ -133,29 +153,7 @@ export const createOrganisme = async ({
       logger.error(`createOrganisme > Erreur sur l'etablissement ${siret} via API Entreprise`);
     }
   }
-
-  // Construction de l'arbre des formations de l'organisme
-  const { formations } = await getFormationsTreeForOrganisme(uai);
-  // TODO abd: hydrate other organismes from formations
-
-  const { insertedId } = await organismesDb().insertOne(
-    validateOrganisme({
-      uai,
-      ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
-      ...defaultValuesOrganisme(),
-      sirets,
-      ...(siret ? { siret } : {}),
-      metiers,
-      formations,
-      ...(adresse ? { adresse } : {}),
-      ...data,
-      ferme,
-      ...(enseigne ? { enseigne } : {}),
-      ...(raison_sociale ? { raison_sociale } : {}),
-    })
-  );
-
-  return await organismesDb().findOne({ _id: insertedId });
+  return { adresse, ferme, enseigne, raison_sociale, nom };
 };
 
 /**
@@ -283,7 +281,6 @@ export const updateOrganisme = async (id, { nom, sirets, ...data }) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  // TODO [metier] really used ?
   let metiers = [];
   if (sirets && Array.isArray(sirets) && !sirets.every((newSiret) => organisme.sirets.includes(newSiret))) {
     try {
