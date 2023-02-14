@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import Head from "next/head";
 import NavLink from "next/link";
-import { Page } from "../../components";
-import { Support } from "../../theme/components/icons"; // TODO wtf this is an image !
+
+import Page from "@/components/Page/Page";
+import { Support } from "@/theme/components/icons"; // TODO wtf this is an image !
 
 const RedirectionPage = () => {
   const router = useRouter();

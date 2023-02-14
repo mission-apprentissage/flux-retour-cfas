@@ -2,13 +2,13 @@ import { Box, Flex, Heading, HStack, Spinner } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { _get, _post } from "../../common/httpClient";
-import decodeJWT from "../../common/utils/decodeJWT";
-import useAuth from "../../hooks/useAuth";
-import useToken from "../../hooks/useToken";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { _get, _post } from "@/common/httpClient";
+import decodeJWT from "@/common/utils/decodeJWT";
+import useAuth from "@/hooks/useAuth";
+import useToken from "@/hooks/useToken";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useQuery } from "@tanstack/react-query";
-import { CONTACT_ADDRESS } from "../../common/constants/product";
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

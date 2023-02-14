@@ -5,10 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 
 import { _get } from "@/common/httpClient";
 import { ArrowDropRightLine } from "@/theme/components/icons";
-import { Breadcrumb, PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
 import { FIABILISATION_LABEL } from "@/common/constants/fiabilisation.js";
 import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
-import { Page } from "@/components";
+import Page from "@/components/Page/Page";
 import { useEspace } from "@/hooks/useEspace";
 import Link from "@/components/Links/Link";
 import Table from "@/components/Table/Table";

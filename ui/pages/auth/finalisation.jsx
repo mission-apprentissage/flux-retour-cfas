@@ -22,19 +22,19 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import uniq from "lodash.uniq";
 
-import { Page } from "../../components/Page/Page";
+import Page from "@/components/Page/Page";
 
-import useToken from "../../hooks/useToken";
-import useAuth from "../../hooks/useAuth";
-import { _get, _post } from "../../common/httpClient";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
-import Link from "../../components/Links/Link";
-import Ribbons from "../../components/Ribbons/Ribbons";
-import { CONTACT_ADDRESS } from "../../common/constants/product";
-import { ACADEMIES, REGIONS, DEPARTEMENTS } from "../../common/constants/territoiresConstants";
+import useToken from "@/hooks/useToken";
+import useAuth from "@/hooks/useAuth";
+import { _get, _post } from "@/common/httpClient";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Link from "@/components/Links/Link";
+import Ribbons from "@/components/Ribbons/Ribbons";
+import { CONTACT_ADDRESS } from "@/common/constants/product";
+import { ACADEMIES, REGIONS, DEPARTEMENTS } from "@/common/constants/territoiresConstants";
 import { Check } from "../../theme/components/icons";
-import { RESEAUX_CFAS } from "../../common/constants/networksConstants";
-import { Input } from "../../modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
+import { RESEAUX_CFAS } from "@/common/constants/networksConstants";
+import { Input } from "@/modules/mon-espace/effectifs/engine/formEngine/components/Input/Input";
 
 const ACADEMIES_SORTED = Object.values(ACADEMIES).sort((a, b) => Number(a.code) - Number(b.code));
 const REGIONS_SORTED = REGIONS.sort((a, b) => Number(a.code) - Number(b.code));

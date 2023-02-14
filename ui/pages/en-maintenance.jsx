@@ -5,12 +5,12 @@ import { useRouter } from "next/router";
 import ReactMarkdown from "react-markdown";
 import ChakraUIMarkdownRenderer from "chakra-ui-markdown-renderer";
 
-import { getAuthServerSideProps } from "../common/SSR/getAuthServerSideProps";
-import { Page } from "../components/Page/Page";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Page from "@/components/Page/Page";
 import { ExternalLinkLine } from "../theme/components/icons";
 import useAuth from "../hooks/useAuth";
 import useMaintenanceMessages from "../hooks/useMaintenanceMessages";
-import { isUserAdmin } from "../common/utils/rolesUtils";
+import { isUserAdmin } from "@/common/utils/rolesUtils";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

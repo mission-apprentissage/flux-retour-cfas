@@ -3,25 +3,20 @@ import { Box, Container, Stack, Heading } from "@chakra-ui/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import { Breadcrumb, PAGES } from "@/components/Breadcrumb/Breadcrumb";
-import { Page } from "@/components/Page/Page";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
-import { useEspace } from "@/hooks/useEspace";
 import { useOrganisme } from "@/hooks/useOrganisme";
 import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/components/OrganismeInfo";
 import { hasContextAccessTo } from "@/common/utils/rolesUtils";
-import LandingErp from "@/modules/mon-espace/landing/LandingErp";
-import LandingTransverse from "@/modules/mon-espace/landing/LandingTransverse";
-import LandingReseau from "@/modules/mon-espace/landing/LandingReseau.jsx";
-import LandingPilot from "@/modules/mon-espace/landing/LandingPilot.jsx";
+import Dashboard from "@/modules/mon-espace/landing/Dashboard";
 import RibbonsUnauthorizedAccessToOrganisme from "@/components/Ribbons/RibbonsUnauthorizedAccessToOrganisme";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
-const PageMonOrganisme = () => {
+const Organisme = () => {
   const router = useRouter();
-  let { whoIs } = useEspace();
   const { organisme } = useOrganisme(router.query.id);
 
   return (
@@ -46,12 +41,7 @@ const PageMonOrganisme = () => {
                 <RibbonsUnauthorizedAccessToOrganisme />
               )
             ) : (
-              <>
-                {whoIs === "reseau_of" && <LandingReseau />}
-                {whoIs === "pilot" && <LandingPilot />}
-                {whoIs === "erp" && <LandingErp />}
-                {!whoIs && <LandingTransverse />}
-              </>
+              <Dashboard />
             )}
           </Box>
         </Container>
@@ -60,4 +50,4 @@ const PageMonOrganisme = () => {
   );
 };
 
-export default withAuth(PageMonOrganisme);
+export default withAuth(Organisme);

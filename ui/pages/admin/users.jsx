@@ -29,8 +29,8 @@ import {
 } from "@chakra-ui/react";
 
 import { _delete, _get, _post, _put } from "@/common/httpClient";
-import { Breadcrumb } from "@/components/Breadcrumb/Breadcrumb";
-import { Page } from "@/components/Page/Page";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import Acl from "@/components/Acl";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";

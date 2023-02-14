@@ -1,6 +1,6 @@
 import { Spinner, HStack, Flex, Heading } from "@chakra-ui/react";
 import React from "react";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

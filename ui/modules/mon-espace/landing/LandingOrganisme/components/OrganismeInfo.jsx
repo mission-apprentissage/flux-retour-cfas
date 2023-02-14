@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
 
-import { Section } from "@/components/index";
+import Section from "@/components/Section/Section";
 import Ribbons from "@/components/Ribbons/Ribbons";
 import NatureOrganismeDeFormationWarning from "./NatureOrganismeDeFormationWarning";
 import { formatSiretSplitted } from "@/common/utils/stringUtils";

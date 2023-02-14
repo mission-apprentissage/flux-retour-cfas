@@ -3,20 +3,20 @@ import { Badge, Box, Divider, Flex, Heading, HStack, Link, Text } from "@chakra-
 import { format, formatISO } from "date-fns";
 import fr from "date-fns/locale/fr";
 
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
-import { Page } from "../../components/Page/Page";
-import Sommaire from "../../components/Sommaire/Sommaire";
-import { NAVIGATION_PAGES } from "../../common/constants/navigationPages";
-import { getUniquesMonthAndYearFromDatesList } from "../../common/utils/dateUtils";
-import { capitalize } from "../../common/utils/stringUtils";
-import { groupEvolutionsByDate } from "../../modules/journal-des-evolutions/groupEvolutionsByDate";
-import JournalDesEvolutionsTagFilter from "../../modules/journal-des-evolutions/JournalDesEvolutionsTagFilter";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
+import Sommaire from "@/components/Sommaire/Sommaire";
+import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
+import { getUniquesMonthAndYearFromDatesList } from "@/common/utils/dateUtils";
+import { capitalize } from "@/common/utils/stringUtils";
+import { groupEvolutionsByDate } from "@/modules/journal-des-evolutions/groupEvolutionsByDate";
+import JournalDesEvolutionsTagFilter from "@/modules/journal-des-evolutions/JournalDesEvolutionsTagFilter";
 import {
   JOURNAL_DES_EVOLUTIONS_DATA,
   JOURNAL_DES_EVOLUTIONS_TAGS,
-} from "../../modules/journal-des-evolutions/JournalEvolutionsData";
+} from "@/modules/journal-des-evolutions/JournalEvolutionsData";
 import Head from "next/head";
-import Section from "../../components/Section/Section";
+import Section from "@/components/Section/Section";
 
 const JournalDesEvolutions = () => {
   const title = "Journal des évolutions";

@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { Text, Center, Heading, Flex } from "@chakra-ui/react";
 
-import { Page } from "../../components/Page/Page";
-import Inscription from "../../modules/auth/inscription/Inscription";
-import InformationBlock from "../../modules/auth/inscription/components/InformationBlock";
+import Page from "@/components/Page/Page";
+import Inscription from "@/modules/auth/inscription/Inscription";
+import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

@@ -2,9 +2,9 @@ import React from "react";
 import Head from "next/head";
 import { Box, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 
-import { Page } from "../components";
-import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
-import { NAVIGATION_PAGES } from "../common/constants/navigationPages";
+import Page from "@/components/Page/Page";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import { NAVIGATION_PAGES } from "@/common/constants/navigationPages";
 
 const StatistiquesPage = () => {
   const title = "Statistiques";

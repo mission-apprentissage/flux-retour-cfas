@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { _delete, _get, _post, _put } from "../../common/httpClient";
+import { _delete, _get, _post, _put } from "@/common/httpClient";
 import { useFormik } from "formik";
 import {
   Accordion,
@@ -15,13 +15,13 @@ import {
   Input,
   Stack,
 } from "@chakra-ui/react";
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
-import { Page } from "../../components/Page/Page";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import Head from "next/head";
-import withAuth from "../../components/withAuth";
+import withAuth from "@/components/withAuth";
 
-import Acl from "../../components/Acl";
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
+import Acl from "@/components/Acl";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 
 // TODO [tech]
 const RoleLine = ({ role }) => {

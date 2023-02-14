@@ -2,12 +2,12 @@ import { Flex } from "@chakra-ui/react";
 import React from "react";
 import Head from "next/head";
 
-import { Page } from "../../components";
-import Login from "../../modules/auth/connexion/Connexion";
-import { Breadcrumb } from "../../components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
+import Login from "@/modules/auth/connexion/Connexion";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
-import { getAuthServerSideProps } from "../../common/SSR/getAuthServerSideProps";
-import InformationBlock from "../../modules/auth/inscription/components/InformationBlock";
+import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
+import InformationBlock from "@/modules/auth/inscription/components/InformationBlock";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 

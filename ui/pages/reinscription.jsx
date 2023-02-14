@@ -3,7 +3,7 @@ import React from "react";
 import Head from "next/head";
 import NavLink from "next/link";
 
-import { Page } from "../components";
+import Page from "@/components/Page/Page";
 import { Support } from "../theme/components/icons/Support.js";
 
 const Reinscription = () => {

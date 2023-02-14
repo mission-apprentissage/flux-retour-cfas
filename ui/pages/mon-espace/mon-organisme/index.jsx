@@ -2,22 +2,19 @@ import React from "react";
 import { Box, Container, Stack, Heading } from "@chakra-ui/react";
 import Head from "next/head";
 
-import { Breadcrumb, PAGES } from "@/components/Breadcrumb/Breadcrumb";
-import { Page } from "@/components/Page/Page";
+import Breadcrumb, { PAGES } from "@/components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
 import withAuth from "@/components/withAuth";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useEspace } from "@/hooks/useEspace";
 import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/components/OrganismeInfo";
 import { hasContextAccessTo } from "@/common/utils/rolesUtils";
-import LandingErp from "@/modules/mon-espace/landing/LandingErp";
-import LandingTransverse from "@/modules/mon-espace/landing/LandingTransverse";
-import LandingReseau from "@/modules/mon-espace/landing/LandingReseau.jsx";
-import LandingPilot from "@/modules/mon-espace/landing/LandingPilot.jsx";
+import Dashboard from "@/modules/mon-espace/landing/Dashboard";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const PageMonOrganisme = () => {
-  let { myOrganisme, whoIs } = useEspace();
+  let { myOrganisme } = useEspace();
 
   return (
     <Page>
@@ -39,12 +36,7 @@ const PageMonOrganisme = () => {
                 </Stack>
               )
             ) : (
-              <>
-                {whoIs === "reseau_of" && <LandingReseau />}
-                {whoIs === "pilot" && <LandingPilot />}
-                {whoIs === "erp" && <LandingErp />}
-                {!whoIs && <LandingTransverse />}
-              </>
+              <Dashboard />
             )}
           </Box>
         </Container>

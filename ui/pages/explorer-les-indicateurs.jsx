@@ -3,15 +3,15 @@ import Head from "next/head";
 import { Box, Container, Heading, HStack, Text } from "@chakra-ui/react";
 import { startOfHour } from "date-fns";
 
-import { Page } from "../components";
-import { Breadcrumb } from "../components/Breadcrumb/Breadcrumb";
+import Page from "@/components/Page/Page";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 import { Padlock } from "../theme/components/icons";
-import Link from "../components/Links/Link";
+import Link from "@/components/Links/Link";
 
-import { Section } from "../components";
+import Section from "@/components/Section/Section";
 import useFetchIndicateursNational from "../hooks/useFetchIndicateursNational";
-import { formatDateDayMonthYear } from "../common/utils/dateUtils";
-import IndicateursGridStack from "../components/IndicateursGridStack";
+import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
+import IndicateursGridStack from "@/components/IndicateursGridStack";
 
 const ExplorerLesIndicateursPage = () => {
   const title = "Visualiser les indicateurs en temps réel";

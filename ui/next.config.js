@@ -31,6 +31,9 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   output: "standalone",
+  experimental: {
+    appDir: false,
+  },
   webpack: (config) => {
     config.plugins.push(new CaseSensitivePathsPlugin());
     return config;

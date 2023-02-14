@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/router";
 import {
   Box,
   Button,
@@ -16,6 +17,7 @@ import {
   Text,
   // Skeleton,
 } from "@chakra-ui/react";
+
 import { Logo } from "./Logo";
 import Link from "../../Links/Link";
 import { PRODUCT_NAME } from "../../../common/constants/product";
@@ -27,7 +29,6 @@ import { _get } from "../../../common/httpClient.js";
 import MenuItem from "../../Links/MenuItem";
 import { Parametre } from "../../../theme/components/icons/Parametre.js";
 import { Settings4Fill, UserFill } from "../../../theme/components/icons";
-import { useRouter } from "next/router";
 // import { NotificationsMenu } from "./Notifications/Notifications";
 
 const UserMenu = () => {
