@@ -86,7 +86,7 @@ export default function Table({
   if (table.getPrePaginationRowModel().rows.length === 0) return null;
 
   return (
-    <>
+    <div className="flex flex-col">
       <Box as="table" flex={1} fontSize="delta" w="100%" {...props}>
         <Box as="thead">
           {table.getHeaderGroups().map((headerGroup, key) => (
@@ -229,6 +229,6 @@ export default function Table({
           </HStack>
         </>
       )}
-    </>
+    </div>
   );
 }
