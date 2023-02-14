@@ -9,7 +9,7 @@ import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useEspace } from "@/hooks/useEspace";
 import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/components/OrganismeInfo";
 import { hasContextAccessTo } from "@/common/utils/rolesUtils";
-import LandingTransverse from "@/modules/mon-espace/landing/LandingTransverse";
+import Dashboard from "@/modules/mon-espace/landing/Dashboard";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
@@ -36,7 +36,7 @@ const PageMonOrganisme = () => {
                 </Stack>
               )
             ) : (
-              <LandingTransverse />
+              <Dashboard />
             )}
           </Box>
         </Container>

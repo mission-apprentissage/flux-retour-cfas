@@ -10,7 +10,7 @@ import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useOrganisme } from "@/hooks/useOrganisme";
 import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/components/OrganismeInfo";
 import { hasContextAccessTo } from "@/common/utils/rolesUtils";
-import LandingTransverse from "@/modules/mon-espace/landing/LandingTransverse";
+import Dashboard from "@/modules/mon-espace/landing/Dashboard";
 import RibbonsUnauthorizedAccessToOrganisme from "@/components/Ribbons/RibbonsUnauthorizedAccessToOrganisme";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
@@ -41,7 +41,7 @@ const Organisme = () => {
                 <RibbonsUnauthorizedAccessToOrganisme />
               )
             ) : (
-              <LandingTransverse />
+              <Dashboard />
             )}
           </Box>
         </Container>

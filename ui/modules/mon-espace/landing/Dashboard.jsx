@@ -3,11 +3,11 @@ import { Heading, Stack } from "@chakra-ui/react";
 import { SimpleFiltersProvider } from "./common/SimpleFiltersContext.js";
 import IndicateursInfo from "./common/IndicateursInfos.jsx";
 
-const LandingTransverse = () => {
+const Dashboard = () => {
   return (
     <Stack spacing="2w">
       <Heading textStyle="h2" color="grey.800">
-        Bienvenue sur votre tableau de bord [TRANSVERSE]
+        Bienvenue sur votre tableau de bord
       </Heading>
 
       <SimpleFiltersProvider>
@@ -17,4 +17,4 @@ const LandingTransverse = () => {
   );
 };
 
-export default LandingTransverse;
+export default Dashboard;
