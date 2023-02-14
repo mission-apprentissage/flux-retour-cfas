@@ -9,15 +9,12 @@ import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { useEspace } from "@/hooks/useEspace";
 import OrganismeInfo from "@/modules/mon-espace/landing/LandingOrganisme/components/OrganismeInfo";
 import { hasContextAccessTo } from "@/common/utils/rolesUtils";
-import LandingErp from "@/modules/mon-espace/landing/LandingErp";
 import LandingTransverse from "@/modules/mon-espace/landing/LandingTransverse";
-import LandingReseau from "@/modules/mon-espace/landing/LandingReseau.jsx";
-import LandingPilot from "@/modules/mon-espace/landing/LandingPilot.jsx";
 
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 const PageMonOrganisme = () => {
-  let { myOrganisme, whoIs } = useEspace();
+  let { myOrganisme } = useEspace();
 
   return (
     <Page>
@@ -39,12 +36,7 @@ const PageMonOrganisme = () => {
                 </Stack>
               )
             ) : (
-              <>
-                {whoIs === "reseau_of" && <LandingReseau />}
-                {whoIs === "pilot" && <LandingPilot />}
-                {whoIs === "erp" && <LandingErp />}
-                {!whoIs && <LandingTransverse />}
-              </>
+              <LandingTransverse />
             )}
           </Box>
         </Container>
