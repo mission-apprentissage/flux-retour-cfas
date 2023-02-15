@@ -28,6 +28,7 @@
   "dependencies": {
     "@sentry/node": "7.33.0",
     "@sentry/tracing": "7.33.0",
+    "@supercharge/promise-pool": "2.4.0",
     "arg": "5.0.1",
     "async": "3.2.3",
     "axios": "0.27.2",

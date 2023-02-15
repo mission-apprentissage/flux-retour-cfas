@@ -1,3 +1,4 @@
+import { PromisePool } from "@supercharge/promise-pool";
 import logger from "../../../common/logger.js";
 import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
@@ -17,11 +18,11 @@ export const hydrateOrganismesReferentiel = async () => {
   // On récupère l'intégralité des organismes depuis le référentiel
   let { organismes } = await fetchOrganismes();
   logger.info(`Insertion de ${organismes.length} organismes provenant du référentiel...`);
-  await Promise.all(
-    organismes.map((currentOrganisme) => {
-      return insertOrganismeReferentiel(currentOrganisme);
-    })
-  );
+
+  // Processes 10 organismes en // par défaut
+  await PromisePool.for(organismes).process(async (currentOrganisme) => {
+    return insertOrganismeReferentiel(currentOrganisme);
+  });
 
   // Log & stats
   logger.info(`--> ${nbOrganismeCreated} organismesReferentiel créés depuis le référentiel`);
