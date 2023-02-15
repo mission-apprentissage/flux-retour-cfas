@@ -1,5 +1,4 @@
 import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js";
-import { DEFAULT_REFERENTIEL_FIELDS_TO_FETCH, fetchOrganismes } from "../../../../common/apis/apiReferentielMna.js";
 import { FIABILISATION_TYPES } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
 import {

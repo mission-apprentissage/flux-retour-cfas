@@ -1,4 +1,3 @@
-import { fetchOrganismes } from "../../../../../common/apis/apiReferentielMna.js";
 import logger from "../../../../../common/logger.js";
 import {
   dossiersApprenantsMigrationDb,
