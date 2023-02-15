@@ -1,6 +1,5 @@
 import { strict as assert } from "assert";
 import nock from "nock";
-import { pick } from "lodash-es";
 
 import { startServer } from "../../utils/testUtils.js";
 import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
@@ -13,7 +12,6 @@ import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd.js";
 import { dossiersApprenantsMigrationDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
 import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
-import { buildTokenizedString } from "../../../src/common/utils/buildTokenizedString.js";
 import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";
 
 const user = {
