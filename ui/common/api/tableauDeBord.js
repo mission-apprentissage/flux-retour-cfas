@@ -1,14 +1,6 @@
 import qs from "query-string";
 
-import { _delete, _get, _post, _put } from "../httpClient";
-
-/* Effectifs */
-
-export const fetchIndicateurs = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/indicateurs?${queryParameters}`;
-  return _get(url);
-};
+import { _delete, _get, _post } from "../httpClient";
 
 // TODO Rename & Refacto
 export const fetchEffectifsParCfa = (filters) => {
@@ -28,12 +20,6 @@ export const fetchEffectifsParFormation = (filters) => {
 export const fetchEffectifsParAnneeFormation = (filters) => {
   const queryParameters = qs.stringify(filters);
   const url = `/api/effectifs/annee-formation?${queryParameters}`;
-  return _get(url);
-};
-
-export const fetchIndicateursNational = (filters) => {
-  const queryParameters = qs.stringify(filters);
-  const url = `/api/indicateurs-national?${queryParameters}`;
   return _get(url);
 };
 
