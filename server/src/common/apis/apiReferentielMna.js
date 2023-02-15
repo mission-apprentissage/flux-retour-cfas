@@ -6,16 +6,19 @@ import config from "../../config.js";
 
 const API_ENDPOINT = config.mnaReferentielApi.endpoint;
 
-export const fetchOrganismes = async (options = {}) => {
-  const { itemsPerPage = 10000, champs = DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(",") } = options;
-
+/**
+ * Récupération des organismes du référentiel
+ * Par défaut on récupère 10000 éléments par page et tous les champs définis dans DEFAULT_REFERENTIEL_FIELDS_TO_FETCH
+ * @returns
+ */
+export const fetchOrganismes = async () => {
   const { data } = await axios({
     method: "GET",
     baseURL: API_ENDPOINT,
     url: "/organismes",
     params: {
-      items_par_page: itemsPerPage,
-      champs,
+      items_par_page: 10000,
+      champs: DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(","),
     },
   });
   return data;
@@ -49,10 +52,12 @@ export const DEFAULT_REFERENTIEL_FIELDS_TO_FETCH = [
   "adresse",
   "enseigne",
   "etat_administratif",
+  "forme_juridique",
   "nature",
   "numero_declaration_activite",
   "qualiopi",
   "raison_sociale",
   "siret",
+  "siege_social",
   "uai",
 ];

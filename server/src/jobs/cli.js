@@ -14,6 +14,7 @@ import { hydrateOrganismesAndFormations } from "./hydrate/organismes/hydrate-org
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
 import { hydrateRefreshFormations } from "./hydrate/refresh-formations/hydrate-refresh-formations.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
+import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 
 /**
  * Job d'initialisation de données de test
@@ -111,6 +112,18 @@ cli
     runScript(async () => {
       return clearRoles();
     }, "Clear");
+  });
+
+/**
+ * Job de remplissage des organismes du référentiel
+ */
+cli
+  .command("hydrate:organismes-referentiel")
+  .description("Remplissage des organismes du référentiel")
+  .action(async () => {
+    runScript(async () => {
+      return hydrateOrganismesReferentiel();
+    }, "hydrate-organismes-referentiel");
   });
 
 /**

@@ -1,6 +1,5 @@
 import cliProgress from "cli-progress";
 import logger from "../../../common/logger.js";
-import { fetchOrganismes } from "../../../common/apis/apiReferentielMna.js";
 import {
   createOrganisme,
   findOrganismeByUaiAndSiret,
@@ -11,6 +10,7 @@ import { buildAdresseFromUai } from "../../../common/utils/uaiUtils.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { buildTokenizedString } from "../../../common/utils/buildTokenizedString.js";
 import { getFormationsTreeForOrganisme } from "../../../common/actions/organismes/organismes.formations.actions.js";
+import { organismesReferentielDb } from "../../../common/model/collections.js";
 
 const loadingBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 const JOB_NAME = "hydrate-organismes-and-formations";
@@ -27,7 +27,7 @@ const JOB_NAME = "hydrate-organismes-and-formations";
  */
 export const hydrateOrganismesAndFormations = async () => {
   // On récupère l'intégralité des organismes depuis le référentiel
-  let { organismes } = await fetchOrganismes();
+  const organismes = await organismesReferentielDb().find().toArray();
 
   let nbOrganismeCreated = 0;
   let nbOrganismeNotCreated = 0;

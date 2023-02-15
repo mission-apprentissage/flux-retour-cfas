@@ -1,6 +1,9 @@
-import { fetchOrganismes } from "../../../../../common/apis/apiReferentielMna.js";
 import logger from "../../../../../common/logger.js";
-import { dossiersApprenantsMigrationDb, fiabilisationUaiSiretDb } from "../../../../../common/model/collections.js";
+import {
+  dossiersApprenantsMigrationDb,
+  fiabilisationUaiSiretDb,
+  organismesReferentielDb,
+} from "../../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../../common/utils/asyncUtils.js";
 import { FIABILISATION_MAPPINGS as manualMapping } from "../../mapping.js";
 
@@ -15,28 +18,11 @@ const insertInFiabilisationMappingIfNotExist = async (mapping) => {
   return await fiabilisationUaiSiretDb().insertOne({ created_at: new Date(), ...mapping });
 };
 
-// TODO : a déplacer ?
-const REFERENTIEL_FIELDS_TO_FETCH = [
-  "siret",
-  "uai",
-  "etat_administratif",
-  "qualiopi",
-  "raison_sociale",
-  "enseigne",
-  "nature",
-  "qualiopi",
-  "adresse",
-  "numero_declaration_activite",
-];
-
 /**
  * Méthode de création de la collection de mapping pour fiabilisation couples UAI SIRET
  */
 export const createFiabilisationUaiSiretMapping = async () => {
-  const { organismes: organismesFromReferentiel } = await fetchOrganismes({
-    champs: REFERENTIEL_FIELDS_TO_FETCH.join(","),
-    itemsPerPage: 10000,
-  });
+  const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
 
   // on récupère tous les couples UAI/SIRET depuis les dossiers apprenants
   const allCouplesUaiSiretTdb = await dossiersApprenantsMigrationDb()
