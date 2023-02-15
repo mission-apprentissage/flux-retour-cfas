@@ -30,9 +30,6 @@ const RegisterPage = () => {
           h="100%"
           flexGrow={1}
           borderColor="openbluefrance"
-          onSucceeded={() => {
-            router.push("/auth/inscription/bravo");
-          }}
         />
         <InformationBlock w={{ base: "100%", md: "50%" }} />
       </Flex>

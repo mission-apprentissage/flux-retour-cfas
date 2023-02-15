@@ -33,7 +33,6 @@ const PageFormulaire = () => {
   const router = useRouter();
   const title = "Créer un compte";
   const { organismesAppartenance, siret, uai } = router.query;
-  console.log({ organismesAppartenance, siret, uai });
   const { data: etablissements, isFetching } = useFetchEtablissements({ siret });
   const etablissement = etablissements?.[0];
 

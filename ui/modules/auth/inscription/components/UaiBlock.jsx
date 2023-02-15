@@ -98,7 +98,6 @@ export const UaiBlock = ({ uai, onUaiFetched }) => {
           onSuccess: (data) => {
             // si plusieurs etablissement,
             // on laisse l'utilisateur choisir
-            console.log(data);
             if (data.length === 1) {
               onUaiFetched(data[0]);
             }
