@@ -57,23 +57,9 @@ export const hydrateOrganismesFromReferentiel = async () => {
 /**
  * Reset du flag est_dans_le_referentiel pour tous les organismes ayant au moins un siret
  */
-const resetOrganismesReferentielPresence = async (organisme) => {
-  const organismes = await organismesDb()
-    .find({ siret: { $exists: true } })
-    .toArray();
-
+const resetOrganismesReferentielPresence = async () => {
   logger.info(`Remise à 0 des organismes comme non présents dans le référentiel...`);
-  await PromisePool.for(organismes).process(async (currentOrganismeToReset) => {
-    await updateOrganisme(
-      organisme._id,
-      { ...currentOrganismeToReset, est_dans_le_referentiel: false },
-      {
-        buildFormationTree: false,
-        buildInfosFromSiret: false,
-        callLbaApi: false,
-      }
-    );
-  });
+  await organismesDb().updateMany({ siret: { $exists: true } }, { $set: { est_dans_le_referentiel: false } });
 };
 
 /**
