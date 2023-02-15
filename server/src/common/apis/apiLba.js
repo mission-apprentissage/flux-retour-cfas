@@ -11,7 +11,7 @@ const NO_METIERS_FOUND_ERROR_MSG = "No training found";
 const fetchMetiersBySiret = async (siret) => {
   const url = `${API_ENDPOINT}/metiers/metiersParEtablissement/${encodeURIComponent(siret)}`;
   const { data } = await axios.get(url);
-  return data;
+  return data?.metiers ?? [];
 };
 
 /**
@@ -23,12 +23,12 @@ export const getMetiersBySiret = async (siret) => {
   if (!siret) throw new Error("sirets param must be a specified");
 
   try {
-    const { metiers } = await fetchMetiersBySiret(siret);
+    const metiers = await fetchMetiersBySiret(siret);
     return metiers;
   } catch (err) {
     // 500 with specific message on this route means no métiers were found for those SIRET
     if (err.response?.status === 500 && err.response?.data?.error === NO_METIERS_FOUND_ERROR_MSG) {
-      return { data: null };
+      return [];
     } else {
       const errorMessage = err.response?.data || err.code;
       logger.error("API LBA getMetiersBySirets something went wrong:", errorMessage);

@@ -14,6 +14,7 @@ import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-o
 import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
+import { updateOrganismesWithApis } from "./hydrate/organismes/update-organismes-with-apis.js";
 
 /**
  * Job d'initialisation de données de test
@@ -122,6 +123,21 @@ cli
     runScript(async () => {
       return hydrateOrganismesFromReferentiel();
     }, "hydrate-organismes");
+  });
+
+/**
+ * Job de mise à jour des organismes en allant appeler des API externes pour remplir
+ * - Les informations liés au SIRET (API Entreprise)
+ * - L'arbre des formations (API Catalogue)
+ * - Les métiers liés (API LBA)
+ */
+cli
+  .command("update:organismes-with-apis")
+  .description("Mise à jour des organismes via API externes")
+  .action(async () => {
+    runScript(async () => {
+      return updateOrganismesWithApis();
+    }, "update-organismes-with-apis");
   });
 
 /**
