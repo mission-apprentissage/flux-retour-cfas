@@ -11,6 +11,7 @@ import MaintenanceMessagesModelDescriptor from "./maintenanceMessages.model.js";
 import RolesModelDescriptor from "./roles.model.js";
 import PermissionsDescriptor from "./permissions.model.js";
 import OrganismesModelDescriptor from "./organismes.model.js";
+import OrganismesReferentielModelDescriptor from "./organismesReferentiel.model.js";
 import dossiersApprenantsMigrationModelDescriptor from "./dossiersApprenantsMigration.model.js";
 import effectifsModelDescriptor from "./effectifs.model/effectifs.model.js";
 import uploadsModelDescriptor from "./uploads.model/uploads.model.js";
@@ -27,6 +28,7 @@ export const modelDescriptors = [
   RolesModelDescriptor,
   PermissionsDescriptor,
   OrganismesModelDescriptor,
+  OrganismesReferentielModelDescriptor,
   dossiersApprenantsMigrationModelDescriptor,
   effectifsModelDescriptor,
   uploadsModelDescriptor,
@@ -63,6 +65,10 @@ export const jwtSessionsDb = () => {
 
 export function organismesDb() {
   return getDbCollection(OrganismesModelDescriptor.collectionName);
+}
+
+export function organismesReferentielDb() {
+  return getDbCollection(OrganismesReferentielModelDescriptor.collectionName);
 }
 
 export function permissionsDb() {
