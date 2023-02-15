@@ -2,7 +2,6 @@ import { strict as assert } from "assert";
 import { createRandomOrganisme } from "../../../data/randomizedSample.js";
 import pick from "lodash.pick";
 import {
-  createAndControlOrganisme,
   createOrganisme,
   findOrganismeById,
   updateOrganisme,
@@ -17,6 +16,23 @@ import { SAMPLES_ETABLISSEMENTS_API_ENTREPRISE } from "../../../data/entreprise.
 import { DEPARTEMENTS } from "../../../../src/common/constants/territoiresConstants.js";
 
 describe("Test des actions Organismes", () => {
+  // Construction de l'adresse nockée via API Entreprise pour un fichier de sample
+  const buildAdresseFromApiEntreprise = (etablissementSample) => {
+    const { adresse, region_implantation } = etablissementSample;
+    const academieFromRegion = DEPARTEMENTS.find((o) => o.region?.code === region_implantation?.code);
+    return {
+      academie: academieFromRegion?.academie?.code,
+      code_insee: adresse?.code_insee_localite,
+      code_postal: adresse?.code_postal,
+      commune: adresse?.localite,
+      complete: `${adresse?.l1}\r\n${adresse?.l2}\r\n${adresse?.l4}\r\n${adresse?.l6}\r\n${adresse?.l7}`,
+      departement: adresse?.code_postal.substring(0, 2),
+      numero: parseInt(adresse?.numero_voie),
+      region: region_implantation?.code,
+      voie: `${adresse?.type_voie}${adresse.nom_voie}`,
+    };
+  };
+
   describe("createOrganisme", () => {
     it("throws when given organisme is null", async () => {
       try {
@@ -38,7 +54,77 @@ describe("Test des actions Organismes", () => {
       }
     });
 
-    it("returns created organisme when valid", async () => {
+    it("returns created organisme when valid with UAI & SIRET & no API Calls", async () => {
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+
+      // Création de l'organisme sans les appels API
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
+      const created = await findOrganismeById(_id);
+
+      assert.deepEqual(pick(created, ["uai", "siret", "nom", "nature"]), {
+        uai: sampleOrganisme.uai,
+        siret: sampleOrganisme.siret,
+        nom: sampleOrganisme.nom,
+        nature: sampleOrganisme.nature,
+      });
+
+      // Vérification des autres champs
+      assert.equal(created.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
+      assert.equal(created.private_url !== null, true);
+      assert.equal(created.accessToken !== null, true);
+      assert.equal(created.created_at !== null, true);
+      assert.equal(created.updated_at !== null, true);
+    });
+
+    it("returns created organisme when valid with SIRET and no UAI & no API Calls", async () => {
+      const sampleOrganisme = {
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+
+      // Création de l'organisme sans les appels API
+      const { _id } = await createOrganisme(sampleOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
+      const created = await findOrganismeById(_id);
+
+      assert.deepEqual(pick(created, ["siret", "nom", "nature"]), {
+        siret: sampleOrganisme.siret,
+        nom: sampleOrganisme.nom,
+        nature: sampleOrganisme.nature,
+      });
+
+      // Vérification des autres champs
+      assert.equal(created.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
+      assert.equal(created.private_url !== null, true);
+      assert.equal(created.accessToken !== null, true);
+      assert.equal(created.created_at !== null, true);
+      assert.equal(created.updated_at !== null, true);
+    });
+
+    it("returns created organisme when valid with UAI & SIRET & API Calls", async () => {
       const sampleOrganisme = {
         uai: "0693400W",
         siret: "41461021200014",
@@ -55,6 +141,41 @@ describe("Test des actions Organismes", () => {
 
       assert.deepEqual(pick(created, ["uai", "siret", "nom", "nature"]), {
         uai: sampleOrganisme.uai,
+        siret: sampleOrganisme.siret,
+        nom: sampleOrganisme.nom,
+        nature: sampleOrganisme.nature,
+      });
+
+      assert.deepEqual(
+        created.adresse,
+        buildAdresseFromApiEntreprise(SAMPLES_ETABLISSEMENTS_API_ENTREPRISE.sample41461021200014.etablissement)
+      );
+
+      // TODO Tester les API pour les formations tree et les metiers LBA
+
+      // Vérification des autres champs
+      assert.equal(created.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
+      assert.equal(created.private_url !== null, true);
+      assert.equal(created.accessToken !== null, true);
+      assert.equal(created.created_at !== null, true);
+      assert.equal(created.updated_at !== null, true);
+    });
+
+    it("returns created organisme when valid with SIRET & no UAI & API Calls", async () => {
+      const sampleOrganisme = {
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+      const { _id } = await createOrganisme(sampleOrganisme);
+      const created = await findOrganismeById(_id);
+
+      assert.deepEqual(pick(created, ["siret", "nom", "nature"]), {
         siret: sampleOrganisme.siret,
         nom: sampleOrganisme.nom,
         nature: sampleOrganisme.nature,
@@ -88,39 +209,38 @@ describe("Test des actions Organismes", () => {
 
   describe("updateOrganisme", () => {
     it("throws when given data is null", async () => {
-      // TODO use assert.rejects
-      try {
-        await updateOrganisme("id", null);
-      } catch (err) {
-        assert.notEqual(err, undefined);
-      }
+      await assert.rejects(() => updateOrganisme("id", null));
     });
 
     it("throws when given id is null", async () => {
       const randomOrganisme = createRandomOrganisme();
-      // TODO use assert.rejects
-      try {
-        await updateOrganisme(null, randomOrganisme);
-      } catch (err) {
-        assert.notEqual(err, undefined);
-      }
+      await assert.rejects(() => updateOrganisme(null, randomOrganisme));
     });
 
     it("throws when given id is not existant", async () => {
       const randomOrganisme = createRandomOrganisme();
-      // TODO use assert.rejects
-      try {
-        await updateOrganisme("random-id", randomOrganisme);
-      } catch (err) {
-        assert.notEqual(err, undefined);
-      }
+      await assert.rejects(() => updateOrganisme("random-id", randomOrganisme));
     });
 
-    it("returns update cfa when id and dossier apprenant are valid", async () => {
-      const randomOrganisme = createRandomOrganisme();
-      const { _id } = await createOrganisme(randomOrganisme);
-      const toUpdateOrganisme = { ...randomOrganisme, nom: "UPDATED" };
-      const updatedOrganisme = await updateOrganisme(_id, toUpdateOrganisme);
+    it("returns updated organisme when id valid and no API Calls", async () => {
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+      const { _id } = await createOrganisme(sampleOrganisme);
+      const toUpdateOrganisme = { ...sampleOrganisme, nom: "UPDATED" };
+      const updatedOrganisme = await updateOrganisme(_id, toUpdateOrganisme, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
 
       assert.deepEqual(pick(updatedOrganisme, ["uai", "siret", "nom", "adresse", "nature"]), {
         uai: updatedOrganisme.uai,
@@ -131,6 +251,55 @@ describe("Test des actions Organismes", () => {
       });
 
       assert.equal(updatedOrganisme.nom_tokenized, buildTokenizedString("UPDATED", 4));
+      assert.equal(updatedOrganisme.private_url !== null, true);
+      assert.equal(updatedOrganisme.accessToken !== null, true);
+      assert.equal(updatedOrganisme.created_at !== null, true);
+      assert.equal(updatedOrganisme.updated_at !== null, true);
+    });
+
+    it("returns updated organisme when id valid and API Calls", async () => {
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+      const { _id } = await createOrganisme(sampleOrganisme);
+      // Test d'update sur le champ api_key
+      const toUpdateOrganisme = { ...sampleOrganisme, api_key: "UPDATED" };
+      const updatedOrganisme = await updateOrganisme(_id, toUpdateOrganisme);
+
+      assert.deepEqual(pick(updatedOrganisme, ["uai", "siret", "api_key", "nature"]), {
+        uai: updatedOrganisme.uai,
+        siret: updatedOrganisme.siret,
+        api_key: "UPDATED",
+        nature: updatedOrganisme.nature,
+      });
+
+      // Vérification de l'adresse construite depuis l'appel API Entreprise
+      const { adresse, region_implantation } = SAMPLES_ETABLISSEMENTS_API_ENTREPRISE.sample41461021200014.etablissement;
+      const academieFromRegion = DEPARTEMENTS.find((o) => o.region?.code === region_implantation?.code);
+      const adresseBuildFromApiEntreprise = {
+        academie: academieFromRegion?.academie?.code,
+        code_insee: adresse?.code_insee_localite,
+        code_postal: adresse?.code_postal,
+        commune: adresse?.localite,
+        complete: `${adresse?.l1}\r\n${adresse?.l2}\r\n${adresse?.l4}\r\n${adresse?.l6}\r\n${adresse?.l7}`,
+        departement: adresse?.code_postal.substring(0, 2),
+        numero: parseInt(adresse?.numero_voie),
+        region: region_implantation?.code,
+        voie: `${adresse?.type_voie}${adresse.nom_voie}`,
+      };
+
+      assert.deepEqual(updatedOrganisme.adresse, adresseBuildFromApiEntreprise);
+      // TODO Tester les API pour les formations tree et les metiers LBA
+
+      assert.equal(updatedOrganisme.nom_tokenized, buildTokenizedString(sampleOrganisme.nom.trim(), 4));
       assert.equal(updatedOrganisme.private_url !== null, true);
       assert.equal(updatedOrganisme.accessToken !== null, true);
       assert.equal(updatedOrganisme.created_at !== null, true);
@@ -227,134 +396,6 @@ describe("Test des actions Organismes", () => {
       });
       assert.equal(cleanUai, sampleUaiFiable);
       assert.equal(cleanSiret, sampleSiretFiable);
-    });
-  });
-
-  describe("createAndControlOrganisme", () => {
-    it("return created organisme if uai-siret not already existant in db", async () => {
-      const uai = "0611175W";
-      const siret = "41461021200014";
-      const nom = "testOf";
-
-      const created = await createAndControlOrganisme({ uai, siret, nom });
-
-      assert.ok(created);
-      assert.deepEqual(created.uai, uai);
-      assert.deepEqual(created.siret, siret);
-      assert.deepEqual(created.nom, nom);
-    });
-
-    it("return existant organisme id if uai-siret couple already existant in db", async () => {
-      const uai = "0611175W";
-      const siret = "41461021200014";
-
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
-      const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret, nom: randomOrganisme.nom });
-
-      assert.deepEqual(createdOrganismeId, foundOrganismeId);
-    });
-
-    it("return existant organisme id if uai-siret couple existant in db after fiabilisation with mapping via file", async () => {
-      const uai = FIABILISATION_MAPPINGS[0].uai;
-      const siret = FIABILISATION_MAPPINGS[0].siret;
-      const uaiFiable = FIABILISATION_MAPPINGS[0].uai_fiable;
-      const siretFiable = FIABILISATION_MAPPINGS[0].siret_fiable;
-
-      // Création d'un organisme clean avec uai - siret fiables issus du fichier de mapping
-      const randomOrganisme = createRandomOrganisme({ uai: uaiFiable, siret: siretFiable });
-      const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
-
-      // Création & control d'un organisme avec l'UAI et siret non fiabilisés
-      const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai, siret });
-
-      assert.deepEqual(createdOrganismeId, foundOrganismeId);
-    });
-
-    it("return existant organisme id if uai-siret couple existant in db after fiabilisation with mapping via collection", async () => {
-      const sampleUai = "0755805C";
-      const sampleSiret = "77568013501139";
-      const sampleUaiFiable = "0755805C";
-      const sampleSiretFiable = "77568013501089";
-
-      // Create entry A_FIABILISER in fiabilisation collection
-      await fiabilisationUaiSiretDb().insertOne({
-        uai: sampleUai,
-        siret: sampleSiret,
-        uai_fiable: sampleUaiFiable,
-        siret_fiable: sampleSiretFiable,
-        type: FIABILISATION_TYPES.A_FIABILISER,
-      });
-
-      // Création d'un organisme clean avec uai - siret fiables issus de la collection
-      const randomOrganisme = createRandomOrganisme({ uai: sampleUaiFiable, siret: sampleSiretFiable });
-      const { _id: createdOrganismeId } = await createOrganisme(randomOrganisme);
-
-      // Création & control d'un organisme avec l'UAI et siret non fiabilisés
-      const { _id: foundOrganismeId } = await createAndControlOrganisme({ uai: sampleUai, siret: sampleSiret });
-
-      assert.deepEqual(createdOrganismeId, foundOrganismeId);
-    });
-
-    it("throws an error if siret fiabilized is empty (via collection)", async () => {
-      const sampleUai = "0755805C";
-      const sampleSiret = "77568013501139";
-      const sampleUaiFiable = "0755805C";
-
-      // Create entry A_FIABILISER in fiabilisation collection
-      await fiabilisationUaiSiretDb().insertOne({
-        uai: sampleUai,
-        siret: sampleSiret,
-        uai_fiable: sampleUaiFiable,
-        siret_fiable: null,
-        type: FIABILISATION_TYPES.A_FIABILISER,
-      });
-
-      // Création & control d'un organisme avec uai et siret
-      await assert.rejects(
-        () => createAndControlOrganisme({ uai: sampleUai, siret: sampleSiret }),
-        new Error(`Impossible de créer l'organisme d'uai ${sampleUai} avec un SIRET vide`)
-      );
-    });
-
-    it("throws an error if siret found with another uai", async () => {
-      const uai = "0040533H";
-      const siret = "19040492100016";
-
-      // Création d'un organisme avec couple uai - siret
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      await createOrganisme(randomOrganisme);
-
-      // Création & control d'un organisme avec le même siret mais un UAI différent
-      const otherUai = "0611175W";
-      await assert.rejects(
-        () => createAndControlOrganisme({ uai: otherUai, siret }),
-        new Error(`L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${uai}`)
-      );
-    });
-
-    it("throws an error if uai found with another siret", async () => {
-      const uai = "0040533H";
-      const siret = "19040492100016";
-
-      // Création d'un organisme avec couple uai - siret
-      const randomOrganisme = createRandomOrganisme({ uai, siret });
-      await createOrganisme(randomOrganisme);
-
-      // Création & control d'un organisme avec le même uai mais un SIRET différent
-      const otherSiret = "78354361400029";
-      await assert.rejects(
-        () => createAndControlOrganisme({ uai, siret: otherSiret }),
-        new Error(`L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${siret}`)
-      );
-    });
-
-    it("throws error if uai-siret not present in ACCES", async () => {
-      // TODO Faire un createAndControlOrganisme avec un couple uai - siret non présent en db et non présent dans ACCES
-    });
-
-    it("return a created organisme id if uai-siret couple existant in base ACCES and not in db", async () => {
-      // TODO Faire un createAndControlOrganisme avec un couple uai - siret non présent en db et présent dans ACCES
     });
   });
 });
