@@ -8,6 +8,21 @@ function getTemplateFile(name) {
   return path.join(__dirname(import.meta.url), `${name}.mjml.ejs`);
 }
 
+function getRegionAsString(code) {
+  const region = REGIONS_BY_ID[code];
+  return region ? `${region.nom} (${region.code})` : code;
+}
+
+function getDepartementAsString(code) {
+  const dep = DEPARTEMENTS_BY_ID[code];
+  return dep ? `${dep.nom} (${dep.code})` : code;
+}
+
+function getAcademyAsString(code) {
+  const academie = ACADEMIES_BY_ID[code];
+  return academie ? `${academie.nom} (${academie.code})` : code;
+}
+
 export function activation_user({ payload }, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
   return {
@@ -29,12 +44,19 @@ export function activation_user({ payload }, token, options = {}) {
 
 export function validation_first_organisme_user_by_tdb_team({ payload }, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
+  const region_as_string = getRegionAsString(payload.organisme.adresse.region);
+  const departement_as_string = getDepartementAsString(payload.organisme.adresse.departement);
+  const academie_as_string = getAcademyAsString(payload.organisme.adresse.academie);
+
   return {
     subject: `${prefix} [ADMIN] Demande d'accès à l'organisme ${payload.organisme.nom}`,
     templateFile: getTemplateFile("validation_first_organisme_user_by_tdb_team"),
     data: {
       user: payload.user,
       organisme: payload.organisme,
+      region_as_string,
+      academie_as_string,
+      departement_as_string,
       type: payload.type,
       token,
     },
@@ -43,26 +65,9 @@ export function validation_first_organisme_user_by_tdb_team({ payload }, token, 
 
 export function validation_user_by_tdb_team({ payload }, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
-  const regions_as_string = payload.user.codes_region
-    .map((code) => {
-      const region = REGIONS_BY_ID[code];
-      return region ? `${region.nom} (${region.code})` : code;
-    })
-    .join(", ");
-
-  const departements_as_string = payload.user.codes_departement
-    .map((code) => {
-      const dep = DEPARTEMENTS_BY_ID[code];
-      return dep ? `${dep.nom} (${dep.code})` : code;
-    })
-    .join(", ");
-
-  const academies_as_string = payload.user.codes_academie
-    .map((code) => {
-      const academie = ACADEMIES_BY_ID[code];
-      return academie ? `${academie.nom} (${academie.code})` : code;
-    })
-    .join(", ");
+  const regions_as_string = payload.user.codes_region.map(getRegionAsString).join(", ");
+  const departements_as_string = payload.user.codes_departement.map(getDepartementAsString).join(", ");
+  const academies_as_string = payload.user.codes_academie.map(getAcademyAsString).join(", ");
 
   return {
     subject: `${prefix} [ADMIN] Demande d'accès`,
@@ -80,12 +85,19 @@ export function validation_user_by_tdb_team({ payload }, token, options = {}) {
 
 export function validation_user_by_orga_admin({ payload }, token, options = {}) {
   const prefix = options.resend ? "[Rappel] " : "";
+  const region_as_string = getRegionAsString(payload.organisme.adresse.region);
+  const departement_as_string = getDepartementAsString(payload.organisme.adresse.departement);
+  const academie_as_string = getAcademyAsString(payload.organisme.adresse.academie);
+
   return {
     subject: `${prefix} Demande d'accès à votre organisme ${payload.organisme.nom}`,
     templateFile: getTemplateFile("validation_user_by_orga_admin"),
     data: {
       user: payload.user,
       organisme: payload.organisme,
+      region_as_string,
+      academie_as_string,
+      departement_as_string,
       type: payload.type,
       token,
     },

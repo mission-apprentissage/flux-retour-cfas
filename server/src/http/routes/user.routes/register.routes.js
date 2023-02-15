@@ -264,7 +264,7 @@ export default ({ mailer }) => {
         throw Boom.conflict("Unable to retrieve user");
       }
 
-      if (userDb.account_status !== "FORCE_COMPLETE_PROFILE_STEP1") {
+      if (!["FORCE_COMPLETE_PROFILE_STEP1", "FORCE_COMPLETE_PROFILE_STEP2"].includes(userDb.account_status)) {
         logger.error(
           `User ${userDb.email} is not in the right status to ask for access (status : ${userDb.account_status})`
         );
