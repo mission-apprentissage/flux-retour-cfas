@@ -2,7 +2,11 @@ import { createJobEvent } from "../../../../common/actions/jobEvents.actions.js"
 import { DEFAULT_REFERENTIEL_FIELDS_TO_FETCH, fetchOrganismes } from "../../../../common/apis/apiReferentielMna.js";
 import { FIABILISATION_TYPES } from "../../../../common/constants/fiabilisationConstants.js";
 import logger from "../../../../common/logger.js";
-import { dossiersApprenantsMigrationDb, fiabilisationUaiSiretDb } from "../../../../common/model/collections.js";
+import {
+  dossiersApprenantsMigrationDb,
+  fiabilisationUaiSiretDb,
+  organismesReferentielDb,
+} from "../../../../common/model/collections.js";
 import { asyncForEach } from "../../../../common/utils/asyncUtils.js";
 import { getPercentage } from "../../../../common/utils/miscUtils.js";
 import { FIABILISATION_MAPPINGS as manualMapping } from "../mapping.js";
@@ -40,10 +44,7 @@ export const buildFiabilisationUaiSiret = async () => {
     action: "beginning",
   });
 
-  const { organismes: organismesFromReferentiel } = await fetchOrganismes({
-    champs: DEFAULT_REFERENTIEL_FIELDS_TO_FETCH.join(","),
-    itemsPerPage: 10000,
-  });
+  const organismesFromReferentiel = await organismesReferentielDb().find().toArray();
 
   // on récupère tous les couples UAI/SIRET depuis les dossiers apprenants (migration)
   const allCouplesUaiSiretTdb = await dossiersApprenantsMigrationDb()
