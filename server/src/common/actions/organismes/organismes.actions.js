@@ -35,18 +35,17 @@ export const createOrganisme = async (
   const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
 
   // Construction de l'arbre des formations de l'organisme si option active
-  // TODO abd: hydrate other organismes from formations
   const formations = buildFormationTree ? (await getFormationsTreeForOrganisme(uai))?.formations || [] : [];
 
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
     ? await getOrganismeInfosFromSiret(siret)
-    : { nom: nomIn, adresse: adresseIn };
+    : { nom: nomIn.trim(), adresse: adresseIn };
 
   const { insertedId } = await organismesDb().insertOne(
     validateOrganisme({
       ...(uai ? { uai } : {}),
-      ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
+      ...(nom ? { nom, nom_tokenized: buildTokenizedString(nom, 4) } : {}),
       ...defaultValuesOrganisme(),
       ...(siret ? { siret } : {}),
       metiers,
@@ -97,7 +96,7 @@ export const getOrganismeInfosFromSiret = async (siret) => {
 
       if (dataSiret.result.enseigne) {
         organismeInfos.enseigne = dataSiret.result.enseigne;
-        organismeInfos.nom = dataSiret.result.enseigne;
+        organismeInfos.nom = dataSiret.result.enseigne.trim();
       }
 
       if (dataSiret.result.entreprise_raison_sociale)
