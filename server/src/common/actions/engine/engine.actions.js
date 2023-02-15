@@ -15,10 +15,10 @@ import {
   validateEffectifObject,
 } from "../effectifs.actions.js";
 import {
+  createOrganisme,
   findOrganismeBySiret,
   findOrganismeByUai,
   findOrganismeByUaiAndSiret,
-  insertOrganisme,
   setOrganismeFirstDateTransmissionIfNeeded,
 } from "../organismes/organismes.actions.js";
 import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.js";
@@ -304,10 +304,16 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
       throw new Error(organismeFound.error);
     }
 
-    // Organisme a créer
+    // Création de l'organisme (sans appels API externes)
     if (organismeToCreate) {
-      organismeCreatedId = await insertOrganisme(organismeToCreate);
+      const { _id } = await createOrganisme(organismeToCreate, {
+        buildFormationTree: false,
+        buildInfosFromSiret: false,
+        callLbaApi: false,
+      });
+
       // Ajout organisme id a l'effectifData
+      organismeCreatedId = _id;
       effectifData.organisme_id = organismeCreatedId.toString();
     }
 

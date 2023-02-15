@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-import { getMetiersBySirets } from "../../apis/apiLba.js";
+import { getMetiersBySiret } from "../../apis/apiLba.js";
 import { organismesDb } from "../../model/collections.js";
 import { defaultValuesOrganisme, validateOrganisme } from "../../model/organismes.model.js";
 import { buildAdresseFromApiEntreprise } from "../../utils/adresseUtils.js";
@@ -8,7 +8,6 @@ import { buildTokenizedString } from "../../utils/buildTokenizedString.js";
 import { generateKey } from "../../utils/cryptoUtils.js";
 import { buildAdresseFromUai } from "../../utils/uaiUtils.js";
 import { siretSchema } from "../../utils/validationUtils.js";
-import { mapFiabilizedOrganismeUaiSiretCouple } from "../engine/engine.organismes.utils.js";
 import { createPermission, hasPermission, removePermissions } from "../permissions.actions.js";
 import { findRolePermissionById } from "../roles.actions.js";
 import { getUser, structureUser } from "../users.actions.js";
@@ -17,92 +16,43 @@ import { findDataFromSiret } from "../infoSiret.actions.js";
 import logger from "../../logger.js";
 
 /**
- * Méthode de création d'un organisme qui applique en entrée des filtres / rejection
- * via la collection de fiabilisation sur les couples UAI-Siret
- * ainsi qu'un filtre d'existence dans la base ACCES 
-// TODO Refacto la méthode pour renvoyer notValid ou toCreate ou existant
- */
-// TODO abd: ??? DUPLICATE OF hydrateOrganisme ?
-export const createAndControlOrganisme = async ({ uai, siret, nom, ...data }) => {
-  // Applique le mapping de fiabilisation
-  const { cleanUai, cleanSiret } = await mapFiabilizedOrganismeUaiSiretCouple({ uai, siret });
-
-  // Si pas de siret après fiabilisation -> KO (+ Log?)
-  if (!cleanSiret) throw new Error(`Impossible de créer l'organisme d'uai ${uai} avec un SIRET vide`);
-
-  // Applique les règles de rejection si pas dans la db
-  const organismeFoundWithUaiSiret = await findOrganismeByUaiAndSiret(cleanUai, cleanSiret);
-
-  if (organismeFoundWithUaiSiret?._id) {
-    return organismeFoundWithUaiSiret;
-  } else {
-    const organismeFoundWithSiret = await findOrganismeBySiret(cleanSiret);
-
-    // Si pour le couple uai-siret IN on trouve le SIRET mais un UAI différent -> KO (+ Log?)
-    if (organismeFoundWithSiret?._id)
-      throw new Error(
-        `L'organisme ayant le SIRET ${siret} existe déja en base avec un UAI différent : ${organismeFoundWithSiret.uai}`
-      ); // TODO LOG ?
-
-    const organismeFoundWithUai = await findOrganismeByUai(cleanUai);
-    // Si pour le couple uai-siret IN on trouve l'UAI mais un SIRET différent -> KO (+ Log?)
-    if (organismeFoundWithUai?._id)
-      throw new Error(
-        `L'organisme ayant l'UAI ${uai} existe déja en base avec un SIRET différent : ${organismeFoundWithUai.siret}`
-      ); // TODO LOG ?
-
-    // TODO CHECK BASE ACCES
-    // TODO Create if ok acces
-    const { insertedId } = await organismesDb().insertOne(
-      validateOrganisme({
-        uai,
-        siret,
-        ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
-        ...defaultValuesOrganisme(),
-        ...data,
-      })
-    );
-
-    return await organismesDb().findOne({ _id: insertedId });
-  }
-};
-
-/**
  * Méthode de création d'un organisme
  * Checks uai format & existence
  * @param {*} organismeProps
  * @returns
  */
-export const createOrganisme = async ({ uai, siret, nom: nomIn, adresse: adresseIn, ...data }) => {
+export const createOrganisme = async (
+  { uai, siret, nom: nomIn, adresse: adresseIn, ...data },
+  options = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
+) => {
   if (await organismesDb().countDocuments({ uai, siret })) {
     throw new Error(`Un organisme avec l'UAI ${uai} et le siret ${siret} existe déjà`);
   }
 
-  let metiers = [];
-  try {
-    metiers = (await getMetiersBySirets([siret]))?.metiers ?? [];
-  } catch (error) {
-    console.error(error);
-  }
+  const { callLbaApi, buildFormationTree, buildInfosFromSiret } = options;
 
-  // Récupération des infos depuis API Entreprise
-  const { adresse, ferme, enseigne, raison_sociale, nom } = await getOrganismeInfosFromSiret(siret, nomIn, adresseIn);
+  // Récupération des infos depuis API LBA si option active
+  const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
 
-  // Construction de l'arbre des formations de l'organisme
-  const { formations } = await getFormationsTreeForOrganisme(uai);
-  // TODO abd: hydrate other organismes from formations
+  // Construction de l'arbre des formations de l'organisme si option active
+  const formations = buildFormationTree ? (await getFormationsTreeForOrganisme(uai))?.formations || [] : [];
+
+  // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
+  const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
+    ? await getOrganismeInfosFromSiret(siret)
+    : { nom: nomIn.trim(), adresse: adresseIn };
 
   const { insertedId } = await organismesDb().insertOne(
     validateOrganisme({
-      uai,
-      ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
+      ...(uai ? { uai } : {}),
+      ...(nom ? { nom, nom_tokenized: buildTokenizedString(nom, 4) } : {}),
       ...defaultValuesOrganisme(),
       ...(siret ? { siret } : {}),
       metiers,
       formations,
       ...(adresse ? { adresse } : {}),
       ...data,
-      ferme,
+      ferme: ferme || false,
       ...(enseigne ? { enseigne } : {}),
       ...(raison_sociale ? { raison_sociale } : {}),
     })
@@ -112,31 +62,47 @@ export const createOrganisme = async ({ uai, siret, nom: nomIn, adresse: adresse
 };
 
 /**
+ * Fonction de récupération des métiers depuis l'API LBA
+ * @param {*} siret
+ * @returns
+ */
+const getMetiersFromLba = async (siret) => {
+  let metiers = [];
+
+  try {
+    metiers = await getMetiersBySiret(siret);
+  } catch (error) {
+    logger.error(`getMetiersFromLba > Erreur ${error} `);
+  }
+
+  return metiers ?? [];
+};
+
+/**
  * Fonction de récupération d'informations depuis SIRET via API Entreprise via siret
  * @param {*} siret
  * @param {*} nomIn
  * @param {*} adresseIn
  * @returns
  */
-export const getOrganismeInfosFromSiret = async (siret, nomIn = null, adresseIn = null) => {
-  let nom = nomIn;
-  let adresse = adresseIn;
-  let ferme = false;
-  let enseigne = null;
-  let raison_sociale = null;
+export const getOrganismeInfosFromSiret = async (siret) => {
+  let organismeInfos = {};
 
   if (siret) {
     const dataSiret = await findDataFromSiret(siret, true, false);
 
     if (dataSiret.messages.api_entreprise === "Ok") {
-      ferme = dataSiret.result.ferme;
+      organismeInfos.ferme = dataSiret.result.ferme;
 
-      if (dataSiret.result.enseigne) enseigne = dataSiret.result.enseigne;
-      if (dataSiret.result.entreprise_raison_sociale) raison_sociale = dataSiret.result.entreprise_raison_sociale;
-      if (!nom) nom = dataSiret.result.enseigne;
+      if (dataSiret.result.enseigne) {
+        organismeInfos.enseigne = dataSiret.result.enseigne;
+        organismeInfos.nom = dataSiret.result.enseigne.trim();
+      }
 
-      adresse = {
-        ...(adresse ?? {}),
+      if (dataSiret.result.entreprise_raison_sociale)
+        organismeInfos.raison_sociale = dataSiret.result.entreprise_raison_sociale;
+
+      organismeInfos.adresse = {
         ...(dataSiret.result.numero_voie ? { numero: dataSiret.result.numero_voie } : {}),
         ...(dataSiret.result.voie_complete ? { voie: dataSiret.result.voie_complete } : {}),
         ...(dataSiret.result.complement_adresse ? { complement: dataSiret.result.complement_adresse } : {}),
@@ -149,21 +115,11 @@ export const getOrganismeInfosFromSiret = async (siret, nomIn = null, adresseIn 
         ...(dataSiret.result.adresse ? { complete: dataSiret.result.adresse } : {}),
       };
     } else {
-      // TODO Find adresse somewhere else
-      logger.error(`createOrganisme > Erreur sur l'etablissement ${siret} via API Entreprise`);
+      logger.error(`getOrganismeInfosFromSiret > Erreur sur le siret ${siret} via API Entreprise / API Cfa Dock`);
     }
   }
-  return { adresse, ferme, enseigne, raison_sociale, nom };
-};
 
-/**
- * Méthode d'insert d'un organisme en base
- * @param {*} data
- * @returns
- */
-export const insertOrganisme = async (data) => {
-  const { insertedId } = await organismesDb().insertOne(validateOrganisme(data));
-  return insertedId;
+  return organismeInfos;
 };
 
 /**
@@ -269,7 +225,11 @@ export const findOrganismesByQuery = async (query, projection = {}) => {
  * @param {*} id
  * @returns
  */
-export const updateOrganisme = async (id, { nom, siret, ...data }) => {
+export const updateOrganisme = async (
+  id,
+  { nom: nomIn, adresse: adresseIn, siret, ...data },
+  options = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
+) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
@@ -278,21 +238,33 @@ export const updateOrganisme = async (id, { nom, siret, ...data }) => {
     throw new Error(`Unable to find organisme ${_id.toString()}`);
   }
 
-  let metiers = [];
-  try {
-    metiers = (await getMetiersBySirets([siret]))?.metiers ?? [];
-  } catch (error) {
-    console.error(error);
-  }
+  const { callLbaApi, buildFormationTree, buildInfosFromSiret } = options;
+
+  // Récupération des infos depuis API LBA si option active
+  const metiers = callLbaApi ? await getMetiersFromLba(siret) : [];
+
+  // Construction de l'arbre des formations de l'organisme si option active
+  const formations = buildFormationTree ? (await getFormationsTreeForOrganisme(organisme?.uai))?.formations || [] : [];
+
+  // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
+  const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
+    ? await getOrganismeInfosFromSiret(siret)
+    : { nom: nomIn, adresse: adresseIn };
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
     {
       $set: validateOrganisme({
-        uai: organisme.uai,
+        ...(organisme.uai ? { uai: organisme.uai } : {}),
+        siret,
         ...data,
         ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
         metiers,
+        formations,
+        ...(adresse ? { adresse } : {}),
+        ferme,
+        ...(enseigne ? { enseigne } : {}),
+        ...(raison_sociale ? { raison_sociale } : {}),
         updated_at: new Date(),
       }),
     },
@@ -330,6 +302,7 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, roleName
     {
       $set: validateOrganisme({
         uai: organisme.uai,
+        siret: organisme.siret,
         updated_at: new Date(),
       }),
       $addToSet: {

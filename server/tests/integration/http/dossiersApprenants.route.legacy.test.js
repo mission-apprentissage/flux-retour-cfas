@@ -1,6 +1,5 @@
 import { strict as assert } from "assert";
 import nock from "nock";
-import { pick } from "lodash-es";
 
 import { startServer } from "../../utils/testUtils.js";
 import { apiRoles, tdbRoles } from "../../../src/common/roles.js";
@@ -13,7 +12,6 @@ import { cfdRegex } from "../../../src/common/utils/validationsUtils/cfd.js";
 import { dossiersApprenantsMigrationDb, usersDb } from "../../../src/common/model/collections.js";
 import { createUserLegacy } from "../../../src/common/actions/legacy/users.legacy.actions.js";
 import { createOrganisme, findOrganismeById } from "../../../src/common/actions/organismes/organismes.actions.js";
-import { buildTokenizedString } from "../../../src/common/utils/buildTokenizedString.js";
 import { insertDossierApprenant } from "../../../src/common/actions/dossiersApprenants.actions.js";
 
 const user = {
@@ -79,26 +77,6 @@ describe("Dossiers Apprenants Route", () => {
   });
 
   describe("POST dossiers-apprenants/", () => {
-    it("Vérifie la création d'un organisme", async () => {
-      await startServer();
-      await createApiUser();
-
-      // Test organisme creation
-      assert.deepEqual(pick(createdOrganisme, ["uai", "siret", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        siret: randomOrganisme.siret,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(createdOrganisme.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(createdOrganisme.private_url !== null, true);
-      assert.equal(createdOrganisme.accessToken !== null, true);
-      assert.equal(createdOrganisme.created_at !== null, true);
-      assert.equal(createdOrganisme.updated_at !== null, true);
-    });
-
     it("Vérifie que la route /dossiers-apprenants fonctionne avec un tableau vide", async () => {
       nock("https://entreprise.api.gouv.fr:443");
 

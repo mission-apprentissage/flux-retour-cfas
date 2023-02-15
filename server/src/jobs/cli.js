@@ -12,7 +12,6 @@ import {
 } from "./users/generate-password-update-token.js";
 import { hydrateOrganismesAndFormations } from "./hydrate/organismes/hydrate-organismes-and-formations.js";
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
-import { hydrateRefreshFormations } from "./hydrate/refresh-formations/hydrate-refresh-formations.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 
@@ -70,20 +69,6 @@ cli
   });
 
 /**
- * Job d'initialisation projet avec des données d'exemple
- */
-// cli
-//   .command("seed:sample")
-//   .description("Seed projet avec des données d'exemple")
-//   .option("--random", "Indique si le seed doit générer des données aléatoires")
-//   .option("--nbDossiers <int>", "Indique le nombre de statuts à générer si mode random")
-//   .action(async ({ random, nbDossiers }) => {
-//     runScript(async () => {
-//       return seedWithSample(random, nbDossiers);
-//     }, "Seed-sample");
-//   });
-
-/**
  * Job de nettoyage de db
  */
 cli
@@ -136,19 +121,6 @@ cli
     runScript(async () => {
       return hydrateOrganismesAndFormations();
     }, "hydrate-organismes-and-formations");
-  });
-
-/**
- *  TODO ?
- * Job de rafraichissement des formations déja présentes en base
- */
-cli
-  .command("hydrate:refresh-formations")
-  .description("Mise à jour des formations")
-  .action(async () => {
-    runScript(async () => {
-      return hydrateRefreshFormations();
-    }, "hydrate-refresh-formations");
   });
 
 /**

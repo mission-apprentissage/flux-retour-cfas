@@ -11,6 +11,8 @@ import { findOrganismeByUai } from "./organismes.actions.js";
  * @param {*} uai
  */
 export const getFormationsTreeForOrganisme = async (uai) => {
+  if (!uai) return [];
+
   // Récupération des formations liés à l'organisme
   const catalogFormationsForOrganisme = await getCatalogFormationsForOrganisme(uai);
 

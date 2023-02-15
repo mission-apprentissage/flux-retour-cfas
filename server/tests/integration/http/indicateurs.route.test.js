@@ -37,14 +37,13 @@ describe("Effectifs Route", () => {
       assert.equal(response.status, 401);
     });
 
-    // TODO Remettre le test une fois middleware réactivé
     it("Vérifie qu'on ne peut pas accéder aux effectifs d'un autre organisme", async () => {
       const { httpClient, logUser } = await startServer();
 
       // Création de son organisme
       await createOrganisme({
         uai: "0142321X",
-        siret: "44492238900010",
+        siret: "41461021200014",
         adresse: {
           departement: "14",
           region: "28",
@@ -58,7 +57,7 @@ describe("Effectifs Route", () => {
 
       const otherOrganisme = await createOrganisme({
         uai: "0142322X",
-        siret: "44492238900010",
+        siret: "77568013501089",
         adresse: {
           departement: "14",
           region: "28",
@@ -104,7 +103,7 @@ describe("Effectifs Route", () => {
       // Création de son organisme
       const createdOrganisme = await createOrganisme({
         uai: "0142321X",
-        siret: "44492238900010",
+        siret: "41461021200014",
         adresse: {
           departement: "14",
           region: "28",

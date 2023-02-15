@@ -8,23 +8,23 @@ const API_ENDPOINT = config.lbaApi.endpoint;
 
 const NO_METIERS_FOUND_ERROR_MSG = "No training found";
 
-const fetchMetiersBySirets = async (sirets) => {
-  const url = `${API_ENDPOINT}/metiers/metiersParEtablissement/${encodeURIComponent(sirets.join(", "))}`;
+const fetchMetiersBySiret = async (siret) => {
+  const url = `${API_ENDPOINT}/metiers/metiersParEtablissement/${encodeURIComponent(siret)}`;
   const { data } = await axios.get(url);
   return data;
 };
 
 /**
- * Returns a list of metiers fetched from La Bonne Alternance API based on passed list of SIRET
- * @param  {[string]} sirets
+ * Renvoie une liste de métiers depuis l'API LBA pour un siret donné
+ * @param  [string] siret
  * @returns {{data: {metiers:[string]|null}}
  */
-export const getMetiersBySirets = async (sirets) => {
-  if (!Array.isArray(sirets) || sirets.length === 0) throw new Error("sirets param must be a non-empty array");
+export const getMetiersBySiret = async (siret) => {
+  if (!siret) throw new Error("sirets param must be a specified");
 
   try {
-    const result = await fetchMetiersBySirets(sirets);
-    return result;
+    const { metiers } = await fetchMetiersBySiret(siret);
+    return metiers;
   } catch (err) {
     // 500 with specific message on this route means no métiers were found for those SIRET
     if (err.response?.status === 500 && err.response?.data?.error === NO_METIERS_FOUND_ERROR_MSG) {
@@ -32,7 +32,7 @@ export const getMetiersBySirets = async (sirets) => {
     } else {
       const errorMessage = err.response?.data || err.code;
       logger.error("API LBA getMetiersBySirets something went wrong:", errorMessage);
-      throw new Error("An error occured while fetching métiers for list of SIRET", sirets.join(","));
+      throw new Error(`An error occured while fetching métiers for SIRET ${siret}`);
     }
   }
 };
