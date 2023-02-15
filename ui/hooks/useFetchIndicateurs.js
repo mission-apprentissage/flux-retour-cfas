@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchIndicateurs } from "../common/api/tableauDeBord.js";
-import { QUERY_KEYS } from "../common/constants/queryKeys.js";
-import { mapSimpleFiltersToApiFormat } from "../common/utils/mapFiltersToApiFormat.js";
+import { _get } from "@/common/httpClient";
+import { mapSimpleFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat.js";
 
 const mapIndicateursData = (effectifsData) => ({
   apprentis: effectifsData.apprentis,
@@ -11,15 +10,11 @@ const mapIndicateursData = (effectifsData) => ({
   abandons: effectifsData.abandons,
 });
 
-/**
- * TODO : voir si on laisse dans hooks ou si on move directement dans folder spécifique feature
- * @returns
- */
 const useFetchIndicateurs = (filtersValues) => {
   const requestFilters = mapSimpleFiltersToApiFormat(filtersValues);
 
-  const { status, data, error } = useQuery([QUERY_KEYS.INDICATEURS, requestFilters], () =>
-    fetchIndicateurs(requestFilters)
+  const { status, data, error } = useQuery(["indicateurs", requestFilters], () =>
+    _get("/api/indicateurs", { params: requestFilters })
   );
 
   const loading = status === "loading";

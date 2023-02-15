@@ -56,63 +56,63 @@ const getHttpsAgent = () => {
     : undefined;
 };
 
-export const _get = async (path, signal) => {
+export const _get = async (path, options) => {
   const response = await axios.get(path, {
     headers: getHeaders(),
-    signal,
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
+    ...options,
   });
   return handleResponse(path, response);
 };
 
-export const _getBlob = async (path, signal) => {
+export const _getBlob = async (path, options) => {
   const response = await axios.get(path, {
     headers: getHeaders(),
-    signal,
     validateStatus: () => true,
     httpsAgent: getHttpsAgent(),
     responseType: "blob",
+    ...options,
   });
   return handleResponse(path, response);
 };
 
-export const _post = async (path, body, signal) => {
+export const _post = async (path, body, options) => {
   const response = await axios.post(path, body, {
     headers: getHeaders(),
     validateStatus: () => true,
-    signal,
     httpsAgent: getHttpsAgent(),
+    ...options,
   });
   return handleResponse(path, response);
 };
 
-export const _postFile = async (path, data, signal) => {
+export const _postFile = async (path, data, options) => {
   const response = await axios.post(path, data, {
     headers: getHeaders(null),
     validateStatus: () => true,
-    signal,
     httpsAgent: getHttpsAgent(),
+    ...options,
   });
   return handleResponse(path, response);
 };
 
-export const _put = async (path, body = {}, signal) => {
+export const _put = async (path, body = {}, options) => {
   const response = await axios.put(path, body, {
     headers: getHeaders(),
     validateStatus: () => true,
-    signal,
     httpsAgent: getHttpsAgent(),
+    ...options,
   });
   return handleResponse(path, response);
 };
 
-export const _delete = async (path, signal) => {
+export const _delete = async (path, options) => {
   const response = await axios.delete(path, {
     headers: getHeaders(),
     validateStatus: () => true,
-    signal,
     httpsAgent: getHttpsAgent(),
+    ...options,
   });
   return handleResponse(path, response);
 };

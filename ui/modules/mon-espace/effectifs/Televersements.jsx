@@ -285,17 +285,21 @@ const Televersements = () => {
   return (
     <>
       {step === "landing" && (
-        <Flex alignItems="flex-start" mt={8} flexDirection="column">
-          <Text>Vous n&rsquo;avez pas de fichier ? Utilisez notre fichier modèle.</Text>
-          <Link href={"/modele_tableau_de_bord.csv"} textDecoration={"underline"} isExternal>
-            <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de bord
-          </Link>
-          <Box mt={10}>
-            <Button onClick={() => setStep("upload")} size={"md"} variant="primary">
-              Importer un fichier
-              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
-            </Button>
-          </Box>
+        <Flex alignItems="flex-start" flexDirection="column" gap={6}>
+          <Heading as="h3" flexGrow="1" fontSize="1.2rem" mt={2} mb={5}>
+            Importer votre fichier pour transmettre ou ajouter des effectifs.
+          </Heading>
+          <Button onClick={() => setStep("upload")} size={"md"} variant="primary">
+            Importer un fichier
+            <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} mt={"0.250rem"} ml="0.5rem" />
+          </Button>
+          <div>
+            <Text>Vous n&rsquo;avez pas de fichier ? Utilisez notre fichier modèle.</Text>
+            <Link href={"/modele_tableau_de_bord.csv"} textDecoration={"underline"} isExternal>
+              <ArrowDropRightLine w={"0.75rem"} h={"0.75rem"} ml="0.5rem" /> Télécharger le fichier modèle tableau de
+              bord
+            </Link>
+          </div>
         </Flex>
       )}
       <Flex width="100%" justify="flex-start" mt={5} mb={10} flexDirection="column">
