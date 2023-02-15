@@ -306,12 +306,14 @@ export const runEngine = async ({ effectifData, lockEffectif = true }, organisme
 
     // Création de l'organisme (sans appels API externes)
     if (organismeToCreate) {
-      organismeCreatedId = await createOrganisme(organismeToCreate, {
+      const { _id } = await createOrganisme(organismeToCreate, {
         buildFormationTree: false,
         buildInfosFromSiret: false,
         callLbaApi: false,
       });
+
       // Ajout organisme id a l'effectifData
+      organismeCreatedId = _id;
       effectifData.organisme_id = organismeCreatedId.toString();
     }
 
