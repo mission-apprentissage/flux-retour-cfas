@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useRouter } from "next/router";
 import {
   Box,
   FormControl,
@@ -9,7 +10,6 @@ import {
   FormLabel,
   Input,
   Spinner,
-  Center,
   Accordion,
   AccordionItem,
   AccordionButton,
@@ -20,19 +20,8 @@ import {
   VStack,
 } from "@chakra-ui/react";
 
-import { _post } from "../../../../common/httpClient";
-
-const validate = async (validationSchema, obj) => {
-  let isValid = false;
-  let error = null;
-  try {
-    await validationSchema.validate(obj);
-    isValid = true;
-  } catch (err) {
-    error = err;
-  }
-  return { isValid, error };
-};
+import useFetchEtablissements from "@/hooks/useFetchEtablissements";
+import { UAI_REGEX, validateUai } from "@/common/domain/uai";
 
 const EntrepriseDetails = ({ data }) => {
   return (
@@ -87,99 +76,60 @@ const EntrepriseDetails = ({ data }) => {
   );
 };
 
-export const UaiBlock = ({ onUaiFetched }) => {
-  const [isFetching, setIsFetching] = useState(false);
-  const [entrepriseData, setEntrepriseData] = useState(null);
+export const UaiBlock = ({ uai, onUaiFetched }) => {
+  const router = useRouter();
 
-  const { values, errors, touched, setFieldValue } = useFormik({ initialValues: { uai: "" } });
-
-  const uaiLookUp = async (e) => {
-    const uai = e.target.value;
-    setEntrepriseData(null);
-    const validationSchema = Yup.object().shape({
+  const { values, errors, handleChange } = useFormik({
+    validationSchema: Yup.object().shape({
       uai: Yup.string()
-        .matches(new RegExp("^([0-9]{7}[A-Z]{1})$"), {
-          message: `n'est pas un UAI valide`,
+        .matches(UAI_REGEX, {
+          message: "UAI invalide",
           excludeEmptyString: true,
         })
-        .required("L'uai est obligatoire"),
-    });
+        .required("L'UAI est obligatoire"),
+    }),
+    initialValues: { uai: uai || "" },
+  });
+  const { data: etablissements, isFetching } = useFetchEtablissements(
+    validateUai(values.uai)
+      ? {
+          uai: values.uai,
+          organismeFormation: true,
+          onSuccess: (data) => {
+            // si plusieurs etablissement,
+            // on laisse l'utilisateur choisir
+            if (data.length === 1) {
+              onUaiFetched(data[0]);
+            }
+          },
+        }
+      : {}
+  );
 
-    const { isValid } = await validate(validationSchema, { uai });
-    if (!isValid) {
-      return setFieldValue("uai", uai);
+  useEffect(() => {
+    if (etablissements?.length === 1) {
+      etablissements[0].siret && onUaiFetched(etablissements[0]);
     }
-
-    setFieldValue("uai", uai);
-    setIsFetching(true);
-    const results = await _post("/api/v1/auth/uai-siret-adresse", {
-      uai,
-      organismeFormation: true,
-    });
-    setIsFetching(false);
-
-    const formatItemResponse = (response) => {
-      let ret = {
-        successed: true,
-        data: response.result,
-        message: null,
-      };
-      if (Object.keys(response.result).length === 0) {
-        ret = {
-          successed: false,
-          data: null,
-          message: response.messages.error,
-        };
-      }
-      if (response.result.ferme) {
-        ret = {
-          successed: false,
-          data: null,
-          message: `L'établissement fermé.`,
-        };
-      }
-      return ret;
-    };
-
-    if (results.length > 1) {
-      let formatedResults = [];
-      for (const result of results) {
-        const response = formatItemResponse(result);
-        if (response.successed) formatedResults.push(response);
-      }
-      if (formatedResults.length > 1) {
-        setEntrepriseData({
-          successed: true,
-          data: formatedResults,
-          multiple: true,
-          message: "Plusieurs Siret sont identifiés pour cette UAI. Choisissez votre établissement.",
-        });
-      } else {
-        setEntrepriseData(formatedResults[0]);
-        onUaiFetched(formatedResults[0]);
-      }
-    } else {
-      const [response] = results;
-      const result = formatItemResponse(response);
-      setEntrepriseData(result);
-      onUaiFetched(result);
-    }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etablissements?.[0].siret]);
 
   return (
     <>
-      <FormControl mt={4} py={2} isRequired isInvalid={errors.uai && touched.uai}>
+      <FormControl mt={4} py={2} isRequired isInvalid={errors.uai}>
         <FormLabel>UAI de votre organisme</FormLabel>
         <FormHelperText mb={2}>Une UAI au format valide est composée de 7 chiffres et 1 lettre</FormHelperText>
         <Input
           id="uai"
           name="uai"
           placeholder="Exemple: 9876543A"
-          onChange={uaiLookUp}
+          onChange={(value) => {
+            router.push({ query: { ...router.query, uai: value.target.value } }, undefined, { shallow: true });
+            handleChange(value);
+          }}
           value={values.uai}
           isDisabled={isFetching}
         />
-        {errors.uai && touched.uai && <FormErrorMessage>{errors.uai}</FormErrorMessage>}
+        {errors.uai && <FormErrorMessage>{errors.uai}</FormErrorMessage>}
       </FormControl>
       {values.uai && (
         <VStack
@@ -187,13 +137,15 @@ export const UaiBlock = ({ onUaiFetched }) => {
           borderWidth="2px"
           borderStyle="dashed"
           borderColor={
-            entrepriseData
-              ? entrepriseData.multiple
+            etablissements
+              ? etablissements.length === 1
+                ? "green.500"
+                : etablissements.length > 0
                 ? "white"
-                : entrepriseData.successed
+                : !etablissements[0].ferme
                 ? "green.500"
                 : "error"
-              : "grey.400"
+              : "white"
           }
           rounded="md"
           minH="50"
@@ -202,39 +154,36 @@ export const UaiBlock = ({ onUaiFetched }) => {
           w="100%"
         >
           {isFetching && <Spinner alignSelf="center" />}
-          {!isFetching && entrepriseData && (
+          {!isFetching && etablissements && (
             <>
-              {entrepriseData.data && !entrepriseData.multiple && <EntrepriseDetails data={entrepriseData.data} />}
-              {entrepriseData.message && (
+              {etablissements.length > 1 && (
                 <>
                   <Box color="error" my={2}>
                     <Box as="i" className="ri-alert-fill" color="warning" marginRight="1v" />
-                    {entrepriseData.message}
+                    Plusieurs Siret sont identifiés pour cette UAI. Choisissez votre établissement.
                   </Box>
                 </>
               )}
-              {entrepriseData.data && entrepriseData.multiple && (
+              {etablissements && (
                 <Accordion allowToggle variant="withBorder" w="100%">
-                  {entrepriseData.data.map((item, index) => {
+                  {etablissements.map((etablissement, index) => {
+                    if (etablissements.length === 1) return <EntrepriseDetails data={etablissement} />;
                     return (
-                      <AccordionItem key={index}>
+                      <AccordionItem key={index} as="div">
                         <AccordionButton color="bluefrance" w="full">
                           <Box flex="1" textAlign="left">
-                            {item.data.enseigne || item.data.entreprise_raison_sociale}
+                            {etablissement.enseigne || etablissement.entreprise_raison_sociale}
                           </Box>
                           <AccordionIcon />
                         </AccordionButton>
                         <AccordionPanel pb={4}>
-                          <EntrepriseDetails data={item.data} />
+                          <EntrepriseDetails data={etablissement} />
                           <Button
                             mt="2w"
                             size="md"
                             variant="primary"
                             px={6}
-                            onClick={() => {
-                              setEntrepriseData(entrepriseData.data[index]);
-                              onUaiFetched(entrepriseData.data[index]);
-                            }}
+                            onClick={() => onUaiFetched(etablissement)}
                           >
                             Ceci est mon organisme
                           </Button>

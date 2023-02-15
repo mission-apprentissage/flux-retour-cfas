@@ -94,7 +94,7 @@ export default ({ mailer }) => {
         if (resp) {
           uai = resp.uai;
         } else {
-          throw Boom.badRequest("Something went wrong");
+          throw Boom.badRequest("SIRET inconnu");
         }
         if (userUai !== uai) {
           // TODO FIABILISATION

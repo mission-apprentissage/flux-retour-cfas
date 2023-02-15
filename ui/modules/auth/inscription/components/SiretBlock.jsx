@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -9,141 +9,102 @@ import {
   FormLabel,
   Input,
   Spinner,
-  Center,
   Text,
   VStack,
 } from "@chakra-ui/react";
 
-import { _post } from "../../../../common/httpClient";
-
-const validate = async (validationSchema, obj) => {
-  let isValid = false;
-  let error = null;
-  try {
-    await validationSchema.validate(obj);
-    isValid = true;
-  } catch (err) {
-    error = err;
-  }
-  return { isValid, error };
-};
+import useFetchEtablissements from "@/hooks/useFetchEtablissements";
+import { SIRET_REGEX, validateSiret } from "@/common/domain/siret";
 
 export const SiretBlock = ({ onSiretFetched, organismeFormation = false }) => {
-  const [isFetching, setIsFetching] = useState(false);
-  const [entrepriseData, setEntrepriseData] = useState(null);
-
-  const { values, errors, touched, setFieldValue } = useFormik({ initialValues: { siret: "" } });
-
-  const siretLookUp = async (e) => {
-    const siret = e.target.value;
-    setEntrepriseData(null);
-    const validationSchema = Yup.object().shape({
+  const { values, errors, handleChange } = useFormik({
+    validationSchema: Yup.object().shape({
       siret: Yup.string()
-        .matches(new RegExp("^([0-9]{14}|[0-9]{9} [0-9]{4})$"), {
-          message: `n'est pas un SIRET valide`,
+        .matches(SIRET_REGEX, {
+          message: "SIRET invalide",
           excludeEmptyString: true,
         })
-        .required("Le siret est obligatoire"),
-    });
+        .required("Le SIRET est obligatoire"),
+    }),
+    initialValues: { siret: "" },
+  });
+  const { data: etablissements, isFetching } = useFetchEtablissements(
+    validateSiret(values.siret)
+      ? {
+          siret: values.siret,
+          organismeFormation,
+        }
+      : {}
+  );
+  const etablissement = etablissements?.[0];
+  const isValidEtablissement = etablissement && !etablissement.ferme;
 
-    const { isValid } = await validate(validationSchema, { siret });
-    if (!isValid) {
-      return setFieldValue("siret", siret);
-    }
-
-    setFieldValue("siret", siret);
-    setIsFetching(true);
-    const [response] = await _post("/api/v1/auth/uai-siret-adresse", {
-      siret,
-      organismeFormation,
-    });
-    setIsFetching(false);
-    let ret = {
-      successed: true,
-      data: response.result,
-      message: null,
-    };
-    if (Object.keys(response.result).length === 0) {
-      ret = {
-        successed: false,
-        data: null,
-        message: response.messages.error,
-      };
-    }
-    if (response.result.ferme) {
-      ret = {
-        successed: false,
-        data: null,
-        message: `Le Siret ${siret} est un établissement fermé.`,
-      };
-    }
-    setEntrepriseData(ret);
-    onSiretFetched(ret);
-  };
+  useEffect(() => {
+    etablissement?.siret && onSiretFetched(etablissement);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etablissement?.siret]);
 
   return (
     <>
-      <FormControl mt={4} py={2} isRequired isInvalid={errors.siret && touched.siret}>
+      <FormControl mt={4} py={2} isRequired isInvalid={errors.siret}>
         <FormLabel>SIRET de votre organisme</FormLabel>
         <FormHelperText mb={2}>Un SIRET au format valide est composé de 14 chiffres</FormHelperText>
         <Input
           id="siret"
           name="siret"
           placeholder="Exemple: 98765432400019"
-          onChange={siretLookUp}
           value={values.siret}
+          onChange={handleChange}
           isDisabled={isFetching}
         />
-        {errors.siret && touched.siret && <FormErrorMessage>{errors.siret}</FormErrorMessage>}
+        {errors.siret && <FormErrorMessage>{errors.siret}</FormErrorMessage>}
       </FormControl>
       {values.siret && (
         <VStack
           alignItems="baseline"
           borderWidth="2px"
           borderStyle="dashed"
-          borderColor={entrepriseData ? (entrepriseData.successed ? "green.500" : "error") : "grey.400"}
+          borderColor={etablissement ? (isValidEtablissement ? "green.500" : "error") : "grey.400"}
           rounded="md"
           minH="50"
           flexDirection="column"
           p={4}
         >
           {isFetching && <Spinner alignSelf="center" />}
-          {!isFetching && entrepriseData && (
+          {!isFetching && etablissement && (
             <>
-              {entrepriseData.data && (
-                <VStack alignItems={"baseline"} spacing={1}>
-                  {organismeFormation && entrepriseData.data.uai && (
-                    <Text mb={5}>
-                      <b>Votre UAI :</b> {entrepriseData.data.uai}
+              <VStack alignItems={"baseline"} spacing={1}>
+                {organismeFormation && etablissement.uai && (
+                  <Text mb={5}>
+                    <b>Votre UAI :</b> {etablissement.uai}
+                  </Text>
+                )}
+                <Text fontWeight="bold">Votre adresse :</Text>
+                {!etablissement.secretSiret && (
+                  <>
+                    <Text>{etablissement.enseigne || etablissement.entreprise_raison_sociale}</Text>
+                    <Text>
+                      {etablissement.numero_voie} {etablissement.type_voie} {etablissement.nom_voie}
                     </Text>
-                  )}
-                  <Text fontWeight="bold">Votre adresse :</Text>
-                  {!entrepriseData.data.secretSiret && (
-                    <>
-                      <Text>{entrepriseData.data.enseigne || entrepriseData.data.entreprise_raison_sociale}</Text>
-                      <Text>
-                        {entrepriseData.data.numero_voie} {entrepriseData.data.type_voie} {entrepriseData.data.nom_voie}
-                      </Text>
-                      {entrepriseData.data.complement_adresse && <Text>{entrepriseData.data.complement_adresse}</Text>}
-                      <Text>
-                        {entrepriseData.data.code_postal} {entrepriseData.data.localite}
-                      </Text>
-                    </>
-                  )}
-                  {entrepriseData.data.secretSiret && (
-                    <>
-                      <Text>Votre siret est valide.</Text>
-                      <Text>
-                        En revanche, en raison de sa nature, nous ne pourrons pas récupérer les informations reliées.
-                        (telles que l&apos;adresse et autres données)
-                      </Text>
-                    </>
-                  )}
-                </VStack>
-              )}
-              {entrepriseData.message && (
+                    {etablissement.complement_adresse && <Text>{etablissement.complement_adresse}</Text>}
+                    <Text>
+                      {etablissement.code_postal} {etablissement.localite}
+                    </Text>
+                  </>
+                )}
+                {etablissement.secretSiret && (
+                  <>
+                    <Text>Votre siret est valide.</Text>
+                    <Text>
+                      En revanche, en raison de sa nature, nous ne pourrons pas récupérer les informations reliées.
+                      (telles que l&apos;adresse et autres données)
+                    </Text>
+                  </>
+                )}
+              </VStack>
+              {etablissement.ferme && (
                 <Box color="error" my={2}>
-                  {entrepriseData.message}
+                  Le Siret ${values.siret} est un établissement fermé.
                 </Box>
               )}
             </>

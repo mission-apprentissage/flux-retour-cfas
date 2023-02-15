@@ -5,13 +5,13 @@ import "react-phone-input-2/lib/style.css";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChakraProvider } from "@chakra-ui/react";
 import { RecoilRoot } from "recoil";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+
 import Fonts from "../theme/Fonts";
 import theme from "../theme/index";
 import UserWrapper from "@/components/UserWrapper/UserWrapper";
 import AlertMessage from "@/components/AlertMessage/AlertMessage";
-
-const queryClient = new QueryClient();
+import { queryClient } from "@/common/queryClient";
 
 function MyApp({ Component, pageProps }) {
   return (

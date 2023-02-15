@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import NavLink from "next/link";
+import { useRouter } from "next/router";
 import { Box, Text, Radio, RadioGroup, Stack, Flex, Link } from "@chakra-ui/react";
 import { SiretBlock } from "./components/SiretBlock";
 import { UaiBlock } from "./components/UaiBlock";
 
-export const InscriptionOF = ({ onEndOfSpecific, typeOfSearch, setTypeOfSearch }) => {
+export const InscriptionOF = ({ onEtablissementSelected }) => {
+  const router = useRouter();
+  const uai = router.query.uai;
   const [help, setHelp] = useState("");
+  const typeOfSearch = router.query.select || (uai ? "uai" : null);
+  const setTypeOfSearch = (value) => {
+    router.push(`/auth/inscription/organisme_formation?select=${value}`);
+  };
 
   return (
     <Box>
@@ -23,8 +30,10 @@ export const InscriptionOF = ({ onEndOfSpecific, typeOfSearch, setTypeOfSearch }
           </Box>
         </>
       )}
-      {typeOfSearch === "siret" && help === "" && <SiretBlock onSiretFetched={onEndOfSpecific} organismeFormation />}
-      {typeOfSearch === "uai" && help === "" && <UaiBlock onUaiFetched={onEndOfSpecific} />}
+      {typeOfSearch === "siret" && help === "" && (
+        <SiretBlock onSiretFetched={onEtablissementSelected} organismeFormation />
+      )}
+      {typeOfSearch === "uai" && help === "" && <UaiBlock uai={uai} onUaiFetched={onEtablissementSelected} />}
 
       {typeOfSearch === "" && help === "" && (
         <Flex flexGrow={1} mb={8}>
