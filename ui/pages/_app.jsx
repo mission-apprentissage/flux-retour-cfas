@@ -10,8 +10,7 @@ import Fonts from "../theme/Fonts";
 import theme from "../theme/index";
 import UserWrapper from "@/components/UserWrapper/UserWrapper";
 import AlertMessage from "@/components/AlertMessage/AlertMessage";
-
-const queryClient = new QueryClient();
+import { queryClient } from "@/common/queryClient";
 
 function MyApp({ Component, pageProps }) {
   return (
