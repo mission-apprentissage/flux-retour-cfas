@@ -90,6 +90,10 @@ export const REGIONS = [
     nom: "Saint-Barthélemy",
     code: "977",
   },
+  {
+    nom: "Collectivité d'outre mer",
+    code: "00",
+  },
 ];
 export const REGIONS_BY_ID = REGIONS.reduce((acc, region) => {
   acc[region.code] = region;
@@ -1546,6 +1550,8 @@ export const ACADEMIES = {
   33: { nom: "Guyane", code: 33 },
   43: { nom: "Mayotte", code: 43 },
   70: { nom: "Normandie", code: 70 },
+  77: { nom: "Saint-Barthélemy", code: 77 },
+  78: { nom: "Saint-Martin", code: 78 },
 };
 
 export const ACADEMIES_BY_ID = Object.values(ACADEMIES).reduce((acc, academie) => {
