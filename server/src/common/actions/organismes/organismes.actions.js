@@ -53,7 +53,7 @@ export const createOrganisme = async (
       formations,
       ...(adresse ? { adresse } : {}),
       ...data,
-      ferme,
+      ferme: ferme || false,
       ...(enseigne ? { enseigne } : {}),
       ...(raison_sociale ? { raison_sociale } : {}),
     })
@@ -303,6 +303,7 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, roleName
     {
       $set: validateOrganisme({
         uai: organisme.uai,
+        siret: organisme.siret,
         updated_at: new Date(),
       }),
       $addToSet: {

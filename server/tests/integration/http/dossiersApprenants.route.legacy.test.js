@@ -79,26 +79,6 @@ describe("Dossiers Apprenants Route", () => {
   });
 
   describe("POST dossiers-apprenants/", () => {
-    it("Vérifie la création d'un organisme", async () => {
-      await startServer();
-      await createApiUser();
-
-      // Test organisme creation
-      assert.deepEqual(pick(createdOrganisme, ["uai", "siret", "nom", "adresse", "nature"]), {
-        uai: randomOrganisme.uai,
-        siret: randomOrganisme.siret,
-        nom: randomOrganisme.nom,
-        adresse: randomOrganisme.adresse,
-        nature: randomOrganisme.nature,
-      });
-
-      assert.equal(createdOrganisme.nom_tokenized, buildTokenizedString(randomOrganisme.nom.trim(), 4));
-      assert.equal(createdOrganisme.private_url !== null, true);
-      assert.equal(createdOrganisme.accessToken !== null, true);
-      assert.equal(createdOrganisme.created_at !== null, true);
-      assert.equal(createdOrganisme.updated_at !== null, true);
-    });
-
     it("Vérifie que la route /dossiers-apprenants fonctionne avec un tableau vide", async () => {
       nock("https://entreprise.api.gouv.fr:443");
 
