@@ -11,7 +11,7 @@ import {
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token.js";
 import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes.js";
-import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
+import { hydrateReseaux } from "./hydrate/reseaux/hydrate-reseaux.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
 
@@ -128,12 +128,12 @@ cli
  * Job de remplissage & maj des d'organismes / dossiersApprenants pour les réseaux avec le nouveau format
  */
 cli
-  .command("hydrate:reseaux-newFormat")
-  .description("MAJ des réseaux nouveau format pour les organismes et dossiersApprenants")
+  .command("hydrate:reseaux")
+  .description("Remplissage des réseaux pour les organismes et dossiersApprenants")
   .action(async () => {
     runScript(async () => {
-      return hydrateReseauxNewFormat();
-    }, "hydrate-reseaux-newFormat");
+      return hydrateReseaux();
+    }, "hydrate-reseaux");
   });
 
 /**
