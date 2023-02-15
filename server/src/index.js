@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 import server from "./http/server.js";
 import logger from "./common/logger.js";
-import config from "../src/config.js";
+import config from "./config.js";
 import createComponents from "./common/components/components.js";
 import createServices from "./services.js";
 import { connectToMongodb, configureDbSchemaValidation } from "./common/mongodb.js";
