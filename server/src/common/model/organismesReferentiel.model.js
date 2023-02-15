@@ -1,5 +1,4 @@
-import { object, objectId, string, date, arrayOf, boolean } from "./json-schema/jsonSchemaTypes.js";
-import { adresseSchema } from "./json-schema/adresseSchema.js";
+import { object, objectId, string, boolean, number, array } from "./json-schema/jsonSchemaTypes.js";
 
 export const collectionName = "organismesReferentiel";
 
@@ -25,18 +24,6 @@ export const indexes = () => {
   ];
 };
 
-const required = [
-  "siret",
-  "nature",
-  "uai_potentiels",
-  "contacts",
-  "relations",
-  "lieux_de_formation",
-  "certifications",
-  "diplomes",
-  "_meta",
-];
-
 export const schema = object(
   {
     _id: objectId(),
@@ -48,7 +35,53 @@ export const schema = object(
     numero_declaration_activite: string(),
     etat_administratif: string({ enum: ["actif", "fermé"] }),
     nature: string({ enum: ["responsable", "formateur", "responsable_formateur", "inconnue"] }),
-    adresse: adresseSchema,
+    adresse: object(
+      {
+        label: string(),
+        code_postal: string(),
+        code_insee: string(),
+        localite: string(),
+        departement: object(
+          {
+            code: string(),
+            nom: string(),
+          },
+          { required: ["code", "nom"] }
+        ),
+        region: object(
+          {
+            code: string(),
+            nom: string(),
+          },
+          { required: ["code", "nom"] }
+        ),
+        academie: object(
+          {
+            code: string(),
+            nom: string(),
+          },
+          { required: ["code", "nom"] }
+        ),
+        geojson: object(
+          {
+            type: string(),
+            geometry: object(
+              {
+                type: string(),
+                coordinates: array(),
+              },
+              { required: ["type", "coordinates"] }
+            ),
+            properties: object({
+              score: number(),
+              source: string(),
+            }),
+          },
+          { required: ["type", "geometry"] }
+        ),
+      },
+      { required: ["code_postal", "code_insee", "localite", "region", "academie"] }
+    ),
     forme_juridique: object(
       {
         code: string(),
@@ -56,118 +89,9 @@ export const schema = object(
       },
       { required: ["code", "label"] }
     ),
-    referentiels: arrayOf(string()),
-    reseaux: arrayOf(
-      object(
-        {
-          code: string(),
-          label: string(),
-          sources: arrayOf(string()),
-          date_collecte: date(),
-        },
-        { required: ["code", "label", "sources", "date_collecte"] }
-      )
-    ),
     qualiopi: boolean(),
-    uai_potentiels: arrayOf(
-      object(
-        {
-          uai: string(),
-          sources: arrayOf(string()),
-          date_collecte: date(),
-        },
-        { required: ["uai", "sources", "date_collecte"] }
-      )
-    ),
-    contacts: arrayOf(
-      object(
-        {
-          email: string(),
-          confirmé: boolean(),
-          sources: arrayOf(string()),
-          date_collecte: date(),
-          _extras: object({}, { additionalProperties: true }),
-        },
-        { required: ["email", "confirmé", "sources", "date_collecte"] }
-      )
-    ),
-    relations: arrayOf(
-      object(
-        {
-          type: string({
-            enum: ["formateur->responsable", "responsable->formateur", "entreprise"],
-          }),
-          siret: string(),
-          referentiel: boolean(),
-          label: string(),
-          sources: arrayOf(string()),
-          date_collecte: date(),
-        },
-        { required: ["siret", "referentiel", "type", "sources", "date_collecte"] }
-      )
-    ),
-    lieux_de_formation: arrayOf(
-      object(
-        {
-          code: string(),
-          siret: string(),
-          uai: string(),
-          adresse: adresseSchema,
-          sources: arrayOf(string()),
-          date_collecte: date(),
-        },
-        { required: ["code", "adresse", "sources", "date_collecte"] }
-      )
-    ),
-    certifications: arrayOf(
-      object(
-        {
-          code: string(),
-          type: string({ enum: ["rncp"] }),
-          label: string(),
-          sources: arrayOf(string()),
-          date_collecte: date(),
-        },
-        { required: ["code", "type", "sources", "date_collecte"] }
-      )
-    ),
-    diplomes: arrayOf(
-      object(
-        {
-          code: string(),
-          type: string({ enum: ["cfd"] }),
-          niveau: string(),
-          label: string(),
-          sources: arrayOf(string()),
-          date_collecte: date(),
-        },
-        { required: ["code", "type", "sources", "date_collecte"] }
-      )
-    ),
-    _meta: object(
-      {
-        date_import: date(),
-        date_dernier_import: date(),
-        date_collecte: date(),
-        anomalies: arrayOf(
-          object(
-            {
-              key: string(),
-              type: string(),
-              job: string(),
-              code: string(),
-              details: string(),
-              sources: arrayOf(string()),
-              date_collecte: date(),
-            },
-            { required: ["key", "job", "sources", "date_collecte"] }
-          )
-        ),
-      },
-      { required: ["anomalies", "date_import", "date_dernier_import"] }
-    ),
   },
-  { required }
+  { required: ["siret", "nature"] }
 );
 
 export default { schema, indexes, collectionName };
