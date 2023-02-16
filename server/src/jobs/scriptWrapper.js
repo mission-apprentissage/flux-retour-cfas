@@ -66,7 +66,7 @@ export const runScript = async (job, jobName) => {
       data: { startDate, endDate, duration },
     });
 
-    await exit();
+    await exit(null);
   } catch (e) {
     await exit(e);
   } finally {

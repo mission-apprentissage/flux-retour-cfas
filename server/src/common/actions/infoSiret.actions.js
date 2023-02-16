@@ -7,7 +7,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
     return {
       result: {},
       messages: {
-        error: `Le Siret ${siret} n'est pas valide, un Siret doit être définit et au format 14 caractères`,
+        error: `Le Siret ${providedSiret} n'est pas valide, un Siret doit être définit et au format 14 caractères`,
       },
     };
   }
@@ -17,7 +17,7 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
   let etablissementApiInfo;
   try {
     etablissementApiInfo = await apiEntreprise.getEtablissement(siret, non_diffusables);
-  } catch (e) {
+  } catch (/** @type {any}*/ e) {
     console.error(e);
     if (e.reason === 451) {
       return {

@@ -40,7 +40,7 @@ export const findRolePermission = async (query, projection = {}) => {
 };
 
 export const findRolePermissionById = async (id, projection = {}) => {
-  const role = await rolesDb().findOne({ _id: ObjectId(id), type: "permission" }, { projection });
+  const role = await rolesDb().findOne({ _id: new ObjectId(id), type: "permission" }, { projection });
   return role;
 };
 
@@ -61,12 +61,12 @@ export const findRoleByName = async (name, projection = {}) => {
 };
 
 export const findRoleById = async (id, projection = {}) => {
-  const role = await rolesDb().findOne({ _id: ObjectId(id) }, { projection });
+  const role = await rolesDb().findOne({ _id: new ObjectId(id) }, { projection });
   return role;
 };
 
 export const hasAclsByRoleId = async (id, acl) => {
-  const roleDb = await rolesDb().findOne({ _id: ObjectId(id) }, { acl: 1 });
+  const roleDb = await rolesDb().findOne({ _id: new ObjectId(id) }, { acl: 1 });
   if (!roleDb) {
     throw new Error("Role doesn't exist");
   }

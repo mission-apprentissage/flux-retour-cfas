@@ -9,6 +9,7 @@ export const nockGetCfdInfo = (callback) => {
     .persist()
     .post("/cfd")
     .reply(200, (_uri, requestBody) => ({
+      // @ts-ignore
       result: callback ? callback(requestBody.cfd) : dataForGetCfdInfo.withIntituleLong,
     }));
 };
@@ -24,6 +25,7 @@ export const nockGetCodePostalInfo = () => {
     .persist()
     .post("/code-postal")
     .reply(200, (_uri, requestBody) => {
+      // @ts-ignore
       const { codePostal } = requestBody;
       const departementId = codePostal.substring(0, 2);
       const departement = DEPARTEMENTS.find((o) => o.code === departementId) || {

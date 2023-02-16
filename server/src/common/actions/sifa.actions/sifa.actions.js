@@ -37,7 +37,7 @@ export const isEligibleSIFA = ({ historique_statut }) => {
 
 /**
  * Méthode
- * @param {*} props
+ * @param {string} organisme_id
  */
 export const generateSifa = async (organisme_id) => {
   const organisme = await findOrganismeById(organisme_id);

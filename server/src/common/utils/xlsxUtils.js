@@ -1,13 +1,8 @@
 import XLSX from "xlsx";
 
 const readXLSXData = (data, readOpt = { codepage: 65001, cellDates: true, dateNF: "dd/MM/yyyy" }) => {
-  try {
-    const workbook = XLSX.read(data, readOpt);
-
-    return { sheet_name_list: workbook.SheetNames, workbook };
-  } catch (error) {
-    return null;
-  }
+  const workbook = XLSX.read(data, readOpt);
+  return { sheet_name_list: workbook.SheetNames, workbook };
 };
 
 export const getJsonFromXlsxData = (

@@ -27,7 +27,8 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
  * Fonction de remplissage d'un effectif à créer ou à mettre à jour
  * Contrôle si l'effectif en entrée existe déja en base
  * Va créer un effectif structuré avec les erreurs éventuelles de modèle
- * @param {*} effectifs
+ * @param {*} effectifData
+ * @param {*} [options]
  */
 export const hydrateEffectif = async (effectifData, options) => {
   const queryKeys = options?.queryKeys ?? ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"];
@@ -214,7 +215,7 @@ export const hydrateEffectif = async (effectifData, options) => {
  * ?? Pas besoin d'update car le runEngine ne va que créer / contrôler l'existant
  * ?? -> La MAJ d'un organisme ne doit pas se faire via l'API / migration ???
  * TODO Contrôle base ACCESS à ajouter ici
- * @param {*} organismesData
+ * @param {*} organisme
  */
 export const hydrateOrganisme = async (organisme) => {
   let organismeToCreate = null;

@@ -17,5 +17,6 @@ export const compare = (password, hash) => {
 export const isTooWeak = (hash) => {
   const array = hash.split("$");
   const round = array[2].split("=")[1];
+  // @ts-ignore
   return round < config.auth.passwordHashRounds;
 };

@@ -119,8 +119,8 @@ export default ({ cfas }) => {
 
   /**
    * Retourne la liste des organismes matching passed criteria
-   * @param {{}} searchCriteria
-   * @return {Array<{uai: string, nom: string}>} Array of CFA information
+   * @param {Object} searchCriteria
+   * @return {Promise<{ uai: string; nom: string; }[]>} Array of CFA information
    */
   const searchOrganismes = async (searchCriteria) => {
     const { searchTerm, ...otherCriteria } = searchCriteria;

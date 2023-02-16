@@ -11,7 +11,7 @@ import { defaultValuesUpload } from "../model/uploads.model/uploads.model.js";
 export const createUpload = async ({ organisme_id }) => {
   const { insertedId } = await uploadsDb().insertOne({
     ...defaultValuesUpload(),
-    organisme_id: ObjectId(organisme_id),
+    organisme_id: new ObjectId(organisme_id),
   });
 
   const effectifCreated = await uploadsDb().findOne({ _id: insertedId });
@@ -19,7 +19,7 @@ export const createUpload = async ({ organisme_id }) => {
 };
 
 export const getUploadEntryByOrgaId = async (organismeId, projection = {}) => {
-  const organisme_id = typeof organismeId === "string" ? ObjectId(organismeId) : organismeId;
+  const organisme_id = typeof organismeId === "string" ? new ObjectId(organismeId) : organismeId;
   if (!ObjectId.isValid(organisme_id)) throw new Error("Invalid organismeId passed");
 
   const uploadEntry = await uploadsDb().findOne({ organisme_id }, { projection });
@@ -51,7 +51,7 @@ export const addDocument = async (
   let found = null;
   try {
     found = await getUploadEntryByOrgaId(organisme_id);
-  } catch (error) {
+  } catch (/** @type {any}*/ error) {
     if (error.message.includes("Unable to find uploadEntry")) {
       found = await createUpload({ organisme_id });
     }
@@ -98,7 +98,7 @@ export const updateDocument = async (organisme_id, { nom_fichier, taille_fichier
   let found = null;
   try {
     found = await getUploadEntryByOrgaId(organisme_id);
-  } catch (error) {
+  } catch (/** @type {any}*/ error) {
     if (error.message.includes("Unable to find uploadEntry")) {
       found = await createUpload({ organisme_id });
     }

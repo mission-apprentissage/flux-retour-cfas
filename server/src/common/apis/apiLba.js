@@ -16,8 +16,8 @@ const fetchMetiersBySiret = async (siret) => {
 
 /**
  * Renvoie une liste de métiers depuis l'API LBA pour un siret donné
- * @param  [string] siret
- * @returns {{data: {metiers:[string]|null}}
+ * @param  string[] siret
+ * @returns {Promise<string[]>}
  */
 export const getMetiersBySiret = async (siret) => {
   if (!siret) throw new Error("sirets param must be a specified");
@@ -25,7 +25,7 @@ export const getMetiersBySiret = async (siret) => {
   try {
     const metiers = await fetchMetiersBySiret(siret);
     return metiers;
-  } catch (err) {
+  } catch (/** @type {any}*/ err) {
     // 500 with specific message on this route means no métiers were found for those SIRET
     if (err.response?.status === 500 && err.response?.data?.error === NO_METIERS_FOUND_ERROR_MSG) {
       return [];
@@ -46,7 +46,7 @@ const fetchMetiersByCfd = async (cfd) => {
 /**
  * Returns a list of metiers fetched from La Bonne Alternance API based on passed CFD
  * @param  {string} cfd
- * @returns {{data: {metiers:[string]}|null}}
+ * @returns {Promise<{data: {metiers:string[]}|null}>}
  */
 export const getMetiersByCfd = async (cfd) => {
   if (!cfd) throw new Error("cfd param not provided");
@@ -54,7 +54,7 @@ export const getMetiersByCfd = async (cfd) => {
   try {
     const result = await fetchMetiersByCfd(cfd);
     return { data: result };
-  } catch (err) {
+  } catch (/** @type {any}*/ err) {
     // 500 with specific message on this route means no métiers were found for this CFD
     if (err.response?.status === 500 && err.response?.data?.error === NO_METIERS_FOUND_ERROR_MSG) {
       return { data: null };

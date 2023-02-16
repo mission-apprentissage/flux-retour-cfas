@@ -39,6 +39,7 @@ export function checksum() {
 
 export function generateKey(size = 32, format = "base64") {
   const buffer = crypto.randomBytes(size);
+  // @ts-ignore
   return buffer.toString(format);
 }
 

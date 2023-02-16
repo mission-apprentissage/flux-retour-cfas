@@ -2,7 +2,7 @@ import logger from "../../../common/logger.js";
 import { fullSampleWithUpdates } from "../../../../tests/data/sample.js";
 import { createRandomDossierApprenantList, createRandomOrganisme } from "../../../../tests/data/randomizedSample.js";
 import { asyncForEach } from "../../../common/utils/asyncUtils.js";
-import { createDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
+// import { createDossierApprenant } from "../../../common/actions/dossiersApprenants.actions.js";
 import { createOrganisme } from "../../../common/actions/organismes/organismes.actions.js";
 
 /**
@@ -33,10 +33,10 @@ export const seedSample = async () => {
 export const seedRandomizedSample = async (nbDossiers) => {
   try {
     const randomData = createRandomDossierApprenantList(nbDossiers);
-    await asyncForEach(randomData, async (currentDossierToAdd) => {
+    await asyncForEach(randomData, async () => {
       const randomOrganisme = createRandomOrganisme();
-      const { _id: organisme_id } = await createOrganisme(randomOrganisme);
-      await createDossierApprenant({ organisme_id, ...currentDossierToAdd });
+      await createOrganisme(randomOrganisme);
+      // await createDossierApprenant({ organisme_id, ...currentDossierToAdd });
     });
   } catch (err) {
     logger.error(err);

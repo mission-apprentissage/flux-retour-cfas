@@ -7,9 +7,10 @@ import { modelDescriptors } from "../collections.js";
  */
 export class BaseIndexer {
   /**
-   * Constructeur
-   * @param {array} collectionName Nom de la collection
-   * @param {array} indexesList Liste des indexs à créer
+   *
+   * @param {object} options
+   * @param {string} options.collectionName - Nom de la collection
+   * @param {function} options.indexesList - Liste des indexs à créer
    */
   constructor({ collectionName, indexesList }) {
     this.indexesList = indexesList;

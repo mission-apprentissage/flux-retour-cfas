@@ -17,13 +17,13 @@ export function compare(password, hash) {
 export function isTooWeak(hash) {
   const array = hash.split("$");
   const round = array[2].split("=")[1];
+  // @ts-ignore
   return round < config.auth.passwordHashRounds;
 }
 
 /**
  * Generates a random password with a fixed length and made of characters belonging to a specified wishlist
- * @param {*} length
- * @param {*} wishlist
+ * @param {number} length
  * @returns
  */
 export const generateRandomAlphanumericPhrase = (length = 20) => {

@@ -154,8 +154,8 @@ describe("Tests des actions Formations", () => {
           .pop()
       );
 
-      await asyncForEach(formationsSeed, async ({ cfd, libelle }) => {
-        await createFormation({ cfd }, libelle);
+      await asyncForEach(formationsSeed, async ({ cfd }) => {
+        await createFormation({ cfd });
 
         await dossiersApprenantsMigrationDb().insertOne({
           ...createRandomDossierApprenant(),

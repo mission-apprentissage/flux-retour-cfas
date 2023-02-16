@@ -29,7 +29,7 @@ export const createMaintenanceMessage = async ({ name, msg, type, context, time,
  * @returns
  */
 export const updateMaintenanceMessage = async (_id, data) => {
-  const item = await maintenanceMessageDb().findOne({ _id: ObjectId(_id) });
+  const item = await maintenanceMessageDb().findOne({ _id: new ObjectId(_id) });
 
   if (!item) {
     throw new Error("Unable to find maintenance message");
@@ -61,7 +61,7 @@ export const findMaintenanceMessages = async () => {
  * @returns
  */
 export const removeMaintenanceMessage = async (_id) => {
-  const item = await maintenanceMessageDb().findOne({ _id: ObjectId(_id) });
+  const item = await maintenanceMessageDb().findOne({ _id: new ObjectId(_id) });
 
   if (!item) {
     throw new Error("Unable to find maintenance message");

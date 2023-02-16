@@ -4,7 +4,10 @@ import { fiabilisationUaiSiretDb } from "../../model/collections.js";
 
 /**
  * Renvoi le couple UAI-SIRET fiabilisé si présent dans le fichier de fiabilisation
- * @param {*} {param0}
+ * @param {Object} options
+ * @param {string} options.uai
+ * @param {string|null} options.siret
+ *
  * @returns
  */
 export const mapFiabilizedOrganismeUaiSiretCouple = async ({ uai, siret = null }) => {

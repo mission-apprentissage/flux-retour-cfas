@@ -141,7 +141,7 @@ export const updateDossierApprenant = async (
     ...data
   }
 ) => {
-  const _id = typeof id === "string" ? ObjectId(id) : id;
+  const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const dossiersApprenant = await dossiersApprenantsMigrationDb().findOne({ _id });
@@ -280,8 +280,8 @@ export const getCfaFirstTransmissionDateFromUai = async (uai) => {
 /**
  * TODO add to unit tests
  * Returns the first date of dossierApprenant transmission for a SIRET
- * @param {*} uai
- * @returns {Date|null}
+ * @param {string} siret
+ * @returns {Promise<Date|null>}
  */
 export const getCfaFirstTransmissionDateFromSiret = async (siret) => {
   const historiqueDatesDossiersApprenantsWithSiret = await dossiersApprenantsMigrationDb()
