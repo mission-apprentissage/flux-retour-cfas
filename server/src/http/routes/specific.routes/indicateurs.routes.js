@@ -2,8 +2,8 @@ import express from "express";
 import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
-import { getNbDistinctOrganismesByUai } from "../../../common/actions/dossiersApprenants.actions.js";
 import { ObjectId } from "mongodb";
+import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
 
 const commonEffectifsFilters = {
   organisme_id: Joi.string().allow(null, ""),
@@ -31,7 +31,7 @@ export default ({ effectifs }) => {
         annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 
-      const nbOrganismes = await getNbDistinctOrganismesByUai(filters);
+      const nbOrganismes = await getNbDistinctOrganismes(filters);
 
       return res.json({
         nbOrganismes,

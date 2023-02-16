@@ -249,14 +249,14 @@ export const buildNewHistoriqueStatutApprenant = (
 };
 
 /**
- * Récupération du nb distinct d'organismes via leurs UAI
- // TODO voir si on garde ici ou dans un utils ?
+ * Récupération du nb distinct d'organismes
+ * On récupère le nombre distinct d'organismes id dans la collection dossiersApprenantsMigrationDb
  * @param {*} filters
  * @returns
  */
-export const getNbDistinctOrganismesByUai = async (filters = {}) => {
-  const distinctCfas = await dossiersApprenantsMigrationDb().distinct("uai_etablissement", filters);
-  return distinctCfas ? distinctCfas.length : 0;
+export const getNbDistinctOrganismes = async (filters = {}) => {
+  const distinctOrganismes = await dossiersApprenantsMigrationDb().distinct("organisme_id", filters);
+  return distinctOrganismes ? distinctOrganismes.length : 0;
 };
 
 /**
