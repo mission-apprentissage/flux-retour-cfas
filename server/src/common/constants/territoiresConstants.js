@@ -1418,7 +1418,7 @@ export const DEPARTEMENTS = [
     },
   },
   {
-    nom: "St Barthelemy",
+    nom: "Saint-Barthelemy",
     code: "977",
     uaiCode: "977",
     region: {
@@ -1431,7 +1431,7 @@ export const DEPARTEMENTS = [
     },
   },
   {
-    nom: "St Martin",
+    nom: "Saint-Martin",
     code: "978",
     uaiCode: "978",
     region: {
