@@ -5,7 +5,7 @@
 sensible_files_pattern="\.(csv|xls|xls(x?)|json|env)$"
 exception="((package.json|custom-environment-variables.json"
 exception="$exception|manifest.json"
-exception="$exception|eslintrc.json|app.json|jsconfig.json|rome.json"
+exception="$exception|eslintrc.json|app.json|jsconfig.json|tsconfig.json|rome.json"
 exception="$exception)$|^server/tests)"
 
 if grep -q vault ".infra/ansible/roles/setup/vars/main/vault.yml"; then

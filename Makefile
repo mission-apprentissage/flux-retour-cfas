@@ -1,5 +1,5 @@
 install: install-root install-server install-ui
-build: build-ui
+build: build-server build-ui
 
 install-root:
 	yarn install
@@ -12,6 +12,9 @@ install-ui:
 
 build-ui: 
 	yarn --cwd ui build
+
+build-server: 
+	yarn --cwd server build
 
 start:
 	docker-compose up --build --force-recreate -d
