@@ -1,9 +1,9 @@
-- name: Add CRON to run jobs processing application data everyday at 5:30AM
+- name: Add CRON to run jobs processing application data everyday at 02:30AM
   become: true
   cron:
-    name: "Run daily jobs each day at 05h30"
+    name: "Run daily jobs each day at 02h30"
     minute: "30"
-    hour: "5"
+    hour: "2"
     job: "bash /opt/flux-retour-cfas/tools/cron-data-jobs/run-daily-jobs.sh"
 
 - name: Add CRON to run fiabilité analyses on data received in last 24hours everyday at 11:15AM

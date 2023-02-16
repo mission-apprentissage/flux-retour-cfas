@@ -14,8 +14,11 @@ call_daily_jobs_with_logs(){
   # Remplissage des organismes depuis le référentiel
   docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:organismes" || true
   
-  # Remplissage des réseaux depuis csv fournis
-  docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux-newFormat" || true
+  # Remplissage des réseaux
+  docker exec flux_retour_cfas_server bash -c "yarn cli hydrate:reseaux" || true
+
+  # Mise à jour des organismes via APIs externes
+  docker exec flux_retour_cfas_server bash -c "yarn cli update:organismes-with-apis" || true
 
   # Purge des données inutiles
   docker exec flux_retour_cfas_server bash -c "yarn cli purge:events" || true
