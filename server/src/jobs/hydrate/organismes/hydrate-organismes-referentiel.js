@@ -20,9 +20,7 @@ export const hydrateOrganismesReferentiel = async () => {
   logger.info(`Insertion de ${organismes.length} organismes provenant du référentiel...`);
 
   // Processes 10 organismes en // par défaut
-  await PromisePool.for(organismes).process(async (currentOrganisme) => {
-    return insertOrganismeReferentiel(currentOrganisme);
-  });
+  await PromisePool.for(organismes).process(insertOrganismeReferentiel);
 
   // Log & stats
   logger.info(`--> ${nbOrganismeCreated} organismesReferentiel créés depuis le référentiel`);

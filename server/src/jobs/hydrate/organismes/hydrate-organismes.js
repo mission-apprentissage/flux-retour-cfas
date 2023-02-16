@@ -1,3 +1,4 @@
+import { PromisePool } from "@supercharge/promise-pool";
 import logger from "../../../common/logger.js";
 import {
   createOrganisme,
@@ -6,7 +7,6 @@ import {
 } from "../../../common/actions/organismes/organismes.actions.js";
 import { createJobEvent } from "../../../common/actions/jobEvents.actions.js";
 import { organismesDb, organismesReferentielDb } from "../../../common/model/collections.js";
-import { PromisePool } from "@supercharge/promise-pool/dist/promise-pool.js";
 
 const JOB_NAME = "hydrate-organismes";
 
@@ -31,9 +31,7 @@ export const hydrateOrganismesFromReferentiel = async () => {
   logger.info(`Traitement de ${organismesFromReferentiel.length} organismes provenant du référentiel...`);
 
   // Processes 10 organismes en // par défaut
-  await PromisePool.for(organismesFromReferentiel).process(async (currentOrganismeFromReferentiel) => {
-    return insertOrUpdateOrganisme(currentOrganismeFromReferentiel);
-  });
+  await PromisePool.for(organismesFromReferentiel).process(insertOrUpdateOrganisme);
 
   // Log & stats
   logger.info(`--> ${nbOrganismeCreated} organismes créés depuis le référentiel`);
