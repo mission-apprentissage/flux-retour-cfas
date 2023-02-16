@@ -73,10 +73,7 @@ const clearReseauxInOrganismes = async () => {
  */
 export const hydrateReseaux = async () => {
   await clearReseauxInOrganismes();
-
-  await PromisePool.for(INPUT_FILES).process(async (currentFileName) => {
-    return hydrateReseauFile(currentFileName);
-  });
+  await PromisePool.for(INPUT_FILES).process(hydrateReseauFile);
 };
 
 /**
