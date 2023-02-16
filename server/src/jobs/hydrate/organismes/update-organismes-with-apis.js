@@ -51,7 +51,7 @@ export const updateOrganismesWithApis = async () => {
 
 /**
  * Fonction de maj d'un organisme en appelant les APIs externes
- * @param {*} organismeReferentiel
+ * @param {*} organisme
  */
 const updateOrganismeWithApis = async (organisme) => {
   try {

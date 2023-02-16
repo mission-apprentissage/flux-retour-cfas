@@ -44,13 +44,16 @@ export const createUser = async ({ email, password }, options = {}) => {
 
   let rolesMatchIds = [];
   if (roles && roles.length > 0) {
-    rolesMatchIds = await rolesDb()
-      .find({ name: { $in: roles } }, { projection: { _id: 1 } })
-      .toArray();
-    rolesMatchIds = rolesMatchIds.map(({ _id }) => _id);
-    if (!rolesMatchIds.length) {
-      throw new Error(`Roles ${rolesMatchIds.join(",")} don't exist`);
-    }
+    rolesMatchIds = (
+      await rolesDb()
+        .find({ name: { $in: roles } }, { projection: { _id: 1 } })
+        .toArray()
+    ).map(({ _id }) => _id);
+
+    // TODO reintroduce it
+    // if (rolesMatchIds.length === 0) {
+    //   throw new Error(`Roles ${roles.join(",")} don't exist`);
+    // }
   }
 
   // Vérification de l'existence de l'email - même si on a un index unique

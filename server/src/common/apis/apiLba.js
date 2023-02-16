@@ -11,7 +11,7 @@ const NO_METIERS_FOUND_ERROR_MSG = "No training found";
 /**
  * Renvoie une liste de métiers depuis l'API LBA pour un siret donné
  * @param  string siret
- * @returns {Promise<{metiers: string[]}>}
+ * @returns {Promise<string[]>}
  */
 const fetchMetiersBySiret = async (siret) => {
   const url = `${API_ENDPOINT}/metiers/metiersParEtablissement/${encodeURIComponent(siret)}`;

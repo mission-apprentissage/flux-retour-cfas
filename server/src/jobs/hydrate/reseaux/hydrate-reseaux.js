@@ -37,7 +37,7 @@ const INPUT_FILES = [
 /**
  * Parse des réseaux depuis le csv
  * @param  {string} reseauText
- * @returns {[string]} List of parsed réseaux
+ * @returns {string[]} List of parsed réseaux
  */
 const parseReseauxTextFromCsv = (reseauText) => {
   if (!reseauText || RESEAU_NULL_VALUES.includes(reseauText)) {
