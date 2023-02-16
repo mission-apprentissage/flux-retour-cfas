@@ -96,7 +96,7 @@ export const getOrganismeInfosFromSiret = async (siret) => {
 
       if (dataSiret.result.enseigne) {
         organismeInfos.enseigne = dataSiret.result.enseigne;
-        organismeInfos.nom = dataSiret.result.enseigne?.trim();
+        organismeInfos.nom = dataSiret.result.enseigne;
       }
 
       if (dataSiret.result.entreprise_raison_sociale)
