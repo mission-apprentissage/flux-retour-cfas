@@ -22,7 +22,7 @@ import logger from "../../logger.js";
  * @returns
  */
 export const createOrganisme = async (
-  { uai, siret, nom: nomIn, adresse: adresseIn, ...data },
+  { uai, siret, nom: nomIn, adresse: adresseIn, ferme: fermeIn, ...data },
   options = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
 ) => {
   if (await organismesDb().countDocuments({ uai, siret })) {
@@ -40,7 +40,7 @@ export const createOrganisme = async (
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
     ? await getOrganismeInfosFromSiret(siret)
-    : { nom: nomIn.trim(), adresse: adresseIn };
+    : { nom: nomIn?.trim(), adresse: adresseIn, ferme: fermeIn };
 
   const { insertedId } = await organismesDb().insertOne(
     validateOrganisme({
@@ -96,7 +96,7 @@ export const getOrganismeInfosFromSiret = async (siret) => {
 
       if (dataSiret.result.enseigne) {
         organismeInfos.enseigne = dataSiret.result.enseigne;
-        organismeInfos.nom = dataSiret.result.enseigne.trim();
+        organismeInfos.nom = dataSiret.result.enseigne;
       }
 
       if (dataSiret.result.entreprise_raison_sociale)
@@ -178,8 +178,7 @@ export const findOrganismeBySiret = async (siret, projection = {}) => {
 };
 
 /**
- * Méthode de récupération d'un organisme depuis un UAI et un siret
- * Previously getFromUaiAndSiret
+ * Méthode de récupération d'un organisme depuis un UAI et un SIRET
  * @param {string} uai
  * @param {string} siret
  * @param {*} projection
@@ -227,7 +226,7 @@ export const findOrganismesByQuery = async (query, projection = {}) => {
  */
 export const updateOrganisme = async (
   id,
-  { nom: nomIn, adresse: adresseIn, siret, ...data },
+  { nom: nomIn, adresse: adresseIn, ferme: fermeIn, siret, ...data },
   options = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
 ) => {
   const _id = typeof id === "string" ? ObjectId(id) : id;
@@ -249,7 +248,7 @@ export const updateOrganisme = async (
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
     ? await getOrganismeInfosFromSiret(siret)
-    : { nom: nomIn, adresse: adresseIn };
+    : { nom: nomIn, adresse: adresseIn, ferme: typeof fermeIn === "boolean" ? fermeIn : organisme.ferme }; // si aucun champ ferme fourni en entrée on récupère celui de l'organisme trouvé par son id
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -262,7 +261,7 @@ export const updateOrganisme = async (
         metiers,
         formations,
         ...(adresse ? { adresse } : {}),
-        ferme,
+        ...(ferme ? { ferme } : { ferme: false }), // Si aucun champ ferme fourni false par défaut
         ...(enseigne ? { enseigne } : {}),
         ...(raison_sociale ? { raison_sociale } : {}),
         updated_at: new Date(),

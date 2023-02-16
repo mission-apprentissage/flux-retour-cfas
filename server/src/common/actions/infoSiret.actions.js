@@ -148,7 +148,9 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
       date_creation: etablissementApiInfo.date_creation_etablissement,
       date_mise_a_jour: etablissementApiInfo.date_mise_a_jour,
       diffusable_commercialement: etablissementApiInfo.diffusable_commercialement,
-      enseigne: etablissementApiInfo.enseigne ? etablissementApiInfo.enseigne : entrepriseApiInfo?.enseigne,
+      enseigne: etablissementApiInfo.enseigne
+        ? etablissementApiInfo.enseigne?.trim()
+        : entrepriseApiInfo?.enseigne?.trim(),
       adresse: buildAdresse(etablissementApiInfo.adresse),
       numero_voie: etablissementApiInfo.adresse.numero_voie,
       type_voie: etablissementApiInfo.adresse.type_voie,

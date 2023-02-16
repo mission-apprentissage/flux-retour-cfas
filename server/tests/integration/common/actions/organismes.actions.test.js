@@ -305,6 +305,74 @@ describe("Test des actions Organismes", () => {
       assert.equal(updatedOrganisme.created_at !== null, true);
       assert.equal(updatedOrganisme.updated_at !== null, true);
     });
+
+    it("returns updated organisme & update ferme field to false when id valid and no API Calls", async () => {
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        ferme: true,
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+
+      const { _id } = await createOrganisme(sampleOrganisme);
+      const updatedOrganisme = await updateOrganisme(
+        _id,
+        { ...sampleOrganisme, ferme: false },
+        { buildFormationTree: false, buildInfosFromSiret: false, callLbaApi: false }
+      );
+
+      assert.equal(updatedOrganisme.ferme, false);
+    });
+
+    it("returns updated organisme & does not update ferme field when id valid and no API Calls", async () => {
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        ferme: true,
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+
+      const { _id } = await createOrganisme(sampleOrganisme);
+      const updatedOrganisme = await updateOrganisme(
+        _id,
+        { ...sampleOrganisme },
+        { buildFormationTree: false, buildInfosFromSiret: false, callLbaApi: false }
+      );
+
+      assert.equal(updatedOrganisme.ferme, true);
+    });
+
+    it("returns updated organisme & update ferme field from API", async () => {
+      const sampleOrganisme = {
+        uai: "0693400W",
+        siret: "41461021200014",
+        nom: "ETABLISSEMENT TEST",
+        ferme: true,
+        nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+        adresse: {
+          departement: "01",
+          region: "84",
+          academie: "10",
+        },
+      };
+
+      const { _id } = await createOrganisme(sampleOrganisme);
+      const updatedOrganisme = await updateOrganisme(_id, { ...sampleOrganisme });
+
+      assert.equal(updatedOrganisme.ferme, false);
+    });
   });
 
   describe("mapFiabilizedOrganismeUaiSiretCouple", () => {

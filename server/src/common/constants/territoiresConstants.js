@@ -1,5 +1,7 @@
 /**
  * Liste des régions du territoire national
+ * TODO : Rationaliser la liste des régions (point transverse tech ?)
+ * https://fr.wikipedia.org/wiki/Code_officiel_g%C3%A9ographique
  */
 export const REGIONS = [
   {
@@ -90,7 +92,12 @@ export const REGIONS = [
     nom: "Saint-Barthélemy",
     code: "977",
   },
+  {
+    nom: "Collectivité d'outre-mer",
+    code: "00",
+  },
 ];
+
 export const REGIONS_BY_ID = REGIONS.reduce((acc, region) => {
   acc[region.code] = region;
   return acc;
@@ -1411,7 +1418,7 @@ export const DEPARTEMENTS = [
     },
   },
   {
-    nom: "St Barthelemy",
+    nom: "Saint-Barthelemy",
     code: "977",
     uaiCode: "977",
     region: {
@@ -1424,7 +1431,7 @@ export const DEPARTEMENTS = [
     },
   },
   {
-    nom: "St Martin",
+    nom: "Saint-Martin",
     code: "978",
     uaiCode: "978",
     region: {
@@ -1510,11 +1517,15 @@ export const DEPARTEMENTS = [
     },
   },
 ];
+
 export const DEPARTEMENTS_BY_ID = DEPARTEMENTS.reduce((acc, departement) => {
   acc[departement.code] = departement;
   return acc;
 }, {});
 
+/**
+ * TODO Rationaliser / construire le référentiel des académies
+ */
 export const ACADEMIES = {
   "01": { nom: "Paris", code: 1 },
   "02": { nom: "Aix-Marseille", code: 2 },
@@ -1546,6 +1557,8 @@ export const ACADEMIES = {
   33: { nom: "Guyane", code: 33 },
   43: { nom: "Mayotte", code: 43 },
   70: { nom: "Normandie", code: 70 },
+  77: { nom: "Saint-Barthélemy", code: 77 },
+  78: { nom: "Saint Martin", code: 78 },
 };
 
 export const ACADEMIES_BY_ID = Object.values(ACADEMIES).reduce((acc, academie) => {

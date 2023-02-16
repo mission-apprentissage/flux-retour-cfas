@@ -10,7 +10,7 @@ import {
   generatePasswordUpdateTokenForUser,
   generatePasswordUpdateTokenForUserLegacy,
 } from "./users/generate-password-update-token.js";
-import { hydrateOrganismesAndFormations } from "./hydrate/organismes/hydrate-organismes-and-formations.js";
+import { hydrateOrganismesFromReferentiel } from "./hydrate/organismes/hydrate-organismes.js";
 import { hydrateReseauxNewFormat } from "./hydrate/reseaux/hydrate-reseaux-new-format.js";
 import { updateUsersApiSeeders } from "./users/update-apiSeeders.js";
 import { hydrateOrganismesReferentiel } from "./hydrate/organismes/hydrate-organismes-referentiel.js";
@@ -112,15 +112,16 @@ cli
   });
 
 /**
- * Job de remplissage des organismes et des formations
+ * Job de remplissage des organismes en allant ajouter / maj aux organismes existants (issus de la transmission)
+ * tous les organismes du référentiel
  */
 cli
-  .command("hydrate:organismes-and-formations")
-  .description("Remplissage des organismes et des formations")
+  .command("hydrate:organismes")
+  .description("Remplissage des organismes via le référentiel")
   .action(async () => {
     runScript(async () => {
-      return hydrateOrganismesAndFormations();
-    }, "hydrate-organismes-and-formations");
+      return hydrateOrganismesFromReferentiel();
+    }, "hydrate-organismes");
   });
 
 /**
