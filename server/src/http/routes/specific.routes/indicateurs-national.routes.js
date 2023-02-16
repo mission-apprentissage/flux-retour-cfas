@@ -4,7 +4,7 @@ import Joi from "joi";
 import tryCatch from "../../middlewares/tryCatchMiddleware.js";
 import { getAnneesScolaireListFromDate } from "../../../common/utils/anneeScolaireUtils.js";
 import { getCacheKeyForRoute } from "../../../common/utils/cacheUtils.js";
-import { getNbDistinctOrganismesByUai } from "../../../common/actions/dossiersApprenants.actions.js";
+import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
 
 export default ({ effectifs, cache }) => {
   const router = express.Router();
@@ -27,7 +27,7 @@ export default ({ effectifs, cache }) => {
 
       const response = {
         date,
-        totalOrganismes: await getNbDistinctOrganismesByUai(filters),
+        totalOrganismes: await getNbDistinctOrganismes(filters),
         apprentis: await effectifs.apprentis.getCountAtDate(date, filters),
         rupturants: await effectifs.rupturants.getCountAtDate(date, filters),
         inscritsSansContrat: await effectifs.inscritsSansContrats.getCountAtDate(date, filters),
