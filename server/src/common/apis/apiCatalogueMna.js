@@ -7,9 +7,9 @@ import config from "../../config.js";
 export const API_ENDPOINT = config.mnaCatalogApi.endpoint;
 
 /**
- *
+ * getFormations
  * @param {Object} options
- * @returns
+ * @returns {Promise<import("./@types/CatalogueFormation").default[]|null>}
  */
 export const getFormations = async (options) => {
   const url = `${API_ENDPOINT}/entity/formations`;
@@ -39,7 +39,7 @@ export const getFormations = async (options) => {
  * TODO : Optim fetching & pagination récupération
  * Méthode de récupération depuis l'API Catalogue des formations lié à un UAI d'organisme
  * @param {string} uai
- * @returns
+ * @returns {Promise<import("./@types/CatalogueFormation").default[]|null>}
  */
 export const getCatalogFormationsForOrganisme = async (uai) => {
   const url = `${API_ENDPOINT}/entity/formations`;

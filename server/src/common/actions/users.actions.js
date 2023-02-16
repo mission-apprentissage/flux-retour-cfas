@@ -49,7 +49,7 @@ export const createUser = async ({ email, password }, options = {}) => {
       .toArray();
     rolesMatchIds = rolesMatchIds.map(({ _id }) => _id);
     if (!rolesMatchIds.length) {
-      throw new Error("Roles don't exist");
+      throw new Error(`Roles ${rolesMatchIds.join(",")} don't exist`);
     }
   }
 

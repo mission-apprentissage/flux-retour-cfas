@@ -6,6 +6,11 @@ import config from "../../config.js";
 
 export const API_ENDPOINT = config.tablesCorrespondances.endpoint;
 
+/**
+ *
+ * @param {string} cfd
+ * @returns {Promise<(import("./@types/TabCoCfdInfo.js").default)['result']|null>}
+ */
 export const getCfdInfo = async (cfd) => {
   const url = `${API_ENDPOINT}/cfd`;
   try {
@@ -19,6 +24,11 @@ export const getCfdInfo = async (cfd) => {
   }
 };
 
+/**
+ *
+ * @param {string} rncp
+ * @returns {Promise<import("./@types/TabCoRncpInfo.js").default|null>}
+ */
 export const getRncpInfo = async (rncp) => {
   const url = `${API_ENDPOINT}/rncp`;
   try {
@@ -36,6 +46,11 @@ export const getRncpInfo = async (rncp) => {
   }
 };
 
+/**
+ *
+ * @param {string} codePostal
+ * @returns {Promise<import("./@types/TabCoCodePostalInfo.js").default|null>}
+ */
 export const getCodePostalInfo = async (codePostal) => {
   const url = `${API_ENDPOINT}/code-postal`;
   try {
@@ -49,9 +64,6 @@ export const getCodePostalInfo = async (codePostal) => {
       `${error.message} for code=${codePostal}`,
       error.code || error.response?.status
     );
-    return {
-      result: {},
-      messages: { error: "Erreur techinque" },
-    };
+    return null;
   }
 };

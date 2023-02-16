@@ -112,26 +112,15 @@ export const findDataFromSiret = async (providedSiret, non_diffusables = true, g
     }
   }
 
-  let complement_conventionCollective = {
-    active: false,
-    date_publication: null,
-    etat: null,
-    titre_court: null,
-    titre: null,
-    url: null,
-  };
+  let complement_conventionCollective = {};
   if (getConventionCollective && conventionCollective.status !== "ERROR") {
     try {
-      const { active, date_publication, etat, titre_court, titre, url } = await apiEntreprise.getConventionCollective(
-        siret,
-        non_diffusables
-      );
-      complement_conventionCollective = { active, date_publication, etat, titre_court, titre, url };
+      complement_conventionCollective = (await apiEntreprise.getConventionCollective(siret, non_diffusables)) || {};
+      conventionCollective = { ...conventionCollective, ...complement_conventionCollective };
     } catch (e) {
       console.error(e);
     }
   }
-  conventionCollective = { ...conventionCollective, ...complement_conventionCollective };
 
   let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_insee_localite);
   const { nom_dept, nom_region, code_region, nom_academie, num_academie } = findDataByDepartementNum(code_dept);

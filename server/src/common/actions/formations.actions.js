@@ -87,15 +87,6 @@ export const createFormation = async ({ cfd, duree = null, annee = null }) => {
   // Call TCO Api
   const formationInfo = await getCfdInfo(cfd);
 
-  // Call LBA Api // TODO Removed not useful now
-  let metiersFromCfd = null;
-  // try {
-  //   const { data } = await getMetiersByCfd(cfd);
-  //   metiersFromCfd = data?.metiers;
-  // } catch {
-  //   logger.error(`createFormation / getMetiersByCfd: something went wrong while requesting cfd ${cfd}`);
-  // }
-
   // Libelle
   const libelleFormationBuilt = buildFormationLibelle(formationInfo);
   const tokenizedLibelle = buildTokenizedString(libelleFormationBuilt || "", 3);
@@ -110,7 +101,7 @@ export const createFormation = async ({ cfd, duree = null, annee = null }) => {
       tokenized_libelle: tokenizedLibelle,
       niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
       niveau_libelle: formationInfo?.niveau,
-      metiers: metiersFromCfd || [],
+      metiers: [],
       duree,
       annee,
       created_at: new Date(),
@@ -143,15 +134,6 @@ export const updateFormation = async (id, { cfd, duree = null, annee = null, ...
   // Call TCO Api
   const formationInfo = await getCfdInfo(cfd);
 
-  // Call LBA Api // TODO Removed not useful now
-  let metiersFromCfd = null;
-  // try {
-  //   const { data } = await getMetiersByCfd(cfd);
-  //   metiersFromCfd = data?.metiers;
-  // } catch {
-  //   logger.error(`createFormation / getMetiersByCfd: something went wrong while requesting cfd ${cfd}`);
-  // }
-
   // Libelle
   const libelleFormationBuilt = buildFormationLibelle(formationInfo);
   const tokenizedLibelle = buildTokenizedString(libelleFormationBuilt || "", 3);
@@ -168,7 +150,7 @@ export const updateFormation = async (id, { cfd, duree = null, annee = null, ...
         tokenized_libelle: tokenizedLibelle,
         niveau: getNiveauFormationFromLibelle(formationInfo?.niveau),
         niveau_libelle: formationInfo?.niveau,
-        metiers: metiersFromCfd || [],
+        metiers: [],
         duree,
         annee,
         ...data,

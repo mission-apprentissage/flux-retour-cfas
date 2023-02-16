@@ -120,28 +120,28 @@ export const hydrateEffectif = async (effectifData, options) => {
    * @param {*} codePostalOrCodeInsee
    */
   const fillConvertedEffectifAdresseData = async (codePostalOrCodeInsee) => {
-    const { result: adresseInfo } = await getCodePostalInfo(codePostalOrCodeInsee);
-
-    if (adresseInfo.code_postal) {
+    const cpInfo = await getCodePostalInfo(codePostalOrCodeInsee);
+    const adresseInfo = cpInfo?.result;
+    if (adresseInfo?.code_postal) {
       convertedEffectif.apprenant.adresse.code_postal = adresseInfo.code_postal;
     }
 
-    if (adresseInfo.code_commune_insee) {
+    if (adresseInfo?.code_commune_insee) {
       convertedEffectif.apprenant.adresse.code_insee = adresseInfo.code_commune_insee;
     }
 
-    if (adresseInfo.commune) {
+    if (adresseInfo?.commune) {
       convertedEffectif.apprenant.adresse.commune = adresseInfo.commune;
     }
 
     // Lookup département code in reference list
-    if (adresseInfo.num_departement && DEPARTEMENTS.map(({ code }) => code).includes(adresseInfo.num_departement)) {
+    if (adresseInfo?.num_departement && DEPARTEMENTS.map(({ code }) => code).includes(adresseInfo.num_departement)) {
       convertedEffectif.apprenant.adresse.departement = adresseInfo.num_departement;
     }
 
     // Lookup academie code in reference list
     if (
-      adresseInfo.num_academie &&
+      adresseInfo?.num_academie &&
       Object.values(ACADEMIES)
         .map(({ code }) => `${code}`)
         .includes(`${adresseInfo.num_academie}`)
@@ -151,7 +151,7 @@ export const hydrateEffectif = async (effectifData, options) => {
 
     // Lookup région code in reference list
     if (
-      adresseInfo.num_region &&
+      adresseInfo?.num_region &&
       Object.values(REGIONS)
         .map(({ code }) => code)
         .includes(adresseInfo.num_region)

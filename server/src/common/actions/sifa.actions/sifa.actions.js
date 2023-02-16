@@ -54,7 +54,8 @@ export const generateSifa = async (organisme_id) => {
     const [formationOrganisme] = organisme.formations.filter(
       (f) => f.formation_id?.toString() === effectif.formation.formation_id?.toString()
     );
-    const { result: cpNaissanceInfo } = await getCodePostalInfo(effectif.apprenant.code_postal_de_naissance);
+    const cpInfo = await getCodePostalInfo(effectif.apprenant.code_postal_de_naissance);
+    const cpNaissanceInfo = cpInfo?.result;
 
     const formatStringForSIFA = (str) => {
       if (!str) return undefined;
@@ -101,7 +102,7 @@ export const generateSifa = async (organisme_id) => {
           )
         : undefined, // REQUIRED
 
-      LIEU_NAIS: wrapNumString(cpNaissanceInfo.code_commune_insee), // REQUIRED
+      LIEU_NAIS: wrapNumString(cpNaissanceInfo?.code_commune_insee), // REQUIRED
       SEXE: effectif.apprenant.sexe === "M" ? "1" : "2", // REQUIRED
       ADRESSE: effectif.apprenant.adresse
         ? effectif.apprenant.adresse?.complete ??
