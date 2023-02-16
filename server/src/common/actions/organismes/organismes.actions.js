@@ -254,8 +254,9 @@ export const updateOrganisme = async (
     { _id: organisme._id },
     {
       $set: validateOrganisme({
+        ...organisme,
         ...(organisme.uai ? { uai: organisme.uai } : {}),
-        siret,
+        ...(siret ? { siret } : {}),
         ...data,
         ...(nom ? { nom: nom.trim(), nom_tokenized: buildTokenizedString(nom.trim(), 4) } : {}),
         metiers,
