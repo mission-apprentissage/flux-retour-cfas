@@ -46,8 +46,8 @@ const ChoixTransmission = () => {
             </Box>
             <Center h="10%">
               <Button
-                onClick={() => {
-                  updateOrganisme(organisme.id, { mode_de_transmission: "API" });
+                onClick={async () => {
+                  await updateOrganisme(organisme.id, { mode_de_transmission: "API" });
                   router.reload();
                 }}
                 size={"md"}
@@ -80,8 +80,11 @@ const ChoixTransmission = () => {
             </Box>
             <Center h="10%">
               <Button
-                onClick={() => {
-                  updateOrganisme(organisme.id, { mode_de_transmission: "MANUEL", setup_step_courante: "COMPLETE" });
+                onClick={async () => {
+                  await updateOrganisme(organisme.id, {
+                    mode_de_transmission: "MANUEL",
+                    setup_step_courante: "COMPLETE",
+                  });
                   router.reload();
                 }}
                 size={"md"}
