@@ -35,6 +35,7 @@ export function useOrganisme(organisme_id) {
           organisme_id: id,
         });
       } catch (e) {
+        console.error(e);
         setError(e);
       } finally {
         setOrganisme(upOrganisme);
