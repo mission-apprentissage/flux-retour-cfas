@@ -6,6 +6,11 @@ import config from "../../config.js";
 
 export const API_ENDPOINT = config.tablesCorrespondances.endpoint;
 
+/**
+ *
+ * @param {string} cfd
+ * @returns {Promise<(import("./@types/TabCoCfdInfo.js").default)['result']|null>}
+ */
 export const getCfdInfo = async (cfd) => {
   const url = `${API_ENDPOINT}/cfd`;
   try {
@@ -13,12 +18,17 @@ export const getCfdInfo = async (cfd) => {
       cfd,
     });
     return data.result;
-  } catch (error) {
+  } catch (/** @type {any}*/ error) {
     logger.error(`getCfdInfo: something went wrong while requesting ${url}`, error.response?.data || error.message);
     return null;
   }
 };
 
+/**
+ *
+ * @param {string} rncp
+ * @returns {Promise<import("./@types/TabCoRncpInfo.js").default|null>}
+ */
 export const getRncpInfo = async (rncp) => {
   const url = `${API_ENDPOINT}/rncp`;
   try {
@@ -26,7 +36,7 @@ export const getRncpInfo = async (rncp) => {
       rncp,
     });
     return data.result;
-  } catch (error) {
+  } catch (/** @type {any}*/ error) {
     logger.error(
       `getRncpInfo: something went wrong while requesting ${url}`,
       `${error.message} for rncp=${rncp}`,
@@ -36,6 +46,11 @@ export const getRncpInfo = async (rncp) => {
   }
 };
 
+/**
+ *
+ * @param {string} codePostal
+ * @returns {Promise<import("./@types/TabCoCodePostalInfo.js").default|null>}
+ */
 export const getCodePostalInfo = async (codePostal) => {
   const url = `${API_ENDPOINT}/code-postal`;
   try {
@@ -43,15 +58,12 @@ export const getCodePostalInfo = async (codePostal) => {
       codePostal,
     });
     return data;
-  } catch (error) {
+  } catch (/** @type {any}*/ error) {
     logger.error(
       `getCodePostalInfo: something went wrong while requesting ${url}`,
       `${error.message} for code=${codePostal}`,
       error.code || error.response?.status
     );
-    return {
-      result: {},
-      messages: { error: "Erreur techinque" },
-    };
+    return null;
   }
 };

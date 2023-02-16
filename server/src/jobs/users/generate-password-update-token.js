@@ -5,7 +5,7 @@ import config from "../../config.js";
 
 /**
  *
- * @param {*} param0
+ * @param {*} email
  */
 export const generatePasswordUpdateTokenForUser = async (email) => {
   logger.info(`Génération d'un lien de MAJ de mot de passe pour ${email}`);
@@ -18,7 +18,7 @@ export const generatePasswordUpdateTokenForUser = async (email) => {
 
 /**
  *
- * @param {*} param0
+ * @param {*} username
  */
 export const generatePasswordUpdateTokenForUserLegacy = async (username) => {
   logger.info(`Génération d'un lien de MAJ de mot de passe pour un ancien user ${username}`);

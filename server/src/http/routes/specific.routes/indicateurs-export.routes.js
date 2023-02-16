@@ -40,7 +40,7 @@ export default ({ effectifs }) => {
       const date = new Date(dateFromParams);
       const filters = {
         ...filtersFromBody,
-        organisme_id: ObjectId(organisme_id),
+        organisme_id: new ObjectId(organisme_id),
         annee_scolaire: { $in: getAnneesScolaireListFromDate(date) },
       };
 

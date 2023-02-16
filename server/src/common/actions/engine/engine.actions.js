@@ -27,7 +27,8 @@ import { mapFiabilizedOrganismeUaiSiretCouple } from "./engine.organismes.utils.
  * Fonction de remplissage d'un effectif à créer ou à mettre à jour
  * Contrôle si l'effectif en entrée existe déja en base
  * Va créer un effectif structuré avec les erreurs éventuelles de modèle
- * @param {*} effectifs
+ * @param {*} effectifData
+ * @param {*} [options]
  */
 export const hydrateEffectif = async (effectifData, options) => {
   const queryKeys = options?.queryKeys ?? ["formation.cfd", "annee_scolaire", "apprenant.nom", "apprenant.prenom"];
@@ -119,28 +120,28 @@ export const hydrateEffectif = async (effectifData, options) => {
    * @param {*} codePostalOrCodeInsee
    */
   const fillConvertedEffectifAdresseData = async (codePostalOrCodeInsee) => {
-    const { result: adresseInfo } = await getCodePostalInfo(codePostalOrCodeInsee);
-
-    if (adresseInfo.code_postal) {
+    const cpInfo = await getCodePostalInfo(codePostalOrCodeInsee);
+    const adresseInfo = cpInfo?.result;
+    if (adresseInfo?.code_postal) {
       convertedEffectif.apprenant.adresse.code_postal = adresseInfo.code_postal;
     }
 
-    if (adresseInfo.code_commune_insee) {
+    if (adresseInfo?.code_commune_insee) {
       convertedEffectif.apprenant.adresse.code_insee = adresseInfo.code_commune_insee;
     }
 
-    if (adresseInfo.commune) {
+    if (adresseInfo?.commune) {
       convertedEffectif.apprenant.adresse.commune = adresseInfo.commune;
     }
 
     // Lookup département code in reference list
-    if (adresseInfo.num_departement && DEPARTEMENTS.map(({ code }) => code).includes(adresseInfo.num_departement)) {
+    if (adresseInfo?.num_departement && DEPARTEMENTS.map(({ code }) => code).includes(adresseInfo.num_departement)) {
       convertedEffectif.apprenant.adresse.departement = adresseInfo.num_departement;
     }
 
     // Lookup academie code in reference list
     if (
-      adresseInfo.num_academie &&
+      adresseInfo?.num_academie &&
       Object.values(ACADEMIES)
         .map(({ code }) => `${code}`)
         .includes(`${adresseInfo.num_academie}`)
@@ -150,7 +151,7 @@ export const hydrateEffectif = async (effectifData, options) => {
 
     // Lookup région code in reference list
     if (
-      adresseInfo.num_region &&
+      adresseInfo?.num_region &&
       Object.values(REGIONS)
         .map(({ code }) => code)
         .includes(adresseInfo.num_region)
@@ -214,7 +215,7 @@ export const hydrateEffectif = async (effectifData, options) => {
  * ?? Pas besoin d'update car le runEngine ne va que créer / contrôler l'existant
  * ?? -> La MAJ d'un organisme ne doit pas se faire via l'API / migration ???
  * TODO Contrôle base ACCESS à ajouter ici
- * @param {*} organismesData
+ * @param {*} organisme
  */
 export const hydrateOrganisme = async (organisme) => {
   let organismeToCreate = null;

@@ -5,7 +5,6 @@ export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * Generates a random password with a fixed length and made of characters belonging to a specified wishlist
  * @param {*} length
- * @param {*} wishlist
  * @returns
  */
 export const generateRandomAlphanumericPhrase = (length = 20) => {
@@ -17,8 +16,8 @@ export const generateRandomAlphanumericPhrase = (length = 20) => {
 };
 
 /**
- * @param  {[any]} array1
- * @param  {[any]} array2
+ * @param  {any[]} array1
+ * @param  {any[]} array2
  * @returns  {boolean}
  */
 export const arraysContainSameValues = (array1, array2) => {

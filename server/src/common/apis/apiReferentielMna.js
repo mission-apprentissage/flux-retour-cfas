@@ -9,7 +9,7 @@ const API_ENDPOINT = config.mnaReferentielApi.endpoint;
 /**
  * Récupération des organismes du référentiel
  * Par défaut on récupère 10000 éléments par page et tous les champs définis dans DEFAULT_REFERENTIEL_FIELDS_TO_FETCH
- * @returns
+ * @returns {Promise<{organismes: import("./@types/MnaOrganisme").default[]}>}
  */
 export const fetchOrganismes = async () => {
   const { data } = await axios({
@@ -24,12 +24,17 @@ export const fetchOrganismes = async () => {
   return data;
 };
 
+/**
+ * @param {*} siret
+ * @returns {Promise<import("./@types/MnaOrganisme.js").default|null>}
+ */
 export const fetchOrganismeWithSiret = async (siret) => {
   const url = `${API_ENDPOINT}/organismes/${siret}`;
   try {
     const { data } = await axios.get(url);
+
     return data;
-  } catch (err) {
+  } catch (/** @type {any}*/ err) {
     const errorMessage = err.response?.data || err.code;
     logger.error("API REFERENTIEL fetchOrganismeWithSiret something went wrong:", errorMessage);
     return null;
@@ -41,7 +46,7 @@ export const fetchOrganismesWithUai = async (uai) => {
   try {
     const { data } = await axios.get(url, { params: { uais: uai } });
     return data;
-  } catch (err) {
+  } catch (/** @type {any}*/ err) {
     const errorMessage = err.response?.data || err.code;
     logger.error("API REFERENTIEL fetchOrganismesWithUai something went wrong:", errorMessage);
     return null;

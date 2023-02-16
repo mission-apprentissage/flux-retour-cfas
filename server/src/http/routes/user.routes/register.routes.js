@@ -146,7 +146,7 @@ export default ({ mailer }) => {
         const { value, error: errorOnUserSiret } = siretSchema().validate(userSiret);
         if (errorOnUserSiret)
           return res.json([
-            { uai, siret: null, result: [], messages: { error: `Le siret ${siret} n'est pas valide` } },
+            { uai: userUai, siret: null, result: [], messages: { error: `Le siret ${siret} n'est pas valide` } },
           ]);
         siret = value;
       }

@@ -15,7 +15,7 @@ export default () => {
     } else {
       error = Boom.boomify(rawError, {
         statusCode: rawError.status || 500,
-        ...(!rawError.message ? "Une erreur est survenue" : {}),
+        ...(!rawError.message ? { message: "Une erreur est survenue" } : {}),
       });
     }
 

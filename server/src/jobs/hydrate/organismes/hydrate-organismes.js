@@ -56,13 +56,13 @@ export const hydrateOrganismesFromReferentiel = async () => {
  * Reset du flag est_dans_le_referentiel pour tous les organismes ayant au moins un siret
  */
 const resetOrganismesReferentielPresence = async () => {
-  logger.info(`Remise à 0 des organismes comme non présents dans le référentiel...`);
+  logger.info("Remise à 0 des organismes comme non présents dans le référentiel...");
   await organismesDb().updateMany({ siret: { $exists: true } }, { $set: { est_dans_le_referentiel: false } });
 };
 
 /**
  * Fonction d'insertion ou de maj d'un organisme dans la collection
- * @param {*} organismeReferentiel
+ * @param {*} organismeFromReferentiel
  */
 const insertOrUpdateOrganisme = async (organismeFromReferentiel) => {
   const { uai, siret, nature, raison_sociale, adresse, etat_administratif } = organismeFromReferentiel;

@@ -43,8 +43,10 @@ export class EffectifsInscritsSansContrats extends Indicator {
         }))
       ),
       dans_le_statut_depuis:
-        addMonths(new Date(item.statut_apprenant_at_date.date_statut), SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS) >
-        Date.now()
+        addMonths(
+          new Date(item.statut_apprenant_at_date.date_statut),
+          SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS
+        ).getTime() > Date.now()
           ? `Moins de ${SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS} mois`
           : `Plus de ${SEUIL_ALERTE_NB_MOIS_INSCRITS_SANS_CONTRATS} mois`,
     }));

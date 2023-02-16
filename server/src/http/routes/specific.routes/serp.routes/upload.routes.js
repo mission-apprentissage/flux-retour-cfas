@@ -236,7 +236,7 @@ export default ({ clamav }) => {
       let upload = null;
       try {
         upload = await getUploadEntryByOrgaId(organisme_id, { last_snapshot_effectifs: 0 });
-      } catch (error) {
+      } catch (/** @type {any}*/ error) {
         if (error.message.includes("Unable to find uploadEntry")) {
           upload = await createUpload({ organisme_id });
         }
@@ -289,9 +289,9 @@ export default ({ clamav }) => {
           headers = Object.keys(content[0]);
           rawFileJson = content;
         } else {
-          let tmp = getJsonFromXlsxData(data, { raw: false, header: 1 });
+          let tmp = getJsonFromXlsxData(data, { raw: false, header: 1 }) || [];
           headers = tmp[0];
-          rawFileJson = getJsonFromXlsxData(data, { raw: false, dateNF: "dd/MM/yyyy" });
+          rawFileJson = getJsonFromXlsxData(data, { raw: false, dateNF: "dd/MM/yyyy" }) || [];
         }
       })
     );

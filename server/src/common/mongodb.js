@@ -17,10 +17,7 @@ const ensureInitialization = () => {
  */
 export const connectToMongodb = async (uri) => {
   logger.info("Connecting to MongoDB...");
-  const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  const client = new MongoClient(uri);
 
   await client.connect();
   mongodbClient = client;

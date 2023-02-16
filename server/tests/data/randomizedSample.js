@@ -140,7 +140,7 @@ export const createRandomDossierApprenantApiInput = (params = {}) => {
 
 const createRandomListOf =
   (generateItem) =>
-  (nbItems = null, params) => {
+  (nbItems = 0, params) => {
     const randomList = [];
     if (!nbItems) {
       nbItems = Math.floor(Math.random() * Math.floor(100));

@@ -180,8 +180,8 @@ const isUaiFoundUniqueInReferentiel = () => async (uai) => {
 
 const isSiretFoundInReferentiel = () => async (siret) => {
   try {
-    const { organismes } = await fetchOrganismeWithSiret(siret);
-    return organismes?.length > 0;
+    const organisme = await fetchOrganismeWithSiret(siret);
+    return !!organisme;
   } catch (err) {
     logger.error(err);
     return false;

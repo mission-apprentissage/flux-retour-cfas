@@ -8,10 +8,16 @@ import { findOrganismeByUai } from "./organismes.actions.js";
 
 /**
  * Méthode de récupération de l'arbre des formations issues du catalogue liées à un organisme
- * @param {*} uai
+ * @param {string} uai
+ * @returns
  */
 export const getFormationsTreeForOrganisme = async (uai) => {
-  if (!uai) return [];
+  if (!uai)
+    return {
+      formations: [],
+      nbFormationsCreatedForOrganisme: 0,
+      nbFormationsNotCreatedForOrganisme: 0,
+    };
 
   // Récupération des formations liés à l'organisme
   const catalogFormationsForOrganisme = await getCatalogFormationsForOrganisme(uai);
@@ -22,7 +28,7 @@ export const getFormationsTreeForOrganisme = async (uai) => {
   // let nbFormationsUpdatedForOrganisme = 0;
   let nbFormationsNotCreatedForOrganisme = 0;
 
-  if (catalogFormationsForOrganisme?.length > 0) {
+  if (catalogFormationsForOrganisme?.length) {
     await asyncForEach(catalogFormationsForOrganisme, async (currentFormation) => {
       let currentFormationId;
 
@@ -153,12 +159,12 @@ const getOrganismeNature = (defaultNature, formationCatalog, organismesLinkedToF
 
 /**
  * Méthode de recherche d'une formation dans un organisme depuis un cfd
- * @param {string|ObjectId} id
- * @param {*} projection
+ * @param {string|ObjectId} organisme_id
+ * @param {string} cfd
  * @returns
  */
 export const findOrganismeFormationByCfd = async (organisme_id, cfd) => {
-  const organisme = await organismesDb().findOne({ _id: ObjectId(organisme_id) });
+  const organisme = await organismesDb().findOne({ _id: new ObjectId(organisme_id) });
   const formationFound = await getFormationWithCfd(cfd, { _id: 1 });
 
   if (!formationFound) return null;

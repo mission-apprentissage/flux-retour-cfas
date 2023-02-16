@@ -21,6 +21,7 @@ export function siretSchema() {
     .regex(/^[0-9]{14}$/)
     .creditCard()
     .error((errors) => {
+      // @ts-ignore
       const error = errors[0].local;
       return new Error(
         error.code === "string.base"

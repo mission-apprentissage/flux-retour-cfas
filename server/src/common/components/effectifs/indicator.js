@@ -29,6 +29,18 @@ export class Indicator {
   }
 
   /**
+   *
+   * @param {*} _searchDate
+   * @param {*} _filters
+   * @param {*} _options
+   * @returns {any[]}
+   */
+  getAtDateAggregationPipeline(_searchDate, _filters = {}, _options = {}) {
+    // fonction implémentée dans les classes filles
+    return [];
+  }
+
+  /**
    * Décompte du nombre de jeunes correspondant à cet indicateur à la date donnée
    * @param {*} searchDate Date de recherche
    * @param {*} filters Filtres optionnels
@@ -65,6 +77,10 @@ export class Indicator {
    * 1. On filtre dans l'historique sur les éléments ayant une date <= date recherchée
    * 2. On construit dans l'historique des statuts un champ diff_date_search = différence entre la date du statut de l'historique et la date recherchée
    * 3. On crée un champ statut_apprenant_at_date = statut dans l'historique avec le plus petit diff_date_search
+   *
+   * @param {*} date
+   * @param {*} projection
+   * @returns
    */
   getEffectifsWithStatutAtDateAggregationPipeline(date, projection = {}) {
     return [
@@ -111,6 +127,11 @@ export class Indicator {
     ];
   }
 
+  async getExportFormattedListAtDate(_searchDate, _filters, _indicateur) {
+    // TODO Not implemented
+    return [];
+  }
+
   /**
    * Fonction de récupération de la liste des apprentis anonymisée et formatée pour un export à une date donnée
    * @param {*} searchDate
@@ -119,9 +140,12 @@ export class Indicator {
    */
   async getFullExportFormattedListAtDate(searchDate, filters = {}, indicateur) {
     return (await this.getExportFormattedListAtDate(searchDate, filters, indicateur)).map((item) => ({
+      // @ts-ignore
       ...item,
       indicateur,
+      // @ts-ignore
       date_debut_formation: item.formation.periode ? item.formation.periode[0] : null,
+      // @ts-ignore
       date_fin_formation: item.formation.periode ? item.formation.periode[1] : null,
     }));
   }

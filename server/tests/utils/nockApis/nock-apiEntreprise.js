@@ -5,13 +5,17 @@ import { API_ENDPOINT } from "../../../src/common/apis/ApiEntreprise.js";
 
 const jsonEtablissementDataDir = `${process.cwd()}/tests/data/entreprise.api.gouv.fr/etablissements`;
 const realEtablissementDataBySiret = readdirSync(jsonEtablissementDataDir).reduce((acc, jsonFilename) => {
-  acc[jsonFilename.replace(".json", "")] = JSON.parse(readFileSync(`${jsonEtablissementDataDir}/${jsonFilename}`));
+  acc[jsonFilename.replace(".json", "")] = JSON.parse(
+    readFileSync(`${jsonEtablissementDataDir}/${jsonFilename}`).toString()
+  );
   return acc;
 }, {});
 
 const jsonEntrepriseDataDir = `${process.cwd()}/tests/data/entreprise.api.gouv.fr/entreprises`;
 const realEnterpriseDataBySiret = readdirSync(jsonEntrepriseDataDir).reduce((acc, jsonFilename) => {
-  acc[jsonFilename.replace(".json", "")] = JSON.parse(readFileSync(`${jsonEntrepriseDataDir}/${jsonFilename}`));
+  acc[jsonFilename.replace(".json", "")] = JSON.parse(
+    readFileSync(`${jsonEntrepriseDataDir}/${jsonFilename}`).toString()
+  );
   return acc;
 }, {});
 

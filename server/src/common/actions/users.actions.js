@@ -44,13 +44,16 @@ export const createUser = async ({ email, password }, options = {}) => {
 
   let rolesMatchIds = [];
   if (roles && roles.length > 0) {
-    rolesMatchIds = await rolesDb()
-      .find({ name: { $in: roles } }, { projection: { _id: 1 } })
-      .toArray();
-    rolesMatchIds = rolesMatchIds.map(({ _id }) => _id);
-    if (!rolesMatchIds.length === 0) {
-      throw new Error("Roles doesn't exist");
-    }
+    rolesMatchIds = (
+      await rolesDb()
+        .find({ name: { $in: roles } }, { projection: { _id: 1 } })
+        .toArray()
+    ).map(({ _id }) => _id);
+
+    // TODO reintroduce it
+    // if (rolesMatchIds.length === 0) {
+    //   throw new Error(`Roles ${roles.join(",")} don't exist`);
+    // }
   }
 
   // Vérification de l'existence de l'email - même si on a un index unique
@@ -90,7 +93,7 @@ export const createUser = async ({ email, password }, options = {}) => {
 
 /**
  * Méthode de rehash du password de l'utilisateur
- * @param {*} user
+ * @param {ObjectId} _id
  * @param {*} password
  * @returns
  */
@@ -157,7 +160,7 @@ export const getUser = async (email) => {
  * @returns
  */
 export const getUserById = async (_id, projection = {}) => {
-  const user = await usersMigrationDb().findOne({ _id: ObjectId(_id) }, { projection });
+  const user = await usersMigrationDb().findOne({ _id: new ObjectId(_id) }, { projection });
 
   if (!user) {
     throw new Error("Unable to find user");
@@ -178,11 +181,11 @@ export const getAllUsers = async (query = {}) =>
 
 /**
  * Méthode de suppression d'un user depuis son id
- * @param {*} _id
+ * @param {string} _idStr
  * @returns
  */
 export const removeUser = async (_idStr) => {
-  const _id = ObjectId(_idStr);
+  const _id = new ObjectId(_idStr);
   const user = await usersMigrationDb().findOne({ _id });
 
   if (!user) {
@@ -198,7 +201,7 @@ export const removeUser = async (_idStr) => {
  * @returns
  */
 export const updateUser = async (_id, data) => {
-  const user = await usersMigrationDb().findOne({ _id: ObjectId(_id) });
+  const user = await usersMigrationDb().findOne({ _id: new ObjectId(_id) });
 
   if (!user) {
     throw new Error("Unable to find user");
@@ -231,7 +234,7 @@ export const updateMainOrganismeUser = async ({ organisme_id, userEmail }) => {
     throw new Error("Unable to find user");
   }
 
-  const main_organisme_id = typeof id === "string" ? ObjectId(organisme_id) : organisme_id;
+  const main_organisme_id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
   if (!ObjectId.isValid(main_organisme_id)) throw new Error("Invalid id passed");
 
   const updated = await usersMigrationDb().findOneAndUpdate(
@@ -373,7 +376,8 @@ export const finalizeUser = async (email, data) => {
 
 /**
  * Méthode de mise à jour du mot de passe d'un user
- * @param {*} _id
+ * @param {string} email
+ * @param {string} newPassword
  * @returns
  */
 export const changePassword = async (email, newPassword) => {

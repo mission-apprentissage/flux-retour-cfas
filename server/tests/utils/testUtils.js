@@ -57,9 +57,5 @@ export const createAdminUser = async () => {
 };
 
 export const wait = async (time) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, time);
-  });
+  return new Promise((resolve) => setTimeout(resolve, time));
 };

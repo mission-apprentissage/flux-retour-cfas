@@ -36,7 +36,6 @@ export const createPermission = async ({
 
 /**
  * Méthode de récupération de la liste des permissions en base
- * @param {*} query
  * @returns
  */
 export const getAllPermissions = async () =>
@@ -92,7 +91,7 @@ export const findActivePermissionsForUser = async ({ userEmail }, projection = {
 
 export const hasPermission = async ({ organisme_id, userEmail }, projection = {}) => {
   return await permissionsDb().findOne(
-    { organisme_id: organisme_id ? ObjectId(organisme_id) : null, userEmail: userEmail.toLowerCase() },
+    { organisme_id: organisme_id ? new ObjectId(organisme_id) : null, userEmail: userEmail.toLowerCase() },
     { projection }
   );
 };
@@ -114,7 +113,7 @@ export const findPermissionsByUserEmail = async (organisme_id, userEmail, projec
   return await permissionsDb()
     .find(
       {
-        ...(organisme_id ? { organisme_id: ObjectId(organisme_id) } : {}),
+        ...(organisme_id ? { organisme_id: new ObjectId(organisme_id) } : {}),
         userEmail: userEmail.toLowerCase(),
       },
       { projection }
@@ -169,7 +168,7 @@ export const updatePermission = async ({ organisme_id, userEmail, roleName, cust
  * @returns
  */
 export const updatePermissionPending = async ({ organisme_id, userEmail, pending }) => {
-  const permission = await findPermissionByUserEmail(ObjectId(organisme_id), userEmail.toLowerCase());
+  const permission = await findPermissionByUserEmail(new ObjectId(organisme_id), userEmail.toLowerCase());
   if (!permission) {
     throw new Error(
       `Unable to find permission for userEmail ${userEmail.toLowerCase()} and organisme_id ${organisme_id}`
@@ -215,7 +214,9 @@ export const updatePermissionsPending = async ({ userEmail, pending, organisme_i
 
 /**
  * Méthode de suppression de permissions
- * @param {ObjectId} _id
+ * @param {Object} options
+ * @param {string} options.userEmail
+ * @param {string|null|ObjectId} options.organisme_id
  * @returns
  */
 export const removePermissions = async ({ userEmail, organisme_id }) => {

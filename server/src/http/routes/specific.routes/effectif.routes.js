@@ -139,7 +139,7 @@ export default () => {
         .unknown()
         .validateAsync(params, { abortEarly: false });
 
-      const effectif = await effectifsDb().findOne({ _id: ObjectId(id) });
+      const effectif = await effectifsDb().findOne({ _id: new ObjectId(id) });
       return res.json(buildEffectifResult(effectif));
     })
   );
@@ -221,7 +221,7 @@ export default () => {
       // eslint-disable-next-line no-unused-vars
       const { inputNames, ...data } = body; // TODO JOI (inputNames used to track suer actions)
 
-      const effectifDb = await effectifsDb().findOne({ _id: ObjectId(params.id) }, { _id: 0, __v: 0 });
+      const effectifDb = await effectifsDb().findOne({ _id: new ObjectId(params.id) }, { _id: 0, __v: 0 });
       if (!effectifDb) {
         throw new Error(`Unable to find effectif ${params.id}`);
       }

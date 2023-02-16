@@ -6,9 +6,15 @@ import config from "../../config.js";
 
 export const API_ENDPOINT = config.mnaCatalogApi.endpoint;
 
+/**
+ * getFormations
+ * @param {Object} options
+ * @returns {Promise<import("./@types/CatalogueFormation").default[]|null>}
+ */
 export const getFormations = async (options) => {
   const url = `${API_ENDPOINT}/entity/formations`;
   try {
+    // @ts-ignore
     let { page, allFormations, limit, query, select } = { page: 1, allFormations: [], limit: 1050, ...options };
 
     let params = { page, limit, query, select };
@@ -23,7 +29,7 @@ export const getFormations = async (options) => {
     } else {
       return allFormations;
     }
-  } catch (err) {
+  } catch (/** @type {any}*/ err) {
     logger.error(`getFormations: something went wrong while requesting ${url}`, err.response?.data, err.message);
     return null;
   }
@@ -32,9 +38,8 @@ export const getFormations = async (options) => {
 /**
  * TODO : Optim fetching & pagination récupération
  * Méthode de récupération depuis l'API Catalogue des formations lié à un UAI d'organisme
- * @param {*} uai
- * @param {*} cfd
- * @returns
+ * @param {string} uai
+ * @returns {Promise<import("./@types/CatalogueFormation").default[]|null>}
  */
 export const getCatalogFormationsForOrganisme = async (uai) => {
   const url = `${API_ENDPOINT}/entity/formations`;
@@ -46,7 +51,7 @@ export const getCatalogFormationsForOrganisme = async (uai) => {
       $or: [{ etablissement_formateur_uai: uai }, { etablissement_gestionnaire_uai: uai }],
     };
 
-    let { page, allFormations, limit, select } = { page: 1, allFormations: [], limit: 1050 };
+    let { page, allFormations, limit, select } = { page: 1, allFormations: [], limit: 1050, select: undefined };
 
     let params = { page, limit, query, select };
     const response = await axios.get(url, { params });
@@ -55,15 +60,15 @@ export const getCatalogFormationsForOrganisme = async (uai) => {
     allFormations = allFormations.concat(formations); // Should be properly exploded, function should be pure
 
     if (page < pagination.nombre_de_page) {
-      return getCatalogFormationsForOrganisme({ page: page + 1, allFormations, limit });
-    } else {
-      return allFormations;
+      // TODO handle pagination
+      // return getCatalogFormationsForOrganisme({ page: page + 1, allFormations, limit });
     }
-  } catch (err) {
+    return allFormations;
+  } catch (/** @type {any}*/ err) {
     logger.error(
       `getFormationsForOrganisme: something went wrong while requesting ${url}`,
       err.response?.data || err.message
     );
-    return null;
+    return [];
   }
 };

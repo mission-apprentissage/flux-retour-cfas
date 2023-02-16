@@ -8,6 +8,8 @@ import { transformToInternationalNumber } from "../utils/validationsUtils/french
 
 /**
  * Méthode de build d'un effectif
+ * @param {any} effectif
+ * @param {boolean} lockAtCreate
  * @returns
  */
 export const buildEffectif = (
@@ -38,16 +40,23 @@ export const buildEffectif = (
       ...formation,
     },
     id_erp_apprenant: _id_erp_apprenant,
-    organisme_id: ObjectId(organisme_id),
+    organisme_id: new ObjectId(organisme_id),
     source,
     annee_scolaire,
     validation_errors,
   };
 };
-
 /**
  * Méthode de création d'un effectif
- * // TODO SAME AS INSERT
+ * @param {Object} effectif
+ * @param {string} effectif.organisme_id
+ * @param {string} [effectif.annee_scolaire]
+ * @param {string} [effectif.source]
+ * @param {string|null} [effectif.id_erp_apprenant]
+ * @param {Object} effectif.apprenant
+ * @param {Object} effectif.formation
+ * @param {any[]} [effectif.validation_errors]
+ * @param {*} lockAtCreate
  * @returns
  */
 export const createEffectif = async (
@@ -91,9 +100,10 @@ export const validateEffectifObject = (effectif) => {
       validationError.fieldName.includes("apprenant.historique_statut") &&
       (validationError.fieldName.includes("valeur_statut") || validationError.fieldName.includes("date_statut"))
     ) {
-      const [, index] = RegExp(/^apprenant.historique_statut\[([0-9]{1})\].(valeur_statut|date_statut)$/, "g").exec(
-        validationError.fieldName
-      );
+      const [, index] =
+        RegExp(/^apprenant.historique_statut\[([0-9]{1})\].(valeur_statut|date_statut)$/, "g").exec(
+          validationError.fieldName
+        ) || [];
       effectifMandate.apprenant.historique_statut = [
         ...effectifMandate.apprenant.historique_statut.slice(0, index),
         ...effectifMandate.apprenant.historique_statut.slice(index + 1),
@@ -103,9 +113,8 @@ export const validateEffectifObject = (effectif) => {
       validationError.fieldName.includes("apprenant.contrats") &&
       (validationError.fieldName.includes("date_debut") || validationError.fieldName.includes("date_fin"))
     ) {
-      const [, index] = RegExp(/^apprenant.contrats\[([0-9]{1})\].(date_debut|date_fin)$/, "g").exec(
-        validationError.fieldName
-      );
+      const [, index] =
+        RegExp(/^apprenant.contrats\[([0-9]{1})\].(date_debut|date_fin)$/, "g").exec(validationError.fieldName) || [];
       effectifMandate.apprenant.contrats = [
         ...effectifMandate.apprenant.contrats.slice(0, index),
         ...effectifMandate.apprenant.contrats.slice(index + 1),
@@ -301,7 +310,7 @@ export const structureEffectifFromDossierApprenant = (dossiersApprenant) => {
  */
 export const findEffectifs = async (organisme_id, projection = {}) => {
   return await effectifsDb()
-    .find({ organisme_id: ObjectId(organisme_id) }, { projection })
+    .find({ organisme_id: new ObjectId(organisme_id) }, { projection })
     .toArray();
 };
 
@@ -322,7 +331,7 @@ export const findEffectifByQuery = async (query, projection = {}) => {
  * @returns
  */
 export const findEffectifById = async (id, projection = {}) => {
-  const found = await effectifsDb().findOne({ _id: ObjectId(id) }, { projection });
+  const found = await effectifsDb().findOne({ _id: new ObjectId(id) }, { projection });
   return found;
 };
 
@@ -332,7 +341,7 @@ export const findEffectifById = async (id, projection = {}) => {
  * @returns
  */
 export const updateEffectif = async (id, data, opt = { keepPreviousErrors: false }) => {
-  const _id = typeof id === "string" ? ObjectId(id) : id;
+  const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const effectif = await effectifsDb().findOne({ _id });
@@ -353,7 +362,7 @@ export const updateEffectif = async (id, data, opt = { keepPreviousErrors: false
               ),
             }
           : {}),
-        organisme_id: ObjectId(data.organisme_id),
+        organisme_id: new ObjectId(data.organisme_id),
         updated_at: new Date(),
       },
     },
@@ -369,7 +378,7 @@ export const updateEffectif = async (id, data, opt = { keepPreviousErrors: false
  * @returns
  */
 export const updateEffectifAndLock = async (id, { apprenant, formation, validation_errors = [] }) => {
-  const _id = typeof id === "string" ? ObjectId(id) : id;
+  const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const effectif = await effectifsDb().findOne({ _id });

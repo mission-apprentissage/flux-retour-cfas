@@ -3,7 +3,7 @@ export const buildTokenizedString = (string = "", minGram = 1) => {
 
   return string
     .split(separator)
-    .reduce((memo, token) => {
+    .reduce((/** @type {string[]}*/ memo, token) => {
       for (let i = minGram; i <= token.length; i++) {
         memo = [...memo, token.slice(0, i)];
       }

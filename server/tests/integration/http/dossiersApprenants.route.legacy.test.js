@@ -47,7 +47,7 @@ describe("Dossiers Apprenants Route", () => {
     try {
       const { _id } = await createOrganisme(randomOrganisme);
       createdOrganisme = await findOrganismeById(_id);
-    } catch (err) {
+    } catch (/** @type {any}*/ err) {
       console.error("Error with the following randomOrganisme", randomOrganisme);
       throw new Error(err);
     }

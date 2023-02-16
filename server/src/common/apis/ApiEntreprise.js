@@ -7,7 +7,7 @@ import { ApiError, apiRateLimiter } from "../utils/apiUtils.js";
 
 export const API_ENDPOINT = config.apiEntreprise.endpoint;
 
-// Cf Documentation : https://doc.entreprise.api.gouv.fr/#param-tres-obligatoires
+// Cf Documentation : https://v2.entreprise.api.gouv.fr/catalogue/
 const executeWithRateLimiting = apiRateLimiter("apiEntreprise", {
   //2 requests per second
   nbRequests: 2,
@@ -25,6 +25,12 @@ const apiParams = {
   non_diffusables: true,
 };
 
+/**
+ * getEntreprise
+ * @param {string} siren
+ * @param {boolean} non_diffusables
+ * @returns {Promise<import("./@types/ApiEntEntreprise").default|null>}
+ */
 export const getEntreprise = (siren, non_diffusables = true) => {
   return executeWithRateLimiting(async (client) => {
     try {
@@ -36,7 +42,7 @@ export const getEntreprise = (siren, non_diffusables = true) => {
         throw new ApiError("Api Entreprise", "No entreprise data received");
       }
       return response.data.entreprise;
-    } catch (e) {
+    } catch (/** @type {any}*/ e) {
       if (e.message.includes("timeout")) {
         return null;
       }
@@ -48,6 +54,12 @@ export const getEntreprise = (siren, non_diffusables = true) => {
   });
 };
 
+/**
+ * getEtablissement
+ * @param {string} siret
+ * @param {boolean} non_diffusables
+ * @returns {Promise<import("./@types/ApiEntEtablissement").default>}
+ */
 export const getEtablissement = async (siret, non_diffusables = true) => {
   return executeWithRateLimiting(async (client) => {
     axiosRetry(client, { retries: 3 });
@@ -61,12 +73,19 @@ export const getEtablissement = async (siret, non_diffusables = true) => {
         throw new ApiError("Api Entreprise", "No etablissement data received");
       }
       return response.data.etablissement;
-    } catch (e) {
+    } catch (/** @type {any}*/ e) {
       throw new ApiError("Api Entreprise getEtablissement", e.message, e.code || e.response?.status);
     }
   });
 };
 
+/**
+ *
+ * Exemple: https://entreprise.api.gouv.fr/v2/conventions_collectives/82161143100015
+ * @param {string} siret
+ * @param {boolean} non_diffusables
+ * @returns {Promise<import("./@types/ApiEntConventionCollective").default|null>}
+ */
 export const getConventionCollective = async (siret, non_diffusables = true) => {
   return executeWithRateLimiting(async (client) => {
     try {
@@ -78,9 +97,9 @@ export const getConventionCollective = async (siret, non_diffusables = true) => 
         throw new ApiError("Api Entreprise", "error getConventionCollective");
       }
       return response.data.conventions[0];
-    } catch (e) {
+    } catch (/** @type {any}*/ e) {
       if (e.response?.status === 404) {
-        return { active: null, date_publication: null, etat: null, titre_court: null, titre: null, url: null };
+        return null;
       } else {
         throw new ApiError("Api Entreprise ConventionCollective", e.message, e.code || e.response?.status);
       }

@@ -192,7 +192,7 @@ export default () => {
           ko: validationErrors.length,
           validationErrors,
         });
-      } catch (err) {
+      } catch (/** @type {any}*/ err) {
         logger.error(`POST /dossiers-apprenants error : ${err}`);
         res.status(400).json({
           status: "ERROR",
@@ -244,6 +244,7 @@ export default () => {
         logger.error(`GET DossierApprenants error : ${err}`);
         res.status(500).json({
           status: "ERROR",
+          // @ts-ignore
           message: err.message,
         });
       }

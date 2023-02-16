@@ -40,7 +40,7 @@ export const createOrganisme = async (
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
     ? await getOrganismeInfosFromSiret(siret)
-    : { nom: nomIn?.trim(), adresse: adresseIn, ferme: fermeIn };
+    : { nom: nomIn?.trim(), adresse: adresseIn, ferme: fermeIn, enseigne: undefined, raison_sociale: undefined };
 
   const { insertedId } = await organismesDb().insertOne(
     validateOrganisme({
@@ -63,7 +63,7 @@ export const createOrganisme = async (
 
 /**
  * Fonction de récupération des métiers depuis l'API LBA
- * @param {*} siret
+ * @param {string} siret
  * @returns
  */
 const getMetiersFromLba = async (siret) => {
@@ -81,9 +81,7 @@ const getMetiersFromLba = async (siret) => {
 /**
  * Fonction de récupération d'informations depuis SIRET via API Entreprise via siret
  * @param {*} siret
- * @param {*} nomIn
- * @param {*} adresseIn
- * @returns
+ * @returns Object
  */
 export const getOrganismeInfosFromSiret = async (siret) => {
   let organismeInfos = {};
@@ -195,7 +193,7 @@ export const findOrganismeByUaiAndSiret = async (uai, siret, projection = {}) =>
  * @returns
  */
 export const findOrganismeById = async (id, projection = {}) => {
-  const found = await organismesDb().findOne({ _id: ObjectId(id) }, { projection });
+  const found = await organismesDb().findOne({ _id: new ObjectId(id) }, { projection });
   return found;
 };
 
@@ -221,7 +219,9 @@ export const findOrganismesByQuery = async (query, projection = {}) => {
 
 /**
  * Méthode de mise à jour d'un organisme depuis son id
- * @param {*} id
+ * @param {string|ObjectId} id
+ * @param {Object} data
+ * @param {Object} options
  * @returns
  */
 export const updateOrganisme = async (
@@ -229,7 +229,7 @@ export const updateOrganisme = async (
   { nom: nomIn, adresse: adresseIn, ferme: fermeIn, siret, ...data },
   options = { callLbaApi: true, buildFormationTree: true, buildInfosFromSiret: true }
 ) => {
-  const _id = typeof id === "string" ? ObjectId(id) : id;
+  const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });
@@ -248,7 +248,13 @@ export const updateOrganisme = async (
   // Récupération des infos depuis API Entreprise si option active, sinon renvoi des nom / adresse passé en paramètres
   const { nom, adresse, ferme, enseigne, raison_sociale } = buildInfosFromSiret
     ? await getOrganismeInfosFromSiret(siret)
-    : { nom: nomIn, adresse: adresseIn, ferme: typeof fermeIn === "boolean" ? fermeIn : organisme.ferme }; // si aucun champ ferme fourni en entrée on récupère celui de l'organisme trouvé par son id
+    : {
+        nom: nomIn,
+        adresse: adresseIn,
+        ferme: typeof fermeIn === "boolean" ? fermeIn : organisme.ferme,
+        enseigne: undefined,
+        raison_sociale: undefined,
+      }; // si aucun champ ferme fourni en entrée on récupère celui de l'organisme trouvé par son id
 
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organisme._id },
@@ -281,7 +287,7 @@ export const updateOrganisme = async (
  * @returns
  */
 export const addContributeurOrganisme = async (organisme_id, userEmail, roleName, pending = true, custom_acl = []) => {
-  const _id = typeof organisme_id === "string" ? ObjectId(organisme_id) : organisme_id;
+  const _id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });
@@ -322,7 +328,7 @@ export const addContributeurOrganisme = async (organisme_id, userEmail, roleName
  * @returns
  */
 export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
-  const _id = typeof organisme_id === "string" ? ObjectId(organisme_id) : organisme_id;
+  const _id = typeof organisme_id === "string" ? new ObjectId(organisme_id) : organisme_id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });
@@ -348,11 +354,11 @@ export const removeContributeurOrganisme = async (organisme_id, userEmail) => {
 /**
  * TODO add to unit tests
  * Méthode de récupération des contributeurs d'un organisme
- * @param {*} organisme_id
+ * @param {string} organismeId
  * @returns
  */
 export const getContributeurs = async (organismeId) => {
-  const _id = typeof organismeId === "string" ? ObjectId(organismeId) : organismeId;
+  const _id = typeof organismeId === "string" ? new ObjectId(organismeId) : organismeId;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });
@@ -361,18 +367,17 @@ export const getContributeurs = async (organismeId) => {
   }
 
   const buildContributeursResult = async (contributeurEmail, orgId) => {
-    const userSelectFields = { email: 1, nom: 1, prenom: 1, _id: 0 };
     const permSelectFields = { pending: 1, created_at: 1, role: 1, custom_acl: 1 };
     const roleSelectFields = { name: 1, description: 1, title: 1, _id: 1 };
 
-    const currentUser = (await getUser(contributeurEmail, userSelectFields)) || {
+    const currentUser = (await getUser(contributeurEmail)) || {
       email: contributeurEmail,
       nom: "",
       prenom: "",
     };
 
     const currentUserPerm = await hasPermission(
-      { organisme_id: ObjectId(orgId), userEmail: contributeurEmail },
+      { organisme_id: new ObjectId(orgId), userEmail: contributeurEmail },
       permSelectFields
     );
 
@@ -410,7 +415,7 @@ export const getContributeurs = async (organismeId) => {
  * @returns
  */
 export const updateOrganismeApiKey = async (id) => {
-  const _id = typeof id === "string" ? ObjectId(id) : id;
+  const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });
@@ -434,7 +439,7 @@ export const updateOrganismeApiKey = async (id) => {
 };
 
 export const setOrganismeFirstDateTransmissionIfNeeded = async (id) => {
-  const _id = typeof id === "string" ? ObjectId(id) : id;
+  const _id = typeof id === "string" ? new ObjectId(id) : id;
   if (!ObjectId.isValid(_id)) throw new Error("Invalid id passed");
 
   const organisme = await organismesDb().findOne({ _id });

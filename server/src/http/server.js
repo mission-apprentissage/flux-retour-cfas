@@ -52,7 +52,7 @@ export default async (services) => {
 
   // Configure Sentry
   Sentry.init({
-    dsn: config.sentry.dsn,
+    dsn: config.sentry.dsn || "",
     enabled: !!config.sentry.dsn,
     environment: config.env,
     integrations: [
@@ -72,7 +72,7 @@ export default async (services) => {
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
 
-  const requireJwtAuthentication = requireJwtAuthenticationMiddleware(services);
+  const requireJwtAuthentication = requireJwtAuthenticationMiddleware();
 
   const checkJwtToken = authMiddleware();
 
@@ -136,23 +136,23 @@ export default async (services) => {
     indicateursExportRouter(services)
   );
 
-  app.use("/api/healthcheck", healthcheckRouter(services));
+  app.use("/api/healthcheck", healthcheckRouter());
 
   // Route pour ancien mécanisme de login : ERP TRANSMISSION => 4 erps GESTI,YMAG,SCFORM, FORMASUP PARIS HAUT DE FRANCE
-  app.use("/api/login", loginRouter(services));
+  app.use("/api/login", loginRouter());
 
   // @deprecated to /dossiers-apprenants
   app.use(
     ["/api/statut-candidats", "/api/dossiers-apprenants"],
     requireJwtAuthentication,
     permissionsMiddleware([apiRoles.apiStatutsSeeder]),
-    dossierApprenantRouter(services)
+    dossierApprenantRouter()
   );
 
   app.use(
     "/api/organismes",
     requireApiKeyAuthenticationMiddleware({ apiKeyValue: config.organismesConsultationApiKey }),
-    organismesRouter(services)
+    organismesRouter()
   ); // EXPOSED TO REFERENTIEL PROTECTED BY API KEY
 
   // TODO : Route à corriger / transformer pour le filtre par formations
@@ -160,7 +160,7 @@ export default async (services) => {
 
   // TODO : Routes à supprimer une fois la V3 validée & recette faite &  système de cache enlevé
   app.use("/api/cfas", cfasRouter(services)); // FRONT
-  app.use("/api/referentiel", referentielRouter(services)); // FRONT
+  app.use("/api/referentiel", referentielRouter()); // FRONT
 
   // The error handler must be before any other error middleware and after all controllers
   app.use(Sentry.Handlers.errorHandler());

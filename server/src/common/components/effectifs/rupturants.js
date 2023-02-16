@@ -53,7 +53,8 @@ export class EffectifsRupturants extends Indicator {
         }))
       ),
       dans_le_statut_depuis:
-        addMonths(new Date(item.statut_apprenant_at_date.date_statut), SEUIL_ALERTE_NB_MOIS_RUPTURANTS) > Date.now()
+        addMonths(new Date(item.statut_apprenant_at_date.date_statut), SEUIL_ALERTE_NB_MOIS_RUPTURANTS).getTime() >
+        Date.now()
           ? `Moins de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`
           : `Plus de ${SEUIL_ALERTE_NB_MOIS_RUPTURANTS} mois`,
     }));
