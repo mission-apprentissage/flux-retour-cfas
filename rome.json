@@ -13,6 +13,7 @@
         "noDelete": "off"
       },
       "suspicious": {
+        "noExplicitAny": "off",
         "noArrayIndexKey": "off",
         "noAsyncPromiseExecutor": "off"
       },
