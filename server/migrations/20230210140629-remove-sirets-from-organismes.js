@@ -1,4 +1,4 @@
 export const up = async (db) => {
   const collection = db.collection("organismes");
-  await collection.updateMany({}, { $unset: { sirets: "" } });
+  await collection.updateMany({ siret: { $exists: true } }, { $unset: { sirets: "" } });
 };
