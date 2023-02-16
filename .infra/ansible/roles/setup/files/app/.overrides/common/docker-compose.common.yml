@@ -14,6 +14,7 @@ services:
 
   server:
     environment:
+      - FLUX_RETOUR_CFAS_MNA_REFERENTIEL_ENDPOINT_URL=https://referentiel.apprentissage.onisep.fr/api/v1
       - FLUX_RETOUR_CFAS_CLAMAV_URI=clamav:3310
     volumes:
       - /opt/flux-retour-cfas/data/server:/data
