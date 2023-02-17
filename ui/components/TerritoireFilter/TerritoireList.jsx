@@ -45,7 +45,7 @@ const TerritoireList = ({ onTerritoireClick, currentFilter }) => {
         {!searchTerm && <TouteLaFranceOption onClick={() => onTerritoireClick()} />}
         {filteredTerritoires.map((territoire) => (
           <FilterOption
-            key={territoire.code + territoire.nom}
+            key={territoire.type + territoire.code + territoire.nom}
             onClick={() => onTerritoireClick(territoire)}
             isSelected={currentFilter?.nom === territoire.nom}
           >
