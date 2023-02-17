@@ -1,5 +1,6 @@
 import express from "express";
 import Joi from "joi";
+import { getNbDistinctOrganismes } from "../../../common/actions/dossiersApprenants.actions.js";
 import { validateFullObjectSchema } from "../../../common/utils/validationUtils.js";
 import { returnResult } from "../../middlewares/helpers.js";
 
@@ -38,16 +39,14 @@ export default ({ effectifs }) => {
   /**
    * Gets nb organismes formation
    */
-  // FIXME voir si utilisé dans l'UI
   router.get(
     "/total-organismes",
-    returnResult(async () => {
-      throw new Error("not implemented");
-      // const filters = await buildFiltersFromRequest(req);
-      // const nbOrganismes = await getNbDistinctOrganismes(filters);
-      // return {
-      //   nbOrganismes,
-      // };
+    returnResult(async (req) => {
+      const filters = await buildEffectifsFiltersFromRequest(req);
+      const nbOrganismes = await getNbDistinctOrganismes(filters); // FIXME: fetch from effectifs collection?
+      return {
+        nbOrganismes,
+      };
     })
   );
 
