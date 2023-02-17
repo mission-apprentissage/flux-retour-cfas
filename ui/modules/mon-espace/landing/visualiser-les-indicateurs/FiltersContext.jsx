@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import qs from "query-string";
 import { createContext, useContext, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useRouter } from "next/router";
 
 import { omitNullishValues } from "@/common/utils/omitNullishValues";
 
@@ -81,15 +81,15 @@ const isStateValid = (state) => {
 };
 
 export const FiltersProvider = ({ children, defaultState = {}, fixedState = {} }) => {
-  const history = useHistory();
-  const currentQueryString = history.location.search.slice(1);
+  const router = useRouter();
+  const currentQueryString = typeof window !== "undefined" ? window.history?.location?.search?.slice(1) : ""; // not available in ssr
 
   const updateUrlWithState = (state) => {
     // in some cases, we want some fields in the state to never change (network for a network user for example)
     const newState = { ...state, ...fixedState };
     // serialize state to url query string
     const queryString = stateToQueryString(newState);
-    history.push({ search: queryString });
+    router.push({ search: queryString });
   };
   const initialState = { ...getDefaultState(), ...defaultState };
 

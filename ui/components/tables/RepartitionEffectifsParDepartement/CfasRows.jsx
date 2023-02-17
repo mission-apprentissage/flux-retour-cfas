@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useHistory } from "react-router-dom";
+import { useRouter } from "next/router";
 
 import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
 import { fetchEffectifsParCfa } from "../../../common/api/tableauDeBord";
@@ -14,7 +14,7 @@ import CfaRow from "./CfaRow";
 
 const CfasRows = ({ departementCode }) => {
   const filtersContext = useFiltersContext();
-  const history = useHistory();
+  const router = useRouter();
   const requestFilters = {
     ...mapFiltersToApiFormat(filtersContext.state),
     etablissement_num_departement: departementCode,
@@ -43,7 +43,7 @@ const CfasRows = ({ departementCode }) => {
               effectifs={effectifs}
               key={uai_etablissement}
               onCfaClick={() => {
-                navigateToOrganismePage(history, { uai_etablissement, nom_etablissement });
+                navigateToOrganismePage(router, { uai_etablissement, nom_etablissement });
                 window.scrollTo(0, 0);
               }}
             />

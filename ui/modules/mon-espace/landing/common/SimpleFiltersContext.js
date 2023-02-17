@@ -48,7 +48,7 @@ const updateUrlWithState = (state) => {
   const newState = { ...state, ...fixedState };
   // serialize state to url query string
   const queryString = stateToQueryString(newState);
-  history.push({ search: queryString });
+  router.push({ search: queryString });
 };
 
 /**
@@ -57,14 +57,14 @@ const updateUrlWithState = (state) => {
  * @returns
  */
 export const SimpleFiltersProvider = ({ children, initialState = null }) => {
-  // const history = useHistory();
+  // const router = useRouter();
 
   // const updateUrlWithState = (state) => {
   //   // in some cases, we want some fields in the state to never change (network for a network user for example)
   //   const newState = { ...state, ...fixedState };
   //   // serialize state to url query string
   //   const queryString = stateToQueryString(newState);
-  //   history.push({ search: queryString });
+  //   router.push({ search: queryString });
   // };
 
   // TODO Check all filters needed
