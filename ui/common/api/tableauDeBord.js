@@ -6,7 +6,7 @@ import { mapFiltersToApiFormat } from "../utils/mapFiltersToApiFormat";
 // FIXME les routes ont été renommées effectifs -> indicateurs
 
 export const fetchEffectifs = (filters) => {
-  return _get(`/api/indicateurs?${stringify(stringify(mapFiltersToApiFormat(filters)))}`);
+  return _get(`/api/indicateurs?${stringify(mapFiltersToApiFormat(filters))}`);
 };
 
 export const fetchEffectifsParCfa = (filters) => {
@@ -66,7 +66,7 @@ export const fetchUsers = async () => {
 };
 
 export const fetchTotalOrganismes = (filters) => {
-  return _get(`/api/effectifs/total-organismes?${stringify(filters)}`);
+  return _get(`/api/indicateurs/total-organismes?${stringify(filters)}`);
 };
 
 /* Formations */
