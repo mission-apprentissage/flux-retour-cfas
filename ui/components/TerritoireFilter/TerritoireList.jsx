@@ -60,15 +60,19 @@ const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
 
 TerritoireList.propTypes = {
   data: PropTypes.shape({
-    regions: PropTypes.shape({
-      nom: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-      shortName: PropTypes.string,
-    }).isRequired,
-    departements: PropTypes.shape({
-      nom: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-    }).isRequired,
+    regions: PropTypes.arrayOf(
+      PropTypes.shape({
+        nom: PropTypes.string.isRequired,
+        code: PropTypes.string.isRequired,
+        shortName: PropTypes.string,
+      }).isRequired
+    ).isRequired,
+    departements: PropTypes.arrayOf(
+      PropTypes.shape({
+        nom: PropTypes.string.isRequired,
+        code: PropTypes.string.isRequired,
+      }).isRequired
+    ).isRequired,
   }).isRequired,
   onTerritoireClick: PropTypes.func.isRequired,
   currentFilter: PropTypes.shape({
