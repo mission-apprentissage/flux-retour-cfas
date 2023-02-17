@@ -1,8 +1,8 @@
 export const hasUserRoles = (auth, roles = []) => {
-  if (!auth || !auth.permissions || auth.permissions.length === 0) return false;
+  if (!auth || !auth.roles || auth.roles.length === 0) return false;
 
   const rolesToCheck = Array.isArray(roles) ? roles : [roles];
-  return rolesToCheck.some((item) => auth.permissions.includes(item));
+  return rolesToCheck.some((item) => auth.roles.includes(item));
 };
 
 export const roles = {
