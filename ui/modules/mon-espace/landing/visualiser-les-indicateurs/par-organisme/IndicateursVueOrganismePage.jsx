@@ -31,7 +31,7 @@ const IndicateursVueOrganismePage = ({ userLoggedAsReseau = false }) => {
 
   return (
     <Page>
-      <Section withShadow paddingY="3w">
+      <Section paddingY="3w">
         <BreadcrumbNav
           links={[NAVIGATION_PAGES.VisualiserLesIndicateurs, NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme]}
         />
