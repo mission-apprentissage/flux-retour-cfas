@@ -1,6 +1,6 @@
 import { Box, Button, List } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import NavLink from "next/link";
 
 import FilterOption from "@/components/FilterOption/FilterOption";
 import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
@@ -33,16 +33,19 @@ const SwitchViewButton = () => {
       {isOpen && (
         <OverlayMenu width="558px" fixedHorizon={true} onClose={() => setIsOpen(false)}>
           <List spacing="2w" marginTop="1w" textAlign="left">
-            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.path} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href={NAVIGATION_PAGES.VisualiserLesIndicateursParTerritoire.path}
+              onClick={() => setIsOpen(false)}
+            >
               <FilterOption>Vue par territoire</FilterOption>
             </NavLink>
-            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path} onClick={() => setIsOpen(false)}>
+            <NavLink href={NAVIGATION_PAGES.VisualiserLesIndicateursParReseau.path} onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par réseau</FilterOption>
             </NavLink>
-            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path} onClick={() => setIsOpen(false)}>
+            <NavLink href={NAVIGATION_PAGES.VisualiserLesIndicateursParOrganisme.path} onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par organisme de formation</FilterOption>
             </NavLink>
-            <NavLink to={NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.path} onClick={() => setIsOpen(false)}>
+            <NavLink href={NAVIGATION_PAGES.VisualiserLesIndicateursParFormation.path} onClick={() => setIsOpen(false)}>
               <FilterOption>Vue par formation</FilterOption>
             </NavLink>
           </List>
