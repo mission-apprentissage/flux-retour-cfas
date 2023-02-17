@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { filtersPropTypes } from "../FiltersContext";
+import { indicateursEffectifsSchema } from "../indicateursEffectifsSchema";
 import IndicateursAndRepartitionEffectifsDepartement from "./IndicateursAndRepartitionEffectifsDepartement";
 import IndicateursAndRepartitionEffectifsNational from "./IndicateursAndRepartitionEffectifsNational";
 import IndicateursAndRepartitionEffectifsRegion from "./IndicateursAndRepartitionEffectifsRegion";
@@ -19,20 +20,7 @@ const IndicateursAndRepartitionEffectifsTerritoire = ({ filters, effectifs, load
 IndicateursAndRepartitionEffectifsTerritoire.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  effectifs: PropTypes.shape({
-    apprentis: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    inscritsSansContrat: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    abandons: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    rupturants: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-  }),
+  ...indicateursEffectifsSchema,
 };
 
 export default IndicateursAndRepartitionEffectifsTerritoire;

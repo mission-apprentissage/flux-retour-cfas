@@ -6,6 +6,7 @@ import EffectifCard from "@/components/EffectifCard/EffectifCard";
 import { isDateFuture } from "@/common/utils/dateUtils";
 import { pluralize } from "@/common/utils/stringUtils";
 import OrganismesCountCard from "./OrganismesCountCard";
+import { indicateursEffectifsSchema } from "./indicateursEffectifsSchema";
 
 const GRID_TEMPLATE_COLUMNS = ["", "", "repeat(3, 2fr)", "repeat(5, 1fr)"];
 
@@ -96,12 +97,7 @@ const IndicateursGridStack = ({ effectifs, effectifsDate, organismesCount, loadi
 IndicateursGridStack.propTypes = {
   loading: PropTypes.bool.isRequired,
   showOrganismesCount: PropTypes.bool,
-  effectifs: PropTypes.shape({
-    apprentis: PropTypes.number.isRequired,
-    inscritsSansContrat: PropTypes.number.isRequired,
-    abandons: PropTypes.number.isRequired,
-    rupturants: PropTypes.number.isRequired,
-  }),
+  ...indicateursEffectifsSchema,
   effectifsDate: PropTypes.instanceOf(Date),
   organismesCount: PropTypes.number,
 };

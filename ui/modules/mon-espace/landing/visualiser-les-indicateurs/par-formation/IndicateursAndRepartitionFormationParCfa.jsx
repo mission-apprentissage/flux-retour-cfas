@@ -12,6 +12,7 @@ import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import DateWithTooltipSelector from "../DateWithTooltipSelector";
 import { filtersPropTypes } from "../FiltersContext";
 import IndicateursGridStack from "../IndicateursGridStack";
+import { indicateursEffectifsSchema } from "../indicateursEffectifsSchema";
 
 const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading }) => {
   const { data, isLoading, error } = useFetchEffectifsParCfa(filters);
@@ -62,20 +63,7 @@ const IndicateursAndRepartitionFormationParCfa = ({ filters, effectifs, loading 
 IndicateursAndRepartitionFormationParCfa.propTypes = {
   filters: filtersPropTypes.state,
   loading: PropTypes.bool.isRequired,
-  effectifs: PropTypes.shape({
-    apprentis: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    inscritsSansContrat: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    abandons: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    rupturants: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-  }),
+  ...indicateursEffectifsSchema,
 };
 
 export default IndicateursAndRepartitionFormationParCfa;

@@ -13,6 +13,7 @@ import { mapFiltersToApiFormat } from "@/common/utils/mapFiltersToApiFormat";
 import DateWithTooltipSelector from "../../../DateWithTooltipSelector";
 import { filtersPropTypes } from "../../../FiltersContext";
 import IndicateursGridStack from "../../../IndicateursGridStack";
+import { indicateursEffectifsSchema } from "../../../indicateursEffectifsSchema";
 
 const IndicateursAndRepartionCfaNiveauAnneesSection = ({
   filters,
@@ -81,20 +82,7 @@ IndicateursAndRepartionCfaNiveauAnneesSection.propTypes = {
   loading: PropTypes.bool.isRequired,
   hasMultipleSirets: PropTypes.bool,
   namedDataDownloadMode: PropTypes.bool,
-  effectifs: PropTypes.shape({
-    apprentis: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    inscritsSansContrat: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    abandons: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    rupturants: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-  }),
+  ...indicateursEffectifsSchema,
 };
 
 export default IndicateursAndRepartionCfaNiveauAnneesSection;
