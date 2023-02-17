@@ -5,31 +5,32 @@ import OverlayMenu from "@/components/OverlayMenu/OverlayMenu";
 import PrimarySelectButton from "@/components/SelectButton/PrimarySelectButton";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import TerritoiresList from "./TerritoireList";
-import { filtersPropTypes } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
-import { DEPARTEMENTS_SORTED, REGIONS_SORTED, TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
+import { useSimpleFiltersContext } from "@/modules/mon-espace/landing/common/SimpleFiltersContext";
+import { TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
+import { MapPinRangeFill } from "@/theme/components/icons/MapPinRangeFill";
 
-const TERRITOIRES_DATA = { regions: REGIONS_SORTED, departements: DEPARTEMENTS_SORTED };
-
-const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerritoireReset, variant = "primary" }) => {
+const TerritoireFilter = ({ variant = "primary" }) => {
+  const { filtersValues, filtersSetters } = useSimpleFiltersContext();
   const [isOpen, setIsOpen] = useState(false);
 
   const onTerritoireClick = (territoire) => {
     if (!territoire) {
-      onTerritoireReset();
+      filtersSetters.resetTerritoire();
     } else if (territoire.type === TERRITOIRE_TYPE.REGION) {
-      onRegionChange(territoire);
+      filtersSetters.setRegion(territoire);
     } else {
-      onDepartementChange(territoire);
+      filtersSetters.setDepartement(territoire);
     }
     setIsOpen(false);
   };
 
-  const value = filters.region || filters.departement;
-  const buttonLabel = value?.nom || "En France";
+  const territoire = filtersValues.region || filtersValues.departement;
+  const buttonLabel = territoire?.nom || "En France";
   const onButtonClick = () => setIsOpen(!isOpen);
 
   return (
-    <div>
+    <section>
+      <MapPinRangeFill mr=".5rem" boxSize={5} />
       {variant === "primary" ? (
         <PrimarySelectButton onClick={onButtonClick} isActive={isOpen}>
           {buttonLabel}
@@ -38,8 +39,8 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
         <SecondarySelectButton
           onClick={onButtonClick}
           isActive={isOpen}
-          isClearable={!!value}
-          clearIconOnClick={() => onTerritoireReset()}
+          isClearable={!!territoire}
+          clearIconOnClick={() => filtersSetters.resetTerritoire()}
         >
           {buttonLabel}
         </SecondarySelectButton>
@@ -47,22 +48,14 @@ const TerritoireFilter = ({ filters, onDepartementChange, onRegionChange, onTerr
 
       {isOpen && (
         <OverlayMenu onClose={() => setIsOpen(false)}>
-          <TerritoiresList
-            data={TERRITOIRES_DATA}
-            onTerritoireClick={onTerritoireClick}
-            currentFilter={filters.region}
-          />
+          <TerritoiresList onTerritoireClick={onTerritoireClick} currentFilter={filtersValues.region} />
         </OverlayMenu>
       )}
-    </div>
+    </section>
   );
 };
 
 TerritoireFilter.propTypes = {
-  onDepartementChange: PropTypes.func.isRequired,
-  onRegionChange: PropTypes.func.isRequired,
-  onTerritoireReset: PropTypes.func.isRequired,
-  filters: filtersPropTypes.state,
   variant: PropTypes.oneOf(["primary", "secondary"]),
 };
 

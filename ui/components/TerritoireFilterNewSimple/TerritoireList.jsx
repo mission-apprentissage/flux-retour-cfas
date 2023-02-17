@@ -6,13 +6,13 @@ import { stringContains, stringEqualsCaseInsensitive } from "@/common/utils/stri
 import FilterOption from "@/components/FilterOption/FilterOption";
 import SearchInput from "@/components/SearchInput/SearchInput";
 import TouteLaFranceOption from "./TouteLaFranceOption";
-import { TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
+import { DEPARTEMENTS_SORTED, REGIONS_SORTED, TERRITOIRE_TYPE } from "@/common/constants/territoiresConstants";
 
-const findTerritoire = (data) => (searchTerm) => {
-  const regionMatches = data.regions.filter((region) => {
+const findTerritoire = () => (searchTerm) => {
+  const regionMatches = REGIONS_SORTED.filter((region) => {
     return stringContains(region.nom, searchTerm) || stringEqualsCaseInsensitive(region.shortName, searchTerm);
   });
-  const departementMatches = data.departements.filter((departement) => {
+  const departementMatches = DEPARTEMENTS_SORTED.filter((departement) => {
     return stringContains(departement.nom, searchTerm) || searchTerm === departement.code;
   });
 
@@ -27,10 +27,12 @@ const NoResults = () => {
   );
 };
 
-const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
+const TERRITOIRES = [...REGIONS_SORTED, ...DEPARTEMENTS_SORTED];
+
+const TerritoireList = ({ onTerritoireClick, currentFilter }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredTerritoires = searchTerm ? findTerritoire(data)(searchTerm) : [...data.regions, ...data.departements];
+  const filteredTerritoires = searchTerm ? findTerritoire(searchTerm) : TERRITOIRES;
 
   return (
     <>
@@ -59,17 +61,6 @@ const TerritoireList = ({ data, onTerritoireClick, currentFilter }) => {
 };
 
 TerritoireList.propTypes = {
-  data: PropTypes.shape({
-    regions: PropTypes.shape({
-      nom: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-      shortName: PropTypes.string,
-    }).isRequired,
-    departements: PropTypes.shape({
-      nom: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
   onTerritoireClick: PropTypes.func.isRequired,
   currentFilter: PropTypes.shape({
     nom: PropTypes.string.isRequired,

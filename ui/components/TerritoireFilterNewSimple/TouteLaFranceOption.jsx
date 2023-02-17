@@ -2,13 +2,13 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import FilterOption from "@/components/FilterOption/FilterOption";
-import { useFiltersContext } from "@/modules/mon-espace/landing/visualiser-les-indicateurs/FiltersContext";
+import { useSimpleFiltersContext } from "@/modules/mon-espace/landing/common/SimpleFiltersContext";
 
 const TouteLaFranceOption = ({ onClick }) => {
-  const { state } = useFiltersContext();
+  const { filtersValues } = useSimpleFiltersContext();
 
   return (
-    <FilterOption onClick={onClick} isSelected={state.region === null && state.departement === null}>
+    <FilterOption onClick={onClick} isSelected={filtersValues.region === null && filtersValues.departement === null}>
       Toute la France
     </FilterOption>
   );
